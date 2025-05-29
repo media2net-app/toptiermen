@@ -27,7 +27,7 @@ export default function FinanceBusiness() {
       <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">Finance & Business</h1>
       <p className="text-[#A3AED6] text-lg mb-8">Groei financieel en zakelijk met structuur en discipline</p>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {finance.map((item, i) =>
+        {finance.map((item) =>
           item.href ? (
             <Link
               key={item.title}

@@ -1,7 +1,7 @@
 "use client";
-import Link from 'next/link';
 import { useState } from 'react';
 import { FaEdit, FaMapMarkerAlt, FaMedal, FaDumbbell, FaFire, FaUserFriends, FaCrown, FaCog, FaUsers, FaTrophy, FaCommentDots, FaHandshake, FaFistRaised } from 'react-icons/fa';
+import Image from 'next/image';
 
 const coverUrl = 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80';
 const avatarUrl = 'https://randomuser.me/api/portraits/men/32.jpg';
@@ -36,13 +36,13 @@ export default function Profiel() {
     <div className="min-h-screen bg-[#18122B] text-[#E1CBB3]">
       {/* Hero block */}
       <div className="relative w-full h-56 md:h-72 bg-[#232042] rounded-b-3xl overflow-hidden shadow-xl">
-        <img src={coverUrl} alt="cover" className="object-cover w-full h-full opacity-80" />
+        <Image src={coverUrl} alt="cover" className="object-cover w-full h-full opacity-80" width={1200} height={288} />
         <div className="absolute top-4 right-4">
           <button className="bg-[#232042]/80 p-2 rounded-full text-white hover:bg-[#393053] shadow-lg"><FaEdit size={22} /></button>
         </div>
         <div className="absolute left-8" style={{ top: '100%', transform: 'translateY(-50%)' }}>
           <div className="relative">
-            <img src={avatarUrl} alt="avatar" className="w-24 h-24 md:w-28 md:h-28 rounded-full border-4 border-[#E1CBB3] shadow-xl object-cover" />
+            <Image src={avatarUrl} alt="avatar" className="w-24 h-24 md:w-28 md:h-28 rounded-full border-4 border-[#E1CBB3] shadow-xl object-cover" width={112} height={112} />
           </div>
         </div>
       </div>

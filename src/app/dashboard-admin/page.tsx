@@ -61,7 +61,6 @@ export default function AdminDashboard() {
   const [counts, setCounts] = useState([0, 0, 0, 0]);
   useEffect(() => {
     ledenStats.forEach((stat, i) => {
-      let start = 0;
       const end = stat.value;
       const duration = 900;
       const step = () => {
@@ -91,7 +90,6 @@ export default function AdminDashboard() {
   const [communityCounts, setCommunityCounts] = useState([0, 0, 0, 0]);
   useEffect(() => {
     communityStats.forEach((stat, i) => {
-      let start = 0;
       const end = stat.value;
       const duration = 900;
       const step = () => {
@@ -133,7 +131,7 @@ export default function AdminDashboard() {
           {communityStats.map((stat, i) => (
             <div key={stat.label} className="bg-[#181818]/95 rounded-2xl shadow-xl border border-[#C49C48]/40 p-6 flex flex-col items-center justify-center min-h-[110px]">
               <span className="text-3xl font-bold text-[#C49C48] mb-1">
-                {stat.prefix || ''}{communityCounts[i]}{stat.suffix || ''}
+                {stat.prefix || ''}&apos;{communityCounts[i]}&apos;{stat.suffix || ''}
               </span>
               <span className="text-[#E5C97B] text-sm text-center">{stat.label}</span>
             </div>
@@ -156,7 +154,7 @@ export default function AdminDashboard() {
         <div className="bg-[#181818]/95 rounded-2xl shadow-xl border border-[#C49C48]/40 p-6 flex flex-col gap-2">
           <h2 className="text-xl font-bold text-[#C49C48] mb-2">Boekenkamer</h2>
           <div className="flex flex-col gap-1 text-[#E5C97B]">
-            <span>Meest gelezen boek: <b className='text-[#C49C48]'>Can't Hurt Me – David Goggins (792 views)</b></span>
+            <span>Meest gelezen boek: <b className='text-[#C49C48]'>Can&apos;t Hurt Me – David Goggins (792 views)</b></span>
             <span>Boeken gemarkeerd als 'gelezen': <b className='text-[#C49C48]'>1.208</b></span>
             <span>Nieuw toegevoegde boeken deze maand: <b className='text-[#C49C48]'>7</b></span>
           </div>

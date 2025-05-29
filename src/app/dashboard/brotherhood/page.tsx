@@ -2,6 +2,7 @@
 import ClientLayout from '../../components/ClientLayout';
 import Link from 'next/link';
 import { useState } from 'react';
+import Image from 'next/image';
 
 const filters = ["Populair", "Nieuw", "Progressie-updates", "Challenges"];
 const posts = [
@@ -85,11 +86,11 @@ export default function Brotherhood() {
           <section className="flex-1 flex flex-col justify-start">
             <h2 className="text-2xl font-bold text-white mb-4">Mijn Profiel</h2>
             <Link href="/dashboard/brotherhood/profiel" className="flex items-center gap-6 bg-[#232042]/80 rounded-2xl p-6 shadow-xl border border-[#393053]/40 hover:scale-105 transition-transform w-full min-h-[130px] h-full">
-              <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="avatar" className="w-16 h-16 rounded-full border-2 border-[#635985] self-start" />
+              <Image src="https://randomuser.me/api/portraits/men/32.jpg" alt="avatar" className="w-16 h-16 rounded-full border-2 border-[#635985] self-start" width={64} height={64} />
               <div className="flex-1 flex flex-col justify-start">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-xl font-bold text-white">Rick</span>
-                  <span className="text-xs text-[#A3AED6] italic">"Train. Lead. Conquer."</span>
+                  <span className="text-xs text-[#A3AED6] italic">&quot;Train. Lead. Conquer.&quot;</span>
                 </div>
                 <div className="w-full h-2 bg-[#393053]/40 rounded-full mb-2">
                   <div className="h-2 bg-gradient-to-r from-[#635985] to-[#443C68] rounded-full" style={{ width: '68%' }}></div>
@@ -114,7 +115,7 @@ export default function Brotherhood() {
                 <div className="flex gap-6 mb-4">
                   {leaderboard.map((user, i) => (
                     <div key={user.name} className="flex flex-col items-center">
-                      <img src={user.avatar} alt="avatar" className="w-12 h-12 rounded-full border-2 border-[#635985] mb-1" />
+                      <Image src={user.avatar} alt="avatar" className="w-12 h-12 rounded-full border-2 border-[#635985] mb-1" width={48} height={48} />
                       <span className="text-white font-semibold">{user.name}</span>
                       <span className="text-[#A3AED6] text-xs">{i === 0 ? 'Top groeier van de maand' : `Score: ${user.score}`}</span>
                     </div>
@@ -163,15 +164,15 @@ export default function Brotherhood() {
             {filteredPosts.map((post, idx) => (
               <div key={post.id} className="bg-[#232042]/80 rounded-2xl p-6 shadow-xl border border-[#393053]/40">
                 <div className="flex items-center gap-4 mb-2">
-                  <img src={post.user.avatar} alt="avatar" className="w-10 h-10 rounded-full border border-[#393053]" />
+                  <Image src={post.user.avatar} alt="avatar" className="w-10 h-10 rounded-full border border-[#393053]" width={40} height={40} />
                   <div>
                     <span className="font-semibold text-white">{post.user.name}</span>
-                    <span className="ml-2 text-xs text-[#A3AED6] italic">{post.user.motto}</span>
+                    <span className="ml-2 text-xs text-[#A3AED6] italic">&quot;{post.user.motto}&quot;</span>
                   </div>
                   <span className="ml-auto text-xs text-[#A3AED6]">{post.time}</span>
                 </div>
                 <div className="mb-2 text-[#A3AED6]">{post.content}</div>
-                {post.image && <img src={post.image} alt="post" className="rounded-xl mb-2" />}
+                {post.image && <Image src={post.image} alt="post" className="rounded-xl mb-2" width={320} height={240} />}
                 <div className="flex items-center gap-4 mt-2">
                   <button onClick={() => handleLike(idx)} className="text-[#A3AED6] hover:text-[#f0a14f] font-bold">♥ {likeCounts[idx]}</button>
                   <span className="text-xs text-[#A3AED6]">{post.comments.length} reacties</span>

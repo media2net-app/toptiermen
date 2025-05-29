@@ -1,6 +1,5 @@
 import './globals.css';
 import { HomeIcon, FireIcon, AcademicCapIcon, ChartBarIcon, CurrencyDollarIcon, UsersIcon, BookOpenIcon, StarIcon, UserCircleIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/solid';
-import Link from 'next/link';
 
 function slugify(str: string) {
   return str.toLowerCase().replace(/ /g, '-').replace(/[^a-z0-9-]/g, '');

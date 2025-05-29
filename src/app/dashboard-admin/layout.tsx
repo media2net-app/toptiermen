@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { UserGroupIcon, ChartBarIcon, StarIcon, BookOpenIcon, ChatBubbleLeftRightIcon, AcademicCapIcon, CreditCardIcon, BellIcon, Cog6ToothIcon, InboxIcon, HomeIcon } from '@heroicons/react/24/solid';
+import { UserGroupIcon, StarIcon, BookOpenIcon, ChatBubbleLeftRightIcon, AcademicCapIcon, CreditCardIcon, BellIcon, Cog6ToothIcon, InboxIcon, HomeIcon } from '@heroicons/react/24/solid';
 
 const adminMenu = [
   { label: 'Dashboard', icon: HomeIcon, href: '/dashboard-admin' },

@@ -1,6 +1,7 @@
 "use client";
 import { useState } from 'react';
-import { FaBookOpen, FaHeadphones, FaStar, FaBookmark, FaCrown, FaFire, FaCheckCircle } from 'react-icons/fa';
+import { FaBookOpen, FaHeadphones, FaStar, FaBookmark } from 'react-icons/fa';
+import Image from 'next/image';
 
 const categories = [
   'Mindset',
@@ -32,7 +33,7 @@ const books = [
   },
   {
     cover: '/books/canthurtme.jpg',
-    title: 'Can\'t Hurt Me',
+    title: 'Can&apos;t Hurt Me',
     author: 'David Goggins',
     summary: 'Het inspirerende verhaal van een Navy SEAL over mentale weerbaarheid en discipline.',
     tag: 'Nieuw toegevoegd',
@@ -48,7 +49,7 @@ const books = [
   },
   {
     cover: 'https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=400&q=80',
-    title: 'Man\'s Search for Meaning',
+    title: 'Man&apos;s Search for Meaning',
     author: 'Viktor Frankl',
     summary: 'Over de kracht van zingeving, zelfs in de zwaarste omstandigheden.',
     tag: 'Classic',
@@ -103,7 +104,7 @@ export default function Boekenkamer() {
           books.filter(b => b.category === activeCat).map((book, i) => (
             <div key={i} className="bg-[#232042]/80 rounded-2xl shadow-xl border border-[#393053]/40 flex flex-col h-full">
               <div className="relative">
-                <img src={book.cover} alt={book.title} className="w-full h-48 object-cover rounded-t-2xl" />
+                <Image src={book.cover} alt={book.title} className="w-full h-48 object-cover rounded-t-2xl" width={192} height={256} />
                 <span className="absolute top-2 left-2 bg-gradient-to-r from-[#f0a14f] to-[#635985] text-xs font-bold text-[#232042] px-3 py-1 rounded shadow flex items-center gap-1">
                   {book.tag === 'Aanbevolen door Rick' && <FaStar className="text-yellow-400" />} {book.tag}
                 </span>

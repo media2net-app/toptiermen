@@ -22,7 +22,7 @@ export default function MindFocus() {
       <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">Mind & Focus</h1>
       <p className="text-[#A3AED6] text-lg mb-8">Mentale weerbaarheid, focus en discipline</p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {mindFocus.map((item, i) =>
+        {mindFocus.map((item) =>
           item.href ? (
             <Link
               key={item.title}

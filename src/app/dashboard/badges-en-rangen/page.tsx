@@ -1,6 +1,6 @@
 "use client";
 import { useState } from 'react';
-import { FaMedal, FaDumbbell, FaBrain, FaUsers, FaFire, FaCrown, FaStar, FaTrophy, FaLock, FaChevronRight, FaChevronUp, FaChevronDown, FaBolt, FaBookOpen, FaRunning, FaSnowflake, FaUserShield, FaFlag, FaCheckCircle } from 'react-icons/fa';
+import { FaMedal, FaDumbbell, FaBrain, FaUsers, FaFire, FaCrown, FaStar, FaTrophy, FaLock, FaBolt, FaBookOpen, FaRunning, FaSnowflake, FaUserShield, FaFlag, FaCheckCircle, FaChevronUp, FaChevronDown } from 'react-icons/fa';
 
 const ranks = [
   { name: 'Recruit', icon: <FaFlag />, needed: 0, unlocks: 'Toegang tot community' },
