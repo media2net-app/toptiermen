@@ -21,7 +21,7 @@ export default function StoicijnseMindsetDetail() {
           <div className="flex-1 bg-[#393053]/30 rounded-xl p-4 shadow border border-[#393053]/40 mb-4 md:mb-0">
             <h3 className="text-lg font-semibold text-white mb-1">Voorbeeldvideo: Stoïcijnse Mindset</h3>
             <div className="bg-[#232042] rounded-lg p-4 text-[#A3AED6] text-sm mb-2">[Video placeholder]</div>
-            <p className="text-xs text-[#A3AED6]">Binnenkort beschikbaar: inspirerende video's van Rick over stoïcisme en mentale kracht.</p>
+            <p className="text-xs text-[#A3AED6]">Binnenkort beschikbaar: inspirerende video&apos;s van Rick over stoïcisme en mentale kracht.</p>
           </div>
           <div className="flex-1 flex flex-col gap-6">
             <div className="bg-[#393053]/30 rounded-xl p-4 shadow border border-[#393053]/40">

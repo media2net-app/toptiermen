@@ -51,7 +51,7 @@ export default function Home() {
       <section className="w-full bg-[#232042] py-16 px-4 flex flex-col items-center border-t-4 border-[#393053]">
         <div className="max-w-3xl w-full text-center">
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-6">Voor wie is dit platform?</h2>
-          <p className="text-[#A3AED6] mb-4">Voor jonge mannen die hun pad zoeken. Voor ondernemers die structuur willen. Voor vaders die een voorbeeld willen zijn. Voor elke man die niet tevreden is met "goed genoeg".</p>
+          <p className="text-[#A3AED6] mb-4">Voor jonge mannen die hun pad zoeken. Voor ondernemers die structuur willen. Voor vaders die een voorbeeld willen zijn. Voor elke man die niet tevreden is met &quot;goed genoeg&quot;.</p>
           <p className="text-[#E1CBB3] mb-8">Top Tier Men EU is jouw digitale strijdveld, jouw mentor, jouw team.<br />Geen excuses meer. Word de man die je diep van binnen weet dat je kunt zijn.</p>
           <div className="flex flex-col md:flex-row gap-4 justify-center">
             <Link href="/login" className="px-8 py-4 rounded-xl bg-gradient-to-r from-[#635985] to-[#443C68] text-white font-bold text-lg shadow hover:from-[#443C68] hover:to-[#635985] transition-all">Start nu – Log in</Link>

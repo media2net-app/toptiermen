@@ -1,22 +1,4 @@
 import './globals.css';
-import { HomeIcon, FireIcon, AcademicCapIcon, ChartBarIcon, CurrencyDollarIcon, UsersIcon, BookOpenIcon, StarIcon, UserCircleIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/solid';
-
-function slugify(str: string) {
-  return str.toLowerCase().replace(/ /g, '-').replace(/[^a-z0-9-]/g, '');
-}
-
-const menu = [
-  { label: 'Dashboard', icon: HomeIcon },
-  { label: 'Mijn Missies', icon: FireIcon },
-  { label: 'Trainingscentrum', icon: AcademicCapIcon },
-  { label: 'Mind & Focus', icon: ChartBarIcon },
-  { label: 'Finance & Business', icon: CurrencyDollarIcon },
-  { label: 'Brotherhood', icon: UsersIcon },
-  { label: 'Boekenkamer', icon: BookOpenIcon },
-  { label: 'Badges & Rangen', icon: StarIcon },
-  { label: 'Mijn Profiel', icon: UserCircleIcon },
-  { label: 'Mentorship & Coaching', icon: ChatBubbleLeftRightIcon },
-];
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

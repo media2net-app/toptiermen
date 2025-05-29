@@ -128,7 +128,7 @@ export default function Profiel() {
                 </div>
               ))}
               <div className="mt-6">
-                <span className="text-[#A3AED6] font-semibold mb-2 block">Progressiefoto's</span>
+                <span className="text-[#A3AED6] font-semibold mb-2 block">Progressiefoto&apos;s</span>
                 <div className="flex gap-4">
                   <div className="w-32 h-32 bg-[#232042] rounded-xl flex items-center justify-center text-[#A3AED6] text-xs">Voor-foto</div>
                   <div className="w-32 h-32 bg-[#232042] rounded-xl flex items-center justify-center text-[#A3AED6] text-xs">Na-foto</div>

@@ -155,7 +155,7 @@ export default function AdminDashboard() {
           <h2 className="text-xl font-bold text-[#C49C48] mb-2">Boekenkamer</h2>
           <div className="flex flex-col gap-1 text-[#E5C97B]">
             <span>Meest gelezen boek: <b className='text-[#C49C48]'>Can&apos;t Hurt Me – David Goggins (792 views)</b></span>
-            <span>Boeken gemarkeerd als 'gelezen': <b className='text-[#C49C48]'>1.208</b></span>
+            <span>Boeken gemarkeerd als &apos;gelezen&apos;: <b className='text-[#C49C48]'>1.208</b></span>
             <span>Nieuw toegevoegde boeken deze maand: <b className='text-[#C49C48]'>7</b></span>
           </div>
         </div>
