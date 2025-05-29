@@ -1,103 +1,64 @@
-import Image from "next/image";
+"use client";
+
+import Link from 'next/link';
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <main className="min-h-screen bg-[#18122B] text-[#E1CBB3] flex flex-col">
+      {/* Hero / Intro */}
+      <section className="w-full bg-[#232042] py-16 px-4 md:px-0 flex flex-col items-center shadow-xl border-b-4 border-[#393053]">
+        <div className="max-w-3xl text-center">
+          <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-4 drop-shadow-lg">Wat is <span className="text-[#f0a14f]">Top Tier Men EU</span> – en waarom jij erbij hoort</h1>
+          <p className="text-lg md:text-xl text-[#A3AED6] mb-8">Top Tier Men EU is méér dan een platform. Het is een broederschap voor mannen die weigeren gemiddeld te zijn. Voor gasten die klaar zijn met uitstelgedrag, excuses en eindeloos scrollen – en in plaats daarvan kiezen voor richting, discipline en persoonlijke groei.</p>
+          <p className="text-[#E1CBB3] mb-8">Of je nu 17 bent en op zoek bent naar houvast… of 35 en klaar bent om een leider te worden in je gezin, business of lichaam – dit platform is gebouwd voor jou.</p>
+          <div className="flex flex-col md:flex-row gap-4 justify-center">
+            <Link href="/login" className="px-8 py-4 rounded-xl bg-gradient-to-r from-[#635985] to-[#443C68] text-white font-bold text-lg shadow hover:from-[#443C68] hover:to-[#635985] transition-all">Start nu – Log in</Link>
+            <Link href="/register" className="px-8 py-4 rounded-xl bg-[#232042] text-[#f0a14f] font-bold text-lg shadow border border-[#393053] hover:bg-[#393053] transition-all">Registreer gratis</Link>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      </section>
+
+      {/* Wat je krijgt */}
+      <section className="w-full bg-[#18122B] py-16 px-4 flex flex-col items-center">
+        <div className="max-w-4xl w-full">
+          <h2 className="text-2xl md:text-3xl font-bold text-white mb-8 text-center">Wat je krijgt</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="bg-[#232042]/80 rounded-2xl p-6 shadow-xl border border-[#393053]/40 flex flex-col gap-2">
+              <span className="text-xl font-semibold text-[#f0a14f] mb-1">Mentale en fysieke structuur</span>
+              <p className="text-[#A3AED6]">Dagelijkse routines, challenges en begeleiding om je hoofd en lijf te trainen. Geen zweverig gedoe – gewoon doen wat werkt.</p>
+            </div>
+            <div className="bg-[#232042]/80 rounded-2xl p-6 shadow-xl border border-[#393053]/40 flex flex-col gap-2">
+              <span className="text-xl font-semibold text-[#f0a14f] mb-1">Een Brotherhood die je accountable houdt</span>
+              <p className="text-[#A3AED6]">Sluit je aan bij mannen met dezelfde mindset. Motiveer elkaar. Daag elkaar uit. Groei samen. Hier ben je niet alleen.</p>
+            </div>
+            <div className="bg-[#232042]/80 rounded-2xl p-6 shadow-xl border border-[#393053]/40 flex flex-col gap-2">
+              <span className="text-xl font-semibold text-[#f0a14f] mb-1">Coaching & mentorship op jouw niveau</span>
+              <p className="text-[#A3AED6]">Van AI-ondersteuning tot echte mentoren: je krijgt de tools en support om te bouwen aan een sterke, zelfverzekerde en gedisciplineerde versie van jezelf.</p>
+            </div>
+            <div className="bg-[#232042]/80 rounded-2xl p-6 shadow-xl border border-[#393053]/40 flex flex-col gap-2">
+              <span className="text-xl font-semibold text-[#f0a14f] mb-1">Badges. Rangen. Progressie.</span>
+              <p className="text-[#A3AED6]">Alles wat je doet wordt zichtbaar. Je progressie wordt beloond, je doelen worden meetbaar, je discipline wordt een levensstijl.</p>
+            </div>
+            <div className="bg-[#232042]/80 rounded-2xl p-6 shadow-xl border border-[#393053]/40 flex flex-col gap-2 md:col-span-2">
+              <span className="text-xl font-semibold text-[#f0a14f] mb-1">Toegang tot kennis die het verschil maakt</span>
+              <p className="text-[#A3AED6]">In de Boekenkamer vind je de juiste boeken, podcasts en inzichten om jezelf mentaal te wapenen voor deze tijd.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Voor wie is dit platform? */}
+      <section className="w-full bg-[#232042] py-16 px-4 flex flex-col items-center border-t-4 border-[#393053]">
+        <div className="max-w-3xl w-full text-center">
+          <h2 className="text-2xl md:text-3xl font-bold text-white mb-6">Voor wie is dit platform?</h2>
+          <p className="text-[#A3AED6] mb-4">Voor jonge mannen die hun pad zoeken. Voor ondernemers die structuur willen. Voor vaders die een voorbeeld willen zijn. Voor elke man die niet tevreden is met "goed genoeg".</p>
+          <p className="text-[#E1CBB3] mb-8">Top Tier Men EU is jouw digitale strijdveld, jouw mentor, jouw team.<br />Geen excuses meer. Word de man die je diep van binnen weet dat je kunt zijn.</p>
+          <div className="flex flex-col md:flex-row gap-4 justify-center">
+            <Link href="/login" className="px-8 py-4 rounded-xl bg-gradient-to-r from-[#635985] to-[#443C68] text-white font-bold text-lg shadow hover:from-[#443C68] hover:to-[#635985] transition-all">Start nu – Log in</Link>
+            <Link href="/register" className="px-8 py-4 rounded-xl bg-[#232042] text-[#f0a14f] font-bold text-lg shadow border border-[#393053] hover:bg-[#393053] transition-all">Registreer gratis</Link>
+          </div>
+        </div>
+      </section>
+    </main>
   );
 }
