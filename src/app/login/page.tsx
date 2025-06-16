@@ -38,14 +38,17 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center relative" style={{ backgroundColor: '#181F17' }}>
       <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
       <div className="w-full max-w-md p-8 rounded-3xl shadow-2xl bg-[#232D1A]/95 border border-[#3A4D23] backdrop-blur-lg relative z-10">
-        <h1 className="text-3xl font-bold text-[#B6C948] mb-2 text-center tracking-tight drop-shadow-lg font-['Inter']">Top Tier Men</h1>
-        <p className="text-[#B6C948] text-center mb-8 text-lg font-['Inter']">Log in op je dashboard</p>
+        <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tight mb-2 text-center">
+          <span className="text-white">TOP TIER </span>
+          <span className="text-[#8BAE5A]">MEN</span>
+        </h1>
+        <p className="text-[#8BAE5A] text-center mb-8 text-lg font-['Figtree']">Log in op je dashboard</p>
         <form onSubmit={handleLogin} className="flex flex-col gap-6">
           <div className="relative">
             <select
               value={selectedUser.value}
               onChange={handleUserChange}
-              className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#181F17] text-[#B6C948] focus:outline-none focus:ring-2 focus:ring-[#B6C948] border border-[#3A4D23] mb-4 appearance-none font-['Inter']"
+              className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#181F17] text-[#B6C948] focus:outline-none focus:ring-2 focus:ring-[#B6C948] border border-[#3A4D23] mb-4 appearance-none font-['Figtree']"
             >
               {users.map(user => (
                 <option key={user.value} value={user.value}>{user.label}</option>
@@ -58,7 +61,7 @@ export default function Login() {
               type="text"
               value={username}
               onChange={e => setUsername(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#181F17] text-[#B6C948] placeholder-[#B6C948] focus:outline-none focus:ring-2 focus:ring-[#B6C948] transition shadow-inner border border-[#3A4D23] font-['Inter']"
+              className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#181F17] text-[#B6C948] placeholder-[#B6C948] focus:outline-none focus:ring-2 focus:ring-[#B6C948] transition shadow-inner border border-[#3A4D23] font-['Figtree']"
               placeholder="Gebruikersnaam"
               autoComplete="username"
               readOnly
@@ -70,17 +73,24 @@ export default function Login() {
               type="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#181F17] text-[#B6C948] placeholder-[#B6C948] focus:outline-none focus:ring-2 focus:ring-[#B6C948] transition shadow-inner border border-[#3A4D23] font-['Inter']"
+              className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#181F17] text-[#B6C948] placeholder-[#B6C948] focus:outline-none focus:ring-2 focus:ring-[#B6C948] transition shadow-inner border border-[#3A4D23] font-['Figtree']"
               placeholder="Wachtwoord"
               autoComplete="current-password"
             />
           </div>
-          {error && <div className="text-[#B6C948] text-center text-sm -mt-4 border border-[#B6C948] rounded-lg py-1 bg-[#181F17] font-['Inter']">{error}</div>}
+          {error && <div className="text-[#B6C948] text-center text-sm -mt-4 border border-[#B6C948] rounded-lg py-1 bg-[#181F17] font-['Figtree']">{error}</div>}
           <button
             type="submit"
-            className="w-full py-3 rounded-xl bg-gradient-to-r from-[#B6C948] to-[#3A4D23] text-[#181F17] font-semibold text-lg shadow-lg hover:from-[#B6C948] hover:to-[#B6C948] transition-all duration-200 border border-[#B6C948] font-['Inter']"
+            className="w-full py-3 rounded-xl bg-gradient-to-r from-[#B6C948] to-[#3A4D23] text-[#181F17] font-semibold text-lg shadow-lg hover:from-[#B6C948] hover:to-[#B6C948] transition-all duration-200 border border-[#B6C948] font-['Figtree']"
           >
             Inloggen
+          </button>
+          <button
+            type="button"
+            onClick={() => router.push('/register')}
+            className="w-full mt-2 py-3 rounded-xl border border-[#B6C948] text-[#B6C948] font-semibold text-lg hover:bg-[#B6C948] hover:text-[#181F17] transition-all duration-200 font-['Figtree']"
+          >
+            Nog geen account? Registreren
           </button>
         </form>
       </div>
