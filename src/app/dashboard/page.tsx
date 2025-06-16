@@ -252,7 +252,7 @@ export default function Dashboard() {
           <div className="bg-[#232D1A]/80 rounded-2xl p-10 flex flex-col md:flex-row gap-8 items-center shadow-xl border border-[#3A4D23]/40">
             <div className="flex-1">
               <div className="text-xl text-white font-semibold mb-2">Motivational quote</div>
-              <blockquote className="italic text-white">"Discipline is the bridge between goals and accomplishment."</blockquote>
+              <blockquote className="italic text-white">&ldquo;Discipline is the bridge between goals and accomplishment.&rdquo;</blockquote>
               <div className="mt-4 text-xs text-[#8BAE5A]">- Rick</div>
             </div>
           </div>
