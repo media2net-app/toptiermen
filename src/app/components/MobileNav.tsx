@@ -45,7 +45,7 @@ export default function MobileNav() {
       </nav>
       {showMobileMenu && (
         <div className="fixed inset-0 z-40 flex">
-          <div className="w-64 bg-[#18122B] h-full shadow-2xl flex flex-col p-6 animate-slide-in-left">
+          <div className="w-64 bg-[#18122B] h-full shadow-2xl flex flex-col p-6 transform transition-transform duration-300 ease-in-out translate-x-0">
             <button
               className="self-end mb-6 text-[#A3AED6] text-2xl"
               onClick={() => setShowMobileMenu(false)}
@@ -69,15 +69,6 @@ export default function MobileNav() {
           <div className="flex-1 bg-black/40" onClick={() => setShowMobileMenu(false)} />
         </div>
       )}
-      <style>{`
-        @keyframes slide-in-left {
-          from { transform: translateX(-100%); }
-          to { transform: translateX(0); }
-        }
-        .animate-slide-in-left {
-          animation: slide-in-left 0.3s cubic-bezier(.4,0,.2,1) both;
-        }
-      `}</style>
     </>
   );
 } 
