@@ -85,6 +85,13 @@ export default function Login() {
           >
             Inloggen
           </button>
+          <button
+            type="button"
+            onClick={() => router.push('/register')}
+            className="w-full mt-2 py-3 rounded-xl border border-[#B6C948] text-[#B6C948] font-semibold text-lg hover:bg-[#B6C948] hover:text-[#181F17] transition-all duration-200 font-['Figtree']"
+          >
+            Nog geen account? Registreren
+          </button>
         </form>
       </div>
     </div>

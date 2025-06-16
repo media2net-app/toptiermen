@@ -57,10 +57,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 href={href}
                 key={item.label}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide transition-all duration-150 font-['Figtree']
-                  ${isActive ? 'bg-[#8BAE5A] text-black shadow-lg' : 'text-[#8BAE5A] hover:bg-[#232D1A] hover:text-white'}
+                  ${isActive ? 'bg-[#8BAE5A] text-black shadow-lg' : 'text-white hover:text-[#8BAE5A]'}
                   ${collapsed ? 'justify-center px-2' : ''}`}
               >
-                <item.icon className={`w-6 h-6 ${isActive ? 'text-black' : 'text-[#8BAE5A]'}`} />
+                <item.icon className={`w-6 h-6 ${isActive ? 'text-[#181F17]' : 'text-[#8BAE5A]'}`} />
                 {!collapsed && <span>{item.label}</span>}
               </Link>
             );

@@ -49,3 +49,20 @@ body {
     background: #232042cc;
   }
 }
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #8BAE5A #181F17;
+}
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  background: #181F17;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #8BAE5A;
+  border-radius: 8px;
+  border: 2px solid #181F17;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #181F17;
+}

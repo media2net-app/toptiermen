@@ -36,7 +36,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center relative" style={{ backgroundColor: '#181F17' }}>
-      <img src={require('../../pattern.png')} alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
+      <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
       <div className="w-full max-w-md p-8 rounded-3xl shadow-2xl bg-[#232D1A]/95 border border-[#3A4D23] backdrop-blur-lg relative z-10">
         <h1 className="text-3xl font-bold text-[#B6C948] mb-2 text-center tracking-tight drop-shadow-lg font-['Inter']">Top Tier Men</h1>
         <p className="text-[#B6C948] text-center mb-8 text-lg font-['Inter']">Log in op je dashboard</p>
