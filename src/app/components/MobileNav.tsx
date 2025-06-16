@@ -27,15 +27,15 @@ export default function MobileNav() {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   return (
     <>
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#232042]/95 border-t border-[#393053]/60 flex justify-between items-center px-2 py-1 shadow-2xl">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#232D1A]/95 border-t border-[#3A4D23]/60 flex justify-between items-center px-2 py-1 shadow-2xl">
         {mobileMenu.map((item) => (
-          <Link key={item.label} href={item.href} className="bottom-nav-btn flex flex-col items-center flex-1 py-2 text-[#A3AED6] hover:text-white transition">
+          <Link key={item.label} href={item.href} className="bottom-nav-btn flex flex-col items-center flex-1 py-2 text-[#8BAE5A] hover:text-white transition">
             <item.icon className="w-7 h-7 mb-1" />
             <span className="text-xs font-medium">{item.label}</span>
           </Link>
         ))}
         <button
-          className="bottom-nav-btn flex flex-col items-center flex-1 py-2 text-[#A3AED6] hover:text-white transition"
+          className="bottom-nav-btn flex flex-col items-center flex-1 py-2 text-[#8BAE5A] hover:text-white transition"
           onClick={() => setShowMobileMenu(true)}
           aria-label="Open menu"
         >
@@ -45,9 +45,9 @@ export default function MobileNav() {
       </nav>
       {showMobileMenu && (
         <div className="fixed inset-0 z-40 flex">
-          <div className="w-64 bg-[#18122B] h-full shadow-2xl flex flex-col p-6 transform transition-transform duration-300 ease-in-out translate-x-0">
+          <div className="w-64 bg-[#181F17] h-full shadow-2xl flex flex-col p-6 transform transition-transform duration-300 ease-in-out translate-x-0">
             <button
-              className="self-end mb-6 text-[#A3AED6] text-2xl"
+              className="self-end mb-6 text-[#8BAE5A] text-2xl"
               onClick={() => setShowMobileMenu(false)}
               aria-label="Sluit menu"
             >
@@ -58,7 +58,7 @@ export default function MobileNav() {
                 <Link
                   key={item.label}
                   href={item.href}
-                  className="text-[#A3AED6] hover:text-white text-lg font-medium py-2 px-2 rounded transition"
+                  className="text-[#8BAE5A] hover:text-white text-lg font-medium py-2 px-2 rounded transition"
                   onClick={() => setShowMobileMenu(false)}
                 >
                   {item.label}

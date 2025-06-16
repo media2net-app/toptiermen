@@ -46,6 +46,7 @@ export default function Dashboard() {
   const [fadeIn, setFadeIn] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState<'profile'|'notifications'|'messages'|null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [showWelcome, setShowWelcome] = useState(true);
 
   // Dummy data
   const notifications = [
@@ -161,13 +162,45 @@ export default function Dashboard() {
 
   return (
     <ClientLayout>
+      {showWelcome && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
+          <div className="bg-[#232D1A] rounded-2xl p-8 shadow-2xl flex flex-col items-center max-w-2xl w-full relative">
+            <button
+              className="absolute top-5 right-5 text-white text-3xl font-bold hover:text-[#8BAE5A] transition"
+              onClick={() => setShowWelcome(false)}
+              aria-label="Sluit welkom popup"
+            >
+              ×
+            </button>
+            <div className="w-full h-[28rem] bg-[#181F17] rounded-xl flex items-center justify-center mb-6 overflow-hidden">
+              <iframe
+                src="https://www.youtube.com/embed/26U_seo0a1g"
+                title="Welkom video"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                className="w-full h-full rounded-xl"
+              ></iframe>
+            </div>
+            <h2 className="text-3xl font-bold text-[#8BAE5A] mb-3 text-center">Welkom bij Top Tier Men!</h2>
+            <p className="text-white text-center mb-6 text-lg">Bekijk de korte introductievideo om direct van start te gaan.</p>
+            <button
+              className="mt-2 px-8 py-3 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#3A4D23] text-[#181F17] font-semibold text-xl shadow hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all duration-200 border border-[#8BAE5A]"
+              onClick={() => setShowWelcome(false)}
+            >
+              Sluiten
+            </button>
+          </div>
+        </div>
+      )}
       <div className="relative">
-        <div className="absolute top-0 right-0 z-20 flex items-center gap-4">
+        {/* Responsive header icons */}
+        <div className="md:absolute md:top-0 md:right-0 z-20 flex items-center gap-4 md:gap-4 mb-4 md:mb-0 justify-end md:justify-end w-full md:w-auto px-2 md:px-0 mt-4 md:mt-0">
           {/* Notificatie */}
           <div className="relative">
-            <button className={`relative p-2 rounded-full bg-[#232D1A] hover:bg-[#8BAE5A]/10 transition ${dropdownOpen==='notifications' ? 'ring-2 ring-[#8BAE5A]' : ''}`} onClick={() => setDropdownOpen(dropdownOpen==='notifications'?null:'notifications')}>
-              <BellIcon className="w-7 h-7 text-white" />
-              <span className="absolute top-1 right-1 w-3 h-3 bg-[#FFD600] border-2 border-[#232D1A] rounded-full"></span>
+            <button className={`relative p-2 rounded-full bg-[#232D1A] hover:bg-[#8BAE5A]/10 transition md:w-12 md:h-12 w-10 h-10 ${dropdownOpen==='notifications' ? 'ring-2 ring-[#8BAE5A]' : ''}`} onClick={() => setDropdownOpen(dropdownOpen==='notifications'?null:'notifications')}>
+              <BellIcon className="w-6 h-6 md:w-7 md:h-7 text-white" />
+              <span className="absolute top-1 right-1 w-2.5 h-2.5 md:w-3 md:h-3 bg-[#FFD600] border-2 border-[#232D1A] rounded-full"></span>
             </button>
             {dropdownOpen==='notifications' && (
               <div ref={dropdownRef} className="absolute right-0 mt-3 w-96 bg-[#181F17] border border-[#232D1A] rounded-2xl shadow-2xl py-4 px-0 text-white">
@@ -198,9 +231,9 @@ export default function Dashboard() {
           </div>
           {/* Inbox */}
           <div className="relative">
-            <button className={`relative p-2 rounded-full bg-[#232D1A] hover:bg-[#8BAE5A]/10 transition ${dropdownOpen==='messages' ? 'ring-2 ring-[#8BAE5A]' : ''}`} onClick={() => setDropdownOpen(dropdownOpen==='messages'?null:'messages')}>
-              <EnvelopeIcon className="w-7 h-7 text-white" />
-              <span className="absolute top-1 right-1 w-3 h-3 bg-[#4ADE80] border-2 border-[#232D1A] rounded-full"></span>
+            <button className={`relative p-2 rounded-full bg-[#232D1A] hover:bg-[#8BAE5A]/10 transition md:w-12 md:h-12 w-10 h-10 ${dropdownOpen==='messages' ? 'ring-2 ring-[#8BAE5A]' : ''}`} onClick={() => setDropdownOpen(dropdownOpen==='messages'?null:'messages')}>
+              <EnvelopeIcon className="w-6 h-6 md:w-7 md:h-7 text-white" />
+              <span className="absolute top-1 right-1 w-2.5 h-2.5 md:w-3 md:h-3 bg-[#4ADE80] border-2 border-[#232D1A] rounded-full"></span>
             </button>
             {dropdownOpen==='messages' && (
               <div ref={dropdownRef} className="absolute right-0 mt-3 w-96 bg-[#181F17] border border-[#232D1A] rounded-2xl shadow-2xl py-4 px-0 text-white">
@@ -226,22 +259,9 @@ export default function Dashboard() {
               </div>
             )}
           </div>
-          {/* Profiel avatar */}
+          {/* Profielfoto */}
           <div className="relative">
-            <button onClick={() => setDropdownOpen(dropdownOpen==='profile'?null:'profile')} className="focus:outline-none">
-              <img
-                src="/profielfoto.png"
-                alt="Profiel"
-                className="w-12 h-12 rounded-full border-2 border-[#8BAE5A] shadow-lg hover:scale-105 transition"
-              />
-            </button>
-            {dropdownOpen==='profile' && (
-              <div ref={dropdownRef} className="absolute right-0 mt-2 w-48 bg-[#232D1A] border border-[#8BAE5A] rounded-xl shadow-xl py-2">
-                <a href="#" className="block px-4 py-2 text-white hover:bg-[#8BAE5A]/10">Profiel</a>
-                <a href="#" className="block px-4 py-2 text-white hover:bg-[#8BAE5A]/10">Instellingen</a>
-                <a href="#" className="block px-4 py-2 text-[#8BAE5A] font-bold hover:bg-[#8BAE5A]/10">Uitloggen</a>
-              </div>
-            )}
+            <img src="/profielfoto.png" alt="Profielfoto" className="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-[#8BAE5A] object-cover" />
           </div>
         </div>
         <div className={`mb-8 transition-opacity duration-700 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
