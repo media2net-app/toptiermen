@@ -6,6 +6,18 @@ import { BellIcon, EnvelopeIcon, CheckCircleIcon, TrophyIcon, FireIcon, ChatBubb
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Link from 'next/link';
+import { Line } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Tooltip,
+  Filler,
+} from 'chart.js';
+
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Filler);
 
 const badges = [
   {
@@ -40,6 +52,85 @@ const getGreeting = () => {
   if (hour < 12) return 'Goedemorgen';
   if (hour < 18) return 'Goedemiddag';
   return 'Goedenavond';
+};
+
+// Kleine chart data generator voor dashboard kaart
+const generateMiniFinanceChartData = () => {
+  const now = new Date();
+  const labels = Array.from({ length: 6 }, (_, i) => {
+    const date = new Date(now);
+    date.setMonth(date.getMonth() - (5 - i));
+    return date.toLocaleDateString('nl-NL', { month: 'short' });
+  });
+  const data = Array.from({ length: 6 }, (_, i) => 40000 + i * 2000 + Math.random() * 3000);
+  const goalAmount = 100000;
+  const startAmount = data[0];
+  const goalData = Array.from({ length: 6 }, (_, i) => startAmount + ((goalAmount - startAmount) * i) / 5);
+  return {
+    labels,
+    datasets: [
+      {
+        label: 'Netto Waarde',
+        data,
+        borderColor: '#8BAE5A',
+        backgroundColor: 'rgba(139, 174, 90, 0.1)',
+        fill: true,
+        tension: 0.4,
+        borderWidth: 2,
+        pointRadius: 0,
+      },
+      {
+        label: 'Doel',
+        data: goalData,
+        borderColor: '#FFD700',
+        borderDash: [5, 5],
+        fill: false,
+        borderWidth: 2,
+        pointRadius: 0,
+        tension: 0,
+      },
+    ],
+  };
+};
+
+const miniChartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      backgroundColor: 'rgba(35, 45, 26, 0.9)',
+      titleColor: '#fff',
+      bodyColor: '#8BAE5A',
+      borderColor: '#3A4D23',
+      borderWidth: 1,
+      padding: 8,
+      boxPadding: 4,
+      usePointStyle: true,
+      callbacks: {
+        label: function(context: any) {
+          let label = context.dataset.label || '';
+          if (label) label += ': ';
+          if (context.parsed.y !== null) {
+            label += new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(context.parsed.y);
+          }
+          return label;
+        }
+      }
+    },
+  },
+  scales: {
+    x: {
+      display: false,
+    },
+    y: {
+      display: false,
+    },
+  },
+  animation: {
+    duration: 1200,
+    easing: 'easeInOutQuart' as const,
+  },
 };
 
 export default function Dashboard() {
@@ -385,10 +476,10 @@ export default function Dashboard() {
               <span className="text-[#8BAE5A]">Netto Waarde</span>
             </div>
             <div className="w-full h-16 flex items-end">
-              {/* Dummy grafiek */}
-              <svg width="100%" height="100%" viewBox="0 0 120 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <polyline points="0,30 20,20 40,25 60,10 80,15 100,5 120,12" fill="none" stroke="#8BAE5A" strokeWidth="3" />
-              </svg>
+              {/* Mini Chart.js grafiek */}
+              <div className="w-full h-full">
+                <Line data={generateMiniFinanceChartData()} options={miniChartOptions} />
+              </div>
             </div>
           </Link>
 
