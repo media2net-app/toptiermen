@@ -3,192 +3,202 @@ import ClientLayout from '../../components/ClientLayout';
 import Link from 'next/link';
 import { useState } from 'react';
 import Image from 'next/image';
+import { FaUsers, FaTrophy, FaCalendarAlt, FaComments } from 'react-icons/fa';
 
-const filters = ["Populair", "Nieuw", "Progressie-updates", "Challenges"];
-const posts = [
+// Mock data for the new community dashboard
+const myGroups = [
+  { id: 1, name: "Crypto & DeFi Pioniers", logo: "https://randomuser.me/api/portraits/men/32.jpg" },
+  { id: 2, name: "Mindset Masters", logo: "https://randomuser.me/api/portraits/men/65.jpg" },
+  { id: 3, name: "Fitness Tribe", logo: "https://randomuser.me/api/portraits/men/12.jpg" }
+];
+
+const myConnections = [
+  { id: 1, name: "Rick", avatar: "https://randomuser.me/api/portraits/men/32.jpg" },
+  { id: 2, name: "Sven", avatar: "https://randomuser.me/api/portraits/men/65.jpg" },
+  { id: 3, name: "Teun", avatar: "https://randomuser.me/api/portraits/men/12.jpg" }
+];
+
+const upcomingEvents = [
+  { id: 1, title: "Finance Mastermind Call", date: "Morgen 20:00", type: "Online Workshop", attendees: 12 },
+  { id: 2, title: "Mindset Workshop", date: "Overmorgen 19:00", type: "Fysieke Meetup (Amsterdam)", attendees: 8 },
+  { id: 3, title: "Crypto Meetup", date: "Volgende week", type: "Online Workshop", attendees: 15 }
+];
+
+const recentTopics = [
+  { id: 1, title: "Hoe investeer je je eerste €1000?", author: "Mark V.", time: "2u geleden" },
+  { id: 2, title: "Welk boek over mindset heeft jouw leven veranderd?", author: "Jeroen D.", time: "1u geleden" },
+  { id: 3, title: "Ik zoek een accountability partner voor sporten.", author: "Rick", time: "10m geleden" }
+];
+
+const featuredGroups = [
+  { id: 1, name: "Crypto & DeFi Pioniers", mission: "Samen de wereld van decentralized finance verkennen en kansen spotten.", members: 8, logo: "https://randomuser.me/api/portraits/men/32.jpg" },
+  { id: 2, name: "Mindset Masters", mission: "Groeien door mindset en persoonlijke ontwikkeling.", members: 6, logo: "https://randomuser.me/api/portraits/men/65.jpg" },
+  { id: 3, name: "Fitness Tribe", mission: "Samen fitter en sterker worden.", members: 10, logo: "https://randomuser.me/api/portraits/men/12.jpg" }
+];
+
+const events = [
   {
     id: 1,
-    user: {
-      name: "Rick",
-      avatar: "https://randomuser.me/api/portraits/men/32.jpg",
-      motto: "Train. Lead. Conquer."
-    },
-    type: "progress",
-    content: "Vandaag 10.000 stappen gezet en 30 min gelezen!",
-    image: null,
-    likes: 12,
-    comments: [
-      { user: "Teun", text: "Topper!" },
-      { user: "Jeroen", text: "Inspirerend!" }
-    ],
-    time: "2u geleden"
+    title: 'Weekend Retreat',
+    date: '15-17 maart 2024',
+    location: 'Ardennen, België',
+    spots: 12,
+    price: '€495',
+    image: '/images/brotherhood/ardennen.png',
   },
   {
     id: 2,
-    user: {
-      name: "Sven",
-      avatar: "https://randomuser.me/api/portraits/men/65.jpg",
-      motto: "No excuses."
-    },
-    type: "challenge",
-    content: "Push-up challenge afgerond 💪",
-    image: null,
-    likes: 8,
-    comments: [],
-    time: "1u geleden"
+    title: 'Mastermind Avond',
+    date: '28 maart 2024',
+    location: 'Amsterdam',
+    spots: 8,
+    price: '€95',
+    image: '/images/brotherhood/mastermind.png',
   },
   {
     id: 3,
-    user: {
-      name: "Rick",
-      avatar: "https://randomuser.me/api/portraits/men/32.jpg",
-      motto: "Train. Lead. Conquer."
-    },
-    type: "vraag",
-    content: "Wie heeft tips voor meal-prep?",
-    image: null,
-    likes: 3,
-    comments: [
-      { user: "Sven", text: "Check mijn post van vorige week!" }
-    ],
-    time: "10m geleden"
-  }
+    title: 'Online Q&A met Rick',
+    date: '5 april 2024',
+    location: 'Zoom',
+    spots: 25,
+    price: 'Gratis',
+    image: '/images/brotherhood/qena.png',
+  },
 ];
 
-const leaderboard = [
-  { name: "Rick", score: 120, avatar: "https://randomuser.me/api/portraits/men/32.jpg" },
-  { name: "Sven", score: 110, avatar: "https://randomuser.me/api/portraits/men/65.jpg" },
-  { name: "Teun", score: 105, avatar: "https://randomuser.me/api/portraits/men/12.jpg" },
+const challenges = [
+  {
+    id: 1,
+    title: '30 Dagen Discipline',
+    participants: 45,
+    progress: 75,
+    endDate: '15 maart 2024',
+  },
+  {
+    id: 2,
+    title: 'Fysieke Transformatie',
+    participants: 32,
+    progress: 60,
+    endDate: '1 april 2024',
+  },
+  {
+    id: 3,
+    title: 'Mindset Mastery',
+    participants: 28,
+    progress: 40,
+    endDate: '15 april 2024',
+  },
 ];
 
 export default function Brotherhood() {
-  const [selectedFilter, setSelectedFilter] = useState("Populair");
-  const [likeCounts, setLikeCounts] = useState(posts.map(p => p.likes));
-
-  const filteredPosts = posts.filter(post => {
-    if (selectedFilter === "Populair") return true;
-    if (selectedFilter === "Nieuw") return true;
-    if (selectedFilter === "Progressie-updates") return post.type === "progress";
-    if (selectedFilter === "Challenges") return post.type === "challenge";
-    return true;
-  });
-
-  const handleLike = (idx: number) => {
-    setLikeCounts(likeCounts.map((c, i) => (i === idx ? c + 1 : c)));
-  };
-
   return (
     <ClientLayout>
-      <div className="py-8 px-4 md:px-12 flex flex-col gap-12">
-        {/* Top 3 blokken naast elkaar */}
-        <div className="flex flex-col md:flex-row gap-6 mb-10">
-          {/* Mijn Profiel */}
-          <section className="flex-1 flex flex-col justify-start">
-            <h2 className="text-2xl font-bold text-white mb-4">Mijn Profiel</h2>
-            <Link href="/dashboard/brotherhood/profiel" className="flex items-center gap-6 bg-[#232042]/80 rounded-2xl p-6 shadow-xl border border-[#393053]/40 hover:scale-105 transition-transform w-full min-h-[130px] h-full">
-              <Image src="https://randomuser.me/api/portraits/men/32.jpg" alt="avatar" className="w-16 h-16 rounded-full border-2 border-[#635985] self-start" width={64} height={64} />
-              <div className="flex-1 flex flex-col justify-start">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xl font-bold text-white">Rick</span>
-                  <span className="text-xs text-[#A3AED6] italic">&quot;Train. Lead. Conquer.&quot;</span>
-                </div>
-                <div className="w-full h-2 bg-[#393053]/40 rounded-full mb-2">
-                  <div className="h-2 bg-gradient-to-r from-[#635985] to-[#443C68] rounded-full" style={{ width: '68%' }}></div>
-                </div>
-                <div className="flex gap-4 text-xs text-[#A3AED6]">
-                  <span>Badges: 7</span>
-                  <span>Challenges: 3</span>
-                  <span>Dagen actief: 42</span>
-                  <span>Posts: 15</span>
-                </div>
-                <div className="mt-2 text-xs text-[#A3AED6]">AI-Coach: Discipline (toonbaar)</div>
-                <div className="mt-1 text-xs text-[#A3AED6]">Mijn routines: 06:00 opstaan, 10.000 stappen, 30 min lezen</div>
-              </div>
-            </Link>
-          </section>
+      <div className="py-8 px-4 md:px-12">
+        <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">Brotherhood</h1>
+        <p className="text-[#8BAE5A] text-lg mb-8">Word onderdeel van een community van mannen die streven naar excellentie.</p>
 
-          {/* Live Leaderboard */}
-          <section className="flex-1">
-            <h2 className="text-2xl font-bold text-white mb-4">Live Leaderboard</h2>
-            <div className="bg-[#232042]/80 rounded-2xl p-6 shadow-xl border border-[#393053]/40 w-full h-full min-h-[260px] flex flex-col justify-between">
-              <div>
-                <div className="flex gap-6 mb-4">
-                  {leaderboard.map((user, i) => (
-                    <div key={user.name} className="flex flex-col items-center">
-                      <Image src={user.avatar} alt="avatar" className="w-12 h-12 rounded-full border-2 border-[#635985] mb-1" width={48} height={48} />
-                      <span className="text-white font-semibold">{user.name}</span>
-                      <span className="text-[#A3AED6] text-xs">{i === 0 ? 'Top groeier van de maand' : `Score: ${user.score}`}</span>
-                    </div>
-                  ))}
-                </div>
-                <span className="text-xs text-[#A3AED6] mt-2 block">Weekscore: 120</span>
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+          <div className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-[#8BAE5A]/20 flex items-center justify-center">
+                <FaUsers className="text-[#8BAE5A] text-xl" />
               </div>
-              <button className="mt-4 px-4 py-2 rounded-xl bg-gradient-to-r from-[#635985] to-[#443C68] text-white font-semibold shadow hover:from-[#443C68] hover:to-[#635985] transition-all w-full">Buddy-verzoek</button>
-            </div>
-          </section>
-
-          {/* Join a Squad */}
-          <section className="flex-1">
-            <h2 className="text-2xl font-bold text-white mb-4">Join a Squad</h2>
-            <div className="bg-gradient-to-r from-[#443C68] to-[#635985] rounded-2xl p-6 shadow-xl border border-[#393053]/40 w-full h-full min-h-[260px] flex flex-col justify-between">
               <div>
-                <h3 className="text-xl font-bold text-white mb-2">Word lid van een Squad</h3>
-                <p className="text-[#A3AED6] mb-2">Sluit je aan bij een Squad (subgroep op niveau of regio) en krijg toegang tot een groepschat, tribe en accountability-buddy systeem.</p>
-                <ul className="list-disc list-inside text-[#A3AED6] text-sm mb-2">
-                  <li>Eigen groepschat of updates</li>
-                  <li>Kleine tribe binnen de Brotherhood</li>
-                  <li>Accountability-buddy systeem</li>
-                </ul>
+                <div className="text-2xl font-bold text-white">248</div>
+                <div className="text-[#8BAE5A] text-sm">Brothers</div>
               </div>
-              <button className="mt-4 px-6 py-3 rounded-xl bg-[#232042] text-white font-semibold shadow hover:bg-[#393053] transition-all w-full">Sluit je aan bij een Squad</button>
             </div>
-          </section>
+          </div>
+          <div className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-[#8BAE5A]/20 flex items-center justify-center">
+                <FaTrophy className="text-[#8BAE5A] text-xl" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-white">12</div>
+                <div className="text-[#8BAE5A] text-sm">Challenges</div>
+              </div>
+            </div>
+          </div>
+          <div className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-[#8BAE5A]/20 flex items-center justify-center">
+                <FaCalendarAlt className="text-[#8BAE5A] text-xl" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-white">8</div>
+                <div className="text-[#8BAE5A] text-sm">Events</div>
+              </div>
+            </div>
+          </div>
+          <div className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-[#8BAE5A]/20 flex items-center justify-center">
+                <FaComments className="text-[#8BAE5A] text-xl" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-white">1.2k</div>
+                <div className="text-[#8BAE5A] text-sm">Interacties</div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Community Wall */}
-        <section>
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">Community Wall</h1>
-          <p className="text-[#A3AED6] text-lg mb-4">Updates van leden: overwinningen, challenges, reflecties & meer</p>
-          <div className="flex gap-3 mb-6">
-            {filters.map(f => (
-              <button
-                key={f}
-                onClick={() => setSelectedFilter(f)}
-                className={`px-4 py-2 rounded-xl font-semibold text-sm ${selectedFilter === f ? 'bg-gradient-to-r from-[#443C68] to-[#635985] text-white' : 'bg-[#232042] text-[#A3AED6]'} transition`}
-              >
-                {f}
-              </button>
-            ))}
-          </div>
-          <div className="flex flex-col gap-6">
-            {filteredPosts.map((post, idx) => (
-              <div key={post.id} className="bg-[#232042]/80 rounded-2xl p-6 shadow-xl border border-[#393053]/40">
-                <div className="flex items-center gap-4 mb-2">
-                  <Image src={post.user.avatar} alt="avatar" className="w-10 h-10 rounded-full border border-[#393053]" width={40} height={40} />
-                  <div>
-                    <span className="font-semibold text-white">{post.user.name}</span>
-                    <span className="ml-2 text-xs text-[#A3AED6] italic">&quot;{post.user.motto}&quot;</span>
-                  </div>
-                  <span className="ml-auto text-xs text-[#A3AED6]">{post.time}</span>
+        {/* Upcoming Events */}
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold text-white mb-6">Aankomende Events</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {events.map((event) => (
+              <div key={event.id} className="bg-[#232D1A]/80 rounded-2xl overflow-hidden shadow-xl border border-[#3A4D23]/40">
+                <div className="relative h-48">
+                  <img src={event.image} alt={event.title} className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#232D1A] to-transparent" />
                 </div>
-                <div className="mb-2 text-[#A3AED6]">{post.content}</div>
-                {post.image && <Image src={post.image} alt="post" className="rounded-xl mb-2" width={320} height={240} />}
-                <div className="flex items-center gap-4 mt-2">
-                  <button onClick={() => handleLike(idx)} className="text-[#A3AED6] hover:text-[#f0a14f] font-bold">♥ {likeCounts[idx]}</button>
-                  <span className="text-xs text-[#A3AED6]">{post.comments.length} reacties</span>
-                  <Link href="/dashboard/brotherhood/profiel" className="ml-auto text-xs text-[#A3AED6] underline hover:text-white">Bekijk profiel</Link>
-                </div>
-                {post.comments.length > 0 && (
-                  <div className="mt-2 ml-4 border-l-2 border-[#393053] pl-4">
-                    {post.comments.map((c, i) => (
-                      <div key={i} className="text-xs text-[#A3AED6] mb-1"><span className="font-semibold">{c.user}:</span> {c.text}</div>
-                    ))}
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-white mb-2">{event.title}</h3>
+                  <div className="text-[#8BAE5A] text-sm mb-4">
+                    <div>{event.date}</div>
+                    <div>{event.location}</div>
+                    <div>{event.spots} spots beschikbaar</div>
                   </div>
-                )}
+                  <div className="flex items-center justify-between">
+                    <span className="text-[#FFD700] font-bold">{event.price}</span>
+                    <button className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] text-[#181F17] font-semibold shadow hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all">Inschrijven</button>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
-        </section>
+        </div>
+
+        {/* Active Challenges */}
+        <div>
+          <h2 className="text-2xl font-bold text-white mb-6">Actieve Challenges</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {challenges.map((challenge) => (
+              <div key={challenge.id} className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40">
+                <h3 className="text-xl font-bold text-white mb-4">{challenge.title}</h3>
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex justify-between text-[#8BAE5A] text-sm mb-1">
+                      <span>Voortgang</span>
+                      <span>{challenge.progress}%</span>
+                    </div>
+                    <div className="h-2 bg-[#3A4D23]/40 rounded-full">
+                      <div className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full" style={{ width: `${challenge.progress}%` }}></div>
+                    </div>
+                  </div>
+                  <div className="flex justify-between text-[#8BAE5A] text-sm">
+                    <span>{challenge.participants} deelnemers</span>
+                    <span>Eindigt: {challenge.endDate}</span>
+                  </div>
+                  <button className="w-full px-4 py-2 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] text-[#181F17] font-semibold shadow hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all">Join Challenge</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </ClientLayout>
   );

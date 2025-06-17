@@ -9,28 +9,28 @@ const cards = [
     description: 'Vind rust en helderheid met onze collectie geleide meditaties. Voor beginners en gevorderden.',
     icon: <FaLeaf className="w-8 h-8 text-[#8BAE5A] drop-shadow" />, // lotusbloem
     href: '/dashboard/mind-en-focus/meditaties',
-    bg: '/images/mind/zenlake.jpg',
+    bg: '/images/mind/1.png',
   },
   {
     title: 'Ademhalingsoefeningen',
     description: 'Verlaag stress en verhoog je energie in enkele minuten met technieken als de Box Breathing en Wim Hof methode.',
     icon: <FaLungs className="w-8 h-8 text-[#8BAE5A] drop-shadow" />, // longen
     href: '/dashboard/mind-en-focus/ademhaling',
-    bg: '/images/mind/mountainsky.jpg',
+    bg: '/images/mind/2.png',
   },
   {
     title: 'Mijn Dankbaarheidsdagboek',
     description: 'Train je brein om het positieve te zien. Noteer dagelijks waar je dankbaar voor bent en verander je perspectief.',
     icon: <FaRegSmileBeam className="w-8 h-8 text-[#FFD700] drop-shadow" />, // hart/smile
     href: '/dashboard/mind-en-focus/dankbaarheid',
-    bg: '/images/mind/journal.jpg',
+    bg: '/images/mind/3.png',
   },
   {
     title: 'Focus & Productiviteit',
     description: 'Leer technieken om afleiding te verslaan en diep werk te verrichten. Inclusief tools zoals de Pomodoro timer.',
     icon: <FaBrain className="w-8 h-8 text-[#8BAE5A] drop-shadow" />, // brein
     href: '/dashboard/mind-en-focus/focus',
-    bg: '/images/mind/desk.jpg',
+    bg: '/images/mind/4.png',
   },
 ];
 
