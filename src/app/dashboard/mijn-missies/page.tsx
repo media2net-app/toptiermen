@@ -1,116 +1,50 @@
 'use client';
 import ClientLayout from '../../components/ClientLayout';
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { LockClosedIcon } from '@heroicons/react/24/solid';
+import { useState } from 'react';
 
-const modules = [
-  {
-    title: 'Discipline & Identiteit',
-    description: 'Ontwikkel een onwankelbare identiteit en dagelijkse discipline.',
-    progress: 80,
-    href: '/dashboard/mijn-missies/discipline-identiteit',
-    unlocked: true,
-  },
-  {
-    title: 'Fysieke Dominantie',
-    description: 'Werk aan kracht, uithoudingsvermogen en fysieke gezondheid.',
-    progress: 60,
-    unlocked: false,
-  },
-  {
-    title: 'Mentale Weerbaarheid',
-    description: 'Vergroot je mentale kracht en veerkracht.',
-    progress: 45,
-    unlocked: false,
-  },
-  {
-    title: 'Financiële Groei',
-    description: 'Leer alles over geld, investeren en financiële vrijheid.',
-    progress: 30,
-    unlocked: false,
-  },
-  {
-    title: 'High Performance Lifestyle',
-    description: 'Optimaliseer je routines voor maximale prestaties.',
-    progress: 55,
-    unlocked: false,
-  },
-  {
-    title: 'Broederschap',
-    description: 'Bouw aan een sterk netwerk en accountability.',
-    progress: 20,
-    unlocked: false,
-  },
+const initialMissions = [
+  { id: 1, title: '10.000 stappen per dag', type: 'Dagelijks', done: true },
+  { id: 2, title: '30 min lezen', type: 'Dagelijks', done: true },
+  { id: 3, title: '3x sporten', type: 'Wekelijks', done: false },
+  { id: 4, title: '2x mediteren', type: 'Wekelijks', done: false },
 ];
 
 export default function MijnMissies() {
-  const [animated, setAnimated] = useState(Array(modules.length).fill(0));
-
-  useEffect(() => {
-    modules.forEach((mod, i) => {
-      const end = mod.progress;
-      const duration = 900;
-      const step = () => {
-        setAnimated((prev) => {
-          const next = [...prev];
-          if (next[i] < end) {
-            next[i] = Math.min(next[i] + 2, end);
-          }
-          return next;
-        });
-      };
-      if (animated[i] < end) {
-        const interval = setInterval(step, duration / end);
-        return () => clearInterval(interval);
-      }
-    });
-  }, [animated]);
+  const [missions, setMissions] = useState(initialMissions);
+  const [filter, setFilter] = useState('deze week');
 
   return (
     <ClientLayout>
       <div className="p-6 md:p-12">
-        <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">Mijn Missies</h1>
-        <p className="text-[#8BAE5A] text-lg mb-8">Overzicht van alle modules en jouw voortgang</p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {modules.map((mod, i) =>
-            mod.unlocked ? (
-              <Link
-                key={mod.title}
-                href={mod.href!}
-                className="bg-[#181F17]/90 rounded-2xl p-6 shadow-xl border border-[#8BAE5A]/40 flex flex-col gap-2 cursor-pointer transition-transform duration-200 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] relative"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="flex items-center gap-2 text-xl font-semibold text-[#8BAE5A]">
-                    <span className="w-8 h-8 rounded-full bg-[#232D1A] border border-[#8BAE5A] flex items-center justify-center font-bold text-lg mr-2">{i+1}</span>
-                    {mod.title}
-                  </span>
-                  <span className="text-[#8BAE5A] font-mono text-sm">{animated[i]}%</span>
-                </div>
-                <p className="text-[#A6C97B] mb-2 text-sm">{mod.description}</p>
-                <div className="w-full h-2 bg-[#8BAE5A]/20 rounded-full">
-                  <div className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#3A4D23] rounded-full transition-all duration-500" style={{ width: `${animated[i]}%` }}></div>
-                </div>
-              </Link>
-            ) : (
-              <div key={mod.title} className="bg-[#181F17]/90 rounded-2xl p-6 shadow-xl border border-[#8BAE5A]/40 flex flex-col gap-2 relative opacity-60 select-none">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="flex items-center gap-2 text-xl font-semibold text-[#8BAE5A]">
-                    <span className="w-8 h-8 rounded-full bg-[#232D1A] border border-[#8BAE5A] flex items-center justify-center font-bold text-lg mr-2">{i+1}</span>
-                    {mod.title}
-                  </span>
-                  <span className="text-[#8BAE5A] font-mono text-sm">{animated[i]}%</span>
-                </div>
-                <p className="text-[#A6C97B] mb-2 text-sm">{mod.description}</p>
-                <div className="w-full h-2 bg-[#8BAE5A]/20 rounded-full">
-                  <div className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#3A4D23] rounded-full transition-all duration-500" style={{ width: `${animated[i]}%` }}></div>
-                </div>
-                <div className="absolute inset-0 bg-black/60 rounded-2xl flex flex-col items-center justify-center z-10">
-                  <LockClosedIcon className="w-10 h-10 text-[#8BAE5A] mb-2" />
-                  <span className="text-[#8BAE5A] font-semibold text-sm">Ontgrendel na afronden vorige module</span>
-                </div>
-              </div>
-            )
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">Mijn Missies</h1>
+            <p className="text-[#8BAE5A] text-lg">Overzicht van je actieve en voltooide missies deze week</p>
+          </div>
+          <button className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] text-[#181F17] font-bold text-lg shadow hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all border border-[#8BAE5A]">
+            + Nieuwe missie toevoegen
+          </button>
+        </div>
+        <div className="flex gap-2 mb-6">
+          <button onClick={() => setFilter('deze week')} className={`px-4 py-2 rounded-full font-semibold transition ${filter === 'deze week' ? 'bg-[#232D1A] text-[#8BAE5A]' : 'text-[#B6C948] hover:text-[#8BAE5A]'}`}>Deze week</button>
+          <button onClick={() => setFilter('alle')} className={`px-4 py-2 rounded-full font-semibold transition ${filter === 'alle' ? 'bg-[#232D1A] text-[#8BAE5A]' : 'text-[#B6C948] hover:text-[#8BAE5A]'}`}>Alle missies</button>
+        </div>
+        <div className="bg-[#232D1A] rounded-2xl shadow-xl p-6 border border-[#3A4D23]">
+          {missions.length === 0 ? (
+            <div className="text-[#8BAE5A] text-center py-12">Geen missies gevonden. Voeg een nieuwe missie toe!</div>
+          ) : (
+            <ul className="divide-y divide-[#3A4D23]">
+              {missions.map(m => (
+                <li key={m.id} className="flex items-center justify-between py-4">
+                  <div className="flex items-center gap-3">
+                    <span className={`w-6 h-6 rounded-full flex items-center justify-center border-2 ${m.done ? 'bg-[#8BAE5A] border-[#8BAE5A] text-[#181F17]' : 'bg-[#232D1A] border-[#3A4D23] text-[#8BAE5A]'}`}>{m.done ? '✓' : ''}</span>
+                    <span className={`text-lg ${m.done ? 'line-through text-[#B6C948]' : 'text-white'}`}>{m.title}</span>
+                    <span className="ml-2 px-2 py-0.5 rounded bg-[#3A4D23] text-[#8BAE5A] text-xs font-semibold">{m.type}</span>
+                  </div>
+                  {m.done && <span className="text-[#8BAE5A] text-sm">Voltooid</span>}
+                </li>
+              ))}
+            </ul>
           )}
         </div>
       </div>

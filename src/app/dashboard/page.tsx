@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { BellIcon, EnvelopeIcon, CheckCircleIcon, TrophyIcon, FireIcon, ChatBubbleLeftRightIcon, UserGroupIcon, CalendarDaysIcon, ArrowTrendingUpIcon, DocumentCheckIcon } from '@heroicons/react/24/solid';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Link from 'next/link';
 
 const badges = [
   {
@@ -265,37 +266,273 @@ export default function Dashboard() {
           </div>
         </div>
         <div className={`mb-8 transition-opacity duration-700 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
-          <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tight mb-4 text-white">
-            {getGreeting()}, <span className="text-[#8BAE5A]">Rick</span>!
-          </h1>
+          <div className="mb-6">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+              <div>
+                <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tight mb-2 text-white">
+                  {getGreeting()}, <span className="text-[#8BAE5A]">Rick</span>!
+                </h1>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="inline-block bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] text-white px-4 py-1 rounded-full text-sm font-semibold shadow">
+                    Rang: Warrior
+                  </span>
+                </div>
+              </div>
+              {/* eventueel andere header icons */}
+            </div>
+            {/* Badges */}
+            <div className="flex items-center gap-3 mt-4 overflow-x-auto pb-2">
+              <div className="flex flex-row gap-3">
+                {/* Voorbeeld badges */}
+                <button className="flex flex-col items-center group focus:outline-none">
+                  <img src="/badge1.png" alt="Discipline Badge" className="w-12 h-12 transition-transform duration-200 group-hover:scale-110" />
+                  <span className="text-xs text-white mt-1">Discipline</span>
+                </button>
+                <button className="flex flex-col items-center group focus:outline-none">
+                  <img src="/badge2.png" alt="Consistency Badge" className="w-12 h-12 transition-transform duration-200 group-hover:scale-110" />
+                  <span className="text-xs text-white mt-1">Consistency</span>
+                </button>
+                <button className="flex flex-col items-center group focus:outline-none">
+                  <img src="/badge3.png" alt="Leader Badge" className="w-12 h-12 transition-transform duration-200 group-hover:scale-110" />
+                  <span className="text-xs text-white mt-1">Leader</span>
+                </button>
+                {/* Meer badges indicator */}
+                <button className="flex flex-col items-center justify-center group focus:outline-none">
+                  <div className="w-12 h-12 flex items-center justify-center bg-[#232D1A] border border-[#8BAE5A] rounded-full text-[#8BAE5A] font-bold text-lg transition-transform duration-200 group-hover:scale-110">
+                    +17
+                  </div>
+                  <span className="text-xs text-white mt-1">meer</span>
+                </button>
+              </div>
+            </div>
+          </div>
           <p className="text-white text-lg mb-8">Jouw persoonlijke Top Tier Men dashboard</p>
-          <div className="bg-[#232D1A]/80 rounded-2xl p-10 flex flex-col md:flex-row gap-8 items-center shadow-xl border border-[#3A4D23]/40">
-            <div className="flex-1">
-              <div className="text-xl text-white font-semibold mb-2">Motivational quote</div>
-              <blockquote className="italic text-white">&ldquo;Discipline is the bridge between goals and accomplishment.&rdquo;</blockquote>
-              <div className="mt-4 text-xs text-[#8BAE5A]">- Rick</div>
+        </div>
+
+        {/* Jouw Week in Cijfers */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 animate-fade-in-up">
+          {/* Mijn Missies */}
+          <Link href="/dashboard/mijn-missies" className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#f0a14f] cursor-pointer block">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-white">Mijn Missies</h3>
+              <span className="text-[#8BAE5A] text-2xl">🎯</span>
+            </div>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-3xl font-bold text-white">3/5</span>
+              <span className="text-[#8BAE5A]">volbracht</span>
+            </div>
+            <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
+              <div className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full" style={{ width: '60%' }}></div>
+            </div>
+          </Link>
+
+          {/* Trainingscentrum */}
+          {/* (verwijderd) */}
+
+          {/* Mind & Focus */}
+          <div className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#f0a14f]">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-white">Mind & Focus</h3>
+              <span className="text-[#8BAE5A] text-2xl">🧘‍♂️</span>
+            </div>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-3xl font-bold text-white">4</span>
+              <span className="text-[#8BAE5A]">meditaties voltooid</span>
+            </div>
+            <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
+              <div className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full" style={{ width: '80%' }}></div>
+            </div>
+          </div>
+
+          {/* Boekenkamer */}
+          <div className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#f0a14f]">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-white">Boekenkamer</h3>
+              <span className="text-[#8BAE5A] text-2xl">📚</span>
+            </div>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-3xl font-bold text-white">45</span>
+              <span className="text-[#8BAE5A]">minuten gelezen</span>
+            </div>
+            <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
+              <div className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full" style={{ width: '75%' }}></div>
+            </div>
+          </div>
+
+          {/* Mijn Trainingen */}
+          <Link href="/dashboard/mijn-trainingen" className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#f0a14f] cursor-pointer block">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-white">Mijn Trainingen</h3>
+              <span className="text-[#8BAE5A] text-2xl">💪</span>
+            </div>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-3xl font-bold text-white">2/3</span>
+              <span className="text-[#8BAE5A]">trainingen gedaan</span>
+            </div>
+            <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
+              <div className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full" style={{ width: '66%' }}></div>
+            </div>
+          </Link>
+
+          {/* Finance & Business */}
+          <Link href="/dashboard/finance-en-business" className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#f0a14f] cursor-pointer block">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-white">Finance & Business</h3>
+              <span className="text-[#8BAE5A] text-2xl">💰</span>
+            </div>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-3xl font-bold text-white">€12.500</span>
+              <span className="text-[#8BAE5A]">Netto Waarde</span>
+            </div>
+            <div className="w-full h-16 flex items-end">
+              {/* Dummy grafiek */}
+              <svg width="100%" height="100%" viewBox="0 0 120 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <polyline points="0,30 20,20 40,25 60,10 80,15 100,5 120,12" fill="none" stroke="#8BAE5A" strokeWidth="3" />
+              </svg>
+            </div>
+          </Link>
+
+          {/* Passief Inkomen */}
+          <Link href="/dashboard/finance-en-business/passief-inkomen" className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#f0a14f] cursor-pointer block">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-white">Passief Inkomen</h3>
+              <span className="text-[#8BAE5A] text-2xl">📈</span>
+            </div>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-3xl font-bold text-white">€150</span>
+              <span className="text-[#8BAE5A]">/ €500 doel</span>
+            </div>
+            <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
+              <div className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full" style={{ width: '30%' }}></div>
+            </div>
+          </Link>
+        </div>
+
+        {/* Voortgang naar Hoofddoel */}
+        <div className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 mb-8 animate-fade-in-up">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-bold text-white">Voortgang naar Hoofddoel</h3>
+            <span className="text-[#8BAE5A] text-2xl">🎯</span>
+          </div>
+          <p className="text-white mb-4">Fitter worden en 10% lichaamsvet bereiken</p>
+          <div className="w-full h-3 bg-[#3A4D23]/40 rounded-full">
+            <div className="h-3 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full transition-all duration-700" style={{ width: `${progress}%` }}></div>
+          </div>
+          <div className="flex justify-between mt-2">
+            <span className="text-[#8BAE5A] text-sm">Start</span>
+            <span className="text-[#8BAE5A] text-sm">{progress}%</span>
+            <span className="text-[#8BAE5A] text-sm">Doel</span>
+          </div>
+        </div>
+
+        {/* Quote van de Dag */}
+        <div className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 mb-8 animate-fade-in-up">
+          <div className="flex items-center gap-4">
+            <span className="text-[#8BAE5A] text-4xl">💭</span>
+            <div>
+              <h3 className="text-xl font-bold text-white mb-2">Quote van de Dag</h3>
+              <blockquote className="text-white italic">"Discipline is the bridge between goals and accomplishment."</blockquote>
+              <p className="text-[#8BAE5A] text-sm mt-2">- Rick</p>
             </div>
           </div>
         </div>
-        <div className={`grid grid-cols-1 md:grid-cols-4 gap-10 mb-12 transition-opacity duration-700 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}> 
-          <div className="bg-[#181F17]/90 rounded-2xl p-8 shadow-xl border border-[#8BAE5A]/40 flex flex-col items-center transform transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]">
-            <span className="text-white text-sm mb-1">Voortgang</span>
-            <span className="text-3xl font-bold text-white">{progress}%</span>
-            <div className="w-full h-2 bg-[#8BAE5A]/20 rounded-full mt-2">
-              <div className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#3A4D23] rounded-full transition-all duration-500" style={{ width: `${progress}%` }}></div>
+
+        {/* Gedetailleerde Widgets per Module */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8 animate-fade-in-up">
+          {/* Mijn Missies & Gewoontes */}
+          <div className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#f0a14f]">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-white">Mijn Missies & Gewoontes</h3>
+              <span className="text-[#8BAE5A] text-2xl">🎯</span>
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-[#8BAE5A]">✓</span>
+                  <span className="text-white">Dagelijkse meditatie</span>
+                </div>
+                <span className="text-[#8BAE5A]">3/7 dagen</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-[#8BAE5A]">✓</span>
+                  <span className="text-white">10.000 stappen</span>
+                </div>
+                <span className="text-[#8BAE5A]">5/7 dagen</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-[#8BAE5A]">✓</span>
+                  <span className="text-white">30 min lezen</span>
+                </div>
+                <span className="text-[#8BAE5A]">4/7 dagen</span>
+              </div>
             </div>
           </div>
-          <div className="bg-[#181F17]/90 rounded-2xl p-8 shadow-xl border border-[#8BAE5A]/40 flex flex-col items-center transform transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]">
-            <span className="text-white text-sm mb-1">Level</span>
-            <span className="text-3xl font-bold text-white">4</span>
+
+          {/* Trainingscentrum */}
+          {/* (verwijderd) */}
+
+          {/* Mind & Focus */}
+          <div className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#f0a14f]">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-white">Mind & Focus</h3>
+              <span className="text-[#8BAE5A] text-2xl">🧘‍♂️</span>
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-[#8BAE5A]">⏱️</span>
+                  <span className="text-white">Meditatie streak</span>
+                </div>
+                <span className="text-[#8BAE5A]">4 dagen</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-[#8BAE5A]">📝</span>
+                  <span className="text-white">Journal entries</span>
+                </div>
+                <span className="text-[#8BAE5A]">3 deze week</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-[#8BAE5A]">🎯</span>
+                  <span className="text-white">Focus score</span>
+                </div>
+                <span className="text-[#8BAE5A]">85%</span>
+              </div>
+            </div>
           </div>
-          <div className="bg-[#181F17]/90 rounded-2xl p-8 shadow-xl border border-[#8BAE5A]/40 flex flex-col items-center transform transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]">
-            <span className="text-white text-sm mb-1">Badges</span>
-            <span className="text-3xl font-bold text-white">7</span>
-          </div>
-          <div className="bg-[#181F17]/90 rounded-2xl p-8 shadow-xl border border-[#8BAE5A]/40 flex flex-col items-center transform transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]">
-            <span className="text-white text-sm mb-1">Dagelijkse Missie</span>
-            <span className="text-lg font-semibold text-white text-center">10.000 stappen<br />30 min lezen</span>
+
+          {/* Boekenkamer */}
+          <div className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#f0a14f]">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-white">Boekenkamer</h3>
+              <span className="text-[#8BAE5A] text-2xl">📚</span>
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-[#8BAE5A]">📖</span>
+                  <span className="text-white">Huidig boek</span>
+                </div>
+                <span className="text-[#8BAE5A]">Atomic Habits</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-[#8BAE5A]">⏱️</span>
+                  <span className="text-white">Leestijd deze week</span>
+                </div>
+                <span className="text-[#8BAE5A]">45 min</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-[#8BAE5A]">🎯</span>
+                  <span className="text-white">Doel: 30 min/dag</span>
+                </div>
+                <span className="text-[#8BAE5A]">64%</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>

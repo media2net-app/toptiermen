@@ -263,12 +263,12 @@ export default function LesPage() {
       </div>
       <div className="flex justify-between">
         {prev ? (
-          <Link href={`/dashboard/mijn-missies/discipline-identiteit/${prev.slug}`} className="px-6 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] font-semibold border border-[#3A4D23] hover:bg-[#232D1A] transition">
+          <Link href={`/dashboard/academy/discipline-identiteit/${prev.slug}`} className="px-6 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] font-semibold border border-[#3A4D23] hover:bg-[#232D1A] transition">
             ← {prev.title}
           </Link>
         ) : <div />}
         {next ? (
-          <Link href={`/dashboard/mijn-missies/discipline-identiteit/${next.slug}`} className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#3A4D23] text-[#181F17] font-bold border border-[#8BAE5A] hover:from-[#B6C948] hover:to-[#8BAE5A] transition">
+          <Link href={`/dashboard/academy/discipline-identiteit/${next.slug}`} className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#3A4D23] text-[#181F17] font-bold border border-[#8BAE5A] hover:from-[#B6C948] hover:to-[#8BAE5A] transition">
             Volgende les →
           </Link>
         ) : <div />}

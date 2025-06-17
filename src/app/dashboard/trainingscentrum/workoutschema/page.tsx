@@ -33,7 +33,7 @@ export default function Workoutschema() {
           <Link
             key={schema.title}
             href={schema.href}
-            className="bg-[#232042]/80 rounded-2xl p-6 shadow-xl border border-[#393053]/40 flex flex-col gap-4 items-start cursor-pointer transition-transform duration-200 hover:scale-105 hover:shadow-2xl hover:border-[#635985] focus:outline-none focus:ring-2 focus:ring-[#635985]"
+            className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 flex flex-col gap-4 items-start cursor-pointer transition-transform duration-200 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
           >
             <Image
               src={schema.image}
@@ -43,8 +43,8 @@ export default function Workoutschema() {
               className="w-full h-40 object-cover rounded-xl mb-2 shadow-lg"
             />
             <span className="text-xl font-semibold text-white mb-1">{schema.title}</span>
-            <p className="text-[#A3AED6] mb-2 text-sm">{schema.description}</p>
-            <button className="mt-auto px-4 py-2 rounded-xl bg-gradient-to-r from-[#635985] to-[#443C68] text-white font-semibold shadow hover:from-[#443C68] hover:to-[#635985] transition-all">Bekijk schema</button>
+            <p className="text-white mb-2 text-sm">{schema.description}</p>
+            <button className="mt-auto px-4 py-2 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] text-white font-semibold shadow hover:from-[#f0a14f] hover:to-[#8BAE5A] transition-all">Bekijk schema</button>
           </Link>
         ))}
       </div>

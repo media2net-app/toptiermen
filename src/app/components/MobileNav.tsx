@@ -5,7 +5,7 @@ import { useState } from 'react';
 
 const mobileMenu = [
   { label: 'Dashboard', href: '/dashboard', icon: HomeIcon },
-  { label: 'Mijn Missies', href: '/dashboard/mijn-missies', icon: FireIcon },
+  { label: 'Academy', href: '/dashboard/academy', icon: FireIcon },
   { label: 'Trainingscentrum', href: '/dashboard/trainingscentrum', icon: AcademicCapIcon },
   { label: 'Mijn Profiel', href: '/dashboard/mijn-profiel', icon: UserCircleIcon },
 ];

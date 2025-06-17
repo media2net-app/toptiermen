@@ -15,21 +15,31 @@ function slugify(str: string) {
 }
 
 const menu = [
-  { label: 'Dashboard', icon: HomeIcon },
-  { label: 'Mijn Missies', icon: FireIcon },
-  { label: 'Trainingscentrum', icon: AcademicCapIcon },
-  { label: 'Mind & Focus', icon: ChartBarIcon },
-  { label: 'Finance & Business', icon: CurrencyDollarIcon },
-  { label: 'Brotherhood', icon: UsersIcon },
-  { label: 'Boekenkamer', icon: BookOpenIcon },
-  { label: 'Badges & Rangen', icon: StarIcon },
-  { label: 'Mijn Profiel', icon: UserCircleIcon },
-  { label: 'Mentorship & Coaching', icon: ChatBubbleLeftRightIcon },
+  { label: 'Dashboard', icon: HomeIcon, href: '/dashboard' },
+  {
+    label: 'Mijn Missies',
+    icon: FireIcon,
+    parent: 'Dashboard',
+    href: '/dashboard/mijn-missies',
+    isSub: true
+  },
+  { label: 'Mijn Trainingen', icon: AcademicCapIcon, parent: 'Dashboard', href: '/dashboard/mijn-trainingen', isSub: true },
+  { label: 'Finance & Business', icon: CurrencyDollarIcon, parent: 'Dashboard', href: '/dashboard/finance-en-business', isSub: true },
+  { label: 'Passief Inkomen', icon: StarIcon, parent: 'Dashboard', href: '/dashboard/finance-en-business/passief-inkomen', isSub: true },
+  { label: 'Academy', icon: FireIcon, href: '/dashboard/academy' },
+  { label: 'Trainingscentrum', icon: AcademicCapIcon, href: '/dashboard/trainingscentrum' },
+  { label: 'Mind & Focus', icon: ChartBarIcon, href: '/dashboard/mind-en-focus' },
+  { label: 'Brotherhood', icon: UsersIcon, href: '/dashboard/brotherhood' },
+  { label: 'Boekenkamer', icon: BookOpenIcon, href: '/dashboard/boekenkamer' },
+  { label: 'Badges & Rangen', icon: StarIcon, href: '/dashboard/badges-en-rangen' },
+  { label: 'Mijn Profiel', icon: UserCircleIcon, href: '/dashboard/mijn-profiel' },
+  { label: 'Mentorship & Coaching', icon: ChatBubbleLeftRightIcon, href: '/dashboard/mentorship-en-coaching' },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const safePathname = pathname || '';
   return (
     <div className="flex min-h-screen">
       {/* Sidebar */}
@@ -49,21 +59,45 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
         <nav className="flex-1 flex flex-col gap-2 mt-4">
           {menu.map((item, idx) => {
-            const slug = idx === 0 ? 'dashboard' : `dashboard/${slugify(item.label)}`;
-            const href = `/${slug}`;
-            const isActive = pathname === href;
-            return (
-              <Link
-                href={href}
-                key={item.label}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide transition-all duration-150 font-['Figtree']
-                  ${isActive ? 'bg-[#8BAE5A] text-black shadow-lg' : 'text-white hover:text-[#8BAE5A]'}
-                  ${collapsed ? 'justify-center px-2' : ''}`}
-              >
-                <item.icon className={`w-6 h-6 ${isActive ? 'text-[#181F17]' : 'text-[#8BAE5A]'}`} />
-                {!collapsed && <span>{item.label}</span>}
-              </Link>
-            );
+            if (!item.parent) {
+              // Hoofditem
+              const isActive = safePathname === item.href;
+              return (
+                <div key={item.label}>
+                  <Link
+                    href={item.href}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide transition-all duration-150 font-['Figtree']
+                      ${isActive ? 'bg-[#8BAE5A] text-black shadow-lg' : 'text-white hover:text-[#8BAE5A]'}
+                      ${collapsed ? 'justify-center px-2' : ''}`}
+                  >
+                    <item.icon className={`w-6 h-6 ${isActive ? 'text-[#181F17]' : 'text-[#8BAE5A]'}`} />
+                    {!collapsed && <span>{item.label}</span>}
+                  </Link>
+                  {/* Subitems */}
+                  {menu.filter(sub => sub.parent === item.label).length > 0 && !collapsed && (
+                    <div className="ml-8 mt-1 flex flex-col gap-1">
+                      {menu.filter(sub => sub.parent === item.label).map(sub => {
+                        const isSubActive = safePathname === sub.href;
+                        return (
+                          <Link
+                            href={sub.href}
+                            key={sub.label}
+                            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-150
+                              ${isSubActive ? 'bg-[#8BAE5A] text-black' : 'text-white hover:text-[#8BAE5A]'}
+                            `}
+                          >
+                            <sub.icon className="w-5 h-5" />
+                            <span>{sub.label}</span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            }
+            // Subitems worden hierboven al gerenderd
+            return null;
           })}
         </nav>
         <button className={`mt-10 w-full py-2 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#3A4D23] text-black font-bold border border-[#8BAE5A] hover:from-[#A6C97B] hover:to-[#8BAE5A] transition font-['Figtree'] ${collapsed ? 'text-xs px-0' : ''}`}>{!collapsed ? 'Log Out' : <span className="w-6 h-6"><ChevronLeftIcon className="w-5 h-5 mx-auto text-black" /></span>}</button>

@@ -33,7 +33,7 @@ export default function DisciplineIdentiteit() {
           <h1 className="text-3xl md:text-4xl font-extrabold text-white mb-2">Discipline & Identiteit</h1>
           <p className="text-[#8BAE5A] font-semibold mb-1">Module 1 van 6</p>
           <p className="text-[#B6C948] text-lg max-w-xl">Ontdek de kracht van discipline en bouw aan een onwankelbare identiteit. Start hier jouw transformatie!</p>
-          <Link href="/dashboard/mijn-missies/discipline-identiteit/introductie">
+          <Link href="/dashboard/academy/discipline-identiteit/introductie">
             <button className="mt-4 px-6 py-3 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#3A4D23] text-[#181F17] font-bold text-lg shadow hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all duration-200 border border-[#8BAE5A]">
               Start module
             </button>
@@ -86,7 +86,7 @@ export default function DisciplineIdentiteit() {
             <ol className="list-decimal pl-6 text-[#B6C948] space-y-2">
               {lessons.map((lesson, idx) => (
                 <li key={lesson.slug} className="flex items-center justify-between group">
-                  <Link href={`/dashboard/mijn-missies/discipline-identiteit/${lesson.slug}`} className="flex-1 font-semibold hover:text-[#8BAE5A] transition">
+                  <Link href={`/dashboard/academy/discipline-identiteit/${lesson.slug}`} className="flex-1 font-semibold hover:text-[#8BAE5A] transition">
                     {lesson.title}
                   </Link>
                   <span className="ml-4 text-xs text-[#8BAE5A] group-hover:text-white transition">{lesson.duration}</span>
