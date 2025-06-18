@@ -43,7 +43,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="flex min-h-screen">
       {/* Sidebar */}
-      <aside className={`hidden md:flex flex-col ${collapsed ? 'w-20' : 'w-64'} bg-[#181F17] border-r border-[#3A4D23] shadow-2xl z-20 py-8 px-4 font-['Figtree'] transition-all duration-300`}>
+      <aside className={`hidden md:flex flex-col ${collapsed ? 'w-20' : 'w-64'} bg-[#181F17] border-r border-[#3A4D23] shadow-2xl z-20 py-8 px-4 font-figtree transition-all duration-300`}>
         <div className={`mb-6 flex items-center justify-center ${collapsed ? 'px-0' : ''}`}>
           <img src="/logo.svg" alt="Top Tier Men logo" className={`${collapsed ? 'w-10' : 'w-full max-w-[160px]'} h-auto transition-all duration-300`} />
         </div>
@@ -66,7 +66,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <div key={item.label}>
                   <Link
                     href={item.href}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide transition-all duration-150 font-['Figtree']
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide transition-all duration-150 font-figtree
                       ${isActive ? 'bg-[#8BAE5A] text-black shadow-lg' : 'text-white hover:text-[#8BAE5A]'}
                       ${collapsed ? 'justify-center px-2' : ''}`}
                   >
@@ -100,10 +100,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             return null;
           })}
         </nav>
-        <button className={`mt-10 w-full py-2 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#3A4D23] text-black font-bold border border-[#8BAE5A] hover:from-[#A6C97B] hover:to-[#8BAE5A] transition font-['Figtree'] ${collapsed ? 'text-xs px-0' : ''}`}>{!collapsed ? 'Log Out' : <span className="w-6 h-6"><ChevronLeftIcon className="w-5 h-5 mx-auto text-black" /></span>}</button>
+        <button className={`mt-10 w-full py-2 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#3A4D23] text-black font-bold border border-[#8BAE5A] hover:from-[#A6C97B] hover:to-[#8BAE5A] transition font-figtree ${collapsed ? 'text-xs px-0' : ''}`}>{!collapsed ? 'Log Out' : <span className="w-6 h-6"><ChevronLeftIcon className="w-5 h-5 mx-auto text-black" /></span>}</button>
       </aside>
       {/* Main content section */}
-      <section className="flex-1 p-8 md:p-12 bg-[#232D1A] font-['Figtree']">{children}</section>
+      <section className="flex-1 p-8 md:p-12 bg-[#232D1A] font-figtree">{children}</section>
     </div>
   );
 } 
