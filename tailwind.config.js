@@ -12,6 +12,9 @@ module.exports = {
         secondary: '#232D1A',
         dark: '#181F17',
       },
+      fontFamily: {
+        figtree: ["Figtree", "sans-serif"],
+      },
     },
   },
   plugins: [],

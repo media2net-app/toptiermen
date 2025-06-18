@@ -1,7 +1,13 @@
 import './globals.css';
-import { Inter } from 'next/font/google';
+import { Inter, Figtree } from 'next/font/google';
 
 const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  fallback: ['system-ui', 'Arial', 'sans-serif'],
+});
+
+const figtree = Figtree({
   subsets: ['latin'],
   display: 'swap',
   fallback: ['system-ui', 'Arial', 'sans-serif'],
@@ -18,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={inter.className}>
+    <html lang="en" className={`${inter.className} ${figtree.className}`}>
       <body>{children}</body>
     </html>
   );
