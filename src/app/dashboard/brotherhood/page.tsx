@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import Image from 'next/image';
 import { FaUsers, FaTrophy, FaCalendarAlt, FaComments } from 'react-icons/fa';
+import BrotherhoodSubNav from "./SubNav";
 
 // Mock data for the new community dashboard
 const myGroups = [
@@ -93,111 +94,114 @@ const challenges = [
 export default function Brotherhood() {
   return (
     <ClientLayout>
-      <div className="py-8 px-4 md:px-12">
-        <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">Brotherhood</h1>
-        <p className="text-[#8BAE5A] text-lg mb-8">Word onderdeel van een community van mannen die streven naar excellentie.</p>
+      {/* Recente Activiteit Widget */}
+      <div className="mb-10">
+        <h2 className="text-xl font-bold text-white mb-2">Wat gebeurt er in de Brotherhood?</h2>
+        <div className="bg-[#232D1A]/80 rounded-2xl p-4 border border-[#3A4D23]/40 text-[#8BAE5A]">
+          <p className="italic">Recente posts uit de Social Feed komen hier...</p>
+        </div>
+      </div>
 
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-          <div className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-[#8BAE5A]/20 flex items-center justify-center">
-                <FaUsers className="text-[#8BAE5A] text-xl" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-white">248</div>
-                <div className="text-[#8BAE5A] text-sm">Brothers</div>
-              </div>
+      {/* Stats Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+        <div className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-[#8BAE5A]/20 flex items-center justify-center">
+              <FaUsers className="text-[#8BAE5A] text-xl" />
             </div>
-          </div>
-          <div className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-[#8BAE5A]/20 flex items-center justify-center">
-                <FaTrophy className="text-[#8BAE5A] text-xl" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-white">12</div>
-                <div className="text-[#8BAE5A] text-sm">Challenges</div>
-              </div>
-            </div>
-          </div>
-          <div className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-[#8BAE5A]/20 flex items-center justify-center">
-                <FaCalendarAlt className="text-[#8BAE5A] text-xl" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-white">8</div>
-                <div className="text-[#8BAE5A] text-sm">Events</div>
-              </div>
-            </div>
-          </div>
-          <div className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-[#8BAE5A]/20 flex items-center justify-center">
-                <FaComments className="text-[#8BAE5A] text-xl" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-white">1.2k</div>
-                <div className="text-[#8BAE5A] text-sm">Interacties</div>
-              </div>
+            <div>
+              <div className="text-2xl font-bold text-white">248</div>
+              <div className="text-[#8BAE5A] text-sm">Brothers</div>
             </div>
           </div>
         </div>
-
-        {/* Upcoming Events */}
-        <div className="mb-12">
-          <h2 className="text-2xl font-bold text-white mb-6">Aankomende Events</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {events.map((event) => (
-              <div key={event.id} className="bg-[#232D1A]/80 rounded-2xl overflow-hidden shadow-xl border border-[#3A4D23]/40">
-                <div className="relative h-48">
-                  <img src={event.image} alt={event.title} className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#232D1A] to-transparent" />
-                </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-white mb-2">{event.title}</h3>
-                  <div className="text-[#8BAE5A] text-sm mb-4">
-                    <div>{event.date}</div>
-                    <div>{event.location}</div>
-                    <div>{event.spots} spots beschikbaar</div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[#FFD700] font-bold">{event.price}</span>
-                    <button className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] text-[#181F17] font-semibold shadow hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all">Inschrijven</button>
-                  </div>
-                </div>
-              </div>
-            ))}
+        <div className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-[#8BAE5A]/20 flex items-center justify-center">
+              <FaTrophy className="text-[#8BAE5A] text-xl" />
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-white">12</div>
+              <div className="text-[#8BAE5A] text-sm">Challenges</div>
+            </div>
           </div>
         </div>
+        <div className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-[#8BAE5A]/20 flex items-center justify-center">
+              <FaCalendarAlt className="text-[#8BAE5A] text-xl" />
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-white">8</div>
+              <div className="text-[#8BAE5A] text-sm">Events</div>
+            </div>
+          </div>
+        </div>
+        <div className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-[#8BAE5A]/20 flex items-center justify-center">
+              <FaComments className="text-[#8BAE5A] text-xl" />
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-white">1.2k</div>
+              <div className="text-[#8BAE5A] text-sm">Interacties</div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-        {/* Active Challenges */}
-        <div>
-          <h2 className="text-2xl font-bold text-white mb-6">Actieve Challenges</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {challenges.map((challenge) => (
-              <div key={challenge.id} className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40">
-                <h3 className="text-xl font-bold text-white mb-4">{challenge.title}</h3>
-                <div className="space-y-4">
-                  <div>
-                    <div className="flex justify-between text-[#8BAE5A] text-sm mb-1">
-                      <span>Voortgang</span>
-                      <span>{challenge.progress}%</span>
-                    </div>
-                    <div className="h-2 bg-[#3A4D23]/40 rounded-full">
-                      <div className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full" style={{ width: `${challenge.progress}%` }}></div>
-                    </div>
-                  </div>
-                  <div className="flex justify-between text-[#8BAE5A] text-sm">
-                    <span>{challenge.participants} deelnemers</span>
-                    <span>Eindigt: {challenge.endDate}</span>
-                  </div>
-                  <button className="w-full px-4 py-2 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] text-[#181F17] font-semibold shadow hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all">Join Challenge</button>
+      {/* Upcoming Events */}
+      <div className="mb-12">
+        <h2 className="text-2xl font-bold text-white mb-6">Aankomende Events</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {events.map((event) => (
+            <div key={event.id} className="bg-[#232D1A]/80 rounded-2xl overflow-hidden shadow-xl border border-[#3A4D23]/40">
+              <div className="relative h-48">
+                <img src={event.image} alt={event.title} className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#232D1A] to-transparent" />
+              </div>
+              <div className="p-6">
+                <h3 className="text-xl font-bold text-white mb-2">{event.title}</h3>
+                <div className="text-[#8BAE5A] text-sm mb-4">
+                  <div>{event.date}</div>
+                  <div>{event.location}</div>
+                  <div>{event.spots} spots beschikbaar</div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[#FFD700] font-bold">{event.price}</span>
+                  <button className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] text-[#181F17] font-semibold shadow hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all">Inschrijven</button>
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Active Challenges */}
+      <div>
+        <h2 className="text-2xl font-bold text-white mb-6">Actieve Challenges</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {challenges.map((challenge) => (
+            <div key={challenge.id} className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40">
+              <h3 className="text-xl font-bold text-white mb-4">{challenge.title}</h3>
+              <div className="space-y-4">
+                <div>
+                  <div className="flex justify-between text-[#8BAE5A] text-sm mb-1">
+                    <span>Voortgang</span>
+                    <span>{challenge.progress}%</span>
+                  </div>
+                  <div className="h-2 bg-[#3A4D23]/40 rounded-full">
+                    <div className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full" style={{ width: `${challenge.progress}%` }}></div>
+                  </div>
+                </div>
+                <div className="flex justify-between text-[#8BAE5A] text-sm">
+                  <span>{challenge.participants} deelnemers</span>
+                  <span>Eindigt: {challenge.endDate}</span>
+                </div>
+                <button className="w-full px-4 py-2 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] text-[#181F17] font-semibold shadow hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all">Join Challenge</button>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </ClientLayout>
