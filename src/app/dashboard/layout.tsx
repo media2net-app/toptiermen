@@ -16,6 +16,7 @@ function slugify(str: string) {
 
 const menu = [
   { label: 'Dashboard', icon: HomeIcon, href: '/dashboard' },
+  { label: 'Mijn Profiel', icon: UserCircleIcon, parent: 'Dashboard', href: '/dashboard/mijn-profiel', isSub: true },
   {
     label: 'Mijn Missies',
     icon: FireIcon,
@@ -32,7 +33,6 @@ const menu = [
   { label: 'Brotherhood', icon: UsersIcon, href: '/dashboard/brotherhood' },
   { label: 'Boekenkamer', icon: BookOpenIcon, href: '/dashboard/boekenkamer' },
   { label: 'Badges & Rangen', icon: StarIcon, href: '/dashboard/badges-en-rangen' },
-  { label: 'Mijn Profiel', icon: UserCircleIcon, href: '/dashboard/mijn-profiel' },
   { label: 'Mentorship & Coaching', icon: ChatBubbleLeftRightIcon, href: '/dashboard/mentorship-en-coaching' },
 ];
 
