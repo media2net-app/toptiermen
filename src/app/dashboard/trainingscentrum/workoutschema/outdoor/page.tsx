@@ -6,124 +6,124 @@ const WorkoutPlayerModal = dynamic(() => import("../../WorkoutPlayerModal"), { s
 
 const days = [
   {
-    label: "Dag 1: Push",
-    title: "Push Day - Focus op Borst, Schouders & Triceps",
+    label: "Dag 1: Full Body Outdoor",
+    title: "Full Body - Outdoor Kracht & Conditie",
     exercises: [
       {
-        name: "Bench Press",
-        img: "https://images.unsplash.com/photo-1517960413843-0aee8e2d471c?auto=format&fit=crop&w=400&q=80",
-        sets: "3 sets x 6-8 reps",
-        rest: "90-120s",
-        last: "8 reps @ 60kg",
-        notes: "Focus op langzaam zakken",
-      },
-      {
-        name: "Incline Dumbbell Press",
-        img: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=crop&w=400&q=80",
-        sets: "3 sets x 8-10 reps",
-        rest: "90s",
-        last: "10 reps @ 22kg",
-        notes: "Volledig uitstoten",
-      },
-      {
-        name: "Overhead Press",
-        img: "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=400&q=80",
-        sets: "3 sets x 8 reps",
-        rest: "90s",
-        last: "8 reps @ 35kg",
-        notes: "Core aanspannen",
-      },
-      {
-        name: "Tricep Pushdown",
-        img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=400&q=80",
-        sets: "3 sets x 12 reps",
+        name: "Push-up",
+        img: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80",
+        sets: "3 sets x 15 reps",
         rest: "60s",
-        last: "12 reps @ 30kg",
-        notes: "Elleboog stil houden",
-      },
-    ],
-  },
-  {
-    label: "Dag 2: Pull",
-    title: "Pull Day - Focus op Rug & Biceps",
-    exercises: [
-      {
-        name: "Deadlift",
-        img: "https://images.unsplash.com/photo-1517960413843-0aee8e2d471c?auto=format&fit=crop&w=400&q=80",
-        sets: "3 sets x 5 reps",
-        rest: "120s",
-        last: "5 reps @ 100kg",
-        notes: "Rug recht houden",
+        last: "15 reps @ BW",
+        notes: "Volledig uitstrekken, core aanspannen",
       },
       {
-        name: "Pull-up",
-        img: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=crop&w=400&q=80",
+        name: "Pull-up aan rekstok",
+        img: "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80",
         sets: "3 sets x 8 reps",
         rest: "90s",
         last: "8 reps @ BW",
-        notes: "Volledig uithangen",
+        notes: "Volledig uithangen, kin boven de stang",
       },
       {
-        name: "Barbell Row",
-        img: "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=400&q=80",
-        sets: "3 sets x 10 reps",
-        rest: "90s",
-        last: "10 reps @ 50kg",
-        notes: "Explosief optrekken",
+        name: "Squat Jump",
+        img: "https://images.unsplash.com/photo-1517960413843-0aee8e2d471c?auto=format&fit=crop&w=400&q=80",
+        sets: "3 sets x 12 reps",
+        rest: "60s",
+        last: "12 reps @ BW",
+        notes: "Explosief omhoog springen",
       },
       {
-        name: "Bicep Curl",
+        name: "Dips op bankje",
         img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=400&q=80",
         sets: "3 sets x 12 reps",
         rest: "60s",
-        last: "12 reps @ 14kg",
-        notes: "Polsen recht houden",
+        last: "12 reps @ BW",
+        notes: "Elleboog naar achter, schouders laag",
       },
     ],
   },
   {
-    label: "Dag 3: Legs",
-    title: "Leg Day - Focus op Benen & Core",
+    label: "Dag 2: Cardio & Core",
+    title: "Cardio & Core - Buiten",
     exercises: [
       {
-        name: "Squat",
-        img: "https://images.unsplash.com/photo-1517960413843-0aee8e2d471c?auto=format&fit=crop&w=400&q=80",
-        sets: "4 sets x 6-8 reps",
-        rest: "120s",
-        last: "8 reps @ 80kg",
-        notes: "Diep zakken",
-      },
-      {
-        name: "Leg Press",
-        img: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=crop&w=400&q=80",
-        sets: "3 sets x 10 reps",
-        rest: "90s",
-        last: "10 reps @ 140kg",
-        notes: "Voeten hoog op platform",
-      },
-      {
-        name: "Lunge",
+        name: "Hardlopen (interval)",
         img: "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=400&q=80",
+        sets: "5 x 400m sprint / 2 min rust",
+        rest: "2 min",
+        last: "5 x 400m @ 1:30",
+        notes: "Volle inspanning, herstel goed",
+      },
+      {
+        name: "Plank",
+        img: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=crop&w=400&q=80",
+        sets: "3 sets x 1 min",
+        rest: "60s",
+        last: "1 min",
+        notes: "Heupen laag, rug recht",
+      },
+      {
+        name: "Mountain Climbers",
+        img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=400&q=80",
+        sets: "3 sets x 30 sec",
+        rest: "45s",
+        last: "30 sec",
+        notes: "Tempo hoog houden",
+      },
+      {
+        name: "Burpees",
+        img: "https://images.unsplash.com/photo-1517960413843-0aee8e2d471c?auto=format&fit=crop&w=400&q=80",
         sets: "3 sets x 12 reps",
         rest: "60s",
-        last: "12 reps @ 20kg",
-        notes: "Knie niet voorbij teen",
+        last: "12 reps",
+        notes: "Explosief, volledige beweging",
+      },
+    ],
+  },
+  {
+    label: "Dag 3: Mobility & Stretch",
+    title: "Mobility & Stretch - Buiten Herstel",
+    exercises: [
+      {
+        name: "Walking Lunges",
+        img: "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80",
+        sets: "3 sets x 20 stappen",
+        rest: "60s",
+        last: "20 stappen",
+        notes: "Grote passen, knie niet voorbij teen",
       },
       {
-        name: "Calf Raise",
+        name: "Standing Toe Touch",
+        img: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80",
+        sets: "3 sets x 30 sec",
+        rest: "30s",
+        last: "30 sec",
+        notes: "Rustig doorademen, niet veren",
+      },
+      {
+        name: "Arm Circles",
+        img: "https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=crop&w=400&q=80",
+        sets: "3 sets x 30 sec",
+        rest: "30s",
+        last: "30 sec",
+        notes: "Grote cirkels, schouders ontspannen",
+      },
+      {
+        name: "Cat-Cow Stretch",
         img: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=400&q=80",
-        sets: "3 sets x 15 reps",
-        rest: "45s",
-        last: "15 reps @ 40kg",
-        notes: "Top vasthouden",
+        sets: "3 sets x 10 reps",
+        rest: "30s",
+        last: "10 reps",
+        notes: "Rustig tempo, focus op mobiliteit",
       },
     ],
   },
 ];
 
-export default function GymSchema() {
+export default function OutdoorSchema() {
   const [activeTab, setActiveTab] = useState(0);
-  const [activeSchema, setActiveSchema] = useState(true);
+  const [activeSchema, setActiveSchema] = useState(false);
   const [notes, setNotes] = useState<string[]>(days.map(() => ""));
   const [showWorkoutModal, setShowWorkoutModal] = useState(false);
 
@@ -147,8 +147,8 @@ export default function GymSchema() {
       {/* Header */}
       <div className="bg-[#232D1A]/90 rounded-2xl p-6 shadow-xl border border-[#8BAE5A]/40 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
         <div>
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Gym Schema: Full Body Krachttraining</h1>
-          <p className="text-[#A3AED6] text-lg mb-2">Ontworpen voor maximale spiergroei en krachttoename.</p>
+          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Outdoor Schema: Full Body & Conditie</h1>
+          <p className="text-[#A3AED6] text-lg mb-2">Perfect voor trainen in de buitenlucht, zonder apparatuur.</p>
           <div className="flex gap-3 mt-2">
             <button
               className={`px-4 py-2 rounded-xl font-semibold shadow transition-all ${activeSchema ? 'bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17]' : 'bg-[#232D1A] text-[#8BAE5A] border border-[#3A4D23]/40'}`}

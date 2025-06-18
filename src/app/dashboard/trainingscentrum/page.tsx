@@ -99,6 +99,12 @@ export default function Trainingscentrum() {
           )
         )}
       </div>
+
+      <div className="flex flex-col items-center gap-4 mt-8">
+        <a href="/dashboard/voedingsplannen" className="px-8 py-4 rounded-2xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] text-xl font-bold shadow-lg hover:from-[#FFD700] hover:to-[#8BAE5A] transition-all">
+          Bekijk Voedingsplannen
+        </a>
+      </div>
     </ClientLayout>
   );
 } 

@@ -1,5 +1,7 @@
 'use client';
 
+import React from "react";
+
 const mentorship = [
   {
     title: '1-op-1 Sessies',
@@ -18,20 +20,16 @@ const mentorship = [
   },
 ];
 
-export default function MentorshipCoaching() {
+export default function MentorshipEnCoachingPage() {
   return (
-    <>
-      <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">Mentorship & Coaching</h1>
-      <p className="text-[#A3AED6] text-lg mb-8">Persoonlijke groei en begeleiding van Rick</p>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {mentorship.map((item) => (
-          <div key={item.title} className="bg-[#232042]/80 rounded-2xl p-6 shadow-xl border border-[#393053]/40 flex flex-col gap-4 items-start">
-            <span className="text-xl font-semibold text-white mb-2">{item.title}</span>
-            <p className="text-[#A3AED6] mb-4 text-sm">{item.description}</p>
-            <button className="mt-auto px-4 py-2 rounded-xl bg-gradient-to-r from-[#635985] to-[#443C68] text-white font-semibold shadow hover:from-[#443C68] hover:to-[#635985] transition-all">{item.cta}</button>
-          </div>
-        ))}
+    <div className="flex flex-col items-center justify-center min-h-[60vh]">
+      <div className="bg-[#232D1A]/90 border-2 border-[#8BAE5A] rounded-2xl p-10 flex flex-col items-center shadow-xl">
+        <span className="text-5xl mb-4">🎓</span>
+        <h1 className="text-2xl md:text-3xl font-bold text-[#8BAE5A] mb-2 text-center">Binnenkort beschikbaar</h1>
+        <p className="text-[#A3AED6] text-lg text-center max-w-xl">
+          Hier vind je straks alle info over <b>mentorship</b> & <b>1-op-1 coaching</b>.
+        </p>
       </div>
-    </>
+    </div>
   );
 } 

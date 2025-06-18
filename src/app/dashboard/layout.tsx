@@ -86,7 +86,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                               ${isSubActive ? 'bg-[#8BAE5A] text-black' : 'text-white hover:text-[#8BAE5A]'}
                             `}
                           >
-                            <sub.icon className="w-5 h-5" />
+                            <span className='text-[#8BAE5A] w-5 inline-block text-lg'>-</span>
                             <span>{sub.label}</span>
                           </Link>
                         );
