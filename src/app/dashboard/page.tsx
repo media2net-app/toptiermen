@@ -145,13 +145,91 @@ export default function Dashboard() {
 
   // Dummy data
   const notifications = [
-    { id: 1, icon: <TrophyIcon className="w-6 h-6 text-[#8BAE5A]" />, title: 'Nieuwe badge: Iron Discipline behaald!', time: '2 uur geleden', unread: true },
-    { id: 2, icon: <FireIcon className="w-6 h-6 text-[#8BAE5A]" />, title: 'Je dagelijkse missie is voltooid!', time: 'vandaag', unread: true },
-    { id: 3, icon: <UserGroupIcon className="w-6 h-6 text-[#8BAE5A]" />, title: 'Nieuwe reactie in de community', time: '1 dag geleden', unread: false },
-    { id: 4, icon: <ChatBubbleLeftRightIcon className="w-6 h-6 text-[#8BAE5A]" />, title: 'Mentor heeft feedback gegeven op je voortgang', time: '2 dagen geleden', unread: false },
-    { id: 5, icon: <CalendarDaysIcon className="w-6 h-6 text-[#8BAE5A]" />, title: 'Live sessie vanavond om 20:00', time: '2 dagen geleden', unread: true },
-    { id: 6, icon: <ArrowTrendingUpIcon className="w-6 h-6 text-[#8BAE5A]" />, title: 'Je bent een level gestegen!', time: '3 dagen geleden', unread: true },
-    { id: 7, icon: <DocumentCheckIcon className="w-6 h-6 text-[#8BAE5A]" />, title: 'Intakeformulier succesvol afgerond', time: '3 dagen geleden', unread: false },
+    // Social notificaties
+    { 
+      id: 1, 
+      category: 'social',
+      icon: <UserGroupIcon className="w-6 h-6 text-[#8BAE5A]" />, 
+      title: 'Mark V. heeft je connectieverzoek geaccepteerd', 
+      time: '2 uur geleden', 
+      unread: true,
+      link: '/dashboard/brotherhood/leden'
+    },
+    { 
+      id: 2, 
+      category: 'social',
+      icon: <ChatBubbleLeftRightIcon className="w-6 h-6 text-[#8BAE5A]" />, 
+      title: 'Jeroen D. heeft gereageerd op jouw forumpost: "Hoe investeer je..."', 
+      time: '4 uur geleden', 
+      unread: true,
+      link: '/dashboard/brotherhood/forum'
+    },
+    { 
+      id: 3, 
+      category: 'social',
+      icon: <UserGroupIcon className="w-6 h-6 text-[#8BAE5A]" />, 
+      title: 'Rick heeft je genoemd in een reactie: "@Rick, wat denk jij hiervan?"', 
+      time: '1 dag geleden', 
+      unread: false,
+      link: '/dashboard/brotherhood/social-feed'
+    },
+    // Prestaties notificaties
+    { 
+      id: 4, 
+      category: 'prestaties',
+      icon: <TrophyIcon className="w-6 h-6 text-[#FFD700]" />, 
+      title: 'Badge Ontgrendeld: Ochtendmens! Je hebt 7 dagen op rij voor 7 uur \'s ochtends een missie voltooid', 
+      time: 'vandaag', 
+      unread: true,
+      link: '/dashboard/badges-en-rangen'
+    },
+    { 
+      id: 5, 
+      category: 'prestaties',
+      icon: <TrophyIcon className="w-6 h-6 text-[#FFD700]" />, 
+      title: 'Nieuwe Rang Bereikt: Veteraan! Bekijk je nieuwe voordelen', 
+      time: '2 dagen geleden', 
+      unread: true,
+      link: '/dashboard/badges-en-rangen'
+    },
+    // Trainingen & Voortgang
+    { 
+      id: 6, 
+      category: 'training',
+      icon: <FireIcon className="w-6 h-6 text-[#8BAE5A]" />, 
+      title: 'Nieuw PR gezet op Squat! Bekijk je progressie in je logboek', 
+      time: 'vandaag', 
+      unread: true,
+      link: '/dashboard/mijn-trainingen'
+    },
+    { 
+      id: 7, 
+      category: 'training',
+      icon: <CheckCircleIcon className="w-6 h-6 text-[#8BAE5A]" />, 
+      title: 'Je hebt je wekelijkse trainingsdoel van 4 sessies behaald. Goed bezig!', 
+      time: '1 dag geleden', 
+      unread: false,
+      link: '/dashboard/mijn-trainingen'
+    },
+    // Community
+    { 
+      id: 8, 
+      category: 'community',
+      icon: <CalendarDaysIcon className="w-6 h-6 text-[#8BAE5A]" />, 
+      title: 'De online workshop "Onderhandelen als een Pro" waarvoor je bent aangemeld, begint over een uur', 
+      time: 'nu', 
+      unread: true,
+      link: '/dashboard/brotherhood/mijn-groepen'
+    },
+    { 
+      id: 9, 
+      category: 'community',
+      icon: <UserGroupIcon className="w-6 h-6 text-[#8BAE5A]" />, 
+      title: 'Nieuwe leden in je Mastermind groep: Welkom Sven en Teun!', 
+      time: '3 dagen geleden', 
+      unread: false,
+      link: '/dashboard/brotherhood/mijn-groepen'
+    },
   ];
   const messages = [
     { id: 1, avatar: '/profielfoto.png', name: 'Coach Mark', text: 'Goed bezig met je missies deze week!', time: '2 uur geleden', unread: true },
@@ -271,22 +349,76 @@ export default function Dashboard() {
                 <div ref={dropdownRef} className="absolute right-0 mt-3 w-96 bg-[#181F17] border border-[#232D1A] rounded-2xl shadow-2xl py-4 px-0 text-white">
                   <div className="flex items-center justify-between px-6 mb-3">
                     <span className="text-xl font-bold">Notifications</span>
-                    <label className="flex items-center gap-2 text-sm select-none cursor-pointer">
-                      <input type="checkbox" className="accent-[#8BAE5A]" />
+                    <button 
+                      onClick={() => {
+                        // Mark all as read functionality
+                        toast.success('Alle notificaties als gelezen gemarkeerd');
+                      }}
+                      className="text-[#8BAE5A] text-sm font-semibold hover:underline"
+                    >
                       Mark all as read
-                    </label>
+                    </button>
                   </div>
                   <div className="max-h-80 overflow-y-auto custom-scrollbar">
-                    {notifications.map(n => (
-                      <div key={n.id} className="flex items-center gap-4 px-6 py-3 hover:bg-[#232D1A] transition">
-                        <span className="w-10 h-10 flex items-center justify-center rounded-xl bg-[#232D1A] text-2xl">{n.icon}</span>
-                        <div className="flex-1 min-w-0">
-                          <div className="font-semibold truncate">{n.title}</div>
-                          <div className="text-xs text-[#8BAE5A]">{n.time}</div>
-                        </div>
-                        {n.unread ? <span className="w-3 h-3 bg-blue-500 rounded-full ml-2"></span> : <CheckCircleIcon className="w-4 h-4 text-[#8BAE5A] ml-2" />}
-                      </div>
-                    ))}
+                    {/* Social Notificaties */}
+                    <div className="px-6 py-2">
+                      <h4 className="text-sm font-semibold text-[#8BAE5A] mb-2">Social</h4>
+                      {notifications.filter(n => n.category === 'social').map(n => (
+                        <Link href={n.link} key={n.id} className="flex items-center gap-4 py-3 hover:bg-[#232D1A] transition">
+                          <span className="w-10 h-10 flex items-center justify-center rounded-xl bg-[#232D1A]">{n.icon}</span>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-semibold truncate text-sm">{n.title}</div>
+                            <div className="text-xs text-[#8BAE5A]">{n.time}</div>
+                          </div>
+                          {n.unread ? <span className="w-3 h-3 bg-blue-500 rounded-full ml-2"></span> : <CheckCircleIcon className="w-4 h-4 text-[#8BAE5A] ml-2" />}
+                        </Link>
+                      ))}
+                    </div>
+                    
+                    {/* Prestaties Notificaties */}
+                    <div className="px-6 py-2">
+                      <h4 className="text-sm font-semibold text-[#FFD700] mb-2">Prestaties</h4>
+                      {notifications.filter(n => n.category === 'prestaties').map(n => (
+                        <Link href={n.link} key={n.id} className="flex items-center gap-4 py-3 hover:bg-[#232D1A] transition">
+                          <span className="w-10 h-10 flex items-center justify-center rounded-xl bg-[#232D1A]">{n.icon}</span>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-semibold truncate text-sm">{n.title}</div>
+                            <div className="text-xs text-[#8BAE5A]">{n.time}</div>
+                          </div>
+                          {n.unread ? <span className="w-3 h-3 bg-blue-500 rounded-full ml-2"></span> : <CheckCircleIcon className="w-4 h-4 text-[#8BAE5A] ml-2" />}
+                        </Link>
+                      ))}
+                    </div>
+                    
+                    {/* Training Notificaties */}
+                    <div className="px-6 py-2">
+                      <h4 className="text-sm font-semibold text-[#8BAE5A] mb-2">Trainingen</h4>
+                      {notifications.filter(n => n.category === 'training').map(n => (
+                        <Link href={n.link} key={n.id} className="flex items-center gap-4 py-3 hover:bg-[#232D1A] transition">
+                          <span className="w-10 h-10 flex items-center justify-center rounded-xl bg-[#232D1A]">{n.icon}</span>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-semibold truncate text-sm">{n.title}</div>
+                            <div className="text-xs text-[#8BAE5A]">{n.time}</div>
+                          </div>
+                          {n.unread ? <span className="w-3 h-3 bg-blue-500 rounded-full ml-2"></span> : <CheckCircleIcon className="w-4 h-4 text-[#8BAE5A] ml-2" />}
+                        </Link>
+                      ))}
+                    </div>
+                    
+                    {/* Community Notificaties */}
+                    <div className="px-6 py-2">
+                      <h4 className="text-sm font-semibold text-[#8BAE5A] mb-2">Community</h4>
+                      {notifications.filter(n => n.category === 'community').map(n => (
+                        <Link href={n.link} key={n.id} className="flex items-center gap-4 py-3 hover:bg-[#232D1A] transition">
+                          <span className="w-10 h-10 flex items-center justify-center rounded-xl bg-[#232D1A]">{n.icon}</span>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-semibold truncate text-sm">{n.title}</div>
+                            <div className="text-xs text-[#8BAE5A]">{n.time}</div>
+                          </div>
+                          {n.unread ? <span className="w-3 h-3 bg-blue-500 rounded-full ml-2"></span> : <CheckCircleIcon className="w-4 h-4 text-[#8BAE5A] ml-2" />}
+                        </Link>
+                      ))}
+                    </div>
                   </div>
                   <div className="pt-3 px-6">
                     <a href="#" className="block text-center text-[#8BAE5A] hover:underline text-sm font-semibold">View All Activity</a>
