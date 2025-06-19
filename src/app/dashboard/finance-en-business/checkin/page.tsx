@@ -1,3 +1,4 @@
+'use client';
 import { useState } from 'react';
 import { useFinance } from '../FinanceContext';
 import { toast } from 'react-toastify';

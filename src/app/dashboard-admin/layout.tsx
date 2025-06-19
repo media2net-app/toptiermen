@@ -119,7 +119,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         {item.items?.map((subItem) => (
                           <Link
                             key={subItem.href}
-                            href={subItem.href || '#'}
+                            href={subItem.href ?? '#'}
                             className={`flex items-center gap-3 px-4 py-2 rounded-xl font-medium transition-all duration-200 ${
                               pathname === subItem.href 
                                 ? 'bg-[#8BAE5A] text-[#181F17] shadow-lg' 
@@ -137,8 +137,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               } else {
                 return (
                   <Link
-                    key={item.href}
-                    href={item.href}
+                    key={item.href as string}
+                    href={item.href as string}
                     className={`flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-all duration-200 ${
                       pathname === item.href 
                         ? 'bg-[#8BAE5A] text-[#181F17] shadow-lg' 
