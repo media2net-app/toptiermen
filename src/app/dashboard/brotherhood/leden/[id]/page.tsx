@@ -19,7 +19,7 @@ const badges = [
 const mockMembers = Array.from({ length: 24 }, (_, i) => ({
   id: (i + 1).toString(),
   name: ['Rick Cuijpers', 'Mark V.', 'Jeroen D.', 'Sven', 'Teun'][i % 5],
-  avatar: `https://randomuser.me/api/portraits/men/${30 + i}.jpg`,
+  avatar: '/profielfoto.png',
   rank: ranks[i % 4],
   location: ['Amsterdam, NL', 'Rotterdam, NL', 'Utrecht, NL', 'Antwerpen, BE', 'Brussel, BE'][i % 5],
   interests: [interests[i % 6], interests[(i + 1) % 6]],
