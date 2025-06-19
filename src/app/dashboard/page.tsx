@@ -808,6 +808,91 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Welcome Modal */}
+      {showWelcome && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+          <div className="bg-[#232D1A] rounded-2xl border border-[#3A4D23] max-w-4xl w-full mx-4 overflow-hidden shadow-2xl">
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-[#3A4D23]">
+              <div>
+                <h2 className="text-2xl font-bold text-[#8BAE5A]">Welkom bij Top Tier Men</h2>
+                <p className="text-[#B6C948] mt-1">Een persoonlijke boodschap van Rick</p>
+              </div>
+              <button
+                onClick={() => setShowWelcome(false)}
+                className="p-2 rounded-xl hover:bg-[#181F17] transition-colors duration-200"
+              >
+                <svg className="w-6 h-6 text-[#B6C948]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Video Content */}
+            <div className="p-6">
+              <div className="relative bg-[#181F17] rounded-xl overflow-hidden" style={{ aspectRatio: '16/9' }}>
+                <video
+                  className="w-full h-full object-contain"
+                  controls
+                  autoPlay
+                  poster="/video-placeholder.jpg"
+                >
+                  <source src="/welkom.MP4" type="video/mp4" />
+                  Je browser ondersteunt geen video afspelen.
+                </video>
+              </div>
+              
+              {/* Welcome Message */}
+              <div className="mt-6 text-center">
+                <h3 className="text-xl font-bold text-[#8BAE5A] mb-3">
+                  Welkom in je nieuwe Top Tier leven
+                </h3>
+                <p className="text-[#B6C948] mb-6 leading-relaxed">
+                  Je bent nu onderdeel van een community van mannen die net als jij klaar zijn om te groeien. 
+                  Gebruik dit platform om je discipline te ontwikkelen, je lichaam te transformeren, 
+                  je mindset te versterken en je financiële vrijheid te creëren.
+                </p>
+                
+                <div className="flex items-center justify-center gap-4 text-[#B6C948] text-sm">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 bg-[#8BAE5A] rounded-full"></span>
+                    <span>Discipline & Focus</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 bg-[#8BAE5A] rounded-full"></span>
+                    <span>Fysieke Kracht</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 bg-[#8BAE5A] rounded-full"></span>
+                    <span>Financiële Vrijheid</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="flex items-center justify-between p-6 border-t border-[#3A4D23] bg-[#181F17]">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-[#8BAE5A]/20 flex items-center justify-center">
+                  <span className="text-[#8BAE5A] font-bold">R</span>
+                </div>
+                <div>
+                  <p className="text-[#8BAE5A] font-semibold">Rick</p>
+                  <p className="text-[#B6C948] text-sm">Top Tier Men Founder</p>
+                </div>
+              </div>
+              
+              <button
+                onClick={() => setShowWelcome(false)}
+                className="px-6 py-3 rounded-xl bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#B6C948] transition-all duration-200"
+              >
+                Begrijpen & Doorgaan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Add Mission Modal */}
       {showAddMissionModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
