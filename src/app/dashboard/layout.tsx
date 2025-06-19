@@ -26,7 +26,6 @@ const menu = [
   },
   { label: 'Mijn Trainingen', icon: AcademicCapIcon, parent: 'Dashboard', href: '/dashboard/mijn-trainingen', isSub: true },
   { label: 'Finance & Business', icon: CurrencyDollarIcon, parent: 'Dashboard', href: '/dashboard/finance-en-business', isSub: true },
-  { label: 'Passief Inkomen', icon: StarIcon, parent: 'Dashboard', href: '/dashboard/finance-en-business/passief-inkomen', isSub: true },
   { label: 'Academy', icon: FireIcon, href: '/dashboard/academy' },
   { label: 'Trainingscentrum', icon: AcademicCapIcon, href: '/dashboard/trainingscentrum' },
   { label: 'Mind & Focus', icon: ChartBarIcon, href: '/dashboard/mind-en-focus' },

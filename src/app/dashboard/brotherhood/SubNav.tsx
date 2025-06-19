@@ -7,7 +7,8 @@ const tabs = [
   { label: "Social Feed", href: "/dashboard/brotherhood/social-feed" },
   { label: "Forum", href: "/dashboard/brotherhood/forum" },
   { label: "Leden", href: "/dashboard/brotherhood/leden" },
-  { label: "Mijn Groepen & Evenementen", href: "/dashboard/brotherhood/mijn-groepen" },
+  { label: "Mijn Groepen", href: "/dashboard/brotherhood/mijn-groepen" },
+  { label: "Mijn Evenementen", href: "/dashboard/brotherhood/mijn-evenementen" },
 ];
 
 export default function BrotherhoodSubNav() {

@@ -3,6 +3,22 @@ import ClientLayout from '../../components/ClientLayout';
 import { useState, useEffect } from 'react';
 import { PlusIcon, CalendarIcon, ChartBarIcon, ShareIcon, PlayIcon, TrophyIcon, FireIcon, CalendarDaysIcon } from '@heroicons/react/24/solid';
 import { toast } from 'react-toastify';
+import { Line } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+import CalendarHeatmap from 'react-calendar-heatmap';
+import type { ReactCalendarHeatmapValue } from 'react-calendar-heatmap';
+import 'react-calendar-heatmap/dist/styles.css';
+
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 // Mock training data
 const mockTrainingData = {
@@ -398,8 +414,10 @@ const mockTrainingData = {
   },
 };
 
-// Mock progressie data voor analyse
-const progressData = {
+type ProgressEntry = { date: string; weight: number; reps: number; volume: number };
+type ProgressData = Record<string, ProgressEntry[]>;
+
+const progressData: ProgressData = {
   'Bench Press': [
     { date: '2024-01-01', weight: 55, reps: 8, volume: 440 },
     { date: '2024-01-08', weight: 57.5, reps: 8, volume: 460 },
@@ -575,6 +593,56 @@ export default function MijnTrainingen() {
     // Hier zou de link naar de Workout Speler komen
   };
 
+  // Chart data genereren voor analyse
+  const chartData = () => {
+    const data: ProgressEntry[] = progressData[selectedExercise] || [];
+    const labels = data.map((d: ProgressEntry) => d.date);
+    let datasetData: number[] = [];
+    let label = '';
+    if (analysisMetric === 'weight') {
+      datasetData = data.map((d: ProgressEntry) => d.weight);
+      label = 'Gewicht (kg)';
+    } else if (analysisMetric === 'volume') {
+      datasetData = data.map((d: ProgressEntry) => d.volume);
+      label = 'Totaal Volume';
+    } else {
+      datasetData = data.map((d: ProgressEntry) => d.reps);
+      label = 'Max Herhalingen';
+    }
+    return {
+      labels,
+      datasets: [
+        {
+          label,
+          data: datasetData,
+          borderColor: '#8BAE5A',
+          backgroundColor: 'rgba(139, 174, 90, 0.2)',
+          pointBackgroundColor: '#FFD700',
+          tension: 0.3,
+        },
+      ],
+    };
+  };
+
+  const chartOptions = {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      title: { display: false },
+      tooltip: { enabled: true },
+    },
+    scales: {
+      x: {
+        ticks: { color: '#8BAE5A' },
+        grid: { color: '#3A4D23' },
+      },
+      y: {
+        ticks: { color: '#FFD700' },
+        grid: { color: '#3A4D23' },
+      },
+    },
+  };
+
   return (
     <ClientLayout>
       <div className="p-6 md:p-12">
@@ -589,24 +657,6 @@ export default function MijnTrainingen() {
           >
             <PlusIcon className="w-5 h-5" />
             Start Lege Training
-          </button>
-        </div>
-
-        {/* View Toggle */}
-        <div className="flex gap-2 mb-6">
-          <button 
-            onClick={() => setActiveView('calendar')}
-            className={`px-4 py-2 rounded-xl font-semibold transition-all flex items-center gap-2 ${activeView === 'calendar' ? 'bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] shadow' : 'bg-[#232D1A] text-[#8BAE5A] hover:bg-[#2A341F]'}`}
-          >
-            <CalendarIcon className="w-5 h-5" />
-            Kalenderweergave
-          </button>
-          <button 
-            onClick={() => setActiveView('analysis')}
-            className={`px-4 py-2 rounded-xl font-semibold transition-all flex items-center gap-2 ${activeView === 'analysis' ? 'bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] shadow' : 'bg-[#232D1A] text-[#8BAE5A] hover:bg-[#2A341F]'}`}
-          >
-            <ChartBarIcon className="w-5 h-5" />
-            Analyse
           </button>
         </div>
 
@@ -683,65 +733,6 @@ export default function MijnTrainingen() {
                   )}
                 </button>
               ))}
-            </div>
-          </div>
-        )}
-
-        {activeView === 'analysis' && (
-          <div className="space-y-6">
-            {/* Oefening Progressie */}
-            <div className="bg-[#232D1A] rounded-2xl shadow-xl p-6 border border-[#3A4D23]">
-              <h3 className="text-xl font-bold text-[#8BAE5A] mb-4 flex items-center gap-2">
-                <ChartBarIcon className="w-5 h-5" />
-                Oefening Progressie
-              </h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <select
-                  value={selectedExercise}
-                  onChange={(e) => setSelectedExercise(e.target.value)}
-                  className="rounded-xl bg-[#181F17] border border-[#3A4D23] py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                >
-                  {Object.keys(progressData).map(exercise => (
-                    <option key={exercise} value={exercise}>{exercise}</option>
-                  ))}
-                </select>
-                
-                <select
-                  value={analysisMetric}
-                  onChange={(e) => setAnalysisMetric(e.target.value as 'weight' | 'volume' | 'reps')}
-                  className="rounded-xl bg-[#181F17] border border-[#3A4D23] py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                >
-                  <option value="weight">Gewicht (1RM)</option>
-                  <option value="volume">Totaal Volume</option>
-                  <option value="reps">Maximale Herhalingen</option>
-                </select>
-              </div>
-
-              {/* Grafiek Placeholder */}
-              <div className="h-64 bg-[#181F17] rounded-xl flex items-center justify-center border border-[#3A4D23]">
-                <div className="text-center">
-                  <ChartBarIcon className="w-12 h-12 text-[#8BAE5A]/60 mx-auto mb-2" />
-                  <p className="text-[#8BAE5A]/60">Progressie grafiek voor {selectedExercise}</p>
-                  <p className="text-[#8BAE5A]/40 text-sm">Toont {analysisMetric} over tijd</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Consistentie Heatmap */}
-            <div className="bg-[#232D1A] rounded-2xl shadow-xl p-6 border border-[#3A4D23]">
-              <h3 className="text-xl font-bold text-[#8BAE5A] mb-4 flex items-center gap-2">
-                <CalendarDaysIcon className="w-5 h-5" />
-                Consistentie Heatmap
-              </h3>
-              
-              <div className="h-48 bg-[#181F17] rounded-xl flex items-center justify-center border border-[#3A4D23]">
-                <div className="text-center">
-                  <FireIcon className="w-12 h-12 text-[#8BAE5A]/60 mx-auto mb-2" />
-                  <p className="text-[#8BAE5A]/60">Jaarkalender met trainingsfrequentie</p>
-                  <p className="text-[#8BAE5A]/40 text-sm">Visualiseert je discipline over tijd</p>
-                </div>
-              </div>
             </div>
           </div>
         )}

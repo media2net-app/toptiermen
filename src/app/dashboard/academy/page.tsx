@@ -8,47 +8,78 @@ const modules = [
   {
     title: 'Discipline & Identiteit',
     description: 'Ontwikkel een onwankelbare identiteit en dagelijkse discipline.',
-    progress: 80,
+    progress: 100,
     href: '/dashboard/academy/discipline-identiteit',
     unlocked: true,
+    completed: true,
   },
   {
     title: 'Fysieke Dominantie',
     description: 'Werk aan kracht, uithoudingsvermogen en fysieke gezondheid.',
-    progress: 60,
+    progress: 0,
+    href: '/dashboard/academy/fysieke-dominantie',
     unlocked: false,
+    completed: false,
   },
   {
     title: 'Mentale Weerbaarheid',
     description: 'Vergroot je mentale kracht en veerkracht.',
-    progress: 45,
+    progress: 0,
     unlocked: false,
+    completed: false,
   },
   {
     title: 'Financiële Groei',
     description: 'Leer alles over geld, investeren en financiële vrijheid.',
-    progress: 30,
+    progress: 0,
     unlocked: false,
+    completed: false,
   },
   {
     title: 'High Performance Lifestyle',
     description: 'Optimaliseer je routines voor maximale prestaties.',
-    progress: 55,
+    progress: 0,
     unlocked: false,
+    completed: false,
   },
   {
     title: 'Broederschap',
     description: 'Bouw aan een sterk netwerk en accountability.',
-    progress: 20,
+    progress: 0,
     unlocked: false,
+    completed: false,
   },
 ];
 
 export default function MijnMissies() {
   const [animated, setAnimated] = useState(Array(modules.length).fill(0));
+  const [unlockAnimation, setUnlockAnimation] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [moduleStates, setModuleStates] = useState(modules);
 
   useEffect(() => {
-    modules.forEach((mod, i) => {
+    // Check if we need to unlock Module 2
+    const shouldUnlock = localStorage.getItem('unlockModule2');
+    if (shouldUnlock === 'true') {
+      // Clear the flag
+      localStorage.removeItem('unlockModule2');
+      
+      // Start unlock animation
+      setUnlockAnimation(true);
+      setShowConfetti(true);
+      
+      // Update module states
+      setModuleStates(prev => prev.map((mod, i) => 
+        i === 1 ? { ...mod, unlocked: true, progress: 0 } : mod
+      ));
+      
+      // Stop confetti after 3 seconds
+      setTimeout(() => setShowConfetti(false), 3000);
+    }
+  }, []);
+
+  useEffect(() => {
+    moduleStates.forEach((mod, i) => {
       const end = mod.progress;
       const duration = 900;
       const step = () => {
@@ -65,24 +96,53 @@ export default function MijnMissies() {
         return () => clearInterval(interval);
       }
     });
-  }, [animated]);
+  }, [animated, moduleStates]);
 
   return (
     <ClientLayout>
       <div className="p-6 md:p-12">
+        {/* Confetti Animation */}
+        {showConfetti && (
+          <div className="fixed inset-0 pointer-events-none z-50">
+            {Array.from({ length: 100 }).map((_, i) => (
+              <div
+                key={i}
+                className="absolute animate-bounce"
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 100}%`,
+                  animationDelay: `${Math.random() * 3}s`,
+                  animationDuration: `${2 + Math.random() * 3}s`,
+                }}
+              >
+                {['🎉', '🏆', '⭐', '🎊', '💎', '🔓'][Math.floor(Math.random() * 6)]}
+              </div>
+            ))}
+          </div>
+        )}
+
         <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">Academy</h1>
         <p className="text-[#8BAE5A] text-lg mb-8">Overzicht van alle modules en jouw voortgang</p>
+        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {modules.map((mod, i) =>
+          {moduleStates.map((mod, i) =>
             mod.unlocked ? (
               <Link
                 key={mod.title}
-                href={mod.href!}
-                className="bg-[#181F17]/90 rounded-2xl p-6 shadow-xl border border-[#8BAE5A]/40 flex flex-col gap-2 cursor-pointer transition-transform duration-200 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] relative"
+                href={mod.href || '#'}
+                className={`bg-[#181F17]/90 rounded-2xl p-6 shadow-xl border border-[#8BAE5A]/40 flex flex-col gap-2 cursor-pointer transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] relative ${
+                  unlockAnimation && i === 1 ? 'animate-pulse border-[#FFD700] shadow-[#FFD700]/50' : ''
+                }`}
               >
                 <div className="flex items-center justify-between mb-2">
                   <span className="flex items-center gap-2 text-xl font-semibold text-[#8BAE5A]">
-                    <span className="w-8 h-8 rounded-full bg-[#232D1A] border border-[#8BAE5A] flex items-center justify-center font-bold text-lg mr-2">{i+1}</span>
+                    <span className={`w-8 h-8 rounded-full border flex items-center justify-center font-bold text-lg mr-2 ${
+                      mod.completed 
+                        ? 'bg-[#8BAE5A] text-[#181F17] border-[#8BAE5A]' 
+                        : 'bg-[#232D1A] border-[#8BAE5A]'
+                    }`}>
+                      {mod.completed ? '✓' : i+1}
+                    </span>
                     {mod.title}
                   </span>
                   <span className="text-[#8BAE5A] font-mono text-sm">{animated[i]}%</span>
@@ -91,6 +151,9 @@ export default function MijnMissies() {
                 <div className="w-full h-2 bg-[#8BAE5A]/20 rounded-full">
                   <div className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#3A4D23] rounded-full transition-all duration-500" style={{ width: `${animated[i]}%` }}></div>
                 </div>
+                {mod.completed && (
+                  <div className="absolute top-2 right-2 text-[#8BAE5A] text-2xl">🏆</div>
+                )}
               </Link>
             ) : (
               <div key={mod.title} className="bg-[#181F17]/90 rounded-2xl p-6 shadow-xl border border-[#8BAE5A]/40 flex flex-col gap-2 relative opacity-60 select-none">

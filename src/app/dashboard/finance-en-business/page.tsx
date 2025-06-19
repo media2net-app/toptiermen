@@ -13,6 +13,8 @@ import {
   Filler,
 } from 'chart.js';
 import BankConnectionModal from '@/app/components/BankConnectionModal';
+import Link from 'next/link';
+import { FinanceProvider, useFinance } from './FinanceContext';
 
 ChartJS.register(
   CategoryScale,
@@ -198,108 +200,69 @@ const chartOptions = {
   },
 };
 
-export default function FinancePage() {
-  const [selectedPeriod, setSelectedPeriod] = useState('1m');
-  const [isBankModalOpen, setIsBankModalOpen] = useState(false);
-
-  const handleBankSelect = (bankId: string) => {
-    console.log('Selected bank:', bankId);
-    setIsBankModalOpen(false);
-  };
+function FinanceDashboardContent() {
+  const { finance } = useFinance();
+  const totalAssets = finance.assets.reduce((sum, a) => sum + a.value, 0);
+  const totalDebts = finance.debts.reduce((sum, d) => sum + d.value, 0);
+  const netWorth = totalAssets - totalDebts;
+  const savings = finance.savings;
+  const income = finance.income;
+  const savingsRate = income > 0 ? Math.round((savings / income) * 100) : 0;
+  const passiveGoal = 100;
+  // Voor demo: savings als passief inkomen
+  const passiveIncome = savings;
+  const passiveProgress = Math.min(100, Math.round((passiveIncome / passiveGoal) * 100));
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-white">Finance & Business</h1>
-        <button
-          onClick={() => setIsBankModalOpen(true)}
-          className="px-4 py-2 bg-[#8BAE5A] text-white rounded-lg hover:bg-[#7A9A4A] transition-colors"
-        >
-          Mijn bank koppelen
-        </button>
+    <div className="p-6 md:p-12">
+      <h1 className="text-3xl md:text-4xl font-bold text-[#B6C948] mb-2 drop-shadow-lg">Financieel Overzicht</h1>
+      <p className="text-[#8BAE5A] text-lg mb-8">Jouw financiële gezondheid in één oogopslag</p>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Netto Waarde Widget */}
+        <Link href="/dashboard/finance-en-business/netto-waarde" className="bg-[#232D1A] rounded-2xl shadow-xl p-6 border border-[#3A4D23] hover:border-[#B6C948] transition-all flex flex-col items-center cursor-pointer group">
+          <div className="w-full h-40 flex flex-col items-center justify-center mb-4">
+            {/* Placeholder voor grafiek */}
+            <div className="w-full h-32 bg-[#181F17] rounded-xl flex flex-col items-center justify-center border border-[#3A4D23] text-[#B6C948] text-lg font-bold">
+              <span className="text-2xl">€{netWorth.toLocaleString('nl-NL')}</span>
+              <span className="text-[#8BAE5A] text-sm mt-2">Netto Waarde</span>
+            </div>
+          </div>
+          <div className="text-xl font-bold text-[#B6C948] mb-1">Netto Waarde</div>
+          <div className="text-[#8BAE5A] text-sm">Bekijk je vermogen in detail</div>
+        </Link>
+        {/* Spaarquote Widget */}
+        <Link href="/dashboard/finance-en-business/cashflow" className="bg-[#232D1A] rounded-2xl shadow-xl p-6 border border-[#3A4D23] hover:border-[#B6C948] transition-all flex flex-col items-center cursor-pointer group">
+          <div className="w-full h-40 flex flex-col items-center justify-center mb-4">
+            {/* Gauge */}
+            <div className="w-32 h-32 bg-[#181F17] rounded-full flex flex-col items-center justify-center border-4 border-[#8BAE5A] text-[#B6C948] text-lg font-bold">
+              <span className="text-3xl">{savingsRate}%</span>
+              <span className="text-[#8BAE5A] text-sm mt-2">Spaarquote</span>
+            </div>
+          </div>
+          <div className="text-xl font-bold text-[#B6C948] mb-1">Spaarquote</div>
+          <div className="text-[#8BAE5A] text-sm">Gespaard: €{savings.toLocaleString('nl-NL')} / Inkomen: €{income.toLocaleString('nl-NL')}</div>
+        </Link>
+        {/* Passief Inkomen Widget */}
+        <Link href="/dashboard/finance-en-business/portfolio" className="bg-[#232D1A] rounded-2xl shadow-xl p-6 border border-[#3A4D23] hover:border-[#B6C948] transition-all flex flex-col items-center cursor-pointer group">
+          <div className="w-full h-40 flex flex-col items-center justify-center mb-4">
+            {/* Progress bar */}
+            <div className="w-full h-6 bg-[#181F17] rounded-full border border-[#3A4D23] mb-2">
+              <div className="h-6 rounded-full bg-gradient-to-r from-[#8BAE5A] to-[#B6C948]" style={{ width: `${passiveProgress}%` }} />
+            </div>
+            <div className="text-[#B6C948] text-sm font-bold">€{passiveIncome.toLocaleString('nl-NL')} / €{passiveGoal.toLocaleString('nl-NL')} doel</div>
+          </div>
+          <div className="text-xl font-bold text-[#B6C948] mb-1">Passief Inkomen</div>
+          <div className="text-[#8BAE5A] text-sm">Hoe dicht zit je bij je doel?</div>
+        </Link>
       </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-[#232D1A] rounded-xl p-6 border border-[#3A4D23]">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold text-white">Netto Waarde</h2>
-            <div className="flex gap-2">
-              {['1m', '6m', '1y', 'all'].map((period) => (
-                <button
-                  key={period}
-                  onClick={() => setSelectedPeriod(period)}
-                  className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-                    selectedPeriod === period
-                      ? 'bg-[#8BAE5A] text-white'
-                      : 'bg-[#1B2214] text-[#8BAE5A] hover:bg-[#2A341F]'
-                  }`}
-                >
-                  {period === '1m' ? '1M' : period === '6m' ? '6M' : period === '1y' ? '1J' : 'All'}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="h-[400px]">
-            <Line data={generateChartData(selectedPeriod)} options={chartOptions} />
-          </div>
-        </div>
-
-        <div className="space-y-6">
-          <div className="bg-[#232D1A] rounded-xl p-6 border border-[#3A4D23]">
-            <h2 className="text-xl font-semibold text-white mb-4">Activa</h2>
-            <div className="space-y-4">
-              {assets.map((asset) => (
-                <div key={asset.name} className="flex justify-between items-center">
-                  <span className="text-[#8BAE5A]">{asset.name}</span>
-                  <span className="text-white font-medium">
-                    {new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(asset.amount)}
-                  </span>
-                </div>
-              ))}
-              <div className="pt-4 border-t border-[#3A4D23]">
-                <div className="flex justify-between items-center">
-                  <span className="text-white font-semibold">Totaal Activa</span>
-                  <span className="text-white font-bold">
-                    {new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(
-                      assets.reduce((sum, asset) => sum + asset.amount, 0)
-                    )}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-[#232D1A] rounded-xl p-6 border border-[#3A4D23]">
-            <h2 className="text-xl font-semibold text-white mb-4">Schulden</h2>
-            <div className="space-y-4">
-              {debts.map((debt) => (
-                <div key={debt.name} className="flex justify-between items-center">
-                  <span className="text-[#8BAE5A]">{debt.name}</span>
-                  <span className="text-white font-medium">
-                    {new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(debt.amount)}
-                  </span>
-                </div>
-              ))}
-              <div className="pt-4 border-t border-[#3A4D23]">
-                <div className="flex justify-between items-center">
-                  <span className="text-white font-semibold">Totaal Schulden</span>
-                  <span className="text-white font-bold">
-                    {new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(
-                      debts.reduce((sum, debt) => sum + debt.amount, 0)
-                    )}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <BankConnectionModal
-        isOpen={isBankModalOpen}
-        onClose={() => setIsBankModalOpen(false)}
-        onSelectBank={handleBankSelect}
-      />
     </div>
+  );
+}
+
+export default function FinanceDashboard() {
+  return (
+    <FinanceProvider>
+      <FinanceDashboardContent />
+    </FinanceProvider>
   );
 } 

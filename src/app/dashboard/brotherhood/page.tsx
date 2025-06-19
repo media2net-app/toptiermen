@@ -152,7 +152,15 @@ export default function Brotherhood() {
 
       {/* Upcoming Events */}
       <div className="mb-12">
-        <h2 className="text-2xl font-bold text-white mb-6">Aankomende Events</h2>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-white">Aankomende Events</h2>
+          <Link
+            href="/dashboard/brotherhood/evenementen"
+            className="px-4 py-2 rounded-xl bg-[#181F17] text-[#8BAE5A] font-semibold border border-[#3A4D23] hover:bg-[#232D1A] transition"
+          >
+            Bekijk alle evenementen
+          </Link>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {events.map((event) => (
             <div key={event.id} className="bg-[#232D1A]/80 rounded-2xl overflow-hidden shadow-xl border border-[#3A4D23]/40">

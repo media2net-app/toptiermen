@@ -1,45 +1,164 @@
 'use client';
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { UserGroupIcon, StarIcon, BookOpenIcon, ChatBubbleLeftRightIcon, AcademicCapIcon, CreditCardIcon, BellIcon, Cog6ToothIcon, InboxIcon, HomeIcon } from '@heroicons/react/24/solid';
+import { 
+  HomeIcon, 
+  UserGroupIcon, 
+  AcademicCapIcon, 
+  FireIcon, 
+  BookOpenIcon, 
+  StarIcon, 
+  ChatBubbleLeftRightIcon, 
+  CalendarIcon, 
+  Cog6ToothIcon, 
+  MegaphoneIcon,
+  ChevronDownIcon
+} from '@heroicons/react/24/outline';
 
 const adminMenu = [
-  { label: 'Dashboard', icon: HomeIcon, href: '/dashboard-admin' },
-  { label: 'Gebruikersbeheer', icon: UserGroupIcon, href: '/dashboard-admin/gebruikersbeheer' },
-  { label: 'Challenges & Badges', icon: StarIcon, href: '/dashboard-admin/challenges-badges' },
-  { label: 'Contentbeheer', icon: BookOpenIcon, href: '/dashboard-admin/contentbeheer' },
-  { label: 'Community Wall & Posts', icon: ChatBubbleLeftRightIcon, href: '/dashboard-admin/community' },
-  { label: 'Coaching & Mentoring', icon: AcademicCapIcon, href: '/dashboard-admin/coaching' },
-  { label: 'Abonnementen & betalingen', icon: CreditCardIcon, href: '/dashboard-admin/abonnementen' },
-  { label: 'Notificatiebeheer', icon: BellIcon, href: '/dashboard-admin/notificaties' },
-  { label: 'Systeeminstellingen', icon: Cog6ToothIcon, href: '/dashboard-admin/systeem' },
-  { label: 'Feedback & support', icon: InboxIcon, href: '/dashboard-admin/support' },
+  { 
+    label: 'Dashboard', 
+    icon: HomeIcon, 
+    href: '/dashboard-admin' 
+  },
+  { 
+    label: 'LEDEN', 
+    type: 'section',
+    items: [
+      { label: 'Ledenbeheer', icon: UserGroupIcon, href: '/dashboard-admin/ledenbeheer' }
+    ]
+  },
+  { 
+    label: 'CONTENT', 
+    type: 'section',
+    items: [
+      { label: 'Academy', icon: AcademicCapIcon, href: '/dashboard-admin/academy' },
+      { label: 'Trainingscentrum', icon: FireIcon, href: '/dashboard-admin/trainingscentrum' },
+      { label: 'Voedingsplannen', icon: BookOpenIcon, href: '/dashboard-admin/voedingsplannen' },
+      { label: 'Boekenkamer', icon: BookOpenIcon, href: '/dashboard-admin/boekenkamer' },
+      { label: 'Badges & Rangen', icon: StarIcon, href: '/dashboard-admin/badges-rangen' }
+    ]
+  },
+  { 
+    label: 'COMMUNITY', 
+    type: 'section',
+    items: [
+      { label: 'Forum Moderatie', icon: ChatBubbleLeftRightIcon, href: '/dashboard-admin/forum-moderatie' },
+      { label: 'Social Feed', icon: ChatBubbleLeftRightIcon, href: '/dashboard-admin/social-feed' },
+      { label: 'Evenementenbeheer', icon: CalendarIcon, href: '/dashboard-admin/evenementenbeheer' }
+    ]
+  },
+  { 
+    label: 'PLATFORM', 
+    type: 'section',
+    items: [
+      { label: 'Instellingen', icon: Cog6ToothIcon, href: '/dashboard-admin/instellingen' },
+      { label: 'Aankondigingen', icon: MegaphoneIcon, href: '/dashboard-admin/aankondigingen' }
+    ]
+  }
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['LEDEN', 'CONTENT', 'COMMUNITY', 'PLATFORM']));
+
+  const toggleSection = (sectionLabel: string) => {
+    setExpandedSections(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(sectionLabel)) {
+        newSet.delete(sectionLabel);
+      } else {
+        newSet.add(sectionLabel);
+      }
+      return newSet;
+    });
+  };
+
   return (
-    <div className="flex min-h-screen">
-      {/* Sidebar */}
-      <aside className="hidden md:flex flex-col w-72 bg-[#111111]/95 border-r border-[#C49C48]/60 shadow-2xl z-20 py-8 px-4">
-        <div className="mb-10 flex items-center gap-3 px-2">
-          <span className="text-2xl font-bold text-[#C49C48] tracking-tight">Admin Panel</span>
-        </div>
-        <nav className="flex-1 flex flex-col gap-2">
-          {adminMenu.map((item) => (
-            <Link
-              href={item.href}
-              key={item.label}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-[#C49C48] hover:bg-[#181818] transition-all duration-150 ${pathname === item.href ? 'bg-gradient-to-r from-[#C49C48] to-[#B8860B] text-black shadow-lg' : ''}`}
+    <div className="min-h-screen bg-[#181F17]">
+      {/* Top Navigation Bar */}
+      <div className="bg-[#232D1A] border-b border-[#3A4D23] px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <h1 className="text-2xl font-bold text-[#8BAE5A]">Admin Panel</h1>
+            <span className="text-[#B6C948] text-sm">Top Tier Men Platform</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <span className="text-[#8BAE5A] text-sm">Admin</span>
+            <Link 
+              href="/dashboard" 
+              className="px-4 py-2 rounded-xl bg-[#181F17] text-[#8BAE5A] font-semibold border border-[#3A4D23] hover:bg-[#232D1A] transition"
             >
-              <item.icon className="w-6 h-6 text-[#C49C48]" />
-              <span>{item.label}</span>
+              Terug naar Platform
             </Link>
-          ))}
-        </nav>
-      </aside>
-      {/* Main content section */}
-      <section className="flex-1 p-8 md:p-12 bg-[#111111]">{children}</section>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex">
+        {/* Sidebar */}
+        <aside className="w-72 bg-[#232D1A] border-r border-[#3A4D23] min-h-screen p-6">
+          <nav className="space-y-6">
+            {adminMenu.map((item) => {
+              if (item.type === 'section') {
+                const isExpanded = expandedSections.has(item.label);
+                return (
+                  <div key={item.label}>
+                    <button
+                      onClick={() => toggleSection(item.label)}
+                      className="flex items-center justify-between w-full px-4 py-3 rounded-xl text-[#8BAE5A] font-semibold hover:bg-[#181F17] transition-all duration-200"
+                    >
+                      <span>{item.label}</span>
+                      <ChevronDownIcon 
+                        className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} 
+                      />
+                    </button>
+                    {isExpanded && (
+                      <div className="mt-2 ml-4 space-y-1">
+                        {item.items?.map((subItem) => (
+                          <Link
+                            key={subItem.href}
+                            href={subItem.href || '#'}
+                            className={`flex items-center gap-3 px-4 py-2 rounded-xl font-medium transition-all duration-200 ${
+                              pathname === subItem.href 
+                                ? 'bg-[#8BAE5A] text-[#181F17] shadow-lg' 
+                                : 'text-[#B6C948] hover:bg-[#181F17] hover:text-[#8BAE5A]'
+                            }`}
+                          >
+                            {subItem.icon && <subItem.icon className="w-5 h-5" />}
+                            <span>{subItem.label}</span>
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              } else {
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-all duration-200 ${
+                      pathname === item.href 
+                        ? 'bg-[#8BAE5A] text-[#181F17] shadow-lg' 
+                        : 'text-[#8BAE5A] hover:bg-[#181F17]'
+                    }`}
+                  >
+                    {item.icon && <item.icon className="w-6 h-6" />}
+                    <span>{item.label}</span>
+                  </Link>
+                );
+              }
+            })}
+          </nav>
+        </aside>
+
+        {/* Main Content */}
+        <main className="flex-1 p-6 md:p-12">
+          {children}
+        </main>
+      </div>
     </div>
   );
 } 

@@ -651,21 +651,6 @@ export default function Dashboard() {
               </button>
             </div>
           </Link>
-
-          {/* Passief Inkomen */}
-          <Link href="/dashboard/finance-en-business/passief-inkomen" className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#f0a14f] cursor-pointer block">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold text-white">Passief Inkomen</h3>
-              <span className="text-[#8BAE5A] text-2xl">📈</span>
-            </div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-3xl font-bold text-white">€150</span>
-              <span className="text-[#8BAE5A]">/ €500 doel</span>
-            </div>
-            <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
-              <div className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full" style={{ width: '30%' }}></div>
-            </div>
-          </Link>
         </div>
 
         {/* Voortgang naar Hoofddoel */}
