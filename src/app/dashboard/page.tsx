@@ -341,7 +341,7 @@ export default function Dashboard() {
           <div className="md:absolute md:top-0 md:right-0 z-20 flex items-center gap-4 md:gap-4 mb-4 md:mb-0 justify-end md:justify-end w-full md:w-auto px-2 md:px-0 mt-4 md:mt-0">
             {/* Notificatie */}
             <div className="relative">
-              <button className={`relative p-2 rounded-full bg-[#232D1A] hover:bg-[#8BAE5A]/10 transition md:w-12 md:h-12 w-10 h-10 ${dropdownOpen==='notifications' ? 'ring-2 ring-[#8BAE5A]' : ''}`} onClick={() => setDropdownOpen(dropdownOpen==='notifications'?null:'notifications')}>
+              <button className={`relative p-2 rounded-full bg-[#232D1A] hover:bg-[#8BAE5A]/10 transition md:w-12 md:h-12 w-10 h-10 ${dropdownOpen==='notifications' ? 'ring-2 ring-[#8BAE5A]' : ''}`} onClick={() => setDropdownOpen(dropdownOpen==='notifications'?null:'notifications')} data-notification-button>
                 <BellIcon className="w-6 h-6 md:w-7 md:h-7 text-white" />
                 <span className="absolute top-1 right-1 w-2.5 h-2.5 md:w-3 md:h-3 bg-[#FFD600] border-2 border-[#232D1A] rounded-full"></span>
               </button>
@@ -580,6 +580,19 @@ export default function Dashboard() {
               <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
                 <div className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full" style={{ width: '66%' }}></div>
               </div>
+              {/* Cross-module actie */}
+              <div className="mt-4 pt-3 border-t border-[#3A4D23]/40">
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toast.success('Gedeeld in Brotherhood!');
+                  }}
+                  className="w-full px-4 py-2 rounded-xl bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#B6C948] transition-colors text-sm"
+                >
+                  🏆 Deel je Pull Day in Brotherhood
+                </button>
+              </div>
             </div>
           </Link>
 
@@ -623,6 +636,19 @@ export default function Dashboard() {
               <div className="w-full h-full">
                 <Line data={generateMiniFinanceChartData()} options={miniChartOptions} />
               </div>
+            </div>
+            {/* Cross-module actie */}
+            <div className="mt-4 pt-3 border-t border-[#3A4D23]/40">
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  toast.success('Gedeeld in Brotherhood!');
+                }}
+                className="w-full px-3 py-2 rounded-xl bg-[#FFD700] text-[#181F17] font-semibold hover:bg-[#FFED4E] transition-colors text-sm"
+              >
+                💰 Deel je financiële mijlpaal in Brotherhood
+              </button>
             </div>
           </Link>
 
@@ -709,6 +735,16 @@ export default function Dashboard() {
                 </div>
                 <span className="text-[#8BAE5A]">4/7 dagen</span>
               </div>
+              {/* Cross-module suggestie */}
+              <div className="mt-4 pt-3 border-t border-[#3A4D23]/40">
+                <div className="text-sm text-[#8BAE5A] mb-2">💡 Inspireer anderen:</div>
+                <button
+                  onClick={() => toast.success('Gedeeld in Social Feed!')}
+                  className="w-full px-3 py-2 rounded-xl bg-[#181F17] text-[#8BAE5A] font-semibold hover:bg-[#232D1A] transition-colors text-sm border border-[#3A4D23]"
+                >
+                  📚 Deel je leesvoortgang in Social Feed
+                </button>
+              </div>
             </div>
           </div>
 
@@ -742,6 +778,14 @@ export default function Dashboard() {
                   <span className="text-white">Focus score</span>
                 </div>
                 <span className="text-[#8BAE5A]">85%</span>
+              </div>
+              {/* Cross-module actie */}
+              <div className="mt-4 pt-3 border-t border-[#3A4D23]/40">
+                <Link href="/dashboard/brotherhood/forum/fitness-gezondheid" className="block">
+                  <button className="w-full px-3 py-2 rounded-xl bg-[#181F17] text-[#8BAE5A] font-semibold hover:bg-[#232D1A] transition-colors text-sm border border-[#3A4D23]">
+                    💭 Vraag advies in Mind & Focus forum
+                  </button>
+                </Link>
               </div>
             </div>
           </div>

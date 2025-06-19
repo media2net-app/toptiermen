@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { BellIcon, UserGroupIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/solid';
+import { BellIcon, UserGroupIcon, ChatBubbleLeftRightIcon, ArrowRightIcon } from '@heroicons/react/24/solid';
 
 export default function BrotherhoodWidget() {
   return (
@@ -9,7 +9,13 @@ export default function BrotherhoodWidget() {
         {/* Notificaties */}
         <button
           className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#181F17] text-[#FFD700] font-semibold shadow hover:bg-[#232D1A] transition"
-          onClick={() => alert('Notificatiecentrum opent hier!')}
+          onClick={() => {
+            // Simuleer het openen van het notificatiecentrum
+            const notificationButton = document.querySelector('[data-notification-button]') as HTMLButtonElement;
+            if (notificationButton) {
+              notificationButton.click();
+            }
+          }}
         >
           <BellIcon className="w-6 h-6" />
           3 nieuwe meldingen
@@ -28,6 +34,13 @@ export default function BrotherhoodWidget() {
         </span>
         <span className="text-xs text-[#8BAE5A] ml-2">Nu</span>
       </Link>
+      {/* Bekijk alle activiteit */}
+      <div className="mt-2 pt-3 border-t border-[#3A4D23]/40">
+        <Link href="/dashboard/brotherhood/social-feed" className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-[#181F17] text-[#8BAE5A] font-semibold hover:bg-[#232D1A] transition group">
+          <span>Bekijk alle Brotherhood activiteit</span>
+          <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+        </Link>
+      </div>
     </div>
   );
 } 
