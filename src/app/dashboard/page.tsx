@@ -430,12 +430,47 @@ export default function Dashboard() {
               <h3 className="text-xl font-bold text-white">Mijn Trainingen</h3>
               <span className="text-[#8BAE5A] text-2xl">💪</span>
             </div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-3xl font-bold text-white">2/3</span>
-              <span className="text-[#8BAE5A]">trainingen gedaan</span>
+            <div className="space-y-3">
+              <div>
+                <div className="text-sm text-[#8BAE5A] mb-1">Je volgt nu:</div>
+                <div className="text-lg font-bold text-white">Full Body Krachttraining</div>
+              </div>
+              <div>
+                <div className="text-sm text-[#8BAE5A] mb-1">Vandaag op het programma:</div>
+                <div className="text-white font-semibold">Pull Day</div>
+              </div>
+              <div className="flex items-center gap-2 mt-3">
+                <span className="text-2xl font-bold text-white">2/3</span>
+                <span className="text-[#8BAE5A]">trainingen gedaan</span>
+              </div>
+              <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
+                <div className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full" style={{ width: '66%' }}></div>
+              </div>
             </div>
-            <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
-              <div className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full" style={{ width: '66%' }}></div>
+          </Link>
+
+          {/* Mijn Voedingsplan */}
+          <Link href="/dashboard/voedingsplannen" className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#f0a14f] cursor-pointer block">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-white">Mijn Voedingsplan</h3>
+              <span className="text-[#8BAE5A] text-2xl">🥗</span>
+            </div>
+            <div className="space-y-3">
+              <div>
+                <div className="text-sm text-[#8BAE5A] mb-1">Jouw actieve plan:</div>
+                <div className="text-lg font-bold text-white">Gebalanceerd Dieet</div>
+              </div>
+              <div>
+                <div className="text-sm text-[#8BAE5A] mb-1">Calorie-doel:</div>
+                <div className="text-white font-semibold">2.450 kcal</div>
+              </div>
+              <div className="flex items-center gap-2 mt-3">
+                <span className="text-2xl font-bold text-white">1.850</span>
+                <span className="text-[#8BAE5A]">kcal gegeten</span>
+              </div>
+              <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
+                <div className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full" style={{ width: '75%' }}></div>
+              </div>
             </div>
           </Link>
 
