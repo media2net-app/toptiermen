@@ -145,6 +145,7 @@ export default function Dashboard() {
   const [videoLoading, setVideoLoading] = useState(true);
   const [videoError, setVideoError] = useState(false);
   const [videoTimeout, setVideoTimeout] = useState(false);
+  const [autoplayBlocked, setAutoplayBlocked] = useState(false);
 
   // Dummy data
   const notifications = [
@@ -846,7 +847,7 @@ export default function Dashboard() {
             {/* Video Content */}
             <div className="p-6">
               <div className="relative bg-[#181F17] rounded-xl overflow-hidden" style={{ aspectRatio: '16/9' }}>
-                {videoLoading && !videoError && (
+                {videoLoading && !videoError && !autoplayBlocked && (
                   <div className="absolute inset-0 flex items-center justify-center bg-[#181F17]">
                     <div className="text-center">
                       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
@@ -888,22 +889,74 @@ export default function Dashboard() {
                     </div>
                   </div>
                 ) : (
-                  <video
-                    className="w-full h-full object-contain"
-                    controls
-                    autoPlay
-                    poster="/video-placeholder.svg"
-                    onLoadStart={() => setVideoLoading(true)}
-                    onCanPlay={() => setVideoLoading(false)}
-                    onError={() => {
-                      setVideoLoading(false);
-                      setVideoError(true);
-                    }}
-                  >
-                    <source src="/welkom-v2.MP4" type="video/mp4" />
-                    <source src="/welkom.MP4" type="video/mp4" />
-                    Je browser ondersteunt geen video afspelen.
-                  </video>
+                  <div className="relative">
+                    <video
+                      className="w-full h-full object-contain"
+                      controls
+                      autoPlay
+                      muted
+                      playsInline
+                      poster="/video-placeholder.svg"
+                      onLoadStart={() => setVideoLoading(true)}
+                      onCanPlay={() => {
+                        setVideoLoading(false);
+                        // Try to play the video when it's ready
+                        const video = document.querySelector('video') as HTMLVideoElement;
+                        if (video) {
+                          video.play().catch(() => {
+                            // If autoplay fails, show a play button overlay
+                            console.log('Autoplay blocked, showing play button');
+                            setAutoplayBlocked(true);
+                          });
+                        }
+                      }}
+                      onCanPlayThrough={() => {
+                        setVideoLoading(false);
+                        // Video is fully loaded, ensure it plays
+                        const video = document.querySelector('video') as HTMLVideoElement;
+                        if (video && video.paused) {
+                          video.play().catch(() => {
+                            console.log('Autoplay still blocked');
+                            setAutoplayBlocked(true);
+                          });
+                        }
+                      }}
+                      onPlay={() => {
+                        setAutoplayBlocked(false);
+                      }}
+                      onError={() => {
+                        setVideoLoading(false);
+                        setVideoError(true);
+                      }}
+                    >
+                      <source src="/welkom-v2.MP4" type="video/mp4" />
+                      <source src="/welkom.MP4" type="video/mp4" />
+                      Je browser ondersteunt geen video afspelen.
+                    </video>
+                    
+                    {/* Autoplay blocked overlay */}
+                    {autoplayBlocked && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                        <button
+                          onClick={() => {
+                            const video = document.querySelector('video') as HTMLVideoElement;
+                            if (video) {
+                              video.play().then(() => {
+                                setAutoplayBlocked(false);
+                              }).catch(() => {
+                                console.log('Manual play also blocked');
+                              });
+                            }
+                          }}
+                          className="flex items-center justify-center w-20 h-20 rounded-full bg-[#8BAE5A] hover:bg-[#B6C948] transition-colors duration-200 shadow-lg"
+                        >
+                          <svg className="w-8 h-8 text-[#181F17] ml-1" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z"/>
+                          </svg>
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
               
