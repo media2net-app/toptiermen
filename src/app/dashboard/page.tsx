@@ -142,6 +142,9 @@ export default function Dashboard() {
   const [newMission, setNewMission] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [showWelcome, setShowWelcome] = useState(true);
+  const [videoLoading, setVideoLoading] = useState(true);
+  const [videoError, setVideoError] = useState(false);
+  const [videoTimeout, setVideoTimeout] = useState(false);
 
   // Dummy data
   const notifications = [
@@ -332,6 +335,18 @@ export default function Dashboard() {
     setTimeout(showRandomToast, 1000 + Math.random() * 20000);
     // eslint-disable-next-line
   }, []);
+
+  // Add timeout for video loading
+  useEffect(() => {
+    if (showWelcome && videoLoading) {
+      const timer = setTimeout(() => {
+        setVideoTimeout(true);
+        setVideoLoading(false);
+      }, 10000); // 10 second timeout
+
+      return () => clearTimeout(timer);
+    }
+  }, [showWelcome, videoLoading]);
 
   return (
     <ClientLayout>
@@ -831,15 +846,65 @@ export default function Dashboard() {
             {/* Video Content */}
             <div className="p-6">
               <div className="relative bg-[#181F17] rounded-xl overflow-hidden" style={{ aspectRatio: '16/9' }}>
-                <video
-                  className="w-full h-full object-contain"
-                  controls
-                  autoPlay
-                  poster="/video-placeholder.jpg"
-                >
-                  <source src="/welkom-v2.mp4" type="video/mp4" />
-                  Je browser ondersteunt geen video afspelen.
-                </video>
+                {videoLoading && !videoError && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-[#181F17]">
+                    <div className="text-center">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
+                      <p className="text-[#B6C948]">Video laden...</p>
+                    </div>
+                  </div>
+                )}
+                
+                {videoError || videoTimeout ? (
+                  <div className="flex items-center justify-center h-full text-center p-8">
+                    <div>
+                      <div className="text-[#8BAE5A] text-6xl mb-4">🎥</div>
+                      <h3 className="text-xl font-bold text-[#8BAE5A] mb-2">
+                        {videoTimeout ? 'Video laadt te langzaam' : 'Video niet beschikbaar'}
+                      </h3>
+                      <p className="text-[#B6C948] mb-4">
+                        {videoTimeout 
+                          ? 'De video duurt te lang om te laden. Je kunt de welkomstboodschap hieronder lezen.'
+                          : 'De welkomstvideo kon niet worden geladen.'
+                        }
+                      </p>
+                      {!videoTimeout && (
+                        <button 
+                          onClick={() => {
+                            setVideoError(false);
+                            setVideoLoading(true);
+                            setVideoTimeout(false);
+                            // Retry loading the video
+                            const video = document.querySelector('video') as HTMLVideoElement;
+                            if (video) {
+                              video.load();
+                            }
+                          }}
+                          className="px-4 py-2 rounded-lg bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#B6C948] transition-colors"
+                        >
+                          Opnieuw proberen
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <video
+                    className="w-full h-full object-contain"
+                    controls
+                    autoPlay
+                    poster="/video-placeholder.svg"
+                    onLoadStart={() => setVideoLoading(true)}
+                    onCanPlay={() => setVideoLoading(false)}
+                    onError={() => {
+                      setVideoLoading(false);
+                      setVideoError(true);
+                    }}
+                  >
+                    <source src="/welkom-v2.MP4" type="video/mp4" />
+                    <source src="/welkom.MP4" type="video/mp4" />
+                    Je browser ondersteunt geen video afspelen.
+                  </video>
+                )}
               </div>
               
               {/* Welcome Message */}

@@ -1,6 +1,16 @@
-<svg width="640" height="360" viewBox="0 0 640 360" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="640" height="360" rx="32" fill="#232D1A"/>
-  <circle cx="320" cy="180" r="60" fill="#181F17" stroke="#8BAE5A" stroke-width="8"/>
-  <polygon points="310,220 310,140 370,180" fill="#8BAE5A"/>
-  <text x="50%" y="340" text-anchor="middle" fill="#8BAE5A" font-size="28" font-family="Arial, sans-serif">Video Placeholder</text>
+<svg width="400" height="225" viewBox="0 0 400 225" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="225" fill="#181F17"/>
+  <rect x="2" y="2" width="396" height="221" rx="8" stroke="#3A4D23" stroke-width="2" fill="none"/>
+  
+  <!-- Play button -->
+  <circle cx="200" cy="112.5" r="30" fill="#8BAE5A" opacity="0.8"/>
+  <path d="M190 100 L190 125 L215 112.5 Z" fill="#181F17"/>
+  
+  <!-- Text -->
+  <text x="200" y="170" text-anchor="middle" fill="#B6C948" font-family="Arial, sans-serif" font-size="14" font-weight="bold">
+    Welkomstvideo
+  </text>
+  <text x="200" y="185" text-anchor="middle" fill="#8BAE5A" font-family="Arial, sans-serif" font-size="12">
+    Laden...
+  </text>
 </svg> 
