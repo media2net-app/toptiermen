@@ -1,5 +1,5 @@
 'use client';
-import { HomeIcon, FireIcon, AcademicCapIcon, ChartBarIcon, CurrencyDollarIcon, UsersIcon, BookOpenIcon, StarIcon, UserCircleIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/solid';
+import { HomeIcon, FireIcon, AcademicCapIcon, ChartBarIcon, CurrencyDollarIcon, UsersIcon, BookOpenIcon, StarIcon, UserCircleIcon, ChatBubbleLeftRightIcon, ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
@@ -43,6 +43,8 @@ const menu = [
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const [openBrotherhood, setOpenBrotherhood] = useState(false);
+  const [openDashboard, setOpenDashboard] = useState(false);
   const safePathname = pathname || '';
   return (
     <div className="flex min-h-screen">
@@ -66,37 +68,108 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             if (!item.parent) {
               // Hoofditem
               const isActive = safePathname === item.href;
+              // Dashboard special case
+              if (item.label === 'Dashboard') {
+                return (
+                  <div key={item.label} className="group">
+                    <div className={`grid grid-cols-[auto_1fr_auto] items-center gap-4 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide transition-all duration-150 font-figtree w-full text-left ${isActive ? 'bg-[#8BAE5A] text-black shadow-lg' : 'text-white hover:text-[#8BAE5A]'} ${collapsed ? 'justify-center px-2' : ''}`}
+                    >
+                      <item.icon className={`w-6 h-6 ${isActive ? 'text-white' : 'text-[#8BAE5A]'}`} />
+                      {!collapsed && (
+                        <Link href={item.href} className="col-start-2" style={{ minWidth: 0 }}>
+                          <span className="truncate">{item.label}</span>
+                        </Link>
+                      )}
+                      <button
+                        className={`col-start-3 ml-2 p-1 ${collapsed ? 'pointer-events-none opacity-50' : 'pointer-events-auto'} bg-transparent border-none`}
+                        onClick={e => { e.stopPropagation(); setOpenDashboard(v => !v); }}
+                        aria-label={openDashboard ? 'Dashboard submenu inklappen' : 'Dashboard submenu uitklappen'}
+                        tabIndex={0}
+                        type="button"
+                      >
+                        {openDashboard
+                          ? <ChevronUpIcon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-[#8BAE5A]'}`} />
+                          : <ChevronDownIcon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-[#8BAE5A]'}`} />}
+                      </button>
+                    </div>
+                    {/* Subitems */}
+                    {menu.filter(sub => sub.parent === item.label).length > 0 && !collapsed && (
+                      <div className={`ml-8 mt-1 flex flex-col gap-1 overflow-hidden transition-all duration-300 ${openDashboard ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 pointer-events-none'}`}>
+                        {menu.filter(sub => sub.parent === item.label).map(sub => {
+                          const isSubActive = safePathname === sub.href;
+                          return (
+                            <Link
+                              href={sub.href}
+                              key={sub.label}
+                              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-150 ${isSubActive ? 'bg-[#8BAE5A] text-black' : 'text-white hover:text-[#8BAE5A]'}`}
+                            >
+                              <span className='text-[#8BAE5A] w-5 inline-block text-lg'>-</span>
+                              <span>{sub.label}</span>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+              // Brotherhood special case
+              if (item.label === 'Brotherhood') {
+                return (
+                  <div key={item.label} className="group">
+                    <div className={`grid grid-cols-[auto_1fr_auto] items-center gap-4 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide transition-all duration-150 font-figtree w-full text-left ${isActive ? 'bg-[#8BAE5A] text-black shadow-lg' : 'text-white hover:text-[#8BAE5A]'} ${collapsed ? 'justify-center px-2' : ''}`}
+                    >
+                      <item.icon className={`w-6 h-6 ${isActive ? 'text-white' : 'text-[#8BAE5A]'}`} />
+                      {!collapsed && (
+                        <Link href={item.href} className="col-start-2" style={{ minWidth: 0 }}>
+                          <span className="truncate">{item.label}</span>
+                        </Link>
+                      )}
+                      <button
+                        className={`col-start-3 ml-2 p-1 ${collapsed ? 'pointer-events-none opacity-50' : 'pointer-events-auto'} bg-transparent border-none`}
+                        onClick={e => { e.stopPropagation(); setOpenBrotherhood(v => !v); }}
+                        aria-label={openBrotherhood ? 'Brotherhood submenu inklappen' : 'Brotherhood submenu uitklappen'}
+                        tabIndex={0}
+                        type="button"
+                      >
+                        {openBrotherhood
+                          ? <ChevronUpIcon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-[#8BAE5A]'}`} />
+                          : <ChevronDownIcon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-[#8BAE5A]'}`} />}
+                      </button>
+                    </div>
+                    {/* Subitems */}
+                    {menu.filter(sub => sub.parent === item.label).length > 0 && !collapsed && (
+                      <div className={`ml-8 mt-1 flex flex-col gap-1 overflow-hidden transition-all duration-300 ${openBrotherhood ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 pointer-events-none'}`}>
+                        {menu.filter(sub => sub.parent === item.label).map(sub => {
+                          const isSubActive = safePathname === sub.href;
+                          return (
+                            <Link
+                              href={sub.href}
+                              key={sub.label}
+                              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-150 ${isSubActive ? 'bg-[#8BAE5A] text-black' : 'text-white hover:text-[#8BAE5A]'}`}
+                            >
+                              <span className='text-[#8BAE5A] w-5 inline-block text-lg'>-</span>
+                              <span>{sub.label}</span>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+              // Overige hoofditems
               return (
-                <div key={item.label}>
-                  <Link
-                    href={item.href}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide transition-all duration-150 font-figtree
-                      ${isActive ? 'bg-[#8BAE5A] text-black shadow-lg' : 'text-white hover:text-[#8BAE5A]'}
-                      ${collapsed ? 'justify-center px-2' : ''}`}
+                <div key={item.label} className="group">
+                  <div className={`grid grid-cols-[auto_1fr_auto] items-center gap-4 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide transition-all duration-150 font-figtree w-full text-left ${isActive ? 'bg-[#8BAE5A] text-black shadow-lg' : 'text-white hover:text-[#8BAE5A]'} ${collapsed ? 'justify-center px-2' : ''}`}
                   >
                     <item.icon className={`w-6 h-6 ${isActive ? 'text-[#181F17]' : 'text-[#8BAE5A]'}`} />
-                    {!collapsed && <span>{item.label}</span>}
-                  </Link>
-                  {/* Subitems */}
-                  {menu.filter(sub => sub.parent === item.label).length > 0 && !collapsed && (
-                    <div className="ml-8 mt-1 flex flex-col gap-1">
-                      {menu.filter(sub => sub.parent === item.label).map(sub => {
-                        const isSubActive = safePathname === sub.href;
-                        return (
-                          <Link
-                            href={sub.href}
-                            key={sub.label}
-                            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-150
-                              ${isSubActive ? 'bg-[#8BAE5A] text-black' : 'text-white hover:text-[#8BAE5A]'}
-                            `}
-                          >
-                            <span className='text-[#8BAE5A] w-5 inline-block text-lg'>-</span>
-                            <span>{sub.label}</span>
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  )}
+                    {!collapsed && (
+                      <Link href={item.href} className="col-start-2" style={{ minWidth: 0 }}>
+                        <span className="truncate">{item.label}</span>
+                      </Link>
+                    )}
+                  </div>
                 </div>
               );
             }

@@ -1,5 +1,7 @@
 import './globals.css';
 import { Inter, Figtree } from 'next/font/google';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -25,7 +27,26 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.className} ${figtree.className}`}>
-      <body>{children}</body>
+      <body>
+        {children}
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="dark"
+          toastStyle={{
+            backgroundColor: '#232D1A',
+            color: '#8BAE5A',
+            border: '1px solid #3A4D23',
+          }}
+        />
+      </body>
     </html>
   );
 }

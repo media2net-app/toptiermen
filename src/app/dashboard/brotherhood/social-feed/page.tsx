@@ -9,7 +9,7 @@ const user = {
 
 const SocialFeedPage = () => {
   return (
-    <div className="py-8 px-4 md:px-12">
+    <div className="max-w-2xl mx-auto w-full px-2 sm:px-4 md:px-0 py-8">
       {/* Component 1: Create Post Composer */}
       <section className="mb-6">
         <div className="bg-[#232D1A]/80 rounded-2xl shadow-xl border border-[#3A4D23]/40 p-4 flex items-start">
