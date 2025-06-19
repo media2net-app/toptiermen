@@ -2,7 +2,7 @@
 import { useEffect, useState, useRef } from 'react';
 import ClientLayout from '../components/ClientLayout';
 import Image from 'next/image';
-import { BellIcon, EnvelopeIcon, CheckCircleIcon, TrophyIcon, FireIcon, ChatBubbleLeftRightIcon, UserGroupIcon, CalendarDaysIcon, ArrowTrendingUpIcon, DocumentCheckIcon } from '@heroicons/react/24/solid';
+import { BellIcon, EnvelopeIcon, CheckCircleIcon, TrophyIcon, FireIcon, ChatBubbleLeftRightIcon, UserGroupIcon, CalendarDaysIcon, ArrowTrendingUpIcon, DocumentCheckIcon, PlusIcon } from '@heroicons/react/24/solid';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Link from 'next/link';
@@ -138,6 +138,8 @@ export default function Dashboard() {
   const [progress, setProgress] = useState(0);
   const [fadeIn, setFadeIn] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState<'profile'|'notifications'|'messages'|null>(null);
+  const [showAddMissionModal, setShowAddMissionModal] = useState(false);
+  const [newMission, setNewMission] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [showWelcome, setShowWelcome] = useState(true);
 
@@ -543,7 +545,15 @@ export default function Dashboard() {
           <div className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#f0a14f]">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-white">Mijn Missies & Gewoontes</h3>
-              <span className="text-[#8BAE5A] text-2xl">🎯</span>
+              <div className="flex items-center gap-2">
+                <span className="text-[#8BAE5A] text-2xl">🎯</span>
+                <button
+                  onClick={() => setShowAddMissionModal(true)}
+                  className="p-2 rounded-full bg-[#8BAE5A] hover:bg-[#B6C948] transition-colors"
+                >
+                  <PlusIcon className="w-5 h-5 text-[#181F17]" />
+                </button>
+              </div>
             </div>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -636,6 +646,47 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Add Mission Modal */}
+      {showAddMissionModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
+          <div className="bg-[#232D1A] rounded-2xl p-8 shadow-2xl max-w-md w-full mx-4">
+            <h3 className="text-2xl font-bold text-white mb-4">Nieuwe Missie Toevoegen</h3>
+            <input
+              type="text"
+              value={newMission}
+              onChange={(e) => setNewMission(e.target.value)}
+              placeholder="Bijv: 30 min wandelen"
+              className="w-full p-3 rounded-xl bg-[#181F17] border border-[#3A4D23] text-white placeholder-[#8BAE5A] mb-6 focus:outline-none focus:border-[#8BAE5A]"
+            />
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  if (newMission.trim()) {
+                    // Hier zou je de missie toevoegen aan de state/database
+                    toast.success('Missie toegevoegd!');
+                    setNewMission('');
+                  }
+                  setShowAddMissionModal(false);
+                }}
+                className="flex-1 px-6 py-3 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#3A4D23] text-[#181F17] font-semibold hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all duration-200"
+              >
+                Toevoegen
+              </button>
+              <button
+                onClick={() => {
+                  setNewMission('');
+                  setShowAddMissionModal(false);
+                }}
+                className="px-6 py-3 rounded-xl bg-[#181F17] text-white font-semibold hover:bg-[#3A4D23] transition-colors"
+              >
+                Annuleren
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <ToastContainer toastClassName="!bg-[#181F17] !text-white" progressClassName="!bg-[#232D1A]" />
     </ClientLayout>
   );
