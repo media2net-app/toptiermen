@@ -261,7 +261,141 @@ const mockTrainingData = {
     ],
     totalVolume: 3150,
     duration: '60 min'
-  }
+  },
+  // --- JUNI 2025 ---
+  '2025-06-03': {
+    id: 101,
+    name: 'Push Day - Chest Focus',
+    exercises: [
+      { name: 'Bench Press', sets: [ { set: 1, weight: 75, reps: 6 }, { set: 2, weight: 75, reps: 5 }, { set: 3, weight: 75, reps: 4 } ] },
+      { name: 'Incline Dumbbell Press', sets: [ { set: 1, weight: 30, reps: 10 }, { set: 2, weight: 30, reps: 8 } ] },
+      { name: 'Dips', sets: [ { set: 1, weight: 0, reps: 12 }, { set: 2, weight: 0, reps: 10 } ] }
+    ],
+    totalVolume: 2100,
+    duration: '50 min'
+  },
+  '2025-06-07': {
+    id: 102,
+    name: 'Leg Day - Strength',
+    exercises: [
+      { name: 'Squat', sets: [ { set: 1, weight: 95, reps: 5 }, { set: 2, weight: 95, reps: 5 }, { set: 3, weight: 95, reps: 4 } ] },
+      { name: 'Leg Press', sets: [ { set: 1, weight: 130, reps: 10 }, { set: 2, weight: 130, reps: 8 } ] },
+      { name: 'Calf Raises', sets: [ { set: 1, weight: 60, reps: 15 }, { set: 2, weight: 60, reps: 12 } ] }
+    ],
+    totalVolume: 3200,
+    duration: '55 min'
+  },
+  '2025-06-12': {
+    id: 103,
+    name: 'Pull Day - Back & Biceps',
+    exercises: [
+      { name: 'Deadlift', sets: [ { set: 1, weight: 115, reps: 4 }, { set: 2, weight: 115, reps: 3 } ] },
+      { name: 'Barbell Rows', sets: [ { set: 1, weight: 55, reps: 10 }, { set: 2, weight: 55, reps: 8 } ] },
+      { name: 'Pull-ups', sets: [ { set: 1, weight: 0, reps: 8 }, { set: 2, weight: 0, reps: 7 } ] }
+    ],
+    totalVolume: 2100,
+    duration: '45 min'
+  },
+  '2025-06-16': {
+    id: 104,
+    name: 'Full Body - Conditioning',
+    exercises: [
+      { name: 'Burpees', sets: [ { set: 1, weight: 0, reps: 20 }, { set: 2, weight: 0, reps: 15 } ] },
+      { name: 'Kettlebell Swings', sets: [ { set: 1, weight: 24, reps: 15 }, { set: 2, weight: 24, reps: 12 } ] },
+      { name: 'Mountain Climbers', sets: [ { set: 1, weight: 0, reps: 30 }, { set: 2, weight: 0, reps: 25 } ] }
+    ],
+    totalVolume: 900,
+    duration: '35 min'
+  },
+  '2025-06-21': {
+    id: 105,
+    name: 'Push Day - Shoulders',
+    exercises: [
+      { name: 'Overhead Press', sets: [ { set: 1, weight: 50, reps: 8 }, { set: 2, weight: 50, reps: 7 } ] },
+      { name: 'Lateral Raises', sets: [ { set: 1, weight: 8, reps: 15 }, { set: 2, weight: 8, reps: 12 } ] },
+      { name: 'Push-ups', sets: [ { set: 1, weight: 0, reps: 20 }, { set: 2, weight: 0, reps: 15 } ] }
+    ],
+    totalVolume: 1100,
+    duration: '40 min'
+  },
+  '2025-06-25': {
+    id: 106,
+    name: 'Leg Day - Power',
+    exercises: [
+      { name: 'Squat', sets: [ { set: 1, weight: 100, reps: 4 }, { set: 2, weight: 100, reps: 3 } ] },
+      { name: 'Romanian Deadlift', sets: [ { set: 1, weight: 75, reps: 8 }, { set: 2, weight: 75, reps: 7 } ] },
+      { name: 'Box Jumps', sets: [ { set: 1, weight: 0, reps: 12 }, { set: 2, weight: 0, reps: 10 } ] }
+    ],
+    totalVolume: 2100,
+    duration: '50 min'
+  },
+  // --- JULI 2025 ---
+  '2025-07-02': {
+    id: 201,
+    name: 'Push Day - Chest & Triceps',
+    exercises: [
+      { name: 'Bench Press', sets: [ { set: 1, weight: 80, reps: 5 }, { set: 2, weight: 80, reps: 4 } ] },
+      { name: 'Dips', sets: [ { set: 1, weight: 0, reps: 14 }, { set: 2, weight: 0, reps: 12 } ] },
+      { name: 'Tricep Pushdown', sets: [ { set: 1, weight: 35, reps: 12 }, { set: 2, weight: 35, reps: 10 } ] }
+    ],
+    totalVolume: 1800,
+    duration: '45 min'
+  },
+  '2025-07-06': {
+    id: 202,
+    name: 'Pull Day - Back & Grip',
+    exercises: [
+      { name: 'Deadlift', sets: [ { set: 1, weight: 120, reps: 3 }, { set: 2, weight: 120, reps: 2 } ] },
+      { name: 'Barbell Rows', sets: [ { set: 1, weight: 60, reps: 8 }, { set: 2, weight: 60, reps: 7 } ] },
+      { name: 'Farmer Walk', sets: [ { set: 1, weight: 40, reps: 30 }, { set: 2, weight: 40, reps: 25 } ] }
+    ],
+    totalVolume: 2200,
+    duration: '50 min'
+  },
+  '2025-07-10': {
+    id: 203,
+    name: 'Leg Day - Endurance',
+    exercises: [
+      { name: 'Squat', sets: [ { set: 1, weight: 90, reps: 8 }, { set: 2, weight: 90, reps: 7 } ] },
+      { name: 'Leg Press', sets: [ { set: 1, weight: 140, reps: 10 }, { set: 2, weight: 140, reps: 8 } ] },
+      { name: 'Walking Lunges', sets: [ { set: 1, weight: 20, reps: 20 }, { set: 2, weight: 20, reps: 18 } ] }
+    ],
+    totalVolume: 2600,
+    duration: '55 min'
+  },
+  '2025-07-15': {
+    id: 204,
+    name: 'Push Day - Shoulders & Chest',
+    exercises: [
+      { name: 'Overhead Press', sets: [ { set: 1, weight: 55, reps: 6 }, { set: 2, weight: 55, reps: 5 } ] },
+      { name: 'Bench Press', sets: [ { set: 1, weight: 82.5, reps: 4 }, { set: 2, weight: 82.5, reps: 3 } ] },
+      { name: 'Push-ups', sets: [ { set: 1, weight: 0, reps: 22 }, { set: 2, weight: 0, reps: 18 } ] }
+    ],
+    totalVolume: 2000,
+    duration: '50 min'
+  },
+  '2025-07-19': {
+    id: 205,
+    name: 'Pull Day - Back & Arms',
+    exercises: [
+      { name: 'Deadlift', sets: [ { set: 1, weight: 125, reps: 2 }, { set: 2, weight: 125, reps: 2 } ] },
+      { name: 'Barbell Curls', sets: [ { set: 1, weight: 35, reps: 10 }, { set: 2, weight: 35, reps: 8 } ] },
+      { name: 'Lat Pulldowns', sets: [ { set: 1, weight: 65, reps: 10 }, { set: 2, weight: 65, reps: 8 } ] }
+    ],
+    totalVolume: 2100,
+    duration: '45 min'
+  },
+  '2025-07-23': {
+    id: 206,
+    name: 'Leg Day - Power',
+    exercises: [
+      { name: 'Squat', sets: [ { set: 1, weight: 105, reps: 4 }, { set: 2, weight: 105, reps: 3 } ] },
+      { name: 'Romanian Deadlift', sets: [ { set: 1, weight: 80, reps: 7 }, { set: 2, weight: 80, reps: 6 } ] },
+      { name: 'Box Jumps', sets: [ { set: 1, weight: 0, reps: 14 }, { set: 2, weight: 0, reps: 12 } ] }
+    ],
+    totalVolume: 2300,
+    duration: '50 min'
+  },
 };
 
 // Mock progressie data voor analyse
@@ -303,8 +437,38 @@ const progressData = {
     { date: '2024-01-01', weight: 60, reps: 10, volume: 600 },
     { date: '2024-01-08', weight: 65, reps: 10, volume: 650 },
     { date: '2024-01-19', weight: 70, reps: 10, volume: 700 },
-  ]
+  ],
 };
+
+// Voeg extra progressie toe voor juni en juli 2025
+progressData['Bench Press'].push(
+  { date: '2025-06-03', weight: 75, reps: 6, volume: 450 },
+  { date: '2025-07-02', weight: 80, reps: 5, volume: 400 },
+  { date: '2025-07-15', weight: 82.5, reps: 4, volume: 330 }
+);
+progressData['Squat'].push(
+  { date: '2025-06-07', weight: 95, reps: 5, volume: 475 },
+  { date: '2025-06-25', weight: 100, reps: 4, volume: 400 },
+  { date: '2025-07-10', weight: 90, reps: 8, volume: 720 },
+  { date: '2025-07-23', weight: 105, reps: 4, volume: 420 }
+);
+progressData['Deadlift'].push(
+  { date: '2025-06-12', weight: 115, reps: 4, volume: 460 },
+  { date: '2025-07-06', weight: 120, reps: 3, volume: 360 },
+  { date: '2025-07-19', weight: 125, reps: 2, volume: 250 }
+);
+progressData['Overhead Press'].push(
+  { date: '2025-06-21', weight: 50, reps: 8, volume: 400 },
+  { date: '2025-07-15', weight: 55, reps: 6, volume: 330 }
+);
+progressData['Barbell Rows'].push(
+  { date: '2025-06-12', weight: 55, reps: 10, volume: 550 },
+  { date: '2025-07-06', weight: 60, reps: 8, volume: 480 }
+);
+progressData['Romanian Deadlift'].push(
+  { date: '2025-06-25', weight: 75, reps: 8, volume: 600 },
+  { date: '2025-07-23', weight: 80, reps: 7, volume: 560 }
+);
 
 export default function MijnTrainingen() {
   const [activeView, setActiveView] = useState<'calendar' | 'analysis'>('calendar');
