@@ -837,7 +837,7 @@ export default function Dashboard() {
                   autoPlay
                   poster="/video-placeholder.jpg"
                 >
-                  <source src="/welkom.MP4" type="video/mp4" />
+                  <source src="/welkom-v2.mp4" type="video/mp4" />
                   Je browser ondersteunt geen video afspelen.
                 </video>
               </div>
