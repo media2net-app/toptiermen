@@ -100,11 +100,11 @@ export default function MijnMissies() {
 
   return (
     <ClientLayout>
-      <div className="p-6 md:p-12">
+      <div className="p-4 sm:p-6 md:p-12">
         {/* Confetti Animation */}
         {showConfetti && (
           <div className="fixed inset-0 pointer-events-none z-50">
-            {Array.from({ length: 100 }).map((_, i) => (
+            {Array.from({ length: 50 }).map((_, i) => (
               <div
                 key={i}
                 className="absolute animate-bounce"
@@ -113,6 +113,7 @@ export default function MijnMissies() {
                   top: `${Math.random() * 100}%`,
                   animationDelay: `${Math.random() * 3}s`,
                   animationDuration: `${2 + Math.random() * 3}s`,
+                  fontSize: `${Math.max(16, Math.min(24, window.innerWidth / 20))}px`,
                 }}
               >
                 {['🎉', '🏆', '⭐', '🎊', '💎', '🔓'][Math.floor(Math.random() * 6)]}
@@ -121,22 +122,22 @@ export default function MijnMissies() {
           </div>
         )}
 
-        <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">Academy</h1>
-        <p className="text-[#8BAE5A] text-lg mb-8">Overzicht van alle modules en jouw voortgang</p>
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">Academy</h1>
+        <p className="text-[#8BAE5A] text-base sm:text-lg mb-6 sm:mb-8">Overzicht van alle modules en jouw voortgang</p>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
           {moduleStates.map((mod, i) =>
             mod.unlocked ? (
               <Link
                 key={mod.title}
                 href={mod.href || '#'}
-                className={`bg-[#181F17]/90 rounded-2xl p-6 shadow-xl border border-[#8BAE5A]/40 flex flex-col gap-2 cursor-pointer transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] relative ${
+                className={`bg-[#181F17]/90 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-xl border border-[#3A4D23] hover:border-[#8BAE5A]/40 flex flex-col gap-2 cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] relative ${
                   unlockAnimation && i === 1 ? 'animate-pulse border-[#FFD700] shadow-[#FFD700]/50' : ''
-                }`}
+                } active:scale-[0.98] touch-manipulation`}
               >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="flex items-center gap-2 text-xl font-semibold text-[#8BAE5A]">
-                    <span className={`w-8 h-8 rounded-full border flex items-center justify-center font-bold text-lg mr-2 ${
+                <div className="flex items-center justify-between mb-1 sm:mb-2">
+                  <span className="flex items-center gap-1 sm:gap-2 text-lg sm:text-xl font-semibold text-[#8BAE5A]">
+                    <span className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full border flex items-center justify-center font-bold text-base sm:text-lg mr-2 ${
                       mod.completed 
                         ? 'bg-[#8BAE5A] text-[#181F17] border-[#8BAE5A]' 
                         : 'bg-[#232D1A] border-[#8BAE5A]'
@@ -145,26 +146,26 @@ export default function MijnMissies() {
                     </span>
                     {mod.title}
                   </span>
-                  <span className="text-[#8BAE5A] font-mono text-sm">{animated[i]}%</span>
+                  <span className="text-[#8BAE5A] font-mono text-xs sm:text-sm">{animated[i]}%</span>
                 </div>
-                <p className="text-[#A6C97B] mb-2 text-sm">{mod.description}</p>
-                <div className="w-full h-2 bg-[#8BAE5A]/20 rounded-full">
-                  <div className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#3A4D23] rounded-full transition-all duration-500" style={{ width: `${animated[i]}%` }}></div>
+                <p className="text-[#A6C97B] mb-1 sm:mb-2 text-xs sm:text-sm line-clamp-2">{mod.description}</p>
+                <div className="w-full h-1.5 sm:h-2 bg-[#8BAE5A]/20 rounded-full">
+                  <div className="h-1.5 sm:h-2 bg-gradient-to-r from-[#8BAE5A] to-[#3A4D23] rounded-full transition-all duration-500" style={{ width: `${animated[i]}%` }}></div>
                 </div>
                 {mod.completed && (
-                  <div className="absolute top-2 right-2 text-[#8BAE5A] text-2xl">🏆</div>
+                  <div className="absolute top-2 right-2 text-xl sm:text-2xl">🏆</div>
                 )}
               </Link>
             ) : (
-              <div key={mod.title} className="bg-[#181F17]/90 rounded-2xl p-6 shadow-xl border border-[#8BAE5A]/40 flex flex-col gap-2 relative opacity-60 select-none">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="w-8 h-8 rounded-full bg-[#232D1A] border border-[#8BAE5A] flex items-center justify-center font-bold text-lg mr-2">{i+1}</span>
-                  <span className="text-xl font-semibold text-[#8BAE5A]">{mod.title}</span>
+              <div key={mod.title} className="bg-[#181F17]/90 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-xl border border-[#3A4D23] flex flex-col gap-2 relative opacity-60 select-none">
+                <div className="flex items-center gap-1 sm:gap-2 mb-1 sm:mb-2">
+                  <span className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-[#232D1A] border border-[#8BAE5A] flex items-center justify-center font-bold text-base sm:text-lg mr-2">{i+1}</span>
+                  <span className="text-lg sm:text-xl font-semibold text-[#8BAE5A]">{mod.title}</span>
                 </div>
-                <p className="text-[#A6C97B] mb-2 text-sm">{mod.description}</p>
-                <div className="absolute inset-0 bg-black/60 rounded-2xl flex flex-col items-center justify-center z-10">
-                  <LockClosedIcon className="w-10 h-10 text-[#8BAE5A] mb-2" />
-                  <span className="text-[#8BAE5A] font-semibold text-sm">Ontgrendel na afronden vorige module</span>
+                <p className="text-[#A6C97B] mb-1 sm:mb-2 text-xs sm:text-sm line-clamp-2">{mod.description}</p>
+                <div className="absolute inset-0 bg-black/60 rounded-xl sm:rounded-2xl flex flex-col items-center justify-center z-10 backdrop-blur-sm">
+                  <LockClosedIcon className="w-8 h-8 sm:w-10 sm:h-10 text-[#8BAE5A] mb-2" />
+                  <span className="text-[#8BAE5A] font-semibold text-xs sm:text-sm text-center px-4">Ontgrendel na afronden vorige module</span>
                 </div>
               </div>
             )
