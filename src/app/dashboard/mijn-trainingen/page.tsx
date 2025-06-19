@@ -25,6 +25,14 @@ const mockTrainingData = {
           { set: 2, weight: 40, reps: 9 },
           { set: 3, weight: 40, reps: 8 }
         ]
+      },
+      {
+        name: 'Dips',
+        sets: [
+          { set: 1, weight: 0, reps: 12 },
+          { set: 2, weight: 0, reps: 10 },
+          { set: 3, weight: 0, reps: 8 }
+        ]
       }
     ],
     totalVolume: 3240,
@@ -49,6 +57,14 @@ const mockTrainingData = {
           { set: 2, weight: 50, reps: 12 },
           { set: 3, weight: 50, reps: 10 }
         ]
+      },
+      {
+        name: 'Pull-ups',
+        sets: [
+          { set: 1, weight: 0, reps: 8 },
+          { set: 2, weight: 0, reps: 6 },
+          { set: 3, weight: 0, reps: 5 }
+        ]
       }
     ],
     totalVolume: 4200,
@@ -65,10 +81,186 @@ const mockTrainingData = {
           { set: 2, weight: 80, reps: 8 },
           { set: 3, weight: 80, reps: 7 }
         ]
+      },
+      {
+        name: 'Romanian Deadlift',
+        sets: [
+          { set: 1, weight: 70, reps: 10 },
+          { set: 2, weight: 70, reps: 10 },
+          { set: 3, weight: 70, reps: 8 }
+        ]
+      },
+      {
+        name: 'Leg Press',
+        sets: [
+          { set: 1, weight: 120, reps: 12 },
+          { set: 2, weight: 120, reps: 12 },
+          { set: 3, weight: 120, reps: 10 }
+        ]
       }
     ],
-    totalVolume: 1840,
+    totalVolume: 5840,
+    duration: '55 min'
+  },
+  '2024-01-22': {
+    id: 4,
+    name: 'Upper Body - Strength Focus',
+    exercises: [
+      {
+        name: 'Bench Press',
+        sets: [
+          { set: 1, weight: 65, reps: 6 },
+          { set: 2, weight: 65, reps: 6 },
+          { set: 3, weight: 65, reps: 5 }
+        ]
+      },
+      {
+        name: 'Military Press',
+        sets: [
+          { set: 1, weight: 45, reps: 8 },
+          { set: 2, weight: 45, reps: 7 },
+          { set: 3, weight: 45, reps: 6 }
+        ]
+      },
+      {
+        name: 'Incline Dumbbell Press',
+        sets: [
+          { set: 1, weight: 25, reps: 10 },
+          { set: 2, weight: 25, reps: 9 },
+          { set: 3, weight: 25, reps: 8 }
+        ]
+      }
+    ],
+    totalVolume: 3780,
+    duration: '50 min'
+  },
+  '2024-01-24': {
+    id: 5,
+    name: 'Back & Biceps',
+    exercises: [
+      {
+        name: 'Deadlift',
+        sets: [
+          { set: 1, weight: 105, reps: 5 },
+          { set: 2, weight: 105, reps: 5 },
+          { set: 3, weight: 105, reps: 4 }
+        ]
+      },
+      {
+        name: 'Barbell Curls',
+        sets: [
+          { set: 1, weight: 30, reps: 12 },
+          { set: 2, weight: 30, reps: 10 },
+          { set: 3, weight: 30, reps: 8 }
+        ]
+      },
+      {
+        name: 'Lat Pulldowns',
+        sets: [
+          { set: 1, weight: 60, reps: 12 },
+          { set: 2, weight: 60, reps: 10 },
+          { set: 3, weight: 60, reps: 8 }
+        ]
+      }
+    ],
+    totalVolume: 4320,
+    duration: '45 min'
+  },
+  '2024-01-26': {
+    id: 6,
+    name: 'Leg Day - Power Focus',
+    exercises: [
+      {
+        name: 'Squat',
+        sets: [
+          { set: 1, weight: 85, reps: 6 },
+          { set: 2, weight: 85, reps: 6 },
+          { set: 3, weight: 85, reps: 5 }
+        ]
+      },
+      {
+        name: 'Power Cleans',
+        sets: [
+          { set: 1, weight: 50, reps: 5 },
+          { set: 2, weight: 50, reps: 5 },
+          { set: 3, weight: 50, reps: 4 }
+        ]
+      },
+      {
+        name: 'Box Jumps',
+        sets: [
+          { set: 1, weight: 0, reps: 10 },
+          { set: 2, weight: 0, reps: 10 },
+          { set: 3, weight: 0, reps: 8 }
+        ]
+      }
+    ],
+    totalVolume: 3150,
+    duration: '40 min'
+  },
+  '2024-01-29': {
+    id: 7,
+    name: 'Full Body - Circuit',
+    exercises: [
+      {
+        name: 'Burpees',
+        sets: [
+          { set: 1, weight: 0, reps: 15 },
+          { set: 2, weight: 0, reps: 12 },
+          { set: 3, weight: 0, reps: 10 }
+        ]
+      },
+      {
+        name: 'Kettlebell Swings',
+        sets: [
+          { set: 1, weight: 20, reps: 20 },
+          { set: 2, weight: 20, reps: 18 },
+          { set: 3, weight: 20, reps: 15 }
+        ]
+      },
+      {
+        name: 'Mountain Climbers',
+        sets: [
+          { set: 1, weight: 0, reps: 30 },
+          { set: 2, weight: 0, reps: 25 },
+          { set: 3, weight: 0, reps: 20 }
+        ]
+      }
+    ],
+    totalVolume: 1200,
     duration: '35 min'
+  },
+  '2024-01-31': {
+    id: 8,
+    name: 'Strength Training - Max Effort',
+    exercises: [
+      {
+        name: 'Bench Press',
+        sets: [
+          { set: 1, weight: 70, reps: 4 },
+          { set: 2, weight: 70, reps: 3 },
+          { set: 3, weight: 70, reps: 2 }
+        ]
+      },
+      {
+        name: 'Deadlift',
+        sets: [
+          { set: 1, weight: 110, reps: 3 },
+          { set: 2, weight: 110, reps: 2 },
+          { set: 3, weight: 110, reps: 1 }
+        ]
+      },
+      {
+        name: 'Squat',
+        sets: [
+          { set: 1, weight: 90, reps: 4 },
+          { set: 2, weight: 90, reps: 3 },
+          { set: 3, weight: 90, reps: 2 }
+        ]
+      }
+    ],
+    totalVolume: 3150,
+    duration: '60 min'
   }
 };
 
@@ -78,16 +270,39 @@ const progressData = {
     { date: '2024-01-01', weight: 55, reps: 8, volume: 440 },
     { date: '2024-01-08', weight: 57.5, reps: 8, volume: 460 },
     { date: '2024-01-15', weight: 60, reps: 8, volume: 480 },
+    { date: '2024-01-22', weight: 65, reps: 6, volume: 390 },
+    { date: '2024-01-31', weight: 70, reps: 4, volume: 280 },
   ],
   'Deadlift': [
     { date: '2024-01-01', weight: 90, reps: 5, volume: 450 },
     { date: '2024-01-08', weight: 95, reps: 5, volume: 475 },
     { date: '2024-01-17', weight: 100, reps: 5, volume: 500 },
+    { date: '2024-01-24', weight: 105, reps: 5, volume: 525 },
+    { date: '2024-01-31', weight: 110, reps: 3, volume: 330 },
   ],
   'Squat': [
     { date: '2024-01-01', weight: 70, reps: 8, volume: 560 },
     { date: '2024-01-08', weight: 75, reps: 8, volume: 600 },
     { date: '2024-01-19', weight: 80, reps: 8, volume: 640 },
+    { date: '2024-01-26', weight: 85, reps: 6, volume: 510 },
+    { date: '2024-01-31', weight: 90, reps: 4, volume: 360 },
+  ],
+  'Overhead Press': [
+    { date: '2024-01-01', weight: 35, reps: 10, volume: 350 },
+    { date: '2024-01-08', weight: 37.5, reps: 10, volume: 375 },
+    { date: '2024-01-15', weight: 40, reps: 10, volume: 400 },
+    { date: '2024-01-22', weight: 45, reps: 8, volume: 360 },
+  ],
+  'Barbell Rows': [
+    { date: '2024-01-01', weight: 45, reps: 12, volume: 540 },
+    { date: '2024-01-08', weight: 47.5, reps: 12, volume: 570 },
+    { date: '2024-01-17', weight: 50, reps: 12, volume: 600 },
+    { date: '2024-01-24', weight: 50, reps: 12, volume: 600 },
+  ],
+  'Romanian Deadlift': [
+    { date: '2024-01-01', weight: 60, reps: 10, volume: 600 },
+    { date: '2024-01-08', weight: 65, reps: 10, volume: 650 },
+    { date: '2024-01-19', weight: 70, reps: 10, volume: 700 },
   ]
 };
 
@@ -106,12 +321,27 @@ export default function MijnTrainingen() {
     let totalTrainings = 0;
     let totalVolume = 0;
     let mostImprovedExercise = 'Geen data';
+    let maxImprovement = 0;
     
     Object.entries(mockTrainingData).forEach(([date, training]) => {
       const trainingDate = new Date(date);
       if (trainingDate >= monthStart && trainingDate <= monthEnd) {
         totalTrainings++;
         totalVolume += training.totalVolume;
+      }
+    });
+    
+    // Bereken meest gevorderde oefening
+    Object.entries(progressData).forEach(([exercise, data]) => {
+      if (data.length >= 2) {
+        const firstEntry = data[0];
+        const lastEntry = data[data.length - 1];
+        const improvement = lastEntry.weight - firstEntry.weight;
+        
+        if (improvement > maxImprovement) {
+          maxImprovement = improvement;
+          mostImprovedExercise = exercise;
+        }
       }
     });
     
