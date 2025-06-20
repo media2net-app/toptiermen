@@ -1,3 +1,5 @@
+'use client';
+
 import { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
@@ -23,71 +25,70 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check active sessions and sets the user
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    // For now, we'll skip the actual Supabase session check
+    // and just set loading to false
+    setLoading(false);
+    
+    // TODO: Uncomment when Supabase is properly configured
+    // supabase.auth.getSession().then(({ data: { session } }) => {
+    //   setUser(session?.user ?? null);
+    //   setLoading(false);
+    // });
 
-    // Listen for changes on auth state (signed in, signed out, etc.)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    // const {
+    //   data: { subscription },
+    // } = supabase.auth.onAuthStateChange((_event, session) => {
+    //   setUser(session?.user ?? null);
+    // });
 
-    return () => subscription.unsubscribe();
+    // return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, fullName: string) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
-        },
-      },
-    });
-
-    if (error) throw error;
-
-    // Create user profile in users table
-    const { error: profileError } = await supabase
-      .from('users')
-      .insert([
-        {
-          id: (await supabase.auth.getUser()).data.user?.id,
-          email,
-          full_name: fullName,
-          rank: 'Beginner',
-          points: 0,
-          missions_completed: 0,
-        },
-      ]);
-
-    if (profileError) throw profileError;
+  const signIn = async (email: string, password: string) => {
+    try {
+      // TODO: Implement when Supabase is configured
+      console.log('Sign in:', email, password);
+      // const { error } = await supabase.auth.signInWithPassword({
+      //   email,
+      //   password,
+      // });
+      // if (error) throw error;
+    } catch (error) {
+      console.error('Error signing in:', error);
+      throw error;
+    }
   };
 
-  const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) throw error;
-
-    // Update last login
-    const { error: updateError } = await supabase
-      .from('users')
-      .update({ last_login: new Date().toISOString() })
-      .eq('id', (await supabase.auth.getUser()).data.user?.id);
-
-    if (updateError) throw updateError;
+  const signUp = async (email: string, password: string, fullName: string) => {
+    try {
+      // TODO: Implement when Supabase is configured
+      console.log('Sign up:', email, password, fullName);
+      // const { error } = await supabase.auth.signUp({
+      //   email,
+      //   password,
+      //   options: {
+      //     data: {
+      //       full_name: fullName,
+      //     },
+      //   },
+      // });
+      // if (error) throw error;
+    } catch (error) {
+      console.error('Error signing up:', error);
+      throw error;
+    }
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+    try {
+      // TODO: Implement when Supabase is configured
+      console.log('Sign out');
+      // const { error } = await supabase.auth.signOut();
+      // if (error) throw error;
+    } catch (error) {
+      console.error('Error signing out:', error);
+      throw error;
+    }
   };
 
   return (
@@ -98,5 +99,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 };
 
 export const useAuth = () => {
-  return useContext(AuthContext);
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 }; 

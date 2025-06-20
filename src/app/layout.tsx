@@ -2,7 +2,7 @@ import './globals.css';
 import { Inter, Figtree } from 'next/font/google';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { AuthProvider } from '@/contexts/AuthContext';
+import Providers from './components/Providers';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -29,9 +29,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.className} ${figtree.className}`}>
       <body>
-        <AuthProvider>
+        <Providers>
           {children}
-        </AuthProvider>
+        </Providers>
         <ToastContainer
           position="top-right"
           autoClose={3000}
