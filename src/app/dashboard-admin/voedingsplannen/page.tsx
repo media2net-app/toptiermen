@@ -398,6 +398,24 @@ const mockNutritionPlans: NutritionPlan[] = [
 
 const categories = ['Vlees', 'Vis', 'Groente', 'Granen', 'Vetten', 'Fruit', 'Zuivel', 'Noten & Zaden'];
 
+// Helper function to get image from localStorage
+const getImageFromLocalStorage = (imageId: string): string | null => {
+  if (!imageId) return null;
+  
+  try {
+    // If it's a localStorage ID, get the actual image
+    if (imageId.startsWith('recipe-image-')) {
+      return localStorage.getItem(imageId);
+    }
+    
+    // If it's already a base64 string or URL, return it
+    return imageId;
+  } catch (error) {
+    console.error('Error getting image from localStorage:', error);
+    return null;
+  }
+};
+
 export default function AdminVoedingsplannenPage() {
   const [activeTab, setActiveTab] = useState<'recipes' | 'plans' | 'ingredients'>('recipes');
   const [ingredients, setIngredients] = useState<Ingredient[]>(mockIngredients);
@@ -606,42 +624,45 @@ export default function AdminVoedingsplannenPage() {
 
         {activeTab === 'recipes' && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredRecipes.map((recipe) => (
-              <div key={recipe.id} className="bg-[#181F17] rounded-lg p-4 border border-[#3A4D23]/40 hover:border-[#8BAE5A]/40 transition-colors">
-                <div className="aspect-video bg-[#3A4D23]/40 rounded-lg mb-4 flex items-center justify-center overflow-hidden">
-                  {recipe.image && recipe.image !== '/images/recipes/placeholder.jpg' ? (
-                    <img
-                      src={recipe.image}
-                      alt={recipe.name}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.style.display = 'none';
-                        target.nextElementSibling?.classList.remove('hidden');
-                      }}
-                    />
-                  ) : null}
-                  <div className={`text-center ${recipe.image && recipe.image !== '/images/recipes/placeholder.jpg' ? 'hidden' : ''}`}>
-                    <span className="text-[#8BAE5A]/60">📷 Foto</span>
+            {filteredRecipes.map((recipe) => {
+              const displayImage = getImageFromLocalStorage(recipe.image);
+              return (
+                <div key={recipe.id} className="bg-[#181F17] rounded-lg p-4 border border-[#3A4D23]/40 hover:border-[#8BAE5A]/40 transition-colors">
+                  <div className="aspect-video bg-[#3A4D23]/40 rounded-lg mb-4 flex items-center justify-center overflow-hidden">
+                    {displayImage ? (
+                      <img
+                        src={displayImage}
+                        alt={recipe.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                          target.nextElementSibling?.classList.remove('hidden');
+                        }}
+                      />
+                    ) : null}
+                    <div className={`text-center ${displayImage ? 'hidden' : ''}`}>
+                      <span className="text-[#8BAE5A]/60">📷 Foto</span>
+                    </div>
+                  </div>
+                  <h3 className="text-white font-semibold mb-2">{recipe.name}</h3>
+                  <p className="text-[#8BAE5A] text-sm mb-3">{recipe.mealType}</p>
+                  <div className="flex justify-between text-xs text-white/80 mb-4">
+                    <span>🕒 {recipe.prepTime} min</span>
+                    <span>👥 {recipe.servings} portie(s)</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <button className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-[#8BAE5A] text-black rounded-lg text-sm font-medium hover:bg-[#A6C97B] transition-colors" onClick={() => handleEditRecipe(recipe)}>
+                      <PencilIcon className="w-4 h-4" />
+                      Bewerk
+                    </button>
+                    <button className="px-3 py-2 text-red-400 hover:text-red-300 transition-colors">
+                      <TrashIcon className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
-                <h3 className="text-white font-semibold mb-2">{recipe.name}</h3>
-                <p className="text-[#8BAE5A] text-sm mb-3">{recipe.mealType}</p>
-                <div className="flex justify-between text-xs text-white/80 mb-4">
-                  <span>🕒 {recipe.prepTime} min</span>
-                  <span>👥 {recipe.servings} portie(s)</span>
-                </div>
-                <div className="flex gap-2">
-                  <button className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-[#8BAE5A] text-black rounded-lg text-sm font-medium hover:bg-[#A6C97B] transition-colors" onClick={() => handleEditRecipe(recipe)}>
-                    <PencilIcon className="w-4 h-4" />
-                    Bewerk
-                  </button>
-                  <button className="px-3 py-2 text-red-400 hover:text-red-300 transition-colors">
-                    <TrashIcon className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
