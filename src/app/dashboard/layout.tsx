@@ -1,7 +1,7 @@
 'use client';
 import { HomeIcon, FireIcon, AcademicCapIcon, ChartBarIcon, CurrencyDollarIcon, UsersIcon, BookOpenIcon, StarIcon, UserCircleIcon, ChatBubbleLeftRightIcon, ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import MobileNav from '../components/MobileNav';
@@ -42,16 +42,26 @@ const menu = [
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
   const [openBrotherhood, setOpenBrotherhood] = useState(false);
   const [openDashboard, setOpenDashboard] = useState(false);
   const safePathname = pathname || '';
+
+  const handleLogout = () => {
+    // TODO: Implement actual logout logic when Supabase is configured
+    console.log('Logging out...');
+    router.push('/login');
+  };
+
   return (
     <div className="flex min-h-screen">
       {/* Sidebar */}
       <aside className={`hidden md:flex flex-col ${collapsed ? 'w-20' : 'w-64'} bg-[#181F17] border-r border-[#3A4D23] shadow-2xl z-20 py-8 px-4 font-figtree transition-all duration-300 fixed h-full`}>
         <div className={`mb-6 flex items-center justify-center ${collapsed ? 'px-0' : ''}`}>
-          <img src="/logo.svg" alt="Top Tier Men logo" className={`${collapsed ? 'w-10' : 'w-full max-w-[160px]'} h-auto transition-all duration-300`} />
+          <Link href="/dashboard" className="cursor-pointer hover:opacity-80 transition-opacity">
+            <img src="/logo.svg" alt="Top Tier Men logo" className={`${collapsed ? 'w-10' : 'w-full max-w-[160px]'} h-auto transition-all duration-300`} />
+          </Link>
         </div>
         <div className="flex justify-center mb-8">
           <button
@@ -177,7 +187,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             return null;
           })}
         </nav>
-        <button className={`mt-10 w-full py-2 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#3A4D23] text-black font-bold border border-[#8BAE5A] hover:from-[#A6C97B] hover:to-[#8BAE5A] transition font-figtree ${collapsed ? 'text-xs px-0' : ''}`}>{!collapsed ? 'Log Out' : <span className="w-6 h-6"><ChevronLeftIcon className="w-5 h-5 mx-auto text-black" /></span>}</button>
+        <button 
+          onClick={handleLogout}
+          className={`mt-10 w-full py-2 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#3A4D23] text-black font-bold border border-[#8BAE5A] hover:from-[#A6C97B] hover:to-[#8BAE5A] transition font-figtree ${collapsed ? 'text-xs px-0' : ''} cursor-pointer`}
+        >
+          {!collapsed ? 'Log Out' : <span className="w-6 h-6"><ChevronLeftIcon className="w-5 h-5 mx-auto text-black" /></span>}
+        </button>
       </aside>
       {/* Main content section */}
       <section className="flex-1 p-4 sm:p-6 md:p-12 bg-[#232D1A] font-figtree md:ml-[80px] lg:ml-64 min-h-screen pb-24 md:pb-12">
