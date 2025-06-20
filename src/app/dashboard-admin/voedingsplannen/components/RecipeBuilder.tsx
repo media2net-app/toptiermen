@@ -369,19 +369,19 @@ export default function RecipeBuilder({ isOpen, onClose, recipe, ingredients, on
                   <h5 className="text-white font-semibold mb-2">Per Portie ({formData.servings} porties)</h5>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="text-center">
-                      <div className="text-lg font-bold text-[#8BAE5A]">{Math.round(formData.totalCalories / formData.servings)}</div>
+                      <div className="text-lg font-bold text-[#8BAE5A]">{Math.round((formData.totalCalories || 0) / (formData.servings || 1))}</div>
                       <div className="text-sm text-white/60">Calorieën</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-lg font-bold text-[#8BAE5A]">{Math.round((formData.totalProtein / formData.servings) * 10) / 10}g</div>
+                      <div className="text-lg font-bold text-[#8BAE5A]">{Math.round(((formData.totalProtein || 0) / (formData.servings || 1)) * 10) / 10}g</div>
                       <div className="text-sm text-white/60">Eiwitten</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-lg font-bold text-[#8BAE5A]">{Math.round((formData.totalCarbs / formData.servings) * 10) / 10}g</div>
+                      <div className="text-lg font-bold text-[#8BAE5A]">{Math.round(((formData.totalCarbs || 0) / (formData.servings || 1)) * 10) / 10}g</div>
                       <div className="text-sm text-white/60">Koolhydraten</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-lg font-bold text-[#8BAE5A]">{Math.round((formData.totalFat / formData.servings) * 10) / 10}g</div>
+                      <div className="text-lg font-bold text-[#8BAE5A]">{Math.round(((formData.totalFat || 0) / (formData.servings || 1)) * 10) / 10}g</div>
                       <div className="text-sm text-white/60">Vetten</div>
                     </div>
                   </div>
