@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { XMarkIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
+import ImageUpload from './ImageUpload';
 
 interface Ingredient {
   id: string;
@@ -290,6 +291,12 @@ export default function RecipeBuilder({ isOpen, onClose, recipe, ingredients, on
               placeholder="Beschrijf het recept en de bereidingswijze..."
             />
           </div>
+
+          {/* Image Upload */}
+          <ImageUpload
+            currentImage={formData.image}
+            onImageChange={(imageUrl) => setFormData({ ...formData, image: imageUrl })}
+          />
 
           {/* Ingredients Section */}
           <div>
