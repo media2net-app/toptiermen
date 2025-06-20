@@ -13,7 +13,12 @@ import {
   CalendarIcon, 
   Cog6ToothIcon, 
   MegaphoneIcon,
-  ChevronDownIcon
+  ChevronDownIcon,
+  ChartBarIcon,
+  CurrencyDollarIcon,
+  UsersIcon,
+  ClockIcon,
+  WrenchScrewdriverIcon
 } from '@heroicons/react/24/outline';
 
 const adminMenu = [
@@ -21,6 +26,19 @@ const adminMenu = [
     label: 'Dashboard', 
     icon: HomeIcon, 
     href: '/dashboard-admin' 
+  },
+  { 
+    label: 'ANALYTICS', 
+    type: 'section',
+    items: [
+      { label: 'Community Health', icon: ChartBarIcon, href: '/dashboard-admin?tab=overview' },
+      { label: 'Content Performance', icon: AcademicCapIcon, href: '/dashboard-admin?tab=content' },
+      { label: 'Actiegerichte Inzichten', icon: StarIcon, href: '/dashboard-admin?tab=actions' },
+      { label: 'Financiële Metrics', icon: CurrencyDollarIcon, href: '/dashboard-admin?tab=financial' },
+      { label: 'Gebruikers Segmentatie', icon: UsersIcon, href: '/dashboard-admin?tab=users' },
+      { label: 'Real-time Activiteit', icon: ClockIcon, href: '/dashboard-admin?tab=realtime' },
+      { label: 'Technische Performance', icon: WrenchScrewdriverIcon, href: '/dashboard-admin?tab=technical' }
+    ]
   },
   { 
     label: 'LEDEN', 
@@ -61,7 +79,7 @@ const adminMenu = [
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['LEDEN', 'CONTENT', 'COMMUNITY', 'PLATFORM']));
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['ANALYTICS', 'LEDEN', 'CONTENT', 'COMMUNITY', 'PLATFORM']));
 
   const toggleSection = (sectionLabel: string) => {
     setExpandedSections(prev => {
