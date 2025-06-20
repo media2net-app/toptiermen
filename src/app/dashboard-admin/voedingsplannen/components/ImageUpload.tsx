@@ -15,7 +15,10 @@ export default function ImageUpload({ currentImage, onImageChange, className = '
 
   useEffect(() => {
     if (currentImage) {
-      setPreviewUrl(currentImage);
+      const displayImage = getDisplayImage(currentImage);
+      setPreviewUrl(displayImage);
+    } else {
+      setPreviewUrl(null);
     }
   }, [currentImage]);
 
@@ -42,6 +45,23 @@ export default function ImageUpload({ currentImage, onImageChange, className = '
       console.error('Error getting image from localStorage:', error);
       return null;
     }
+  };
+
+  const getDisplayImage = (imageId: string): string | null => {
+    if (!imageId) return null;
+    
+    // If it's a localStorage ID, get the actual image
+    if (imageId.startsWith('recipe-image-')) {
+      return getImageFromLocalStorage(imageId);
+    }
+    
+    // If it's already a base64 string, return it
+    if (imageId.startsWith('data:image/')) {
+      return imageId;
+    }
+    
+    // If it's a URL, return it
+    return imageId;
   };
 
   const handleFileSelect = (file: File) => {
@@ -102,25 +122,6 @@ export default function ImageUpload({ currentImage, onImageChange, className = '
     }
   };
 
-  const getDisplayImage = () => {
-    if (!currentImage) return null;
-    
-    // If it's a localStorage ID, get the actual image
-    if (currentImage.startsWith('recipe-image-')) {
-      return getImageFromLocalStorage(currentImage) || null;
-    }
-    
-    // If it's already a base64 string, return it
-    if (currentImage.startsWith('data:image/')) {
-      return currentImage;
-    }
-    
-    // If it's a URL, return it
-    return currentImage;
-  };
-
-  const displayImage = getDisplayImage();
-
   return (
     <div className={`space-y-4 ${className}`}>
       <label className="block text-[#8BAE5A] text-sm font-medium mb-2">
@@ -137,10 +138,10 @@ export default function ImageUpload({ currentImage, onImageChange, className = '
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
-        {displayImage ? (
+        {previewUrl ? (
           <div className="relative">
             <img
-              src={displayImage}
+              src={previewUrl}
               alt="Recipe preview"
               className="w-full h-48 object-cover rounded-lg"
               onError={(e) => {
