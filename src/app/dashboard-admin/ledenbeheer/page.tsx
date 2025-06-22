@@ -289,7 +289,7 @@ export default function Ledenbeheer() {
   const [activeTab, setActiveTab] = useState<'profile' | 'account' | 'activity'>('profile');
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(20);
+  const [itemsPerPage] = useState(50);
   const [formData, setFormData] = useState({
     name: '',
     username: '',
