@@ -779,20 +779,58 @@ export default function MijnTrainingen() {
                   </div>
                 </div>
 
-                <div className="space-y-4">
-                  {mockTrainingData[selectedDate as keyof typeof mockTrainingData].exercises.map((exercise, index) => (
-                    <div key={index} className="bg-[#181F17] rounded-xl p-4">
-                      <h4 className="text-lg font-bold text-white mb-3">{exercise.name}</h4>
-                      <div className="space-y-2">
-                        {exercise.sets.map((set, setIndex) => (
-                          <div key={setIndex} className="flex justify-between text-sm">
-                            <span className="text-[#8BAE5A]">Set {set.set}:</span>
-                            <span className="text-white">{set.weight} kg x {set.reps} herhalingen</span>
-                          </div>
-                        ))}
+                <div className="mt-8">
+                  <h3 className="text-xl font-bold text-white mb-4">Training Log</h3>
+
+                  {/* Desktop Table View */}
+                  <div className="hidden md:block overflow-x-auto rounded-lg border border-[#3A4D23]">
+                    <table className="w-full text-left">
+                      <thead className="bg-[#181F17] text-[#8BAE5A]">
+                        <tr>
+                          <th className="p-4 font-semibold">Oefening</th>
+                          <th className="p-4 font-semibold text-center">Set</th>
+                          <th className="p-4 font-semibold text-center">Gewicht (kg)</th>
+                          <th className="p-4 font-semibold text-center">Herhalingen</th>
+                          <th className="p-4 font-semibold text-center">Volume</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#3A4D23]">
+                        {mockTrainingData[selectedDate as keyof typeof mockTrainingData].exercises.flatMap((exercise, exIndex) => 
+                          exercise.sets.map((set, setIndex) => (
+                            <tr key={`${exIndex}-${setIndex}`}>
+                              {setIndex === 0 && (
+                                <td className="p-4 text-white font-medium" rowSpan={exercise.sets.length}>
+                                  {exercise.name}
+                                </td>
+                              )}
+                              <td className="p-4 text-center text-gray-300">{set.set}</td>
+                              <td className="p-4 text-center text-gray-300">{set.weight}</td>
+                              <td className="p-4 text-center text-gray-300">{set.reps}</td>
+                              <td className="p-4 text-center text-gray-300">{set.weight * set.reps}</td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Mobile Card View */}
+                  <div className="md:hidden space-y-4">
+                    {mockTrainingData[selectedDate as keyof typeof mockTrainingData].exercises.map((exercise, exIndex) => (
+                      <div key={exIndex} className="bg-[#181F17] rounded-lg p-4 border border-[#3A4D23]">
+                        <h4 className="font-bold text-[#8BAE5A] text-lg mb-3">{exercise.name}</h4>
+                        <div className="space-y-2">
+                          {exercise.sets.map((set, setIndex) => (
+                            <div key={setIndex} className="grid grid-cols-3 gap-2 text-sm border-b border-[#3A4D23] pb-2 last:border-b-0">
+                              <div className="font-semibold text-white">Set {set.set}</div>
+                              <div className="text-gray-300">{set.weight} kg x {set.reps} reps</div>
+                              <div className="text-right font-medium text-white">{set.weight * set.reps} kg</div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               </div>
 
