@@ -11,81 +11,154 @@ import {
   NoSymbolIcon,
   UserIcon,
   CalendarIcon,
-  EnvelopeIcon
+  EnvelopeIcon,
+  XMarkIcon,
+  CheckIcon,
+  ExclamationTriangleIcon,
+  ClockIcon,
+  ChatBubbleLeftRightIcon,
+  ShieldCheckIcon,
+  DocumentTextIcon
 } from '@heroicons/react/24/outline';
+import { toast } from 'react-toastify';
 
-// Mock data - in real app this would come from API
+// Enhanced mock data with additional fields
 const mockMembers = [
   {
     id: 1,
     name: 'Mark van der Berg',
+    username: 'mark_vdb',
     email: 'mark@example.com',
     rank: 'Elite',
     joinDate: '2024-01-15',
     status: 'active',
+    forumStatus: 'active',
     avatar: '/profielfoto.png',
     lastActive: '2024-01-20',
     posts: 45,
-    badges: 12
+    badges: 12,
+    bio: 'Passionate about personal development and helping others reach their potential.',
+    mainGoal: 'Become a certified personal trainer and help 100+ people transform their lives.',
+    adminNotes: 'Excellent community member, very helpful in the forum. Consider for "Lid van de Maand".',
+    recentActivity: [
+      { type: 'login', date: '2024-01-20T14:30:00', description: 'Laatste login' },
+      { type: 'post', date: '2024-01-19T11:15:00', description: 'Laatste forumpost' },
+      { type: 'badge', date: '2024-01-18T09:45:00', description: 'Badge ontgrendeld: Koude Krijger' },
+      { type: 'training', date: '2024-01-17T16:20:00', description: 'Training voltooid' },
+      { type: 'goal', date: '2024-01-16T13:10:00', description: 'Nieuw doel ingesteld' }
+    ]
   },
   {
     id: 2,
     name: 'Thomas Jansen',
+    username: 'thomas_j',
     email: 'thomas@example.com',
     rank: 'Warrior',
     joinDate: '2024-01-14',
     status: 'active',
+    forumStatus: 'active',
     avatar: '/profielfoto.png',
     lastActive: '2024-01-19',
     posts: 23,
-    badges: 8
+    badges: 8,
+    bio: 'Focused on building strength and mental resilience.',
+    mainGoal: 'Deadlift 200kg and run a marathon this year.',
+    adminNotes: 'Good progress, active in training discussions.',
+    recentActivity: [
+      { type: 'login', date: '2024-01-19T10:20:00', description: 'Laatste login' },
+      { type: 'post', date: '2024-01-18T15:30:00', description: 'Laatste forumpost' },
+      { type: 'badge', date: '2024-01-17T08:15:00', description: 'Badge ontgrendeld: Consistent Warrior' }
+    ]
   },
   {
     id: 3,
     name: 'Lucas de Vries',
+    username: 'lucas_dv',
     email: 'lucas@example.com',
     rank: 'Rookie',
     joinDate: '2024-01-13',
     status: 'inactive',
+    forumStatus: 'active',
     avatar: '/profielfoto.png',
     lastActive: '2024-01-16',
     posts: 5,
-    badges: 2
+    badges: 2,
+    bio: 'Just starting my fitness journey.',
+    mainGoal: 'Lose 10kg and build basic strength.',
+    adminNotes: 'New member, needs encouragement to stay active.',
+    recentActivity: [
+      { type: 'login', date: '2024-01-16T12:45:00', description: 'Laatste login' },
+      { type: 'post', date: '2024-01-15T14:20:00', description: 'Laatste forumpost' }
+    ]
   },
   {
     id: 4,
     name: 'Daan Bakker',
+    username: 'daan_b',
     email: 'daan@example.com',
     rank: 'Elite',
     joinDate: '2024-01-12',
     status: 'active',
+    forumStatus: 'active',
     avatar: '/profielfoto.png',
     lastActive: '2024-01-20',
     posts: 67,
-    badges: 15
+    badges: 15,
+    bio: 'Experienced fitness coach helping others achieve their goals.',
+    mainGoal: 'Mentor 50 new members to their first fitness milestone.',
+    adminNotes: 'Top contributor, excellent mentor. Consider for Elite+ promotion.',
+    recentActivity: [
+      { type: 'login', date: '2024-01-20T09:15:00', description: 'Laatste login' },
+      { type: 'post', date: '2024-01-19T16:45:00', description: 'Laatste forumpost' },
+      { type: 'badge', date: '2024-01-18T11:30:00', description: 'Badge ontgrendeld: Mentor Master' }
+    ]
   },
   {
     id: 5,
     name: 'Sem Visser',
+    username: 'sem_v',
     email: 'sem@example.com',
     rank: 'Warrior',
     joinDate: '2024-01-11',
     status: 'suspended',
+    forumStatus: 'muted',
     avatar: '/profielfoto.png',
     lastActive: '2024-01-18',
     posts: 34,
-    badges: 9
+    badges: 9,
+    bio: 'Committed to personal growth and community building.',
+    mainGoal: 'Achieve Elite rank and become a community leader.',
+    adminNotes: 'Suspended for inappropriate forum behavior on 2024-01-18. Review in 7 days.',
+    recentActivity: [
+      { type: 'login', date: '2024-01-18T13:20:00', description: 'Laatste login' },
+      { type: 'suspension', date: '2024-01-18T13:20:00', description: 'Account geschorst' }
+    ]
   }
 ];
 
-const ranks = ['Alle Rangen', 'Rookie', 'Warrior', 'Elite', 'Legend'];
-const statuses = ['Alle Statussen', 'active', 'inactive', 'suspended'];
+const ranks = ['Rookie', 'Warrior', 'Elite', 'Legend'];
+const statuses = ['active', 'inactive', 'suspended'];
+const forumStatuses = ['active', 'muted', 'blocked'];
 
 export default function Ledenbeheer() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRank, setSelectedRank] = useState('Alle Rangen');
   const [selectedStatus, setSelectedStatus] = useState('Alle Statussen');
   const [selectedMember, setSelectedMember] = useState<number | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingMember, setEditingMember] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState<'profile' | 'account' | 'activity'>('profile');
+  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    username: '',
+    bio: '',
+    mainGoal: '',
+    rank: '',
+    forumStatus: '',
+    status: '',
+    adminNotes: ''
+  });
 
   const filteredMembers = mockMembers.filter(member => {
     const matchesSearch = member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -121,6 +194,101 @@ export default function Ledenbeheer() {
       case 'Warrior': return 'text-[#8BAE5A]';
       case 'Rookie': return 'text-[#B6C948]';
       default: return 'text-[#B6C948]';
+    }
+  };
+
+  const handleEditMember = (member: any) => {
+    setEditingMember(member);
+    setFormData({
+      name: member.name,
+      username: member.username,
+      bio: member.bio,
+      mainGoal: member.mainGoal,
+      rank: member.rank,
+      forumStatus: member.forumStatus,
+      status: member.status,
+      adminNotes: member.adminNotes
+    });
+    setShowEditModal(true);
+    setSelectedMember(null); // Close dropdown
+  };
+
+  const handleSave = async () => {
+    setIsLoading(true);
+    
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Update the member data
+      const updatedMembers = mockMembers.map(member => 
+        member.id === editingMember.id 
+          ? { ...member, ...formData }
+          : member
+      );
+      
+      // In a real app, you would call your API here
+      // await updateUser(editingMember.id, formData);
+      
+      toast.success(`Profiel van ${formData.name} succesvol bijgewerkt`, {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
+      });
+      
+      setShowEditModal(false);
+      setEditingMember(null);
+    } catch (error) {
+      toast.error('Er is een fout opgetreden bij het opslaan', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handlePasswordReset = async () => {
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      toast.success('Wachtwoord reset e-mail verzonden', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
+      });
+    } catch (error) {
+      toast.error('Er is een fout opgetreden bij het verzenden van de e-mail', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
+      });
+    }
+  };
+
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case 'login': return ClockIcon;
+      case 'post': return ChatBubbleLeftRightIcon;
+      case 'badge': return StarIcon;
+      case 'training': return UserIcon;
+      case 'goal': return CheckIcon;
+      case 'suspension': return ExclamationTriangleIcon;
+      default: return ClockIcon;
     }
   };
 
@@ -162,7 +330,7 @@ export default function Ledenbeheer() {
               onChange={(e) => setSelectedRank(e.target.value)}
               className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] appearance-none"
             >
-              {ranks.map(rank => (
+              {['Alle Rangen', ...ranks].map(rank => (
                 <option key={rank} value={rank}>{rank}</option>
               ))}
             </select>
@@ -176,7 +344,7 @@ export default function Ledenbeheer() {
               onChange={(e) => setSelectedStatus(e.target.value)}
               className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] appearance-none"
             >
-              {statuses.map(status => (
+              {['Alle Statussen', ...statuses].map(status => (
                 <option key={status} value={status}>
                   {status === 'Alle Statussen' ? 'Alle Statussen' : getStatusText(status)}
                 </option>
@@ -274,7 +442,10 @@ export default function Ledenbeheer() {
                                 <EyeIcon className="w-4 h-4" />
                                 Bekijk Profiel
                               </button>
-                              <button className="w-full px-4 py-2 text-left text-[#B6C948] hover:bg-[#232D1A] flex items-center gap-2">
+                              <button 
+                                onClick={() => handleEditMember(member)}
+                                className="w-full px-4 py-2 text-left text-[#B6C948] hover:bg-[#232D1A] flex items-center gap-2"
+                              >
                                 <PencilIcon className="w-4 h-4" />
                                 Bewerk Gegevens
                               </button>
@@ -318,6 +489,267 @@ export default function Ledenbeheer() {
           </button>
         </div>
       </div>
+
+      {/* Edit User Modal */}
+      {showEditModal && editingMember && (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#232D1A] border border-[#3A4D23] rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="p-6 border-b border-[#3A4D23]">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-bold text-[#8BAE5A]">
+                  Bewerk Profiel: {editingMember.name}
+                </h2>
+                <button
+                  onClick={() => setShowEditModal(false)}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <XMarkIcon className="w-6 h-6" />
+                </button>
+              </div>
+            </div>
+
+            {/* Tab Navigation */}
+            <div className="px-6 pt-4">
+              <div className="flex space-x-1 bg-[#181F17] rounded-lg p-1">
+                <button
+                  onClick={() => setActiveTab('profile')}
+                  className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                    activeTab === 'profile'
+                      ? 'bg-[#8BAE5A] text-[#0A0F0A]'
+                      : 'text-gray-400 hover:text-white'
+                  }`}
+                >
+                  Profielgegevens
+                </button>
+                <button
+                  onClick={() => setActiveTab('account')}
+                  className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                    activeTab === 'account'
+                      ? 'bg-[#8BAE5A] text-[#0A0F0A]'
+                      : 'text-gray-400 hover:text-white'
+                  }`}
+                >
+                  Account & Rechten
+                </button>
+                <button
+                  onClick={() => setActiveTab('activity')}
+                  className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                    activeTab === 'activity'
+                      ? 'bg-[#8BAE5A] text-[#0A0F0A]'
+                      : 'text-gray-400 hover:text-white'
+                  }`}
+                >
+                  Activiteit & Notities
+                </button>
+              </div>
+            </div>
+
+            {/* Tab Content */}
+            <div className="p-6">
+              {/* Tab 1: Profielgegevens */}
+              {activeTab === 'profile' && (
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Volledige Naam
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Username
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.username}
+                      onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                      className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Bio / Motto
+                    </label>
+                    <textarea
+                      value={formData.bio}
+                      onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                      rows={3}
+                      className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                      placeholder="Admin Actie: Hier kun je ongepaste taal corrigeren of de opmaak verbeteren."
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      #1 Hoofddoel
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.mainGoal}
+                      onChange={(e) => setFormData({ ...formData, mainGoal: e.target.value })}
+                      className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Tab 2: Account & Rechten */}
+              {activeTab === 'account' && (
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      E-mailadres
+                    </label>
+                    <input
+                      type="email"
+                      value={editingMember.email}
+                      disabled
+                      className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-gray-400 cursor-not-allowed"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Dit veld is read-only om problemen te voorkomen.</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Rang
+                    </label>
+                    <select
+                      value={formData.rank}
+                      onChange={(e) => setFormData({ ...formData, rank: e.target.value })}
+                      className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                    >
+                      {ranks.map(rank => (
+                        <option key={rank} value={rank}>{rank}</option>
+                      ))}
+                    </select>
+                    <p className="text-xs text-gray-500 mt-1">Admin Actie: Hier kun je een gebruiker handmatig promoveren als beloning voor uitzonderlijke bijdragen.</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Forum Status
+                    </label>
+                    <select
+                      value={formData.forumStatus}
+                      onChange={(e) => setFormData({ ...formData, forumStatus: e.target.value })}
+                      className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                    >
+                      {forumStatuses.map(status => (
+                        <option key={status} value={status}>
+                          {status === 'active' ? 'Actief' : status === 'muted' ? 'Gedempt (Muted)' : 'Geblokkeerd'}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-xs text-gray-500 mt-1">Admin Actie: Dit is de directe link naar de moderatie-tools. Hier kun je een gebruiker tijdelijk het zwijgen opleggen of volledig blokkeren van het forum.</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Account Status
+                    </label>
+                    <select
+                      value={formData.status}
+                      onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                      className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                    >
+                      {statuses.map(status => (
+                        <option key={status} value={status}>
+                          {getStatusText(status)}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-xs text-gray-500 mt-1">Admin Actie: Deactiveer een account volledig als dat nodig is.</p>
+                  </div>
+
+                  <div className="pt-4 border-t border-[#3A4D23]">
+                    <button
+                      onClick={handlePasswordReset}
+                      className="px-4 py-2 bg-[#181F17] text-[#8BAE5A] rounded-lg border border-[#3A4D23] hover:bg-[#232D1A] transition-colors flex items-center gap-2"
+                    >
+                      <KeyIcon className="w-4 h-4" />
+                      Verstuur Wachtwoord Reset E-mail
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Tab 3: Activiteit & Notities */}
+              {activeTab === 'activity' && (
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-lg font-medium text-white mb-4">Recente Activiteit</h3>
+                    <div className="space-y-3">
+                      {editingMember.recentActivity.map((activity: any, index: number) => {
+                        const ActivityIcon = getActivityIcon(activity.type);
+                        return (
+                          <div key={index} className="flex items-center gap-3 p-3 bg-[#181F17] rounded-lg">
+                            <ActivityIcon className="w-5 h-5 text-[#8BAE5A]" />
+                            <div className="flex-1">
+                              <p className="text-white text-sm">{activity.description}</p>
+                              <p className="text-[#B6C948] text-xs">
+                                {new Date(activity.date).toLocaleString('nl-NL')}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Admin Notities
+                    </label>
+                    <textarea
+                      value={formData.adminNotes}
+                      onChange={(e) => setFormData({ ...formData, adminNotes: e.target.value })}
+                      rows={4}
+                      className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                      placeholder="Cruciale Functie: Hier kunnen admins interne notities over een gebruiker achterlaten die alleen voor andere admins zichtbaar zijn."
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Voorbeeld: "Heeft op 15-06-2025 een waarschuwing ontvangen voor spam op het forum." of "Zeer waardevol lid, kandidaat voor 'Lid van de Maand'."</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-6 border-t border-[#3A4D23] flex justify-end space-x-3">
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="px-6 py-2 bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-700 transition-colors"
+              >
+                Annuleren
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={isLoading}
+                className="px-6 py-2 bg-[#8BAE5A] text-[#0A0F0A] rounded-lg font-medium hover:bg-[#7A9D4A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {isLoading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-[#0A0F0A] border-t-transparent rounded-full animate-spin"></div>
+                    Opslaan...
+                  </>
+                ) : (
+                  <>
+                    <CheckIcon className="w-4 h-4" />
+                    Opslaan
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 
