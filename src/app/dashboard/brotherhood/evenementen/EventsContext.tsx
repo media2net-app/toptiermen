@@ -52,7 +52,7 @@ export const events: Event[] = [
       { id: 4, name: 'Tom', avatar: '/profielfoto.png' },
     ],
     description: 'Leer de kunst van effectief onderhandelen in zowel zakelijke als persoonlijke situaties.',
-    host: 'Rick van der Berg',
+    host: 'Rick Cuijpers',
     hostId: 1,
     status: 'upcoming',
     agenda: [
@@ -145,7 +145,7 @@ export const events: Event[] = [
     attendees: 20,
     attendeesList: [],
     description: 'Een workshop over het ontwikkelen van een onwankelbare mindset en dagelijkse discipline.',
-    host: 'Rick van der Berg',
+    host: 'Rick Cuijpers',
     hostId: 1,
     status: 'past',
     agenda: [

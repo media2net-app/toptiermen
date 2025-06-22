@@ -91,7 +91,7 @@ Onze kernwaarden:
 Overtredingen leiden tot waarschuwingen of uitsluiting.`
   },
   email: {
-    senderName: 'Rick van Top Tier Men',
+    senderName: 'Rick Cuijpers',
     senderEmail: 'rick@toptiermen.app',
     templates: {
       welcome: {
@@ -111,7 +111,7 @@ Wat je nu kunt doen:
 We zijn er om je te ondersteunen op elke stap van je reis.
 
 Met respect,
-Rick van der Berg
+Rick Cuijpers
 Top Tier Men`
       },
       passwordReset: {
@@ -150,7 +150,7 @@ Kom terug en blijf groeien:
 Je Brotherhood wacht op je.
 
 Met respect,
-Rick van der Berg
+Rick Cuijpers
 Top Tier Men`
       }
     }
@@ -560,7 +560,7 @@ export default function PlatformSettings() {
                   email: { ...prev.email, senderName: e.target.value }
                 }))}
                 className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                placeholder="Rick van Top Tier Men"
+                placeholder="Rick Cuijpers"
               />
             </div>
             <div>

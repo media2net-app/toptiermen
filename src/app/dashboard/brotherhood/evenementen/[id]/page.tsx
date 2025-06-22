@@ -25,7 +25,7 @@ const events = [
       { id: 4, name: 'Tom', avatar: '/profielfoto.png' },
     ],
     description: 'Leer de kunst van effectief onderhandelen in zowel zakelijke als persoonlijke situaties.',
-    host: 'Rick van der Berg',
+    host: 'Rick Cuijpers',
     hostId: 1,
     status: 'upcoming',
     agenda: [

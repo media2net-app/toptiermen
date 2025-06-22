@@ -75,7 +75,7 @@ const events: Event[] = [
     type: 'online',
     date: '2024-02-15',
     time: '19:00',
-    host: 'Rick van der Berg',
+    host: 'Rick Cuijpers',
     location: {
       type: 'online',
       url: 'https://zoom.us/j/123456789'
