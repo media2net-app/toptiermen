@@ -12,7 +12,10 @@ import {
   InformationCircleIcon,
   XMarkIcon,
   DocumentDuplicateIcon,
-  MagnifyingGlassIcon
+  MagnifyingGlassIcon,
+  MegaphoneIcon,
+  CalendarDaysIcon,
+  CursorArrowRaysIcon
 } from '@heroicons/react/24/outline';
 
 interface Announcement {
@@ -107,33 +110,36 @@ const mockArchivedAnnouncements: Announcement[] = [
 ];
 
 const styleOptions = [
-  { value: 'info', label: 'Informatie (Blauw)', color: 'bg-blue-500' },
-  { value: 'success', label: 'Succes / Nieuwe Feature (Groen)', color: 'bg-green-500' },
-  { value: 'warning', label: 'Waarschuwing (Oranje)', color: 'bg-orange-500' },
-  { value: 'error', label: 'Alarm / Kritiek Onderhoud (Rood)', color: 'bg-red-500' }
+  { value: 'info', label: 'Informatie (Blauw)', color: 'bg-blue-500', icon: InformationCircleIcon },
+  { value: 'success', label: 'Succes / Nieuwe Feature (Groen)', color: 'bg-green-500', icon: CheckCircleIcon },
+  { value: 'warning', label: 'Waarschuwing (Oranje)', color: 'bg-orange-500', icon: ExclamationTriangleIcon },
+  { value: 'error', label: 'Alarm / Kritiek Onderhoud (Rood)', color: 'bg-red-500', icon: ExclamationTriangleIcon }
 ];
 
-const getStatusBadge = (status: string) => {
+const getStatusInfo = (status: Announcement['status']) => {
   switch (status) {
     case 'active':
-      return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">🟢 Actief</span>;
+      return { text: 'Actief', color: 'text-green-400', bg: 'bg-green-900/50' };
     case 'scheduled':
-      return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">🟠 Gepland</span>;
+      return { text: 'Gepland', color: 'text-yellow-400', bg: 'bg-yellow-900/50' };
     case 'draft':
-      return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">⚪ Concept</span>;
+      return { text: 'Concept', color: 'text-gray-400', bg: 'bg-gray-700/50' };
     default:
-      return null;
+      return { text: 'Onbekend', color: 'text-gray-500', bg: 'bg-gray-800' };
   }
 };
 
-const getStyleBadge = (style: string) => {
-  const option = styleOptions.find(opt => opt.value === style);
-  return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white ${option?.color}`}>
-      {option?.label.split(' ')[0]}
-    </span>
-  );
-};
+const StatCard = ({ icon: Icon, value, label }: { icon: React.ElementType, value: string | number, label: string }) => (
+    <div className="bg-[#232D1A] p-4 rounded-xl flex items-center gap-4 border border-[#3A4D23]">
+        <div className="p-3 rounded-lg bg-[#8BAE5A]/20">
+            <Icon className="w-6 h-6 text-[#8BAE5A]" />
+        </div>
+        <div>
+            <p className="text-2xl font-bold text-white">{value}</p>
+            <p className="text-sm text-[#B6C948]">{label}</p>
+        </div>
+    </div>
+);
 
 export default function AnnouncementsManagement() {
   const [activeTab, setActiveTab] = useState<'active' | 'archive'>('active');
@@ -146,7 +152,7 @@ export default function AnnouncementsManagement() {
   const [formData, setFormData] = useState({
     title: '',
     content: '',
-    style: 'info' as const,
+    style: 'info' as Announcement['style'],
     startDate: '',
     startTime: '',
     endDate: '',
@@ -241,152 +247,140 @@ export default function AnnouncementsManagement() {
     a.content.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const activeCount = announcements.filter(a => a.status === 'active').length;
+  const scheduledCount = announcements.filter(a => a.status === 'scheduled').length;
+  const totalClicks = announcements.reduce((acc, a) => acc + a.clicks, 0);
+
   return (
-    <div className="min-h-screen bg-[#0A0F0A] text-white p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Aankondigingen Beheer</h1>
-          <p className="text-gray-400">
-            Beheer platform-brede aankondigingen en communiceer direct met alle gebruikers
-          </p>
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-[#8BAE5A]">Aankondigingen Beheer</h1>
+          <p className="text-[#B6C948] mt-2">Beheer platform-brede aankondigingen en communiceer direct met alle gebruikers.</p>
         </div>
+        <button
+          onClick={handleCreateNew}
+          className="px-6 py-3 rounded-xl bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#B6C948] transition-all duration-200 flex items-center gap-2"
+        >
+          <PlusIcon className="w-5 h-5" />
+          Nieuwe Aankondiging
+        </button>
+      </div>
 
-        {/* Tabs */}
-        <div className="flex space-x-1 bg-[#181F17] rounded-lg p-1 mb-6">
-          <button
-            onClick={() => setActiveTab('active')}
-            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-              activeTab === 'active'
-                ? 'bg-[#8BAE5A] text-[#0A0F0A]'
-                : 'text-gray-400 hover:text-white'
-            }`}
-          >
-            Actieve & Geplande Aankondigingen
-          </button>
-          <button
-            onClick={() => setActiveTab('archive')}
-            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-              activeTab === 'archive'
-                ? 'bg-[#8BAE5A] text-[#0A0F0A]'
-                : 'text-gray-400 hover:text-white'
-            }`}
-          >
-            Archief
-          </button>
-        </div>
+      {/* Summary Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <StatCard icon={MegaphoneIcon} value={activeCount} label="Actieve Aankondigingen" />
+        <StatCard icon={CalendarDaysIcon} value={scheduledCount} label="Geplande Aankondigingen" />
+        <StatCard icon={CursorArrowRaysIcon} value={totalClicks.toLocaleString()} label="Totale Kliks" />
+      </div>
 
-        {activeTab === 'active' && (
-          <div>
-            {/* Action Button */}
-            <div className="mb-6">
-              <button
-                onClick={handleCreateNew}
-                className="inline-flex items-center px-4 py-2 bg-[#8BAE5A] text-[#0A0F0A] rounded-lg font-medium hover:bg-[#7A9D4A] transition-colors"
+      {/* Tabs */}
+      <div className="flex space-x-1 bg-[#181F17] rounded-lg p-1 max-w-md">
+        <button
+          onClick={() => setActiveTab('active')}
+          className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+            activeTab === 'active'
+              ? 'bg-[#8BAE5A] text-[#0A0F0A]'
+              : 'text-gray-400 hover:text-white'
+          }`}
+        >
+          Actief & Gepland
+        </button>
+        <button
+          onClick={() => setActiveTab('archive')}
+          className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+            activeTab === 'archive'
+              ? 'bg-[#8BAE5A] text-[#0A0F0A]'
+              : 'text-gray-400 hover:text-white'
+          }`}
+        >
+          Archief
+        </button>
+      </div>
+
+      {activeTab === 'active' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {announcements.map((announcement) => {
+            const statusInfo = getStatusInfo(announcement.status);
+            const styleInfo = styleOptions.find(s => s.value === announcement.style);
+            const Icon = styleInfo?.icon || InformationCircleIcon;
+
+            return (
+              <div
+                key={announcement.id}
+                className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23] flex flex-col justify-between"
               >
-                <PlusIcon className="w-5 h-5 mr-2" />
-                Nieuwe Aankondiging Maken
-              </button>
-            </div>
+                <div>
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="p-3 rounded-xl bg-[#8BAE5A]/20">
+                      <Icon className="w-6 h-6 text-[#8BAE5A]" />
+                    </div>
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusInfo.color} ${statusInfo.bg}`}>
+                      {statusInfo.text}
+                    </span>
+                  </div>
+                  
+                  <h3 className="text-xl font-bold text-[#8BAE5A] mb-2">{announcement.title}</h3>
+                  <p className="text-[#B6C948] text-sm mb-4">{announcement.content}</p>
+                  
+                  <div className="space-y-3 text-sm border-t border-[#3A4D23] pt-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[#B6C948]">Zichtbaar van:</span>
+                      <span className="text-white font-semibold">{new Date(announcement.startDate).toLocaleString('nl-NL', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[#B6C948]">Zichtbaar tot:</span>
+                      <span className="text-white font-semibold">{new Date(announcement.endDate).toLocaleString('nl-NL', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                        <span className="text-[#B6C948]">Weergaven / Kliks:</span>
+                        <div className="flex items-center gap-2 text-white font-semibold">
+                            <EyeIcon className="w-4 h-4 text-[#B6C948]" />
+                            {announcement.views.toLocaleString()}
+                            <span>/</span>
+                            <CheckCircleIcon className="w-4 h-4 text-[#B6C948]" />
+                            {announcement.clicks.toLocaleString()}
+                        </div>
+                    </div>
+                  </div>
+                </div>
 
-            {/* Active Announcements Table */}
-            <div className="bg-[#181F17] rounded-lg overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-[#2A3A1F]">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                        Titel
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                        Status
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                        Zichtbaar van
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                        Zichtbaar tot
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                        Weergaven / Kliks
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                        Acties
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#2A3A1F]">
-                    {announcements.map((announcement) => (
-                      <tr key={announcement.id} className="hover:bg-[#2A3A1F] transition-colors">
-                        <td className="px-6 py-4">
-                          <div>
-                            <div className="text-sm font-medium text-white">{announcement.title}</div>
-                            <div className="text-sm text-gray-400 mt-1">{announcement.content}</div>
-                            <div className="mt-1">{getStyleBadge(announcement.style)}</div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          {getStatusBadge(announcement.status)}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-300">
-                          {new Date(announcement.startDate).toLocaleDateString('nl-NL')}
-                          <br />
-                          {new Date(announcement.startDate).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-300">
-                          {new Date(announcement.endDate).toLocaleDateString('nl-NL')}
-                          <br />
-                          {new Date(announcement.endDate).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-300">
-                          <div className="flex items-center space-x-2">
-                            <EyeIcon className="w-4 h-4" />
-                            <span>{announcement.views.toLocaleString()}</span>
-                          </div>
-                          <div className="flex items-center space-x-2 mt-1">
-                            <CheckCircleIcon className="w-4 h-4" />
-                            <span>{announcement.clicks.toLocaleString()}</span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex space-x-2">
-                            <button
-                              onClick={() => handleEdit(announcement)}
-                              className="text-blue-400 hover:text-blue-300 transition-colors"
-                            >
-                              <PencilIcon className="w-4 h-4" />
-                            </button>
-                            {announcement.status === 'active' && (
-                              <button
-                                onClick={() => handleDeactivate(announcement.id)}
-                                className="text-orange-400 hover:text-orange-300 transition-colors"
-                                title="Deactiveer Nu"
-                              >
-                                <XMarkIcon className="w-4 h-4" />
-                              </button>
-                            )}
-                            <button
-                              onClick={() => handleDelete(announcement.id)}
-                              className="text-red-400 hover:text-red-300 transition-colors"
-                            >
-                              <TrashIcon className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                <div className="mt-6 flex items-center gap-2">
+                  <button
+                    onClick={() => handleEdit(announcement)}
+                    className="flex-1 px-4 py-2 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A] transition flex items-center justify-center gap-2"
+                  >
+                    <PencilIcon className="w-4 h-4" />
+                    Bewerk
+                  </button>
+                  {announcement.status === 'active' && (
+                    <button
+                      onClick={() => handleDeactivate(announcement.id)}
+                      className="p-2 rounded-xl bg-[#181F17] text-orange-400 border border-[#3A4D23] hover:bg-[#232D1A] transition"
+                      title="Deactiveer Nu"
+                    >
+                      <XMarkIcon className="w-4 h-4" />
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handleDelete(announcement.id)}
+                    className="p-2 rounded-xl bg-[#181F17] text-red-400 border border-[#3A4D23] hover:bg-[#232D1A] transition"
+                    title="Verwijder"
+                  >
+                    <TrashIcon className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
-            </div>
-          </div>
-        )}
+            )
+          })}
+        </div>
+      )}
 
-        {activeTab === 'archive' && (
-          <div>
-            {/* Search */}
+      {activeTab === 'archive' && (
+         <div className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23]">
             <div className="mb-6">
-              <div className="relative">
+              <div className="relative max-w-sm">
                 <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="text"
@@ -398,250 +392,226 @@ export default function AnnouncementsManagement() {
               </div>
             </div>
 
-            {/* Archived Announcements Table */}
-            <div className="bg-[#181F17] rounded-lg overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-[#2A3A1F]">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                  <thead className="bg-[#181F17] border-b border-[#3A4D23]">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                        Titel
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                        Tekst van de banner
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                        Periode
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                        Weergaven
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                        Kliks
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                        Actie
-                      </th>
+                      <th className="px-4 py-3 text-left text-[#8BAE5A] font-semibold">Titel</th>
+                      <th className="px-4 py-3 text-left text-[#8BAE5A] font-semibold">Periode</th>
+                      <th className="px-4 py-3 text-left text-[#8BAE5A] font-semibold">Weergaven</th>
+                      <th className="px-4 py-3 text-left text-[#8BAE5A] font-semibold">Kliks</th>
+                      <th className="px-4 py-3 text-center text-[#8BAE5A] font-semibold">Actie</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#2A3A1F]">
+                  <tbody className="divide-y divide-[#3A4D23]">
                     {filteredArchived.map((announcement) => (
-                      <tr key={announcement.id} className="hover:bg-[#2A3A1F] transition-colors">
-                        <td className="px-6 py-4">
-                          <div className="text-sm font-medium text-white">{announcement.title}</div>
-                          <div className="mt-1">{getStyleBadge(announcement.style)}</div>
+                      <tr key={announcement.id} className="hover:bg-[#181F17] transition-colors duration-200">
+                        <td className="px-4 py-3">
+                          <span className="text-white font-medium">{announcement.title}</span>
+                          <p className="text-[#B6C948] text-xs max-w-xs truncate">{announcement.content}</p>
                         </td>
-                        <td className="px-6 py-4 text-sm text-gray-300 max-w-xs">
-                          {announcement.content}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-300">
-                          {new Date(announcement.startDate).toLocaleDateString('nl-NL')} t/m{' '}
+                        <td className="px-4 py-3 text-sm text-gray-300">
+                          {new Date(announcement.startDate).toLocaleDateString('nl-NL')} - {' '}
                           {new Date(announcement.endDate).toLocaleDateString('nl-NL')}
                         </td>
-                        <td className="px-6 py-4 text-sm text-gray-300">
-                          {announcement.views.toLocaleString()}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-300">
-                          {announcement.clicks.toLocaleString()}
-                        </td>
-                        <td className="px-6 py-4">
+                        <td className="px-4 py-3 text-white">{announcement.views.toLocaleString()}</td>
+                        <td className="px-4 py-3 text-white">{announcement.clicks.toLocaleString()}</td>
+                        <td className="px-4 py-3 text-center">
                           <button
                             onClick={() => handleDuplicate(announcement)}
-                            className="inline-flex items-center px-3 py-1 bg-[#8BAE5A] text-[#0A0F0A] rounded text-sm font-medium hover:bg-[#7A9D4A] transition-colors"
+                            className="inline-flex items-center px-3 py-1 bg-[#181F17] text-[#8BAE5A] rounded-lg text-sm font-medium hover:bg-[#3A4D23] transition-colors border border-[#3A4D23]"
                           >
-                            <DocumentDuplicateIcon className="w-4 h-4 mr-1" />
-                            Dupliceer naar Concept
+                            <DocumentDuplicateIcon className="w-4 h-4 mr-2" />
+                            Dupliceer
                           </button>
                         </td>
                       </tr>
                     ))}
                   </tbody>
-                </table>
-              </div>
+              </table>
             </div>
-          </div>
-        )}
+        </div>
+      )}
 
-        {/* Form Modal */}
-        {showForm && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-[#181F17] rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="p-6">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-xl font-bold text-white">
-                    {editingAnnouncement ? 'Bewerk Aankondiging' : 'Nieuwe Aankondiging'}
-                  </h2>
-                  <button
-                    onClick={() => setShowForm(false)}
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    <XMarkIcon className="w-6 h-6" />
-                  </button>
+      {/* Form Modal */}
+      {showForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#232D1A] border border-[#3A4D23] rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold text-[#8BAE5A]">
+                  {editingAnnouncement ? 'Bewerk Aankondiging' : 'Nieuwe Aankondiging'}
+                </h2>
+                <button
+                  onClick={() => setShowForm(false)}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <XMarkIcon className="w-6 h-6" />
+                </button>
+              </div>
+
+              <form className="space-y-6">
+                {/* Section 1: Content */}
+                <div>
+                  <h3 className="text-lg font-medium text-white mb-4">Inhoud</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Titel (intern gebruik)
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.title}
+                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                        placeholder="Bijv. Lancering Brotherhood 2.0"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Content / Tekst van de Banner
+                      </label>
+                      <textarea
+                        value={formData.content}
+                        onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                        rows={3}
+                        className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                        placeholder="Hou het kort en krachtig..."
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Visuele Stijl
+                      </label>
+                      <select
+                        value={formData.style}
+                        onChange={(e) => setFormData({ ...formData, style: e.target.value as any })}
+                        className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                      >
+                        {styleOptions.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
                 </div>
 
-                <form className="space-y-6">
-                  {/* Section 1: Content */}
-                  <div>
-                    <h3 className="text-lg font-medium text-white mb-4">Inhoud</h3>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Titel (intern gebruik)
-                        </label>
-                        <input
-                          type="text"
-                          value={formData.title}
-                          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                          className="w-full bg-[#0A0F0A] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                          placeholder="Bijv. Lancering Brotherhood 2.0"
-                        />
-                      </div>
+                {/* Section 2: Call-to-Action */}
+                <div>
+                  <h3 className="text-lg font-medium text-white mb-4">Call-to-Action (Optioneel)</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Knop Tekst
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.ctaText}
+                        onChange={(e) => setFormData({ ...formData, ctaText: e.target.value })}
+                        className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                        placeholder="Bijv. Ontdek de nieuwe features"
+                      />
+                    </div>
 
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Content / Tekst van de Banner
-                        </label>
-                        <textarea
-                          value={formData.content}
-                          onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                          rows={3}
-                          className="w-full bg-[#0A0F0A] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                          placeholder="Hou het kort en krachtig..."
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Visuele Stijl
-                        </label>
-                        <select
-                          value={formData.style}
-                          onChange={(e) => setFormData({ ...formData, style: e.target.value as any })}
-                          className="w-full bg-[#0A0F0A] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                        >
-                          {styleOptions.map((option) => (
-                            <option key={option.value} value={option.value}>
-                              {option.label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Knop Link
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.ctaLink}
+                        onChange={(e) => setFormData({ ...formData, ctaLink: e.target.value })}
+                        className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                        placeholder="Bijv. /dashboard/brotherhood/social-feed"
+                      />
                     </div>
                   </div>
+                </div>
 
-                  {/* Section 2: Call-to-Action */}
-                  <div>
-                    <h3 className="text-lg font-medium text-white mb-4">Call-to-Action (Optioneel)</h3>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Knop Tekst
-                        </label>
-                        <input
-                          type="text"
-                          value={formData.ctaText}
-                          onChange={(e) => setFormData({ ...formData, ctaText: e.target.value })}
-                          className="w-full bg-[#0A0F0A] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                          placeholder="Bijv. Ontdek de nieuwe features"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Knop Link
-                        </label>
-                        <input
-                          type="text"
-                          value={formData.ctaLink}
-                          onChange={(e) => setFormData({ ...formData, ctaLink: e.target.value })}
-                          className="w-full bg-[#0A0F0A] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                          placeholder="Bijv. /dashboard/brotherhood/social-feed"
-                        />
-                      </div>
+                {/* Section 3: Timing & Publication */}
+                <div>
+                  <h3 className="text-lg font-medium text-white mb-4">Timing & Publicatie</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Startdatum
+                      </label>
+                      <input
+                        type="date"
+                        value={formData.startDate}
+                        onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                        className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Starttijd
+                      </label>
+                      <input
+                        type="time"
+                        value={formData.startTime}
+                        onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
+                        className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Einddatum
+                      </label>
+                      <input
+                        type="date"
+                        value={formData.endDate}
+                        onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                        className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Eindtijd
+                      </label>
+                      <input
+                        type="time"
+                        value={formData.endTime}
+                        onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
+                        className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                      />
                     </div>
                   </div>
+                </div>
 
-                  {/* Section 3: Timing & Publication */}
-                  <div>
-                    <h3 className="text-lg font-medium text-white mb-4">Timing & Publicatie</h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Startdatum
-                        </label>
-                        <input
-                          type="date"
-                          value={formData.startDate}
-                          onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                          className="w-full bg-[#0A0F0A] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Starttijd
-                        </label>
-                        <input
-                          type="time"
-                          value={formData.startTime}
-                          onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
-                          className="w-full bg-[#0A0F0A] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Einddatum
-                        </label>
-                        <input
-                          type="date"
-                          value={formData.endDate}
-                          onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                          className="w-full bg-[#0A0F0A] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Eindtijd
-                        </label>
-                        <input
-                          type="time"
-                          value={formData.endTime}
-                          onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
-                          className="w-full bg-[#0A0F0A] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex space-x-3 pt-6 border-t border-[#3A4D23]">
-                    <button
-                      type="button"
-                      onClick={() => handleSave('draft')}
-                      className="flex-1 px-4 py-2 bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-700 transition-colors"
-                    >
-                      Opslaan als Concept
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleSave('publish')}
-                      className="flex-1 px-4 py-2 bg-[#8BAE5A] text-[#0A0F0A] rounded-lg font-medium hover:bg-[#7A9D4A] transition-colors"
-                    >
-                      Publiceer Nu
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleSave('schedule')}
-                      className="flex-1 px-4 py-2 bg-[#3A4D23] text-white rounded-lg font-medium hover:bg-[#2A3A1F] transition-colors"
-                    >
-                      Plan In
-                    </button>
-                  </div>
-                </form>
-              </div>
+                {/* Action Buttons */}
+                <div className="flex space-x-3 pt-6 border-t border-[#3A4D23]">
+                  <button
+                    type="button"
+                    onClick={() => handleSave('draft')}
+                    className="flex-1 px-4 py-3 bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-700 transition-colors"
+                  >
+                    Opslaan als Concept
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSave('publish')}
+                    className="flex-1 px-4 py-3 bg-[#8BAE5A] text-[#0A0F0A] rounded-lg font-medium hover:bg-[#7A9D4A] transition-colors"
+                  >
+                    Publiceer Nu
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSave('schedule')}
+                    className="flex-1 px-4 py-3 bg-[#3A4D23] text-white rounded-lg font-medium hover:bg-[#2A3A1F] transition-colors"
+                  >
+                    Plan In
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 } 
