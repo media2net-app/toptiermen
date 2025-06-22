@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   MagnifyingGlassIcon, 
   FunnelIcon, 
@@ -136,6 +136,145 @@ const mockMembers = [
   }
 ];
 
+// Generate 200 additional dummy members
+const generateDummyMembers = () => {
+  const firstNames = [
+    'Alexander', 'Benjamin', 'Cas', 'Dylan', 'Elias', 'Finn', 'Gijs', 'Hugo', 'Isaac', 'Jasper',
+    'Koen', 'Liam', 'Milan', 'Noah', 'Owen', 'Pepijn', 'Quinn', 'Ruben', 'Sam', 'Timo',
+    'Udo', 'Victor', 'Willem', 'Xander', 'Yannick', 'Zeno', 'Adriaan', 'Bram', 'Cedric', 'Dirk',
+    'Erik', 'Floris', 'Gerard', 'Hendrik', 'Ivo', 'Jeroen', 'Klaas', 'Lars', 'Maarten', 'Niels',
+    'Olaf', 'Pieter', 'Quinten', 'Rik', 'Sander', 'Thijs', 'Uwe', 'Vincent', 'Wouter', 'Xavier'
+  ];
+  
+  const lastNames = [
+    'van der Berg', 'Jansen', 'de Vries', 'Bakker', 'Visser', 'Smit', 'Meijer', 'de Boer', 'Mulder', 'de Groot',
+    'Bos', 'Vos', 'Peters', 'Hendriks', 'van Leeuwen', 'Dekker', 'Brouwer', 'de Wit', 'Dijkstra', 'Smits',
+    'de Graaf', 'van der Meer', 'Smeets', 'de Haan', 'van den Berg', 'van Dijk', 'van Vliet', 'van der Heijden', 'van der Wal', 'van der Ven',
+    'van der Beek', 'van der Linden', 'van der Velde', 'van der Steen', 'van der Laan', 'van der Kooij', 'van der Veen', 'van der Zee', 'van der Ploeg', 'van der Schaaf',
+    'van der Schoot', 'van der Sluis', 'van der Spek', 'van der Stap', 'van der Stoep', 'van der Straaten', 'van der Veer', 'van der Vliet', 'van der Voort', 'van der Weide'
+  ];
+  
+  const ranks = ['Rookie', 'Warrior', 'Elite', 'Legend'];
+  const statuses = ['active', 'inactive', 'suspended'];
+  const forumStatuses = ['active', 'muted', 'blocked'];
+  
+  const bios = [
+    'Passionate about personal development and helping others reach their potential.',
+    'Focused on building strength and mental resilience.',
+    'Just starting my fitness journey.',
+    'Experienced fitness coach helping others achieve their goals.',
+    'Committed to personal growth and community building.',
+    'Dedicated to continuous improvement and pushing limits.',
+    'Building a stronger version of myself every day.',
+    'Sharing knowledge and motivating others in their fitness journey.',
+    'Transforming challenges into opportunities for growth.',
+    'Creating sustainable habits for long-term success.'
+  ];
+  
+  const goals = [
+    'Become a certified personal trainer and help 100+ people transform their lives.',
+    'Deadlift 200kg and run a marathon this year.',
+    'Lose 10kg and build basic strength.',
+    'Mentor 50 new members to their first fitness milestone.',
+    'Achieve Elite rank and become a community leader.',
+    'Complete an Ironman triathlon within 2 years.',
+    'Build a sustainable morning routine and stick to it for 365 days.',
+    'Help 25 people achieve their first pull-up.',
+    'Develop mental toughness through cold exposure and meditation.',
+    'Create a supportive community for working professionals.'
+  ];
+  
+  const adminNotes = [
+    'Excellent community member, very helpful in the forum.',
+    'Good progress, active in training discussions.',
+    'New member, needs encouragement to stay active.',
+    'Top contributor, excellent mentor.',
+    'Suspended for inappropriate forum behavior. Review in 7 days.',
+    'Consistent participant in challenges and events.',
+    'Shows great potential, consider for mentorship program.',
+    'Quiet but dedicated member, always completes training logs.',
+    'Very active in the nutrition section, provides valuable insights.',
+    'Recently promoted, adapting well to new responsibilities.',
+    'Needs more engagement in community activities.',
+    'Excellent technical knowledge, great resource for other members.',
+    'Consistently helps new members with their questions.',
+    'Has shown significant improvement over the last 3 months.',
+    'Consider for "Lid van de Maand" nomination.',
+    'May benefit from additional motivation and support.',
+    'Very organized with training and nutrition tracking.',
+    'Great team player in group challenges.',
+    'Shows leadership potential in group activities.',
+    'Needs reminder about forum etiquette guidelines.'
+  ];
+  
+  const badgeNames = ['Koude Krijger', 'Consistent Warrior', 'Mentor Master', 'Iron Will', 'Community Builder', 'Nutrition Expert', 'Strength Seeker', 'Endurance Master'];
+  
+  return Array.from({ length: 200 }, (_, index) => {
+    const id = index + 6;
+    const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+    const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+    const name = `${firstName} ${lastName}`;
+    const username = `${firstName.toLowerCase()}_${lastName.toLowerCase().replace(/\s+/g, '_')}`;
+    const email = `${firstName.toLowerCase()}.${lastName.toLowerCase().replace(/\s+/g, '')}@example.com`;
+    const rank = ranks[Math.floor(Math.random() * ranks.length)];
+    const status = statuses[Math.floor(Math.random() * statuses.length)];
+    const forumStatus = forumStatuses[Math.floor(Math.random() * forumStatuses.length)];
+    
+    // Generate realistic dates
+    const joinDate = new Date(2023, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1);
+    const lastActive = new Date(2024, 0, Math.floor(Math.random() * 20) + 1);
+    
+    // Generate realistic activity data
+    const posts = Math.floor(Math.random() * 100);
+    const badges = Math.floor(Math.random() * 20);
+    
+    const bio = bios[Math.floor(Math.random() * bios.length)];
+    const mainGoal = goals[Math.floor(Math.random() * goals.length)];
+    const adminNote = adminNotes[Math.floor(Math.random() * adminNotes.length)];
+    
+    // Generate recent activity
+    const activityTypes = ['login', 'post', 'badge', 'training', 'goal'];
+    const recentActivity = Array.from({ length: Math.floor(Math.random() * 5) + 1 }, (_, i) => {
+      const type = activityTypes[Math.floor(Math.random() * activityTypes.length)];
+      const date = new Date(2024, 0, Math.floor(Math.random() * 20) + 1);
+      const descriptions = {
+        login: 'Laatste login',
+        post: 'Laatste forumpost',
+        badge: `Badge ontgrendeld: ${badgeNames[Math.floor(Math.random() * badgeNames.length)]}`,
+        training: 'Training voltooid',
+        goal: 'Nieuw doel ingesteld'
+      };
+      return {
+        type,
+        date: date.toISOString(),
+        description: descriptions[type as keyof typeof descriptions]
+      };
+    });
+    
+    return {
+      id,
+      name,
+      username,
+      email,
+      rank,
+      joinDate: joinDate.toISOString().split('T')[0],
+      status,
+      forumStatus,
+      avatar: '/profielfoto.png',
+      lastActive: lastActive.toISOString().split('T')[0],
+      posts,
+      badges,
+      bio,
+      mainGoal,
+      adminNotes: adminNote,
+      recentActivity
+    };
+  });
+};
+
+// Combine original members with dummy members
+const allMembers = [...mockMembers, ...generateDummyMembers()];
+
 const ranks = ['Rookie', 'Warrior', 'Elite', 'Legend'];
 const statuses = ['active', 'inactive', 'suspended'];
 const forumStatuses = ['active', 'muted', 'blocked'];
@@ -149,6 +288,8 @@ export default function Ledenbeheer() {
   const [editingMember, setEditingMember] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<'profile' | 'account' | 'activity'>('profile');
   const [isLoading, setIsLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(20);
   const [formData, setFormData] = useState({
     name: '',
     username: '',
@@ -160,7 +301,7 @@ export default function Ledenbeheer() {
     adminNotes: ''
   });
 
-  const filteredMembers = mockMembers.filter(member => {
+  const filteredMembers = allMembers.filter(member => {
     const matchesSearch = member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          member.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRank = selectedRank === 'Alle Rangen' || member.rank === selectedRank;
@@ -168,6 +309,21 @@ export default function Ledenbeheer() {
     
     return matchesSearch && matchesRank && matchesStatus;
   });
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredMembers.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentMembers = filteredMembers.slice(startIndex, endIndex);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedRank, selectedStatus]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -221,7 +377,7 @@ export default function Ledenbeheer() {
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       // Update the member data
-      const updatedMembers = mockMembers.map(member => 
+      const updatedMembers = allMembers.map(member => 
         member.id === editingMember.id 
           ? { ...member, ...formData }
           : member
@@ -302,7 +458,7 @@ export default function Ledenbeheer() {
         </div>
         <div className="flex items-center gap-4">
           <span className="text-[#8BAE5A] font-semibold">
-            {filteredMembers.length} van {mockMembers.length} leden
+            {filteredMembers.length} van {allMembers.length} leden
           </span>
         </div>
       </div>
@@ -377,7 +533,7 @@ export default function Ledenbeheer() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#3A4D23]">
-              {filteredMembers.map((member) => (
+              {currentMembers.map((member) => (
                 <tr key={member.id} className="hover:bg-[#181F17] transition-colors duration-200">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
@@ -477,14 +633,24 @@ export default function Ledenbeheer() {
       {/* Pagination */}
       <div className="flex items-center justify-between">
         <div className="text-[#B6C948] text-sm">
-          Toon {filteredMembers.length} van {mockMembers.length} leden
+          Toon {filteredMembers.length} van {allMembers.length} leden
         </div>
         <div className="flex items-center gap-2">
-          <button className="px-4 py-2 rounded-xl bg-[#232D1A] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#181F17] transition">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="px-4 py-2 rounded-xl bg-[#232D1A] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#181F17] transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             Vorige
           </button>
-          <span className="px-4 py-2 text-[#8BAE5A] font-semibold">1</span>
-          <button className="px-4 py-2 rounded-xl bg-[#232D1A] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#181F17] transition">
+          <span className="px-4 py-2 text-[#8BAE5A] font-semibold">
+            {currentPage} van {totalPages}
+          </span>
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="px-4 py-2 rounded-xl bg-[#232D1A] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#181F17] transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             Volgende
           </button>
         </div>
