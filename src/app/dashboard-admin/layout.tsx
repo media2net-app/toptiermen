@@ -18,7 +18,9 @@ import {
   CurrencyDollarIcon,
   UsersIcon,
   ClockIcon,
-  WrenchScrewdriverIcon
+  WrenchScrewdriverIcon,
+  Bars3Icon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 
 const adminMenu = [
@@ -77,8 +79,7 @@ const adminMenu = [
   }
 ];
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
+const SidebarContent = ({ pathname }: { pathname: string }) => {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['ANALYTICS', 'LEDEN', 'CONTENT', 'COMMUNITY', 'PLATFORM']));
 
   const toggleSection = (sectionLabel: string) => {
@@ -94,19 +95,85 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   };
 
   return (
+    <nav className="space-y-6">
+      {adminMenu.map((item) => {
+        if (item.type === 'section') {
+          const isExpanded = expandedSections.has(item.label);
+          return (
+            <div key={item.label}>
+              <button
+                onClick={() => toggleSection(item.label)}
+                className="flex items-center justify-between w-full px-4 py-3 rounded-xl text-[#8BAE5A] font-semibold hover:bg-[#181F17] transition-all duration-200"
+              >
+                <span>{item.label}</span>
+                <ChevronDownIcon 
+                  className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} 
+                />
+              </button>
+              {isExpanded && (
+                <div className="mt-2 ml-4 space-y-1">
+                  {item.items?.map((subItem) => (
+                    <Link
+                      key={subItem.href!}
+                      href={subItem.href!}
+                      className={`flex items-center gap-3 px-4 py-2 rounded-xl font-medium transition-all duration-200 ${
+                        pathname === subItem.href 
+                          ? 'bg-[#8BAE5A] text-[#181F17] shadow-lg' 
+                          : 'text-[#B6C948] hover:bg-[#181F17] hover:text-[#8BAE5A]'
+                      }`}
+                    >
+                      {subItem.icon && <subItem.icon className="w-5 h-5" />}
+                      <span>{subItem.label}</span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        } else {
+          return (
+            <Link
+              key={item.href!}
+              href={item.href!}
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-all duration-200 ${
+                pathname === item.href 
+                  ? 'bg-[#8BAE5A] text-[#181F17] shadow-lg' 
+                  : 'text-[#8BAE5A] hover:bg-[#181F17]'
+              }`}
+            >
+              {item.icon && <item.icon className="w-6 h-6" />}
+              <span>{item.label}</span>
+            </Link>
+          );
+        }
+      })}
+    </nav>
+  )
+};
+
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  return (
     <div className="min-h-screen bg-[#181F17]">
       {/* Top Navigation Bar */}
-      <div className="bg-[#232D1A] border-b border-[#3A4D23] px-6 py-4">
+      <div className="bg-[#232D1A] border-b border-[#3A4D23] px-4 sm:px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <h1 className="text-2xl font-bold text-[#8BAE5A]">Admin Panel</h1>
-            <span className="text-[#B6C948] text-sm">Top Tier Men Platform</span>
+            <button
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="md:hidden p-2 text-[#8BAE5A]"
+            >
+              <Bars3Icon className="w-6 h-6" />
+            </button>
+            <h1 className="text-xl md:text-2xl font-bold text-[#8BAE5A]">Admin Panel</h1>
           </div>
           <div className="flex items-center gap-4">
-            <span className="text-[#8BAE5A] text-sm">Admin</span>
+            <span className="hidden sm:inline text-[#8BAE5A] text-sm">Admin</span>
             <Link 
               href="/dashboard" 
-              className="px-4 py-2 rounded-xl bg-[#181F17] text-[#8BAE5A] font-semibold border border-[#3A4D23] hover:bg-[#232D1A] transition"
+              className="px-4 py-2 rounded-xl bg-[#181F17] text-[#8BAE5A] text-sm font-semibold border border-[#3A4D23] hover:bg-[#232D1A] transition"
             >
               Terug naar Platform
             </Link>
@@ -115,65 +182,29 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </div>
 
       <div className="flex">
-        {/* Sidebar */}
-        <aside className="w-72 bg-[#232D1A] border-r border-[#3A4D23] min-h-screen p-6">
-          <nav className="space-y-6">
-            {adminMenu.map((item) => {
-              if (item.type === 'section') {
-                const isExpanded = expandedSections.has(item.label);
-                return (
-                  <div key={item.label}>
-                    <button
-                      onClick={() => toggleSection(item.label)}
-                      className="flex items-center justify-between w-full px-4 py-3 rounded-xl text-[#8BAE5A] font-semibold hover:bg-[#181F17] transition-all duration-200"
-                    >
-                      <span>{item.label}</span>
-                      <ChevronDownIcon 
-                        className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} 
-                      />
-                    </button>
-                    {isExpanded && (
-                      <div className="mt-2 ml-4 space-y-1">
-                        {item.items?.map((subItem) => (
-                          <Link
-                            key={subItem.href}
-                            href={subItem.href ?? '#'}
-                            className={`flex items-center gap-3 px-4 py-2 rounded-xl font-medium transition-all duration-200 ${
-                              pathname === subItem.href 
-                                ? 'bg-[#8BAE5A] text-[#181F17] shadow-lg' 
-                                : 'text-[#B6C948] hover:bg-[#181F17] hover:text-[#8BAE5A]'
-                            }`}
-                          >
-                            {subItem.icon && <subItem.icon className="w-5 h-5" />}
-                            <span>{subItem.label}</span>
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                );
-              } else {
-                return (
-                  <Link
-                    key={item.href as string}
-                    href={item.href as string}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-all duration-200 ${
-                      pathname === item.href 
-                        ? 'bg-[#8BAE5A] text-[#181F17] shadow-lg' 
-                        : 'text-[#8BAE5A] hover:bg-[#181F17]'
-                    }`}
-                  >
-                    {item.icon && <item.icon className="w-6 h-6" />}
-                    <span>{item.label}</span>
-                  </Link>
-                );
-              }
-            })}
-          </nav>
+        {/* Mobile Menu Overlay */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden fixed inset-0 z-40 flex">
+             <div className="fixed inset-0 bg-black/60" onClick={() => setIsMobileMenuOpen(false)}></div>
+             <div className="relative flex-1 flex flex-col max-w-xs w-full bg-[#232D1A] border-r border-[#3A4D23] p-6">
+                <button
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="absolute top-5 right-5 p-2 text-[#8BAE5A]"
+                >
+                    <XMarkIcon className="w-6 h-6" />
+                </button>
+                <SidebarContent pathname={pathname} />
+             </div>
+          </div>
+        )}
+        
+        {/* Desktop Sidebar */}
+        <aside className="hidden md:block w-72 bg-[#232D1A] border-r border-[#3A4D23] min-h-screen p-6">
+          <SidebarContent pathname={pathname} />
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-6 md:p-12">
+        <main className="flex-1 p-6 md:p-12 overflow-x-auto">
           {children}
         </main>
       </div>

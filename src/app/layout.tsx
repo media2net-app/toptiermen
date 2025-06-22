@@ -19,6 +19,7 @@ const figtree = Figtree({
 export const metadata = {
   title: 'Top Tier Men',
   description: 'Become the best version of yourself',
+  viewport: 'width=device-width, initial-scale=1.0',
 };
 
 export default function RootLayout({
