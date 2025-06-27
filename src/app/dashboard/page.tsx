@@ -142,7 +142,7 @@ export default function Dashboard() {
   const [showAddMissionModal, setShowAddMissionModal] = useState(false);
   const [newMission, setNewMission] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const [showWelcome, setShowWelcome] = useState(true);
+  const [showWelcome, setShowWelcome] = useState(false);
   const [videoLoading, setVideoLoading] = useState(true);
   const [videoError, setVideoError] = useState(false);
   const [videoTimeout, setVideoTimeout] = useState(false);
@@ -366,6 +366,12 @@ export default function Dashboard() {
     }
   }, [showWelcome, videoLoading]);
 
+  useEffect(() => {
+    // Check of welkomsvideo al getoond is
+    const shown = localStorage.getItem('welcomeVideoShown');
+    setShowWelcome(!shown);
+  }, []);
+
   return (
     <ClientLayout>
       <div className="max-w-7xl mx-auto w-full px-2 sm:px-4 md:px-0">
@@ -539,8 +545,6 @@ export default function Dashboard() {
           </div>
         </div>
         
-        <BrotherhoodWidget />
-        
         {/* Onboarding Widget - Only show for new users */}
         <OnboardingWidget 
           isVisible={showOnboarding && !onboardingCompleted}
@@ -550,310 +554,313 @@ export default function Dashboard() {
             localStorage.setItem('onboardingCompleted', 'true');
             toast.success('Gefeliciteerd! Je hebt je fundament gelegd! 🎉');
           }}
-          onHide={() => {
-            setShowOnboarding(false);
-            localStorage.setItem('onboardingSkipped', 'true');
-          }}
         />
         
-        {/* Jouw Week in Cijfers */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 animate-fade-in-up">
-          {/* Mijn Missies */}
-          <Link href="/dashboard/mijn-missies" className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#f0a14f] cursor-pointer block">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold text-white">Mijn Missies</h3>
-              <span className="text-[#8BAE5A] text-2xl">🎯</span>
-            </div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-3xl font-bold text-white">3/5</span>
-              <span className="text-[#8BAE5A]">volbracht</span>
-            </div>
-            <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
-              <div className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full" style={{ width: '60%' }}></div>
-            </div>
-          </Link>
-
-          {/* Trainingscentrum */}
-          {/* (verwijderd) */}
-
-          {/* Mind & Focus */}
-          <div className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#f0a14f]">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold text-white">Mind & Focus</h3>
-              <span className="text-[#8BAE5A] text-2xl">🧘‍♂️</span>
-            </div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-3xl font-bold text-white">4</span>
-              <span className="text-[#8BAE5A]">meditaties voltooid</span>
-            </div>
-            <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
-              <div className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full" style={{ width: '80%' }}></div>
-            </div>
-          </div>
-
-          {/* Boekenkamer */}
-          <div className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#f0a14f]">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold text-white">Boekenkamer</h3>
-              <span className="text-[#8BAE5A] text-2xl">📚</span>
-            </div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-3xl font-bold text-white">45</span>
-              <span className="text-[#8BAE5A]">minuten gelezen</span>
-            </div>
-            <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
-              <div className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full" style={{ width: '75%' }}></div>
-            </div>
-          </div>
-
-          {/* Mijn Trainingen */}
-          <Link href="/dashboard/mijn-trainingen" className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#f0a14f] cursor-pointer block">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold text-white">Mijn Trainingen</h3>
-              <span className="text-[#8BAE5A] text-2xl">💪</span>
-            </div>
-            <div className="space-y-3">
-              <div>
-                <div className="text-sm text-[#8BAE5A] mb-1">Je volgt nu:</div>
-                <div className="text-lg font-bold text-white">Full Body Krachttraining</div>
-              </div>
-              <div>
-                <div className="text-sm text-[#8BAE5A] mb-1">Vandaag op het programma:</div>
-                <div className="text-white font-semibold">Pull Day</div>
-              </div>
-              <div className="flex items-center gap-2 mt-3">
-                <span className="text-2xl font-bold text-white">2/3</span>
-                <span className="text-[#8BAE5A]">trainingen gedaan</span>
-              </div>
-              <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
-                <div className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full" style={{ width: '66%' }}></div>
-              </div>
-              {/* Cross-module actie */}
-              <div className="mt-4 pt-3 border-t border-[#3A4D23]/40">
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    toast.success('Gedeeld in Brotherhood!');
-                  }}
-                  className="w-full px-4 py-2 rounded-xl bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#B6C948] transition-colors text-sm"
-                >
-                  🏆 Deel je Pull Day in Brotherhood
-                </button>
-              </div>
-            </div>
-          </Link>
-
-          {/* Mijn Voedingsplan */}
-          <Link href="/dashboard/voedingsplannen" className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#f0a14f] cursor-pointer block">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold text-white">Mijn Voedingsplan</h3>
-              <span className="text-[#8BAE5A] text-2xl">🥗</span>
-            </div>
-            <div className="space-y-3">
-              <div>
-                <div className="text-sm text-[#8BAE5A] mb-1">Jouw actieve plan:</div>
-                <div className="text-lg font-bold text-white">Gebalanceerd Dieet</div>
-              </div>
-              <div>
-                <div className="text-sm text-[#8BAE5A] mb-1">Calorie-doel:</div>
-                <div className="text-white font-semibold">2.450 kcal</div>
-              </div>
-              <div className="flex items-center gap-2 mt-3">
-                <span className="text-2xl font-bold text-white">1.850</span>
-                <span className="text-[#8BAE5A]">kcal gegeten</span>
-              </div>
-              <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
-                <div className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full" style={{ width: '75%' }}></div>
-              </div>
-            </div>
-          </Link>
-
-          {/* Finance & Business */}
-          <Link href="/dashboard/finance-en-business" className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#f0a14f] cursor-pointer block">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold text-white">Finance & Business</h3>
-              <span className="text-[#8BAE5A] text-2xl">💰</span>
-            </div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-3xl font-bold text-white">€12.500</span>
-              <span className="text-[#8BAE5A]">Netto Waarde</span>
-            </div>
-            <div className="w-full h-16 flex items-end">
-              {/* Mini Chart.js grafiek */}
-              <div className="w-full h-full">
-                <Line data={generateMiniFinanceChartData()} options={miniChartOptions} />
-              </div>
-            </div>
-            {/* Cross-module actie */}
-            <div className="mt-4 pt-3 border-t border-[#3A4D23]/40">
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  toast.success('Gedeeld in Brotherhood!');
-                }}
-                className="w-full px-3 py-2 rounded-xl bg-[#FFD700] text-[#181F17] font-semibold hover:bg-[#FFED4E] transition-colors text-sm"
-              >
-                💰 Deel je financiële mijlpaal in Brotherhood
-              </button>
-            </div>
-          </Link>
-        </div>
-
-        {/* Voortgang naar Hoofddoel */}
-        <div className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 mb-8 animate-fade-in-up">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-bold text-white">Voortgang naar Hoofddoel</h3>
-            <span className="text-[#8BAE5A] text-2xl">🎯</span>
-          </div>
-          <p className="text-white mb-4">Fitter worden en 10% lichaamsvet bereiken</p>
-          <div className="w-full h-3 bg-[#3A4D23]/40 rounded-full">
-            <div className="h-3 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full transition-all duration-700" style={{ width: `${progress}%` }}></div>
-          </div>
-          <div className="flex justify-between mt-2">
-            <span className="text-[#8BAE5A] text-sm">Start</span>
-            <span className="text-[#8BAE5A] text-sm">{progress}%</span>
-            <span className="text-[#8BAE5A] text-sm">Doel</span>
-          </div>
-        </div>
-
-        {/* Quote van de Dag */}
-        <div className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 mb-8 animate-fade-in-up">
-          <div className="flex items-center gap-4">
-            <span className="text-[#8BAE5A] text-4xl">💭</span>
-            <div>
-              <h3 className="text-xl font-bold text-white mb-2">Quote van de Dag</h3>
-              <blockquote className="text-white italic">"Discipline is the bridge between goals and accomplishment."</blockquote>
-              <p className="text-[#8BAE5A] text-sm mt-2">- Rick</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Gedetailleerde Widgets per Module */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8 animate-fade-in-up">
-          {/* Mijn Missies & Gewoontes */}
-          <div className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#f0a14f]">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-white">Mijn Missies & Gewoontes</h3>
-              <div className="flex items-center gap-2">
-                <span className="text-[#8BAE5A] text-2xl">🎯</span>
-                <button
-                  onClick={() => setShowAddMissionModal(true)}
-                  className="p-2 rounded-full bg-[#8BAE5A] hover:bg-[#B6C948] transition-colors"
-                >
-                  <PlusIcon className="w-5 h-5 text-[#181F17]" />
-                </button>
-              </div>
-            </div>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="text-[#8BAE5A]">✓</span>
-                  <span className="text-white">Dagelijkse meditatie</span>
+        {/* Dashboard Content - Only show after onboarding is completed */}
+        {onboardingCompleted && (
+          <>
+            <BrotherhoodWidget />
+            
+            {/* Jouw Week in Cijfers */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 animate-fade-in-up">
+              {/* Mijn Missies */}
+              <Link href="/dashboard/mijn-missies" className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#f0a14f] cursor-pointer block">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-white">Mijn Missies</h3>
+                  <span className="text-[#8BAE5A] text-2xl">🎯</span>
                 </div>
-                <span className="text-[#8BAE5A]">3/7 dagen</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="text-[#8BAE5A]">✓</span>
-                  <span className="text-white">10.000 stappen</span>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-3xl font-bold text-white">3/5</span>
+                  <span className="text-[#8BAE5A]">volbracht</span>
                 </div>
-                <span className="text-[#8BAE5A]">5/7 dagen</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="text-[#8BAE5A]">✓</span>
-                  <span className="text-white">30 min lezen</span>
+                <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
+                  <div className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full" style={{ width: '60%' }}></div>
                 </div>
-                <span className="text-[#8BAE5A]">4/7 dagen</span>
-              </div>
-              {/* Cross-module suggestie */}
-              <div className="mt-4 pt-3 border-t border-[#3A4D23]/40">
-                <div className="text-sm text-[#8BAE5A] mb-2">💡 Inspireer anderen:</div>
-                <button
-                  onClick={() => toast.success('Gedeeld in Social Feed!')}
-                  className="w-full px-3 py-2 rounded-xl bg-[#181F17] text-[#8BAE5A] font-semibold hover:bg-[#232D1A] transition-colors text-sm border border-[#3A4D23]"
-                >
-                  📚 Deel je leesvoortgang in Social Feed
-                </button>
-              </div>
-            </div>
-          </div>
+              </Link>
 
-          {/* Trainingscentrum */}
-          {/* (verwijderd) */}
+              {/* Trainingscentrum */}
+              {/* (verwijderd) */}
 
-          {/* Mind & Focus */}
-          <div className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#f0a14f]">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-white">Mind & Focus</h3>
-              <span className="text-[#8BAE5A] text-2xl">🧘‍♂️</span>
-            </div>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="text-[#8BAE5A]">⏱️</span>
-                  <span className="text-white">Meditatie streak</span>
+              {/* Mind & Focus */}
+              <div className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#f0a14f]">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-white">Mind & Focus</h3>
+                  <span className="text-[#8BAE5A] text-2xl">🧘‍♂️</span>
                 </div>
-                <span className="text-[#8BAE5A]">4 dagen</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="text-[#8BAE5A]">📝</span>
-                  <span className="text-white">Journal entries</span>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-3xl font-bold text-white">4</span>
+                  <span className="text-[#8BAE5A]">meditaties voltooid</span>
                 </div>
-                <span className="text-[#8BAE5A]">3 deze week</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="text-[#8BAE5A]">🎯</span>
-                  <span className="text-white">Focus score</span>
+                <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
+                  <div className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full" style={{ width: '80%' }}></div>
                 </div>
-                <span className="text-[#8BAE5A]">85%</span>
               </div>
-              {/* Cross-module actie */}
-              <div className="mt-4 pt-3 border-t border-[#3A4D23]/40">
-                <Link href="/dashboard/brotherhood/forum/fitness-gezondheid" className="block">
-                  <button className="w-full px-3 py-2 rounded-xl bg-[#181F17] text-[#8BAE5A] font-semibold hover:bg-[#232D1A] transition-colors text-sm border border-[#3A4D23]">
-                    💭 Vraag advies in Mind & Focus forum
+
+              {/* Boekenkamer */}
+              <div className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#f0a14f]">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-white">Boekenkamer</h3>
+                  <span className="text-[#8BAE5A] text-2xl">📚</span>
+                </div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-3xl font-bold text-white">45</span>
+                  <span className="text-[#8BAE5A]">minuten gelezen</span>
+                </div>
+                <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
+                  <div className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full" style={{ width: '75%' }}></div>
+                </div>
+              </div>
+
+              {/* Mijn Trainingen */}
+              <Link href="/dashboard/mijn-trainingen" className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#f0a14f] cursor-pointer block">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-white">Mijn Trainingen</h3>
+                  <span className="text-[#8BAE5A] text-2xl">💪</span>
+                </div>
+                <div className="space-y-3">
+                  <div>
+                    <div className="text-sm text-[#8BAE5A] mb-1">Je volgt nu:</div>
+                    <div className="text-lg font-bold text-white">Full Body Krachttraining</div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-[#8BAE5A] mb-1">Vandaag op het programma:</div>
+                    <div className="text-white font-semibold">Pull Day</div>
+                  </div>
+                  <div className="flex items-center gap-2 mt-3">
+                    <span className="text-2xl font-bold text-white">2/3</span>
+                    <span className="text-[#8BAE5A]">trainingen gedaan</span>
+                  </div>
+                  <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
+                    <div className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full" style={{ width: '66%' }}></div>
+                  </div>
+                  {/* Cross-module actie */}
+                  <div className="mt-4 pt-3 border-t border-[#3A4D23]/40">
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toast.success('Gedeeld in Brotherhood!');
+                      }}
+                      className="w-full px-4 py-2 rounded-xl bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#B6C948] transition-colors text-sm"
+                    >
+                      🏆 Deel je Pull Day in Brotherhood
+                    </button>
+                  </div>
+                </div>
+              </Link>
+
+              {/* Mijn Voedingsplan */}
+              <Link href="/dashboard/voedingsplannen" className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#f0a14f] cursor-pointer block">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-white">Mijn Voedingsplan</h3>
+                  <span className="text-[#8BAE5A] text-2xl">🥗</span>
+                </div>
+                <div className="space-y-3">
+                  <div>
+                    <div className="text-sm text-[#8BAE5A] mb-1">Jouw actieve plan:</div>
+                    <div className="text-lg font-bold text-white">Gebalanceerd Dieet</div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-[#8BAE5A] mb-1">Calorie-doel:</div>
+                    <div className="text-white font-semibold">2.450 kcal</div>
+                  </div>
+                  <div className="flex items-center gap-2 mt-3">
+                    <span className="text-2xl font-bold text-white">1.850</span>
+                    <span className="text-[#8BAE5A]">kcal gegeten</span>
+                  </div>
+                  <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
+                    <div className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full" style={{ width: '75%' }}></div>
+                  </div>
+                </div>
+              </Link>
+
+              {/* Finance & Business */}
+              <Link href="/dashboard/finance-en-business" className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#f0a14f] cursor-pointer block">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-white">Finance & Business</h3>
+                  <span className="text-[#8BAE5A] text-2xl">💰</span>
+                </div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-3xl font-bold text-white">€12.500</span>
+                  <span className="text-[#8BAE5A]">Netto Waarde</span>
+                </div>
+                <div className="w-full h-16 flex items-end">
+                  {/* Mini Chart.js grafiek */}
+                  <div className="w-full h-full">
+                    <Line data={generateMiniFinanceChartData()} options={miniChartOptions} />
+                  </div>
+                </div>
+                {/* Cross-module actie */}
+                <div className="mt-4 pt-3 border-t border-[#3A4D23]/40">
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      toast.success('Gedeeld in Brotherhood!');
+                    }}
+                    className="w-full px-3 py-2 rounded-xl bg-[#FFD700] text-[#181F17] font-semibold hover:bg-[#FFED4E] transition-colors text-sm"
+                  >
+                    💰 Deel je financiële mijlpaal in Brotherhood
                   </button>
-                </Link>
-              </div>
+                </div>
+              </Link>
             </div>
-          </div>
 
-          {/* Boekenkamer */}
-          <div className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#f0a14f]">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-white">Boekenkamer</h3>
-              <span className="text-[#8BAE5A] text-2xl">📚</span>
-            </div>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="text-[#8BAE5A]">📖</span>
-                  <span className="text-white">Huidig boek</span>
-                </div>
-                <span className="text-[#8BAE5A]">Atomic Habits</span>
+            {/* Voortgang naar Hoofddoel */}
+            <div className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 mb-8 animate-fade-in-up">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold text-white">Voortgang naar Hoofddoel</h3>
+                <span className="text-[#8BAE5A] text-2xl">🎯</span>
               </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="text-[#8BAE5A]">⏱️</span>
-                  <span className="text-white">Leestijd deze week</span>
-                </div>
-                <span className="text-[#8BAE5A]">45 min</span>
+              <p className="text-white mb-4">Fitter worden en 10% lichaamsvet bereiken</p>
+              <div className="w-full h-3 bg-[#3A4D23]/40 rounded-full">
+                <div className="h-3 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full transition-all duration-700" style={{ width: `${progress}%` }}></div>
               </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="text-[#8BAE5A]">🎯</span>
-                  <span className="text-white">Doel: 30 min/dag</span>
-                </div>
-                <span className="text-[#8BAE5A]">64%</span>
+              <div className="flex justify-between mt-2">
+                <span className="text-[#8BAE5A] text-sm">Start</span>
+                <span className="text-[#8BAE5A] text-sm">{progress}%</span>
+                <span className="text-[#8BAE5A] text-sm">Doel</span>
               </div>
             </div>
-          </div>
-        </div>
+
+            {/* Quote van de Dag */}
+            <div className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 mb-8 animate-fade-in-up">
+              <div className="flex items-center gap-4">
+                <span className="text-[#8BAE5A] text-4xl">💭</span>
+                <div>
+                  <h3 className="text-xl font-bold text-white mb-2">Quote van de Dag</h3>
+                  <blockquote className="text-white italic">"Discipline is the bridge between goals and accomplishment."</blockquote>
+                  <p className="text-[#8BAE5A] text-sm mt-2">- Rick</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Gedetailleerde Widgets per Module */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8 animate-fade-in-up">
+              {/* Mijn Missies & Gewoontes */}
+              <div className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#f0a14f]">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-bold text-white">Mijn Missies & Gewoontes</h3>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[#8BAE5A] text-2xl">🎯</span>
+                    <button
+                      onClick={() => setShowAddMissionModal(true)}
+                      className="p-2 rounded-full bg-[#8BAE5A] hover:bg-[#B6C948] transition-colors"
+                    >
+                      <PlusIcon className="w-5 h-5 text-[#181F17]" />
+                    </button>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="text-[#8BAE5A]">✓</span>
+                      <span className="text-white">Dagelijkse meditatie</span>
+                    </div>
+                    <span className="text-[#8BAE5A]">3/7 dagen</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="text-[#8BAE5A]">✓</span>
+                      <span className="text-white">10.000 stappen</span>
+                    </div>
+                    <span className="text-[#8BAE5A]">5/7 dagen</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="text-[#8BAE5A]">✓</span>
+                      <span className="text-white">30 min lezen</span>
+                    </div>
+                    <span className="text-[#8BAE5A]">4/7 dagen</span>
+                  </div>
+                  {/* Cross-module suggestie */}
+                  <div className="mt-4 pt-3 border-t border-[#3A4D23]/40">
+                    <div className="text-sm text-[#8BAE5A] mb-2">💡 Inspireer anderen:</div>
+                    <button
+                      onClick={() => toast.success('Gedeeld in Social Feed!')}
+                      className="w-full px-3 py-2 rounded-xl bg-[#181F17] text-[#8BAE5A] font-semibold hover:bg-[#232D1A] transition-colors text-sm border border-[#3A4D23]"
+                    >
+                      📚 Deel je leesvoortgang in Social Feed
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Trainingscentrum */}
+              {/* (verwijderd) */}
+
+              {/* Mind & Focus */}
+              <div className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#f0a14f]">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-bold text-white">Mind & Focus</h3>
+                  <span className="text-[#8BAE5A] text-2xl">🧘‍♂️</span>
+                </div>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="text-[#8BAE5A]">⏱️</span>
+                      <span className="text-white">Meditatie streak</span>
+                    </div>
+                    <span className="text-[#8BAE5A]">4 dagen</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="text-[#8BAE5A]">📝</span>
+                      <span className="text-white">Journal entries</span>
+                    </div>
+                    <span className="text-[#8BAE5A]">3 deze week</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="text-[#8BAE5A]">🎯</span>
+                      <span className="text-white">Focus score</span>
+                    </div>
+                    <span className="text-[#8BAE5A]">85%</span>
+                  </div>
+                  {/* Cross-module actie */}
+                  <div className="mt-4 pt-3 border-t border-[#3A4D23]/40">
+                    <Link href="/dashboard/brotherhood/forum/fitness-gezondheid" className="block">
+                      <button className="w-full px-3 py-2 rounded-xl bg-[#181F17] text-[#8BAE5A] font-semibold hover:bg-[#232D1A] transition-colors text-sm border border-[#3A4D23]">
+                        💭 Vraag advies in Mind & Focus forum
+                      </button>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+
+              {/* Boekenkamer */}
+              <div className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#f0a14f]">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-bold text-white">Boekenkamer</h3>
+                  <span className="text-[#8BAE5A] text-2xl">📚</span>
+                </div>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="text-[#8BAE5A]">📖</span>
+                      <span className="text-white">Huidig boek</span>
+                    </div>
+                    <span className="text-[#8BAE5A]">Atomic Habits</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="text-[#8BAE5A]">⏱️</span>
+                      <span className="text-white">Leestijd deze week</span>
+                    </div>
+                    <span className="text-[#8BAE5A]">45 min</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="text-[#8BAE5A]">🎯</span>
+                      <span className="text-white">Doel: 30 min/dag</span>
+                    </div>
+                    <span className="text-[#8BAE5A]">64%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Welcome Modal */}
@@ -867,7 +874,10 @@ export default function Dashboard() {
                 <p className="text-[#B6C948] mt-1">Een persoonlijke boodschap van Rick</p>
               </div>
               <button
-                onClick={() => setShowWelcome(false)}
+                onClick={() => {
+                  setShowWelcome(false);
+                  localStorage.setItem('welcomeVideoShown', 'true');
+                }}
                 className="p-2 rounded-xl hover:bg-[#181F17] transition-colors duration-200"
               >
                 <svg className="w-6 h-6 text-[#B6C948]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1062,7 +1072,10 @@ export default function Dashboard() {
               </div>
               
               <button
-                onClick={() => setShowWelcome(false)}
+                onClick={() => {
+                  setShowWelcome(false);
+                  localStorage.setItem('welcomeVideoShown', 'true');
+                }}
                 className="px-6 py-3 rounded-xl bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#B6C948] transition-all duration-200"
               >
                 Begrijpen & Doorgaan

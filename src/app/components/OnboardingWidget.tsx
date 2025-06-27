@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { CheckCircleIcon, XMarkIcon, ArrowRightIcon, TagIcon, BellIcon, CakeIcon, StarIcon, TrophyIcon } from '@heroicons/react/24/solid';
+import { CheckCircleIcon, XMarkIcon, ArrowRightIcon } from '@heroicons/react/24/solid';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -9,7 +9,6 @@ interface OnboardingStep {
   id: string;
   title: string;
   description: string;
-  icon: React.ReactNode;
   completed: boolean;
   action: () => void;
 }
@@ -17,16 +16,14 @@ interface OnboardingStep {
 interface OnboardingWidgetProps {
   isVisible: boolean;
   onComplete: () => void;
-  onHide: () => void;
 }
 
-export default function OnboardingWidget({ isVisible, onComplete, onHide }: OnboardingWidgetProps) {
+export default function OnboardingWidget({ isVisible, onComplete }: OnboardingWidgetProps) {
   const [steps, setSteps] = useState<OnboardingStep[]>([
     {
       id: 'goal',
       title: 'Definieer jouw #1 Hoofddoel',
       description: 'Stel je belangrijkste doel voor de komende 6 maanden vast',
-      icon: <TagIcon className="w-6 h-6" />,
       completed: false,
       action: () => setShowGoalModal(true)
     },
@@ -34,7 +31,6 @@ export default function OnboardingWidget({ isVisible, onComplete, onHide }: Onbo
       id: 'training',
       title: 'Stel je Persoonlijke Trainingsschema samen',
       description: 'Creëer een op maat gemaakt trainingsplan',
-      icon: <BellIcon className="w-6 h-6" />,
       completed: false,
       action: () => router.push('/dashboard/trainingscentrum')
     },
@@ -42,7 +38,6 @@ export default function OnboardingWidget({ isVisible, onComplete, onHide }: Onbo
       id: 'nutrition',
       title: 'Creëer je Voedingsplan op Maat',
       description: 'Genereer een persoonlijk voedingsplan',
-      icon: <CakeIcon className="w-6 h-6" />,
       completed: false,
       action: () => router.push('/dashboard/voedingsplannen')
     },
@@ -50,24 +45,24 @@ export default function OnboardingWidget({ isVisible, onComplete, onHide }: Onbo
       id: 'missions',
       title: 'Kies je Eerste 3 Missies',
       description: 'Selecteer je eerste dagelijkse gewoontes',
-      icon: <StarIcon className="w-6 h-6" />,
       completed: false,
       action: () => setShowMissionsModal(true)
     },
     {
       id: 'challenge',
       title: 'Doe mee aan een Starter-Challenge',
-      description: 'Start met een 30-dagen uitdaging',
-      icon: <TrophyIcon className="w-6 h-6" />,
+      description: 'Kies een challenge om direct te starten.',
       completed: false,
-      action: () => router.push('/dashboard/trainingscentrum')
+      action: () => setShowChallengeModal(true)
     }
   ]);
 
   const [showGoalModal, setShowGoalModal] = useState(false);
   const [showMissionsModal, setShowMissionsModal] = useState(false);
+  const [showChallengeModal, setShowChallengeModal] = useState(false);
   const [goalText, setGoalText] = useState('');
   const [selectedMissions, setSelectedMissions] = useState<string[]>([]);
+  const [selectedChallenge, setSelectedChallenge] = useState<string>('');
   const [isCompleted, setIsCompleted] = useState(false);
   const router = useRouter();
 
@@ -85,6 +80,51 @@ export default function OnboardingWidget({ isVisible, onComplete, onHide }: Onbo
     { id: 'gratitude', title: 'Dankbaarheid opschrijven', description: 'Cultiveer een positieve mindset' }
   ];
 
+  const starterChallenges = [
+    'Push-up Challenge',
+    'Plank Challenge',
+    'Squat Challenge',
+    'Burpee Challenge',
+    'Mountain Climber Challenge',
+  ];
+
+  // Initialize steps from localStorage and check for external completions
+  useEffect(() => {
+    const initializeSteps = () => {
+      // Laad bestaande voltooide stappen uit localStorage
+      const completedStepsData = localStorage.getItem('onboardingCompletedSteps');
+      const completedIds = completedStepsData ? JSON.parse(completedStepsData) : [];
+
+      // Check externe flags
+      const trainingCompleted = localStorage.getItem('trainingSchemaCompleted') === 'true';
+      const nutritionCompleted = localStorage.getItem('nutritionPlanCompleted') === 'true';
+
+      // Combineer alles in een Set (geen dubbele waarden)
+      const allCompletedIds = new Set(completedIds);
+      if (trainingCompleted) allCompletedIds.add('training');
+      if (nutritionCompleted) allCompletedIds.add('nutrition');
+
+      // Update steps met gecombineerde status
+      setSteps(prevSteps =>
+        prevSteps.map(step => ({
+          ...step,
+          completed: allCompletedIds.has(step.id)
+        }))
+      );
+      // Sla direct de gecombineerde lijst op zodat deze nooit verloren gaat
+      localStorage.setItem('onboardingCompletedSteps', JSON.stringify(Array.from(allCompletedIds)));
+    };
+
+    initializeSteps();
+
+    const handleFocus = () => {
+      initializeSteps();
+    };
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, []);
+
+  // Check for completion
   useEffect(() => {
     if (completedSteps === steps.length && !isCompleted) {
       setIsCompleted(true);
@@ -94,38 +134,6 @@ export default function OnboardingWidget({ isVisible, onComplete, onHide }: Onbo
     }
   }, [completedSteps, steps.length, isCompleted, onComplete]);
 
-  // Check if user has completed training or nutrition steps
-  useEffect(() => {
-    const checkCompletedSteps = () => {
-      const trainingCompleted = localStorage.getItem('trainingSchemaCompleted');
-      const nutritionCompleted = localStorage.getItem('nutritionPlanCompleted');
-      
-      let updatedSteps = [...steps];
-      
-      if (trainingCompleted && !steps.find(s => s.id === 'training')?.completed) {
-        updatedSteps = updatedSteps.map(step => 
-          step.id === 'training' ? { ...step, completed: true } : step
-        );
-      }
-      
-      if (nutritionCompleted && !steps.find(s => s.id === 'nutrition')?.completed) {
-        updatedSteps = updatedSteps.map(step => 
-          step.id === 'nutrition' ? { ...step, completed: true } : step
-        );
-      }
-      
-      if (updatedSteps !== steps) {
-        setSteps(updatedSteps);
-      }
-    };
-
-    // Check on mount and when window gains focus
-    checkCompletedSteps();
-    window.addEventListener('focus', checkCompletedSteps);
-    
-    return () => window.removeEventListener('focus', checkCompletedSteps);
-  }, [steps]);
-
   const handleStepClick = (step: OnboardingStep) => {
     if (!step.completed) {
       step.action();
@@ -134,6 +142,13 @@ export default function OnboardingWidget({ isVisible, onComplete, onHide }: Onbo
 
   const handleGoalSave = () => {
     if (goalText.trim()) {
+      // Voeg 'goal' toe aan localStorage
+      const completedStepsData = localStorage.getItem('onboardingCompletedSteps');
+      const completedIds = completedStepsData ? JSON.parse(completedStepsData) : [];
+      if (!completedIds.includes('goal')) {
+        completedIds.push('goal');
+        localStorage.setItem('onboardingCompletedSteps', JSON.stringify(completedIds));
+      }
       const updatedSteps = steps.map(step => 
         step.id === 'goal' ? { ...step, completed: true } : step
       );
@@ -155,12 +170,37 @@ export default function OnboardingWidget({ isVisible, onComplete, onHide }: Onbo
 
   const handleMissionsSave = () => {
     if (selectedMissions.length === 3) {
+      // Voeg 'missions' toe aan localStorage
+      const completedStepsData = localStorage.getItem('onboardingCompletedSteps');
+      const completedIds = completedStepsData ? JSON.parse(completedStepsData) : [];
+      if (!completedIds.includes('missions')) {
+        completedIds.push('missions');
+        localStorage.setItem('onboardingCompletedSteps', JSON.stringify(completedIds));
+      }
       const updatedSteps = steps.map(step => 
         step.id === 'missions' ? { ...step, completed: true } : step
       );
       setSteps(updatedSteps);
       setShowMissionsModal(false);
       setSelectedMissions([]);
+    }
+  };
+
+  const handleChallengeSave = () => {
+    if (selectedChallenge) {
+      // Voeg 'challenge' toe aan localStorage
+      const completedStepsData = localStorage.getItem('onboardingCompletedSteps');
+      const completedIds = completedStepsData ? JSON.parse(completedStepsData) : [];
+      if (!completedIds.includes('challenge')) {
+        completedIds.push('challenge');
+        localStorage.setItem('onboardingCompletedSteps', JSON.stringify(completedIds));
+      }
+      const updatedSteps = steps.map(step =>
+        step.id === 'challenge' ? { ...step, completed: true } : step
+      );
+      setSteps(updatedSteps);
+      setShowChallengeModal(false);
+      setSelectedChallenge('');
     }
   };
 
@@ -207,7 +247,6 @@ export default function OnboardingWidget({ isVisible, onComplete, onHide }: Onbo
       >
         {/* Close button */}
         <button
-          onClick={onHide}
           className="absolute top-4 right-4 text-[#8BAE5A] hover:text-white transition-colors"
         >
           <XMarkIcon className="w-6 h-6" />
@@ -273,14 +312,11 @@ export default function OnboardingWidget({ isVisible, onComplete, onHide }: Onbo
                 )}
               </div>
               <div className="flex-1">
-                <div className="flex items-center gap-3 mb-1">
-                  <span className="text-[#8BAE5A]">{step.icon}</span>
-                  <h3 className={`font-semibold ${
-                    step.completed ? 'text-[#8BAE5A] line-through' : 'text-white'
-                  }`}>
-                    {step.title}
-                  </h3>
-                </div>
+                <h3 className={`font-semibold mb-1 ${
+                  step.completed ? 'text-[#8BAE5A] line-through' : 'text-white'
+                }`}>
+                  {step.title}
+                </h3>
                 <p className={`text-sm ${
                   step.completed ? 'text-[#8BAE5A]/70' : 'text-[#8BAE5A]'
                 }`}>
@@ -293,16 +329,6 @@ export default function OnboardingWidget({ isVisible, onComplete, onHide }: Onbo
             </motion.div>
           ))}
         </div>
-
-        {/* Skip option */}
-        <div className="mt-6 pt-4 border-t border-[#3A4D23]/40 text-center">
-          <button
-            onClick={onHide}
-            className="text-[#8BAE5A] hover:text-white transition-colors text-sm font-semibold"
-          >
-            Sla over voor nu
-          </button>
-        </div>
       </motion.div>
 
       {/* Goal Modal */}
@@ -313,17 +339,17 @@ export default function OnboardingWidget({ isVisible, onComplete, onHide }: Onbo
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
-            onClick={() => setShowGoalModal(false)}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               className="bg-[#232D1A] rounded-2xl p-6 w-full max-w-md border border-[#8BAE5A]"
-              onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center gap-3 mb-4">
-                <TagIcon className="w-8 h-8 text-[#8BAE5A]" />
+                <div className="w-8 h-8 bg-[#8BAE5A] rounded-full flex items-center justify-center">
+                  <span className="text-[#181F17] font-bold">1</span>
+                </div>
                 <h3 className="text-xl font-bold text-white">
                   Definieer je Hoofddoel
                 </h3>
@@ -365,17 +391,17 @@ export default function OnboardingWidget({ isVisible, onComplete, onHide }: Onbo
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
-            onClick={() => setShowMissionsModal(false)}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               className="bg-[#232D1A] rounded-2xl p-6 w-full max-w-md border border-[#8BAE5A] max-h-[80vh] overflow-y-auto"
-              onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center gap-3 mb-4">
-                <StarIcon className="w-8 h-8 text-[#8BAE5A]" />
+                <div className="w-8 h-8 bg-[#8BAE5A] rounded-full flex items-center justify-center">
+                  <span className="text-[#181F17] font-bold">4</span>
+                </div>
                 <h3 className="text-xl font-bold text-white">
                   Kies je Eerste 3 Missies
                 </h3>
@@ -422,6 +448,50 @@ export default function OnboardingWidget({ isVisible, onComplete, onHide }: Onbo
                 </button>
               </div>
             </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Challenge Modal */}
+      <AnimatePresence>
+        {showChallengeModal && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <div className="bg-[#232D1A] rounded-2xl border border-[#3A4D23] max-w-md w-full mx-4 overflow-hidden shadow-2xl p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold">Kies een Starter-Challenge</h2>
+                <button onClick={() => setShowChallengeModal(false)} className="text-gray-400 hover:text-white">
+                  <span className="sr-only">Sluiten</span>
+                  <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+              </div>
+              <div className="space-y-2 mb-4">
+                {starterChallenges.map((challenge) => (
+                  <label key={challenge} className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="starter-challenge"
+                      value={challenge}
+                      checked={selectedChallenge === challenge}
+                      onChange={() => setSelectedChallenge(challenge)}
+                      className="accent-green-600"
+                    />
+                    <span>{challenge}</span>
+                  </label>
+                ))}
+              </div>
+              <button
+                className="w-full bg-green-700 hover:bg-green-800 text-white font-semibold py-2 px-4 rounded disabled:opacity-50"
+                onClick={handleChallengeSave}
+                disabled={!selectedChallenge}
+              >
+                Challenge starten
+              </button>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
