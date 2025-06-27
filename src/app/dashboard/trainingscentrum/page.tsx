@@ -473,20 +473,37 @@ export default function TrainingscentrumPage() {
               ))}
             </div>
 
-            <div className="mt-8 text-center">
+            <div className="mt-8 text-center space-y-4">
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => {
-                  setSelectedOption(null);
-                  setCurrentStep(1);
-                  setWorkoutSchema(null);
+                  // Mark training schema as completed for onboarding
+                  localStorage.setItem('trainingSchemaCompleted', 'true');
+                  // Navigate back to dashboard
+                  window.location.href = '/dashboard';
                 }}
-                className="inline-flex items-center px-6 py-3 bg-[#8BAE5A] text-[#232D1A] font-semibold rounded-lg hover:bg-[#7A9D4A] transition-colors duration-200"
+                className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] text-[#232D1A] font-bold rounded-xl hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200 shadow-lg hover:shadow-xl"
               >
-                <ArrowRightIcon className="w-5 h-5 mr-2" />
-                Nieuw Schema Genereren
+                <CheckIcon className="w-6 h-6 mr-2" />
+                Start met dit Schema
               </motion.button>
+              
+              <div>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => {
+                    setSelectedOption(null);
+                    setCurrentStep(1);
+                    setWorkoutSchema(null);
+                  }}
+                  className="inline-flex items-center px-6 py-3 bg-[#3A4D23] text-[#8BAE5A] font-semibold rounded-lg hover:bg-[#4A5D33] transition-colors duration-200"
+                >
+                  <ArrowRightIcon className="w-5 h-5 mr-2" />
+                  Nieuw Schema Genereren
+                </motion.button>
+              </div>
             </div>
           </motion.div>
         )}

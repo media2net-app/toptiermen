@@ -674,7 +674,20 @@ export default function VoedingsplannenPage() {
                 ))}
               </div>
 
-              <div className="text-center pt-6">
+              <div className="text-center pt-6 space-y-4">
+                <button
+                  onClick={() => {
+                    // Mark nutrition plan as completed for onboarding
+                    localStorage.setItem('nutritionPlanCompleted', 'true');
+                    // Navigate back to dashboard
+                    window.location.href = '/dashboard';
+                  }}
+                  className="bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] text-[#232D1A] px-8 py-4 rounded-xl font-bold hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center mx-auto"
+                >
+                  <CheckIcon className="w-6 h-6 mr-2" />
+                  Start met dit Plan
+                </button>
+                
                 <button
                   onClick={() => setCurrentStep(1)}
                   className="bg-[#3A4D23] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#4A5D33] transition-all"

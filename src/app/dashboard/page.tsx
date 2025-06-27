@@ -17,6 +17,7 @@ import {
   Filler,
 } from 'chart.js';
 import BrotherhoodWidget from '../components/BrotherhoodWidget';
+import OnboardingWidget from '../components/OnboardingWidget';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Filler);
 
@@ -147,6 +148,21 @@ export default function Dashboard() {
   const [videoTimeout, setVideoTimeout] = useState(false);
   const [autoplayBlocked, setAutoplayBlocked] = useState(false);
   const [userInteracted, setUserInteracted] = useState(false);
+  
+  // Onboarding state
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [onboardingCompleted, setOnboardingCompleted] = useState(false);
+
+  // Check onboarding status on component mount
+  useEffect(() => {
+    const onboardingStatus = localStorage.getItem('onboardingCompleted');
+    if (!onboardingStatus) {
+      setShowOnboarding(true);
+    } else {
+      setOnboardingCompleted(true);
+      setShowOnboarding(false);
+    }
+  }, []);
 
   // Dummy data
   const notifications = [
@@ -524,6 +540,21 @@ export default function Dashboard() {
         </div>
         
         <BrotherhoodWidget />
+        
+        {/* Onboarding Widget - Only show for new users */}
+        <OnboardingWidget 
+          isVisible={showOnboarding && !onboardingCompleted}
+          onComplete={() => {
+            setOnboardingCompleted(true);
+            setShowOnboarding(false);
+            localStorage.setItem('onboardingCompleted', 'true');
+            toast.success('Gefeliciteerd! Je hebt je fundament gelegd! 🎉');
+          }}
+          onHide={() => {
+            setShowOnboarding(false);
+            localStorage.setItem('onboardingSkipped', 'true');
+          }}
+        />
         
         {/* Jouw Week in Cijfers */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 animate-fade-in-up">
