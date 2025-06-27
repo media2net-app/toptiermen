@@ -4,6 +4,7 @@ import { ReactNode } from 'react';
 interface PageLayoutProps {
   title: string;
   subtitle?: string;
+  description?: string;
   actionButtons?: ReactNode;
   children: ReactNode;
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '7xl' | 'full';
@@ -30,6 +31,7 @@ const paddingClasses = {
 export default function PageLayout({ 
   title, 
   subtitle, 
+  description,
   actionButtons, 
   children, 
   maxWidth = '7xl',
@@ -47,6 +49,11 @@ export default function PageLayout({
             {subtitle && (
               <p className="text-[#A3AED6] text-base sm:text-lg">
                 {subtitle}
+              </p>
+            )}
+            {description && (
+              <p className="text-[#B6C948] text-base sm:text-lg mt-1">
+                {description}
               </p>
             )}
           </div>

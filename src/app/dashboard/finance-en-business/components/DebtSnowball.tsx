@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from 'react';
-import Card, { CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
+import Card from '@/components/ui/Card';
 import { PlusIcon, TrashIcon, CalculatorIcon } from '@heroicons/react/24/outline';
 
 interface Debt {
@@ -138,12 +138,10 @@ export default function DebtSnowball() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          🏔️ Schulden-Sneeuwbal Calculator
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
+      <div className="font-bold text-lg mb-2">
+        🏔️ Schulden-Sneeuwbal Calculator
+      </div>
+      <div className="p-4">
         {/* Strategy Selection */}
         <div className="bg-[#181F17] rounded-xl p-4">
           <h3 className="text-[#8BAE5A] font-semibold mb-3">Kies je Strategie</h3>
@@ -335,7 +333,7 @@ export default function DebtSnowball() {
             </div>
           </div>
         )}
-      </CardContent>
+      </div>
     </Card>
   );
 } 

@@ -134,10 +134,14 @@ export default function OutdoorSchema() {
       name: ex.name,
       video: ex.img,
       instructions: [ex.notes],
+      alternatives: [
+        { name: `${ex.name} (Makkelijker)`, reason: 'Niveau aanpassen' },
+        { name: `${ex.name} (Zwaarder)`, reason: 'Meer uitdaging nodig' }
+      ],
       sets: [
-        { prevWeight: Number(ex.last.split('@')[1]?.replace('kg', '').trim()) || 0, prevReps: Number(ex.last.split('reps')[0]?.trim()) || 0, weight: '', reps: '', done: false },
-        { prevWeight: Number(ex.last.split('@')[1]?.replace('kg', '').trim()) || 0, prevReps: Number(ex.last.split('reps')[0]?.trim()) || 0, weight: '', reps: '', done: false },
-        { prevWeight: Number(ex.last.split('@')[1]?.replace('kg', '').trim()) || 0, prevReps: Number(ex.last.split('reps')[0]?.trim()) || 0, weight: '', reps: '', done: false }
+        { prevWeight: Number(ex.last.split('@')[1]?.replace('kg', '').trim()) || 0, prevReps: Number(ex.last.split('reps')[0]?.trim()) || 0, weight: '', reps: '', done: false, feedback: '' },
+        { prevWeight: Number(ex.last.split('@')[1]?.replace('kg', '').trim()) || 0, prevReps: Number(ex.last.split('reps')[0]?.trim()) || 0, weight: '', reps: '', done: false, feedback: '' },
+        { prevWeight: Number(ex.last.split('@')[1]?.replace('kg', '').trim()) || 0, prevReps: Number(ex.last.split('reps')[0]?.trim()) || 0, weight: '', reps: '', done: false, feedback: '' }
       ]
     }))
   };
@@ -169,7 +173,15 @@ export default function OutdoorSchema() {
         </div>
       </div>
 
-      <WorkoutPlayerModal isOpen={showWorkoutModal} onClose={() => setShowWorkoutModal(false)} trainingData={trainingData} />
+      <WorkoutPlayerModal 
+        isOpen={showWorkoutModal} 
+        onClose={() => setShowWorkoutModal(false)} 
+        onComplete={(data) => {
+          console.log('Workout completed:', data);
+          setShowWorkoutModal(false);
+        }}
+        trainingData={trainingData} 
+      />
 
       {/* Tabbladen per dag */}
       <div className="flex gap-2 mb-4">

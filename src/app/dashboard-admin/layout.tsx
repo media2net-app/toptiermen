@@ -241,14 +241,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 >
                     <XMarkIcon className="w-6 h-6" />
                 </button>
-                <SidebarContent pathname={pathname} />
+                <SidebarContent pathname={pathname ?? ''} />
              </div>
           </div>
         )}
         
         {/* Desktop Sidebar */}
         <aside className="hidden md:block w-72 bg-[#232D1A] border-r border-[#3A4D23] min-h-screen p-6">
-          <SidebarContent pathname={pathname} />
+          <SidebarContent pathname={pathname ?? ''} />
         </aside>
 
         {/* Main Content */}

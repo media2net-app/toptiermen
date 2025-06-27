@@ -35,6 +35,8 @@ interface WorkoutSchema {
       sets: number;
       reps: string;
       rest: string;
+      alternatives: { name: string; reason: string }[];
+      feedback: string;
     }[];
   }[];
 }
@@ -90,6 +92,29 @@ export default function TrainingscentrumPage() {
       full: ['Burpees', 'Mountain Climbers', 'Jump Squats', 'Push-ups', 'Pull-ups']
     };
 
+    const exerciseAlternatives = {
+      'Bench Press': [
+        { name: 'Dumbbell Press', reason: 'Geen barbell beschikbaar' },
+        { name: 'Machine Chest Press', reason: 'Barbell rack bezet' }
+      ],
+      'Pull-ups': [
+        { name: 'Lat Pulldown', reason: 'Pull-up bar niet beschikbaar' },
+        { name: 'Assisted Pull-ups', reason: 'Nog niet sterk genoeg' }
+      ],
+      'Squats': [
+        { name: 'Leg Press', reason: 'Squat rack bezet' },
+        { name: 'Goblet Squats', reason: 'Lichte blessure' }
+      ],
+      'Deadlifts': [
+        { name: 'Romanian Deadlifts', reason: 'Lichte blessure' },
+        { name: 'Good Mornings', reason: 'Geen barbell beschikbaar' }
+      ],
+      'Push-ups': [
+        { name: 'Knee Push-ups', reason: 'Nog niet sterk genoeg' },
+        { name: 'Incline Push-ups', reason: 'Makkelijkere variant' }
+      ]
+    };
+
     const exercises = style === 'gym' ? gymExercises : bodyweightExercises;
     
     const dayConfigs = {
@@ -133,7 +158,9 @@ export default function TrainingscentrumPage() {
         name: exercise,
         sets: Math.floor(Math.random() * 3) + 3, // 3-5 sets
         reps: style === 'gym' ? '8-12' : '10-15',
-        rest: '60-90 sec'
+        rest: '60-90 sec',
+        alternatives: exerciseAlternatives[exercise as keyof typeof exerciseAlternatives] || [],
+        feedback: ''
       }))
     }));
   };

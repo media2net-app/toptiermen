@@ -12,6 +12,8 @@ import {
   Legend,
   Filler,
 } from 'chart.js';
+import Button from '@/components/ui/Button';
+import Card from '@/components/ui/Card';
 
 ChartJS.register(
   CategoryScale,

@@ -2,6 +2,7 @@
 import { Fragment, useState, useEffect } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { PlayIcon, PauseIcon, ArrowRightIcon, FireIcon, LightBulbIcon } from "@heroicons/react/24/solid";
+import { SparklesIcon } from '@heroicons/react/24/outline';
 
 interface PreWorkoutModalProps {
   isOpen: boolean;

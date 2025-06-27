@@ -137,8 +137,8 @@ export default function AcademyManagement() {
   const [selectedModule, setSelectedModule] = useState<number | null>(null);
   const [showModuleModal, setShowModuleModal] = useState(false);
   const [showLessonModal, setShowLessonModal] = useState(false);
-  const [editingModule, setEditingModule] = useState<any>(null);
-  const [editingLesson, setEditingLesson] = useState<any>(null);
+  const [editingModule, setEditingModule] = useState<number | null>(null);
+  const [editingLesson, setEditingLesson] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
@@ -150,7 +150,7 @@ export default function AcademyManagement() {
     shortDescription: '',
     coverImage: '',
     status: 'draft',
-    unlockRequirement: null
+    unlockRequirement: '' as string | null
   });
 
   // Lesson form state
@@ -206,7 +206,7 @@ export default function AcademyManagement() {
   // Module Modal Functions
   const openModuleModal = (module?: any) => {
     if (module) {
-      setEditingModule(module);
+      setEditingModule(module.id);
       setModuleForm({
         title: module.title,
         description: module.description,
@@ -223,7 +223,7 @@ export default function AcademyManagement() {
         shortDescription: '',
         coverImage: '',
         status: 'draft',
-        unlockRequirement: null
+        unlockRequirement: '' as string | null
       });
     }
     setShowModuleModal(true);
@@ -263,7 +263,7 @@ export default function AcademyManagement() {
   // Lesson Modal Functions
   const openLessonModal = (lesson?: any) => {
     if (lesson) {
-      setEditingLesson(lesson);
+      setEditingLesson(lesson.id);
       setLessonForm({
         title: lesson.title,
         type: lesson.type,
@@ -681,13 +681,13 @@ export default function AcademyManagement() {
               <div>
                 <label className="block text-[#8BAE5A] font-semibold mb-2">Ontgrendel-voorwaarde (Geavanceerd)</label>
                 <select
-                  value={moduleForm.unlockRequirement || ''}
-                  onChange={(e) => setModuleForm({...moduleForm, unlockRequirement: e.target.value ? parseInt(e.target.value) : null})}
+                  value={moduleForm.unlockRequirement ?? ''}
+                  onChange={(e) => setModuleForm({...moduleForm, unlockRequirement: e.target.value})}
                   className="w-full px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
                 >
                   <option value="">Geen voorwaarde (direct beschikbaar)</option>
-                  {mockModules.filter(m => m.id !== editingModule?.id).map(module => (
-                    <option key={module.id} value={module.id}>
+                  {mockModules.filter(m => m.id !== editingModule).map(module => (
+                    <option key={module.id} value={String(module.id)}>
                       Deze module wordt ontgrendeld na het voltooien van: {module.title}
                     </option>
                   ))}
@@ -851,7 +851,7 @@ export default function AcademyManagement() {
                         />
                         {question.type === 'multiple_choice' && (
                           <div className="space-y-2">
-                            {question.options.map((option, optionIndex) => (
+                            {question.options.map((option: string, optionIndex: number) => (
                               <div key={optionIndex} className="flex items-center gap-2">
                                 <input
                                   type="radio"
