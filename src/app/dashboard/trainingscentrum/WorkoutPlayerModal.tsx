@@ -1,6 +1,7 @@
 "use client";
 import { Fragment, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
+import { ArrowPathIcon, LightBulbIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 
 const mockTraining = {
   name: "Push Day",
@@ -14,10 +15,15 @@ const mockTraining = {
         "Stang laten zakken tot borsthoogte",
         "Volledige extensie bij het uitstoten"
       ],
+      alternatives: [
+        { name: "Dumbbell Press", reason: "Geen barbell beschikbaar" },
+        { name: "Machine Chest Press", reason: "Barbell rack bezet" },
+        { name: "Incline Push-ups", reason: "Lichte blessure" }
+      ],
       sets: [
-        { prevWeight: 60, prevReps: 8, weight: "", reps: "", done: false },
-        { prevWeight: 60, prevReps: 8, weight: "", reps: "", done: false },
-        { prevWeight: 60, prevReps: 8, weight: "", reps: "", done: false }
+        { prevWeight: 60, prevReps: 8, weight: "", reps: "", done: false, feedback: "" },
+        { prevWeight: 60, prevReps: 8, weight: "", reps: "", done: false, feedback: "" },
+        { prevWeight: 60, prevReps: 8, weight: "", reps: "", done: false, feedback: "" }
       ]
     },
     {
@@ -28,10 +34,14 @@ const mockTraining = {
         "Dumbbells boven borst uitstoten",
         "Langzaam laten zakken tot schouderhoogte"
       ],
+      alternatives: [
+        { name: "Incline Barbell Press", reason: "Dumbbells niet beschikbaar" },
+        { name: "Decline Push-ups", reason: "Bankje bezet" }
+      ],
       sets: [
-        { prevWeight: 22, prevReps: 10, weight: "", reps: "", done: false },
-        { prevWeight: 22, prevReps: 10, weight: "", reps: "", done: false },
-        { prevWeight: 22, prevReps: 10, weight: "", reps: "", done: false }
+        { prevWeight: 22, prevReps: 10, weight: "", reps: "", done: false, feedback: "" },
+        { prevWeight: 22, prevReps: 10, weight: "", reps: "", done: false, feedback: "" },
+        { prevWeight: 22, prevReps: 10, weight: "", reps: "", done: false, feedback: "" }
       ]
     }
   ]
@@ -40,14 +50,19 @@ const mockTraining = {
 type WorkoutPlayerModalProps = {
   isOpen: boolean;
   onClose: () => void;
+  onComplete: (data: any) => void;
   trainingData?: typeof mockTraining;
 };
 
-export default function WorkoutPlayerModal({ isOpen, onClose, trainingData = mockTraining }: WorkoutPlayerModalProps) {
+export default function WorkoutPlayerModal({ isOpen, onClose, onComplete, trainingData = mockTraining }: WorkoutPlayerModalProps) {
   const [activeIdx, setActiveIdx] = useState(0);
   const [exercises, setExercises] = useState(trainingData.exercises);
   const [resting, setResting] = useState(false);
   const [restTime, setRestTime] = useState(90);
+  const [showAlternatives, setShowAlternatives] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [currentFeedback, setCurrentFeedback] = useState("");
+  const [workoutStartTime] = useState(Date.now());
 
   // Mock rest-timer
   function handleSetDone(exIdx: number, setIdx: number) {
@@ -62,6 +77,28 @@ export default function WorkoutPlayerModal({ isOpen, onClose, trainingData = moc
         : ex
     );
     setExercises(updated);
+
+    // Generate feedback based on performance
+    const currentSet = exercises[exIdx].sets[setIdx];
+    const weight = parseFloat(currentSet.weight);
+    const reps = parseInt(currentSet.reps);
+    const prevWeight = currentSet.prevWeight;
+    const prevReps = currentSet.prevReps;
+
+    let feedback = "";
+    if (weight > prevWeight && reps >= prevReps) {
+      feedback = "Uitstekend! Probeer de volgende set met " + (weight + 2.5) + "kg.";
+    } else if (weight === prevWeight && reps > prevReps) {
+      feedback = "Goed! Je hebt meer reps gedaan. Probeer nu " + (weight + 2.5) + "kg.";
+    } else if (weight === prevWeight && reps === prevReps) {
+      feedback = "Steady! Blijf op " + weight + "kg voor de volgende set.";
+    } else if (reps < prevReps) {
+      feedback = "De laatste rep was een gevecht. Blijf op " + weight + "kg.";
+    }
+
+    setCurrentFeedback(feedback);
+    setShowFeedback(true);
+
     setResting(true);
     setRestTime(90);
     const interval = setInterval(() => {
@@ -75,6 +112,35 @@ export default function WorkoutPlayerModal({ isOpen, onClose, trainingData = moc
       });
     }, 1000);
   }
+
+  const handleCompleteWorkout = () => {
+    const workoutDuration = Math.round((Date.now() - workoutStartTime) / 1000 / 60);
+    const totalVolume = exercises.reduce((total, exercise) => {
+      return total + exercise.sets.reduce((setTotal, set) => {
+        if (set.done && set.weight && set.reps) {
+          return setTotal + (parseFloat(set.weight) * parseInt(set.reps));
+        }
+        return setTotal;
+      }, 0);
+    }, 0);
+
+    const workoutData = {
+      duration: workoutDuration,
+      totalVolume: totalVolume,
+      exercises: exercises.map(exercise => ({
+        name: exercise.name,
+        sets: exercise.sets.filter(set => set.done).length,
+        reps: exercise.sets.filter(set => set.done).map(set => parseInt(set.reps)),
+        weight: exercise.sets.filter(set => set.done).map(set => parseFloat(set.weight)),
+        isPR: false // This would be calculated based on user history
+      })),
+      newPRs: [], // This would be calculated based on user history
+      energy: 0,
+      pump: 0
+    };
+
+    onComplete(workoutData);
+  };
 
   const activeExercise = exercises[activeIdx];
 
@@ -122,7 +188,16 @@ export default function WorkoutPlayerModal({ isOpen, onClose, trainingData = moc
                 </div>
                 {/* Actieve oefening */}
                 <div className="flex-1 p-6 flex flex-col gap-4">
-                  <h2 className="text-2xl font-bold text-[#FFD700] mb-2">{activeExercise.name}</h2>
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-2xl font-bold text-[#FFD700] mb-2">{activeExercise.name}</h2>
+                    <button
+                      onClick={() => setShowAlternatives(true)}
+                      className="p-2 rounded-lg bg-[#3A4D23] text-[#8BAE5A] hover:bg-[#8BAE5A] hover:text-[#181F17] transition-all"
+                      title="Alternatieve oefeningen"
+                    >
+                      <ArrowPathIcon className="h-5 w-5" />
+                    </button>
+                  </div>
                   <div className="flex flex-col md:flex-row gap-6">
                     {/* Video/GIF */}
                     <div className="w-full md:w-64 h-40 bg-[#181F17] rounded-xl flex items-center justify-center overflow-hidden">
@@ -195,7 +270,7 @@ export default function WorkoutPlayerModal({ isOpen, onClose, trainingData = moc
                   <div className="mt-8 flex justify-end">
                     <button
                       className="px-6 py-3 rounded-2xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] text-lg font-bold shadow-lg hover:from-[#FFD700] hover:to-[#8BAE5A] transition-all"
-                      onClick={onClose}
+                      onClick={handleCompleteWorkout}
                     >
                       VOLTOOI TRAINING
                     </button>
@@ -205,6 +280,61 @@ export default function WorkoutPlayerModal({ isOpen, onClose, trainingData = moc
             </Transition.Child>
           </div>
         </div>
+
+        {/* Feedback Modal */}
+        {showFeedback && (
+          <div className="fixed inset-0 z-60 flex items-center justify-center p-4">
+            <div className="bg-[#232D1A] rounded-2xl p-6 border border-[#8BAE5A]/40 max-w-md w-full">
+              <div className="flex items-center gap-3 mb-4">
+                <LightBulbIcon className="h-6 w-6 text-[#FFD700]" />
+                <h3 className="text-lg font-bold text-[#FFD700]">Prestatie Feedback</h3>
+              </div>
+              <p className="text-[#8BAE5A] mb-6">{currentFeedback}</p>
+              <button
+                onClick={() => setShowFeedback(false)}
+                className="w-full px-4 py-2 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-semibold"
+              >
+                Begrepen
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Alternatives Modal */}
+        {showAlternatives && (
+          <div className="fixed inset-0 z-60 flex items-center justify-center p-4">
+            <div className="bg-[#232D1A] rounded-2xl p-6 border border-[#8BAE5A]/40 max-w-md w-full">
+              <h3 className="text-lg font-bold text-[#FFD700] mb-4">
+                {activeExercise.name} vervangen?
+              </h3>
+              <p className="text-[#8BAE5A] mb-4">
+                Probeer een van deze alternatieven die dezelfde spiergroep traint:
+              </p>
+              <div className="space-y-3 mb-6">
+                {activeExercise.alternatives.map((alt, index) => (
+                  <div key={index} className="bg-[#181F17] rounded-lg p-3">
+                    <div className="font-semibold text-[#8BAE5A]">{alt.name}</div>
+                    <div className="text-sm text-[#8BAE5A]/70">{alt.reason}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowAlternatives(false)}
+                  className="flex-1 px-4 py-2 rounded-xl bg-[#3A4D23] text-[#8BAE5A] font-semibold"
+                >
+                  Blijf bij origineel
+                </button>
+                <button
+                  onClick={() => setShowAlternatives(false)}
+                  className="flex-1 px-4 py-2 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-semibold"
+                >
+                  Kies alternatief
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </Dialog>
     </Transition.Root>
   );

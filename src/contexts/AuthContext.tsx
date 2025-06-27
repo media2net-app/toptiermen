@@ -1,15 +1,21 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
-import { User } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabase';
+
+type User = {
+  id: string;
+  username: string;
+  role: 'user' | 'admin';
+  label: string;
+};
 
 type AuthContextType = {
   user: User | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
+  signIn: (username: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, fullName: string) => Promise<void>;
   signOut: () => Promise<void>;
+  isAuthenticated: boolean;
 };
 
 const AuthContext = createContext<AuthContextType>({
@@ -18,41 +24,57 @@ const AuthContext = createContext<AuthContextType>({
   signIn: async () => {},
   signUp: async () => {},
   signOut: async () => {},
+  isAuthenticated: false,
 });
+
+const users = [
+  { label: 'Rick', value: 'rick', password: 'demo', role: 'user' as const },
+  { label: 'Admin', value: 'admin', password: 'admin123', role: 'admin' as const },
+];
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // For now, we'll skip the actual Supabase session check
-    // and just set loading to false
-    setLoading(false);
+    // Check for existing session in localStorage
+    const isLoggedIn = localStorage.getItem('isLoggedIn');
+    const userRole = localStorage.getItem('userRole');
+    const username = localStorage.getItem('username');
+    const userLabel = localStorage.getItem('userLabel');
     
-    // TODO: Uncomment when Supabase is properly configured
-    // supabase.auth.getSession().then(({ data: { session } }) => {
-    //   setUser(session?.user ?? null);
-    //   setLoading(false);
-    // });
-
-    // const {
-    //   data: { subscription },
-    // } = supabase.auth.onAuthStateChange((_event, session) => {
-    //   setUser(session?.user ?? null);
-    // });
-
-    // return () => subscription.unsubscribe();
+    if (isLoggedIn === 'true' && username && userRole && userLabel) {
+      setUser({
+        id: username,
+        username,
+        role: userRole as 'user' | 'admin',
+        label: userLabel,
+      });
+    }
+    
+    setLoading(false);
   }, []);
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (username: string, password: string) => {
     try {
-      // TODO: Implement when Supabase is configured
-      console.log('Sign in:', email, password);
-      // const { error } = await supabase.auth.signInWithPassword({
-      //   email,
-      //   password,
-      // });
-      // if (error) throw error;
+      const user = users.find(u => u.value === username && u.password === password);
+      
+      if (!user) {
+        throw new Error('Invalid credentials');
+      }
+
+      // Set authentication state
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('userRole', user.role);
+      localStorage.setItem('username', user.value);
+      localStorage.setItem('userLabel', user.label);
+
+      setUser({
+        id: user.value,
+        username: user.value,
+        role: user.role,
+        label: user.label,
+      });
     } catch (error) {
       console.error('Error signing in:', error);
       throw error;
@@ -81,10 +103,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signOut = async () => {
     try {
-      // TODO: Implement when Supabase is configured
-      console.log('Sign out');
-      // const { error } = await supabase.auth.signOut();
-      // if (error) throw error;
+      // Clear authentication state
+      localStorage.removeItem('isLoggedIn');
+      localStorage.removeItem('userRole');
+      localStorage.removeItem('username');
+      localStorage.removeItem('userLabel');
+      
+      setUser(null);
     } catch (error) {
       console.error('Error signing out:', error);
       throw error;
@@ -92,7 +117,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      loading, 
+      signIn, 
+      signUp, 
+      signOut,
+      isAuthenticated: !!user 
+    }}>
       {children}
     </AuthContext.Provider>
   );

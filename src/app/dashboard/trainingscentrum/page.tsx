@@ -1,137 +1,469 @@
-'use client';
-import ClientLayout from '../../components/ClientLayout';
-import Link from 'next/link';
+"use client";
+
 import { useState } from 'react';
-import dynamic from 'next/dynamic';
-const WorkoutPlayerModal = dynamic(() => import('./WorkoutPlayerModal'), { ssr: false });
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  CalendarIcon, 
+  FireIcon, 
+  SparklesIcon,
+  PlayIcon,
+  CheckIcon,
+  ArrowRightIcon,
+  ClockIcon,
+  HeartIcon,
+  CalculatorIcon
+} from '@heroicons/react/24/outline';
+import PageLayout from '@/components/PageLayout';
 
-const trainings = [
-  {
-    title: "Workoutschema's",
-    description: "Kies uit gym, outdoor of bodyweight schema's. Persoonlijk afgestemd op jouw doelen.",
-    cta: "Bekijk schema's",
-    href: '/dashboard/trainingscentrum/workoutschema',
-    icon: '💪',
-  },
-  {
-    title: "Challenges",
-    description: "Doe mee aan Spartan Week, 30-dagen push-up challenge en meer. Daag jezelf uit!",
-    cta: "Bekijk challenges",
-    icon: '🏆',
-  },
-  {
-    title: "Voedingsplannen",
-    description: "Meal-prep strategieën en voedingsplannen voor optimale resultaten.",
-    cta: "Bekijk plannen",
-    icon: '🥗',
-  },
-];
+interface TrainingPreferences {
+  frequency: number;
+  style: 'gym' | 'bodyweight';
+}
 
-const todaysTraining = {
-  day: 2,
-  name: 'Push Day',
-  schema: 'Full Body',
-  exercises: [
-    {
-      name: 'Bench Press',
-      last: { sets: 3, reps: 8, weight: 60 },
-      suggestion: 62.5,
-    },
-    {
-      name: 'Incline Dumbbell Press',
-      last: { sets: 3, reps: 10, weight: 22 },
-      suggestion: 24,
-    },
-  ],
-};
+interface WorkoutSchema {
+  id: string;
+  name: string;
+  frequency: number;
+  style: 'gym' | 'bodyweight';
+  description: string;
+  days: {
+    day: number;
+    name: string;
+    focus: string;
+    exercises: {
+      name: string;
+      sets: number;
+      reps: string;
+      rest: string;
+    }[];
+  }[];
+}
 
-export default function Trainingscentrum() {
-  const [showWorkoutModal, setShowWorkoutModal] = useState(false);
+export default function TrainingscentrumPage() {
+  const [selectedOption, setSelectedOption] = useState<'training' | 'nutrition' | null>(null);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [trainingPreferences, setTrainingPreferences] = useState<TrainingPreferences>({
+    frequency: 0,
+    style: 'gym'
+  });
+  const [workoutSchema, setWorkoutSchema] = useState<WorkoutSchema | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const handleOptionSelect = (option: 'training' | 'nutrition') => {
+    setSelectedOption(option);
+    if (option === 'nutrition') {
+      // Navigate to voedingsplannen
+      window.location.href = '/dashboard/voedingsplannen';
+    }
+  };
+
+  const generateWorkoutSchema = () => {
+    setIsGenerating(true);
+    
+    // Simulate API call
+    setTimeout(() => {
+      const schema: WorkoutSchema = {
+        id: '1',
+        name: `${trainingPreferences.frequency}-Daagse ${trainingPreferences.style === 'gym' ? 'Gym' : 'Bodyweight'} Schema`,
+        frequency: trainingPreferences.frequency,
+        style: trainingPreferences.style,
+        description: `Een professioneel ${trainingPreferences.frequency}-daags schema geoptimaliseerd voor ${trainingPreferences.style === 'gym' ? 'gym training' : 'thuis training'} met focus op progressieve overload en balans.`,
+        days: generateWorkoutDays(trainingPreferences.frequency, trainingPreferences.style)
+      };
+      
+      setWorkoutSchema(schema);
+      setCurrentStep(3);
+      setIsGenerating(false);
+    }, 2000);
+  };
+
+  const generateWorkoutDays = (frequency: number, style: 'gym' | 'bodyweight') => {
+    const gymExercises = {
+      upper: ['Bench Press', 'Pull-ups', 'Overhead Press', 'Barbell Rows', 'Dips'],
+      lower: ['Squats', 'Deadlifts', 'Leg Press', 'Romanian Deadlifts', 'Lunges'],
+      full: ['Deadlifts', 'Bench Press', 'Squats', 'Pull-ups', 'Overhead Press']
+    };
+
+    const bodyweightExercises = {
+      upper: ['Push-ups', 'Pull-ups', 'Dips', 'Pike Push-ups', 'Inverted Rows'],
+      lower: ['Squats', 'Lunges', 'Pistol Squats', 'Glute Bridges', 'Calf Raises'],
+      full: ['Burpees', 'Mountain Climbers', 'Jump Squats', 'Push-ups', 'Pull-ups']
+    };
+
+    const exercises = style === 'gym' ? gymExercises : bodyweightExercises;
+    
+    const dayConfigs = {
+      2: [
+        { name: 'Full Body A', focus: 'Kracht & Hypertrofie', type: 'full' },
+        { name: 'Full Body B', focus: 'Kracht & Hypertrofie', type: 'full' }
+      ],
+      3: [
+        { name: 'Upper Body', focus: 'Bovenlichaam', type: 'upper' },
+        { name: 'Lower Body', focus: 'Onderlichaam', type: 'lower' },
+        { name: 'Full Body', focus: 'Volledige Lichaam', type: 'full' }
+      ],
+      4: [
+        { name: 'Upper Body A', focus: 'Bovenlichaam (Push)', type: 'upper' },
+        { name: 'Lower Body', focus: 'Onderlichaam', type: 'lower' },
+        { name: 'Upper Body B', focus: 'Bovenlichaam (Pull)', type: 'upper' },
+        { name: 'Full Body', focus: 'Volledige Lichaam', type: 'full' }
+      ],
+      5: [
+        { name: 'Upper Body A', focus: 'Bovenlichaam (Push)', type: 'upper' },
+        { name: 'Lower Body A', focus: 'Onderlichaam (Quad)', type: 'lower' },
+        { name: 'Upper Body B', focus: 'Bovenlichaam (Pull)', type: 'upper' },
+        { name: 'Lower Body B', focus: 'Onderlichaam (Posterior)', type: 'lower' },
+        { name: 'Full Body', focus: 'Volledige Lichaam', type: 'full' }
+      ],
+      6: [
+        { name: 'Upper Body A', focus: 'Bovenlichaam (Push)', type: 'upper' },
+        { name: 'Lower Body A', focus: 'Onderlichaam (Quad)', type: 'lower' },
+        { name: 'Upper Body B', focus: 'Bovenlichaam (Pull)', type: 'upper' },
+        { name: 'Lower Body B', focus: 'Onderlichaam (Posterior)', type: 'lower' },
+        { name: 'Full Body A', focus: 'Volledige Lichaam', type: 'full' },
+        { name: 'Full Body B', focus: 'Volledige Lichaam', type: 'full' }
+      ]
+    };
+
+    return dayConfigs[frequency as keyof typeof dayConfigs].map((config, index) => ({
+      day: index + 1,
+      name: config.name,
+      focus: config.focus,
+      exercises: exercises[config.type as keyof typeof exercises].slice(0, 5).map(exercise => ({
+        name: exercise,
+        sets: Math.floor(Math.random() * 3) + 3, // 3-5 sets
+        reps: style === 'gym' ? '8-12' : '10-15',
+        rest: '60-90 sec'
+      }))
+    }));
+  };
 
   return (
-    <ClientLayout>
-      <div className="space-y-6 sm:space-y-8">
-        <div>
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1 sm:mb-2 drop-shadow-lg">Trainingscentrum</h1>
-          <p className="text-[#A3AED6] text-base sm:text-lg">Alles voor jouw fysieke groei en discipline</p>
-        </div>
+    <PageLayout
+      title="Trainingscentrum"
+      description="Persoonlijke trainingsschema's en voedingsplannen op maat"
+    >
+      <AnimatePresence mode="wait">
+        {!selectedOption && (
+          <motion.div
+            key="choice"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="max-w-4xl mx-auto"
+          >
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-white mb-4">
+                Kies Jouw Focus
+              </h2>
+              <p className="text-gray-300 text-lg">
+                Wat wil je vandaag optimaliseren? Kies tussen een persoonlijk trainingsschema of een voedingsplan op maat.
+              </p>
+            </div>
 
-        {/* Jouw Training Vandaag blok */}
-        <div className="bg-[#232D1A]/90 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-xl border border-[#8BAE5A]/40 flex flex-col md:flex-row md:items-center md:justify-between gap-4 sm:gap-6">
-          <div className="flex-1">
-            <span className="text-[#8BAE5A] text-xs sm:text-sm font-semibold uppercase tracking-wider">Jouw Training Vandaag</span>
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mt-1 mb-2">
-              Dag {todaysTraining.day} - {todaysTraining.name}
-              <span className="block text-base sm:text-lg text-[#8BAE5A] mt-1 font-normal">'{todaysTraining.schema}' schema</span>
-            </h2>
-            <div className="space-y-2">
-              {todaysTraining.exercises.map((ex, i) => (
-                <div key={i} className="bg-[#181F17]/40 rounded-lg p-3 text-white">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-semibold text-[#FFD700] text-sm sm:text-base">{ex.name}</span>
+            <div className="grid md:grid-cols-2 gap-8">
+              {/* Trainingsschema Option */}
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="relative group cursor-pointer"
+                onClick={() => handleOptionSelect('training')}
+              >
+                <div className="bg-gradient-to-br from-[#232D1A] to-[#1A2315] border-2 border-[#3A4D23] rounded-2xl p-8 h-full transition-all duration-300 group-hover:border-[#8BAE5A] group-hover:shadow-2xl group-hover:shadow-[#8BAE5A]/20">
+                  <div className="flex items-center justify-center w-16 h-16 bg-[#8BAE5A] rounded-full mb-6 mx-auto group-hover:scale-110 transition-transform duration-300">
+                    <FireIcon className="w-8 h-8 text-[#232D1A]" />
                   </div>
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-xs sm:text-sm">
-                    <span className="text-[#8BAE5A]">
-                      Vorige: {ex.last.sets}×{ex.last.reps} @ {ex.last.weight}kg
-                    </span>
-                    <span className="text-[#FFD700] sm:ml-2">
-                      Vandaag: {ex.suggestion}kg
-                    </span>
+                  
+                  <h3 className="text-2xl font-bold text-white mb-4 text-center">
+                    Trainingsschema
+                  </h3>
+                  
+                  <p className="text-gray-300 text-center mb-6">
+                    Krijg een persoonlijk trainingsschema op basis van jouw beschikbaarheid en voorkeuren. Perfect voor zowel gym als thuis training.
+                  </p>
+                  
+                  <div className="space-y-3">
+                    <div className="flex items-center text-sm text-gray-400">
+                      <CheckIcon className="w-4 h-4 mr-2 text-[#8BAE5A]" />
+                      Op maat voor jouw frequentie
+                    </div>
+                    <div className="flex items-center text-sm text-gray-400">
+                      <CheckIcon className="w-4 h-4 mr-2 text-[#8BAE5A]" />
+                      Gym of bodyweight opties
+                    </div>
+                    <div className="flex items-center text-sm text-gray-400">
+                      <CheckIcon className="w-4 h-4 mr-2 text-[#8BAE5A]" />
+                      Progressieve overload
+                    </div>
                   </div>
                 </div>
+              </motion.div>
+
+              {/* Voedingsplan Option */}
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="relative group cursor-pointer"
+                onClick={() => handleOptionSelect('nutrition')}
+              >
+                <div className="bg-gradient-to-br from-[#232D1A] to-[#1A2315] border-2 border-[#3A4D23] rounded-2xl p-8 h-full transition-all duration-300 group-hover:border-[#8BAE5A] group-hover:shadow-2xl group-hover:shadow-[#8BAE5A]/20">
+                  <div className="flex items-center justify-center w-16 h-16 bg-[#8BAE5A] rounded-full mb-6 mx-auto group-hover:scale-110 transition-transform duration-300">
+                    <HeartIcon className="w-8 h-8 text-[#232D1A]" />
+                  </div>
+                  
+                  <h3 className="text-2xl font-bold text-white mb-4 text-center">
+                    Voedingsplan
+                  </h3>
+                  
+                  <p className="text-gray-300 text-center mb-6">
+                    Ontvang een compleet voedingsplan op basis van jouw doelen en voorkeuren. Van calorieën tot macronutriënten en maaltijdplanning.
+                  </p>
+                  
+                  <div className="space-y-3">
+                    <div className="flex items-center text-sm text-gray-400">
+                      <CheckIcon className="w-4 h-4 mr-2 text-[#8BAE5A]" />
+                      Persoonlijke caloriebehoefte
+                    </div>
+                    <div className="flex items-center text-sm text-gray-400">
+                      <CheckIcon className="w-4 h-4 mr-2 text-[#8BAE5A]" />
+                      Macro-optimalisatie
+                    </div>
+                    <div className="flex items-center text-sm text-gray-400">
+                      <CheckIcon className="w-4 h-4 mr-2 text-[#8BAE5A]" />
+                      Dagelijkse maaltijdplanning
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          </motion.div>
+        )}
+
+        {selectedOption === 'training' && currentStep === 1 && (
+          <motion.div
+            key="step1"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="max-w-4xl mx-auto"
+          >
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-white mb-4">
+                Stap 1: Hoeveel dagen per week wil je committeren aan je training?
+              </h2>
+              <p className="text-gray-300 text-lg">
+                Kies de frequentie die het beste past bij jouw levensstijl en doelen.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
+              {[2, 3, 4, 5, 6].map((days) => (
+                <motion.button
+                  key={days}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => {
+                    setTrainingPreferences(prev => ({ ...prev, frequency: days }));
+                    setCurrentStep(2);
+                  }}
+                  className={`p-6 rounded-xl border-2 transition-all duration-300 ${
+                    trainingPreferences.frequency === days
+                      ? 'border-[#8BAE5A] bg-[#8BAE5A]/10'
+                      : 'border-[#3A4D23] bg-[#232D1A] hover:border-[#8BAE5A]/50'
+                  }`}
+                >
+                  <div className="text-2xl font-bold text-white mb-2">{days}</div>
+                  <div className="text-sm text-gray-400">dagen</div>
+                  {days === 3 && (
+                    <div className="text-xs text-[#8BAE5A] mt-2">
+                      Aanbevolen voor een solide basis
+                    </div>
+                  )}
+                  {days === 5 && (
+                    <div className="text-xs text-[#8BAE5A] mt-2">
+                      Voor serieuze progressie
+                    </div>
+                  )}
+                </motion.button>
               ))}
             </div>
-          </div>
-          <div className="flex flex-col items-stretch sm:items-center justify-center mt-2 sm:mt-0">
-            <button
-              className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] text-lg sm:text-xl font-bold shadow-lg hover:from-[#FFD700] hover:to-[#8BAE5A] transition-all active:scale-95 touch-manipulation"
-              onClick={() => setShowWorkoutModal(true)}
-            >
-              START TRAINING
-            </button>
-          </div>
-        </div>
+          </motion.div>
+        )}
 
-        <WorkoutPlayerModal isOpen={showWorkoutModal} onClose={() => setShowWorkoutModal(false)} />
-
-        {/* Training opties grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-8">
-          {trainings.map((t, i) =>
-            i === 0 ? (
-              <Link
-                key={t.title}
-                href={t.href!}
-                className="bg-[#232D1A]/80 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-xl border border-[#3A4D23]/40 flex flex-col gap-3 sm:gap-4 items-start cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-2xl hover:border-[#8BAE5A] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] active:scale-[0.98] touch-manipulation"
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl" role="img" aria-label="icon">{t.icon}</span>
-                  <span className="text-lg sm:text-xl font-semibold text-white">{t.title}</span>
-                </div>
-                <p className="text-[#8BAE5A] text-sm sm:text-base">{t.description}</p>
-                <button className="mt-auto w-full sm:w-auto px-4 py-2 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] text-white font-semibold shadow hover:from-[#f0a14f] hover:to-[#8BAE5A] transition-all text-sm sm:text-base">{t.cta}</button>
-              </Link>
-            ) : (
-              <div key={t.title} className="bg-[#232D1A]/80 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-xl border border-[#3A4D23]/40 flex flex-col gap-3 sm:gap-4 items-start">
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl" role="img" aria-label="icon">{t.icon}</span>
-                  <span className="text-lg sm:text-xl font-semibold text-white">{t.title}</span>
-                </div>
-                <p className="text-[#8BAE5A] text-sm sm:text-base">{t.description}</p>
-                <button className="mt-auto w-full sm:w-auto px-4 py-2 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] text-white font-semibold shadow hover:from-[#f0a14f] hover:to-[#8BAE5A] transition-all text-sm sm:text-base">{t.cta}</button>
-              </div>
-            )
-          )}
-        </div>
-
-        <div className="flex flex-col items-stretch sm:items-center gap-4 pt-4 sm:pt-8">
-          <Link 
-            href="/dashboard/voedingsplannen" 
-            className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] text-lg sm:text-xl font-bold shadow-lg hover:from-[#FFD700] hover:to-[#8BAE5A] transition-all active:scale-95 touch-manipulation text-center"
+        {selectedOption === 'training' && currentStep === 2 && (
+          <motion.div
+            key="step2"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="max-w-4xl mx-auto"
           >
-            Bekijk Voedingsplannen
-          </Link>
-        </div>
-      </div>
-    </ClientLayout>
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-white mb-4">
+                Stap 2: Wat is jouw trainingsstijl?
+              </h2>
+              <p className="text-gray-300 text-lg">
+                Kies de omgeving waar je het liefst traint.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-8 mb-8">
+              {/* Gym Option */}
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => {
+                  setTrainingPreferences(prev => ({ ...prev, style: 'gym' }));
+                  generateWorkoutSchema();
+                }}
+                className={`cursor-pointer rounded-2xl p-8 border-2 transition-all duration-300 ${
+                  trainingPreferences.style === 'gym'
+                    ? 'border-[#8BAE5A] bg-[#8BAE5A]/10'
+                    : 'border-[#3A4D23] bg-[#232D1A] hover:border-[#8BAE5A]/50'
+                }`}
+              >
+                <div className="flex items-center justify-center w-16 h-16 bg-[#8BAE5A] rounded-full mb-6 mx-auto">
+                  <FireIcon className="w-8 h-8 text-[#232D1A]" />
+                </div>
+                
+                <h3 className="text-2xl font-bold text-white mb-4 text-center">
+                  🏋️‍♂️ Gym
+                </h3>
+                
+                <p className="text-gray-300 text-center">
+                  Je hebt toegang tot een sportschool met een volledig arsenaal aan barbells, dumbbells en machines.
+                </p>
+              </motion.div>
+
+              {/* Bodyweight Option */}
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => {
+                  setTrainingPreferences(prev => ({ ...prev, style: 'bodyweight' }));
+                  generateWorkoutSchema();
+                }}
+                className={`cursor-pointer rounded-2xl p-8 border-2 transition-all duration-300 ${
+                  trainingPreferences.style === 'bodyweight'
+                    ? 'border-[#8BAE5A] bg-[#8BAE5A]/10'
+                    : 'border-[#3A4D23] bg-[#232D1A] hover:border-[#8BAE5A]/50'
+                }`}
+              >
+                <div className="flex items-center justify-center w-16 h-16 bg-[#8BAE5A] rounded-full mb-6 mx-auto">
+                  <PlayIcon className="w-8 h-8 text-[#232D1A]" />
+                </div>
+                
+                <h3 className="text-2xl font-bold text-white mb-4 text-center">
+                  🤸 Bodyweight / Thuis
+                </h3>
+                
+                <p className="text-gray-300 text-center">
+                  Je traint thuis, buiten of op reis met voornamelijk je eigen lichaamsgewicht.
+                </p>
+              </motion.div>
+            </div>
+
+            {isGenerating && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-center"
+              >
+                <div className="inline-flex items-center space-x-2 text-[#8BAE5A]">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#8BAE5A]"></div>
+                  <span>We stellen het optimale schema voor je samen...</span>
+                </div>
+              </motion.div>
+            )}
+          </motion.div>
+        )}
+
+        {selectedOption === 'training' && currentStep === 3 && workoutSchema && (
+          <motion.div
+            key="step3"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="max-w-6xl mx-auto"
+          >
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-white mb-4">
+                {workoutSchema.name}
+              </h2>
+              <p className="text-gray-300 text-lg mb-6">
+                {workoutSchema.description}
+              </p>
+              <div className="inline-flex items-center space-x-4 text-sm text-gray-400">
+                <div className="flex items-center">
+                  <CalendarIcon className="w-4 h-4 mr-2" />
+                  {workoutSchema.frequency} dagen per week
+                </div>
+                <div className="flex items-center">
+                  <ClockIcon className="w-4 h-4 mr-2" />
+                  45-60 min per training
+                </div>
+              </div>
+            </div>
+
+            <div className="grid gap-6">
+              {workoutSchema.days.map((day, index) => (
+                <motion.div
+                  key={day.day}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-6"
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="text-xl font-bold text-white">
+                        Dag {day.day}: {day.name}
+                      </h3>
+                      <p className="text-gray-400">{day.focus}</p>
+                    </div>
+                    <div className="text-sm text-[#8BAE5A] font-medium">
+                      {day.exercises.length} oefeningen
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    {day.exercises.map((exercise, exerciseIndex) => (
+                      <div
+                        key={exerciseIndex}
+                        className="flex items-center justify-between p-3 bg-[#1A2315] rounded-lg"
+                      >
+                        <div className="flex-1">
+                          <div className="font-medium text-white">{exercise.name}</div>
+                        </div>
+                        <div className="flex items-center space-x-4 text-sm text-gray-400">
+                          <span>{exercise.sets} sets</span>
+                          <span>{exercise.reps} reps</span>
+                          <span>{exercise.rest} rust</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            <div className="mt-8 text-center">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => {
+                  setSelectedOption(null);
+                  setCurrentStep(1);
+                  setWorkoutSchema(null);
+                }}
+                className="inline-flex items-center px-6 py-3 bg-[#8BAE5A] text-[#232D1A] font-semibold rounded-lg hover:bg-[#7A9D4A] transition-colors duration-200"
+              >
+                <ArrowRightIcon className="w-5 h-5 mr-2" />
+                Nieuw Schema Genereren
+              </motion.button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </PageLayout>
   );
 } 

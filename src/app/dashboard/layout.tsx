@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
+import { useAuth } from '@/contexts/AuthContext';
 // import MobileNav from '../components/MobileNav';
 
 function slugify(str: string) {
@@ -127,12 +128,31 @@ const SidebarContent = ({ collapsed, onLinkClick }: { collapsed: boolean, onLink
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const { user, loading, signOut, isAuthenticated } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const handleLogout = () => {
-    // TODO: Implement actual logout logic
-    router.push('/login');
+  // Check authentication
+  useEffect(() => {
+    if (!loading && !isAuthenticated) {
+      router.push('/login');
+    }
+  }, [loading, isAuthenticated, router]);
+
+  // Redirect admin users to admin dashboard
+  useEffect(() => {
+    if (!loading && user && user.role === 'admin') {
+      router.push('/dashboard-admin');
+    }
+  }, [loading, user, router]);
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      router.push('/login');
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
   };
 
   useEffect(() => {
@@ -145,6 +165,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#181F17] flex items-center justify-center">
+        <div className="text-[#8BAE5A] text-xl">Laden...</div>
+      </div>
+    );
+  }
+
+  // Show unauthorized message if not authenticated
+  if (!isAuthenticated) {
+    return null; // Will redirect to login
+  }
 
   return (
     <div className="flex min-h-screen bg-[#181F17]">

@@ -48,6 +48,8 @@ const mockExercises = [
 
 export default function SchemaBuilder({ isOpen, onClose, schema }: SchemaBuilderProps) {
   const [currentStep, setCurrentStep] = useState(1);
+  const [templateStep, setTemplateStep] = useState(true);
+  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [schemaDetails, setSchemaDetails] = useState({
     name: schema?.name || '',
     description: schema?.description || '',
@@ -149,6 +151,77 @@ export default function SchemaBuilder({ isOpen, onClose, schema }: SchemaBuilder
     console.log('Saving schema:', { schemaDetails, trainingDays });
     onClose();
   };
+
+  // Template opties
+  const templates = [
+    {
+      name: 'Push/Pull/Legs',
+      days: [
+        { id: 1, name: 'Dag 1: Push', exercises: [] },
+        { id: 2, name: 'Dag 2: Pull', exercises: [] },
+        { id: 3, name: 'Dag 3: Legs', exercises: [] }
+      ]
+    },
+    {
+      name: 'Upper/Lower Body',
+      days: [
+        { id: 1, name: 'Dag 1: Upper Body', exercises: [] },
+        { id: 2, name: 'Dag 2: Lower Body', exercises: [] }
+      ]
+    },
+    {
+      name: 'Full Body',
+      days: [
+        { id: 1, name: 'Dag 1: Full Body', exercises: [] },
+        { id: 2, name: 'Dag 2: Full Body', exercises: [] },
+        { id: 3, name: 'Dag 3: Full Body', exercises: [] }
+      ]
+    }
+  ];
+
+  // Template keuze stap
+  if (templateStep && !schema) {
+    return (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="bg-[#232D1A] rounded-2xl border border-[#3A4D23] w-full max-w-lg p-8">
+          <h2 className="text-2xl font-bold text-[#8BAE5A] mb-4">Nieuw schema starten</h2>
+          <div className="space-y-4">
+            <button
+              className="w-full px-6 py-4 rounded-xl bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#B6C948] transition"
+              onClick={() => {
+                setTrainingDays([
+                  { id: 1, name: 'Dag 1', exercises: [] }
+                ]);
+                setTemplateStep(false);
+              }}
+            >
+              Start met een leeg schema
+            </button>
+            <div className="text-[#B6C948] text-center font-semibold">of kies een template</div>
+            {templates.map((template) => (
+              <button
+                key={template.name}
+                className="w-full px-6 py-4 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A] transition font-semibold"
+                onClick={() => {
+                  setTrainingDays(template.days);
+                  setSelectedTemplate(template.name);
+                  setTemplateStep(false);
+                }}
+              >
+                {template.name}
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={onClose}
+            className="mt-8 w-full px-6 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A] transition"
+          >
+            Annuleren
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (!isOpen) return null;
 

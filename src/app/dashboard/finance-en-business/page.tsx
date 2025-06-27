@@ -15,6 +15,10 @@ import {
 import BankConnectionModal from '@/app/components/BankConnectionModal';
 import Link from 'next/link';
 import { FinanceProvider, useFinance } from './FinanceContext';
+import ZeroBasedBudget from './components/ZeroBasedBudget';
+import DebtSnowball from './components/DebtSnowball';
+import CompoundInterest from './components/CompoundInterest';
+import FIRECalculator from './components/FIRECalculator';
 
 ChartJS.register(
   CategoryScale,
@@ -202,6 +206,7 @@ const chartOptions = {
 
 function FinanceDashboardContent() {
   const { finance } = useFinance();
+  const [activeTab, setActiveTab] = useState<'overview' | 'planning'>('overview');
   const totalAssets = finance.assets.reduce((sum, a) => sum + a.value, 0);
   const totalDebts = finance.debts.reduce((sum, d) => sum + d.value, 0);
   const netWorth = totalAssets - totalDebts;
@@ -215,46 +220,95 @@ function FinanceDashboardContent() {
 
   return (
     <div className="p-6 md:p-12">
-      <h1 className="text-3xl md:text-4xl font-bold text-[#B6C948] mb-2 drop-shadow-lg">Financieel Overzicht</h1>
-      <p className="text-[#8BAE5A] text-lg mb-8">Jouw financiële gezondheid in één oogopslag</p>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Netto Waarde Widget */}
-        <Link href="/dashboard/finance-en-business/netto-waarde" className="bg-[#232D1A] rounded-2xl shadow-xl p-6 border border-[#3A4D23] hover:border-[#B6C948] transition-all flex flex-col items-center cursor-pointer group">
-          <div className="w-full h-40 flex flex-col items-center justify-center mb-4">
-            {/* Placeholder voor grafiek */}
-            <div className="w-full h-32 bg-[#181F17] rounded-xl flex flex-col items-center justify-center border border-[#3A4D23] text-[#B6C948] text-lg font-bold">
-              <span className="text-2xl">€{netWorth.toLocaleString('nl-NL')}</span>
-              <span className="text-[#8BAE5A] text-sm mt-2">Netto Waarde</span>
-            </div>
-          </div>
-          <div className="text-xl font-bold text-[#B6C948] mb-1">Netto Waarde</div>
-          <div className="text-[#8BAE5A] text-sm">Bekijk je vermogen in detail</div>
-        </Link>
-        {/* Spaarquote Widget */}
-        <Link href="/dashboard/finance-en-business/cashflow" className="bg-[#232D1A] rounded-2xl shadow-xl p-6 border border-[#3A4D23] hover:border-[#B6C948] transition-all flex flex-col items-center cursor-pointer group">
-          <div className="w-full h-40 flex flex-col items-center justify-center mb-4">
-            {/* Gauge */}
-            <div className="w-32 h-32 bg-[#181F17] rounded-full flex flex-col items-center justify-center border-4 border-[#8BAE5A] text-[#B6C948] text-lg font-bold">
-              <span className="text-3xl">{savingsRate}%</span>
-              <span className="text-[#8BAE5A] text-sm mt-2">Spaarquote</span>
-            </div>
-          </div>
-          <div className="text-xl font-bold text-[#B6C948] mb-1">Spaarquote</div>
-          <div className="text-[#8BAE5A] text-sm">Gespaard: €{savings.toLocaleString('nl-NL')} / Inkomen: €{income.toLocaleString('nl-NL')}</div>
-        </Link>
-        {/* Passief Inkomen Widget */}
-        <Link href="/dashboard/finance-en-business/portfolio" className="bg-[#232D1A] rounded-2xl shadow-xl p-6 border border-[#3A4D23] hover:border-[#B6C948] transition-all flex flex-col items-center cursor-pointer group">
-          <div className="w-full h-40 flex flex-col items-center justify-center mb-4">
-            {/* Progress bar */}
-            <div className="w-full h-6 bg-[#181F17] rounded-full border border-[#3A4D23] mb-2">
-              <div className="h-6 rounded-full bg-gradient-to-r from-[#8BAE5A] to-[#B6C948]" style={{ width: `${passiveProgress}%` }} />
-            </div>
-            <div className="text-[#B6C948] text-sm font-bold">€{passiveIncome.toLocaleString('nl-NL')} / €{passiveGoal.toLocaleString('nl-NL')} doel</div>
-          </div>
-          <div className="text-xl font-bold text-[#B6C948] mb-1">Passief Inkomen</div>
-          <div className="text-[#8BAE5A] text-sm">Hoe dicht zit je bij je doel?</div>
-        </Link>
+      <h1 className="text-3xl md:text-4xl font-bold text-[#B6C948] mb-2 drop-shadow-lg">Finance & Business</h1>
+      <p className="text-[#8BAE5A] text-lg mb-8">Jouw financiële gezondheid en planning in één oogopslag</p>
+      
+      {/* Tab Navigation */}
+      <div className="flex space-x-1 bg-[#181F17] rounded-xl p-1 mb-8">
+        <button
+          onClick={() => setActiveTab('overview')}
+          className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-all ${
+            activeTab === 'overview'
+              ? 'bg-[#8BAE5A] text-[#232D1A] shadow-lg'
+              : 'text-[#8BAE5A] hover:bg-[#232D1A]'
+          }`}
+        >
+          📊 Overzicht
+        </button>
+        <button
+          onClick={() => setActiveTab('planning')}
+          className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-all ${
+            activeTab === 'planning'
+              ? 'bg-[#8BAE5A] text-[#232D1A] shadow-lg'
+              : 'text-[#8BAE5A] hover:bg-[#232D1A]'
+          }`}
+        >
+          🎯 Planningstools
+        </button>
       </div>
+
+      {activeTab === 'overview' && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Netto Waarde Widget */}
+          <Link href="/dashboard/finance-en-business/netto-waarde" className="bg-[#232D1A] rounded-2xl shadow-xl p-6 border border-[#3A4D23] hover:border-[#B6C948] transition-all flex flex-col items-center cursor-pointer group">
+            <div className="w-full h-40 flex flex-col items-center justify-center mb-4">
+              {/* Placeholder voor grafiek */}
+              <div className="w-full h-32 bg-[#181F17] rounded-xl flex flex-col items-center justify-center border border-[#3A4D23] text-[#B6C948] text-lg font-bold">
+                <span className="text-2xl">€{netWorth.toLocaleString('nl-NL')}</span>
+                <span className="text-[#8BAE5A] text-sm mt-2">Netto Waarde</span>
+              </div>
+            </div>
+            <div className="text-xl font-bold text-[#B6C948] mb-1">Netto Waarde</div>
+            <div className="text-[#8BAE5A] text-sm">Bekijk je vermogen in detail</div>
+          </Link>
+          {/* Spaarquote Widget */}
+          <Link href="/dashboard/finance-en-business/cashflow" className="bg-[#232D1A] rounded-2xl shadow-xl p-6 border border-[#3A4D23] hover:border-[#B6C948] transition-all flex flex-col items-center cursor-pointer group">
+            <div className="w-full h-40 flex flex-col items-center justify-center mb-4">
+              {/* Gauge */}
+              <div className="w-32 h-32 bg-[#181F17] rounded-full flex flex-col items-center justify-center border-4 border-[#8BAE5A] text-[#B6C948] text-lg font-bold">
+                <span className="text-3xl">{savingsRate}%</span>
+                <span className="text-[#8BAE5A] text-sm mt-2">Spaarquote</span>
+              </div>
+            </div>
+            <div className="text-xl font-bold text-[#B6C948] mb-1">Spaarquote</div>
+            <div className="text-[#8BAE5A] text-sm">Gespaard: €{savings.toLocaleString('nl-NL')} / Inkomen: €{income.toLocaleString('nl-NL')}</div>
+          </Link>
+          {/* Passief Inkomen Widget */}
+          <Link href="/dashboard/finance-en-business/portfolio" className="bg-[#232D1A] rounded-2xl shadow-xl p-6 border border-[#3A4D23] hover:border-[#B6C948] transition-all flex flex-col items-center cursor-pointer group">
+            <div className="w-full h-40 flex flex-col items-center justify-center mb-4">
+              {/* Progress bar */}
+              <div className="w-full h-6 bg-[#181F17] rounded-full border border-[#3A4D23] mb-2">
+                <div className="h-6 rounded-full bg-gradient-to-r from-[#8BAE5A] to-[#B6C948]" style={{ width: `${passiveProgress}%` }} />
+              </div>
+              <div className="text-[#B6C948] text-sm font-bold">€{passiveIncome.toLocaleString('nl-NL')} / €{passiveGoal.toLocaleString('nl-NL')} doel</div>
+            </div>
+            <div className="text-xl font-bold text-[#B6C948] mb-1">Passief Inkomen</div>
+            <div className="text-[#8BAE5A] text-sm">Hoe dicht zit je bij je doel?</div>
+          </Link>
+        </div>
+      )}
+
+      {activeTab === 'planning' && (
+        <div className="space-y-8">
+          {/* Fundamentele Planningstools */}
+          <div>
+            <h2 className="text-2xl font-bold text-[#B6C948] mb-6">Fundamentele Planningstools</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <ZeroBasedBudget />
+              <DebtSnowball />
+            </div>
+          </div>
+
+          {/* Investerings- & Groeitools */}
+          <div>
+            <h2 className="text-2xl font-bold text-[#B6C948] mb-6">Investerings- & Groeitools</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <CompoundInterest />
+              <FIRECalculator />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

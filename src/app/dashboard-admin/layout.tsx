@@ -1,7 +1,8 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
   HomeIcon, 
   UserGroupIcon, 
@@ -153,7 +154,46 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, loading, signOut, isAuthenticated } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Check authentication
+  useEffect(() => {
+    if (!loading && !isAuthenticated) {
+      router.push('/login');
+    }
+  }, [loading, isAuthenticated, router]);
+
+  // Check admin role
+  useEffect(() => {
+    if (!loading && user && user.role !== 'admin') {
+      router.push('/dashboard');
+    }
+  }, [loading, user, router]);
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      router.push('/login');
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+  };
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#181F17] flex items-center justify-center">
+        <div className="text-[#8BAE5A] text-xl">Laden...</div>
+      </div>
+    );
+  }
+
+  // Show unauthorized message if not authenticated or not admin
+  if (!isAuthenticated || (user && user.role !== 'admin')) {
+    return null; // Will redirect to appropriate page
+  }
 
   return (
     <div className="min-h-screen bg-[#181F17]">
@@ -170,10 +210,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <h1 className="text-xl md:text-2xl font-bold text-[#8BAE5A]">Admin Panel</h1>
           </div>
           <div className="flex items-center gap-4">
-            <span className="hidden sm:inline text-[#8BAE5A] text-sm">Admin</span>
+            <span className="hidden sm:inline text-[#8BAE5A] text-sm">
+              {user?.label || 'Admin'}
+            </span>
+            <button
+              onClick={handleLogout}
+              className="px-4 py-2 rounded-xl bg-[#181F17] text-[#8BAE5A] text-sm font-semibold border border-[#3A4D23] hover:bg-[#232D1A] transition"
+            >
+              Uitloggen
+            </button>
             <Link 
               href="/dashboard" 
-              className="px-4 py-2 rounded-xl bg-[#181F17] text-[#8BAE5A] text-sm font-semibold border border-[#3A4D23] hover:bg-[#232D1A] transition"
+              className="px-4 py-2 rounded-xl bg-[#8BAE5A] text-[#181F17] text-sm font-semibold border border-[#8BAE5A] hover:bg-[#A6C97B] transition"
             >
               Terug naar Platform
             </Link>

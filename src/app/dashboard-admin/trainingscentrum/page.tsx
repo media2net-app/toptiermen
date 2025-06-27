@@ -12,7 +12,15 @@ import {
   CogIcon,
   MagnifyingGlassIcon,
   FunnelIcon,
-  ArrowsUpDownIcon
+  ArrowsUpDownIcon,
+  ChartBarIcon,
+  ArrowTrendingUpIcon,
+  StarIcon,
+  ExclamationTriangleIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  UserGroupIcon,
+  BoltIcon
 } from '@heroicons/react/24/outline';
 import SchemaBuilder from './SchemaBuilder';
 
@@ -107,6 +115,70 @@ const mockChallenges = [
   }
 ];
 
+// Analytics Mock Data
+const mockAnalytics = {
+  popularSchemas: [
+    { name: 'Full Body Krachttraining', users: 1247, completionRate: 85 },
+    { name: 'Outdoor Bootcamp', users: 892, completionRate: 72 },
+    { name: 'Upper Body Focus', users: 567, completionRate: 68 },
+    { name: 'Lower Body Power', users: 423, completionRate: 91 },
+    { name: 'Core & Stability', users: 298, completionRate: 78 }
+  ],
+  skippedExercises: [
+    { name: 'Bulgarian Split Squats', skipRate: 60, reason: 'Te complex' },
+    { name: 'Turkish Get-ups', skipRate: 45, reason: 'Tijdsintensief' },
+    { name: 'Handstand Push-ups', skipRate: 38, reason: 'Te moeilijk' },
+    { name: 'Pistol Squats', skipRate: 32, reason: 'Balans vereist' },
+    { name: 'Muscle-ups', skipRate: 28, reason: 'Gevorderd niveau' }
+  ],
+  schemaCompletion: [
+    { name: 'Beginner Full Body', completionRate: 85, difficulty: 'Beginner' },
+    { name: 'Intermediate Push/Pull', completionRate: 72, difficulty: 'Intermediate' },
+    { name: 'Advanced Powerlifting', completionRate: 40, difficulty: 'Advanced' },
+    { name: 'Bodyweight Mastery', completionRate: 65, difficulty: 'Intermediate' },
+    { name: 'Elite Strength', completionRate: 35, difficulty: 'Advanced' }
+  ]
+};
+
+// Progress Mock Data
+const mockProgress = {
+  globalStrength: {
+    squat: { current: 120, previous: 115, change: '+4.3%' },
+    bench: { current: 85, previous: 82, change: '+3.7%' },
+    deadlift: { current: 150, previous: 145, change: '+3.4%' }
+  },
+  popularPRs: [
+    { exercise: 'Bench Press', prs: 234, period: 'Deze maand' },
+    { exercise: 'Squat', prs: 189, period: 'Deze maand' },
+    { exercise: 'Deadlift', prs: 156, period: 'Deze maand' },
+    { exercise: 'Pull-ups', prs: 123, period: 'Deze maand' },
+    { exercise: 'Overhead Press', prs: 98, period: 'Deze maand' }
+  ],
+  workoutFeedback: [
+    { 
+      workout: 'Full Body Krachttraining - Dag 1',
+      rating: 4.2,
+      difficulty: 'Perfect',
+      comments: ['Geweldige workout!', 'Goede balans', 'Uitdagend maar haalbaar'],
+      date: '2024-01-20'
+    },
+    { 
+      workout: 'Outdoor Bootcamp - HIIT',
+      rating: 3.8,
+      difficulty: 'Te zwaar',
+      comments: ['Intensief maar effectief', 'Meer rust tussen sets', 'Goede variatie'],
+      date: '2024-01-19'
+    },
+    { 
+      workout: 'Upper Body Focus - Push',
+      rating: 4.5,
+      difficulty: 'Perfect',
+      comments: ['Fantastische oefeningen', 'Goede progressie', 'Voel de spieren werken'],
+      date: '2024-01-18'
+    }
+  ]
+};
+
 const categories = ['Gym', 'Outdoor', 'Bodyweight'];
 const muscleGroups = ['Borst', 'Rug', 'Benen', 'Schouders', 'Armen', 'Core', 'Glutes'];
 const equipment = ['Barbell', 'Dumbbell', 'Bodyweight', 'Machine', 'Cable', 'Kettlebell'];
@@ -197,6 +269,28 @@ export default function TrainingscentrumBeheer() {
           >
             <FireIcon className="w-5 h-5" />
             Challenge Beheer
+          </button>
+          <button
+            onClick={() => setActiveTab('analytics')}
+            className={`flex-1 px-4 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
+              activeTab === 'analytics'
+                ? 'bg-[#8BAE5A] text-[#181F17]'
+                : 'text-[#8BAE5A] hover:bg-[#181F17]'
+            }`}
+          >
+            <ChartBarIcon className="w-5 h-5" />
+            Analytics
+          </button>
+          <button
+            onClick={() => setActiveTab('progress')}
+            className={`flex-1 px-4 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
+              activeTab === 'progress'
+                ? 'bg-[#8BAE5A] text-[#181F17]'
+                : 'text-[#8BAE5A] hover:bg-[#181F17]'
+            }`}
+          >
+            <ArrowTrendingUpIcon className="w-5 h-5" />
+            Gebruikersprogressie
           </button>
         </div>
       </div>
@@ -462,6 +556,211 @@ export default function TrainingscentrumBeheer() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Analytics Tab */}
+      {activeTab === 'analytics' && (
+        <div className="space-y-8">
+          <div>
+            <h2 className="text-2xl font-bold text-[#8BAE5A] mb-2">Trainingsschema Analytics</h2>
+            <p className="text-[#B6C948]">Data-gedreven inzichten voor het optimaliseren van je content</p>
+          </div>
+
+          {/* Popular Schemas Widget */}
+          <div className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23]">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-[#8BAE5A]">Meest Populaire Schema's</h3>
+              <StarIcon className="w-6 h-6 text-[#B6C948]" />
+            </div>
+            <div className="space-y-4">
+              {mockAnalytics.popularSchemas.map((schema, index) => (
+                <div key={index} className="flex items-center justify-between p-4 bg-[#181F17] rounded-xl">
+                  <div className="flex items-center gap-4">
+                    <div className="w-8 h-8 rounded-full bg-[#8BAE5A]/20 flex items-center justify-center">
+                      <span className="text-[#8BAE5A] font-bold text-sm">{index + 1}</span>
+                    </div>
+                    <div>
+                      <h4 className="text-[#8BAE5A] font-semibold">{schema.name}</h4>
+                      <p className="text-[#B6C948] text-sm">{schema.users.toLocaleString('nl-NL')} gebruikers</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-[#8BAE5A] font-bold">{schema.completionRate}%</div>
+                    <div className="text-[#B6C948] text-sm">Voltooiing</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Schema Completion Widget */}
+          <div className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23]">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-[#8BAE5A]">Schema Voltooiingsgraad</h3>
+              <CheckCircleIcon className="w-6 h-6 text-[#B6C948]" />
+            </div>
+            <div className="space-y-4">
+              {mockAnalytics.schemaCompletion.map((schema, index) => (
+                <div key={index} className="p-4 bg-[#181F17] rounded-xl">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-[#8BAE5A] font-semibold">{schema.name}</h4>
+                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                      schema.difficulty === 'Beginner' ? 'bg-green-500/20 text-green-400' :
+                      schema.difficulty === 'Intermediate' ? 'bg-yellow-500/20 text-yellow-400' :
+                      'bg-red-500/20 text-red-400'
+                    }`}>
+                      {schema.difficulty}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-[#B6C948] text-sm">Voltooiing</span>
+                        <span className="text-[#8BAE5A] font-semibold">{schema.completionRate}%</span>
+                      </div>
+                      <div className="w-full h-2 bg-[#3A4D23] rounded-full overflow-hidden">
+                        <div 
+                          className={`h-full rounded-full ${
+                            schema.completionRate >= 80 ? 'bg-green-500' :
+                            schema.completionRate >= 60 ? 'bg-yellow-500' :
+                            'bg-red-500'
+                          }`}
+                          style={{ width: `${schema.completionRate}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                  {schema.completionRate < 50 && (
+                    <div className="mt-2 flex items-center gap-2 text-yellow-400 text-sm">
+                      <ExclamationTriangleIcon className="w-4 h-4" />
+                      <span>Overweeg het aanpassen van de moeilijkheidsgraad</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Skipped Exercises Widget */}
+          <div className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23]">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-[#8BAE5A]">Meest Overgeslagen Oefeningen</h3>
+              <ExclamationTriangleIcon className="w-6 h-6 text-red-400" />
+            </div>
+            <div className="space-y-4">
+              {mockAnalytics.skippedExercises.map((exercise, index) => (
+                <div key={index} className="p-4 bg-[#181F17] rounded-xl">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-[#8BAE5A] font-semibold">{exercise.name}</h4>
+                    <span className="text-red-400 font-bold">{exercise.skipRate}%</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[#B6C948] text-sm">Reden: {exercise.reason}</span>
+                    <button className="px-3 py-1 rounded-lg bg-[#8BAE5A] text-[#181F17] text-sm font-semibold hover:bg-[#B6C948] transition">
+                      Alternatief Toevoegen
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Progress Tab */}
+      {activeTab === 'progress' && (
+        <div className="space-y-8">
+          <div>
+            <h2 className="text-2xl font-bold text-[#8BAE5A] mb-2">Gebruikersprogressie & Feedback</h2>
+            <p className="text-[#B6C948]">Community-brede resultaten en feedback voor platform optimalisatie</p>
+          </div>
+
+          {/* Global Strength Widget */}
+          <div className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23]">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-[#8BAE5A]">Globale Krachttoename</h3>
+              <ArrowTrendingUpIcon className="w-6 h-6 text-[#B6C948]" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {Object.entries(mockProgress.globalStrength).map(([lift, data]) => (
+                <div key={lift} className="p-4 bg-[#181F17] rounded-xl text-center">
+                  <h4 className="text-[#8BAE5A] font-semibold capitalize mb-2">{lift}</h4>
+                  <div className="text-2xl font-bold text-[#8BAE5A] mb-1">{data.current}kg</div>
+                  <div className="text-green-400 font-semibold">{data.change}</div>
+                  <div className="text-[#B6C948] text-sm">vs vorige maand</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Popular PRs Widget */}
+          <div className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23]">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-[#8BAE5A]">Populairste PR's (Deze Maand)</h3>
+              <BoltIcon className="w-6 h-6 text-[#B6C948]" />
+            </div>
+            <div className="space-y-4">
+              {mockProgress.popularPRs.map((pr, index) => (
+                <div key={index} className="flex items-center justify-between p-4 bg-[#181F17] rounded-xl">
+                  <div className="flex items-center gap-4">
+                    <div className="w-8 h-8 rounded-full bg-[#8BAE5A]/20 flex items-center justify-center">
+                      <span className="text-[#8BAE5A] font-bold text-sm">{index + 1}</span>
+                    </div>
+                    <div>
+                      <h4 className="text-[#8BAE5A] font-semibold">{pr.exercise}</h4>
+                      <p className="text-[#B6C948] text-sm">{pr.period}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-[#8BAE5A] font-bold">{pr.prs}</div>
+                    <div className="text-[#B6C948] text-sm">PR's</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Workout Feedback Widget */}
+          <div className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23]">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-[#8BAE5A]">Ingekomen Feedback op Workouts</h3>
+              <UserGroupIcon className="w-6 h-6 text-[#B6C948]" />
+            </div>
+            <div className="space-y-4">
+              {mockProgress.workoutFeedback.map((feedback, index) => (
+                <div key={index} className="p-4 bg-[#181F17] rounded-xl">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="text-[#8BAE5A] font-semibold">{feedback.workout}</h4>
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1">
+                        {[...Array(5)].map((_, i) => (
+                          <StarIcon 
+                            key={i} 
+                            className={`w-4 h-4 ${
+                              i < Math.floor(feedback.rating) ? 'text-yellow-400 fill-current' : 'text-[#B6C948]'
+                            }`} 
+                          />
+                        ))}
+                      </div>
+                      <span className="text-[#8BAE5A] font-semibold">{feedback.rating}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-[#B6C948] text-sm">Moeilijkheidsgraad: {feedback.difficulty}</span>
+                    <span className="text-[#B6C948] text-sm">{new Date(feedback.date).toLocaleDateString('nl-NL')}</span>
+                  </div>
+                  <div className="space-y-1">
+                    {feedback.comments.map((comment, commentIndex) => (
+                      <div key={commentIndex} className="text-[#B6C948] text-sm bg-[#232D1A] p-2 rounded-lg">
+                        "{comment}"
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}

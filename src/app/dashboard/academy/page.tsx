@@ -1,5 +1,6 @@
 'use client';
 import ClientLayout from '../../components/ClientLayout';
+import PageLayout from '../../../components/PageLayout';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { LockClosedIcon } from '@heroicons/react/24/solid';
@@ -100,31 +101,31 @@ export default function MijnMissies() {
 
   return (
     <ClientLayout>
-      <div className="p-4 sm:p-6 md:p-12">
-        {/* Confetti Animation */}
-        {showConfetti && (
-          <div className="fixed inset-0 pointer-events-none z-50">
-            {Array.from({ length: 50 }).map((_, i) => (
-              <div
-                key={i}
-                className="absolute animate-bounce"
-                style={{
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                  animationDelay: `${Math.random() * 3}s`,
-                  animationDuration: `${2 + Math.random() * 3}s`,
-                  fontSize: `${Math.max(16, Math.min(24, window.innerWidth / 20))}px`,
-                }}
-              >
-                {['🎉', '🏆', '⭐', '🎊', '💎', '🔓'][Math.floor(Math.random() * 6)]}
-              </div>
-            ))}
-          </div>
-        )}
+      {/* Confetti Animation */}
+      {showConfetti && (
+        <div className="fixed inset-0 pointer-events-none z-50">
+          {Array.from({ length: 50 }).map((_, i) => (
+            <div
+              key={i}
+              className="absolute animate-bounce"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 3}s`,
+                animationDuration: `${2 + Math.random() * 3}s`,
+                fontSize: `${Math.max(16, Math.min(24, window.innerWidth / 20))}px`,
+              }}
+            >
+              {['🎉', '🏆', '⭐', '🎊', '💎', '🔓'][Math.floor(Math.random() * 6)]}
+            </div>
+          ))}
+        </div>
+      )}
 
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">Academy</h1>
-        <p className="text-[#8BAE5A] text-base sm:text-lg mb-6 sm:mb-8">Overzicht van alle modules en jouw voortgang</p>
-        
+      <PageLayout 
+        title="Academy"
+        subtitle="Overzicht van alle modules en jouw voortgang"
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
           {moduleStates.map((mod, i) =>
             mod.unlocked ? (
@@ -171,7 +172,7 @@ export default function MijnMissies() {
             )
           )}
         </div>
-      </div>
+      </PageLayout>
     </ClientLayout>
   );
 } 

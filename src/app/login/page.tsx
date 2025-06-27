@@ -2,18 +2,32 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { LockClosedIcon, UserIcon } from "@heroicons/react/24/solid";
+import { useAuth } from "@/contexts/AuthContext";
 
 const users = [
-  { label: 'Rick', value: 'rick', password: 'demo' },
-  { label: 'Admin', value: 'admin', password: 'admin123' },
+  { label: 'Rick', value: 'rick', password: 'demo', role: 'user' },
+  { label: 'Admin', value: 'admin', password: 'admin123', role: 'admin' },
 ];
 
 export default function Login() {
   const router = useRouter();
+  const { signIn, isAuthenticated, user } = useAuth();
   const [selectedUser, setSelectedUser] = useState(users[0]);
   const [username, setUsername] = useState(users[0].value);
   const [password, setPassword] = useState(users[0].password);
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Check if user is already logged in
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      if (user.role === 'admin') {
+        router.push('/dashboard-admin');
+      } else {
+        router.push('/dashboard');
+      }
+    }
+  }, [isAuthenticated, user, router]);
 
   function handleUserChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const user = users.find(u => u.value === e.target.value)!;
@@ -23,14 +37,18 @@ export default function Login() {
     setError("");
   }
 
-  function handleLogin(e: React.FormEvent) {
+  async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    if (username === "rick" && password === "demo") {
-      router.push("/dashboard");
-    } else if (username === "admin" && password === "admin123") {
-      router.push("/dashboard-admin");
-    } else {
+    setIsLoading(true);
+    setError("");
+    
+    try {
+      await signIn(username, password);
+      // The redirect will be handled by the useEffect above
+    } catch (error) {
       setError("Ongeldige inloggegevens");
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -85,9 +103,10 @@ export default function Login() {
           )}
           <button
             type="submit"
-            className="w-full py-3 sm:py-4 rounded-xl bg-gradient-to-r from-[#B6C948] to-[#3A4D23] text-[#181F17] font-semibold text-base sm:text-lg shadow-lg hover:from-[#B6C948] hover:to-[#B6C948] transition-all duration-200 border border-[#B6C948] font-figtree"
+            disabled={isLoading}
+            className="w-full py-3 sm:py-4 rounded-xl bg-gradient-to-r from-[#B6C948] to-[#3A4D23] text-[#181F17] font-semibold text-base sm:text-lg shadow-lg hover:from-[#B6C948] hover:to-[#B6C948] transition-all duration-200 border border-[#B6C948] font-figtree disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Inloggen
+            {isLoading ? 'Inloggen...' : 'Inloggen'}
           </button>
           <button
             type="button"
