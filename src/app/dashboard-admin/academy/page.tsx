@@ -128,6 +128,17 @@ export default function AcademyManagement() {
     fetchLessons();
   }, []);
 
+  // Ensure lessonForm arrays are always initialized
+  useEffect(() => {
+    if (showLessonModal && (!lessonForm.attachments || !lessonForm.examQuestions)) {
+      setLessonForm(prev => ({
+        ...prev,
+        attachments: prev.attachments || [],
+        examQuestions: prev.examQuestions || []
+      }));
+    }
+  }, [showLessonModal, lessonForm.attachments, lessonForm.examQuestions]);
+
   // Module Modal Functions
   const openModuleModal = (module?: any) => {
     if (module) {
@@ -225,13 +236,13 @@ export default function AcademyManagement() {
     if (lesson) {
       setEditingLesson(lesson.id);
       setLessonForm({
-        title: lesson.title,
-        type: lesson.type,
-        videoUrl: lesson.videoUrl,
-        content: lesson.content,
-        status: lesson.status,
-        attachments: lesson.attachments,
-        examQuestions: lesson.examQuestions
+        title: lesson.title || '',
+        type: lesson.type || 'video',
+        videoUrl: lesson.videoUrl || '',
+        content: lesson.content || '',
+        status: lesson.status || 'draft',
+        attachments: lesson.attachments || [],
+        examQuestions: lesson.examQuestions || []
       });
     } else {
       setEditingLesson(null);
@@ -768,14 +779,14 @@ export default function AcademyManagement() {
               <div>
                 <label className="block text-[#8BAE5A] font-semibold mb-2">Hulpmiddelen & Downloads</label>
                 <div className="space-y-3">
-                  {lessonForm.attachments.map((attachment, index) => (
+                  {(lessonForm.attachments || []).map((attachment, index) => (
                     <div key={index} className="flex items-center gap-3 p-3 bg-[#181F17] rounded-xl">
                       <DocumentTextIcon className="w-5 h-5 text-[#B6C948]" />
                       <span className="text-[#8BAE5A] flex-1">{attachment.name}</span>
                       <button 
                         onClick={() => setLessonForm({
                           ...lessonForm, 
-                          attachments: lessonForm.attachments.filter((_, i) => i !== index)
+                          attachments: (lessonForm.attachments || []).filter((_, i) => i !== index)
                         })}
                         className="p-1 rounded hover:bg-[#232D1A] transition"
                       >
@@ -795,14 +806,14 @@ export default function AcademyManagement() {
                 <div>
                   <label className="block text-[#8BAE5A] font-semibold mb-2">Examen/Reflectie Vragen</label>
                   <div className="space-y-4">
-                    {lessonForm.examQuestions.map((question, index) => (
+                    {(lessonForm.examQuestions || []).map((question, index) => (
                       <div key={index} className="p-4 bg-[#181F17] rounded-xl border border-[#3A4D23]">
                         <div className="flex items-center justify-between mb-3">
                           <span className="text-[#8BAE5A] font-semibold">Vraag {index + 1}</span>
                           <button 
                             onClick={() => setLessonForm({
                               ...lessonForm, 
-                              examQuestions: lessonForm.examQuestions.filter((_, i) => i !== index)
+                              examQuestions: (lessonForm.examQuestions || []).filter((_, i) => i !== index)
                             })}
                             className="p-1 rounded hover:bg-[#232D1A] transition"
                           >
@@ -813,7 +824,7 @@ export default function AcademyManagement() {
                           type="text"
                           value={question.question}
                           onChange={(e) => {
-                            const newQuestions = [...lessonForm.examQuestions];
+                            const newQuestions = [...(lessonForm.examQuestions || [])];
                             newQuestions[index].question = e.target.value;
                             setLessonForm({...lessonForm, examQuestions: newQuestions});
                           }}
@@ -829,7 +840,7 @@ export default function AcademyManagement() {
                                   name={`question-${index}`}
                                   checked={question.correctAnswer === optionIndex}
                                   onChange={() => {
-                                    const newQuestions = [...lessonForm.examQuestions];
+                                    const newQuestions = [...(lessonForm.examQuestions || [])];
                                     newQuestions[index].correctAnswer = optionIndex;
                                     setLessonForm({...lessonForm, examQuestions: newQuestions});
                                   }}
@@ -839,7 +850,7 @@ export default function AcademyManagement() {
                                   type="text"
                                   value={option}
                                   onChange={(e) => {
-                                    const newQuestions = [...lessonForm.examQuestions];
+                                    const newQuestions = [...(lessonForm.examQuestions || [])];
                                     newQuestions[index].options[optionIndex] = e.target.value;
                                     setLessonForm({...lessonForm, examQuestions: newQuestions});
                                   }}
@@ -855,7 +866,7 @@ export default function AcademyManagement() {
                     <button 
                       onClick={() => setLessonForm({
                         ...lessonForm, 
-                        examQuestions: [...lessonForm.examQuestions, {
+                        examQuestions: [...(lessonForm.examQuestions || []), {
                           question: '',
                           type: 'multiple_choice',
                           options: ['', '', '', ''],
