@@ -1,10 +1,11 @@
 'use client';
-import { HomeIcon, FireIcon, AcademicCapIcon, ChartBarIcon, CurrencyDollarIcon, UsersIcon, BookOpenIcon, StarIcon, UserCircleIcon, ChatBubbleLeftRightIcon, ChevronUpIcon, ChevronDownIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/solid';
+import { HomeIcon, FireIcon, AcademicCapIcon, ChartBarIcon, CurrencyDollarIcon, UsersIcon, BookOpenIcon, StarIcon, UserCircleIcon, ChatBubbleLeftRightIcon, ChevronUpIcon, ChevronDownIcon, Bars3Icon, XMarkIcon, BellIcon, EnvelopeIcon, CheckCircleIcon, UserGroupIcon, TrophyIcon, CalendarDaysIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import { useAuth } from '@/contexts/AuthContext';
+import Image from 'next/image';
 // import MobileNav from '../components/MobileNav';
 
 function slugify(str: string) {
@@ -126,11 +127,19 @@ const SidebarContent = ({ collapsed, onLinkClick }: { collapsed: boolean, onLink
   );
 };
 
+// Dummy data voor notificaties en berichten (kan later uit context of API komen)
+const notifications: any[] = [];
+const messages: any[] = [];
+
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { user, loading, signOut, isAuthenticated } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
+  const [dropdownOpen, setDropdownOpen] = useState<'notifications'|'messages'|null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Check authentication
   useEffect(() => {
@@ -149,7 +158,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const handleLogout = async () => {
     try {
       await signOut();
-      router.push('/login');
+      setTimeout(() => {
+        router.push('/login');
+      }, 200);
     } catch (error) {
       console.error('Error logging out:', error);
     }
@@ -165,6 +176,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Sluit dropdown als je buiten het menu klikt
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
+        setProfileMenuOpen(false);
+      }
+    }
+    if (profileMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [profileMenuOpen]);
 
   // Show loading state
   if (loading) {
@@ -240,8 +266,161 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <Link href="/dashboard">
             <img src="/logo.svg" alt="Top Tier Men logo" className="w-28 h-auto" />
           </Link>
-          <div className="w-10"></div> {/* Spacer */}
+          <div className="w-10 flex items-center justify-end">
+            <img
+              src={user?.avatar_url || "/profielfoto.png"}
+              alt="Profielfoto"
+              className="w-8 h-8 rounded-full border-2 border-[#8BAE5A] object-cover"
+            />
+          </div>
         </header>
+
+        {/* Desktop Header (rechtsboven) */}
+        <div className="hidden md:flex justify-end items-center px-8 pt-6 pb-2 gap-4">
+          {/* Notificatie */}
+          <div className="relative">
+            <button className={`relative p-2 rounded-full bg-[#232D1A] hover:bg-[#8BAE5A]/10 transition w-12 h-12 ${dropdownOpen==='notifications' ? 'ring-2 ring-[#8BAE5A]' : ''}`} onClick={() => setDropdownOpen(dropdownOpen==='notifications'?null:'notifications')}>
+              <BellIcon className="w-7 h-7 text-white" />
+            </button>
+            {dropdownOpen==='notifications' && (
+              <div ref={dropdownRef} className="absolute right-0 mt-3 w-96 bg-[#181F17] border border-[#232D1A] rounded-2xl shadow-2xl py-4 px-0 text-white z-50">
+                <div className="flex items-center justify-between px-6 mb-3">
+                  <span className="text-xl font-bold">Notifications</span>
+                  <button 
+                    onClick={() => {/* Mark all as read functionaliteit */}}
+                    className="text-[#8BAE5A] text-sm font-semibold hover:underline"
+                  >
+                    Mark all as read
+                  </button>
+                </div>
+                <div className="max-h-80 overflow-y-auto custom-scrollbar">
+                  {/* Social Notificaties */}
+                  <div className="px-6 py-2">
+                    <h4 className="text-sm font-semibold text-[#8BAE5A] mb-2">Social</h4>
+                    {notifications.filter(n => n.category === 'social').map(n => (
+                      <Link href={n.link} key={n.id} className="flex items-center gap-4 py-3 hover:bg-[#232D1A] transition">
+                        <span className="w-10 h-10 flex items-center justify-center rounded-xl bg-[#232D1A]">{n.icon}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-semibold truncate text-sm">{n.title}</div>
+                          <div className="text-xs text-[#8BAE5A]">{n.time}</div>
+                        </div>
+                        {n.unread ? <span className="w-3 h-3 bg-blue-500 rounded-full ml-2"></span> : <CheckCircleIcon className="w-4 h-4 text-[#8BAE5A] ml-2" />}
+                      </Link>
+                    ))}
+                  </div>
+                  {/* Prestaties Notificaties */}
+                  <div className="px-6 py-2">
+                    <h4 className="text-sm font-semibold text-[#FFD700] mb-2">Prestaties</h4>
+                    {notifications.filter(n => n.category === 'prestaties').map(n => (
+                      <Link href={n.link} key={n.id} className="flex items-center gap-4 py-3 hover:bg-[#232D1A] transition">
+                        <span className="w-10 h-10 flex items-center justify-center rounded-xl bg-[#232D1A]">{n.icon}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-semibold truncate text-sm">{n.title}</div>
+                          <div className="text-xs text-[#8BAE5A]">{n.time}</div>
+                        </div>
+                        {n.unread ? <span className="w-3 h-3 bg-blue-500 rounded-full ml-2"></span> : <CheckCircleIcon className="w-4 h-4 text-[#8BAE5A] ml-2" />}
+                      </Link>
+                    ))}
+                  </div>
+                  {/* Training Notificaties */}
+                  <div className="px-6 py-2">
+                    <h4 className="text-sm font-semibold text-[#8BAE5A] mb-2">Trainingen</h4>
+                    {notifications.filter(n => n.category === 'training').map(n => (
+                      <Link href={n.link} key={n.id} className="flex items-center gap-4 py-3 hover:bg-[#232D1A] transition">
+                        <span className="w-10 h-10 flex items-center justify-center rounded-xl bg-[#232D1A]">{n.icon}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-semibold truncate text-sm">{n.title}</div>
+                          <div className="text-xs text-[#8BAE5A]">{n.time}</div>
+                        </div>
+                        {n.unread ? <span className="w-3 h-3 bg-blue-500 rounded-full ml-2"></span> : <CheckCircleIcon className="w-4 h-4 text-[#8BAE5A] ml-2" />}
+                      </Link>
+                    ))}
+                  </div>
+                  {/* Community Notificaties */}
+                  <div className="px-6 py-2">
+                    <h4 className="text-sm font-semibold text-[#8BAE5A] mb-2">Community</h4>
+                    {notifications.filter(n => n.category === 'community').map(n => (
+                      <Link href={n.link} key={n.id} className="flex items-center gap-4 py-3 hover:bg-[#232D1A] transition">
+                        <span className="w-10 h-10 flex items-center justify-center rounded-xl bg-[#232D1A]">{n.icon}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-semibold truncate text-sm">{n.title}</div>
+                          <div className="text-xs text-[#8BAE5A]">{n.time}</div>
+                        </div>
+                        {n.unread ? <span className="w-3 h-3 bg-blue-500 rounded-full ml-2"></span> : <CheckCircleIcon className="w-4 h-4 text-[#8BAE5A] ml-2" />}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+                <div className="pt-3 px-6">
+                  <a href="#" className="block text-center text-[#8BAE5A] hover:underline text-sm font-semibold">View All Activity</a>
+                </div>
+              </div>
+            )}
+          </div>
+          {/* Inbox */}
+          <div className="relative">
+            <button className={`relative p-2 rounded-full bg-[#232D1A] hover:bg-[#8BAE5A]/10 transition w-12 h-12 ${dropdownOpen==='messages' ? 'ring-2 ring-[#8BAE5A]' : ''}`} onClick={() => setDropdownOpen(dropdownOpen==='messages'?null:'messages')}>
+              <EnvelopeIcon className="w-7 h-7 text-white" />
+            </button>
+            {dropdownOpen==='messages' && (
+              <div ref={dropdownRef} className="absolute right-0 mt-3 w-96 bg-[#181F17] border border-[#232D1A] rounded-2xl shadow-2xl py-4 px-0 text-white z-50">
+                <div className="flex items-center justify-between px-6 mb-3">
+                  <span className="text-xl font-bold">Messages</span>
+                  <a href="/dashboard/inbox" className="text-[#8BAE5A] text-sm font-semibold hover:underline">View all</a>
+                </div>
+                <div className="max-h-80 overflow-y-auto custom-scrollbar">
+                  {messages.map(m => (
+                    <a href="/dashboard/inbox" key={m.id} className="flex items-center gap-4 px-6 py-3 hover:bg-[#232D1A] transition cursor-pointer">
+                      <img src={m.avatar} alt={m.name} className="w-10 h-10 rounded-full object-cover" />
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold truncate">{m.name}</div>
+                        <div className="text-xs text-[#8BAE5A] truncate">{m.text}</div>
+                      </div>
+                      <div className="flex flex-col items-end">
+                        <span className="text-xs text-[#8BAE5A]">{m.time}</span>
+                        {m.unread ? <span className="w-3 h-3 bg-blue-500 rounded-full mt-1"></span> : <CheckCircleIcon className="w-4 h-4 text-[#8BAE5A] mt-1" />}
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+          {/* Profielfoto + dropdown */}
+          <div className="relative" ref={profileMenuRef}>
+            <button
+              onClick={() => setProfileMenuOpen((v) => !v)}
+              className="focus:outline-none"
+              aria-label="Open profielmenu"
+            >
+              <img
+                src={user?.avatar_url || "/profielfoto.png"}
+                alt="Profielfoto"
+                className="w-10 h-10 rounded-full border-2 border-[#8BAE5A] object-cover cursor-pointer"
+              />
+            </button>
+            {profileMenuOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-[#232D1A] border border-[#3A4D23] rounded-xl shadow-lg z-50 py-2">
+                <Link
+                  href="/dashboard/mijn-profiel"
+                  className="block px-4 py-2 text-white hover:bg-[#8BAE5A] hover:text-black rounded-t-xl transition"
+                  onClick={() => setProfileMenuOpen(false)}
+                >
+                  Account instellingen
+                </Link>
+                <button
+                  onClick={async () => {
+                    setProfileMenuOpen(false);
+                    await handleLogout();
+                  }}
+                  className="block w-full text-left px-4 py-2 text-white hover:bg-[#8BAE5A] hover:text-black rounded-b-xl transition"
+                >
+                  Log out
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* Main content section */}
         <main className={`flex-1 p-4 sm:p-6 md:p-12 bg-[#232D1A] font-figtree min-h-screen pb-12 ${collapsed ? 'md:ml-20' : 'md:ml-64'}`}>

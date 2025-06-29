@@ -982,7 +982,7 @@ function AdminDashboardContent() {
         >
           Technische Performance
         </button>
-      </div>
+            </div>
 
       {activeTab === 'overview' && (
         <>
@@ -997,11 +997,11 @@ function AdminDashboardContent() {
                   </h2>
                 </TooltipWrapper>
                 <p className="text-[#B6C948] text-sm">Algehele gezondheid van je community</p>
-              </div>
+            </div>
               <div className="text-right">
                 <div className="text-2xl font-bold text-[#8BAE5A]">{Math.round(animatedOverallScore)}/100</div>
                 <div className="text-sm text-[#B6C948]">Gezondheidsscore</div>
-              </div>
+          </div>
             </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
@@ -1071,23 +1071,23 @@ function AdminDashboardContent() {
           <div className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23]">
             <TooltipWrapper text="Toont de reis van een nieuw lid naar een 'power user'. Helpt bij het identificeren van afhaakmomenten.">
               <div className="flex items-center justify-between mb-2 cursor-help">
-                <div>
+          <div>
                   <h2 className="text-xl font-bold text-[#8BAE5A] flex items-center gap-2">
                     <ArrowTrendingUpIcon className="w-6 h-6" />
                     User Journey Funnel
                   </h2>
                   <p className="text-[#B6C948] text-sm">Gebruikersreis en conversie rates</p>
-                </div>
+          </div>
                 <div className="text-sm text-[#B6C948]">
                   {selectedPeriod === '7d' && 'Laatste 7 dagen'}
                   {selectedPeriod === '30d' && 'Laatste 30 dagen'}
                   {selectedPeriod === '90d' && 'Laatste 90 dagen'}
-                </div>
-              </div>
+            </div>
+          </div>
             </TooltipWrapper>
             
             <UserJourneyFunnel data={userJourneyData} />
-          </div>
+        </div>
         </>
       )}
 
@@ -1103,12 +1103,12 @@ function AdminDashboardContent() {
                     Academy Performance
                   </h2>
                   <p className="text-[#B6C948] text-sm">Module completion rates en populariteit</p>
-                </div>
+            </div>
                 <div className="text-right">
                   <div className="text-2xl font-bold text-[#8BAE5A]">{Math.round(animatedAcademyCompletion)}%</div>
                   <div className="text-sm text-[#B6C948]">Gem. completion rate</div>
-                </div>
-              </div>
+            </div>
+          </div>
             </TooltipWrapper>
             
             <div className="space-y-4">
@@ -1122,18 +1122,18 @@ function AdminDashboardContent() {
           <div className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23]">
             <TooltipWrapper text="Analyse van de prestaties van de trainingen. Meet voltooiing en hoeveel workouts als favoriet zijn gemarkeerd.">
               <div className="flex items-center justify-between mb-6 cursor-help">
-                <div>
+          <div>
                   <h2 className="text-xl font-bold text-[#8BAE5A] flex items-center gap-2">
                     <FireIcon className="w-6 h-6" />
                     Training Performance
                   </h2>
                   <p className="text-[#B6C948] text-sm">Workout completion en favorieten</p>
-                </div>
+          </div>
                 <div className="text-right">
                   <div className="text-2xl font-bold text-[#8BAE5A]">{Math.round(animatedTrainingCompletion)}%</div>
                   <div className="text-sm text-[#B6C948]">Gem. completion rate</div>
-                </div>
-              </div>
+          </div>
+        </div>
             </TooltipWrapper>
             
             <div className="space-y-4">
@@ -1147,25 +1147,25 @@ function AdminDashboardContent() {
           <div className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23]">
             <TooltipWrapper text="Analyse van forumactiviteit. Toont de meest actieve bijdragers en de gemiddelde reactietijd.">
               <div className="flex items-center justify-between mb-6 cursor-help">
-                <div>
+          <div>
                   <h2 className="text-xl font-bold text-[#8BAE5A] flex items-center gap-2">
                     <ChatBubbleLeftRightIcon className="w-6 h-6" />
                     Forum Performance
                   </h2>
                   <p className="text-[#B6C948] text-sm">Top contributors en engagement</p>
-                </div>
+          </div>
                 <div className="text-right">
                   <div className="text-2xl font-bold text-[#8BAE5A]">{animatedForumResponseTime.toFixed(1)}min</div>
                   <div className="text-sm text-[#B6C948]">Gem. response time</div>
                 </div>
-              </div>
+                </div>
             </TooltipWrapper>
             
             <div className="space-y-4">
               {contentPerformanceData.forum.topContributors.map((contributor: any, index: number) => (
                 <ForumContributorListItem key={index} contributor={contributor} />
               ))}
-            </div>
+              </div>
           </div>
         </div>
       )}
@@ -1193,9 +1193,9 @@ function AdminDashboardContent() {
             <div className="space-y-4">
               {riskData.churnRisk.map((member: any, index: number) => (
                 <ChurnRiskListItem key={member.id} member={member} />
-              ))}
-            </div>
+            ))}
           </div>
+        </div>
 
           {/* Ambassador Spotlight */}
           <div className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23]">
@@ -1207,7 +1207,7 @@ function AdminDashboardContent() {
                     Ambassadeur Spotlight
                   </h2>
                   <p className="text-[#B6C948] text-sm">Potentiële community leiders</p>
-                </div>
+            </div>
                 <div className="text-right">
                   <div className="text-2xl font-bold text-[#8BAE5A]">{Math.round(animatedAmbassadorCount)}</div>
                   <div className="text-sm text-[#B6C948]">Kandidaten</div>
@@ -1409,8 +1409,8 @@ function AdminDashboardContent() {
                     <button className="w-full mt-3 bg-[#8BAE5A] text-black py-2 px-4 rounded-lg hover:bg-[#B6C948] transition-colors flex items-center justify-center gap-2">
                       <EnvelopeIcon className="w-4 h-4" />
                       Stuur welkomst e-mail
-                    </button>
-                  </div>
+            </button>
+          </div>
                 ))}
               </div>
             </div>
@@ -1424,20 +1424,20 @@ function AdminDashboardContent() {
           <div className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23]">
             <TooltipWrapper text="Het aantal momenteel ingelogde gebruikers op het platform.">
               <div className="flex items-center justify-between mb-6 cursor-help">
-                <div>
+          <div>
                   <h2 className="text-xl font-bold text-[#8BAE5A] flex items-center gap-2">
                     <UserIcon className="w-6 h-6" />
                     Live Gebruikers Nu
                   </h2>
                   <p className="text-[#B6C948] text-sm">Real-time platform activiteit</p>
-                </div>
+          </div>
                 <div className="text-right">
                   <div className="text-4xl font-bold text-[#8BAE5A]">{Math.round(animatedCurrentUsers)}</div>
                   <div className="text-sm text-[#B6C948]">actieve gebruikers</div>
-                </div>
-              </div>
+            </div>
+            </div>
             </TooltipWrapper>
-          </div>
+            </div>
 
           {/* Real-time Events Feed */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -1450,7 +1450,7 @@ function AdminDashboardContent() {
                       Real-time Gebeurtenissen
                     </h2>
                     <p className="text-[#B6C948] text-sm">Live activiteit feed</p>
-                  </div>
+          </div>
                 </div>
               </TooltipWrapper>
               
@@ -1470,10 +1470,10 @@ function AdminDashboardContent() {
                     </div>
                   </div>
                 ))}
-              </div>
-            </div>
+        </div>
+      </div>
 
-            <div className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23]">
+      <div className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23]">
               <TooltipWrapper text="Content die op dit moment de meeste interactie krijgt. Hiermee kun je direct inhaken op trending topics binnen je community.">
                 <div className="flex items-center justify-between mb-6 cursor-help">
                   <div>
@@ -1482,8 +1482,8 @@ function AdminDashboardContent() {
                       Populaire Content (Vandaag)
                     </h2>
                     <p className="text-[#B6C948] text-sm">Trending topics en content</p>
-                  </div>
-                </div>
+          </div>
+        </div>
               </TooltipWrapper>
               
               <div className="space-y-4">
@@ -1496,14 +1496,14 @@ function AdminDashboardContent() {
                       </div>
                       <span className="text-xs font-medium bg-[#3A4D23] text-[#8BAE5A] px-2 py-1 rounded">
                         {content.trend}
-                      </span>
+              </span>
                     </div>
                     <div className="text-lg font-bold text-[#8BAE5A]">{content.interactions}</div>
                     <div className="text-xs text-[#B6C948]">interacties</div>
-                  </div>
-                ))}
-              </div>
             </div>
+          ))}
+        </div>
+      </div>
           </div>
         </div>
       )}
@@ -1517,7 +1517,7 @@ function AdminDashboardContent() {
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[#B6C948] text-sm">API Response Time</span>
                   <span className="text-green-400 text-xs">-12ms</span>
-                </div>
+          </div>
                 <div className="text-2xl font-bold text-[#8BAE5A]">{technicalData.apiResponseTime}ms</div>
                 <div className="text-xs text-[#B6C948]">Gemiddelde responstijd</div>
               </div>
@@ -1528,7 +1528,7 @@ function AdminDashboardContent() {
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[#B6C948] text-sm">Uptime</span>
                   <span className="text-green-400 text-xs">+0.1%</span>
-                </div>
+          </div>
                 <div className="text-2xl font-bold text-[#8BAE5A]">{animatedUptime.toFixed(1)}%</div>
                 <div className="text-xs text-[#B6C948]">Platform beschikbaarheid</div>
               </div>
@@ -1539,10 +1539,10 @@ function AdminDashboardContent() {
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[#B6C948] text-sm">Error Count</span>
                   <span className="text-red-400 text-xs">+1</span>
-                </div>
+          </div>
                 <div className="text-2xl font-bold text-[#8BAE5A]">{Math.round(animatedErrorCount)}</div>
                 <div className="text-xs text-[#B6C948]">Laatste 24 uur</div>
-              </div>
+      </div>
             </TooltipWrapper>
 
             <TooltipWrapper text="Gemiddelde laadtijd van alle pagina's in seconden.">

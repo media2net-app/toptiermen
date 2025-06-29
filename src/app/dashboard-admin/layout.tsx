@@ -157,6 +157,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   const { user, loading, signOut, isAuthenticated } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   // Check authentication
   useEffect(() => {
@@ -173,11 +174,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, [loading, user, router]);
 
   const handleLogout = async () => {
+    if (isLoggingOut) return; // Prevent double click
+    
+    setIsLoggingOut(true);
     try {
       await signOut();
-      router.push('/login');
+      setTimeout(() => {
+        router.push('/login');
+      }, 200);
     } catch (error) {
       console.error('Error logging out:', error);
+      setIsLoggingOut(false);
     }
   };
 
@@ -211,20 +218,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
           <div className="flex items-center gap-4">
             <span className="hidden sm:inline text-[#8BAE5A] text-sm">
-              {user?.label || 'Admin'}
+              {user?.email || 'Admin'}
             </span>
             <button
               onClick={handleLogout}
-              className="px-4 py-2 rounded-xl bg-[#181F17] text-[#8BAE5A] text-sm font-semibold border border-[#3A4D23] hover:bg-[#232D1A] transition"
+              disabled={isLoggingOut}
+              className="px-4 py-2 rounded-xl bg-[#181F17] text-[#8BAE5A] text-sm font-semibold border border-[#3A4D23] hover:bg-[#232D1A] transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Uitloggen
+              {isLoggingOut ? 'Uitloggen...' : 'Uitloggen'}
             </button>
-            <Link 
-              href="/dashboard" 
-              className="px-4 py-2 rounded-xl bg-[#8BAE5A] text-[#181F17] text-sm font-semibold border border-[#8BAE5A] hover:bg-[#A6C97B] transition"
-            >
-              Terug naar Platform
-            </Link>
           </div>
         </div>
       </div>

@@ -20,6 +20,11 @@ export interface Database {
           points: number
           missions_completed: number
           last_login: string | null
+          bio: string | null
+          location: string | null
+          interests: Json | null
+          cover_url: string | null
+          role: 'user' | 'admin'
         }
         Insert: {
           id?: string
@@ -31,6 +36,11 @@ export interface Database {
           points?: number
           missions_completed?: number
           last_login?: string | null
+          bio?: string | null
+          location?: string | null
+          interests?: Json | null
+          cover_url?: string | null
+          role?: 'user' | 'admin'
         }
         Update: {
           id?: string
@@ -42,6 +52,11 @@ export interface Database {
           points?: number
           missions_completed?: number
           last_login?: string | null
+          bio?: string | null
+          location?: string | null
+          interests?: Json | null
+          cover_url?: string | null
+          role?: 'user' | 'admin'
         }
       }
       missions: {

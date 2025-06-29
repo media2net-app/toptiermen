@@ -512,7 +512,7 @@ export default function VoedingsplannenPage() {
                   >
                     <CalculatorIcon className="w-6 h-6 mr-2" />
                     Bereken Mijn Doelen
-                  </button>
+            </button>
                 </div>
               </div>
             </motion.div>
@@ -555,8 +555,8 @@ export default function VoedingsplannenPage() {
                       <div className="text-2xl font-bold text-[#8BAE5A]">{nutritionGoals.fat}g</div>
                       <div className="text-sm text-gray-400">Vet</div>
                     </div>
-                  </div>
-                </div>
+        </div>
+      </div>
               )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -630,7 +630,7 @@ export default function VoedingsplannenPage() {
                   <ShoppingCartIcon className="w-5 h-5 mr-2" />
                   Genereer Boodschappenlijst voor dit Plan
                 </button>
-              </div>
+            </div>
 
               <div className="space-y-6">
                 {[
@@ -643,8 +643,8 @@ export default function VoedingsplannenPage() {
                       <h3 className="text-xl font-bold text-white">{title} ({time})</h3>
                       <div className="text-sm text-gray-400">
                         {meal.calories} kcal | {meal.protein}g eiwit | {meal.carbs}g koolhydraten | {meal.fat}g vet
-                      </div>
-                    </div>
+            </div>
+          </div>
                     
                     <div className="flex flex-col md:flex-row gap-6">
                       <div className="w-full md:w-1/3">
@@ -664,10 +664,10 @@ export default function VoedingsplannenPage() {
                             {meal.ingredients.map((ingredient, index) => (
                               <div key={index} className="text-gray-300 text-sm">
                                 • {ingredient.name}: {ingredient.amount} {ingredient.unit}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
+          </div>
+        ))}
+      </div>
+    </div>
                       </div>
                     </div>
                   </div>

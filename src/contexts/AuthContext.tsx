@@ -76,7 +76,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (data) {
         setUser({
           ...data,
-          role: data.email?.includes('admin') ? 'admin' : 'user',
+          role: data.role || 'user',
         });
       }
     } catch (error) {
@@ -123,6 +123,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             rank: 'Beginner',
             points: 0,
             missions_completed: 0,
+            role: 'user',
           });
 
         if (profileError) {

@@ -199,8 +199,8 @@ export default function TrainingscentrumPage() {
                 <div className="bg-gradient-to-br from-[#232D1A] to-[#1A2315] border-2 border-[#3A4D23] rounded-2xl p-8 h-full transition-all duration-300 group-hover:border-[#8BAE5A] group-hover:shadow-2xl group-hover:shadow-[#8BAE5A]/20">
                   <div className="flex items-center justify-center w-16 h-16 bg-[#8BAE5A] rounded-full mb-6 mx-auto group-hover:scale-110 transition-transform duration-300">
                     <FireIcon className="w-8 h-8 text-[#232D1A]" />
-                  </div>
-                  
+        </div>
+
                   <h3 className="text-2xl font-bold text-white mb-4 text-center">
                     Trainingsschema
                   </h3>
@@ -332,7 +332,7 @@ export default function TrainingscentrumPage() {
               <p className="text-gray-300 text-lg">
                 Kies de omgeving waar je het liefst traint.
               </p>
-            </div>
+          </div>
 
             <div className="grid md:grid-cols-2 gap-8 mb-8">
               {/* Gym Option */}
@@ -351,7 +351,7 @@ export default function TrainingscentrumPage() {
               >
                 <div className="flex items-center justify-center w-16 h-16 bg-[#8BAE5A] rounded-full mb-6 mx-auto">
                   <FireIcon className="w-8 h-8 text-[#232D1A]" />
-                </div>
+          </div>
                 
                 <h3 className="text-2xl font-bold text-white mb-4 text-center">
                   🏋️‍♂️ Gym
@@ -378,8 +378,8 @@ export default function TrainingscentrumPage() {
               >
                 <div className="flex items-center justify-center w-16 h-16 bg-[#8BAE5A] rounded-full mb-6 mx-auto">
                   <PlayIcon className="w-8 h-8 text-[#232D1A]" />
-                </div>
-                
+        </div>
+
                 <h3 className="text-2xl font-bold text-white mb-4 text-center">
                   🤸 Bodyweight / Thuis
                 </h3>
@@ -471,7 +471,7 @@ export default function TrainingscentrumPage() {
                   </div>
                 </motion.div>
               ))}
-            </div>
+        </div>
 
             <div className="mt-8 text-center space-y-4">
               <motion.button
@@ -503,8 +503,8 @@ export default function TrainingscentrumPage() {
                   <ArrowRightIcon className="w-5 h-5 mr-2" />
                   Nieuw Schema Genereren
                 </motion.button>
-              </div>
-            </div>
+        </div>
+      </div>
           </motion.div>
         )}
       </AnimatePresence>
