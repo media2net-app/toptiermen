@@ -220,6 +220,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <span className="hidden sm:inline text-[#8BAE5A] text-sm">
               {user?.email || 'Admin'}
             </span>
+            <Link 
+              href="/dashboard" 
+              className="px-4 py-2 rounded-xl bg-[#8BAE5A] text-[#181F17] text-sm font-semibold border border-[#8BAE5A] hover:bg-[#A6C97B] transition"
+            >
+              Ga naar Platform
+            </Link>
             <button
               onClick={handleLogout}
               disabled={isLoggingOut}

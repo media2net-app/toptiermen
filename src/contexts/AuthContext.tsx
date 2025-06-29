@@ -17,6 +17,7 @@ type AuthContextType = {
   signOut: () => Promise<void>;
   isAuthenticated: boolean;
   updateUser: (updates: Partial<User>) => Promise<void>;
+  redirectAdminToDashboard?: boolean;
 };
 
 const AuthContext = createContext<AuthContextType>({
@@ -27,6 +28,7 @@ const AuthContext = createContext<AuthContextType>({
   signOut: async () => {},
   isAuthenticated: false,
   updateUser: async () => {},
+  redirectAdminToDashboard: true,
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -175,6 +177,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       signOut,
       isAuthenticated: !!user,
       updateUser,
+      redirectAdminToDashboard: true,
     }}>
       {children}
     </AuthContext.Provider>

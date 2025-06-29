@@ -148,12 +148,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
   }, [loading, isAuthenticated, router]);
 
-  // Redirect admin users to admin dashboard
-  useEffect(() => {
-    if (!loading && user && user.role === 'admin') {
-      router.push('/dashboard-admin');
-    }
-  }, [loading, user, router]);
+  // Note: Admin users can now access both admin dashboard and regular dashboard
+  // The redirect to admin dashboard only happens on initial login in AuthContext
 
   const handleLogout = async () => {
     try {
@@ -386,6 +382,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </div>
             )}
           </div>
+          {/* Admin Dashboard Button - Only show for admin users */}
+          {user?.role === 'admin' && (
+            <Link 
+              href="/dashboard-admin" 
+              className="px-4 py-2 rounded-xl bg-[#181F17] text-[#8BAE5A] text-sm font-semibold border border-[#3A4D23] hover:bg-[#232D1A] transition"
+            >
+              Admin Dashboard
+            </Link>
+          )}
           {/* Profielfoto + dropdown */}
           <div className="relative" ref={profileMenuRef}>
             <button
