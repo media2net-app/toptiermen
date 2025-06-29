@@ -23,115 +23,8 @@ import {
   ChevronDownIcon
 } from '@heroicons/react/24/outline';
 import { toast } from 'react-toastify';
-
-// Enhanced mock data with all required fields
-const mockModules = [
-  {
-    id: 1,
-    title: 'Discipline & Identiteit',
-    description: 'Bouw een onwrikbare discipline en ontdek je ware identiteit',
-    shortDescription: 'De basis van persoonlijke groei',
-    coverImage: '/images/mind/1.png',
-    lessons: 8,
-    totalDuration: '2u 45m',
-    enrolledStudents: 1247,
-    completionRate: 78,
-    status: 'published',
-    unlockRequirement: null,
-    order: 1
-  },
-  {
-    id: 2,
-    title: 'Fysieke Dominantie',
-    description: 'Transformeer je lichaam en word fysiek dominant',
-    shortDescription: 'Fysieke transformatie en kracht',
-    coverImage: '/images/mind/2.png',
-    lessons: 12,
-    totalDuration: '4u 20m',
-    enrolledStudents: 892,
-    completionRate: 65,
-    status: 'published',
-    unlockRequirement: 1, // Requires completion of module 1
-    order: 2
-  },
-  {
-    id: 3,
-    title: 'Mentale Kracht',
-    description: 'Ontwikkel een ijzersterke mindset en mentale weerbaarheid',
-    shortDescription: 'Mindset en mentale weerbaarheid',
-    coverImage: '/images/mind/3.png',
-    lessons: 6,
-    totalDuration: '1u 55m',
-    enrolledStudents: 1103,
-    completionRate: 82,
-    status: 'draft',
-    unlockRequirement: 2, // Requires completion of module 2
-    order: 3
-  }
-];
-
-const mockLessons = [
-  {
-    id: 1,
-    title: 'De Basis van Discipline',
-    moduleId: 1,
-    duration: '25m',
-    type: 'video',
-    status: 'published',
-    order: 1,
-    views: 1247,
-    completionRate: 89,
-    videoUrl: 'https://www.youtube.com/watch?v=example1',
-    content: '',
-    attachments: [],
-    examQuestions: []
-  },
-  {
-    id: 2,
-    title: 'Je Identiteit Definiëren',
-    moduleId: 1,
-    duration: '30m',
-    type: 'text',
-    status: 'published',
-    order: 2,
-    views: 1102,
-    completionRate: 76,
-    videoUrl: '',
-    content: 'Dit is een uitgebreide tekst over het definiëren van je identiteit...',
-    attachments: [
-      { name: 'Identiteit Werkblad.pdf', url: '/attachments/identiteit-werkblad.pdf' }
-    ],
-    examQuestions: []
-  },
-  {
-    id: 3,
-    title: 'Dagelijkse Routines',
-    moduleId: 1,
-    duration: '20m',
-    type: 'exam',
-    status: 'published',
-    order: 3,
-    views: 987,
-    completionRate: 71,
-    videoUrl: '',
-    content: '',
-    attachments: [],
-    examQuestions: [
-      {
-        question: 'Wat is de eerste stap in het opbouwen van discipline?',
-        type: 'multiple_choice',
-        options: ['Doelen stellen', 'Direct beginnen', 'Plannen maken', 'Motivatie zoeken'],
-        correctAnswer: 1
-      },
-      {
-        question: 'Hoeveel tijd moet je minimaal besteden aan je ochtendroutine?',
-        type: 'text',
-        options: [],
-        correctAnswer: null
-      }
-    ]
-  }
-];
+import { supabase } from '@/lib/supabase';
+import { useDebug } from '@/contexts/DebugContext';
 
 export default function AcademyManagement() {
   const [selectedModule, setSelectedModule] = useState<number | null>(null);
@@ -142,6 +35,9 @@ export default function AcademyManagement() {
   const [isLoading, setIsLoading] = useState(false);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [modules, setModules] = useState<any[]>([]);
+  const [lessons, setLessons] = useState<any[]>([]);
+  const { showDebug } = useDebug();
 
   // Module form state
   const [moduleForm, setModuleForm] = useState({
@@ -200,8 +96,37 @@ export default function AcademyManagement() {
     }
   };
 
-  const selectedModuleData = mockModules.find(m => m.id === selectedModule);
-  const moduleLessons = mockLessons.filter(l => l.moduleId === selectedModule).sort((a, b) => a.order - b.order);
+  const selectedModuleData = modules.find(m => m.id === selectedModule);
+  const moduleLessons = lessons.filter(l => l.module_id === selectedModule).sort((a, b) => a.order_index - b.order_index);
+
+  const fetchModules = async () => {
+    const { data, error } = await supabase
+      .from('academy_modules')
+      .select('*')
+      .order('order_index', { ascending: true });
+    if (error) {
+      toast.error('Fout bij ophalen modules: ' + error.message);
+    } else {
+      setModules(data || []);
+    }
+  };
+
+  const fetchLessons = async () => {
+    const { data, error } = await supabase
+      .from('academy_lessons')
+      .select('*')
+      .order('order_index', { ascending: true });
+    if (error) {
+      toast.error('Fout bij ophalen lessen: ' + error.message);
+    } else {
+      setLessons(data || []);
+    }
+  };
+
+  useEffect(() => {
+    fetchModules();
+    fetchLessons();
+  }, []);
 
   // Module Modal Functions
   const openModuleModal = (module?: any) => {
@@ -210,10 +135,10 @@ export default function AcademyManagement() {
       setModuleForm({
         title: module.title,
         description: module.description,
-        shortDescription: module.shortDescription,
-        coverImage: module.coverImage,
+        shortDescription: module.short_description || '',
+        coverImage: module.cover_image || '',
         status: module.status,
-        unlockRequirement: module.unlockRequirement
+        unlockRequirement: module.unlock_requirement || ''
       });
     } else {
       setEditingModule(null);
@@ -223,7 +148,7 @@ export default function AcademyManagement() {
         shortDescription: '',
         coverImage: '',
         status: 'draft',
-        unlockRequirement: '' as string | null
+        unlockRequirement: ''
       });
     }
     setShowModuleModal(true);
@@ -231,30 +156,65 @@ export default function AcademyManagement() {
 
   const handleModuleSave = async () => {
     setIsLoading(true);
-    
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
       if (editingModule) {
-        toast.success(`Module "${moduleForm.title}" succesvol bijgewerkt`, {
-          position: "top-right",
-          autoClose: 3000
-        });
+        // Update bestaande module
+        const { error } = await supabase
+          .from('academy_modules')
+          .update({
+            title: moduleForm.title,
+            description: moduleForm.description,
+            short_description: moduleForm.shortDescription,
+            cover_image: moduleForm.coverImage,
+            status: moduleForm.status,
+            unlock_requirement: moduleForm.unlockRequirement || null,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', editingModule);
+        if (error) throw error;
+        toast.success(`Module "${moduleForm.title}" succesvol bijgewerkt`);
       } else {
-        toast.success(`Module "${moduleForm.title}" succesvol aangemaakt`, {
-          position: "top-right",
-          autoClose: 3000
-        });
+        // Nieuwe module toevoegen
+        const { error } = await supabase
+          .from('academy_modules')
+          .insert({
+            title: moduleForm.title,
+            description: moduleForm.description,
+            short_description: moduleForm.shortDescription,
+            cover_image: moduleForm.coverImage,
+            status: moduleForm.status,
+            unlock_requirement: moduleForm.unlockRequirement || null,
+            order_index: modules.length + 1,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          });
+        if (error) throw error;
+        toast.success(`Module "${moduleForm.title}" succesvol aangemaakt`);
       }
-      
       setShowModuleModal(false);
       setEditingModule(null);
-    } catch (error) {
-      toast.error('Er is een fout opgetreden bij het opslaan', {
-        position: "top-right",
-        autoClose: 3000
-      });
+      await fetchModules();
+    } catch (error: any) {
+      toast.error('Er is een fout opgetreden bij het opslaan: ' + error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Module verwijderen
+  const handleModuleDelete = async (id: string) => {
+    if (!window.confirm('Weet je zeker dat je deze module wilt verwijderen?')) return;
+    setIsLoading(true);
+    try {
+      const { error } = await supabase
+        .from('academy_modules')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+      toast.success('Module succesvol verwijderd');
+      await fetchModules();
+    } catch (error: any) {
+      toast.error('Fout bij verwijderen: ' + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -356,18 +316,20 @@ export default function AcademyManagement() {
           <h1 className="text-3xl font-bold text-[#8BAE5A]">Academy Beheer</h1>
           <p className="text-[#B6C948] mt-2">Beheer alle Academy modules en lessen</p>
         </div>
-        <button
-          onClick={() => openModuleModal()}
-          className="px-6 py-3 rounded-xl bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#B6C948] transition-all duration-200 flex items-center gap-2"
-        >
-          <PlusIcon className="w-5 h-5" />
-          Nieuwe Module
-        </button>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => openModuleModal()}
+            className="px-6 py-3 rounded-xl bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#B6C948] transition-all duration-200 flex items-center gap-2"
+          >
+            <PlusIcon className="w-5 h-5" />
+            Nieuwe Module
+          </button>
+        </div>
       </div>
 
       {/* Modules Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {mockModules.map((module) => (
+        {modules.map((module) => (
           <div 
             key={module.id}
             className={`bg-[#232D1A] rounded-2xl p-6 border transition-all duration-300 cursor-pointer ${
@@ -384,6 +346,13 @@ export default function AcademyManagement() {
               <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(module.status)} bg-[#181F17]`}>
                 {getStatusText(module.status)}
               </span>
+              <button
+                onClick={e => { e.stopPropagation(); handleModuleDelete(module.id); }}
+                className="ml-2 text-red-400 hover:text-red-600"
+                title="Verwijder module"
+              >
+                <TrashIcon className="w-5 h-5" />
+              </button>
             </div>
             
             <h3 className="text-xl font-bold text-[#8BAE5A] mb-2">{module.title}</h3>
@@ -392,19 +361,21 @@ export default function AcademyManagement() {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-[#B6C948] text-sm">Lessen</span>
-                <span className="text-[#8BAE5A] font-semibold">{module.lessons}</span>
+                <span className="text-[#8BAE5A] font-semibold">
+                  {lessons.filter(l => l.module_id === module.id).length}
+                </span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-[#B6C948] text-sm">Duur</span>
-                <span className="text-[#8BAE5A] font-semibold">{module.totalDuration}</span>
+                <span className="text-[#8BAE5A] font-semibold">{module.total_duration || '0m'}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-[#B6C948] text-sm">Studenten</span>
-                <span className="text-[#8BAE5A] font-semibold">{module.enrolledStudents}</span>
+                <span className="text-[#8BAE5A] font-semibold">{module.enrolled_students || 0}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-[#B6C948] text-sm">Voltooiing</span>
-                <span className="text-[#8BAE5A] font-semibold">{module.completionRate}%</span>
+                <span className="text-[#8BAE5A] font-semibold">{module.completion_rate || 0}%</span>
               </div>
             </div>
 
@@ -495,7 +466,7 @@ export default function AcademyManagement() {
                           <TypeIcon className="w-4 h-4 text-[#8BAE5A]" />
                         </div>
                         <div>
-                          <span className="text-[#8BAE5A] font-semibold text-sm">Les {lesson.order}</span>
+                          <span className="text-[#8BAE5A] font-semibold text-sm">Les {lesson.order_index}</span>
                           <h3 className="text-[#8BAE5A] font-medium">{lesson.title}</h3>
                         </div>
                       </div>
@@ -550,7 +521,7 @@ export default function AcademyManagement() {
               <AcademicCapIcon className="w-6 h-6 text-[#8BAE5A]" />
             </div>
             <div>
-              <h3 className="text-2xl font-bold text-[#8BAE5A]">{mockModules.length}</h3>
+              <h3 className="text-2xl font-bold text-[#8BAE5A]">{modules.length}</h3>
               <p className="text-[#B6C948] text-sm">Modules</p>
             </div>
           </div>
@@ -562,7 +533,7 @@ export default function AcademyManagement() {
               <BookOpenIcon className="w-6 h-6 text-[#8BAE5A]" />
             </div>
             <div>
-              <h3 className="text-2xl font-bold text-[#8BAE5A]">{mockLessons.length}</h3>
+              <h3 className="text-2xl font-bold text-[#8BAE5A]">{lessons.length}</h3>
               <p className="text-[#B6C948] text-sm">Lessen</p>
             </div>
           </div>
@@ -686,7 +657,7 @@ export default function AcademyManagement() {
                   className="w-full px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
                 >
                   <option value="">Geen voorwaarde (direct beschikbaar)</option>
-                  {mockModules.filter(m => m.id !== editingModule).map(module => (
+                  {modules.filter(m => m.id !== editingModule).map(module => (
                     <option key={module.id} value={String(module.id)}>
                       Deze module wordt ontgrendeld na het voltooien van: {module.title}
                     </option>
@@ -937,6 +908,43 @@ export default function AcademyManagement() {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Debug Info - Conditionally shown at bottom */}
+      {showDebug && (
+        <div className="bg-[#181F17] p-4 rounded-xl border border-[#3A4D23]">
+          <h3 className="text-[#8BAE5A] font-semibold mb-2">Debug Info:</h3>
+          <p className="text-white">Aantal modules geladen: {modules.length}</p>
+          <p className="text-white">Modules: {JSON.stringify(modules.map(m => ({ id: m.id, title: m.title, lessons_count: m.lessons_count })))}</p>
+          <p className="text-white">Aantal lessen geladen: {lessons.length}</p>
+          <p className="text-white">Lessen: {JSON.stringify(lessons.map(l => ({ 
+            id: l.id, 
+            title: l.title, 
+            module_id: l.module_id, 
+            status: l.status,
+            order_index: l.order_index 
+          })))}</p>
+          
+          {/* Module-Lesson Mapping */}
+          <div className="mt-4">
+            <h4 className="text-[#B6C948] font-semibold mb-2">Module-Lesson Mapping:</h4>
+            {modules.map(module => {
+              const moduleLessons = lessons.filter(l => l.module_id === module.id);
+              return (
+                <div key={module.id} className="text-white text-sm mb-2">
+                  <span className="text-[#8BAE5A] font-medium">{module.title}:</span> {moduleLessons.length} lessen
+                  {moduleLessons.length > 0 && (
+                    <ul className="ml-4 text-[#B6C948]">
+                      {moduleLessons.map(lesson => (
+                        <li key={lesson.id}>• {lesson.title} (ID: {lesson.id})</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

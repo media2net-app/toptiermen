@@ -21,6 +21,8 @@ import {
   DocumentTextIcon
 } from '@heroicons/react/24/outline';
 import { toast } from 'react-toastify';
+import { useDebug } from '@/contexts/DebugContext';
+import DebugPanel from '@/components/DebugPanel';
 
 // Enhanced mock data with additional fields
 const mockMembers = [
@@ -916,6 +918,32 @@ export default function Ledenbeheer() {
           </div>
         </div>
       )}
+
+      {/* Debug Panel */}
+      <DebugPanel 
+        data={{
+          'Totaal aantal leden': allMembers.length,
+          'Actieve leden': allMembers.filter(m => m.status === 'active').length,
+          'Inactieve leden': allMembers.filter(m => m.status === 'inactive').length,
+          'Geschorste leden': allMembers.filter(m => m.status === 'suspended').length,
+          'Huidige pagina': currentPage,
+          'Leden per pagina': itemsPerPage,
+          'Zoekterm': searchTerm,
+          'Gefilterde leden': filteredMembers.length,
+          'Geselecteerde filters': {
+            status: selectedStatus,
+            rank: selectedRank,
+            forumStatus: selectedRank
+          },
+          'Bewerkte lid': editingMember ? {
+            id: editingMember.id,
+            name: editingMember.name,
+            email: editingMember.email,
+            status: editingMember.status
+          } : null
+        }}
+        title="Ledenbeheer Debug Info"
+      />
     </div>
   );
 } 

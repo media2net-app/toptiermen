@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { DebugProvider, useDebug } from '@/contexts/DebugContext';
 import { 
   HomeIcon, 
   UserGroupIcon, 
@@ -21,7 +22,8 @@ import {
   ClockIcon,
   WrenchScrewdriverIcon,
   Bars3Icon,
-  XMarkIcon
+  XMarkIcon,
+  BugAntIcon
 } from '@heroicons/react/24/outline';
 
 const adminMenu = [
@@ -153,9 +155,18 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
 };
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <DebugProvider>
+      <AdminLayoutContent>{children}</AdminLayoutContent>
+    </DebugProvider>
+  );
+}
+
+function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, loading, signOut, isAuthenticated } = useAuth();
+  const { showDebug, setShowDebug } = useDebug();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -220,6 +231,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <span className="hidden sm:inline text-[#8BAE5A] text-sm">
               {user?.email || 'Admin'}
             </span>
+            {/* Debug Toggle */}
+            <div className="flex items-center gap-2">
+              <BugAntIcon className="w-4 h-4 text-[#B6C948]" />
+              <select
+                value={showDebug ? 'true' : 'false'}
+                onChange={(e) => setShowDebug(e.target.value === 'true')}
+                className="px-2 py-1 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-1 focus:ring-[#8BAE5A] text-xs"
+              >
+                <option value="false">Debug OFF</option>
+                <option value="true">Debug ON</option>
+              </select>
+            </div>
             <Link 
               href="/dashboard" 
               className="px-4 py-2 rounded-xl bg-[#8BAE5A] text-[#181F17] text-sm font-semibold border border-[#8BAE5A] hover:bg-[#A6C97B] transition"
