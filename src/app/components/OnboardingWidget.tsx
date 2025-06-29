@@ -4,6 +4,7 @@ import { CheckCircleIcon, XMarkIcon, ArrowRightIcon } from '@heroicons/react/24/
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface OnboardingStep {
   id: string;
@@ -19,42 +20,44 @@ interface OnboardingWidgetProps {
 }
 
 export default function OnboardingWidget({ isVisible, onComplete }: OnboardingWidgetProps) {
+  const { user, updateUser } = useAuth();
+  const router = useRouter();
   const [steps, setSteps] = useState<OnboardingStep[]>([
     {
       id: 'goal',
       title: 'Definieer jouw #1 Hoofddoel',
-      description: 'Stel je belangrijkste doel voor de komende 6 maanden vast',
+      description: 'Wat is je belangrijkste doel voor de komende 90 dagen?',
       completed: false,
-      action: () => setShowGoalModal(true)
-    },
-    {
-      id: 'training',
-      title: 'Stel je Persoonlijke Trainingsschema samen',
-      description: 'Creëer een op maat gemaakt trainingsplan',
-      completed: false,
-      action: () => router.push('/dashboard/trainingscentrum')
-    },
-    {
-      id: 'nutrition',
-      title: 'Creëer je Voedingsplan op Maat',
-      description: 'Genereer een persoonlijk voedingsplan',
-      completed: false,
-      action: () => router.push('/dashboard/voedingsplannen')
+      action: () => setShowGoalModal(true),
     },
     {
       id: 'missions',
       title: 'Kies je Eerste 3 Missies',
-      description: 'Selecteer je eerste dagelijkse gewoontes',
+      description: 'Selecteer 3 missies die je deze week wilt voltooien',
       completed: false,
-      action: () => setShowMissionsModal(true)
+      action: () => setShowMissionsModal(true),
+    },
+    {
+      id: 'training',
+      title: 'Kies je Trainingsschema',
+      description: 'Selecteer een trainingsschema dat bij je past',
+      completed: false,
+      action: () => router.push('/dashboard/trainingscentrum'),
+    },
+    {
+      id: 'nutrition',
+      title: 'Kies je Voedingsplan',
+      description: 'Selecteer een voedingsplan voor optimale prestaties',
+      completed: false,
+      action: () => router.push('/dashboard/voedingsplannen'),
     },
     {
       id: 'challenge',
       title: 'Doe mee aan een Starter-Challenge',
-      description: 'Kies een challenge om direct te starten.',
+      description: 'Kies een challenge om je discipline te testen',
       completed: false,
-      action: () => setShowChallengeModal(true)
-    }
+      action: () => setShowChallengeModal(true),
+    },
   ]);
 
   const [showGoalModal, setShowGoalModal] = useState(false);
@@ -63,21 +66,14 @@ export default function OnboardingWidget({ isVisible, onComplete }: OnboardingWi
   const [goalText, setGoalText] = useState('');
   const [selectedMissions, setSelectedMissions] = useState<string[]>([]);
   const [selectedChallenge, setSelectedChallenge] = useState<string>('');
-  const [isCompleted, setIsCompleted] = useState(false);
-  const router = useRouter();
 
-  const completedSteps = steps.filter(step => step.completed).length;
-  const progress = (completedSteps / steps.length) * 100;
-
-  const starterMissions = [
-    { id: 'read', title: '10 min lezen per dag', description: 'Bouw een leesgewoonte op' },
-    { id: 'cold-shower', title: 'Koude douche nemen', description: 'Versterk je mentale weerstand' },
-    { id: 'make-bed', title: 'Maak je bed op', description: 'Start elke dag met discipline' },
-    { id: 'water', title: '2L water per dag', description: 'Blijf gehydrateerd' },
-    { id: 'walk', title: '10.000 stappen', description: 'Blijf actief gedurende de dag' },
-    { id: 'meditation', title: '5 min meditatie', description: 'Train je focus en rust' },
-    { id: 'no-phone', title: 'Geen telefoon voor 8:00', description: 'Start je dag bewust' },
-    { id: 'gratitude', title: 'Dankbaarheid opschrijven', description: 'Cultiveer een positieve mindset' }
+  const availableMissions = [
+    'Doe 50 push-ups',
+    'Mediteer 10 minuten',
+    'Lees 30 minuten',
+    'Neem een koude douche',
+    'Maak je bed op',
+    'Drink 2L water',
   ];
 
   const starterChallenges = [
@@ -91,64 +87,55 @@ export default function OnboardingWidget({ isVisible, onComplete }: OnboardingWi
   // Initialize steps from localStorage and check for external completions
   useEffect(() => {
     const initializeSteps = () => {
-      // Laad bestaande voltooide stappen uit localStorage
+      // Load completed steps from localStorage
       const completedStepsData = localStorage.getItem('onboardingCompletedSteps');
       const completedIds = completedStepsData ? JSON.parse(completedStepsData) : [];
 
-      // Check externe flags
+      // Check for external completions (training and nutrition)
       const trainingCompleted = localStorage.getItem('trainingSchemaCompleted') === 'true';
       const nutritionCompleted = localStorage.getItem('nutritionPlanCompleted') === 'true';
 
-      // Combineer alles in een Set (geen dubbele waarden)
+      // Combine everything in a Set (no duplicate values)
       const allCompletedIds = new Set(completedIds);
       if (trainingCompleted) allCompletedIds.add('training');
       if (nutritionCompleted) allCompletedIds.add('nutrition');
 
-      // Update steps met gecombineerde status
-      setSteps(prevSteps =>
-        prevSteps.map(step => ({
-          ...step,
-          completed: allCompletedIds.has(step.id)
-        }))
-      );
-      // Sla direct de gecombineerde lijst op zodat deze nooit verloren gaat
-      localStorage.setItem('onboardingCompletedSteps', JSON.stringify(Array.from(allCompletedIds)));
+      // Update localStorage with combined list
+      localStorage.setItem('onboardingCompletedSteps', JSON.stringify([...allCompletedIds]));
+
+      // Update steps state
+      const updatedSteps = steps.map(step => ({
+        ...step,
+        completed: allCompletedIds.has(step.id),
+      }));
+      setSteps(updatedSteps);
     };
 
     initializeSteps();
-
-    const handleFocus = () => {
-      initializeSteps();
-    };
-    window.addEventListener('focus', handleFocus);
-    return () => window.removeEventListener('focus', handleFocus);
   }, []);
 
-  // Check for completion
-  useEffect(() => {
-    if (completedSteps === steps.length && !isCompleted) {
-      setIsCompleted(true);
-      setTimeout(() => {
-        onComplete();
-      }, 3000);
-    }
-  }, [completedSteps, steps.length, isCompleted, onComplete]);
-
-  const handleStepClick = (step: OnboardingStep) => {
-    if (!step.completed) {
-      step.action();
-    }
-  };
-
-  const handleGoalSave = () => {
+  const handleGoalSave = async () => {
     if (goalText.trim()) {
-      // Voeg 'goal' toe aan localStorage
+      // Add 'goal' to localStorage
       const completedStepsData = localStorage.getItem('onboardingCompletedSteps');
       const completedIds = completedStepsData ? JSON.parse(completedStepsData) : [];
       if (!completedIds.includes('goal')) {
         completedIds.push('goal');
         localStorage.setItem('onboardingCompletedSteps', JSON.stringify(completedIds));
       }
+
+      // Save goal to Supabase if user is authenticated
+      if (user) {
+        try {
+          await updateUser({ 
+            // Store goal in a custom field or use a separate table
+            // For now, we'll store it in localStorage and can extend later
+          });
+        } catch (error) {
+          console.error('Error saving goal to database:', error);
+        }
+      }
+
       const updatedSteps = steps.map(step => 
         step.id === 'goal' ? { ...step, completed: true } : step
       );
@@ -158,25 +145,28 @@ export default function OnboardingWidget({ isVisible, onComplete }: OnboardingWi
     }
   };
 
-  const handleMissionToggle = (missionId: string) => {
-    setSelectedMissions(prev => 
-      prev.includes(missionId) 
-        ? prev.filter(id => id !== missionId)
-        : prev.length < 3 
-          ? [...prev, missionId]
-          : prev
-    );
-  };
-
-  const handleMissionsSave = () => {
+  const handleMissionsSave = async () => {
     if (selectedMissions.length === 3) {
-      // Voeg 'missions' toe aan localStorage
+      // Add 'missions' to localStorage
       const completedStepsData = localStorage.getItem('onboardingCompletedSteps');
       const completedIds = completedStepsData ? JSON.parse(completedStepsData) : [];
       if (!completedIds.includes('missions')) {
         completedIds.push('missions');
         localStorage.setItem('onboardingCompletedSteps', JSON.stringify(completedIds));
       }
+
+      // Save missions to Supabase if user is authenticated
+      if (user) {
+        try {
+          await updateUser({ 
+            // Store selected missions in a custom field or use a separate table
+            // For now, we'll store it in localStorage and can extend later
+          });
+        } catch (error) {
+          console.error('Error saving missions to database:', error);
+        }
+      }
+
       const updatedSteps = steps.map(step => 
         step.id === 'missions' ? { ...step, completed: true } : step
       );
@@ -186,16 +176,29 @@ export default function OnboardingWidget({ isVisible, onComplete }: OnboardingWi
     }
   };
 
-  const handleChallengeSave = () => {
+  const handleChallengeSave = async () => {
     if (selectedChallenge) {
-      // Voeg 'challenge' toe aan localStorage
+      // Add 'challenge' to localStorage
       const completedStepsData = localStorage.getItem('onboardingCompletedSteps');
       const completedIds = completedStepsData ? JSON.parse(completedStepsData) : [];
       if (!completedIds.includes('challenge')) {
         completedIds.push('challenge');
         localStorage.setItem('onboardingCompletedSteps', JSON.stringify(completedIds));
       }
-      const updatedSteps = steps.map(step =>
+
+      // Save challenge to Supabase if user is authenticated
+      if (user) {
+        try {
+          await updateUser({ 
+            // Store selected challenge in a custom field or use a separate table
+            // For now, we'll store it in localStorage and can extend later
+          });
+        } catch (error) {
+          console.error('Error saving challenge to database:', error);
+        }
+      }
+
+      const updatedSteps = steps.map(step => 
         step.id === 'challenge' ? { ...step, completed: true } : step
       );
       setSteps(updatedSteps);
@@ -204,9 +207,31 @@ export default function OnboardingWidget({ isVisible, onComplete }: OnboardingWi
     }
   };
 
+  const toggleMission = (mission: string) => {
+    setSelectedMissions(prev => 
+      prev.includes(mission) 
+        ? prev.filter(m => m !== mission)
+        : prev.length < 3 
+          ? [...prev, mission]
+          : prev
+    );
+  };
+
+  const completedCount = steps.filter(step => step.completed).length;
+  const progress = (completedCount / steps.length) * 100;
+
+  // Check if all steps are completed
+  useEffect(() => {
+    if (completedCount === steps.length) {
+      setTimeout(() => {
+        onComplete();
+      }, 1000);
+    }
+  }, [completedCount, steps.length, onComplete]);
+
   if (!isVisible) return null;
 
-  if (isCompleted) {
+  if (completedCount === steps.length) {
     return (
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
@@ -269,7 +294,7 @@ export default function OnboardingWidget({ isVisible, onComplete }: OnboardingWi
         <div className="mb-6">
           <div className="flex justify-between items-center mb-2">
             <span className="text-white font-semibold">
-              Voortgang: {completedSteps}/{steps.length} stappen voltooid
+              Voortgang: {completedCount}/{steps.length} stappen voltooid
             </span>
             <span className="text-[#8BAE5A] font-bold">
               {Math.round(progress)}%
@@ -298,7 +323,7 @@ export default function OnboardingWidget({ isVisible, onComplete }: OnboardingWi
                   ? 'bg-[#8BAE5A]/20 border border-[#8BAE5A]' 
                   : 'bg-[#232D1A] border border-[#3A4D23] hover:border-[#8BAE5A] hover:bg-[#8BAE5A]/10'
               }`}
-              onClick={() => handleStepClick(step)}
+              onClick={() => step.action()}
             >
               <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
                 step.completed 
@@ -355,7 +380,7 @@ export default function OnboardingWidget({ isVisible, onComplete }: OnboardingWi
                 </h3>
               </div>
               <p className="text-[#8BAE5A] mb-4">
-                Wat is het allerbelangrijkste doel dat je de komende 6 maanden wilt bereiken?
+                Wat is het allerbelangrijkste doel dat je de komende 90 dagen wilt bereiken?
               </p>
               <textarea
                 value={goalText}
@@ -407,27 +432,26 @@ export default function OnboardingWidget({ isVisible, onComplete }: OnboardingWi
                 </h3>
               </div>
               <p className="text-[#8BAE5A] mb-4">
-                Selecteer 3 dagelijkse gewoontes om mee te beginnen:
+                Selecteer 3 missies die je deze week wilt voltooien:
               </p>
               <div className="space-y-3 mb-4">
-                {starterMissions.map((mission) => (
+                {availableMissions.map((mission) => (
                   <label
-                    key={mission.id}
+                    key={mission}
                     className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all border ${
-                      selectedMissions.includes(mission.id)
+                      selectedMissions.includes(mission)
                         ? 'bg-[#8BAE5A]/20 border-[#8BAE5A]'
                         : 'bg-[#181F17] border-[#3A4D23] hover:border-[#8BAE5A]'
                     }`}
                   >
                     <input
                       type="checkbox"
-                      checked={selectedMissions.includes(mission.id)}
-                      onChange={() => handleMissionToggle(mission.id)}
+                      checked={selectedMissions.includes(mission)}
+                      onChange={() => toggleMission(mission)}
                       className="w-5 h-5 text-[#8BAE5A] bg-[#181F17] border-[#3A4D23] rounded focus:ring-[#8BAE5A]"
                     />
                     <div>
-                      <div className="font-semibold text-white">{mission.title}</div>
-                      <div className="text-sm text-[#8BAE5A]">{mission.description}</div>
+                      <div className="font-semibold text-white">{mission}</div>
                     </div>
                   </label>
                 ))}

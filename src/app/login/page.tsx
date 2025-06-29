@@ -1,20 +1,14 @@
 'use client';
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { LockClosedIcon, UserIcon } from "@heroicons/react/24/solid";
+import { LockClosedIcon, EnvelopeIcon } from "@heroicons/react/24/solid";
 import { useAuth } from "@/contexts/AuthContext";
-
-const users = [
-  { label: 'Rick', value: 'rick', password: 'demo', role: 'user' },
-  { label: 'Admin', value: 'admin', password: 'admin123', role: 'admin' },
-];
 
 export default function Login() {
   const router = useRouter();
   const { signIn, isAuthenticated, user } = useAuth();
-  const [selectedUser, setSelectedUser] = useState(users[0]);
-  const [username, setUsername] = useState(users[0].value);
-  const [password, setPassword] = useState(users[0].password);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -29,24 +23,16 @@ export default function Login() {
     }
   }, [isAuthenticated, user, router]);
 
-  function handleUserChange(e: React.ChangeEvent<HTMLSelectElement>) {
-    const user = users.find(u => u.value === e.target.value)!;
-    setSelectedUser(user);
-    setUsername(user.value);
-    setPassword(user.password);
-    setError("");
-  }
-
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setIsLoading(true);
     setError("");
     
     try {
-      await signIn(username, password);
+      await signIn(email, password);
       // The redirect will be handled by the useEffect above
-    } catch (error) {
-      setError("Ongeldige inloggegevens");
+    } catch (error: any) {
+      setError(error.message || "Ongeldige inloggegevens");
     } finally {
       setIsLoading(false);
     }
@@ -63,26 +49,15 @@ export default function Login() {
         <p className="text-[#8BAE5A] text-center mb-6 sm:mb-8 text-base sm:text-lg font-figtree">Log in op je dashboard</p>
         <form onSubmit={handleLogin} className="flex flex-col gap-6">
           <div className="relative">
-            <select
-              value={selectedUser.value}
-              onChange={handleUserChange}
-              className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#181F17] text-[#B6C948] focus:outline-none focus:ring-2 focus:ring-[#B6C948] border border-[#3A4D23] mb-4 appearance-none font-figtree"
-            >
-              {users.map(user => (
-                <option key={user.value} value={user.value}>{user.label}</option>
-              ))}
-            </select>
-            <UserIcon className="w-5 h-5 text-[#B6C948] absolute left-3 top-4" />
-          </div>
-          <div className="relative">
+            <EnvelopeIcon className="w-5 h-5 text-[#B6C948] absolute left-3 top-1/2 -translate-y-1/2" />
             <input
-              type="text"
-              value={username}
-              onChange={e => setUsername(e.target.value)}
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
               className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#181F17] text-[#B6C948] placeholder-[#B6C948] focus:outline-none focus:ring-2 focus:ring-[#B6C948] transition shadow-inner border border-[#3A4D23] font-figtree"
-              placeholder="Gebruikersnaam"
-              autoComplete="username"
-              readOnly
+              placeholder="E-mailadres"
+              autoComplete="email"
+              required
             />
           </div>
           <div className="relative">
@@ -94,6 +69,7 @@ export default function Login() {
               className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#181F17] text-[#B6C948] placeholder-[#B6C948] focus:outline-none focus:ring-2 focus:ring-[#B6C948] transition shadow-inner border border-[#3A4D23] font-figtree"
               placeholder="Wachtwoord"
               autoComplete="current-password"
+              required
             />
           </div>
           {error && (

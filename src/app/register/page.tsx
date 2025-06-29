@@ -2,9 +2,11 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { FaCheck } from "react-icons/fa6";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Register() {
   const router = useRouter();
+  const { signUp, isAuthenticated, user } = useAuth();
   const [step, setStep] = useState<'intro'|'intake'|'approved'|'rejected'|'register'|'package'|'registration'|'payment'|'success'>('intro');
   const [intake, setIntake] = useState({
     goal: '',
@@ -27,6 +29,18 @@ export default function Register() {
   });
   const [agreeIncasso, setAgreeIncasso] = useState(false);
   const [showProcessing, setShowProcessing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Check if user is already logged in
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      if (user.role === 'admin') {
+        router.push('/dashboard-admin');
+      } else {
+        router.push('/dashboard');
+      }
+    }
+  }, [isAuthenticated, user, router]);
 
   const packages = [
     {
@@ -174,10 +188,20 @@ export default function Register() {
     const { name, value } = e.target;
     setRegistration(prev => ({ ...prev, [name]: value }));
   }
-  function handleRegistration(e: React.FormEvent) {
+  async function handleRegistration(e: React.FormEvent) {
     e.preventDefault();
-    // Eerst naar de betaalstap, niet direct naar dashboard
-    setStep('payment');
+    setIsLoading(true);
+    setError('');
+    
+    try {
+      const fullName = `${registration.firstName} ${registration.lastName}`;
+      await signUp(registration.email, registration.password, fullName);
+      setStep('success');
+    } catch (error: any) {
+      setError(error.message || 'Er is een fout opgetreden bij het registreren');
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -424,6 +448,18 @@ export default function Register() {
                 <div className="animate-pulse text-2xl">💳</div>
               </div>
             )}
+          </div>
+        )}
+        {step === 'success' && (
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-[#B6C948] mb-4">✅ Registratie succesvol!</h2>
+            <p className="text-[#B6C948] mb-8 text-lg">Welkom bij Top Tier Men! Je account is succesvol aangemaakt.</p>
+            <button 
+              onClick={() => router.push('/dashboard')} 
+              className="px-8 py-3 rounded-xl bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] text-[#181F17] font-semibold text-lg hover:from-[#8BAE5A] hover:to-[#B6C948] transition-all duration-200"
+            >
+              Ga naar Dashboard
+            </button>
           </div>
         )}
       </div>
