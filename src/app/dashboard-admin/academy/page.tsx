@@ -168,6 +168,20 @@ export default function AcademyManagement() {
     setShowModuleModal(true);
   };
 
+  // Functie om de module-modal te sluiten en de form te resetten
+  const closeModuleModal = () => {
+    setShowModuleModal(false);
+    setEditingModule(null);
+    setModuleForm({
+      title: '',
+      description: '',
+      shortDescription: '',
+      coverImage: '',
+      status: 'draft',
+      unlockRequirement: ''
+    });
+  };
+
   // Voeg een logging functie toe
   const logAdminAction = async (action: string, details?: any) => {
     try {
