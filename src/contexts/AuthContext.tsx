@@ -31,6 +31,22 @@ const AuthContext = createContext<AuthContextType>({
   redirectAdminToDashboard: true,
 });
 
+// Voeg een logging functie toe
+const logUserAction = async (action: string, details?: any) => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      await supabase.from('platform_logs').insert({
+        user_id: user.id,
+        action: action,
+        details: details || {}
+      });
+    }
+  } catch (error) {
+    console.error('Logging error:', error);
+  }
+};
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -87,20 +103,38 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signIn = async (email: string, password: string) => {
+    setLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
-
       if (error) throw error;
-    } catch (error) {
-      console.error('Error signing in:', error);
-      throw error;
+      
+      // Log de succesvolle login
+      await logUserAction('user_login', { 
+        email: email,
+        timestamp: new Date().toISOString()
+      });
+      
+      setUser(data.user);
+      return { success: true };
+    } catch (error: any) {
+      // Log mislukte login poging
+      await logUserAction('login_failed', { 
+        email: email,
+        error: error.message,
+        timestamp: new Date().toISOString()
+      });
+      
+      return { success: false, error: error.message };
+    } finally {
+      setLoading(false);
     }
   };
 
   const signUp = async (email: string, password: string, fullName: string) => {
+    setLoading(true);
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -111,9 +145,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           },
         },
       });
-
       if (error) throw error;
-
+      
+      // Log nieuwe registratie
+      await logUserAction('user_registration', { 
+        email: email,
+        timestamp: new Date().toISOString()
+      });
+      
       // Create user profile in database
       if (data.user) {
         const { error: profileError } = await supabase
@@ -132,20 +171,37 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           console.error('Error creating user profile:', profileError);
         }
       }
-    } catch (error) {
-      console.error('Error signing up:', error);
-      throw error;
+      return { success: true };
+    } catch (error: any) {
+      // Log mislukte registratie
+      await logUserAction('registration_failed', { 
+        email: email,
+        error: error.message,
+        timestamp: new Date().toISOString()
+      });
+      
+      return { success: false, error: error.message };
+    } finally {
+      setLoading(false);
     }
   };
 
   const signOut = async () => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        // Log logout voordat we uitloggen
+        await logUserAction('user_logout', { 
+          email: user.email,
+          timestamp: new Date().toISOString()
+        });
+      }
+      
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       setUser(null);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error signing out:', error);
-      throw error;
     }
   };
 

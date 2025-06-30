@@ -14,6 +14,22 @@ const tabs = [
   { key: 'notificaties', label: 'Notificaties' },
 ];
 
+// Voeg een logging functie toe
+const logUserAction = async (action: string, details?: any) => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      await supabase.from('platform_logs').insert({
+        user_id: user.id,
+        action: action,
+        details: details || {}
+      });
+    }
+  } catch (error) {
+    console.error('Logging error:', error);
+  }
+};
+
 export default function MijnProfiel() {
   const { user, updateUser } = useAuth();
   const [activeTab, setActiveTab] = useState('publiek');
@@ -139,6 +155,12 @@ export default function MijnProfiel() {
       
       await updateUser(updateData);
       
+      // Log de profiel update
+      await logUserAction('profile_updated', {
+        updated_fields: ['avatar_url', 'cover_url'],
+        timestamp: new Date().toISOString()
+      });
+
       toast.success(`${uploadingType === 'avatar' ? 'Profielfoto' : 'Coverfoto'} succesvol bijgewerkt!`);
     } catch (error) {
       console.error('Upload error:', error);

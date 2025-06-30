@@ -23,7 +23,9 @@ import {
   WrenchScrewdriverIcon,
   Bars3Icon,
   XMarkIcon,
-  BugAntIcon
+  BugAntIcon,
+  DocumentTextIcon,
+  ClipboardIcon
 } from '@heroicons/react/24/outline';
 
 const adminMenu = [
@@ -79,6 +81,11 @@ const adminMenu = [
       { label: 'Instellingen', icon: Cog6ToothIcon, href: '/dashboard-admin/instellingen' },
       { label: 'Aankondigingen', icon: MegaphoneIcon, href: '/dashboard-admin/aankondigingen' }
     ]
+  },
+  {
+    label: 'Platform Logs',
+    href: '/dashboard-admin/logs',
+    icon: ClipboardIcon
   }
 ];
 

@@ -25,6 +25,7 @@ import {
 import { toast } from 'react-toastify';
 import { supabase } from '@/lib/supabase';
 import { useDebug } from '@/contexts/DebugContext';
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function AcademyManagement() {
   const [selectedModule, setSelectedModule] = useState<number | null>(null);
@@ -38,6 +39,7 @@ export default function AcademyManagement() {
   const [modules, setModules] = useState<any[]>([]);
   const [lessons, setLessons] = useState<any[]>([]);
   const { showDebug } = useDebug();
+  const { user } = useAuth();
 
   // Module form state
   const [moduleForm, setModuleForm] = useState({
@@ -166,6 +168,21 @@ export default function AcademyManagement() {
     setShowModuleModal(true);
   };
 
+  // Voeg een logging functie toe
+  const logAdminAction = async (action: string, details?: any) => {
+    try {
+      if (user) {
+        await supabase.from('platform_logs').insert({
+          user_id: user.id,
+          action: action,
+          details: details || {}
+        });
+      }
+    } catch (error) {
+      console.error('Logging error:', error);
+    }
+  };
+
   const handleModuleSave = async () => {
     setIsLoading(true);
     try {
@@ -176,38 +193,46 @@ export default function AcademyManagement() {
           .update({
             title: moduleForm.title,
             description: moduleForm.description,
-            short_description: moduleForm.shortDescription,
-            cover_image: moduleForm.coverImage,
             status: moduleForm.status,
-            unlock_requirement: moduleForm.unlockRequirement || null,
             updated_at: new Date().toISOString(),
           })
           .eq('id', editingModule);
         if (error) throw error;
+        
+        // Log de module update
+        await logAdminAction('module_updated', {
+          module_id: editingModule,
+          module_title: moduleForm.title,
+          admin_email: user?.email
+        });
+        
         toast.success(`Module "${moduleForm.title}" succesvol bijgewerkt`);
       } else {
-        // Nieuwe module toevoegen
-        const { error } = await supabase
+        // Nieuwe module aanmaken
+        const { data, error } = await supabase
           .from('academy_modules')
           .insert({
             title: moduleForm.title,
             description: moduleForm.description,
-            short_description: moduleForm.shortDescription,
-            cover_image: moduleForm.coverImage,
             status: moduleForm.status,
-            unlock_requirement: moduleForm.unlockRequirement || null,
-            order_index: modules.length + 1,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          });
+          })
+          .select()
+          .single();
         if (error) throw error;
+        
+        // Log de nieuwe module
+        await logAdminAction('module_created', {
+          module_id: data.id,
+          module_title: moduleForm.title,
+          admin_email: user?.email
+        });
+        
         toast.success(`Module "${moduleForm.title}" succesvol aangemaakt`);
       }
-      setShowModuleModal(false);
-      setEditingModule(null);
       await fetchModules();
+      closeModuleModal();
     } catch (error: any) {
-      toast.error('Er is een fout opgetreden bij het opslaan: ' + error.message);
+      toast.error('Fout bij opslaan: ' + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -218,11 +243,22 @@ export default function AcademyManagement() {
     if (!window.confirm('Weet je zeker dat je deze module wilt verwijderen?')) return;
     setIsLoading(true);
     try {
+      // Haal module info op voor logging
+      const moduleToDelete = modules.find(m => m.id === id);
+      
       const { error } = await supabase
         .from('academy_modules')
         .delete()
         .eq('id', id);
       if (error) throw error;
+      
+      // Log de module verwijdering
+      await logAdminAction('module_deleted', {
+        module_id: id,
+        module_title: moduleToDelete?.title || 'Onbekend',
+        admin_email: user?.email
+      });
+      
       toast.success('Module succesvol verwijderd');
       await fetchModules();
     } catch (error: any) {
@@ -282,13 +318,19 @@ export default function AcademyManagement() {
           })
           .eq('id', editingLesson);
         if (error) throw error;
-        toast.success(`Les "${lessonForm.title}" succesvol bijgewerkt`, {
-          position: "top-right",
-          autoClose: 3000
+        
+        // Log de les update
+        await logAdminAction('lesson_updated', {
+          lesson_id: editingLesson,
+          lesson_title: lessonForm.title,
+          module_id: selectedModule,
+          admin_email: user?.email
         });
+        
+        toast.success(`Les "${lessonForm.title}" succesvol bijgewerkt`);
       } else {
-        // Nieuwe les toevoegen
-        const { error } = await supabase
+        // Nieuwe les aanmaken
+        const { data, error } = await supabase
           .from('academy_lessons')
           .insert({
             title: lessonForm.title,
@@ -300,23 +342,25 @@ export default function AcademyManagement() {
             exam_questions: lessonForm.examQuestions,
             duration: lessonForm.duration,
             module_id: selectedModule,
-            order_index: (lessons.filter(l => l.module_id === selectedModule).length + 1),
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          });
+          })
+          .select()
+          .single();
         if (error) throw error;
-        toast.success(`Les "${lessonForm.title}" succesvol aangemaakt`, {
-          position: "top-right",
-          autoClose: 3000
+        
+        // Log de nieuwe les
+        await logAdminAction('lesson_created', {
+          lesson_id: data.id,
+          lesson_title: lessonForm.title,
+          module_id: selectedModule,
+          admin_email: user?.email
         });
+        
+        toast.success(`Les "${lessonForm.title}" succesvol aangemaakt`);
       }
-      closeLessonModal();
       await fetchLessons();
+      closeLessonModal();
     } catch (error: any) {
-      toast.error('Er is een fout opgetreden bij het opslaan: ' + error.message, {
-        position: "top-right",
-        autoClose: 3000
-      });
+      toast.error('Fout bij opslaan: ' + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -372,11 +416,23 @@ export default function AcademyManagement() {
     if (!window.confirm('Weet je zeker dat je deze les wilt verwijderen?')) return;
     setIsLoading(true);
     try {
+      // Haal les info op voor logging
+      const lessonToDelete = lessons.find(l => l.id === id);
+      
       const { error } = await supabase
         .from('academy_lessons')
         .delete()
         .eq('id', id);
       if (error) throw error;
+      
+      // Log de les verwijdering
+      await logAdminAction('lesson_deleted', {
+        lesson_id: id,
+        lesson_title: lessonToDelete?.title || 'Onbekend',
+        module_id: selectedModule,
+        admin_email: user?.email
+      });
+      
       toast.success('Les succesvol verwijderd');
       await fetchLessons();
     } catch (error: any) {
