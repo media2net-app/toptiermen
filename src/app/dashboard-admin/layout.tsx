@@ -126,7 +126,14 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
                       }`}
                     >
                       {subItem.icon && <subItem.icon className="w-5 h-5" />}
-                      <span>{subItem.label}</span>
+                      <span className="flex items-center gap-2">
+                        {subItem.label}
+                        {subItem.label === 'Academy' ? (
+                          <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-bold bg-green-700 text-green-200">Live</span>
+                        ) : (
+                          <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-bold bg-yellow-700 text-yellow-200">Dummy</span>
+                        )}
+                      </span>
                     </Link>
                   ))}
                 </div>

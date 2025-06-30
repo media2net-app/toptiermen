@@ -57,7 +57,8 @@ export default function AcademyManagement() {
     content: '',
     status: 'draft',
     attachments: [] as any[],
-    examQuestions: [] as any[]
+    examQuestions: [] as any[],
+    duration: ''
   });
 
   const getStatusColor = (status: string) => {
@@ -242,7 +243,8 @@ export default function AcademyManagement() {
         content: lesson.content || '',
         status: lesson.status || 'draft',
         attachments: lesson.attachments || [],
-        examQuestions: lesson.examQuestions || []
+        examQuestions: lesson.examQuestions || [],
+        duration: lesson.duration || ''
       });
     } else {
       setEditingLesson(null);
@@ -253,7 +255,8 @@ export default function AcademyManagement() {
         content: '',
         status: 'draft',
         attachments: [],
-        examQuestions: []
+        examQuestions: [],
+        duration: ''
       });
     }
     setShowLessonModal(true);
@@ -261,33 +264,78 @@ export default function AcademyManagement() {
 
   const handleLessonSave = async () => {
     setIsLoading(true);
-    
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
       if (editingLesson) {
+        // Update bestaande les
+        const { error } = await supabase
+          .from('academy_lessons')
+          .update({
+            title: lessonForm.title,
+            type: lessonForm.type,
+            video_url: lessonForm.videoUrl,
+            content: lessonForm.content,
+            status: lessonForm.status,
+            attachments: lessonForm.attachments,
+            exam_questions: lessonForm.examQuestions,
+            duration: lessonForm.duration,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', editingLesson);
+        if (error) throw error;
         toast.success(`Les "${lessonForm.title}" succesvol bijgewerkt`, {
           position: "top-right",
           autoClose: 3000
         });
       } else {
+        // Nieuwe les toevoegen
+        const { error } = await supabase
+          .from('academy_lessons')
+          .insert({
+            title: lessonForm.title,
+            type: lessonForm.type,
+            video_url: lessonForm.videoUrl,
+            content: lessonForm.content,
+            status: lessonForm.status,
+            attachments: lessonForm.attachments,
+            exam_questions: lessonForm.examQuestions,
+            duration: lessonForm.duration,
+            module_id: selectedModule,
+            order_index: (lessons.filter(l => l.module_id === selectedModule).length + 1),
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          });
+        if (error) throw error;
         toast.success(`Les "${lessonForm.title}" succesvol aangemaakt`, {
           position: "top-right",
           autoClose: 3000
         });
       }
-      
-      setShowLessonModal(false);
-      setEditingLesson(null);
-    } catch (error) {
-      toast.error('Er is een fout opgetreden bij het opslaan', {
+      closeLessonModal();
+      await fetchLessons();
+    } catch (error: any) {
+      toast.error('Er is een fout opgetreden bij het opslaan: ' + error.message, {
         position: "top-right",
         autoClose: 3000
       });
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Functie om de les-modal te sluiten en de form te resetten
+  const closeLessonModal = () => {
+    setShowLessonModal(false);
+    setEditingLesson(null);
+    setLessonForm({
+      title: '',
+      type: 'video',
+      videoUrl: '',
+      content: '',
+      status: 'draft',
+      attachments: [],
+      examQuestions: [],
+      duration: ''
+    });
   };
 
   // Drag and Drop Functions
@@ -317,6 +365,80 @@ export default function AcademyManagement() {
   const handleDragEnd = () => {
     setDragIndex(null);
     setDragOverIndex(null);
+  };
+
+  // Les verwijderen
+  const handleLessonDelete = async (id: string) => {
+    if (!window.confirm('Weet je zeker dat je deze les wilt verwijderen?')) return;
+    setIsLoading(true);
+    try {
+      const { error } = await supabase
+        .from('academy_lessons')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+      toast.success('Les succesvol verwijderd');
+      await fetchLessons();
+    } catch (error: any) {
+      toast.error('Fout bij verwijderen: ' + error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getTotalModuleDuration = () => {
+    // Som van alle durations van lessen in deze module
+    const moduleLessons = lessons.filter(l => l.module_id === selectedModule);
+    // Parseer alle durations naar minuten en tel op
+    let totalMinutes = 0;
+    for (const lesson of moduleLessons) {
+      if (lesson.duration) {
+        // Ondersteun formaten als '10m', '1u 15m', '45m', '2u'
+        const match = lesson.duration.match(/(?:(\d+)u)?\s*(\d+)?m?/);
+        if (match) {
+          const uren = parseInt(match[1] || '0', 10);
+          const minuten = parseInt(match[2] || '0', 10);
+          totalMinutes += uren * 60 + minuten;
+        }
+      }
+    }
+    // Format naar 'X u Ym' of 'Xm'
+    if (totalMinutes >= 60) {
+      const uren = Math.floor(totalMinutes / 60);
+      const minuten = totalMinutes % 60;
+      return minuten > 0 ? `${uren}u ${minuten}m` : `${uren}u`;
+    } else {
+      return `${totalMinutes}m`;
+    }
+  };
+
+  const getTotalModuleDurationForModule = (moduleId: string) => {
+    const moduleLessons = lessons.filter(l => l.module_id === moduleId);
+    let totalMinutes = 0;
+    for (const lesson of moduleLessons) {
+      if (lesson.duration) {
+        const match = lesson.duration.match(/(?:(\d+)u)?\s*(\d+)?m?/);
+        if (match) {
+          const uren = parseInt(match[1] || '0', 10);
+          const minuten = parseInt(match[2] || '0', 10);
+          totalMinutes += uren * 60 + minuten;
+        }
+      }
+    }
+    if (totalMinutes >= 60) {
+      const uren = Math.floor(totalMinutes / 60);
+      const minuten = totalMinutes % 60;
+      return minuten > 0 ? `${uren}u ${minuten}m` : `${uren}u`;
+    } else {
+      return `${totalMinutes}m`;
+    }
+  };
+
+  const getAverageCompletionRate = () => {
+    if (!modules.length) return 0;
+    const validRates = modules.map(m => typeof m.completion_rate === 'number' ? m.completion_rate : 0);
+    const sum = validRates.reduce((acc, val) => acc + val, 0);
+    return Math.round(sum / modules.length);
   };
 
   return (
@@ -372,21 +494,19 @@ export default function AcademyManagement() {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-[#B6C948] text-sm">Lessen</span>
-                <span className="text-[#8BAE5A] font-semibold">
-                  {lessons.filter(l => l.module_id === module.id).length}
-                </span>
+                <span className="text-[#8BAE5A] font-semibold">{(lessons.filter(l => l.module_id === module.id).length) || 0}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-[#B6C948] text-sm">Duur</span>
-                <span className="text-[#8BAE5A] font-semibold">{module.total_duration || '0m'}</span>
+                <span className="text-[#8BAE5A] font-semibold">{getTotalModuleDurationForModule(module.id) || '0m'}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-[#B6C948] text-sm">Studenten</span>
-                <span className="text-[#8BAE5A] font-semibold">{module.enrolled_students || 0}</span>
+                <span className="text-[#8BAE5A] font-semibold">{module.students_count ?? 0}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-[#B6C948] text-sm">Voltooiing</span>
-                <span className="text-[#8BAE5A] font-semibold">{module.completion_rate || 0}%</span>
+                <span className="text-[#8BAE5A] font-semibold">{module.completion_rate != null ? `${module.completion_rate}%` : '0%'}</span>
               </div>
             </div>
 
@@ -504,12 +624,7 @@ export default function AcademyManagement() {
                         <PencilIcon className="w-4 h-4 text-[#B6C948]" />
                       </button>
                       <button 
-                        className="p-2 rounded-xl hover:bg-[#232D1A] transition-colors duration-200"
-                        title="Bekijk les"
-                      >
-                        <EyeIcon className="w-4 h-4 text-[#B6C948]" />
-                      </button>
-                      <button 
+                        onClick={() => handleLessonDelete(lesson.id)}
                         className="p-2 rounded-xl hover:bg-[#232D1A] transition-colors duration-200"
                         title="Verwijder les"
                       >
@@ -568,7 +683,7 @@ export default function AcademyManagement() {
               <CheckCircleIcon className="w-6 h-6 text-[#8BAE5A]" />
             </div>
             <div>
-              <h3 className="text-2xl font-bold text-[#8BAE5A]">75%</h3>
+              <h3 className="text-2xl font-bold text-[#8BAE5A]">{modules.length ? `${getAverageCompletionRate()}%` : '0%'}</h3>
               <p className="text-[#B6C948] text-sm">Gem. Voltooiing</p>
             </div>
           </div>
@@ -713,7 +828,7 @@ export default function AcademyManagement() {
                 {editingLesson ? 'Les Bewerken' : 'Nieuwe Les Toevoegen'}
               </h2>
               <button
-                onClick={() => setShowLessonModal(false)}
+                onClick={closeLessonModal}
                 className="p-2 rounded-xl hover:bg-[#181F17] transition"
               >
                 <XMarkIcon className="w-6 h-6 text-[#B6C948]" />
@@ -882,6 +997,19 @@ export default function AcademyManagement() {
                 </div>
               )}
 
+              {/* Les Duur */}
+              <div>
+                <label className="block text-[#8BAE5A] font-semibold mb-2">Duur (bijv. 10m, 1u 15m) <span className="text-red-400">*</span></label>
+                <input
+                  type="text"
+                  value={lessonForm.duration}
+                  onChange={(e) => setLessonForm({...lessonForm, duration: e.target.value})}
+                  placeholder="bijv. 10m, 1u 15m"
+                  className="w-full px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] placeholder-[#B6C948]"
+                  required
+                />
+              </div>
+
               {/* Publication Status */}
               <div>
                 <label className="block text-[#8BAE5A] font-semibold mb-2">Publicatiestatus</label>
@@ -898,14 +1026,14 @@ export default function AcademyManagement() {
               {/* Action Buttons */}
               <div className="flex items-center gap-4 pt-4">
                 <button
-                  onClick={() => setShowLessonModal(false)}
+                  onClick={closeLessonModal}
                   className="flex-1 px-6 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A] transition"
                 >
                   Annuleren
                 </button>
                 <button
                   onClick={handleLessonSave}
-                  disabled={isLoading || !lessonForm.title}
+                  disabled={isLoading || !lessonForm.title || !lessonForm.duration}
                   className="flex-1 px-6 py-3 rounded-xl bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#B6C948] transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {isLoading ? (
