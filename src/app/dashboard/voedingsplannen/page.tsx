@@ -102,21 +102,7 @@ const dietTypes = [
   }
 ];
 
-// Voeg een logging functie toe
-const logUserAction = async (action: string, details?: any) => {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      await supabase.from('platform_logs').insert({
-        user_id: user.id,
-        action: action,
-        details: details || {}
-      });
-    }
-  } catch (error) {
-    console.error('Logging error:', error);
-  }
-};
+
 
 export default function VoedingsplannenPage() {
   const { user } = useAuth();

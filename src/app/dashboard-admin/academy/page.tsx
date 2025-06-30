@@ -175,26 +175,9 @@ export default function AcademyManagement() {
     setModuleForm({
       title: '',
       description: '',
-      shortDescription: '',
-      coverImage: '',
       status: 'draft',
       unlockRequirement: ''
     });
-  };
-
-  // Voeg een logging functie toe
-  const logAdminAction = async (action: string, details?: any) => {
-    try {
-      if (user) {
-        await supabase.from('platform_logs').insert({
-          user_id: user.id,
-          action: action,
-          details: details || {}
-        });
-      }
-    } catch (error) {
-      console.error('Logging error:', error);
-    }
   };
 
   const handleModuleSave = async () => {
@@ -213,13 +196,6 @@ export default function AcademyManagement() {
           .eq('id', editingModule);
         if (error) throw error;
         
-        // Log de module update
-        await logAdminAction('module_updated', {
-          module_id: editingModule,
-          module_title: moduleForm.title,
-          admin_email: user?.email
-        });
-        
         toast.success(`Module "${moduleForm.title}" succesvol bijgewerkt`);
       } else {
         // Nieuwe module aanmaken
@@ -233,13 +209,6 @@ export default function AcademyManagement() {
           .select()
           .single();
         if (error) throw error;
-        
-        // Log de nieuwe module
-        await logAdminAction('module_created', {
-          module_id: data.id,
-          module_title: moduleForm.title,
-          admin_email: user?.email
-        });
         
         toast.success(`Module "${moduleForm.title}" succesvol aangemaakt`);
       }
@@ -257,21 +226,11 @@ export default function AcademyManagement() {
     if (!window.confirm('Weet je zeker dat je deze module wilt verwijderen?')) return;
     setIsLoading(true);
     try {
-      // Haal module info op voor logging
-      const moduleToDelete = modules.find(m => m.id === id);
-      
       const { error } = await supabase
         .from('academy_modules')
         .delete()
         .eq('id', id);
       if (error) throw error;
-      
-      // Log de module verwijdering
-      await logAdminAction('module_deleted', {
-        module_id: id,
-        module_title: moduleToDelete?.title || 'Onbekend',
-        admin_email: user?.email
-      });
       
       toast.success('Module succesvol verwijderd');
       await fetchModules();
@@ -333,14 +292,6 @@ export default function AcademyManagement() {
           .eq('id', editingLesson);
         if (error) throw error;
         
-        // Log de les update
-        await logAdminAction('lesson_updated', {
-          lesson_id: editingLesson,
-          lesson_title: lessonForm.title,
-          module_id: selectedModule,
-          admin_email: user?.email
-        });
-        
         toast.success(`Les "${lessonForm.title}" succesvol bijgewerkt`);
       } else {
         // Nieuwe les aanmaken
@@ -360,14 +311,6 @@ export default function AcademyManagement() {
           .select()
           .single();
         if (error) throw error;
-        
-        // Log de nieuwe les
-        await logAdminAction('lesson_created', {
-          lesson_id: data.id,
-          lesson_title: lessonForm.title,
-          module_id: selectedModule,
-          admin_email: user?.email
-        });
         
         toast.success(`Les "${lessonForm.title}" succesvol aangemaakt`);
       }
@@ -438,14 +381,6 @@ export default function AcademyManagement() {
         .delete()
         .eq('id', id);
       if (error) throw error;
-      
-      // Log de les verwijdering
-      await logAdminAction('lesson_deleted', {
-        lesson_id: id,
-        lesson_title: lessonToDelete?.title || 'Onbekend',
-        module_id: selectedModule,
-        admin_email: user?.email
-      });
       
       toast.success('Les succesvol verwijderd');
       await fetchLessons();

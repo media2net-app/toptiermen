@@ -43,22 +43,6 @@ interface WorkoutSchema {
   }[];
 }
 
-// Voeg een logging functie toe
-const logUserAction = async (action: string, details?: any) => {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      await supabase.from('platform_logs').insert({
-        user_id: user.id,
-        action: action,
-        details: details || {}
-      });
-    }
-  } catch (error) {
-    console.error('Logging error:', error);
-  }
-};
-
 export default function TrainingscentrumPage() {
   const { user } = useAuth();
   const [selectedOption, setSelectedOption] = useState<'training' | 'nutrition' | null>(null);
@@ -186,14 +170,6 @@ export default function TrainingscentrumPage() {
 
   const startWorkout = async (workout: any) => {
     try {
-      // Log workout start
-      await logUserAction('workout_started', {
-        workout_id: workout.id,
-        workout_name: workout.name,
-        workout_type: workout.type,
-        timestamp: new Date().toISOString()
-      });
-
       setCurrentWorkout(workout);
       setShowPreWorkoutModal(true);
     } catch (error) {
@@ -203,16 +179,6 @@ export default function TrainingscentrumPage() {
 
   const completeWorkout = async (workoutData: any) => {
     try {
-      // Log workout completion
-      await logUserAction('workout_completed', {
-        workout_id: currentWorkout?.id,
-        workout_name: currentWorkout?.name,
-        duration: workoutData.duration,
-        difficulty_rating: workoutData.difficultyRating,
-        notes: workoutData.notes,
-        timestamp: new Date().toISOString()
-      });
-
       // Rest van de workout completion logica...
     } catch (error) {
       console.error('Error completing workout:', error);

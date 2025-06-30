@@ -82,11 +82,6 @@ const adminMenu = [
       { label: 'Aankondigingen', icon: MegaphoneIcon, href: '/dashboard-admin/aankondigingen' }
     ]
   },
-  {
-    label: 'Platform Logs',
-    href: '/dashboard-admin/logs',
-    icon: ClipboardIcon
-  }
 ];
 
 const SidebarContent = ({ pathname }: { pathname: string }) => {
