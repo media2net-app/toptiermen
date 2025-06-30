@@ -63,6 +63,11 @@ export default function AcademyManagement() {
     duration: ''
   });
 
+  const [moduleCompletion, setModuleCompletion] = useState<{ [moduleId: string]: number }>({});
+  const [lessonCompletion, setLessonCompletion] = useState<{ [lessonId: string]: number }>({});
+  const [studentCount, setStudentCount] = useState(0);
+  const [avgCompletion, setAvgCompletion] = useState(0);
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'published': return 'text-green-400';
@@ -142,6 +147,71 @@ export default function AcademyManagement() {
     }
   }, [showLessonModal, lessonForm.attachments, lessonForm.examQuestions]);
 
+  // Haal live completion rates op
+  useEffect(() => {
+    async function fetchCompletionRates() {
+      // MODULE completion
+      const { data: moduleProgress } = await supabase
+        .from('user_module_progress')
+        .select('module_id, completed, user_id');
+      if (moduleProgress) {
+        const grouped = moduleProgress.reduce((acc, row) => {
+          if (!acc[row.module_id]) acc[row.module_id] = { total: 0, completed: 0, users: new Set() };
+          acc[row.module_id].users.add(row.user_id);
+          acc[row.module_id].total++;
+          if (row.completed) acc[row.module_id].completed++;
+          return acc;
+        }, {} as any);
+        const rates: { [moduleId: string]: number } = {};
+        Object.entries(grouped).forEach(([moduleId, obj]: any) => {
+          rates[moduleId] = obj.total > 0 ? Math.round((obj.completed / obj.total) * 1000) / 10 : 0;
+        });
+        setModuleCompletion(rates);
+      }
+      // LESSON completion
+      const { data: lessonProgress } = await supabase
+        .from('user_lesson_progress')
+        .select('lesson_id, completed, user_id');
+      if (lessonProgress) {
+        const grouped = lessonProgress.reduce((acc, row) => {
+          if (!acc[row.lesson_id]) acc[row.lesson_id] = { total: 0, completed: 0, users: new Set() };
+          acc[row.lesson_id].users.add(row.user_id);
+          acc[row.lesson_id].total++;
+          if (row.completed) acc[row.lesson_id].completed++;
+          return acc;
+        }, {} as any);
+        const rates: { [lessonId: string]: number } = {};
+        Object.entries(grouped).forEach(([lessonId, obj]: any) => {
+          rates[lessonId] = obj.total > 0 ? Math.round((obj.completed / obj.total) * 1000) / 10 : 0;
+        });
+        setLessonCompletion(rates);
+      }
+    }
+    fetchCompletionRates();
+  }, [modules, lessons]);
+
+  useEffect(() => {
+    async function fetchStats() {
+      // Haal unieke studenten op
+      const { data: moduleProgress, error: studentError } = await supabase
+        .from('user_module_progress')
+        .select('user_id', { count: 'exact' });
+      if (!studentError && moduleProgress) {
+        // Unieke user_id's tellen
+        const uniqueUsers = Array.from(new Set(moduleProgress.map((row: any) => row.user_id)));
+        setStudentCount(uniqueUsers.length);
+      }
+
+      // Bereken gemiddelde voltooiing
+      const completionValues = Object.values(moduleCompletion);
+      const avg = completionValues.length
+        ? Math.round(completionValues.reduce((a, b) => a + b, 0) / completionValues.length)
+        : 0;
+      setAvgCompletion(avg);
+    }
+    fetchStats();
+  }, [moduleCompletion]);
+
   // Module Modal Functions
   const openModuleModal = (module?: any) => {
     if (module) {
@@ -175,6 +245,8 @@ export default function AcademyManagement() {
     setModuleForm({
       title: '',
       description: '',
+      shortDescription: '',
+      coverImage: '',
       status: 'draft',
       unlockRequirement: ''
     });
@@ -511,7 +583,7 @@ export default function AcademyManagement() {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-[#B6C948] text-sm">Voltooiing</span>
-                <span className="text-[#8BAE5A] font-semibold">{module.completion_rate != null ? `${module.completion_rate}%` : '0%'}</span>
+                <span className="text-[#8BAE5A] font-semibold">{moduleCompletion[module.id] != null ? `${moduleCompletion[module.id]}%` : '0%'}</span>
               </div>
             </div>
 
@@ -676,7 +748,7 @@ export default function AcademyManagement() {
               <UsersIcon className="w-6 h-6 text-[#8BAE5A]" />
             </div>
             <div>
-              <h3 className="text-2xl font-bold text-[#8BAE5A]">3,242</h3>
+              <h3 className="text-2xl font-bold text-[#8BAE5A]">{studentCount.toLocaleString()}</h3>
               <p className="text-[#B6C948] text-sm">Studenten</p>
             </div>
           </div>
@@ -688,7 +760,7 @@ export default function AcademyManagement() {
               <CheckCircleIcon className="w-6 h-6 text-[#8BAE5A]" />
             </div>
             <div>
-              <h3 className="text-2xl font-bold text-[#8BAE5A]">{modules.length ? `${getAverageCompletionRate()}%` : '0%'}</h3>
+              <h3 className="text-2xl font-bold text-[#8BAE5A]">{avgCompletion}%</h3>
               <p className="text-[#B6C948] text-sm">Gem. Voltooiing</p>
             </div>
           </div>
