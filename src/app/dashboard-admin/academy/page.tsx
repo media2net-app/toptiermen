@@ -26,6 +26,11 @@ import { toast } from 'react-toastify';
 import { supabase } from '@/lib/supabase';
 import { useDebug } from '@/contexts/DebugContext';
 import { useAuth } from "@/contexts/AuthContext";
+import dynamic from 'next/dynamic';
+import VideoUpload from '@/components/VideoUpload';
+import 'react-quill/dist/quill.snow.css';
+
+const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
 
 export default function AcademyManagement() {
   const [selectedModule, setSelectedModule] = useState<number | null>(null);
@@ -47,8 +52,9 @@ export default function AcademyManagement() {
     description: '',
     shortDescription: '',
     coverImage: '',
-    status: 'draft',
-    unlockRequirement: '' as string | null
+    status: 'published',
+    unlockRequirement: '' as string | null,
+    positie: 1 as number
   });
 
   // Lesson form state
@@ -57,7 +63,7 @@ export default function AcademyManagement() {
     type: 'video',
     videoUrl: '',
     content: '',
-    status: 'draft',
+    status: 'published',
     attachments: [] as any[],
     examQuestions: [] as any[],
     duration: ''
@@ -212,6 +218,25 @@ export default function AcademyManagement() {
     fetchStats();
   }, [moduleCompletion]);
 
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        fetchModules();
+        fetchLessons();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, []);
+
+  // Helper om het eerstvolgende vrije positie-nummer te bepalen
+  function getNextModulePositie() {
+    const posities = modules.map(m => Number(m.positie)).filter(n => !isNaN(n));
+    let n = 1;
+    while (posities.includes(n)) n++;
+    return n;
+  }
+
   // Module Modal Functions
   const openModuleModal = (module?: any) => {
     if (module) {
@@ -222,7 +247,8 @@ export default function AcademyManagement() {
         shortDescription: module.short_description || '',
         coverImage: module.cover_image || '',
         status: module.status,
-        unlockRequirement: module.unlock_requirement || ''
+        unlockRequirement: module.unlock_requirement || '',
+        positie: module.positie ?? getNextModulePositie()
       });
     } else {
       setEditingModule(null);
@@ -231,8 +257,9 @@ export default function AcademyManagement() {
         description: '',
         shortDescription: '',
         coverImage: '',
-        status: 'draft',
-        unlockRequirement: ''
+        status: 'published',
+        unlockRequirement: '',
+        positie: getNextModulePositie()
       });
     }
     setShowModuleModal(true);
@@ -247,8 +274,9 @@ export default function AcademyManagement() {
       description: '',
       shortDescription: '',
       coverImage: '',
-      status: 'draft',
-      unlockRequirement: ''
+      status: 'published',
+      unlockRequirement: '',
+      positie: 1
     });
   };
 
@@ -264,6 +292,7 @@ export default function AcademyManagement() {
             description: moduleForm.description,
             status: moduleForm.status,
             updated_at: new Date().toISOString(),
+            positie: moduleForm.positie !== 0 ? Number(moduleForm.positie) : null
           })
           .eq('id', editingModule);
         if (error) throw error;
@@ -277,6 +306,7 @@ export default function AcademyManagement() {
             title: moduleForm.title,
             description: moduleForm.description,
             status: moduleForm.status,
+            positie: moduleForm.positie !== 0 ? Number(moduleForm.positie) : null
           })
           .select()
           .single();
@@ -322,7 +352,7 @@ export default function AcademyManagement() {
         type: lesson.type || 'video',
         videoUrl: lesson.videoUrl || '',
         content: lesson.content || '',
-        status: lesson.status || 'draft',
+        status: lesson.status || 'published',
         attachments: lesson.attachments || [],
         examQuestions: lesson.examQuestions || [],
         duration: lesson.duration || ''
@@ -334,7 +364,7 @@ export default function AcademyManagement() {
         type: 'video',
         videoUrl: '',
         content: '',
-        status: 'draft',
+        status: 'published',
         attachments: [],
         examQuestions: [],
         duration: ''
@@ -404,7 +434,7 @@ export default function AcademyManagement() {
       type: 'video',
       videoUrl: '',
       content: '',
-      status: 'draft',
+      status: 'published',
       attachments: [],
       examQuestions: [],
       duration: ''
@@ -846,8 +876,8 @@ export default function AcademyManagement() {
                   onChange={(e) => setModuleForm({...moduleForm, status: e.target.value})}
                   className="w-full px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
                 >
-                  <option value="draft">Concept (niet zichtbaar voor gebruikers)</option>
                   <option value="published">Gepubliceerd</option>
+                  <option value="draft">Concept (niet zichtbaar voor gebruikers)</option>
                 </select>
               </div>
 
@@ -866,6 +896,22 @@ export default function AcademyManagement() {
                     </option>
                   ))}
                 </select>
+              </div>
+
+              {/* Module Positie */}
+              <div>
+                <label className="block text-[#8BAE5A] font-semibold mb-2">Module Positie (volgorde)</label>
+                <input
+                  type="number"
+                  min="1"
+                  value={moduleForm.positie}
+                  onChange={e => {
+                    const val = Number(e.target.value);
+                    if (!isNaN(val) && val > 0) setModuleForm({ ...moduleForm, positie: val });
+                  }}
+                  placeholder="bijv. 1 voor eerste module"
+                  className="w-full px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] placeholder-[#B6C948]"
+                />
               </div>
 
               {/* Action Buttons */}
@@ -942,13 +988,12 @@ export default function AcademyManagement() {
               {/* Video URL - Only show for video type */}
               {lessonForm.type === 'video' && (
                 <div>
-                  <label className="block text-[#8BAE5A] font-semibold mb-2">Video URL</label>
-                  <input
-                    type="url"
-                    value={lessonForm.videoUrl}
-                    onChange={(e) => setLessonForm({...lessonForm, videoUrl: e.target.value})}
-                    placeholder="https://www.youtube.com/watch?v=..."
-                    className="w-full px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] placeholder-[#B6C948]"
+                  <label className="block text-[#8BAE5A] font-semibold mb-2">Video</label>
+                  <VideoUpload
+                    currentVideoUrl={lessonForm.videoUrl}
+                    onVideoUploaded={(url) => setLessonForm({...lessonForm, videoUrl: url})}
+                    bucketName="academy-videos"
+                    folderPath="videos"
                   />
                 </div>
               )}
@@ -957,13 +1002,15 @@ export default function AcademyManagement() {
               {lessonForm.type === 'text' && (
                 <div>
                   <label className="block text-[#8BAE5A] font-semibold mb-2">Lesinhoud</label>
-                  <textarea
-                    value={lessonForm.content}
-                    onChange={(e) => setLessonForm({...lessonForm, content: e.target.value})}
-                    placeholder="Schrijf hier de inhoud van de les..."
-                    rows={8}
-                    className="w-full px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] placeholder-[#B6C948] resize-none"
-                  />
+                  <div className="bg-[#181F17] rounded-xl border border-[#3A4D23]">
+                    <ReactQuill
+                      theme="snow"
+                      value={lessonForm.content}
+                      onChange={val => setLessonForm({...lessonForm, content: val})}
+                      className="text-[#8BAE5A]"
+                      style={{ minHeight: 200, color: '#8BAE5A' }}
+                    />
+                  </div>
                 </div>
               )}
 
@@ -1095,8 +1142,8 @@ export default function AcademyManagement() {
                   onChange={(e) => setLessonForm({...lessonForm, status: e.target.value})}
                   className="w-full px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
                 >
-                  <option value="draft">Concept</option>
                   <option value="published">Gepubliceerd</option>
+                  <option value="draft">Concept</option>
                 </select>
               </div>
 

@@ -5,6 +5,7 @@ import { LockClosedIcon, EnvelopeIcon } from "@heroicons/react/24/solid";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function Login() {
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const { signIn, isAuthenticated, user } = useAuth();
   const [email, setEmail] = useState("");
@@ -12,7 +13,8 @@ export default function Login() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // Check if user is already logged in
+  useEffect(() => { setMounted(true); }, []);
+
   useEffect(() => {
     if (isAuthenticated && user) {
       if (user.role === 'admin') {
@@ -22,6 +24,8 @@ export default function Login() {
       }
     }
   }, [isAuthenticated, user, router]);
+
+  if (!mounted) return null;
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
