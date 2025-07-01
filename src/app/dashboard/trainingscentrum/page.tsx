@@ -52,6 +52,8 @@ export default function TrainingscentrumPage() {
     style: 'gym'
   });
   const [workoutSchema, setWorkoutSchema] = useState<WorkoutSchema | null>(null);
+  const [currentWorkout, setCurrentWorkout] = useState<any>(null);
+  const [showPreWorkoutModal, setShowPreWorkoutModal] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
 
   const handleOptionSelect = (option: 'training' | 'nutrition') => {
