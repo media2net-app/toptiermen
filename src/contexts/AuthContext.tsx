@@ -12,8 +12,8 @@ type User = Database['public']['Tables']['users']['Row'] & {
 type AuthContextType = {
   user: User | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, fullName: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  signUp: (email: string, password: string, fullName: string) => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<void>;
   isAuthenticated: boolean;
   updateUser: (updates: Partial<User>) => Promise<void>;
@@ -23,8 +23,8 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
-  signIn: async () => {},
-  signUp: async () => {},
+  signIn: async () => ({ success: true }),
+  signUp: async () => ({ success: true }),
   signOut: async () => {},
   isAuthenticated: false,
   updateUser: async () => {},
@@ -95,7 +95,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
       if (error) throw error;
       
-      setUser(data.user);
+      if (data.user) {
+        await fetchUserProfile(data.user);
+      }
       return { success: true };
     } catch (error: any) {
       return { success: false, error: error.message };
