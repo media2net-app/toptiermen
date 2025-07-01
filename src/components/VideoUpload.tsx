@@ -49,7 +49,7 @@ export default function VideoUpload({
       // @ts-ignore: Supabase JS v2+ only
       const { data, error } = await supabase.storage
         .from(bucketName)
-        .createSignedUploadUrl(filePath, file.type);
+        .createSignedUploadUrl(filePath, { upsert: true });
 
       if (error || !data?.signedUrl) {
         throw error || new Error('Kon geen upload URL ophalen');
