@@ -23,259 +23,7 @@ import {
 import { toast } from 'react-toastify';
 import { useDebug } from '@/contexts/DebugContext';
 import DebugPanel from '@/components/DebugPanel';
-
-// Enhanced mock data with additional fields
-const mockMembers = [
-  {
-    id: 1,
-    name: 'Mark van der Berg',
-    username: 'mark_vdb',
-    email: 'mark@example.com',
-    rank: 'Elite',
-    joinDate: '2024-01-15',
-    status: 'active',
-    forumStatus: 'active',
-    avatar: '/profielfoto.png',
-    lastActive: '2024-01-20',
-    posts: 45,
-    badges: 12,
-    bio: 'Passionate about personal development and helping others reach their potential.',
-    mainGoal: 'Become a certified personal trainer and help 100+ people transform their lives.',
-    adminNotes: 'Excellent community member, very helpful in the forum. Consider for "Lid van de Maand".',
-    recentActivity: [
-      { type: 'login', date: '2024-01-20T14:30:00', description: 'Laatste login' },
-      { type: 'post', date: '2024-01-19T11:15:00', description: 'Laatste forumpost' },
-      { type: 'badge', date: '2024-01-18T09:45:00', description: 'Badge ontgrendeld: Koude Krijger' },
-      { type: 'training', date: '2024-01-17T16:20:00', description: 'Training voltooid' },
-      { type: 'goal', date: '2024-01-16T13:10:00', description: 'Nieuw doel ingesteld' }
-    ]
-  },
-  {
-    id: 2,
-    name: 'Thomas Jansen',
-    username: 'thomas_j',
-    email: 'thomas@example.com',
-    rank: 'Warrior',
-    joinDate: '2024-01-14',
-    status: 'active',
-    forumStatus: 'active',
-    avatar: '/profielfoto.png',
-    lastActive: '2024-01-19',
-    posts: 23,
-    badges: 8,
-    bio: 'Focused on building strength and mental resilience.',
-    mainGoal: 'Deadlift 200kg and run a marathon this year.',
-    adminNotes: 'Good progress, active in training discussions.',
-    recentActivity: [
-      { type: 'login', date: '2024-01-19T10:20:00', description: 'Laatste login' },
-      { type: 'post', date: '2024-01-18T15:30:00', description: 'Laatste forumpost' },
-      { type: 'badge', date: '2024-01-17T08:15:00', description: 'Badge ontgrendeld: Consistent Warrior' }
-    ]
-  },
-  {
-    id: 3,
-    name: 'Lucas de Vries',
-    username: 'lucas_dv',
-    email: 'lucas@example.com',
-    rank: 'Rookie',
-    joinDate: '2024-01-13',
-    status: 'inactive',
-    forumStatus: 'active',
-    avatar: '/profielfoto.png',
-    lastActive: '2024-01-16',
-    posts: 5,
-    badges: 2,
-    bio: 'Just starting my fitness journey.',
-    mainGoal: 'Lose 10kg and build basic strength.',
-    adminNotes: 'New member, needs encouragement to stay active.',
-    recentActivity: [
-      { type: 'login', date: '2024-01-16T12:45:00', description: 'Laatste login' },
-      { type: 'post', date: '2024-01-15T14:20:00', description: 'Laatste forumpost' }
-    ]
-  },
-  {
-    id: 4,
-    name: 'Daan Bakker',
-    username: 'daan_b',
-    email: 'daan@example.com',
-    rank: 'Elite',
-    joinDate: '2024-01-12',
-    status: 'active',
-    forumStatus: 'active',
-    avatar: '/profielfoto.png',
-    lastActive: '2024-01-20',
-    posts: 67,
-    badges: 15,
-    bio: 'Experienced fitness coach helping others achieve their goals.',
-    mainGoal: 'Mentor 50 new members to their first fitness milestone.',
-    adminNotes: 'Top contributor, excellent mentor. Consider for Elite+ promotion.',
-    recentActivity: [
-      { type: 'login', date: '2024-01-20T09:15:00', description: 'Laatste login' },
-      { type: 'post', date: '2024-01-19T16:45:00', description: 'Laatste forumpost' },
-      { type: 'badge', date: '2024-01-18T11:30:00', description: 'Badge ontgrendeld: Mentor Master' }
-    ]
-  },
-  {
-    id: 5,
-    name: 'Sem Visser',
-    username: 'sem_v',
-    email: 'sem@example.com',
-    rank: 'Warrior',
-    joinDate: '2024-01-11',
-    status: 'suspended',
-    forumStatus: 'muted',
-    avatar: '/profielfoto.png',
-    lastActive: '2024-01-18',
-    posts: 34,
-    badges: 9,
-    bio: 'Committed to personal growth and community building.',
-    mainGoal: 'Achieve Elite rank and become a community leader.',
-    adminNotes: 'Suspended for inappropriate forum behavior on 2024-01-18. Review in 7 days.',
-    recentActivity: [
-      { type: 'login', date: '2024-01-18T13:20:00', description: 'Laatste login' },
-      { type: 'suspension', date: '2024-01-18T13:20:00', description: 'Account geschorst' }
-    ]
-  }
-];
-
-// Generate 200 additional dummy members
-const generateDummyMembers = () => {
-  const firstNames = [
-    'Alexander', 'Benjamin', 'Cas', 'Dylan', 'Elias', 'Finn', 'Gijs', 'Hugo', 'Isaac', 'Jasper',
-    'Koen', 'Liam', 'Milan', 'Noah', 'Owen', 'Pepijn', 'Quinn', 'Ruben', 'Sam', 'Timo',
-    'Udo', 'Victor', 'Willem', 'Xander', 'Yannick', 'Zeno', 'Adriaan', 'Bram', 'Cedric', 'Dirk',
-    'Erik', 'Floris', 'Gerard', 'Hendrik', 'Ivo', 'Jeroen', 'Klaas', 'Lars', 'Maarten', 'Niels',
-    'Olaf', 'Pieter', 'Quinten', 'Rik', 'Sander', 'Thijs', 'Uwe', 'Vincent', 'Wouter', 'Xavier'
-  ];
-  
-  const lastNames = [
-    'van der Berg', 'Jansen', 'de Vries', 'Bakker', 'Visser', 'Smit', 'Meijer', 'de Boer', 'Mulder', 'de Groot',
-    'Bos', 'Vos', 'Peters', 'Hendriks', 'van Leeuwen', 'Dekker', 'Brouwer', 'de Wit', 'Dijkstra', 'Smits',
-    'de Graaf', 'van der Meer', 'Smeets', 'de Haan', 'van den Berg', 'van Dijk', 'van Vliet', 'van der Heijden', 'van der Wal', 'van der Ven',
-    'van der Beek', 'van der Linden', 'van der Velde', 'van der Steen', 'van der Laan', 'van der Kooij', 'van der Veen', 'van der Zee', 'van der Ploeg', 'van der Schaaf',
-    'van der Schoot', 'van der Sluis', 'van der Spek', 'van der Stap', 'van der Stoep', 'van der Straaten', 'van der Veer', 'van der Vliet', 'van der Voort', 'van der Weide'
-  ];
-  
-  const ranks = ['Rookie', 'Warrior', 'Elite', 'Legend'];
-  const statuses = ['active', 'inactive', 'suspended'];
-  const forumStatuses = ['active', 'muted', 'blocked'];
-  
-  const bios = [
-    'Passionate about personal development and helping others reach their potential.',
-    'Focused on building strength and mental resilience.',
-    'Just starting my fitness journey.',
-    'Experienced fitness coach helping others achieve their goals.',
-    'Committed to personal growth and community building.',
-    'Dedicated to continuous improvement and pushing limits.',
-    'Building a stronger version of myself every day.',
-    'Sharing knowledge and motivating others in their fitness journey.',
-    'Transforming challenges into opportunities for growth.',
-    'Creating sustainable habits for long-term success.'
-  ];
-  
-  const goals = [
-    'Become a certified personal trainer and help 100+ people transform their lives.',
-    'Deadlift 200kg and run a marathon this year.',
-    'Lose 10kg and build basic strength.',
-    'Mentor 50 new members to their first fitness milestone.',
-    'Achieve Elite rank and become a community leader.',
-    'Complete an Ironman triathlon within 2 years.',
-    'Build a sustainable morning routine and stick to it for 365 days.',
-    'Help 25 people achieve their first pull-up.',
-    'Develop mental toughness through cold exposure and meditation.',
-    'Create a supportive community for working professionals.'
-  ];
-  
-  const adminNotes = [
-    'Excellent community member, very helpful in the forum.',
-    'Good progress, active in training discussions.',
-    'New member, needs encouragement to stay active.',
-    'Top contributor, excellent mentor.',
-    'Suspended for inappropriate forum behavior. Review in 7 days.',
-    'Consistent participant in challenges and events.',
-    'Shows great potential, consider for mentorship program.',
-    'Quiet but dedicated member, always completes training logs.',
-    'Very active in the nutrition section, provides valuable insights.',
-    'Recently promoted, adapting well to new responsibilities.',
-    'Needs more engagement in community activities.',
-    'Excellent technical knowledge, great resource for other members.',
-    'Consistently helps new members with their questions.',
-    'Has shown significant improvement over the last 3 months.',
-    'Consider for "Lid van de Maand" nomination.',
-    'May benefit from additional motivation and support.',
-    'Very organized with training and nutrition tracking.',
-    'Great team player in group challenges.',
-    'Shows leadership potential in group activities.',
-    'Needs reminder about forum etiquette guidelines.'
-  ];
-  
-  const badgeNames = ['Koude Krijger', 'Consistent Warrior', 'Mentor Master', 'Iron Will', 'Community Builder', 'Nutrition Expert', 'Strength Seeker', 'Endurance Master'];
-  
-  return Array.from({ length: 200 }, (_, index) => {
-    const id = index + 6;
-    const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
-    const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
-    const name = `${firstName} ${lastName}`;
-    const username = `${firstName.toLowerCase()}_${lastName.toLowerCase().replace(/\s+/g, '_')}`;
-    const email = `${firstName.toLowerCase()}.${lastName.toLowerCase().replace(/\s+/g, '')}@example.com`;
-    const rank = ranks[Math.floor(Math.random() * ranks.length)];
-    const status = statuses[Math.floor(Math.random() * statuses.length)];
-    const forumStatus = forumStatuses[Math.floor(Math.random() * forumStatuses.length)];
-    
-    // Generate realistic dates
-    const joinDate = new Date(2023, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1);
-    const lastActive = new Date(2024, 0, Math.floor(Math.random() * 20) + 1);
-    
-    // Generate realistic activity data
-    const posts = Math.floor(Math.random() * 100);
-    const badges = Math.floor(Math.random() * 20);
-    
-    const bio = bios[Math.floor(Math.random() * bios.length)];
-    const mainGoal = goals[Math.floor(Math.random() * goals.length)];
-    const adminNote = adminNotes[Math.floor(Math.random() * adminNotes.length)];
-    
-    // Generate recent activity
-    const activityTypes = ['login', 'post', 'badge', 'training', 'goal'];
-    const recentActivity = Array.from({ length: Math.floor(Math.random() * 5) + 1 }, (_, i) => {
-      const type = activityTypes[Math.floor(Math.random() * activityTypes.length)];
-      const date = new Date(2024, 0, Math.floor(Math.random() * 20) + 1);
-      const descriptions = {
-        login: 'Laatste login',
-        post: 'Laatste forumpost',
-        badge: `Badge ontgrendeld: ${badgeNames[Math.floor(Math.random() * badgeNames.length)]}`,
-        training: 'Training voltooid',
-        goal: 'Nieuw doel ingesteld'
-      };
-      return {
-        type,
-        date: date.toISOString(),
-        description: descriptions[type as keyof typeof descriptions]
-      };
-    });
-    
-    return {
-      id,
-      name,
-      username,
-      email,
-      rank,
-      joinDate: joinDate.toISOString().split('T')[0],
-      status,
-      forumStatus,
-      avatar: '/profielfoto.png',
-      lastActive: lastActive.toISOString().split('T')[0],
-      posts,
-      badges,
-      bio,
-      mainGoal,
-      adminNotes: adminNote,
-      recentActivity
-    };
-  });
-};
-
-// Combine original members with dummy members
-const allMembers = [...mockMembers, ...generateDummyMembers()];
+import { supabase } from '@/lib/supabase';
 
 const ranks = ['Rookie', 'Warrior', 'Elite', 'Legend'];
 const statuses = ['active', 'inactive', 'suspended'];
@@ -285,7 +33,7 @@ export default function Ledenbeheer() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRank, setSelectedRank] = useState('Alle Rangen');
   const [selectedStatus, setSelectedStatus] = useState('Alle Statussen');
-  const [selectedMember, setSelectedMember] = useState<number | null>(null);
+  const [selectedMember, setSelectedMember] = useState<number | string | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingMember, setEditingMember] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<'profile' | 'account' | 'activity'>('profile');
@@ -302,13 +50,28 @@ export default function Ledenbeheer() {
     status: '',
     adminNotes: ''
   });
+  const [allMembers, setAllMembers] = useState<any[]>([]);
+  const [loadingMembers, setLoadingMembers] = useState(false);
+
+  // Haal leden op uit Supabase
+  useEffect(() => {
+    async function fetchMembers() {
+      setLoadingMembers(true);
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (data) setAllMembers(data);
+      setLoadingMembers(false);
+    }
+    fetchMembers();
+  }, []);
 
   const filteredMembers = allMembers.filter(member => {
-    const matchesSearch = member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         member.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = (member.full_name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+                         (member.email?.toLowerCase() || '').includes(searchTerm.toLowerCase());
     const matchesRank = selectedRank === 'Alle Rangen' || member.rank === selectedRank;
     const matchesStatus = selectedStatus === 'Alle Statussen' || member.status === selectedStatus;
-    
     return matchesSearch && matchesRank && matchesStatus;
   });
 
@@ -358,14 +121,14 @@ export default function Ledenbeheer() {
   const handleEditMember = (member: any) => {
     setEditingMember(member);
     setFormData({
-      name: member.name,
-      username: member.username,
-      bio: member.bio,
-      mainGoal: member.mainGoal,
-      rank: member.rank,
-      forumStatus: member.forumStatus,
-      status: member.status,
-      adminNotes: member.adminNotes
+      name: member.full_name || '',
+      username: member.username || '',
+      bio: member.bio || '',
+      mainGoal: member.main_goal || '',
+      rank: member.rank || '',
+      forumStatus: member.forum_status || '',
+      status: member.status || '',
+      adminNotes: member.admin_notes || ''
     });
     setShowEditModal(true);
     setSelectedMember(null); // Close dropdown
@@ -373,21 +136,22 @@ export default function Ledenbeheer() {
 
   const handleSave = async () => {
     setIsLoading(true);
-    
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Update the member data
-      const updatedMembers = allMembers.map(member => 
-        member.id === editingMember.id 
-          ? { ...member, ...formData }
-          : member
-      );
-      
-      // In a real app, you would call your API here
-      // await updateUser(editingMember.id, formData);
-      
+      const updates: any = {
+        full_name: formData.name,
+        username: formData.username,
+        bio: formData.bio,
+        main_goal: formData.mainGoal,
+        rank: formData.rank,
+        forum_status: formData.forumStatus,
+        status: formData.status,
+        admin_notes: formData.adminNotes
+      };
+      const { error } = await supabase
+        .from('users')
+        .update(updates)
+        .eq('id', editingMember.id);
+      if (error) throw error;
       toast.success(`Profiel van ${formData.name} succesvol bijgewerkt`, {
         position: "top-right",
         autoClose: 3000,
@@ -396,9 +160,14 @@ export default function Ledenbeheer() {
         pauseOnHover: true,
         draggable: true
       });
-      
       setShowEditModal(false);
       setEditingMember(null);
+      // Refresh members
+      const { data } = await supabase
+        .from('users')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (data) setAllMembers(data);
     } catch (error) {
       toast.error('Er is een fout opgetreden bij het opslaan', {
         position: "top-right",
@@ -543,7 +312,7 @@ export default function Ledenbeheer() {
                         <UserIcon className="w-5 h-5 text-[#8BAE5A]" />
                       </div>
                       <div>
-                        <p className="text-[#8BAE5A] font-medium">{member.name}</p>
+                        <p className="text-[#8BAE5A] font-medium">{member.full_name}</p>
                         <p className="text-[#B6C948] text-sm">ID: {member.id}</p>
                       </div>
                     </div>
@@ -568,13 +337,13 @@ export default function Ledenbeheer() {
                     <div className="flex items-center gap-2">
                       <CalendarIcon className="w-4 h-4 text-[#B6C948]" />
                       <span className="text-[#B6C948]">
-                        {new Date(member.joinDate).toLocaleDateString('nl-NL')}
+                        {new Date(member.created_at).toLocaleDateString('nl-NL')}
                       </span>
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <span className="text-[#B6C948] text-sm">
-                      {new Date(member.lastActive).toLocaleDateString('nl-NL')}
+                      {new Date(member.last_login).toLocaleDateString('nl-NL')}
                     </span>
                   </td>
                   <td className="px-6 py-4">
@@ -594,7 +363,7 @@ export default function Ledenbeheer() {
                         </button>
                         
                         {selectedMember === member.id && (
-                          <div className="absolute right-0 mt-2 w-48 bg-[#181F17] rounded-xl border border-[#3A4D23] shadow-lg z-10">
+                          <div className="fixed w-48 bg-[#181F17] rounded-xl border border-[#3A4D23] shadow-lg z-50" style={{right: '2rem', top: 'calc(50% + 40px)'}}>
                             <div className="py-2">
                               <button className="w-full px-4 py-2 text-left text-[#B6C948] hover:bg-[#232D1A] flex items-center gap-2">
                                 <EyeIcon className="w-4 h-4" />
@@ -666,7 +435,7 @@ export default function Ledenbeheer() {
             <div className="p-6 border-b border-[#3A4D23]">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-bold text-[#8BAE5A]">
-                  Bewerk Profiel: {editingMember.name}
+                  Bewerk Profiel: {editingMember.full_name}
                 </h2>
                 <button
                   onClick={() => setShowEditModal(false)}
@@ -855,7 +624,7 @@ export default function Ledenbeheer() {
                   <div>
                     <h3 className="text-lg font-medium text-white mb-4">Recente Activiteit</h3>
                     <div className="space-y-3">
-                      {editingMember.recentActivity.map((activity: any, index: number) => {
+                      {editingMember.recent_activity.map((activity: any, index: number) => {
                         const ActivityIcon = getActivityIcon(activity.type);
                         return (
                           <div key={index} className="flex items-center gap-3 p-3 bg-[#181F17] rounded-lg">
@@ -863,7 +632,7 @@ export default function Ledenbeheer() {
                             <div className="flex-1">
                               <p className="text-white text-sm">{activity.description}</p>
                               <p className="text-[#B6C948] text-xs">
-                                {new Date(activity.date).toLocaleString('nl-NL')}
+                                {new Date(activity.created_at).toLocaleString('nl-NL')}
                               </p>
                             </div>
                           </div>
@@ -937,7 +706,7 @@ export default function Ledenbeheer() {
           },
           'Bewerkte lid': editingMember ? {
             id: editingMember.id,
-            name: editingMember.name,
+            name: editingMember.full_name,
             email: editingMember.email,
             status: editingMember.status
           } : null

@@ -10,7 +10,8 @@ export default function LessonDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuth();
-  const { slug, lessonId } = params;
+  const slug = (params as any).slug as string;
+  const lessonId = (params as any).lessonId as string;
   const [module, setModule] = useState<any>(null);
   const [lesson, setLesson] = useState<any>(null);
   const [lessons, setLessons] = useState<any[]>([]);
@@ -171,8 +172,8 @@ export default function LessonDetailPage() {
           {lesson.description}
         </p>
         <div 
-          className="text-[#B6C948]" 
-          dangerouslySetInnerHTML={{ __html: lesson.content || '' }} 
+          className="prose prose-lg prose-invert max-w-none text-[#B6C948] [&_*]:text-[#B6C948] [&>h1]:text-[#FFD700] [&>h2]:text-[#8BAE5A] [&>h3]:text-[#8BAE5A] [&>strong]:text-white [&>ul]:list-disc [&>ol]:list-decimal [&>blockquote]:border-l-4 [&>blockquote]:border-[#FFD700] [&>blockquote]:pl-4 [&>blockquote]:italic"
+          dangerouslySetInnerHTML={{ __html: lesson.content || '' }}
         />
       </div>
       <div className="flex justify-between mb-8">

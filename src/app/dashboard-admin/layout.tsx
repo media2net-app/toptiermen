@@ -132,6 +132,8 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
                         {subItem.label}
                         {subItem.label === 'Academy' ? (
                           <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-bold bg-green-700 text-green-200">Live</span>
+                        ) : subItem.label === 'Ledenbeheer' ? (
+                          <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-bold bg-green-700 text-green-200">Live</span>
                         ) : (
                           <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-bold bg-yellow-700 text-yellow-200">Dummy</span>
                         )}
