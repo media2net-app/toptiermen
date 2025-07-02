@@ -149,6 +149,24 @@ export default function SchemaBuilder({ isOpen, onClose, schema }: SchemaBuilder
   const handleSave = () => {
     // Here you would save the schema to your backend
     console.log('Saving schema:', { schemaDetails, trainingDays });
+    // Reset states when closing
+    setTemplateStep(true);
+    setCurrentStep(1);
+    setSelectedTemplate(null);
+    setSchemaDetails({
+      name: '',
+      description: '',
+      category: 'Gym',
+      coverImage: ''
+    });
+    setTrainingDays([
+      { id: 1, name: 'Dag 1', exercises: [] },
+      { id: 2, name: 'Dag 2', exercises: [] },
+      { id: 3, name: 'Dag 3', exercises: [] }
+    ]);
+    setSelectedDay(null);
+    setShowExerciseSearch(false);
+    setExerciseSearchTerm('');
     onClose();
   };
 
@@ -180,7 +198,7 @@ export default function SchemaBuilder({ isOpen, onClose, schema }: SchemaBuilder
   ];
 
   // Template keuze stap
-  if (templateStep && !schema) {
+  if (isOpen && templateStep && !schema) {
     return (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
         <div className="bg-[#232D1A] rounded-2xl border border-[#3A4D23] w-full max-w-lg p-8">
@@ -213,7 +231,27 @@ export default function SchemaBuilder({ isOpen, onClose, schema }: SchemaBuilder
             ))}
           </div>
           <button
-            onClick={onClose}
+            onClick={() => {
+              // Reset states when closing
+              setTemplateStep(true);
+              setCurrentStep(1);
+              setSelectedTemplate(null);
+              setSchemaDetails({
+                name: '',
+                description: '',
+                category: 'Gym',
+                coverImage: ''
+              });
+              setTrainingDays([
+                { id: 1, name: 'Dag 1', exercises: [] },
+                { id: 2, name: 'Dag 2', exercises: [] },
+                { id: 3, name: 'Dag 3', exercises: [] }
+              ]);
+              setSelectedDay(null);
+              setShowExerciseSearch(false);
+              setExerciseSearchTerm('');
+              onClose();
+            }}
             className="mt-8 w-full px-6 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A] transition"
           >
             Annuleren
@@ -237,7 +275,27 @@ export default function SchemaBuilder({ isOpen, onClose, schema }: SchemaBuilder
             <p className="text-[#B6C948] mt-1">Stap {currentStep} van {totalSteps}</p>
           </div>
           <button
-            onClick={onClose}
+            onClick={() => {
+              // Reset states when closing
+              setTemplateStep(true);
+              setCurrentStep(1);
+              setSelectedTemplate(null);
+              setSchemaDetails({
+                name: '',
+                description: '',
+                category: 'Gym',
+                coverImage: ''
+              });
+              setTrainingDays([
+                { id: 1, name: 'Dag 1', exercises: [] },
+                { id: 2, name: 'Dag 2', exercises: [] },
+                { id: 3, name: 'Dag 3', exercises: [] }
+              ]);
+              setSelectedDay(null);
+              setShowExerciseSearch(false);
+              setExerciseSearchTerm('');
+              onClose();
+            }}
             className="p-2 rounded-xl hover:bg-[#181F17] transition-colors duration-200"
           >
             <XMarkIcon className="w-6 h-6 text-[#B6C948]" />
@@ -527,7 +585,27 @@ export default function SchemaBuilder({ isOpen, onClose, schema }: SchemaBuilder
 
           <div className="flex items-center gap-3">
             <button
-              onClick={onClose}
+              onClick={() => {
+                // Reset states when closing
+                setTemplateStep(true);
+                setCurrentStep(1);
+                setSelectedTemplate(null);
+                setSchemaDetails({
+                  name: '',
+                  description: '',
+                  category: 'Gym',
+                  coverImage: ''
+                });
+                setTrainingDays([
+                  { id: 1, name: 'Dag 1', exercises: [] },
+                  { id: 2, name: 'Dag 2', exercises: [] },
+                  { id: 3, name: 'Dag 3', exercises: [] }
+                ]);
+                setSelectedDay(null);
+                setShowExerciseSearch(false);
+                setExerciseSearchTerm('');
+                onClose();
+              }}
               className="px-6 py-3 rounded-xl bg-[#181F17] text-[#B6C948] border border-[#3A4D23] hover:bg-[#232D1A] transition-all duration-200"
             >
               Annuleren

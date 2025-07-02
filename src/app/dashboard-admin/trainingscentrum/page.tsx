@@ -323,7 +323,10 @@ export default function TrainingscentrumBeheer() {
               </select>
             </div>
             <button
-              onClick={() => setShowNewSchemaModal(true)}
+              onClick={() => { 
+                console.log('Open SchemaBuilder modal');
+                setShowNewSchemaModal(true);
+              }}
               className="px-6 py-3 rounded-xl bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#B6C948] transition-all duration-200 flex items-center gap-2"
             >
               <PlusIcon className="w-5 h-5" />
@@ -819,7 +822,10 @@ export default function TrainingscentrumBeheer() {
       {/* Schema Builder Modal */}
       <SchemaBuilder 
         isOpen={showNewSchemaModal}
-        onClose={() => setShowNewSchemaModal(false)}
+        onClose={() => {
+          console.log('Close SchemaBuilder modal');
+          setShowNewSchemaModal(false);
+        }}
       />
     </div>
   );
