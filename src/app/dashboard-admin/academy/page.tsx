@@ -28,6 +28,8 @@ import { useDebug } from '@/contexts/DebugContext';
 import { useAuth } from "@/contexts/AuthContext";
 import dynamic from 'next/dynamic';
 import VideoUpload from '@/components/VideoUpload';
+import PDFUpload from '@/components/PDFUpload';
+import ImageUpload from '@/components/ImageUpload';
 import 'react-quill/dist/quill.snow.css';
 
 const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
@@ -66,7 +68,8 @@ export default function AcademyManagement() {
     status: 'published',
     attachments: [] as any[],
     examQuestions: [] as any[],
-    duration: ''
+    duration: '',
+    worksheetUrl: '' as string | null
   });
 
   const [moduleCompletion, setModuleCompletion] = useState<{ [moduleId: string]: number }>({});
@@ -290,6 +293,8 @@ export default function AcademyManagement() {
           .update({
             title: moduleForm.title,
             description: moduleForm.description,
+            short_description: moduleForm.shortDescription,
+            cover_image: moduleForm.coverImage,
             status: moduleForm.status,
             updated_at: new Date().toISOString(),
             positie: moduleForm.positie !== 0 ? Number(moduleForm.positie) : null
@@ -305,6 +310,8 @@ export default function AcademyManagement() {
           .insert({
             title: moduleForm.title,
             description: moduleForm.description,
+            short_description: moduleForm.shortDescription,
+            cover_image: moduleForm.coverImage,
             status: moduleForm.status,
             positie: moduleForm.positie !== 0 ? Number(moduleForm.positie) : null
           })
@@ -350,12 +357,13 @@ export default function AcademyManagement() {
       setLessonForm({
         title: lesson.title || '',
         type: lesson.type || 'video',
-        videoUrl: lesson.videoUrl || '',
+        videoUrl: lesson.video_url || '',
         content: lesson.content || '',
         status: lesson.status || 'published',
         attachments: lesson.attachments || [],
-        examQuestions: lesson.examQuestions || [],
-        duration: lesson.duration || ''
+        examQuestions: lesson.exam_questions || [],
+        duration: lesson.duration || '',
+        worksheetUrl: lesson.worksheet_url || null
       });
     } else {
       setEditingLesson(null);
@@ -367,7 +375,8 @@ export default function AcademyManagement() {
         status: 'published',
         attachments: [],
         examQuestions: [],
-        duration: ''
+        duration: '',
+        worksheetUrl: null
       });
     }
     setShowLessonModal(true);
@@ -389,6 +398,7 @@ export default function AcademyManagement() {
             attachments: lessonForm.attachments,
             exam_questions: lessonForm.examQuestions,
             duration: lessonForm.duration,
+            worksheet_url: lessonForm.worksheetUrl,
             updated_at: new Date().toISOString(),
           })
           .eq('id', editingLesson);
@@ -408,6 +418,7 @@ export default function AcademyManagement() {
             attachments: lessonForm.attachments,
             exam_questions: lessonForm.examQuestions,
             duration: lessonForm.duration,
+            worksheet_url: lessonForm.worksheetUrl,
             module_id: selectedModule,
           })
           .select()
@@ -437,7 +448,8 @@ export default function AcademyManagement() {
       status: 'published',
       attachments: [],
       examQuestions: [],
-      duration: ''
+      duration: '',
+      worksheetUrl: null
     });
   };
 
@@ -853,19 +865,13 @@ export default function AcademyManagement() {
               {/* Cover Image */}
               <div>
                 <label className="block text-[#8BAE5A] font-semibold mb-2">Cover Afbeelding</label>
-                <div className="flex items-center gap-4">
-                  {moduleForm.coverImage && (
-                    <img 
-                      src={moduleForm.coverImage} 
-                      alt="Cover" 
-                      className="w-20 h-20 rounded-xl object-cover border border-[#3A4D23]"
-                    />
-                  )}
-                  <button className="px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A] transition flex items-center gap-2">
-                    <PhotoIcon className="w-5 h-5" />
-                    {moduleForm.coverImage ? 'Afbeelding Wijzigen' : 'Afbeelding Uploaden'}
-                  </button>
-                </div>
+                <ImageUpload
+                  currentImageUrl={moduleForm.coverImage}
+                  onImageUploaded={(url) => setModuleForm({...moduleForm, coverImage: url || ''})}
+                  bucketName="module-covers"
+                  folder="covers"
+                  maxSize={5}
+                />
               </div>
 
               {/* Publication Status */}
@@ -992,8 +998,6 @@ export default function AcademyManagement() {
                   <VideoUpload
                     currentVideoUrl={lessonForm.videoUrl}
                     onVideoUploaded={(url) => setLessonForm({...lessonForm, videoUrl: url})}
-                    bucketName="academy-videos"
-                    folderPath="videos"
                   />
                 </div>
               )}
@@ -1016,110 +1020,12 @@ export default function AcademyManagement() {
 
               {/* Attachments */}
               <div>
-                <label className="block text-[#8BAE5A] font-semibold mb-2">Hulpmiddelen & Downloads</label>
-                <div className="space-y-3">
-                  {(lessonForm.attachments || []).map((attachment, index) => (
-                    <div key={index} className="flex items-center gap-3 p-3 bg-[#181F17] rounded-xl">
-                      <DocumentTextIcon className="w-5 h-5 text-[#B6C948]" />
-                      <span className="text-[#8BAE5A] flex-1">{attachment.name}</span>
-                      <button 
-                        onClick={() => setLessonForm({
-                          ...lessonForm, 
-                          attachments: (lessonForm.attachments || []).filter((_, i) => i !== index)
-                        })}
-                        className="p-1 rounded hover:bg-[#232D1A] transition"
-                      >
-                        <TrashIcon className="w-4 h-4 text-red-400" />
-                      </button>
-                    </div>
-                  ))}
-                  <button className="w-full px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A] transition flex items-center justify-center gap-2">
-                    <CloudArrowUpIcon className="w-5 h-5" />
-                    Bestand Toevoegen (PDF, werkbladen, etc.)
-                  </button>
-                </div>
+                <label className="block text-[#8BAE5A] font-semibold mb-2">Werkblad (PDF)</label>
+                <PDFUpload
+                  currentPDFUrl={lessonForm.worksheetUrl || undefined}
+                  onPDFUploaded={(url: string | null) => setLessonForm({...lessonForm, worksheetUrl: url})}
+                />
               </div>
-
-              {/* Exam Questions - Only show for exam type */}
-              {lessonForm.type === 'exam' && (
-                <div>
-                  <label className="block text-[#8BAE5A] font-semibold mb-2">Examen/Reflectie Vragen</label>
-                  <div className="space-y-4">
-                    {(lessonForm.examQuestions || []).map((question, index) => (
-                      <div key={index} className="p-4 bg-[#181F17] rounded-xl border border-[#3A4D23]">
-                        <div className="flex items-center justify-between mb-3">
-                          <span className="text-[#8BAE5A] font-semibold">Vraag {index + 1}</span>
-                          <button 
-                            onClick={() => setLessonForm({
-                              ...lessonForm, 
-                              examQuestions: (lessonForm.examQuestions || []).filter((_, i) => i !== index)
-                            })}
-                            className="p-1 rounded hover:bg-[#232D1A] transition"
-                          >
-                            <TrashIcon className="w-4 h-4 text-red-400" />
-                          </button>
-                        </div>
-                        <input
-                          type="text"
-                          value={question.question}
-                          onChange={(e) => {
-                            const newQuestions = [...(lessonForm.examQuestions || [])];
-                            newQuestions[index].question = e.target.value;
-                            setLessonForm({...lessonForm, examQuestions: newQuestions});
-                          }}
-                          placeholder="Stel hier je vraag..."
-                          className="w-full px-3 py-2 rounded-lg bg-[#232D1A] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] placeholder-[#B6C948] mb-3"
-                        />
-                        {question.type === 'multiple_choice' && (
-                          <div className="space-y-2">
-                            {question.options.map((option: string, optionIndex: number) => (
-                              <div key={optionIndex} className="flex items-center gap-2">
-                                <input
-                                  type="radio"
-                                  name={`question-${index}`}
-                                  checked={question.correctAnswer === optionIndex}
-                                  onChange={() => {
-                                    const newQuestions = [...(lessonForm.examQuestions || [])];
-                                    newQuestions[index].correctAnswer = optionIndex;
-                                    setLessonForm({...lessonForm, examQuestions: newQuestions});
-                                  }}
-                                  className="text-[#8BAE5A]"
-                                />
-                                <input
-                                  type="text"
-                                  value={option}
-                                  onChange={(e) => {
-                                    const newQuestions = [...(lessonForm.examQuestions || [])];
-                                    newQuestions[index].options[optionIndex] = e.target.value;
-                                    setLessonForm({...lessonForm, examQuestions: newQuestions});
-                                  }}
-                                  placeholder={`Optie ${optionIndex + 1}`}
-                                  className="flex-1 px-3 py-2 rounded-lg bg-[#232D1A] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] placeholder-[#B6C948]"
-                                />
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                    <button 
-                      onClick={() => setLessonForm({
-                        ...lessonForm, 
-                        examQuestions: [...(lessonForm.examQuestions || []), {
-                          question: '',
-                          type: 'multiple_choice',
-                          options: ['', '', '', ''],
-                          correctAnswer: 0
-                        }]
-                      })}
-                      className="w-full px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A] transition flex items-center justify-center gap-2"
-                    >
-                      <PlusIcon className="w-5 h-5" />
-                      Vraag Toevoegen
-                    </button>
-                  </div>
-                </div>
-              )}
 
               {/* Les Duur */}
               <div>

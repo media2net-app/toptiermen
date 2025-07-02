@@ -1,0 +1,101 @@
+-- Insert lessons for module 6: Voeding & Gezondheid
+-- Run this SQL in your Supabase SQL editor
+
+INSERT INTO academy_lessons (
+    module_id,
+    title,
+    duration,
+    type,
+    status,
+    order_index,
+    views,
+    completion_rate,
+    video_url,
+    content,
+    created_at,
+    updated_at
+) VALUES 
+(
+    (SELECT id FROM academy_modules WHERE title = 'Voeding & Gezondheid' LIMIT 1),
+    'Voeding als Brandstof',
+    '30m',
+    'video',
+    'published',
+    1,
+    0,
+    0,
+    'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    '',
+    NOW(),
+    NOW()
+),
+(
+    (SELECT id FROM academy_modules WHERE title = 'Voeding & Gezondheid' LIMIT 1),
+    'Macro\'s en Micro\'s',
+    '25m',
+    'text',
+    'published',
+    2,
+    0,
+    0,
+    '',
+    'Leer over macronutriënten (eiwitten, koolhydraten, vetten) en micronutriënten (vitamines, mineralen) en hun rol in je gezondheid.',
+    NOW(),
+    NOW()
+),
+(
+    (SELECT id FROM academy_modules WHERE title = 'Voeding & Gezondheid' LIMIT 1),
+    'Meal Planning en Prep',
+    '35m',
+    'text',
+    'published',
+    3,
+    0,
+    0,
+    '',
+    'Meal planning en prep zijn essentieel voor consistente gezonde voeding. Leer hoe je dit efficiënt kunt doen.',
+    NOW(),
+    NOW()
+),
+(
+    (SELECT id FROM academy_modules WHERE title = 'Voeding & Gezondheid' LIMIT 1),
+    'Supplementen en Optimalisatie',
+    '40m',
+    'video',
+    'published',
+    4,
+    0,
+    0,
+    'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    '',
+    NOW(),
+    NOW()
+),
+(
+    (SELECT id FROM academy_modules WHERE title = 'Voeding & Gezondheid' LIMIT 1),
+    'Gezondheid en Welzijn',
+    '30m',
+    'text',
+    'published',
+    5,
+    0,
+    0,
+    '',
+    'Gezondheid gaat verder dan alleen voeding. Leer over slaap, stress management en algemeen welzijn.',
+    NOW(),
+    NOW()
+),
+(
+    (SELECT id FROM academy_modules WHERE title = 'Voeding & Gezondheid' LIMIT 1),
+    'Reflectie & Integratie',
+    '15m',
+    'exam',
+    'published',
+    6,
+    0,
+    0,
+    '',
+    '',
+    NOW(),
+    NOW()
+);

@@ -340,23 +340,23 @@ export default function Ledenbeheer() {
             <p className="text-[#B6C948]/70 text-sm">Er zijn nog geen gebruikers geregistreerd in het systeem.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-[#181F17] border-b border-[#3A4D23]">
-                <tr>
-                  <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Lid</th>
-                  <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">E-mail</th>
-                  <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Rang</th>
-                  <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Status</th>
-                  <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Lid sinds</th>
-                  <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Laatste activiteit</th>
-                  <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Posts</th>
-                  <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Badges</th>
-                  <th className="px-6 py-4 text-center text-[#8BAE5A] font-semibold">Acties</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#3A4D23]">
-                {currentMembers.map((member) => (
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-[#181F17] border-b border-[#3A4D23]">
+              <tr>
+                <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Lid</th>
+                <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">E-mail</th>
+                <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Rang</th>
+                <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Status</th>
+                <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Lid sinds</th>
+                <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Laatste activiteit</th>
+                <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Posts</th>
+                <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Badges</th>
+                <th className="px-6 py-4 text-center text-[#8BAE5A] font-semibold">Acties</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#3A4D23]">
+              {currentMembers.map((member) => (
                 <tr key={member.id} className="hover:bg-[#181F17] transition-colors duration-200">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
@@ -467,30 +467,30 @@ export default function Ledenbeheer() {
 
       {/* Pagination */}
       {allMembers.length > 0 && (
-        <div className="flex items-center justify-between">
-          <div className="text-[#B6C948] text-sm">
-            Toon {filteredMembers.length} van {allMembers.length} leden
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-              className="px-4 py-2 rounded-xl bg-[#232D1A] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#181F17] transition disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Vorige
-            </button>
-            <span className="px-4 py-2 text-[#8BAE5A] font-semibold">
-              {currentPage} van {totalPages}
-            </span>
-            <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className="px-4 py-2 rounded-xl bg-[#232D1A] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#181F17] transition disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Volgende
-            </button>
-          </div>
+      <div className="flex items-center justify-between">
+        <div className="text-[#B6C948] text-sm">
+          Toon {filteredMembers.length} van {allMembers.length} leden
         </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="px-4 py-2 rounded-xl bg-[#232D1A] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#181F17] transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Vorige
+          </button>
+          <span className="px-4 py-2 text-[#8BAE5A] font-semibold">
+            {currentPage} van {totalPages}
+          </span>
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="px-4 py-2 rounded-xl bg-[#232D1A] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#181F17] transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Volgende
+          </button>
+        </div>
+      </div>
       )}
 
       {/* Edit User Modal */}

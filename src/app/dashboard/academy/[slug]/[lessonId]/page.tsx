@@ -175,6 +175,24 @@ export default function LessonDetailPage() {
           className="prose prose-lg prose-invert max-w-none text-[#B6C948] [&_*]:text-[#B6C948] [&>h1]:text-[#FFD700] [&>h2]:text-[#8BAE5A] [&>h3]:text-[#8BAE5A] [&>strong]:text-white [&>ul]:list-disc [&>ol]:list-decimal [&>blockquote]:border-l-4 [&>blockquote]:border-[#FFD700] [&>blockquote]:pl-4 [&>blockquote]:italic"
           dangerouslySetInnerHTML={{ __html: lesson.content || '' }}
         />
+        
+        {/* Werkblad Download */}
+        {lesson.worksheet_url && (
+          <div className="mt-6 p-4 bg-[#181F17] rounded-xl border border-[#3A4D23]">
+            <h3 className="text-lg font-bold text-[#8BAE5A] mb-2">📄 Werkblad</h3>
+            <p className="text-[#B6C948] text-sm mb-3">
+              Download het bijbehorende werkblad om de les te versterken
+            </p>
+            <a
+              href={lesson.worksheet_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#B6C948] transition-colors"
+            >
+              📥 Download PDF Werkblad
+            </a>
+          </div>
+        )}
       </div>
       <div className="flex justify-between mb-8">
         {prev && (

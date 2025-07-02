@@ -91,6 +91,17 @@ export default function MijnMissies() {
                     tabIndex={locked ? -1 : 0}
                     aria-disabled={locked}
                   >
+                    {/* Cover Image */}
+                    {mod.cover_image && (
+                      <div className="mb-3 -mx-4 -mt-4 sm:-mx-6 sm:-mt-6">
+                        <img
+                          src={mod.cover_image}
+                          alt={`Cover voor ${mod.title}`}
+                          className="w-full h-32 sm:h-40 object-cover rounded-t-xl sm:rounded-t-2xl"
+                        />
+                      </div>
+                    )}
+                    
                     <div className="flex items-center justify-between mb-1 sm:mb-2">
                       <span className="flex items-center gap-1 sm:gap-2 text-lg sm:text-xl font-semibold text-[#8BAE5A]">
                         <span className="w-6 h-6 sm:w-8 sm:h-8 rounded-full border flex items-center justify-center font-bold text-base sm:text-lg mr-2 bg-[#232D1A] border-[#8BAE5A]">

@@ -1,0 +1,101 @@
+-- Insert lessons for module 5: Brotherhood & Sociale Vaardigheden
+-- Run this SQL in your Supabase SQL editor
+
+INSERT INTO academy_lessons (
+    module_id,
+    title,
+    duration,
+    type,
+    status,
+    order_index,
+    views,
+    completion_rate,
+    video_url,
+    content,
+    created_at,
+    updated_at
+) VALUES 
+(
+    (SELECT id FROM academy_modules WHERE title = 'Brotherhood & Sociale Vaardigheden' LIMIT 1),
+    'De Kracht van Brotherhood',
+    '30m',
+    'video',
+    'published',
+    1,
+    0,
+    0,
+    'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    '',
+    NOW(),
+    NOW()
+),
+(
+    (SELECT id FROM academy_modules WHERE title = 'Brotherhood & Sociale Vaardigheden' LIMIT 1),
+    'Effectieve Communicatie',
+    '25m',
+    'text',
+    'published',
+    2,
+    0,
+    0,
+    '',
+    'Leer hoe je effectief communiceert en sterke relaties opbouwt. Communicatie is de basis van alle succesvolle interacties.',
+    NOW(),
+    NOW()
+),
+(
+    (SELECT id FROM academy_modules WHERE title = 'Brotherhood & Sociale Vaardigheden' LIMIT 1),
+    'Netwerken en Relaties',
+    '35m',
+    'text',
+    'published',
+    3,
+    0,
+    0,
+    '',
+    'Netwerken is cruciaal voor succes. Leer hoe je waardevolle relaties opbouwt en onderhoudt.',
+    NOW(),
+    NOW()
+),
+(
+    (SELECT id FROM academy_modules WHERE title = 'Brotherhood & Sociale Vaardigheden' LIMIT 1),
+    'Leiderschap en Invloed',
+    '40m',
+    'video',
+    'published',
+    4,
+    0,
+    0,
+    'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    '',
+    NOW(),
+    NOW()
+),
+(
+    (SELECT id FROM academy_modules WHERE title = 'Brotherhood & Sociale Vaardigheden' LIMIT 1),
+    'Conflicten Oplossen',
+    '30m',
+    'text',
+    'published',
+    5,
+    0,
+    0,
+    '',
+    'Conflicten zijn onvermijdelijk. Leer hoe je ze constructief kunt oplossen en sterker uit kunt komen.',
+    NOW(),
+    NOW()
+),
+(
+    (SELECT id FROM academy_modules WHERE title = 'Brotherhood & Sociale Vaardigheden' LIMIT 1),
+    'Reflectie & Integratie',
+    '15m',
+    'exam',
+    'published',
+    6,
+    0,
+    0,
+    '',
+    '',
+    NOW(),
+    NOW()
+);

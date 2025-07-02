@@ -6,7 +6,8 @@ import Link from "next/link";
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function ModuleDetailPage() {
-  const { slug } = useParams();
+  const params = useParams();
+  const slug = params?.slug as string;
   const { user } = useAuth();
   const [module, setModule] = useState<any>(null);
   const [lessons, setLessons] = useState<any[]>([]);
@@ -86,6 +87,17 @@ export default function ModuleDetailPage() {
           />
         </div>
       </div>
+      {/* Cover Image */}
+      {module.cover_image && (
+        <div className="mb-8">
+          <img
+            src={module.cover_image}
+            alt={`Cover voor ${module.title}`}
+            className="w-full h-48 md:h-64 object-cover rounded-2xl border border-[#3A4D23]"
+          />
+        </div>
+      )}
+      
       <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">{module.title}</h1>
       <div className="text-[#B6C948] text-lg mb-6">{module.subtitle}</div>
       <div className="text-[#B6C948] mb-8">{module.description}</div>
@@ -101,7 +113,9 @@ export default function ModuleDetailPage() {
                 <span className="ml-2 text-[#8BAE5A] text-lg" title="Voltooid">✔</span>
               )}
             </div>
-            <span className="text-[#B6C948] text-sm">{lesson.duration}</span>
+            <div>
+              <span className="text-[#B6C948] text-sm">{lesson.duration}</span>
+            </div>
           </li>
         ))}
       </ul>

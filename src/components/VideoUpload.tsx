@@ -14,8 +14,8 @@ interface VideoUploadProps {
 export default function VideoUpload({ 
   currentVideoUrl, 
   onVideoUploaded, 
-  bucketName = 'academy-videos',
-  folderPath = 'videos'
+  bucketName = 'workout-videos',
+  folderPath = 'exercises'
 }: VideoUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -176,17 +176,19 @@ export default function VideoUpload({
         )}
       </div>
 
-      {/* URL Input Fallback */}
-      <div className="mt-4">
-        <p className="text-[#8BAE5A] text-sm mb-2">Of voer een video URL in:</p>
-        <input
-          type="url"
-          value={currentVideoUrl || ''}
-          onChange={(e) => onVideoUploaded(e.target.value)}
-          placeholder="https://www.youtube.com/watch?v=... of https://..."
-          className="w-full px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] placeholder-[#B6C948]"
-        />
-      </div>
+      {/* URL Input Fallback - Only show if no video is uploaded */}
+      {!currentVideoUrl && (
+        <div className="mt-4">
+          <p className="text-[#8BAE5A] text-sm mb-2">Of voer een video URL in:</p>
+          <input
+            type="url"
+            value={currentVideoUrl || ''}
+            onChange={(e) => onVideoUploaded(e.target.value)}
+            placeholder="https://www.youtube.com/watch?v=... of https://..."
+            className="w-full px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] placeholder-[#B6C948]"
+          />
+        </div>
+      )}
     </div>
   );
 } 

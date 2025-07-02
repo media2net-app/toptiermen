@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   PlusIcon, 
   PencilIcon, 
@@ -22,7 +22,10 @@ import {
   UserGroupIcon,
   BoltIcon
 } from '@heroicons/react/24/outline';
+import { supabase } from '@/lib/supabase';
+import { toast } from 'react-toastify';
 import SchemaBuilder from './SchemaBuilder';
+import ExerciseModal from './ExerciseModal';
 
 // Mock data - in real app this would come from API
 const mockSchemas = [
@@ -526,6 +529,107 @@ export default function TrainingscentrumBeheer() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('Alle Categorieën');
   const [filterMuscle, setFilterMuscle] = useState('Alle Spiergroepen');
+  
+  // Database state
+  const [exercises, setExercises] = useState<any[]>([]);
+  const [loadingExercises, setLoadingExercises] = useState(true);
+  const [editingExercise, setEditingExercise] = useState<any>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+
+  // Fetch exercises from database
+  useEffect(() => {
+    fetchExercises();
+  }, []);
+
+  const fetchExercises = async () => {
+    setLoadingExercises(true);
+    try {
+      const { data, error } = await supabase
+        .from('exercises')
+        .select('*')
+        .order('name', { ascending: true });
+      
+      if (error) {
+        console.error('Error fetching exercises:', error);
+        toast.error('Fout bij het laden van oefeningen');
+      } else {
+        setExercises(data || []);
+      }
+    } catch (err) {
+      console.error('Exception fetching exercises:', err);
+      toast.error('Fout bij het laden van oefeningen');
+    } finally {
+      setLoadingExercises(false);
+    }
+  };
+
+  const handleAddExercise = async (exerciseData: any) => {
+    try {
+      const { data, error } = await supabase
+        .from('exercises')
+        .insert([exerciseData])
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('Error adding exercise:', error);
+        toast.error('Fout bij het toevoegen van oefening');
+      } else {
+        setExercises([...exercises, data]);
+        setShowNewExerciseModal(false);
+        toast.success('Oefening succesvol toegevoegd');
+      }
+    } catch (err) {
+      console.error('Exception adding exercise:', err);
+      toast.error('Fout bij het toevoegen van oefening');
+    }
+  };
+
+  const handleUpdateExercise = async (id: number, exerciseData: any) => {
+    try {
+      const { data, error } = await supabase
+        .from('exercises')
+        .update(exerciseData)
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('Error updating exercise:', error);
+        toast.error('Fout bij het bijwerken van oefening');
+      } else {
+        setExercises(exercises.map(ex => ex.id === id ? data : ex));
+        setShowEditModal(false);
+        setEditingExercise(null);
+        toast.success('Oefening succesvol bijgewerkt');
+      }
+    } catch (err) {
+      console.error('Exception updating exercise:', err);
+      toast.error('Fout bij het bijwerken van oefening');
+    }
+  };
+
+  const handleDeleteExercise = async (id: number) => {
+    if (!confirm('Weet je zeker dat je deze oefening wilt verwijderen?')) return;
+    
+    try {
+      const { error } = await supabase
+        .from('exercises')
+        .delete()
+        .eq('id', id);
+      
+      if (error) {
+        console.error('Error deleting exercise:', error);
+        toast.error('Fout bij het verwijderen van oefening');
+      } else {
+        setExercises(exercises.filter(ex => ex.id !== id));
+        toast.success('Oefening succesvol verwijderd');
+      }
+    } catch (err) {
+      console.error('Exception deleting exercise:', err);
+      toast.error('Fout bij het verwijderen van oefening');
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -552,9 +656,9 @@ export default function TrainingscentrumBeheer() {
     (filterCategory === 'Alle Categorieën' || schema.category === filterCategory)
   );
 
-  const filteredExercises = mockExercises.filter(exercise => 
+  const filteredExercises = exercises.filter(exercise => 
     exercise.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-    (filterMuscle === 'Alle Spiergroepen' || exercise.primaryMuscle === filterMuscle)
+    (filterMuscle === 'Alle Spiergroepen' || exercise.primary_muscle === filterMuscle)
   );
 
   return (
@@ -763,63 +867,123 @@ export default function TrainingscentrumBeheer() {
                 ))}
               </select>
             </div>
-            <button
-              onClick={() => setShowNewExerciseModal(true)}
-              className="px-6 py-3 rounded-xl bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#B6C948] transition-all duration-200 flex items-center gap-2"
-            >
-              <PlusIcon className="w-5 h-5" />
-              Nieuwe Oefening
-            </button>
+            <div className="flex items-center gap-4">
+              {/* Debug info */}
+              <div className="text-[#B6C948] text-sm">
+                {filteredExercises.length} van {mockExercises.length} oefeningen
+                {searchTerm && ` (gefilterd op: "${searchTerm}")`}
+                {filterMuscle !== 'Alle Spiergroepen' && ` (spiergroep: ${filterMuscle})`}
+              </div>
+              <button
+                onClick={() => setShowNewExerciseModal(true)}
+                className="px-6 py-3 rounded-xl bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#B6C948] transition-all duration-200 flex items-center gap-2"
+              >
+                <PlusIcon className="w-5 h-5" />
+                Nieuwe Oefening
+              </button>
+            </div>
           </div>
 
           {/* Exercises Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredExercises.map((exercise) => (
-              <div key={exercise.id} className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23] hover:border-[#8BAE5A] transition-all duration-300">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="p-3 rounded-xl bg-[#8BAE5A]/20">
-                    <PlayIcon className="w-6 h-6 text-[#8BAE5A]" />
+          {loadingExercises ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
+              <p className="text-[#B6C948]">Oefeningen laden...</p>
+            </div>
+          ) : filteredExercises.length === 0 ? (
+            <div className="text-center py-12">
+              <PlayIcon className="w-12 h-12 text-[#8BAE5A]/50 mx-auto mb-4" />
+              <p className="text-[#B6C948] text-lg mb-2">Geen oefeningen gevonden</p>
+              <p className="text-[#B6C948]/70 text-sm">
+                {searchTerm || filterMuscle !== 'Alle Spiergroepen' 
+                  ? 'Probeer je zoekcriteria aan te passen.' 
+                  : 'Er zijn nog geen oefeningen toegevoegd.'}
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredExercises.map((exercise) => (
+                <div key={exercise.id} className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23] hover:border-[#8BAE5A] transition-all duration-300">
+                  {/* Video Preview */}
+                  {exercise.video_url && (
+                    <div className="mb-4 relative">
+                      <video 
+                        src={exercise.video_url} 
+                        className="w-full h-32 object-cover rounded-xl border border-[#3A4D23] bg-[#181F17]"
+                        controls
+                      />
+                    </div>
+                  )}
+                  
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="p-3 rounded-xl bg-[#8BAE5A]/20">
+                      <PlayIcon className="w-6 h-6 text-[#8BAE5A]" />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button 
+                        onClick={() => {
+                          setEditingExercise(exercise);
+                          setShowEditModal(true);
+                        }}
+                        className="p-2 rounded-xl hover:bg-[#181F17] transition-colors duration-200"
+                      >
+                        <PencilIcon className="w-4 h-4 text-[#B6C948]" />
+                      </button>
+                      <button 
+                        onClick={() => handleDeleteExercise(exercise.id)}
+                        className="p-2 rounded-xl hover:bg-[#181F17] transition-colors duration-200"
+                      >
+                        <TrashIcon className="w-4 h-4 text-red-400" />
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <button className="p-2 rounded-xl hover:bg-[#181F17] transition-colors duration-200">
-                      <PencilIcon className="w-4 h-4 text-[#B6C948]" />
-                    </button>
-                    <button className="p-2 rounded-xl hover:bg-[#181F17] transition-colors duration-200">
-                      <TrashIcon className="w-4 h-4 text-red-400" />
-                    </button>
+                  
+                  <h3 className="text-lg font-bold text-[#8BAE5A] mb-2">{exercise.name}</h3>
+                  <p className="text-[#B6C948] text-sm mb-4">
+                    {exercise.instructions.length > 100 
+                      ? `${exercise.instructions.substring(0, 100)}...` 
+                      : exercise.instructions}
+                  </p>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[#B6C948] text-sm">Primaire Spiergroep</span>
+                      <span className="text-[#8BAE5A] font-semibold">{exercise.primary_muscle}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[#B6C948] text-sm">Materiaal</span>
+                      <span className="text-[#8BAE5A] font-semibold">{exercise.equipment}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[#B6C948] text-sm">Niveau</span>
+                      <span className="text-[#8BAE5A] font-semibold">{exercise.difficulty}</span>
+                    </div>
                   </div>
-                </div>
-                
-                <h3 className="text-lg font-bold text-[#8BAE5A] mb-2">{exercise.name}</h3>
-                <p className="text-[#B6C948] text-sm mb-4">{exercise.instructions.substring(0, 100)}...</p>
-                
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[#B6C948] text-sm">Primaire Spiergroep</span>
-                    <span className="text-[#8BAE5A] font-semibold">{exercise.primaryMuscle}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[#B6C948] text-sm">Materiaal</span>
-                    <span className="text-[#8BAE5A] font-semibold">{exercise.equipment}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[#B6C948] text-sm">Niveau</span>
-                    <span className="text-[#8BAE5A] font-semibold">{exercise.difficulty}</span>
-                  </div>
-                </div>
 
-                <div className="mt-4">
-                  <div className="flex flex-wrap gap-1">
-                    {exercise.secondaryMuscles.map((muscle, index) => (
-                      <span key={index} className="px-2 py-1 rounded-full text-xs bg-[#181F17] text-[#B6C948]">
-                        {muscle}
-                      </span>
-                    ))}
+                  <div className="mt-4">
+                    <div className="flex flex-wrap gap-1">
+                      {exercise.secondary_muscles && exercise.secondary_muscles.map((muscle: string, index: number) => (
+                        <span key={index} className="px-2 py-1 rounded-full text-xs bg-[#181F17] text-[#B6C948]">
+                          {muscle}
+                        </span>
+                      ))}
+                    </div>
                   </div>
+
+                  {exercise.worksheet_url && (
+                    <a
+                      href={exercise.worksheet_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-500 underline block mt-2"
+                    >
+                      Download werkblad (PDF)
+                    </a>
+                  )}
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -1121,7 +1285,7 @@ export default function TrainingscentrumBeheer() {
               <PlayIcon className="w-6 h-6 text-[#8BAE5A]" />
             </div>
             <div>
-              <h3 className="text-2xl font-bold text-[#8BAE5A]">{mockExercises.length}</h3>
+              <h3 className="text-2xl font-bold text-[#8BAE5A]">{exercises.length}</h3>
               <p className="text-[#B6C948] text-sm">Oefeningen</p>
             </div>
           </div>
@@ -1159,6 +1323,24 @@ export default function TrainingscentrumBeheer() {
           console.log('Close SchemaBuilder modal');
           setShowNewSchemaModal(false);
         }}
+      />
+
+      {/* Exercise Modal */}
+      <ExerciseModal
+        isOpen={showNewExerciseModal || showEditModal}
+        onClose={() => {
+          setShowNewExerciseModal(false);
+          setShowEditModal(false);
+          setEditingExercise(null);
+        }}
+        onSave={(exerciseData) => {
+          if (editingExercise) {
+            handleUpdateExercise(editingExercise.id, exerciseData);
+          } else {
+            handleAddExercise(exerciseData);
+          }
+        }}
+        exercise={editingExercise}
       />
     </div>
   );
