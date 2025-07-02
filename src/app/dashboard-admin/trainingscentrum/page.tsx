@@ -62,6 +62,7 @@ const mockSchemas = [
 ];
 
 const mockExercises = [
+  // BORST - 5 meest populaire oefeningen
   {
     id: 1,
     name: 'Bench Press',
@@ -74,6 +75,100 @@ const mockExercises = [
   },
   {
     id: 2,
+    name: 'Dumbbell Press',
+    primaryMuscle: 'Borst',
+    secondaryMuscles: ['Triceps', 'Voorste Deltavleugel'],
+    equipment: 'Dumbbell',
+    videoUrl: '/video-placeholder.jpg',
+    instructions: 'Ga liggen met dumbbells op schouderhoogte, duw beide dumbbells gelijktijdig omhoog.',
+    difficulty: 'Beginner'
+  },
+  {
+    id: 3,
+    name: 'Push-ups',
+    primaryMuscle: 'Borst',
+    secondaryMuscles: ['Triceps', 'Voorste Deltavleugel', 'Core'],
+    equipment: 'Bodyweight',
+    videoUrl: '/video-placeholder.jpg',
+    instructions: 'Start in plank positie, laat je lichaam zakken en duw jezelf omhoog.',
+    difficulty: 'Beginner'
+  },
+  {
+    id: 4,
+    name: 'Incline Bench Press',
+    primaryMuscle: 'Borst',
+    secondaryMuscles: ['Triceps', 'Voorste Deltavleugel'],
+    equipment: 'Barbell',
+    videoUrl: '/video-placeholder.jpg',
+    instructions: 'Bench press op een hellende bank (30-45 graden) voor focus op bovenste borst.',
+    difficulty: 'Intermediate'
+  },
+  {
+    id: 5,
+    name: 'Cable Flyes',
+    primaryMuscle: 'Borst',
+    secondaryMuscles: ['Voorste Deltavleugel'],
+    equipment: 'Cable',
+    videoUrl: '/video-placeholder.jpg',
+    instructions: 'Sta tussen de kabels, trek beide kabels naar elkaar toe in een vloeiende beweging.',
+    difficulty: 'Intermediate'
+  },
+
+  // RUG - 5 meest populaire oefeningen
+  {
+    id: 6,
+    name: 'Pull-up',
+    primaryMuscle: 'Rug',
+    secondaryMuscles: ['Biceps', 'Onderarmen'],
+    equipment: 'Bodyweight',
+    videoUrl: '/video-placeholder.jpg',
+    instructions: 'Hang aan de pull-up bar, trek jezelf omhoog tot je kin over de stang is.',
+    difficulty: 'Advanced'
+  },
+  {
+    id: 7,
+    name: 'Deadlift',
+    primaryMuscle: 'Rug',
+    secondaryMuscles: ['Benen', 'Glutes', 'Core'],
+    equipment: 'Barbell',
+    videoUrl: '/video-placeholder.jpg',
+    instructions: 'Pak de stang op, houd je rug recht en til de stang op door je heupen te strekken.',
+    difficulty: 'Advanced'
+  },
+  {
+    id: 8,
+    name: 'Barbell Row',
+    primaryMuscle: 'Rug',
+    secondaryMuscles: ['Biceps', 'Onderarmen'],
+    equipment: 'Barbell',
+    videoUrl: '/video-placeholder.jpg',
+    instructions: 'Buig voorover, trek de stang naar je onderbuik terwijl je je ellebogen dicht bij je lichaam houdt.',
+    difficulty: 'Intermediate'
+  },
+  {
+    id: 9,
+    name: 'Lat Pulldown',
+    primaryMuscle: 'Rug',
+    secondaryMuscles: ['Biceps', 'Onderarmen'],
+    equipment: 'Machine',
+    videoUrl: '/video-placeholder.jpg',
+    instructions: 'Trek de stang naar je borst terwijl je je schouderbladen naar elkaar toe trekt.',
+    difficulty: 'Beginner'
+  },
+  {
+    id: 10,
+    name: 'Seated Cable Row',
+    primaryMuscle: 'Rug',
+    secondaryMuscles: ['Biceps', 'Onderarmen'],
+    equipment: 'Cable',
+    videoUrl: '/video-placeholder.jpg',
+    instructions: 'Zit rechtop, trek de handgrepen naar je buik terwijl je je rug recht houdt.',
+    difficulty: 'Beginner'
+  },
+
+  // BENEN - 5 meest populaire oefeningen
+  {
+    id: 11,
     name: 'Squat',
     primaryMuscle: 'Benen',
     secondaryMuscles: ['Glutes', 'Core'],
@@ -83,14 +178,252 @@ const mockExercises = [
     difficulty: 'Beginner'
   },
   {
-    id: 3,
-    name: 'Pull-up',
-    primaryMuscle: 'Rug',
-    secondaryMuscles: ['Biceps', 'Onderarmen'],
+    id: 12,
+    name: 'Deadlift',
+    primaryMuscle: 'Benen',
+    secondaryMuscles: ['Rug', 'Glutes', 'Core'],
+    equipment: 'Barbell',
+    videoUrl: '/video-placeholder.jpg',
+    instructions: 'Pak de stang op, houd je rug recht en til de stang op door je heupen te strekken.',
+    difficulty: 'Advanced'
+  },
+  {
+    id: 13,
+    name: 'Leg Press',
+    primaryMuscle: 'Benen',
+    secondaryMuscles: ['Glutes'],
+    equipment: 'Machine',
+    videoUrl: '/video-placeholder.jpg',
+    instructions: 'Zit in de machine, duw het platform weg met je voeten en laat gecontroleerd zakken.',
+    difficulty: 'Beginner'
+  },
+  {
+    id: 14,
+    name: 'Lunges',
+    primaryMuscle: 'Benen',
+    secondaryMuscles: ['Glutes', 'Core'],
+    equipment: 'Dumbbell',
+    videoUrl: '/video-placeholder.jpg',
+    instructions: 'Stap naar voren, zak door beide knieën en duw jezelf terug naar de startpositie.',
+    difficulty: 'Beginner'
+  },
+  {
+    id: 15,
+    name: 'Romanian Deadlift',
+    primaryMuscle: 'Benen',
+    secondaryMuscles: ['Rug', 'Glutes'],
+    equipment: 'Barbell',
+    videoUrl: '/video-placeholder.jpg',
+    instructions: 'Houd je benen recht, buig voorover en laat de stang langs je benen zakken.',
+    difficulty: 'Intermediate'
+  },
+
+  // SCHOUDERS - 5 meest populaire oefeningen
+  {
+    id: 16,
+    name: 'Overhead Press',
+    primaryMuscle: 'Schouders',
+    secondaryMuscles: ['Triceps', 'Core'],
+    equipment: 'Barbell',
+    videoUrl: '/video-placeholder.jpg',
+    instructions: 'Duw de stang van schouderhoogte omhoog tot je armen volledig gestrekt zijn.',
+    difficulty: 'Intermediate'
+  },
+  {
+    id: 17,
+    name: 'Dumbbell Shoulder Press',
+    primaryMuscle: 'Schouders',
+    secondaryMuscles: ['Triceps'],
+    equipment: 'Dumbbell',
+    videoUrl: '/video-placeholder.jpg',
+    instructions: 'Duw beide dumbbells gelijktijdig omhoog vanaf schouderhoogte.',
+    difficulty: 'Beginner'
+  },
+  {
+    id: 18,
+    name: 'Lateral Raises',
+    primaryMuscle: 'Schouders',
+    secondaryMuscles: ['Trapezius'],
+    equipment: 'Dumbbell',
+    videoUrl: '/video-placeholder.jpg',
+    instructions: 'Hef beide dumbbells zijwaarts omhoog tot schouderhoogte.',
+    difficulty: 'Beginner'
+  },
+  {
+    id: 19,
+    name: 'Front Raises',
+    primaryMuscle: 'Schouders',
+    secondaryMuscles: ['Voorste Deltavleugel'],
+    equipment: 'Dumbbell',
+    videoUrl: '/video-placeholder.jpg',
+    instructions: 'Hef beide dumbbells voorwaarts omhoog tot schouderhoogte.',
+    difficulty: 'Beginner'
+  },
+  {
+    id: 20,
+    name: 'Upright Rows',
+    primaryMuscle: 'Schouders',
+    secondaryMuscles: ['Trapezius', 'Biceps'],
+    equipment: 'Barbell',
+    videoUrl: '/video-placeholder.jpg',
+    instructions: 'Trek de stang omhoog langs je lichaam tot onder je kin.',
+    difficulty: 'Intermediate'
+  },
+
+  // ARMEN - 5 meest populaire oefeningen
+  {
+    id: 21,
+    name: 'Bicep Curl',
+    primaryMuscle: 'Armen',
+    secondaryMuscles: ['Onderarmen'],
+    equipment: 'Dumbbell',
+    videoUrl: '/video-placeholder.jpg',
+    instructions: 'Hef de dumbbells omhoog door je ellebogen te buigen, houd je bovenarmen stil.',
+    difficulty: 'Beginner'
+  },
+  {
+    id: 22,
+    name: 'Tricep Dip',
+    primaryMuscle: 'Armen',
+    secondaryMuscles: ['Borst', 'Schouders'],
     equipment: 'Bodyweight',
     videoUrl: '/video-placeholder.jpg',
-    instructions: 'Hang aan de pull-up bar, trek jezelf omhoog tot je kin over de stang is.',
+    instructions: 'Laat je lichaam zakken door je ellebogen te buigen en duw jezelf omhoog.',
+    difficulty: 'Intermediate'
+  },
+  {
+    id: 23,
+    name: 'Hammer Curl',
+    primaryMuscle: 'Armen',
+    secondaryMuscles: ['Onderarmen'],
+    equipment: 'Dumbbell',
+    videoUrl: '/video-placeholder.jpg',
+    instructions: 'Hef de dumbbells omhoog met je handpalmen naar elkaar toe gericht.',
+    difficulty: 'Beginner'
+  },
+  {
+    id: 24,
+    name: 'Tricep Pushdown',
+    primaryMuscle: 'Armen',
+    secondaryMuscles: [],
+    equipment: 'Cable',
+    videoUrl: '/video-placeholder.jpg',
+    instructions: 'Duw de kabel naar beneden door je ellebogen te strekken.',
+    difficulty: 'Beginner'
+  },
+  {
+    id: 25,
+    name: 'Preacher Curl',
+    primaryMuscle: 'Armen',
+    secondaryMuscles: ['Onderarmen'],
+    equipment: 'Barbell',
+    videoUrl: '/video-placeholder.jpg',
+    instructions: 'Voer bicep curls uit met je armen ondersteund op de preacher bank.',
+    difficulty: 'Intermediate'
+  },
+
+  // CORE - 5 meest populaire oefeningen
+  {
+    id: 26,
+    name: 'Plank',
+    primaryMuscle: 'Core',
+    secondaryMuscles: ['Schouders', 'Glutes'],
+    equipment: 'Bodyweight',
+    videoUrl: '/video-placeholder.jpg',
+    instructions: 'Houd je lichaam in een rechte lijn, ondersteund door je onderarmen en tenen.',
+    difficulty: 'Beginner'
+  },
+  {
+    id: 27,
+    name: 'Crunches',
+    primaryMuscle: 'Core',
+    secondaryMuscles: [],
+    equipment: 'Bodyweight',
+    videoUrl: '/video-placeholder.jpg',
+    instructions: 'Krul je bovenlichaam omhoog terwijl je je voeten op de grond houdt.',
+    difficulty: 'Beginner'
+  },
+  {
+    id: 28,
+    name: 'Russian Twist',
+    primaryMuscle: 'Core',
+    secondaryMuscles: ['Obliques'],
+    equipment: 'Dumbbell',
+    videoUrl: '/video-placeholder.jpg',
+    instructions: 'Draai je bovenlichaam van links naar rechts terwijl je je voeten van de grond houdt.',
+    difficulty: 'Intermediate'
+  },
+  {
+    id: 29,
+    name: 'Mountain Climbers',
+    primaryMuscle: 'Core',
+    secondaryMuscles: ['Schouders', 'Benen'],
+    equipment: 'Bodyweight',
+    videoUrl: '/video-placeholder.jpg',
+    instructions: 'Wissel snel je knieën af terwijl je in plank positie blijft.',
+    difficulty: 'Intermediate'
+  },
+  {
+    id: 30,
+    name: 'Leg Raises',
+    primaryMuscle: 'Core',
+    secondaryMuscles: ['Heupflexoren'],
+    equipment: 'Bodyweight',
+    videoUrl: '/video-placeholder.jpg',
+    instructions: 'Hef je benen omhoog terwijl je op je rug ligt, houd je onderrug op de grond.',
+    difficulty: 'Intermediate'
+  },
+
+  // GLUTES - 5 meest populaire oefeningen
+  {
+    id: 31,
+    name: 'Hip Thrust',
+    primaryMuscle: 'Glutes',
+    secondaryMuscles: ['Benen', 'Core'],
+    equipment: 'Barbell',
+    videoUrl: '/video-placeholder.jpg',
+    instructions: 'Leun tegen een bank, plaats de stang op je heupen en duw je heupen omhoog.',
+    difficulty: 'Intermediate'
+  },
+  {
+    id: 32,
+    name: 'Glute Bridge',
+    primaryMuscle: 'Glutes',
+    secondaryMuscles: ['Benen', 'Core'],
+    equipment: 'Bodyweight',
+    videoUrl: '/video-placeholder.jpg',
+    instructions: 'Lig op je rug, buig je knieën en duw je heupen omhoog.',
+    difficulty: 'Beginner'
+  },
+  {
+    id: 33,
+    name: 'Donkey Kicks',
+    primaryMuscle: 'Glutes',
+    secondaryMuscles: ['Benen'],
+    equipment: 'Bodyweight',
+    videoUrl: '/video-placeholder.jpg',
+    instructions: 'Op handen en knieën, schop je been omhoog en naar achteren.',
+    difficulty: 'Beginner'
+  },
+  {
+    id: 34,
+    name: 'Bulgarian Split Squat',
+    primaryMuscle: 'Glutes',
+    secondaryMuscles: ['Benen', 'Core'],
+    equipment: 'Dumbbell',
+    videoUrl: '/video-placeholder.jpg',
+    instructions: 'Plaats je achterste voet op een verhoging en voer squats uit met je voorste been.',
     difficulty: 'Advanced'
+  },
+  {
+    id: 35,
+    name: 'Cable Kickback',
+    primaryMuscle: 'Glutes',
+    secondaryMuscles: ['Benen'],
+    equipment: 'Cable',
+    videoUrl: '/video-placeholder.jpg',
+    instructions: 'Schop je been naar achteren terwijl je voorover buigt en de kabel vasthoudt.',
+    difficulty: 'Beginner'
   }
 ];
 
