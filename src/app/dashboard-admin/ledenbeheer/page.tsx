@@ -58,6 +58,7 @@ export default function Ledenbeheer() {
     async function fetchMembers() {
       setLoadingMembers(true);
       try {
+        console.log('Fetching members from database...');
         const { data, error } = await supabase
           .from('users')
           .select('*')
@@ -75,7 +76,16 @@ export default function Ledenbeheer() {
           });
         } else if (data) {
           console.log('Fetched members:', data.length, data);
+          console.log('Member details:', data.map(m => ({
+            id: m.id,
+            email: m.email,
+            full_name: m.full_name,
+            status: m.status,
+            created_at: m.created_at
+          })));
           setAllMembers(data);
+        } else {
+          console.log('No data returned from query');
         }
       } catch (err) {
         console.error('Exception fetching members:', err);
