@@ -57,12 +57,39 @@ export default function Ledenbeheer() {
   useEffect(() => {
     async function fetchMembers() {
       setLoadingMembers(true);
-      const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .order('created_at', { ascending: false });
-      if (data) setAllMembers(data);
-      setLoadingMembers(false);
+      try {
+        const { data, error } = await supabase
+          .from('users')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        if (error) {
+          console.error('Error fetching members:', error);
+          toast.error('Fout bij het laden van leden', {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true
+          });
+        } else if (data) {
+          console.log('Fetched members:', data.length, data);
+          setAllMembers(data);
+        }
+      } catch (err) {
+        console.error('Exception fetching members:', err);
+        toast.error('Fout bij het laden van leden', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true
+        });
+      } finally {
+        setLoadingMembers(false);
+      }
     }
     fetchMembers();
   }, []);
@@ -231,6 +258,9 @@ export default function Ledenbeheer() {
           <span className="text-[#8BAE5A] font-semibold">
             {filteredMembers.length} van {allMembers.length} leden
           </span>
+          {loadingMembers && (
+            <span className="text-[#B6C948] text-sm">Laden...</span>
+          )}
         </div>
       </div>
 
@@ -288,27 +318,50 @@ export default function Ledenbeheer() {
 
       {/* Members Table */}
       <div className="bg-[#232D1A] rounded-2xl border border-[#3A4D23] overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-[#181F17] border-b border-[#3A4D23]">
-              <tr>
-                <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Lid</th>
-                <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">E-mail</th>
-                <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Rang</th>
-                <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Status</th>
-                <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Lid sinds</th>
-                <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Laatste activiteit</th>
-                <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Posts</th>
-                <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Badges</th>
-                <th className="px-6 py-4 text-center text-[#8BAE5A] font-semibold">Acties</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#3A4D23]">
-              {currentMembers.map((member) => (
+        {loadingMembers ? (
+          <div className="p-8 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
+            <p className="text-[#B6C948]">Leden laden...</p>
+          </div>
+        ) : allMembers.length === 0 ? (
+          <div className="p-8 text-center">
+            <UserIcon className="w-12 h-12 text-[#8BAE5A]/50 mx-auto mb-4" />
+            <p className="text-[#B6C948] text-lg mb-2">Geen leden gevonden</p>
+            <p className="text-[#B6C948]/70 text-sm">Er zijn nog geen gebruikers geregistreerd in het systeem.</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-[#181F17] border-b border-[#3A4D23]">
+                <tr>
+                  <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Lid</th>
+                  <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">E-mail</th>
+                  <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Rang</th>
+                  <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Status</th>
+                  <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Lid sinds</th>
+                  <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Laatste activiteit</th>
+                  <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Posts</th>
+                  <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Badges</th>
+                  <th className="px-6 py-4 text-center text-[#8BAE5A] font-semibold">Acties</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#3A4D23]">
+                {currentMembers.map((member) => (
                 <tr key={member.id} className="hover:bg-[#181F17] transition-colors duration-200">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-[#8BAE5A]/20 flex items-center justify-center">
+                      {member.avatar_url ? (
+                        <img 
+                          src={member.avatar_url} 
+                          alt={member.full_name}
+                          className="w-10 h-10 rounded-full object-cover border-2 border-[#8BAE5A]/20"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                            e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                          }}
+                        />
+                      ) : null}
+                      <div className={`w-10 h-10 rounded-full bg-[#8BAE5A]/20 flex items-center justify-center ${member.avatar_url ? 'hidden' : ''}`}>
                         <UserIcon className="w-5 h-5 text-[#8BAE5A]" />
                       </div>
                       <div>
@@ -399,33 +452,36 @@ export default function Ledenbeheer() {
             </tbody>
           </table>
         </div>
+        )}
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-between">
-        <div className="text-[#B6C948] text-sm">
-          Toon {filteredMembers.length} van {allMembers.length} leden
+      {allMembers.length > 0 && (
+        <div className="flex items-center justify-between">
+          <div className="text-[#B6C948] text-sm">
+            Toon {filteredMembers.length} van {allMembers.length} leden
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="px-4 py-2 rounded-xl bg-[#232D1A] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#181F17] transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Vorige
+            </button>
+            <span className="px-4 py-2 text-[#8BAE5A] font-semibold">
+              {currentPage} van {totalPages}
+            </span>
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 rounded-xl bg-[#232D1A] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#181F17] transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Volgende
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-            className="px-4 py-2 rounded-xl bg-[#232D1A] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#181F17] transition disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Vorige
-          </button>
-          <span className="px-4 py-2 text-[#8BAE5A] font-semibold">
-            {currentPage} van {totalPages}
-          </span>
-          <button
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className="px-4 py-2 rounded-xl bg-[#232D1A] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#181F17] transition disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Volgende
-          </button>
-        </div>
-      </div>
+      )}
 
       {/* Edit User Modal */}
       {showEditModal && editingMember && (
@@ -487,6 +543,37 @@ export default function Ledenbeheer() {
               {/* Tab 1: Profielgegevens */}
               {activeTab === 'profile' && (
                 <div className="space-y-6">
+                  {/* Profile Photo Display */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Profielfoto
+                    </label>
+                    <div className="flex items-center gap-4">
+                      {editingMember.avatar_url ? (
+                        <img 
+                          src={editingMember.avatar_url} 
+                          alt={editingMember.full_name}
+                          className="w-16 h-16 rounded-full object-cover border-2 border-[#8BAE5A]/20"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                            e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                          }}
+                        />
+                      ) : null}
+                      <div className={`w-16 h-16 rounded-full bg-[#8BAE5A]/20 flex items-center justify-center ${editingMember.avatar_url ? 'hidden' : ''}`}>
+                        <UserIcon className="w-8 h-8 text-[#8BAE5A]" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-[#B6C948] text-sm">
+                          {editingMember.avatar_url ? 'Profielfoto geüpload' : 'Geen profielfoto'}
+                        </p>
+                        <p className="text-gray-500 text-xs">
+                          {editingMember.avatar_url ? 'Foto wordt automatisch geladen van het profiel' : 'Gebruiker heeft nog geen profielfoto geüpload'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
                       Volledige Naam
@@ -695,6 +782,7 @@ export default function Ledenbeheer() {
           'Actieve leden': allMembers.filter(m => m.status === 'active').length,
           'Inactieve leden': allMembers.filter(m => m.status === 'inactive').length,
           'Geschorste leden': allMembers.filter(m => m.status === 'suspended').length,
+          'Leden met profielfoto': allMembers.filter(m => m.avatar_url).length,
           'Huidige pagina': currentPage,
           'Leden per pagina': itemsPerPage,
           'Zoekterm': searchTerm,
@@ -704,11 +792,21 @@ export default function Ledenbeheer() {
             rank: selectedRank,
             forumStatus: selectedRank
           },
+          'Leden details': allMembers.map(m => ({
+            id: m.id,
+            name: m.full_name,
+            email: m.email,
+            status: m.status,
+            rank: m.rank,
+            hasAvatar: !!m.avatar_url,
+            created: m.created_at
+          })),
           'Bewerkte lid': editingMember ? {
             id: editingMember.id,
             name: editingMember.full_name,
             email: editingMember.email,
-            status: editingMember.status
+            status: editingMember.status,
+            avatar_url: editingMember.avatar_url
           } : null
         }}
         title="Ledenbeheer Debug Info"
