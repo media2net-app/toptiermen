@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase';
 import { DocumentTextIcon, TrashIcon, CloudArrowUpIcon } from '@heroicons/react/24/outline';
 
 interface PDFUploadProps {
-  currentPDFUrl?: string;
+  currentPDFUrl?: string | null;
   onPDFUploaded: (url: string | null) => void;
 }
 

@@ -33,7 +33,7 @@ export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: Exe
     video_url: '',
     instructions: '',
     difficulty: '',
-    worksheet_url: ''
+    worksheet_url: '' as string | null
   });
 
   const [newSecondaryMuscle, setNewSecondaryMuscle] = useState('');
@@ -48,7 +48,7 @@ export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: Exe
         video_url: exercise.video_url || '',
         instructions: exercise.instructions || '',
         difficulty: exercise.difficulty || '',
-        worksheet_url: exercise.worksheet_url || ''
+        worksheet_url: exercise.worksheet_url || null
       });
     } else {
       setFormData({
@@ -59,7 +59,7 @@ export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: Exe
         video_url: '',
         instructions: '',
         difficulty: '',
-        worksheet_url: ''
+        worksheet_url: null
       });
     }
   }, [exercise, isOpen]);
