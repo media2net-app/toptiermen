@@ -396,14 +396,14 @@ export default function Ledenbeheer() {
                   </td>
                   <td className="px-6 py-4">
                     <span className="text-[#B6C948] text-sm">
-                      {new Date(member.last_login).toLocaleDateString('nl-NL')}
+                      {member.last_login ? new Date(member.last_login).toLocaleDateString('nl-NL') : 'Niet beschikbaar'}
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-[#8BAE5A] font-semibold">{member.posts}</span>
+                    <span className="text-[#8BAE5A] font-semibold">{member.posts || 0}</span>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-[#8BAE5A] font-semibold">{member.badges}</span>
+                    <span className="text-[#8BAE5A] font-semibold">{member.badges || 0}</span>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-center">
@@ -711,20 +711,27 @@ export default function Ledenbeheer() {
                   <div>
                     <h3 className="text-lg font-medium text-white mb-4">Recente Activiteit</h3>
                     <div className="space-y-3">
-                      {editingMember.recent_activity.map((activity: any, index: number) => {
-                        const ActivityIcon = getActivityIcon(activity.type);
-                        return (
-                          <div key={index} className="flex items-center gap-3 p-3 bg-[#181F17] rounded-lg">
-                            <ActivityIcon className="w-5 h-5 text-[#8BAE5A]" />
-                            <div className="flex-1">
-                              <p className="text-white text-sm">{activity.description}</p>
-                              <p className="text-[#B6C948] text-xs">
-                                {new Date(activity.created_at).toLocaleString('nl-NL')}
-                              </p>
+                      {editingMember.recent_activity && editingMember.recent_activity.length > 0 ? (
+                        editingMember.recent_activity.map((activity: any, index: number) => {
+                          const ActivityIcon = getActivityIcon(activity.type);
+                          return (
+                            <div key={index} className="flex items-center gap-3 p-3 bg-[#181F17] rounded-lg">
+                              <ActivityIcon className="w-5 h-5 text-[#8BAE5A]" />
+                              <div className="flex-1">
+                                <p className="text-white text-sm">{activity.description}</p>
+                                <p className="text-[#B6C948] text-xs">
+                                  {new Date(activity.created_at).toLocaleString('nl-NL')}
+                                </p>
+                              </div>
                             </div>
-                          </div>
-                        );
-                      })}
+                          );
+                        })
+                      ) : (
+                        <div className="p-4 bg-[#181F17] rounded-lg text-center">
+                          <ClockIcon className="w-8 h-8 text-[#8BAE5A]/50 mx-auto mb-2" />
+                          <p className="text-[#B6C948] text-sm">Geen recente activiteit</p>
+                        </div>
+                      )}
                     </div>
                   </div>
 
