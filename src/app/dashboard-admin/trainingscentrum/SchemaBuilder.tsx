@@ -1,634 +1,705 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
-  XMarkIcon,
-  PlusIcon,
-  PencilIcon,
+  XMarkIcon, 
+  PlusIcon, 
   TrashIcon,
-  ArrowLeftIcon,
-  ArrowRightIcon,
-  CheckIcon,
-  PlayIcon,
-  ClockIcon,
+  MagnifyingGlassIcon,
   ArrowsUpDownIcon
 } from '@heroicons/react/24/outline';
-
-interface TrainingDay {
-  id: number;
-  name: string;
-  exercises: Exercise[];
-}
+import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
+import { supabase } from '@/lib/supabase';
+import { toast } from 'react-toastify';
 
 interface Exercise {
   id: number;
   name: string;
+  primary_muscle: string;
+  secondary_muscles: string[];
+  equipment: string;
+  difficulty: string;
+  video_url?: string;
+}
+
+interface SchemaExercise {
+  id?: number;
+  exercise_id?: number;
+  exercise_name: string;
   sets: number;
   reps: string;
-  restTime: string;
-  order: number;
+  rest_time: number;
+  order_index: number;
+  exercise?: Exercise;
+}
+
+interface TrainingDay {
+  id?: number;
+  schema_id?: number;
+  day_number: number;
+  name: string;
+  description?: string;
+  exercises: SchemaExercise[];
+}
+
+interface TrainingSchema {
+  id?: number;
+  name: string;
+  description: string;
+  category: 'Gym' | 'Outdoor' | 'Home';
+  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+  days: TrainingDay[];
+  status: 'concept' | 'gepubliceerd';
 }
 
 interface SchemaBuilderProps {
   isOpen: boolean;
   onClose: () => void;
-  schema?: any; // For editing existing schema
+  schema?: TrainingSchema;
+  onSave: (schema: TrainingSchema) => void;
 }
 
-const categories = ['Gym', 'Outdoor', 'Bodyweight'];
-const mockExercises = [
-  { id: 1, name: 'Bench Press', muscle: 'Borst' },
-  { id: 2, name: 'Squat', muscle: 'Benen' },
-  { id: 3, name: 'Pull-up', muscle: 'Rug' },
-  { id: 4, name: 'Deadlift', muscle: 'Rug' },
-  { id: 5, name: 'Overhead Press', muscle: 'Schouders' },
-  { id: 6, name: 'Bicep Curl', muscle: 'Armen' },
-  { id: 7, name: 'Tricep Dip', muscle: 'Armen' },
-  { id: 8, name: 'Plank', muscle: 'Core' },
-];
-
-export default function SchemaBuilder({ isOpen, onClose, schema }: SchemaBuilderProps) {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [templateStep, setTemplateStep] = useState(true);
-  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
-  const [schemaDetails, setSchemaDetails] = useState({
-    name: schema?.name || '',
-    description: schema?.description || '',
-    category: schema?.category || 'Gym',
-    coverImage: schema?.coverImage || ''
+export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: SchemaBuilderProps) {
+  const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedMuscle, setSelectedMuscle] = useState<string>('');
+  const [formData, setFormData] = useState<TrainingSchema>({
+    name: '',
+    description: '',
+    category: 'Gym',
+    difficulty: 'Beginner',
+    days: [],
+    status: 'concept'
   });
-  const [trainingDays, setTrainingDays] = useState<TrainingDay[]>(
-    schema?.days || [
-      { id: 1, name: 'Dag 1', exercises: [] },
-      { id: 2, name: 'Dag 2', exercises: [] },
-      { id: 3, name: 'Dag 3', exercises: [] }
-    ]
-  );
-  const [selectedDay, setSelectedDay] = useState<number | null>(null);
-  const [showExerciseSearch, setShowExerciseSearch] = useState(false);
-  const [exerciseSearchTerm, setExerciseSearchTerm] = useState('');
 
-  const totalSteps = 3;
+  useEffect(() => {
+    if (isOpen) {
+      fetchExercises();
+      if (schema) {
+        // Transform database schema to form data
+        const transformedSchema: TrainingSchema = {
+          id: schema.id,
+          name: schema.name,
+          description: schema.description,
+          category: schema.category,
+          difficulty: schema.difficulty,
+          days: schema.days?.map((day: any) => ({
+            id: day.id,
+            schema_id: day.schema_id,
+            day_number: day.day_number,
+            name: day.name,
+            description: day.description,
+            exercises: day.exercises?.map((exercise: any) => ({
+              id: exercise.id,
+              exercise_id: exercise.exercise_id,
+              exercise_name: exercise.exercise_name,
+              sets: exercise.sets,
+              reps: exercise.reps,
+              rest_time: exercise.rest_time,
+              order_index: exercise.order_index
+            })) || []
+          })) || [],
+          status: schema.status
+        };
+        setFormData(transformedSchema);
+      } else {
+        setFormData({
+          name: '',
+          description: '',
+          category: 'Gym',
+          difficulty: 'Beginner',
+          days: [],
+          status: 'concept'
+        });
+      }
+    }
+  }, [isOpen, schema]);
 
-  const handleNext = () => {
-    if (currentStep < totalSteps) {
-      setCurrentStep(currentStep + 1);
+  const fetchExercises = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('exercises')
+        .select('*')
+        .order('name');
+
+      if (error) throw error;
+      setExercises(data || []);
+    } catch (error) {
+      console.error('Error fetching exercises:', error);
+      toast.error('Fout bij het ophalen van oefeningen');
     }
   };
 
-  const handlePrevious = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
+  const filteredExercises = exercises.filter(exercise => {
+    const matchesSearch = exercise.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesMuscle = !selectedMuscle || exercise.primary_muscle === selectedMuscle;
+    return matchesSearch && matchesMuscle;
+  });
 
-  const addTrainingDay = () => {
+  const muscleGroups = Array.from(new Set(exercises.map(e => e.primary_muscle))).sort();
+
+  const addDay = () => {
     const newDay: TrainingDay = {
-      id: Date.now(),
-      name: `Dag ${trainingDays.length + 1}`,
+      day_number: formData.days.length + 1,
+      name: `Dag ${formData.days.length + 1}`,
+      description: '',
       exercises: []
     };
-    setTrainingDays([...trainingDays, newDay]);
+    setFormData(prev => ({
+      ...prev,
+      days: [...prev.days, newDay]
+    }));
   };
 
-  const removeTrainingDay = (dayId: number) => {
-    setTrainingDays(trainingDays.filter(day => day.id !== dayId));
+  const removeDay = (dayIndex: number) => {
+    setFormData(prev => ({
+      ...prev,
+      days: prev.days.filter((_, index) => index !== dayIndex)
+    }));
   };
 
-  const updateDayName = (dayId: number, newName: string) => {
-    setTrainingDays(trainingDays.map(day => 
-      day.id === dayId ? { ...day, name: newName } : day
-    ));
-  };
-
-  const addExerciseToDay = (dayId: number, exercise: any) => {
-    const newExercise: Exercise = {
-      id: Date.now(),
-      name: exercise.name,
+  const addExerciseToDay = (dayIndex: number, exercise: Exercise) => {
+    const newExercise: SchemaExercise = {
+      exercise_id: exercise.id,
+      exercise_name: exercise.name,
       sets: 3,
       reps: '8-12',
-      restTime: '90 sec',
-      order: trainingDays.find(day => day.id === dayId)?.exercises.length || 0
+      rest_time: 90,
+      order_index: formData.days[dayIndex].exercises.length,
+      exercise: exercise
     };
 
-    setTrainingDays(trainingDays.map(day => 
-      day.id === dayId 
-        ? { ...day, exercises: [...day.exercises, newExercise] }
-        : day
-    ));
-    setShowExerciseSearch(false);
-    setExerciseSearchTerm('');
+    setFormData(prev => ({
+      ...prev,
+      days: prev.days.map((day, index) => 
+        index === dayIndex 
+          ? { ...day, exercises: [...day.exercises, newExercise] }
+          : day
+      )
+    }));
   };
 
-  const removeExerciseFromDay = (dayId: number, exerciseId: number) => {
-    setTrainingDays(trainingDays.map(day => 
-      day.id === dayId 
-        ? { ...day, exercises: day.exercises.filter(ex => ex.id !== exerciseId) }
-        : day
-    ));
+  const removeExerciseFromDay = (dayIndex: number, exerciseIndex: number) => {
+    setFormData(prev => ({
+      ...prev,
+      days: prev.days.map((day, index) => 
+        index === dayIndex 
+          ? { ...day, exercises: day.exercises.filter((_, exIndex) => exIndex !== exerciseIndex) }
+          : day
+      )
+    }));
   };
 
-  const updateExerciseDetails = (dayId: number, exerciseId: number, field: string, value: any) => {
-    setTrainingDays(trainingDays.map(day => 
-      day.id === dayId 
-        ? { 
-            ...day, 
-            exercises: day.exercises.map(ex => 
-              ex.id === exerciseId 
-                ? { ...ex, [field]: value }
-                : ex
-            )
-          }
-        : day
-    ));
+  const updateExerciseInDay = (dayIndex: number, exerciseIndex: number, field: keyof SchemaExercise, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      days: prev.days.map((day, index) => 
+        index === dayIndex 
+          ? {
+              ...day,
+              exercises: day.exercises.map((exercise, exIndex) => 
+                exIndex === exerciseIndex 
+                  ? { ...exercise, [field]: value }
+                  : exercise
+              )
+            }
+          : day
+      )
+    }));
   };
 
-  const filteredExercises = mockExercises.filter(exercise =>
-    exercise.name.toLowerCase().includes(exerciseSearchTerm.toLowerCase())
-  );
-
-  const handleSave = () => {
-    // Here you would save the schema to your backend
-    console.log('Saving schema:', { schemaDetails, trainingDays });
-    // Reset states when closing
-    setTemplateStep(true);
-    setCurrentStep(1);
-    setSelectedTemplate(null);
-    setSchemaDetails({
-      name: '',
-      description: '',
-      category: 'Gym',
-      coverImage: ''
-    });
-    setTrainingDays([
-      { id: 1, name: 'Dag 1', exercises: [] },
-      { id: 2, name: 'Dag 2', exercises: [] },
-      { id: 3, name: 'Dag 3', exercises: [] }
-    ]);
-    setSelectedDay(null);
-    setShowExerciseSearch(false);
-    setExerciseSearchTerm('');
-    onClose();
+  const updateDay = (dayIndex: number, field: keyof TrainingDay, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      days: prev.days.map((day, index) => 
+        index === dayIndex 
+          ? { ...day, [field]: value }
+          : day
+      )
+    }));
   };
 
-  // Template opties
-  const templates = [
-    {
-      name: 'Push/Pull/Legs',
-      days: [
-        { id: 1, name: 'Dag 1: Push', exercises: [] },
-        { id: 2, name: 'Dag 2: Pull', exercises: [] },
-        { id: 3, name: 'Dag 3: Legs', exercises: [] }
-      ]
-    },
-    {
-      name: 'Upper/Lower Body',
-      days: [
-        { id: 1, name: 'Dag 1: Upper Body', exercises: [] },
-        { id: 2, name: 'Dag 2: Lower Body', exercises: [] }
-      ]
-    },
-    {
-      name: 'Full Body',
-      days: [
-        { id: 1, name: 'Dag 1: Full Body', exercises: [] },
-        { id: 2, name: 'Dag 2: Full Body', exercises: [] },
-        { id: 3, name: 'Dag 3: Full Body', exercises: [] }
-      ]
+  const handleDragEnd = (result: DropResult) => {
+    const { source, destination } = result;
+
+    // Dropped outside the list
+    if (!destination) {
+      return;
     }
-  ];
 
-  // Template keuze stap
-  if (isOpen && templateStep && !schema) {
-    return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-        <div className="bg-[#232D1A] rounded-2xl border border-[#3A4D23] w-full max-w-lg p-8">
-          <h2 className="text-2xl font-bold text-[#8BAE5A] mb-4">Nieuw schema starten</h2>
-          <div className="space-y-4">
-            <button
-              className="w-full px-6 py-4 rounded-xl bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#B6C948] transition"
-              onClick={() => {
-                setTrainingDays([
-                  { id: 1, name: 'Dag 1', exercises: [] }
-                ]);
-                setTemplateStep(false);
-              }}
-            >
-              Start met een leeg schema
-            </button>
-            <div className="text-[#B6C948] text-center font-semibold">of kies een template</div>
-            {templates.map((template) => (
-              <button
-                key={template.name}
-                className="w-full px-6 py-4 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A] transition font-semibold"
-                onClick={() => {
-                  setTrainingDays(template.days);
-                  setSelectedTemplate(template.name);
-                  setTemplateStep(false);
-                }}
-              >
-                {template.name}
-              </button>
-            ))}
-          </div>
-          <button
-            onClick={() => {
-              // Reset states when closing
-              setTemplateStep(true);
-              setCurrentStep(1);
-              setSelectedTemplate(null);
-              setSchemaDetails({
-                name: '',
-                description: '',
-                category: 'Gym',
-                coverImage: ''
+    // Check if dragging from library
+    if (source.droppableId === 'library') {
+      const exerciseId = parseInt(result.draggableId.replace('library-', ''));
+      const exercise = exercises.find(e => e.id === exerciseId);
+      const destDayIndex = parseInt(destination.droppableId);
+      const destExerciseIndex = destination.index;
+
+      if (exercise) {
+        const newExercise: SchemaExercise = {
+          exercise_id: exercise.id,
+          exercise_name: exercise.name,
+          sets: 3,
+          reps: '8-12',
+          rest_time: 90,
+          order_index: destExerciseIndex,
+          exercise: exercise
+        };
+
+        setFormData(prev => ({
+          ...prev,
+          days: prev.days.map((day, index) => {
+            if (index === destDayIndex) {
+              const newExercises = Array.from(day.exercises);
+              newExercises.splice(destExerciseIndex, 0, newExercise);
+              // Update order_index for all exercises
+              newExercises.forEach((ex, exIndex) => {
+                ex.order_index = exIndex;
               });
-              setTrainingDays([
-                { id: 1, name: 'Dag 1', exercises: [] },
-                { id: 2, name: 'Dag 2', exercises: [] },
-                { id: 3, name: 'Dag 3', exercises: [] }
-              ]);
-              setSelectedDay(null);
-              setShowExerciseSearch(false);
-              setExerciseSearchTerm('');
-              onClose();
-            }}
-            className="mt-8 w-full px-6 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A] transition"
-          >
-            Annuleren
-          </button>
-        </div>
-      </div>
-    );
-  }
+              return { ...day, exercises: newExercises };
+            }
+            return day;
+          })
+        }));
+      }
+      return;
+    }
+
+    const sourceDayIndex = parseInt(source.droppableId);
+    const destDayIndex = parseInt(destination.droppableId);
+    const sourceExerciseIndex = source.index;
+    const destExerciseIndex = destination.index;
+
+    // Same day, reorder within the day
+    if (sourceDayIndex === destDayIndex) {
+      const day = formData.days[sourceDayIndex];
+      const newExercises = Array.from(day.exercises);
+      const [removed] = newExercises.splice(sourceExerciseIndex, 1);
+      newExercises.splice(destExerciseIndex, 0, removed);
+
+      // Update order_index for all exercises in this day
+      newExercises.forEach((exercise, index) => {
+        exercise.order_index = index;
+      });
+
+      setFormData(prev => ({
+        ...prev,
+        days: prev.days.map((day, index) => 
+          index === sourceDayIndex 
+            ? { ...day, exercises: newExercises }
+            : day
+        )
+      }));
+    } else {
+      // Different days, move between days
+      const sourceDay = formData.days[sourceDayIndex];
+      const destDay = formData.days[destDayIndex];
+      
+      const sourceExercises = Array.from(sourceDay.exercises);
+      const destExercises = Array.from(destDay.exercises);
+      
+      const [movedExercise] = sourceExercises.splice(sourceExerciseIndex, 1);
+      destExercises.splice(destExerciseIndex, 0, movedExercise);
+
+      // Update order_index for both days
+      sourceExercises.forEach((exercise, index) => {
+        exercise.order_index = index;
+      });
+      destExercises.forEach((exercise, index) => {
+        exercise.order_index = index;
+      });
+
+      setFormData(prev => ({
+        ...prev,
+        days: prev.days.map((day, index) => {
+          if (index === sourceDayIndex) {
+            return { ...day, exercises: sourceExercises };
+          } else if (index === destDayIndex) {
+            return { ...day, exercises: destExercises };
+          }
+          return day;
+        })
+      }));
+    }
+  };
+
+  const handleSave = async () => {
+    if (!formData.name.trim()) {
+      toast.error('Vul een naam in voor het schema');
+      return;
+    }
+
+    if (formData.days.length === 0) {
+      toast.error('Voeg minimaal één dag toe aan het schema');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Save schema
+      const { data: schemaData, error: schemaError } = await supabase
+        .from('training_schemas')
+        .upsert({
+          id: formData.id,
+          name: formData.name,
+          description: formData.description,
+          category: formData.category,
+          difficulty: formData.difficulty,
+          status: formData.status
+        })
+        .select()
+        .single();
+
+      if (schemaError) throw schemaError;
+
+      const schemaId = schemaData.id;
+
+      // Save days
+      for (let i = 0; i < formData.days.length; i++) {
+        const day = formData.days[i];
+        const { data: dayData, error: dayError } = await supabase
+          .from('training_schema_days')
+          .upsert({
+            id: day.id,
+            schema_id: schemaId,
+            day_number: day.day_number,
+            name: day.name,
+            description: day.description
+          })
+          .select()
+          .single();
+
+        if (dayError) throw dayError;
+
+        const dayId = dayData.id;
+
+        // Save exercises for this day
+        for (let j = 0; j < day.exercises.length; j++) {
+          const exercise = day.exercises[j];
+          await supabase
+            .from('training_schema_exercises')
+            .upsert({
+              id: exercise.id,
+              day_id: dayId,
+              exercise_id: exercise.exercise_id,
+              exercise_name: exercise.exercise_name,
+              sets: exercise.sets,
+              reps: exercise.reps,
+              rest_time: exercise.rest_time,
+              order_index: exercise.order_index
+            });
+        }
+      }
+
+      toast.success('Schema succesvol opgeslagen!');
+      onSave({ ...formData, id: schemaId });
+      onClose();
+    } catch (error) {
+      console.error('Error saving schema:', error);
+      toast.error('Fout bij het opslaan van het schema');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-[#232D1A] rounded-2xl border border-[#3A4D23] w-full max-w-4xl max-h-[90vh] overflow-hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-[#3A4D23]">
-          <div>
-            <h2 className="text-2xl font-bold text-[#8BAE5A]">
-              {schema ? 'Bewerk Schema' : 'Nieuw Trainingsschema'}
-            </h2>
-            <p className="text-[#B6C948] mt-1">Stap {currentStep} van {totalSteps}</p>
-          </div>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-[#181F17] rounded-lg w-full max-w-6xl max-h-[90vh] overflow-hidden">
+        <div className="flex items-center justify-between p-6 border-b border-gray-700">
+          <h2 className="text-xl font-bold text-white">
+            {schema ? 'Bewerk Training Schema' : 'Nieuw Training Schema'}
+          </h2>
           <button
-            onClick={() => {
-              // Reset states when closing
-              setTemplateStep(true);
-              setCurrentStep(1);
-              setSelectedTemplate(null);
-              setSchemaDetails({
-                name: '',
-                description: '',
-                category: 'Gym',
-                coverImage: ''
-              });
-              setTrainingDays([
-                { id: 1, name: 'Dag 1', exercises: [] },
-                { id: 2, name: 'Dag 2', exercises: [] },
-                { id: 3, name: 'Dag 3', exercises: [] }
-              ]);
-              setSelectedDay(null);
-              setShowExerciseSearch(false);
-              setExerciseSearchTerm('');
-              onClose();
-            }}
-            className="p-2 rounded-xl hover:bg-[#181F17] transition-colors duration-200"
+            onClick={onClose}
+            className="text-gray-400 hover:text-white"
           >
-            <XMarkIcon className="w-6 h-6 text-[#B6C948]" />
+            <XMarkIcon className="h-6 w-6" />
           </button>
         </div>
 
-        {/* Progress Bar */}
-        <div className="px-6 py-4 bg-[#181F17]">
-          <div className="flex items-center gap-2">
-            {[1, 2, 3].map((step) => (
-              <div key={step} className="flex items-center">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
-                  step <= currentStep 
-                    ? 'bg-[#8BAE5A] text-[#181F17]' 
-                    : 'bg-[#3A4D23] text-[#B6C948]'
-                }`}>
-                  {step < currentStep ? <CheckIcon className="w-4 h-4" /> : step}
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <div className="flex h-[calc(90vh-120px)]">
+            {/* Left side - Schema details and days */}
+            <div className="w-2/3 p-6 overflow-y-auto">
+              {/* Schema details */}
+              <div className="space-y-4 mb-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Schema Naam
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-[#8BAE5A] focus:ring-2"
+                    placeholder="Bijv. Full Body Krachttraining"
+                  />
                 </div>
-                {step < 3 && (
-                  <div className={`w-16 h-1 mx-2 ${
-                    step < currentStep ? 'bg-[#8BAE5A]' : 'bg-[#3A4D23]'
-                  }`} />
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
 
-        {/* Content */}
-        <div className="p-6 overflow-y-auto max-h-[60vh]">
-          {/* Step 1: Schema Details */}
-          {currentStep === 1 && (
-            <div className="space-y-6">
-              <div>
-                <label className="block text-[#8BAE5A] font-semibold mb-2">Naam van het Schema</label>
-                <input
-                  type="text"
-                  value={schemaDetails.name}
-                  onChange={(e) => setSchemaDetails({...schemaDetails, name: e.target.value})}
-                  placeholder="Bijv. Full Body Krachttraining"
-                  className="w-full px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                />
-              </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Beschrijving
+                  </label>
+                  <textarea
+                    value={formData.description}
+                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                    className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-[#8BAE5A] focus:ring-2"
+                    rows={3}
+                    placeholder="Beschrijf het schema..."
+                  />
+                </div>
 
-              <div>
-                <label className="block text-[#8BAE5A] font-semibold mb-2">Omschrijving</label>
-                <textarea
-                  value={schemaDetails.description}
-                  onChange={(e) => setSchemaDetails({...schemaDetails, description: e.target.value})}
-                  placeholder="Beschrijf het doel en de focus van dit trainingsschema..."
-                  rows={4}
-                  className="w-full px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] resize-none"
-                />
-              </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Categorie
+                    </label>
+                    <select
+                      value={formData.category}
+                      onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value as any }))}
+                      className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-[#8BAE5A] focus:ring-2"
+                    >
+                      <option value="Gym">Gym</option>
+                      <option value="Outdoor">Outdoor</option>
+                      <option value="Home">Home</option>
+                    </select>
+                  </div>
 
-              <div>
-                <label className="block text-[#8BAE5A] font-semibold mb-2">Categorie</label>
-                <select
-                  value={schemaDetails.category}
-                  onChange={(e) => setSchemaDetails({...schemaDetails, category: e.target.value})}
-                  className="w-full px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                >
-                  {categories.map(category => (
-                    <option key={category} value={category}>{category}</option>
-                  ))}
-                </select>
-              </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Niveau
+                    </label>
+                    <select
+                      value={formData.difficulty}
+                      onChange={(e) => setFormData(prev => ({ ...prev, difficulty: e.target.value as any }))}
+                      className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-[#8BAE5A] focus:ring-2"
+                    >
+                      <option value="Beginner">Beginner</option>
+                      <option value="Intermediate">Intermediate</option>
+                      <option value="Advanced">Advanced</option>
+                    </select>
+                  </div>
+                </div>
 
-              <div>
-                <label className="block text-[#8BAE5A] font-semibold mb-2">Cover Afbeelding URL</label>
-                <input
-                  type="text"
-                  value={schemaDetails.coverImage}
-                  onChange={(e) => setSchemaDetails({...schemaDetails, coverImage: e.target.value})}
-                  placeholder="https://example.com/image.jpg"
-                  className="w-full px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Step 2: Training Days */}
-          {currentStep === 2 && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold text-[#8BAE5A]">Trainingsdagen Definiëren</h3>
-                <button
-                  onClick={addTrainingDay}
-                  className="px-4 py-2 rounded-xl bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#B6C948] transition-all duration-200 flex items-center gap-2"
-                >
-                  <PlusIcon className="w-4 h-4" />
-                  Trainingsdag Toevoegen
-                </button>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                  <div>
+                    <label className="block text-sm font-medium text-white mb-1">Status</label>
+                    <select
+                      className="w-full rounded-lg border border-gray-700 bg-[#232B1A] text-white p-2 focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                      value={formData.status}
+                      onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as 'concept' | 'gepubliceerd' }))}
+                    >
+                      <option value="concept">Concept</option>
+                      <option value="gepubliceerd">Gepubliceerd</option>
+                    </select>
+                  </div>
+                </div>
               </div>
 
+              {/* Days */}
               <div className="space-y-4">
-                {trainingDays.map((day, index) => (
-                  <div key={day.id} className="bg-[#181F17] rounded-xl p-4 border border-[#3A4D23]">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-white">Training Dagen</h3>
+                  <button
+                    onClick={addDay}
+                    className="flex items-center px-3 py-2 bg-[#8BAE5A] text-[#181F17] rounded-md hover:bg-[#B6C948]"
+                  >
+                    <PlusIcon className="h-4 w-4 mr-2" />
+                    Dag Toevoegen
+                  </button>
+                </div>
+
+                {formData.days.map((day, dayIndex) => (
+                  <div key={dayIndex} className="border border-gray-700 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex-1">
                         <input
                           type="text"
                           value={day.name}
-                          onChange={(e) => updateDayName(day.id, e.target.value)}
-                          className="text-lg font-semibold text-[#8BAE5A] bg-transparent border-none focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] rounded px-2 py-1"
+                          onChange={(e) => updateDay(dayIndex, 'name', e.target.value)}
+                          className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-[#8BAE5A] focus:ring-2"
+                          placeholder="Dag naam"
                         />
-                        <span className="text-[#B6C948] text-sm">{day.exercises.length} oefeningen</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <button className="p-2 rounded-xl hover:bg-[#232D1A] transition-colors duration-200">
-                          <PencilIcon className="w-4 h-4 text-[#B6C948]" />
-                        </button>
-                        {trainingDays.length > 1 && (
-                          <button 
-                            onClick={() => removeTrainingDay(day.id)}
-                            className="p-2 rounded-xl hover:bg-[#232D1A] transition-colors duration-200"
-                          >
-                            <TrashIcon className="w-4 h-4 text-red-400" />
-                          </button>
-                        )}
-                      </div>
+                      <button
+                        onClick={() => removeDay(dayIndex)}
+                        className="ml-2 p-2 text-red-400 hover:text-red-300"
+                      >
+                        <TrashIcon className="h-5 w-5" />
+                      </button>
                     </div>
-                    
-                    {day.exercises.length === 0 ? (
-                      <div className="text-center py-8 text-[#B6C948]">
-                        <PlayIcon className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                        <p>Nog geen oefeningen toegevoegd</p>
-                        <p className="text-sm">Voeg oefeningen toe in de volgende stap</p>
-                      </div>
-                    ) : (
-                      <div className="space-y-2">
-                        {day.exercises.map((exercise, exIndex) => (
-                          <div key={exercise.id} className="flex items-center gap-3 p-3 bg-[#232D1A] rounded-xl">
-                            <span className="text-[#8BAE5A] font-semibold w-8">{exIndex + 1}</span>
-                            <span className="text-[#B6C948] flex-1">{exercise.name}</span>
-                            <span className="text-[#8BAE5A] text-sm">{exercise.sets} sets</span>
-                            <span className="text-[#8BAE5A] text-sm">{exercise.reps}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+
+                    <div className="mb-4">
+                      <textarea
+                        value={day.description || ''}
+                        onChange={(e) => updateDay(dayIndex, 'description', e.target.value)}
+                        className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-[#8BAE5A] focus:ring-2"
+                        rows={2}
+                        placeholder="Dag beschrijving (optioneel)"
+                      />
+                    </div>
+
+                    {/* Exercises in this day */}
+                    <Droppable droppableId={dayIndex.toString()}>
+                      {(provided, snapshot) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.droppableProps}
+                          className={`space-y-2 min-h-[50px] ${snapshot.isDraggingOver ? 'bg-[#8BAE5A]/10 rounded-lg' : ''}`}
+                        >
+                          {day.exercises.map((exercise, exerciseIndex) => (
+                            <Draggable
+                              key={`${dayIndex}-${exerciseIndex}`}
+                              draggableId={`${dayIndex}-${exerciseIndex}`}
+                              index={exerciseIndex}
+                            >
+                              {(provided, snapshot) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  className={`flex items-center space-x-2 p-2 bg-gray-800 rounded ${
+                                    snapshot.isDragging ? 'shadow-lg transform rotate-2' : ''
+                                  }`}
+                                >
+                                  <div
+                                    {...provided.dragHandleProps}
+                                    className="p-1 text-gray-400 hover:text-white cursor-grab active:cursor-grabbing"
+                                  >
+                                    <ArrowsUpDownIcon className="h-4 w-4" />
+                                  </div>
+                                  <div className="flex-1">
+                                    <div className="text-sm font-medium text-white">{exercise.exercise_name}</div>
+                                    <div className="text-xs text-gray-400">{exercise.exercise?.primary_muscle}</div>
+                                  </div>
+                                  <input
+                                    type="number"
+                                    value={exercise.sets}
+                                    onChange={(e) => updateExerciseInDay(dayIndex, exerciseIndex, 'sets', parseInt(e.target.value))}
+                                    className="w-16 px-2 py-1 bg-gray-700 border border-gray-600 rounded text-white text-center"
+                                    placeholder="Sets"
+                                  />
+                                  <input
+                                    type="text"
+                                    value={exercise.reps}
+                                    onChange={(e) => updateExerciseInDay(dayIndex, exerciseIndex, 'reps', e.target.value)}
+                                    className="w-20 px-2 py-1 bg-gray-700 border border-gray-600 rounded text-white text-center"
+                                    placeholder="Reps"
+                                  />
+                                  <input
+                                    type="number"
+                                    value={exercise.rest_time}
+                                    onChange={(e) => updateExerciseInDay(dayIndex, exerciseIndex, 'rest_time', parseInt(e.target.value))}
+                                    className="w-20 px-2 py-1 bg-gray-700 border border-gray-600 rounded text-white text-center"
+                                    placeholder="Rest (s)"
+                                  />
+                                  <button
+                                    onClick={() => removeExerciseFromDay(dayIndex, exerciseIndex)}
+                                    className="p-1 text-red-400 hover:text-red-300"
+                                  >
+                                    <TrashIcon className="h-4 w-4" />
+                                  </button>
+                                </div>
+                              )}
+                            </Draggable>
+                          ))}
+                          {provided.placeholder}
+                        </div>
+                      )}
+                    </Droppable>
                   </div>
                 ))}
               </div>
             </div>
-          )}
 
-          {/* Step 3: Exercise Addition */}
-          {currentStep === 3 && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold text-[#8BAE5A]">Oefeningen Toevoegen</h3>
-                <div className="flex items-center gap-4">
-                  <span className="text-[#B6C948] text-sm">Selecteer een dag om oefeningen toe te voegen:</span>
-                  <select
-                    value={selectedDay || ''}
-                    onChange={(e) => setSelectedDay(Number(e.target.value))}
-                    className="px-4 py-2 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                  >
-                    <option value="">Kies een dag</option>
-                    {trainingDays.map(day => (
-                      <option key={day.id} value={day.id}>{day.name}</option>
-                    ))}
-                  </select>
+            {/* Right side - Exercise library */}
+            <div className="w-1/3 border-l border-gray-700 p-6 overflow-y-auto">
+              <h3 className="text-lg font-semibold text-white mb-4">Oefeningen Bibliotheek</h3>
+              
+              {/* Search and filter */}
+              <div className="space-y-3 mb-4">
+                <div className="relative">
+                  <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-[#8BAE5A] focus:ring-2"
+                    placeholder="Zoek oefeningen..."
+                  />
                 </div>
-              </div>
 
-              {selectedDay && (
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-lg font-semibold text-[#8BAE5A]">
-                      {trainingDays.find(d => d.id === selectedDay)?.name}
-                    </h4>
-                    <button
-                      onClick={() => setShowExerciseSearch(true)}
-                      className="px-4 py-2 rounded-xl bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#B6C948] transition-all duration-200 flex items-center gap-2"
-                    >
-                      <PlusIcon className="w-4 h-4" />
-                      Oefening Toevoegen
-                    </button>
-                  </div>
-
-                  <div className="space-y-3">
-                    {trainingDays.find(d => d.id === selectedDay)?.exercises.map((exercise, index) => (
-                      <div key={exercise.id} className="bg-[#181F17] rounded-xl p-4 border border-[#3A4D23]">
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center gap-3">
-                            <span className="text-[#8BAE5A] font-semibold w-8">{index + 1}</span>
-                            <span className="text-[#B6C948] font-medium">{exercise.name}</span>
-                          </div>
-                          <button
-                            onClick={() => removeExerciseFromDay(selectedDay, exercise.id)}
-                            className="p-2 rounded-xl hover:bg-[#232D1A] transition-colors duration-200"
-                          >
-                            <TrashIcon className="w-4 h-4 text-red-400" />
-                          </button>
-                        </div>
-                        
-                        <div className="grid grid-cols-3 gap-4">
-                          <div>
-                            <label className="block text-[#B6C948] text-sm mb-1">Sets</label>
-                            <input
-                              type="number"
-                              value={exercise.sets}
-                              onChange={(e) => updateExerciseDetails(selectedDay, exercise.id, 'sets', Number(e.target.value))}
-                              className="w-full px-3 py-2 rounded-xl bg-[#232D1A] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-[#B6C948] text-sm mb-1">Herhalingen</label>
-                            <input
-                              type="text"
-                              value={exercise.reps}
-                              onChange={(e) => updateExerciseDetails(selectedDay, exercise.id, 'reps', e.target.value)}
-                              placeholder="8-12"
-                              className="w-full px-3 py-2 rounded-xl bg-[#232D1A] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-[#B6C948] text-sm mb-1">Rusttijd</label>
-                            <input
-                              type="text"
-                              value={exercise.restTime}
-                              onChange={(e) => updateExerciseDetails(selectedDay, exercise.id, 'restTime', e.target.value)}
-                              placeholder="90 sec"
-                              className="w-full px-3 py-2 rounded-xl bg-[#232D1A] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Exercise Search Modal */}
-          {showExerciseSearch && (
-            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-              <div className="bg-[#232D1A] rounded-2xl border border-[#3A4D23] w-full max-w-md p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-bold text-[#8BAE5A]">Oefening Zoeken</h3>
-                  <button
-                    onClick={() => setShowExerciseSearch(false)}
-                    className="p-2 rounded-xl hover:bg-[#181F17] transition-colors duration-200"
-                  >
-                    <XMarkIcon className="w-5 h-5 text-[#B6C948]" />
-                  </button>
-                </div>
-                
-                <input
-                  type="text"
-                  placeholder="Zoek oefeningen..."
-                  value={exerciseSearchTerm}
-                  onChange={(e) => setExerciseSearchTerm(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] mb-4"
-                />
-                
-                <div className="space-y-2 max-h-60 overflow-y-auto">
-                  {filteredExercises.map(exercise => (
-                    <button
-                      key={exercise.id}
-                      onClick={() => addExerciseToDay(selectedDay!, exercise)}
-                      className="w-full p-3 text-left bg-[#181F17] rounded-xl hover:bg-[#3A4D23] transition-colors duration-200"
-                    >
-                      <div className="text-[#8BAE5A] font-medium">{exercise.name}</div>
-                      <div className="text-[#B6C948] text-sm">{exercise.muscle}</div>
-                    </button>
+                <select
+                  value={selectedMuscle}
+                  onChange={(e) => setSelectedMuscle(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-[#8BAE5A] focus:ring-2"
+                >
+                  <option value="">Alle spiergroepen</option>
+                  {muscleGroups.map(muscle => (
+                    <option key={muscle} value={muscle}>{muscle}</option>
                   ))}
-                </div>
+                </select>
               </div>
+
+              {/* Exercise list */}
+              <Droppable droppableId="library" isDropDisabled={true}>
+                {(provided) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className="space-y-2"
+                  >
+                    {filteredExercises.map((exercise) => (
+                      <Draggable
+                        key={`library-${exercise.id}`}
+                        draggableId={`library-${exercise.id}`}
+                        index={exercise.id}
+                        isDragDisabled={formData.days.length === 0}
+                      >
+                        {(provided, snapshot) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            className={`p-3 bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-700 transition-colors ${
+                              snapshot.isDragging ? 'shadow-lg transform rotate-2' : ''
+                            } ${formData.days.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            onClick={() => {
+                              if (formData.days.length > 0) {
+                                addExerciseToDay(formData.days.length - 1, exercise);
+                              }
+                            }}
+                          >
+                            <div className="font-medium text-white">{exercise.name}</div>
+                            <div className="text-sm text-gray-400">{exercise.primary_muscle}</div>
+                            <div className="text-xs text-gray-500">{exercise.equipment} • {exercise.difficulty}</div>
+                          </div>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
             </div>
-          )}
-        </div>
+          </div>
+        </DragDropContext>
 
         {/* Footer */}
-        <div className="flex items-center justify-between p-6 border-t border-[#3A4D23]">
+        <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-700 sticky bottom-0 bg-gray-900 z-10">
           <button
-            onClick={handlePrevious}
-            disabled={currentStep === 1}
-            className="px-6 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            onClick={onClose}
+            className="px-4 py-2 text-gray-300 hover:text-white"
           >
-            <ArrowLeftIcon className="w-4 h-4" />
-            Vorige
+            Annuleren
           </button>
-
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => {
-                // Reset states when closing
-                setTemplateStep(true);
-                setCurrentStep(1);
-                setSelectedTemplate(null);
-                setSchemaDetails({
-                  name: '',
-                  description: '',
-                  category: 'Gym',
-                  coverImage: ''
-                });
-                setTrainingDays([
-                  { id: 1, name: 'Dag 1', exercises: [] },
-                  { id: 2, name: 'Dag 2', exercises: [] },
-                  { id: 3, name: 'Dag 3', exercises: [] }
-                ]);
-                setSelectedDay(null);
-                setShowExerciseSearch(false);
-                setExerciseSearchTerm('');
-                onClose();
-              }}
-              className="px-6 py-3 rounded-xl bg-[#181F17] text-[#B6C948] border border-[#3A4D23] hover:bg-[#232D1A] transition-all duration-200"
-            >
-              Annuleren
-            </button>
-            
-            {currentStep < totalSteps ? (
-              <button
-                onClick={handleNext}
-                className="px-6 py-3 rounded-xl bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#B6C948] transition-all duration-200 flex items-center gap-2"
-              >
-                Volgende
-                <ArrowRightIcon className="w-4 h-4" />
-              </button>
-            ) : (
-              <button
-                onClick={handleSave}
-                className="px-6 py-3 rounded-xl bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#B6C948] transition-all duration-200 flex items-center gap-2"
-              >
-                <CheckIcon className="w-4 h-4" />
-                Schema Opslaan
-              </button>
-            )}
-          </div>
+          <button
+            onClick={handleSave}
+            disabled={loading}
+            className="px-6 py-2 bg-[#8BAE5A] text-[#181F17] rounded-md hover:bg-[#B6C948] disabled:opacity-50"
+          >
+            {loading ? 'Opslaan...' : 'Opslaan'}
+          </button>
         </div>
       </div>
     </div>

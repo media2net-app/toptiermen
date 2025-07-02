@@ -7,25 +7,41 @@ import { useAuth } from "@/contexts/AuthContext";
 export default function Login() {
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
-  const { signIn, isAuthenticated, user } = useAuth();
+  const { signIn, isAuthenticated, user, loading: authLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => { 
+    setMounted(true); 
+  }, []);
 
   useEffect(() => {
-    if (isAuthenticated && user) {
+    // Only redirect if we're not loading and the user is authenticated
+    if (!authLoading && isAuthenticated && user && mounted) {
+      console.log('Redirecting user:', user.role);
       if (user.role === 'admin') {
         router.push('/dashboard-admin');
       } else {
         router.push('/dashboard');
       }
     }
-  }, [isAuthenticated, user, router]);
+  }, [isAuthenticated, user, router, authLoading, mounted]);
 
-  if (!mounted) return null;
+  if (!mounted || authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center relative px-4 py-6" style={{ backgroundColor: '#181F17' }}>
+        <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
+        <div className="w-full max-w-md p-6 sm:p-8 rounded-3xl shadow-2xl bg-[#232D1A]/95 border border-[#3A4D23] backdrop-blur-lg relative z-10">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#B6C948] mx-auto mb-4"></div>
+            <p className="text-[#B6C948] text-lg">Laden...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -33,10 +49,15 @@ export default function Login() {
     setError("");
     
     try {
-      await signIn(email, password);
-      // The redirect will be handled by the useEffect above
+      const result = await signIn(email, password);
+      
+      if (!result.success) {
+        setError(result.error || "Ongeldige inloggegevens");
+      }
+      // If successful, the redirect will be handled by the useEffect above
     } catch (error: any) {
-      setError(error.message || "Ongeldige inloggegevens");
+      console.error('Login error:', error);
+      setError(error.message || "Er is een fout opgetreden bij het inloggen");
     } finally {
       setIsLoading(false);
     }
@@ -62,6 +83,7 @@ export default function Login() {
               placeholder="E-mailadres"
               autoComplete="email"
               required
+              disabled={isLoading}
             />
           </div>
           <div className="relative">
@@ -74,24 +96,33 @@ export default function Login() {
               placeholder="Wachtwoord"
               autoComplete="current-password"
               required
+              disabled={isLoading}
             />
           </div>
           {error && (
-            <div className="text-[#B6C948] text-center text-sm -mt-4 border border-[#B6C948] rounded-lg py-1 bg-[#181F17] font-figtree">
+            <div className="text-[#B6C948] text-center text-sm -mt-4 border border-[#B6C948] rounded-lg py-2 px-3 bg-[#181F17] font-figtree">
               {error}
             </div>
           )}
           <button
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || authLoading}
             className="w-full py-3 sm:py-4 rounded-xl bg-gradient-to-r from-[#B6C948] to-[#3A4D23] text-[#181F17] font-semibold text-base sm:text-lg shadow-lg hover:from-[#B6C948] hover:to-[#B6C948] transition-all duration-200 border border-[#B6C948] font-figtree disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? 'Inloggen...' : 'Inloggen'}
+            {isLoading ? (
+              <div className="flex items-center justify-center">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#181F17] mr-2"></div>
+                Inloggen...
+              </div>
+            ) : (
+              'Inloggen'
+            )}
           </button>
           <button
             type="button"
             onClick={() => router.push('/register')}
-            className="w-full mt-2 py-3 sm:py-4 rounded-xl border border-[#B6C948] text-[#B6C948] font-semibold text-base sm:text-lg hover:bg-[#B6C948] hover:text-[#181F17] transition-all duration-200 font-figtree"
+            disabled={isLoading || authLoading}
+            className="w-full mt-2 py-3 sm:py-4 rounded-xl border border-[#B6C948] text-[#B6C948] font-semibold text-base sm:text-lg hover:bg-[#B6C948] hover:text-[#181F17] transition-all duration-200 font-figtree disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Nog geen account? Registreren
           </button>

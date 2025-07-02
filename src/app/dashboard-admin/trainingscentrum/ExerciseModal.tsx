@@ -13,11 +13,11 @@ interface ExerciseModalProps {
 }
 
 const muscleGroups = [
-  'Borst', 'Rug', 'Benen', 'Schouders', 'Armen', 'Core', 'Glutes'
+  'Borst', 'Rug', 'Benen', 'Schouders', 'Armen', 'Core', 'Glutes', 'Biceps', 'Triceps', 'Algemeen'
 ];
 
 const equipmentTypes = [
-  'Barbell', 'Dumbbell', 'Machine', 'Cable', 'Bodyweight', 'Kettlebell', 'Resistance Band'
+  'Barbell', 'Dumbbell', 'Machine', 'Cable', 'Bodyweight', 'Kettlebell', 'Resistance Band', 'Cable Machine', 'Leg Press Machine', 'Lat Pulldown Machine', 'Leg Extension Machine', 'Leg Curl Machine', 'Calf Machine', 'Pull-up Bar', 'Dip Bars'
 ];
 
 const difficultyLevels = [

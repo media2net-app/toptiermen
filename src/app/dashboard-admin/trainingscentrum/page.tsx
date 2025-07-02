@@ -519,6 +519,31 @@ const categories = ['Gym', 'Outdoor', 'Bodyweight'];
 const muscleGroups = ['Borst', 'Rug', 'Benen', 'Schouders', 'Armen', 'Core', 'Glutes'];
 const equipment = ['Barbell', 'Dumbbell', 'Bodyweight', 'Machine', 'Cable', 'Kettlebell'];
 
+const mapDbSchemaToForm = (dbSchema: any) => ({
+  id: dbSchema.id,
+  name: dbSchema.name,
+  description: dbSchema.description,
+  category: dbSchema.category,
+  difficulty: dbSchema.difficulty,
+  status: dbSchema.status,
+  days: (dbSchema.training_schema_days || []).map((day: any) => ({
+    id: day.id,
+    schema_id: dbSchema.id,
+    day_number: day.day_number,
+    name: day.name,
+    description: day.description,
+    exercises: (day.training_schema_exercises || []).map((ex: any) => ({
+      id: ex.id,
+      exercise_id: ex.exercise_id,
+      exercise_name: ex.exercise_name,
+      sets: ex.sets,
+      reps: ex.reps,
+      rest_time: ex.rest_time,
+      order_index: ex.order_index ?? 0,
+    })),
+  })),
+});
+
 export default function TrainingscentrumBeheer() {
   const [activeTab, setActiveTab] = useState('schemas');
   const [selectedSchema, setSelectedSchema] = useState<number | null>(null);
@@ -526,6 +551,7 @@ export default function TrainingscentrumBeheer() {
   const [showNewSchemaModal, setShowNewSchemaModal] = useState(false);
   const [showNewExerciseModal, setShowNewExerciseModal] = useState(false);
   const [showNewChallengeModal, setShowNewChallengeModal] = useState(false);
+  const [editingSchema, setEditingSchema] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('Alle Categorieën');
   const [filterMuscle, setFilterMuscle] = useState('Alle Spiergroepen');
@@ -535,10 +561,13 @@ export default function TrainingscentrumBeheer() {
   const [loadingExercises, setLoadingExercises] = useState(true);
   const [editingExercise, setEditingExercise] = useState<any>(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [schemas, setSchemas] = useState<any[]>([]);
+  const [loadingSchemas, setLoadingSchemas] = useState(true);
 
-  // Fetch exercises from database
+  // Fetch data from database
   useEffect(() => {
     fetchExercises();
+    fetchSchemas();
   }, []);
 
   const fetchExercises = async () => {
@@ -560,6 +589,42 @@ export default function TrainingscentrumBeheer() {
       toast.error('Fout bij het laden van oefeningen');
     } finally {
       setLoadingExercises(false);
+    }
+  };
+
+  const fetchSchemas = async () => {
+    setLoadingSchemas(true);
+    try {
+      const { data, error } = await supabase
+        .from('training_schemas')
+        .select(`
+          *,
+          training_schema_days (
+            id,
+            day_number,
+            name,
+            training_schema_exercises (
+              id,
+              exercise_name,
+              sets,
+              reps,
+              rest_time
+            )
+          )
+        `)
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching schemas:', error);
+        toast.error('Fout bij het laden van trainingsschema\'s');
+      } else {
+        setSchemas(data || []);
+      }
+    } catch (err) {
+      console.error('Exception fetching schemas:', err);
+      toast.error('Fout bij het laden van trainingsschema\'s');
+    } finally {
+      setLoadingSchemas(false);
     }
   };
 
@@ -631,6 +696,68 @@ export default function TrainingscentrumBeheer() {
     }
   };
 
+  const handleDeleteSchema = async (id: number) => {
+    if (!confirm('Weet je zeker dat je dit trainingsschema wilt verwijderen? Dit kan niet ongedaan worden gemaakt.')) return;
+    
+    try {
+      // Eerst alle day IDs ophalen voor dit schema
+      const { data: dayIds, error: fetchDaysError } = await supabase
+        .from('training_schema_days')
+        .select('id')
+        .eq('schema_id', id);
+      
+      if (fetchDaysError) {
+        console.error('Error fetching training schema days:', fetchDaysError);
+        toast.error('Fout bij het ophalen van trainingsdagen');
+        return;
+      }
+
+      // Dan alle training schema day exercises verwijderen
+      if (dayIds && dayIds.length > 0) {
+        const dayIdArray = dayIds.map(day => day.id);
+        const { error: dayExercisesError } = await supabase
+          .from('training_schema_exercises')
+          .delete()
+          .in('schema_day_id', dayIdArray);
+        
+        if (dayExercisesError) {
+          console.error('Error deleting training schema day exercises:', dayExercisesError);
+          toast.error('Fout bij het verwijderen van oefeningen uit trainingsdagen');
+          return;
+        }
+      }
+
+      // Dan alle training schema days verwijderen
+      const { error: daysError } = await supabase
+        .from('training_schema_days')
+        .delete()
+        .eq('schema_id', id);
+      
+      if (daysError) {
+        console.error('Error deleting training schema days:', daysError);
+        toast.error('Fout bij het verwijderen van trainingsdagen');
+        return;
+      }
+
+      // Dan het schema zelf verwijderen
+      const { error: schemaError } = await supabase
+        .from('training_schemas')
+        .delete()
+        .eq('id', id);
+      
+      if (schemaError) {
+        console.error('Error deleting training schema:', schemaError);
+        toast.error('Fout bij het verwijderen van trainingsschema');
+      } else {
+        setSchemas(schemas.filter(schema => schema.id !== id));
+        toast.success('Trainingsschema succesvol verwijderd');
+      }
+    } catch (err) {
+      console.error('Exception deleting training schema:', err);
+      toast.error('Fout bij het verwijderen van trainingsschema');
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'published': return 'text-green-400';
@@ -651,7 +778,7 @@ export default function TrainingscentrumBeheer() {
     }
   };
 
-  const filteredSchemas = mockSchemas.filter(schema => 
+  const filteredSchemas = schemas.filter(schema => 
     schema.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
     (filterCategory === 'Alle Categorieën' || schema.category === filterCategory)
   );
@@ -772,71 +899,97 @@ export default function TrainingscentrumBeheer() {
           </div>
 
           {/* Schemas Table */}
-          <div className="bg-[#232D1A] rounded-2xl border border-[#3A4D23] overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-[#181F17] border-b border-[#3A4D23]">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Schema</th>
-                    <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Categorie</th>
-                    <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Dagen</th>
-                    <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Status</th>
-                    <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Gebruikers</th>
-                    <th className="px-6 py-4 text-center text-[#8BAE5A] font-semibold">Acties</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#3A4D23]">
-                  {filteredSchemas.map((schema) => (
-                    <tr key={schema.id} className="hover:bg-[#181F17] transition-colors duration-200">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-xl bg-[#8BAE5A]/20 flex items-center justify-center">
-                            <CalendarIcon className="w-6 h-6 text-[#8BAE5A]" />
-                          </div>
-                          <div>
-                            <h3 className="text-[#8BAE5A] font-semibold">{schema.name}</h3>
-                            <p className="text-[#B6C948] text-sm">{schema.description}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="px-3 py-1 rounded-full text-xs font-semibold text-[#8BAE5A] bg-[#181F17]">
-                          {schema.category}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="text-[#8BAE5A] font-semibold">{schema.days}</span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(schema.status)} bg-[#181F17]`}>
-                          {getStatusText(schema.status)}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="text-[#8BAE5A] font-semibold">{schema.enrolledUsers.toLocaleString('nl-NL')}</span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center justify-center gap-2">
-                          <button className="p-2 rounded-xl hover:bg-[#181F17] transition-colors duration-200">
-                            <EyeIcon className="w-4 h-4 text-[#B6C948]" />
-                          </button>
-                          <button className="p-2 rounded-xl hover:bg-[#181F17] transition-colors duration-200">
-                            <PencilIcon className="w-4 h-4 text-[#B6C948]" />
-                          </button>
-                          <button className="p-2 rounded-xl hover:bg-[#181F17] transition-colors duration-200">
-                            <DocumentDuplicateIcon className="w-4 h-4 text-[#B6C948]" />
-                          </button>
-                          <button className="p-2 rounded-xl hover:bg-[#181F17] transition-colors duration-200">
-                            <TrashIcon className="w-4 h-4 text-red-400" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          {loadingSchemas ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
+              <p className="text-[#B6C948]">Trainingsschema's laden...</p>
             </div>
-          </div>
+          ) : filteredSchemas.length === 0 ? (
+            <div className="text-center py-12">
+              <CalendarIcon className="w-12 h-12 text-[#8BAE5A]/50 mx-auto mb-4" />
+              <p className="text-[#B6C948] text-lg mb-2">Geen trainingsschema's gevonden</p>
+              <p className="text-[#B6C948]/70 text-sm">
+                {searchTerm || filterCategory !== 'Alle Categorieën' 
+                  ? 'Probeer je zoekcriteria aan te passen.' 
+                  : 'Er zijn nog geen trainingsschema\'s toegevoegd.'}
+              </p>
+            </div>
+          ) : (
+            <div className="bg-[#232D1A] rounded-2xl border border-[#3A4D23] overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-[#181F17] border-b border-[#3A4D23]">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Schema</th>
+                      <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Categorie</th>
+                      <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Dagen</th>
+                      <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Status</th>
+                      <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Gebruikers</th>
+                      <th className="px-6 py-4 text-center text-[#8BAE5A] font-semibold">Acties</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#3A4D23]">
+                    {filteredSchemas.map((schema) => (
+                      <tr key={schema.id} className="hover:bg-[#181F17] transition-colors duration-200">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-xl bg-[#8BAE5A]/20 flex items-center justify-center">
+                              <CalendarIcon className="w-6 h-6 text-[#8BAE5A]" />
+                            </div>
+                            <div>
+                              <h3 className="text-[#8BAE5A] font-semibold">{schema.name}</h3>
+                              <p className="text-[#B6C948] text-sm">{schema.description}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="px-3 py-1 rounded-full text-xs font-semibold text-[#8BAE5A] bg-[#181F17]">
+                            {schema.category}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="text-[#8BAE5A] font-semibold">{schema.training_schema_days?.length || 0}</span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(schema.status)} bg-[#181F17]`}>
+                            {getStatusText(schema.status)}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="text-[#8BAE5A] font-semibold">0</span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center justify-center gap-2">
+                            <button className="p-2 rounded-xl hover:bg-[#181F17] transition-colors duration-200">
+                              <EyeIcon className="w-4 h-4 text-[#B6C948]" />
+                            </button>
+                            <button 
+                              onClick={() => {
+                                setEditingSchema(mapDbSchemaToForm(schema));
+                                setShowNewSchemaModal(true);
+                              }}
+                              className="p-2 rounded-xl hover:bg-[#181F17] transition-colors duration-200"
+                            >
+                              <PencilIcon className="w-4 h-4 text-[#B6C948]" />
+                            </button>
+                            <button className="p-2 rounded-xl hover:bg-[#181F17] transition-colors duration-200">
+                              <DocumentDuplicateIcon className="w-4 h-4 text-[#B6C948]" />
+                            </button>
+                            <button 
+                              onClick={() => handleDeleteSchema(schema.id)}
+                              className="p-2 rounded-xl hover:bg-[#181F17] transition-colors duration-200"
+                            >
+                              <TrashIcon className="w-4 h-4 text-red-400" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -1320,8 +1473,15 @@ export default function TrainingscentrumBeheer() {
       <SchemaBuilder 
         isOpen={showNewSchemaModal}
         onClose={() => {
-          console.log('Close SchemaBuilder modal');
           setShowNewSchemaModal(false);
+          setEditingSchema(null);
+        }}
+        schema={editingSchema}
+        onSave={(schema) => {
+          // Refresh schemas after saving
+          fetchSchemas();
+          setShowNewSchemaModal(false);
+          setEditingSchema(null);
         }}
       />
 
