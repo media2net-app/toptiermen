@@ -25,6 +25,8 @@ export interface Database {
           interests: Json | null
           cover_url: string | null
           role: 'user' | 'admin'
+          selected_schema_id: string | null
+          selected_nutrition_plan: string | null
         }
         Insert: {
           id?: string
@@ -41,6 +43,8 @@ export interface Database {
           interests?: Json | null
           cover_url?: string | null
           role?: 'user' | 'admin'
+          selected_schema_id?: string | null
+          selected_nutrition_plan?: string | null
         }
         Update: {
           id?: string
@@ -57,6 +61,8 @@ export interface Database {
           interests?: Json | null
           cover_url?: string | null
           role?: 'user' | 'admin'
+          selected_schema_id?: string | null
+          selected_nutrition_plan?: string | null
         }
       }
       missions: {

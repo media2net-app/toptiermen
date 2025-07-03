@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   CalculatorIcon, 
@@ -118,6 +118,23 @@ export default function VoedingsplannenPage() {
   const [selectedDiet, setSelectedDiet] = useState<string>('');
   const [mealPlan, setMealPlan] = useState<MealPlan | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [selectedNutritionPlan, setSelectedNutritionPlan] = useState<string | null>(null);
+  const [showPlanBanner, setShowPlanBanner] = useState(true);
+
+  useEffect(() => {
+    const fetchSelectedPlan = async () => {
+      if (!user) return;
+      const { data, error } = await supabase
+        .from('users')
+        .select('selected_nutrition_plan')
+        .eq('id', user.id)
+        .single();
+      if (!error && data?.selected_nutrition_plan) {
+        setSelectedNutritionPlan(data.selected_nutrition_plan);
+      }
+    };
+    fetchSelectedPlan();
+  }, [user]);
 
   const calculateNutritionGoals = (data: UserData): NutritionGoals => {
     // BMR berekening (Mifflin-St Jeor Equation) - Altijd voor mannen
@@ -370,6 +387,18 @@ export default function VoedingsplannenPage() {
     setIsGenerating(false);
   };
 
+  const handleConfirmNutritionPlan = async () => {
+    if (!user || !selectedDiet) return;
+    const { error } = await supabase
+      .from('users')
+      .update({ selected_nutrition_plan: selectedDiet })
+      .eq('id', user.id);
+    if (!error) {
+      setSelectedNutritionPlan(selectedDiet);
+      setShowPlanBanner(true);
+    }
+  };
+
   const generateShoppingList = () => {
     if (!mealPlan) return;
     
@@ -406,6 +435,33 @@ export default function VoedingsplannenPage() {
       subtitle="Creëer jouw persoonlijke voedingsplan op maat"
     >
       <div className="max-w-4xl mx-auto">
+        {!isGenerating && selectedNutritionPlan && showPlanBanner && (
+          <div className="max-w-4xl mx-auto mt-8 mb-8">
+            <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="flex-1 text-center md:text-left">
+                <div className="text-sm text-[#8BAE5A] font-semibold mb-1">Je huidige voedingsplan</div>
+                <div className="text-xl font-bold text-white mb-1">
+                  {dietTypes.find(d => d.id === selectedNutritionPlan)?.name || selectedNutritionPlan}
+                </div>
+                <div className="text-gray-400 text-sm mb-1">
+                  {dietTypes.find(d => d.id === selectedNutritionPlan)?.subtitle}
+                </div>
+                <div className="text-gray-300 text-sm">
+                  {dietTypes.find(d => d.id === selectedNutritionPlan)?.description}
+                </div>
+              </div>
+              <button
+                className="mt-4 md:mt-0 px-6 py-3 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] text-[#232D1A] font-bold rounded-xl hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200 shadow-lg hover:shadow-xl"
+                onClick={() => {
+                  setCurrentStep(2);
+                  setShowPlanBanner(false);
+                }}
+              >
+                Wijzig voedingsplan
+              </button>
+            </div>
+          </div>
+        )}
         <AnimatePresence mode="wait">
           {currentStep === 1 && (
             <motion.div
@@ -531,6 +587,28 @@ export default function VoedingsplannenPage() {
               exit={{ opacity: 0, y: -20 }}
               className="space-y-8"
             >
+              <div className="max-w-3xl mx-auto">
+                <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-6 flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
+                  <div className="flex-1 text-center md:text-left">
+                    <div className="text-sm text-[#8BAE5A] font-semibold mb-1">Jouw Invoer</div>
+                    <div className="flex flex-wrap gap-4 mb-2">
+                      <div className="text-white text-sm">Leeftijd: <span className="font-bold">{userData.age}</span></div>
+                      <div className="text-white text-sm">Lengte: <span className="font-bold">{userData.height} cm</span></div>
+                      <div className="text-white text-sm">Gewicht: <span className="font-bold">{userData.weight} kg</span></div>
+                      <div className="text-white text-sm">Activiteit: <span className="font-bold">{activityLevels.find(l => l.value === userData.activityLevel)?.label}</span></div>
+                      <div className="text-white text-sm">Doel: <span className="font-bold">{userData.goal === 'cut' ? 'Vet verliezen' : userData.goal === 'bulk' ? 'Spier opbouwen' : 'Op gewicht blijven'}</span></div>
+                    </div>
+                    {nutritionGoals && (
+                      <div className="flex flex-wrap gap-6 mt-2">
+                        <div className="text-[#8BAE5A] text-lg font-bold">{nutritionGoals.calories} kcal</div>
+                        <div className="text-[#8BAE5A] text-lg font-bold">{nutritionGoals.protein}g eiwit</div>
+                        <div className="text-[#8BAE5A] text-lg font-bold">{nutritionGoals.carbs}g koolhydraten</div>
+                        <div className="text-[#8BAE5A] text-lg font-bold">{nutritionGoals.fat}g vet</div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
               <div className="text-center">
                 <h2 className="text-2xl font-bold text-white mb-2">
                   Stap 2: Welke voedingsaanpak past bij jou?
@@ -539,30 +617,6 @@ export default function VoedingsplannenPage() {
                   Kies de dieetfilosofie die het beste bij jouw levensstijl past
                 </p>
               </div>
-
-              {nutritionGoals && (
-                <div className="bg-[#1A1A1A] rounded-xl p-6 mb-8">
-                  <h3 className="text-lg font-semibold text-white mb-4">Jouw Doelen:</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-[#8BAE5A]">{nutritionGoals.calories}</div>
-                      <div className="text-sm text-gray-400">kcal/dag</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-[#8BAE5A]">{nutritionGoals.protein}g</div>
-                      <div className="text-sm text-gray-400">Eiwit</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-[#8BAE5A]">{nutritionGoals.carbs}g</div>
-                      <div className="text-sm text-gray-400">Koolhydraten</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-[#8BAE5A]">{nutritionGoals.fat}g</div>
-                      <div className="text-sm text-gray-400">Vet</div>
-                    </div>
-                  </div>
-                </div>
-              )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {dietTypes.map(diet => (
@@ -591,20 +645,20 @@ export default function VoedingsplannenPage() {
 
               <div className="text-center pt-6">
                 <button
-                  onClick={handleGeneratePlan}
+                  onClick={async () => {
+                    await handleGeneratePlan();
+                    await handleConfirmNutritionPlan();
+                  }}
                   disabled={!selectedDiet}
                   className="bg-gradient-to-r from-[#8BAE5A] to-[#6B8E3A] text-white px-8 py-4 rounded-lg font-semibold text-lg hover:from-[#7A9D4B] hover:to-[#5A7D2A] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center mx-auto"
                 >
                   {isGenerating ? (
                     <>
                       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mr-2"></div>
-                      We stellen jouw plan op maat samen...
+                      Plan genereren...
                     </>
                   ) : (
-                    <>
-                      <SparklesIcon className="w-6 h-6 mr-2" />
-                      Genereer Mijn Persoonlijke Plan
-                    </>
+                    'Genereer Mijn Persoonlijke Plan'
                   )}
                 </button>
               </div>

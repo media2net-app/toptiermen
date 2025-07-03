@@ -20,6 +20,7 @@ export default function LessonDetailPage() {
   const [saving, setSaving] = useState(false);
   const [completedLessonIds, setCompletedLessonIds] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [videoLoading, setVideoLoading] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
@@ -153,12 +154,21 @@ export default function LessonDetailPage() {
         </span>
       </div>
       {lesson.video_url && (
-        <div className="w-full aspect-video bg-[#181F17] rounded-xl flex items-center justify-center overflow-hidden border border-[#3A4D23] mb-6">
+        <div className="w-full aspect-video bg-[#181F17] rounded-xl flex items-center justify-center overflow-hidden border border-[#3A4D23] mb-6 relative">
+          {videoLoading && (
+            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/70">
+              <div className="text-[#8BAE5A] text-2xl font-bold mb-2">Laden...</div>
+            </div>
+          )}
           <video
             src={lesson.video_url}
             controls
+            autoPlay
+            muted
             className="w-full h-full rounded-xl bg-black"
             poster="/video-placeholder.svg"
+            onCanPlay={() => setVideoLoading(false)}
+            onLoadedData={() => setVideoLoading(false)}
           >
             Je browser ondersteunt deze video niet.
           </video>

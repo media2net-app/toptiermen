@@ -15,87 +15,93 @@ export default function MijnMissies() {
   const [unlocks, setUnlocks] = useState<Record<string, any>>({});
   const prevProgressRef = useRef<Record<string, number>>({});
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     async function fetchModulesAndProgress() {
       setLoading(true);
       setErrorMsg(null);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(() => {
+        setErrorMsg('Het laden duurt te lang. Controleer je internetverbinding of probeer het later opnieuw.');
+        setLoading(false);
+      }, 10000); // 10 seconden timeout
+
+      console.log('Academy page: user =', user);
       if (!user) {
         setErrorMsg('Je bent niet ingelogd. Log opnieuw in.');
         setLoading(false);
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
         return;
       }
       const { data: modulesData, error } = await supabase
         .from('academy_modules')
         .select('*')
         .order('order_index', { ascending: true });
+      console.log('Academy page: modulesData =', modulesData, 'error =', error);
       if (error) {
         setErrorMsg('Fout bij laden van modules: ' + error.message);
         setLoading(false);
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
         return;
       }
-      if (modulesData) {
-        const sortedModules = [...modulesData].sort((a, b) => {
-          if (a.positie != null && b.positie != null) {
-            return a.positie - b.positie;
-          }
-          if (a.positie != null) return -1;
-          if (b.positie != null) return 1;
-          if (a.order_index != null && b.order_index != null) {
-            return a.order_index - b.order_index;
-          }
-          if (a.order_index != null) return -1;
-          if (b.order_index != null) return 1;
-          return a.id.localeCompare(b.id);
+      if (!modulesData || modulesData.length === 0) {
+        setErrorMsg('Geen modules gevonden. Neem contact op met support.');
+        setLoading(false);
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        return;
+      }
+      try {
+        const { data: lessonsData } = await supabase
+          .from('academy_lessons')
+          .select('id,module_id');
+        const { data: progressRows } = await supabase
+          .from('user_lesson_progress')
+          .select('lesson_id')
+          .eq('user_id', user.id)
+          .eq('completed', true);
+        const progressPerModule: Record<string, number> = {};
+        modulesData.forEach(mod => {
+          const lessons = lessonsData?.filter(l => l.module_id === mod.id) || [];
+          const total = lessons.length;
+          const completed = lessons.filter(l => progressRows?.some(p => p.lesson_id === l.id)).length;
+          progressPerModule[mod.id] = total > 0 ? Math.round((completed / total) * 100) : 0;
         });
-        setModules(sortedModules);
-        try {
-          const { data: lessonsData } = await supabase
-            .from('academy_lessons')
-            .select('id,module_id');
-          const { data: progressRows } = await supabase
-            .from('user_lesson_progress')
-            .select('lesson_id')
-            .eq('user_id', user.id)
-            .eq('completed', true);
-          const progressPerModule: Record<string, number> = {};
-          sortedModules.forEach(mod => {
-            const lessons = lessonsData?.filter(l => l.module_id === mod.id) || [];
-            const total = lessons.length;
-            const completed = lessons.filter(l => progressRows?.some(p => p.lesson_id === l.id)).length;
-            progressPerModule[mod.id] = total > 0 ? Math.round((completed / total) * 100) : 0;
-          });
-          // Haal unlocks op
-          const { data: unlockRows } = await supabase
-            .from('user_module_unlocks')
-            .select('*')
-            .eq('user_id', user.id);
-          const unlockMap: Record<string, any> = {};
-          unlockRows?.forEach((row: any) => {
-            unlockMap[row.module_id] = row;
-          });
-          setUnlocks(unlockMap);
-          // Unlock logica: als vorige module 100% is en deze nog niet in unlocks zit, upsert
-          for (let i = 1; i < sortedModules.length; i++) {
-            const prevModule = sortedModules[i - 1];
-            const thisModule = sortedModules[i];
-            if (progressPerModule[prevModule.id] === 100 && !unlockMap[thisModule.id]) {
-              await supabase.from('user_module_unlocks').upsert({
-                user_id: user.id,
-                module_id: thisModule.id,
-                unlocked_at: new Date().toISOString(),
-              }, { onConflict: 'user_id,module_id' });
-            }
+        // Haal unlocks op
+        const { data: unlockRows } = await supabase
+          .from('user_module_unlocks')
+          .select('*')
+          .eq('user_id', user.id);
+        const unlockMap: Record<string, any> = {};
+        unlockRows?.forEach((row: any) => {
+          unlockMap[row.module_id] = row;
+        });
+        setUnlocks(unlockMap);
+        // Unlock logica: als vorige module 100% is en deze nog niet in unlocks zit, upsert
+        for (let i = 1; i < modulesData.length; i++) {
+          const prevModule = modulesData[i - 1];
+          const thisModule = modulesData[i];
+          if (progressPerModule[prevModule.id] === 100 && !unlockMap[thisModule.id]) {
+            await supabase.from('user_module_unlocks').upsert({
+              user_id: user.id,
+              module_id: thisModule.id,
+              unlocked_at: new Date().toISOString(),
+            }, { onConflict: 'user_id,module_id' });
           }
-          prevProgressRef.current = progressPerModule;
-          setProgressData(progressPerModule);
-        } catch (err) {
-          setErrorMsg('Fout bij laden van voortgang: ' + (err as Error).message);
         }
+        prevProgressRef.current = progressPerModule;
+        setProgressData(progressPerModule);
+        setModules(modulesData);
+      } catch (err) {
+        setErrorMsg('Fout bij laden van voortgang: ' + (err as Error).message);
       }
       setLoading(false);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
     }
     fetchModulesAndProgress();
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
   }, [user]);
 
   return (
