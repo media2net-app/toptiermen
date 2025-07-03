@@ -1,7 +1,7 @@
 'use client';
 import ClientLayout from '../../components/ClientLayout';
 import PageLayout from '../../../components/PageLayout';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { LockClosedIcon } from '@heroicons/react/24/solid';
 import { supabase } from '@/lib/supabase';
@@ -12,6 +12,8 @@ export default function MijnMissies() {
   const [modules, setModules] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [progressData, setProgressData] = useState<Record<string, number>>({});
+  const [unlocks, setUnlocks] = useState<Record<string, any>>({});
+  const prevProgressRef = useRef<Record<string, number>>({});
 
   useEffect(() => {
     async function fetchModulesAndProgress() {
@@ -21,7 +23,6 @@ export default function MijnMissies() {
         .select('*')
         .order('order_index', { ascending: true });
       if (!error && modulesData) {
-        // Sorteer modules op positie (of order_index, of id als laatste fallback)
         const sortedModules = [...modulesData].sort((a, b) => {
           if (a.positie != null && b.positie != null) {
             return a.positie - b.positie;
@@ -37,17 +38,14 @@ export default function MijnMissies() {
         });
         setModules(sortedModules);
         if (user) {
-          // Haal alle lessen op voor alle modules
           const { data: lessonsData } = await supabase
             .from('academy_lessons')
             .select('id,module_id');
-          // Haal alle afgeronde lessen op voor deze user
           const { data: progressRows } = await supabase
             .from('user_lesson_progress')
             .select('lesson_id')
             .eq('user_id', user.id)
             .eq('completed', true);
-          // Bereken per module het percentage
           const progressPerModule: Record<string, number> = {};
           sortedModules.forEach(mod => {
             const lessons = lessonsData?.filter(l => l.module_id === mod.id) || [];
@@ -55,6 +53,29 @@ export default function MijnMissies() {
             const completed = lessons.filter(l => progressRows?.some(p => p.lesson_id === l.id)).length;
             progressPerModule[mod.id] = total > 0 ? Math.round((completed / total) * 100) : 0;
           });
+          // Haal unlocks op
+          const { data: unlockRows } = await supabase
+            .from('user_module_unlocks')
+            .select('*')
+            .eq('user_id', user.id);
+          const unlockMap: Record<string, any> = {};
+          unlockRows?.forEach((row: any) => {
+            unlockMap[row.module_id] = row;
+          });
+          setUnlocks(unlockMap);
+          // Unlock logica: als vorige module 100% is en deze nog niet in unlocks zit, upsert
+          for (let i = 1; i < sortedModules.length; i++) {
+            const prevModule = sortedModules[i - 1];
+            const thisModule = sortedModules[i];
+            if (progressPerModule[prevModule.id] === 100 && !unlockMap[thisModule.id]) {
+              await supabase.from('user_module_unlocks').upsert({
+                user_id: user.id,
+                module_id: thisModule.id,
+                unlocked_at: new Date().toISOString(),
+              }, { onConflict: 'user_id,module_id' });
+            }
+          }
+          prevProgressRef.current = progressPerModule;
           setProgressData(progressPerModule);
         }
       }
@@ -83,8 +104,11 @@ export default function MijnMissies() {
                 const prevModule = modules[i - 1];
                 locked = progressData[prevModule.id] !== 100;
               }
+              // Groene gloed als unlocked maar nog niet geopend
+              const unlock = unlocks[mod.id];
+              const justUnlocked = unlock && !unlock.opened_at;
               return (
-                <div key={mod.id} className="relative">
+                <div key={mod.id} className={`relative ${justUnlocked ? 'animate-pop shadow-[0_0_0_4px_#8BAE5A80]' : ''}`}>
                   <Link
                     href={locked ? '#' : `/dashboard/academy/${mod.slug || mod.id}`}
                     className={`bg-[#181F17]/90 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-xl border border-[#3A4D23] flex flex-col gap-2 cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] relative active:scale-[0.98] touch-manipulation ${locked ? 'opacity-60 pointer-events-none' : ''}`}
@@ -128,6 +152,17 @@ export default function MijnMissies() {
           </div>
         )}
       </PageLayout>
+      <style jsx global>{`
+@keyframes pop {
+  0% { transform: scale(0.8); opacity: 0; }
+  60% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); }
+}
+.animate-pop {
+  animation: pop 0.8s cubic-bezier(.22,1,.36,1) both;
+  box-shadow: 0 0 0 4px #8BAE5A80;
+}
+`}</style>
     </ClientLayout>
   );
 } 

@@ -221,15 +221,40 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signOut = async () => {
     try {
+      console.log('Starting sign out process...');
+      
+      // Clear local state first
+      setUser(null);
+      setLoading(true);
+      
+      // Sign out from Supabase
       const { error } = await supabase.auth.signOut();
+      
       if (error) {
-        console.error('Sign out error:', error);
+        console.error('Supabase sign out error:', error);
+        // Even if Supabase fails, we should still clear local state
+        setUser(null);
         throw error;
       }
-      setUser(null);
+      
+      console.log('Sign out successful');
+      
+      // Clear any local storage or session data
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('welcomeVideoShown');
+        localStorage.removeItem('onboardingCompleted');
+        localStorage.removeItem('nutritionPlanCompleted');
+        // Clear any other app-specific storage
+        sessionStorage.clear();
+      }
+      
     } catch (error: any) {
       console.error('Error signing out:', error);
+      // Ensure user is cleared even if there's an error
+      setUser(null);
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 

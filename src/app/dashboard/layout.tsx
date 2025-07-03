@@ -140,6 +140,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const [dropdownOpen, setDropdownOpen] = useState<'notifications'|'messages'|null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   // Check authentication
   useEffect(() => {
@@ -153,12 +154,28 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const handleLogout = async () => {
     try {
+      console.log('Dashboard logout initiated...');
+      setIsLoggingOut(true);
       await signOut();
+      
+      // Force redirect after a short delay to ensure cleanup
       setTimeout(() => {
-        router.push('/login');
-      }, 200);
+        window.location.href = '/login';
+      }, 500);
+      
     } catch (error) {
       console.error('Error logging out:', error);
+      
+      // Show user feedback
+      alert('Er is een fout opgetreden bij het uitloggen. Probeer het opnieuw.');
+      
+      // Fallback: force redirect even if signOut fails
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 1000);
+      
+    } finally {
+      setIsLoggingOut(false);
     }
   };
 
@@ -245,6 +262,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <button 
           onClick={handleLogout}
           className={`mt-auto w-full py-2 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#3A4D23] text-black font-bold border border-[#8BAE5A] hover:from-[#A6C97B] hover:to-[#8BAE5A] transition font-figtree ${collapsed ? 'text-xs px-0' : ''}`}
+          disabled={isLoggingOut}
         >
           {!collapsed ? 'Log Out' : <ChevronLeftIcon className="w-5 h-5 mx-auto text-black" />}
         </button>
@@ -418,9 +436,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     setProfileMenuOpen(false);
                     await handleLogout();
                   }}
-                  className="block w-full text-left px-4 py-2 text-white hover:bg-[#8BAE5A] hover:text-black rounded-b-xl transition"
+                  disabled={isLoggingOut}
+                  className="block w-full text-left px-4 py-2 text-white hover:bg-[#8BAE5A] hover:text-black rounded-b-xl transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Log out
+                  {isLoggingOut ? 'Uitloggen...' : 'Log out'}
                 </button>
               </div>
             )}

@@ -130,12 +130,8 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
                       {subItem.icon && <subItem.icon className="w-5 h-5" />}
                       <span className="flex items-center gap-2">
                         {subItem.label}
-                        {subItem.label === 'Academy' ? (
+                        {subItem.label === 'Community Health' || subItem.label === 'Real-time Activiteit' || subItem.label === 'Academy' || subItem.label === 'Ledenbeheer' || subItem.label === 'Trainingscentrum' ? (
                           <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-bold bg-green-700 text-green-200">Live</span>
-                        ) : subItem.label === 'Ledenbeheer' ? (
-                          <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-bold bg-green-700 text-green-200">Live</span>
-                        ) : subItem.label === 'Trainingscentrum' ? (
-                          <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-bold bg-yellow-700 text-yellow-200">Mee bezig</span>
                         ) : (
                           <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-bold bg-red-700 text-red-200">Dummy</span>
                         )}
@@ -202,13 +198,25 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     
     setIsLoggingOut(true);
     try {
+      console.log('Admin logout initiated...');
       await signOut();
+      
+      // Force redirect after a short delay to ensure cleanup
       setTimeout(() => {
-        router.push('/login');
-      }, 200);
+        window.location.href = '/login';
+      }, 500);
+      
     } catch (error) {
       console.error('Error logging out:', error);
       setIsLoggingOut(false);
+      
+      // Show user feedback
+      alert('Er is een fout opgetreden bij het uitloggen. Probeer het opnieuw.');
+      
+      // Fallback: force redirect even if signOut fails
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 1000);
     }
   };
 

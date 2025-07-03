@@ -48,7 +48,7 @@ interface TrainingSchema {
   category: 'Gym' | 'Outdoor' | 'Home';
   difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
   days: TrainingDay[];
-  status: 'concept' | 'gepubliceerd';
+  status: 'draft' | 'published' | 'archived';
 }
 
 interface SchemaBuilderProps {
@@ -69,7 +69,7 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
     category: 'Gym',
     difficulty: 'Beginner',
     days: [],
-    status: 'concept'
+    status: 'draft'
   });
 
   useEffect(() => {
@@ -109,7 +109,7 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
           category: 'Gym',
           difficulty: 'Beginner',
           days: [],
-          status: 'concept'
+          status: 'draft'
         });
       }
     }
@@ -379,7 +379,7 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
             .from('training_schema_exercises')
             .upsert({
               id: exercise.id,
-              day_id: dayId,
+              schema_day_id: dayId,
               exercise_id: exercise.exercise_id,
               exercise_name: exercise.exercise_name,
               sets: exercise.sets,
@@ -488,10 +488,11 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
                     <select
                       className="w-full rounded-lg border border-gray-700 bg-[#232B1A] text-white p-2 focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
                       value={formData.status}
-                      onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as 'concept' | 'gepubliceerd' }))}
+                      onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as 'draft' | 'published' | 'archived' }))}
                     >
-                      <option value="concept">Concept</option>
-                      <option value="gepubliceerd">Gepubliceerd</option>
+                      <option value="draft">Concept</option>
+                      <option value="published">Gepubliceerd</option>
+                      <option value="archived">Gearchiveerd</option>
                     </select>
                   </div>
                 </div>

@@ -26,6 +26,7 @@ import { supabase } from '@/lib/supabase';
 import { toast } from 'react-toastify';
 import SchemaBuilder from './SchemaBuilder';
 import ExerciseModal from './ExerciseModal';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 // Mock data - in real app this would come from API
 const mockSchemas = [
@@ -545,6 +546,7 @@ const mapDbSchemaToForm = (dbSchema: any) => ({
 });
 
 export default function TrainingscentrumBeheer() {
+  const [mounted, setMounted] = useState(false);
   const [activeTab, setActiveTab] = useState('schemas');
   const [selectedSchema, setSelectedSchema] = useState<number | null>(null);
   const [selectedExercise, setSelectedExercise] = useState<number | null>(null);
@@ -563,29 +565,37 @@ export default function TrainingscentrumBeheer() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [schemas, setSchemas] = useState<any[]>([]);
   const [loadingSchemas, setLoadingSchemas] = useState(true);
+  const [errorExercises, setErrorExercises] = useState<string | null>(null);
+  const [errorSchemas, setErrorSchemas] = useState<string | null>(null);
 
-  // Fetch data from database
   useEffect(() => {
-    fetchExercises();
-    fetchSchemas();
+    setMounted(true);
+    return () => setMounted(false);
   }, []);
+
+  useEffect(() => {
+    if (mounted) {
+      fetchExercises();
+      fetchSchemas();
+    }
+  }, [mounted]);
 
   const fetchExercises = async () => {
     setLoadingExercises(true);
+    setErrorExercises(null);
     try {
       const { data, error } = await supabase
         .from('exercises')
         .select('*')
         .order('name', { ascending: true });
-      
       if (error) {
-        console.error('Error fetching exercises:', error);
+        setErrorExercises('Fout bij het laden van oefeningen');
         toast.error('Fout bij het laden van oefeningen');
       } else {
         setExercises(data || []);
       }
     } catch (err) {
-      console.error('Exception fetching exercises:', err);
+      setErrorExercises('Fout bij het laden van oefeningen');
       toast.error('Fout bij het laden van oefeningen');
     } finally {
       setLoadingExercises(false);
@@ -594,34 +604,20 @@ export default function TrainingscentrumBeheer() {
 
   const fetchSchemas = async () => {
     setLoadingSchemas(true);
+    setErrorSchemas(null);
     try {
       const { data, error } = await supabase
         .from('training_schemas')
-        .select(`
-          *,
-          training_schema_days (
-            id,
-            day_number,
-            name,
-            training_schema_exercises (
-              id,
-              exercise_name,
-              sets,
-              reps,
-              rest_time
-            )
-          )
-        `)
+        .select(`*,training_schema_days (id,day_number,name,training_schema_exercises (id,exercise_name,sets,reps,rest_time))`)
         .order('created_at', { ascending: false });
-      
       if (error) {
-        console.error('Error fetching schemas:', error);
+        setErrorSchemas('Fout bij het laden van trainingsschema\'s');
         toast.error('Fout bij het laden van trainingsschema\'s');
       } else {
         setSchemas(data || []);
       }
     } catch (err) {
-      console.error('Exception fetching schemas:', err);
+      setErrorSchemas('Fout bij het laden van trainingsschema\'s');
       toast.error('Fout bij het laden van trainingsschema\'s');
     } finally {
       setLoadingSchemas(false);
@@ -788,6 +784,15 @@ export default function TrainingscentrumBeheer() {
     (filterMuscle === 'Alle Spiergroepen' || exercise.primary_muscle === filterMuscle)
   );
 
+  // Show loading state if component is not mounted yet
+  if (!mounted) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <LoadingSpinner size="lg" text="Pagina laden..." />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -901,8 +906,19 @@ export default function TrainingscentrumBeheer() {
           {/* Schemas Table */}
           {loadingSchemas ? (
             <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
-              <p className="text-[#B6C948]">Trainingsschema's laden...</p>
+              <LoadingSpinner size="lg" text="Trainingsschema's laden..." />
+            </div>
+          ) : errorSchemas ? (
+            <div className="text-center py-12">
+              <ExclamationTriangleIcon className="w-12 h-12 text-red-400 mx-auto mb-4" />
+              <p className="text-red-400 text-lg mb-2">Fout bij het laden</p>
+              <p className="text-[#B6C948]/70 text-sm mb-4">{errorSchemas}</p>
+              <button
+                onClick={fetchSchemas}
+                className="px-4 py-2 rounded-xl bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#B6C948] transition-all duration-200"
+              >
+                Opnieuw proberen
+              </button>
             </div>
           ) : filteredSchemas.length === 0 ? (
             <div className="text-center py-12">
@@ -1040,8 +1056,19 @@ export default function TrainingscentrumBeheer() {
           {/* Exercises Grid */}
           {loadingExercises ? (
             <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
-              <p className="text-[#B6C948]">Oefeningen laden...</p>
+              <LoadingSpinner size="lg" text="Oefeningen laden..." />
+            </div>
+          ) : errorExercises ? (
+            <div className="text-center py-12">
+              <ExclamationTriangleIcon className="w-12 h-12 text-red-400 mx-auto mb-4" />
+              <p className="text-red-400 text-lg mb-2">Fout bij het laden</p>
+              <p className="text-[#B6C948]/70 text-sm mb-4">{errorExercises}</p>
+              <button
+                onClick={fetchExercises}
+                className="px-4 py-2 rounded-xl bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#B6C948] transition-all duration-200"
+              >
+                Opnieuw proberen
+              </button>
             </div>
           ) : filteredExercises.length === 0 ? (
             <div className="text-center py-12">
