@@ -18,21 +18,25 @@ export default function ModuleDetailPage() {
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
-      let { data: mod, error: modErr } = await supabase
-        .from('academy_modules')
-        .select('*')
-        .eq('slug', slug)
-        .single();
-      if (modErr) {
-        const { data: modById, error: modByIdErr } = await supabase
+      let mod = null;
+      let modErr = null;
+      // Bepaal of slug een UUID is
+      if (isUuid(slug)) {
+        const { data, error } = await supabase
           .from('academy_modules')
           .select('*')
           .eq('id', slug)
           .single();
-        if (!modByIdErr && modById) {
-          mod = modById;
-          modErr = null;
-        }
+        mod = data;
+        modErr = error;
+      } else {
+        const { data, error } = await supabase
+          .from('academy_modules')
+          .select('*')
+          .eq('slug', slug)
+          .single();
+        mod = data;
+        modErr = error;
       }
       if (!modErr && mod) {
         setModule(mod);
@@ -66,7 +70,6 @@ export default function ModuleDetailPage() {
       } else {
         setModule(null);
         setLessons([]);
-        setCompletedLessonIds([]);
       }
       setLoading(false);
     }
@@ -209,4 +212,8 @@ function GraduationModal({ module, onClose }: { module: any; onClose: () => void
       </div>
     </div>
   );
+}
+
+function isUuid(str: string) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
 } 
