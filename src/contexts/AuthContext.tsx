@@ -18,6 +18,7 @@ type AuthContextType = {
   isAuthenticated: boolean;
   updateUser: (updates: Partial<User>) => Promise<void>;
   redirectAdminToDashboard?: boolean;
+  clearAllCache: () => void;
 };
 
 const AuthContext = createContext<AuthContextType>({
@@ -29,6 +30,7 @@ const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   updateUser: async () => {},
   redirectAdminToDashboard: true,
+  clearAllCache: () => {},
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -277,6 +279,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const clearAllCache = () => {
+    if (typeof window !== 'undefined') {
+      console.log('🧹 Clearing all cache and localStorage...');
+      
+      // Clear all localStorage items
+      localStorage.clear();
+      
+      // Clear all sessionStorage items
+      sessionStorage.clear();
+      
+      // Clear any cached data in memory
+      setUser(null);
+      setLoading(false);
+      
+      // Force reload the page to clear any React state
+      window.location.reload();
+    }
+  };
+
   return (
     <AuthContext.Provider value={{ 
       user, 
@@ -287,6 +308,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       isAuthenticated: !!user,
       updateUser,
       redirectAdminToDashboard: true,
+      clearAllCache,
     }}>
       {children}
     </AuthContext.Provider>
