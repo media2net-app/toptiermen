@@ -5,6 +5,8 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import { useAuth } from '@/contexts/AuthContext';
+import { useDebug } from '@/contexts/DebugContext';
+import DebugPanel from '@/components/DebugPanel';
 import Image from 'next/image';
 // import MobileNav from '../components/MobileNav';
 
@@ -453,6 +455,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </main>
       </div>
+      
+      {/* Debug Panel for non-admin users */}
+      <DebugPanel />
     </div>
   );
 } 

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { DebugProvider, useDebug } from '@/contexts/DebugContext';
+import { clearAllCache, clearAppSpecificCache, checkForCacheIssues } from '@/lib/cache-utils';
 import { 
   HomeIcon, 
   UserGroupIcon, 
@@ -252,6 +253,33 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
             <span className="hidden sm:inline text-[#8BAE5A] text-sm">
               {user?.email || 'Admin'}
             </span>
+            
+            {/* Cache Management - Only for Admin */}
+            <div className="flex items-center gap-2">
+              <span className="text-[#B6C948] text-xs font-medium">Cache:</span>
+              <button
+                onClick={() => {
+                  clearAppSpecificCache();
+                  alert('App cache opgeruimd!');
+                }}
+                className="px-2 py-1 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A] focus:outline-none focus:ring-1 focus:ring-[#8BAE5A] text-xs transition-colors"
+                title="Ruim app cache op"
+              >
+                🧹 App
+              </button>
+              <button
+                onClick={() => {
+                  if (confirm('Weet je zeker dat je ALLE cache wilt opruimen? Dit zal de pagina herladen.')) {
+                    clearAllCache();
+                  }
+                }}
+                className="px-2 py-1 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A] focus:outline-none focus:ring-1 focus:ring-[#8BAE5A] text-xs transition-colors"
+                title="Ruim alle cache op en herlaad"
+              >
+                🔄 Alles
+              </button>
+            </div>
+            
             {/* Debug Toggle */}
             <div className="flex items-center gap-2">
               <BugAntIcon className="w-4 h-4 text-[#B6C948]" />
