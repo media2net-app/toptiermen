@@ -80,10 +80,11 @@ export default function ModuleDetailPage() {
 
   // Toon GraduationModal als 100% behaald en nog niet getoond
   useEffect(() => {
-    if (progress === 100 && !showGraduationModal) {
+    const graduationShown = module ? localStorage.getItem(`moduleGraduationShown_${module.id}`) : null;
+    if (progress === 100 && !showGraduationModal && !graduationShown) {
       setShowGraduationModal(true);
     }
-  }, [progress, showGraduationModal]);
+  }, [progress, showGraduationModal, module]);
 
   if (loading) {
     return <div className="text-[#8BAE5A] text-center py-12">Laden...</div>;
@@ -145,7 +146,10 @@ export default function ModuleDetailPage() {
       {showGraduationModal && (
         <GraduationModal
           module={module}
-          onClose={() => setShowGraduationModal(false)}
+          onClose={() => {
+            setShowGraduationModal(false);
+            localStorage.setItem(`moduleGraduationShown_${module.id}`, 'true');
+          }}
         />
       )}
     </div>
