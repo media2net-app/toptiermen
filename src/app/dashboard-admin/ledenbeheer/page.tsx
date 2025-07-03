@@ -22,7 +22,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { toast } from 'react-toastify';
 import { useDebug } from '@/contexts/DebugContext';
-import DebugPanel from '@/components/DebugPanel';
+
 import { supabase } from '@/lib/supabase';
 
 const ranks = ['Rookie', 'Warrior', 'Elite', 'Legend'];
@@ -792,42 +792,7 @@ export default function Ledenbeheer() {
         </div>
       )}
 
-      {/* Debug Panel */}
-      <DebugPanel 
-        data={{
-          'Totaal aantal leden': allMembers.length,
-          'Actieve leden': allMembers.filter(m => m.status === 'active').length,
-          'Inactieve leden': allMembers.filter(m => m.status === 'inactive').length,
-          'Geschorste leden': allMembers.filter(m => m.status === 'suspended').length,
-          'Leden met profielfoto': allMembers.filter(m => m.avatar_url).length,
-          'Huidige pagina': currentPage,
-          'Leden per pagina': itemsPerPage,
-          'Zoekterm': searchTerm,
-          'Gefilterde leden': filteredMembers.length,
-          'Geselecteerde filters': {
-            status: selectedStatus,
-            rank: selectedRank,
-            forumStatus: selectedRank
-          },
-          'Leden details': allMembers.map(m => ({
-            id: m.id,
-            name: m.full_name,
-            email: m.email,
-            status: m.status,
-            rank: m.rank,
-            hasAvatar: !!m.avatar_url,
-            created: m.created_at
-          })),
-          'Bewerkte lid': editingMember ? {
-            id: editingMember.id,
-            name: editingMember.full_name,
-            email: editingMember.email,
-            status: editingMember.status,
-            avatar_url: editingMember.avatar_url
-          } : null
-        }}
-        title="Ledenbeheer Debug Info"
-      />
+      {/* Debug Panel is now global and doesn't need props */}
     </div>
   );
 } 

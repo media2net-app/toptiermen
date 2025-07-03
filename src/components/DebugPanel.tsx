@@ -4,10 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useState, useEffect } from 'react';
 import { getCacheInfo, checkForCacheIssues, clearAppSpecificCache } from '@/lib/cache-utils';
 
-interface DebugPanelProps {
-  data: Record<string, any>;
-  title?: string;
-}
+
 
 export default function DebugPanel() {
   const { showDebug, toggleDebug } = useDebug();
