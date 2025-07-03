@@ -14,15 +14,27 @@ export default function MijnMissies() {
   const [progressData, setProgressData] = useState<Record<string, number>>({});
   const [unlocks, setUnlocks] = useState<Record<string, any>>({});
   const prevProgressRef = useRef<Record<string, number>>({});
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchModulesAndProgress() {
       setLoading(true);
+      setErrorMsg(null);
+      if (!user) {
+        setErrorMsg('Je bent niet ingelogd. Log opnieuw in.');
+        setLoading(false);
+        return;
+      }
       const { data: modulesData, error } = await supabase
         .from('academy_modules')
         .select('*')
         .order('order_index', { ascending: true });
-      if (!error && modulesData) {
+      if (error) {
+        setErrorMsg('Fout bij laden van modules: ' + error.message);
+        setLoading(false);
+        return;
+      }
+      if (modulesData) {
         const sortedModules = [...modulesData].sort((a, b) => {
           if (a.positie != null && b.positie != null) {
             return a.positie - b.positie;
@@ -37,7 +49,7 @@ export default function MijnMissies() {
           return a.id.localeCompare(b.id);
         });
         setModules(sortedModules);
-        if (user) {
+        try {
           const { data: lessonsData } = await supabase
             .from('academy_lessons')
             .select('id,module_id');
@@ -77,11 +89,13 @@ export default function MijnMissies() {
           }
           prevProgressRef.current = progressPerModule;
           setProgressData(progressPerModule);
+        } catch (err) {
+          setErrorMsg('Fout bij laden van voortgang: ' + (err as Error).message);
         }
       }
       setLoading(false);
     }
-    if (user) fetchModulesAndProgress();
+    fetchModulesAndProgress();
   }, [user]);
 
   return (
@@ -90,7 +104,9 @@ export default function MijnMissies() {
         title="Academy"
         subtitle="Overzicht van alle modules en jouw voortgang"
       >
-        {loading ? (
+        {errorMsg ? (
+          <div className="text-red-400 text-center py-12 font-bold">{errorMsg}</div>
+        ) : loading ? (
           <div className="text-[#8BAE5A] text-center py-12">Laden...</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
