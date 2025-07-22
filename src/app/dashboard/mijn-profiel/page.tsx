@@ -117,6 +117,11 @@ export default function MijnProfiel() {
       const processedFile = await convertHeicToJpeg(file);
       console.log('Processed file:', processedFile.name, 'Type:', processedFile.type);
       
+      // Show info message for HEIC files
+      if (isHeicFile(file)) {
+        toast.info('HEIC bestand gedetecteerd. Probeer de foto eerst naar JPEG te converteren op je telefoon voor betere kwaliteit.');
+      }
+      
       const reader = new FileReader();
       reader.onload = (e) => {
         const result = e.target?.result as string;
