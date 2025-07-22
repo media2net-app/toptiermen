@@ -47,6 +47,16 @@ interface MealPlan {
   meals: Meal[];
 }
 
+interface WeekPlan {
+  [day: string]: MealPlan;
+}
+
+interface DayPlan {
+  day: string;
+  date: string;
+  meals: Meal[];
+}
+
 const activityLevels = [
   { value: 'sedentary', label: 'Zittend werk', description: 'Weinig tot geen beweging' },
   { value: 'light', label: 'Licht actief', description: '1-3x per week sporten' },
@@ -104,8 +114,9 @@ export default function VoedingsplannenPage() {
   });
   const [nutritionGoals, setNutritionGoals] = useState<NutritionGoals | null>(null);
   const [selectedDiet, setSelectedDiet] = useState<string>('');
-  const [mealPlan, setMealPlan] = useState<MealPlan | null>(null);
-  const [originalMealPlan, setOriginalMealPlan] = useState<MealPlan | null>(null); // Store original meal plan
+  const [weekPlan, setWeekPlan] = useState<WeekPlan | null>(null);
+  const [originalWeekPlan, setOriginalWeekPlan] = useState<WeekPlan | null>(null); // Store original week plan
+  const [selectedDay, setSelectedDay] = useState<string>('monday'); // Current selected day
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedNutritionPlan, setSelectedNutritionPlan] = useState<string | null>(null);
   const [showPlanBanner, setShowPlanBanner] = useState(true);
@@ -440,6 +451,17 @@ export default function VoedingsplannenPage() {
     setSelectedDiet(dietId);
   };
 
+  const generateWeekPlan = (goals: NutritionGoals, dietType: string): WeekPlan => {
+    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    const weekPlan: WeekPlan = {};
+    
+    days.forEach(day => {
+      weekPlan[day] = generateMealPlan(goals, dietType);
+    });
+    
+    return weekPlan;
+  };
+
   const handleGeneratePlan = async () => {
     if (!nutritionGoals || !selectedDiet) return;
     
@@ -448,9 +470,9 @@ export default function VoedingsplannenPage() {
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    const plan = generateMealPlan(nutritionGoals, selectedDiet);
-    setOriginalMealPlan(plan); // Store original plan
-    setMealPlan(plan);
+    const plan = generateWeekPlan(nutritionGoals, selectedDiet);
+    setOriginalWeekPlan(plan); // Store original plan
+    setWeekPlan(plan);
     setCurrentStep(3);
     setIsGenerating(false);
   };
@@ -517,18 +539,20 @@ export default function VoedingsplannenPage() {
   };
 
   const generateShoppingList = () => {
-    if (!mealPlan) return;
+    if (!weekPlan) return;
     
     const ingredients = new Map<string, { amount: number; unit: string }>();
     
-    mealPlan.meals.forEach(meal => {
-      meal.ingredients.forEach((ingredient: { name: string; amount: number; unit: string }) => {
-        const existing = ingredients.get(ingredient.name);
-        if (existing) {
-          existing.amount += ingredient.amount;
-        } else {
-          ingredients.set(ingredient.name, { amount: ingredient.amount, unit: ingredient.unit });
-        }
+    Object.values(weekPlan).forEach(dayPlan => {
+      dayPlan.meals.forEach(meal => {
+        meal.ingredients.forEach((ingredient: { name: string; amount: number; unit: string }) => {
+          const existing = ingredients.get(ingredient.name);
+          if (existing) {
+            existing.amount += ingredient.amount;
+          } else {
+            ingredients.set(ingredient.name, { amount: ingredient.amount, unit: ingredient.unit });
+          }
+        });
       });
     });
 
@@ -551,20 +575,37 @@ export default function VoedingsplannenPage() {
     setIsEditModalOpen(true);
   };
 
-  const handleSaveMeal = (updatedMeal: Meal) => {
-    if (!mealPlan) return;
+  const getDayName = (day: string): string => {
+    const dayNames: { [key: string]: string } = {
+      monday: 'Maandag',
+      tuesday: 'Dinsdag', 
+      wednesday: 'Woensdag',
+      thursday: 'Donderdag',
+      friday: 'Vrijdag',
+      saturday: 'Zaterdag',
+      sunday: 'Zondag'
+    };
+    return dayNames[day] || day;
+  };
 
-    const updatedMeals = mealPlan.meals.map(meal => 
+  const handleSaveMeal = (updatedMeal: Meal) => {
+    if (!weekPlan) return;
+
+    const currentDayPlan = weekPlan[selectedDay];
+    const updatedMeals = currentDayPlan.meals.map(meal => 
       meal.id === updatedMeal.id ? updatedMeal : meal
     );
 
     // Redistribute calories to maintain total daily goals
-    const redistributedMeals = redistributeCalories(updatedMeals, nutritionGoals, originalMealPlan?.meals);
+    const redistributedMeals = redistributeCalories(updatedMeals, nutritionGoals, originalWeekPlan?.[selectedDay]?.meals);
     
-    setMealPlan({
-      ...mealPlan,
-      meals: redistributedMeals
-    });
+    setWeekPlan(prev => ({
+      ...prev!,
+      [selectedDay]: {
+        ...currentDayPlan,
+        meals: redistributedMeals
+      }
+    }));
   };
 
   return (
@@ -803,7 +844,7 @@ export default function VoedingsplannenPage() {
             </motion.div>
           )}
 
-          {currentStep === 3 && mealPlan && (
+          {currentStep === 3 && weekPlan && (
             <motion.div
               key="step3"
               initial={{ opacity: 0, y: 20 }}
@@ -812,30 +853,59 @@ export default function VoedingsplannenPage() {
             >
               <div className="text-center">
                 <h2 className="text-2xl font-bold text-white mb-2">
-                  Jouw Persoonlijke {selectedDiet === 'carnivore' ? 'Carnivoor' : 'Voedings'} Plan op Maat
+                  Jouw Persoonlijke {selectedDiet === 'carnivore' ? 'Carnivoor' : 'Voedings'} Weekplan op Maat
                 </h2>
                 <p className="text-gray-300 mb-4">
                   Gebaseerd op jouw doel van {nutritionGoals?.calories} kcal en {nutritionGoals?.protein}g eiwit per dag
                 </p>
                 
-                {/* Total daily nutrition summary */}
+                {/* Day Navigation */}
+                <div className="flex gap-2 justify-center mb-6 overflow-x-auto">
+                  {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map((day) => (
+                    <button
+                      key={day}
+                      onClick={() => setSelectedDay(day)}
+                      className={`px-4 py-2 rounded-lg font-medium transition-all whitespace-nowrap ${
+                        selectedDay === day
+                          ? 'bg-[#8BAE5A] text-white'
+                          : 'bg-[#2A2A2A] text-gray-300 hover:text-white'
+                      }`}
+                    >
+                      {day === 'monday' ? 'Maandag' :
+                       day === 'tuesday' ? 'Dinsdag' :
+                       day === 'wednesday' ? 'Woensdag' :
+                       day === 'thursday' ? 'Donderdag' :
+                       day === 'friday' ? 'Vrijdag' :
+                       day === 'saturday' ? 'Zaterdag' : 'Zondag'}
+                    </button>
+                  ))}
+                </div>
+                
+                {/* Total daily nutrition summary for selected day */}
                 <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-4 mb-6 inline-block">
-                  <div className="text-sm text-[#8BAE5A] font-semibold mb-2">Totaal Dagelijks Plan</div>
+                  <div className="text-sm text-[#8BAE5A] font-semibold mb-2">
+                    {selectedDay === 'monday' ? 'Maandag' :
+                     selectedDay === 'tuesday' ? 'Dinsdag' :
+                     selectedDay === 'wednesday' ? 'Woensdag' :
+                     selectedDay === 'thursday' ? 'Donderdag' :
+                     selectedDay === 'friday' ? 'Vrijdag' :
+                     selectedDay === 'saturday' ? 'Zaterdag' : 'Zondag'} - Totaal Dagelijks Plan
+                  </div>
                   <div className="flex gap-6 text-white">
                     <div>
-                      <span className="font-bold">{mealPlan.meals.reduce((sum, meal) => sum + meal.calories, 0)}</span>
+                      <span className="font-bold">{weekPlan[selectedDay].meals.reduce((sum: number, meal: Meal) => sum + meal.calories, 0)}</span>
                       <span className="text-sm text-gray-400"> kcal</span>
                     </div>
                     <div>
-                      <span className="font-bold">{mealPlan.meals.reduce((sum, meal) => sum + meal.protein, 0)}</span>
+                      <span className="font-bold">{weekPlan[selectedDay].meals.reduce((sum: number, meal: Meal) => sum + meal.protein, 0)}</span>
                       <span className="text-sm text-gray-400">g eiwit</span>
                     </div>
                     <div>
-                      <span className="font-bold">{mealPlan.meals.reduce((sum, meal) => sum + meal.carbs, 0)}</span>
+                      <span className="font-bold">{weekPlan[selectedDay].meals.reduce((sum: number, meal: Meal) => sum + meal.carbs, 0)}</span>
                       <span className="text-sm text-gray-400">g koolhydraten</span>
                     </div>
                     <div>
-                      <span className="font-bold">{mealPlan.meals.reduce((sum, meal) => sum + meal.fat, 0)}</span>
+                      <span className="font-bold">{weekPlan[selectedDay].meals.reduce((sum: number, meal: Meal) => sum + meal.fat, 0)}</span>
                       <span className="text-sm text-gray-400">g vet</span>
                     </div>
                   </div>
