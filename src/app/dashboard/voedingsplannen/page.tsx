@@ -104,6 +104,7 @@ export default function VoedingsplannenPage() {
   const [nutritionGoals, setNutritionGoals] = useState<NutritionGoals | null>(null);
   const [selectedDiet, setSelectedDiet] = useState<string>('');
   const [mealPlan, setMealPlan] = useState<MealPlan | null>(null);
+  const [originalMealPlan, setOriginalMealPlan] = useState<MealPlan | null>(null); // Store original meal plan
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedNutritionPlan, setSelectedNutritionPlan] = useState<string | null>(null);
   const [showPlanBanner, setShowPlanBanner] = useState(true);
@@ -445,6 +446,7 @@ export default function VoedingsplannenPage() {
     await new Promise(resolve => setTimeout(resolve, 2000));
     
     const plan = generateMealPlan(nutritionGoals, selectedDiet);
+    setOriginalMealPlan(plan); // Store original plan
     setMealPlan(plan);
     setCurrentStep(3);
     setIsGenerating(false);
@@ -463,7 +465,7 @@ export default function VoedingsplannenPage() {
   };
 
   // Helper function to redistribute calories when meals change
-  const redistributeCalories = (meals: Meal[], nutritionGoals: NutritionGoals | null): Meal[] => {
+  const redistributeCalories = (meals: Meal[], nutritionGoals: NutritionGoals | null, originalMeals?: Meal[]): Meal[] => {
     if (!nutritionGoals) return meals;
     
     const mainMeals = meals.filter(m => m.type !== 'snack');
@@ -474,16 +476,17 @@ export default function VoedingsplannenPage() {
     const snackPercentage = snacks.length > 0 ? 0.15 / snacks.length : 0;
     
     return meals.map(meal => {
-      // Calculate the ratio of new calories to original calories
-      const originalCalories = meal.calories;
+      // Find the original meal to get the base calories and ingredients
+      const originalMeal = originalMeals?.find(m => m.id === meal.id) || meal;
+      const originalCalories = originalMeal.calories;
       const newCalories = meal.type === 'snack' 
         ? Math.round(nutritionGoals.calories * snackPercentage)
         : Math.round(nutritionGoals.calories * mainMealPercentage);
       
       const calorieRatio = originalCalories > 0 ? newCalories / originalCalories : 1;
       
-      // Adjust ingredients proportionally
-      const adjustedIngredients = meal.ingredients.map(ingredient => ({
+      // Adjust ingredients proportionally based on original meal
+      const adjustedIngredients = originalMeal.ingredients.map(ingredient => ({
         ...ingredient,
         amount: Math.round(ingredient.amount * calorieRatio * 10) / 10 // Round to 1 decimal
       }));
@@ -839,7 +842,7 @@ export default function VoedingsplannenPage() {
                           <button
                             onClick={() => {
                               const remainingMeals = mealPlan.meals.filter(m => m.id !== meal.id);
-                              const updatedMeals = redistributeCalories(remainingMeals, nutritionGoals);
+                              const updatedMeals = redistributeCalories(remainingMeals, nutritionGoals, originalMealPlan?.meals);
                               
                               setMealPlan(prev => ({
                                 ...prev!,
@@ -909,7 +912,7 @@ export default function VoedingsplannenPage() {
                             type: 'snack'
                           };
                           
-                          const updatedMeals = redistributeCalories([...mealPlan.meals, newSnack], nutritionGoals);
+                          const updatedMeals = redistributeCalories([...mealPlan.meals, newSnack], nutritionGoals, originalMealPlan?.meals);
                           
                           setMealPlan(prev => ({
                             ...prev!,
@@ -944,7 +947,7 @@ export default function VoedingsplannenPage() {
                             type: 'snack'
                           };
                           
-                          const updatedMeals = redistributeCalories([...mealPlan.meals, newSnack], nutritionGoals);
+                          const updatedMeals = redistributeCalories([...mealPlan.meals, newSnack], nutritionGoals, originalMealPlan?.meals);
                           
                           setMealPlan(prev => ({
                             ...prev!,
