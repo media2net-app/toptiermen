@@ -105,82 +105,42 @@ export default function TrainingscentrumPage() {
   const [selectedSchema, setSelectedSchema] = useState<TrainingSchemaDb | null>(null);
   const [selectedNutritionPlan, setSelectedNutritionPlan] = useState<string | null>(null);
 
-  // Add refs for better state management
-  const mountedRef = useRef(true);
-  const lastUserRef = useRef<any>(null);
-  const fetchingRef = useRef(false);
-
-  // Combined fetch function to prevent race conditions
+  // Simplified data fetching function
   const fetchAllUserData = useCallback(async () => {
-    if (!user || fetchingRef.current) {
-      console.log('Trainingscentrum: Skipping fetch - no user or already fetching');
-      return;
-    }
-
-    // Don't fetch if user hasn't changed
-    if (lastUserRef.current === user) {
-      console.log('Trainingscentrum: User unchanged, skipping fetch');
+    if (!user) {
+      console.log('Trainingscentrum: No user, skipping data fetch...');
       return;
     }
 
     console.log('Trainingscentrum: Fetching data for user:', user.email);
-    fetchingRef.current = true;
-    lastUserRef.current = user;
+    setIsLoading(true);
 
     try {
-      // Fetch all user data in parallel with timeouts and abort controllers
-      const timeout = 8000;
-      
-      console.log('Trainingscentrum: Starting parallel fetch...');
-      
-      const userController = new AbortController();
-      const schemasController = new AbortController();
-      const userTimeout = setTimeout(() => userController.abort(), timeout);
-      const schemasTimeout = setTimeout(() => schemasController.abort(), timeout);
-      
-      const [userResult, schemasResult] = await Promise.allSettled([
-        Promise.race([
-          supabase
-            .from('users')
-            .select('selected_schema_id, selected_nutrition_plan')
-            .eq('id', user.id)
-            .single(),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('User data timeout')), timeout))
-        ]),
-        Promise.race([
-          supabase
-            .from('training_schemas')
-            .select('*')
-            .eq('status', 'published'),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Schemas timeout')), timeout))
-        ])
-      ]);
+      // Step 1: Fetch user data
+      console.log('Trainingscentrum: Fetching user data...');
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('selected_schema_id, selected_nutrition_plan')
+        .eq('id', user.id)
+        .single();
 
-      clearTimeout(userTimeout);
-      clearTimeout(schemasTimeout);
-
-      if (!mountedRef.current) return;
-
-      // Handle user data result
-      let userData = null;
-      if (userResult.status === 'fulfilled' && !(userResult.value as any).error) {
-        userData = (userResult.value as any).data;
-      } else {
-        console.warn('User data fetch failed:', userResult.status === 'rejected' ? userResult.reason : (userResult.value as any).error);
+      if (userError) {
+        console.warn('Trainingscentrum: User data fetch failed:', userError.message);
       }
 
-      // Handle schemas data result
-      let schemasData: any[] = [];
-      if (schemasResult.status === 'fulfilled' && !(schemasResult.value as any).error) {
-        schemasData = (schemasResult.value as any).data || [];
-      } else {
-        console.warn('Schemas fetch failed:', schemasResult.status === 'rejected' ? schemasResult.reason : (schemasResult.value as any).error);
+      // Step 2: Fetch training schemas
+      console.log('Trainingscentrum: Fetching training schemas...');
+      const { data: schemasData, error: schemasError } = await supabase
+        .from('training_schemas')
+        .select('*')
+        .eq('status', 'published');
+
+      if (schemasError) {
+        console.warn('Trainingscentrum: Schemas fetch failed:', schemasError.message);
       }
 
-      if (!mountedRef.current) return;
-
-      // Update schemas first
-      setAvailableSchemas(schemasData);
+      // Update schemas
+      setAvailableSchemas(schemasData || []);
 
       // Process user data if available
       if (userData) {
@@ -188,26 +148,22 @@ export default function TrainingscentrumPage() {
         if (userData.selected_schema_id) {
           setSelectedSchemaId(userData.selected_schema_id);
           
-          // Fetch the schema object with timeout
+          // Fetch the selected schema object
           try {
-            const schemaResult = await Promise.race([
-              supabase
-                .from('training_schemas')
-                .select('*')
-                .eq('id', userData.selected_schema_id)
-                .single(),
-              new Promise((_, reject) => setTimeout(() => reject(new Error('Schema fetch timeout')), 5000))
-            ]);
+            const { data: schemaData, error: schemaError } = await supabase
+              .from('training_schemas')
+              .select('*')
+              .eq('id', userData.selected_schema_id)
+              .single();
             
-            const result = schemaResult as any;
-            if (result.data && mountedRef.current) {
-              setSelectedSchema(result.data);
-            } else {
-              console.warn('Selected schema fetch failed:', result.error);
+            if (schemaError) {
+              console.warn('Trainingscentrum: Selected schema fetch failed:', schemaError.message);
               setSelectedSchema(null);
+            } else {
+              setSelectedSchema(schemaData);
             }
           } catch (error) {
-            console.error('Error fetching selected schema:', error);
+            console.error('Trainingscentrum: Error fetching selected schema:', error);
             setSelectedSchema(null);
           }
         } else {
@@ -228,17 +184,9 @@ export default function TrainingscentrumPage() {
       console.log('Trainingscentrum: Data loaded successfully');
 
     } catch (error) {
-      console.error('Error fetching trainingscentrum data:', error);
-      const err = error as Error;
-      if (err.name === 'AbortError') {
-        console.log('Trainingscentrum: Fetch was aborted due to timeout');
-      }
-      // Don't show error to user for trainingscentrum, just log it
+      console.error('Trainingscentrum: Error during data fetch:', error);
     } finally {
-      if (mountedRef.current) {
-        setIsLoading(false);
-        fetchingRef.current = false;
-      }
+      setIsLoading(false);
     }
   }, [user]);
 
@@ -260,8 +208,7 @@ export default function TrainingscentrumPage() {
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      mountedRef.current = false;
-      fetchingRef.current = false;
+      // No specific cleanup needed here as the simplified fetchAllUserData doesn't use refs
     };
   }, []);
 
