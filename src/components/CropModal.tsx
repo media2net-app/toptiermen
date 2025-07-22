@@ -66,18 +66,44 @@ const CropModal: React.FC<CropModalProps> = ({ image, aspect, onClose, onCrop })
   const [zoom, setZoom] = useState(1);
   const [croppedArea, setCroppedArea] = useState<any>(null);
   const [imageError, setImageError] = useState(false);
+  const [isCropperReady, setIsCropperReady] = useState(false);
 
   console.log('CropModal received image:', image ? 'Image provided' : 'No image', 'Length:', image?.length);
 
   const onCropComplete = useCallback((_: any, croppedAreaPixels: any) => {
+    console.log('Crop complete, area:', croppedAreaPixels);
     setCroppedArea(croppedAreaPixels);
   }, []);
 
+  const onMediaLoaded = useCallback(() => {
+    console.log('Media loaded in cropper');
+    // Add a small delay to ensure the cropper is fully ready
+    setTimeout(() => {
+      setIsCropperReady(true);
+    }, 500);
+  }, []);
+
   const handleCrop = async () => {
+    console.log('Handle crop called, croppedArea:', croppedArea, 'isCropperReady:', isCropperReady);
+    
     if (!croppedArea) {
       console.error('No cropped area available');
+      // Try to create a default crop area
+      if (isCropperReady) {
+        console.log('Creating default crop area');
+        const defaultCrop = { x: 0, y: 0, width: 100, height: 100 };
+        try {
+          const croppedImg = await getCroppedImg(image, defaultCrop, zoom, aspect);
+          console.log('Default crop successful, result length:', croppedImg.length);
+          onCrop(croppedImg);
+          return;
+        } catch (error) {
+          console.error('Default crop failed:', error);
+        }
+      }
       return;
     }
+    
     try {
       const croppedImg = await getCroppedImg(image, croppedArea, zoom, aspect);
       console.log('Crop successful, result length:', croppedImg.length);
@@ -114,6 +140,7 @@ const CropModal: React.FC<CropModalProps> = ({ image, aspect, onClose, onCrop })
               onCropChange={setCrop}
               onZoomChange={setZoom}
               onCropComplete={onCropComplete}
+              onMediaLoaded={onMediaLoaded}
               cropShape="rect"
               showGrid={true}
             />
@@ -130,7 +157,17 @@ const CropModal: React.FC<CropModalProps> = ({ image, aspect, onClose, onCrop })
         />
         <div className="flex gap-4 w-full">
           <button className="flex-1 px-4 py-2 rounded-xl bg-[#232D1A] text-[#8BAE5A] font-semibold shadow border border-[#3A4D23]/40 hover:bg-[#2A341F]" onClick={onClose}>Annuleren</button>
-          <button className="flex-1 px-4 py-2 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-semibold shadow hover:from-[#FFD700] hover:to-[#8BAE5A]" onClick={handleCrop}>Opslaan</button>
+          <button 
+            className={`flex-1 px-4 py-2 rounded-xl font-semibold shadow transition-all ${
+              isCropperReady 
+                ? 'bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] hover:from-[#FFD700] hover:to-[#8BAE5A]' 
+                : 'bg-gray-500 text-gray-300 cursor-not-allowed'
+            }`} 
+            onClick={handleCrop}
+            disabled={!isCropperReady}
+          >
+            {isCropperReady ? 'Opslaan' : 'Laden...'}
+          </button>
         </div>
       </div>
     </div>
