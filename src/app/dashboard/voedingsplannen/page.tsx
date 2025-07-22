@@ -615,6 +615,73 @@ export default function VoedingsplannenPage() {
     }));
   };
 
+  const handleAddSnack = (time: string, type: 'afternoon' | 'evening') => {
+    if (!weekPlan || !nutritionGoals) return;
+
+    const estimatedCalories = Math.round(nutritionGoals.calories * 0.075);
+    
+    const newSnack: Meal = {
+      id: `snack-${Date.now()}`,
+      name: type === 'afternoon' ? 'Gezonde Snack' : 'Avond Snack',
+      image: type === 'afternoon' 
+        ? 'https://images.unsplash.com/photo-1482049016688-2d3e1b311543?w=800&h=600&fit=crop'
+        : 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=800&h=600&fit=crop',
+      ingredients: type === 'afternoon' 
+        ? [
+            { name: 'Amandelen', amount: Math.round(estimatedCalories * 0.3 / 6), unit: 'gram' },
+            { name: 'Appel', amount: 1, unit: 'stuk' }
+          ]
+        : [
+            { name: 'Griekse yoghurt', amount: Math.round(estimatedCalories * 0.6 / 0.6), unit: 'gram' },
+            { name: 'Bessen', amount: Math.round(estimatedCalories * 0.4 / 0.5), unit: 'gram' }
+          ],
+      calories: estimatedCalories,
+      protein: Math.round(estimatedCalories * (type === 'afternoon' ? 0.15 : 0.25)),
+      carbs: Math.round(estimatedCalories * (type === 'afternoon' ? 0.6 : 0.55)),
+      fat: Math.round(estimatedCalories * (type === 'afternoon' ? 0.25 : 0.2)),
+      time,
+      type: 'snack'
+    };
+
+    const allOriginalMeals = [...(originalWeekPlan?.[selectedDay]?.meals || []), newSnack];
+    const updatedMeals = redistributeCalories([...weekPlan[selectedDay].meals, newSnack], nutritionGoals, allOriginalMeals);
+    
+    setWeekPlan(prev => ({
+      ...prev!,
+      [selectedDay]: {
+        ...prev![selectedDay],
+        meals: updatedMeals.sort((a, b) => a.time.localeCompare(b.time))
+      }
+    }));
+  };
+
+  const handleRemoveSnack = (mealId: string) => {
+    if (!weekPlan) return;
+
+    const remainingMeals = weekPlan[selectedDay].meals.filter(m => m.id !== mealId);
+    const remainingOriginalMeals = originalWeekPlan?.[selectedDay]?.meals.filter(m => 
+      remainingMeals.some(remaining => remaining.id === m.id)
+    );
+    const updatedMeals = redistributeCalories(remainingMeals, nutritionGoals, remainingOriginalMeals);
+    
+    setWeekPlan(prev => ({
+      ...prev!,
+      [selectedDay]: {
+        ...prev![selectedDay],
+        meals: updatedMeals.sort((a, b) => a.time.localeCompare(b.time))
+      }
+    }));
+  };
+
+  const handleStartPlan = () => {
+    localStorage.setItem('nutritionPlanCompleted', 'true');
+    window.location.href = '/dashboard';
+  };
+
+  const handleNewPlan = () => {
+    setCurrentStep(1);
+  };
+
   return (
     <PageLayout
       title="Top Tier Voedingsplan Generator"
@@ -852,12 +919,19 @@ export default function VoedingsplannenPage() {
           )}
 
           {currentStep === 3 && weekPlan && (
-            <motion.div
-              key="step3"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="space-y-8"
-            >
+            <WeekPlanView
+              weekPlan={weekPlan}
+              selectedDay={selectedDay}
+              setSelectedDay={setSelectedDay}
+              nutritionGoals={nutritionGoals}
+              selectedDiet={selectedDiet}
+              onEditMeal={handleEditMeal}
+              onAddSnack={handleAddSnack}
+              onRemoveSnack={handleRemoveSnack}
+              onStartPlan={handleStartPlan}
+              onNewPlan={handleNewPlan}
+            />
+          )}
               <div className="text-center">
                 <h2 className="text-2xl font-bold text-white mb-2">
                   Jouw Persoonlijke {selectedDiet === 'carnivore' ? 'Carnivoor' : 'Voedings'} Weekplan op Maat
