@@ -462,6 +462,38 @@ export default function VoedingsplannenPage() {
     }
   };
 
+  // Helper function to redistribute calories when meals change
+  const redistributeCalories = (meals: Meal[], nutritionGoals: NutritionGoals | null): Meal[] => {
+    if (!nutritionGoals) return meals;
+    
+    const mainMeals = meals.filter(m => m.type !== 'snack');
+    const snacks = meals.filter(m => m.type === 'snack');
+    
+    // Redistribute calories: main meals get 85%, snacks get 15%
+    const mainMealPercentage = mainMeals.length > 0 ? 0.85 / mainMeals.length : 1;
+    const snackPercentage = snacks.length > 0 ? 0.15 / snacks.length : 0;
+    
+    return meals.map(meal => {
+      if (meal.type === 'snack') {
+        return {
+          ...meal,
+          calories: Math.round(nutritionGoals.calories * snackPercentage),
+          protein: Math.round(nutritionGoals.protein * snackPercentage),
+          carbs: Math.round(nutritionGoals.carbs * snackPercentage),
+          fat: Math.round(nutritionGoals.fat * snackPercentage)
+        };
+      } else {
+        return {
+          ...meal,
+          calories: Math.round(nutritionGoals.calories * mainMealPercentage),
+          protein: Math.round(nutritionGoals.protein * mainMealPercentage),
+          carbs: Math.round(nutritionGoals.carbs * mainMealPercentage),
+          fat: Math.round(nutritionGoals.fat * mainMealPercentage)
+        };
+      }
+    });
+  };
+
   const generateShoppingList = () => {
     if (!mealPlan) return;
     
@@ -739,9 +771,32 @@ export default function VoedingsplannenPage() {
                 <h2 className="text-2xl font-bold text-white mb-2">
                   Jouw Persoonlijke {selectedDiet === 'carnivore' ? 'Carnivoor' : 'Voedings'} Plan op Maat
                 </h2>
-                <p className="text-gray-300">
+                <p className="text-gray-300 mb-4">
                   Gebaseerd op jouw doel van {nutritionGoals?.calories} kcal en {nutritionGoals?.protein}g eiwit per dag
                 </p>
+                
+                {/* Total daily nutrition summary */}
+                <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-4 mb-6 inline-block">
+                  <div className="text-sm text-[#8BAE5A] font-semibold mb-2">Totaal Dagelijks Plan</div>
+                  <div className="flex gap-6 text-white">
+                    <div>
+                      <span className="font-bold">{mealPlan.meals.reduce((sum, meal) => sum + meal.calories, 0)}</span>
+                      <span className="text-sm text-gray-400"> kcal</span>
+                    </div>
+                    <div>
+                      <span className="font-bold">{mealPlan.meals.reduce((sum, meal) => sum + meal.protein, 0)}</span>
+                      <span className="text-sm text-gray-400">g eiwit</span>
+                    </div>
+                    <div>
+                      <span className="font-bold">{mealPlan.meals.reduce((sum, meal) => sum + meal.carbs, 0)}</span>
+                      <span className="text-sm text-gray-400">g koolhydraten</span>
+                    </div>
+                    <div>
+                      <span className="font-bold">{mealPlan.meals.reduce((sum, meal) => sum + meal.fat, 0)}</span>
+                      <span className="text-sm text-gray-400">g vet</span>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div className="text-center mb-8">
@@ -767,9 +822,12 @@ export default function VoedingsplannenPage() {
                         {meal.type === 'snack' && (
                           <button
                             onClick={() => {
+                              const remainingMeals = mealPlan.meals.filter(m => m.id !== meal.id);
+                              const updatedMeals = redistributeCalories(remainingMeals, nutritionGoals);
+                              
                               setMealPlan(prev => ({
                                 ...prev!,
-                                meals: prev!.meals.filter(m => m.id !== meal.id)
+                                meals: updatedMeals.sort((a, b) => a.time.localeCompare(b.time))
                               }));
                             }}
                             className="text-red-400 hover:text-red-300 text-sm font-medium"
@@ -824,16 +882,19 @@ export default function VoedingsplannenPage() {
                               { name: 'Amandelen', amount: 30, unit: 'gram' },
                               { name: 'Appel', amount: 1, unit: 'stuk' }
                             ],
-                            calories: Math.round((nutritionGoals?.calories || 0) * 0.1),
-                            protein: Math.round((nutritionGoals?.protein || 0) * 0.1),
-                            carbs: Math.round((nutritionGoals?.carbs || 0) * 0.1),
-                            fat: Math.round((nutritionGoals?.fat || 0) * 0.1),
+                            calories: 0, // Will be calculated by redistributeCalories
+                            protein: 0,
+                            carbs: 0,
+                            fat: 0,
                             time: '15:00',
                             type: 'snack'
                           };
+                          
+                          const updatedMeals = redistributeCalories([...mealPlan.meals, newSnack], nutritionGoals);
+                          
                           setMealPlan(prev => ({
                             ...prev!,
-                            meals: [...prev!.meals, newSnack].sort((a, b) => a.time.localeCompare(b.time))
+                            meals: updatedMeals.sort((a, b) => a.time.localeCompare(b.time))
                           }));
                         }}
                         className="bg-[#3A4D23] text-white px-4 py-2 rounded-lg hover:bg-[#4A5D33] transition-all text-sm"
@@ -853,16 +914,19 @@ export default function VoedingsplannenPage() {
                               { name: 'Griekse yoghurt', amount: 100, unit: 'gram' },
                               { name: 'Bessen', amount: 50, unit: 'gram' }
                             ],
-                            calories: Math.round((nutritionGoals?.calories || 0) * 0.08),
-                            protein: Math.round((nutritionGoals?.protein || 0) * 0.08),
-                            carbs: Math.round((nutritionGoals?.carbs || 0) * 0.08),
-                            fat: Math.round((nutritionGoals?.fat || 0) * 0.08),
+                            calories: 0, // Will be calculated by redistributeCalories
+                            protein: 0,
+                            carbs: 0,
+                            fat: 0,
                             time: '21:00',
                             type: 'snack'
                           };
+                          
+                          const updatedMeals = redistributeCalories([...mealPlan.meals, newSnack], nutritionGoals);
+                          
                           setMealPlan(prev => ({
                             ...prev!,
-                            meals: [...prev!.meals, newSnack].sort((a, b) => a.time.localeCompare(b.time))
+                            meals: updatedMeals.sort((a, b) => a.time.localeCompare(b.time))
                           }));
                         }}
                         className="bg-[#3A4D23] text-white px-4 py-2 rounded-lg hover:bg-[#4A5D33] transition-all text-sm"
