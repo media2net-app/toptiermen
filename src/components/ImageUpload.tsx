@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { XMarkIcon, PhotoIcon } from '@heroicons/react/24/outline';
+import { convertHeicToJpeg, isHeicFile } from '@/lib/heic-converter';
 
 interface ImageUploadProps {
   currentImageUrl?: string | null;
@@ -32,8 +33,8 @@ export default function ImageUpload({
 
     // Validate file type
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-    if (!allowedTypes.includes(file.type)) {
-      setError('Alleen JPEG, PNG, WebP en GIF bestanden zijn toegestaan.');
+    if (!allowedTypes.includes(file.type) && !isHeicFile(file)) {
+      setError('Alleen JPEG, PNG, WebP, GIF en HEIC bestanden zijn toegestaan.');
       return;
     }
 
@@ -48,14 +49,17 @@ export default function ImageUpload({
     setUploadProgress(0);
 
     try {
+      // Convert HEIC to JPEG if needed
+      const processedFile = await convertHeicToJpeg(file);
+      
       // Generate unique filename
-      const fileExt = file.name.split('.').pop();
+      const fileExt = processedFile.name.split('.').pop();
       const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
 
       // Upload to Supabase Storage
       const { data, error: uploadError } = await supabase.storage
         .from(bucketName)
-        .upload(fileName, file, {
+        .upload(fileName, processedFile, {
           cacheControl: '3600',
           upsert: false
         });
@@ -134,7 +138,7 @@ export default function ImageUpload({
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/*"
+            accept="image/*,.heic,.heif"
             onChange={handleFileSelect}
             className="hidden"
             disabled={uploading}
@@ -149,7 +153,7 @@ export default function ImageUpload({
               {uploading ? 'Uploaden...' : 'Cover afbeelding uploaden'}
             </span>
             <span className="text-[#B6C948] text-sm">
-              JPEG, PNG, WebP of GIF (max {maxSize}MB)
+              JPEG, PNG, WebP, GIF of HEIC (max {maxSize}MB)
             </span>
           </button>
         </div>

@@ -6,6 +6,7 @@ import CropModal from '../../../components/CropModal';
 import { toast } from 'react-toastify';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
+import { convertHeicToJpeg, isHeicFile } from '@/lib/heic-converter';
 
 const tabs = [
   { key: 'publiek', label: 'Mijn Publieke Profiel' },
@@ -93,12 +94,12 @@ export default function MijnProfiel() {
   };
 
   // Handle file selection
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'cover') => {
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>, type: 'avatar' | 'cover') => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     // Validate file type
-    if (!file.type.startsWith('image/')) {
+    if (!file.type.startsWith('image/') && !isHeicFile(file)) {
       toast.error('Alleen afbeeldingen zijn toegestaan');
       return;
     }
@@ -109,15 +110,23 @@ export default function MijnProfiel() {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const result = e.target?.result as string;
-      setSelectedImage(result);
-      setCropAspect(type === 'avatar' ? 1 : 3);
-      setUploadingType(type);
-      setShowCropModal(true);
-    };
-    reader.readAsDataURL(file);
+    try {
+      // Convert HEIC to JPEG if needed
+      const processedFile = await convertHeicToJpeg(file);
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        setSelectedImage(result);
+        setCropAspect(type === 'avatar' ? 1 : 3);
+        setUploadingType(type);
+        setShowCropModal(true);
+      };
+      reader.readAsDataURL(processedFile);
+    } catch (error) {
+      console.error('Error processing image:', error);
+      toast.error('Er is een fout opgetreden bij het verwerken van de afbeelding');
+    }
   };
 
   // Handle crop completion
@@ -209,7 +218,7 @@ export default function MijnProfiel() {
                   {user.cover_url ? 'Coverfoto wijzigen' : 'Coverfoto toevoegen'}
                   <input
                     type="file"
-                    accept="image/*"
+                    accept="image/*,.heic,.heif"
                     onChange={(e) => handleFileSelect(e, 'cover')}
                     className="hidden"
                   />
@@ -232,7 +241,7 @@ export default function MijnProfiel() {
                   {user.avatar_url ? 'Wijzigen' : 'Toevoegen'}
                   <input
                     type="file"
-                    accept="image/*"
+                    accept="image/*,.heic,.heif"
                     onChange={(e) => handleFileSelect(e, 'avatar')}
                     className="hidden"
                   />
