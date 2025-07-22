@@ -842,14 +842,109 @@ export default function VoedingsplannenPage() {
                 </div>
               </div>
 
-              <div className="text-center mb-8">
-                <button
-                  onClick={generateShoppingList}
-                  className="bg-gradient-to-r from-[#8BAE5A] to-[#6B8E3A] text-white px-6 py-3 rounded-lg font-semibold hover:from-[#7A9D4B] hover:to-[#5A7D2A] transition-all flex items-center justify-center mx-auto"
-                >
-                  <ShoppingCartIcon className="w-5 h-5 mr-2" />
-                  Genereer Boodschappenlijst voor dit Plan
-                </button>
+              {/* Top action buttons */}
+              <div className="space-y-6 mb-8">
+                {/* Add snack buttons */}
+                {mealPlan.meals.length < 5 && (
+                  <div className="flex gap-4 justify-center">
+                    {!mealPlan.meals.some(m => m.type === 'snack' && m.time === '15:00') && (
+                      <button
+                        onClick={() => {
+                          // Calculate estimated calories for this snack (will be adjusted by redistributeCalories)
+                          const estimatedCalories = Math.round((nutritionGoals?.calories || 0) * 0.075); // 7.5% of daily calories
+                          
+                          const newSnack: Meal = {
+                            id: `snack-${Date.now()}`,
+                            name: 'Gezonde Snack',
+                            image: 'https://images.unsplash.com/photo-1482049016688-2d3e1b311543?w=800&h=600&fit=crop',
+                            ingredients: [
+                              { name: 'Amandelen', amount: Math.round(estimatedCalories * 0.3 / 6), unit: 'gram' }, // ~6 cal/g for nuts
+                              { name: 'Appel', amount: 1, unit: 'stuk' }
+                            ],
+                            calories: estimatedCalories,
+                            protein: Math.round(estimatedCalories * 0.15), // 15% protein
+                            carbs: Math.round(estimatedCalories * 0.6), // 60% carbs
+                            fat: Math.round(estimatedCalories * 0.25), // 25% fat
+                            time: '15:00',
+                            type: 'snack'
+                          };
+                          
+                          // For adding snacks, we need the original meals plus the new snack
+                          const allOriginalMeals = [...(originalMealPlan?.meals || []), newSnack];
+                          const updatedMeals = redistributeCalories([...mealPlan.meals, newSnack], nutritionGoals, allOriginalMeals);
+                          
+                          setMealPlan(prev => ({
+                            ...prev!,
+                            meals: updatedMeals.sort((a, b) => a.time.localeCompare(b.time))
+                          }));
+                        }}
+                        className="bg-[#3A4D23] text-white px-4 py-2 rounded-lg hover:bg-[#4A5D33] transition-all text-sm"
+                      >
+                        + Middag Snack
+                      </button>
+                    )}
+                    
+                    {!mealPlan.meals.some(m => m.type === 'snack' && m.time === '21:00') && (
+                      <button
+                        onClick={() => {
+                          // Calculate estimated calories for this snack (will be adjusted by redistributeCalories)
+                          const estimatedCalories = Math.round((nutritionGoals?.calories || 0) * 0.075); // 7.5% of daily calories
+                          
+                          const newSnack: Meal = {
+                            id: `snack-${Date.now()}`,
+                            name: 'Avond Snack',
+                            image: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=800&h=600&fit=crop',
+                            ingredients: [
+                              { name: 'Griekse yoghurt', amount: Math.round(estimatedCalories * 0.6 / 0.6), unit: 'gram' }, // ~0.6 cal/g for yogurt
+                              { name: 'Bessen', amount: Math.round(estimatedCalories * 0.4 / 0.5), unit: 'gram' } // ~0.5 cal/g for berries
+                            ],
+                            calories: estimatedCalories,
+                            protein: Math.round(estimatedCalories * 0.25), // 25% protein
+                            carbs: Math.round(estimatedCalories * 0.55), // 55% carbs
+                            fat: Math.round(estimatedCalories * 0.2), // 20% fat
+                            time: '21:00',
+                            type: 'snack'
+                          };
+                          
+                          // For adding snacks, we need the original meals plus the new snack
+                          const allOriginalMeals = [...(originalMealPlan?.meals || []), newSnack];
+                          const updatedMeals = redistributeCalories([...mealPlan.meals, newSnack], nutritionGoals, allOriginalMeals);
+                          
+                          setMealPlan(prev => ({
+                            ...prev!,
+                            meals: updatedMeals.sort((a, b) => a.time.localeCompare(b.time))
+                          }));
+                        }}
+                        className="bg-[#3A4D23] text-white px-4 py-2 rounded-lg hover:bg-[#4A5D33] transition-all text-sm"
+                      >
+                        + Avond Snack
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {/* Action buttons */}
+                <div className="text-center space-y-4">
+                  <button
+                    onClick={() => {
+                      // Mark nutrition plan as completed for onboarding
+                      localStorage.setItem('nutritionPlanCompleted', 'true');
+                      // Navigate back to dashboard
+                      window.location.href = '/dashboard';
+                    }}
+                    className="bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] text-[#232D1A] px-8 py-4 rounded-xl font-bold hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center mx-auto"
+                  >
+                    <CheckIcon className="w-6 h-6 mr-2" />
+                    Start met dit Plan
+                  </button>
+                  
+                  <button
+                    onClick={() => setCurrentStep(1)}
+                    className="bg-[#3A4D23] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#4A5D33] transition-all"
+                  >
+                    Nieuw Plan Genereren
+                  </button>
+                </div>
               </div>
 
               <div className="space-y-6">
