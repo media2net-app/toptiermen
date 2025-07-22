@@ -474,21 +474,37 @@ export default function VoedingsplannenPage() {
     const snackPercentage = snacks.length > 0 ? 0.15 / snacks.length : 0;
     
     return meals.map(meal => {
+      // Calculate the ratio of new calories to original calories
+      const originalCalories = meal.calories;
+      const newCalories = meal.type === 'snack' 
+        ? Math.round(nutritionGoals.calories * snackPercentage)
+        : Math.round(nutritionGoals.calories * mainMealPercentage);
+      
+      const calorieRatio = originalCalories > 0 ? newCalories / originalCalories : 1;
+      
+      // Adjust ingredients proportionally
+      const adjustedIngredients = meal.ingredients.map(ingredient => ({
+        ...ingredient,
+        amount: Math.round(ingredient.amount * calorieRatio * 10) / 10 // Round to 1 decimal
+      }));
+      
       if (meal.type === 'snack') {
         return {
           ...meal,
-          calories: Math.round(nutritionGoals.calories * snackPercentage),
+          calories: newCalories,
           protein: Math.round(nutritionGoals.protein * snackPercentage),
           carbs: Math.round(nutritionGoals.carbs * snackPercentage),
-          fat: Math.round(nutritionGoals.fat * snackPercentage)
+          fat: Math.round(nutritionGoals.fat * snackPercentage),
+          ingredients: adjustedIngredients
         };
       } else {
         return {
           ...meal,
-          calories: Math.round(nutritionGoals.calories * mainMealPercentage),
+          calories: newCalories,
           protein: Math.round(nutritionGoals.protein * mainMealPercentage),
           carbs: Math.round(nutritionGoals.carbs * mainMealPercentage),
-          fat: Math.round(nutritionGoals.fat * mainMealPercentage)
+          fat: Math.round(nutritionGoals.fat * mainMealPercentage),
+          ingredients: adjustedIngredients
         };
       }
     });
@@ -874,18 +890,21 @@ export default function VoedingsplannenPage() {
                     {!mealPlan.meals.some(m => m.type === 'snack' && m.time === '15:00') && (
                       <button
                         onClick={() => {
+                          // Calculate estimated calories for this snack (will be adjusted by redistributeCalories)
+                          const estimatedCalories = Math.round((nutritionGoals?.calories || 0) * 0.075); // 7.5% of daily calories
+                          
                           const newSnack: Meal = {
                             id: `snack-${Date.now()}`,
                             name: 'Gezonde Snack',
                             image: '/images/nutrition/snack.jpg',
                             ingredients: [
-                              { name: 'Amandelen', amount: 30, unit: 'gram' },
+                              { name: 'Amandelen', amount: Math.round(estimatedCalories * 0.3 / 6), unit: 'gram' }, // ~6 cal/g for nuts
                               { name: 'Appel', amount: 1, unit: 'stuk' }
                             ],
-                            calories: 0, // Will be calculated by redistributeCalories
-                            protein: 0,
-                            carbs: 0,
-                            fat: 0,
+                            calories: estimatedCalories,
+                            protein: Math.round(estimatedCalories * 0.15), // 15% protein
+                            carbs: Math.round(estimatedCalories * 0.6), // 60% carbs
+                            fat: Math.round(estimatedCalories * 0.25), // 25% fat
                             time: '15:00',
                             type: 'snack'
                           };
@@ -906,18 +925,21 @@ export default function VoedingsplannenPage() {
                     {!mealPlan.meals.some(m => m.type === 'snack' && m.time === '21:00') && (
                       <button
                         onClick={() => {
+                          // Calculate estimated calories for this snack (will be adjusted by redistributeCalories)
+                          const estimatedCalories = Math.round((nutritionGoals?.calories || 0) * 0.075); // 7.5% of daily calories
+                          
                           const newSnack: Meal = {
                             id: `snack-${Date.now()}`,
                             name: 'Avond Snack',
                             image: '/images/nutrition/snack.jpg',
                             ingredients: [
-                              { name: 'Griekse yoghurt', amount: 100, unit: 'gram' },
-                              { name: 'Bessen', amount: 50, unit: 'gram' }
+                              { name: 'Griekse yoghurt', amount: Math.round(estimatedCalories * 0.6 / 0.6), unit: 'gram' }, // ~0.6 cal/g for yogurt
+                              { name: 'Bessen', amount: Math.round(estimatedCalories * 0.4 / 0.5), unit: 'gram' } // ~0.5 cal/g for berries
                             ],
-                            calories: 0, // Will be calculated by redistributeCalories
-                            protein: 0,
-                            carbs: 0,
-                            fat: 0,
+                            calories: estimatedCalories,
+                            protein: Math.round(estimatedCalories * 0.25), // 25% protein
+                            carbs: Math.round(estimatedCalories * 0.55), // 55% carbs
+                            fat: Math.round(estimatedCalories * 0.2), // 20% fat
                             time: '21:00',
                             type: 'snack'
                           };
