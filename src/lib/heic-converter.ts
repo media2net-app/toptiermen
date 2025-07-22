@@ -1,15 +1,58 @@
 // HEIC to JPEG converter utility
 // This uses the heic2any library to convert HEIC files to JPEG
 
+// Test function to check if heic2any is available
+export const testHeic2Any = async (): Promise<boolean> => {
+  try {
+    if (typeof window === 'undefined') {
+      console.log('Not in browser environment');
+      return false;
+    }
+    
+    const heic2anyModule = await import('heic2any');
+    const heic2any = heic2anyModule.default || heic2anyModule;
+    
+    if (!heic2any) {
+      console.log('heic2any not found in module');
+      return false;
+    }
+    
+    console.log('heic2any library is available');
+    return true;
+  } catch (error) {
+    console.error('Error testing heic2any:', error);
+    return false;
+  }
+};
+
 export const convertHeicToJpeg = async (file: File): Promise<File> => {
   // Check if file is HEIC
   if (file.type === 'image/heic' || file.type === 'image/heif' || file.name.toLowerCase().endsWith('.heic')) {
     try {
+      console.log('Converting HEIC file:', file.name);
+      
+      // Check if we're in browser environment
+      if (typeof window === 'undefined') {
+        console.log('Not in browser environment, skipping HEIC conversion');
+        return file;
+      }
+      
+      // Test if heic2any is available first
+      const isAvailable = await testHeic2Any();
+      if (!isAvailable) {
+        throw new Error('HEIC converter niet beschikbaar');
+      }
+      
       // Dynamic import of heic2any to avoid SSR issues
-      const heic2any = (await import('heic2any')).default;
+      const heic2anyModule = await import('heic2any');
+      const heic2any = heic2anyModule.default || heic2anyModule;
+      
+      if (!heic2any) {
+        throw new Error('heic2any library niet beschikbaar');
+      }
       
       // Convert HEIC to JPEG
-      const convertedBlob = await (heic2any as any)({
+      const convertedBlob = await heic2any({
         blob: file,
         toType: 'image/jpeg',
         quality: 0.8
@@ -22,11 +65,14 @@ export const convertHeicToJpeg = async (file: File): Promise<File> => {
         lastModified: Date.now()
       });
       
-      console.log('HEIC file converted to JPEG:', newFileName);
+      console.log('HEIC file successfully converted to JPEG:', newFileName);
       return convertedFile;
     } catch (error) {
       console.error('Error converting HEIC file:', error);
-      throw new Error('Kon HEIC bestand niet converteren naar JPEG. Probeer een andere afbeelding.');
+      
+      // Show user-friendly error message
+      console.log('HEIC conversion failed, showing error to user');
+      throw new Error('HEIC bestand kon niet worden geconverteerd. Probeer de foto eerst naar JPEG te converteren op je telefoon.');
     }
   }
   

@@ -122,10 +122,14 @@ export default function MijnProfiel() {
         setUploadingType(type);
         setShowCropModal(true);
       };
+      reader.onerror = () => {
+        console.error('FileReader error');
+        toast.error('Er is een fout opgetreden bij het lezen van de afbeelding');
+      };
       reader.readAsDataURL(processedFile);
     } catch (error) {
       console.error('Error processing image:', error);
-      toast.error('Er is een fout opgetreden bij het verwerken van de afbeelding');
+      toast.error('Er is een fout opgetreden bij het verwerken van de afbeelding. Probeer een andere afbeelding.');
     }
   };
 
