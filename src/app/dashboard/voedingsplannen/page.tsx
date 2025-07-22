@@ -136,6 +136,38 @@ export default function VoedingsplannenPage() {
     fetchSelectedPlan();
   }, [user]);
 
+  useEffect(() => {
+    const fetchNutritionProfile = async () => {
+      if (!user) return;
+      const { data, error } = await supabase
+        .from('users')
+        .select('nutrition_profile')
+        .eq('id', user.id)
+        .single();
+      if (!error && data?.nutrition_profile) {
+        setUserData({
+          ...userData,
+          ...data.nutrition_profile
+        });
+      }
+    };
+    fetchNutritionProfile();
+    // eslint-disable-next-line
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+    if (!userData.age && !userData.height && !userData.weight) return;
+    const saveNutritionProfile = async () => {
+      await supabase
+        .from('users')
+        .update({ nutrition_profile: userData })
+        .eq('id', user.id);
+    };
+    saveNutritionProfile();
+    // eslint-disable-next-line
+  }, [userData]);
+
   const calculateNutritionGoals = (data: UserData): NutritionGoals => {
     // BMR berekening (Mifflin-St Jeor Equation) - Altijd voor mannen
     let bmr = 10 * data.weight + 6.25 * data.height - 5 * data.age + 5;

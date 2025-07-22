@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   CalendarIcon, 
@@ -55,6 +55,37 @@ interface TrainingSchemaDb {
   target_audience: string | null;
 }
 
+const dietTypes = [
+  {
+    id: 'balanced',
+    name: 'Gebalanceerd',
+    subtitle: 'Voor duurzame energie en algehele gezondheid',
+    description: 'Een mix van alle macronutriënten',
+    icon: '🥗',
+  },
+  {
+    id: 'low_carb',
+    name: 'Koolhydraatarm / Keto',
+    subtitle: 'Focus op vetverbranding en een stabiele bloedsuikerspiegel',
+    description: 'Minimale koolhydraten, hoog in gezonde vetten',
+    icon: '🥑',
+  },
+  {
+    id: 'carnivore',
+    name: 'Carnivoor (Rick\'s Aanpak)',
+    subtitle: 'Voor maximale eenvoud en het elimineren van potentiële triggers',
+    description: 'Eet zoals de oprichter',
+    icon: '🥩',
+  },
+  {
+    id: 'high_protein',
+    name: 'High Protein',
+    subtitle: 'Geoptimaliseerd voor maximale spieropbouw en herstel',
+    description: 'Maximale eiwitinname voor spiergroei',
+    icon: '💪',
+  }
+];
+
 export default function TrainingscentrumPage() {
   const { user } = useAuth();
   const [selectedOption, setSelectedOption] = useState<'training' | 'nutrition' | null>(null);
@@ -72,55 +103,166 @@ export default function TrainingscentrumPage() {
   const [selectedSchemaId, setSelectedSchemaId] = useState<string | null>(null);
   const [availableSchemas, setAvailableSchemas] = useState<TrainingSchemaDb[]>([]);
   const [selectedSchema, setSelectedSchema] = useState<TrainingSchemaDb | null>(null);
+  const [selectedNutritionPlan, setSelectedNutritionPlan] = useState<string | null>(null);
 
-  // Load user's selected schema on component mount
-  useEffect(() => {
-    const loadUserSelectedSchema = async () => {
-      if (!user) {
-        setIsLoading(false);
-        return;
-      }
-      try {
-        const { data, error } = await supabase
-          .from('users')
-          .select('selected_schema_id')
-          .eq('id', user.id)
-          .single();
-        if (error) {
-          console.error('Error loading user schema:', error);
-        } else if (data?.selected_schema_id) {
-          setSelectedSchemaId(data.selected_schema_id);
-          // Haal het schema object op
-          const { data: schemaData } = await supabase
+  // Add refs for better state management
+  const mountedRef = useRef(true);
+  const lastUserRef = useRef<any>(null);
+  const fetchingRef = useRef(false);
+
+  // Combined fetch function to prevent race conditions
+  const fetchAllUserData = useCallback(async () => {
+    if (!user || fetchingRef.current) {
+      console.log('Trainingscentrum: Skipping fetch - no user or already fetching');
+      return;
+    }
+
+    // Don't fetch if user hasn't changed
+    if (lastUserRef.current === user) {
+      console.log('Trainingscentrum: User unchanged, skipping fetch');
+      return;
+    }
+
+    console.log('Trainingscentrum: Fetching data for user:', user.email);
+    fetchingRef.current = true;
+    lastUserRef.current = user;
+
+    try {
+      // Fetch all user data in parallel with timeouts and abort controllers
+      const timeout = 8000;
+      
+      console.log('Trainingscentrum: Starting parallel fetch...');
+      
+      const userController = new AbortController();
+      const schemasController = new AbortController();
+      const userTimeout = setTimeout(() => userController.abort(), timeout);
+      const schemasTimeout = setTimeout(() => schemasController.abort(), timeout);
+      
+      const [userResult, schemasResult] = await Promise.allSettled([
+        Promise.race([
+          supabase
+            .from('users')
+            .select('selected_schema_id, selected_nutrition_plan')
+            .eq('id', user.id)
+            .single(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('User data timeout')), timeout))
+        ]),
+        Promise.race([
+          supabase
             .from('training_schemas')
             .select('*')
-            .eq('id', data.selected_schema_id)
-            .single();
-          if (schemaData) setSelectedSchema(schemaData);
+            .eq('status', 'published'),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Schemas timeout')), timeout))
+        ])
+      ]);
+
+      clearTimeout(userTimeout);
+      clearTimeout(schemasTimeout);
+
+      if (!mountedRef.current) return;
+
+      // Handle user data result
+      let userData = null;
+      if (userResult.status === 'fulfilled' && !(userResult.value as any).error) {
+        userData = (userResult.value as any).data;
+      } else {
+        console.warn('User data fetch failed:', userResult.status === 'rejected' ? userResult.reason : (userResult.value as any).error);
+      }
+
+      // Handle schemas data result
+      let schemasData: any[] = [];
+      if (schemasResult.status === 'fulfilled' && !(schemasResult.value as any).error) {
+        schemasData = (schemasResult.value as any).data || [];
+      } else {
+        console.warn('Schemas fetch failed:', schemasResult.status === 'rejected' ? schemasResult.reason : (schemasResult.value as any).error);
+      }
+
+      if (!mountedRef.current) return;
+
+      // Update schemas first
+      setAvailableSchemas(schemasData);
+
+      // Process user data if available
+      if (userData) {
+        // Set selected schema
+        if (userData.selected_schema_id) {
+          setSelectedSchemaId(userData.selected_schema_id);
+          
+          // Fetch the schema object with timeout
+          try {
+            const schemaResult = await Promise.race([
+              supabase
+                .from('training_schemas')
+                .select('*')
+                .eq('id', userData.selected_schema_id)
+                .single(),
+              new Promise((_, reject) => setTimeout(() => reject(new Error('Schema fetch timeout')), 5000))
+            ]);
+            
+            const result = schemaResult as any;
+            if (result.data && mountedRef.current) {
+              setSelectedSchema(result.data);
+            } else {
+              console.warn('Selected schema fetch failed:', result.error);
+              setSelectedSchema(null);
+            }
+          } catch (error) {
+            console.error('Error fetching selected schema:', error);
+            setSelectedSchema(null);
+          }
         } else {
           setSelectedSchema(null);
         }
-      } catch (error) {
-        console.error('Error loading user schema:', error);
-      } finally {
-        setIsLoading(false);
+
+        // Set selected nutrition plan
+        if (userData.selected_nutrition_plan) {
+          setSelectedNutritionPlan(userData.selected_nutrition_plan);
+        }
+      } else {
+        // Reset if no user data
+        setSelectedSchemaId(null);
+        setSelectedSchema(null);
+        setSelectedNutritionPlan(null);
       }
-    };
-    loadUserSelectedSchema();
+
+      console.log('Trainingscentrum: Data loaded successfully');
+
+    } catch (error) {
+      console.error('Error fetching trainingscentrum data:', error);
+      const err = error as Error;
+      if (err.name === 'AbortError') {
+        console.log('Trainingscentrum: Fetch was aborted due to timeout');
+      }
+      // Don't show error to user for trainingscentrum, just log it
+    } finally {
+      if (mountedRef.current) {
+        setIsLoading(false);
+        fetchingRef.current = false;
+      }
+    }
   }, [user]);
 
-  // Haal beschikbare trainingsschema's op
+  // Single useEffect for all data loading
   useEffect(() => {
-    const fetchSchemas = async () => {
-      const { data, error } = await supabase
-        .from('training_schemas')
-        .select('*')
-        .eq('status', 'published');
-      if (!error && data) {
-        setAvailableSchemas(data);
-      }
+    if (user) {
+      fetchAllUserData();
+    } else if (user === null) {
+      // User explicitly logged out
+      setSelectedSchemaId(null);
+      setSelectedSchema(null);
+      setSelectedNutritionPlan(null);
+      setAvailableSchemas([]);
+      setIsLoading(false);
+    }
+    // If user is undefined, auth is still loading
+  }, [user, fetchAllUserData]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false;
+      fetchingRef.current = false;
     };
-    fetchSchemas();
   }, []);
 
   const handleOptionSelect = (option: 'training' | 'nutrition') => {
@@ -330,6 +472,30 @@ export default function TrainingscentrumPage() {
               }}
             >
               Wijzig schema
+            </button>
+          </div>
+        </div>
+      )}
+      {!isLoading && selectedNutritionPlan && (
+        <div className="max-w-4xl mx-auto mt-8 mb-4">
+          <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex-1 text-center md:text-left">
+              <div className="text-sm text-[#8BAE5A] font-semibold mb-1">Je huidige voedingsplan</div>
+              <div className="text-xl font-bold text-white mb-1">
+                {dietTypes.find(d => d.id === selectedNutritionPlan)?.name || selectedNutritionPlan}
+              </div>
+              <div className="text-gray-400 text-sm mb-1">
+                {dietTypes.find(d => d.id === selectedNutritionPlan)?.subtitle}
+              </div>
+              <div className="text-gray-300 text-sm">
+                {dietTypes.find(d => d.id === selectedNutritionPlan)?.description}
+              </div>
+            </div>
+            <button
+              className="mt-4 md:mt-0 px-6 py-3 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] text-[#232D1A] font-bold rounded-xl hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200 shadow-lg hover:shadow-xl"
+              onClick={() => window.location.href = '/dashboard/voedingsplannen'}
+            >
+              Wijzig voedingsplan
             </button>
           </div>
         </div>

@@ -21,15 +21,17 @@ export default function Login() {
     // Only redirect if we're not loading and the user is authenticated
     if (!authLoading && isAuthenticated && user && mounted) {
       console.log('Redirecting user:', user.role);
+      // Use replace instead of push to prevent back button issues
       if (user.role === 'admin') {
-        router.push('/dashboard-admin');
+        router.replace('/dashboard-admin');
       } else {
-        router.push('/dashboard');
+        router.replace('/dashboard');
       }
     }
   }, [isAuthenticated, user, router, authLoading, mounted]);
 
-  if (!mounted || authLoading) {
+  // Only show loading screen during initial auth check, not during login process
+  if (!mounted || (authLoading && !isLoading)) {
     return (
       <div className="min-h-screen flex items-center justify-center relative px-4 py-6" style={{ backgroundColor: '#181F17' }}>
         <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
@@ -53,12 +55,13 @@ export default function Login() {
       
       if (!result.success) {
         setError(result.error || "Ongeldige inloggegevens");
+        setIsLoading(false);
       }
-      // If successful, the redirect will be handled by the useEffect above
+      // If successful, keep loading state until redirect happens
+      // The redirect will be handled by the useEffect above
     } catch (error: any) {
       console.error('Login error:', error);
       setError(error.message || "Er is een fout opgetreden bij het inloggen");
-    } finally {
       setIsLoading(false);
     }
   }

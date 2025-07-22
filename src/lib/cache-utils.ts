@@ -2,10 +2,143 @@
  * Cache utility functions to help resolve loading issues
  */
 
+// Timeout utility for async operations
+export const withTimeout = <T>(
+  promise: Promise<T>,
+  timeoutMs: number = 10000,
+  errorMessage: string = 'Operation timed out'
+): Promise<T> => {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error(errorMessage)), timeoutMs)
+    )
+  ]);
+};
+
+// Safe async operation with timeout and error handling
+export const safeAsync = async <T>(
+  operation: () => Promise<T>,
+  options: {
+    timeout?: number;
+    defaultValue?: T;
+    onError?: (error: Error) => void;
+    retries?: number;
+  } = {}
+): Promise<T | null> => {
+  const { timeout = 10000, defaultValue = null, onError, retries = 0 } = options;
+  
+  let lastError: Error;
+  
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const result = await withTimeout(operation(), timeout, `Operation timed out after ${timeout}ms`);
+      return result;
+    } catch (error) {
+      lastError = error as Error;
+      console.error(`Attempt ${attempt + 1} failed:`, error);
+      
+      if (onError) {
+        onError(lastError);
+      }
+      
+      if (attempt === retries) {
+        break;
+      }
+      
+      // Wait before retry (exponential backoff)
+      await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+    }
+  }
+  
+  return defaultValue as T;
+};
+
+// Loading state manager to prevent stuck loading states
+export class LoadingStateManager {
+  private loadingStates = new Map<string, { timeout: NodeJS.Timeout; startTime: number }>();
+  
+  startLoading(key: string, timeoutMs: number = 15000, onTimeout?: () => void): void {
+    // Clear any existing timeout for this key
+    this.clearLoading(key);
+    
+    const timeout = setTimeout(() => {
+      console.warn(`Loading state for "${key}" timed out after ${timeoutMs}ms`);
+      this.clearLoading(key);
+      if (onTimeout) {
+        onTimeout();
+      }
+    }, timeoutMs);
+    
+    this.loadingStates.set(key, {
+      timeout,
+      startTime: Date.now()
+    });
+    
+    console.log(`Started loading state for "${key}"`);
+  }
+  
+  clearLoading(key: string): void {
+    const state = this.loadingStates.get(key);
+    if (state) {
+      clearTimeout(state.timeout);
+      const duration = Date.now() - state.startTime;
+      console.log(`Cleared loading state for "${key}" after ${duration}ms`);
+      this.loadingStates.delete(key);
+    }
+  }
+  
+  isLoading(key: string): boolean {
+    return this.loadingStates.has(key);
+  }
+  
+  getLoadingDuration(key: string): number {
+    const state = this.loadingStates.get(key);
+    return state ? Date.now() - state.startTime : 0;
+  }
+  
+  clearAll(): void {
+    for (const [key] of this.loadingStates) {
+      this.clearLoading(key);
+    }
+  }
+  
+  getAllLoadingStates(): Array<{ key: string; duration: number }> {
+    return Array.from(this.loadingStates.entries()).map(([key, state]) => ({
+      key,
+      duration: Date.now() - state.startTime
+    }));
+  }
+}
+
+// Global loading state manager instance
+export const globalLoadingManager = new LoadingStateManager();
+
+// Cleanup function for components
+export const useLoadingCleanup = (componentName: string) => {
+  if (typeof window !== 'undefined') {
+    const cleanup = () => {
+      globalLoadingManager.clearLoading(`${componentName}-data-fetch`);
+      globalLoadingManager.clearLoading(`${componentName}-auth-check`);
+      globalLoadingManager.clearLoading(`${componentName}-init`);
+    };
+    
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', cleanup);
+    
+    return cleanup;
+  }
+  
+  return () => {};
+};
+
 export const clearAllCache = () => {
   if (typeof window === 'undefined') return;
   
   console.log('🧹 Clearing all cache and localStorage...');
+  
+  // Clear loading states
+  globalLoadingManager.clearAll();
   
   // Clear all localStorage items
   localStorage.clear();
@@ -38,6 +171,7 @@ export const getCacheInfo = () => {
     sessionStorage: {},
     localStorageSize: 0,
     sessionStorageSize: 0,
+    loadingStates: globalLoadingManager.getAllLoadingStates(),
   };
 
   // Get localStorage info
@@ -104,6 +238,12 @@ export const checkForCacheIssues = () => {
   
   if (problematicKeys.length > 0) {
     issues.push(`Large localStorage items found: ${problematicKeys.join(', ')}`);
+  }
+  
+  // Check for stuck loading states
+  const stuckLoadingStates = info.loadingStates.filter((state: any) => state.duration > 30000); // 30 seconds
+  if (stuckLoadingStates.length > 0) {
+    issues.push(`Stuck loading states found: ${stuckLoadingStates.map((s: any) => s.key).join(', ')}`);
   }
   
   return {

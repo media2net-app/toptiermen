@@ -1,190 +1,377 @@
-'use client';
-import ClientLayout from '../../components/ClientLayout';
-import PageLayout from '../../../components/PageLayout';
-import { useEffect, useState, useRef } from 'react';
+"use client";
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { LockClosedIcon } from '@heroicons/react/24/solid';
-import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/contexts/AuthContext';
+import { LockClosedIcon } from '@heroicons/react/24/outline';
+import PageLayout from '@/components/PageLayout';
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/lib/supabase";
 
-export default function MijnMissies() {
+interface Module {
+  id: string;
+  title: string;
+  description: string;
+  short_description?: string;
+  cover_image?: string;
+  slug: string;
+  order_index: number;
+  lessons_count: number;
+  status: string;
+}
+
+interface Lesson {
+  id: string;
+  title: string;
+  module_id: string;
+  order_index: number;
+  status: string;
+}
+
+interface ProgressData {
+  [moduleId: string]: number;
+}
+
+interface UnlockData {
+  [moduleId: string]: {
+    unlocked_at: string;
+    opened_at?: string;
+  };
+}
+
+export default function AcademyPage() {
   const { user } = useAuth();
-  const [modules, setModules] = useState<any[]>([]);
+  const [modules, setModules] = useState<Module[]>([]);
+  const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [progressData, setProgressData] = useState<ProgressData>({});
+  const [unlocks, setUnlocks] = useState<UnlockData>({});
   const [loading, setLoading] = useState(true);
-  const [progressData, setProgressData] = useState<Record<string, number>>({});
-  const [unlocks, setUnlocks] = useState<Record<string, any>>({});
-  const prevProgressRef = useRef<Record<string, number>>({});
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
+  // Simple data fetching without complex useCallback dependencies
   useEffect(() => {
-    async function fetchModulesAndProgress() {
-      setLoading(true);
-      setErrorMsg(null);
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      timeoutRef.current = setTimeout(() => {
-        setErrorMsg('Het laden duurt te lang. Controleer je internetverbinding of probeer het later opnieuw.');
-        setLoading(false);
-      }, 10000); // 10 seconden timeout
+    let isMounted = true;
 
-      console.log('Academy page: user =', user);
-      if (!user) {
-        setErrorMsg('Je bent niet ingelogd. Log opnieuw in.');
-        setLoading(false);
-        if (timeoutRef.current) clearTimeout(timeoutRef.current);
-        return;
+    const fetchAcademyData = async () => {
+      // Reset state
+      if (isMounted) {
+        setLoading(true);
+        setError(null);
+        console.log('🎓 Academy: Starting data fetch...');
       }
-      const { data: modulesData, error } = await supabase
-        .from('academy_modules')
-        .select('*')
-        .order('order_index', { ascending: true });
-      console.log('Academy page: modulesData =', modulesData, 'error =', error);
-      if (error) {
-        setErrorMsg('Fout bij laden van modules: ' + error.message);
-        setLoading(false);
-        if (timeoutRef.current) clearTimeout(timeoutRef.current);
-        return;
-      }
-      if (!modulesData || modulesData.length === 0) {
-        setErrorMsg('Geen modules gevonden. Neem contact op met support.');
-        setLoading(false);
-        if (timeoutRef.current) clearTimeout(timeoutRef.current);
-        return;
-      }
+
       try {
-        const { data: lessonsData } = await supabase
+        // Step 1: Fetch modules
+        console.log('📚 Academy: Fetching modules...');
+        const { data: modulesData, error: modulesError } = await supabase
+          .from('academy_modules')
+          .select('*')
+          .eq('status', 'published')
+          .order('order_index');
+
+        if (modulesError) {
+          throw new Error(`Modules query failed: ${modulesError.message}`);
+        }
+
+        if (!isMounted) return;
+        console.log(`✅ Academy: Loaded ${modulesData?.length || 0} modules`);
+
+        // Step 2: Fetch lessons
+        console.log('📖 Academy: Fetching lessons...');
+        const { data: lessonsData, error: lessonsError } = await supabase
           .from('academy_lessons')
-          .select('id,module_id');
-        const { data: progressRows } = await supabase
+          .select('*')
+          .eq('status', 'published')
+          .order('order_index');
+
+        if (lessonsError) {
+          throw new Error(`Lessons query failed: ${lessonsError.message}`);
+        }
+
+        if (!isMounted) return;
+        console.log(`✅ Academy: Loaded ${lessonsData?.length || 0} lessons`);
+
+        // Step 3: Fetch user progress
+        console.log('📊 Academy: Fetching user progress...');
+        const { data: progressRows, error: progressError } = await supabase
           .from('user_lesson_progress')
           .select('lesson_id')
           .eq('user_id', user.id)
           .eq('completed', true);
-        const progressPerModule: Record<string, number> = {};
-        modulesData.forEach(mod => {
-          const lessons = lessonsData?.filter(l => l.module_id === mod.id) || [];
-          const total = lessons.length;
-          const completed = lessons.filter(l => progressRows?.some(p => p.lesson_id === l.id)).length;
-          progressPerModule[mod.id] = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+        if (progressError) {
+          console.warn('⚠️ Academy: Progress query failed:', progressError.message);
+          // Don't throw error for progress - it's optional
+        }
+
+        if (!isMounted) return;
+
+        // Step 4: Calculate progress per module
+        const completedLessons = new Set((progressRows || []).map(p => p.lesson_id));
+        const progressMap: ProgressData = {};
+        
+        (modulesData || []).forEach(module => {
+          const moduleLessons = (lessonsData || []).filter(l => l.module_id === module.id);
+          const completedModuleLessons = moduleLessons.filter(l => completedLessons.has(l.id));
+          const progress = moduleLessons.length > 0 ? Math.round((completedModuleLessons.length / moduleLessons.length) * 100) : 0;
+          progressMap[module.id] = progress;
         });
-        // Haal unlocks op
-        const { data: unlockRows } = await supabase
+
+        console.log(`📈 Academy: Calculated progress for ${Object.keys(progressMap).length} modules`);
+
+        // Step 5: Fetch module unlocks
+        console.log('🔓 Academy: Fetching module unlocks...');
+        const { data: unlocksData, error: unlocksError } = await supabase
           .from('user_module_unlocks')
           .select('*')
           .eq('user_id', user.id);
-        const unlockMap: Record<string, any> = {};
-        unlockRows?.forEach((row: any) => {
-          unlockMap[row.module_id] = row;
+
+        if (unlocksError) {
+          console.warn('⚠️ Academy: Unlocks query failed:', unlocksError.message);
+          // Don't throw error for unlocks - we'll handle defaults
+        }
+
+        if (!isMounted) return;
+
+        const unlocksMap: UnlockData = {};
+        (unlocksData || []).forEach(unlock => {
+          unlocksMap[unlock.module_id] = {
+            unlocked_at: unlock.unlocked_at,
+            opened_at: unlock.opened_at
+          };
         });
-        setUnlocks(unlockMap);
-        // Unlock logica: als vorige module 100% is en deze nog niet in unlocks zit, upsert
-        for (let i = 1; i < modulesData.length; i++) {
-          const prevModule = modulesData[i - 1];
-          const thisModule = modulesData[i];
-          if (progressPerModule[prevModule.id] === 100 && !unlockMap[thisModule.id]) {
-            await supabase.from('user_module_unlocks').upsert({
-              user_id: user.id,
-              module_id: thisModule.id,
-              unlocked_at: new Date().toISOString(),
-            }, { onConflict: 'user_id,module_id' });
+
+        console.log(`🔑 Academy: Loaded ${Object.keys(unlocksMap).length} unlocks`);
+
+        // Step 6: Handle first module unlock
+        if ((modulesData || []).length > 0 && !unlocksMap[modulesData[0].id]) {
+          console.log('🔓 Academy: Unlocking first module for new user...');
+          try {
+            const { error: unlockError } = await supabase
+              .from('user_module_unlocks')
+              .insert({
+                user_id: user.id,
+                module_id: modulesData[0].id,
+                unlocked_at: new Date().toISOString()
+              });
+
+            if (!unlockError) {
+              unlocksMap[modulesData[0].id] = {
+                unlocked_at: new Date().toISOString()
+              };
+            }
+          } catch (unlockErr) {
+            console.warn('⚠️ Academy: Failed to unlock first module:', unlockErr);
           }
         }
-        prevProgressRef.current = progressPerModule;
-        setProgressData(progressPerModule);
-        setModules(modulesData);
-      } catch (err) {
-        setErrorMsg('Fout bij laden van voortgang: ' + (err as Error).message);
-      }
-      setLoading(false);
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    }
-    fetchModulesAndProgress();
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-  }, [user]);
 
-  return (
-    <ClientLayout>
+        // Step 7: Update state with all data
+        if (isMounted) {
+          setModules(modulesData || []);
+          setLessons(lessonsData || []);
+          setProgressData(progressMap);
+          setUnlocks(unlocksMap);
+          console.log('🎉 Academy: All data loaded successfully!');
+        }
+
+      } catch (err) {
+        console.error('❌ Academy: Error during data fetch:', err);
+        if (isMounted) {
+          const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+          setError(`Academy kon niet worden geladen: ${errorMessage}`);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+          console.log('⏹️ Academy: Loading completed');
+        }
+      }
+    };
+
+    // Only fetch if user is authenticated
+    if (user) {
+      fetchAcademyData();
+    } else if (user === null) {
+      // User is explicitly not logged in
+      setLoading(false);
+      setError('Je bent niet ingelogd. Log opnieuw in.');
+    }
+    // If user is undefined, auth is still loading
+
+    // Cleanup function
+    return () => {
+      isMounted = false;
+      console.log('🧹 Academy: Component unmounted, stopping any pending operations');
+    };
+  }, [user]); // Only depend on user
+
+  // Helper functions
+  const getFirstLesson = (moduleId: string) => {
+    return lessons.find(l => l.module_id === moduleId && l.status === 'published');
+  };
+
+  const isModuleLocked = (moduleIndex: number) => {
+    // TEMPORARILY DISABLED: All modules unlocked for checking lessons
+    return false;
+    
+    // Original lock logic (commented out):
+    // if (moduleIndex === 0) return false; // First module is always unlocked
+    // const module = modules[moduleIndex];
+    // const prevModule = modules[moduleIndex - 1];
+    // 
+    // // Check if previous module is completed AND current module is unlocked
+    // return progressData[prevModule.id] < 100 || !unlocks[module.id];
+  };
+
+  const getModuleNumber = (module: Module, index: number) => {
+    return index + 1;
+  };
+
+  const handleRetry = () => {
+    setError(null);
+    setLoading(true);
+    // Force a re-render to trigger useEffect
+    window.location.reload();
+  };
+
+  // Render loading state
+  if (loading) {
+    return (
       <PageLayout 
         title="Academy"
         subtitle="Overzicht van alle modules en jouw voortgang"
       >
-        {errorMsg ? (
-          <div className="text-red-400 text-center py-12 font-bold">{errorMsg}</div>
-        ) : loading ? (
-          <div className="text-[#8BAE5A] text-center py-12">Laden...</div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
-            {modules.map((mod, i) => {
-              // Bepaal het modulenummer
-              const moduleNum = mod.positie != null ? mod.positie : (mod.order_index != null ? mod.order_index : i + 1);
-              // Bepaal of deze module locked is
-              let locked = false;
-              if (i > 0) {
-                // Kijk of de vorige module 100% is afgerond
-                const prevModule = modules[i - 1];
-                locked = progressData[prevModule.id] !== 100;
-              }
-              // Groene gloed als unlocked maar nog niet geopend
-              const unlock = unlocks[mod.id];
-              const justUnlocked = unlock && !unlock.opened_at;
-              return (
-                <div key={mod.id} className={`relative ${justUnlocked ? 'animate-pop shadow-[0_0_0_4px_#8BAE5A80]' : ''}`}>
-                  <Link
-                    href={locked ? '#' : `/dashboard/academy/${mod.slug || mod.id}`}
-                    className={`bg-[#181F17]/90 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-xl border border-[#3A4D23] flex flex-col gap-2 cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] relative active:scale-[0.98] touch-manipulation ${locked ? 'opacity-60 pointer-events-none' : ''}`}
-                    tabIndex={locked ? -1 : 0}
-                    aria-disabled={locked}
-                  >
-                    {/* Cover Image */}
-                    {mod.cover_image && (
-                      <div className="mb-3 -mx-4 -mt-4 sm:-mx-6 sm:-mt-6">
-                        <img
-                          src={mod.cover_image}
-                          alt={`Cover voor ${mod.title}`}
-                          className="w-full h-32 sm:h-40 object-cover rounded-t-xl sm:rounded-t-2xl"
-                        />
-                      </div>
-                    )}
-                    
-                    <div className="flex items-center justify-between mb-1 sm:mb-2">
-                      <span className="flex items-center gap-1 sm:gap-2 text-lg sm:text-xl font-semibold text-[#8BAE5A]">
-                        <span className="w-6 h-6 sm:w-8 sm:h-8 rounded-full border flex items-center justify-center font-bold text-base sm:text-lg mr-2 bg-[#232D1A] border-[#8BAE5A]">
-                          {moduleNum}
-                        </span>
-                        {mod.title}
-                        {locked && <LockClosedIcon className="w-5 h-5 text-[#8BAE5A] ml-2" title="Module is vergrendeld" />}
-                      </span>
-                      <span className="text-[#8BAE5A] font-mono text-xs sm:text-sm">{progressData[mod.id] != null ? `${progressData[mod.id]}%` : '0%'}</span>
-                    </div>
-                    <p className="text-[#A6C97B] mb-1 sm:mb-2 text-xs sm:text-sm line-clamp-2">{mod.short_description || mod.description}</p>
-                    <div className="w-full h-1.5 sm:h-2 bg-[#8BAE5A]/20 rounded-full">
-                      <div className="h-1.5 sm:h-2 bg-gradient-to-r from-[#8BAE5A] to-[#3A4D23] rounded-full transition-all duration-500" style={{ width: `${progressData[mod.id] || 0}%` }}></div>
-                    </div>
-                  </Link>
-                  {locked && (
-                    <div className="absolute inset-0 bg-[#181F17]/60 rounded-xl sm:rounded-2xl flex items-center justify-center z-10">
-                      <span className="text-[#8BAE5A] font-bold flex items-center gap-2"><LockClosedIcon className="w-6 h-6" /> Module vergrendeld</span>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
+            <p className="text-gray-300">Academy laden...</p>
+            <p className="text-gray-500 text-sm mt-2">Dit kan even duren...</p>
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  // Render error state
+  if (error) {
+    return (
+      <PageLayout 
+        title="Academy"
+        subtitle="Overzicht van alle modules en jouw voortgang"
+      >
+        <div className="text-center py-12">
+          <div className="text-red-400 mb-4 text-lg font-semibold">{error}</div>
+          <div className="text-gray-400 mb-6 text-sm">
+            Er is een probleem opgetreden bij het laden van de academy data.
+          </div>
+          <button
+            onClick={handleRetry}
+            className="px-6 py-3 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold"
+          >
+            Opnieuw proberen
+          </button>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  // Render success state
+  return (
+    <PageLayout 
+      title="Academy"
+      subtitle="Overzicht van alle modules en jouw voortgang"
+    >
+      {modules.length === 0 ? (
+        <div className="text-center py-12 text-gray-400">
+          <div className="text-lg font-medium mb-2">Geen modules gevonden</div>
+          <div className="text-sm mb-4">Er zijn momenteel geen gepubliceerde modules beschikbaar.</div>
+          <button
+            onClick={handleRetry}
+            className="px-6 py-3 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold"
+          >
+            Vernieuwen
+          </button>
+        </div>
+      ) :
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+          {modules.map((module, index) => {
+            const moduleNum = getModuleNumber(module, index);
+            const locked = isModuleLocked(index);
+            const firstLesson = getFirstLesson(module.id);
+            const progress = progressData[module.id] || 0;
+            const unlock = unlocks[module.id];
+            const justUnlocked = unlock && !unlock.opened_at;
+            
+            // Determine link - either to first lesson or module overview
+            const linkHref = locked ? '#' : 
+              firstLesson ? `/dashboard/academy/${module.id}/${firstLesson.id}` : 
+              `/dashboard/academy/${module.id}`;
+
+            return (
+              <div key={module.id} className={`relative ${justUnlocked ? 'animate-pulse shadow-[0_0_0_4px_#8BAE5A80]' : ''}`}>
+                <Link
+                  href={linkHref}
+                  className={`bg-[#181F17]/90 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-xl border border-[#3A4D23] flex flex-col gap-2 cursor-pointer transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] relative active:scale-[0.98] touch-manipulation ${locked ? 'opacity-60 pointer-events-none' : ''}`}
+                  tabIndex={locked ? -1 : 0}
+                  aria-disabled={locked}
+                >
+                  {/* Cover Image */}
+                  {module.cover_image && (
+                    <div className="mb-3 -mx-4 -mt-4 sm:-mx-6 sm:-mt-6">
+                      <img
+                        src={module.cover_image}
+                        alt={`Cover voor ${module.title}`}
+                        className="w-full h-32 sm:h-40 object-cover rounded-t-xl sm:rounded-t-2xl"
+                      />
                     </div>
                   )}
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </PageLayout>
-      <style jsx global>{`
-@keyframes pop {
-  0% { transform: scale(0.8); opacity: 0; }
-  60% { transform: scale(1.1); opacity: 1; }
-  100% { transform: scale(1); }
-}
-.animate-pop {
-  animation: pop 0.8s cubic-bezier(.22,1,.36,1) both;
-  box-shadow: 0 0 0 4px #8BAE5A80;
-}
-`}</style>
-    </ClientLayout>
+                  
+                  <div className="flex items-center justify-between mb-1 sm:mb-2">
+                    <span className="flex items-center gap-1 sm:gap-2 text-lg sm:text-xl font-semibold text-[#8BAE5A]">
+                      <span className="w-6 h-6 sm:w-8 sm:h-8 rounded-full border flex items-center justify-center font-bold text-base sm:text-lg mr-2 bg-[#232D1A] border-[#8BAE5A]">
+                        {moduleNum}
+                      </span>
+                      {module.title}
+                      {locked && <LockClosedIcon className="w-5 h-5 text-[#8BAE5A] ml-2" title="Module is vergrendeld" />}
+                    </span>
+                    <span className="text-[#8BAE5A] font-mono text-xs sm:text-sm">{progress}%</span>
+                  </div>
+                  
+                  <p className="text-[#A6C97B] mb-1 sm:mb-2 text-xs sm:text-sm line-clamp-2">
+                    {module.short_description || module.description}
+                  </p>
+                  
+                  <div className="flex items-center justify-between">
+                    <span className="text-[#8BAE5A] text-xs sm:text-sm">
+                      {module.lessons_count} {module.lessons_count === 1 ? 'les' : 'lessen'}
+                    </span>
+                    {locked ? (
+                      <span className="text-[#8BAE5A] text-xs bg-[#8BAE5A]/10 px-2 py-1 rounded">
+                        Vergrendeld
+                      </span>
+                    ) : justUnlocked ? (
+                      <span className="text-[#B6C948] text-xs bg-[#B6C948]/10 px-2 py-1 rounded animate-pulse">
+                        Nieuw beschikbaar!
+                      </span>
+                    ) : (
+                      <span className="text-[#B6C948] text-xs bg-[#B6C948]/10 px-2 py-1 rounded">
+                        Beschikbaar
+                      </span>
+                    )}
+                  </div>
+                  
+                  {/* Progress bar */}
+                  <div className="w-full h-1 bg-[#8BAE5A]/20 rounded-full mt-2">
+                    <div
+                      className="h-1 bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] rounded-full transition-all duration-500"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                </Link>
+              </div>
+            );
+          })}
+        </div>
+      }
+    </PageLayout>
   );
 } 

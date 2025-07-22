@@ -27,6 +27,7 @@ export interface Database {
           role: 'user' | 'admin'
           selected_schema_id: string | null
           selected_nutrition_plan: string | null
+          nutrition_profile: any | null
         }
         Insert: {
           id?: string
@@ -45,6 +46,7 @@ export interface Database {
           role?: 'user' | 'admin'
           selected_schema_id?: string | null
           selected_nutrition_plan?: string | null
+          nutrition_profile?: any | null
         }
         Update: {
           id?: string
@@ -63,6 +65,174 @@ export interface Database {
           role?: 'user' | 'admin'
           selected_schema_id?: string | null
           selected_nutrition_plan?: string | null
+          nutrition_profile?: any | null
+        }
+      }
+      academy_modules: {
+        Row: {
+          id: string
+          title: string
+          description: string
+          short_description: string | null
+          cover_image: string | null
+          slug: string
+          lessons_count: number
+          total_duration: string
+          enrolled_students: number
+          completion_rate: number
+          status: 'draft' | 'published' | 'archived'
+          unlock_requirement: string | null
+          order_index: number
+          created_at: string
+          updated_at: string
+          created_by: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          id?: string
+          title: string
+          description: string
+          short_description?: string | null
+          cover_image?: string | null
+          slug?: string
+          lessons_count?: number
+          total_duration?: string
+          enrolled_students?: number
+          completion_rate?: number
+          status?: 'draft' | 'published' | 'archived'
+          unlock_requirement?: string | null
+          order_index?: number
+          created_at?: string
+          updated_at?: string
+          created_by?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          id?: string
+          title?: string
+          description?: string
+          short_description?: string | null
+          cover_image?: string | null
+          slug?: string
+          lessons_count?: number
+          total_duration?: string
+          enrolled_students?: number
+          completion_rate?: number
+          status?: 'draft' | 'published' | 'archived'
+          unlock_requirement?: string | null
+          order_index?: number
+          created_at?: string
+          updated_at?: string
+          created_by?: string | null
+          updated_by?: string | null
+        }
+      }
+      academy_lessons: {
+        Row: {
+          id: string
+          module_id: string
+          title: string
+          duration: string
+          type: 'video' | 'text' | 'exam'
+          status: 'draft' | 'published' | 'archived'
+          order_index: number
+          views: number
+          completion_rate: number
+          video_url: string | null
+          content: string | null
+          created_at: string
+          updated_at: string
+          created_by: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          id?: string
+          module_id: string
+          title: string
+          duration?: string
+          type?: 'video' | 'text' | 'exam'
+          status?: 'draft' | 'published' | 'archived'
+          order_index?: number
+          views?: number
+          completion_rate?: number
+          video_url?: string | null
+          content?: string | null
+          created_at?: string
+          updated_at?: string
+          created_by?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          id?: string
+          module_id?: string
+          title?: string
+          duration?: string
+          type?: 'video' | 'text' | 'exam'
+          status?: 'draft' | 'published' | 'archived'
+          order_index?: number
+          views?: number
+          completion_rate?: number
+          video_url?: string | null
+          content?: string | null
+          created_at?: string
+          updated_at?: string
+          created_by?: string | null
+          updated_by?: string | null
+        }
+      }
+      user_lesson_progress: {
+        Row: {
+          id: string
+          user_id: string
+          lesson_id: string
+          completed: boolean
+          watched_duration: number
+          exam_score: number | null
+          started_at: string
+          completed_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          lesson_id: string
+          completed?: boolean
+          watched_duration?: number
+          exam_score?: number | null
+          started_at?: string
+          completed_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          lesson_id?: string
+          completed?: boolean
+          watched_duration?: number
+          exam_score?: number | null
+          started_at?: string
+          completed_at?: string | null
+        }
+      }
+      user_module_unlocks: {
+        Row: {
+          id: string
+          user_id: string
+          module_id: string
+          unlocked_at: string
+          opened_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          module_id: string
+          unlocked_at?: string
+          opened_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          module_id?: string
+          unlocked_at?: string
+          opened_at?: string | null
         }
       }
       missions: {
