@@ -15,7 +15,6 @@ interface Module {
   cover_image?: string;
   slug: string;
   order_index: number;
-  lessons_count: number;
   status: string;
 }
 
@@ -348,7 +347,11 @@ export default function AcademyPage() {
                   
                   <div className="flex items-center justify-between">
                     <span className="text-[#8BAE5A] text-xs sm:text-sm">
-                      {module.lessons_count} {module.lessons_count === 1 ? 'les' : 'lessen'}
+                      {(() => {
+                        const moduleLessons = lessons.filter(l => l.module_id === module.id);
+                        const lessonCount = moduleLessons.length;
+                        return `${lessonCount} ${lessonCount === 1 ? 'les' : 'lessen'}`;
+                      })()}
                     </span>
                     {locked ? (
                       <span className="text-[#8BAE5A] text-xs bg-[#8BAE5A]/10 px-2 py-1 rounded">
