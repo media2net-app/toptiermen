@@ -58,6 +58,12 @@ interface DayPlan {
   meals: Meal[];
 }
 
+interface DayPlan {
+  day: string;
+  date: string;
+  meals: Meal[];
+}
+
 const activityLevels = [
   { value: 'sedentary', label: 'Zittend werk', description: 'Weinig tot geen beweging' },
   { value: 'light', label: 'Licht actief', description: '1-3x per week sporten' },
