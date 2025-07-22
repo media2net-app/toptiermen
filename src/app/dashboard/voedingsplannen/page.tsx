@@ -17,6 +17,7 @@ import MealEditModal from './MealEditModal';
 import WeekPlanView from './WeekPlanView';
 import WeekPlanView from './WeekPlanView';
 import WeekPlanView from './WeekPlanView';
+import WeekPlanView from './WeekPlanView';
 
 interface UserData {
   age: number;
@@ -934,6 +935,7 @@ export default function VoedingsplannenPage() {
               onNewPlan={handleNewPlan}
             />
           )}
+              <div className="text-center">
                 <h2 className="text-2xl font-bold text-white mb-2">
                   Jouw Persoonlijke {selectedDiet === 'carnivore' ? 'Carnivoor' : 'Voedings'} Weekplan op Maat
                 </h2>
