@@ -838,26 +838,37 @@ export default function VoedingsplannenPage() {
                            meal.type === 'lunch' ? 'Lunch' : 
                            meal.type === 'dinner' ? 'Diner' : 'Snack'} ({meal.time})
                         </h3>
-                        {meal.type === 'snack' && (
+                        <div className="flex items-center gap-3">
                           <button
                             onClick={() => {
-                              const remainingMeals = mealPlan.meals.filter(m => m.id !== meal.id);
-                              // Filter original meals to only include the remaining ones
-                              const remainingOriginalMeals = originalMealPlan?.meals.filter(m => 
-                                remainingMeals.some(remaining => remaining.id === m.id)
-                              );
-                              const updatedMeals = redistributeCalories(remainingMeals, nutritionGoals, remainingOriginalMeals);
-                              
-                              setMealPlan(prev => ({
-                                ...prev!,
-                                meals: updatedMeals.sort((a, b) => a.time.localeCompare(b.time))
-                              }));
+                              // TODO: Implement meal editing functionality
+                              console.log('Edit meal:', meal.id);
                             }}
-                            className="text-red-400 hover:text-red-300 text-sm font-medium"
+                            className="text-[#8BAE5A] hover:text-[#7A9D4B] text-sm font-medium"
                           >
-                            Verwijder
+                            Wijzig maaltijd
                           </button>
-                        )}
+                          {meal.type === 'snack' && (
+                            <button
+                              onClick={() => {
+                                const remainingMeals = mealPlan.meals.filter(m => m.id !== meal.id);
+                                // Filter original meals to only include the remaining ones
+                                const remainingOriginalMeals = originalMealPlan?.meals.filter(m => 
+                                  remainingMeals.some(remaining => remaining.id === m.id)
+                                );
+                                const updatedMeals = redistributeCalories(remainingMeals, nutritionGoals, remainingOriginalMeals);
+                                
+                                setMealPlan(prev => ({
+                                  ...prev!,
+                                  meals: updatedMeals.sort((a, b) => a.time.localeCompare(b.time))
+                                }));
+                              }}
+                              className="text-red-400 hover:text-red-300 text-sm font-medium"
+                            >
+                              Verwijder
+                            </button>
+                          )}
+                        </div>
                       </div>
                       <div className="text-sm text-gray-400">
                         {meal.calories} kcal | {meal.protein}g eiwit | {meal.carbs}g koolhydraten | {meal.fat}g vet
