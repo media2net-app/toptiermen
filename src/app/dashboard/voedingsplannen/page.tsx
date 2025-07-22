@@ -13,6 +13,7 @@ import {
 import PageLayout from '@/components/PageLayout';
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
+import MealEditModal from './MealEditModal';
 
 interface UserData {
   age: number;
@@ -108,6 +109,8 @@ export default function VoedingsplannenPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedNutritionPlan, setSelectedNutritionPlan] = useState<string | null>(null);
   const [showPlanBanner, setShowPlanBanner] = useState(true);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingMeal, setEditingMeal] = useState<Meal | null>(null);
 
   useEffect(() => {
     const fetchSelectedPlan = async () => {
@@ -543,6 +546,27 @@ export default function VoedingsplannenPage() {
     URL.revokeObjectURL(url);
   };
 
+  const handleEditMeal = (meal: Meal) => {
+    setEditingMeal(meal);
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveMeal = (updatedMeal: Meal) => {
+    if (!mealPlan) return;
+
+    const updatedMeals = mealPlan.meals.map(meal => 
+      meal.id === updatedMeal.id ? updatedMeal : meal
+    );
+
+    // Redistribute calories to maintain total daily goals
+    const redistributedMeals = redistributeCalories(updatedMeals, nutritionGoals, originalMealPlan?.meals);
+    
+    setMealPlan({
+      ...mealPlan,
+      meals: redistributedMeals
+    });
+  };
+
   return (
     <PageLayout
       title="Top Tier Voedingsplan Generator"
@@ -840,10 +864,7 @@ export default function VoedingsplannenPage() {
                         </h3>
                         <div className="flex items-center gap-3">
                           <button
-                            onClick={() => {
-                              // TODO: Implement meal editing functionality
-                              console.log('Edit meal:', meal.id);
-                            }}
+                            onClick={() => handleEditMeal(meal)}
                             className="text-[#8BAE5A] hover:text-[#7A9D4B] text-sm font-medium"
                           >
                             Wijzig maaltijd
@@ -1006,6 +1027,15 @@ export default function VoedingsplannenPage() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Meal Edit Modal */}
+        <MealEditModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          meal={editingMeal}
+          onSave={handleSaveMeal}
+          nutritionGoals={nutritionGoals}
+        />
       </div>
     </PageLayout>
   );
