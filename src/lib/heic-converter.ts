@@ -1,5 +1,5 @@
 // HEIC to JPEG converter utility
-// This provides a simple fallback approach for HEIC files
+// Simple browser-based conversion without external libraries
 
 export const convertHeicToJpeg = async (file: File): Promise<File> => {
   // Check if file is HEIC
@@ -12,9 +12,9 @@ export const convertHeicToJpeg = async (file: File): Promise<File> => {
       return file;
     }
 
-    // Try canvas-based conversion first (works for many HEIC files)
+    // Method 1: Try direct canvas conversion
     try {
-      const result = await tryCanvasConversion(file);
+      const result = await convertHeicWithCanvas(file);
       if (result) {
         console.log('HEIC conversion successful with canvas method');
         return result;
@@ -23,7 +23,7 @@ export const convertHeicToJpeg = async (file: File): Promise<File> => {
       console.log('Canvas conversion failed:', error);
     }
 
-    // Fallback: try to use file as-is with JPEG extension
+    // Method 2: Try using the file as-is (some browsers support HEIC)
     try {
       const newFileName = file.name.replace(/\.(heic|heif)$/i, '.jpg');
       const convertedFile = new File([file], newFileName, {
@@ -46,35 +46,65 @@ export const convertHeicToJpeg = async (file: File): Promise<File> => {
   return file;
 };
 
-// Canvas-based conversion (works for many HEIC files)
-async function tryCanvasConversion(file: File): Promise<File | null> {
+// Enhanced canvas-based conversion for HEIC files
+async function convertHeicWithCanvas(file: File): Promise<File | null> {
   try {
     return new Promise((resolve, reject) => {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       const img = new Image();
       
-      img.onload = () => {
-        canvas.width = img.width;
-        canvas.height = img.height;
-        ctx?.drawImage(img, 0, 0);
-        
-        canvas.toBlob((blob) => {
-          if (blob) {
-            const newFileName = file.name.replace(/\.(heic|heif)$/i, '.jpg');
-            const convertedFile = new File([blob], newFileName, {
-              type: 'image/jpeg',
-              lastModified: Date.now()
-            });
-            resolve(convertedFile);
-          } else {
-            reject(new Error('Canvas conversion failed'));
-          }
-        }, 'image/jpeg', 0.8);
+      // Set crossOrigin to handle potential CORS issues
+      img.crossOrigin = 'anonymous';
+      
+
+      
+      img.onerror = (error) => {
+        console.error('HEIC image load error:', error);
+        reject(new Error('Failed to load HEIC image'));
       };
       
-      img.onerror = () => reject(new Error('Image loading failed'));
-      img.src = URL.createObjectURL(file);
+      // Create object URL and load image
+      const objectUrl = URL.createObjectURL(file);
+      img.src = objectUrl;
+      
+      // Clean up object URL after loading
+      img.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+        console.log('HEIC image loaded successfully, dimensions:', img.width, 'x', img.height);
+        
+        // Set canvas dimensions
+        canvas.width = img.width;
+        canvas.height = img.height;
+        
+        if (ctx) {
+          try {
+            // Draw the image to canvas
+            ctx.drawImage(img, 0, 0);
+            
+            // Convert to blob
+            canvas.toBlob((blob) => {
+              if (blob) {
+                const newFileName = file.name.replace(/\.(heic|heif)$/i, '.jpg');
+                const convertedFile = new File([blob], newFileName, {
+                  type: 'image/jpeg',
+                  lastModified: Date.now()
+                });
+                console.log('HEIC successfully converted to JPEG:', newFileName);
+                resolve(convertedFile);
+              } else {
+                console.error('Canvas toBlob failed');
+                reject(new Error('Canvas conversion failed'));
+              }
+            }, 'image/jpeg', 0.8);
+          } catch (error) {
+            console.error('Canvas draw error:', error);
+            reject(error);
+          }
+        } else {
+          reject(new Error('Could not get canvas context'));
+        }
+      };
     });
   } catch (error) {
     console.log('Canvas conversion failed:', error);
