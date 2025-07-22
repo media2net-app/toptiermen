@@ -29,34 +29,21 @@ interface NutritionGoals {
   fat: number;
 }
 
+interface Meal {
+  id: string;
+  name: string;
+  image: string;
+  ingredients: { name: string; amount: number; unit: string }[];
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  time: string;
+  type: 'breakfast' | 'lunch' | 'dinner' | 'snack';
+}
+
 interface MealPlan {
-  breakfast: {
-    name: string;
-    image: string;
-    ingredients: { name: string; amount: number; unit: string }[];
-    calories: number;
-    protein: number;
-    carbs: number;
-    fat: number;
-  };
-  lunch: {
-    name: string;
-    image: string;
-    ingredients: { name: string; amount: number; unit: string }[];
-    calories: number;
-    protein: number;
-    carbs: number;
-    fat: number;
-  };
-  dinner: {
-    name: string;
-    image: string;
-    ingredients: { name: string; amount: number; unit: string }[];
-    calories: number;
-    protein: number;
-    carbs: number;
-    fat: number;
-  };
+  meals: Meal[];
 }
 
 const activityLevels = [
@@ -221,177 +208,221 @@ export default function VoedingsplannenPage() {
     // Realistische dagmenu's per dieettype
     if (dietType === 'balanced') {
       return {
-        breakfast: {
-          name: 'Havermout met Blauwe Bessen & Walnoten',
-          image: '/images/mind/1.png',
-          ingredients: [
-            { name: 'Havermout', amount: 60, unit: 'gram' },
-            { name: 'Melk', amount: 250, unit: 'ml' },
-            { name: 'Blauwe bessen', amount: 50, unit: 'gram' },
-            { name: 'Walnoten', amount: 15, unit: 'gram' }
-          ],
-          calories: Math.round(goals.calories * 0.25),
-          protein: Math.round(goals.protein * 0.25),
-          carbs: Math.round(goals.carbs * 0.3),
-          fat: Math.round(goals.fat * 0.2)
-        },
-        lunch: {
-          name: 'Volkoren Wrap met Kip, Groenten & Hummus',
-          image: '/images/mind/2.png',
-          ingredients: [
-            { name: 'Volkoren wrap', amount: 1, unit: 'stuk' },
-            { name: 'Kipfilet', amount: 100, unit: 'gram' },
-            { name: 'Paprika', amount: 50, unit: 'gram' },
-            { name: 'Komkommer', amount: 50, unit: 'gram' },
-            { name: 'Hummus', amount: 30, unit: 'gram' }
-          ],
-          calories: Math.round(goals.calories * 0.35),
-          protein: Math.round(goals.protein * 0.35),
-          carbs: Math.round(goals.carbs * 0.35),
-          fat: Math.round(goals.fat * 0.3)
-        },
-        dinner: {
-          name: 'Zalmfilet met Zoete Aardappel & Broccoli',
-          image: '/images/mind/3.png',
-          ingredients: [
-            { name: 'Zalmfilet', amount: 150, unit: 'gram' },
-            { name: 'Zoete aardappel', amount: 200, unit: 'gram' },
-            { name: 'Broccoli', amount: 150, unit: 'gram' }
-          ],
-          calories: Math.round(goals.calories * 0.4),
-          protein: Math.round(goals.protein * 0.4),
-          carbs: Math.round(goals.carbs * 0.35),
-          fat: Math.round(goals.fat * 0.5)
-        }
+        meals: [
+          {
+            id: 'breakfast-1',
+            name: 'Havermout met Blauwe Bessen & Walnoten',
+            image: '/images/mind/1.png',
+            ingredients: [
+              { name: 'Havermout', amount: 60, unit: 'gram' },
+              { name: 'Melk', amount: 250, unit: 'ml' },
+              { name: 'Blauwe bessen', amount: 50, unit: 'gram' },
+              { name: 'Walnoten', amount: 15, unit: 'gram' }
+            ],
+            calories: Math.round(goals.calories * 0.25),
+            protein: Math.round(goals.protein * 0.25),
+            carbs: Math.round(goals.carbs * 0.3),
+            fat: Math.round(goals.fat * 0.2),
+            time: '08:00',
+            type: 'breakfast'
+          },
+          {
+            id: 'lunch-1',
+            name: 'Volkoren Wrap met Kip, Groenten & Hummus',
+            image: '/images/mind/2.png',
+            ingredients: [
+              { name: 'Volkoren wrap', amount: 1, unit: 'stuk' },
+              { name: 'Kipfilet', amount: 100, unit: 'gram' },
+              { name: 'Paprika', amount: 50, unit: 'gram' },
+              { name: 'Komkommer', amount: 50, unit: 'gram' },
+              { name: 'Hummus', amount: 30, unit: 'gram' }
+            ],
+            calories: Math.round(goals.calories * 0.35),
+            protein: Math.round(goals.protein * 0.35),
+            carbs: Math.round(goals.carbs * 0.35),
+            fat: Math.round(goals.fat * 0.3),
+            time: '13:00',
+            type: 'lunch'
+          },
+          {
+            id: 'dinner-1',
+            name: 'Zalmfilet met Zoete Aardappel & Broccoli',
+            image: '/images/mind/3.png',
+            ingredients: [
+              { name: 'Zalmfilet', amount: 150, unit: 'gram' },
+              { name: 'Zoete aardappel', amount: 200, unit: 'gram' },
+              { name: 'Broccoli', amount: 150, unit: 'gram' }
+            ],
+            calories: Math.round(goals.calories * 0.4),
+            protein: Math.round(goals.protein * 0.4),
+            carbs: Math.round(goals.carbs * 0.35),
+            fat: Math.round(goals.fat * 0.5),
+            time: '19:00',
+            type: 'dinner'
+          }
+        ]
       };
     }
     if (dietType === 'low_carb') {
       return {
-        breakfast: {
-          name: 'Griekse Yoghurt met Noten & Lijnzaad',
-          image: '/images/mind/4.png',
-          ingredients: [
-            { name: 'Griekse yoghurt', amount: 200, unit: 'gram' },
-            { name: 'Gemengde noten', amount: 20, unit: 'gram' },
-            { name: 'Lijnzaad', amount: 10, unit: 'gram' }
-          ],
-          calories: Math.round(goals.calories * 0.25),
-          protein: Math.round(goals.protein * 0.3),
-          carbs: Math.round(goals.carbs * 0.15),
-          fat: Math.round(goals.fat * 0.3)
-        },
-        lunch: {
-          name: 'Omelet met Spinazie, Tomaat & Feta',
-          image: '/images/brotherhood/mastermind.png',
-          ingredients: [
-            { name: 'Eieren', amount: 3, unit: 'stuks' },
-            { name: 'Spinazie', amount: 50, unit: 'gram' },
-            { name: 'Tomaat', amount: 50, unit: 'gram' },
-            { name: 'Feta', amount: 30, unit: 'gram' }
-          ],
-          calories: Math.round(goals.calories * 0.35),
-          protein: Math.round(goals.protein * 0.35),
-          carbs: Math.round(goals.carbs * 0.2),
-          fat: Math.round(goals.fat * 0.35)
-        },
-        dinner: {
-          name: 'Kipfilet met Courgette & Avocado',
-          image: '/images/brotherhood/qena.png',
-          ingredients: [
-            { name: 'Kipfilet', amount: 150, unit: 'gram' },
-            { name: 'Courgette', amount: 100, unit: 'gram' },
-            { name: 'Avocado', amount: 50, unit: 'gram' }
-          ],
-          calories: Math.round(goals.calories * 0.4),
-          protein: Math.round(goals.protein * 0.35),
-          carbs: Math.round(goals.carbs * 0.2),
-          fat: Math.round(goals.fat * 0.35)
-        }
+        meals: [
+          {
+            id: 'breakfast-1',
+            name: 'Griekse Yoghurt met Noten & Lijnzaad',
+            image: '/images/mind/4.png',
+            ingredients: [
+              { name: 'Griekse yoghurt', amount: 200, unit: 'gram' },
+              { name: 'Gemengde noten', amount: 20, unit: 'gram' },
+              { name: 'Lijnzaad', amount: 10, unit: 'gram' }
+            ],
+            calories: Math.round(goals.calories * 0.25),
+            protein: Math.round(goals.protein * 0.3),
+            carbs: Math.round(goals.carbs * 0.15),
+            fat: Math.round(goals.fat * 0.3),
+            time: '08:00',
+            type: 'breakfast'
+          },
+          {
+            id: 'lunch-1',
+            name: 'Omelet met Spinazie, Tomaat & Feta',
+            image: '/images/brotherhood/mastermind.png',
+            ingredients: [
+              { name: 'Eieren', amount: 3, unit: 'stuks' },
+              { name: 'Spinazie', amount: 50, unit: 'gram' },
+              { name: 'Tomaat', amount: 50, unit: 'gram' },
+              { name: 'Feta', amount: 30, unit: 'gram' }
+            ],
+            calories: Math.round(goals.calories * 0.35),
+            protein: Math.round(goals.protein * 0.35),
+            carbs: Math.round(goals.carbs * 0.2),
+            fat: Math.round(goals.fat * 0.35),
+            time: '13:00',
+            type: 'lunch'
+          },
+          {
+            id: 'dinner-1',
+            name: 'Kipfilet met Courgette & Avocado',
+            image: '/images/brotherhood/qena.png',
+            ingredients: [
+              { name: 'Kipfilet', amount: 150, unit: 'gram' },
+              { name: 'Courgette', amount: 100, unit: 'gram' },
+              { name: 'Avocado', amount: 50, unit: 'gram' }
+            ],
+            calories: Math.round(goals.calories * 0.4),
+            protein: Math.round(goals.protein * 0.35),
+            carbs: Math.round(goals.carbs * 0.2),
+            fat: Math.round(goals.fat * 0.35),
+            time: '19:00',
+            type: 'dinner'
+          }
+        ]
       };
     }
     if (dietType === 'high_protein') {
       return {
-        breakfast: {
-          name: 'Proteïne Pannenkoeken met Kwark',
-          image: '/images/brotherhood/ardenne.png',
-          ingredients: [
-            { name: 'Proteïne poeder', amount: 30, unit: 'gram' },
-            { name: 'Havermout', amount: 40, unit: 'gram' },
-            { name: 'Ei', amount: 1, unit: 'stuk' },
-            { name: 'Magere kwark', amount: 100, unit: 'gram' }
-          ],
-          calories: Math.round(goals.calories * 0.25),
-          protein: Math.round(goals.protein * 0.35),
-          carbs: Math.round(goals.carbs * 0.25),
-          fat: Math.round(goals.fat * 0.2)
-        },
-        lunch: {
-          name: 'Tonijnsalade met Kidneybonen & Paprika',
-          image: '/images/mind/4.png',
-          ingredients: [
-            { name: 'Tonijn uit blik', amount: 1, unit: 'blik' },
-            { name: 'Kidneybonen', amount: 50, unit: 'gram' },
-            { name: 'Paprika', amount: 50, unit: 'gram' },
-            { name: 'Olijfolie', amount: 10, unit: 'ml' }
-          ],
-          calories: Math.round(goals.calories * 0.35),
-          protein: Math.round(goals.protein * 0.35),
-          carbs: Math.round(goals.carbs * 0.25),
-          fat: Math.round(goals.fat * 0.25)
-        },
-        dinner: {
-          name: 'Biefstuk met Sperziebonen & Zoete Aardappel',
-          image: '/images/mind/2.png',
-          ingredients: [
-            { name: 'Biefstuk', amount: 150, unit: 'gram' },
-            { name: 'Sperziebonen', amount: 100, unit: 'gram' },
-            { name: 'Zoete aardappel', amount: 150, unit: 'gram' }
-          ],
-          calories: Math.round(goals.calories * 0.4),
-          protein: Math.round(goals.protein * 0.3),
-          carbs: Math.round(goals.carbs * 0.3),
-          fat: Math.round(goals.fat * 0.3)
-        }
+        meals: [
+          {
+            id: 'breakfast-1',
+            name: 'Proteïne Pannenkoeken met Kwark',
+            image: '/images/brotherhood/ardenne.png',
+            ingredients: [
+              { name: 'Proteïne poeder', amount: 30, unit: 'gram' },
+              { name: 'Havermout', amount: 40, unit: 'gram' },
+              { name: 'Ei', amount: 1, unit: 'stuk' },
+              { name: 'Magere kwark', amount: 100, unit: 'gram' }
+            ],
+            calories: Math.round(goals.calories * 0.25),
+            protein: Math.round(goals.protein * 0.35),
+            carbs: Math.round(goals.carbs * 0.25),
+            fat: Math.round(goals.fat * 0.2),
+            time: '08:00',
+            type: 'breakfast'
+          },
+          {
+            id: 'lunch-1',
+            name: 'Tonijnsalade met Kidneybonen & Paprika',
+            image: '/images/mind/4.png',
+            ingredients: [
+              { name: 'Tonijn uit blik', amount: 1, unit: 'blik' },
+              { name: 'Kidneybonen', amount: 50, unit: 'gram' },
+              { name: 'Paprika', amount: 50, unit: 'gram' },
+              { name: 'Olijfolie', amount: 10, unit: 'ml' }
+            ],
+            calories: Math.round(goals.calories * 0.35),
+            protein: Math.round(goals.protein * 0.35),
+            carbs: Math.round(goals.carbs * 0.25),
+            fat: Math.round(goals.fat * 0.25),
+            time: '13:00',
+            type: 'lunch'
+          },
+          {
+            id: 'dinner-1',
+            name: 'Biefstuk met Sperziebonen & Zoete Aardappel',
+            image: '/images/mind/2.png',
+            ingredients: [
+              { name: 'Biefstuk', amount: 150, unit: 'gram' },
+              { name: 'Sperziebonen', amount: 100, unit: 'gram' },
+              { name: 'Zoete aardappel', amount: 150, unit: 'gram' }
+            ],
+            calories: Math.round(goals.calories * 0.4),
+            protein: Math.round(goals.protein * 0.3),
+            carbs: Math.round(goals.carbs * 0.3),
+            fat: Math.round(goals.fat * 0.3),
+            time: '19:00',
+            type: 'dinner'
+          }
+        ]
       };
     }
     // Default: carnivore
     return {
-      breakfast: {
-        name: 'Gebakken Eieren met Spek',
-        image: '/images/mind/1.png',
-        ingredients: [
-          { name: 'Eieren', amount: Math.round(goals.protein * 0.3 / 6), unit: 'stuks' },
-          { name: 'Spek', amount: Math.round(goals.fat * 0.4 / 9), unit: 'gram' }
-        ],
-        calories: Math.round(goals.calories * 0.3),
-        protein: Math.round(goals.protein * 0.3),
-        carbs: 0,
-        fat: Math.round(goals.fat * 0.4)
-      },
-      lunch: {
-        name: 'Gegrilde Ribeye',
-        image: '/images/mind/2.png',
-        ingredients: [
-          { name: 'Ribeye Steak', amount: Math.round(goals.protein * 0.4 / 2.5), unit: 'gram' },
-          { name: 'Boter', amount: Math.round(goals.fat * 0.3 / 9), unit: 'gram' }
-        ],
-        calories: Math.round(goals.calories * 0.4),
-        protein: Math.round(goals.protein * 0.4),
-        carbs: 0,
-        fat: Math.round(goals.fat * 0.3)
-      },
-      dinner: {
-        name: 'Gehaktballen met Kaas',
-        image: '/images/mind/3.png',
-        ingredients: [
-          { name: 'Rundergehakt', amount: Math.round(goals.protein * 0.3 / 2.5), unit: 'gram' },
-          { name: 'Kaas', amount: Math.round(goals.fat * 0.3 / 9), unit: 'gram' }
-        ],
-        calories: Math.round(goals.calories * 0.3),
-        protein: Math.round(goals.protein * 0.3),
-        carbs: 0,
-        fat: Math.round(goals.fat * 0.3)
-      }
+      meals: [
+        {
+          id: 'breakfast-1',
+          name: 'Gebakken Eieren met Spek',
+          image: '/images/mind/1.png',
+          ingredients: [
+            { name: 'Eieren', amount: Math.round(goals.protein * 0.3 / 6), unit: 'stuks' },
+            { name: 'Spek', amount: Math.round(goals.fat * 0.4 / 9), unit: 'gram' }
+          ],
+          calories: Math.round(goals.calories * 0.3),
+          protein: Math.round(goals.protein * 0.3),
+          carbs: 0,
+          fat: Math.round(goals.fat * 0.4),
+          time: '08:00',
+          type: 'breakfast'
+        },
+        {
+          id: 'lunch-1',
+          name: 'Gegrilde Ribeye',
+          image: '/images/mind/2.png',
+          ingredients: [
+            { name: 'Ribeye Steak', amount: Math.round(goals.protein * 0.4 / 2.5), unit: 'gram' },
+            { name: 'Boter', amount: Math.round(goals.fat * 0.3 / 9), unit: 'gram' }
+          ],
+          calories: Math.round(goals.calories * 0.4),
+          protein: Math.round(goals.protein * 0.4),
+          carbs: 0,
+          fat: Math.round(goals.fat * 0.3),
+          time: '13:00',
+          type: 'lunch'
+        },
+        {
+          id: 'dinner-1',
+          name: 'Gehaktballen met Kaas',
+          image: '/images/mind/3.png',
+          ingredients: [
+            { name: 'Rundergehakt', amount: Math.round(goals.protein * 0.3 / 2.5), unit: 'gram' },
+            { name: 'Kaas', amount: Math.round(goals.fat * 0.3 / 9), unit: 'gram' }
+          ],
+          calories: Math.round(goals.calories * 0.3),
+          protein: Math.round(goals.protein * 0.3),
+          carbs: 0,
+          fat: Math.round(goals.fat * 0.3),
+          time: '19:00',
+          type: 'dinner'
+        }
+      ]
     };
   };
 
@@ -436,8 +467,8 @@ export default function VoedingsplannenPage() {
     
     const ingredients = new Map<string, { amount: number; unit: string }>();
     
-    [mealPlan.breakfast, mealPlan.lunch, mealPlan.dinner].forEach(meal => {
-      meal.ingredients.forEach(ingredient => {
+    mealPlan.meals.forEach(meal => {
+      meal.ingredients.forEach((ingredient: { name: string; amount: number; unit: string }) => {
         const existing = ingredients.get(ingredient.name);
         if (existing) {
           existing.amount += ingredient.amount;
@@ -724,14 +755,29 @@ export default function VoedingsplannenPage() {
               </div>
 
               <div className="space-y-6">
-                {[
-                  { meal: mealPlan.breakfast, time: '08:00', title: 'Ontbijt' },
-                  { meal: mealPlan.lunch, time: '13:00', title: 'Lunch' },
-                  { meal: mealPlan.dinner, time: '19:00', title: 'Diner' }
-                ].map(({ meal, time, title }) => (
-                  <div key={title} className="bg-[#1A1A1A] rounded-xl p-6">
+                {mealPlan.meals.map((meal) => (
+                  <div key={meal.id} className="bg-[#1A1A1A] rounded-xl p-6">
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-xl font-bold text-white">{title} ({time})</h3>
+                      <div className="flex items-center gap-4">
+                        <h3 className="text-xl font-bold text-white">
+                          {meal.type === 'breakfast' ? 'Ontbijt' : 
+                           meal.type === 'lunch' ? 'Lunch' : 
+                           meal.type === 'dinner' ? 'Diner' : 'Snack'} ({meal.time})
+                        </h3>
+                        {meal.type === 'snack' && (
+                          <button
+                            onClick={() => {
+                              setMealPlan(prev => ({
+                                ...prev!,
+                                meals: prev!.meals.filter(m => m.id !== meal.id)
+                              }));
+                            }}
+                            className="text-red-400 hover:text-red-300 text-sm font-medium"
+                          >
+                            Verwijder
+                          </button>
+                        )}
+                      </div>
                       <div className="text-sm text-gray-400">
                         {meal.calories} kcal | {meal.protein}g eiwit | {meal.carbs}g koolhydraten | {meal.fat}g vet
                       </div>
@@ -752,7 +798,7 @@ export default function VoedingsplannenPage() {
                         <div className="mb-4">
                           <h5 className="text-sm font-medium text-[#8BAE5A] mb-2">Porties voor jou:</h5>
                           <div className="space-y-1">
-                            {meal.ingredients.map((ingredient, index) => (
+                            {meal.ingredients.map((ingredient: { name: string; amount: number; unit: string }, index: number) => (
                               <div key={index} className="text-gray-300 text-sm">
                                 • {ingredient.name}: {ingredient.amount} {ingredient.unit}
                               </div>
@@ -763,6 +809,69 @@ export default function VoedingsplannenPage() {
                     </div>
                   </div>
                 ))}
+                
+                {/* Add snack buttons */}
+                {mealPlan.meals.length < 5 && (
+                  <div className="flex gap-4 justify-center">
+                    {!mealPlan.meals.some(m => m.type === 'snack' && m.time === '15:00') && (
+                      <button
+                        onClick={() => {
+                          const newSnack: Meal = {
+                            id: `snack-${Date.now()}`,
+                            name: 'Gezonde Snack',
+                            image: '/images/nutrition/snack.jpg',
+                            ingredients: [
+                              { name: 'Amandelen', amount: 30, unit: 'gram' },
+                              { name: 'Appel', amount: 1, unit: 'stuk' }
+                            ],
+                            calories: Math.round((nutritionGoals?.calories || 0) * 0.1),
+                            protein: Math.round((nutritionGoals?.protein || 0) * 0.1),
+                            carbs: Math.round((nutritionGoals?.carbs || 0) * 0.1),
+                            fat: Math.round((nutritionGoals?.fat || 0) * 0.1),
+                            time: '15:00',
+                            type: 'snack'
+                          };
+                          setMealPlan(prev => ({
+                            ...prev!,
+                            meals: [...prev!.meals, newSnack].sort((a, b) => a.time.localeCompare(b.time))
+                          }));
+                        }}
+                        className="bg-[#3A4D23] text-white px-4 py-2 rounded-lg hover:bg-[#4A5D33] transition-all text-sm"
+                      >
+                        + Middag Snack
+                      </button>
+                    )}
+                    
+                    {!mealPlan.meals.some(m => m.type === 'snack' && m.time === '21:00') && (
+                      <button
+                        onClick={() => {
+                          const newSnack: Meal = {
+                            id: `snack-${Date.now()}`,
+                            name: 'Avond Snack',
+                            image: '/images/nutrition/snack.jpg',
+                            ingredients: [
+                              { name: 'Griekse yoghurt', amount: 100, unit: 'gram' },
+                              { name: 'Bessen', amount: 50, unit: 'gram' }
+                            ],
+                            calories: Math.round((nutritionGoals?.calories || 0) * 0.08),
+                            protein: Math.round((nutritionGoals?.protein || 0) * 0.08),
+                            carbs: Math.round((nutritionGoals?.carbs || 0) * 0.08),
+                            fat: Math.round((nutritionGoals?.fat || 0) * 0.08),
+                            time: '21:00',
+                            type: 'snack'
+                          };
+                          setMealPlan(prev => ({
+                            ...prev!,
+                            meals: [...prev!.meals, newSnack].sort((a, b) => a.time.localeCompare(b.time))
+                          }));
+                        }}
+                        className="bg-[#3A4D23] text-white px-4 py-2 rounded-lg hover:bg-[#4A5D33] transition-all text-sm"
+                      >
+                        + Avond Snack
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className="text-center pt-6 space-y-4">
