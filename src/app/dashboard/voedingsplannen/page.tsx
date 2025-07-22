@@ -842,7 +842,11 @@ export default function VoedingsplannenPage() {
                           <button
                             onClick={() => {
                               const remainingMeals = mealPlan.meals.filter(m => m.id !== meal.id);
-                              const updatedMeals = redistributeCalories(remainingMeals, nutritionGoals, originalMealPlan?.meals);
+                              // Filter original meals to only include the remaining ones
+                              const remainingOriginalMeals = originalMealPlan?.meals.filter(m => 
+                                remainingMeals.some(remaining => remaining.id === m.id)
+                              );
+                              const updatedMeals = redistributeCalories(remainingMeals, nutritionGoals, remainingOriginalMeals);
                               
                               setMealPlan(prev => ({
                                 ...prev!,
@@ -912,7 +916,9 @@ export default function VoedingsplannenPage() {
                             type: 'snack'
                           };
                           
-                          const updatedMeals = redistributeCalories([...mealPlan.meals, newSnack], nutritionGoals, originalMealPlan?.meals);
+                          // For adding snacks, we need the original meals plus the new snack
+                          const allOriginalMeals = [...(originalMealPlan?.meals || []), newSnack];
+                          const updatedMeals = redistributeCalories([...mealPlan.meals, newSnack], nutritionGoals, allOriginalMeals);
                           
                           setMealPlan(prev => ({
                             ...prev!,
@@ -947,7 +953,9 @@ export default function VoedingsplannenPage() {
                             type: 'snack'
                           };
                           
-                          const updatedMeals = redistributeCalories([...mealPlan.meals, newSnack], nutritionGoals, originalMealPlan?.meals);
+                          // For adding snacks, we need the original meals plus the new snack
+                          const allOriginalMeals = [...(originalMealPlan?.meals || []), newSnack];
+                          const updatedMeals = redistributeCalories([...mealPlan.meals, newSnack], nutritionGoals, allOriginalMeals);
                           
                           setMealPlan(prev => ({
                             ...prev!,
