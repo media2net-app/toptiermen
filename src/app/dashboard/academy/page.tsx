@@ -52,6 +52,12 @@ export default function AcademyPage() {
     let isMounted = true;
 
     const fetchAcademyData = async () => {
+      // Check if user exists
+      if (!user) {
+        console.log('🎓 Academy: No user, skipping data fetch...');
+        return;
+      }
+
       // Reset state
       if (isMounted) {
         setLoading(true);
