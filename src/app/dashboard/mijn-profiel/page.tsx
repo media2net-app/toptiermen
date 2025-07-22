@@ -98,6 +98,8 @@ export default function MijnProfiel() {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    console.log('Selected file:', file.name, 'Type:', file.type, 'Size:', file.size);
+
     // Validate file type
     if (!file.type.startsWith('image/') && !isHeicFile(file)) {
       toast.error('Alleen afbeeldingen zijn toegestaan');
@@ -113,17 +115,26 @@ export default function MijnProfiel() {
     try {
       // Convert HEIC to JPEG if needed
       const processedFile = await convertHeicToJpeg(file);
+      console.log('Processed file:', processedFile.name, 'Type:', processedFile.type);
       
       const reader = new FileReader();
       reader.onload = (e) => {
         const result = e.target?.result as string;
+        console.log('FileReader result length:', result.length);
+        console.log('FileReader result starts with:', result.substring(0, 50));
+        
+        if (!result || result.length === 0) {
+          toast.error('Kon de afbeelding niet lezen');
+          return;
+        }
+        
         setSelectedImage(result);
         setCropAspect(type === 'avatar' ? 1 : 3);
         setUploadingType(type);
         setShowCropModal(true);
       };
-      reader.onerror = () => {
-        console.error('FileReader error');
+      reader.onerror = (error) => {
+        console.error('FileReader error:', error);
         toast.error('Er is een fout opgetreden bij het lezen van de afbeelding');
       };
       reader.readAsDataURL(processedFile);

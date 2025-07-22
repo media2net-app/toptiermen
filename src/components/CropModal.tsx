@@ -9,32 +9,55 @@ interface CropModalProps {
 }
 
 function getCroppedImg(imageSrc: string, crop: any, zoom: number, aspect: number): Promise<string> {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
+    console.log('Starting crop process with image length:', imageSrc.length);
+    
     const image = new window.Image();
-    image.src = imageSrc;
+    image.crossOrigin = 'anonymous';
+    
     image.onload = () => {
+      console.log('Image loaded successfully, dimensions:', image.width, 'x', image.height);
+      
       let outW = 400, outH = 400;
       if (aspect === 3) { outW = 1200; outH = 400; }
       if (aspect === 1) { outW = 400; outH = 400; }
+      
       const canvas = document.createElement('canvas');
       canvas.width = outW;
       canvas.height = outH;
       const ctx = canvas.getContext('2d');
+      
       if (ctx) {
-        ctx.drawImage(
-          image,
-          crop.x,
-          crop.y,
-          crop.width,
-          crop.height,
-          0,
-          0,
-          outW,
-          outH
-        );
-        resolve(canvas.toDataURL('image/jpeg'));
+        try {
+          ctx.drawImage(
+            image,
+            crop.x,
+            crop.y,
+            crop.width,
+            crop.height,
+            0,
+            0,
+            outW,
+            outH
+          );
+          const result = canvas.toDataURL('image/jpeg', 0.8);
+          console.log('Crop successful, result length:', result.length);
+          resolve(result);
+        } catch (error) {
+          console.error('Canvas draw error:', error);
+          reject(error);
+        }
+      } else {
+        reject(new Error('Could not get canvas context'));
       }
     };
+    
+    image.onerror = (error) => {
+      console.error('Image load error:', error);
+      reject(new Error('Failed to load image for cropping'));
+    };
+    
+    image.src = imageSrc;
   });
 }
 
@@ -42,15 +65,31 @@ const CropModal: React.FC<CropModalProps> = ({ image, aspect, onClose, onCrop })
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedArea, setCroppedArea] = useState<any>(null);
+  const [imageError, setImageError] = useState(false);
+
+  console.log('CropModal received image:', image ? 'Image provided' : 'No image', 'Length:', image?.length);
 
   const onCropComplete = useCallback((_: any, croppedAreaPixels: any) => {
     setCroppedArea(croppedAreaPixels);
   }, []);
 
   const handleCrop = async () => {
-    if (!croppedArea) return;
-    const croppedImg = await getCroppedImg(image, croppedArea, zoom, aspect);
-    onCrop(croppedImg);
+    if (!croppedArea) {
+      console.error('No cropped area available');
+      return;
+    }
+    try {
+      const croppedImg = await getCroppedImg(image, croppedArea, zoom, aspect);
+      console.log('Crop successful, result length:', croppedImg.length);
+      onCrop(croppedImg);
+    } catch (error) {
+      console.error('Crop failed:', error);
+    }
+  };
+
+  const handleImageError = () => {
+    console.error('Image failed to load in CropModal');
+    setImageError(true);
   };
 
   return (
@@ -58,17 +97,27 @@ const CropModal: React.FC<CropModalProps> = ({ image, aspect, onClose, onCrop })
       <div className="bg-[#232D1A] rounded-2xl shadow-2xl p-6 w-full max-w-lg relative flex flex-col items-center">
         <button className="absolute top-4 right-4 text-white text-2xl hover:text-[#8BAE5A]" onClick={onClose}>&times;</button>
         <div className="w-full h-72 relative bg-black rounded-xl overflow-hidden mb-4">
-          <Cropper
-            image={image}
-            crop={crop}
-            zoom={zoom}
-            aspect={aspect}
-            onCropChange={setCrop}
-            onZoomChange={setZoom}
-            onCropComplete={onCropComplete}
-            cropShape="rect"
-            showGrid={true}
-          />
+          {imageError ? (
+            <div className="flex items-center justify-center h-full text-white">
+              <div className="text-center">
+                <div className="text-2xl mb-2">⚠️</div>
+                <div>Afbeelding kon niet worden geladen</div>
+                <div className="text-sm text-gray-400 mt-1">Probeer een andere afbeelding</div>
+              </div>
+            </div>
+          ) : (
+            <Cropper
+              image={image}
+              crop={crop}
+              zoom={zoom}
+              aspect={aspect}
+              onCropChange={setCrop}
+              onZoomChange={setZoom}
+              onCropComplete={onCropComplete}
+              cropShape="rect"
+              showGrid={true}
+            />
+          )}
         </div>
         <input
           type="range"
