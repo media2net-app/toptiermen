@@ -14,6 +14,7 @@ import PageLayout from '@/components/PageLayout';
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import MealEditModal from './MealEditModal';
+import WeekPlanView from './WeekPlanView';
 
 interface UserData {
   age: number;
