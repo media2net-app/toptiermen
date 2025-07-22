@@ -226,7 +226,7 @@ export default function LessonDetailPage() {
       title={lesson.title}
       subtitle={`Module: ${module.title}`}
     >
-      <div className="max-w-4xl mx-auto">
+      <div className="w-full">
         {/* Navigation */}
         <div className="flex items-center justify-between mb-6">
           <Link
@@ -332,7 +332,7 @@ export default function LessonDetailPage() {
         {/* Lesson list */}
         <div className="mt-8">
           <h3 className="text-lg font-semibold text-[#8BAE5A] mb-4">Lessen in deze module</h3>
-          <div className="space-y-2">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {lessons.map((l, index) => (
               <Link
                 key={l.id}
