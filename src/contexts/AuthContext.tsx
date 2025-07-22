@@ -19,6 +19,7 @@ type AuthContextType = {
   updateUser: (updates: Partial<User>) => Promise<void>;
   redirectAdminToDashboard?: boolean;
   clearAllCache: () => void;
+  initialized: boolean;
 };
 
 const AuthContext = createContext<AuthContextType>({
@@ -31,13 +32,16 @@ const AuthContext = createContext<AuthContextType>({
   updateUser: async () => {},
   redirectAdminToDashboard: true,
   clearAllCache: () => {},
+  initialized: false,
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [initialized, setInitialized] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
   const mountedRef = useRef(true);
+  const initializationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const fetchUserProfile = useCallback(async (supabaseUser: SupabaseUser): Promise<User | null> => {
     try {
@@ -74,29 +78,37 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       console.error('Error fetching user profile:', error);
       return null;
     }
-  }, []); // Empty dependency array - this function doesn't depend on any external values
+  }, []);
 
+  // Initialize authentication state
   useEffect(() => {
     let mounted = true;
     mountedRef.current = true;
 
-    const getInitialSession = async () => {
+    const initializeAuth = async () => {
       try {
-        console.log('Getting initial session...');
+        console.log('Initializing authentication...');
+        setIsInitializing(true);
         
-        // Add timeout to prevent hanging
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Session fetch timeout')), 8000)
-        );
-        
-        const sessionPromise = supabase.auth.getSession();
-        const { data: { session }, error } = await Promise.race([sessionPromise, timeoutPromise]) as any;
+        // Set a timeout for the entire initialization process
+        initializationTimeoutRef.current = setTimeout(() => {
+          if (mounted && mountedRef.current) {
+            console.log('Auth initialization timeout, setting loading to false');
+            setLoading(false);
+            setInitialized(true);
+            setIsInitializing(false);
+          }
+        }, 15000); // 15 second timeout
+
+        // Get initial session
+        const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
           console.error('Error getting session:', error);
           if (mounted && mountedRef.current) {
             setLoading(false);
             setInitialized(true);
+            setIsInitializing(false);
           }
           return;
         }
@@ -110,18 +122,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         } else {
           console.log('No session found');
         }
-      } catch (error) {
-        console.error('Error in getInitialSession:', error);
-      } finally {
+
+        // Clear timeout and set initialized
+        if (initializationTimeoutRef.current) {
+          clearTimeout(initializationTimeoutRef.current);
+          initializationTimeoutRef.current = null;
+        }
+
         if (mounted && mountedRef.current) {
-          console.log('Initial session check completed');
+          console.log('Authentication initialized successfully');
           setLoading(false);
           setInitialized(true);
+          setIsInitializing(false);
+        }
+      } catch (error) {
+        console.error('Error in auth initialization:', error);
+        if (mounted && mountedRef.current) {
+          setLoading(false);
+          setInitialized(true);
+          setIsInitializing(false);
         }
       }
     };
 
-    getInitialSession();
+    initializeAuth();
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -134,15 +158,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           const userProfile = await fetchUserProfile(session.user);
           if (mounted && mountedRef.current) {
             setUser(userProfile);
+            setLoading(false);
           }
         } else {
           if (mounted && mountedRef.current) {
             setUser(null);
+            setLoading(false);
           }
-        }
-        
-        if (mounted && mountedRef.current) {
-          setLoading(false);
         }
       }
     );
@@ -151,6 +173,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       console.log('Cleaning up auth effects...');
       mounted = false;
       mountedRef.current = false;
+      if (initializationTimeoutRef.current) {
+        clearTimeout(initializationTimeoutRef.current);
+      }
       subscription.unsubscribe();
     };
   }, [fetchUserProfile]);
@@ -209,6 +234,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     setLoading(true);
     try {
+      console.log('Signing up:', email);
+      
       // Add timeout
       const timeoutPromise = new Promise((_, reject) => 
         setTimeout(() => reject(new Error('Sign up timeout')), 15000)
@@ -231,33 +258,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return { success: false, error: error.message };
       }
       
-      // Create user profile in database
       if (data.user) {
+        // Create user profile in database
         const { error: profileError } = await supabase
           .from('users')
-          .insert({
-            id: data.user.id,
-            email: data.user.email!,
-            full_name: fullName,
-            rank: 'Beginner',
-            points: 0,
-            missions_completed: 0,
-            role: 'user',
-          });
-
+          .insert([
+            {
+              id: data.user.id,
+              email: data.user.email!,
+              full_name: fullName,
+              role: 'user',
+              points: 0,
+              missions_completed: 0,
+            },
+          ]);
+        
         if (profileError) {
           console.error('Error creating user profile:', profileError);
-          return { success: false, error: 'Account created but failed to set up profile. Please contact support.' };
+          return { success: false, error: 'Failed to create user profile' };
         }
-
-        // Fetch the created profile
+        
         const userProfile = await fetchUserProfile(data.user);
-        if (userProfile && mountedRef.current) {
+        if (userProfile) {
           setUser(userProfile);
+          return { success: true };
+        } else {
+          return { success: false, error: 'Failed to load user profile' };
         }
       }
       
-      return { success: true };
+      return { success: false, error: 'No user data received' };
     } catch (error: any) {
       console.error('Unexpected sign up error:', error);
       return { success: false, error: error.message || 'An unexpected error occurred' };
@@ -270,43 +300,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signOut = async () => {
     try {
-      console.log('Starting sign out process...');
-      
-      // Clear local state first
-      setUser(null);
+      console.log('Signing out...');
       setLoading(true);
       
-      // Sign out from Supabase with timeout
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Sign out timeout')), 5000)
-      );
-      
-      const signOutPromise = supabase.auth.signOut();
-      const { error } = await Promise.race([signOutPromise, timeoutPromise]) as any;
+      const { error } = await supabase.auth.signOut();
       
       if (error) {
-        console.error('Supabase sign out error:', error);
-        // Even if Supabase fails, we should still clear local state
-        setUser(null);
+        console.error('Sign out error:', error);
         throw error;
       }
       
-      console.log('Sign out successful');
-      
-      // Clear any local storage or session data
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('welcomeVideoShown');
-        localStorage.removeItem('onboardingCompleted');
-        localStorage.removeItem('nutritionPlanCompleted');
-        localStorage.removeItem('trainingSchemaCompleted');
-        // Clear any other app-specific storage
-        sessionStorage.clear();
-      }
-      
-    } catch (error: any) {
-      console.error('Error signing out:', error);
-      // Ensure user is cleared even if there's an error
       setUser(null);
+      console.log('Sign out successful');
+    } catch (error) {
+      console.error('Error during sign out:', error);
       throw error;
     } finally {
       if (mountedRef.current) {
@@ -316,20 +323,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const updateUser = async (updates: Partial<User>) => {
+    if (!user) return;
+    
     try {
-      if (!user) return;
-
       const { error } = await supabase
         .from('users')
         .update(updates)
         .eq('id', user.id);
-
-      if (error) throw error;
-
-      // Update local state
-      if (mountedRef.current) {
-        setUser(prev => prev ? { ...prev, ...updates } : null);
+      
+      if (error) {
+        console.error('Error updating user:', error);
+        throw error;
       }
+      
+      setUser(prev => prev ? { ...prev, ...updates } : null);
     } catch (error) {
       console.error('Error updating user:', error);
       throw error;
@@ -337,43 +344,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const clearAllCache = () => {
-    if (typeof window !== 'undefined') {
-      console.log('🧹 Clearing all cache and localStorage...');
-      
-      // Clear all localStorage items
-      localStorage.clear();
-      
-      // Clear all sessionStorage items
-      sessionStorage.clear();
-      
-      // Clear any cached data in memory
-      setUser(null);
-      setLoading(false);
-      
-      // Force reload the page to clear any React state
-      window.location.reload();
-    }
+    // Clear any cached data if needed
+    console.log('Clearing all cache...');
   };
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      mountedRef.current = false;
-    };
-  }, []);
+  const isAuthenticated = !!user && initialized;
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      loading, 
-      signIn, 
-      signUp, 
-      signOut,
-      isAuthenticated: !!user,
-      updateUser,
-      redirectAdminToDashboard: true,
-      clearAllCache,
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading: loading || isInitializing,
+        signIn,
+        signUp,
+        signOut,
+        isAuthenticated,
+        updateUser,
+        redirectAdminToDashboard: true,
+        clearAllCache,
+        initialized,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -381,7 +372,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;

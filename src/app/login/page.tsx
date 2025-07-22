@@ -7,20 +7,22 @@ import { useAuth } from "@/contexts/AuthContext";
 export default function Login() {
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
-  const { signIn, isAuthenticated, user, loading: authLoading } = useAuth();
+  const { signIn, isAuthenticated, user, loading: authLoading, initialized } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
 
   useEffect(() => { 
     setMounted(true); 
   }, []);
 
   useEffect(() => {
-    // Only redirect if we're not loading and the user is authenticated
-    if (!authLoading && isAuthenticated && user && mounted) {
+    // Only redirect if we're initialized, not loading, and the user is authenticated
+    if (initialized && !authLoading && isAuthenticated && user && mounted && !redirecting) {
       console.log('Redirecting user:', user.role);
+      setRedirecting(true);
       // Use replace instead of push to prevent back button issues
       if (user.role === 'admin') {
         router.replace('/dashboard-admin');
@@ -28,17 +30,22 @@ export default function Login() {
         router.replace('/dashboard');
       }
     }
-  }, [isAuthenticated, user, router, authLoading, mounted]);
+  }, [initialized, isAuthenticated, user, router, authLoading, mounted, redirecting]);
 
-  // Only show loading screen during initial auth check, not during login process
-  if (!mounted || (authLoading && !isLoading)) {
+  // Show loading screen during initial auth check or when redirecting
+  if (!mounted || !initialized || authLoading || redirecting) {
     return (
       <div className="min-h-screen flex items-center justify-center relative px-4 py-6" style={{ backgroundColor: '#181F17' }}>
         <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
         <div className="w-full max-w-md p-6 sm:p-8 rounded-3xl shadow-2xl bg-[#232D1A]/95 border border-[#3A4D23] backdrop-blur-lg relative z-10">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#B6C948] mx-auto mb-4"></div>
-            <p className="text-[#B6C948] text-lg">Laden...</p>
+            <p className="text-[#B6C948] text-lg">
+              {redirecting ? 'Doorsturen...' : 'Laden...'}
+            </p>
+            {redirecting && (
+              <p className="text-[#B6C948] text-sm mt-2">Je wordt doorgestuurd naar je dashboard</p>
+            )}
           </div>
         </div>
       </div>

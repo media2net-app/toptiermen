@@ -135,7 +135,7 @@ const messages: any[] = [];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { user, loading, signOut, isAuthenticated } = useAuth();
+  const { user, loading, signOut, isAuthenticated, initialized } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
@@ -143,13 +143,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [dropdownOpen, setDropdownOpen] = useState<'notifications'|'messages'|null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
 
-  // Check authentication
+  // Check authentication with better handling
   useEffect(() => {
-    if (!loading && !isAuthenticated) {
-      router.push('/login');
+    if (initialized && !loading && !isAuthenticated && !redirecting) {
+      console.log('User not authenticated, redirecting to login...');
+      setRedirecting(true);
+      router.replace('/login');
     }
-  }, [loading, isAuthenticated, router]);
+  }, [initialized, loading, isAuthenticated, router, redirecting]);
 
   // Note: Admin users can now access both admin dashboard and regular dashboard
   // The redirect to admin dashboard only happens on initial login in AuthContext
@@ -207,18 +210,31 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [profileMenuOpen]);
 
-  // Show loading state
-  if (loading) {
+  // Show loading state during initialization or authentication check
+  if (loading || !initialized || redirecting) {
     return (
       <div className="min-h-screen bg-[#181F17] flex items-center justify-center">
-        <div className="text-[#8BAE5A] text-xl">Laden...</div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
+          <div className="text-[#8BAE5A] text-xl">Laden...</div>
+          {redirecting && (
+            <div className="text-[#8BAE5A] text-sm mt-2">Doorsturen naar login...</div>
+          )}
+        </div>
       </div>
     );
   }
 
   // Show unauthorized message if not authenticated
   if (!isAuthenticated) {
-    return null; // Will redirect to login
+    return (
+      <div className="min-h-screen bg-[#181F17] flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-[#8BAE5A] text-xl mb-4">Niet geautoriseerd</div>
+          <div className="text-[#8BAE5A] text-sm">Je wordt doorgestuurd naar de login pagina...</div>
+        </div>
+      </div>
+    );
   }
 
   return (
