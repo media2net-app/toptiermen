@@ -213,7 +213,7 @@ export default function VoedingsplannenPage() {
           {
             id: 'breakfast-1',
             name: 'Havermout met Blauwe Bessen & Walnoten',
-            image: '/images/mind/1.png',
+            image: 'https://images.unsplash.com/photo-1517686469429-8bdb88b9f907?w=800&h=600&fit=crop',
             ingredients: [
               { name: 'Havermout', amount: 60, unit: 'gram' },
               { name: 'Melk', amount: 250, unit: 'ml' },
@@ -230,7 +230,7 @@ export default function VoedingsplannenPage() {
           {
             id: 'lunch-1',
             name: 'Volkoren Wrap met Kip, Groenten & Hummus',
-            image: '/images/mind/2.png',
+            image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&h=600&fit=crop',
             ingredients: [
               { name: 'Volkoren wrap', amount: 1, unit: 'stuk' },
               { name: 'Kipfilet', amount: 100, unit: 'gram' },
@@ -248,7 +248,7 @@ export default function VoedingsplannenPage() {
           {
             id: 'dinner-1',
             name: 'Zalmfilet met Zoete Aardappel & Broccoli',
-            image: '/images/mind/3.png',
+            image: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=800&h=600&fit=crop',
             ingredients: [
               { name: 'Zalmfilet', amount: 150, unit: 'gram' },
               { name: 'Zoete aardappel', amount: 200, unit: 'gram' },
@@ -270,7 +270,7 @@ export default function VoedingsplannenPage() {
           {
             id: 'breakfast-1',
             name: 'Griekse Yoghurt met Noten & Lijnzaad',
-            image: '/images/mind/4.png',
+            image: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=800&h=600&fit=crop',
             ingredients: [
               { name: 'Griekse yoghurt', amount: 200, unit: 'gram' },
               { name: 'Gemengde noten', amount: 20, unit: 'gram' },
@@ -286,7 +286,7 @@ export default function VoedingsplannenPage() {
           {
             id: 'lunch-1',
             name: 'Omelet met Spinazie, Tomaat & Feta',
-            image: '/images/brotherhood/mastermind.png',
+            image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=800&h=600&fit=crop',
             ingredients: [
               { name: 'Eieren', amount: 3, unit: 'stuks' },
               { name: 'Spinazie', amount: 50, unit: 'gram' },
@@ -303,7 +303,7 @@ export default function VoedingsplannenPage() {
           {
             id: 'dinner-1',
             name: 'Kipfilet met Courgette & Avocado',
-            image: '/images/brotherhood/qena.png',
+            image: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=800&h=600&fit=crop',
             ingredients: [
               { name: 'Kipfilet', amount: 150, unit: 'gram' },
               { name: 'Courgette', amount: 100, unit: 'gram' },
@@ -325,7 +325,7 @@ export default function VoedingsplannenPage() {
           {
             id: 'breakfast-1',
             name: 'Proteïne Pannenkoeken met Kwark',
-            image: '/images/brotherhood/ardenne.png',
+            image: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=800&h=600&fit=crop',
             ingredients: [
               { name: 'Proteïne poeder', amount: 30, unit: 'gram' },
               { name: 'Havermout', amount: 40, unit: 'gram' },
@@ -342,7 +342,7 @@ export default function VoedingsplannenPage() {
           {
             id: 'lunch-1',
             name: 'Tonijnsalade met Kidneybonen & Paprika',
-            image: '/images/mind/4.png',
+            image: 'https://images.unsplash.com/photo-1546069901-d5bfd2cbfb1f?w=800&h=600&fit=crop',
             ingredients: [
               { name: 'Tonijn uit blik', amount: 1, unit: 'blik' },
               { name: 'Kidneybonen', amount: 50, unit: 'gram' },
@@ -359,7 +359,7 @@ export default function VoedingsplannenPage() {
           {
             id: 'dinner-1',
             name: 'Biefstuk met Sperziebonen & Zoete Aardappel',
-            image: '/images/mind/2.png',
+            image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=800&h=600&fit=crop',
             ingredients: [
               { name: 'Biefstuk', amount: 150, unit: 'gram' },
               { name: 'Sperziebonen', amount: 100, unit: 'gram' },
@@ -381,7 +381,7 @@ export default function VoedingsplannenPage() {
         {
           id: 'breakfast-1',
           name: 'Gebakken Eieren met Spek',
-          image: '/images/mind/1.png',
+          image: 'https://images.unsplash.com/photo-1482049016688-2d3e1b311543?w=800&h=600&fit=crop',
           ingredients: [
             { name: 'Eieren', amount: Math.round(goals.protein * 0.3 / 6), unit: 'stuks' },
             { name: 'Spek', amount: Math.round(goals.fat * 0.4 / 9), unit: 'gram' }
@@ -396,7 +396,7 @@ export default function VoedingsplannenPage() {
         {
           id: 'lunch-1',
           name: 'Gegrilde Ribeye',
-          image: '/images/mind/2.png',
+          image: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=800&h=600&fit=crop',
           ingredients: [
             { name: 'Ribeye Steak', amount: Math.round(goals.protein * 0.4 / 2.5), unit: 'gram' },
             { name: 'Boter', amount: Math.round(goals.fat * 0.3 / 9), unit: 'gram' }
@@ -411,7 +411,7 @@ export default function VoedingsplannenPage() {
         {
           id: 'dinner-1',
           name: 'Gehaktballen met Kaas',
-          image: '/images/mind/3.png',
+          image: 'https://images.unsplash.com/photo-1563379926898-05f4575a45d8?w=800&h=600&fit=crop',
           ingredients: [
             { name: 'Rundergehakt', amount: Math.round(goals.protein * 0.3 / 2.5), unit: 'gram' },
             { name: 'Kaas', amount: Math.round(goals.fat * 0.3 / 9), unit: 'gram' }
@@ -903,7 +903,7 @@ export default function VoedingsplannenPage() {
                           const newSnack: Meal = {
                             id: `snack-${Date.now()}`,
                             name: 'Gezonde Snack',
-                            image: '/images/nutrition/snack.jpg',
+                            image: 'https://images.unsplash.com/photo-1482049016688-2d3e1b311543?w=800&h=600&fit=crop',
                             ingredients: [
                               { name: 'Amandelen', amount: Math.round(estimatedCalories * 0.3 / 6), unit: 'gram' }, // ~6 cal/g for nuts
                               { name: 'Appel', amount: 1, unit: 'stuk' }
@@ -940,7 +940,7 @@ export default function VoedingsplannenPage() {
                           const newSnack: Meal = {
                             id: `snack-${Date.now()}`,
                             name: 'Avond Snack',
-                            image: '/images/nutrition/snack.jpg',
+                            image: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=800&h=600&fit=crop',
                             ingredients: [
                               { name: 'Griekse yoghurt', amount: Math.round(estimatedCalories * 0.6 / 0.6), unit: 'gram' }, // ~0.6 cal/g for yogurt
                               { name: 'Bessen', amount: Math.round(estimatedCalories * 0.4 / 0.5), unit: 'gram' } // ~0.5 cal/g for berries
