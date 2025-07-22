@@ -373,7 +373,7 @@ export default function TrainingscentrumPage() {
     // Toon direct het gekozen schema
     return (
       <PageLayout title="Trainingscentrum" description="Persoonlijke trainingsschema's en voedingsplannen op maat">
-        <div className="max-w-4xl mx-auto mt-12">
+        <div className="w-full mt-12">
           <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-8 text-center">
             <h2 className="text-3xl font-bold text-white mb-4">Jouw Gekozen Schema</h2>
             <h3 className="text-2xl font-bold text-[#8BAE5A] mb-2">{selectedSchema.name}</h3>
@@ -402,7 +402,7 @@ export default function TrainingscentrumPage() {
       description="Persoonlijke trainingsschema's en voedingsplannen op maat"
     >
       {!isLoading && selectedSchema && (
-        <div className="max-w-4xl mx-auto mt-8 mb-8">
+        <div className="w-full mt-8 mb-8">
           <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex-1 text-center md:text-left">
               <div className="text-sm text-[#8BAE5A] font-semibold mb-1">Je huidige schema</div>
@@ -424,7 +424,7 @@ export default function TrainingscentrumPage() {
         </div>
       )}
       {!isLoading && selectedNutritionPlan && (
-        <div className="max-w-4xl mx-auto mt-8 mb-4">
+        <div className="w-full mt-8 mb-4">
           <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex-1 text-center md:text-left">
               <div className="text-sm text-[#8BAE5A] font-semibold mb-1">Je huidige voedingsplan</div>
@@ -462,7 +462,7 @@ export default function TrainingscentrumPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="max-w-4xl mx-auto"
+              className="w-full"
             >
               <div className="text-center mb-12">
                 <h2 className="text-3xl font-bold text-white mb-4">
@@ -557,7 +557,7 @@ export default function TrainingscentrumPage() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="max-w-4xl mx-auto"
+              className="w-full"
             >
               <div className="text-center mb-12">
                 <h2 className="text-3xl font-bold text-white mb-4">
@@ -608,7 +608,7 @@ export default function TrainingscentrumPage() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="max-w-4xl mx-auto"
+              className="w-full"
             >
               <div className="text-center mb-12">
                 <h2 className="text-3xl font-bold text-white mb-4">
@@ -652,7 +652,7 @@ export default function TrainingscentrumPage() {
               key="step3"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="max-w-6xl mx-auto"
+              className="w-full"
             >
               <div className="text-center mb-12">
                 <h2 className="text-3xl font-bold text-white mb-4">
