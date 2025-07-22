@@ -15,11 +15,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import MealEditModal from './MealEditModal';
 import WeekPlanView from './WeekPlanView';
-import WeekPlanView from './WeekPlanView';
-import WeekPlanView from './WeekPlanView';
-import WeekPlanView from './WeekPlanView';
-import WeekPlanView from './WeekPlanView';
-import WeekPlanView from './WeekPlanView';
 
 interface UserData {
   age: number;
@@ -55,12 +50,6 @@ interface MealPlan {
 
 interface WeekPlan {
   [day: string]: MealPlan;
-}
-
-interface DayPlan {
-  day: string;
-  date: string;
-  meals: Meal[];
 }
 
 interface DayPlan {
@@ -136,18 +125,43 @@ export default function VoedingsplannenPage() {
   const [editingMeal, setEditingMeal] = useState<Meal | null>(null);
 
   useEffect(() => {
-    const fetchSelectedPlan = async () => {
+    const fetchUserNutritionData = async () => {
       if (!user) return;
-      const { data, error } = await supabase
-        .from('users')
-        .select('selected_nutrition_plan')
-        .eq('id', user.id)
-        .single();
-      if (!error && data?.selected_nutrition_plan) {
-        setSelectedNutritionPlan(data.selected_nutrition_plan);
+      
+      try {
+        // Fetch active nutrition plan
+        const { data: planData, error: planError } = await supabase
+          .from('user_nutrition_plans')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('is_active', true)
+          .single();
+
+        if (!planError && planData) {
+          // Load the saved plan
+          setSelectedNutritionPlan(planData.plan_type);
+          setNutritionGoals(planData.nutrition_goals);
+          setUserData(planData.user_data);
+          setWeekPlan(planData.week_plan);
+          setOriginalWeekPlan(planData.week_plan);
+          setCurrentStep(3); // Show the plan
+        } else {
+          // Fallback to old method
+          const { data, error } = await supabase
+            .from('users')
+            .select('selected_nutrition_plan')
+            .eq('id', user.id)
+            .single();
+          if (!error && data?.selected_nutrition_plan) {
+            setSelectedNutritionPlan(data.selected_nutrition_plan);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching nutrition data:', error);
       }
     };
-    fetchSelectedPlan();
+    
+    fetchUserNutritionData();
   }, [user]);
 
   useEffect(() => {
@@ -600,8 +614,8 @@ export default function VoedingsplannenPage() {
     return dayNames[day] || day;
   };
 
-  const handleSaveMeal = (updatedMeal: Meal) => {
-    if (!weekPlan) return;
+  const handleSaveMeal = async (updatedMeal: Meal) => {
+    if (!weekPlan || !user) return;
 
     const currentDayPlan = weekPlan[selectedDay];
     const updatedMeals = currentDayPlan.meals.map(meal => 
@@ -611,13 +625,36 @@ export default function VoedingsplannenPage() {
     // Redistribute calories to maintain total daily goals
     const redistributedMeals = redistributeCalories(updatedMeals, nutritionGoals, originalWeekPlan?.[selectedDay]?.meals);
     
-    setWeekPlan(prev => ({
-      ...prev!,
+    const updatedWeekPlan = {
+      ...weekPlan,
       [selectedDay]: {
         ...currentDayPlan,
         meals: redistributedMeals
       }
-    }));
+    };
+
+    setWeekPlan(updatedWeekPlan);
+
+    // Save meal customization to database
+    try {
+      const { error } = await supabase
+        .from('user_meal_customizations')
+        .upsert({
+          user_id: user.id,
+          plan_id: 'current', // We'll need to get the actual plan ID
+          day_of_week: selectedDay,
+          meal_id: updatedMeal.id,
+          original_meal: originalWeekPlan?.[selectedDay]?.meals.find(m => m.id === updatedMeal.id),
+          customized_meal: updatedMeal,
+          updated_at: new Date().toISOString()
+        });
+
+      if (error) {
+        console.error('Error saving meal customization:', error);
+      }
+    } catch (error) {
+      console.error('Error saving meal customization:', error);
+    }
   };
 
   const handleAddSnack = (time: string, type: 'afternoon' | 'evening') => {
@@ -678,9 +715,36 @@ export default function VoedingsplannenPage() {
     }));
   };
 
-  const handleStartPlan = () => {
-    localStorage.setItem('nutritionPlanCompleted', 'true');
-    window.location.href = '/dashboard';
+  const handleStartPlan = async () => {
+    if (!user || !weekPlan || !nutritionGoals || !selectedDiet) return;
+
+    try {
+      // Save the complete nutrition plan to database
+      const { error } = await supabase
+        .from('user_nutrition_plans')
+        .upsert({
+          user_id: user.id,
+          plan_type: selectedDiet,
+          nutrition_goals: nutritionGoals,
+          user_data: userData,
+          week_plan: weekPlan,
+          is_active: true,
+          updated_at: new Date().toISOString()
+        });
+
+      if (error) {
+        console.error('Error saving nutrition plan:', error);
+        return;
+      }
+
+      // Mark nutrition plan as completed for onboarding
+      localStorage.setItem('nutritionPlanCompleted', 'true');
+      
+      // Navigate back to dashboard
+      window.location.href = '/dashboard';
+    } catch (error) {
+      console.error('Error starting nutrition plan:', error);
+    }
   };
 
   const handleNewPlan = () => {
@@ -936,346 +1000,6 @@ export default function VoedingsplannenPage() {
               onStartPlan={handleStartPlan}
               onNewPlan={handleNewPlan}
             />
-          )}
-              <div className="text-center">
-                <h2 className="text-2xl font-bold text-white mb-2">
-                  Jouw Persoonlijke {selectedDiet === 'carnivore' ? 'Carnivoor' : 'Voedings'} Weekplan op Maat
-                </h2>
-                <p className="text-gray-300 mb-4">
-                  Gebaseerd op jouw doel van {nutritionGoals?.calories} kcal en {nutritionGoals?.protein}g eiwit per dag
-                </p>
-                
-                {/* Day Navigation */}
-                <div className="flex gap-2 justify-center mb-6 overflow-x-auto">
-                  {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map((day) => (
-                    <button
-                      key={day}
-                      onClick={() => setSelectedDay(day)}
-                      className={`px-4 py-2 rounded-lg font-medium transition-all whitespace-nowrap ${
-                        selectedDay === day
-                          ? 'bg-[#8BAE5A] text-white'
-                          : 'bg-[#2A2A2A] text-gray-300 hover:text-white'
-                      }`}
-                    >
-                      {day === 'monday' ? 'Maandag' :
-                       day === 'tuesday' ? 'Dinsdag' :
-                       day === 'wednesday' ? 'Woensdag' :
-                       day === 'thursday' ? 'Donderdag' :
-                       day === 'friday' ? 'Vrijdag' :
-                       day === 'saturday' ? 'Zaterdag' : 'Zondag'}
-                    </button>
-                  ))}
-                </div>
-                
-                {/* Total daily nutrition summary for selected day */}
-                <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-4 mb-6 inline-block">
-                  <div className="text-sm text-[#8BAE5A] font-semibold mb-2">
-                    {selectedDay === 'monday' ? 'Maandag' :
-                     selectedDay === 'tuesday' ? 'Dinsdag' :
-                     selectedDay === 'wednesday' ? 'Woensdag' :
-                     selectedDay === 'thursday' ? 'Donderdag' :
-                     selectedDay === 'friday' ? 'Vrijdag' :
-                     selectedDay === 'saturday' ? 'Zaterdag' : 'Zondag'} - Totaal Dagelijks Plan
-                  </div>
-                  <div className="flex gap-6 text-white">
-                    <div>
-                      <span className="font-bold">{weekPlan[selectedDay].meals.reduce((sum: number, meal: Meal) => sum + meal.calories, 0)}</span>
-                      <span className="text-sm text-gray-400"> kcal</span>
-                    </div>
-                    <div>
-                      <span className="font-bold">{weekPlan[selectedDay].meals.reduce((sum: number, meal: Meal) => sum + meal.protein, 0)}</span>
-                      <span className="text-sm text-gray-400">g eiwit</span>
-                    </div>
-                    <div>
-                      <span className="font-bold">{weekPlan[selectedDay].meals.reduce((sum: number, meal: Meal) => sum + meal.carbs, 0)}</span>
-                      <span className="text-sm text-gray-400">g koolhydraten</span>
-                    </div>
-                    <div>
-                      <span className="font-bold">{weekPlan[selectedDay].meals.reduce((sum: number, meal: Meal) => sum + meal.fat, 0)}</span>
-                      <span className="text-sm text-gray-400">g vet</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Top action buttons */}
-              <div className="space-y-6 mb-8">
-                {/* Add snack buttons */}
-                {mealPlan.meals.length < 5 && (
-                  <div className="flex gap-4 justify-center">
-                    {!mealPlan.meals.some(m => m.type === 'snack' && m.time === '15:00') && (
-                      <button
-                        onClick={() => {
-                          // Calculate estimated calories for this snack (will be adjusted by redistributeCalories)
-                          const estimatedCalories = Math.round((nutritionGoals?.calories || 0) * 0.075); // 7.5% of daily calories
-                          
-                          const newSnack: Meal = {
-                            id: `snack-${Date.now()}`,
-                            name: 'Gezonde Snack',
-                            image: 'https://images.unsplash.com/photo-1482049016688-2d3e1b311543?w=800&h=600&fit=crop',
-                            ingredients: [
-                              { name: 'Amandelen', amount: Math.round(estimatedCalories * 0.3 / 6), unit: 'gram' }, // ~6 cal/g for nuts
-                              { name: 'Appel', amount: 1, unit: 'stuk' }
-                            ],
-                            calories: estimatedCalories,
-                            protein: Math.round(estimatedCalories * 0.15), // 15% protein
-                            carbs: Math.round(estimatedCalories * 0.6), // 60% carbs
-                            fat: Math.round(estimatedCalories * 0.25), // 25% fat
-                            time: '15:00',
-                            type: 'snack'
-                          };
-                          
-                          // For adding snacks, we need the original meals plus the new snack
-                          const allOriginalMeals = [...(originalMealPlan?.meals || []), newSnack];
-                          const updatedMeals = redistributeCalories([...mealPlan.meals, newSnack], nutritionGoals, allOriginalMeals);
-                          
-                          setMealPlan(prev => ({
-                            ...prev!,
-                            meals: updatedMeals.sort((a, b) => a.time.localeCompare(b.time))
-                          }));
-                        }}
-                        className="bg-[#3A4D23] text-white px-4 py-2 rounded-lg hover:bg-[#4A5D33] transition-all text-sm"
-                      >
-                        + Middag Snack
-                      </button>
-                    )}
-                    
-                    {!mealPlan.meals.some(m => m.type === 'snack' && m.time === '21:00') && (
-                      <button
-                        onClick={() => {
-                          // Calculate estimated calories for this snack (will be adjusted by redistributeCalories)
-                          const estimatedCalories = Math.round((nutritionGoals?.calories || 0) * 0.075); // 7.5% of daily calories
-                          
-                          const newSnack: Meal = {
-                            id: `snack-${Date.now()}`,
-                            name: 'Avond Snack',
-                            image: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=800&h=600&fit=crop',
-                            ingredients: [
-                              { name: 'Griekse yoghurt', amount: Math.round(estimatedCalories * 0.6 / 0.6), unit: 'gram' }, // ~0.6 cal/g for yogurt
-                              { name: 'Bessen', amount: Math.round(estimatedCalories * 0.4 / 0.5), unit: 'gram' } // ~0.5 cal/g for berries
-                            ],
-                            calories: estimatedCalories,
-                            protein: Math.round(estimatedCalories * 0.25), // 25% protein
-                            carbs: Math.round(estimatedCalories * 0.55), // 55% carbs
-                            fat: Math.round(estimatedCalories * 0.2), // 20% fat
-                            time: '21:00',
-                            type: 'snack'
-                          };
-                          
-                          // For adding snacks, we need the original meals plus the new snack
-                          const allOriginalMeals = [...(originalMealPlan?.meals || []), newSnack];
-                          const updatedMeals = redistributeCalories([...mealPlan.meals, newSnack], nutritionGoals, allOriginalMeals);
-                          
-                          setMealPlan(prev => ({
-                            ...prev!,
-                            meals: updatedMeals.sort((a, b) => a.time.localeCompare(b.time))
-                          }));
-                        }}
-                        className="bg-[#3A4D23] text-white px-4 py-2 rounded-lg hover:bg-[#4A5D33] transition-all text-sm"
-                      >
-                        + Avond Snack
-                      </button>
-                    )}
-                  </div>
-                )}
-
-                {/* Action buttons */}
-                <div className="text-center space-y-4">
-                  <button
-                    onClick={() => {
-                      // Mark nutrition plan as completed for onboarding
-                      localStorage.setItem('nutritionPlanCompleted', 'true');
-                      // Navigate back to dashboard
-                      window.location.href = '/dashboard';
-                    }}
-                    className="bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] text-[#232D1A] px-8 py-4 rounded-xl font-bold hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center mx-auto"
-                  >
-                    <CheckIcon className="w-6 h-6 mr-2" />
-                    Start met dit Plan
-                  </button>
-                  
-                  <button
-                    onClick={() => setCurrentStep(1)}
-                    className="bg-[#3A4D23] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#4A5D33] transition-all"
-                  >
-                    Nieuw Plan Genereren
-                  </button>
-                </div>
-              </div>
-
-              <div className="space-y-6">
-                {mealPlan.meals.map((meal) => (
-                  <div key={meal.id} className="bg-[#1A1A1A] rounded-xl p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-4">
-                        <h3 className="text-xl font-bold text-white">
-                          {meal.type === 'breakfast' ? 'Ontbijt' : 
-                           meal.type === 'lunch' ? 'Lunch' : 
-                           meal.type === 'dinner' ? 'Diner' : 'Snack'} ({meal.time})
-                        </h3>
-                        <div className="flex items-center gap-3">
-                          <button
-                            onClick={() => handleEditMeal(meal)}
-                            className="text-[#8BAE5A] hover:text-[#7A9D4B] text-sm font-medium"
-                          >
-                            Wijzig maaltijd
-                          </button>
-                          {meal.type === 'snack' && (
-                            <button
-                              onClick={() => {
-                                const remainingMeals = mealPlan.meals.filter(m => m.id !== meal.id);
-                                // Filter original meals to only include the remaining ones
-                                const remainingOriginalMeals = originalMealPlan?.meals.filter(m => 
-                                  remainingMeals.some(remaining => remaining.id === m.id)
-                                );
-                                const updatedMeals = redistributeCalories(remainingMeals, nutritionGoals, remainingOriginalMeals);
-                                
-                                setMealPlan(prev => ({
-                                  ...prev!,
-                                  meals: updatedMeals.sort((a, b) => a.time.localeCompare(b.time))
-                                }));
-                              }}
-                              className="text-red-400 hover:text-red-300 text-sm font-medium"
-                            >
-                              Verwijder
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                      <div className="text-sm text-gray-400">
-                        {meal.calories} kcal | {meal.protein}g eiwit | {meal.carbs}g koolhydraten | {meal.fat}g vet
-                      </div>
-                    </div>
-                    
-                    <div className="flex flex-col md:flex-row gap-6">
-                      <div className="w-full md:w-1/3">
-                        <img
-                          src={meal.image}
-                          alt={meal.name}
-                          className="w-full h-48 object-cover rounded-lg"
-                        />
-                      </div>
-                      
-                      <div className="flex-1">
-                        <h4 className="text-lg font-semibold text-white mb-3">{meal.name}</h4>
-                        
-                        <div className="mb-4">
-                          <h5 className="text-sm font-medium text-[#8BAE5A] mb-2">Porties voor jou:</h5>
-                          <div className="space-y-1">
-                            {meal.ingredients.map((ingredient: { name: string; amount: number; unit: string }, index: number) => (
-                              <div key={index} className="text-gray-300 text-sm">
-                                • {ingredient.name}: {ingredient.amount} {ingredient.unit}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                
-                {/* Add snack buttons */}
-                {mealPlan.meals.length < 5 && (
-                  <div className="flex gap-4 justify-center">
-                    {!mealPlan.meals.some(m => m.type === 'snack' && m.time === '15:00') && (
-                      <button
-                        onClick={() => {
-                          // Calculate estimated calories for this snack (will be adjusted by redistributeCalories)
-                          const estimatedCalories = Math.round((nutritionGoals?.calories || 0) * 0.075); // 7.5% of daily calories
-                          
-                          const newSnack: Meal = {
-                            id: `snack-${Date.now()}`,
-                            name: 'Gezonde Snack',
-                            image: 'https://images.unsplash.com/photo-1482049016688-2d3e1b311543?w=800&h=600&fit=crop',
-                            ingredients: [
-                              { name: 'Amandelen', amount: Math.round(estimatedCalories * 0.3 / 6), unit: 'gram' }, // ~6 cal/g for nuts
-                              { name: 'Appel', amount: 1, unit: 'stuk' }
-                            ],
-                            calories: estimatedCalories,
-                            protein: Math.round(estimatedCalories * 0.15), // 15% protein
-                            carbs: Math.round(estimatedCalories * 0.6), // 60% carbs
-                            fat: Math.round(estimatedCalories * 0.25), // 25% fat
-                            time: '15:00',
-                            type: 'snack'
-                          };
-                          
-                          // For adding snacks, we need the original meals plus the new snack
-                          const allOriginalMeals = [...(originalMealPlan?.meals || []), newSnack];
-                          const updatedMeals = redistributeCalories([...mealPlan.meals, newSnack], nutritionGoals, allOriginalMeals);
-                          
-                          setMealPlan(prev => ({
-                            ...prev!,
-                            meals: updatedMeals.sort((a, b) => a.time.localeCompare(b.time))
-                          }));
-                        }}
-                        className="bg-[#3A4D23] text-white px-4 py-2 rounded-lg hover:bg-[#4A5D33] transition-all text-sm"
-                      >
-                        + Middag Snack
-                      </button>
-                    )}
-                    
-                    {!mealPlan.meals.some(m => m.type === 'snack' && m.time === '21:00') && (
-                      <button
-                        onClick={() => {
-                          // Calculate estimated calories for this snack (will be adjusted by redistributeCalories)
-                          const estimatedCalories = Math.round((nutritionGoals?.calories || 0) * 0.075); // 7.5% of daily calories
-                          
-                          const newSnack: Meal = {
-                            id: `snack-${Date.now()}`,
-                            name: 'Avond Snack',
-                            image: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=800&h=600&fit=crop',
-                            ingredients: [
-                              { name: 'Griekse yoghurt', amount: Math.round(estimatedCalories * 0.6 / 0.6), unit: 'gram' }, // ~0.6 cal/g for yogurt
-                              { name: 'Bessen', amount: Math.round(estimatedCalories * 0.4 / 0.5), unit: 'gram' } // ~0.5 cal/g for berries
-                            ],
-                            calories: estimatedCalories,
-                            protein: Math.round(estimatedCalories * 0.25), // 25% protein
-                            carbs: Math.round(estimatedCalories * 0.55), // 55% carbs
-                            fat: Math.round(estimatedCalories * 0.2), // 20% fat
-                            time: '21:00',
-                            type: 'snack'
-                          };
-                          
-                          // For adding snacks, we need the original meals plus the new snack
-                          const allOriginalMeals = [...(originalMealPlan?.meals || []), newSnack];
-                          const updatedMeals = redistributeCalories([...mealPlan.meals, newSnack], nutritionGoals, allOriginalMeals);
-                          
-                          setMealPlan(prev => ({
-                            ...prev!,
-                            meals: updatedMeals.sort((a, b) => a.time.localeCompare(b.time))
-                          }));
-                        }}
-                        className="bg-[#3A4D23] text-white px-4 py-2 rounded-lg hover:bg-[#4A5D33] transition-all text-sm"
-                      >
-                        + Avond Snack
-                      </button>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              <div className="text-center pt-6 space-y-4">
-                <button
-                  onClick={() => {
-                    // Mark nutrition plan as completed for onboarding
-                    localStorage.setItem('nutritionPlanCompleted', 'true');
-                    // Navigate back to dashboard
-                    window.location.href = '/dashboard';
-                  }}
-                  className="bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] text-[#232D1A] px-8 py-4 rounded-xl font-bold hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center mx-auto"
-                >
-                  <CheckIcon className="w-6 h-6 mr-2" />
-                  Start met dit Plan
-                </button>
-                
-                <button
-                  onClick={() => setCurrentStep(1)}
-                  className="bg-[#3A4D23] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#4A5D33] transition-all"
-                >
-                  Nieuw Plan Genereren
-                </button>
-              </div>
-            </motion.div>
           )}
         </AnimatePresence>
 

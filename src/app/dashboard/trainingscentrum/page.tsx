@@ -16,6 +16,7 @@ import {
 import PageLayout from '@/components/PageLayout';
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
+import { useRouter } from 'next/navigation';
 
 interface TrainingPreferences {
   frequency: number;
@@ -88,6 +89,7 @@ const dietTypes = [
 
 export default function TrainingscentrumPage() {
   const { user } = useAuth();
+  const router = useRouter();
   const [selectedOption, setSelectedOption] = useState<'training' | 'nutrition' | null>(null);
   const [currentStep, setCurrentStep] = useState(1);
   const [trainingPreferences, setTrainingPreferences] = useState<TrainingPreferences>({
@@ -369,6 +371,52 @@ export default function TrainingscentrumPage() {
     }
   };
 
+  const viewTrainingSchema = () => {
+    if (selectedSchema) {
+      // Navigate to a detailed view of the training schema
+      router.push(`/dashboard/trainingscentrum/schema/${selectedSchema.id}`);
+    }
+  };
+
+  const viewNutritionPlan = () => {
+    if (selectedNutritionPlan) {
+      // Navigate to the nutrition plan page to view the current plan
+      router.push('/dashboard/voedingsplannen');
+    }
+  };
+
+  // Filter schemas based on selected frequency
+  const getFilteredSchemas = () => {
+    if (!trainingPreferences.frequency) return availableSchemas;
+    
+    return availableSchemas.filter(schema => {
+      // Extract frequency from schema name or target_audience
+      const name = schema.name.toLowerCase();
+      const audience = schema.target_audience?.toLowerCase() || '';
+      
+      // Check for frequency patterns in name
+      if (name.includes(`${trainingPreferences.frequency}-daag`) || 
+          name.includes(`${trainingPreferences.frequency} daag`) ||
+          name.includes(`${trainingPreferences.frequency} dagen`)) {
+        return true;
+      }
+      
+      // Check for frequency patterns in target_audience
+      if (audience.includes(`${trainingPreferences.frequency}-daag`) || 
+          audience.includes(`${trainingPreferences.frequency} daag`) ||
+          audience.includes(`${trainingPreferences.frequency} dagen`)) {
+        return true;
+      }
+      
+      // If no specific frequency is mentioned, show all schemas
+      if (!name.includes('daag') && !audience.includes('daag')) {
+        return true;
+      }
+      
+      return false;
+    });
+  };
+
   if (!isLoading && selectedSchema && !showConfirmation && !workoutSchema && !currentStep) {
     // Toon direct het gekozen schema
     return (
@@ -380,16 +428,25 @@ export default function TrainingscentrumPage() {
             <p className="text-gray-300 mb-4">{selectedSchema.description}</p>
             <div className="text-sm text-gray-400 mb-2">Categorie: {selectedSchema.category}</div>
             <div className="text-sm text-gray-400 mb-6">Niveau: {selectedSchema.difficulty}</div>
-            <button
+            <div className="flex gap-4 justify-center">
+              <button
+                className="inline-flex items-center px-6 py-3 bg-[#3A4D23] text-white font-semibold rounded-lg hover:bg-[#4A5D33] transition-all duration-200"
+                onClick={viewTrainingSchema}
+              >
+                Bekijk schema
+              </button>
+                          <button
               className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] text-[#232D1A] font-bold rounded-xl hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200 shadow-lg hover:shadow-xl"
               onClick={() => {
-                setCurrentStep(2);
+                setSelectedOption('training');
+                setCurrentStep(1);
                 setWorkoutSchema(null);
                 setShowConfirmation(false);
               }}
             >
               Wijzig schema
             </button>
+            </div>
           </div>
         </div>
       </PageLayout>
@@ -410,16 +467,25 @@ export default function TrainingscentrumPage() {
               <div className="text-gray-400 text-sm mb-1">Categorie: {selectedSchema.category} | Niveau: {selectedSchema.difficulty}</div>
               <div className="text-gray-300 text-sm">{selectedSchema.description}</div>
             </div>
-            <button
-              className="mt-4 md:mt-0 px-6 py-3 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] text-[#232D1A] font-bold rounded-xl hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200 shadow-lg hover:shadow-xl"
-              onClick={() => {
-                setCurrentStep(2);
-                setWorkoutSchema(null);
-                setShowConfirmation(false);
-              }}
-            >
-              Wijzig schema
-            </button>
+            <div className="flex gap-3 mt-4 md:mt-0">
+              <button
+                className="px-4 py-3 bg-[#3A4D23] text-white font-semibold rounded-lg hover:bg-[#4A5D33] transition-all duration-200"
+                onClick={viewTrainingSchema}
+              >
+                Bekijk schema
+              </button>
+              <button
+                className="px-6 py-3 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] text-[#232D1A] font-bold rounded-xl hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200 shadow-lg hover:shadow-xl"
+                onClick={() => {
+                  setSelectedOption('training');
+                  setCurrentStep(1);
+                  setWorkoutSchema(null);
+                  setShowConfirmation(false);
+                }}
+              >
+                Wijzig schema
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -438,12 +504,20 @@ export default function TrainingscentrumPage() {
                 {dietTypes.find(d => d.id === selectedNutritionPlan)?.description}
               </div>
             </div>
-            <button
-              className="mt-4 md:mt-0 px-6 py-3 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] text-[#232D1A] font-bold rounded-xl hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200 shadow-lg hover:shadow-xl"
-              onClick={() => window.location.href = '/dashboard/voedingsplannen'}
-            >
-              Wijzig voedingsplan
-            </button>
+            <div className="flex gap-3 mt-4 md:mt-0">
+              <button
+                className="px-4 py-3 bg-[#3A4D23] text-white font-semibold rounded-lg hover:bg-[#4A5D33] transition-all duration-200"
+                onClick={viewNutritionPlan}
+              >
+                Bekijk plan
+              </button>
+              <button
+                className="px-6 py-3 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] text-[#232D1A] font-bold rounded-xl hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200 shadow-lg hover:shadow-xl"
+                onClick={() => window.location.href = '/dashboard/voedingsplannen'}
+              >
+                Wijzig voedingsplan
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -615,34 +689,54 @@ export default function TrainingscentrumPage() {
                   Stap 2: Kies een trainingsschema
                 </h2>
                 <p className="text-gray-300 text-lg">
-                  Selecteer een schema dat bij jou past.
+                  Selecteer een schema dat past bij jouw keuze van {trainingPreferences.frequency} dagen per week.
                 </p>
               </div>
               <div className="grid md:grid-cols-2 gap-8 mb-8">
-                {availableSchemas.map((schema) => (
-                  <motion.div
-                    key={schema.id}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => {
-                      setWorkoutSchema({
-                        id: schema.id,
-                        name: schema.name,
-                        frequency: 0, // optioneel: kun je uit schema halen als je wilt
-                        style: schema.category === 'Gym' ? 'gym' : 'bodyweight',
-                        description: schema.description,
-                        days: [], // optioneel: kun je aanvullen als je dagdata wilt ophalen
-                      });
-                      setCurrentStep(3);
-                    }}
-                    className="cursor-pointer rounded-2xl p-8 border-2 transition-all duration-300 border-[#3A4D23] bg-[#232D1A] hover:border-[#8BAE5A]/50"
-                  >
-                    <h3 className="text-2xl font-bold text-white mb-4 text-center">{schema.name}</h3>
-                    <p className="text-gray-300 text-center mb-4">{schema.description}</p>
-                    <div className="text-sm text-gray-400 text-center">Categorie: {schema.category}</div>
-                    <div className="text-sm text-gray-400 text-center">Niveau: {schema.difficulty}</div>
-                  </motion.div>
-                ))}
+                {getFilteredSchemas().length > 0 ? (
+                  getFilteredSchemas().map((schema) => (
+                    <motion.div
+                      key={schema.id}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => {
+                        setWorkoutSchema({
+                          id: schema.id,
+                          name: schema.name,
+                          frequency: trainingPreferences.frequency,
+                          style: schema.category === 'Gym' ? 'gym' : 'bodyweight',
+                          description: schema.description,
+                          days: [], // optioneel: kun je aanvullen als je dagdata wilt ophalen
+                        });
+                        setCurrentStep(3);
+                      }}
+                      className="cursor-pointer rounded-2xl p-8 border-2 transition-all duration-300 border-[#3A4D23] bg-[#232D1A] hover:border-[#8BAE5A]/50"
+                    >
+                      <h3 className="text-2xl font-bold text-white mb-4 text-center">{schema.name}</h3>
+                      <p className="text-gray-300 text-center mb-4">{schema.description}</p>
+                      <div className="text-sm text-gray-400 text-center">Categorie: {schema.category}</div>
+                      <div className="text-sm text-gray-400 text-center">Niveau: {schema.difficulty}</div>
+                    </motion.div>
+                  ))
+                ) : (
+                  <div className="col-span-2 text-center py-12">
+                    <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-8">
+                      <h3 className="text-xl font-bold text-white mb-4">
+                        Geen schema's gevonden voor {trainingPreferences.frequency} dagen per week
+                      </h3>
+                      <p className="text-gray-300 mb-6">
+                        Er zijn momenteel geen trainingsschema's beschikbaar voor {trainingPreferences.frequency} dagen per week. 
+                        Probeer een andere frequentie te kiezen of neem contact op voor een persoonlijk schema.
+                      </p>
+                      <button
+                        onClick={() => setCurrentStep(1)}
+                        className="bg-[#8BAE5A] text-white px-6 py-3 rounded-lg hover:bg-[#7A9D4A] transition-all"
+                      >
+                        Terug naar frequentie keuze
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}
