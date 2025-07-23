@@ -33,10 +33,25 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
   const [posts, setPosts] = useState<ForumPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [newReply, setNewReply] = useState('');
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
   useEffect(() => {
+    fetchCurrentUser();
     fetchThreadData();
   }, [params.id]);
+
+  const fetchCurrentUser = async () => {
+    try {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error) {
+        console.error('Error fetching user:', error);
+        return;
+      }
+      setCurrentUser(user);
+    } catch (error) {
+      console.error('Error fetching user:', error);
+    }
+  };
 
   const fetchThreadData = async () => {
     try {
@@ -93,18 +108,27 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
         }
       };
 
-      // Process posts data
-      const processedPosts = (postsData || []).map((post: any) => ({
-        id: post.id,
-        content: post.content,
-        created_at: post.created_at,
-        like_count: post.like_count,
-        author: {
-          first_name: 'Rick',
-          last_name: 'Cuijpers',
-          avatar_url: undefined
-        }
-      }));
+      // Process posts data - show Rick for old posts, real user for new posts
+      const processedPosts = (postsData || []).map((post: any) => {
+        // Check if this is a new post (created after our fix) or old post
+        const isNewPost = post.author_id !== '00000000-0000-0000-0000-000000000001';
+        
+        return {
+          id: post.id,
+          content: post.content,
+          created_at: post.created_at,
+          like_count: post.like_count,
+          author: isNewPost ? {
+            first_name: currentUser?.user_metadata?.full_name?.split(' ')[0] || 'User',
+            last_name: currentUser?.user_metadata?.full_name?.split(' ').slice(1).join(' ') || '',
+            avatar_url: currentUser?.user_metadata?.avatar_url
+          } : {
+            first_name: 'Rick',
+            last_name: 'Cuijpers',
+            avatar_url: undefined
+          }
+        };
+      });
 
       setTopic(processedTopic);
       setPosts(processedPosts);
@@ -116,14 +140,15 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
   };
 
   const handleSubmitReply = async () => {
-    if (!newReply.trim() || !topic) return;
+    if (!newReply.trim() || !topic || !currentUser) return;
 
     try {
       const { error } = await supabase
         .from('forum_posts')
         .insert({
           topic_id: topic.id,
-          content: newReply.trim()
+          content: newReply.trim(),
+          author_id: currentUser.id
         });
 
       if (error) {
@@ -251,7 +276,7 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
           <button 
             className="px-6 py-2 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold shadow hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all"
             onClick={handleSubmitReply}
-            disabled={!newReply.trim()}
+            disabled={!newReply.trim() || !currentUser}
           >
             Plaats Reactie
           </button>
