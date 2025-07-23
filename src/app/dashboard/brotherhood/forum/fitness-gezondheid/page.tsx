@@ -1,44 +1,134 @@
 'use client';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { supabase } from '@/lib/supabase';
 
-const pinnedTopics = [
-  {
-    id: 1,
-    title: '📌 Categorie Regels',
-    starter: 'Admin',
-    date: '1 jan 2024',
-    replies: 12,
-    likes: 34,
-    last: { author: 'Rick', time: '09:12' },
-    pinned: true,
-  },
-  {
-    id: 2,
-    title: '📌 Lees dit eerst: Trainingsgids voor Beginners',
-    starter: 'Jeroen D.',
-    date: '3 jan 2024',
-    replies: 8,
-    likes: 21,
-    last: { author: 'Sven', time: '10:45' },
-    pinned: true,
-  },
-];
-
-const topics = Array.from({ length: 54 }, (_, i) => ({
-  id: i + 3,
-  title: `Topic ${i + 1}: Vraag over training of voeding?`,
-  starter: ['Rick', 'Sven', 'Teun', 'Jeroen D.'][i % 4],
-  date: `18 juni 2025`,
-  replies: Math.floor(Math.random() * 20),
-  likes: Math.floor(Math.random() * 40),
-  last: { author: ['Mark V.', 'Rick', 'Sven', 'Teun'][i % 4], time: `${8 + (i % 12)}:${(10 + i) % 60}` },
-  pinned: false,
-}));
-
-const allTopics = [...pinnedTopics, ...topics];
+interface ForumTopic {
+  id: number;
+  title: string;
+  content: string;
+  is_pinned: boolean;
+  reply_count: number;
+  like_count: number;
+  created_at: string;
+  last_reply_at?: string;
+  author: {
+    first_name: string;
+    last_name: string;
+  };
+  last_reply_author?: {
+    first_name: string;
+    last_name: string;
+  };
+}
 
 const FitnessGezondheidCategory = () => {
+  const [topics, setTopics] = useState<ForumTopic[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchTopics();
+  }, []);
+
+  const fetchTopics = async () => {
+    try {
+      // Get category ID for fitness-gezondheid
+      const { data: categoryData, error: categoryError } = await supabase
+        .from('forum_categories')
+        .select('id')
+        .eq('slug', 'fitness-gezondheid')
+        .single();
+
+      if (categoryError || !categoryData) {
+        console.error('Error fetching category:', categoryError);
+        return;
+      }
+
+      // Fetch topics for this category
+      const { data: topicsData, error: topicsError } = await supabase
+        .from('forum_topics')
+        .select(`
+          id,
+          title,
+          content,
+          is_pinned,
+          reply_count,
+          like_count,
+          created_at,
+          last_reply_at,
+          author:profiles!forum_topics_author_id_fkey(
+            first_name,
+            last_name
+          )
+        `)
+        .eq('category_id', categoryData.id)
+        .order('is_pinned', { ascending: false })
+        .order('last_reply_at', { ascending: false })
+        .order('created_at', { ascending: false });
+
+      if (topicsError) {
+        console.error('Error fetching topics:', topicsError);
+        return;
+      }
+
+      // Process the data to match the interface
+      const processedTopics = (topicsData || []).map((topic: any) => ({
+        id: topic.id,
+        title: topic.title,
+        content: topic.content,
+        is_pinned: topic.is_pinned,
+        reply_count: topic.reply_count,
+        like_count: topic.like_count,
+        created_at: topic.created_at,
+        last_reply_at: topic.last_reply_at,
+        author: {
+          first_name: topic.author?.first_name || 'Unknown',
+          last_name: topic.author?.last_name || ''
+        }
+      }));
+
+      setTopics(processedTopics);
+    } catch (error) {
+      console.error('Error fetching forum data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('nl-NL', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
+  };
+
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString('nl-NL', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="max-w-5xl mx-auto">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-700 rounded mb-6"></div>
+          <div className="bg-[#232D1A]/90 rounded-2xl p-6">
+            <div className="space-y-4">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="h-16 bg-gray-700 rounded"></div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-5xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
@@ -60,34 +150,48 @@ const FitnessGezondheidCategory = () => {
             </tr>
           </thead>
           <tbody>
-            {allTopics.map((topic) => (
-              topic.pinned ? (
+            {topics.map((topic) => (
+              topic.is_pinned ? (
                 <tr key={topic.id} className="border-b border-[#3A4D23]/20 bg-[#3A4D23]/30">
                   <td className="px-6 py-4 text-white font-semibold flex items-center gap-2">
                     <span className="text-[#FFD700]">📌</span>
                     <span>{topic.title}</span>
                   </td>
-                  <td className="px-6 py-4 text-[#8BAE5A]">{topic.starter}<br /><span className="text-xs text-[#8BAE5A]/70">{topic.date}</span></td>
-                  <td className="px-4 py-4 text-center text-[#FFD700] font-bold">{topic.replies}</td>
-                  <td className="px-4 py-4 text-center text-[#8BAE5A] font-bold">{topic.likes}</td>
                   <td className="px-6 py-4 text-[#8BAE5A]">
-                    <span className="font-semibold text-white">{topic.last.author}</span>
-                    <span className="ml-2 text-xs text-[#8BAE5A]/70">{topic.last.time}</span>
+                    {topic.author.first_name} {topic.author.last_name}<br />
+                    <span className="text-xs text-[#8BAE5A]/70">{formatDate(topic.created_at)}</span>
+                  </td>
+                  <td className="px-4 py-4 text-center text-[#FFD700] font-bold">{topic.reply_count}</td>
+                  <td className="px-4 py-4 text-center text-[#8BAE5A] font-bold">{topic.like_count}</td>
+                  <td className="px-6 py-4 text-[#8BAE5A]">
+                    <span className="font-semibold text-white">
+                      {topic.last_reply_at ? topic.author.first_name : topic.author.first_name}
+                    </span>
+                    <span className="ml-2 text-xs text-[#8BAE5A]/70">
+                      {topic.last_reply_at ? formatTime(topic.last_reply_at) : formatTime(topic.created_at)}
+                    </span>
                   </td>
                 </tr>
               ) : (
                 <tr key={topic.id} className="border-b border-[#3A4D23]/20 hover:bg-[#181F17]/60 transition cursor-pointer">
                   <td className="px-6 py-4 text-white font-semibold flex items-center gap-2">
-                    <Link href="/dashboard/brotherhood/forum/fitness-gezondheid/thread" className="w-full block hover:underline focus:outline-none">
+                    <Link href={`/dashboard/brotherhood/forum/fitness-gezondheid/thread/${topic.id}`} className="w-full block hover:underline focus:outline-none">
                       {topic.title}
                     </Link>
                   </td>
-                  <td className="px-6 py-4 text-[#8BAE5A]">{topic.starter}<br /><span className="text-xs text-[#8BAE5A]/70">{topic.date}</span></td>
-                  <td className="px-4 py-4 text-center text-[#FFD700] font-bold">{topic.replies}</td>
-                  <td className="px-4 py-4 text-center text-[#8BAE5A] font-bold">{topic.likes}</td>
                   <td className="px-6 py-4 text-[#8BAE5A]">
-                    <span className="font-semibold text-white">{topic.last.author}</span>
-                    <span className="ml-2 text-xs text-[#8BAE5A]/70">{topic.last.time}</span>
+                    {topic.author.first_name} {topic.author.last_name}<br />
+                    <span className="text-xs text-[#8BAE5A]/70">{formatDate(topic.created_at)}</span>
+                  </td>
+                  <td className="px-4 py-4 text-center text-[#FFD700] font-bold">{topic.reply_count}</td>
+                  <td className="px-4 py-4 text-center text-[#8BAE5A] font-bold">{topic.like_count}</td>
+                  <td className="px-6 py-4 text-[#8BAE5A]">
+                    <span className="font-semibold text-white">
+                      {topic.last_reply_at ? topic.author.first_name : topic.author.first_name}
+                    </span>
+                    <span className="ml-2 text-xs text-[#8BAE5A]/70">
+                      {topic.last_reply_at ? formatTime(topic.last_reply_at) : formatTime(topic.created_at)}
+                    </span>
                   </td>
                 </tr>
               )
