@@ -1,7 +1,7 @@
 'use client';
 import ClientLayout from '../../components/ClientLayout';
 import { useState, useEffect, useRef } from 'react';
-import { CameraIcon, TrashIcon, PlusIcon, UserGroupIcon, TrophyIcon, FireIcon, BookOpenIcon, ArrowDownTrayIcon, ShieldCheckIcon, BellIcon, PencilIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/solid';
+import { CameraIcon, TrashIcon, PlusIcon, UserGroupIcon, TrophyIcon, FireIcon, BookOpenIcon, ArrowDownTrayIcon, ShieldCheckIcon, BellIcon, PencilIcon, CheckIcon, XMarkIcon, ExclamationTriangleIcon } from '@heroicons/react/24/solid';
 import CropModal from '../../../components/CropModal';
 import { toast } from 'react-toastify';
 import { useAuth } from '@/contexts/AuthContext';
@@ -46,7 +46,7 @@ const interestOptions = [
 ];
 
 export default function MijnProfiel() {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, signOut } = useAuth();
   const [activeTab, setActiveTab] = useState('publiek');
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -62,6 +62,11 @@ export default function MijnProfiel() {
   const [cropAspect, setCropAspect] = useState(1);
   const [uploadingType, setUploadingType] = useState<'avatar' | 'cover' | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  
+  // Delete account states
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -187,6 +192,108 @@ export default function MijnProfiel() {
     await updateProfile({
       interests: currentInterests.filter(i => i !== interest)
     });
+  };
+
+  // Account deletion functions
+  const handleDeleteAccount = () => {
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteAccount = async () => {
+    if (deleteConfirmation !== 'VERWIJDER') {
+      toast.error('Type "VERWIJDER" om je account te verwijderen');
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      // Delete user data from all tables
+      const userId = user?.id;
+      
+      // Delete from profiles table
+      await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', userId);
+
+      // Delete from users table
+      await supabase
+        .from('users')
+        .delete()
+        .eq('id', userId);
+
+      // Delete forum posts
+      await supabase
+        .from('forum_posts')
+        .delete()
+        .eq('author_id', userId);
+
+      // Delete forum topics
+      await supabase
+        .from('forum_topics')
+        .delete()
+        .eq('author_id', userId);
+
+      // Delete forum likes
+      await supabase
+        .from('forum_likes')
+        .delete()
+        .eq('user_id', userId);
+
+      // Delete forum views
+      await supabase
+        .from('forum_views')
+        .delete()
+        .eq('user_id', userId);
+
+      // Delete user progress
+      await supabase
+        .from('user_lesson_progress')
+        .delete()
+        .eq('user_id', userId);
+
+      // Delete user training schemas
+      await supabase
+        .from('user_training_schemas')
+        .delete()
+        .eq('user_id', userId);
+
+      // Delete user nutrition plans
+      await supabase
+        .from('user_nutrition_plans')
+        .delete()
+        .eq('user_id', userId);
+
+      // Finally, delete the auth user
+      const { error: authError } = await supabase.auth.admin.deleteUser(userId!);
+
+      if (authError) {
+        console.error('Error deleting auth user:', authError);
+        toast.error('Er is een fout opgetreden bij het verwijderen van je account');
+        return;
+      }
+
+      toast.success('Account succesvol verwijderd');
+      
+      // Sign out and redirect to home
+      setTimeout(() => {
+        signOut();
+        window.location.href = '/';
+      }, 2000);
+
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      toast.error('Er is een fout opgetreden bij het verwijderen van je account');
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteModal(false);
+      setDeleteConfirmation('');
+    }
+  };
+
+  const cancelDeleteAccount = () => {
+    setShowDeleteModal(false);
+    setDeleteConfirmation('');
   };
 
   // Helper function to convert base64 to blob
@@ -613,7 +720,10 @@ export default function MijnProfiel() {
                   <h3 className="font-semibold text-white">Account verwijderen</h3>
                   <p className="text-[#8BAE5A] text-sm">Permanent verwijderen van je account</p>
                 </div>
-                <button className="px-4 py-2 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition-colors">
+                <button 
+                  onClick={handleDeleteAccount}
+                  className="px-4 py-2 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition-colors"
+                >
                   Verwijderen
                 </button>
               </div>
@@ -661,6 +771,73 @@ export default function MijnProfiel() {
           </div>
         )}
       </div>
+      
+      {/* Delete Account Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-[#232D1A] rounded-2xl p-8 max-w-md w-full mx-4 border border-red-500/20">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <ExclamationTriangleIcon className="w-8 h-8 text-red-500" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">Account Verwijderen</h3>
+              <p className="text-[#8BAE5A] text-sm">
+                Deze actie is <strong>permanent en onomkeerbaar</strong>. Alle je data, voortgang en content zal worden verwijderd.
+              </p>
+            </div>
+            
+            <div className="space-y-4 mb-6">
+              <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
+                <h4 className="font-semibold text-red-400 mb-2">Wat wordt er verwijderd:</h4>
+                <ul className="text-[#8BAE5A] text-sm space-y-1">
+                  <li>• Je profiel en alle persoonlijke data</li>
+                  <li>• Alle forum posts en topics</li>
+                  <li>• Je voortgang en missies</li>
+                  <li>• Training schemas en voedingsplannen</li>
+                  <li>• Alle opgeslagen content</li>
+                </ul>
+              </div>
+              
+              <div className="bg-[#181F17] rounded-lg p-4">
+                <p className="text-[#8BAE5A] text-sm mb-3">
+                  Type <strong>"VERWIJDER"</strong> om te bevestigen dat je je account wilt verwijderen:
+                </p>
+                <input
+                  type="text"
+                  value={deleteConfirmation}
+                  onChange={(e) => setDeleteConfirmation(e.target.value)}
+                  placeholder="Type VERWIJDER"
+                  className="w-full bg-[#232D1A] text-white px-3 py-2 rounded-lg border border-[#3A4D23] focus:outline-none focus:border-red-500"
+                />
+              </div>
+            </div>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={cancelDeleteAccount}
+                disabled={isDeleting}
+                className="flex-1 px-4 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded-lg font-semibold hover:bg-[#4A5D33] transition-colors disabled:opacity-50"
+              >
+                Annuleren
+              </button>
+              <button
+                onClick={confirmDeleteAccount}
+                disabled={isDeleting || deleteConfirmation !== 'VERWIJDER'}
+                className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isDeleting ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Verwijderen...
+                  </div>
+                ) : (
+                  'Account Verwijderen'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Crop Modal */}
       {showCropModal && selectedImage && (
