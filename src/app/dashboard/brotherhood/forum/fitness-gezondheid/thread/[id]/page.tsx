@@ -111,7 +111,7 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
       // Process posts data - show Rick for old posts, real user for new posts
       const processedPosts = (postsData || []).map((post: any) => {
         // Check if this is a new post (created after our fix) or old post
-        const isNewPost = post.author_id !== '00000000-0000-0000-0000-000000000001';
+        const isNewPost = post.author_id !== '9d6aa8ba-58ab-4188-9a9f-09380a67eb0c';
         
         return {
           id: post.id,
