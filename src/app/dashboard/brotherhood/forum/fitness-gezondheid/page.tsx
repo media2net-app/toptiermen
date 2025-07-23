@@ -56,10 +56,7 @@ const FitnessGezondheidCategory = () => {
           like_count,
           created_at,
           last_reply_at,
-          author:profiles!forum_topics_author_id_fkey(
-            first_name,
-            last_name
-          )
+          author_id
         `)
         .eq('category_id', categoryData.id)
         .order('is_pinned', { ascending: false })
@@ -82,8 +79,8 @@ const FitnessGezondheidCategory = () => {
         created_at: topic.created_at,
         last_reply_at: topic.last_reply_at,
         author: {
-          first_name: topic.author?.first_name || 'Unknown',
-          last_name: topic.author?.last_name || ''
+          first_name: `User ${topic.author_id?.slice(0, 8) || 'Unknown'}`,
+          last_name: ''
         }
       }));
 

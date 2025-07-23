@@ -37,16 +37,12 @@ const ForumOverview = () => {
           description,
           emoji,
           slug,
-          forum_topics!inner(
+          forum_topics(
             id,
             title,
             created_at,
             author_id,
-            reply_count,
-            profiles!forum_topics_author_id_fkey(
-              first_name,
-              last_name
-            )
+            reply_count
           )
         `)
         .order('order_index');
@@ -68,13 +64,13 @@ const ForumOverview = () => {
         }, 0);
 
         // Get last post info
-        const lastTopic = topics.sort((a: any, b: any) => 
+        const lastTopic = topics.length > 0 ? topics.sort((a: any, b: any) => 
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        )[0];
+        )[0] : null;
 
         const lastPost = lastTopic ? {
           title: lastTopic.title,
-          author: `${lastTopic.profiles?.first_name || 'Unknown'} ${lastTopic.profiles?.last_name || ''}`.trim(),
+          author: `User ${lastTopic.author_id?.slice(0, 8) || 'Unknown'}`,
           time: formatTimeAgo(lastTopic.created_at)
         } : undefined;
 

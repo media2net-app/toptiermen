@@ -51,11 +51,7 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
           content,
           created_at,
           like_count,
-          author:profiles!forum_topics_author_id_fkey(
-            first_name,
-            last_name,
-            avatar_url
-          )
+          author_id
         `)
         .eq('id', topicId)
         .single();
@@ -73,11 +69,7 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
           content,
           created_at,
           like_count,
-          author:profiles!forum_posts_author_id_fkey(
-            first_name,
-            last_name,
-            avatar_url
-          )
+          author_id
         `)
         .eq('topic_id', topicId)
         .order('created_at', { ascending: true });
@@ -95,9 +87,9 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
         created_at: topicData.created_at,
         like_count: topicData.like_count,
         author: {
-          first_name: topicData.author?.first_name || 'Unknown',
-          last_name: topicData.author?.last_name || '',
-          avatar_url: topicData.author?.avatar_url
+          first_name: `User ${topicData.author_id?.slice(0, 8) || 'Unknown'}`,
+          last_name: '',
+          avatar_url: undefined
         }
       };
 
@@ -108,9 +100,9 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
         created_at: post.created_at,
         like_count: post.like_count,
         author: {
-          first_name: post.author?.first_name || 'Unknown',
-          last_name: post.author?.last_name || '',
-          avatar_url: post.author?.avatar_url
+          first_name: `User ${post.author_id?.slice(0, 8) || 'Unknown'}`,
+          last_name: '',
+          avatar_url: undefined
         }
       }));
 
