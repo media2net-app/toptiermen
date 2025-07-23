@@ -23,6 +23,16 @@ interface Profile {
   interests: any;
   created_at: string;
   last_login: string | null;
+  // New rank system properties
+  current_xp?: number;
+  current_rank?: {
+    id: number;
+    name: string;
+    rank_order: number;
+    icon_name: string;
+  } | null;
+  badges_count?: number;
+  fallback_rank?: string;
 }
 
 const ranks = [
@@ -59,18 +69,76 @@ export default function LedenOverzicht() {
       setLoading(true);
       setError(null);
 
-      const { data, error: fetchError } = await supabase
+      // First get profiles data
+      const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (fetchError) {
-        console.error('Error fetching members:', fetchError);
+      if (profilesError) {
+        console.error('Error fetching profiles:', profilesError);
         setError('Kon leden niet laden. Probeer het later opnieuw.');
         return;
       }
 
-      setMembers(data || []);
+      // Get XP and rank data for all users
+      const { data: xpData, error: xpError } = await supabase
+        .from('user_xp')
+        .select(`
+          user_id,
+          total_xp,
+          current_rank_id,
+          ranks (
+            id,
+            name,
+            rank_order,
+            icon_name
+          )
+        `);
+
+      // Get user badges count
+      const { data: badgesCounts, error: badgesError } = await supabase
+        .from('user_badges')
+        .select('user_id');
+
+      // Create a map for XP data
+      const xpMap = new Map();
+      if (xpData) {
+        xpData.forEach(xp => {
+          xpMap.set(xp.user_id, {
+            total_xp: xp.total_xp,
+            rank: xp.ranks,
+            current_rank_id: xp.current_rank_id
+          });
+        });
+      }
+
+      // Create a map for badges count
+      const badgesMap = new Map();
+      if (badgesCounts) {
+        badgesCounts.forEach(badge => {
+          const count = badgesMap.get(badge.user_id) || 0;
+          badgesMap.set(badge.user_id, count + 1);
+        });
+      }
+
+      // Combine the data
+      const enrichedMembers = (profilesData || []).map(profile => {
+        const xpInfo = xpMap.get(profile.id);
+        const badgeCount = badgesMap.get(profile.id) || 0;
+        
+        return {
+          ...profile,
+          // Override with new rank system data
+          current_xp: xpInfo?.total_xp || 0,
+          current_rank: xpInfo?.rank || null,
+          badges_count: badgeCount,
+          // Keep original rank as fallback
+          fallback_rank: profile.rank
+        };
+      });
+
+      setMembers(enrichedMembers);
     } catch (err) {
       console.error('Error fetching members:', err);
       setError('Er is een fout opgetreden bij het laden van de leden.');
@@ -108,7 +176,7 @@ export default function LedenOverzicht() {
 
   const filtered = members.filter((m) => {
     const memberInterests = getMemberInterests(m.interests);
-    const memberRank = m.rank || 'Beginner';
+    const memberRank = m.current_rank?.name || m.fallback_rank || 'Recruit';
     const memberName = m.display_name || m.full_name || 'Onbekend';
     
     return (
@@ -222,7 +290,7 @@ export default function LedenOverzicht() {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {filtered.map((m) => {
           const memberInterests = getMemberInterests(m.interests);
-          const memberRank = m.rank || 'Beginner';
+          const memberRank = m.current_rank?.name || m.fallback_rank || 'Recruit';
           const rankIcon = getRankIcon(memberRank);
           const avatarUrl = m.avatar_url || '/profielfoto.png';
           const isMemberOnline = isOnline(m.last_login);
@@ -230,6 +298,10 @@ export default function LedenOverzicht() {
           const memberName = m.display_name || m.full_name || 'Onbekend';
           const isCurrentUser = m.id === user?.id;
           const mutualConnections = Math.floor(Math.random() * 5) + 1; // Random number for demo
+          // Use new rank system data
+          const displayRank = m.current_rank ? `Level ${m.current_rank.rank_order} - ${m.current_rank.name}` : memberRank;
+          const displayXP = m.current_xp || 0;
+          const displayBadges = m.badges_count || 0;
           
           return (
             <div key={m.id} className="bg-[#232D1A]/90 rounded-2xl shadow-xl border border-[#3A4D23]/40 p-5 flex flex-col items-center gap-3 hover:shadow-2xl transition-all">
@@ -248,7 +320,7 @@ export default function LedenOverzicht() {
                 <div className="text-lg font-bold text-white text-center group-hover:text-[#FFD700] transition-colors">{memberName}</div>
                 <div className="flex items-center gap-2 text-[#FFD700] font-semibold text-sm">
                   <span>{rankIcon}</span>
-                  <span>{memberRank}</span>
+                  <span>{displayRank}</span>
                 </div>
                 <div className="text-xs text-[#8BAE5A] mb-1">{m.location || 'Locatie onbekend'}</div>
                 {memberInterests.length > 0 && (
@@ -262,7 +334,7 @@ export default function LedenOverzicht() {
                   </div>
                 )}
                 <div className="text-xs text-[#FFD700] font-semibold">
-                  {m.points} punten • {m.missions_completed} missies
+                  {displayXP} XP • {displayBadges} badges
                 </div>
                 <div className="text-xs text-[#8BAE5A]">
                   {mutualConnections} mutuals

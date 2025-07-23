@@ -25,17 +25,7 @@ export default function BrotherhoodLayout({ children }: { children: React.ReactN
                   Word onderdeel van een community van mannen die streven naar excellentie.
                 </p>
                 
-                {/* Decorative elements */}
-                <div className="flex items-center gap-4 mt-4">
-                  <div className="flex items-center gap-2 text-[#FFD700] text-sm">
-                    <span className="w-2 h-2 bg-[#FFD700] rounded-full animate-pulse"></span>
-                    <span>Live Community</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-[#8BAE5A] text-sm">
-                    <span className="w-2 h-2 bg-[#8BAE5A] rounded-full"></span>
-                    <span>Premium Access</span>
-                  </div>
-                </div>
+                {/* Decorative elements - removed for cleaner look */}
               </div>
               
               {/* Decorative icon */}

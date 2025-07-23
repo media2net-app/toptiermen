@@ -76,35 +76,30 @@ export default function BrotherhoodSubNav() {
                         : "text-[#8BAE5A]/70 hover:text-[#8BAE5A] hover:bg-[#232D1A]/50 hover:transform hover:scale-105"
                     }`}
                   >
-                    {/* Active indicator */}
-                    {active && (
-                      <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-[#FFD700] rounded-full shadow-lg shadow-[#FFD700]/50"></div>
-                    )}
-                    
-                    {/* Icon */}
-                    <IconComponent className={`w-5 h-5 mb-1 transition-all duration-300 ${
-                      active ? "text-[#181F17]" : "text-[#8BAE5A]/70 group-hover:text-[#8BAE5A]"
-                    }`} />
-                    
-                    {/* Label */}
-                    <span className={`text-xs font-semibold transition-all duration-300 ${
-                      active ? "text-[#181F17]" : "text-[#8BAE5A]/70 group-hover:text-[#8BAE5A]"
-                    }`}>
-                      {tab.label}
-                    </span>
-                    
-                    {/* Description */}
-                    <span className={`text-xs opacity-60 transition-all duration-300 ${
-                      active ? "text-[#181F17]/80" : "text-[#8BAE5A]/40 group-hover:text-[#8BAE5A]/60"
-                    }`}>
-                      {tab.description}
-                    </span>
-                    
-                    {/* Hover effect */}
-                    {!active && (
-                      <div className="absolute inset-0 bg-gradient-to-br from-[#8BAE5A]/5 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    )}
-                  </Link>
+                     {/* Icon */}
+                     <IconComponent className={`w-5 h-5 mb-1 transition-all duration-300 ${
+                       active ? "text-[#181F17]" : "text-[#8BAE5A]/70 group-hover:text-[#8BAE5A]"
+                     }`} />
+                     
+                     {/* Label */}
+                     <span className={`text-xs font-semibold transition-all duration-300 ${
+                       active ? "text-[#181F17]" : "text-[#8BAE5A]/70 group-hover:text-[#8BAE5A]"
+                     }`}>
+                       {tab.label}
+                     </span>
+                     
+                     {/* Description */}
+                     <span className={`text-xs opacity-60 transition-all duration-300 ${
+                       active ? "text-[#181F17]/80" : "text-[#8BAE5A]/40 group-hover:text-[#8BAE5A]/60"
+                     }`}>
+                       {tab.description}
+                     </span>
+                     
+                     {/* Hover effect */}
+                     {!active && (
+                       <div className="absolute inset-0 bg-gradient-to-br from-[#8BAE5A]/5 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                     )}
+                   </Link>
                 </li>
               );
             })}

@@ -32,10 +32,13 @@ export default function ProfielDetail() {
   const [error, setError] = useState<string | null>(null);
   const [connectionStatus, setConnectionStatus] = useState('geen');
   const [notification, setNotification] = useState<string | null>(null);
+  const [currentMemberRank, setCurrentMemberRank] = useState<any>(null);
+  const [currentMemberXP, setCurrentMemberXP] = useState(0);
 
   useEffect(() => {
     if (id) {
       fetchMember();
+      fetchMemberRank();
     }
   }, [id]);
 
@@ -66,6 +69,34 @@ export default function ProfielDetail() {
       setError('Er is een fout opgetreden bij het laden van het profiel.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchMemberRank = async () => {
+    try {
+      // Get member XP and current rank
+      const { data: xpData, error: xpError } = await supabase
+        .from('user_xp')
+        .select('total_xp, current_rank_id')
+        .eq('user_id', id)
+        .single();
+
+      if (!xpError && xpData) {
+        setCurrentMemberXP(xpData.total_xp || 0);
+
+        // Get rank details
+        const { data: rankData, error: rankError } = await supabase
+          .from('ranks')
+          .select('*')
+          .eq('id', xpData.current_rank_id)
+          .single();
+
+        if (!rankError && rankData) {
+          setCurrentMemberRank(rankData);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching member rank:', error);
     }
   };
 
@@ -132,8 +163,8 @@ export default function ProfielDetail() {
   }
 
   const memberInterests = getMemberInterests(member.interests);
-  const memberRank = member.rank || 'Member';
-  const rankIcon = getRankIcon(memberRank);
+  const displayRank = currentMemberRank ? currentMemberRank.name : (member.rank || 'Member');
+  const rankIcon = getRankIcon(displayRank);
   const avatarUrl = member.avatar_url || '/profielfoto.png';
   const memberBadges = badges.slice(0, Math.min(3, Math.floor((member.points || 0) / 100) + 1));
 
@@ -162,7 +193,9 @@ export default function ProfielDetail() {
         <div className="flex-1 flex flex-col gap-2">
           <div className="flex items-center gap-3">
             <h2 className="text-2xl font-bold text-white">{member.full_name}</h2>
-            <span className="flex items-center gap-1 text-[#FFD700] font-semibold text-lg">{rankIcon} {memberRank}</span>
+            <span className="flex items-center gap-1 text-[#FFD700] font-semibold text-lg">
+              {rankIcon} {currentMemberRank ? `Level ${currentMemberRank.rank_order} - ${currentMemberRank.name}` : displayRank}
+            </span>
           </div>
           <div className="text-[#8BAE5A] text-sm">{member.location || 'Locatie onbekend'}</div>
           {memberInterests.length > 0 && (

@@ -20,6 +20,7 @@ import BrotherhoodWidget from '../components/BrotherhoodWidget';
 import OnboardingWidget from '../components/OnboardingWidget';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDashboard } from '@/hooks/useDashboard';
+import { supabase } from '@/lib/supabase';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Filler);
 
@@ -157,6 +158,10 @@ export default function Dashboard() {
 
   const { user } = useAuth();
   const dashboardData = useDashboard();
+  
+  // Badges & Ranks state
+  const [currentRank, setCurrentRank] = useState<any>(null);
+  const [currentXP, setCurrentXP] = useState(0);
 
   // Check onboarding status on component mount
   useEffect(() => {
@@ -195,6 +200,41 @@ export default function Dashboard() {
       toast.error('Er is een fout opgetreden bij het voltooien van de onboarding, maar je kunt verder gaan');
     }
   };
+
+  // Fetch badges & ranks data
+  useEffect(() => {
+    const fetchBadgesAndRanks = async () => {
+      if (!user?.id) return;
+      
+      try {
+        // Get user XP and current rank
+        const { data: xpData, error: xpError } = await supabase
+          .from('user_xp')
+          .select('total_xp, current_rank_id')
+          .eq('user_id', user.id)
+          .single();
+
+        if (!xpError && xpData) {
+          setCurrentXP(xpData.total_xp || 0);
+
+          // Get rank details
+          const { data: rankData, error: rankError } = await supabase
+            .from('ranks')
+            .select('*')
+            .eq('id', xpData.current_rank_id)
+            .single();
+
+          if (!rankError && rankData) {
+            setCurrentRank(rankData);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching badges and ranks:', error);
+      }
+    };
+
+    fetchBadgesAndRanks();
+  }, [user?.id]);
 
   // Dummy data
   const notifications: any[] = [];
@@ -310,7 +350,10 @@ export default function Dashboard() {
                   </h1>
                   <div className="flex items-center gap-2 mb-2">
                     <span className="inline-block bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] text-white px-4 py-1 rounded-full text-sm font-semibold shadow">
-                      Rang: {dashboardData.profile?.rank || 'Beginner'}
+                      {currentRank ? `Level ${currentRank.rank_order} - ${currentRank.name}` : 'Level 1 - Recruit'}
+                    </span>
+                    <span className="inline-block bg-[#3A4D23] text-[#8BAE5A] px-3 py-1 rounded-full text-sm font-semibold">
+                      {currentXP} XP
                     </span>
                   </div>
                 </div>

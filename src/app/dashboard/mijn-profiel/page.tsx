@@ -68,12 +68,18 @@ export default function MijnProfiel() {
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
   
+  // Badges & Ranks states
+  const [currentRank, setCurrentRank] = useState<any>(null);
+  const [currentXP, setCurrentXP] = useState(0);
+  const [userBadges, setUserBadges] = useState<any[]>([]);
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch user profile
   useEffect(() => {
     if (user) {
       fetchUserProfile();
+      fetchBadgesAndRanks();
     }
   }, [user]);
 
@@ -98,6 +104,54 @@ export default function MijnProfiel() {
       console.error('Error:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchBadgesAndRanks = async () => {
+    try {
+      // Get user XP and current rank
+      const { data: xpData, error: xpError } = await supabase
+        .from('user_xp')
+        .select('total_xp, current_rank_id')
+        .eq('user_id', user?.id)
+        .single();
+
+      if (!xpError && xpData) {
+        setCurrentXP(xpData.total_xp || 0);
+
+        // Get rank details
+        const { data: rankData, error: rankError } = await supabase
+          .from('ranks')
+          .select('*')
+          .eq('id', xpData.current_rank_id)
+          .single();
+
+        if (!rankError && rankData) {
+          setCurrentRank(rankData);
+        }
+      }
+
+      // Get user badges
+      const { data: badgesData, error: badgesError } = await supabase
+        .from('user_badges')
+        .select(`
+          badge_id,
+          awarded_at,
+          badges (
+            title,
+            description,
+            icon_name,
+            category_id
+          )
+        `)
+        .eq('user_id', user?.id)
+        .eq('status', 'unlocked');
+
+      if (!badgesError && badgesData) {
+        setUserBadges(badgesData);
+      }
+    } catch (error) {
+      console.error('Error fetching badges and ranks:', error);
     }
   };
 
@@ -544,13 +598,13 @@ export default function MijnProfiel() {
                 
                 <div className="flex flex-wrap gap-2">
                   <span className="inline-block bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-white px-4 py-1 rounded-full text-sm font-semibold shadow">
-                    {profile.rank || 'Beginner'}
+                    {currentRank ? `Level ${currentRank.rank_order} - ${currentRank.name}` : 'Beginner'}
                   </span>
                   <span className="inline-block bg-[#3A4D23] text-[#8BAE5A] px-4 py-1 rounded-full text-sm font-semibold">
-                    {profile.points || 0} punten
+                    {currentXP} XP
                   </span>
                   <span className="inline-block bg-[#3A4D23] text-[#8BAE5A] px-4 py-1 rounded-full text-sm font-semibold">
-                    {profile.missions_completed || 0} missies voltooid
+                    {userBadges.length} badges
                   </span>
                 </div>
               </div>
@@ -669,20 +723,20 @@ export default function MijnProfiel() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-[#181F17] rounded-xl p-6 text-center">
                 <TrophyIcon className="w-12 h-12 text-[#FFD700] mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-white mb-2">{profile?.points || 0}</h3>
-                <p className="text-[#8BAE5A]">Totaal Punten</p>
+                <h3 className="text-xl font-bold text-white mb-2">{currentXP}</h3>
+                <p className="text-[#8BAE5A]">Totaal XP</p>
               </div>
               
               <div className="bg-[#181F17] rounded-xl p-6 text-center">
                 <FireIcon className="w-12 h-12 text-[#FFD700] mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-white mb-2">{profile?.missions_completed || 0}</h3>
-                <p className="text-[#8BAE5A]">Missies Voltooid</p>
+                <h3 className="text-xl font-bold text-white mb-2">{userBadges.length}</h3>
+                <p className="text-[#8BAE5A]">Badges Verdiend</p>
               </div>
               
               <div className="bg-[#181F17] rounded-xl p-6 text-center">
                 <BookOpenIcon className="w-12 h-12 text-[#FFD700] mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-white mb-2">{profile?.rank || 'Beginner'}</h3>
-                <p className="text-[#8BAE5A]">Huidige Rang</p>
+                <h3 className="text-xl font-bold text-white mb-2">{currentRank ? `Level ${currentRank.rank_order}` : 'Level 1'}</h3>
+                <p className="text-[#8BAE5A]">{currentRank?.name || 'Recruit'}</p>
               </div>
             </div>
             
