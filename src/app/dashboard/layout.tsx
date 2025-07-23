@@ -29,6 +29,13 @@ const menu = [
     href: '/dashboard/mijn-missies',
     isSub: true
   },
+  {
+    label: 'Mijn Challenges',
+    icon: TrophyIcon,
+    parent: 'Dashboard',
+    href: '/dashboard/mijn-challenges',
+    isSub: true
+  },
   { label: 'Mijn Trainingen', icon: AcademicCapIcon, parent: 'Dashboard', href: '/dashboard/mijn-trainingen', isSub: true },
   { label: 'Finance & Business', icon: CurrencyDollarIcon, parent: 'Dashboard', href: '/dashboard/finance-en-business', isSub: true },
   { label: 'Academy', icon: FireIcon, href: '/dashboard/academy' },

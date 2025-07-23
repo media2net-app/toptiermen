@@ -28,6 +28,7 @@ export interface Database {
           selected_schema_id: string | null
           selected_nutrition_plan: string | null
           nutrition_profile: any | null
+          status: 'active' | 'inactive' | 'suspended'
         }
         Insert: {
           id?: string
@@ -47,6 +48,7 @@ export interface Database {
           selected_schema_id?: string | null
           selected_nutrition_plan?: string | null
           nutrition_profile?: any | null
+          status?: 'active' | 'inactive' | 'suspended'
         }
         Update: {
           id?: string
@@ -66,6 +68,7 @@ export interface Database {
           selected_schema_id?: string | null
           selected_nutrition_plan?: string | null
           nutrition_profile?: any | null
+          status?: 'active' | 'inactive' | 'suspended'
         }
       }
       academy_modules: {

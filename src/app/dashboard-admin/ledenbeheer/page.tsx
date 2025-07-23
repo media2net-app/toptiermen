@@ -59,13 +59,15 @@ export default function Ledenbeheer() {
       setLoadingMembers(true);
       try {
         console.log('Fetching members from database...');
-        const { data, error } = await supabase
-          .from('users')
-          .select('*')
-          .order('created_at', { ascending: false });
         
-        if (error) {
-          console.error('Error fetching members:', error);
+        // Fetch users and profiles separately since there's no foreign key relationship
+        const [usersResult, profilesResult] = await Promise.all([
+          supabase.from('users').select('*').order('created_at', { ascending: false }),
+          supabase.from('profiles').select('*')
+        ]);
+        
+        if (usersResult.error) {
+          console.error('Error fetching users:', usersResult.error);
           toast.error('Fout bij het laden van leden', {
             position: "top-right",
             autoClose: 3000,
@@ -74,19 +76,55 @@ export default function Ledenbeheer() {
             pauseOnHover: true,
             draggable: true
           });
-        } else if (data) {
-          console.log('Fetched members:', data.length, data);
-          console.log('Member details:', data.map(m => ({
-            id: m.id,
-            email: m.email,
-            full_name: m.full_name,
-            status: m.status,
-            created_at: m.created_at
-          })));
-          setAllMembers(data);
-        } else {
-          console.log('No data returned from query');
+          return;
         }
+        
+        if (profilesResult.error) {
+          console.error('Error fetching profiles:', profilesResult.error);
+          // Continue with just users data
+        }
+        
+        const users = usersResult.data || [];
+        const profiles = profilesResult.data || [];
+        
+        console.log('Fetched users:', users.length, 'profiles:', profiles.length);
+        
+        // Create a map of profiles by user ID for quick lookup
+        const profilesMap = new Map();
+        profiles.forEach(profile => {
+          profilesMap.set(profile.id, profile);
+        });
+        
+        // Combine user and profile data
+        const combinedData = users.map(user => {
+          const profile = profilesMap.get(user.id);
+          return {
+            ...user,
+            ...(profile || {}),
+            // Use profile data as primary, fallback to user data
+            full_name: profile?.full_name || user.full_name,
+            rank: profile?.rank || user.rank || 'Rookie',
+            avatar_url: profile?.avatar_url,
+            bio: profile?.bio,
+            main_goal: profile?.main_goal,
+            points: profile?.points || 0,
+            missions_completed: profile?.missions_completed || 0,
+            posts: profile?.posts || 0,
+            badges: profile?.badges || 0
+          };
+        });
+        
+        console.log('Combined member details:', combinedData.map(m => ({
+          id: m.id,
+          email: m.email,
+          full_name: m.full_name,
+          rank: m.rank,
+          status: m.status,
+          created_at: m.created_at,
+          avatar_url: m.avatar_url
+        })));
+        
+        setAllMembers(combinedData);
       } catch (err) {
         console.error('Exception fetching members:', err);
         toast.error('Fout bij het laden van leden', {
@@ -174,21 +212,33 @@ export default function Ledenbeheer() {
   const handleSave = async () => {
     setIsLoading(true);
     try {
-      const updates: any = {
+      // Update users table
+      const userUpdates: any = {
         full_name: formData.name,
         username: formData.username,
-        bio: formData.bio,
-        main_goal: formData.mainGoal,
-        rank: formData.rank,
-        forum_status: formData.forumStatus,
         status: formData.status,
         admin_notes: formData.adminNotes
       };
-      const { error } = await supabase
-        .from('users')
-        .update(updates)
-        .eq('id', editingMember.id);
-      if (error) throw error;
+      
+      // Update profiles table
+      const profileUpdates: any = {
+        full_name: formData.name,
+        display_name: formData.username,
+        bio: formData.bio,
+        main_goal: formData.mainGoal,
+        rank: formData.rank,
+        forum_status: formData.forumStatus
+      };
+      
+      // Update both tables
+      const [userResult, profileResult] = await Promise.all([
+        supabase.from('users').update(userUpdates).eq('id', editingMember.id),
+        supabase.from('profiles').update(profileUpdates).eq('id', editingMember.id)
+      ]);
+      
+      if (userResult.error) throw userResult.error;
+      if (profileResult.error) throw profileResult.error;
+      
       toast.success(`Profiel van ${formData.name} succesvol bijgewerkt`, {
         position: "top-right",
         autoClose: 3000,
@@ -199,12 +249,41 @@ export default function Ledenbeheer() {
       });
       setShowEditModal(false);
       setEditingMember(null);
-      // Refresh members
-      const { data } = await supabase
-        .from('users')
-        .select('*')
-        .order('created_at', { ascending: false });
-      if (data) setAllMembers(data);
+      
+      // Refresh members with combined data
+      const [usersResult, profilesResult] = await Promise.all([
+        supabase.from('users').select('*').order('created_at', { ascending: false }),
+        supabase.from('profiles').select('*')
+      ]);
+      
+      if (usersResult.data) {
+        const users = usersResult.data;
+        const profiles = profilesResult.data || [];
+        
+        // Create a map of profiles by user ID for quick lookup
+        const profilesMap = new Map();
+        profiles.forEach(profile => {
+          profilesMap.set(profile.id, profile);
+        });
+        
+        const combinedData = users.map(user => {
+          const profile = profilesMap.get(user.id);
+          return {
+            ...user,
+            ...(profile || {}),
+            full_name: profile?.full_name || user.full_name,
+            rank: profile?.rank || user.rank || 'Rookie',
+            avatar_url: profile?.avatar_url,
+            bio: profile?.bio,
+            main_goal: profile?.main_goal,
+            points: profile?.points || 0,
+            missions_completed: profile?.missions_completed || 0,
+            posts: profile?.posts || 0,
+            badges: profile?.badges || 0
+          };
+        });
+        setAllMembers(combinedData);
+      }
     } catch (error) {
       toast.error('Er is een fout opgetreden bij het opslaan', {
         position: "top-right",
@@ -348,10 +427,10 @@ export default function Ledenbeheer() {
                 <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">E-mail</th>
                 <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Rang</th>
                 <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Status</th>
+                <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Punten</th>
+                <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Missies</th>
                 <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Lid sinds</th>
                 <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Laatste activiteit</th>
-                <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Posts</th>
-                <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Badges</th>
                 <th className="px-6 py-4 text-center text-[#8BAE5A] font-semibold">Acties</th>
               </tr>
             </thead>
@@ -397,6 +476,12 @@ export default function Ledenbeheer() {
                     </span>
                   </td>
                   <td className="px-6 py-4">
+                    <span className="text-[#8BAE5A] font-semibold">{member.points || 0}</span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="text-[#8BAE5A] font-semibold">{member.missions_completed || 0}</span>
+                  </td>
+                  <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
                       <CalendarIcon className="w-4 h-4 text-[#B6C948]" />
                       <span className="text-[#B6C948]">
@@ -408,12 +493,6 @@ export default function Ledenbeheer() {
                     <span className="text-[#B6C948] text-sm">
                       {member.last_login ? new Date(member.last_login).toLocaleDateString('nl-NL') : 'Niet beschikbaar'}
                     </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="text-[#8BAE5A] font-semibold">{member.posts || 0}</span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="text-[#8BAE5A] font-semibold">{member.badges || 0}</span>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-center">

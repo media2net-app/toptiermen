@@ -13,6 +13,7 @@ const mobileMenu = [
 const fullMenu = [
   { label: 'Dashboard', href: '/dashboard' },
   { label: 'Mijn Missies', href: '/dashboard/mijn-missies' },
+  { label: 'Mijn Challenges', href: '/dashboard/mijn-challenges' },
   { label: 'Trainingscentrum', href: '/dashboard/trainingscentrum' },
   { label: 'Mind & Focus', href: '/dashboard/mind-en-focus' },
   { label: 'Finance & Business', href: '/dashboard/finance-en-business' },

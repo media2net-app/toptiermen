@@ -181,19 +181,6 @@ export default function Brotherhood() {
   return (
     <ClientLayout>
       <div className="space-y-8">
-        {/* Header */}
-        <div className="text-center">
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">
-            Brotherhood
-          </h1>
-          <p className="text-[#8BAE5A] text-lg">
-            Word onderdeel van een community van mannen die streven naar excellentie
-          </p>
-        </div>
-
-        {/* Navigation */}
-        <BrotherhoodSubNav />
-
         {/* Stats Overview */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-[#232D1A]/80 rounded-xl p-4 text-center border border-[#3A4D23]/40">
