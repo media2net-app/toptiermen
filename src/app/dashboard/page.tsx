@@ -19,6 +19,7 @@ import {
 import BrotherhoodWidget from '../components/BrotherhoodWidget';
 import OnboardingWidget from '../components/OnboardingWidget';
 import { useAuth } from '@/contexts/AuthContext';
+import { useDashboard } from '@/hooks/useDashboard';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Filler);
 
@@ -155,24 +156,26 @@ export default function Dashboard() {
   const [onboardingCompleted, setOnboardingCompleted] = useState(false);
 
   const { user } = useAuth();
+  const dashboardData = useDashboard();
 
   // Check onboarding status on component mount
   useEffect(() => {
-    const onboardingStatus = localStorage.getItem('onboardingCompleted');
-    if (!onboardingStatus) {
-      setShowOnboarding(true);
-    } else {
-      setOnboardingCompleted(true);
-      setShowOnboarding(false);
+    if (dashboardData.onboardingStatus) {
+      if (!dashboardData.onboardingStatus.onboarding_completed) {
+        setShowOnboarding(true);
+      } else {
+        setOnboardingCompleted(true);
+        setShowOnboarding(false);
+      }
     }
-  }, []);
+  }, [dashboardData.onboardingStatus]);
 
   // Dummy data
   const notifications: any[] = [];
   const messages: any[] = [];
 
   useEffect(() => {
-    const end = 68;
+    const end = dashboardData.primaryGoal ? dashboardData.primaryGoal.progress_percentage : 68;
     const duration = 900;
     const step = () => {
       setProgress((prev) => {
@@ -186,7 +189,7 @@ export default function Dashboard() {
       const interval = setInterval(step, duration / end);
       return () => clearInterval(interval);
     }
-  }, [progress]);
+  }, [progress, dashboardData.primaryGoal]);
 
   useEffect(() => {
     setTimeout(() => setFadeIn(true), 100);
@@ -206,63 +209,6 @@ export default function Dashboard() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [dropdownOpen]);
 
-  useEffect(() => {
-    // Toastify notificaties - UITGESCHAKELD
-    // const shown = new Set();
-    // // Eerste notificatie direct tonen
-    // shown.add(0);
-    // const n0 = notifications[0];
-    // setTimeout(() => {
-    //   toast.info(
-    //     <div className="flex items-center gap-3">
-    //       <span>{n0.icon}</span>
-    //       <span className="font-semibold">{n0.title}</span>
-    //     </div>,
-    //     {
-    //       position: 'bottom-right',
-    //       autoClose: 5000,
-    //       hideProgressBar: false,
-    //       closeOnClick: true,
-    //       pauseOnHover: true,
-    //       draggable: true,
-    //       progress: undefined,
-    //       theme: 'dark',
-    //     }
-    //   );
-    // }, 500);
-    // // Overige 2 random binnen 1 minuut
-    // function showRandomToast() {
-    //   if (shown.size >= 3) return;
-    //   let idx;
-    //   do {
-    //     idx = Math.floor(Math.random() * notifications.length);
-    //   } while (shown.has(idx));
-    //   shown.add(idx);
-    //   const n = notifications[idx];
-    //   toast.info(
-    //     <div className="flex items-center gap-3">
-    //       <span>{n.icon}</span>
-    //       <span className="font-semibold">{n.title}</span>
-    //     </div>,
-    //     {
-    //       position: 'bottom-right',
-    //       autoClose: 5000,
-    //       hideProgressBar: false,
-    //       closeOnClick: true,
-    //       pauseOnHover: true,
-    //       draggable: true,
-    //       progress: undefined,
-    //       theme: 'dark',
-    //     }
-    //   );
-    //   if (shown.size < 3) {
-    //     setTimeout(showRandomToast, 1000 + Math.random() * 20000);
-    //   }
-    // }
-    // setTimeout(showRandomToast, 1000 + Math.random() * 20000);
-    // eslint-disable-next-line
-  }, []);
-
   // Add timeout for video loading
   useEffect(() => {
     if (showWelcome && videoLoading) {
@@ -281,6 +227,50 @@ export default function Dashboard() {
     setShowWelcome(!shown);
   }, []);
 
+  const handleMissionComplete = async (missionId: string) => {
+    try {
+      await dashboardData.updateMissionStatus(missionId, 'completed');
+      toast.success('Missie voltooid! 🎉');
+    } catch (error) {
+      toast.error('Fout bij het voltooien van missie');
+    }
+  };
+
+  const handleAddMission = async () => {
+    if (!newMission.trim()) return;
+
+    try {
+      await dashboardData.createMission({
+        title: newMission,
+        description: newMission,
+        category: 'daily',
+        difficulty: 'medium',
+        points: 10,
+        due_date: new Date().toISOString().split('T')[0]
+      });
+      
+      setNewMission('');
+      setShowAddMissionModal(false);
+      toast.success('Missie toegevoegd! 🎯');
+    } catch (error) {
+      toast.error('Fout bij het toevoegen van missie');
+    }
+  };
+
+  if (!user) {
+    return <div className="text-white">Gebruiker niet gevonden.</div>;
+  }
+
+  if (dashboardData.loading) {
+    return (
+      <ClientLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A]"></div>
+        </div>
+      </ClientLayout>
+    );
+  }
+
   return (
     <ClientLayout>
       <div className="max-w-7xl mx-auto w-full px-2 sm:px-4 md:px-0">
@@ -290,39 +280,36 @@ export default function Dashboard() {
               <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                 <div>
                   <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tight mb-2 text-white">
-                    {getGreeting()}, <span className="text-[#8BAE5A]">{user?.full_name || 'Gebruiker'}</span>!
+                    {getGreeting()}, <span className="text-[#8BAE5A]">{dashboardData.profile?.display_name || user?.full_name || 'Gebruiker'}</span>!
                   </h1>
                   <div className="flex items-center gap-2 mb-2">
                     <span className="inline-block bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] text-white px-4 py-1 rounded-full text-sm font-semibold shadow">
-                      Rang: {user?.rank || 'Beginner'}
+                      Rang: {dashboardData.profile?.rank || 'Beginner'}
                     </span>
                   </div>
                 </div>
-                {/* eventueel andere header icons */}
               </div>
               {/* Badges */}
               <div className="flex items-center gap-3 mt-4 overflow-x-auto pb-2">
                 <div className="flex flex-row gap-3">
-                  {/* Voorbeeld badges */}
-                  <button className="flex flex-col items-center group focus:outline-none">
-                    <img src="/badge1.png" alt="Discipline Badge" className="w-12 h-12 transition-transform duration-200 group-hover:scale-110" />
-                    <span className="text-xs text-white mt-1">Discipline</span>
-                  </button>
-                  <button className="flex flex-col items-center group focus:outline-none">
-                    <img src="/badge2.png" alt="Consistency Badge" className="w-12 h-12 transition-transform duration-200 group-hover:scale-110" />
-                    <span className="text-xs text-white mt-1">Consistency</span>
-                  </button>
-                  <button className="flex flex-col items-center group focus:outline-none">
-                    <img src="/badge3.png" alt="Leader Badge" className="w-12 h-12 transition-transform duration-200 group-hover:scale-110" />
-                    <span className="text-xs text-white mt-1">Leader</span>
-                  </button>
-                  {/* Meer badges indicator */}
-                  <button className="flex flex-col items-center justify-center group focus:outline-none">
-                    <div className="w-12 h-12 flex items-center justify-center bg-[#232D1A] border border-[#8BAE5A] rounded-full text-[#8BAE5A] font-bold text-lg transition-transform duration-200 group-hover:scale-110">
-                      +17
-                    </div>
-                    <span className="text-xs text-white mt-1">meer</span>
-                  </button>
+                  {/* Real achievements */}
+                  {dashboardData.achievements.slice(0, 3).map((achievement, index) => (
+                    <button key={achievement.id} className="flex flex-col items-center group focus:outline-none">
+                      <div className="w-12 h-12 bg-[#8BAE5A]/20 rounded-full flex items-center justify-center text-2xl transition-transform duration-200 group-hover:scale-110">
+                        {achievement.icon || '🏆'}
+                      </div>
+                      <span className="text-xs text-white mt-1">{achievement.title}</span>
+                    </button>
+                  ))}
+                  {/* More badges indicator */}
+                  {dashboardData.achievements.length > 3 && (
+                    <button className="flex flex-col items-center justify-center group focus:outline-none">
+                      <div className="w-12 h-12 flex items-center justify-center bg-[#232D1A] border border-[#8BAE5A] rounded-full text-[#8BAE5A] font-bold text-lg transition-transform duration-200 group-hover:scale-110">
+                        +{dashboardData.achievements.length - 3}
+                      </div>
+                      <span className="text-xs text-white mt-1">meer</span>
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -336,7 +323,7 @@ export default function Dashboard() {
           onComplete={() => {
             setOnboardingCompleted(true);
             setShowOnboarding(false);
-            localStorage.setItem('onboardingCompleted', 'true');
+            dashboardData.updateOnboardingStatus({ onboarding_completed: true });
             toast.success('Gefeliciteerd! Je hebt je fundament gelegd! 🎉');
           }}
         />
@@ -355,16 +342,16 @@ export default function Dashboard() {
                   <span className="text-[#8BAE5A] text-2xl">🎯</span>
                 </div>
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-3xl font-bold text-white">3/5</span>
+                  <span className="text-3xl font-bold text-white">{dashboardData.completedMissions.length}/{dashboardData.missions.length}</span>
                   <span className="text-[#8BAE5A]">volbracht</span>
                 </div>
                 <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
-                  <div className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full" style={{ width: '60%' }}></div>
+                  <div 
+                    className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full" 
+                    style={{ width: `${dashboardData.missions.length > 0 ? (dashboardData.completedMissions.length / dashboardData.missions.length) * 100 : 0}%` }}
+                  ></div>
                 </div>
               </Link>
-
-              {/* Trainingscentrum */}
-              {/* (verwijderd) */}
 
               {/* Mind & Focus */}
               <div className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#f0a14f]">
@@ -373,11 +360,14 @@ export default function Dashboard() {
                   <span className="text-[#8BAE5A] text-2xl">🧘‍♂️</span>
                 </div>
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-3xl font-bold text-white">4</span>
-                  <span className="text-[#8BAE5A]">meditaties voltooid</span>
+                  <span className="text-3xl font-bold text-white">{dashboardData.dailyProgress?.meditation_minutes || 0}</span>
+                  <span className="text-[#8BAE5A]">minuten gemediteerd</span>
                 </div>
                 <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
-                  <div className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full" style={{ width: '80%' }}></div>
+                  <div 
+                    className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full" 
+                    style={{ width: `${Math.min((dashboardData.dailyProgress?.meditation_minutes || 0) / 10 * 100, 100)}%` }}
+                  ></div>
                 </div>
               </div>
 
@@ -388,11 +378,14 @@ export default function Dashboard() {
                   <span className="text-[#8BAE5A] text-2xl">📚</span>
                 </div>
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-3xl font-bold text-white">45</span>
+                  <span className="text-3xl font-bold text-white">{dashboardData.dailyProgress?.reading_minutes || 0}</span>
                   <span className="text-[#8BAE5A]">minuten gelezen</span>
                 </div>
                 <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
-                  <div className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full" style={{ width: '75%' }}></div>
+                  <div 
+                    className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full" 
+                    style={{ width: `${Math.min((dashboardData.dailyProgress?.reading_minutes || 0) / 30 * 100, 100)}%` }}
+                  ></div>
                 </div>
               </div>
 
@@ -404,32 +397,20 @@ export default function Dashboard() {
                 </div>
                 <div className="space-y-3">
                   <div>
-                    <div className="text-sm text-[#8BAE5A] mb-1">Je volgt nu:</div>
-                    <div className="text-lg font-bold text-white">Full Body Krachttraining</div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-[#8BAE5A] mb-1">Vandaag op het programma:</div>
-                    <div className="text-white font-semibold">Pull Day</div>
+                    <div className="text-sm text-[#8BAE5A] mb-1">Training vandaag:</div>
+                    <div className="text-white font-semibold">
+                      {dashboardData.dailyProgress?.training_completed ? 'Voltooid' : 'Nog te doen'}
+                    </div>
                   </div>
                   <div className="flex items-center gap-2 mt-3">
-                    <span className="text-2xl font-bold text-white">2/3</span>
-                    <span className="text-[#8BAE5A]">trainingen gedaan</span>
+                    <span className="text-2xl font-bold text-white">{dashboardData.weeklyStats[0]?.training_sessions || 0}</span>
+                    <span className="text-[#8BAE5A]">trainingen deze week</span>
                   </div>
                   <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
-                    <div className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full" style={{ width: '66%' }}></div>
-                  </div>
-                  {/* Cross-module actie */}
-                  <div className="mt-4 pt-3 border-t border-[#3A4D23]/40">
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        toast.success('Gedeeld in Brotherhood!');
-                      }}
-                      className="w-full px-4 py-2 rounded-xl bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#B6C948] transition-colors text-sm"
-                    >
-                      🏆 Deel je Pull Day in Brotherhood
-                    </button>
+                    <div 
+                      className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full" 
+                      style={{ width: `${Math.min(((dashboardData.weeklyStats[0]?.training_sessions || 0) / 5) * 100, 100)}%` }}
+                    ></div>
                   </div>
                 </div>
               </Link>
@@ -442,19 +423,20 @@ export default function Dashboard() {
                 </div>
                 <div className="space-y-3">
                   <div>
-                    <div className="text-sm text-[#8BAE5A] mb-1">Jouw actieve plan:</div>
-                    <div className="text-lg font-bold text-white">Gebalanceerd Dieet</div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-[#8BAE5A] mb-1">Calorie-doel:</div>
-                    <div className="text-white font-semibold">2.450 kcal</div>
+                    <div className="text-sm text-[#8BAE5A] mb-1">Voeding vandaag:</div>
+                    <div className="text-white font-semibold">
+                      {dashboardData.dailyProgress?.nutrition_tracked ? 'Getrackt' : 'Nog niet getrackt'}
+                    </div>
                   </div>
                   <div className="flex items-center gap-2 mt-3">
-                    <span className="text-2xl font-bold text-white">1.850</span>
-                    <span className="text-[#8BAE5A]">kcal gegeten</span>
+                    <span className="text-2xl font-bold text-white">{dashboardData.habits.filter(h => h.title.toLowerCase().includes('water')).length}</span>
+                    <span className="text-[#8BAE5A]">gezonde gewoontes</span>
                   </div>
                   <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
-                    <div className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full" style={{ width: '75%' }}></div>
+                    <div 
+                      className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full" 
+                      style={{ width: `${Math.min((dashboardData.habits.filter(h => h.title.toLowerCase().includes('water')).length / 3) * 100, 100)}%` }}
+                    ></div>
                   </div>
                 </div>
               </Link>
@@ -466,7 +448,12 @@ export default function Dashboard() {
                   <span className="text-[#8BAE5A] text-2xl">💰</span>
                 </div>
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-3xl font-bold text-white">€12.500</span>
+                  <span className="text-3xl font-bold text-white">
+                    {dashboardData.primaryGoal?.category === 'finance' 
+                      ? `${dashboardData.primaryGoal.current_value}${dashboardData.primaryGoal.unit}`
+                      : '€12.500'
+                    }
+                  </span>
                   <span className="text-[#8BAE5A]">Netto Waarde</span>
                 </div>
                 <div className="w-full h-16 flex items-end">
@@ -475,38 +462,30 @@ export default function Dashboard() {
                     <Line data={generateMiniFinanceChartData()} options={miniChartOptions} />
                   </div>
                 </div>
-                {/* Cross-module actie */}
-                <div className="mt-4 pt-3 border-t border-[#3A4D23]/40">
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      toast.success('Gedeeld in Brotherhood!');
-                    }}
-                    className="w-full px-3 py-2 rounded-xl bg-[#FFD700] text-[#181F17] font-semibold hover:bg-[#FFED4E] transition-colors text-sm"
-                  >
-                    💰 Deel je financiële mijlpaal in Brotherhood
-                  </button>
-                </div>
               </Link>
             </div>
 
             {/* Voortgang naar Hoofddoel */}
-            <div className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 mb-8 animate-fade-in-up">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-white">Voortgang naar Hoofddoel</h3>
-                <span className="text-[#8BAE5A] text-2xl">🎯</span>
+            {dashboardData.primaryGoal && (
+              <div className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 mb-8 animate-fade-in-up">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-white">Voortgang naar Hoofddoel</h3>
+                  <span className="text-[#8BAE5A] text-2xl">🎯</span>
+                </div>
+                <p className="text-white mb-4">{dashboardData.primaryGoal.title}</p>
+                <div className="w-full h-3 bg-[#3A4D23]/40 rounded-full">
+                  <div 
+                    className="h-3 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full transition-all duration-700" 
+                    style={{ width: `${progress}%` }}
+                  ></div>
+                </div>
+                <div className="flex justify-between mt-2">
+                  <span className="text-[#8BAE5A] text-sm">Start</span>
+                  <span className="text-[#8BAE5A] text-sm">{progress}%</span>
+                  <span className="text-[#8BAE5A] text-sm">Doel</span>
+                </div>
               </div>
-              <p className="text-white mb-4">Fitter worden en 10% lichaamsvet bereiken</p>
-              <div className="w-full h-3 bg-[#3A4D23]/40 rounded-full">
-                <div className="h-3 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full transition-all duration-700" style={{ width: `${progress}%` }}></div>
-              </div>
-              <div className="flex justify-between mt-2">
-                <span className="text-[#8BAE5A] text-sm">Start</span>
-                <span className="text-[#8BAE5A] text-sm">{progress}%</span>
-                <span className="text-[#8BAE5A] text-sm">Doel</span>
-              </div>
-            </div>
+            )}
 
             {/* Quote van de Dag */}
             <div className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 mb-8 animate-fade-in-up">
@@ -537,42 +516,25 @@ export default function Dashboard() {
                   </div>
                 </div>
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <span className="text-[#8BAE5A]">✓</span>
-                      <span className="text-white">Dagelijkse meditatie</span>
+                  {dashboardData.pendingMissions.slice(0, 3).map((mission) => (
+                    <div key={mission.id} className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => handleMissionComplete(mission.id)}
+                          className="text-[#8BAE5A] hover:text-[#FFD700] transition-colors"
+                        >
+                          ○
+                        </button>
+                        <span className="text-white">{mission.title}</span>
+                      </div>
+                      <span className="text-[#8BAE5A]">{mission.points} punten</span>
                     </div>
-                    <span className="text-[#8BAE5A]">3/7 dagen</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <span className="text-[#8BAE5A]">✓</span>
-                      <span className="text-white">10.000 stappen</span>
-                    </div>
-                    <span className="text-[#8BAE5A]">5/7 dagen</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <span className="text-[#8BAE5A]">✓</span>
-                      <span className="text-white">30 min lezen</span>
-                    </div>
-                    <span className="text-[#8BAE5A]">4/7 dagen</span>
-                  </div>
-                  {/* Cross-module suggestie */}
-                  <div className="mt-4 pt-3 border-t border-[#3A4D23]/40">
-                    <div className="text-sm text-[#8BAE5A] mb-2">💡 Inspireer anderen:</div>
-                    <button
-                      onClick={() => toast.success('Gedeeld in Social Feed!')}
-                      className="w-full px-3 py-2 rounded-xl bg-[#181F17] text-[#8BAE5A] font-semibold hover:bg-[#232D1A] transition-colors text-sm border border-[#3A4D23]"
-                    >
-                      📚 Deel je leesvoortgang in Social Feed
-                    </button>
-                  </div>
+                  ))}
+                  {dashboardData.pendingMissions.length === 0 && (
+                    <p className="text-[#8BAE5A] text-center py-4">Alle missies voltooid! 🎉</p>
+                  )}
                 </div>
               </div>
-
-              {/* Trainingscentrum */}
-              {/* (verwijderd) */}
 
               {/* Mind & Focus */}
               <div className="bg-[#232D1A]/80 rounded-2xl p-6 shadow-xl border border-[#3A4D23]/40 transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#f0a14f]">
@@ -586,29 +548,23 @@ export default function Dashboard() {
                       <span className="text-[#8BAE5A]">⏱️</span>
                       <span className="text-white">Meditatie streak</span>
                     </div>
-                    <span className="text-[#8BAE5A]">4 dagen</span>
+                    <span className="text-[#8BAE5A]">
+                      {dashboardData.habits.find(h => h.title.toLowerCase().includes('meditatie'))?.current_streak || 0} dagen
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <span className="text-[#8BAE5A]">📝</span>
-                      <span className="text-white">Journal entries</span>
+                      <span className="text-white">Focus score</span>
                     </div>
-                    <span className="text-[#8BAE5A]">3 deze week</span>
+                    <span className="text-[#8BAE5A]">{dashboardData.dailyProgress?.mood_rating || 0}/10</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <span className="text-[#8BAE5A]">🎯</span>
-                      <span className="text-white">Focus score</span>
+                      <span className="text-[#8BAE5A]">💧</span>
+                      <span className="text-white">Water intake</span>
                     </div>
-                    <span className="text-[#8BAE5A]">85%</span>
-                  </div>
-                  {/* Cross-module actie */}
-                  <div className="mt-4 pt-3 border-t border-[#3A4D23]/40">
-                    <Link href="/dashboard/brotherhood/forum/fitness-gezondheid" className="block">
-                      <button className="w-full px-3 py-2 rounded-xl bg-[#181F17] text-[#8BAE5A] font-semibold hover:bg-[#232D1A] transition-colors text-sm border border-[#3A4D23]">
-                        💭 Vraag advies in Mind & Focus forum
-                      </button>
-                    </Link>
+                    <span className="text-[#8BAE5A]">{dashboardData.dailyProgress?.water_intake_liters || 0}L</span>
                   </div>
                 </div>
               </div>
@@ -623,23 +579,27 @@ export default function Dashboard() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <span className="text-[#8BAE5A]">📖</span>
-                      <span className="text-white">Huidig boek</span>
+                      <span className="text-white">Leestijd vandaag</span>
                     </div>
-                    <span className="text-[#8BAE5A]">Atomic Habits</span>
+                    <span className="text-[#8BAE5A]">{dashboardData.dailyProgress?.reading_minutes || 0} min</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <span className="text-[#8BAE5A]">⏱️</span>
-                      <span className="text-white">Leestijd deze week</span>
+                      <span className="text-white">Leesstreak</span>
                     </div>
-                    <span className="text-[#8BAE5A]">45 min</span>
+                    <span className="text-[#8BAE5A]">
+                      {dashboardData.habits.find(h => h.title.toLowerCase().includes('lezen'))?.current_streak || 0} dagen
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <span className="text-[#8BAE5A]">🎯</span>
                       <span className="text-white">Doel: 30 min/dag</span>
                     </div>
-                    <span className="text-[#8BAE5A]">64%</span>
+                    <span className="text-[#8BAE5A]">
+                      {Math.round(((dashboardData.dailyProgress?.reading_minutes || 0) / 30) * 100)}%
+                    </span>
                   </div>
                 </div>
               </div>
@@ -696,23 +656,6 @@ export default function Dashboard() {
                           : 'De welkomstvideo kon niet worden geladen.'
                         }
                       </p>
-                      {!videoTimeout && (
-                        <button 
-                          onClick={() => {
-                            setVideoError(false);
-                            setVideoLoading(true);
-                            setVideoTimeout(false);
-                            // Retry loading the video
-                            const video = document.querySelector('video') as HTMLVideoElement;
-                            if (video) {
-                              video.load();
-                            }
-                          }}
-                          className="px-4 py-2 rounded-lg bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#B6C948] transition-colors"
-                        >
-                          Opnieuw proberen
-                        </button>
-                      )}
                     </div>
                   </div>
                 ) : (
@@ -727,23 +670,18 @@ export default function Dashboard() {
                       onLoadStart={() => setVideoLoading(true)}
                       onCanPlay={() => {
                         setVideoLoading(false);
-                        // Try to play the video when it's ready
                         const video = document.querySelector('video') as HTMLVideoElement;
                         if (video) {
                           video.play().catch(() => {
-                            // If autoplay fails, show a play button overlay
-                            console.log('Autoplay blocked, showing play button');
                             setAutoplayBlocked(true);
                           });
                         }
                       }}
                       onCanPlayThrough={() => {
                         setVideoLoading(false);
-                        // Video is fully loaded, ensure it plays
                         const video = document.querySelector('video') as HTMLVideoElement;
                         if (video && video.paused) {
                           video.play().catch(() => {
-                            console.log('Autoplay still blocked');
                             setAutoplayBlocked(true);
                           });
                         }
@@ -784,7 +722,6 @@ export default function Dashboard() {
                             if (video) {
                               video.play().then(() => {
                                 setAutoplayBlocked(false);
-                                // Unmute the video when user clicks play
                                 setUserInteracted(true);
                                 video.muted = false;
                               }).catch(() => {
@@ -884,14 +821,7 @@ export default function Dashboard() {
             />
             <div className="flex gap-3">
               <button
-                onClick={() => {
-                  if (newMission.trim()) {
-                    // Hier zou je de missie toevoegen aan de state/database
-                    toast.success('Missie toegevoegd!');
-                    setNewMission('');
-                  }
-                  setShowAddMissionModal(false);
-                }}
+                onClick={handleAddMission}
                 className="flex-1 px-6 py-3 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#3A4D23] text-[#181F17] font-semibold hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all duration-200"
               >
                 Toevoegen
