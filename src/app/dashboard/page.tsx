@@ -160,15 +160,41 @@ export default function Dashboard() {
 
   // Check onboarding status on component mount
   useEffect(() => {
-    if (dashboardData.onboardingStatus) {
-      if (!dashboardData.onboardingStatus.onboarding_completed) {
-        setShowOnboarding(true);
-      } else {
-        setOnboardingCompleted(true);
-        setShowOnboarding(false);
-      }
-    }
+    // Temporarily disable onboarding check until RLS policies are fixed
+    setOnboardingCompleted(true);
+    setShowOnboarding(false);
+    
+    // Original code (commented out for now):
+    // if (dashboardData.onboardingStatus) {
+    //   if (!dashboardData.onboardingStatus.onboarding_completed) {
+    //     setShowOnboarding(true);
+    //     setOnboardingCompleted(false);
+    //   } else {
+    //     setOnboardingCompleted(true);
+    //     setShowOnboarding(false);
+    //   }
+    // }
   }, [dashboardData.onboardingStatus]);
+
+  // Handle onboarding completion
+  const handleOnboardingComplete = async () => {
+    try {
+      await dashboardData.updateOnboardingStatus({ 
+        onboarding_completed: true,
+        completed_steps: JSON.stringify(['goal', 'missions', 'training', 'nutrition', 'challenge'])
+      });
+      setOnboardingCompleted(true);
+      setShowOnboarding(false);
+      toast.success('Gefeliciteerd! Je hebt je fundament gelegd! 🎉');
+    } catch (error) {
+      console.error('Error completing onboarding:', error);
+      // Even if there's an error, we should still close the widget
+      // The user can always complete the onboarding later
+      setOnboardingCompleted(true);
+      setShowOnboarding(false);
+      toast.error('Er is een fout opgetreden bij het voltooien van de onboarding, maar je kunt verder gaan');
+    }
+  };
 
   // Dummy data
   const notifications: any[] = [];
@@ -320,12 +346,7 @@ export default function Dashboard() {
         {/* Onboarding Widget - Only show for new users */}
         <OnboardingWidget 
           isVisible={showOnboarding && !onboardingCompleted}
-          onComplete={() => {
-            setOnboardingCompleted(true);
-            setShowOnboarding(false);
-            dashboardData.updateOnboardingStatus({ onboarding_completed: true });
-            toast.success('Gefeliciteerd! Je hebt je fundament gelegd! 🎉');
-          }}
+          onComplete={handleOnboardingComplete}
         />
         
         {/* Dashboard Content - Only show after onboarding is completed */}

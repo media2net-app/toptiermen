@@ -223,9 +223,10 @@ export default function OnboardingWidget({ isVisible, onComplete }: OnboardingWi
   // Check if all steps are completed
   useEffect(() => {
     if (completedCount === steps.length) {
-      setTimeout(() => {
-        onComplete();
-      }, 1000);
+      // Don't auto-complete, let user click the button
+      // setTimeout(() => {
+      //   onComplete();
+      // }, 1000);
     }
   }, [completedCount, steps.length, onComplete]);
 
@@ -253,7 +254,15 @@ export default function OnboardingWidget({ isVisible, onComplete }: OnboardingWi
             </h3>
           </div>
           <button
-            onClick={onComplete}
+            onClick={async () => {
+              try {
+                await onComplete();
+              } catch (error) {
+                console.error('Error completing onboarding:', error);
+                // Even if there's an error, we should still close the widget
+                // The parent component will handle the error display
+              }
+            }}
             className="bg-white text-[#8BAE5A] px-8 py-3 rounded-xl font-bold hover:bg-gray-100 transition-colors"
           >
             Start je reis!

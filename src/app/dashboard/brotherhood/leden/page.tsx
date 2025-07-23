@@ -3,21 +3,40 @@ import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/contexts/AuthContext';
 import { Database } from '@/types/database.types';
 
 type User = Database['public']['Tables']['users']['Row'];
 
+// Custom Profile type for the profiles table
+interface Profile {
+  id: string;
+  full_name: string;
+  display_name: string | null;
+  email: string;
+  rank: string;
+  points: number;
+  missions_completed: number;
+  avatar_url: string | null;
+  bio: string | null;
+  location: string | null;
+  interests: any;
+  created_at: string;
+  last_login: string | null;
+}
+
 const ranks = [
-  { name: 'Legende', icon: '🦁' },
+  { name: 'Elite', icon: '🦁' },
   { name: 'Veteraan', icon: '🎖️' },
-  { name: 'Alpha', icon: '💪' },
-  { name: 'Member', icon: '👊' },
+  { name: 'Intermediate', icon: '💪' },
+  { name: 'Beginner', icon: '👊' },
 ];
 
 const interests = ['Finance', 'Fitness', 'Mindset', 'Vaderschap', 'Digitale Nomaden', 'Ondernemerschap'];
 
 export default function LedenOverzicht() {
-  const [members, setMembers] = useState<User[]>([]);
+  const { user } = useAuth();
+  const [members, setMembers] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
@@ -41,7 +60,7 @@ export default function LedenOverzicht() {
       setError(null);
 
       const { data, error: fetchError } = await supabase
-        .from('users')
+        .from('profiles')
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -89,11 +108,12 @@ export default function LedenOverzicht() {
 
   const filtered = members.filter((m) => {
     const memberInterests = getMemberInterests(m.interests);
-    const memberRank = m.rank || 'Member';
+    const memberRank = m.rank || 'Beginner';
+    const memberName = m.display_name || m.full_name || 'Onbekend';
     
     return (
       (!search || 
-        m.full_name.toLowerCase().includes(search.toLowerCase()) || 
+        memberName.toLowerCase().includes(search.toLowerCase()) || 
         memberInterests.some(tag => tag.toLowerCase().includes(search.toLowerCase())) ||
         (m.bio && m.bio.toLowerCase().includes(search.toLowerCase()))) &&
       (!selectedRank || memberRank === selectedRank) &&
@@ -105,11 +125,20 @@ export default function LedenOverzicht() {
   });
 
   const handleConnect = (id: string) => {
+    // Prevent connecting with yourself
+    if (id === user?.id) {
+      setNotification('Je kunt geen connectie maken met jezelf.');
+      if (notificationTimeout.current) clearTimeout(notificationTimeout.current);
+      notificationTimeout.current = setTimeout(() => setNotification(null), 2500);
+      return;
+    }
+
     setConnectionStatus((prev) => ({ ...prev, [id]: 'verzoek' }));
     const member = members.find(m => m.id === id);
-    setNotification(`Connectieverzoek verzonden naar ${member?.full_name || 'lid'}.`);
+    const memberName = member?.display_name || member?.full_name || 'lid';
+    setNotification(`Connectieverzoek verzonden naar ${memberName}.`);
     if (notificationTimeout.current) clearTimeout(notificationTimeout.current);
-    notificationTimeout.current = setTimeout(() => setNotification(null), 2500);
+    notificationTimeout.current = setTimeout(() => setNotification(null), 2505);
   };
 
   if (loading) {
@@ -193,11 +222,14 @@ export default function LedenOverzicht() {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {filtered.map((m) => {
           const memberInterests = getMemberInterests(m.interests);
-          const memberRank = m.rank || 'Member';
+          const memberRank = m.rank || 'Beginner';
           const rankIcon = getRankIcon(memberRank);
           const avatarUrl = m.avatar_url || '/profielfoto.png';
           const isMemberOnline = isOnline(m.last_login);
           const isMemberNew = isNewMember(m.created_at);
+          const memberName = m.display_name || m.full_name || 'Onbekend';
+          const isCurrentUser = m.id === user?.id;
+          const mutualConnections = Math.floor(Math.random() * 5) + 1; // Random number for demo
           
           return (
             <div key={m.id} className="bg-[#232D1A]/90 rounded-2xl shadow-xl border border-[#3A4D23]/40 p-5 flex flex-col items-center gap-3 hover:shadow-2xl transition-all">
@@ -205,7 +237,7 @@ export default function LedenOverzicht() {
                 <div className="relative">
                   <Image 
                     src={avatarUrl} 
-                    alt={m.full_name} 
+                    alt={memberName} 
                     width={80} 
                     height={80} 
                     className="w-20 h-20 rounded-full border-2 border-[#8BAE5A] object-cover group-hover:scale-105 transition-transform" 
@@ -213,7 +245,7 @@ export default function LedenOverzicht() {
                   {isMemberOnline && <span className="absolute bottom-1 right-1 w-4 h-4 bg-[#8BAE5A] border-2 border-white rounded-full" title="Online" />}
                   {isMemberNew && <span className="absolute -top-1 -right-1 bg-[#FFD700] text-[#181F17] text-xs px-2 py-1 rounded-full font-bold">Nieuw</span>}
                 </div>
-                <div className="text-lg font-bold text-white text-center group-hover:text-[#FFD700] transition-colors">{m.full_name}</div>
+                <div className="text-lg font-bold text-white text-center group-hover:text-[#FFD700] transition-colors">{memberName}</div>
                 <div className="flex items-center gap-2 text-[#FFD700] font-semibold text-sm">
                   <span>{rankIcon}</span>
                   <span>{memberRank}</span>
@@ -229,14 +261,17 @@ export default function LedenOverzicht() {
                     )}
                   </div>
                 )}
-                {m.points && (
-                  <div className="text-xs text-[#FFD700] font-semibold">
-                    {m.points} punten • {m.missions_completed || 0} missies
-                  </div>
-                )}
+                <div className="text-xs text-[#FFD700] font-semibold">
+                  {m.points} punten • {m.missions_completed} missies
+                </div>
+                <div className="text-xs text-[#8BAE5A]">
+                  {mutualConnections} mutuals
+                </div>
               </Link>
               <div className="w-full mt-auto">
-                {connectionStatus[m.id] === 'verzoek' ? (
+                {isCurrentUser ? (
+                  <button className="w-full px-4 py-2 rounded-xl bg-[#3A4D23]/60 text-[#8BAE5A] font-bold shadow cursor-default" disabled>Jij bent dit</button>
+                ) : connectionStatus[m.id] === 'verzoek' ? (
                   <button className="w-full px-4 py-2 rounded-xl bg-[#8BAE5A]/30 text-[#8BAE5A] font-bold shadow cursor-default" disabled>✓ Verzoek Verzonden</button>
                 ) : (
                   <button

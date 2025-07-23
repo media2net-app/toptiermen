@@ -102,14 +102,16 @@ export default function MijnProfiel() {
   };
 
   const createUserProfile = async () => {
+    if (!user) return;
+
     try {
       const { data, error } = await supabase
         .from('profiles')
         .insert({
           id: user?.id,
           email: user?.email,
-          full_name: user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User',
-          display_name: user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User',
+          full_name: (user as any)?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User',
+          display_name: (user as any)?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User',
         })
         .select()
         .single();
@@ -161,7 +163,7 @@ export default function MijnProfiel() {
     if (!editingField || !editValue.trim()) return;
 
     const updates: Partial<UserProfile> = {};
-    updates[editingField as keyof UserProfile] = editValue.trim();
+    (updates as any)[editingField] = editValue.trim();
     
     await updateProfile(updates);
   };

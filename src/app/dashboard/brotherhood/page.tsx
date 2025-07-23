@@ -75,7 +75,7 @@ export default function Brotherhood() {
         const formattedTopics: Topic[] = topics?.map(topic => ({
           id: topic.id.toString(),
           title: topic.title,
-          author: topic.profiles?.display_name || topic.profiles?.full_name || 'Onbekende gebruiker',
+          author: topic.profiles?.[0]?.display_name || topic.profiles?.[0]?.full_name || 'Onbekende gebruiker',
           time: formatTimeAgo(topic.created_at)
         })) || [];
         setRecentTopics(formattedTopics);

@@ -1,10 +1,25 @@
--- Dashboard Database Tables
+-- Dashboard Database Tables - Clean Version
+-- This script drops existing tables and recreates them
 -- Run this SQL in your Supabase SQL editor
+
+-- =====================================================
+-- DROP EXISTING TABLES (if they exist)
+-- =====================================================
+DROP TABLE IF EXISTS user_challenge_logs CASCADE;
+DROP TABLE IF EXISTS user_challenges CASCADE;
+DROP TABLE IF EXISTS user_achievements CASCADE;
+DROP TABLE IF EXISTS user_weekly_stats CASCADE;
+DROP TABLE IF EXISTS user_daily_progress CASCADE;
+DROP TABLE IF EXISTS user_onboarding_status CASCADE;
+DROP TABLE IF EXISTS user_habit_logs CASCADE;
+DROP TABLE IF EXISTS user_habits CASCADE;
+DROP TABLE IF EXISTS user_missions CASCADE;
+DROP TABLE IF EXISTS user_goals CASCADE;
 
 -- =====================================================
 -- 1. USER GOALS TABLE
 -- =====================================================
-CREATE TABLE IF NOT EXISTS user_goals (
+CREATE TABLE user_goals (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     title TEXT NOT NULL,
@@ -24,7 +39,7 @@ CREATE TABLE IF NOT EXISTS user_goals (
 -- =====================================================
 -- 2. USER MISSIONS TABLE
 -- =====================================================
-CREATE TABLE IF NOT EXISTS user_missions (
+CREATE TABLE user_missions (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     title TEXT NOT NULL,
@@ -43,7 +58,7 @@ CREATE TABLE IF NOT EXISTS user_missions (
 -- =====================================================
 -- 3. USER HABITS TABLE
 -- =====================================================
-CREATE TABLE IF NOT EXISTS user_habits (
+CREATE TABLE user_habits (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     title TEXT NOT NULL,
@@ -61,7 +76,7 @@ CREATE TABLE IF NOT EXISTS user_habits (
 -- =====================================================
 -- 4. USER HABIT LOGS TABLE
 -- =====================================================
-CREATE TABLE IF NOT EXISTS user_habit_logs (
+CREATE TABLE user_habit_logs (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     habit_id UUID NOT NULL REFERENCES user_habits(id) ON DELETE CASCADE,
@@ -73,7 +88,7 @@ CREATE TABLE IF NOT EXISTS user_habit_logs (
 -- =====================================================
 -- 5. USER ONBOARDING STATUS TABLE
 -- =====================================================
-CREATE TABLE IF NOT EXISTS user_onboarding_status (
+CREATE TABLE user_onboarding_status (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     welcome_video_shown BOOLEAN DEFAULT FALSE,
@@ -92,7 +107,7 @@ CREATE TABLE IF NOT EXISTS user_onboarding_status (
 -- =====================================================
 -- 6. USER DAILY PROGRESS TABLE
 -- =====================================================
-CREATE TABLE IF NOT EXISTS user_daily_progress (
+CREATE TABLE user_daily_progress (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     date DATE NOT NULL,
@@ -115,7 +130,7 @@ CREATE TABLE IF NOT EXISTS user_daily_progress (
 -- =====================================================
 -- 7. USER WEEKLY STATS TABLE
 -- =====================================================
-CREATE TABLE IF NOT EXISTS user_weekly_stats (
+CREATE TABLE user_weekly_stats (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     week_start_date DATE NOT NULL, -- Monday of the week
@@ -135,7 +150,7 @@ CREATE TABLE IF NOT EXISTS user_weekly_stats (
 -- =====================================================
 -- 8. USER ACHIEVEMENTS TABLE
 -- =====================================================
-CREATE TABLE IF NOT EXISTS user_achievements (
+CREATE TABLE user_achievements (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     achievement_type VARCHAR(50) NOT NULL, -- 'streak', 'milestone', 'challenge', 'badge'
@@ -150,7 +165,7 @@ CREATE TABLE IF NOT EXISTS user_achievements (
 -- =====================================================
 -- 9. USER CHALLENGES TABLE
 -- =====================================================
-CREATE TABLE IF NOT EXISTS user_challenges (
+CREATE TABLE user_challenges (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     challenge_name VARCHAR(100) NOT NULL,
@@ -169,7 +184,7 @@ CREATE TABLE IF NOT EXISTS user_challenges (
 -- =====================================================
 -- 10. USER CHALLENGE LOGS TABLE
 -- =====================================================
-CREATE TABLE IF NOT EXISTS user_challenge_logs (
+CREATE TABLE user_challenge_logs (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     challenge_id UUID NOT NULL REFERENCES user_challenges(id) ON DELETE CASCADE,
@@ -182,37 +197,37 @@ CREATE TABLE IF NOT EXISTS user_challenge_logs (
 -- =====================================================
 -- INDEXES FOR PERFORMANCE
 -- =====================================================
-CREATE INDEX IF NOT EXISTS idx_user_goals_user_id ON user_goals(user_id);
-CREATE INDEX IF NOT EXISTS idx_user_goals_active ON user_goals(is_active);
-CREATE INDEX IF NOT EXISTS idx_user_goals_primary ON user_goals(is_primary);
+CREATE INDEX idx_user_goals_user_id ON user_goals(user_id);
+CREATE INDEX idx_user_goals_active ON user_goals(is_active);
+CREATE INDEX idx_user_goals_primary ON user_goals(is_primary);
 
-CREATE INDEX IF NOT EXISTS idx_user_missions_user_id ON user_missions(user_id);
-CREATE INDEX IF NOT EXISTS idx_user_missions_status ON user_missions(status);
-CREATE INDEX IF NOT EXISTS idx_user_missions_due_date ON user_missions(due_date);
+CREATE INDEX idx_user_missions_user_id ON user_missions(user_id);
+CREATE INDEX idx_user_missions_status ON user_missions(status);
+CREATE INDEX idx_user_missions_due_date ON user_missions(due_date);
 
-CREATE INDEX IF NOT EXISTS idx_user_habits_user_id ON user_habits(user_id);
-CREATE INDEX IF NOT EXISTS idx_user_habits_active ON user_habits(is_active);
+CREATE INDEX idx_user_habits_user_id ON user_habits(user_id);
+CREATE INDEX idx_user_habits_active ON user_habits(is_active);
 
-CREATE INDEX IF NOT EXISTS idx_user_habit_logs_user_id ON user_habit_logs(user_id);
-CREATE INDEX IF NOT EXISTS idx_user_habit_logs_habit_id ON user_habit_logs(habit_id);
-CREATE INDEX IF NOT EXISTS idx_user_habit_logs_date ON user_habit_logs(completed_at);
+CREATE INDEX idx_user_habit_logs_user_id ON user_habit_logs(user_id);
+CREATE INDEX idx_user_habit_logs_habit_id ON user_habit_logs(habit_id);
+CREATE INDEX idx_user_habit_logs_date ON user_habit_logs(completed_at);
 
-CREATE INDEX IF NOT EXISTS idx_user_onboarding_status_user_id ON user_onboarding_status(user_id);
+CREATE INDEX idx_user_onboarding_status_user_id ON user_onboarding_status(user_id);
 
-CREATE INDEX IF NOT EXISTS idx_user_daily_progress_user_id ON user_daily_progress(user_id);
-CREATE INDEX IF NOT EXISTS idx_user_daily_progress_date ON user_daily_progress(date);
+CREATE INDEX idx_user_daily_progress_user_id ON user_daily_progress(user_id);
+CREATE INDEX idx_user_daily_progress_date ON user_daily_progress(date);
 
-CREATE INDEX IF NOT EXISTS idx_user_weekly_stats_user_id ON user_weekly_stats(user_id);
-CREATE INDEX IF NOT EXISTS idx_user_weekly_stats_week ON user_weekly_stats(week_start_date);
+CREATE INDEX idx_user_weekly_stats_user_id ON user_weekly_stats(user_id);
+CREATE INDEX idx_user_weekly_stats_week ON user_weekly_stats(week_start_date);
 
-CREATE INDEX IF NOT EXISTS idx_user_achievements_user_id ON user_achievements(user_id);
-CREATE INDEX IF NOT EXISTS idx_user_achievements_type ON user_achievements(achievement_type);
+CREATE INDEX idx_user_achievements_user_id ON user_achievements(user_id);
+CREATE INDEX idx_user_achievements_type ON user_achievements(achievement_type);
 
-CREATE INDEX IF NOT EXISTS idx_user_challenges_user_id ON user_challenges(user_id);
-CREATE INDEX IF NOT EXISTS idx_user_challenges_status ON user_challenges(status);
+CREATE INDEX idx_user_challenges_user_id ON user_challenges(user_id);
+CREATE INDEX idx_user_challenges_status ON user_challenges(status);
 
-CREATE INDEX IF NOT EXISTS idx_user_challenge_logs_user_id ON user_challenge_logs(user_id);
-CREATE INDEX IF NOT EXISTS idx_user_challenge_logs_challenge_id ON user_challenge_logs(challenge_id);
+CREATE INDEX idx_user_challenge_logs_user_id ON user_challenge_logs(user_id);
+CREATE INDEX idx_user_challenge_logs_challenge_id ON user_challenge_logs(challenge_id);
 
 -- =====================================================
 -- ROW LEVEL SECURITY (RLS)

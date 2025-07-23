@@ -265,7 +265,7 @@ export default function VoedingsplannenPage() {
             carbs: Math.round(goals.carbs * 0.3),
             fat: Math.round(goals.fat * 0.2),
             time: '08:00',
-            type: 'breakfast'
+            type: 'breakfast' as const
           },
           {
             id: 'lunch-1',
@@ -283,7 +283,7 @@ export default function VoedingsplannenPage() {
             carbs: Math.round(goals.carbs * 0.35),
             fat: Math.round(goals.fat * 0.3),
             time: '13:00',
-            type: 'lunch'
+            type: 'lunch' as const
           },
           {
             id: 'dinner-1',
@@ -299,7 +299,7 @@ export default function VoedingsplannenPage() {
             carbs: Math.round(goals.carbs * 0.35),
             fat: Math.round(goals.fat * 0.5),
             time: '19:00',
-            type: 'dinner'
+            type: 'dinner' as const
           }
         ]
       };
@@ -321,7 +321,7 @@ export default function VoedingsplannenPage() {
             carbs: Math.round(goals.carbs * 0.15),
             fat: Math.round(goals.fat * 0.3),
             time: '08:00',
-            type: 'breakfast'
+            type: 'breakfast' as const
           },
           {
             id: 'lunch-1',
@@ -338,7 +338,7 @@ export default function VoedingsplannenPage() {
             carbs: Math.round(goals.carbs * 0.2),
             fat: Math.round(goals.fat * 0.35),
             time: '13:00',
-            type: 'lunch'
+            type: 'lunch' as const
           },
           {
             id: 'dinner-1',
@@ -354,7 +354,7 @@ export default function VoedingsplannenPage() {
             carbs: Math.round(goals.carbs * 0.2),
             fat: Math.round(goals.fat * 0.35),
             time: '19:00',
-            type: 'dinner'
+            type: 'dinner' as const
           }
         ]
       };
@@ -377,7 +377,7 @@ export default function VoedingsplannenPage() {
             carbs: Math.round(goals.carbs * 0.25),
             fat: Math.round(goals.fat * 0.2),
             time: '08:00',
-            type: 'breakfast'
+            type: 'breakfast' as const
           },
           {
             id: 'lunch-1',
@@ -394,7 +394,7 @@ export default function VoedingsplannenPage() {
             carbs: Math.round(goals.carbs * 0.25),
             fat: Math.round(goals.fat * 0.25),
             time: '13:00',
-            type: 'lunch'
+            type: 'lunch' as const
           },
           {
             id: 'dinner-1',
@@ -410,7 +410,7 @@ export default function VoedingsplannenPage() {
             carbs: Math.round(goals.carbs * 0.3),
             fat: Math.round(goals.fat * 0.3),
             time: '19:00',
-            type: 'dinner'
+            type: 'dinner' as const
           }
         ]
       };
@@ -431,7 +431,7 @@ export default function VoedingsplannenPage() {
           carbs: 0,
           fat: Math.round(goals.fat * 0.4),
           time: '08:00',
-          type: 'breakfast'
+          type: 'breakfast' as const
         },
         {
           id: 'lunch-1',
@@ -446,7 +446,7 @@ export default function VoedingsplannenPage() {
           carbs: 0,
           fat: Math.round(goals.fat * 0.3),
           time: '13:00',
-          type: 'lunch'
+          type: 'lunch' as const
         },
         {
           id: 'dinner-1',
@@ -461,7 +461,7 @@ export default function VoedingsplannenPage() {
           carbs: 0,
           fat: Math.round(goals.fat * 0.3),
           time: '19:00',
-          type: 'dinner'
+          type: 'dinner' as const
         }
       ]
     };
@@ -481,9 +481,321 @@ export default function VoedingsplannenPage() {
     const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
     const weekPlan: WeekPlan = {};
     
-    days.forEach(day => {
-      weekPlan[day] = generateMealPlan(goals, dietType);
-    });
+    if (dietType === 'carnivore') {
+      // Generate different carnivore meal plans for each day
+      const carnivoreMeals = {
+        monday: {
+          meals: [
+            createMealWithMacros(
+              'monday-breakfast',
+              'Rundvlees & Eieren Ontbijt',
+              '/images/meals/beef-eggs.jpg',
+              [
+                { name: 'Rundvlees (biefstuk)', amount: 200, unit: 'g' },
+                { name: 'Eieren', amount: 3, unit: 'stuks' },
+                { name: 'Boter', amount: 30, unit: 'g' },
+                { name: 'Zout', amount: 5, unit: 'g' }
+              ],
+              '08:00',
+              'breakfast'
+            ),
+            createMealWithMacros(
+              'monday-lunch',
+              'Lamsvlees Lunch',
+              '/images/meals/lamb.jpg',
+              [
+                { name: 'Lamsvlees (lende)', amount: 250, unit: 'g' },
+                { name: 'Boter', amount: 25, unit: 'g' },
+                { name: 'Zout', amount: 5, unit: 'g' },
+                { name: 'Peper', amount: 3, unit: 'g' }
+              ],
+              '13:00',
+              'lunch'
+            ),
+            createMealWithMacros(
+              'monday-dinner',
+              'Varkensvlees Avondeten',
+              '/images/meals/pork.jpg',
+              [
+                { name: 'Varkensvlees (varkenshaas)', amount: 300, unit: 'g' },
+                { name: 'Spek', amount: 50, unit: 'g' },
+                { name: 'Boter', amount: 20, unit: 'g' },
+                { name: 'Zout', amount: 5, unit: 'g' }
+              ],
+              '19:00',
+              'dinner'
+            )
+          ]
+        },
+        tuesday: {
+          meals: [
+            createMealWithMacros(
+              'tuesday-breakfast',
+              'Eieren & Spek Ontbijt',
+              '/images/meals/eggs-bacon.jpg',
+              [
+                { name: 'Eieren', amount: 4, unit: 'stuks' },
+                { name: 'Spek', amount: 100, unit: 'g' },
+                { name: 'Boter', amount: 25, unit: 'g' },
+                { name: 'Zout', amount: 3, unit: 'g' }
+              ],
+              '08:00',
+              'breakfast'
+            ),
+            createMealWithMacros(
+              'tuesday-lunch',
+              'Kipfilet Lunch',
+              '/images/meals/chicken.jpg',
+              [
+                { name: 'Kipfilet', amount: 300, unit: 'g' },
+                { name: 'Boter', amount: 30, unit: 'g' },
+                { name: 'Zout', amount: 5, unit: 'g' },
+                { name: 'Peper', amount: 3, unit: 'g' }
+              ],
+              '13:00',
+              'lunch'
+            ),
+            createMealWithMacros(
+              'tuesday-dinner',
+              'Rundvlees & Lever Avondeten',
+              '/images/meals/beef-liver.jpg',
+              [
+                { name: 'Rundvlees (gehakt)', amount: 250, unit: 'g' },
+                { name: 'Runderlever', amount: 100, unit: 'g' },
+                { name: 'Boter', amount: 25, unit: 'g' },
+                { name: 'Zout', amount: 5, unit: 'g' }
+              ],
+              '19:00',
+              'dinner'
+            )
+          ]
+        },
+        wednesday: {
+          meals: [
+            createMealWithMacros(
+              'wednesday-breakfast',
+              'Zalm & Eieren Ontbijt',
+              '/images/meals/salmon-eggs.jpg',
+              [
+                { name: 'Zalm', amount: 200, unit: 'g' },
+                { name: 'Eieren', amount: 3, unit: 'stuks' },
+                { name: 'Boter', amount: 30, unit: 'g' },
+                { name: 'Zout', amount: 5, unit: 'g' }
+              ],
+              '08:00',
+              'breakfast'
+            ),
+            createMealWithMacros(
+              'wednesday-lunch',
+              'Kalkoen Lunch',
+              '/images/meals/turkey.jpg',
+              [
+                { name: 'Kalkoenfilet', amount: 300, unit: 'g' },
+                { name: 'Boter', amount: 25, unit: 'g' },
+                { name: 'Zout', amount: 5, unit: 'g' },
+                { name: 'Peper', amount: 3, unit: 'g' }
+              ],
+              '13:00',
+              'lunch'
+            ),
+            createMealWithMacros(
+              'wednesday-dinner',
+              'Lamsvlees & Nieren Avondeten',
+              '/images/meals/lamb-kidneys.jpg',
+              [
+                { name: 'Lamsvlees (schouder)', amount: 250, unit: 'g' },
+                { name: 'Lamsnieren', amount: 100, unit: 'g' },
+                { name: 'Boter', amount: 30, unit: 'g' },
+                { name: 'Zout', amount: 5, unit: 'g' }
+              ],
+              '19:00',
+              'dinner'
+            )
+          ]
+        },
+        thursday: {
+          meals: [
+            createMealWithMacros(
+              'thursday-breakfast',
+              'Eieren & Rundvlees Ontbijt',
+              '/images/meals/eggs-beef.jpg',
+              [
+                { name: 'Eieren', amount: 4, unit: 'stuks' },
+                { name: 'Rundvlees (gehakt)', amount: 150, unit: 'g' },
+                { name: 'Boter', amount: 25, unit: 'g' },
+                { name: 'Zout', amount: 3, unit: 'g' }
+              ],
+              '08:00',
+              'breakfast'
+            ),
+            createMealWithMacros(
+              'thursday-lunch',
+              'Varkensvlees Lunch',
+              '/images/meals/pork-lunch.jpg',
+              [
+                { name: 'Varkensvlees (varkenshaas)', amount: 300, unit: 'g' },
+                { name: 'Spek', amount: 50, unit: 'g' },
+                { name: 'Boter', amount: 20, unit: 'g' },
+                { name: 'Zout', amount: 5, unit: 'g' }
+              ],
+              '13:00',
+              'lunch'
+            ),
+            createMealWithMacros(
+              'thursday-dinner',
+              'Kip & Lever Avondeten',
+              '/images/meals/chicken-liver.jpg',
+              [
+                { name: 'Kipfilet', amount: 250, unit: 'g' },
+                { name: 'Kippenlever', amount: 100, unit: 'g' },
+                { name: 'Boter', amount: 25, unit: 'g' },
+                { name: 'Zout', amount: 5, unit: 'g' }
+              ],
+              '19:00',
+              'dinner'
+            )
+          ]
+        },
+        friday: {
+          meals: [
+            createMealWithMacros(
+              'friday-breakfast',
+              'Tonijn & Eieren Ontbijt',
+              '/images/meals/tuna-eggs.jpg',
+              [
+                { name: 'Tonijn', amount: 200, unit: 'g' },
+                { name: 'Eieren', amount: 3, unit: 'stuks' },
+                { name: 'Boter', amount: 30, unit: 'g' },
+                { name: 'Zout', amount: 5, unit: 'g' }
+              ],
+              '08:00',
+              'breakfast'
+            ),
+            createMealWithMacros(
+              'friday-lunch',
+              'Lamsvlees Lunch',
+              '/images/meals/lamb-lunch.jpg',
+              [
+                { name: 'Lamsvlees (lende)', amount: 300, unit: 'g' },
+                { name: 'Boter', amount: 25, unit: 'g' },
+                { name: 'Zout', amount: 5, unit: 'g' },
+                { name: 'Peper', amount: 3, unit: 'g' }
+              ],
+              '13:00',
+              'lunch'
+            ),
+            createMealWithMacros(
+              'friday-dinner',
+              'Rundvlees & Nieren Avondeten',
+              '/images/meals/beef-kidneys.jpg',
+              [
+                { name: 'Rundvlees (biefstuk)', amount: 250, unit: 'g' },
+                { name: 'Rundernieren', amount: 100, unit: 'g' },
+                { name: 'Boter', amount: 30, unit: 'g' },
+                { name: 'Zout', amount: 5, unit: 'g' }
+              ],
+              '19:00',
+              'dinner'
+            )
+          ]
+        },
+        saturday: {
+          meals: [
+            createMealWithMacros(
+              'saturday-breakfast',
+              'Spek & Eieren Ontbijt',
+              '/images/meals/bacon-eggs.jpg',
+              [
+                { name: 'Spek', amount: 150, unit: 'g' },
+                { name: 'Eieren', amount: 4, unit: 'stuks' },
+                { name: 'Boter', amount: 25, unit: 'g' },
+                { name: 'Zout', amount: 3, unit: 'g' }
+              ],
+              '08:00',
+              'breakfast'
+            ),
+            createMealWithMacros(
+              'saturday-lunch',
+              'Kip & Kalkoen Lunch',
+              '/images/meals/chicken-turkey.jpg',
+              [
+                { name: 'Kipfilet', amount: 200, unit: 'g' },
+                { name: 'Kalkoenfilet', amount: 150, unit: 'g' },
+                { name: 'Boter', amount: 25, unit: 'g' },
+                { name: 'Zout', amount: 5, unit: 'g' }
+              ],
+              '13:00',
+              'lunch'
+            ),
+            createMealWithMacros(
+              'saturday-dinner',
+              'Varkensvlees & Lever Avondeten',
+              '/images/meals/pork-liver.jpg',
+              [
+                { name: 'Varkensvlees (varkenshaas)', amount: 250, unit: 'g' },
+                { name: 'Varkenslever', amount: 100, unit: 'g' },
+                { name: 'Boter', amount: 30, unit: 'g' },
+                { name: 'Zout', amount: 5, unit: 'g' }
+              ],
+              '19:00',
+              'dinner'
+            )
+          ]
+        },
+        sunday: {
+          meals: [
+            createMealWithMacros(
+              'sunday-breakfast',
+              'Gevogelte & Eieren Ontbijt',
+              '/images/meals/poultry-eggs.jpg',
+              [
+                { name: 'Eend', amount: 200, unit: 'g' },
+                { name: 'Eieren', amount: 3, unit: 'stuks' },
+                { name: 'Boter', amount: 30, unit: 'g' },
+                { name: 'Zout', amount: 5, unit: 'g' }
+              ],
+              '08:00',
+              'breakfast'
+            ),
+            createMealWithMacros(
+              'sunday-lunch',
+              'Rundvlees & Lamsvlees Lunch',
+              '/images/meals/beef-lamb.jpg',
+              [
+                { name: 'Rundvlees (gehakt)', amount: 200, unit: 'g' },
+                { name: 'Lamsvlees (lende)', amount: 150, unit: 'g' },
+                { name: 'Boter', amount: 25, unit: 'g' },
+                { name: 'Zout', amount: 5, unit: 'g' }
+              ],
+              '13:00',
+              'lunch'
+            ),
+            createMealWithMacros(
+              'sunday-dinner',
+              'Zalm & Kip Avondeten',
+              '/images/meals/salmon-chicken.jpg',
+              [
+                { name: 'Zalm', amount: 200, unit: 'g' },
+                { name: 'Kipfilet', amount: 150, unit: 'g' },
+                { name: 'Boter', amount: 30, unit: 'g' },
+                { name: 'Zout', amount: 5, unit: 'g' }
+              ],
+              '19:00',
+              'dinner'
+            )
+          ]
+        }
+      };
+
+      days.forEach(day => {
+        weekPlan[day] = carnivoreMeals[day as keyof typeof carnivoreMeals];
+      });
+    } else {
+      // For other diet types, use the original generateMealPlan function
+      days.forEach(day => {
+        weekPlan[day] = generateMealPlan(goals, dietType);
+      });
+    }
     
     return weekPlan;
   };
@@ -682,7 +994,7 @@ export default function VoedingsplannenPage() {
       carbs: Math.round(estimatedCalories * (type === 'afternoon' ? 0.6 : 0.55)),
       fat: Math.round(estimatedCalories * (type === 'afternoon' ? 0.25 : 0.2)),
       time,
-      type: 'snack'
+      type: 'snack' as const
     };
 
     const allOriginalMeals = [...(originalWeekPlan?.[selectedDay]?.meals || []), newSnack];
@@ -749,6 +1061,83 @@ export default function VoedingsplannenPage() {
 
   const handleNewPlan = () => {
     setCurrentStep(1);
+  };
+
+  // Calculate accurate macros based on ingredients
+  const calculateMacrosFromIngredients = (ingredients: { name: string; amount: number; unit: string }[]) => {
+    let totalCalories = 0;
+    let totalProtein = 0;
+    let totalCarbs = 0;
+    let totalFat = 0;
+
+    ingredients.forEach(ingredient => {
+      const { name, amount, unit } = ingredient;
+      
+      // Convert to grams if needed
+      let grams = amount;
+      if (unit === 'stuks' && name.toLowerCase().includes('eieren')) {
+        grams = amount * 50; // 1 egg = ~50g
+      }
+
+      // Macro values per 100g (approximate)
+      const macroValues: { [key: string]: { calories: number; protein: number; carbs: number; fat: number } } = {
+        'Rundvlees (biefstuk)': { calories: 250, protein: 26, carbs: 0, fat: 15 },
+        'Rundvlees (gehakt)': { calories: 242, protein: 23, carbs: 0, fat: 15 },
+        'Lamsvlees (lende)': { calories: 294, protein: 25, carbs: 0, fat: 21 },
+        'Lamsvlees (schouder)': { calories: 282, protein: 25, carbs: 0, fat: 20 },
+        'Varkensvlees (varkenshaas)': { calories: 143, protein: 21, carbs: 0, fat: 6 },
+        'Kipfilet': { calories: 165, protein: 31, carbs: 0, fat: 3.6 },
+        'Kalkoenfilet': { calories: 157, protein: 30, carbs: 0, fat: 3.6 },
+        'Zalm': { calories: 208, protein: 25, carbs: 0, fat: 12 },
+        'Tonijn': { calories: 144, protein: 30, carbs: 0, fat: 1 },
+        'Eend': { calories: 337, protein: 19, carbs: 0, fat: 28 },
+        'Eieren': { calories: 155, protein: 13, carbs: 1.1, fat: 11 },
+        'Spek': { calories: 541, protein: 37, carbs: 0, fat: 42 },
+        'Runderlever': { calories: 135, protein: 20, carbs: 3.9, fat: 3.6 },
+        'Kippenlever': { calories: 167, protein: 26, carbs: 0.7, fat: 6.5 },
+        'Varkenslever': { calories: 134, protein: 21, carbs: 2.5, fat: 3.7 },
+        'Rundernieren': { calories: 99, protein: 17, carbs: 0.3, fat: 3.1 },
+        'Lamsnieren': { calories: 97, protein: 16, carbs: 0.8, fat: 3.2 },
+        'Boter': { calories: 717, protein: 0.9, carbs: 0.1, fat: 81 },
+        'Zout': { calories: 0, protein: 0, carbs: 0, fat: 0 },
+        'Peper': { calories: 0, protein: 0, carbs: 0, fat: 0 }
+      };
+
+      const macro = macroValues[name] || { calories: 0, protein: 0, carbs: 0, fat: 0 };
+      const multiplier = grams / 100;
+
+      totalCalories += macro.calories * multiplier;
+      totalProtein += macro.protein * multiplier;
+      totalCarbs += macro.carbs * multiplier;
+      totalFat += macro.fat * multiplier;
+    });
+
+    return {
+      calories: Math.round(totalCalories),
+      protein: Math.round(totalProtein),
+      carbs: Math.round(totalCarbs),
+      fat: Math.round(totalFat)
+    };
+  };
+
+  // Helper function to create meals with accurate macros
+  const createMealWithMacros = (
+    id: string,
+    name: string,
+    image: string,
+    ingredients: { name: string; amount: number; unit: string }[],
+    time: string,
+    type: 'breakfast' | 'lunch' | 'dinner'
+  ) => {
+    return {
+      id,
+      name,
+      image,
+      ingredients,
+      ...calculateMacrosFromIngredients(ingredients),
+      time,
+      type
+    };
   };
 
   return (
