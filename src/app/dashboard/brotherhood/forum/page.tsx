@@ -3,6 +3,12 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
+interface UserProfile {
+  id: string;
+  full_name: string;
+  avatar_url?: string;
+}
+
 interface ForumCategory {
   id: number;
   name: string;
@@ -21,10 +27,35 @@ interface ForumCategory {
 const ForumOverview = () => {
   const [categories, setCategories] = useState<ForumCategory[]>([]);
   const [loading, setLoading] = useState(true);
+  const [userProfiles, setUserProfiles] = useState<{ [key: string]: UserProfile }>({});
 
   useEffect(() => {
     fetchCategories();
   }, []);
+
+  const fetchUserProfiles = async (userIds: string[]) => {
+    try {
+      const { data: profiles, error } = await supabase
+        .from('profiles')
+        .select('id, full_name, avatar_url')
+        .in('id', userIds);
+
+      if (error) {
+        console.error('Error fetching profiles:', error);
+        return {};
+      }
+
+      const profilesMap: { [key: string]: UserProfile } = {};
+      profiles?.forEach(profile => {
+        profilesMap[profile.id] = profile;
+      });
+
+      return profilesMap;
+    } catch (error) {
+      console.error('Error fetching profiles:', error);
+      return {};
+    }
+  };
 
   const fetchCategories = async () => {
     try {
@@ -52,6 +83,24 @@ const ForumOverview = () => {
         return;
       }
 
+      // Collect all user IDs from topics
+      const userIds = new Set<string>();
+      categoriesData?.forEach(category => {
+        category.forum_topics?.forEach(topic => {
+          if (topic.author_id) userIds.add(topic.author_id);
+        });
+      });
+
+      // Fetch user profiles
+      const profiles = await fetchUserProfiles(Array.from(userIds));
+      setUserProfiles(profiles);
+
+      // Helper function to get author name
+      const getAuthorName = (authorId: string) => {
+        const profile = profiles[authorId];
+        return profile ? profile.full_name : 'User';
+      };
+
       // Process categories to get counts and last post info
       const processedCategories = categoriesData.map((category: any) => {
         const topics = category.forum_topics || [];
@@ -70,7 +119,7 @@ const ForumOverview = () => {
 
         const lastPost = lastTopic ? {
           title: lastTopic.title,
-          author: 'Rick Cuijpers',
+          author: getAuthorName(lastTopic.author_id),
           time: formatTimeAgo(lastTopic.created_at)
         } : undefined;
 

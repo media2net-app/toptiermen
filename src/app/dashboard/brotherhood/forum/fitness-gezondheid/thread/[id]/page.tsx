@@ -3,6 +3,12 @@ import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabase';
 
+interface UserProfile {
+  id: string;
+  full_name: string;
+  avatar_url?: string;
+}
+
 interface ForumPost {
   id: number;
   content: string;
@@ -34,6 +40,7 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
   const [loading, setLoading] = useState(true);
   const [newReply, setNewReply] = useState('');
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [userProfiles, setUserProfiles] = useState<{ [key: string]: UserProfile }>({});
 
   useEffect(() => {
     fetchCurrentUser();
@@ -50,6 +57,30 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
       setCurrentUser(user);
     } catch (error) {
       console.error('Error fetching user:', error);
+    }
+  };
+
+  const fetchUserProfiles = async (userIds: string[]) => {
+    try {
+      const { data: profiles, error } = await supabase
+        .from('profiles')
+        .select('id, full_name, avatar_url')
+        .in('id', userIds);
+
+      if (error) {
+        console.error('Error fetching profiles:', error);
+        return {};
+      }
+
+      const profilesMap: { [key: string]: UserProfile } = {};
+      profiles?.forEach(profile => {
+        profilesMap[profile.id] = profile;
+      });
+
+      return profilesMap;
+    } catch (error) {
+      console.error('Error fetching profiles:', error);
+      return {};
     }
   };
 
@@ -94,6 +125,35 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
         return;
       }
 
+      // Collect all user IDs
+      const userIds = new Set<string>();
+      if (topicData.author_id) userIds.add(topicData.author_id);
+      postsData?.forEach(post => {
+        if (post.author_id) userIds.add(post.author_id);
+      });
+
+      // Fetch user profiles
+      const profiles = await fetchUserProfiles(Array.from(userIds));
+      setUserProfiles(profiles);
+
+      // Helper function to get author info
+      const getAuthorInfo = (authorId: string) => {
+        const profile = profiles[authorId];
+        if (profile) {
+          const nameParts = profile.full_name.split(' ');
+          return {
+            first_name: nameParts[0] || 'User',
+            last_name: nameParts.slice(1).join(' ') || '',
+            avatar_url: profile.avatar_url
+          };
+        }
+        return {
+          first_name: 'User',
+          last_name: '',
+          avatar_url: undefined
+        };
+      };
+
       // Process topic data
       const processedTopic = {
         id: topicData.id,
@@ -101,34 +161,17 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
         content: topicData.content,
         created_at: topicData.created_at,
         like_count: topicData.like_count,
-        author: {
-          first_name: 'Rick',
-          last_name: 'Cuijpers',
-          avatar_url: undefined
-        }
+        author: getAuthorInfo(topicData.author_id)
       };
 
-      // Process posts data - show Rick for old posts, real user for new posts
-      const processedPosts = (postsData || []).map((post: any) => {
-        // Check if this is a new post (created after our fix) or old post
-        const isNewPost = post.author_id !== '9d6aa8ba-58ab-4188-9a9f-09380a67eb0c';
-        
-        return {
-          id: post.id,
-          content: post.content,
-          created_at: post.created_at,
-          like_count: post.like_count,
-          author: isNewPost ? {
-            first_name: currentUser?.user_metadata?.full_name?.split(' ')[0] || 'User',
-            last_name: currentUser?.user_metadata?.full_name?.split(' ').slice(1).join(' ') || '',
-            avatar_url: currentUser?.user_metadata?.avatar_url
-          } : {
-            first_name: 'Rick',
-            last_name: 'Cuijpers',
-            avatar_url: undefined
-          }
-        };
-      });
+      // Process posts data
+      const processedPosts = (postsData || []).map((post: any) => ({
+        id: post.id,
+        content: post.content,
+        created_at: post.created_at,
+        like_count: post.like_count,
+        author: getAuthorInfo(post.author_id)
+      }));
 
       setTopic(processedTopic);
       setPosts(processedPosts);
@@ -215,7 +258,7 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
       <div className="bg-[#232D1A]/90 rounded-2xl shadow-xl border-l-4 border-[#FFD700] border border-[#3A4D23]/40 p-6 mb-8">
         <div className="flex items-center gap-4 mb-2">
           <Image 
-            src={topic.author.avatar_url || 'https://randomuser.me/api/portraits/men/32.jpg'} 
+            src={topic.author.avatar_url || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'} 
             alt={`${topic.author.first_name} ${topic.author.last_name}`} 
             width={48} 
             height={48} 
@@ -237,7 +280,7 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
         {posts.map((post) => (
           <div key={post.id} className="bg-[#232D1A]/80 rounded-2xl shadow border border-[#3A4D23]/40 p-5 flex gap-4">
             <Image 
-              src={post.author.avatar_url || 'https://randomuser.me/api/portraits/men/32.jpg'} 
+              src={post.author.avatar_url || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'} 
               alt={`${post.author.first_name} ${post.author.last_name}`} 
               width={40} 
               height={40} 
