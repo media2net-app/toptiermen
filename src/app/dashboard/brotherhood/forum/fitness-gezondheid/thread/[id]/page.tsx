@@ -87,8 +87,8 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
         created_at: topicData.created_at,
         like_count: topicData.like_count,
         author: {
-          first_name: `User ${topicData.author_id?.slice(0, 8) || 'Unknown'}`,
-          last_name: '',
+          first_name: 'Rick',
+          last_name: 'Cuijpers',
           avatar_url: undefined
         }
       };
@@ -100,8 +100,8 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
         created_at: post.created_at,
         like_count: post.like_count,
         author: {
-          first_name: `User ${post.author_id?.slice(0, 8) || 'Unknown'}`,
-          last_name: '',
+          first_name: 'Rick',
+          last_name: 'Cuijpers',
           avatar_url: undefined
         }
       }));

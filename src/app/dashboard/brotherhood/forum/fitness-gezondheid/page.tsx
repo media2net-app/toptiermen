@@ -79,8 +79,8 @@ const FitnessGezondheidCategory = () => {
         created_at: topic.created_at,
         last_reply_at: topic.last_reply_at,
         author: {
-          first_name: `User ${topic.author_id?.slice(0, 8) || 'Unknown'}`,
-          last_name: ''
+          first_name: 'Rick',
+          last_name: 'Cuijpers'
         }
       }));
 

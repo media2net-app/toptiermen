@@ -70,7 +70,7 @@ const ForumOverview = () => {
 
         const lastPost = lastTopic ? {
           title: lastTopic.title,
-          author: `User ${lastTopic.author_id?.slice(0, 8) || 'Unknown'}`,
+          author: 'Rick Cuijpers',
           time: formatTimeAgo(lastTopic.created_at)
         } : undefined;
 
