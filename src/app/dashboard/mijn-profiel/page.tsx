@@ -1,47 +1,193 @@
 'use client';
 import ClientLayout from '../../components/ClientLayout';
 import { useState, useEffect, useRef } from 'react';
-import { CameraIcon, TrashIcon, PlusIcon, UserGroupIcon, TrophyIcon, FireIcon, BookOpenIcon, ArrowDownTrayIcon, ShieldCheckIcon, BellIcon } from '@heroicons/react/24/solid';
+import { CameraIcon, TrashIcon, PlusIcon, UserGroupIcon, TrophyIcon, FireIcon, BookOpenIcon, ArrowDownTrayIcon, ShieldCheckIcon, BellIcon, PencilIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/solid';
 import CropModal from '../../../components/CropModal';
 import { toast } from 'react-toastify';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { convertHeicToJpeg, isHeicFile } from '@/lib/heic-converter';
 
+interface UserProfile {
+  id: string;
+  email: string;
+  full_name: string;
+  display_name?: string;
+  avatar_url?: string;
+  cover_url?: string;
+  bio?: string;
+  location?: string;
+  website?: string;
+  phone?: string;
+  date_of_birth?: string;
+  gender?: string;
+  interests?: string[];
+  rank?: string;
+  points?: number;
+  missions_completed?: number;
+  is_public?: boolean;
+  show_email?: boolean;
+  show_phone?: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
 const tabs = [
-  { key: 'publiek', label: 'Mijn Publieke Profiel' },
-  { key: 'voortgang', label: 'Mijn Voortgang' },
-  { key: 'instellingen', label: 'Account & Instellingen' },
-  { key: 'notificaties', label: 'Notificaties' },
+  { key: 'publiek', label: 'Mijn Publieke Profiel', icon: UserGroupIcon },
+  { key: 'voortgang', label: 'Mijn Voortgang', icon: TrophyIcon },
+  { key: 'instellingen', label: 'Account & Instellingen', icon: ShieldCheckIcon },
+  { key: 'privacy', label: 'Privacy & Beveiliging', icon: BellIcon },
+];
+
+const interestOptions = [
+  'Fitness', 'Voeding', 'Mindset', 'Ondernemerschap', 'Financiën', 
+  'Productiviteit', 'Relaties', 'Spiritualiteit', 'Reizen', 'Muziek',
+  'Gaming', 'Sport', 'Lezen', 'Schrijven', 'Koken', 'Fotografie'
 ];
 
 export default function MijnProfiel() {
   const { user, updateUser } = useAuth();
   const [activeTab, setActiveTab] = useState('publiek');
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  
+  // Edit states
+  const [editingField, setEditingField] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState('');
   
   // Upload states
   const [showCropModal, setShowCropModal] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string>('');
-  const [cropAspect, setCropAspect] = useState(1); // 1 for avatar, 3 for cover
+  const [cropAspect, setCropAspect] = useState(1);
   const [uploadingType, setUploadingType] = useState<'avatar' | 'cover' | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  if (!user) {
-    return <div className="text-white">Gebruiker niet gevonden.</div>;
-  }
+  // Fetch user profile
+  useEffect(() => {
+    if (user) {
+      fetchUserProfile();
+    }
+  }, [user]);
 
-  // Interesses als array tonen
-  let interests: string[] = [];
-  if (Array.isArray(user.interests)) {
-    interests = user.interests as string[];
-  } else if (typeof user.interests === 'string') {
+  const fetchUserProfile = async () => {
     try {
-      const parsed = JSON.parse(user.interests);
-      if (Array.isArray(parsed)) interests = parsed;
-    } catch {}
-  }
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user?.id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching profile:', error);
+        // Create profile if it doesn't exist
+        if (error.code === 'PGRST116') {
+          await createUserProfile();
+        }
+      } else {
+        setProfile(data);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createUserProfile = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .insert({
+          id: user?.id,
+          email: user?.email,
+          full_name: user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User',
+          display_name: user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User',
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating profile:', error);
+      } else {
+        setProfile(data);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+  const updateProfile = async (updates: Partial<UserProfile>) => {
+    if (!profile) return;
+
+    setSaving(true);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .update(updates)
+        .eq('id', profile.id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error updating profile:', error);
+        toast.error('Er is een fout opgetreden bij het opslaan');
+      } else {
+        setProfile(data);
+        toast.success('Profiel succesvol bijgewerkt!');
+        setEditingField(null);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Er is een fout opgetreden');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const startEditing = (field: string, value: string) => {
+    setEditingField(field);
+    setEditValue(value);
+  };
+
+  const saveEdit = async () => {
+    if (!editingField || !editValue.trim()) return;
+
+    const updates: Partial<UserProfile> = {};
+    updates[editingField as keyof UserProfile] = editValue.trim();
+    
+    await updateProfile(updates);
+  };
+
+  const cancelEdit = () => {
+    setEditingField(null);
+    setEditValue('');
+  };
+
+  const addInterest = async (interest: string) => {
+    if (!profile) return;
+    
+    const currentInterests = profile.interests || [];
+    if (currentInterests.includes(interest)) {
+      toast.info('Deze interesse heb je al toegevoegd');
+      return;
+    }
+
+    await updateProfile({
+      interests: [...currentInterests, interest]
+    });
+  };
+
+  const removeInterest = async (interest: string) => {
+    if (!profile) return;
+    
+    const currentInterests = profile.interests || [];
+    await updateProfile({
+      interests: currentInterests.filter(i => i !== interest)
+    });
+  };
 
   // Helper function to convert base64 to blob
   const base64ToBlob = (base64: string): Blob => {
@@ -57,7 +203,6 @@ export default function MijnProfiel() {
   // Upload to Supabase Storage
   const uploadToSupabase = async (file: Blob, fileName: string, bucket: string): Promise<string> => {
     try {
-      // First, try to upload to the bucket
       const { data, error } = await supabase.storage
         .from(bucket)
         .upload(fileName, file, {
@@ -67,21 +212,9 @@ export default function MijnProfiel() {
 
       if (error) {
         console.error('Upload error:', error);
-        
-        // If bucket doesn't exist, create a fallback solution
-        if (error.message.includes('bucket') || error.message.includes('not found')) {
-          throw new Error(`Bucket '${bucket}' bestaat niet. Maak eerst de bucket aan in Supabase Storage.`);
-        }
-        
-        // If RLS policy issue, provide specific error
-        if (error.message.includes('Unauthorized') || error.message.includes('row-level security')) {
-          throw new Error('Geen toestemming om te uploaden. Controleer de RLS policies in Supabase.');
-        }
-        
         throw error;
       }
 
-      // Get the public URL
       const { data: { publicUrl } } = supabase.storage
         .from(bucket)
         .getPublicUrl(fileName);
@@ -98,26 +231,19 @@ export default function MijnProfiel() {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    console.log('Selected file:', file.name, 'Type:', file.type, 'Size:', file.size);
-
-    // Validate file type
     if (!file.type.startsWith('image/') && !isHeicFile(file)) {
       toast.error('Alleen afbeeldingen zijn toegestaan');
       return;
     }
 
-    // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast.error('Afbeelding is te groot. Maximum grootte is 5MB.');
       return;
     }
 
     try {
-      // Convert HEIC to JPEG if needed
       const processedFile = await convertHeicToJpeg(file);
-      console.log('Processed file:', processedFile.name, 'Type:', processedFile.type);
       
-      // Show info message for HEIC files
       if (isHeicFile(file)) {
         toast.info('HEIC bestand gedetecteerd. Probeer de foto eerst naar JPEG te converteren op je telefoon voor betere kwaliteit.');
       }
@@ -125,8 +251,6 @@ export default function MijnProfiel() {
       const reader = new FileReader();
       reader.onload = (e) => {
         const result = e.target?.result as string;
-        console.log('FileReader result length:', result.length);
-        console.log('FileReader result starts with:', result.substring(0, 50));
         
         if (!result || result.length === 0) {
           toast.error('Kon de afbeelding niet lezen');
@@ -145,7 +269,7 @@ export default function MijnProfiel() {
       reader.readAsDataURL(processedFile);
     } catch (error) {
       console.error('Error processing image:', error);
-      toast.error('Er is een fout opgetreden bij het verwerken van de afbeelding. Probeer een andere afbeelding.');
+      toast.error('Er is een fout opgetreden bij het verwerken van de afbeelding');
     }
   };
 
@@ -156,17 +280,16 @@ export default function MijnProfiel() {
 
     try {
       const blob = base64ToBlob(croppedImage);
-      const fileName = `${uploadingType}-${user.id}-${Date.now()}.jpg`;
+      const fileName = `${uploadingType}-${user?.id}-${Date.now()}.jpg`;
       const bucket = uploadingType === 'avatar' ? 'avatars' : 'covers';
       
       const publicUrl = await uploadToSupabase(blob, fileName, bucket);
       
-      // Update user profile
       const updateData = uploadingType === 'avatar' 
         ? { avatar_url: publicUrl }
         : { cover_url: publicUrl };
       
-      await updateUser(updateData);
+      await updateProfile(updateData);
       
       toast.success(`${uploadingType === 'avatar' ? 'Profielfoto' : 'Coverfoto'} succesvol bijgewerkt!`);
     } catch (error) {
@@ -189,6 +312,20 @@ export default function MijnProfiel() {
     }
   };
 
+  if (!user) {
+    return <div className="text-white">Gebruiker niet gevonden.</div>;
+  }
+
+  if (loading) {
+    return (
+      <ClientLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A]"></div>
+        </div>
+      </ClientLayout>
+    );
+  }
+
   return (
     <ClientLayout>
       <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">Mijn Profiel</h1>
@@ -196,46 +333,37 @@ export default function MijnProfiel() {
       
       {/* Tabs */}
       <div className="flex gap-2 mb-8 overflow-x-auto">
-        <button
-          key="publiek"
-          onClick={() => setActiveTab('publiek')}
-          className={`px-4 py-2 rounded-xl font-semibold transition-all text-sm md:text-base whitespace-nowrap ${activeTab === 'publiek' ? 'bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] shadow' : 'bg-[#232D1A] text-[#8BAE5A] hover:bg-[#2A341F]'}`}
-        >
-          Mijn Publieke Profiel
-        </button>
-        <button
-          key="voortgang"
-          onClick={() => setActiveTab('voortgang')}
-          className={`px-4 py-2 rounded-xl font-semibold transition-all text-sm md:text-base whitespace-nowrap ${activeTab === 'voortgang' ? 'bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] shadow' : 'bg-[#232D1A] text-[#8BAE5A] hover:bg-[#2A341F]'}`}
-        >
-          Mijn Voortgang
-        </button>
-        <button
-          key="instellingen"
-          onClick={() => setActiveTab('instellingen')}
-          className={`px-4 py-2 rounded-xl font-semibold transition-all text-sm md:text-base whitespace-nowrap ${activeTab === 'instellingen' ? 'bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] shadow' : 'bg-[#232D1A] text-[#8BAE5A] hover:bg-[#2A341F]'}`}
-        >
-          Account & Instellingen
-        </button>
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
+          return (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`px-4 py-2 rounded-xl font-semibold transition-all text-sm md:text-base whitespace-nowrap flex items-center gap-2 ${activeTab === tab.key ? 'bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] shadow' : 'bg-[#232D1A] text-[#8BAE5A] hover:bg-[#2A341F]'}`}
+            >
+              <Icon className="w-4 h-4" />
+              {tab.label}
+            </button>
+          );
+        })}
       </div>
       
       {/* Tab Content */}
       <div className="bg-[#232D1A]/80 rounded-2xl shadow-xl border border-[#3A4D23]/40 p-6 md:p-10">
-        {activeTab === 'publiek' && (
-          <div className="flex flex-col items-center gap-6">
+        {activeTab === 'publiek' && profile && (
+          <div className="space-y-8">
             {/* Coverfoto */}
-            <div className="w-full h-40 md:h-56 rounded-2xl bg-gradient-to-r from-[#8BAE5A]/30 to-[#FFD700]/20 flex items-end justify-center overflow-hidden relative mb-8 group">
-              {user.cover_url ? (
-                <img src={user.cover_url} alt="Coverfoto" className="w-full h-full object-cover" />
+            <div className="w-full h-40 md:h-56 rounded-2xl bg-gradient-to-r from-[#8BAE5A]/30 to-[#FFD700]/20 flex items-end justify-center overflow-hidden relative group">
+              {profile.cover_url ? (
+                <img src={profile.cover_url} alt="Coverfoto" className="w-full h-full object-cover" />
               ) : (
                 <span className="text-[#8BAE5A]/60 text-2xl md:text-3xl font-bold p-4">Geen coverfoto</span>
               )}
               
-              {/* Coverfoto upload button */}
               <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                 <label className="flex items-center gap-2 px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-xl font-semibold cursor-pointer hover:bg-[#A6C97B] transition-colors">
                   <CameraIcon className="w-5 h-5" />
-                  {user.cover_url ? 'Coverfoto wijzigen' : 'Coverfoto toevoegen'}
+                  {profile.cover_url ? 'Coverfoto wijzigen' : 'Coverfoto toevoegen'}
                   <input
                     type="file"
                     accept="image/*,.heic,.heif"
@@ -246,71 +374,291 @@ export default function MijnProfiel() {
               </div>
             </div>
             
-            {/* Profielfoto */}
-            <div className="w-28 h-28 rounded-full border-4 border-[#FFD700] bg-[#232D1A] flex items-center justify-center overflow-hidden shadow-lg relative -mt-20 mb-4 group">
-              {user.avatar_url ? (
-                <img src={user.avatar_url} alt="Profielfoto" className="w-full h-full object-cover" />
-              ) : (
-                <span className="text-[#8BAE5A]/60 text-3xl">Geen foto</span>
-              )}
+            {/* Profielfoto en basis info */}
+            <div className="flex flex-col md:flex-row gap-6 -mt-20 md:-mt-32">
+              {/* Profielfoto */}
+              <div className="w-28 h-28 rounded-full border-4 border-[#FFD700] bg-[#232D1A] flex items-center justify-center overflow-hidden shadow-lg relative group">
+                {profile.avatar_url ? (
+                  <img src={profile.avatar_url} alt="Profielfoto" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-[#8BAE5A]/60 text-3xl">Geen foto</span>
+                )}
+                
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-full">
+                  <label className="flex items-center gap-2 px-3 py-1.5 bg-[#8BAE5A] text-[#181F17] rounded-lg font-semibold cursor-pointer hover:bg-[#A6C97B] transition-colors text-sm">
+                    <CameraIcon className="w-4 h-4" />
+                    {profile.avatar_url ? 'Wijzigen' : 'Toevoegen'}
+                    <input
+                      type="file"
+                      accept="image/*,.heic,.heif"
+                      onChange={(e) => handleFileSelect(e, 'avatar')}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+              </div>
               
-              {/* Profielfoto upload button */}
-              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-full">
-                <label className="flex items-center gap-2 px-3 py-1.5 bg-[#8BAE5A] text-[#181F17] rounded-lg font-semibold cursor-pointer hover:bg-[#A6C97B] transition-colors text-sm">
-                  <CameraIcon className="w-4 h-4" />
-                  {user.avatar_url ? 'Wijzigen' : 'Toevoegen'}
-                  <input
-                    type="file"
-                    accept="image/*,.heic,.heif"
-                    onChange={(e) => handleFileSelect(e, 'avatar')}
-                    className="hidden"
-                  />
-                </label>
+              {/* Basis info */}
+              <div className="flex-1 space-y-4">
+                <div>
+                  <h2 className="text-2xl font-bold text-white mb-2">
+                    {editingField === 'display_name' ? (
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={editValue}
+                          onChange={(e) => setEditValue(e.target.value)}
+                          className="bg-[#181F17] text-white px-3 py-1 rounded-lg border border-[#8BAE5A] focus:outline-none focus:border-[#FFD700]"
+                          placeholder="Display naam"
+                        />
+                        <button onClick={saveEdit} disabled={saving} className="text-[#8BAE5A] hover:text-[#FFD700]">
+                          <CheckIcon className="w-5 h-5" />
+                        </button>
+                        <button onClick={cancelEdit} className="text-red-400 hover:text-red-300">
+                          <XMarkIcon className="w-5 h-5" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        {profile.display_name || profile.full_name}
+                        <button 
+                          onClick={() => startEditing('display_name', profile.display_name || profile.full_name)}
+                          className="text-[#8BAE5A] hover:text-[#FFD700] opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <PencilIcon className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
+                  </h2>
+                  <p className="text-[#8BAE5A] text-sm">{profile.email}</p>
+                </div>
+                
+                <div className="flex flex-wrap gap-2">
+                  <span className="inline-block bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-white px-4 py-1 rounded-full text-sm font-semibold shadow">
+                    {profile.rank || 'Beginner'}
+                  </span>
+                  <span className="inline-block bg-[#3A4D23] text-[#8BAE5A] px-4 py-1 rounded-full text-sm font-semibold">
+                    {profile.points || 0} punten
+                  </span>
+                  <span className="inline-block bg-[#3A4D23] text-[#8BAE5A] px-4 py-1 rounded-full text-sm font-semibold">
+                    {profile.missions_completed || 0} missies voltooid
+                  </span>
+                </div>
               </div>
             </div>
             
-            <div className="text-center">
-              <span className="text-2xl font-bold text-white block mb-2">{user.full_name}</span>
-              <span className="text-[#8BAE5A] text-sm block mb-2">{user.email}</span>
-              {user.bio && <span className="text-[#8BAE5A] italic block mb-2">{user.bio}</span>}
-              {user.location && <span className="text-[#8BAE5A] block mb-2">{user.location}</span>}
-              {interests.length > 0 && (
-                <div className="flex flex-wrap gap-2 justify-center mb-2">
-                  {interests.map((interest, idx) => (
-                    <span key={idx} className="px-3 py-1 rounded-full bg-[#8BAE5A]/20 text-[#8BAE5A] text-sm font-medium">{interest}</span>
+            {/* Bio */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-white">Over mij</h3>
+                <button 
+                  onClick={() => startEditing('bio', profile.bio || '')}
+                  className="text-[#8BAE5A] hover:text-[#FFD700]"
+                >
+                  <PencilIcon className="w-4 h-4" />
+                </button>
+              </div>
+              {editingField === 'bio' ? (
+                <div className="space-y-2">
+                  <textarea
+                    value={editValue}
+                    onChange={(e) => setEditValue(e.target.value)}
+                    className="w-full bg-[#181F17] text-white px-3 py-2 rounded-lg border border-[#8BAE5A] focus:outline-none focus:border-[#FFD700] resize-none"
+                    rows={3}
+                    placeholder="Vertel iets over jezelf..."
+                  />
+                  <div className="flex gap-2">
+                    <button onClick={saveEdit} disabled={saving} className="px-3 py-1 bg-[#8BAE5A] text-[#181F17] rounded-lg text-sm font-semibold hover:bg-[#A6C97B] transition-colors">
+                      Opslaan
+                    </button>
+                    <button onClick={cancelEdit} className="px-3 py-1 bg-red-500 text-white rounded-lg text-sm font-semibold hover:bg-red-600 transition-colors">
+                      Annuleren
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-[#8BAE5A] italic">
+                  {profile.bio || 'Nog geen bio toegevoegd. Klik op het potlood om er een toe te voegen!'}
+                </p>
+              )}
+            </div>
+            
+            {/* Location */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-white">Locatie</h3>
+                <button 
+                  onClick={() => startEditing('location', profile.location || '')}
+                  className="text-[#8BAE5A] hover:text-[#FFD700]"
+                >
+                  <PencilIcon className="w-4 h-4" />
+                </button>
+              </div>
+              {editingField === 'location' ? (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={editValue}
+                    onChange={(e) => setEditValue(e.target.value)}
+                    className="flex-1 bg-[#181F17] text-white px-3 py-2 rounded-lg border border-[#8BAE5A] focus:outline-none focus:border-[#FFD700]"
+                    placeholder="Je locatie"
+                  />
+                  <button onClick={saveEdit} disabled={saving} className="px-3 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg font-semibold hover:bg-[#A6C97B] transition-colors">
+                    <CheckIcon className="w-4 h-4" />
+                  </button>
+                  <button onClick={cancelEdit} className="px-3 py-2 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition-colors">
+                    <XMarkIcon className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <p className="text-[#8BAE5A]">
+                  {profile.location || 'Locatie niet ingesteld'}
+                </p>
+              )}
+            </div>
+            
+            {/* Interests */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-white">Interesses</h3>
+              <div className="flex flex-wrap gap-2">
+                {profile.interests?.map((interest, idx) => (
+                  <span key={idx} className="px-3 py-1 rounded-full bg-[#8BAE5A]/20 text-[#8BAE5A] text-sm font-medium flex items-center gap-2">
+                    {interest}
+                    <button 
+                      onClick={() => removeInterest(interest)}
+                      className="text-red-400 hover:text-red-300"
+                    >
+                      <XMarkIcon className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+              
+              <div className="space-y-2">
+                <p className="text-[#8BAE5A] text-sm">Voeg interesses toe:</p>
+                <div className="flex flex-wrap gap-2">
+                  {interestOptions.filter(option => !profile.interests?.includes(option)).map((interest) => (
+                    <button
+                      key={interest}
+                      onClick={() => addInterest(interest)}
+                      className="px-3 py-1 rounded-full bg-[#3A4D23] text-[#8BAE5A] text-sm font-medium hover:bg-[#8BAE5A] hover:text-[#181F17] transition-colors"
+                    >
+                      + {interest}
+                    </button>
                   ))}
                 </div>
-              )}
-              <span className="inline-block bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-white px-4 py-1 rounded-full text-sm font-semibold shadow mb-2">
-                Rang: {user.rank || 'Beginner'}
-              </span>
-              {/* Data punten en missies voltooid verborgen - worden later op dashboard getoond */}
-              {/* <div className="flex flex-col items-center gap-1 mt-2">
-                <span className="text-[#8BAE5A]">Punten: {user.points ?? 0}</span>
-                <span className="text-[#8BAE5A]">Missies voltooid: {user.missions_completed ?? 0}</span>
-              </div> */}
-            </div>
-            
-            {/* Upload progress indicator */}
-            {isUploading && (
-              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                <div className="bg-[#232D1A] rounded-2xl p-6 flex flex-col items-center gap-4">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A]"></div>
-                  <p className="text-white font-semibold">
-                    {uploadingType === 'avatar' ? 'Profielfoto' : 'Coverfoto'} wordt geüpload...
-                  </p>
-                </div>
               </div>
-            )}
+            </div>
           </div>
         )}
         
         {activeTab === 'voortgang' && (
-          <div className="text-white">Voortgangsdata volgt...</div>
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-white mb-6">Mijn Voortgang</h2>
+            
+            {/* Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-[#181F17] rounded-xl p-6 text-center">
+                <TrophyIcon className="w-12 h-12 text-[#FFD700] mx-auto mb-4" />
+                <h3 className="text-xl font-bold text-white mb-2">{profile?.points || 0}</h3>
+                <p className="text-[#8BAE5A]">Totaal Punten</p>
+              </div>
+              
+              <div className="bg-[#181F17] rounded-xl p-6 text-center">
+                <FireIcon className="w-12 h-12 text-[#FFD700] mx-auto mb-4" />
+                <h3 className="text-xl font-bold text-white mb-2">{profile?.missions_completed || 0}</h3>
+                <p className="text-[#8BAE5A]">Missies Voltooid</p>
+              </div>
+              
+              <div className="bg-[#181F17] rounded-xl p-6 text-center">
+                <BookOpenIcon className="w-12 h-12 text-[#FFD700] mx-auto mb-4" />
+                <h3 className="text-xl font-bold text-white mb-2">{profile?.rank || 'Beginner'}</h3>
+                <p className="text-[#8BAE5A]">Huidige Rang</p>
+              </div>
+            </div>
+            
+            <div className="text-center text-[#8BAE5A]">
+              <p>Meer voortgangsdata volgt binnenkort...</p>
+            </div>
+          </div>
         )}
         
         {activeTab === 'instellingen' && (
-          <div className="text-white">Instellingen volgen...</div>
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-white mb-6">Account & Instellingen</h2>
+            
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 bg-[#181F17] rounded-lg">
+                <div>
+                  <h3 className="font-semibold text-white">E-mail</h3>
+                  <p className="text-[#8BAE5A] text-sm">{profile?.email}</p>
+                </div>
+                <button className="px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg font-semibold hover:bg-[#A6C97B] transition-colors">
+                  Wijzigen
+                </button>
+              </div>
+              
+              <div className="flex items-center justify-between p-4 bg-[#181F17] rounded-lg">
+                <div>
+                  <h3 className="font-semibold text-white">Wachtwoord</h3>
+                  <p className="text-[#8BAE5A] text-sm">Laatst gewijzigd: onbekend</p>
+                </div>
+                <button className="px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg font-semibold hover:bg-[#A6C97B] transition-colors">
+                  Wijzigen
+                </button>
+              </div>
+              
+              <div className="flex items-center justify-between p-4 bg-[#181F17] rounded-lg">
+                <div>
+                  <h3 className="font-semibold text-white">Account verwijderen</h3>
+                  <p className="text-[#8BAE5A] text-sm">Permanent verwijderen van je account</p>
+                </div>
+                <button className="px-4 py-2 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition-colors">
+                  Verwijderen
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {activeTab === 'privacy' && (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-white mb-6">Privacy & Beveiliging</h2>
+            
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 bg-[#181F17] rounded-lg">
+                <div>
+                  <h3 className="font-semibold text-white">Publiek profiel</h3>
+                  <p className="text-[#8BAE5A] text-sm">Andere gebruikers kunnen je profiel bekijken</p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    checked={profile?.is_public || false}
+                    onChange={(e) => updateProfile({ is_public: e.target.checked })}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#8BAE5A]"></div>
+                </label>
+              </div>
+              
+              <div className="flex items-center justify-between p-4 bg-[#181F17] rounded-lg">
+                <div>
+                  <h3 className="font-semibold text-white">E-mail zichtbaar</h3>
+                  <p className="text-[#8BAE5A] text-sm">Toon e-mail op publiek profiel</p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    checked={profile?.show_email || false}
+                    onChange={(e) => updateProfile({ show_email: e.target.checked })}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#8BAE5A]"></div>
+                </label>
+              </div>
+            </div>
+          </div>
         )}
       </div>
       
@@ -322,6 +670,18 @@ export default function MijnProfiel() {
           onClose={handleCropCancel}
           onCrop={handleCropComplete}
         />
+      )}
+      
+      {/* Upload progress indicator */}
+      {isUploading && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-[#232D1A] rounded-2xl p-6 flex flex-col items-center gap-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A]"></div>
+            <p className="text-white font-semibold">
+              {uploadingType === 'avatar' ? 'Profielfoto' : 'Coverfoto'} wordt geüpload...
+            </p>
+          </div>
+        </div>
       )}
       
       {/* Hidden file input for ref */}
