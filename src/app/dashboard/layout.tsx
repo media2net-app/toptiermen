@@ -30,10 +30,10 @@ const menu = [
     isSub: true
   },
   {
-    label: 'Mijn Challenges',
+    label: 'Challenges',
     icon: TrophyIcon,
     parent: 'Dashboard',
-    href: '/dashboard/mijn-challenges',
+    href: '/dashboard/challenges',
     isSub: true
   },
   { label: 'Mijn Trainingen', icon: AcademicCapIcon, parent: 'Dashboard', href: '/dashboard/mijn-trainingen', isSub: true },

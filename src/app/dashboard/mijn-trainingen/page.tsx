@@ -1,858 +1,298 @@
 'use client';
 import ClientLayout from '../../components/ClientLayout';
 import { useState, useEffect } from 'react';
-import { PlusIcon, CalendarIcon, ChartBarIcon, ShareIcon, PlayIcon, TrophyIcon, FireIcon, CalendarDaysIcon } from '@heroicons/react/24/solid';
+import { LockClosedIcon, PlayIcon, CalendarIcon, ChartBarIcon, ArrowRightIcon, CheckIcon } from '@heroicons/react/24/solid';
 import { toast } from 'react-toastify';
-import { Line } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js';
-import CalendarHeatmap from 'react-calendar-heatmap';
-import type { ReactCalendarHeatmapValue } from 'react-calendar-heatmap';
-import 'react-calendar-heatmap/dist/styles.css';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '../../../contexts/AuthContext';
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+interface TrainingSchema {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  difficulty: string;
+  estimated_duration: string;
+  cover_image?: string;
+}
 
-// Mock training data
-const mockTrainingData = {
-  '2024-01-15': {
-    id: 1,
-    name: 'Push Day - Full Body Schema',
-    exercises: [
-      {
-        name: 'Bench Press',
-        sets: [
-          { set: 1, weight: 60, reps: 8 },
-          { set: 2, weight: 60, reps: 8 },
-          { set: 3, weight: 60, reps: 7 }
-        ]
-      },
-      {
-        name: 'Overhead Press',
-        sets: [
-          { set: 1, weight: 40, reps: 10 },
-          { set: 2, weight: 40, reps: 9 },
-          { set: 3, weight: 40, reps: 8 }
-        ]
-      },
-      {
-        name: 'Dips',
-        sets: [
-          { set: 1, weight: 0, reps: 12 },
-          { set: 2, weight: 0, reps: 10 },
-          { set: 3, weight: 0, reps: 8 }
-        ]
-      }
-    ],
-    totalVolume: 3240,
-    duration: '45 min'
-  },
-  '2024-01-17': {
-    id: 2,
-    name: 'Pull Day - Back Focus',
-    exercises: [
-      {
-        name: 'Deadlift',
-        sets: [
-          { set: 1, weight: 100, reps: 5 },
-          { set: 2, weight: 100, reps: 5 },
-          { set: 3, weight: 100, reps: 5 }
-        ]
-      },
-      {
-        name: 'Barbell Rows',
-        sets: [
-          { set: 1, weight: 50, reps: 12 },
-          { set: 2, weight: 50, reps: 12 },
-          { set: 3, weight: 50, reps: 10 }
-        ]
-      },
-      {
-        name: 'Pull-ups',
-        sets: [
-          { set: 1, weight: 0, reps: 8 },
-          { set: 2, weight: 0, reps: 6 },
-          { set: 3, weight: 0, reps: 5 }
-        ]
-      }
-    ],
-    totalVolume: 4200,
-    duration: '50 min'
-  },
-  '2024-01-19': {
-    id: 3,
-    name: 'Leg Day - Squat Focus',
-    exercises: [
-      {
-        name: 'Squat',
-        sets: [
-          { set: 1, weight: 80, reps: 8 },
-          { set: 2, weight: 80, reps: 8 },
-          { set: 3, weight: 80, reps: 7 }
-        ]
-      },
-      {
-        name: 'Romanian Deadlift',
-        sets: [
-          { set: 1, weight: 70, reps: 10 },
-          { set: 2, weight: 70, reps: 10 },
-          { set: 3, weight: 70, reps: 8 }
-        ]
-      },
-      {
-        name: 'Leg Press',
-        sets: [
-          { set: 1, weight: 120, reps: 12 },
-          { set: 2, weight: 120, reps: 12 },
-          { set: 3, weight: 120, reps: 10 }
-        ]
-      }
-    ],
-    totalVolume: 5840,
-    duration: '55 min'
-  },
-  '2024-01-22': {
-    id: 4,
-    name: 'Upper Body - Strength Focus',
-    exercises: [
-      {
-        name: 'Bench Press',
-        sets: [
-          { set: 1, weight: 65, reps: 6 },
-          { set: 2, weight: 65, reps: 6 },
-          { set: 3, weight: 65, reps: 5 }
-        ]
-      },
-      {
-        name: 'Military Press',
-        sets: [
-          { set: 1, weight: 45, reps: 8 },
-          { set: 2, weight: 45, reps: 7 },
-          { set: 3, weight: 45, reps: 6 }
-        ]
-      },
-      {
-        name: 'Incline Dumbbell Press',
-        sets: [
-          { set: 1, weight: 25, reps: 10 },
-          { set: 2, weight: 25, reps: 9 },
-          { set: 3, weight: 25, reps: 8 }
-        ]
-      }
-    ],
-    totalVolume: 3780,
-    duration: '50 min'
-  },
-  '2024-01-24': {
-    id: 5,
-    name: 'Back & Biceps',
-    exercises: [
-      {
-        name: 'Deadlift',
-        sets: [
-          { set: 1, weight: 105, reps: 5 },
-          { set: 2, weight: 105, reps: 5 },
-          { set: 3, weight: 105, reps: 4 }
-        ]
-      },
-      {
-        name: 'Barbell Curls',
-        sets: [
-          { set: 1, weight: 30, reps: 12 },
-          { set: 2, weight: 30, reps: 10 },
-          { set: 3, weight: 30, reps: 8 }
-        ]
-      },
-      {
-        name: 'Lat Pulldowns',
-        sets: [
-          { set: 1, weight: 60, reps: 12 },
-          { set: 2, weight: 60, reps: 10 },
-          { set: 3, weight: 60, reps: 8 }
-        ]
-      }
-    ],
-    totalVolume: 4320,
-    duration: '45 min'
-  },
-  '2024-01-26': {
-    id: 6,
-    name: 'Leg Day - Power Focus',
-    exercises: [
-      {
-        name: 'Squat',
-        sets: [
-          { set: 1, weight: 85, reps: 6 },
-          { set: 2, weight: 85, reps: 6 },
-          { set: 3, weight: 85, reps: 5 }
-        ]
-      },
-      {
-        name: 'Power Cleans',
-        sets: [
-          { set: 1, weight: 50, reps: 5 },
-          { set: 2, weight: 50, reps: 5 },
-          { set: 3, weight: 50, reps: 4 }
-        ]
-      },
-      {
-        name: 'Box Jumps',
-        sets: [
-          { set: 1, weight: 0, reps: 10 },
-          { set: 2, weight: 0, reps: 10 },
-          { set: 3, weight: 0, reps: 8 }
-        ]
-      }
-    ],
-    totalVolume: 3150,
-    duration: '40 min'
-  },
-  '2024-01-29': {
-    id: 7,
-    name: 'Full Body - Circuit',
-    exercises: [
-      {
-        name: 'Burpees',
-        sets: [
-          { set: 1, weight: 0, reps: 15 },
-          { set: 2, weight: 0, reps: 12 },
-          { set: 3, weight: 0, reps: 10 }
-        ]
-      },
-      {
-        name: 'Kettlebell Swings',
-        sets: [
-          { set: 1, weight: 20, reps: 20 },
-          { set: 2, weight: 20, reps: 18 },
-          { set: 3, weight: 20, reps: 15 }
-        ]
-      },
-      {
-        name: 'Mountain Climbers',
-        sets: [
-          { set: 1, weight: 0, reps: 30 },
-          { set: 2, weight: 0, reps: 25 },
-          { set: 3, weight: 0, reps: 20 }
-        ]
-      }
-    ],
-    totalVolume: 1200,
-    duration: '35 min'
-  },
-  '2024-01-31': {
-    id: 8,
-    name: 'Strength Training - Max Effort',
-    exercises: [
-      {
-        name: 'Bench Press',
-        sets: [
-          { set: 1, weight: 70, reps: 4 },
-          { set: 2, weight: 70, reps: 3 },
-          { set: 3, weight: 70, reps: 2 }
-        ]
-      },
-      {
-        name: 'Deadlift',
-        sets: [
-          { set: 1, weight: 110, reps: 3 },
-          { set: 2, weight: 110, reps: 2 },
-          { set: 3, weight: 110, reps: 1 }
-        ]
-      },
-      {
-        name: 'Squat',
-        sets: [
-          { set: 1, weight: 90, reps: 4 },
-          { set: 2, weight: 90, reps: 3 },
-          { set: 3, weight: 90, reps: 2 }
-        ]
-      }
-    ],
-    totalVolume: 3150,
-    duration: '60 min'
-  },
-  // --- JUNI 2025 ---
-  '2025-06-03': {
-    id: 101,
-    name: 'Push Day - Chest Focus',
-    exercises: [
-      { name: 'Bench Press', sets: [ { set: 1, weight: 75, reps: 6 }, { set: 2, weight: 75, reps: 5 }, { set: 3, weight: 75, reps: 4 } ] },
-      { name: 'Incline Dumbbell Press', sets: [ { set: 1, weight: 30, reps: 10 }, { set: 2, weight: 30, reps: 8 } ] },
-      { name: 'Dips', sets: [ { set: 1, weight: 0, reps: 12 }, { set: 2, weight: 0, reps: 10 } ] }
-    ],
-    totalVolume: 2100,
-    duration: '50 min'
-  },
-  '2025-06-07': {
-    id: 102,
-    name: 'Leg Day - Strength',
-    exercises: [
-      { name: 'Squat', sets: [ { set: 1, weight: 95, reps: 5 }, { set: 2, weight: 95, reps: 5 }, { set: 3, weight: 95, reps: 4 } ] },
-      { name: 'Leg Press', sets: [ { set: 1, weight: 130, reps: 10 }, { set: 2, weight: 130, reps: 8 } ] },
-      { name: 'Calf Raises', sets: [ { set: 1, weight: 60, reps: 15 }, { set: 2, weight: 60, reps: 12 } ] }
-    ],
-    totalVolume: 3200,
-    duration: '55 min'
-  },
-  '2025-06-12': {
-    id: 103,
-    name: 'Pull Day - Back & Biceps',
-    exercises: [
-      { name: 'Deadlift', sets: [ { set: 1, weight: 115, reps: 4 }, { set: 2, weight: 115, reps: 3 } ] },
-      { name: 'Barbell Rows', sets: [ { set: 1, weight: 55, reps: 10 }, { set: 2, weight: 55, reps: 8 } ] },
-      { name: 'Pull-ups', sets: [ { set: 1, weight: 0, reps: 8 }, { set: 2, weight: 0, reps: 7 } ] }
-    ],
-    totalVolume: 2100,
-    duration: '45 min'
-  },
-  '2025-06-16': {
-    id: 104,
-    name: 'Full Body - Conditioning',
-    exercises: [
-      { name: 'Burpees', sets: [ { set: 1, weight: 0, reps: 20 }, { set: 2, weight: 0, reps: 15 } ] },
-      { name: 'Kettlebell Swings', sets: [ { set: 1, weight: 24, reps: 15 }, { set: 2, weight: 24, reps: 12 } ] },
-      { name: 'Mountain Climbers', sets: [ { set: 1, weight: 0, reps: 30 }, { set: 2, weight: 0, reps: 25 } ] }
-    ],
-    totalVolume: 900,
-    duration: '35 min'
-  },
-  '2025-06-21': {
-    id: 105,
-    name: 'Push Day - Shoulders',
-    exercises: [
-      { name: 'Overhead Press', sets: [ { set: 1, weight: 50, reps: 8 }, { set: 2, weight: 50, reps: 7 } ] },
-      { name: 'Lateral Raises', sets: [ { set: 1, weight: 8, reps: 15 }, { set: 2, weight: 8, reps: 12 } ] },
-      { name: 'Push-ups', sets: [ { set: 1, weight: 0, reps: 20 }, { set: 2, weight: 0, reps: 15 } ] }
-    ],
-    totalVolume: 1100,
-    duration: '40 min'
-  },
-  '2025-06-25': {
-    id: 106,
-    name: 'Leg Day - Power',
-    exercises: [
-      { name: 'Squat', sets: [ { set: 1, weight: 100, reps: 4 }, { set: 2, weight: 100, reps: 3 } ] },
-      { name: 'Romanian Deadlift', sets: [ { set: 1, weight: 75, reps: 8 }, { set: 2, weight: 75, reps: 7 } ] },
-      { name: 'Box Jumps', sets: [ { set: 1, weight: 0, reps: 12 }, { set: 2, weight: 0, reps: 10 } ] }
-    ],
-    totalVolume: 2100,
-    duration: '50 min'
-  },
-  // --- JULI 2025 ---
-  '2025-07-02': {
-    id: 201,
-    name: 'Push Day - Chest & Triceps',
-    exercises: [
-      { name: 'Bench Press', sets: [ { set: 1, weight: 80, reps: 5 }, { set: 2, weight: 80, reps: 4 } ] },
-      { name: 'Dips', sets: [ { set: 1, weight: 0, reps: 14 }, { set: 2, weight: 0, reps: 12 } ] },
-      { name: 'Tricep Pushdown', sets: [ { set: 1, weight: 35, reps: 12 }, { set: 2, weight: 35, reps: 10 } ] }
-    ],
-    totalVolume: 1800,
-    duration: '45 min'
-  },
-  '2025-07-06': {
-    id: 202,
-    name: 'Pull Day - Back & Grip',
-    exercises: [
-      { name: 'Deadlift', sets: [ { set: 1, weight: 120, reps: 3 }, { set: 2, weight: 120, reps: 2 } ] },
-      { name: 'Barbell Rows', sets: [ { set: 1, weight: 60, reps: 8 }, { set: 2, weight: 60, reps: 7 } ] },
-      { name: 'Farmer Walk', sets: [ { set: 1, weight: 40, reps: 30 }, { set: 2, weight: 40, reps: 25 } ] }
-    ],
-    totalVolume: 2200,
-    duration: '50 min'
-  },
-  '2025-07-10': {
-    id: 203,
-    name: 'Leg Day - Endurance',
-    exercises: [
-      { name: 'Squat', sets: [ { set: 1, weight: 90, reps: 8 }, { set: 2, weight: 90, reps: 7 } ] },
-      { name: 'Leg Press', sets: [ { set: 1, weight: 140, reps: 10 }, { set: 2, weight: 140, reps: 8 } ] },
-      { name: 'Walking Lunges', sets: [ { set: 1, weight: 20, reps: 20 }, { set: 2, weight: 20, reps: 18 } ] }
-    ],
-    totalVolume: 2600,
-    duration: '55 min'
-  },
-  '2025-07-15': {
-    id: 204,
-    name: 'Push Day - Shoulders & Chest',
-    exercises: [
-      { name: 'Overhead Press', sets: [ { set: 1, weight: 55, reps: 6 }, { set: 2, weight: 55, reps: 5 } ] },
-      { name: 'Bench Press', sets: [ { set: 1, weight: 82.5, reps: 4 }, { set: 2, weight: 82.5, reps: 3 } ] },
-      { name: 'Push-ups', sets: [ { set: 1, weight: 0, reps: 22 }, { set: 2, weight: 0, reps: 18 } ] }
-    ],
-    totalVolume: 2000,
-    duration: '50 min'
-  },
-  '2025-07-19': {
-    id: 205,
-    name: 'Pull Day - Back & Arms',
-    exercises: [
-      { name: 'Deadlift', sets: [ { set: 1, weight: 125, reps: 2 }, { set: 2, weight: 125, reps: 2 } ] },
-      { name: 'Barbell Curls', sets: [ { set: 1, weight: 35, reps: 10 }, { set: 2, weight: 35, reps: 8 } ] },
-      { name: 'Lat Pulldowns', sets: [ { set: 1, weight: 65, reps: 10 }, { set: 2, weight: 65, reps: 8 } ] }
-    ],
-    totalVolume: 2100,
-    duration: '45 min'
-  },
-  '2025-07-23': {
-    id: 206,
-    name: 'Leg Day - Power',
-    exercises: [
-      { name: 'Squat', sets: [ { set: 1, weight: 105, reps: 4 }, { set: 2, weight: 105, reps: 3 } ] },
-      { name: 'Romanian Deadlift', sets: [ { set: 1, weight: 80, reps: 7 }, { set: 2, weight: 80, reps: 6 } ] },
-      { name: 'Box Jumps', sets: [ { set: 1, weight: 0, reps: 14 }, { set: 2, weight: 0, reps: 12 } ] }
-    ],
-    totalVolume: 2300,
-    duration: '50 min'
-  },
-};
+interface TrainingDay {
+  id: string;
+  day_number: number;
+  name: string;
+  description?: string;
+  focus_area?: string;
+}
 
-type ProgressEntry = { date: string; weight: number; reps: number; volume: number };
-type ProgressData = Record<string, ProgressEntry[]>;
+interface UserProgress {
+  current_day: number;
+  completed_days: number;
+  total_days: number;
+  started_at: string;
+  completed_at?: string;
+  is_active: boolean;
+}
 
-const progressData: ProgressData = {
-  'Bench Press': [
-    { date: '2024-01-01', weight: 55, reps: 8, volume: 440 },
-    { date: '2024-01-08', weight: 57.5, reps: 8, volume: 460 },
-    { date: '2024-01-15', weight: 60, reps: 8, volume: 480 },
-    { date: '2024-01-22', weight: 65, reps: 6, volume: 390 },
-    { date: '2024-01-31', weight: 70, reps: 4, volume: 280 },
-  ],
-  'Deadlift': [
-    { date: '2024-01-01', weight: 90, reps: 5, volume: 450 },
-    { date: '2024-01-08', weight: 95, reps: 5, volume: 475 },
-    { date: '2024-01-17', weight: 100, reps: 5, volume: 500 },
-    { date: '2024-01-24', weight: 105, reps: 5, volume: 525 },
-    { date: '2024-01-31', weight: 110, reps: 3, volume: 330 },
-  ],
-  'Squat': [
-    { date: '2024-01-01', weight: 70, reps: 8, volume: 560 },
-    { date: '2024-01-08', weight: 75, reps: 8, volume: 600 },
-    { date: '2024-01-19', weight: 80, reps: 8, volume: 640 },
-    { date: '2024-01-26', weight: 85, reps: 6, volume: 510 },
-    { date: '2024-01-31', weight: 90, reps: 4, volume: 360 },
-  ],
-  'Overhead Press': [
-    { date: '2024-01-01', weight: 35, reps: 10, volume: 350 },
-    { date: '2024-01-08', weight: 37.5, reps: 10, volume: 375 },
-    { date: '2024-01-15', weight: 40, reps: 10, volume: 400 },
-    { date: '2024-01-22', weight: 45, reps: 8, volume: 360 },
-  ],
-  'Barbell Rows': [
-    { date: '2024-01-01', weight: 45, reps: 12, volume: 540 },
-    { date: '2024-01-08', weight: 47.5, reps: 12, volume: 570 },
-    { date: '2024-01-17', weight: 50, reps: 12, volume: 600 },
-    { date: '2024-01-24', weight: 50, reps: 12, volume: 600 },
-  ],
-  'Romanian Deadlift': [
-    { date: '2024-01-01', weight: 60, reps: 10, volume: 600 },
-    { date: '2024-01-08', weight: 65, reps: 10, volume: 650 },
-    { date: '2024-01-19', weight: 70, reps: 10, volume: 700 },
-  ],
-};
-
-// Voeg extra progressie toe voor juni en juli 2025
-progressData['Bench Press'].push(
-  { date: '2025-06-03', weight: 75, reps: 6, volume: 450 },
-  { date: '2025-07-02', weight: 80, reps: 5, volume: 400 },
-  { date: '2025-07-15', weight: 82.5, reps: 4, volume: 330 }
-);
-progressData['Squat'].push(
-  { date: '2025-06-07', weight: 95, reps: 5, volume: 475 },
-  { date: '2025-06-25', weight: 100, reps: 4, volume: 400 },
-  { date: '2025-07-10', weight: 90, reps: 8, volume: 720 },
-  { date: '2025-07-23', weight: 105, reps: 4, volume: 420 }
-);
-progressData['Deadlift'].push(
-  { date: '2025-06-12', weight: 115, reps: 4, volume: 460 },
-  { date: '2025-07-06', weight: 120, reps: 3, volume: 360 },
-  { date: '2025-07-19', weight: 125, reps: 2, volume: 250 }
-);
-progressData['Overhead Press'].push(
-  { date: '2025-06-21', weight: 50, reps: 8, volume: 400 },
-  { date: '2025-07-15', weight: 55, reps: 6, volume: 330 }
-);
-progressData['Barbell Rows'].push(
-  { date: '2025-06-12', weight: 55, reps: 10, volume: 550 },
-  { date: '2025-07-06', weight: 60, reps: 8, volume: 480 }
-);
-progressData['Romanian Deadlift'].push(
-  { date: '2025-06-25', weight: 75, reps: 8, volume: 600 },
-  { date: '2025-07-23', weight: 80, reps: 7, volume: 560 }
-);
+interface TrainingData {
+  hasActiveSchema: boolean;
+  schema?: TrainingSchema;
+  days?: TrainingDay[];
+  progress?: UserProgress;
+  message?: string;
+}
 
 export default function MijnTrainingen() {
-  const [activeView, setActiveView] = useState<'calendar' | 'analysis'>('calendar');
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [selectedMonth, setSelectedMonth] = useState(new Date());
-  const [selectedExercise, setSelectedExercise] = useState('Bench Press');
-  const [analysisMetric, setAnalysisMetric] = useState<'weight' | 'volume' | 'reps'>('weight');
+  const { user } = useAuth();
+  const router = useRouter();
+  const [trainingData, setTrainingData] = useState<TrainingData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedDay, setSelectedDay] = useState<number>(1);
 
-  // Maandstatistieken berekenen
-  const getMonthStats = () => {
-    const monthStart = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1);
-    const monthEnd = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 0);
-    
-    let totalTrainings = 0;
-    let totalVolume = 0;
-    let mostImprovedExercise = 'Geen data';
-    let maxImprovement = 0;
-    
-    Object.entries(mockTrainingData).forEach(([date, training]) => {
-      const trainingDate = new Date(date);
-      if (trainingDate >= monthStart && trainingDate <= monthEnd) {
-        totalTrainings++;
-        totalVolume += training.totalVolume;
-      }
-    });
-    
-    // Bereken meest gevorderde oefening
-    Object.entries(progressData).forEach(([exercise, data]) => {
-      if (data.length >= 2) {
-        const firstEntry = data[0];
-        const lastEntry = data[data.length - 1];
-        const improvement = lastEntry.weight - firstEntry.weight;
-        
-        if (improvement > maxImprovement) {
-          maxImprovement = improvement;
-          mostImprovedExercise = exercise;
-        }
-      }
-    });
-    
-    return { totalTrainings, totalVolume, mostImprovedExercise };
-  };
+  useEffect(() => {
+    if (user) {
+      loadTrainingData();
+    }
+  }, [user]);
 
-  // Kalender genereren
-  const generateCalendar = () => {
-    const year = selectedMonth.getFullYear();
-    const month = selectedMonth.getMonth();
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const startDate = new Date(firstDay);
-    startDate.setDate(startDate.getDate() - firstDay.getDay());
+  const loadTrainingData = async () => {
+    if (!user) return;
     
-    const calendar = [];
-    const currentDate = new Date(startDate);
-    
-    while (currentDate <= lastDay || calendar.length < 42) {
-      const dateString = currentDate.toISOString().split('T')[0];
-      const hasTraining = mockTrainingData[dateString as keyof typeof mockTrainingData];
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/user-training-schema?userId=${user.id}`);
+      const data = await response.json();
       
-      calendar.push({
-        date: new Date(currentDate),
-        dateString,
-        hasTraining,
-        isCurrentMonth: currentDate.getMonth() === month,
-        isToday: currentDate.toDateString() === new Date().toDateString()
-      });
+      setTrainingData(data);
       
-      currentDate.setDate(currentDate.getDate() + 1);
+      if (data.hasActiveSchema && data.progress) {
+        setSelectedDay(data.progress.current_day);
+      }
+    } catch (error) {
+      console.error('Error loading training data:', error);
+      toast.error('Fout bij het laden van trainingsgegevens');
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const startWorkout = (dayNumber: number) => {
+    if (!trainingData?.schema) return;
     
-    return calendar;
+    // Navigate to workout page
+    router.push(`/dashboard/trainingscentrum/workout/${trainingData.schema.id}/${dayNumber}`);
   };
 
-  const calendar = generateCalendar();
-  const monthStats = getMonthStats();
-
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('nl-NL', { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    });
+  const goToTrainingscentrum = () => {
+    router.push('/dashboard/trainingscentrum');
   };
 
-  const handleDateClick = (dateString: string) => {
-    if (mockTrainingData[dateString as keyof typeof mockTrainingData]) {
-      setSelectedDate(dateString);
-    }
-  };
+  if (loading) {
+    return (
+      <ClientLayout>
+        <div className="min-h-screen bg-gradient-to-br from-[#0F1419] to-[#1A1F2E] p-6">
+          <div className="max-w-6xl mx-auto">
+            <div className="flex items-center justify-center min-h-[60vh]">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
+                <p className="text-[#8BAE5A]">Laden van trainingsgegevens...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ClientLayout>
+    );
+  }
 
-  const repeatTraining = () => {
-    toast.success('🏋️‍♂️ Training wordt geladen in de Workout Speler...');
-    // Hier zou de link naar de Workout Speler komen
-  };
+  // Lock state - no active schema
+  if (!trainingData?.hasActiveSchema) {
+    return (
+      <ClientLayout>
+        <div className="min-h-screen bg-gradient-to-br from-[#0F1419] to-[#1A1F2E] p-6">
+          <div className="max-w-4xl mx-auto">
+            {/* Header */}
+            <div className="text-center mb-12">
+              <h1 className="text-4xl font-bold text-white mb-4">Mijn Trainingen</h1>
+              <p className="text-[#8BAE5A] text-lg">Persoonlijke trainingsschema's en voortgang</p>
+            </div>
 
-  const shareTraining = () => {
-    toast.success('🔥 Training gedeeld op de Social Feed!');
-    // Hier zou de social feed integratie komen
-  };
+            {/* Lock State */}
+            <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-2xl p-12 text-center shadow-xl">
+              <div className="mb-8">
+                <div className="w-24 h-24 bg-[#3A4D23] rounded-full flex items-center justify-center mx-auto mb-6">
+                  <LockClosedIcon className="w-12 h-12 text-[#8BAE5A]" />
+                </div>
+                <h2 className="text-3xl font-bold text-white mb-4">Geen Actief Trainingsschema</h2>
+                <p className="text-gray-400 text-lg mb-8 max-w-2xl mx-auto">
+                  Je hebt nog geen trainingsschema geselecteerd. Ga naar het trainingscentrum om een schema te kiezen dat bij jou past.
+                </p>
+              </div>
 
-  const startEmptyTraining = () => {
-    toast.info('💪 Start een nieuwe training in de Workout Speler');
-    // Hier zou de link naar de Workout Speler komen
-  };
+              <div className="space-y-6">
+                <button
+                  onClick={goToTrainingscentrum}
+                  className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold text-lg rounded-xl hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200 shadow-lg hover:shadow-xl"
+                >
+                  <ArrowRightIcon className="w-6 h-6 mr-2" />
+                  Ga naar Trainingscentrum
+                </button>
+                
+                <div className="text-sm text-gray-500">
+                  <p>Kies een schema dat past bij jouw doelen en niveau</p>
+                </div>
+              </div>
+            </div>
 
-  // Chart data genereren voor analyse
-  const chartData = () => {
-    const data: ProgressEntry[] = progressData[selectedExercise] || [];
-    const labels = data.map((d: ProgressEntry) => d.date);
-    let datasetData: number[] = [];
-    let label = '';
-    if (analysisMetric === 'weight') {
-      datasetData = data.map((d: ProgressEntry) => d.weight);
-      label = 'Gewicht (kg)';
-    } else if (analysisMetric === 'volume') {
-      datasetData = data.map((d: ProgressEntry) => d.volume);
-      label = 'Totaal Volume';
-    } else {
-      datasetData = data.map((d: ProgressEntry) => d.reps);
-      label = 'Max Herhalingen';
-    }
-    return {
-      labels,
-      datasets: [
-        {
-          label,
-          data: datasetData,
-          borderColor: '#8BAE5A',
-          backgroundColor: 'rgba(139, 174, 90, 0.2)',
-          pointBackgroundColor: '#FFD700',
-          tension: 0.3,
-        },
-      ],
-    };
-  };
+            {/* Benefits */}
+            <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-[#181F17] border border-[#3A4D23]/30 rounded-xl p-6 text-center">
+                <div className="w-12 h-12 bg-[#8BAE5A]/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <CalendarIcon className="w-6 h-6 text-[#8BAE5A]" />
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2">Gestructureerde Training</h3>
+                <p className="text-gray-400 text-sm">Volg een bewezen schema met duidelijke doelen en progressie</p>
+              </div>
+              
+              <div className="bg-[#181F17] border border-[#3A4D23]/30 rounded-xl p-6 text-center">
+                <div className="w-12 h-12 bg-[#FFD700]/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <ChartBarIcon className="w-6 h-6 text-[#FFD700]" />
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2">Voortgang Tracking</h3>
+                <p className="text-gray-400 text-sm">Houd je prestaties bij en zie je vooruitgang over tijd</p>
+              </div>
+              
+              <div className="bg-[#181F17] border border-[#3A4D23]/30 rounded-xl p-6 text-center">
+                <div className="w-12 h-12 bg-[#f0a14f]/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <PlayIcon className="w-6 h-6 text-[#f0a14f]" />
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2">Direct Starten</h3>
+                <p className="text-gray-400 text-sm">Begin direct met trainen zodra je schema is geselecteerd</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ClientLayout>
+    );
+  }
 
-  const chartOptions = {
-    responsive: true,
-    plugins: {
-      legend: { display: false },
-      title: { display: false },
-      tooltip: { enabled: true },
-    },
-    scales: {
-      x: {
-        ticks: { color: '#8BAE5A' },
-        grid: { color: '#3A4D23' },
-      },
-      y: {
-        ticks: { color: '#FFD700' },
-        grid: { color: '#3A4D23' },
-      },
-    },
-  };
+  // Active schema state
+  const { schema, days, progress } = trainingData;
 
   return (
     <ClientLayout>
-      <div className="p-6 md:p-12">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-          <div>
-            <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">Mijn Trainingen</h1>
-            <p className="text-[#8BAE5A] text-lg">Trainingsgeschiedenis en analyse</p>
+      <div className="min-h-screen bg-gradient-to-br from-[#0F1419] to-[#1A1F2E] p-6">
+        <div className="max-w-6xl mx-auto">
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-white mb-2">Mijn Trainingen</h1>
+            <p className="text-[#8BAE5A] text-lg">Jouw actieve trainingsschema en voortgang</p>
           </div>
-          <button 
-            onClick={startEmptyTraining}
-            className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] text-[#181F17] font-bold text-lg shadow hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all border border-[#8BAE5A] flex items-center gap-2"
-          >
-            <PlusIcon className="w-5 h-5" />
-            Start Lege Training
-          </button>
-        </div>
 
-        {activeView === 'calendar' && (
-          <div className="bg-[#232D1A] rounded-2xl shadow-xl p-6 border border-[#3A4D23]">
-            {/* Maandstatistieken Header */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 p-4 bg-[#181F17] rounded-xl">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-[#8BAE5A]">{monthStats.totalTrainings}</div>
-                <div className="text-sm text-[#8BAE5A]/80">Trainingen deze maand</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-[#FFD700]">{monthStats.totalVolume.toLocaleString()}</div>
-                <div className="text-sm text-[#8BAE5A]/80">kg getild totaal</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-[#f0a14f]">{monthStats.mostImprovedExercise}</div>
-                <div className="text-sm text-[#8BAE5A]/80">Meest gevorderd</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-[#B6C948]">12</div>
-                <div className="text-sm text-[#8BAE5A]/80">Dagen streak</div>
-              </div>
-            </div>
-
-            {/* Kalender Navigatie */}
-            <div className="flex items-center justify-between mb-4">
-              <button 
-                onClick={() => setSelectedMonth(new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() - 1))}
-                className="text-[#8BAE5A] hover:text-white"
-              >
-                ← Vorige
-              </button>
-              <h2 className="text-xl font-bold text-white">
-                {selectedMonth.toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' })}
-              </h2>
-              <button 
-                onClick={() => setSelectedMonth(new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1))}
-                className="text-[#8BAE5A] hover:text-white"
-              >
-                Volgende →
-              </button>
-            </div>
-
-            {/* Kalender Grid */}
-            <div className="grid grid-cols-7 gap-1 mb-4">
-              {['Zo', 'Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za'].map(day => (
-                <div key={day} className="p-2 text-center text-[#8BAE5A] font-semibold text-sm">
-                  {day}
+          {/* Schema Overview */}
+          <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-6 mb-8">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+              <div className="flex-1">
+                <h2 className="text-2xl font-bold text-white mb-2">{schema?.name}</h2>
+                <p className="text-gray-400 mb-4">{schema?.description}</p>
+                <div className="flex flex-wrap gap-4 text-sm">
+                  <span className="text-[#8BAE5A]">Categorie: {schema?.category}</span>
+                  <span className="text-[#FFD700]">Niveau: {schema?.difficulty}</span>
+                  <span className="text-[#f0a14f]">Duur: {schema?.estimated_duration}</span>
                 </div>
-              ))}
-            </div>
-
-            <div className="grid grid-cols-7 gap-1">
-              {calendar.map((day, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleDateClick(day.dateString)}
-                  className={`p-3 h-16 rounded-lg transition-all relative ${
-                    day.isToday 
-                      ? 'bg-[#FFD700]/20 border-2 border-[#FFD700]' 
-                      : day.hasTraining 
-                        ? 'bg-[#8BAE5A]/20 border border-[#8BAE5A] hover:bg-[#8BAE5A]/30' 
-                        : 'bg-[#181F17] border border-[#3A4D23] hover:bg-[#2A341F]'
-                  } ${!day.isCurrentMonth ? 'opacity-50' : ''}`}
-                >
-                  <div className={`text-sm ${day.isCurrentMonth ? 'text-white' : 'text-[#8BAE5A]/50'}`}>
-                    {day.date.getDate()}
-                  </div>
-                  {day.hasTraining && (
-                    <div className="absolute bottom-1 right-1 text-[#8BAE5A] text-xs">
-                      🏋️‍♂️
-                    </div>
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Training Detail Modal */}
-        {selectedDate && mockTrainingData[selectedDate as keyof typeof mockTrainingData] && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-[#232D1A] rounded-2xl p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-white">
-                  Training van: {formatDate(new Date(selectedDate))}
-                </h2>
-                <button 
-                  onClick={() => setSelectedDate(null)}
-                  className="text-[#8BAE5A] hover:text-white"
-                >
-                  ✕
-                </button>
               </div>
-
-              <div className="mb-6">
-                <h3 className="text-xl font-bold text-[#8BAE5A] mb-4">
-                  {mockTrainingData[selectedDate as keyof typeof mockTrainingData].name}
-                </h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                  <div className="bg-[#181F17] rounded-xl p-4 text-center">
-                    <div className="text-2xl font-bold text-[#8BAE5A]">
-                      {mockTrainingData[selectedDate as keyof typeof mockTrainingData].totalVolume.toLocaleString()}
-                    </div>
-                    <div className="text-sm text-[#8BAE5A]/80">kg totaal</div>
+              
+              {progress && (
+                <div className="text-right">
+                  <div className="text-3xl font-bold text-[#8BAE5A] mb-1">
+                    {progress.completed_days}/{progress.total_days}
                   </div>
-                  <div className="bg-[#181F17] rounded-xl p-4 text-center">
-                    <div className="text-2xl font-bold text-[#FFD700]">
-                      {mockTrainingData[selectedDate as keyof typeof mockTrainingData].duration}
+                  <div className="text-sm text-gray-400">Dagen voltooid</div>
+                  <div className="mt-2">
+                    <div className="w-32 h-2 bg-[#3A4D23] rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] transition-all duration-300"
+                        style={{ width: `${(progress.completed_days / progress.total_days) * 100}%` }}
+                      ></div>
                     </div>
-                    <div className="text-sm text-[#8BAE5A]/80">duur</div>
-                  </div>
-                  <div className="bg-[#181F17] rounded-xl p-4 text-center">
-                    <div className="text-2xl font-bold text-[#f0a14f]">
-                      {mockTrainingData[selectedDate as keyof typeof mockTrainingData].exercises.length}
-                    </div>
-                    <div className="text-sm text-[#8BAE5A]/80">oefeningen</div>
                   </div>
                 </div>
+              )}
+            </div>
+          </div>
 
-                <div className="mt-8">
-                  <h3 className="text-xl font-bold text-white mb-4">Training Log</h3>
+          {/* Training Days */}
+          {days && days.length > 0 && (
+            <div className="mb-8">
+              <h2 className="text-xl font-bold text-white mb-4">Trainingsdagen</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {days.map((day) => {
+                  const isCompleted = progress ? day.day_number <= progress.completed_days : false;
+                  const isCurrentDay = day.day_number === selectedDay;
+                  const isNextDay = progress ? day.day_number === progress.current_day : false;
 
-                  {/* Desktop Table View */}
-                  <div className="hidden md:block overflow-x-auto rounded-lg border border-[#3A4D23]">
-                    <table className="w-full text-left">
-                      <thead className="bg-[#181F17] text-[#8BAE5A]">
-                        <tr>
-                          <th className="p-4 font-semibold">Oefening</th>
-                          <th className="p-4 font-semibold text-center">Set</th>
-                          <th className="p-4 font-semibold text-center">Gewicht (kg)</th>
-                          <th className="p-4 font-semibold text-center">Herhalingen</th>
-                          <th className="p-4 font-semibold text-center">Volume</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-[#3A4D23]">
-                        {mockTrainingData[selectedDate as keyof typeof mockTrainingData].exercises.flatMap((exercise, exIndex) => 
-                          exercise.sets.map((set, setIndex) => (
-                            <tr key={`${exIndex}-${setIndex}`}>
-                              {setIndex === 0 && (
-                                <td className="p-4 text-white font-medium" rowSpan={exercise.sets.length}>
-                                  {exercise.name}
-                                </td>
-                              )}
-                              <td className="p-4 text-center text-gray-300">{set.set}</td>
-                              <td className="p-4 text-center text-gray-300">{set.weight}</td>
-                              <td className="p-4 text-center text-gray-300">{set.reps}</td>
-                              <td className="p-4 text-center text-gray-300">{set.weight * set.reps}</td>
-                            </tr>
-                          ))
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  {/* Mobile Card View */}
-                  <div className="md:hidden space-y-4">
-                    {mockTrainingData[selectedDate as keyof typeof mockTrainingData].exercises.map((exercise, exIndex) => (
-                      <div key={exIndex} className="bg-[#181F17] rounded-lg p-4 border border-[#3A4D23]">
-                        <h4 className="font-bold text-[#8BAE5A] text-lg mb-3">{exercise.name}</h4>
-                        <div className="space-y-2">
-                          {exercise.sets.map((set, setIndex) => (
-                            <div key={setIndex} className="grid grid-cols-3 gap-2 text-sm border-b border-[#3A4D23] pb-2 last:border-b-0">
-                              <div className="font-semibold text-white">Set {set.set}</div>
-                              <div className="text-gray-300">{set.weight} kg x {set.reps} reps</div>
-                              <div className="text-right font-medium text-white">{set.weight * set.reps} kg</div>
-                            </div>
-                          ))}
+                  return (
+                    <div
+                      key={day.id}
+                      className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                        isCurrentDay
+                          ? 'border-[#8BAE5A] bg-[#232D1A]'
+                          : isCompleted
+                          ? 'border-green-500 bg-[#1A1A1A]'
+                          : 'border-[#3A4D23] bg-[#1A1A1A] hover:border-[#5A6D43]'
+                      }`}
+                      onClick={() => setSelectedDay(day.day_number)}
+                    >
+                      {isCompleted && (
+                        <div className="absolute top-2 right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                          <CheckIcon className="w-4 h-4 text-white" />
                         </div>
+                      )}
+                      
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="font-semibold text-white">Dag {day.day_number}</h3>
+                        {isNextDay && (
+                          <span className="text-xs bg-[#8BAE5A] text-[#232D1A] px-2 py-1 rounded-full">
+                            Volgende
+                          </span>
+                        )}
                       </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <button
-                  onClick={repeatTraining}
-                  className="flex-1 px-4 py-3 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-semibold flex items-center justify-center gap-2"
-                >
-                  <PlayIcon className="w-5 h-5" />
-                  Herhaal deze training
-                </button>
-                <button
-                  onClick={shareTraining}
-                  className="flex-1 px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] font-semibold border border-[#3A4D23] flex items-center justify-center gap-2"
-                >
-                  <ShareIcon className="w-5 h-5" />
-                  Deel op Social Feed
-                </button>
+                      <h4 className="text-[#8BAE5A] font-medium mb-1">{day.name}</h4>
+                      <p className="text-sm text-gray-400 mb-3">{day.focus_area}</p>
+                      
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          startWorkout(day.day_number);
+                        }}
+                        className="w-full px-4 py-2 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-semibold rounded-lg hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200"
+                      >
+                        Start Training
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             </div>
+          )}
+
+          {/* Quick Actions */}
+          <div className="bg-[#181F17] border border-[#3A4D23]/30 rounded-xl p-6">
+            <h2 className="text-xl font-bold text-white mb-4">Snelle Acties</h2>
+            <div className="flex flex-wrap gap-4">
+              <button
+                onClick={() => router.push('/dashboard/trainingscentrum')}
+                className="px-6 py-3 bg-[#3A4D23] text-[#8BAE5A] font-semibold rounded-lg hover:bg-[#4A5D33] transition-all duration-200"
+              >
+                Wijzig Schema
+              </button>
+              <button
+                onClick={() => router.push('/dashboard/trainingscentrum')}
+                className="px-6 py-3 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-semibold rounded-lg hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200"
+              >
+                Bekijk Alle Schema's
+              </button>
+            </div>
           </div>
-        )}
+        </div>
       </div>
     </ClientLayout>
   );

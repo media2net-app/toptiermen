@@ -33,6 +33,9 @@ interface Profile {
   } | null;
   badges_count?: number;
   fallback_rank?: string;
+  // Real-time online status
+  is_online?: boolean;
+  last_seen?: string | null;
 }
 
 const ranks = [
@@ -58,11 +61,88 @@ export default function LedenOverzicht() {
   const [connectionStatus, setConnectionStatus] = useState<Record<string, string>>({});
   const [notification, setNotification] = useState<string | null>(null);
   const notificationTimeout = useRef<NodeJS.Timeout | null>(null);
+  const [onlineCount, setOnlineCount] = useState(0);
 
   // Fetch real members data
   useEffect(() => {
     fetchMembers();
   }, []);
+
+  // Set up real-time presence updates
+  useEffect(() => {
+    if (!user) return;
+
+    // Mark user as online when component mounts
+    markUserOnline();
+
+    // Set up real-time subscription for presence changes
+    const presenceSubscription = supabase
+      .channel('user_presence')
+      .on('postgres_changes', 
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'user_presence' 
+        }, 
+        (payload) => {
+          console.log('Presence change:', payload);
+          // Refresh members data when presence changes
+          fetchMembers();
+        }
+      )
+      .subscribe();
+
+    // Mark user as offline when component unmounts
+    const handleBeforeUnload = () => {
+      markUserOffline();
+    };
+
+    // Mark user as offline when page becomes hidden
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        markUserOffline();
+      } else {
+        markUserOnline();
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Cleanup function
+    return () => {
+      presenceSubscription.unsubscribe();
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      markUserOffline();
+    };
+  }, [user]);
+
+  const markUserOnline = async () => {
+    if (!user) return;
+    
+    try {
+      const { error } = await supabase.rpc('mark_user_online');
+      if (error) {
+        console.error('Error marking user online:', error);
+      }
+    } catch (error) {
+      console.error('Error marking user online:', error);
+    }
+  };
+
+  const markUserOffline = async () => {
+    if (!user) return;
+    
+    try {
+      const { error } = await supabase.rpc('mark_user_offline');
+      if (error) {
+        console.error('Error marking user offline:', error);
+      }
+    } catch (error) {
+      console.error('Error marking user offline:', error);
+    }
+  };
 
   const fetchMembers = async () => {
     try {
@@ -77,6 +157,10 @@ export default function LedenOverzicht() {
 
       const { members: enrichedMembers } = await response.json();
       setMembers(enrichedMembers);
+      
+      // Count online members
+      const onlineMembers = enrichedMembers.filter((m: Profile) => m.is_online);
+      setOnlineCount(onlineMembers.length);
     } catch (err) {
       console.error('Error fetching members:', err);
       setError('Er is een fout opgetreden bij het laden van de leden.');
@@ -104,15 +188,7 @@ export default function LedenOverzicht() {
     return memberDate > weekAgo;
   };
 
-  const isOnline = (lastLogin: string | null) => {
-    if (!lastLogin) return false;
-    const lastLoginDate = new Date(lastLogin);
-    const fiveMinutesAgo = new Date();
-    fiveMinutesAgo.setMinutes(fiveMinutesAgo.getMinutes() - 5);
-    return lastLoginDate > fiveMinutesAgo;
-  };
-
-  const filtered = members.filter((m) => {
+  const filtered = members.filter((m: Profile) => {
     const memberInterests = getMemberInterests(m.interests);
     const memberRank = m.current_rank?.name || m.fallback_rank || 'Recruit';
     const memberName = m.display_name || m.full_name || 'Onbekend';
@@ -126,7 +202,7 @@ export default function LedenOverzicht() {
       (!selectedInterest || memberInterests.includes(selectedInterest)) &&
       (!location || (m.location && m.location.toLowerCase().includes(location.toLowerCase()))) &&
       (!showNew || isNewMember(m.created_at)) &&
-      (!showOnline || isOnline(m.last_login))
+      (!showOnline || m.is_online)
     );
   });
 
@@ -181,7 +257,18 @@ export default function LedenOverzicht() {
       <div className="mb-8">
         <h2 className="text-3xl font-bold text-white mb-1">De Broeders</h2>
         <p className="text-[#8BAE5A] text-lg mb-2">Vind, connect en leer van de andere leden van Top Tier Men.</p>
-        <span className="text-[#FFD700] text-sm font-semibold">Momenteel {members.length} actieve leden.</span>
+        <div className="flex items-center gap-4 text-[#FFD700] text-sm font-semibold">
+          <span>Momenteel {members.length} actieve leden</span>
+          <span className="flex items-center gap-1">
+            <span 
+              className="w-2 h-2 bg-[#8BAE5A] rounded-full"
+              style={{
+                animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+              }}
+            ></span>
+            {onlineCount} online nu
+          </span>
+        </div>
       </div>
       {/* Filters & Search */}
       <div className="flex flex-col md:flex-row md:items-end gap-4 mb-8">
@@ -220,7 +307,16 @@ export default function LedenOverzicht() {
             <input type="checkbox" checked={showNew} onChange={e => setShowNew(e.target.checked)} className="accent-[#FFD700]" /> Nieuwe leden
           </label>
           <label className="flex items-center gap-1 text-[#8BAE5A] text-xs">
-            <input type="checkbox" checked={showOnline} onChange={e => setShowOnline(e.target.checked)} className="accent-[#FFD700]" /> Online nu
+            <input type="checkbox" checked={showOnline} onChange={e => setShowOnline(e.target.checked)} className="accent-[#FFD700]" /> 
+            <span className="flex items-center gap-1">
+              <span 
+                className="w-2 h-2 bg-[#8BAE5A] rounded-full"
+                style={{
+                  animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+                }}
+              ></span>
+              Online nu ({onlineCount})
+            </span>
           </label>
         </div>
       </div>
@@ -231,7 +327,7 @@ export default function LedenOverzicht() {
           const memberRank = m.current_rank?.name || m.fallback_rank || 'Recruit';
           const rankIcon = getRankIcon(memberRank);
           const avatarUrl = m.avatar_url || '/profielfoto.png';
-          const isMemberOnline = isOnline(m.last_login);
+          const isMemberOnline = m.is_online || false;
           const isMemberNew = isNewMember(m.created_at);
           const memberName = m.display_name || m.full_name || 'Onbekend';
           const isCurrentUser = m.id === user?.id;
@@ -252,7 +348,15 @@ export default function LedenOverzicht() {
                     height={80} 
                     className="w-20 h-20 rounded-full border-2 border-[#8BAE5A] object-cover group-hover:scale-105 transition-transform" 
                   />
-                  {isMemberOnline && <span className="absolute bottom-1 right-1 w-4 h-4 bg-[#8BAE5A] border-2 border-white rounded-full" title="Online" />}
+                  {isMemberOnline && (
+                    <span 
+                      className="absolute bottom-1 right-1 w-5 h-5 bg-[#8BAE5A] border-3 border-white rounded-full shadow-lg" 
+                      title="Online nu"
+                      style={{
+                        animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+                      }}
+                    />
+                  )}
                   {isMemberNew && <span className="absolute -top-1 -right-1 bg-[#FFD700] text-[#181F17] text-xs px-2 py-1 rounded-full font-bold">Nieuw</span>}
                 </div>
                 <div className="text-lg font-bold text-white text-center group-hover:text-[#FFD700] transition-colors">{memberName}</div>

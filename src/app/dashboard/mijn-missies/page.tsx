@@ -1,395 +1,375 @@
 'use client';
-import ClientLayout from '../../components/ClientLayout';
+
 import { useState, useEffect } from 'react';
-import { PlusIcon, TrophyIcon, FireIcon, UserGroupIcon, CheckCircleIcon, StarIcon, BookOpenIcon, HeartIcon, CurrencyDollarIcon } from '@heroicons/react/24/solid';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'react-toastify';
 
-// Missie types en categorieën
-const missionCategories = {
-  'Gezondheid & Fitness': [
-    { id: 'water', title: 'Drink 3L water', icon: '💧', badge: 'Hydration Master', progress: 0 },
-    { id: 'stretch', title: '30 min stretchen', icon: '🧘‍♂️', badge: 'Flexibility King', progress: 0 },
-    { id: 'steps', title: '10.000 stappen', icon: '👟', badge: 'Step Master', progress: 0 },
-    { id: 'cold-shower', title: 'Koud douchen', icon: '❄️', badge: 'Ice Warrior', progress: 0 },
-  ],
-  'Mindset & Focus': [
-    { id: 'meditate', title: '10 min mediteren', icon: '🧘‍♂️', badge: 'Mind Master', progress: 0 },
-    { id: 'no-social', title: 'Geen social media voor 9:00', icon: '📱', badge: 'Digital Minimalist', progress: 0 },
-    { id: 'gratitude', title: 'Dankbaarheidsdagboek', icon: '🙏', badge: 'Gratitude Guru', progress: 0 },
-    { id: 'reading', title: '30 min lezen', icon: '📚', badge: 'Leesworm', progress: 0 },
-  ],
-  'Financiën & Werk': [
-    { id: 'side-hustle', title: '30 min werken aan side-hustle', icon: '💼', badge: 'Entrepreneur', progress: 0 },
-    { id: 'network', title: 'Netwerkbericht sturen', icon: '🤝', badge: 'Networker', progress: 0 },
-    { id: 'budget', title: 'Budget bijwerken', icon: '💰', badge: 'Money Master', progress: 0 },
-    { id: 'invest', title: 'Investeringsonderzoek', icon: '📈', badge: 'Investment Pro', progress: 0 },
-  ],
-};
+interface Mission {
+  id: string;
+  title: string;
+  type: string;
+  done: boolean;
+  category: string;
+  icon: string;
+  badge: string;
+  progress: number;
+  shared: boolean;
+  accountabilityPartner: string | null;
+  xp_reward: number;
+  last_completion_date?: string | null;
+}
 
-const initialMissions = [
-  { 
-    id: 1, 
-    title: '10.000 stappen per dag', 
-    type: 'Dagelijks', 
-    done: true, 
-    category: 'Gezondheid & Fitness',
-    icon: '👟',
-    badge: 'Step Master',
-    progress: 75,
-    shared: false,
-    accountabilityPartner: null
-  },
-  { 
-    id: 2, 
-    title: '30 min lezen', 
-    type: 'Dagelijks', 
-    done: true, 
-    category: 'Mindset & Focus',
-    icon: '📚',
-    badge: 'Leesworm',
-    progress: 65,
-    shared: false,
-    accountabilityPartner: null
-  },
-  { 
-    id: 3, 
-    title: '3x sporten', 
-    type: 'Wekelijks', 
-    done: false, 
-    category: 'Gezondheid & Fitness',
-    icon: '🏋️‍♂️',
-    badge: 'Fitness Warrior',
-    progress: 33,
-    shared: true,
-    accountabilityPartner: 'Mark V.'
-  },
-  { 
-    id: 4, 
-    title: '2x mediteren', 
-    type: 'Wekelijks', 
-    done: false, 
-    category: 'Mindset & Focus',
-    icon: '🧘‍♂️',
-    badge: 'Mind Master',
-    progress: 50,
-    shared: false,
-    accountabilityPartner: null
-  },
-];
+interface Summary {
+  completedToday: number;
+  totalToday: number;
+  dailyStreak: number;
+}
 
-export default function MijnMissies() {
-  const [missions, setMissions] = useState(initialMissions);
-  const [filter, setFilter] = useState('deze week');
-  const [showMissionManager, setShowMissionManager] = useState(false);
-  const [showAddMission, setShowAddMission] = useState(false);
-  const [newMission, setNewMission] = useState({ title: '', type: 'Dagelijks', category: 'Gezondheid & Fitness', shared: false });
-  const [mainGoal, setMainGoal] = useState('Financiële Vrijheid');
-  const [dailyStreak, setDailyStreak] = useState(12);
-  const [completedToday, setCompletedToday] = useState(2);
-  const [totalToday, setTotalToday] = useState(4);
+export default function MijnMissiesPage() {
+  const { user } = useAuth();
+  const [missions, setMissions] = useState<Mission[]>([]);
+  const [summary, setSummary] = useState<Summary>({ completedToday: 0, totalToday: 0, dailyStreak: 0 });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [newMission, setNewMission] = useState({ title: '', type: 'Dagelijks' });
 
-  // Load main goal from localStorage
-  useEffect(() => {
-    const savedGoal = localStorage.getItem('ttm_main_goal');
-    if (savedGoal) setMainGoal(savedGoal);
-  }, []);
-
-  const toggleMission = (id: number) => {
-    setMissions(missions.map(mission => {
-      if (mission.id === id) {
-        const newDone = !mission.done;
-        
-        // Check if this completes all daily missions
-        if (newDone && mission.type === 'Dagelijks') {
-          const dailyMissions = missions.filter(m => m.type === 'Dagelijks');
-          const allDailyCompleted = dailyMissions.every(m => m.id === id ? newDone : m.done);
-          
-          if (allDailyCompleted) {
-            // Show completion celebration
-            toast.success(`🎉 Alle missies voltooid! Je hebt je discipline voor vandaag getoond. Je dagelijkse streak is nu ${dailyStreak + 1} dagen. 🔥`);
-            setDailyStreak(prev => prev + 1);
-          }
-        }
-        
-        return { ...mission, done: newDone };
-      }
-      return mission;
-    }));
+  // Helper function to check if mission was completed today
+  const isMissionCompletedToday = (completionDate: string | null | undefined): boolean => {
+    if (!completionDate) return false;
+    const today = new Date().toISOString().split('T')[0];
+    return completionDate === today;
   };
 
-  const addMission = () => {
-    if (!newMission.title.trim()) return;
-    
-    const mission = {
-      id: Date.now(),
-      title: newMission.title,
-      type: newMission.type,
-      done: false,
-      category: newMission.category,
-      icon: '🎯',
-      badge: 'Custom Badge',
-      progress: 0,
-      shared: newMission.shared,
-      accountabilityPartner: null
-    };
-    
-    setMissions([...missions, mission]);
-    setNewMission({ title: '', type: 'Dagelijks', category: 'Gezondheid & Fitness', shared: false });
-    setShowAddMission(false);
-    
-    if (newMission.shared) {
-      toast.info('🔥 Je commitment is gedeeld met de Brotherhood!');
+  // Load missions
+  useEffect(() => {
+    if (!user?.id) return;
+
+    async function loadMissions() {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const response = await fetch(`/api/missions-simple?userId=${user.id}`);
+        if (!response.ok) {
+          throw new Error('Failed to load missions');
+        }
+
+        const data = await response.json();
+        
+        // Update missions with proper daily tracking
+        const updatedMissions = data.missions.map((mission: Mission) => ({
+          ...mission,
+          done: mission.type === 'Dagelijks' 
+            ? isMissionCompletedToday(mission.last_completion_date)
+            : mission.done
+        }));
+
+        setMissions(updatedMissions);
+        setSummary(data.summary);
+      } catch (err) {
+        console.error('Error loading missions:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load missions');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadMissions();
+  }, [user?.id]);
+
+  // Toggle mission completion
+  const toggleMission = async (missionId: string) => {
+    if (!user?.id) return;
+
+    try {
+      const response = await fetch('/api/missions-simple', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'toggle',
+          userId: user.id,
+          missionId: missionId
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to toggle mission');
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Update missions state
+        setMissions(prevMissions => 
+          prevMissions.map(mission => {
+            if (mission.id === missionId) {
+              const isCompleted = data.completed;
+              return {
+                ...mission,
+                done: isCompleted,
+                last_completion_date: data.completionDate || null
+              };
+            }
+            return mission;
+          })
+        );
+
+        // Update summary
+        if (data.completed) {
+          setSummary(prev => ({
+            ...prev,
+            completedToday: prev.completedToday + 1
+          }));
+        } else {
+          setSummary(prev => ({
+            ...prev,
+            completedToday: Math.max(0, prev.completedToday - 1)
+          }));
+        }
+
+        // Show success message
+        if (data.xpEarned > 0) {
+          toast.success(`🎉 ${data.message || `Missie voltooid! +${data.xpEarned} XP verdiend!`}`);
+        } else if (data.xpEarned < 0) {
+          toast.info(`Missie ongedaan gemaakt. ${Math.abs(data.xpEarned)} XP afgetrokken.`);
+        }
+      }
+    } catch (err) {
+      console.error('Error toggling mission:', err);
+      toast.error('Fout bij het voltooien van de missie');
     }
   };
 
-  const getGoalMessage = () => {
-    const goalMessages = {
-      'Financiële Vrijheid': 'De discipline die je vandaag traint met deze missies, is de brandstof voor jouw succes op de lange termijn.',
-      'Fysieke Kracht': 'Elke afgevinkte missie bouwt aan jouw fysieke en mentale kracht.',
-      'Mentale Focus': 'Deze dagelijkse gewoontes scherpen jouw geest en versterken jouw focus.',
-      'Persoonlijke Groei': 'Elke voltooide missie brengt je dichter bij de beste versie van jezelf.'
-    };
-    return goalMessages[mainGoal as keyof typeof goalMessages] || 'Elke voltooide missie brengt je dichter bij jouw doel.';
+  // Add new mission
+  const addMission = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user?.id || !newMission.title.trim()) return;
+
+    try {
+      const response = await fetch('/api/missions-simple', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create',
+          userId: user.id,
+          title: newMission.title,
+          type: newMission.type
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create mission');
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        setMissions(prev => [...prev, data.mission]);
+        setNewMission({ title: '', type: 'Dagelijks' });
+        toast.success('Missie toegevoegd!');
+      }
+    } catch (err) {
+      console.error('Error creating mission:', err);
+      toast.error('Fout bij het toevoegen van de missie');
+    }
   };
 
-  const getProgressColor = (progress: number) => {
-    if (progress >= 80) return 'text-[#8BAE5A]';
-    if (progress >= 60) return 'text-[#FFD700]';
-    if (progress >= 40) return 'text-[#f0a14f]';
-    return 'text-[#B6C948]';
-  };
+  // Filter missions
+  const pendingMissions = missions.filter(m => !m.done);
+  const completedMissions = missions.filter(m => m.done);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#0F1419] to-[#1A1F2E] p-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-700 rounded w-1/4 mb-6"></div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="h-24 bg-gray-700 rounded"></div>
+              ))}
+            </div>
+            <div className="space-y-4">
+              {[1, 2, 3, 4, 5].map(i => (
+                <div key={i} className="h-20 bg-gray-700 rounded"></div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#0F1419] to-[#1A1F2E] p-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-red-400 text-center py-8">
+            <p>Error: {error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <ClientLayout>
-      <div className="p-6 md:p-12">
-        {/* Focus van Vandaag Header */}
-        <div className="bg-gradient-to-r from-[#8BAE5A]/20 to-[#FFD700]/20 rounded-2xl p-6 mb-8 border border-[#8BAE5A]/30">
-          <h2 className="text-2xl font-bold text-[#FFD700] mb-2 flex items-center gap-2">
-            <StarIcon className="w-6 h-6" />
-            Focus van Vandaag
-          </h2>
-          <p className="text-white text-lg mb-2">
-            Jouw hoofddoel is <span className="text-[#8BAE5A] font-bold">{mainGoal}</span>.
-          </p>
-          <p className="text-[#8BAE5A]/80">
-            {getGoalMessage()}
-          </p>
-          <div className="mt-4 flex items-center gap-4 text-sm">
-            <span className="text-white">
-              <FireIcon className="w-4 h-4 inline mr-1" />
-              Streak: {dailyStreak} dagen
-            </span>
-            <span className="text-[#8BAE5A]">
-              {completedToday}/{totalToday} missies voltooid vandaag
-            </span>
+    <div className="min-h-screen bg-gradient-to-br from-[#0F1419] to-[#1A1F2E] p-6">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-white mb-2">Mijn Missies</h1>
+          <p className="text-gray-400">Voltooi dagelijkse missies en verdien XP</p>
+        </div>
+
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 text-center">
+            <div className="text-2xl font-bold text-[#FFD700]">{summary.completedToday}</div>
+            <div className="text-[#8BAE5A] text-sm">Vandaag Voltooid</div>
+          </div>
+          <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 text-center">
+            <div className="text-2xl font-bold text-[#FFD700]">{summary.totalToday}</div>
+            <div className="text-[#8BAE5A] text-sm">Totaal Vandaag</div>
+          </div>
+          <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 text-center">
+            <div className="text-2xl font-bold text-[#FFD700]">{summary.dailyStreak}</div>
+            <div className="text-[#8BAE5A] text-sm">Dagelijkse Streak</div>
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-          <div>
-            <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">Mijn Missies</h1>
-            <p className="text-[#8BAE5A] text-lg">Overzicht van je actieve en voltooide missies deze week</p>
-          </div>
-          <div className="flex gap-2">
-            <button 
-              onClick={() => setShowMissionManager(true)}
-              className="px-6 py-3 rounded-xl bg-[#232D1A] text-[#8BAE5A] font-bold text-lg shadow border border-[#3A4D23] hover:bg-[#2A341F] transition-all flex items-center gap-2"
+        {/* Add New Mission */}
+        <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-6 mb-8">
+          <h2 className="text-xl font-semibold text-white mb-4">Nieuwe Missie Toevoegen</h2>
+          <form onSubmit={addMission} className="flex flex-col sm:flex-row gap-4">
+            <input
+              type="text"
+              value={newMission.title}
+              onChange={(e) => setNewMission(prev => ({ ...prev, title: e.target.value }))}
+              placeholder="Missie titel..."
+              className="flex-1 bg-[#0F1419] border border-[#3A4D23]/30 rounded-lg px-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-[#8BAE5A]"
+            />
+            <select
+              value={newMission.type}
+              onChange={(e) => setNewMission(prev => ({ ...prev, type: e.target.value }))}
+              className="bg-[#0F1419] border border-[#3A4D23]/30 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#8BAE5A]"
             >
-              <TrophyIcon className="w-5 h-5" />
-              Beheer Missies
-            </button>
-            <button 
-              onClick={() => setShowAddMission(true)}
-              className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] text-[#181F17] font-bold text-lg shadow hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all border border-[#8BAE5A] flex items-center gap-2"
+              <option value="Dagelijks">Dagelijks</option>
+              <option value="Wekelijks">Wekelijks</option>
+            </select>
+            <button
+              type="submit"
+              className="bg-gradient-to-r from-[#8BAE5A] to-[#6B8E3A] hover:from-[#7A9D4A] hover:to-[#5A7D2A] text-white font-semibold px-6 py-2 rounded-lg transition-all duration-200"
             >
-              <PlusIcon className="w-5 h-5" />
-              + Nieuwe missie
+              Toevoegen
             </button>
-          </div>
+          </form>
         </div>
 
-        <div className="flex gap-2 mb-6">
-          <button onClick={() => setFilter('deze week')} className={`px-4 py-2 rounded-full font-semibold transition ${filter === 'deze week' ? 'bg-[#232D1A] text-[#8BAE5A]' : 'text-[#B6C948] hover:text-[#8BAE5A]'}`}>Deze week</button>
-          <button onClick={() => setFilter('alle')} className={`px-4 py-2 rounded-full font-semibold transition ${filter === 'alle' ? 'bg-[#232D1A] text-[#8BAE5A]' : 'text-[#B6C948] hover:text-[#8BAE5A]'}`}>Alle missies</button>
-        </div>
-
-        <div className="bg-[#232D1A] rounded-2xl shadow-xl p-6 border border-[#3A4D23]">
-          {missions.length === 0 ? (
-            <div className="text-[#8BAE5A] text-center py-12">Geen missies gevonden. Voeg een nieuwe missie toe!</div>
-          ) : (
-            <ul className="divide-y divide-[#3A4D23]">
-              {missions.map(m => (
-                <li key={m.id} className="py-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-3">
-                      <button
-                        onClick={() => toggleMission(m.id)}
-                        className={`w-6 h-6 rounded-full flex items-center justify-center border-2 transition-all ${m.done ? 'bg-[#8BAE5A] border-[#8BAE5A] text-[#181F17]' : 'bg-[#232D1A] border-[#3A4D23] text-[#8BAE5A] hover:border-[#8BAE5A]'}`}
-                      >
-                        {m.done && <CheckCircleIcon className="w-4 h-4" />}
-                      </button>
-                      <span className="text-2xl">{m.icon}</span>
-                      <span className={`text-lg ${m.done ? 'line-through text-[#B6C948]' : 'text-white'}`}>{m.title}</span>
-                      <span className="ml-2 px-2 py-0.5 rounded bg-[#3A4D23] text-[#8BAE5A] text-xs font-semibold">{m.type}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {m.shared && (
-                        <span className="text-[#FFD700] text-sm flex items-center gap-1">
-                          <UserGroupIcon className="w-4 h-4" />
-                          Gedeeld
-                        </span>
-                      )}
-                      {m.accountabilityPartner && (
-                        <span className="text-[#8BAE5A] text-sm">
-                          Partner: {m.accountabilityPartner}
-                        </span>
-                      )}
-                      {m.done && <span className="text-[#8BAE5A] text-sm">Voltooid</span>}
-                    </div>
-                  </div>
-                  
-                  {/* Badge Progressie */}
-                  <div className="ml-11 mb-2">
-                    <div className="flex items-center gap-2 text-sm">
-                      <TrophyIcon className="w-4 h-4 text-[#FFD700]" />
-                      <span className={`${getProgressColor(m.progress)}`}>
-                        {m.badge}: {m.progress}% voltooid
-                      </span>
-                    </div>
-                    <div className="w-full bg-[#3A4D23] rounded-full h-2 mt-1">
-                      <div 
-                        className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${m.progress}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        {/* Missie Management Modal */}
-        {showMissionManager && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-[#232D1A] rounded-2xl p-6 max-w-4xl w-full max-h-[80vh] overflow-y-auto">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-white">Missie Management</h2>
-                <button 
-                  onClick={() => setShowMissionManager(false)}
-                  className="text-[#8BAE5A] hover:text-white"
+        {/* TO DO Missions */}
+        {pendingMissions.length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-white mb-4">Te Doen</h2>
+            <div className="space-y-4">
+              {pendingMissions.map((mission) => (
+                <div
+                  key={mission.id}
+                  className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-6 hover:border-[#8BAE5A]/50 transition-all duration-200"
                 >
-                  ✕
-                </button>
-              </div>
-              
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Mijn Huidige Missies */}
-                <div>
-                  <h3 className="text-lg font-bold text-[#8BAE5A] mb-4">Mijn Huidige Missies</h3>
-                  <div className="space-y-2">
-                    {missions.map(mission => (
-                      <div key={mission.id} className="bg-[#181F17] rounded-xl p-3 flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xl">{mission.icon}</span>
-                          <span className="text-white text-sm">{mission.title}</span>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <div className="text-3xl">{mission.icon}</div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-white">{mission.title}</h3>
+                        <div className="flex items-center space-x-4 mt-1">
+                          <span className="text-sm text-[#8BAE5A]">{mission.type}</span>
+                          <span className="text-sm text-gray-400">{mission.category}</span>
+                          {mission.shared && (
+                            <span className="text-sm text-[#FFD700]">👥 Gedeeld</span>
+                          )}
                         </div>
-                        <button className="text-red-400 hover:text-red-300 text-sm">Verwijder</button>
+                        {mission.accountabilityPartner && (
+                          <p className="text-sm text-gray-400 mt-1">
+                            Accountability Partner: {mission.accountabilityPartner}
+                          </p>
+                        )}
                       </div>
-                    ))}
+                    </div>
+                    <div className="flex items-center space-x-4">
+                      <div className="text-right">
+                        <div className="text-lg font-bold text-[#FFD700]">+{mission.xp_reward} XP</div>
+                        <div className="text-sm text-gray-400">{mission.badge}</div>
+                      </div>
+                      <button
+                        onClick={() => toggleMission(mission.id)}
+                        className="bg-gradient-to-r from-[#8BAE5A] to-[#6B8E3A] hover:from-[#7A9D4A] hover:to-[#5A7D2A] text-white font-semibold px-4 py-2 rounded-lg transition-all duration-200"
+                      >
+                        Voltooien
+                      </button>
+                    </div>
                   </div>
                 </div>
-
-                {/* Missie Bibliotheek */}
-                <div>
-                  <h3 className="text-lg font-bold text-[#8BAE5A] mb-4">Missie Bibliotheek</h3>
-                  <div className="space-y-4">
-                    {Object.entries(missionCategories).map(([category, missions]) => (
-                      <div key={category}>
-                        <h4 className="text-[#FFD700] font-semibold mb-2">{category}</h4>
-                        <div className="space-y-2">
-                          {missions.map(mission => (
-                            <div key={mission.id} className="bg-[#181F17] rounded-xl p-3 flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <span className="text-xl">{mission.icon}</span>
-                                <span className="text-white text-sm">{mission.title}</span>
-                              </div>
-                              <button className="text-[#8BAE5A] hover:text-[#FFD700] text-sm">Toevoegen</button>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         )}
 
-        {/* Add Mission Modal */}
-        {showAddMission && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-[#232D1A] rounded-2xl p-6 max-w-md w-full">
-              <h2 className="text-2xl font-bold text-white mb-6">Creëer Eigen Missie</h2>
-              
-              <div className="space-y-4">
-                <input
-                  type="text"
-                  placeholder="Missie titel (bijv. 'Oefen 15 minuten gitaar')"
-                  value={newMission.title}
-                  onChange={(e) => setNewMission({...newMission, title: e.target.value})}
-                  className="w-full rounded-xl bg-[#181F17] border border-[#3A4D23] py-3 px-4 text-white placeholder-[#8BAE5A]/60 focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                />
-                
-                <select
-                  value={newMission.type}
-                  onChange={(e) => setNewMission({...newMission, type: e.target.value})}
-                  className="w-full rounded-xl bg-[#181F17] border border-[#3A4D23] py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+        {/* Completed Missions */}
+        {completedMissions.length > 0 && (
+          <div>
+            <h2 className="text-2xl font-bold text-white mb-4">Voltooid</h2>
+            <div className="space-y-4">
+              {completedMissions.map((mission) => (
+                <div
+                  key={mission.id}
+                  className="bg-gradient-to-br from-[#1A1F2E] to-[#232D1A] border border-[#3A4D23]/50 rounded-xl p-6 opacity-75"
                 >
-                  <option value="Dagelijks">Dagelijks</option>
-                  <option value="Wekelijks">Wekelijks</option>
-                </select>
-                
-                <select
-                  value={newMission.category}
-                  onChange={(e) => setNewMission({...newMission, category: e.target.value})}
-                  className="w-full rounded-xl bg-[#181F17] border border-[#3A4D23] py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                >
-                  <option value="Gezondheid & Fitness">Gezondheid & Fitness</option>
-                  <option value="Mindset & Focus">Mindset & Focus</option>
-                  <option value="Financiën & Werk">Financiën & Werk</option>
-                </select>
-                
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={newMission.shared}
-                    onChange={(e) => setNewMission({...newMission, shared: e.target.checked})}
-                    className="accent-[#8BAE5A]"
-                  />
-                  <span className="text-white">Deel deze commitment met de Brotherhood</span>
-                </label>
-              </div>
-              
-              <div className="flex gap-3 mt-6">
-                <button
-                  onClick={() => setShowAddMission(false)}
-                  className="flex-1 px-4 py-2 rounded-xl bg-[#181F17] text-[#8BAE5A] font-semibold border border-[#3A4D23]"
-                >
-                  Annuleren
-                </button>
-                <button
-                  onClick={addMission}
-                  className="flex-1 px-4 py-2 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-semibold"
-                >
-                  Toevoegen
-                </button>
-              </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <div className="text-3xl">{mission.icon}</div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-white line-through">{mission.title}</h3>
+                        <div className="flex items-center space-x-4 mt-1">
+                          <span className="text-sm text-[#8BAE5A]">{mission.type}</span>
+                          <span className="text-sm text-gray-400">{mission.category}</span>
+                          {mission.shared && (
+                            <span className="text-sm text-[#FFD700]">👥 Gedeeld</span>
+                          )}
+                        </div>
+                        {mission.last_completion_date && (
+                          <p className="text-sm text-gray-400 mt-1">
+                            Voltooid op: {new Date(mission.last_completion_date).toLocaleDateString('nl-NL')}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-4">
+                      <div className="text-right">
+                        <div className="text-lg font-bold text-[#FFD700]">+{mission.xp_reward} XP</div>
+                        <div className="text-sm text-gray-400">{mission.badge}</div>
+                      </div>
+                      <button
+                        onClick={() => toggleMission(mission.id)}
+                        className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white font-semibold px-4 py-2 rounded-lg transition-all duration-200"
+                      >
+                        Ongedaan
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
+          </div>
+        )}
+
+        {/* Empty State */}
+        {missions.length === 0 && (
+          <div className="text-center py-12">
+            <div className="text-6xl mb-4">🎯</div>
+            <h3 className="text-xl font-semibold text-white mb-2">Geen missies gevonden</h3>
+            <p className="text-gray-400">Voeg je eerste missie toe om te beginnen!</p>
           </div>
         )}
       </div>
-    </ClientLayout>
+    </div>
   );
 } 
