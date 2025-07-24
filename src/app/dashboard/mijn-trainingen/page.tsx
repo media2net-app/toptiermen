@@ -5,6 +5,7 @@ import { LockClosedIcon, PlayIcon, CalendarIcon, ChartBarIcon, ArrowRightIcon, C
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../../contexts/AuthContext';
+import PreWorkoutModal from '../trainingscentrum/PreWorkoutModal';
 
 interface TrainingSchema {
   id: string;
@@ -47,6 +48,8 @@ export default function MijnTrainingen() {
   const [trainingData, setTrainingData] = useState<TrainingData | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedDay, setSelectedDay] = useState<number>(1);
+  const [showPreWorkoutModal, setShowPreWorkoutModal] = useState(false);
+  const [selectedDayForWorkout, setSelectedDayForWorkout] = useState<number>(1);
 
   useEffect(() => {
     if (user) {
@@ -78,8 +81,13 @@ export default function MijnTrainingen() {
   const startWorkout = (dayNumber: number) => {
     if (!trainingData?.schema) return;
     
-    // Navigate to workout page
-    router.push(`/dashboard/trainingscentrum/workout/${trainingData.schema.id}/${dayNumber}`);
+    console.log('🚀 Starting workout for day:', dayNumber);
+    console.log('📊 Training data:', trainingData);
+    
+    setSelectedDayForWorkout(dayNumber);
+    setShowPreWorkoutModal(true);
+    
+    console.log('✅ Modal should be open now');
   };
 
   const goToTrainingscentrum = () => {
@@ -97,11 +105,24 @@ export default function MijnTrainingen() {
                 <p className="text-[#8BAE5A]">Laden van trainingsgegevens...</p>
               </div>
             </div>
-          </div>
-        </div>
-      </ClientLayout>
-    );
-  }
+                  </div>
+      </div>
+
+      {/* Pre-Workout Modal */}
+      {trainingData?.schema && (
+        <PreWorkoutModal
+          isOpen={showPreWorkoutModal}
+          onClose={() => setShowPreWorkoutModal(false)}
+          schemaId={trainingData.schema.id}
+          dayNumber={selectedDayForWorkout}
+          schemaName={trainingData.schema.name}
+          focusArea={trainingData.days?.find(d => d.day_number === selectedDayForWorkout)?.focus_area || 'Training'}
+          estimatedDuration={trainingData.schema.estimated_duration}
+        />
+      )}
+    </ClientLayout>
+  );
+}
 
   // Lock state - no active schema
   if (!trainingData?.hasActiveSchema) {
@@ -294,6 +315,19 @@ export default function MijnTrainingen() {
           </div>
         </div>
       </div>
+
+      {/* Pre-Workout Modal */}
+      {trainingData?.schema && (
+        <PreWorkoutModal
+          isOpen={showPreWorkoutModal}
+          onClose={() => setShowPreWorkoutModal(false)}
+          schemaId={trainingData.schema.id}
+          dayNumber={selectedDayForWorkout}
+          schemaName={trainingData.schema.name}
+          focusArea={trainingData.days?.find(d => d.day_number === selectedDayForWorkout)?.focus_area || 'Training'}
+          estimatedDuration={trainingData.schema.estimated_duration}
+        />
+      )}
     </ClientLayout>
   );
 } 

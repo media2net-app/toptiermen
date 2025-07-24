@@ -1,279 +1,299 @@
-"use client";
-import { Fragment, useState, useEffect } from "react";
-import { Dialog, Transition } from "@headlessui/react";
-import { PlayIcon, PauseIcon, ArrowRightIcon, FireIcon, LightBulbIcon } from "@heroicons/react/24/solid";
-import { SparklesIcon } from '@heroicons/react/24/outline';
+'use client';
+
+import { useState } from 'react';
+import { 
+  XMarkIcon, 
+  PlayIcon, 
+  CheckIcon,
+  ClockIcon,
+  FireIcon,
+  SparklesIcon,
+  ExclamationTriangleIcon
+} from '@heroicons/react/24/outline';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface PreWorkoutModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onComplete: () => void;
-  trainingType: string;
+  schemaId: string;
+  dayNumber: number;
+  schemaName: string;
+  focusArea: string;
+  estimatedDuration: string;
 }
 
-const warmingUpExercises = {
-  "Push Day": [
-    {
-      name: "Armcirkels",
-      duration: 30,
-      description: "Maak grote cirkels met je armen voorwaarts en achterwaarts",
-      focus: "Schouder mobiliteit en bloedtoevoer"
-    },
-    {
-      name: "Heupzwaaien",
-      duration: 30,
-      description: "Zwaai je benen zijwaarts om je heupen los te maken",
-      focus: "Heup mobiliteit en core activatie"
-    },
-    {
-      name: "Schoudermobiliteit",
-      duration: 30,
-      description: "Roteer je schouders en maak kleine cirkels",
-      focus: "Schouder warming-up voor bench press"
-    },
-    {
-      name: "Tricep Stretches",
-      duration: 30,
-      description: "Strek je armen achter je hoofd en houd vast",
-      focus: "Tricep flexibiliteit voor dips"
-    }
-  ],
-  "Pull Day": [
-    {
-      name: "Armcirkels",
-      duration: 30,
-      description: "Maak grote cirkels met je armen voorwaarts en achterwaarts",
-      focus: "Schouder mobiliteit en bloedtoevoer"
-    },
-    {
-      name: "Lat Stretches",
-      duration: 30,
-      description: "Strek je armen omhoog en leun naar achteren",
-      focus: "Lat warming-up voor pull-ups"
-    },
-    {
-      name: "Grip Warming",
-      duration: 30,
-      description: "Knijp en ontspan je handen herhaaldelijk",
-      focus: "Grip kracht voor deadlifts"
-    }
-  ],
-  "Leg Day": [
-    {
-      name: "Been Swings",
-      duration: 30,
-      description: "Zwaai je benen voorwaarts en achterwaarts",
-      focus: "Hamstring en quad warming-up"
-    },
-    {
-      name: "Ankle Mobility",
-      duration: 30,
-      description: "Roteer je enkels en maak kleine cirkels",
-      focus: "Enkel mobiliteit voor squats"
-    },
-    {
-      name: "Hip Circles",
-      duration: 30,
-      description: "Maak cirkels met je heupen",
-      focus: "Heup mobiliteit voor deadlifts"
-    }
-  ]
-};
+interface ChecklistItem {
+  id: string;
+  label: string;
+  checked: boolean;
+}
 
-const mindMuscleTips = {
-  "Bench Press": "Pro Tip: Voordat je begint, knijp 5 seconden hard in de stang en focus op het 'samenknijpen' van je borstspieren. Dit activeert de juiste spiervezels en verhoogt de effectiviteit van elke herhaling.",
-  "Squat": "Pro Tip: Plaats je handen op je heupen en voel hoe je core spant. Focus op het 'samenknijpen' van je buikspieren voordat je naar beneden gaat.",
-  "Deadlift": "Pro Tip: Stel je voor dat je de vloer wegduwt met je voeten. Focus op het activeren van je hamstrings en glutes voordat je de stang optilt."
-};
+export default function PreWorkoutModal({
+  isOpen,
+  onClose,
+  schemaId,
+  dayNumber,
+  schemaName,
+  focusArea,
+  estimatedDuration
+}: PreWorkoutModalProps) {
+  const router = useRouter();
+  const { user } = useAuth();
+  const [selectedMode, setSelectedMode] = useState<'interactive' | 'quick'>('interactive');
+  const [checklist, setChecklist] = useState<ChecklistItem[]>([
+    { id: 'warmup', label: 'Warm-up doen (5 min)', checked: false },
+    { id: 'water', label: 'Water klaar', checked: false },
+    { id: 'space', label: 'Ruimte vrij', checked: false },
+    { id: 'music', label: 'Motiverende muziek', checked: false }
+  ]);
+  const [isStarting, setIsStarting] = useState(false);
 
-export default function PreWorkoutModal({ isOpen, onClose, onComplete, trainingType }: PreWorkoutModalProps) {
-  const [currentStep, setCurrentStep] = useState<'welcome' | 'warming' | 'mind-muscle' | 'complete'>('welcome');
-  const [currentExercise, setCurrentExercise] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(30);
-  const [isPlaying, setIsPlaying] = useState(false);
-
-  const exercises = warmingUpExercises[trainingType as keyof typeof warmingUpExercises] || warmingUpExercises["Push Day"];
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    
-    if (isPlaying && timeLeft > 0) {
-      interval = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            if (currentExercise < exercises.length - 1) {
-              setCurrentExercise(prev => prev + 1);
-              return exercises[currentExercise + 1].duration;
-            } else {
-              setIsPlaying(false);
-              setCurrentStep('mind-muscle');
-              return 0;
-            }
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-
-    return () => clearInterval(interval);
-  }, [isPlaying, timeLeft, currentExercise, exercises]);
-
-  const handleStartWarming = () => {
-    setCurrentStep('warming');
-    setCurrentExercise(0);
-    setTimeLeft(exercises[0].duration);
-    setIsPlaying(true);
+  const toggleChecklistItem = (id: string) => {
+    setChecklist(prev => 
+      prev.map(item => 
+        item.id === id ? { ...item, checked: !item.checked } : item
+      )
+    );
   };
 
-  const handleSkipWarming = () => {
-    setCurrentStep('mind-muscle');
+  const startWorkout = async () => {
+    if (!user?.id) return;
+
+    setIsStarting(true);
+
+    try {
+      console.log('Starting workout session:', {
+        userId: user.id,
+        schemaId: schemaId,
+        dayNumber: dayNumber,
+        mode: selectedMode
+      });
+
+      // Start workout session
+      const response = await fetch('/api/workout-sessions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id,
+          schemaId: schemaId,
+          dayNumber: dayNumber,
+          mode: selectedMode
+        })
+      });
+
+      console.log('Response status:', response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Response error:', errorText);
+        throw new Error('Failed to start workout session');
+      }
+
+      const data = await response.json();
+      console.log('Response data:', data);
+
+      if (data.success) {
+        // Navigate to appropriate page based on mode
+        if (selectedMode === 'interactive') {
+          router.push(`/dashboard/trainingscentrum/workout/${schemaId}/${dayNumber}?sessionId=${data.session.id}`);
+        } else {
+          // For quick mode, complete immediately and go back
+          await completeQuickWorkout(data.session.id);
+        }
+      }
+    } catch (error) {
+      console.error('Error starting workout:', error);
+    } finally {
+      setIsStarting(false);
+    }
   };
 
-  const handleComplete = () => {
-    onComplete();
+  const completeQuickWorkout = async (sessionId: string) => {
+    try {
+      const response = await fetch('/api/workout-sessions/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId: sessionId,
+          rating: 5,
+          notes: 'Quick completion'
+        })
+      });
+
+      if (response.ok) {
+        onClose();
+        // Show success message or redirect
+        router.push('/dashboard/mijn-trainingen');
+      }
+    } catch (error) {
+      console.error('Error completing quick workout:', error);
+    }
   };
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
+  const checkedItems = checklist.filter(item => item.checked).length;
+  const totalItems = checklist.length;
+
+  console.log('🎭 Modal render state:', { isOpen, schemaId, dayNumber, schemaName });
+  
+  if (!isOpen) return null;
 
   return (
-    <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={onClose}>
-        <Transition.Child
-          as={Fragment}
-          enter="ease-out duration-300"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="ease-in duration-200"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div 
+        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+        onClick={onClose}
+      />
+
+      {/* Modal */}
+      <div className="relative w-full max-w-2xl bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-2xl p-8 shadow-2xl">
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
         >
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm" />
-        </Transition.Child>
+          <XMarkIcon className="w-6 h-6" />
+        </button>
 
-        <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4">
-            <Transition.Child
-              as={Fragment}
-              enter="ease-out duration-300"
-              enterFrom="opacity-0 scale-95"
-              enterTo="opacity-100 scale-100"
-              leave="ease-in duration-200"
-              leaveFrom="opacity-100 scale-100"
-              leaveTo="opacity-0 scale-95"
-            >
-              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-[#232D1A] p-6 text-left align-middle shadow-xl border border-[#8BAE5A]/40">
-                {currentStep === 'welcome' && (
-                  <div className="text-center">
-                    <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-[#8BAE5A]/20 mb-4">
-                      <FireIcon className="h-6 w-6 text-[#8BAE5A]" />
-                    </div>
-                    <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-white mb-2">
-                      Klaar om te knallen!
-                    </Dialog.Title>
-                    <div className="mt-2">
-                      <p className="text-sm text-[#A3AED6] mb-6">
-                        Wil je eerst een dynamische warming-up van 5 minuten doen die specifiek is afgestemd op je {trainingType} van vandaag?
-                      </p>
-                      <div className="flex flex-col gap-3">
-                        <button
-                          onClick={handleStartWarming}
-                          className="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-semibold hover:from-[#FFD700] hover:to-[#8BAE5A] transition-all"
-                        >
-                          Ja, start warming-up
-                        </button>
-                        <button
-                          onClick={handleSkipWarming}
-                          className="w-full px-4 py-3 rounded-xl bg-[#3A4D23] text-[#8BAE5A] font-semibold hover:bg-[#4A5D33] transition-all"
-                        >
-                          Overslaan
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {currentStep === 'warming' && (
-                  <div className="text-center">
-                    <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-[#8BAE5A]/20 mb-4">
-                      <PlayIcon className="h-6 w-6 text-[#8BAE5A]" />
-                    </div>
-                    <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-white mb-2">
-                      {exercises[currentExercise].name}
-                    </Dialog.Title>
-                    <div className="mt-2">
-                      <p className="text-sm text-[#A3AED6] mb-4">
-                        {exercises[currentExercise].description}
-                      </p>
-                      <p className="text-xs text-[#8BAE5A] mb-6">
-                        Focus: {exercises[currentExercise].focus}
-                      </p>
-                      
-                      <div className="mb-6">
-                        <div className="text-3xl font-bold text-[#FFD700] mb-2">
-                          {formatTime(timeLeft)}
-                        </div>
-                        <div className="flex justify-center gap-2">
-                          <button
-                            onClick={() => setIsPlaying(!isPlaying)}
-                            className="px-4 py-2 rounded-lg bg-[#8BAE5A] text-white hover:bg-[#9BBE6A] transition-all"
-                          >
-                            {isPlaying ? <PauseIcon className="h-4 w-4" /> : <PlayIcon className="h-4 w-4" />}
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="flex justify-center gap-1 mb-4">
-                        {exercises.map((_, index) => (
-                          <div
-                            key={index}
-                            className={`h-2 rounded-full ${
-                              index <= currentExercise ? 'bg-[#8BAE5A]' : 'bg-[#3A4D23]'
-                            } ${index === currentExercise ? 'w-8' : 'w-4'} transition-all`}
-                          />
-                        ))}
-                      </div>
-
-                      <button
-                        onClick={handleSkipWarming}
-                        className="w-full px-4 py-2 rounded-xl bg-[#3A4D23] text-[#8BAE5A] font-semibold hover:bg-[#4A5D33] transition-all"
-                      >
-                        Overslaan
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {currentStep === 'mind-muscle' && (
-                  <div className="text-center">
-                    <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-[#8BAE5A]/20 mb-4">
-                      <LightBulbIcon className="h-6 w-6 text-[#8BAE5A]" />
-                    </div>
-                    <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-white mb-2">
-                      Mind-Muscle Connectie
-                    </Dialog.Title>
-                    <div className="mt-2">
-                      <p className="text-sm text-[#A3AED6] mb-6">
-                        {mindMuscleTips["Bench Press"]}
-                      </p>
-                      <button
-                        onClick={handleComplete}
-                        className="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-semibold hover:from-[#FFD700] hover:to-[#8BAE5A] transition-all flex items-center justify-center gap-2"
-                      >
-                        Start Training
-                        <ArrowRightIcon className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </Dialog.Panel>
-            </Transition.Child>
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center mb-4">
+            <div className="w-16 h-16 bg-gradient-to-br from-[#8BAE5A] to-[#FFD700] rounded-full flex items-center justify-center mr-4">
+              <FireIcon className="w-8 h-8 text-[#181F17]" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-white">Start Training</h2>
+              <p className="text-[#8BAE5A]">Dag {dayNumber}</p>
+            </div>
           </div>
         </div>
-      </Dialog>
-    </Transition>
+
+        {/* Training Info */}
+        <div className="bg-[#0F1419]/50 rounded-xl p-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <h3 className="text-lg font-semibold text-white mb-2">{schemaName}</h3>
+              <p className="text-[#8BAE5A] text-sm">{focusArea}</p>
+            </div>
+            <div className="flex items-center">
+              <ClockIcon className="w-5 h-5 text-[#8BAE5A] mr-2" />
+              <span className="text-white">{estimatedDuration}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Training Mode Selection */}
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold text-white mb-4">Kies je training mode:</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <button
+              onClick={() => setSelectedMode('interactive')}
+              className={`p-4 rounded-xl border-2 transition-all ${
+                selectedMode === 'interactive'
+                  ? 'border-[#8BAE5A] bg-[#232D1A]'
+                  : 'border-[#3A4D23] bg-[#181F17] hover:border-[#5A6D43]'
+              }`}
+            >
+              <div className="flex items-center mb-2">
+                <PlayIcon className="w-6 h-6 text-[#8BAE5A] mr-2" />
+                <span className="font-semibold text-white">Interactive Training</span>
+              </div>
+              <p className="text-sm text-gray-400">
+                Timer-based training met oefening tracking en real-time feedback
+              </p>
+            </button>
+
+            <button
+              onClick={() => setSelectedMode('quick')}
+              className={`p-4 rounded-xl border-2 transition-all ${
+                selectedMode === 'quick'
+                  ? 'border-[#8BAE5A] bg-[#232D1A]'
+                  : 'border-[#3A4D23] bg-[#181F17] hover:border-[#5A6D43]'
+              }`}
+            >
+              <div className="flex items-center mb-2">
+                <CheckIcon className="w-6 h-6 text-[#8BAE5A] mr-2" />
+                <span className="font-semibold text-white">Quick Complete</span>
+              </div>
+              <p className="text-sm text-gray-400">
+                Direct voltooien zonder tracking - voor ervaren trainers
+              </p>
+            </button>
+          </div>
+        </div>
+
+        {/* Pre-Workout Checklist */}
+        {selectedMode === 'interactive' && (
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-white mb-4">
+              Pre-Workout Checklist ({checkedItems}/{totalItems})
+            </h3>
+            <div className="space-y-3">
+              {checklist.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => toggleChecklistItem(item.id)}
+                  className="flex items-center w-full p-3 rounded-lg bg-[#0F1419]/50 hover:bg-[#0F1419]/70 transition-colors"
+                >
+                  <div className={`w-5 h-5 rounded border-2 flex items-center justify-center mr-3 ${
+                    item.checked
+                      ? 'border-[#8BAE5A] bg-[#8BAE5A]'
+                      : 'border-[#3A4D23]'
+                  }`}>
+                    {item.checked && <CheckIcon className="w-3 h-3 text-[#181F17]" />}
+                  </div>
+                  <span className={`text-sm ${item.checked ? 'text-[#8BAE5A]' : 'text-gray-300'}`}>
+                    {item.label}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Warning for Quick Mode */}
+        {selectedMode === 'quick' && (
+          <div className="mb-6 p-4 bg-[#f0a14f]/10 border border-[#f0a14f]/30 rounded-lg">
+            <div className="flex items-start">
+              <ExclamationTriangleIcon className="w-5 h-5 text-[#f0a14f] mr-2 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="text-[#f0a14f] font-semibold text-sm">Quick Mode</p>
+                <p className="text-gray-400 text-sm mt-1">
+                  Je training wordt direct als voltooid gemarkeerd zonder gedetailleerde tracking.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-4">
+          <button
+            onClick={onClose}
+            className="flex-1 px-6 py-3 bg-[#3A4D23] text-[#8BAE5A] font-semibold rounded-lg hover:bg-[#4A5D33] transition-colors"
+          >
+            Annuleren
+          </button>
+          <button
+            onClick={startWorkout}
+            disabled={isStarting}
+            className="flex-1 px-6 py-3 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-semibold rounded-lg hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isStarting ? (
+              <div className="flex items-center justify-center">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#181F17] mr-2"></div>
+                Starten...
+              </div>
+            ) : (
+              <div className="flex items-center justify-center">
+                <SparklesIcon className="w-5 h-5 mr-2" />
+                {selectedMode === 'interactive' ? 'Start Interactive Training' : 'Quick Complete'}
+              </div>
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 } 
