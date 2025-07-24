@@ -45,6 +45,8 @@ export default function MijnMissiesPage() {
     if (!user?.id) return;
 
     async function loadMissions() {
+      if (!user?.id) return;
+      
       try {
         setLoading(true);
         setError(null);
