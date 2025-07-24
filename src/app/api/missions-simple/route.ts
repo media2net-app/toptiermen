@@ -1,10 +1,42 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { promises as fs } from 'fs';
+import path from 'path';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
+
+// File-based storage for missions when database is not available
+const MISSIONS_FILE = path.join(process.cwd(), 'data', 'missions.json');
+
+// Ensure data directory exists
+async function ensureDataDir() {
+  const dataDir = path.dirname(MISSIONS_FILE);
+  try {
+    await fs.access(dataDir);
+  } catch {
+    await fs.mkdir(dataDir, { recursive: true });
+  }
+}
+
+// Read missions from file
+async function readMissionsFromFile(): Promise<{ [userId: string]: any[] }> {
+  try {
+    await ensureDataDir();
+    const data = await fs.readFile(MISSIONS_FILE, 'utf8');
+    return JSON.parse(data);
+  } catch {
+    return {};
+  }
+}
+
+// Write missions to file
+async function writeMissionsToFile(missions: { [userId: string]: any[] }) {
+  await ensureDataDir();
+  await fs.writeFile(MISSIONS_FILE, JSON.stringify(missions, null, 2));
+}
 
 // Helper function to get mission title by ID
 function getMissionTitle(missionId: string): string {
@@ -47,8 +79,10 @@ export async function GET(request: Request) {
         .select('*')
         .eq('user_id', userId);
 
+      console.log('🔍 Database query result:', { userMissions: userMissions?.length || 0, missionsError: missionsError?.message });
+
       if (missionsError) {
-        console.log('⚠️  Missions table not available, using dummy data');
+        console.log('⚠️  Missions table not available, trying file-based storage');
         throw missionsError;
       }
 
@@ -61,54 +95,83 @@ export async function GET(request: Request) {
 
       const dailyStreak = streakData?.current_streak || 0;
 
-      // If we have missions in database, return them with proper daily tracking
-      if (userMissions && userMissions.length > 0) {
-        const today = getTodayDate();
-        
-        const missions = userMissions.map(mission => {
-          // For all missions, check if completed based on last_completion_date
-          const isCompletedToday = mission.frequency_type === 'daily' 
-            ? isMissionCompletedToday(mission.last_completion_date)
-            : !!mission.last_completion_date; // For weekly/monthly, just check if it has a completion date
+      // Process database missions
+      const dbMissions = userMissions?.map(mission => {
+        // For all missions, check if completed based on last_completion_date
+        const isCompletedToday = mission.frequency_type === 'daily' 
+          ? isMissionCompletedToday(mission.last_completion_date)
+          : !!mission.last_completion_date; // For weekly/monthly, just check if it has a completion date
 
-          return {
-            id: mission.id,
-            title: mission.title,
-            type: mission.frequency_type === 'daily' ? 'Dagelijks' : 
-                  mission.frequency_type === 'weekly' ? 'Wekelijks' : 'Maandelijks',
-            done: isCompletedToday,
-            category: mission.category_slug === 'health-fitness' ? 'Gezondheid & Fitness' :
-                     mission.category_slug === 'mindset-focus' ? 'Mindset & Focus' : 'Algemeen',
-            icon: mission.icon || '🎯',
-            badge: mission.badge_name || 'Mission Badge',
-            progress: mission.current_progress,
-            shared: mission.is_shared || false,
-            accountabilityPartner: null,
-            xp_reward: mission.xp_reward || 15,
-            last_completion_date: mission.last_completion_date
-          };
-        });
-
-        const completedToday = missions.filter(m => m.done).length;
-        const totalToday = missions.filter(m => m.type === 'Dagelijks').length;
-
-        const summary = {
-          completedToday,
-          totalToday,
-          dailyStreak
+        return {
+          id: mission.id,
+          title: mission.title,
+          type: mission.frequency_type === 'daily' ? 'Dagelijks' : 
+                mission.frequency_type === 'weekly' ? 'Wekelijks' : 'Maandelijks',
+          done: isCompletedToday,
+          category: mission.category_slug === 'health-fitness' ? 'Gezondheid & Fitness' :
+                   mission.category_slug === 'mindset-focus' ? 'Mindset & Focus' : 'Algemeen',
+          icon: mission.icon || '🎯',
+          badge: mission.badge_name || 'Mission Badge',
+          progress: mission.current_progress,
+          shared: mission.is_shared || false,
+          accountabilityPartner: null,
+          xp_reward: mission.xp_reward || 15,
+          last_completion_date: mission.last_completion_date
         };
+      }) || [];
 
-        console.log('✅ Missions fetched from database with daily tracking');
-        return NextResponse.json({
-          missions,
-          summary
-        });
+      // Try to load file-based missions as well
+      let fileMissions: any[] = [];
+      try {
+        const fileMissionsData = await readMissionsFromFile();
+        fileMissions = fileMissionsData[userId] || [];
+        console.log('📁 File storage check:', { fileMissions: fileMissions.length });
+      } catch (fileError) {
+        console.log('⚠️  File storage not available');
       }
-    } catch (error) {
-      console.log('⚠️  Database not available, using dummy data');
-    }
 
-    // Fallback to dummy data if database is not available
+      // Combine database and file missions, avoiding duplicates
+      const allMissions = [...dbMissions];
+      const dbMissionIds = new Set(dbMissions.map(m => m.id));
+      
+      fileMissions.forEach(fileMission => {
+        if (!dbMissionIds.has(fileMission.id)) {
+          allMissions.push({
+            id: fileMission.id,
+            title: fileMission.title,
+            type: fileMission.type,
+            done: fileMission.type === 'Dagelijks' ? isMissionCompletedToday(fileMission.last_completion_date) : !!fileMission.last_completion_date,
+            category: fileMission.category,
+            icon: fileMission.icon,
+            badge: fileMission.badge,
+            progress: fileMission.progress,
+            shared: fileMission.shared,
+            accountabilityPartner: fileMission.accountabilityPartner,
+            xp_reward: fileMission.xp_reward,
+            last_completion_date: fileMission.last_completion_date
+          });
+        }
+      });
+
+      const completedToday = allMissions.filter(m => m.done).length;
+      const totalToday = allMissions.filter(m => m.type === 'Dagelijks').length;
+
+      const summary = {
+        completedToday,
+        totalToday,
+        dailyStreak
+      };
+
+      console.log('✅ Missions loaded:', { database: dbMissions.length, file: fileMissions.length, total: allMissions.length });
+      return NextResponse.json({
+        missions: allMissions,
+        summary
+      });
+          } catch (error) {
+        console.log('⚠️  Database not available, using dummy data');
+      }
+
+      // Fallback to dummy data if database is not available
     const dummyMissions = [
       { 
         id: '1', 
@@ -222,7 +285,68 @@ export async function POST(request: Request) {
           .single();
 
         if (fetchError) {
-          console.log('⚠️  Mission not found in database, using dummy toggle');
+          console.log('⚠️  Mission not found in database, trying file-based toggle');
+          
+          try {
+            // Try to find mission in file storage
+            const fileMissions = await readMissionsFromFile();
+            const userMissions = fileMissions[userId] || [];
+            const mission = userMissions.find((m: any) => m.id === missionId);
+            
+            if (mission) {
+              const today = getTodayDate();
+              const isCompletedToday = mission.type === 'Dagelijks' ? isMissionCompletedToday(mission.last_completion_date) : !!mission.last_completion_date;
+              
+              let newCompletionDate = null;
+              let isNowCompleted = false;
+              
+              if (mission.type === 'Dagelijks') {
+                // Daily mission logic
+                if (isCompletedToday) {
+                  // Already completed today, uncomplete it
+                  newCompletionDate = null;
+                  isNowCompleted = false;
+                } else {
+                  // Not completed today, complete it
+                  newCompletionDate = today;
+                  isNowCompleted = true;
+                }
+              } else {
+                // Weekly/Monthly mission logic
+                if (mission.last_completion_date) {
+                  // Already completed, uncomplete it
+                  newCompletionDate = null;
+                  isNowCompleted = false;
+                } else {
+                  // Not completed, complete it
+                  newCompletionDate = today;
+                  isNowCompleted = true;
+                }
+              }
+              
+              // Update mission in file storage
+              const updatedMissions = userMissions.map((m: any) => 
+                m.id === missionId 
+                  ? { ...m, last_completion_date: newCompletionDate }
+                  : m
+              );
+              
+              fileMissions[userId] = updatedMissions;
+              await writeMissionsToFile(fileMissions);
+              
+              console.log('✅ Mission toggled in file storage:', missionId, isNowCompleted);
+              return NextResponse.json({ 
+                success: true,
+                completed: isNowCompleted,
+                xpEarned: isNowCompleted ? mission.xp_reward : -mission.xp_reward,
+                message: isNowCompleted ? `Missie voltooid! +${mission.xp_reward} XP verdiend!` : `Missie ongedaan gemaakt. ${mission.xp_reward} XP afgetrokken.`,
+                completionDate: newCompletionDate
+              });
+            }
+          } catch (fileError) {
+            console.log('⚠️  File storage failed, using dummy toggle');
+          }
+          
           // Fallback to dummy toggle with daily tracking
           const xpRewards = {
             '1': 20, '2': 20, '3': 50, '4': 25, '5': 30
@@ -474,28 +598,110 @@ export async function POST(request: Request) {
         });
 
       } catch (error) {
-        console.log('⚠️  Database not available, using dummy create');
-        // Fallback to dummy create
-        const dummyMission = {
-          id: Date.now().toString(),
-          title: title,
-          type: type,
-          done: false,
-          category: 'Algemeen',
-          icon: '🎯',
-          badge: 'Custom Badge',
-          progress: 0,
-          shared: false,
-          accountabilityPartner: null,
-          xp_reward: 15,
-          last_completion_date: null
-        };
+        console.log('⚠️  Database not available, using file-based create');
+        
+        try {
+          // Create mission in file storage
+          const fileMissions = await readMissionsFromFile();
+          const userMissions = fileMissions[userId] || [];
+          
+          const newMission = {
+            id: Date.now().toString(),
+            title: title,
+            type: type,
+            done: false,
+            category: 'Algemeen',
+            icon: '🎯',
+            badge: 'Custom Badge',
+            progress: 0,
+            shared: false,
+            accountabilityPartner: null,
+            xp_reward: 15,
+            last_completion_date: null
+          };
+          
+          userMissions.push(newMission);
+          fileMissions[userId] = userMissions;
+          await writeMissionsToFile(fileMissions);
+          
+          console.log('✅ Mission created in file storage:', newMission.id);
+          return NextResponse.json({ 
+            success: true, 
+            mission: newMission,
+            message: 'Missie aangemaakt!' 
+          });
+        } catch (fileError) {
+          console.log('⚠️  File storage failed, using dummy create');
+          // Fallback to dummy create
+          const dummyMission = {
+            id: Date.now().toString(),
+            title: title,
+            type: type,
+            done: false,
+            category: 'Algemeen',
+            icon: '🎯',
+            badge: 'Custom Badge',
+            progress: 0,
+            shared: false,
+            accountabilityPartner: null,
+            xp_reward: 15,
+            last_completion_date: null
+          };
 
+          return NextResponse.json({ 
+            success: true, 
+            mission: dummyMission,
+            message: 'Missie aangemaakt!' 
+          });
+        }
+      }
+    }
+
+    if (action === 'delete') {
+      try {
+        // Try to delete mission from database
+        const { error: deleteError } = await supabase
+          .from('user_missions')
+          .delete()
+          .eq('id', missionId)
+          .eq('user_id', userId);
+
+        if (deleteError) {
+          console.log('⚠️  Error deleting mission from database, using dummy delete');
+          throw deleteError;
+        }
+
+        console.log('✅ Mission deleted from database:', missionId);
         return NextResponse.json({ 
-          success: true, 
-          mission: dummyMission,
-          message: 'Missie aangemaakt!' 
+          success: true,
+          message: 'Missie verwijderd!' 
         });
+
+      } catch (error) {
+        console.log('⚠️  Database not available, using file-based delete');
+        
+        try {
+          // Delete mission from file storage
+          const fileMissions = await readMissionsFromFile();
+          const userMissions = fileMissions[userId] || [];
+          
+          const updatedMissions = userMissions.filter((mission: any) => mission.id !== missionId);
+          fileMissions[userId] = updatedMissions;
+          await writeMissionsToFile(fileMissions);
+          
+          console.log('✅ Mission deleted from file storage:', missionId);
+          return NextResponse.json({ 
+            success: true,
+            message: 'Missie verwijderd!' 
+          });
+        } catch (fileError) {
+          console.log('⚠️  File storage failed, using dummy delete');
+          // Fallback to dummy delete - just return success
+          return NextResponse.json({ 
+            success: true,
+            message: 'Missie verwijderd!' 
+          });
+        }
       }
     }
 

@@ -1,0 +1,60 @@
+{
+  "061e43d5-c89a-42bb-8a4c-04be2ce99a7e": [
+    {
+      "id": "1753363297352",
+      "title": "sdfdffdsdf",
+      "type": "Dagelijks",
+      "done": false,
+      "category": "Algemeen",
+      "icon": "🎯",
+      "badge": "Custom Badge",
+      "progress": 0,
+      "shared": false,
+      "accountabilityPartner": null,
+      "xp_reward": 15,
+      "last_completion_date": "2025-07-24"
+    },
+    {
+      "id": "1753363299390",
+      "title": "sdfsdffsd",
+      "type": "Dagelijks",
+      "done": false,
+      "category": "Algemeen",
+      "icon": "🎯",
+      "badge": "Custom Badge",
+      "progress": 0,
+      "shared": false,
+      "accountabilityPartner": null,
+      "xp_reward": 15,
+      "last_completion_date": "2025-07-24"
+    },
+    {
+      "id": "1753363304569",
+      "title": "sdffsddfsdffds",
+      "type": "Dagelijks",
+      "done": false,
+      "category": "Algemeen",
+      "icon": "🎯",
+      "badge": "Custom Badge",
+      "progress": 0,
+      "shared": false,
+      "accountabilityPartner": null,
+      "xp_reward": 15,
+      "last_completion_date": "2025-07-24"
+    },
+    {
+      "id": "1753363914749",
+      "title": "21342344423",
+      "type": "Dagelijks",
+      "done": false,
+      "category": "Algemeen",
+      "icon": "🎯",
+      "badge": "Custom Badge",
+      "progress": 0,
+      "shared": false,
+      "accountabilityPartner": null,
+      "xp_reward": 15,
+      "last_completion_date": "2025-07-24"
+    }
+  ]
+}
