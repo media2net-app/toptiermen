@@ -156,14 +156,10 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Failed to log completion' }, { status: 500 });
       }
 
-      // Update user XP
-      const { error: xpError } = await supabase
-        .from('user_xp')
-        .update({
-          total_xp: supabase.raw('total_xp + ?', [mission.xp_reward]),
-          updated_at: new Date().toISOString()
-        })
-        .eq('user_id', userId);
+      // Update XP using exec_sql
+      const { data: xpData, error: xpError } = await supabase.rpc('exec_sql', {
+        sql_query: `UPDATE user_xp SET total_xp = total_xp + ${mission.xp_reward}, updated_at = NOW() WHERE user_id = '${userId}'`
+      });
 
       if (xpError) {
         console.error('⚠️  Error updating XP:', xpError);
