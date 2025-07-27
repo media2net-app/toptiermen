@@ -58,12 +58,12 @@ export async function GET(request: NextRequest) {
 
     console.log('✅ Project statistics fetched successfully:', statistics?.length || 0, 'statistics');
     
-    // Return real project statistics based on actual GitHub commits from May 29, 2024 to July 27, 2025
+    // Return real project statistics based on actual GitHub commits from May 29, 2025 to July 27, 2025
     const realStatistics = [
-      // May 28-29, 2024 - Initial Setup
+      // May 28-29, 2025 - Initial Setup
       { 
         id: "1", 
-        date: "2024-05-29", 
+        date: "2025-05-29", 
         total_hours_spent: 12, 
         features_completed: 0, 
         bugs_fixed: 0, 

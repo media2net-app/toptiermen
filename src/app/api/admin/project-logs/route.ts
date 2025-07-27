@@ -5,7 +5,7 @@ export async function GET(request: NextRequest) {
   try {
     console.log('📊 Fetching project logs from database...');
     
-    // Return actual project logs based on real GitHub commits from May 29, 2024 to July 27, 2025
+    // Return actual project logs based on real GitHub commits from May 29, 2025 to July 27, 2025
     const actualLogs = [
       // July 27, 2025 - Final Phase
       {
@@ -538,10 +538,10 @@ export async function GET(request: NextRequest) {
         complexity_score: 4,
         created_at: "2025-06-13T16:00:00.000Z"
       },
-      // May 29, 2024 - Initial Project Setup
+      // May 29, 2025 - Initial Project Setup
       {
-        id: "log-2024-05-29-01",
-        date: "2024-05-29",
+        id: "log-2025-05-29-01",
+        date: "2025-05-29",
         day_number: 29,
         title: "Initial Project Setup and Clean Build",
         description: "Fix: laatste lint errors (quotes, unused imports), build nu 100% clean. Fix: alle lint errors, ongebruikte imports/vars, img naar Image, quotes geescaped, build klaar",
@@ -552,11 +552,11 @@ export async function GET(request: NextRequest) {
         tags: ["initial", "setup", "lint", "build", "clean"],
         impact_score: 8,
         complexity_score: 6,
-        created_at: "2024-05-29T14:30:00.000Z"
+        created_at: "2025-05-29T14:30:00.000Z"
       },
       {
-        id: "log-2024-05-28-01",
-        date: "2024-05-28",
+        id: "log-2025-05-28-01",
+        date: "2025-05-28",
         day_number: 28,
         title: "Initial Commit from Create Next App",
         description: "Initial commit from Create Next App. Project foundation established",
@@ -567,7 +567,7 @@ export async function GET(request: NextRequest) {
         tags: ["initial", "nextjs", "foundation", "setup"],
         impact_score: 10,
         complexity_score: 3,
-        created_at: "2024-05-28T10:00:00.000Z"
+        created_at: "2025-05-28T10:00:00.000Z"
       }
     ];
 
