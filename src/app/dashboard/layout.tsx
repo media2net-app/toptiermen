@@ -367,30 +367,30 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
         sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64 lg:ml-72'
       }`}>
         {/* Top Bar */}
-        <div className="bg-[#232D1A] border-b border-[#3A4D23] p-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="bg-[#232D1A] border-b border-[#3A4D23] p-3 sm:p-4 flex items-center justify-between">
+          <div className="flex items-center gap-2 sm:gap-4">
             {/* Mobile/Tablet Menu Button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="lg:hidden p-2 bg-[#181F17] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors"
             >
-              <Bars3Icon className="w-6 h-6" />
+              <Bars3Icon className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
 
             {/* Page Title */}
-            <h1 className="text-lg md:text-xl font-bold text-white">
+            <h1 className="text-base sm:text-lg md:text-xl font-bold text-white">
               {menu.find(item => item.href === pathname)?.label || 'Dashboard'}
             </h1>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             {/* Admin Dashboard Button */}
             {user.role === 'admin' && (
               <Link
                 href="/dashboard-admin"
-                className="px-3 md:px-4 py-2 bg-[#8BAE5A] text-[#0A0F0A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold flex items-center gap-1 md:gap-2 text-sm md:text-base"
+                className="px-2 sm:px-3 md:px-4 py-2 bg-[#8BAE5A] text-[#0A0F0A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold flex items-center gap-1 md:gap-2 text-xs sm:text-sm md:text-base"
               >
-                <UserGroupIcon className="w-4 h-4" />
+                <UserGroupIcon className="w-3 h-3 sm:w-4 sm:h-4" />
                 <span className="hidden sm:inline">Admin Dashboard</span>
                 <span className="sm:hidden">Admin</span>
               </Link>
@@ -398,29 +398,31 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
             {/* Notifications */}
             <button className="p-2 bg-[#181F17] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors">
-              <BellIcon className="w-5 h-5" />
+              <BellIcon className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
 
             {/* Messages */}
             <button className="p-2 bg-[#181F17] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors">
-              <EnvelopeIcon className="w-5 h-5" />
+              <EnvelopeIcon className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
 
             {/* Logout */}
             <button
               onClick={handleLogout}
               disabled={isLoggingOut}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+              className="px-2 sm:px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
             >
               {isLoggingOut ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Uitloggen...
+                  <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span className="hidden sm:inline">Uitloggen...</span>
+                  <span className="sm:hidden">...</span>
                 </>
               ) : (
                 <>
-                  <XMarkIcon className="w-4 h-4" />
-                  Uitloggen
+                  <XMarkIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">Uitloggen</span>
+                  <span className="sm:hidden">x Uit</span>
                 </>
               )}
             </button>
@@ -430,14 +432,14 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
         {/* Mobile/Tablet Menu */}
         {isMobileMenuOpen && (
           <div className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-50">
-            <div className="bg-[#232D1A] w-80 md:w-96 h-full p-4 mobile-menu">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-[#8BAE5A] font-bold text-lg">Menu</h2>
+            <div className="bg-[#232D1A] w-[85%] max-w-[400px] h-full p-3 sm:p-4 mobile-menu">
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
+                <h2 className="text-[#8BAE5A] font-bold text-base sm:text-lg">Menu</h2>
                 <button
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="p-2 bg-[#181F17] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors"
                 >
-                  <XMarkIcon className="w-6 h-6" />
+                  <XMarkIcon className="w-5 h-5 sm:w-6 sm:h-6" />
                 </button>
               </div>
               <SidebarContent 
@@ -450,7 +452,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
         )}
 
         {/* Page Content */}
-        <div className="p-4 md:p-6 lg:p-8">
+        <div className="p-3 sm:p-4 md:p-6 lg:p-8">
           {/* Main Content */}
           <div className={`transition-all duration-300 ${isTransitioning ? 'opacity-50 scale-95' : 'opacity-100 scale-100'}`}>
             {children}

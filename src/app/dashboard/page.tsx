@@ -231,26 +231,26 @@ export default function Dashboard() {
 
   return (
     <ClientLayout>
-      <div className="max-w-7xl mx-auto w-full px-2 sm:px-4 md:px-0">
-        <div className={`mb-8 transition-opacity duration-700 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+        <div className={`mb-6 sm:mb-8 transition-opacity duration-700 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
           {/* Header */}
-          <div className="mb-6">
+          <div className="mb-4 sm:mb-6">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between">
               <div>
-                <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tight mb-2 text-white">
-                  {getGreeting()}, <span className="text-[#8BAE5A]">{user?.full_name || 'Gebruiker'}</span>!
+                <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-7xl font-black uppercase tracking-tight mb-2 text-white leading-tight">
+                  {getGreeting()}, <span className="text-[#8BAE5A] break-words">{user?.full_name || 'Gebruiker'}</span>!
                 </h1>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="inline-block bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] text-white px-4 py-1 rounded-full text-sm font-semibold shadow">
+                <div className="flex flex-wrap items-center gap-2 mb-2">
+                  <span className="inline-block bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] text-white px-3 py-1 rounded-full text-xs sm:text-sm font-semibold shadow">
                     {stats?.xp.rank ? `Level ${stats.xp.level} - ${stats.xp.rank.name}` : 'Level 1 - Recruit'}
                   </span>
-                  <span className="inline-block bg-[#3A4D23] text-[#8BAE5A] px-3 py-1 rounded-full text-sm font-semibold">
+                  <span className="inline-block bg-[#3A4D23] text-[#8BAE5A] px-2 py-1 rounded-full text-xs sm:text-sm font-semibold">
                     {stats?.xp.total || 0} XP
                   </span>
                 </div>
               </div>
             </div>
-            <p className="text-white text-lg mb-8">Jouw persoonlijke Top Tier Men dashboard</p>
+            <p className="text-white text-sm sm:text-lg mb-4 sm:mb-8">Jouw persoonlijke Top Tier Men dashboard</p>
           </div>
         </div>
 
@@ -381,16 +381,16 @@ export default function Dashboard() {
         {onboardingCompleted && (
           <>
             {/* Jouw Week in Cijfers */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 animate-fade-in-up">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8 animate-fade-in-up">
               {/* Mijn Missies */}
-              <Link href="/dashboard/mijn-missies" className={`bg-gradient-to-br from-[#181F17] to-[#232D1A] border rounded-xl p-6 text-center transition-transform duration-300 cursor-pointer block ${
+              <Link href="/dashboard/mijn-missies" className={`bg-gradient-to-br from-[#181F17] to-[#232D1A] border rounded-xl p-4 sm:p-6 text-center transition-transform duration-300 cursor-pointer block ${
                 stats?.missions.completedToday === stats?.missions.total && (stats?.missions.total || 0) > 0
                   ? 'border-[#8BAE5A] shadow-2xl shadow-[#8BAE5A]/20 hover:scale-105 hover:shadow-[#8BAE5A]/40'
                   : 'border-[#3A4D23]/30 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50'
               }`}>
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-bold text-white">Mijn Missies</h3>
-                  <span className={`text-2xl ${
+                <div className="flex items-center justify-between mb-3 sm:mb-4">
+                  <h3 className="text-lg sm:text-xl font-bold text-white">Mijn Missies</h3>
+                  <span className={`text-xl sm:text-2xl ${
                     stats?.missions.completedToday === stats?.missions.total && (stats?.missions.total || 0) > 0
                       ? 'text-[#FFD700]' // Goud wanneer volbracht
                       : 'text-[#8BAE5A]'
@@ -399,8 +399,8 @@ export default function Dashboard() {
                   </span>
                 </div>
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-3xl font-bold text-[#FFD700]">{stats?.missions.completedToday || 0}/{stats?.missions.total || 0}</span>
-                  <span className={`${
+                  <span className="text-2xl sm:text-3xl font-bold text-[#FFD700]">{stats?.missions.completedToday || 0}/{stats?.missions.total || 0}</span>
+                  <span className={`text-sm sm:text-base ${
                     stats?.missions.completedToday === stats?.missions.total && (stats?.missions.total || 0) > 0
                       ? 'text-[#FFD700] font-bold'
                       : 'text-[#8BAE5A]'
@@ -431,14 +431,14 @@ export default function Dashboard() {
               </Link>
 
               {/* Challenges */}
-              <Link href="/dashboard/challenges" className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-6 text-center transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50 cursor-pointer block">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-bold text-white">Challenges</h3>
-                  <span className="text-[#8BAE5A] text-2xl">🔥</span>
+              <Link href="/dashboard/challenges" className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 sm:p-6 text-center transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50 cursor-pointer block">
+                <div className="flex items-center justify-between mb-3 sm:mb-4">
+                  <h3 className="text-lg sm:text-xl font-bold text-white">Challenges</h3>
+                  <span className="text-[#8BAE5A] text-xl sm:text-2xl">🔥</span>
                 </div>
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-3xl font-bold text-[#FFD700]">{stats?.challenges.active || 0}</span>
-                  <span className="text-[#8BAE5A]">actief</span>
+                  <span className="text-2xl sm:text-3xl font-bold text-[#FFD700]">{stats?.challenges.active || 0}</span>
+                  <span className="text-[#8BAE5A] text-sm sm:text-base">actief</span>
                 </div>
                 <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
                   <div 
@@ -452,21 +452,21 @@ export default function Dashboard() {
               </Link>
 
               {/* Mijn Trainingen */}
-              <Link href="/dashboard/mijn-trainingen" className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-6 text-center transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50 cursor-pointer block">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-bold text-white">Mijn Trainingen</h3>
-                  <span className="text-[#8BAE5A] text-2xl">💪</span>
+              <Link href="/dashboard/mijn-trainingen" className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 sm:p-6 text-center transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50 cursor-pointer block">
+                <div className="flex items-center justify-between mb-3 sm:mb-4">
+                  <h3 className="text-lg sm:text-xl font-bold text-white">Mijn Trainingen</h3>
+                  <span className="text-[#8BAE5A] text-xl sm:text-2xl">💪</span>
                 </div>
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                   <div>
-                    <div className="text-sm text-[#8BAE5A] mb-1">Schema status:</div>
-                    <div className="text-white font-semibold">
+                    <div className="text-xs sm:text-sm text-[#8BAE5A] mb-1">Schema status:</div>
+                    <div className="text-white font-semibold text-sm sm:text-base">
                       {stats?.training.hasActiveSchema ? 'Actief' : 'Geen schema'}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 mt-3">
-                    <span className="text-2xl font-bold text-[#FFD700]">{stats?.training.weeklySessions || 0}</span>
-                    <span className="text-[#8BAE5A]">trainingen/week</span>
+                  <div className="flex items-center gap-2 mt-2 sm:mt-3">
+                    <span className="text-xl sm:text-2xl font-bold text-[#FFD700]">{stats?.training.weeklySessions || 0}</span>
+                    <span className="text-[#8BAE5A] text-sm sm:text-base">trainingen/week</span>
                   </div>
                   <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
                     <div 
@@ -478,14 +478,14 @@ export default function Dashboard() {
               </Link>
 
               {/* Mind & Focus */}
-              <Link href="/dashboard/mind-en-focus" className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-6 text-center transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50 cursor-pointer block">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-bold text-white">Mind & Focus</h3>
-                  <span className="text-[#8BAE5A] text-2xl">🧘‍♂️</span>
+              <Link href="/dashboard/mind-en-focus" className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 sm:p-6 text-center transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50 cursor-pointer block">
+                <div className="flex items-center justify-between mb-3 sm:mb-4">
+                  <h3 className="text-lg sm:text-xl font-bold text-white">Mind & Focus</h3>
+                  <span className="text-[#8BAE5A] text-xl sm:text-2xl">🧘‍♂️</span>
                 </div>
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-3xl font-bold text-[#FFD700]">{stats?.mindFocus.completedToday || 0}/{stats?.mindFocus.total || 0}</span>
-                  <span className="text-[#8BAE5A]">volbracht</span>
+                  <span className="text-2xl sm:text-3xl font-bold text-[#FFD700]">{stats?.mindFocus.completedToday || 0}/{stats?.mindFocus.total || 0}</span>
+                  <span className="text-[#8BAE5A] text-sm sm:text-base">volbracht</span>
                 </div>
                 <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
                   <div 
@@ -499,14 +499,14 @@ export default function Dashboard() {
               </Link>
 
               {/* Boekenkamer */}
-              <Link href="/dashboard/boekenkamer" className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-6 text-center transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50 cursor-pointer block">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-bold text-white">Boekenkamer</h3>
-                  <span className="text-[#8BAE5A] text-2xl">📚</span>
+              <Link href="/dashboard/boekenkamer" className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 sm:p-6 text-center transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50 cursor-pointer block">
+                <div className="flex items-center justify-between mb-3 sm:mb-4">
+                  <h3 className="text-lg sm:text-xl font-bold text-white">Boekenkamer</h3>
+                  <span className="text-[#8BAE5A] text-xl sm:text-2xl">📚</span>
                 </div>
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-3xl font-bold text-[#FFD700]">{stats?.boekenkamer.completedToday || 0}/{stats?.boekenkamer.total || 0}</span>
-                  <span className="text-[#8BAE5A]">volbracht</span>
+                  <span className="text-2xl sm:text-3xl font-bold text-[#FFD700]">{stats?.boekenkamer.completedToday || 0}/{stats?.boekenkamer.total || 0}</span>
+                  <span className="text-[#8BAE5A] text-sm sm:text-base">volbracht</span>
                 </div>
                 <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
                   <div 
@@ -520,14 +520,14 @@ export default function Dashboard() {
               </Link>
 
               {/* Finance & Business */}
-              <Link href="/dashboard/finance-en-business" className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-6 text-center transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50 cursor-pointer block">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-bold text-white">Finance & Business</h3>
-                  <span className="text-[#8BAE5A] text-2xl">💰</span>
+              <Link href="/dashboard/finance-en-business" className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 sm:p-6 text-center transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-[#8BAE5A]/50 cursor-pointer block">
+                <div className="flex items-center justify-between mb-3 sm:mb-4">
+                  <h3 className="text-lg sm:text-xl font-bold text-white">Finance & Business</h3>
+                  <span className="text-[#8BAE5A] text-xl sm:text-2xl">💰</span>
                 </div>
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-3xl font-bold text-[#FFD700]">€12.500</span>
-                  <span className="text-[#8BAE5A]">Netto Waarde</span>
+                  <span className="text-2xl sm:text-3xl font-bold text-[#FFD700]">€12.500</span>
+                  <span className="text-[#8BAE5A] text-sm sm:text-base">Netto Waarde</span>
                 </div>
                 <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
                   <div 
@@ -542,10 +542,10 @@ export default function Dashboard() {
             </div>
 
             {/* Algemene Voortgang */}
-            <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-6 shadow-xl mb-8 animate-fade-in-up">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-white">Algemene Voortgang</h3>
-                <span className="text-[#8BAE5A] text-2xl">📊</span>
+            <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 sm:p-6 shadow-xl mb-6 sm:mb-8 animate-fade-in-up">
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <h3 className="text-lg sm:text-xl font-bold text-white">Algemene Voortgang</h3>
+                <span className="text-[#8BAE5A] text-xl sm:text-2xl">📊</span>
               </div>
               <div className="w-full h-3 bg-[#3A4D23]/40 rounded-full">
                 <div 
