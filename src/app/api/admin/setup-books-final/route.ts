@@ -3,11 +3,64 @@ import { supabaseAdmin } from '@/lib/supabase-admin';
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('📚 Creating books tables via direct insertion...');
+    console.log('📚 Final books setup - creating tables via Supabase...');
 
-    // Try to create tables by inserting data - Supabase will create the tables automatically
-    console.log('📊 Creating book_categories table by inserting data...');
+    // Since we can't create tables via the client, we'll provide clear instructions
+    // and create a simple test to verify if tables exist
     
+    console.log('🔍 Checking if tables exist...');
+    
+    const { error: categoriesError } = await supabaseAdmin
+      .from('book_categories')
+      .select('*')
+      .limit(1);
+
+    const { error: booksError } = await supabaseAdmin
+      .from('books')
+      .select('*')
+      .limit(1);
+
+    if (categoriesError && categoriesError.code === 'PGRST116') {
+      console.log('❌ book_categories table does not exist');
+      return NextResponse.json({ 
+        error: 'Database tables do not exist',
+        message: 'The books tables need to be created manually in Supabase',
+        instructions: {
+          step1: 'Go to https://supabase.com and log into your project',
+          step2: 'Navigate to SQL Editor in the left sidebar',
+          step3: 'Click "New query"',
+          step4: 'Copy and paste the entire content from create_books_tables.sql',
+          step5: 'Click "Run" to execute the SQL',
+          step6: 'Verify tables exist in Table Editor',
+          step7: 'Test the admin dashboard at /dashboard-admin/boekenkamer'
+        },
+        sqlFile: 'create_books_tables.sql',
+        status: 'manual_setup_required'
+      }, { status: 400 });
+    }
+
+    if (booksError && booksError.code === 'PGRST116') {
+      console.log('❌ books table does not exist');
+      return NextResponse.json({ 
+        error: 'Database tables do not exist',
+        message: 'The books tables need to be created manually in Supabase',
+        instructions: {
+          step1: 'Go to https://supabase.com and log into your project',
+          step2: 'Navigate to SQL Editor in the left sidebar',
+          step3: 'Click "New query"',
+          step4: 'Copy and paste the entire content from create_books_tables.sql',
+          step5: 'Click "Run" to execute the SQL',
+          step6: 'Verify tables exist in Table Editor',
+          step7: 'Test the admin dashboard at /dashboard-admin/boekenkamer'
+        },
+        sqlFile: 'create_books_tables.sql',
+        status: 'manual_setup_required'
+      }, { status: 400 });
+    }
+
+    console.log('✅ Tables exist, inserting sample data...');
+
+    // Insert sample data
     const categories = [
       { name: 'Mindset', description: 'Mentale groei en persoonlijke ontwikkeling', icon: '🧠' },
       { name: 'Productiviteit', description: 'Time management en focus', icon: '⚡' },
@@ -25,24 +78,12 @@ export async function POST(request: NextRequest) {
       
       if (insertError) {
         console.log(`❌ Error inserting category ${category.name}:`, insertError);
-        // If this is a table doesn't exist error, we need to create it manually
-        if (insertError.code === 'PGRST116') {
-          console.log('❌ book_categories table does not exist');
-          console.log('💡 Please create the tables manually in Supabase dashboard');
-          return NextResponse.json({ 
-            error: 'Database tables do not exist',
-            message: 'Please create the tables manually in Supabase dashboard using the provided SQL script',
-            instructions: 'See create_books_tables.sql for the complete SQL script'
-          }, { status: 400 });
-        }
       } else {
         console.log(`✅ Category ${category.name} inserted/updated`);
         categoriesInserted++;
       }
     }
 
-    console.log('📚 Creating books table by inserting data...');
-    
     const books = [
       {
         title: 'Can\'t Hurt Me',
@@ -84,16 +125,6 @@ export async function POST(request: NextRequest) {
       
       if (insertError) {
         console.log(`❌ Error inserting book ${book.title}:`, insertError);
-        // If this is a table doesn't exist error, we need to create it manually
-        if (insertError.code === 'PGRST116') {
-          console.log('❌ books table does not exist');
-          console.log('💡 Please create the tables manually in Supabase dashboard');
-          return NextResponse.json({ 
-            error: 'Database tables do not exist',
-            message: 'Please create the tables manually in Supabase dashboard using the provided SQL script',
-            instructions: 'See create_books_tables.sql for the complete SQL script'
-          }, { status: 400 });
-        }
       } else {
         console.log(`✅ Book ${book.title} inserted/updated`);
         booksInserted++;

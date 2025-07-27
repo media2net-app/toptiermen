@@ -3,11 +3,10 @@ import { supabaseAdmin } from '@/lib/supabase-admin';
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('📚 Creating books tables via direct insertion...');
+    console.log('📚 Initializing books database with sample data...');
 
-    // Try to create tables by inserting data - Supabase will create the tables automatically
-    console.log('📊 Creating book_categories table by inserting data...');
-    
+    // 1. Insert default categories
+    console.log('Inserting default categories...');
     const categories = [
       { name: 'Mindset', description: 'Mentale groei en persoonlijke ontwikkeling', icon: '🧠' },
       { name: 'Productiviteit', description: 'Time management en focus', icon: '⚡' },
@@ -19,30 +18,24 @@ export async function POST(request: NextRequest) {
 
     let categoriesInserted = 0;
     for (const category of categories) {
-      const { error: insertError } = await supabaseAdmin
-        .from('book_categories')
-        .upsert(category, { onConflict: 'name' });
-      
-      if (insertError) {
-        console.log(`❌ Error inserting category ${category.name}:`, insertError);
-        // If this is a table doesn't exist error, we need to create it manually
-        if (insertError.code === 'PGRST116') {
-          console.log('❌ book_categories table does not exist');
-          console.log('💡 Please create the tables manually in Supabase dashboard');
-          return NextResponse.json({ 
-            error: 'Database tables do not exist',
-            message: 'Please create the tables manually in Supabase dashboard using the provided SQL script',
-            instructions: 'See create_books_tables.sql for the complete SQL script'
-          }, { status: 400 });
+      try {
+        const { error: insertError } = await supabaseAdmin
+          .from('book_categories')
+          .upsert(category, { onConflict: 'name' });
+        
+        if (insertError) {
+          console.error(`Error inserting category ${category.name}:`, insertError);
+        } else {
+          console.log(`✅ Category ${category.name} inserted/updated`);
+          categoriesInserted++;
         }
-      } else {
-        console.log(`✅ Category ${category.name} inserted/updated`);
-        categoriesInserted++;
+      } catch (error) {
+        console.error(`Failed to insert category ${category.name}:`, error);
       }
     }
 
-    console.log('📚 Creating books table by inserting data...');
-    
+    // 2. Insert sample books
+    console.log('Inserting sample books...');
     const books = [
       {
         title: 'Can\'t Hurt Me',
@@ -78,43 +71,61 @@ export async function POST(request: NextRequest) {
 
     let booksInserted = 0;
     for (const book of books) {
-      const { error: insertError } = await supabaseAdmin
-        .from('books')
-        .upsert(book, { onConflict: 'title' });
-      
-      if (insertError) {
-        console.log(`❌ Error inserting book ${book.title}:`, insertError);
-        // If this is a table doesn't exist error, we need to create it manually
-        if (insertError.code === 'PGRST116') {
-          console.log('❌ books table does not exist');
-          console.log('💡 Please create the tables manually in Supabase dashboard');
-          return NextResponse.json({ 
-            error: 'Database tables do not exist',
-            message: 'Please create the tables manually in Supabase dashboard using the provided SQL script',
-            instructions: 'See create_books_tables.sql for the complete SQL script'
-          }, { status: 400 });
+      try {
+        const { error: insertError } = await supabaseAdmin
+          .from('books')
+          .upsert(book, { onConflict: 'title' });
+        
+        if (insertError) {
+          console.error(`Error inserting book ${book.title}:`, insertError);
+        } else {
+          console.log(`✅ Book ${book.title} inserted/updated`);
+          booksInserted++;
         }
-      } else {
-        console.log(`✅ Book ${book.title} inserted/updated`);
-        booksInserted++;
+      } catch (error) {
+        console.error(`Failed to insert book ${book.title}:`, error);
       }
     }
 
-    console.log('🎉 Books database setup completed successfully!');
+    // 3. Get final counts
+    let finalCategoriesCount = 0;
+    let finalBooksCount = 0;
+
+    try {
+      const { count: categoriesCount } = await supabaseAdmin
+        .from('book_categories')
+        .select('*', { count: 'exact', head: true });
+      finalCategoriesCount = categoriesCount || 0;
+    } catch (error) {
+      console.error('Error counting categories:', error);
+    }
+
+    try {
+      const { count: booksCount } = await supabaseAdmin
+        .from('books')
+        .select('*', { count: 'exact', head: true });
+      finalBooksCount = booksCount || 0;
+    } catch (error) {
+      console.error('Error counting books:', error);
+    }
+
+    console.log(`✅ Initialization completed: ${finalCategoriesCount} categories, ${finalBooksCount} books`);
 
     return NextResponse.json({ 
       success: true, 
-      message: 'Books database setup completed successfully',
+      message: 'Books database initialized successfully',
       stats: {
+        categories: finalCategoriesCount,
+        books: finalBooksCount,
         categoriesInserted,
         booksInserted
       }
     });
 
   } catch (error) {
-    console.error('❌ Error setting up books database:', error);
+    console.error('❌ Error initializing books database:', error);
     return NextResponse.json({ 
-      error: 'Failed to setup books database',
+      error: 'Failed to initialize books database',
       details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }

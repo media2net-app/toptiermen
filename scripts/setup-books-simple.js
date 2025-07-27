@@ -1,219 +1,185 @@
 const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config({ path: '.env.local' });
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-async function setupBooksDatabase() {
-  console.log('📚 Setting up books database with direct operations...');
+if (!supabaseUrl || !supabaseServiceKey) {
+  console.error('❌ Missing Supabase environment variables');
+  console.error('NEXT_PUBLIC_SUPABASE_URL:', !!supabaseUrl);
+  console.error('SUPABASE_SERVICE_ROLE_KEY:', !!supabaseServiceKey);
+  process.exit(1);
+}
 
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+async function setupBooksTables() {
   try {
-    // 1. Create book categories
-    console.log('📖 Creating book categories...');
-    const categories = [
-      {
-        name: 'Mindset & Psychologie',
-        description: 'Boeken over persoonlijke ontwikkeling, mindset en psychologie',
-        color: '#8BAE5A',
-        icon: '🧠',
-        book_count: 0
-      },
-      {
-        name: 'Productiviteit & Focus',
-        description: 'Boeken over time management, productiviteit en focus',
-        color: '#FFD700',
-        icon: '⚡',
-        book_count: 0
-      },
-      {
-        name: 'Financiën & Business',
-        description: 'Boeken over geld, investeren en ondernemerschap',
-        color: '#f0a14f',
-        icon: '💰',
-        book_count: 0
-      },
-      {
-        name: 'Fitness & Gezondheid',
-        description: 'Boeken over training, voeding en gezondheid',
-        color: '#FF6B6B',
-        icon: '💪',
-        book_count: 0
-      },
-      {
-        name: 'Leadership & Communicatie',
-        description: 'Boeken over leiderschap, communicatie en sociale vaardigheden',
-        color: '#4ECDC4',
-        icon: '🎯',
-        book_count: 0
-      },
-      {
-        name: 'Filosofie & Spiritualiteit',
-        description: 'Boeken over filosofie, spiritualiteit en levensbeschouwing',
-        color: '#9B59B6',
-        icon: '🕊️',
-        book_count: 0
-      }
-    ];
+    console.log('📚 Setting up books tables...');
 
-    const { data: createdCategories, error: categoriesError } = await supabase
+    // Create book_categories table
+    console.log('Creating book_categories table...');
+    const { error: categoriesError } = await supabase
       .from('book_categories')
-      .insert(categories)
-      .select();
+      .select('*')
+      .limit(1);
 
-    if (categoriesError) {
-      console.error('❌ Error creating categories:', categoriesError);
-      if (categoriesError.code === '42P01') {
-        console.log('💡 Book categories table does not exist. Please create it manually in Supabase.');
-        console.log('📖 See create_books_tables.sql for the table structure.');
-        return;
+    if (categoriesError && categoriesError.code === 'PGRST116') {
+      // Table doesn't exist, create it
+      console.log('Table book_categories does not exist, creating...');
+      const { error: createError } = await supabase.rpc('exec_sql', {
+        sql: `
+          CREATE TABLE book_categories (
+            id SERIAL PRIMARY KEY,
+            name VARCHAR(100) NOT NULL UNIQUE,
+            description TEXT,
+            color VARCHAR(7) DEFAULT '#8BAE5A',
+            icon VARCHAR(50),
+            book_count INTEGER DEFAULT 0,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+            updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+          );
+        `
+      });
+
+      if (createError) {
+        console.error('Error creating book_categories table:', createError);
+        console.log('Trying alternative approach...');
+        
+        // Try direct SQL execution
+        const { error: directError } = await supabase
+          .from('book_categories')
+          .insert({ name: 'test' })
+          .select();
+
+        if (directError) {
+          console.error('Direct table creation also failed:', directError);
+          console.log('Please create the tables manually in Supabase dashboard');
+          return;
+        }
+      } else {
+        console.log('✅ book_categories table created');
       }
     } else {
-      console.log(`✅ Created ${createdCategories.length} book categories`);
+      console.log('✅ book_categories table already exists');
     }
 
-    // 2. Create books
-    console.log('📚 Creating books...');
+    // Create books table
+    console.log('Creating books table...');
+    const { error: booksError } = await supabase
+      .from('books')
+      .select('*')
+      .limit(1);
+
+    if (booksError && booksError.code === 'PGRST116') {
+      console.log('Table books does not exist, creating...');
+      const { error: createError } = await supabase.rpc('exec_sql', {
+        sql: `
+          CREATE TABLE books (
+            id SERIAL PRIMARY KEY,
+            title VARCHAR(255) NOT NULL,
+            author VARCHAR(255) NOT NULL,
+            cover_url TEXT,
+            description TEXT,
+            categories TEXT[] DEFAULT '{}',
+            affiliate_bol TEXT,
+            affiliate_amazon TEXT,
+            status VARCHAR(20) DEFAULT 'draft' CHECK (status IN ('draft', 'published')),
+            average_rating DECIMAL(3,2) DEFAULT 0,
+            review_count INTEGER DEFAULT 0,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+            updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+          );
+        `
+      });
+
+      if (createError) {
+        console.error('Error creating books table:', createError);
+      } else {
+        console.log('✅ books table created');
+      }
+    } else {
+      console.log('✅ books table already exists');
+    }
+
+    // Insert default categories
+    console.log('Inserting default categories...');
+    const categories = [
+      { name: 'Mindset', description: 'Mentale groei en persoonlijke ontwikkeling', icon: '🧠' },
+      { name: 'Productiviteit', description: 'Time management en focus', icon: '⚡' },
+      { name: 'Financiën', description: 'Geld, investeren en business', icon: '💰' },
+      { name: 'Fitness', description: 'Training en gezondheid', icon: '💪' },
+      { name: 'Leadership', description: 'Leiderschap en communicatie', icon: '🎯' },
+      { name: 'Filosofie', description: 'Stoïcisme en levensbeschouwing', icon: '🏛️' }
+    ];
+
+    for (const category of categories) {
+      const { error: insertError } = await supabase
+        .from('book_categories')
+        .upsert(category, { onConflict: 'name' });
+      
+      if (insertError) {
+        console.error(`Error inserting category ${category.name}:`, insertError);
+      } else {
+        console.log(`✅ Category ${category.name} inserted/updated`);
+      }
+    }
+
+    // Insert sample books
+    console.log('Inserting sample books...');
     const books = [
       {
-        title: 'Rich Dad Poor Dad',
-        author: 'Robert Kiyosaki',
-        cover_url: 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=400&h=600&fit=crop',
-        description: 'Een klassieker over financiële educatie en het verschil tussen activa en passiva. Robert Kiyosaki legt uit hoe de rijken denken over geld en hoe je financiële vrijheid kunt bereiken.',
-        categories: ['Financiën & Business'],
+        title: 'Can\'t Hurt Me',
+        author: 'David Goggins',
+        cover_url: '/books/canthurtme.jpg',
+        description: 'David Goggins\' verhaal over hoe hij zijn mentale en fysieke grenzen verlegde.',
+        categories: ['Mindset', 'Fitness'],
         status: 'published',
-        average_rating: 4.2,
-        review_count: 12,
-        view_count: 0
+        average_rating: 4.8,
+        review_count: 12
       },
       {
         title: 'Atomic Habits',
         author: 'James Clear',
         cover_url: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=600&fit=crop',
-        description: 'Een praktische gids voor het bouwen van goede gewoontes en het breken van slechte gewoontes. James Clear legt uit hoe kleine veranderingen tot opmerkelijke resultaten kunnen leiden.',
-        categories: ['Mindset & Psychologie', 'Productiviteit & Focus'],
+        description: 'Kleine veranderingen, opmerkelijke resultaten: een bewezen manier om goede gewoontes te bouwen en slechte te doorbreken.',
+        categories: ['Mindset', 'Productiviteit'],
         status: 'published',
-        average_rating: 4.5,
-        review_count: 8,
-        view_count: 0
+        average_rating: 4.6,
+        review_count: 8
       },
       {
-        title: 'Can\'t Hurt Me',
-        author: 'David Goggins',
-        cover_url: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=600&fit=crop',
-        description: 'Het verhaal van David Goggins over hoe hij zijn mentale en fysieke grenzen verlegde. Een inspirerend boek over discipline, doorzettingsvermogen en mentale weerbaarheid.',
-        categories: ['Mindset & Psychologie', 'Fitness & Gezondheid'],
-        status: 'published',
-        average_rating: 4.8,
-        review_count: 15,
-        view_count: 0
-      },
-      {
-        title: 'The Psychology of Money',
-        author: 'Morgan Housel',
+        title: 'Rich Dad Poor Dad',
+        author: 'Robert Kiyosaki',
         cover_url: 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=400&h=600&fit=crop',
-        description: 'Een diepgaande analyse van hoe mensen denken over geld en waarom we vaak irrationele financiële beslissingen nemen.',
-        categories: ['Financiën & Business'],
+        description: 'Wat de rijken hun kinderen leren over geld dat de armen en de middenklasse niet doen.',
+        categories: ['Financiën'],
         status: 'published',
-        average_rating: 4.3,
-        review_count: 6,
-        view_count: 0
-      },
-      {
-        title: 'Deep Work',
-        author: 'Cal Newport',
-        cover_url: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=600&fit=crop',
-        description: 'Een gids voor het ontwikkelen van focus en het vermijden van afleidingen in een wereld vol digitale prikkels.',
-        categories: ['Productiviteit & Focus'],
-        status: 'published',
-        average_rating: 4.1,
-        review_count: 9,
-        view_count: 0
+        average_rating: 4.4,
+        review_count: 5
       }
     ];
 
-    const { data: createdBooks, error: booksError } = await supabase
-      .from('books')
-      .insert(books)
-      .select();
-
-    if (booksError) {
-      console.error('❌ Error creating books:', booksError);
-      if (booksError.code === '42P01') {
-        console.log('💡 Books table does not exist. Please create it manually in Supabase.');
-        console.log('📖 See create_books_tables.sql for the table structure.');
-        return;
-      }
-    } else {
-      console.log(`✅ Created ${createdBooks.length} books`);
-    }
-
-    // 3. Create sample reviews (if we have books and users)
-    console.log('⭐ Creating sample reviews...');
-    
-    // Get first user for reviews
-    const { data: users, error: usersError } = await supabase
-      .from('users')
-      .select('id')
-      .limit(1);
-
-    if (usersError || !users || users.length === 0) {
-      console.log('⚠️ No users found, skipping reviews');
-    } else if (createdBooks && createdBooks.length > 0) {
-      const reviews = [
-        {
-          book_id: createdBooks[0].id,
-          user_id: users[0].id,
-          rating: 5,
-          text: 'Fantastisch boek! Heeft mijn kijk op geld volledig veranderd.',
-          status: 'approved'
-        },
-        {
-          book_id: createdBooks[1].id,
-          user_id: users[0].id,
-          rating: 4,
-          text: 'Zeer praktisch en toepasbaar. Aanrader voor iedereen die gewoontes wil veranderen.',
-          status: 'approved'
-        },
-        {
-          book_id: createdBooks[2].id,
-          user_id: users[0].id,
-          rating: 5,
-          text: 'Inspirerend en motiverend. David Goggins is een echte warrior.',
-          status: 'approved'
-        }
-      ];
-
-      const { data: createdReviews, error: reviewsError } = await supabase
-        .from('book_reviews')
-        .insert(reviews)
-        .select();
-
-      if (reviewsError) {
-        console.error('❌ Error creating reviews:', reviewsError);
-        if (reviewsError.code === '42P01') {
-          console.log('💡 Book reviews table does not exist. Please create it manually in Supabase.');
-        }
+    for (const book of books) {
+      const { error: insertError } = await supabase
+        .from('books')
+        .upsert(book, { onConflict: 'title' });
+      
+      if (insertError) {
+        console.error(`Error inserting book ${book.title}:`, insertError);
       } else {
-        console.log(`✅ Created ${createdReviews.length} reviews`);
+        console.log(`✅ Book ${book.title} inserted/updated`);
       }
     }
 
     console.log('🎉 Books database setup completed!');
-    console.log('📚 You can now use the Boekenkamer with real database data.');
+    console.log('📊 You can now use the admin dashboard to manage books');
+    console.log('🌐 Frontend will automatically sync with the database');
 
   } catch (error) {
-    console.error('❌ Setup failed:', error);
-    console.log('💡 Please create the database tables manually in Supabase first.');
-    console.log('📖 See create_books_tables.sql for the table structure.');
+    console.error('❌ Error setting up books tables:', error);
+    console.log('💡 Please create the tables manually in Supabase dashboard using the SQL from create_books_tables.sql');
   }
 }
 
-// Main execution
-async function main() {
-  console.log('🚀 Starting books database setup...');
-  await setupBooksDatabase();
-}
-
-main().catch(console.error); 
+setupBooksTables(); 

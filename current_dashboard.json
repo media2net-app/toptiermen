@@ -1,0 +1,52 @@
+{
+  "communityHealthScore": 73,
+  "totalUsers": 4,
+  "activeUsers": 4,
+  "completedOnboarding": 2,
+  "onboardingRate": 50,
+  "activeMembersThisMonth": 4,
+  "newRegistrationsThisWeek": 2,
+  "averageDailyLogins": 0,
+  "activeCoachingPackages": 0,
+  "postsLastWeek": 25,
+  "mostActiveUser": {
+    "name": "N/A",
+    "posts": 0
+  },
+  "reportsLastWeek": 0,
+  "mostPopularSquad": {
+    "name": "Alpha Arnhem",
+    "members": 1
+  },
+  "contentPerformance": {
+    "academy": {
+      "totalModules": 7,
+      "totalLessons": 36,
+      "averageCompletionRate": 0
+    },
+    "training": {
+      "totalSchemas": 12,
+      "activeUsers": 4,
+      "averageCompletionRate": 0
+    },
+    "forum": {
+      "totalPosts": 25,
+      "recentPosts": 25,
+      "averageResponseTime": 0
+    },
+    "books": {
+      "totalBooks": 4,
+      "categories": 6,
+      "averageRating": 0
+    }
+  },
+  "userEngagement": {
+    "usersWithXP": 2,
+    "usersWithBadges": 23,
+    "averageXP": 0,
+    "totalMissions": 5,
+    "completedMissions": 0
+  },
+  "period": "7d",
+  "lastUpdated": "2025-07-27T21:11:06.148Z"
+}

@@ -1,21 +1,28 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FaBookOpen, FaHeadphones, FaStar, FaBookmark, FaFilter, FaSearch, FaTimes, FaCalendarAlt, FaUser, FaGlobe } from 'react-icons/fa';
 import Image from 'next/image';
 
 interface Book {
-  cover: string;
+  id: string;
   title: string;
   author: string;
-  summary: string;
-  tag: string;
-  category: string;
-  rating: number;
-  pages: number;
-  year: number;
+  cover: string;
+  categories: string[];
+  description: string;
+  status: 'published' | 'draft';
+  averageRating: number;
+  reviewCount: number;
 }
 
-const categories = [
+interface Category {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+}
+
+const defaultCategories = [
   { id: 'mindset', label: 'Mindset', icon: '🧠', description: 'Mentale groei' },
   { id: 'discipline', label: 'Discipline', icon: '⚡', description: 'Zelfbeheersing' },
   { id: 'training', label: 'Training & voeding', icon: '💪', description: 'Fysieke groei' },
@@ -26,86 +33,91 @@ const categories = [
   { id: 'summaries', label: 'Book Summaries', icon: '📝', description: 'Samenvattingen' },
 ];
 
-const books: Book[] = [
-  {
-    cover: 'https://m.media-amazon.com/images/I/81wgcld4wxL._AC_UF1000,1000_QL80_.jpg',
-    title: 'Atomic Habits',
-    author: 'James Clear',
-    summary: 'Praktisch boek over het bouwen van goede gewoontes en het doorbreken van slechte patronen.',
-    tag: 'Aanbevolen door Rick',
-    category: 'discipline',
-    rating: 4.8,
-    pages: 320,
-    year: 2018,
-  },
-  {
-    cover: 'https://m.media-amazon.com/images/I/71aFt4+OTOL._AC_UF1000,1000_QL80_.jpg',
-    title: 'The Obstacle is the Way',
-    author: 'Ryan Holiday',
-    summary: 'Stoïcijnse lessen over het omzetten van tegenslag in kracht en groei.',
-    tag: 'Classic',
-    category: 'stoicisme',
-    rating: 4.6,
-    pages: 256,
-    year: 2014,
-  },
-  {
-    cover: 'https://m.media-amazon.com/images/I/71aFt4+OTOL._AC_UF1000,1000_QL80_.jpg',
-    title: 'Can\'t Hurt Me',
-    author: 'David Goggins',
-    summary: 'Het inspirerende verhaal van een Navy SEAL over mentale weerbaarheid en discipline.',
-    tag: 'Nieuw toegevoegd',
-    category: 'mindset',
-    rating: 4.9,
-    pages: 364,
-    year: 2018,
-  },
-  {
-    cover: 'https://m.media-amazon.com/images/I/71aFt4+OTOL._AC_UF1000,1000_QL80_.jpg',
-    title: 'Start with Why',
-    author: 'Simon Sinek',
-    summary: 'Waarom succesvolle leiders en bedrijven altijd beginnen met hun "waarom".',
-    tag: 'Aanbevolen door Rick',
-    category: 'ondernemerschap',
-    rating: 4.5,
-    pages: 256,
-    year: 2009,
-  },
-  {
-    cover: 'https://m.media-amazon.com/images/I/71aFt4+OTOL._AC_UF1000,1000_QL80_.jpg',
-    title: 'Man\'s Search for Meaning',
-    author: 'Viktor Frankl',
-    summary: 'Over de kracht van zingeving, zelfs in de zwaarste omstandigheden.',
-    tag: 'Classic',
-    category: 'mindset',
-    rating: 4.7,
-    pages: 184,
-    year: 1946,
-  },
-  {
-    cover: 'https://m.media-amazon.com/images/I/71aFt4+OTOL._AC_UF1000,1000_QL80_.jpg',
-    title: 'The Way of the Superior Man',
-    author: 'David Deida',
-    summary: 'Over mannelijke energie, relaties en persoonlijke groei.',
-    tag: 'Aanbevolen door Rick',
-    category: 'relaties',
-    rating: 4.4,
-    pages: 272,
-    year: 1997,
-  },
-];
-
 export default function Boekenkamer() {
-  const [activeCat, setActiveCat] = useState('mindset');
+  const [activeCat, setActiveCat] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [showBookModal, setShowBookModal] = useState(false);
+  const [books, setBooks] = useState<Book[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const filteredBooks = books.filter(book => 
-    book.category === activeCat && 
-    (book.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-     book.author.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  // Fetch books from database
+  const fetchBooks = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/admin/books');
+      const data = await response.json();
+      
+      if (data.success && data.books) {
+        setBooks(data.books);
+      } else {
+        // Fallback to mock data if database is not available
+        setBooks([
+          {
+            id: '1',
+            title: 'Can\'t Hurt Me',
+            author: 'David Goggins',
+            cover: '/books/canthurtme.jpg',
+            categories: ['Mindset', 'Motivatie'],
+            description: 'David Goggins\' verhaal over hoe hij zijn mentale en fysieke grenzen verlegde.',
+            status: 'published',
+            averageRating: 4.8,
+            reviewCount: 12,
+          },
+          {
+            id: '2',
+            title: 'Atomic Habits',
+            author: 'James Clear',
+            cover: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=600&fit=crop',
+            categories: ['Productiviteit', 'Gewoontes'],
+            description: 'Kleine veranderingen, opmerkelijke resultaten: een bewezen manier om goede gewoontes te bouwen en slechte te doorbreken.',
+            status: 'published',
+            averageRating: 4.6,
+            reviewCount: 8,
+          },
+          {
+            id: '3',
+            title: 'Rich Dad Poor Dad',
+            author: 'Robert Kiyosaki',
+            cover: 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=400&h=600&fit=crop',
+            categories: ['Financiën', 'Ondernemerschap'],
+            description: 'Wat de rijken hun kinderen leren over geld dat de armen en de middenklasse niet doen.',
+            status: 'published',
+            averageRating: 4.4,
+            reviewCount: 5,
+          }
+        ]);
+      }
+    } catch (error) {
+      console.error('Error fetching books:', error);
+      setError('Failed to load books');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBooks();
+  }, []);
+
+  // Filter books based on category and search
+  const filteredBooks = books.filter(book => {
+    const matchesCategory = activeCat === 'all' || 
+      book.categories.some(cat => 
+        defaultCategories.find(defaultCat => 
+          defaultCat.label.toLowerCase().includes(cat.toLowerCase()) || 
+          cat.toLowerCase().includes(defaultCat.label.toLowerCase())
+        )?.id === activeCat
+      );
+    
+    const matchesSearch = book.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      book.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      book.description.toLowerCase().includes(searchTerm.toLowerCase());
+
+    return matchesCategory && matchesSearch;
+  });
 
   const openBookModal = (book: Book) => {
     setSelectedBook(book);
@@ -116,6 +128,37 @@ export default function Boekenkamer() {
     setShowBookModal(false);
     setSelectedBook(null);
   };
+
+  if (loading) {
+    return (
+      <div className="w-full max-w-7xl mx-auto">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
+            <p className="text-[#8BAE5A]">Boeken laden...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="w-full max-w-7xl mx-auto">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <p className="text-red-400 mb-4">{error}</p>
+            <button 
+              onClick={fetchBooks}
+              className="px-4 py-2 bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] text-[#1A2317] rounded-lg font-semibold hover:from-[#A6C97B] hover:to-[#C6D958] transition-all"
+            >
+              Opnieuw proberen
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-7xl mx-auto">
@@ -156,7 +199,27 @@ export default function Boekenkamer() {
             </div>
             
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
-              {categories.map((cat) => {
+              <button
+                onClick={() => setActiveCat('all')}
+                className={`group relative flex flex-col items-center py-3 px-2 rounded-lg font-medium transition-all duration-300 ${
+                  activeCat === 'all'
+                    ? "bg-gradient-to-br from-[#8BAE5A] to-[#B6C948] text-[#1A2317] shadow-md shadow-[#8BAE5A]/20 transform scale-105"
+                    : "text-[#8BAE5A]/70 hover:text-[#8BAE5A] hover:bg-[#2A3317]/50 hover:transform hover:scale-105"
+                }`}
+              >
+                <span className={`text-xl mb-1 transition-all duration-300 ${
+                  activeCat === 'all' ? "text-[#1A2317]" : "text-[#8BAE5A]/70 group-hover:text-[#8BAE5A]"
+                }`}>
+                  📚
+                </span>
+                <span className={`text-xs font-bold transition-all duration-300 text-center ${
+                  activeCat === 'all' ? "text-[#1A2317]" : "text-[#8BAE5A]/70 group-hover:text-[#8BAE5A]"
+                }`}>
+                  Alle Boeken
+                </span>
+              </button>
+              
+              {defaultCategories.map((cat) => {
                 const active = activeCat === cat.id;
                 
                 return (
@@ -201,7 +264,7 @@ export default function Boekenkamer() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-xl md:text-2xl font-bold text-white mb-1">
-                {categories.find(cat => cat.id === activeCat)?.label}
+                {activeCat === 'all' ? 'Alle Boeken' : defaultCategories.find(cat => cat.id === activeCat)?.label}
               </h2>
               <p className="text-[#8BAE5A] text-sm">
                 {filteredBooks.length} boeken gevonden
@@ -234,8 +297,8 @@ export default function Boekenkamer() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {filteredBooks.map((book, i) => (
-                <div key={i} className="group relative bg-[#1A2317]/80 rounded-xl border border-[#3A4D23]/40 overflow-hidden hover:transform hover:scale-105 transition-all duration-300 hover:shadow-lg hover:shadow-[#8BAE5A]/10">
+              {filteredBooks.map((book) => (
+                <div key={book.id} className="group relative bg-[#1A2317]/80 rounded-xl border border-[#3A4D23]/40 overflow-hidden hover:transform hover:scale-105 transition-all duration-300 hover:shadow-lg hover:shadow-[#8BAE5A]/10">
                   {/* Book Cover */}
                   <div className="relative h-48 overflow-hidden">
                     <Image 
@@ -249,8 +312,7 @@ export default function Boekenkamer() {
                     {/* Top Badges */}
                     <div className="absolute top-2 left-2 right-2 flex justify-between items-start">
                       <span className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-xs font-bold text-[#1A2317] px-2 py-1 rounded-full shadow-md flex items-center gap-1">
-                        {book.tag === 'Aanbevolen door Rick' && <FaStar className="text-[#FFD700] w-3 h-3" />} 
-                        {book.tag}
+                        {book.status === 'published' ? 'Gepubliceerd' : 'Concept'}
                       </span>
                       <button className="bg-[#1A2317]/80 p-1.5 rounded-full text-[#8BAE5A] hover:text-[#FFD700] shadow-md transition-colors">
                         <FaBookmark className="w-3 h-3" />
@@ -259,7 +321,7 @@ export default function Boekenkamer() {
                     
                     {/* Rating */}
                     <div className="absolute bottom-2 right-2 bg-[#1A2317]/90 px-2 py-1 rounded-full text-xs text-[#8BAE5A] font-semibold shadow-md">
-                      ⭐ {book.rating}
+                      ⭐ {book.averageRating}
                     </div>
                   </div>
                   
@@ -272,12 +334,18 @@ export default function Boekenkamer() {
                       <p className="text-[#8BAE5A] font-medium text-xs">{book.author}</p>
                     </div>
                     
-                    <p className="text-xs text-[#E1CBB3] leading-relaxed line-clamp-2">{book.summary}</p>
+                    <p className="text-xs text-[#E1CBB3] leading-relaxed line-clamp-2">{book.description}</p>
+                    
+                    <div className="flex flex-wrap gap-1 mb-2">
+                      {book.categories.map((category, index) => (
+                        <span key={index} className="px-2 py-1 bg-[#3A4D23] text-[#8BAE5A] text-xs rounded">
+                          {category}
+                        </span>
+                      ))}
+                    </div>
                     
                     <div className="flex items-center gap-3 text-xs text-[#8BAE5A]/70">
-                      <span>{book.pages} pagina's</span>
-                      <span>•</span>
-                      <span>{book.year}</span>
+                      <span>{book.reviewCount} reviews</span>
                     </div>
                     
                     <div className="flex gap-2 pt-2">
@@ -340,35 +408,32 @@ export default function Boekenkamer() {
                   {/* Book Stats */}
                   <div className="grid grid-cols-2 gap-3">
                     <div className="flex items-center gap-2 text-sm text-[#8BAE5A]/70">
-                      <FaCalendarAlt className="w-3 h-3" />
-                      <span>Publicatie: {selectedBook.year}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-[#8BAE5A]/70">
-                      <FaGlobe className="w-3 h-3" />
-                      <span>{selectedBook.pages} pagina's</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-[#8BAE5A]/70">
                       <FaStar className="w-3 h-3 text-[#FFD700]" />
-                      <span>Rating: {selectedBook.rating}/5</span>
+                      <span>Rating: {selectedBook.averageRating}/5</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-[#8BAE5A]/70">
                       <FaUser className="w-3 h-3" />
-                      <span>Categorie: {categories.find(cat => cat.id === selectedBook.category)?.label}</span>
+                      <span>{selectedBook.reviewCount} reviews</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-[#8BAE5A]/70">
+                      <FaGlobe className="w-3 h-3" />
+                      <span>Status: {selectedBook.status === 'published' ? 'Gepubliceerd' : 'Concept'}</span>
                     </div>
                   </div>
                   
-                  {/* Tag */}
-                  <div className="inline-block">
-                    <span className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-sm font-bold text-[#1A2317] px-2 py-1 rounded-full shadow-md flex items-center gap-2">
-                      {selectedBook.tag === 'Aanbevolen door Rick' && <FaStar className="text-[#FFD700] w-3 h-3" />} 
-                      {selectedBook.tag}
-                    </span>
+                  {/* Categories */}
+                  <div className="flex flex-wrap gap-2">
+                    {selectedBook.categories.map((category, index) => (
+                      <span key={index} className="px-2 py-1 bg-[#3A4D23] text-[#8BAE5A] text-xs rounded">
+                        {category}
+                      </span>
+                    ))}
                   </div>
                   
                   {/* Summary */}
                   <div>
                     <h4 className="text-base font-semibold text-white mb-2">Samenvatting</h4>
-                    <p className="text-[#E1CBB3] leading-relaxed text-sm">{selectedBook.summary}</p>
+                    <p className="text-[#E1CBB3] leading-relaxed text-sm">{selectedBook.description}</p>
                   </div>
                 </div>
               </div>
