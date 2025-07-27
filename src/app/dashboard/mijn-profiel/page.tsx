@@ -491,8 +491,9 @@ export default function MijnProfiel() {
 
   return (
     <ClientLayout>
-      <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">Mijn Profiel</h1>
-      <p className="text-[#8BAE5A] text-lg mb-8">Beheer je profiel, voortgang en instellingen</p>
+      <div className="w-full max-w-7xl mx-auto">
+        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 drop-shadow-lg">Mijn Profiel</h1>
+        <p className="text-[#8BAE5A] text-lg mb-8">Beheer je profiel, voortgang en instellingen</p>
       
       {/* Tabs */}
       <div className="flex gap-2 mb-8 overflow-x-auto">
@@ -924,6 +925,7 @@ export default function MijnProfiel() {
         accept="image/*"
         className="hidden"
       />
+      </div>
     </ClientLayout>
   );
 } 

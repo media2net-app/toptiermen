@@ -200,103 +200,99 @@ export default function MijnTrainingen() {
 
   return (
     <ClientLayout>
-      <div className="min-h-screen bg-gradient-to-br from-[#0F1419] to-[#1A1F2E] p-6">
-        <div className="max-w-6xl mx-auto">
-          {/* Header */}
+      <div className="w-full max-w-7xl mx-auto">
+        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 drop-shadow-lg">Mijn Trainingen</h1>
+        <p className="text-[#8BAE5A] text-lg mb-8">Jouw actieve trainingsschema en voortgang</p>
+
+        {/* Schema Overview */}
+        <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-6 mb-8">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+            <div className="flex-1">
+              <h2 className="text-2xl font-bold text-white mb-2">{schema?.name}</h2>
+              <p className="text-gray-400 mb-4">{schema?.description}</p>
+              <div className="flex flex-wrap gap-4 text-sm">
+                <span className="text-[#8BAE5A]">Categorie: {schema?.category}</span>
+                <span className="text-[#FFD700]">Niveau: {schema?.difficulty}</span>
+                <span className="text-[#f0a14f]">Duur: {schema?.estimated_duration}</span>
+              </div>
+            </div>
+            
+            {progress && (
+              <div className="text-right">
+                <div className="text-3xl font-bold text-[#8BAE5A] mb-1">
+                  {progress.completed_days}/{progress.total_days}
+                </div>
+                <div className="text-sm text-gray-400">Dagen voltooid</div>
+                <div className="mt-2">
+                  <div className="w-32 h-2 bg-[#3A4D23] rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] transition-all duration-300"
+                      style={{ width: `${(progress.completed_days / progress.total_days) * 100}%` }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Training Days */}
+        {days && days.length > 0 && (
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2">Mijn Trainingen</h1>
-            <p className="text-[#8BAE5A] text-lg">Jouw actieve trainingsschema en voortgang</p>
-          </div>
+            <h2 className="text-xl font-bold text-white mb-4">Trainingsdagen</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {days.map((day) => {
+                const isCompleted = progress ? day.day_number <= progress.completed_days : false;
+                const isCurrentDay = day.day_number === selectedDay;
+                const isNextDay = progress ? day.day_number === progress.current_day : false;
 
-          {/* Schema Overview */}
-          <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-6 mb-8">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-              <div className="flex-1">
-                <h2 className="text-2xl font-bold text-white mb-2">{schema?.name}</h2>
-                <p className="text-gray-400 mb-4">{schema?.description}</p>
-                <div className="flex flex-wrap gap-4 text-sm">
-                  <span className="text-[#8BAE5A]">Categorie: {schema?.category}</span>
-                  <span className="text-[#FFD700]">Niveau: {schema?.difficulty}</span>
-                  <span className="text-[#f0a14f]">Duur: {schema?.estimated_duration}</span>
-                </div>
-              </div>
-              
-              {progress && (
-                <div className="text-right">
-                  <div className="text-3xl font-bold text-[#8BAE5A] mb-1">
-                    {progress.completed_days}/{progress.total_days}
-                  </div>
-                  <div className="text-sm text-gray-400">Dagen voltooid</div>
-                  <div className="mt-2">
-                    <div className="w-32 h-2 bg-[#3A4D23] rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] transition-all duration-300"
-                        style={{ width: `${(progress.completed_days / progress.total_days) * 100}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Training Days */}
-          {days && days.length > 0 && (
-            <div className="mb-8">
-              <h2 className="text-xl font-bold text-white mb-4">Trainingsdagen</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {days.map((day) => {
-                  const isCompleted = progress ? day.day_number <= progress.completed_days : false;
-                  const isCurrentDay = day.day_number === selectedDay;
-                  const isNextDay = progress ? day.day_number === progress.current_day : false;
-
-                  return (
-                    <div
-                      key={day.id}
-                      className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                        isCurrentDay
-                          ? 'border-[#8BAE5A] bg-[#232D1A]'
-                          : isCompleted
-                          ? 'border-green-500 bg-[#1A1A1A]'
-                          : 'border-[#3A4D23] bg-[#1A1A1A] hover:border-[#5A6D43]'
-                      }`}
-                      onClick={() => setSelectedDay(day.day_number)}
-                    >
-                      {isCompleted && (
-                        <div className="absolute top-2 right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                          <CheckIcon className="w-4 h-4 text-white" />
-                        </div>
-                      )}
-                      
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="font-semibold text-white">Dag {day.day_number}</h3>
-                        {isNextDay && (
-                          <span className="text-xs bg-[#8BAE5A] text-[#232D1A] px-2 py-1 rounded-full">
-                            Volgende
-                          </span>
-                        )}
+                return (
+                  <div
+                    key={day.id}
+                    className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                      isCurrentDay
+                        ? 'border-[#8BAE5A] bg-[#232D1A]'
+                        : isCompleted
+                        ? 'border-green-500 bg-[#1A1A1A]'
+                        : 'border-[#3A4D23] bg-[#1A1A1A] hover:border-[#5A6D43]'
+                    }`}
+                    onClick={() => setSelectedDay(day.day_number)}
+                  >
+                    {isCompleted && (
+                      <div className="absolute top-2 right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                        <CheckIcon className="w-4 h-4 text-white" />
                       </div>
-                      <h4 className="text-[#8BAE5A] font-medium mb-1">{day.name}</h4>
-                      <p className="text-sm text-gray-400 mb-3">{day.focus_area}</p>
-                      
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          startWorkout(day.day_number);
-                        }}
-                        className="w-full px-4 py-2 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-semibold rounded-lg hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200"
-                      >
-                        Start Training
-                      </button>
+                    )}
+                    
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-semibold text-white">Dag {day.day_number}</h3>
+                      {isNextDay && (
+                        <span className="text-xs bg-[#8BAE5A] text-[#232D1A] px-2 py-1 rounded-full">
+                          Volgende
+                        </span>
+                      )}
                     </div>
-                  );
-                })}
-              </div>
+                    <h4 className="text-[#8BAE5A] font-medium mb-1">{day.name}</h4>
+                    <p className="text-sm text-gray-400 mb-3">{day.focus_area}</p>
+                    
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        startWorkout(day.day_number);
+                      }}
+                      className="w-full px-4 py-2 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-semibold rounded-lg hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200"
+                    >
+                      Start Training
+                    </button>
+                  </div>
+                );
+              })}
             </div>
-          )}
+          </div>
+        )}
 
-          {/* Quick Actions */}
-          <div className="bg-[#181F17] border border-[#3A4D23]/30 rounded-xl p-6">
+        {/* Quick Actions */}
+        <div className="bg-[#181F17] border border-[#3A4D23]/30 rounded-xl p-6">
             <h2 className="text-xl font-bold text-white mb-4">Snelle Acties</h2>
             <div className="flex flex-wrap gap-4">
               <button
@@ -314,7 +310,6 @@ export default function MijnTrainingen() {
             </div>
           </div>
         </div>
-      </div>
 
       {/* Pre-Workout Modal */}
       {trainingData?.schema && (

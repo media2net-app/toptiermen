@@ -39,7 +39,7 @@ export default function MobileNav() {
   const [openBrotherhood, setOpenBrotherhood] = useState(false);
   return (
     <>
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#232D1A]/95 border-t border-[#3A4D23]/60 flex justify-between items-center px-1 py-1 shadow-2xl backdrop-blur-lg">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#232D1A]/95 border-t border-[#3A4D23]/60 flex justify-between items-center px-1 py-1 shadow-2xl backdrop-blur-lg">
         {mobileMenu.map((item) => (
           <Link 
             key={item.label} 
@@ -62,7 +62,7 @@ export default function MobileNav() {
       {showMobileMenu && (
         <div className="fixed inset-0 z-40 flex">
           <div 
-            className="w-[85%] max-w-[320px] bg-[#181F17] h-full shadow-2xl flex flex-col p-4 transform transition-transform duration-300 ease-in-out translate-x-0 overflow-y-auto"
+            className="w-[85%] max-w-[400px] bg-[#181F17] h-full shadow-2xl flex flex-col p-4 transform transition-transform duration-300 ease-in-out translate-x-0 overflow-y-auto"
             style={{ WebkitOverflowScrolling: 'touch' }}
           >
             <div className="flex items-center justify-between mb-6">

@@ -303,20 +303,20 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-[#0A0F0A] flex">
       {/* Sidebar */}
       <div className={`bg-[#232D1A] border-r border-[#3A4D23] transition-all duration-300 ease-in-out ${
-        sidebarCollapsed ? 'w-16' : 'w-64'
-      } hidden md:flex flex-col fixed h-full z-40`}>
+        sidebarCollapsed ? 'w-16' : 'w-64 lg:w-72'
+      } hidden lg:flex flex-col fixed h-full z-40`}>
         <div className="flex-1 flex flex-col">
           {/* Logo */}
           <div className="p-4 border-b border-[#3A4D23]">
-            <div className="flex items-center justify-center">
+            <Link href="/dashboard" className="flex items-center justify-center">
               <Image
                 src="/logo.svg"
                 alt="Top Tier Men Logo"
                 width={sidebarCollapsed ? 32 : 200}
                 height={32}
-                className={`${sidebarCollapsed ? 'w-8 h-8' : 'w-full h-8'} object-contain`}
+                className={`${sidebarCollapsed ? 'w-8 h-8' : 'w-full h-8'} object-contain hover:opacity-80 transition-opacity`}
               />
-            </div>
+            </Link>
           </div>
 
           {/* Navigation */}
@@ -364,21 +364,21 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
       {/* Main Content */}
       <div className={`flex-1 transition-all duration-300 ease-in-out ${
-        sidebarCollapsed ? 'md:ml-16' : 'md:ml-64'
+        sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64 lg:ml-72'
       }`}>
         {/* Top Bar */}
         <div className="bg-[#232D1A] border-b border-[#3A4D23] p-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            {/* Mobile Menu Button */}
+            {/* Mobile/Tablet Menu Button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-2 bg-[#181F17] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors"
+              className="lg:hidden p-2 bg-[#181F17] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors"
             >
               <Bars3Icon className="w-6 h-6" />
             </button>
 
             {/* Page Title */}
-            <h1 className="text-xl font-bold text-white">
+            <h1 className="text-lg md:text-xl font-bold text-white">
               {menu.find(item => item.href === pathname)?.label || 'Dashboard'}
             </h1>
           </div>
@@ -388,10 +388,11 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
             {user.role === 'admin' && (
               <Link
                 href="/dashboard-admin"
-                className="px-4 py-2 bg-[#8BAE5A] text-[#0A0F0A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold flex items-center gap-2"
+                className="px-3 md:px-4 py-2 bg-[#8BAE5A] text-[#0A0F0A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold flex items-center gap-1 md:gap-2 text-sm md:text-base"
               >
                 <UserGroupIcon className="w-4 h-4" />
-                Admin Dashboard
+                <span className="hidden sm:inline">Admin Dashboard</span>
+                <span className="sm:hidden">Admin</span>
               </Link>
             )}
 
@@ -426,10 +427,10 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile/Tablet Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-50">
-            <div className="bg-[#232D1A] w-64 h-full p-4 mobile-menu">
+          <div className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-50">
+            <div className="bg-[#232D1A] w-80 md:w-96 h-full p-4 mobile-menu">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-[#8BAE5A] font-bold text-lg">Menu</h2>
                 <button
@@ -449,7 +450,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
         )}
 
         {/* Page Content */}
-        <div className="p-6">
+        <div className="p-4 md:p-6 lg:p-8">
           {/* Main Content */}
           <div className={`transition-all duration-300 ${isTransitioning ? 'opacity-50 scale-95' : 'opacity-100 scale-100'}`}>
             {children}

@@ -252,7 +252,7 @@ export default function LedenOverzicht() {
   }
 
   return (
-    <div className="px-4 md:px-12">
+    <div className="w-full max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-8">
         <h2 className="text-3xl font-bold text-white mb-1">De Broeders</h2>

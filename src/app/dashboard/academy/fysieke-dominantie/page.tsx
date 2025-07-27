@@ -5,7 +5,7 @@ import Link from 'next/link';
 export default function FysiekeDominantiePage() {
   return (
     <ClientLayout>
-      <div className="p-6 md:p-12">
+      <div className="w-full max-w-7xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Module 2: Fysieke Dominantie</h1>
           <p className="text-[#8BAE5A] text-lg">Werk aan kracht, uithoudingsvermogen en fysieke gezondheid</p>

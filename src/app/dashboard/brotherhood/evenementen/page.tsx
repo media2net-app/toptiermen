@@ -36,7 +36,7 @@ export default function EvenementenPage() {
 
   return (
     <ClientLayout>
-      <div className="p-6 md:p-12">
+      <div className="w-full max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Community Evenementen</h1>

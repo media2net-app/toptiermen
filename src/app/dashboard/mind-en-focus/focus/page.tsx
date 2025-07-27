@@ -164,7 +164,7 @@ export default function FocusToolkit() {
   // UI
   return (
     <ClientLayout>
-      <div className="py-8 px-4 md:px-12 max-w-4xl mx-auto">
+      <div className="w-full max-w-7xl mx-auto">
         <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">Focus & Productiviteit Toolkit</h1>
         <p className="text-[#8BAE5A] text-lg mb-8">Maximaliseer je concentratie en haal het beste uit je werktijd.</p>
         {/* Tabs */}

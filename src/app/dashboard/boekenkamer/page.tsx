@@ -118,7 +118,7 @@ export default function Boekenkamer() {
   };
 
   return (
-    <div className="w-full bg-[#232D1A] min-h-screen">
+    <div className="w-full max-w-7xl mx-auto">
       {/* Hero Section */}
       <div className="relative py-8 px-6">
         <div className="max-w-6xl mx-auto">

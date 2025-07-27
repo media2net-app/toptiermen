@@ -234,7 +234,7 @@ export default function MijnChallenges() {
 
   return (
     <ClientLayout>
-      <div className="p-6 md:p-12">
+      <div className="w-full max-w-7xl mx-auto">
         {/* Focus van Vandaag Header */}
         <div className="bg-gradient-to-r from-[#8BAE5A]/20 to-[#FFD700]/20 rounded-2xl p-6 mb-8 border border-[#8BAE5A]/30">
           <h2 className="text-2xl font-bold text-[#FFD700] mb-2 flex items-center gap-2">

@@ -80,7 +80,7 @@ export default function Ademhaling() {
 
   return (
     <ClientLayout>
-      <div className="py-8 px-4 md:px-12 max-w-5xl mx-auto">
+      <div className="w-full max-w-7xl mx-auto">
         <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">Geleide Ademhaling</h1>
         <p className="text-[#8BAE5A] text-lg mb-8">Vind rust, focus of energie met je ademhaling als gids.</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

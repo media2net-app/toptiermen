@@ -73,7 +73,7 @@ export default function MijnGroepenEnEvenementen() {
   const [eventView, setEventView] = useState<'aankomend' | 'voorbij'>('aankomend');
 
   return (
-    <div className="px-4 md:px-12 py-8">
+    <div className="w-full max-w-7xl mx-auto">
       {/* Tabs */}
       <div className="flex gap-2 mb-8 border-b border-[#3A4D23]/40">
         <button

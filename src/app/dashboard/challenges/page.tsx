@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'react-toastify';
+import ClientLayout from '../../components/ClientLayout';
 
 interface Challenge {
   id: string;
@@ -187,13 +188,10 @@ export default function ChallengesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0F1419] to-[#1A1F2E] p-6">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Challenges</h1>
-          <p className="text-gray-400">Neem deel aan uitdagingen en verdien XP, badges en rangen</p>
-        </div>
+    <ClientLayout>
+      <div className="w-full max-w-7xl mx-auto">
+        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 drop-shadow-lg">Challenges</h1>
+        <p className="text-[#8BAE5A] text-lg mb-8">Neem deel aan uitdagingen en verdien XP, badges en rangen</p>
 
         {/* Summary Cards */}
         {summary && (
@@ -407,6 +405,6 @@ export default function ChallengesPage() {
           </div>
         )}
       </div>
-    </div>
+    </ClientLayout>
   );
 } 

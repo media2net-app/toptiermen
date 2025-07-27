@@ -80,7 +80,7 @@ export default function MeditatieBibliotheek() {
 
   return (
     <ClientLayout>
-      <div className="py-8 px-4 md:px-12 max-w-4xl mx-auto">
+      <div className="w-full max-w-7xl mx-auto">
         <a href="/dashboard/mind-en-focus" className="text-[#8BAE5A] hover:underline mb-6 inline-block">← Terug naar Mind & Focus</a>
         <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">Meditatie Bibliotheek</h1>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">

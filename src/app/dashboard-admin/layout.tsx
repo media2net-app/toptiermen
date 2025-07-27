@@ -308,7 +308,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-4">
             <button
               onClick={() => setIsMobileMenuOpen(true)}
-              className="md:hidden p-2 text-[#8BAE5A]"
+              className="lg:hidden p-2 text-[#8BAE5A]"
             >
               <Bars3Icon className="w-6 h-6" />
             </button>
@@ -372,6 +372,16 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
             >
               Ga naar Platform
             </Link>
+            {/* Marketing button - only visible for Chiel */}
+            {(user?.email === 'chiel@media2net.nl' || user?.full_name?.toLowerCase().includes('chiel')) && (
+              <Link 
+                href="/dashboard-marketing" 
+                className="px-4 py-2 rounded-xl bg-[#1E40AF] text-white text-sm font-semibold border border-[#1E40AF] hover:bg-[#1D4ED8] transition flex items-center gap-2"
+              >
+                <MegaphoneIcon className="w-4 h-4" />
+                Marketing
+              </Link>
+            )}
             <button
               onClick={handleLogout}
               disabled={isLoggingOut}
@@ -384,11 +394,11 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
       </div>
 
       <div className="flex">
-        {/* Mobile Menu Overlay */}
+        {/* Mobile/Tablet Menu Overlay */}
         {isMobileMenuOpen && (
-          <div className="md:hidden fixed inset-0 z-40 flex">
+          <div className="lg:hidden fixed inset-0 z-40 flex">
              <div className="fixed inset-0 bg-black/60" onClick={() => setIsMobileMenuOpen(false)}></div>
-             <div className="relative flex-1 flex flex-col max-w-xs w-full bg-[#232D1A] border-r border-[#3A4D23] p-6">
+             <div className="relative flex-1 flex flex-col max-w-sm w-full bg-[#232D1A] border-r border-[#3A4D23] p-6">
                 <button
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="absolute top-5 right-5 p-2 text-[#8BAE5A]"
@@ -401,7 +411,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
         )}
         
         {/* Desktop Sidebar */}
-        <aside className="hidden md:block w-72 bg-[#232D1A] border-r border-[#3A4D23] min-h-screen p-6">
+        <aside className="hidden lg:block w-72 bg-[#232D1A] border-r border-[#3A4D23] min-h-screen p-6">
           <SidebarContent pathname={pathname ?? ''} />
         </aside>
 

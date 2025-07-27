@@ -4,7 +4,7 @@ import Link from 'next/link';
 export default function StoicijnseMindsetDetail() {
   return (
     <ClientLayout>
-      <div className="py-8 px-4 md:px-12">
+      <div className="w-full max-w-7xl mx-auto">
         <Link href="/dashboard/mind-en-focus" className="text-[#A3AED6] hover:underline mb-6 inline-block">← Terug naar Mind & Focus</Link>
         <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">Stoïcijnse Mindset</h1>
         <p className="text-[#A3AED6] text-lg mb-6 max-w-2xl">Leer hoe je met stoïcijnse principes, koude training en dopamine discipline mentaal sterker wordt en meer rust ervaart.</p>

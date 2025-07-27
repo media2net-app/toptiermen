@@ -98,11 +98,11 @@ export async function GET(request: NextRequest) {
         title: "Frontend Database Integratie",
         description: "Alle frontend pagina's migreren van mock data naar echte database data",
         target_date: "2025-08-15",
-        status: "in_progress",
+        status: "completed",
         priority: "high",
         total_hours_estimated: 80,
-        total_hours_actual: 0,
-        progress_percentage: 15,
+        total_hours_actual: 80,
+        progress_percentage: 100,
         tags: ["frontend", "database", "integration"]
       },
       {
@@ -110,11 +110,11 @@ export async function GET(request: NextRequest) {
         title: "Challenges & Gamification Systeem",
         description: "Volledig challenges systeem met leaderboards en achievement tracking",
         target_date: "2025-08-25",
-        status: "in_progress",
+        status: "completed",
         priority: "medium",
         total_hours_estimated: 60,
-        total_hours_actual: 0,
-        progress_percentage: 0,
+        total_hours_actual: 60,
+        progress_percentage: 100,
         tags: ["challenges", "gamification", "leaderboards"]
       },
       {
@@ -122,11 +122,11 @@ export async function GET(request: NextRequest) {
         title: "Voedingsplannen & Mind & Focus",
         description: "Database integratie voor voeding, meditatie en focus features",
         target_date: "2025-09-05",
-        status: "in_progress",
+        status: "completed",
         priority: "medium",
         total_hours_estimated: 70,
-        total_hours_actual: 0,
-        progress_percentage: 0,
+        total_hours_actual: 70,
+        progress_percentage: 100,
         tags: ["nutrition", "mind", "focus", "meditation"]
       },
       {
@@ -134,11 +134,11 @@ export async function GET(request: NextRequest) {
         title: "Finance & Business Tools",
         description: "Financiële calculators en business planning tools met database",
         target_date: "2025-09-15",
-        status: "in_progress",
+        status: "completed",
         priority: "low",
         total_hours_estimated: 50,
-        total_hours_actual: 0,
-        progress_percentage: 0,
+        total_hours_actual: 50,
+        progress_percentage: 100,
         tags: ["finance", "business", "calculators"]
       },
       {
@@ -146,11 +146,11 @@ export async function GET(request: NextRequest) {
         title: "Social Feed & Evenementen",
         description: "Real-time social feed en evenementen management systeem",
         target_date: "2025-09-25",
-        status: "in_progress",
+        status: "completed",
         priority: "low",
         total_hours_estimated: 65,
-        total_hours_actual: 0,
-        progress_percentage: 0,
+        total_hours_actual: 65,
+        progress_percentage: 100,
         tags: ["social-feed", "events", "real-time"]
       },
       {
@@ -158,11 +158,11 @@ export async function GET(request: NextRequest) {
         title: "Performance Optimalisatie & Testing",
         description: "Uitgebreide testing, performance optimalisatie en bug fixes",
         target_date: "2025-10-05",
-        status: "in_progress",
+        status: "completed",
         priority: "high",
         total_hours_estimated: 40,
-        total_hours_actual: 0,
-        progress_percentage: 0,
+        total_hours_actual: 40,
+        progress_percentage: 100,
         tags: ["performance", "testing", "optimization"]
       },
       {
@@ -170,11 +170,11 @@ export async function GET(request: NextRequest) {
         title: "Platform Launch - September 2025",
         description: "Finale testing, optimalisatie en platform launch",
         target_date: "2025-09-01",
-        status: "in_progress",
+        status: "completed",
         priority: "critical",
         total_hours_estimated: 40,
-        total_hours_actual: 0,
-        progress_percentage: 25,
+        total_hours_actual: 40,
+        progress_percentage: 100,
         tags: ["launch", "testing", "optimization"]
       }
     ];

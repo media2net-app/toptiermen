@@ -3,6 +3,9 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { FaCheck } from "react-icons/fa6";
 import { useAuth } from "@/contexts/AuthContext";
+import EmailVerificationModal from "@/components/EmailVerificationModal";
+import WelcomeEmailModal from "@/components/WelcomeEmailModal";
+import PaymentModal from "@/components/PaymentModal";
 
 export default function Register() {
   const router = useRouter();
@@ -30,6 +33,10 @@ export default function Register() {
   const [agreeIncasso, setAgreeIncasso] = useState(false);
   const [showProcessing, setShowProcessing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showEmailVerification, setShowEmailVerification] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState('');
+  const [showWelcomeEmail, setShowWelcomeEmail] = useState(false);
+  const [registeredUserName, setRegisteredUserName] = useState('');
 
   // Check if user is already logged in
   useEffect(() => {
@@ -195,14 +202,31 @@ export default function Register() {
     
     try {
       const fullName = `${registration.firstName} ${registration.lastName}`;
-      await signUp(registration.email, registration.password, fullName);
-      setStep('success');
+      const result = await signUp(registration.email, registration.password, fullName);
+      
+      if (result.success) {
+        setRegisteredEmail(registration.email);
+        setShowEmailVerification(true);
+      } else {
+        setError(result.error || 'Er is een fout opgetreden bij het registreren');
+      }
     } catch (error: any) {
       setError(error.message || 'Er is een fout opgetreden bij het registreren');
     } finally {
       setIsLoading(false);
     }
   }
+
+  const handleEmailVerified = () => {
+    setShowEmailVerification(false);
+    setRegisteredUserName(registration.firstName);
+    setShowWelcomeEmail(true);
+  };
+
+  const handleWelcomeComplete = () => {
+    setShowWelcomeEmail(false);
+    setStep('success');
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#181F17]">
@@ -414,41 +438,20 @@ export default function Register() {
           </form>
         )}
         {step === 'payment' && (
-          <div className="flex flex-col gap-8 text-left">
-            <h2 className="text-2xl md:text-3xl font-black text-white mb-2 leading-tight">Betaling</h2>
-            <p className="text-[#B6C948] text-lg md:text-xl font-normal">Kies je betaalmethode:</p>
-            <label className="flex items-center gap-3 text-[#B6C948] text-lg">
-              <input
-                type="checkbox"
-                checked={agreeIncasso}
-                onChange={e => setAgreeIncasso(e.target.checked)}
-                className="accent-[#8BAE5A] w-5 h-5"
-              />
-              Ik ga akkoord met automatische incasso
-            </label>
-            <button
-              onClick={() => {
-                if (agreeIncasso) {
-                  setShowProcessing(true);
-                  setTimeout(() => {
-                    setStep('success');
-                    router.push('/dashboard');
-                  }, 2000);
-                }
-              }}
-              disabled={!agreeIncasso || showProcessing}
-              className={`self-start px-10 py-4 rounded-xl bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] text-[#181F17] font-bold text-lg shadow-lg border border-[#B6C948] uppercase tracking-wide transition-all duration-200 ${!agreeIncasso || showProcessing ? 'opacity-50 cursor-not-allowed' : 'hover:from-[#8BAE5A] hover:to-[#B6C948]'}`}
-            >
-              Betaal met iDEAL
-            </button>
-            {agreeIncasso && showProcessing && (
-              <div className="mt-6 p-6 rounded-xl bg-[#181F17] border border-[#8BAE5A] text-[#8BAE5A] text-center">
-                <div className="mb-2 font-bold text-lg">Simulatie Stripe/iDEAL-betaalscherm</div>
-                <div className="mb-2">Je betaling wordt verwerkt...</div>
-                <div className="animate-pulse text-2xl">💳</div>
-              </div>
-            )}
-          </div>
+          <PaymentModal
+            isOpen={step === 'payment'}
+            planId={packageChoice}
+            onSuccess={() => {
+              setStep('success');
+              router.push('/dashboard');
+            }}
+            onClose={() => setStep('package')}
+            user={{
+              id: 'temp-user-id',
+              email: registration.email,
+              full_name: `${registration.firstName} ${registration.lastName}`
+            }}
+          />
         )}
         {step === 'success' && (
           <div className="text-center">
@@ -461,6 +464,22 @@ export default function Register() {
               Ga naar Dashboard
             </button>
           </div>
+        )}
+        {showEmailVerification && registeredEmail && (
+          <EmailVerificationModal
+            isOpen={showEmailVerification}
+            email={registeredEmail}
+            onVerified={handleEmailVerified}
+            onClose={() => setShowEmailVerification(false)}
+          />
+        )}
+        {showWelcomeEmail && registeredUserName && (
+          <WelcomeEmailModal
+            isOpen={showWelcomeEmail}
+            userName={registeredUserName}
+            onComplete={handleWelcomeComplete}
+            onClose={handleWelcomeComplete}
+          />
         )}
       </div>
     </div>

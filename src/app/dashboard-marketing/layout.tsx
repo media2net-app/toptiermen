@@ -1,0 +1,262 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
+import { 
+  ChartBarIcon,
+  MegaphoneIcon,
+  CurrencyDollarIcon,
+  UserGroupIcon,
+  EyeIcon,
+  CursorArrowRaysIcon,
+  PresentationChartLineIcon,
+  DocumentChartBarIcon,
+  DocumentTextIcon,
+  ClipboardDocumentListIcon,
+  Cog6ToothIcon,
+  ArrowLeftOnRectangleIcon,
+  Bars3Icon,
+  XMarkIcon,
+  ExclamationTriangleIcon,
+  WrenchScrewdriverIcon,
+  CalculatorIcon
+} from '@heroicons/react/24/outline';
+import Image from 'next/image';
+
+const navigation = [
+  { name: 'Overzicht', href: '/dashboard-marketing', icon: ChartBarIcon },
+  { name: 'Advertenties', href: '/dashboard-marketing/advertenties', icon: MegaphoneIcon },
+  { name: 'Campagnes', href: '/dashboard-marketing/campagnes', icon: PresentationChartLineIcon },
+  { name: 'Analytics', href: '/dashboard-marketing/analytics', icon: DocumentChartBarIcon },
+  { name: 'Conversies', href: '/dashboard-marketing/conversies', icon: CursorArrowRaysIcon },
+  { name: 'Audience', href: '/dashboard-marketing/audience', icon: UserGroupIcon },
+  { name: 'Budget', href: '/dashboard-marketing/budget', icon: CurrencyDollarIcon },
+  { name: 'Rapporten', href: '/dashboard-marketing/rapporten', icon: EyeIcon },
+  { name: 'Instellingen', href: '/dashboard-marketing/instellingen', icon: Cog6ToothIcon },
+];
+
+const developmentNavigation = [
+  { name: 'Marketing Plan', href: '/dashboard-marketing/marketingplan', icon: DocumentChartBarIcon },
+  { name: 'Content', href: '/dashboard-marketing/content', icon: DocumentTextIcon },
+  { name: 'Takenlijst', href: '/dashboard-marketing/takenlijst', icon: ClipboardDocumentListIcon },
+  { name: 'Prijsopgave', href: '/dashboard-marketing/prijsopgave', icon: CalculatorIcon },
+];
+
+export default function MarketingLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const pathname = usePathname();
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  // Check if user is Chiel (marketing user)
+  const isMarketingUser = user?.email === 'chiel@media2net.nl' || user?.full_name?.toLowerCase().includes('chiel');
+
+  useEffect(() => {
+    if (!loading && !isMarketingUser) {
+      router.push('/dashboard');
+    }
+  }, [loading, isMarketingUser, router]);
+
+  // Show loading while checking auth
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0F1419] flex items-center justify-center">
+        <div className="text-white">Loading...</div>
+      </div>
+    );
+  }
+
+  // Show access denied if not marketing user
+  if (!isMarketingUser) {
+    return (
+      <div className="min-h-screen bg-[#0F1419] flex items-center justify-center">
+        <div className="text-center">
+          <ExclamationTriangleIcon className="w-16 h-16 text-red-400 mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-white mb-2">Toegang Geweigerd</h1>
+          <p className="text-gray-400 mb-4">Je hebt geen toegang tot het Marketing Panel.</p>
+          <Link 
+            href="/dashboard"
+            className="bg-[#1E40AF] hover:bg-[#1D4ED8] text-white px-4 py-2 rounded-lg transition-colors"
+          >
+            Terug naar Dashboard
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#0F1419]">
+      {/* Top Navigation Bar */}
+      <div className="bg-black border-b border-gray-800 px-4 sm:px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4 flex-1">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="lg:hidden p-2 text-white"
+            >
+              <Bars3Icon className="w-6 h-6" />
+            </button>
+            <div className="flex items-center">
+              <Image
+                src="/logo-media2net.svg"
+                alt="Media2Net Logo"
+                width={500}
+                height={40}
+                className="min-w-[500px] h-10"
+              />
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <span className="hidden sm:inline text-white text-sm">
+              {user?.email || 'Marketing'}
+            </span>
+            <Link 
+              href="/dashboard" 
+              className="px-4 py-2 rounded-xl bg-[#3B82F6] text-white text-sm font-semibold border border-[#3B82F6] hover:bg-[#2563EB] transition"
+            >
+              Terug naar Dashboard
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex">
+        {/* Mobile/Tablet Menu Overlay */}
+        {sidebarOpen && (
+          <div className="lg:hidden fixed inset-0 z-40 flex">
+            <div className="fixed inset-0 bg-black/60" onClick={() => setSidebarOpen(false)}></div>
+            <div className="relative flex-1 flex flex-col max-w-sm w-full bg-black border-r border-gray-800 p-6">
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className="absolute top-5 right-5 p-2 text-[#60A5FA]"
+              >
+                <XMarkIcon className="w-6 h-6" />
+              </button>
+              <div className="flex-1">
+                <h2 className="text-lg font-semibold text-white mb-6">Marketing Menu</h2>
+                <nav className="space-y-2">
+                  {navigation.map((item) => {
+                    const isActive = pathname === item.href;
+                    return (
+                      <Link
+                        key={item.name}
+                        href={item.href}
+                        className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          isActive
+                            ? 'bg-[#3B82F6] text-white border border-[#3B82F6]'
+                            : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                        }`}
+                        onClick={() => setSidebarOpen(false)}
+                      >
+                        <item.icon className="w-5 h-5" />
+                        <span>{item.name}</span>
+                      </Link>
+                    );
+                  })}
+                </nav>
+                
+                {/* Ontwikkeling Menu */}
+                <div className="mt-8 pt-6 border-t border-gray-700">
+                  <h2 className="text-lg font-semibold text-white mb-4">Ontwikkeling</h2>
+                  <nav className="space-y-2">
+                    {developmentNavigation.map((item) => {
+                      const isActive = pathname === item.href;
+                      return (
+                        <Link
+                          key={item.name}
+                          href={item.href}
+                          className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                            isActive
+                              ? 'bg-[#3B82F6] text-white border border-[#3B82F6]'
+                              : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                          }`}
+                          onClick={() => setSidebarOpen(false)}
+                        >
+                          <item.icon className="w-5 h-5" />
+                          <span>{item.name}</span>
+                        </Link>
+                      );
+                    })}
+                  </nav>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* Desktop Sidebar */}
+        <aside className="hidden lg:block w-72 bg-black border-r border-gray-800 min-h-screen p-6">
+          <div className="flex flex-col h-full">
+            <h2 className="text-lg font-semibold text-white mb-6">Marketing Menu</h2>
+            <nav className="space-y-2">
+              {navigation.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      isActive
+                        ? 'bg-[#3B82F6] text-white border border-[#3B82F6]'
+                        : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                    }`}
+                  >
+                    <item.icon className="w-5 h-5" />
+                    <span>{item.name}</span>
+                  </Link>
+                );
+              })}
+            </nav>
+            
+            {/* Ontwikkeling Menu */}
+            <div className="mt-8 pt-6 border-t border-gray-700">
+              <h2 className="text-lg font-semibold text-white mb-4">Ontwikkeling</h2>
+              <nav className="space-y-2">
+                {developmentNavigation.map((item) => {
+                  const isActive = pathname === item.href;
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        isActive
+                          ? 'bg-[#3B82F6] text-white border border-[#3B82F6]'
+                          : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                      }`}
+                    >
+                      <item.icon className="w-5 h-5" />
+                      <span>{item.name}</span>
+                    </Link>
+                  );
+                })}
+              </nav>
+            </div>
+            
+            {/* Footer */}
+            <div className="mt-auto pt-6 border-t border-gray-700">
+              <Link
+                href="/dashboard"
+                className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+              >
+                <ArrowLeftOnRectangleIcon className="w-5 h-5" />
+                <span>Terug naar Dashboard</span>
+              </Link>
+            </div>
+          </div>
+        </aside>
+
+        {/* Main Content */}
+        <main className="flex-1 p-4 md:p-6 lg:p-12 overflow-x-auto bg-[#0F1419]">
+          {children}
+        </main>
+      </div>
+    </div>
+  );
+} 

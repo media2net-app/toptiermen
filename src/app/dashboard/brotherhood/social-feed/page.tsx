@@ -361,11 +361,11 @@ const SocialFeedPage = () => {
   }, []);
 
   return (
-    <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-8">
+    <div className="w-full max-w-7xl mx-auto">
       {/* Create Post Composer */}
-      <section className="mb-4 sm:mb-6">
-        <div className="bg-[#232D1A]/80 rounded-xl sm:rounded-2xl shadow-xl border border-[#3A4D23]/40 p-3 sm:p-4">
-          <div className="flex items-start gap-3">
+      <section className="mb-6">
+        <div className="bg-[#232D1A]/80 rounded-xl shadow-xl border border-[#3A4D23]/40 p-4 md:p-6">
+          <div className="flex items-start gap-4">
             {/* User avatar */}
             <div className="flex-shrink-0">
               <Image 
@@ -373,7 +373,7 @@ const SocialFeedPage = () => {
                 alt={user?.full_name || "User"} 
                 width={48} 
                 height={48} 
-                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-[#8BAE5A] object-cover" 
+                className="w-12 h-12 rounded-full border-2 border-[#8BAE5A] object-cover" 
               />
             </div>
             
@@ -383,14 +383,14 @@ const SocialFeedPage = () => {
                 <textarea
                   value={newPost}
                   onChange={(e) => setNewPost(e.target.value)}
-                  className="w-full border-none focus:ring-0 resize-none bg-[#181F17] text-white rounded-xl p-3 pr-12 placeholder:text-[#8BAE5A] text-sm sm:text-base"
+                  className="w-full border-none focus:ring-0 resize-none bg-[#181F17] text-white rounded-xl p-4 pr-12 placeholder:text-[#8BAE5A] text-base"
                   rows={3}
                   placeholder={`Deel een overwinning, stel een vraag of zet je intentie voor vandaag, ${user?.full_name?.split(' ')[0] || 'Brother'}...`}
                   maxLength={500}
                 />
                 <button
                   onClick={() => setShowPostEmojiPicker(!showPostEmojiPicker)}
-                  className="absolute right-3 top-3 p-1 text-[#8BAE5A] hover:text-[#FFD700] transition-colors"
+                  className="absolute right-4 top-4 p-1 text-[#8BAE5A] hover:text-[#FFD700] transition-colors"
                 >
                   <FaceSmileIcon className="w-5 h-5" />
                 </button>
@@ -398,7 +398,7 @@ const SocialFeedPage = () => {
               
               {/* Post Emoji Picker */}
               {showPostEmojiPicker && (
-                <div className="mt-2 bg-[#232D1A] border border-[#3A4D23] rounded-xl p-3">
+                <div className="mt-3 bg-[#232D1A] border border-[#3A4D23] rounded-xl p-4">
                   <div className="grid grid-cols-10 gap-2">
                     {popularEmojis.map((emoji, index) => (
                       <button
@@ -414,19 +414,19 @@ const SocialFeedPage = () => {
               )}
               
               {/* Action buttons */}
-              <div className="flex flex-wrap items-center gap-2 mt-3">
-                <button className="flex items-center px-3 py-1.5 text-sm rounded-xl bg-[#232D1A] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#3A4D23] transition-colors">
-                  <PhotoIcon className="w-4 h-4 mr-1" />
+              <div className="flex flex-wrap items-center gap-3 mt-4">
+                <button className="flex items-center px-4 py-2 text-sm rounded-xl bg-[#232D1A] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#3A4D23] transition-colors">
+                  <PhotoIcon className="w-4 h-4 mr-2" />
                   Foto/Video
                 </button>
-                <button className="flex items-center px-3 py-1.5 text-sm rounded-xl bg-[#232D1A] text-[#FFD700] border border-[#3A4D23] hover:bg-[#3A4D23] transition-colors">
-                  <MapPinIcon className="w-4 h-4 mr-1" />
+                <button className="flex items-center px-4 py-2 text-sm rounded-xl bg-[#232D1A] text-[#FFD700] border border-[#3A4D23] hover:bg-[#3A4D23] transition-colors">
+                  <MapPinIcon className="w-4 h-4 mr-2" />
                   Check-in
                 </button>
                 <button 
                   onClick={createPost}
                   disabled={!newPost.trim() || posting}
-                  className="ml-auto px-5 py-1.5 rounded-xl bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#B6C948] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                  className="ml-auto px-6 py-2 rounded-xl bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#B6C948] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   {posting ? (
                     <>
@@ -447,9 +447,9 @@ const SocialFeedPage = () => {
       </section>
 
       {/* Feed Filters */}
-      <section className="mb-4 -mx-3 sm:mx-0">
+      <section className="mb-6">
         <div className="flex overflow-x-auto hide-scrollbar">
-          <div className="flex space-x-1 sm:space-x-2 px-3 sm:px-0 min-w-full">
+          <div className="flex space-x-2 min-w-full">
             {[
               { id: 'voor-jou', label: 'Voor Jou' },
               { id: 'connecties', label: 'Connecties' },
@@ -458,7 +458,7 @@ const SocialFeedPage = () => {
               <button
                 key={filter.id}
                 onClick={() => setActiveFilter(filter.id)}
-                className={`px-4 py-2 rounded-t-xl font-semibold transition-colors whitespace-nowrap ${
+                className={`px-6 py-3 rounded-t-xl font-semibold transition-colors whitespace-nowrap ${
                   activeFilter === filter.id
                     ? 'bg-[#232D1A] text-[#FFD700] border-b-2 border-[#FFD700]'
                     : 'bg-[#232D1A]/60 text-[#8BAE5A] hover:text-white border-b-2 border-transparent'
@@ -472,35 +472,35 @@ const SocialFeedPage = () => {
       </section>
 
       {/* Feed List */}
-      <section className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+      <section className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         {loading ? (
-          <div className="col-span-full bg-[#232D1A]/80 rounded-xl sm:rounded-2xl shadow-xl border border-[#3A4D23]/40 p-6 text-center">
+          <div className="col-span-full bg-[#232D1A]/80 rounded-xl shadow-xl border border-[#3A4D23]/40 p-8 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
             <p className="text-[#8BAE5A]">Posts laden...</p>
           </div>
         ) : posts.length === 0 ? (
-          <div className="col-span-full bg-[#232D1A]/80 rounded-xl sm:rounded-2xl shadow-xl border border-[#3A4D23]/40 p-6 text-center">
+          <div className="col-span-full bg-[#232D1A]/80 rounded-xl shadow-xl border border-[#3A4D23]/40 p-8 text-center">
             <p className="text-[#8BAE5A] text-lg mb-2">Nog geen posts</p>
             <p className="text-[#8BAE5A]/70 text-sm">Wees de eerste om iets te delen met de Brotherhood!</p>
           </div>
         ) : (
           posts.map((post) => (
-            <div key={post.id} className="bg-[#232D1A]/80 rounded-xl sm:rounded-2xl shadow-xl border border-[#3A4D23]/40 p-3 sm:p-5">
+            <div key={post.id} className="bg-[#232D1A]/80 rounded-xl shadow-xl border border-[#3A4D23]/40 p-6">
               {/* Post header */}
-              <div className="flex items-center gap-2 sm:gap-3 mb-3">
+              <div className="flex items-center gap-3 mb-4">
                 <Image 
                   src={post.user.avatar_url || "/profielfoto.png"} 
                   alt={post.user.full_name} 
                   width={40} 
                   height={40} 
-                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-[#8BAE5A] object-cover flex-shrink-0" 
+                  className="w-10 h-10 rounded-full border-2 border-[#8BAE5A] object-cover flex-shrink-0" 
                 />
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center flex-wrap gap-1 sm:gap-2">
-                    <span className="font-semibold text-white text-sm sm:text-base truncate">
+                  <div className="flex items-center flex-wrap gap-2">
+                    <span className="font-semibold text-white text-base truncate">
                       {post.user.full_name}
                     </span>
-                    <span className="text-xs text-[#FFD700] bg-[#3A4D23] px-2 py-0.5 rounded inline-flex items-center">
+                    <span className="text-xs text-[#FFD700] bg-[#3A4D23] px-2 py-1 rounded inline-flex items-center">
                       <span className="mr-1">👑</span>
                       {post.user.rank || 'Member'}
                     </span>
@@ -508,22 +508,22 @@ const SocialFeedPage = () => {
                       {getPostTypeIcon(post.post_type)}
                     </span>
                   </div>
-                  <span className="block text-xs text-[#8BAE5A]">
+                  <span className="block text-xs text-[#8BAE5A] mt-1">
                     {timeAgo(post.created_at)}
                   </span>
                 </div>
               </div>
 
               {/* Post content */}
-              <div className="mb-3 text-[#E1CBB3] text-sm sm:text-base whitespace-pre-wrap">
+              <div className="mb-4 text-[#E1CBB3] text-base whitespace-pre-wrap">
                 {post.content}
               </div>
 
               {/* Post tags */}
               {post.tags && post.tags.length > 0 && (
-                <div className="mb-3 flex flex-wrap gap-1">
+                <div className="mb-4 flex flex-wrap gap-2">
                   {post.tags.map((tag, index) => (
-                    <span key={index} className="text-xs bg-[#3A4D23] text-[#8BAE5A] px-2 py-1 rounded-full">
+                    <span key={index} className="text-xs bg-[#3A4D23] text-[#8BAE5A] px-3 py-1 rounded-full">
                       #{tag}
                     </span>
                   ))}
@@ -532,37 +532,37 @@ const SocialFeedPage = () => {
 
               {/* Post location */}
               {post.location && (
-                <div className="mb-3 flex items-center gap-1 text-xs text-[#8BAE5A]">
-                  <MapPinIcon className="w-3 h-3" />
+                <div className="mb-4 flex items-center gap-2 text-sm text-[#8BAE5A]">
+                  <MapPinIcon className="w-4 h-4" />
                   {post.location}
                 </div>
               )}
 
               {/* Post actions */}
-              <div className="flex items-center gap-4 sm:gap-6 text-[#8BAE5A]">
+              <div className="flex items-center gap-6 text-[#8BAE5A]">
                 <button 
                   onClick={() => toggleLike(post.id, 'boks')}
-                  className={`flex items-center gap-1.5 hover:text-[#FFD700] active:text-[#FFD700] transition-colors py-1 px-2 -ml-2 rounded-lg ${
+                  className={`flex items-center gap-2 hover:text-[#FFD700] active:text-[#FFD700] transition-colors py-2 px-3 -ml-3 rounded-lg ${
                     post.user_liked && post.user_like_type === 'boks' ? 'text-[#FFD700]' : ''
                   }`}
                 >
-                  <span className="text-lg sm:text-xl">👊</span>
+                  <span className="text-xl">👊</span>
                   <span className="text-sm">{post.likes_count} Boks</span>
                 </button>
                 
                 <button 
                   onClick={() => openCommentModal(post)}
-                  className="flex items-center gap-1.5 hover:text-[#FFD700] active:text-[#FFD700] transition-colors py-1 px-2 rounded-lg"
+                  className="flex items-center gap-2 hover:text-[#FFD700] active:text-[#FFD700] transition-colors py-2 px-3 rounded-lg"
                 >
-                  <span className="text-lg sm:text-xl">💬</span>
+                  <span className="text-xl">💬</span>
                   <span className="text-sm">{post.comments_count} Reacties</span>
                 </button>
 
                 {/* Additional like types */}
-                <div className="flex gap-1">
+                <div className="flex gap-2">
                   <button 
                     onClick={() => toggleLike(post.id, 'fire')}
-                    className={`p-1 rounded hover:bg-[#3A4D23] transition-colors ${
+                    className={`p-2 rounded-lg hover:bg-[#3A4D23] transition-colors ${
                       post.user_liked && post.user_like_type === 'fire' ? 'text-[#FFD700]' : ''
                     }`}
                   >
@@ -570,7 +570,7 @@ const SocialFeedPage = () => {
                   </button>
                   <button 
                     onClick={() => toggleLike(post.id, 'respect')}
-                    className={`p-1 rounded hover:bg-[#3A4D23] transition-colors ${
+                    className={`p-2 rounded-lg hover:bg-[#3A4D23] transition-colors ${
                       post.user_liked && post.user_like_type === 'respect' ? 'text-[#FFD700]' : ''
                     }`}
                   >
@@ -578,7 +578,7 @@ const SocialFeedPage = () => {
                   </button>
                   <button 
                     onClick={() => toggleLike(post.id, 'love')}
-                    className={`p-1 rounded hover:bg-[#3A4D23] transition-colors ${
+                    className={`p-2 rounded-lg hover:bg-[#3A4D23] transition-colors ${
                       post.user_liked && post.user_like_type === 'love' ? 'text-[#FFD700]' : ''
                     }`}
                   >
@@ -608,7 +608,7 @@ const SocialFeedPage = () => {
 
             {/* Original Post */}
             <div className="p-6 border-b border-[#3A4D23] bg-[#181F17]">
-              <div className="flex items-center gap-3 mb-3">
+              <div className="flex items-center gap-3 mb-4">
                 <Image 
                   src={selectedPost.user.avatar_url || "/profielfoto.png"} 
                   alt={selectedPost.user.full_name} 
@@ -619,14 +619,14 @@ const SocialFeedPage = () => {
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-white">{selectedPost.user.full_name}</span>
-                    <span className="text-xs text-[#FFD700] bg-[#3A4D23] px-2 py-0.5 rounded">
+                    <span className="text-xs text-[#FFD700] bg-[#3A4D23] px-2 py-1 rounded">
                       {selectedPost.user.rank || 'Member'}
                     </span>
                   </div>
-                  <span className="text-xs text-[#8BAE5A]">{timeAgo(selectedPost.created_at)}</span>
+                  <span className="text-xs text-[#8BAE5A] mt-1 block">{timeAgo(selectedPost.created_at)}</span>
                 </div>
               </div>
-              <p className="text-[#E1CBB3] text-sm">{selectedPost.content}</p>
+              <p className="text-[#E1CBB3] text-base">{selectedPost.content}</p>
             </div>
 
             {/* Comments List */}
@@ -652,7 +652,7 @@ const SocialFeedPage = () => {
                       className="w-8 h-8 rounded-full border border-[#8BAE5A] object-cover flex-shrink-0" 
                     />
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center gap-2 mb-2">
                         <span className="font-semibold text-white text-sm">{comment.user.full_name}</span>
                         <span className="text-xs text-[#8BAE5A]">{timeAgo(comment.created_at)}</span>
                       </div>
@@ -708,12 +708,12 @@ const SocialFeedPage = () => {
                     </div>
                   )}
                   
-                  <div className="flex justify-between items-center mt-2">
+                  <div className="flex justify-between items-center mt-3">
                     <span className="text-xs text-[#8BAE5A]">{newComment.length}/500</span>
                     <button
                       onClick={addComment}
                       disabled={!newComment.trim() || commenting}
-                      className="px-4 py-2 bg-[#8BAE5A] text-[#181F17] font-semibold rounded-lg hover:bg-[#B6C948] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                      className="px-5 py-2 bg-[#8BAE5A] text-[#181F17] font-semibold rounded-lg hover:bg-[#B6C948] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                     >
                       {commenting ? (
                         <>
