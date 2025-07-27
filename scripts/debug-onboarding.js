@@ -8,55 +8,95 @@ const supabase = createClient(
 
 async function debugOnboarding() {
   try {
-    console.log('🔍 Debugging onboarding status table...\n');
-
-    // Check all data in the table
-    const { data, error } = await supabase
-      .from('user_onboarding_status')
-      .select('*');
-
-    if (error) {
-      console.error('❌ Error fetching data:', error.message);
+    console.log('🔍 Debugging onboarding system...');
+    
+    // Check if onboarding_status table exists
+    const { data: tableCheck, error: tableError } = await supabase
+      .from('onboarding_status')
+      .select('*')
+      .limit(1);
+    
+    if (tableError) {
+      console.log('❌ Table check error:', tableError.message);
       return;
     }
-
-    console.log('📊 All data in user_onboarding_status table:');
-    console.log('Total records:', data.length);
     
-    data.forEach((record, index) => {
-      console.log(`\n📝 Record ${index + 1}:`);
-      console.log('   - id:', record.id);
-      console.log('   - user_id:', record.user_id);
-      console.log('   - onboarding_completed:', record.onboarding_completed);
-      console.log('   - goal_set:', record.goal_set);
-      console.log('   - missions_selected:', record.missions_selected);
-      console.log('   - training_schema_selected:', record.training_schema_selected);
-      console.log('   - nutrition_plan_selected:', record.nutrition_plan_selected);
-      console.log('   - challenge_started:', record.challenge_started);
-      console.log('   - completed_steps:', record.completed_steps);
-      console.log('   - created_at:', record.created_at);
-      console.log('   - updated_at:', record.updated_at);
+    console.log('✅ Onboarding_status table exists');
+    
+    // Get all onboarding statuses
+    const { data: allStatuses, error: statusError } = await supabase
+      .from('onboarding_status')
+      .select('*');
+    
+    if (statusError) {
+      console.log('❌ Status fetch error:', statusError.message);
+      return;
+    }
+    
+    console.log(`\n📊 Found ${allStatuses.length} onboarding statuses:`);
+    
+    allStatuses.forEach((status, index) => {
+      console.log(`\n👤 User ${index + 1}:`);
+      console.log(`   User ID: ${status.user_id}`);
+      console.log(`   Welcome Video: ${status.welcome_video_watched ? '✅' : '❌'}`);
+      console.log(`   Step 1: ${status.step_1_completed ? '✅' : '❌'}`);
+      console.log(`   Step 2: ${status.step_2_completed ? '✅' : '❌'}`);
+      console.log(`   Step 3: ${status.step_3_completed ? '✅' : '❌'}`);
+      console.log(`   Step 4: ${status.step_4_completed ? '✅' : '❌'}`);
+      console.log(`   Step 5: ${status.step_5_completed ? '✅' : '❌'}`);
+      console.log(`   Current Step: ${status.current_step}`);
+      console.log(`   Completed: ${status.onboarding_completed ? '✅' : '❌'}`);
+      console.log(`   Updated At: ${status.updated_at}`);
     });
-
-    // Check specific users
-    const rick = data.find(u => u.user_id === '9d6aa8ba-58ab-4188-9a9f-09380a67eb0c');
-    const chiel = data.find(u => u.user_id === '061e43d5-c89a-42bb-8a4c-04be2ce99a7e');
-
-    console.log('\n🎯 Specific user check:');
-    if (rick) {
-      console.log('   - Rick found:', rick.onboarding_completed ? '✅ Completed' : '❌ Not completed');
-    } else {
-      console.log('   - Rick: ❌ Not found');
+    
+    // Test API functionality for Rob
+    const robUserId = '14d7c55b-4ccd-453f-b79f-403f306f1efb';
+    const robStatus = allStatuses.find(s => s.user_id === robUserId);
+    
+    if (robStatus) {
+      console.log('\n🎯 Rob\'s current status:');
+      console.log(`   Welcome Video: ${robStatus.welcome_video_watched ? '✅' : '❌'}`);
+      console.log(`   Current Step: ${robStatus.current_step}`);
+      console.log(`   Completed: ${robStatus.onboarding_completed ? '✅' : '❌'}`);
+      
+      // Test updating welcome video status
+      console.log('\n🧪 Testing welcome video update...');
+      
+      const { data: updateData, error: updateError } = await supabase
+        .from('onboarding_status')
+        .update({
+          welcome_video_watched: true,
+          current_step: 1,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', robUserId)
+        .select()
+        .single();
+      
+      if (updateError) {
+        console.log('❌ Update test failed:', updateError.message);
+      } else {
+        console.log('✅ Update test successful:', {
+          welcome_video_watched: updateData.welcome_video_watched,
+          current_step: updateData.current_step
+        });
+        
+        // Reset for testing
+        await supabase
+          .from('onboarding_status')
+          .update({
+            welcome_video_watched: false,
+            current_step: 1,
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', robUserId);
+        
+        console.log('🔄 Reset Rob\'s status for testing');
+      }
     }
     
-    if (chiel) {
-      console.log('   - Chiel found:', chiel.onboarding_completed ? '✅ Completed' : '❌ Not completed');
-    } else {
-      console.log('   - Chiel: ❌ Not found');
-    }
-
   } catch (error) {
-    console.error('❌ Error:', error);
+    console.error('❌ Error debugging onboarding:', error);
   }
 }
 

@@ -16,7 +16,6 @@ export interface Database {
           email: string
           full_name: string
           avatar_url: string | null
-          rank: string
           points: number
           missions_completed: number
           last_login: string | null
@@ -25,10 +24,17 @@ export interface Database {
           interests: Json | null
           cover_url: string | null
           role: 'user' | 'admin'
+          username: string | null
+          forum_status: string
+          status: 'active' | 'inactive' | 'suspended'
+          main_goal: string | null
+          admin_notes: string | null
+          posts: number
+          badges: number
+          recent_activity: Json | null
           selected_schema_id: string | null
           selected_nutrition_plan: string | null
           nutrition_profile: any | null
-          status: 'active' | 'inactive' | 'suspended'
         }
         Insert: {
           id?: string
@@ -36,7 +42,6 @@ export interface Database {
           email: string
           full_name: string
           avatar_url?: string | null
-          rank?: string
           points?: number
           missions_completed?: number
           last_login?: string | null
@@ -45,10 +50,17 @@ export interface Database {
           interests?: Json | null
           cover_url?: string | null
           role?: 'user' | 'admin'
+          username?: string | null
+          forum_status?: string
+          status?: 'active' | 'inactive' | 'suspended'
+          main_goal?: string | null
+          admin_notes?: string | null
+          posts?: number
+          badges?: number
+          recent_activity?: Json | null
           selected_schema_id?: string | null
           selected_nutrition_plan?: string | null
           nutrition_profile?: any | null
-          status?: 'active' | 'inactive' | 'suspended'
         }
         Update: {
           id?: string
@@ -56,7 +68,6 @@ export interface Database {
           email?: string
           full_name?: string
           avatar_url?: string | null
-          rank?: string
           points?: number
           missions_completed?: number
           last_login?: string | null
@@ -65,10 +76,100 @@ export interface Database {
           interests?: Json | null
           cover_url?: string | null
           role?: 'user' | 'admin'
+          username?: string | null
+          forum_status?: string
+          status?: 'active' | 'inactive' | 'suspended'
+          main_goal?: string | null
+          admin_notes?: string | null
+          posts?: number
+          badges?: number
+          recent_activity?: Json | null
           selected_schema_id?: string | null
           selected_nutrition_plan?: string | null
           nutrition_profile?: any | null
-          status?: 'active' | 'inactive' | 'suspended'
+        }
+      }
+      profiles: {
+        Row: {
+          id: string
+          email: string | null
+          full_name: string | null
+          avatar_url: string | null
+          created_at: string
+          updated_at: string
+          display_name: string | null
+          bio: string | null
+          location: string | null
+          website: string | null
+          phone: string | null
+          date_of_birth: string | null
+          gender: string | null
+          interests: string[] | null
+          rank: string | null
+          points: number | null
+          missions_completed: number | null
+          cover_url: string | null
+          is_public: boolean | null
+          show_email: boolean | null
+          show_phone: boolean | null
+          last_login: string | null
+          main_goal: string | null
+          badges: number | null
+          posts: number | null
+        }
+        Insert: {
+          id: string
+          email?: string | null
+          full_name?: string | null
+          avatar_url?: string | null
+          created_at?: string
+          updated_at?: string
+          display_name?: string | null
+          bio?: string | null
+          location?: string | null
+          website?: string | null
+          phone?: string | null
+          date_of_birth?: string | null
+          gender?: string | null
+          interests?: string[] | null
+          rank?: string | null
+          points?: number | null
+          missions_completed?: number | null
+          cover_url?: string | null
+          is_public?: boolean | null
+          show_email?: boolean | null
+          show_phone?: boolean | null
+          last_login?: string | null
+          main_goal?: string | null
+          badges?: number | null
+          posts?: number | null
+        }
+        Update: {
+          id?: string
+          email?: string | null
+          full_name?: string | null
+          avatar_url?: string | null
+          created_at?: string
+          updated_at?: string
+          display_name?: string | null
+          bio?: string | null
+          location?: string | null
+          website?: string | null
+          phone?: string | null
+          date_of_birth?: string | null
+          gender?: string | null
+          interests?: string[] | null
+          rank?: string | null
+          points?: number | null
+          missions_completed?: number | null
+          cover_url?: string | null
+          is_public?: boolean | null
+          show_email?: boolean | null
+          show_phone?: boolean | null
+          last_login?: string | null
+          main_goal?: string | null
+          badges?: number | null
+          posts?: number | null
         }
       }
       academy_modules: {

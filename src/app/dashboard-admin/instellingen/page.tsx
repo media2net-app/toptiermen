@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Cog6ToothIcon,
   ShieldCheckIcon,
@@ -60,7 +60,106 @@ interface PlatformSettings {
   };
 }
 
-// Mock data
+// State for database settings
+const [settings, setSettings] = useState<PlatformSettings | null>(null);
+const [loading, setLoading] = useState(true);
+const [error, setError] = useState<string | null>(null);
+const [saving, setSaving] = useState(false);
+
+// Fetch settings from database
+const fetchSettings = async () => {
+  setLoading(true);
+  try {
+    console.log('🔄 Fetching platform settings from database...');
+    
+    const response = await fetch('/api/admin/platform-settings');
+    if (response.ok) {
+      const data = await response.json();
+      const settingsData = data.settings;
+      
+      // Convert database format to component format
+      const convertedSettings: PlatformSettings = {
+        general: settingsData.general || {
+          platformName: 'Top Tier Men',
+          logoUrl: '/logo.svg',
+          maintenanceMode: false
+        },
+        gamification: settingsData.gamification || {
+          xpSystemEnabled: true,
+          xpDailyMission: 10,
+          xpAcademyLesson: 25,
+          xpForumPost: 5,
+          xpReceivedBoks: 1,
+          streakBonusDays: 7,
+          streakBonusXp: 100
+        },
+        community: settingsData.community || {
+          manualApprovalRequired: false,
+          wordFilter: 'spam,scam,verkoop,reclame',
+          forumRules: 'Welkom bij de Top Tier Men Brotherhood!'
+        },
+        email: settingsData.email || {
+          senderName: 'Rick Cuijpers',
+          senderEmail: 'rick@toptiermen.app',
+          templates: {
+            welcome: { subject: 'Welkom', content: 'Beste [Naam]' },
+            passwordReset: { subject: 'Wachtwoord reset', content: 'Beste [Naam]' },
+            weeklyReminder: { subject: 'Wekelijkse update', content: 'Beste [Naam]' }
+          }
+        },
+        integrations: settingsData.integrations || {
+          googleAnalyticsId: '',
+          mailProviderApiKey: '',
+          paymentProviderApiKey: ''
+        }
+      };
+      
+      setSettings(convertedSettings);
+      setError(null);
+    } else {
+      throw new Error('Failed to fetch settings');
+    }
+  } catch (err) {
+    console.error('❌ Error fetching platform settings:', err);
+    setError('Fout bij het laden van instellingen');
+  } finally {
+    setLoading(false);
+  }
+};
+
+// Save settings to database
+const saveSettings = async (settingKey: string, settingValue: any) => {
+  setSaving(true);
+  try {
+    console.log('💾 Saving platform setting:', settingKey);
+    
+    const response = await fetch('/api/admin/platform-settings', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        settingKey,
+        settingValue
+      })
+    });
+
+    if (response.ok) {
+      console.log('✅ Setting saved successfully:', settingKey);
+      // Refresh settings to get updated data
+      await fetchSettings();
+    } else {
+      throw new Error('Failed to save setting');
+    }
+  } catch (err) {
+    console.error('❌ Error saving platform setting:', err);
+    setError('Fout bij het opslaan van instelling');
+  } finally {
+    setSaving(false);
+  }
+};
+
+// Use default settings as fallback
 const defaultSettings: PlatformSettings = {
   general: {
     platformName: 'Top Tier Men',
@@ -79,145 +178,78 @@ const defaultSettings: PlatformSettings = {
   community: {
     manualApprovalRequired: false,
     wordFilter: 'spam,scam,verkoop,reclame',
-    forumRules: `Welkom bij de Top Tier Men Brotherhood!
-
-Onze kernwaarden:
-- Respect voor elkaar
-- Constructieve feedback
-- Geen spam of reclame
-- Blijf on-topic
-- Help elkaar groeien
-
-Overtredingen leiden tot waarschuwingen of uitsluiting.`
+    forumRules: 'Welkom bij de Top Tier Men Brotherhood!'
   },
   email: {
     senderName: 'Rick Cuijpers',
     senderEmail: 'rick@toptiermen.app',
     templates: {
-      welcome: {
-        subject: 'Welkom bij Top Tier Men - Je reis naar excellentie begint nu!',
-        content: `Beste [Naam],
-
-Welkom bij de Top Tier Men Brotherhood! 🎉
-
-Je hebt de eerste stap gezet naar een leven van excellentie, discipline en groei. In deze community vind je gelijkgestemde mannen die net als jij streven naar het beste in zichzelf.
-
-Wat je nu kunt doen:
-- Verken de Academy voor waardevolle lessen
-- Doe mee aan dagelijkse missies
-- Connect met andere leden in het forum
-- Begin je trainingsreis
-
-We zijn er om je te ondersteunen op elke stap van je reis.
-
-Met respect,
-Rick Cuijpers
-Top Tier Men`
-      },
-      passwordReset: {
-        subject: 'Wachtwoord reset - Top Tier Men',
-        content: `Beste [Naam],
-
-Je hebt een wachtwoord reset aangevraagd voor je Top Tier Men account.
-
-Klik op de onderstaande link om je wachtwoord te resetten:
-[RESET_LINK]
-
-Deze link is 24 uur geldig.
-
-Als je deze reset niet hebt aangevraagd, kun je deze e-mail negeren.
-
-Met respect,
-Top Tier Men Team`
-      },
-      weeklyReminder: {
-        subject: 'Je mist de groei - Kom terug naar Top Tier Men',
-        content: `Beste [Naam],
-
-We merken dat je al een tijdje niet actief bent geweest in de Top Tier Men community. 
-
-Misschien ben je druk met andere dingen, maar vergeet niet: groei gebeurt niet vanzelf. Het vereist consistentie en discipline.
-
-Wat je hebt gemist:
-- Nieuwe Academy lessen
-- Inspirerende discussies in het forum
-- Dagelijkse missies voor groei
-- Connecties met gelijkgestemde mannen
-
-Kom terug en blijf groeien:
-[LOGIN_LINK]
-
-Je Brotherhood wacht op je.
-
-Met respect,
-Rick Cuijpers
-Top Tier Men`
-      }
+      welcome: { subject: 'Welkom', content: 'Beste [Naam]' },
+      passwordReset: { subject: 'Wachtwoord reset', content: 'Beste [Naam]' },
+      weeklyReminder: { subject: 'Wekelijkse update', content: 'Beste [Naam]' }
     }
   },
   integrations: {
-    googleAnalyticsId: 'GA-XXXXX-Y',
-    mailProviderApiKey: 'sk_test_1234567890abcdef',
-    paymentProviderApiKey: 'pk_test_1234567890abcdef'
+    googleAnalyticsId: '',
+    mailProviderApiKey: '',
+    paymentProviderApiKey: ''
   }
 };
 
 export default function PlatformSettings() {
-  const [settings, setSettings] = useState<PlatformSettings>(defaultSettings);
   const [showPassword, setShowPassword] = useState<{[key: string]: boolean}>({});
   const [showEmailModal, setShowEmailModal] = useState<{type: string; isOpen: boolean}>({type: '', isOpen: false});
   const [editingTemplate, setEditingTemplate] = useState<{type: string; subject: string; content: string}>({type: '', subject: '', content: ''});
 
-  const handleMaintenanceModeToggle = () => {
-    setSettings(prev => ({
-      ...prev,
-      general: {
-        ...prev.general,
-        maintenanceMode: !prev.general.maintenanceMode
-      }
-    }));
+  // Load settings on component mount
+  useEffect(() => {
+    fetchSettings();
+  }, []);
+
+  // Use settings from database or fallback to defaults
+  const currentSettings = settings || defaultSettings;
+
+  const handleMaintenanceModeToggle = async () => {
+    const newValue = !currentSettings.general.maintenanceMode;
+    await saveSettings('general', {
+      ...currentSettings.general,
+      maintenanceMode: newValue
+    });
   };
 
-  const handleXpSystemToggle = () => {
-    setSettings(prev => ({
-      ...prev,
-      gamification: {
-        ...prev.gamification,
-        xpSystemEnabled: !prev.gamification.xpSystemEnabled
-      }
-    }));
+  const handleXpSystemToggle = async () => {
+    const newValue = !currentSettings.gamification.xpSystemEnabled;
+    await saveSettings('gamification', {
+      ...currentSettings.gamification,
+      xpSystemEnabled: newValue
+    });
   };
 
-  const handleManualApprovalToggle = () => {
-    setSettings(prev => ({
-      ...prev,
-      community: {
-        ...prev.community,
-        manualApprovalRequired: !prev.community.manualApprovalRequired
-      }
-    }));
+  const handleManualApprovalToggle = async () => {
+    const newValue = !currentSettings.community.manualApprovalRequired;
+    await saveSettings('community', {
+      ...currentSettings.community,
+      manualApprovalRequired: newValue
+    });
   };
 
-  const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       // TODO: Implement actual file upload logic
       const reader = new FileReader();
-      reader.onload = (e) => {
-        setSettings(prev => ({
-          ...prev,
-          general: {
-            ...prev.general,
-            logoUrl: e.target?.result as string
-          }
-        }));
+      reader.onload = async (e) => {
+        await saveSettings('general', {
+          ...currentSettings.general,
+          logoUrl: e.target?.result as string
+        });
       };
       reader.readAsDataURL(file);
     }
   };
 
   const handleEditEmailTemplate = (type: string) => {
-    const template = settings.email.templates[type as keyof typeof settings.email.templates];
+    const template = currentSettings.email.templates[type as keyof typeof currentSettings.email.templates];
     setEditingTemplate({
       type,
       subject: template.subject,
@@ -226,20 +258,17 @@ export default function PlatformSettings() {
     setShowEmailModal({ type, isOpen: true });
   };
 
-  const handleSaveEmailTemplate = () => {
-    setSettings(prev => ({
-      ...prev,
-      email: {
-        ...prev.email,
-        templates: {
-          ...prev.email.templates,
-          [editingTemplate.type]: {
-            subject: editingTemplate.subject,
-            content: editingTemplate.content
-          }
+  const handleSaveEmailTemplate = async () => {
+    await saveSettings('email', {
+      ...currentSettings.email,
+      templates: {
+        ...currentSettings.email.templates,
+        [editingTemplate.type]: {
+          subject: editingTemplate.subject,
+          content: editingTemplate.content
         }
       }
-    }));
+    });
     setShowEmailModal({ type: '', isOpen: false });
   };
 
@@ -253,6 +282,36 @@ export default function PlatformSettings() {
   const getMaskedValue = (value: string) => {
     return value.replace(/./g, '*');
   };
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-3xl font-bold text-[#8BAE5A] mb-2">Platform Instellingen</h1>
+          <p className="text-[#B6C948]">Beheer alle platform configuraties</p>
+        </div>
+        <div className="text-center py-12">
+          <div className="text-[#8BAE5A]">Laden...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-3xl font-bold text-[#8BAE5A] mb-2">Platform Instellingen</h1>
+          <p className="text-[#B6C948]">Beheer alle platform configuraties</p>
+        </div>
+        <div className="text-center py-12">
+          <div className="text-red-400">Fout: {error}</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">

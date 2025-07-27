@@ -61,6 +61,43 @@ function isMissionCompletedToday(completionDate: string | null): boolean {
   return completionDate === getTodayDate();
 }
 
+// Helper function to calculate streak from file-based missions
+function calculateFileBasedStreak(userMissions: any[]): number {
+  const today = getTodayDate();
+  const dailyMissions = userMissions.filter(m => m.type === 'Dagelijks');
+  
+  if (dailyMissions.length === 0) return 0;
+  
+  // Check if all daily missions are completed today
+  const allCompletedToday = dailyMissions.every(m => isMissionCompletedToday(m.last_completion_date));
+  
+  if (!allCompletedToday) return 0;
+  
+  // Simple streak calculation - in a real implementation, you'd track consecutive days
+  // For now, we'll return a basic streak based on completion patterns
+  let streak = 1;
+  
+  // Check previous days for consecutive completion
+  for (let i = 1; i <= 7; i++) {
+    const checkDate = new Date();
+    checkDate.setDate(checkDate.getDate() - i);
+    const checkDateStr = checkDate.toISOString().split('T')[0];
+    
+    const completedOnDate = dailyMissions.every(m => {
+      if (!m.last_completion_date) return false;
+      return m.last_completion_date === checkDateStr;
+    });
+    
+    if (completedOnDate) {
+      streak++;
+    } else {
+      break;
+    }
+  }
+  
+  return streak;
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -122,10 +159,12 @@ export async function GET(request: Request) {
 
       // Try to load file-based missions as well
       let fileMissions: any[] = [];
+      let fileStreak = 0;
       try {
         const fileMissionsData = await readMissionsFromFile();
         fileMissions = fileMissionsData[userId] || [];
-        console.log('📁 File storage check:', { fileMissions: fileMissions.length });
+        fileStreak = calculateFileBasedStreak(fileMissions);
+        console.log('📁 File storage check:', { fileMissions: fileMissions.length, fileStreak });
       } catch (fileError) {
         console.log('⚠️  File storage not available');
       }
@@ -156,10 +195,13 @@ export async function GET(request: Request) {
       const completedToday = allMissions.filter(m => m.done).length;
       const totalToday = allMissions.filter(m => m.type === 'Dagelijks').length;
 
+      // Use the higher streak value between database and file-based
+      const combinedStreak = Math.max(dailyStreak, fileStreak);
+
       const summary = {
         completedToday,
         totalToday,
-        dailyStreak
+        dailyStreak: combinedStreak
       };
 
       console.log('✅ Missions loaded:', { database: dbMissions.length, file: fileMissions.length, total: allMissions.length });
@@ -248,7 +290,7 @@ export async function GET(request: Request) {
     const summary = {
       completedToday: 0,
       totalToday: 4, // Daily missions count
-      dailyStreak: 12
+      dailyStreak: 0
     };
 
     console.log('✅ Missions fetched successfully (dummy data)');
@@ -266,7 +308,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { action, userId, missionId, title, type } = body;
+    const { action, userId, missionId, title, type, mission } = body;
 
     if (!userId) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
@@ -419,12 +461,25 @@ export async function POST(request: Request) {
             isNowCompleted = true;
           }
         } else {
-          // Weekly/Monthly mission logic (use last_completion_date for consistency)
+          // Weekly/Monthly mission logic - prevent undoing past completions
           if (existingMission.last_completion_date) {
-            // Already completed, uncomplete it
-            newCompletionDate = null;
-            xpEarned = -existingMission.xp_reward;
-            isNowCompleted = false;
+            const completionDate = new Date(existingMission.last_completion_date);
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            
+            // Only allow undoing if completion was today or yesterday
+            if (completionDate >= yesterday) {
+              // Already completed recently, uncomplete it
+              newCompletionDate = null;
+              xpEarned = -existingMission.xp_reward;
+              isNowCompleted = false;
+            } else {
+              // Cannot undo past completions
+              return NextResponse.json({ 
+                success: false,
+                message: 'Je kunt alleen vandaag of gisteren ongedaan maken!' 
+              });
+            }
           } else {
             // Not completed, complete it
             newCompletionDate = today;
@@ -514,13 +569,43 @@ export async function POST(request: Request) {
             );
 
             if (allDailyCompleted) {
-              // All daily missions completed today, update streak
+              // Get current streak data
+              const { data: currentStreakData, error: streakFetchError } = await supabase
+                .from('user_daily_streaks')
+                .select('*')
+                .eq('user_id', userId)
+                .single();
+
+              let newStreak = 1;
+              let longestStreak = 1;
+
+              if (!streakFetchError && currentStreakData) {
+                const lastCompletionDate = currentStreakData.last_completion_date;
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+                // Check if user completed missions yesterday (consecutive streak)
+                if (lastCompletionDate === yesterdayStr) {
+                  newStreak = currentStreakData.current_streak + 1;
+                } else if (lastCompletionDate === today) {
+                  // Already completed today, keep current streak
+                  newStreak = currentStreakData.current_streak;
+                } else {
+                  // Break in streak, start over
+                  newStreak = 1;
+                }
+
+                longestStreak = Math.max(currentStreakData.longest_streak || 0, newStreak);
+              }
+
+              // Update streak
               const { error: streakError } = await supabase
                 .from('user_daily_streaks')
                 .upsert({
                   user_id: userId,
-                  current_streak: 1, // This logic needs refinement for actual streak increment
-                  longest_streak: 1, // This logic needs refinement
+                  current_streak: newStreak,
+                  longest_streak: longestStreak,
                   last_completion_date: today,
                   updated_at: new Date().toISOString()
                 }, {
@@ -528,7 +613,51 @@ export async function POST(request: Request) {
                 });
 
               if (!streakError) {
-                console.log('✅ Daily streak updated');
+                console.log(`✅ Daily streak updated: ${newStreak} days`);
+              } else {
+                console.error('❌ Error updating streak:', streakError);
+              }
+            } else if (!isNowCompleted && existingMission.frequency_type === 'daily') {
+              // If uncompleting a daily mission, we need to recalculate the streak
+              const { data: currentStreakData, error: streakFetchError } = await supabase
+                .from('user_daily_streaks')
+                .select('*')
+                .eq('user_id', userId)
+                .single();
+
+              if (!streakFetchError && currentStreakData) {
+                // Check if all other daily missions are still completed today
+                const { data: otherDailyMissions, error: otherDailyError } = await supabase
+                  .from('user_missions')
+                  .select('*')
+                  .eq('user_id', userId)
+                  .eq('frequency_type', 'daily')
+                  .neq('id', missionId);
+
+                if (!otherDailyError && otherDailyMissions) {
+                  const allOtherCompleted = otherDailyMissions.every(mission => 
+                    isMissionCompletedToday(mission.last_completion_date)
+                  );
+
+                  if (!allOtherCompleted) {
+                    // If not all other missions are completed, reset streak to 0
+                    const { error: resetError } = await supabase
+                      .from('user_daily_streaks')
+                      .upsert({
+                        user_id: userId,
+                        current_streak: 0,
+                        longest_streak: currentStreakData.longest_streak || 0,
+                        last_completion_date: null,
+                        updated_at: new Date().toISOString()
+                      }, {
+                        onConflict: 'user_id'
+                      });
+
+                    if (!resetError) {
+                      console.log('✅ Daily streak reset to 0 due to incomplete missions');
+                    }
+                  }
+                }
               }
             }
           }
@@ -561,20 +690,27 @@ export async function POST(request: Request) {
     }
 
     if (action === 'create') {
+      // Use mission data if provided (for suggested missions), otherwise use title/type
+      const missionTitle = mission?.title || title;
+      const missionType = mission?.type || type;
+      const missionCategory = mission?.category || 'Algemeen';
+      const missionIcon = mission?.icon || '🎯';
+      const missionXp = mission?.xp_reward || 15;
+      
       try {
         // Try to create mission in database
         const { data: newMission, error: createError } = await supabase
           .from('user_missions')
           .insert({
             user_id: userId,
-            title: title,
-            description: title,
-            frequency_type: type === 'Dagelijks' ? 'daily' : type === 'Wekelijks' ? 'weekly' : 'monthly',
+            title: missionTitle,
+            description: missionTitle,
+            frequency_type: missionType === 'Dagelijks' ? 'daily' : missionType === 'Wekelijks' ? 'weekly' : 'monthly',
             difficulty_level: 'medium',
-            xp_reward: 15,
+            xp_reward: missionXp,
             status: 'active',
-            category_slug: 'general',
-            icon: '🎯',
+            category_slug: missionCategory.toLowerCase().replace(/\s+/g, '-'),
+            icon: missionIcon,
             badge_name: 'Custom Badge',
             current_progress: 0,
             is_shared: false,
@@ -607,17 +743,18 @@ export async function POST(request: Request) {
           
           const newMission = {
             id: Date.now().toString(),
-            title: title,
-            type: type,
+            title: missionTitle,
+            type: missionType,
             done: false,
-            category: 'Algemeen',
-            icon: '🎯',
+            category: missionCategory,
+            icon: missionIcon,
             badge: 'Custom Badge',
             progress: 0,
             shared: false,
             accountabilityPartner: null,
-            xp_reward: 15,
-            last_completion_date: null
+            xp_reward: missionXp,
+            last_completion_date: null,
+            created_at: new Date().toISOString()
           };
           
           userMissions.push(newMission);
@@ -635,17 +772,18 @@ export async function POST(request: Request) {
           // Fallback to dummy create
           const dummyMission = {
             id: Date.now().toString(),
-            title: title,
-            type: type,
+            title: missionTitle,
+            type: missionType,
             done: false,
-            category: 'Algemeen',
-            icon: '🎯',
+            category: missionCategory,
+            icon: missionIcon,
             badge: 'Custom Badge',
             progress: 0,
             shared: false,
             accountabilityPartner: null,
-            xp_reward: 15,
-            last_completion_date: null
+            xp_reward: missionXp,
+            last_completion_date: null,
+            created_at: new Date().toISOString()
           };
 
           return NextResponse.json({ 

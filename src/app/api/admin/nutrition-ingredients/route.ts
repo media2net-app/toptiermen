@@ -1,0 +1,84 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { supabaseAdmin } from '@/lib/supabase-admin';
+
+export async function GET(request: NextRequest) {
+  try {
+    console.log('📊 Fetching nutrition ingredients from database...');
+    
+    const { searchParams } = new URL(request.url);
+    const category = searchParams.get('category');
+    const limit = parseInt(searchParams.get('limit') || '50');
+    const offset = parseInt(searchParams.get('offset') || '0');
+
+    let query = supabaseAdmin
+      .from('nutrition_ingredients')
+      .select('*')
+      .eq('is_active', true)
+      .order('name');
+
+    if (category) {
+      query = query.eq('category', category);
+    }
+
+    const { data: ingredients, error } = await query
+      .range(offset, offset + limit - 1);
+
+    if (error) {
+      console.error('❌ Error fetching nutrition ingredients:', error);
+      return NextResponse.json({ error: `Failed to fetch nutrition ingredients: ${error.message}` }, { status: 500 });
+    }
+
+    console.log('✅ Nutrition ingredients fetched successfully:', ingredients?.length || 0, 'ingredients');
+    return NextResponse.json({ success: true, ingredients: ingredients || [] });
+  } catch (error) {
+    console.error('❌ Error in nutrition ingredients API:', error);
+    return NextResponse.json({ error: `Internal server error: ${error instanceof Error ? error.message : 'Unknown error'}` }, { status: 500 });
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { 
+      name, 
+      category, 
+      calories_per_100g, 
+      protein_per_100g, 
+      carbs_per_100g, 
+      fat_per_100g, 
+      fiber_per_100g, 
+      sugar_per_100g, 
+      sodium_per_100g, 
+      description, 
+      image_url 
+    } = body;
+
+    const { data: ingredient, error } = await supabaseAdmin
+      .from('nutrition_ingredients')
+      .insert({
+        name,
+        category,
+        calories_per_100g,
+        protein_per_100g,
+        carbs_per_100g,
+        fat_per_100g,
+        fiber_per_100g,
+        sugar_per_100g,
+        sodium_per_100g,
+        description,
+        image_url
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating nutrition ingredient:', error);
+      return NextResponse.json({ error: 'Failed to create nutrition ingredient' }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, ingredient });
+  } catch (error) {
+    console.error('Error in nutrition ingredients API:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+} 

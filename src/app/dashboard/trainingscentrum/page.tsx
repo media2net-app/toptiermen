@@ -13,8 +13,10 @@ import {
   HeartIcon,
   CalculatorIcon
 } from '@heroicons/react/24/outline';
+import { toast } from 'react-toastify';
 import PageLayout from '@/components/PageLayout';
 import { useAuth } from "@/contexts/AuthContext";
+import { useOnboarding } from "@/contexts/OnboardingContext";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from 'next/navigation';
 
@@ -89,9 +91,10 @@ const dietTypes = [
 
 export default function TrainingscentrumPage() {
   const { user } = useAuth();
+  const { isOnboarding, currentStep: onboardingStep, completeStep } = useOnboarding();
   const router = useRouter();
   const [selectedOption, setSelectedOption] = useState<'training' | 'nutrition' | null>(null);
-  const [currentStep, setCurrentStep] = useState(1);
+  const [pageStep, setPageStep] = useState(1);
   const [trainingPreferences, setTrainingPreferences] = useState<TrainingPreferences>({
     frequency: 0,
     style: 'gym'
@@ -214,11 +217,20 @@ export default function TrainingscentrumPage() {
     };
   }, []);
 
-  const handleOptionSelect = (option: 'training' | 'nutrition') => {
+  const handleOptionSelect = async (option: 'training' | 'nutrition') => {
     setSelectedOption(option);
     if (option === 'nutrition') {
-      // Navigate to voedingsplannen
-      window.location.href = '/dashboard/voedingsplannen';
+      // For onboarding, show nutrition selection on the same page
+      if (isOnboarding && (onboardingStep === 4 || onboardingStep === 5)) {
+        setPageStep(1); // Reset to step 1 for nutrition flow
+      } else {
+        // Complete nutrition step if we're in onboarding mode
+        if (isOnboarding && onboardingStep === 4) {
+          await completeStep(4); // Complete nutrition step
+        }
+        // Navigate to voedingsplannen for non-onboarding
+        window.location.href = '/dashboard/voedingsplannen';
+      }
     }
   };
 
@@ -237,10 +249,20 @@ export default function TrainingscentrumPage() {
       } else {
         setSelectedSchemaId(schemaId);
         setShowConfirmation(false);
-        // Mark training schema as completed for onboarding
-        localStorage.setItem('trainingSchemaCompleted', 'true');
-        // Navigate back to dashboard
-        window.location.href = '/dashboard';
+        
+        // Complete onboarding step if we're in onboarding mode
+        if (isOnboarding && onboardingStep === 3) {
+          await completeStep(4); // Complete training schema step (step 4)
+        }
+        
+        // For onboarding, stay on the same page to continue with nutrition
+        if (isOnboarding && (onboardingStep === 3 || onboardingStep === 4)) {
+          toast.success('Trainingsschema opgeslagen! Nu kun je een voedingsplan kiezen.');
+          setSelectedOption(null); // Reset to show both options again
+        } else {
+          // Navigate back to dashboard for non-onboarding
+          window.location.href = '/dashboard';
+        }
       }
     } catch (error) {
       console.error('Error saving selected schema:', error);
@@ -263,7 +285,7 @@ export default function TrainingscentrumPage() {
       };
       
       setWorkoutSchema(schema);
-      setCurrentStep(3);
+      setPageStep(3);
       setIsGenerating(false);
     }, 2000);
   };
@@ -417,7 +439,7 @@ export default function TrainingscentrumPage() {
     });
   };
 
-  if (!isLoading && selectedSchema && !showConfirmation && !workoutSchema && !currentStep) {
+  if (!isLoading && selectedSchema && !showConfirmation && !workoutSchema && !pageStep) {
     // Toon direct het gekozen schema
     return (
       <PageLayout title="Trainingscentrum" description="Persoonlijke trainingsschema's en voedingsplannen op maat">
@@ -439,7 +461,7 @@ export default function TrainingscentrumPage() {
               className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] text-[#232D1A] font-bold rounded-xl hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200 shadow-lg hover:shadow-xl"
               onClick={() => {
                 setSelectedOption('training');
-                setCurrentStep(1);
+                setPageStep(1);
                 setWorkoutSchema(null);
                 setShowConfirmation(false);
               }}
@@ -458,6 +480,29 @@ export default function TrainingscentrumPage() {
       title="Trainingscentrum"
       description="Persoonlijke trainingsschema's en voedingsplannen op maat"
     >
+      {/* Onboarding Indicator */}
+      {isOnboarding && (onboardingStep === 3 || onboardingStep === 4 || onboardingStep === 5) && (
+        <div className="w-full mb-6">
+          <div className="bg-gradient-to-r from-[#8BAE5A]/20 to-[#3A4D23]/20 border-2 border-[#8BAE5A] rounded-xl p-4">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">
+                {onboardingStep === 3 ? '💪' : '🥗'}
+              </span>
+              <div className="flex-1">
+                <h3 className="font-semibold text-[#8BAE5A]">
+                  {onboardingStep === 3 ? 'Stap 4: Trainingsschema kiezen' : 'Stap 5: Voedingsplan kiezen'}
+                </h3>
+                <p className="text-sm text-gray-300">
+                  {onboardingStep === 3 
+                    ? 'Selecteer een trainingsschema dat bij jou past' 
+                    : 'Kies een voedingsplan voor optimale resultaten'
+                  }
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {!isLoading && selectedSchema && (
         <div className="w-full mt-8 mb-8">
           <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
@@ -478,7 +523,7 @@ export default function TrainingscentrumPage() {
                 className="px-6 py-3 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] text-[#232D1A] font-bold rounded-xl hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200 shadow-lg hover:shadow-xl"
                 onClick={() => {
                   setSelectedOption('training');
-                  setCurrentStep(1);
+                  setPageStep(1);
                   setWorkoutSchema(null);
                   setShowConfirmation(false);
                 }}
@@ -625,7 +670,7 @@ export default function TrainingscentrumPage() {
             </motion.div>
           )}
 
-          {selectedOption === 'training' && currentStep === 1 && (
+          {selectedOption === 'training' && pageStep === 1 && (
             <motion.div
               key="step1"
               initial={{ opacity: 0, x: 20 }}
@@ -650,7 +695,7 @@ export default function TrainingscentrumPage() {
                     whileTap={{ scale: 0.95 }}
                     onClick={() => {
                       setTrainingPreferences(prev => ({ ...prev, frequency: days }));
-                      setCurrentStep(2);
+                      setPageStep(2);
                     }}
                     className={`p-6 rounded-xl border-2 transition-all duration-300 ${
                       trainingPreferences.frequency === days
@@ -676,7 +721,7 @@ export default function TrainingscentrumPage() {
             </motion.div>
           )}
 
-          {selectedOption === 'training' && currentStep === 2 && (
+          {selectedOption === 'training' && pageStep === 2 && (
             <motion.div
               key="step2"
               initial={{ opacity: 0, x: 20 }}
@@ -708,7 +753,7 @@ export default function TrainingscentrumPage() {
                           description: schema.description,
                           days: [], // optioneel: kun je aanvullen als je dagdata wilt ophalen
                         });
-                        setCurrentStep(3);
+                        setPageStep(3);
                       }}
                       className="cursor-pointer rounded-2xl p-8 border-2 transition-all duration-300 border-[#3A4D23] bg-[#232D1A] hover:border-[#8BAE5A]/50"
                     >
@@ -729,7 +774,7 @@ export default function TrainingscentrumPage() {
                         Probeer een andere frequentie te kiezen of neem contact op voor een persoonlijk schema.
                       </p>
                       <button
-                        onClick={() => setCurrentStep(1)}
+                        onClick={() => setPageStep(1)}
                         className="bg-[#8BAE5A] text-white px-6 py-3 rounded-lg hover:bg-[#7A9D4A] transition-all"
                       >
                         Terug naar frequentie keuze
@@ -741,7 +786,7 @@ export default function TrainingscentrumPage() {
             </motion.div>
           )}
 
-          {selectedOption === 'training' && currentStep === 3 && workoutSchema && (
+          {selectedOption === 'training' && pageStep === 3 && workoutSchema && (
             <motion.div
               key="step3"
               initial={{ opacity: 0, y: 20 }}
@@ -849,7 +894,7 @@ export default function TrainingscentrumPage() {
                     whileTap={{ scale: 0.95 }}
                     onClick={() => {
                       setSelectedOption(null);
-                      setCurrentStep(1);
+                      setPageStep(1);
                       setWorkoutSchema(null);
                       setShowConfirmation(false);
                     }}
@@ -863,9 +908,86 @@ export default function TrainingscentrumPage() {
             </motion.div>
           )}
         </AnimatePresence>
-      )}
+                )}
 
-      {/* Confirmation Modal */}
+          {selectedOption === 'nutrition' && pageStep === 1 && (
+            <motion.div
+              key="nutrition-step1"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="w-full"
+            >
+              <div className="text-center mb-12">
+                <h2 className="text-3xl font-bold text-white mb-4">
+                  Stap 5: Kies een Voedingsplan
+                </h2>
+                <p className="text-gray-300 text-lg">
+                  Selecteer een voedingsplan dat past bij jouw doelen en voorkeuren.
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-8 mb-8">
+                {dietTypes.map((diet) => (
+                  <motion.div
+                    key={diet.id}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={async () => {
+                      setSelectedNutritionPlan(diet.id);
+                      
+                      // Save to database
+                      if (user) {
+                        try {
+                          const { error } = await supabase
+                            .from('users')
+                            .update({ selected_nutrition_plan: diet.id })
+                            .eq('id', user.id);
+
+                          if (error) {
+                            console.error('Error saving nutrition plan:', error);
+                            toast.error('Er is een fout opgetreden bij het opslaan van je voedingsplan.');
+                          } else {
+                            // Complete onboarding step if we're in onboarding mode
+                            if (isOnboarding && (onboardingStep === 4 || onboardingStep === 5)) {
+                              await completeStep(5); // Complete nutrition step
+                            }
+                            
+                            toast.success('Voedingsplan opgeslagen! Doorsturen naar forum...');
+                            
+                            // Navigate to forum for next onboarding step
+                            setTimeout(() => {
+                              window.location.href = '/dashboard/brotherhood/forum';
+                            }, 1500);
+                          }
+                        } catch (error) {
+                          console.error('Error saving nutrition plan:', error);
+                          toast.error('Er is een fout opgetreden bij het opslaan van je voedingsplan.');
+                        }
+                      }
+                    }}
+                    className="cursor-pointer rounded-2xl p-8 border-2 transition-all duration-300 border-[#3A4D23] bg-[#232D1A] hover:border-[#8BAE5A]/50"
+                  >
+                    <div className="text-center mb-4">
+                      <span className="text-4xl">{diet.icon}</span>
+                    </div>
+                    <h3 className="text-2xl font-bold text-white mb-2 text-center">{diet.name}</h3>
+                    <p className="text-[#8BAE5A] text-sm text-center mb-3">{diet.subtitle}</p>
+                    <p className="text-gray-300 text-center mb-4">{diet.description}</p>
+                    
+                    {selectedNutritionPlan === diet.id && (
+                      <div className="inline-flex items-center px-4 py-2 bg-[#8BAE5A]/20 border border-[#8BAE5A] text-[#8BAE5A] rounded-lg">
+                        <CheckIcon className="w-5 h-5 mr-2" />
+                        Geselecteerd
+                      </div>
+                    )}
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Confirmation Modal */}
       <AnimatePresence>
         {showConfirmation && (
           <motion.div

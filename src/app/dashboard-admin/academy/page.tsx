@@ -20,7 +20,8 @@ import {
   QuestionMarkCircleIcon,
   CloudArrowUpIcon,
   ChevronUpIcon,
-  ChevronDownIcon
+  ChevronDownIcon,
+  ArrowPathIcon
 } from '@heroicons/react/24/outline';
 import { toast } from 'react-toastify';
 import { supabase } from '@/lib/supabase';
@@ -30,6 +31,9 @@ import dynamic from 'next/dynamic';
 import VideoUpload from '@/components/VideoUpload';
 import PDFUpload from '@/components/PDFUpload';
 import ImageUpload from '@/components/ImageUpload';
+import AdminCard from '@/components/admin/AdminCard';
+import AdminStatsCard from '@/components/admin/AdminStatsCard';
+import AdminButton from '@/components/admin/AdminButton';
 import 'react-quill/dist/quill.snow.css';
 
 const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
@@ -568,116 +572,146 @@ export default function AcademyManagement() {
           <h1 className="text-3xl font-bold text-[#8BAE5A]">Academy Beheer</h1>
           <p className="text-[#B6C948] mt-2">Beheer alle Academy modules en lessen</p>
         </div>
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => openModuleModal()}
-            className="px-6 py-3 rounded-xl bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#B6C948] transition-all duration-200 flex items-center gap-2"
-          >
-            <PlusIcon className="w-5 h-5" />
-            Nieuwe Module
-          </button>
-        </div>
+        <AdminButton
+          onClick={() => openModuleModal()}
+          variant="primary"
+        >
+          <PlusIcon className="w-5 h-5 mr-2" />
+          Nieuwe Module
+        </AdminButton>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <AdminStatsCard
+          icon={<AcademicCapIcon className="w-6 h-6" />}
+          value={modules.length}
+          title="Modules"
+          color="blue"
+        />
+        <AdminStatsCard
+          icon={<BookOpenIcon className="w-6 h-6" />}
+          value={lessons.length}
+          title="Lessen"
+          color="green"
+        />
+        <AdminStatsCard
+          icon={<UsersIcon className="w-6 h-6" />}
+          value={studentCount.toLocaleString()}
+          title="Studenten"
+          color="purple"
+        />
+        <AdminStatsCard
+          icon={<CheckCircleIcon className="w-6 h-6" />}
+          value={`${avgCompletion}%`}
+          title="Gem. Voltooiing"
+          color="orange"
+        />
       </div>
 
       {/* Modules Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {modules.map((module) => (
-          <div 
-            key={module.id}
-            className={`bg-[#232D1A] rounded-2xl p-6 border transition-all duration-300 cursor-pointer ${
-              selectedModule === module.id 
-                ? 'border-[#8BAE5A] shadow-lg' 
-                : 'border-[#3A4D23] hover:border-[#8BAE5A]'
-            }`}
-            onClick={() => setSelectedModule(selectedModule === module.id ? null : module.id)}
-          >
-            <div className="flex items-start justify-between mb-4">
-              <div className="p-3 rounded-xl bg-[#8BAE5A]/20">
-                <AcademicCapIcon className="w-6 h-6 text-[#8BAE5A]" />
+          <AdminCard key={module.id}>
+            <div 
+              className={`transition-all duration-300 cursor-pointer ${
+                selectedModule === module.id 
+                  ? 'border-[#8BAE5A] shadow-lg' 
+                  : 'hover:border-[#8BAE5A]'
+              }`}
+              onClick={() => setSelectedModule(selectedModule === module.id ? null : module.id)}
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className="p-3 rounded-xl bg-[#8BAE5A]/20">
+                  <AcademicCapIcon className="w-6 h-6 text-[#8BAE5A]" />
+                </div>
+                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(module.status)} bg-[#181F17]`}>
+                  {getStatusText(module.status)}
+                </span>
+                <AdminButton
+                  onClick={() => { handleModuleDelete(module.id); }}
+                  variant="danger"
+                  size="sm"
+                >
+                  <TrashIcon className="w-4 h-4 mr-2" />
+                  Verwijder
+                </AdminButton>
               </div>
-              <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(module.status)} bg-[#181F17]`}>
-                {getStatusText(module.status)}
-              </span>
-              <button
-                onClick={e => { e.stopPropagation(); handleModuleDelete(module.id); }}
-                className="ml-2 text-red-400 hover:text-red-600"
-                title="Verwijder module"
-              >
-                <TrashIcon className="w-5 h-5" />
-              </button>
-            </div>
-            
-            <h3 className="text-xl font-bold text-[#8BAE5A] mb-2">{module.title}</h3>
-            <p className="text-[#B6C948] text-sm mb-4">{module.shortDescription}</p>
-            
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-[#B6C948] text-sm">Lessen</span>
-                <span className="text-[#8BAE5A] font-semibold">{(lessons.filter(l => l.module_id === module.id).length) || 0}</span>
+              
+              <h3 className="text-xl font-bold text-[#8BAE5A] mb-2">{module.title}</h3>
+              <p className="text-[#B6C948] text-sm mb-4">{module.shortDescription}</p>
+              
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[#B6C948] text-sm">Lessen</span>
+                  <span className="text-[#8BAE5A] font-semibold">{(lessons.filter(l => l.module_id === module.id).length) || 0}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[#B6C948] text-sm">Duur</span>
+                  <span className="text-[#8BAE5A] font-semibold">{getTotalModuleDurationForModule(module.id) || '0m'}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[#B6C948] text-sm">Studenten</span>
+                  <span className="text-[#8BAE5A] font-semibold">{module.students_count ?? 0}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[#B6C948] text-sm">Voltooiing</span>
+                  <span className="text-[#8BAE5A] font-semibold">{moduleCompletion[module.id] != null ? `${moduleCompletion[module.id]}%` : '0%'}</span>
+                </div>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-[#B6C948] text-sm">Duur</span>
-                <span className="text-[#8BAE5A] font-semibold">{getTotalModuleDurationForModule(module.id) || '0m'}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-[#B6C948] text-sm">Studenten</span>
-                <span className="text-[#8BAE5A] font-semibold">{module.students_count ?? 0}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-[#B6C948] text-sm">Voltooiing</span>
-                <span className="text-[#8BAE5A] font-semibold">{moduleCompletion[module.id] != null ? `${moduleCompletion[module.id]}%` : '0%'}</span>
-              </div>
-            </div>
 
-            <div className="mt-4 flex items-center gap-2">
-              <button 
-                className="flex-1 px-4 py-2 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A] transition flex items-center justify-center gap-2"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  openModuleModal(module);
-                }}
-              >
-                <PencilIcon className="w-4 h-4" />
-                Bewerk
-              </button>
-              <button 
-                className="flex-1 px-4 py-2 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A] transition flex items-center justify-center gap-2"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectedModule(module.id);
-                }}
-              >
-                <EyeIcon className="w-4 h-4" />
-                Bekijk Lessen
-              </button>
+              <div className="mt-4 flex items-center gap-2">
+                <AdminButton 
+                  onClick={() => {
+                    openModuleModal(module);
+                  }}
+                  variant="secondary"
+                  size="sm"
+                >
+                  <PencilIcon className="w-4 h-4 mr-2" />
+                  Bewerk
+                </AdminButton>
+                <AdminButton 
+                  onClick={() => {
+                    setSelectedModule(module.id);
+                  }}
+                  variant="secondary"
+                  size="sm"
+                >
+                  <EyeIcon className="w-4 h-4 mr-2" />
+                  Bekijk Lessen
+                </AdminButton>
+              </div>
             </div>
-          </div>
+          </AdminCard>
         ))}
       </div>
 
       {/* Selected Module Details */}
       {selectedModule && selectedModuleData && (
-        <div className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23]">
+        <AdminCard>
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
-              <button
+              <AdminButton
                 onClick={() => setSelectedModule(null)}
-                className="p-2 rounded-xl bg-[#181F17] text-[#8BAE5A] hover:bg-[#3A4D23] transition"
+                variant="secondary"
+                size="sm"
               >
-                <ArrowLeftIcon className="w-5 h-5" />
-              </button>
+                <ArrowLeftIcon className="w-5 h-5 mr-2" />
+                Terug
+              </AdminButton>
               <div>
                 <h2 className="text-2xl font-bold text-[#8BAE5A]">Lessen voor Module: {selectedModuleData.title}</h2>
                 <p className="text-[#B6C948] mt-1">{selectedModuleData.description}</p>
               </div>
             </div>
-            <button
+            <AdminButton
               onClick={() => openLessonModal()}
-              className="px-4 py-2 rounded-xl bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#B6C948] transition-all duration-200 flex items-center gap-2"
+              variant="primary"
             >
-              <PlusIcon className="w-4 h-4" />
+              <PlusIcon className="w-4 h-4 mr-2" />
               Nieuwe Les Toevoegen
-            </button>
+            </AdminButton>
           </div>
 
           {/* Lessons List with Drag & Drop */}
@@ -735,79 +769,30 @@ export default function AcademyManagement() {
                     
                     {/* Actions */}
                     <div className="flex items-center gap-2">
-                      <button 
+                      <AdminButton 
                         onClick={() => openLessonModal(lesson)}
-                        className="p-2 rounded-xl hover:bg-[#232D1A] transition-colors duration-200"
-                        title="Bewerk les"
+                        variant="secondary"
+                        size="sm"
                       >
-                        <PencilIcon className="w-4 h-4 text-[#B6C948]" />
-                      </button>
-                      <button 
+                        <PencilIcon className="w-4 h-4 mr-2" />
+                        Bewerk
+                      </AdminButton>
+                      <AdminButton 
                         onClick={() => handleLessonDelete(lesson.id)}
-                        className="p-2 rounded-xl hover:bg-[#232D1A] transition-colors duration-200"
-                        title="Verwijder les"
+                        variant="danger"
+                        size="sm"
                       >
-                        <TrashIcon className="w-4 h-4 text-red-400" />
-                      </button>
+                        <TrashIcon className="w-4 h-4 mr-2" />
+                        Verwijder
+                      </AdminButton>
                     </div>
                   </div>
                 </div>
               );
             })}
           </div>
-        </div>
+        </AdminCard>
       )}
-
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23]">
-          <div className="flex items-center gap-4">
-            <div className="p-3 rounded-xl bg-[#8BAE5A]/20">
-              <AcademicCapIcon className="w-6 h-6 text-[#8BAE5A]" />
-            </div>
-            <div>
-              <h3 className="text-2xl font-bold text-[#8BAE5A]">{modules.length}</h3>
-              <p className="text-[#B6C948] text-sm">Modules</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23]">
-          <div className="flex items-center gap-4">
-            <div className="p-3 rounded-xl bg-[#8BAE5A]/20">
-              <BookOpenIcon className="w-6 h-6 text-[#8BAE5A]" />
-            </div>
-            <div>
-              <h3 className="text-2xl font-bold text-[#8BAE5A]">{lessons.length}</h3>
-              <p className="text-[#B6C948] text-sm">Lessen</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23]">
-          <div className="flex items-center gap-4">
-            <div className="p-3 rounded-xl bg-[#8BAE5A]/20">
-              <UsersIcon className="w-6 h-6 text-[#8BAE5A]" />
-            </div>
-            <div>
-              <h3 className="text-2xl font-bold text-[#8BAE5A]">{studentCount.toLocaleString()}</h3>
-              <p className="text-[#B6C948] text-sm">Studenten</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23]">
-          <div className="flex items-center gap-4">
-            <div className="p-3 rounded-xl bg-[#8BAE5A]/20">
-              <CheckCircleIcon className="w-6 h-6 text-[#8BAE5A]" />
-            </div>
-            <div>
-              <h3 className="text-2xl font-bold text-[#8BAE5A]">{avgCompletion}%</h3>
-              <p className="text-[#B6C948] text-sm">Gem. Voltooiing</p>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* Module Modal */}
       {showModuleModal && (
@@ -922,26 +907,30 @@ export default function AcademyManagement() {
 
               {/* Action Buttons */}
               <div className="flex items-center gap-4 pt-4">
-                <button
+                <AdminButton
                   onClick={() => setShowModuleModal(false)}
-                  className="flex-1 px-6 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A] transition"
+                  variant="secondary"
                 >
+                  <XMarkIcon className="w-5 h-5 mr-2" />
                   Annuleren
-                </button>
-                <button
+                </AdminButton>
+                <AdminButton
                   onClick={handleModuleSave}
                   disabled={isLoading || !moduleForm.title}
-                  className="flex-1 px-6 py-3 rounded-xl bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#B6C948] transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  variant="primary"
                 >
                   {isLoading ? (
                     <>
-                      <div className="w-5 h-5 border-2 border-[#181F17] border-t-transparent rounded-full animate-spin"></div>
+                      <div className="w-5 h-5 border-2 border-[#181F17] border-t-transparent rounded-full animate-spin mr-2"></div>
                       Opslaan...
                     </>
                   ) : (
-                    'Opslaan'
+                    <>
+                      <CheckCircleIcon className="w-5 h-5 mr-2" />
+                      Opslaan
+                    </>
                   )}
-                </button>
+                </AdminButton>
               </div>
             </div>
           </div>
@@ -1055,26 +1044,30 @@ export default function AcademyManagement() {
 
               {/* Action Buttons */}
               <div className="flex items-center gap-4 pt-4">
-                <button
+                <AdminButton
                   onClick={closeLessonModal}
-                  className="flex-1 px-6 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A] transition"
+                  variant="secondary"
                 >
+                  <XMarkIcon className="w-5 h-5 mr-2" />
                   Annuleren
-                </button>
-                <button
+                </AdminButton>
+                <AdminButton
                   onClick={handleLessonSave}
                   disabled={isLoading || !lessonForm.title || !lessonForm.duration}
-                  className="flex-1 px-6 py-3 rounded-xl bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#B6C948] transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  variant="primary"
                 >
                   {isLoading ? (
                     <>
-                      <div className="w-5 h-5 border-2 border-[#181F17] border-t-transparent rounded-full animate-spin"></div>
+                      <div className="w-5 h-5 border-2 border-[#181F17] border-t-transparent rounded-full animate-spin mr-2"></div>
                       Opslaan...
                     </>
                   ) : (
-                    'Opslaan'
+                    <>
+                      <CheckCircleIcon className="w-5 h-5 mr-2" />
+                      Opslaan
+                    </>
                   )}
-                </button>
+                </AdminButton>
               </div>
             </div>
           </div>
@@ -1083,7 +1076,7 @@ export default function AcademyManagement() {
 
       {/* Debug Info - Conditionally shown at bottom */}
       {showDebug && (
-        <div className="bg-[#181F17] p-4 rounded-xl border border-[#3A4D23]">
+        <AdminCard>
           <h3 className="text-[#8BAE5A] font-semibold mb-2">Debug Info:</h3>
           <p className="text-white">Aantal modules geladen: {modules.length}</p>
           <p className="text-white">Modules: {JSON.stringify(modules.map(m => ({ id: m.id, title: m.title, lessons_count: m.lessons_count })))}</p>
@@ -1115,7 +1108,7 @@ export default function AcademyManagement() {
               );
             })}
           </div>
-        </div>
+        </AdminCard>
       )}
     </div>
   );

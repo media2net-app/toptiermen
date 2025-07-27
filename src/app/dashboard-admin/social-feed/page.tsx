@@ -97,139 +97,181 @@ interface Notification {
   isRead: boolean;
 }
 
-// Mock data
-const reportedPosts: ReportedPost[] = [
-  {
-    id: '1',
-    content: 'Check out this amazing workout routine! 💪 #fitness #motivation',
-    author: {
-      name: 'Mark van der Berg',
-      username: '@fitness_mark',
-      avatar: '/api/placeholder/40/40'
-    },
-    timestamp: '2 uur geleden',
-    media: {
-      type: 'image',
-      url: '/api/placeholder/300/200'
-    },
-    reports: [
-      { reporter: 'Daniel V.', reason: 'Spam', timestamp: '1 uur geleden' },
-      { reporter: 'Mike A.', reason: 'Irrelevante content', timestamp: '45 min geleden' },
-      { reporter: 'Tom W.', reason: 'Spam', timestamp: '30 min geleden' }
-    ],
-    likes: 12,
-    comments: 3,
-    status: 'pending',
-    priority: 'high'
-  },
-  {
-    id: '2',
-    content: 'Just completed my morning meditation session. Feeling zen! 🧘‍♂️',
-    author: {
-      name: 'Lucas de Vries',
-      username: '@zen_lucas',
-      avatar: '/api/placeholder/40/40'
-    },
-    timestamp: '4 uur geleden',
-    reports: [
-      { reporter: 'Frank M.', reason: 'Ongepaste content', timestamp: '2 uur geleden' }
-    ],
-    likes: 8,
-    comments: 2,
-    status: 'pending',
-    priority: 'medium'
-  }
-];
+// Database types
+interface SocialFeedPost {
+  id: string;
+  content: string;
+  author_id: string;
+  media_url?: string;
+  media_type?: 'image' | 'video';
+  likes_count: number;
+  comments_count: number;
+  is_pinned: boolean;
+  is_post_of_the_week: boolean;
+  is_hidden: boolean;
+  is_announcement: boolean;
+  cta_button_text?: string;
+  cta_button_link?: string;
+  reach_count: number;
+  impressions_count: number;
+  click_rate: number;
+  status: 'active' | 'hidden' | 'removed' | 'pending';
+  created_at: string;
+  updated_at: string;
+  author?: {
+    full_name: string;
+    username: string;
+    avatar_url?: string;
+  };
+}
 
-const liveFeedPosts: FeedPost[] = [
-  {
-    id: '1',
-    content: 'Just hit a new PR on deadlifts! 180kg for 3 reps. Consistency pays off! 💪',
-    author: {
-      name: 'Daniel Visser',
-      username: '@discipline_daniel',
-      avatar: '/api/placeholder/40/40'
-    },
-    timestamp: '1 uur geleden',
-    media: {
-      type: 'image',
-      url: '/api/placeholder/300/200'
-    },
-    likes: 45,
-    comments: 12,
-    isPinned: true,
-    engagement: {
-      reach: 234,
-      impressions: 567,
-      clickRate: 12.5
-    }
-  },
-  {
-    id: '2',
-    content: 'New Academy module "Financial Freedom" is now live! 🎓',
-    author: {
-      name: 'Top Tier Men',
-      username: '@toptiermen',
-      avatar: '/logo.svg',
-      isOfficial: true
-    },
-    timestamp: '3 uur geleden',
-    likes: 89,
-    comments: 23,
-    isAnnouncement: true,
-    ctaButton: {
-      text: 'Start Module',
-      link: '/dashboard/academy'
-    },
-    engagement: {
-      reach: 456,
-      impressions: 789,
-      clickRate: 18.2
-    }
-  },
-  {
-    id: '3',
-    content: 'Morning routine: 5am wake up, cold shower, 30 min meditation, then gym. The grind never stops! 🔥',
-    author: {
-      name: 'Mike Anderson',
-      username: '@alpha_mike',
-      avatar: '/api/placeholder/40/40'
-    },
-    timestamp: '5 uur geleden',
-    likes: 67,
-    comments: 15,
-    isPostOfTheWeek: true,
-    engagement: {
-      reach: 189,
-      impressions: 345,
-      clickRate: 8.7
-    }
-  }
-];
+interface SocialFeedReport {
+  id: string;
+  post_id: string;
+  reporter_id: string;
+  reason: string;
+  description?: string;
+  status: 'pending' | 'resolved' | 'dismissed';
+  priority: 'low' | 'medium' | 'high';
+  moderator_id?: string;
+  moderator_notes?: string;
+  resolved_at?: string;
+  created_at: string;
+  updated_at: string;
+  reporter?: {
+    full_name: string;
+    username: string;
+  };
+  post?: {
+    content: string;
+  };
+}
 
-const notifications: Notification[] = [
-  {
-    id: '1',
-    type: 'report',
-    message: 'Nieuwe rapportage: Spam post van @fitness_mark',
-    timestamp: '5 min geleden',
-    isRead: false
-  },
-  {
-    id: '2',
-    type: 'engagement',
-    message: 'Hoge engagement op officiële aankondiging: 89 likes, 23 comments',
-    timestamp: '15 min geleden',
-    isRead: false
-  },
-  {
-    id: '3',
-    type: 'system',
-    message: 'Automatische spam detectie: 3 verdachte posts geïdentificeerd',
-    timestamp: '1 uur geleden',
-    isRead: true
+interface SocialFeedNotification {
+  id: string;
+  type: 'report' | 'spam' | 'engagement' | 'system';
+  message: string;
+  user_id?: string;
+  is_read: boolean;
+  metadata?: any;
+  created_at: string;
+}
+
+// State for database data
+const [socialFeedPosts, setSocialFeedPosts] = useState<SocialFeedPost[]>([]);
+const [socialFeedReports, setSocialFeedReports] = useState<SocialFeedReport[]>([]);
+const [socialFeedNotifications, setSocialFeedNotifications] = useState<SocialFeedNotification[]>([]);
+const [loading, setLoading] = useState(true);
+const [error, setError] = useState<string | null>(null);
+
+// Fetch data from database
+const fetchSocialFeedData = async () => {
+  setLoading(true);
+  try {
+    console.log('🔄 Fetching social feed data from database...');
+    
+    const [postsResult, reportsResult, notificationsResult] = await Promise.all([
+      fetch('/api/admin/social-feed-posts'),
+      fetch('/api/admin/social-feed-reports'),
+      fetch('/api/admin/social-feed-notifications')
+    ]);
+
+    if (postsResult.ok) {
+      const postsData = await postsResult.json();
+      setSocialFeedPosts(postsData.posts || []);
+    }
+
+    if (reportsResult.ok) {
+      const reportsData = await reportsResult.json();
+      setSocialFeedReports(reportsData.reports || []);
+    }
+
+    if (notificationsResult.ok) {
+      const notificationsData = await notificationsResult.json();
+      setSocialFeedNotifications(notificationsData.notifications || []);
+    }
+
+    setError(null);
+  } catch (err) {
+    console.error('❌ Error fetching social feed data:', err);
+    setError('Fout bij het laden van social feed data');
+  } finally {
+    setLoading(false);
   }
-];
+};
+
+// Convert database posts to component format
+const convertToFeedPosts = (posts: SocialFeedPost[]): FeedPost[] => {
+  return posts.map(post => ({
+    id: post.id,
+    content: post.content,
+    author: {
+      name: post.author?.full_name || 'Onbekende gebruiker',
+      username: post.author?.username || 'unknown',
+      avatar: post.author?.avatar_url || '/api/placeholder/40/40',
+      isOfficial: post.is_announcement
+    },
+    timestamp: new Date(post.created_at).toLocaleString('nl-NL'),
+    media: post.media_url ? {
+      type: post.media_type || 'image',
+      url: post.media_url
+    } : undefined,
+    likes: post.likes_count,
+    comments: post.comments_count,
+    isPinned: post.is_pinned,
+    isPostOfTheWeek: post.is_post_of_the_week,
+    isHidden: post.is_hidden,
+    isAnnouncement: post.is_announcement,
+    ctaButton: post.cta_button_text ? {
+      text: post.cta_button_text,
+      link: post.cta_button_link || '#'
+    } : undefined,
+    engagement: {
+      reach: post.reach_count,
+      impressions: post.impressions_count,
+      clickRate: post.click_rate
+    }
+  }));
+};
+
+// Convert database reports to component format
+const convertToReportedPosts = (reports: SocialFeedReport[]): ReportedPost[] => {
+  return reports.map(report => ({
+    id: report.id,
+    content: report.post?.content || 'Post niet beschikbaar',
+    author: {
+      name: report.reporter?.full_name || 'Onbekende gebruiker',
+      username: report.reporter?.username || 'unknown',
+      avatar: '/api/placeholder/40/40'
+    },
+    timestamp: new Date(report.created_at).toLocaleString('nl-NL'),
+    reports: [{
+      reporter: report.reporter?.full_name || 'Onbekende gebruiker',
+      reason: report.reason,
+      timestamp: new Date(report.created_at).toLocaleString('nl-NL')
+    }],
+    likes: 0,
+    comments: 0,
+    status: report.status === 'dismissed' ? 'resolved' : report.status,
+    priority: report.priority
+  }));
+};
+
+// Convert database notifications to component format
+const convertToNotifications = (notifications: SocialFeedNotification[]): Notification[] => {
+  return notifications.map(notification => ({
+    id: notification.id,
+    type: notification.type,
+    message: notification.message,
+    timestamp: new Date(notification.created_at).toLocaleString('nl-NL'),
+    isRead: notification.is_read
+  }));
+};
+
+// Use converted data
+const liveFeedPosts = convertToFeedPosts(socialFeedPosts);
+const reportedPosts = convertToReportedPosts(socialFeedReports);
+const notifications = convertToNotifications(socialFeedNotifications);
 
 export default function SocialFeedManagement() {
   const [activeTab, setActiveTab] = useState<'moderation' | 'live' | 'announcement'>('moderation');
@@ -246,6 +288,11 @@ export default function SocialFeedManagement() {
     scheduledDate: '',
     scheduledTime: ''
   });
+
+  // Load data on component mount
+  useEffect(() => {
+    fetchSocialFeedData();
+  }, []);
 
   // Real-time notification simulation
   useEffect(() => {

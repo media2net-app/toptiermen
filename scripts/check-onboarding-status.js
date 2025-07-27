@@ -3,54 +3,59 @@ require('dotenv').config({ path: '.env.local' });
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
 async function checkOnboardingStatus() {
   try {
-    console.log('🔍 Checking onboarding status for all users...\n');
-
-    // Check onboarding status for all users
-    const { data, error } = await supabase
-      .from('user_onboarding_status')
+    console.log('🔍 Checking onboarding status for all users...');
+    
+    // Get all onboarding statuses
+    const { data: allStatuses, error: statusError } = await supabase
+      .from('onboarding_status')
       .select('*');
-
-    if (error) {
-      console.error('❌ Error fetching onboarding status:', error.message);
+    
+    if (statusError) {
+      console.log('❌ Error fetching onboarding statuses:', statusError.message);
       return;
     }
-
-    console.log('📊 Current onboarding status:');
-    data.forEach(user => {
-      console.log(`\n👤 User ID: ${user.user_id}`);
-      console.log(`   - onboarding_completed: ${user.onboarding_completed}`);
-      console.log(`   - goal_set: ${user.goal_set}`);
-      console.log(`   - missions_selected: ${user.missions_selected}`);
-      console.log(`   - training_schema_selected: ${user.training_schema_selected}`);
-      console.log(`   - nutrition_plan_selected: ${user.nutrition_plan_selected}`);
-      console.log(`   - challenge_started: ${user.challenge_started}`);
-      console.log(`   - completed_steps: ${user.completed_steps}`);
+    
+    console.log(`\n📊 Found ${allStatuses.length} onboarding statuses:`);
+    
+    allStatuses.forEach((status, index) => {
+      console.log(`\n👤 User ${index + 1}:`);
+      console.log(`   User ID: ${status.user_id}`);
+      console.log(`   Welcome Video: ${status.welcome_video_watched ? '✅' : '❌'}`);
+      console.log(`   Step 1: ${status.step_1_completed ? '✅' : '❌'}`);
+      console.log(`   Step 2: ${status.step_2_completed ? '✅' : '❌'}`);
+      console.log(`   Step 3: ${status.step_3_completed ? '✅' : '❌'}`);
+      console.log(`   Step 4: ${status.step_4_completed ? '✅' : '❌'}`);
+      console.log(`   Step 5: ${status.step_5_completed ? '✅' : '❌'}`);
+      console.log(`   Current Step: ${status.current_step}`);
+      console.log(`   Completed: ${status.onboarding_completed ? '✅' : '❌'}`);
     });
-
-    // Check if Rick and Chiel exist
-    const rick = data.find(u => u.user_id === '9d6aa8ba-58ab-4188-9a9f-09380a67eb0c');
-    const chiel = data.find(u => u.user_id === '061e43d5-c89a-42bb-8a4c-04be2ce99a7e');
-
-    console.log('\n🎯 Summary:');
-    if (rick) {
-      console.log(`   - Rick: ${rick.onboarding_completed ? '✅ Completed' : '❌ Not completed'}`);
+    
+    // Check specifically for rob
+    const robStatus = allStatuses.find(s => s.user_id === '14d7c55b-4ccd-453f-b79f-403f306f1efb');
+    
+    if (robStatus) {
+      console.log('\n🎯 Rob\'s onboarding status:');
+      console.log(`   User ID: ${robStatus.user_id}`);
+      console.log(`   Welcome Video: ${robStatus.welcome_video_watched ? '✅' : '❌'}`);
+      console.log(`   Current Step: ${robStatus.current_step}`);
+      console.log(`   Completed: ${robStatus.onboarding_completed ? '✅' : '❌'}`);
+      
+      if (!robStatus.onboarding_completed) {
+        console.log('✅ Rob needs onboarding - this is correct!');
+      } else {
+        console.log('❌ Rob should need onboarding but is marked as completed');
+      }
     } else {
-      console.log('   - Rick: ❌ No onboarding status found');
+      console.log('❌ Rob\'s onboarding status not found');
     }
     
-    if (chiel) {
-      console.log(`   - Chiel: ${chiel.onboarding_completed ? '✅ Completed' : '❌ Not completed'}`);
-    } else {
-      console.log('   - Chiel: ❌ No onboarding status found');
-    }
-
   } catch (error) {
-    console.error('❌ Error:', error);
+    console.error('❌ Error checking onboarding status:', error);
   }
 }
 

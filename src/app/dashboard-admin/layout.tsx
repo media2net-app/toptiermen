@@ -29,61 +29,7 @@ import {
   ClipboardIcon
 } from '@heroicons/react/24/outline';
 
-const adminMenu = [
-  { 
-    label: 'Dashboard', 
-    icon: HomeIcon, 
-    href: '/dashboard-admin' 
-  },
-  { 
-    label: 'ANALYTICS', 
-    type: 'section',
-    items: [
-      { label: 'Community Health', icon: ChartBarIcon, href: '/dashboard-admin?tab=overview' },
-      { label: 'Content Performance', icon: AcademicCapIcon, href: '/dashboard-admin?tab=content' },
-      { label: 'Actiegerichte Inzichten', icon: StarIcon, href: '/dashboard-admin?tab=actions' },
-      { label: 'Financiële Metrics', icon: CurrencyDollarIcon, href: '/dashboard-admin?tab=financial' },
-      { label: 'Gebruikers Segmentatie', icon: UsersIcon, href: '/dashboard-admin?tab=users' },
-      { label: 'Real-time Activiteit', icon: ClockIcon, href: '/dashboard-admin?tab=realtime' },
-      { label: 'Technische Performance', icon: WrenchScrewdriverIcon, href: '/dashboard-admin?tab=technical' }
-    ]
-  },
-  { 
-    label: 'LEDEN', 
-    type: 'section',
-    items: [
-      { label: 'Ledenbeheer', icon: UserGroupIcon, href: '/dashboard-admin/ledenbeheer' }
-    ]
-  },
-  { 
-    label: 'CONTENT', 
-    type: 'section',
-    items: [
-      { label: 'Academy', icon: AcademicCapIcon, href: '/dashboard-admin/academy' },
-      { label: 'Trainingscentrum', icon: FireIcon, href: '/dashboard-admin/trainingscentrum' },
-      { label: 'Voedingsplannen', icon: BookOpenIcon, href: '/dashboard-admin/voedingsplannen' },
-      { label: 'Boekenkamer', icon: BookOpenIcon, href: '/dashboard-admin/boekenkamer' },
-      { label: 'Badges & Rangen', icon: StarIcon, href: '/dashboard-admin/badges-rangen' }
-    ]
-  },
-  { 
-    label: 'COMMUNITY', 
-    type: 'section',
-    items: [
-      { label: 'Forum Moderatie', icon: ChatBubbleLeftRightIcon, href: '/dashboard-admin/forum-moderatie' },
-      { label: 'Social Feed', icon: ChatBubbleLeftRightIcon, href: '/dashboard-admin/social-feed' },
-      { label: 'Evenementenbeheer', icon: CalendarIcon, href: '/dashboard-admin/evenementenbeheer' },
-    ]
-  },
-  { 
-    label: 'PLATFORM', 
-    type: 'section',
-    items: [
-      { label: 'Instellingen', icon: Cog6ToothIcon, href: '/dashboard-admin/instellingen' },
-      { label: 'Aankondigingen', icon: MegaphoneIcon, href: '/dashboard-admin/aankondigingen' }
-    ]
-  },
-];
+
 
 const SidebarContent = ({ pathname }: { pathname: string }) => {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['ANALYTICS', 'LEDEN', 'CONTENT', 'COMMUNITY', 'PLATFORM']));
@@ -100,10 +46,74 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
     });
   };
 
+  const adminMenu = [
+    { 
+      label: 'Dashboard', 
+      icon: HomeIcon, 
+      href: '/dashboard-admin',
+      items: [
+        { label: 'Project Logs', icon: DocumentTextIcon, href: '/dashboard-admin/project-logs' }
+      ]
+    },
+    { 
+      label: 'ANALYTICS', 
+      type: 'section',
+      items: [
+        { label: 'Community Health', icon: ChartBarIcon, href: '/dashboard-admin?tab=overview' },
+        { label: 'Content Performance', icon: AcademicCapIcon, href: '/dashboard-admin?tab=content' },
+        { label: 'Actiegerichte Inzichten', icon: StarIcon, href: '/dashboard-admin?tab=actions' },
+        { label: 'Financiële Metrics', icon: CurrencyDollarIcon, href: '/dashboard-admin?tab=financial' },
+        { label: 'Gebruikers Segmentatie', icon: UsersIcon, href: '/dashboard-admin?tab=users' },
+        { label: 'Real-time Activiteit', icon: ClockIcon, href: '/dashboard-admin?tab=realtime' },
+        { label: 'Technische Performance', icon: WrenchScrewdriverIcon, href: '/dashboard-admin?tab=technical' }
+      ]
+    },
+    { 
+      label: 'LEDEN', 
+      type: 'section',
+      items: [
+        { label: 'Ledenbeheer', icon: UserGroupIcon, href: '/dashboard-admin/ledenbeheer' },
+              { 
+        label: 'Onboarding Overzicht', 
+        icon: ClipboardIcon, 
+        href: '/dashboard-admin/onboarding-overview'
+      }
+      ]
+    },
+    { 
+      label: 'CONTENT', 
+      type: 'section',
+      items: [
+        { label: 'Academy', icon: AcademicCapIcon, href: '/dashboard-admin/academy' },
+        { label: 'Trainingscentrum', icon: FireIcon, href: '/dashboard-admin/trainingscentrum' },
+        { label: 'Voedingsplannen', icon: BookOpenIcon, href: '/dashboard-admin/voedingsplannen' },
+        { label: 'Boekenkamer', icon: BookOpenIcon, href: '/dashboard-admin/boekenkamer' },
+        { label: 'Badges & Rangen', icon: StarIcon, href: '/dashboard-admin/badges-rangen' }
+      ]
+    },
+    { 
+      label: 'COMMUNITY', 
+      type: 'section',
+      items: [
+        { label: 'Forum Moderatie', icon: ChatBubbleLeftRightIcon, href: '/dashboard-admin/forum-moderatie' },
+        { label: 'Social Feed', icon: ChatBubbleLeftRightIcon, href: '/dashboard-admin/social-feed' },
+        { label: 'Evenementenbeheer', icon: CalendarIcon, href: '/dashboard-admin/evenementenbeheer' },
+      ]
+    },
+    { 
+      label: 'PLATFORM', 
+      type: 'section',
+      items: [
+        { label: 'Instellingen', icon: Cog6ToothIcon, href: '/dashboard-admin/instellingen' },
+        { label: 'Aankondigingen', icon: MegaphoneIcon, href: '/dashboard-admin/aankondigingen' }
+      ]
+    },
+  ];
+
   return (
     <nav className="space-y-6">
       {adminMenu.map((item) => {
-        if (item.type === 'section') {
+        if (item.type === 'section' || item.items) {
           const isExpanded = expandedSections.has(item.label);
           return (
             <div key={item.label}>
@@ -131,7 +141,27 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
                       {subItem.icon && <subItem.icon className="w-5 h-5" />}
                       <span className="flex items-center gap-2">
                         {subItem.label}
-                        {subItem.label === 'Community Health' || subItem.label === 'Real-time Activiteit' || subItem.label === 'Academy' || subItem.label === 'Ledenbeheer' || subItem.label === 'Trainingscentrum' ? (
+                        {/* Live Data Pages */}
+                        {subItem.label === 'Community Health' ||
+               subItem.label === 'Real-time Activiteit' ||
+               subItem.label === 'Academy' ||
+               subItem.label === 'Trainingscentrum' ||
+               subItem.label === 'Content Performance' ||
+               subItem.label === 'Actiegerichte Inzichten' ||
+               subItem.label === 'Financiële Metrics' ||
+               subItem.label === 'Gebruikers Segmentatie' ||
+               subItem.label === 'Technische Performance' ||
+               subItem.label === 'Onboarding Overzicht' ||
+               subItem.label === 'Badges & Rangen' ||
+               subItem.label === 'Boekenkamer' ||
+               subItem.label === 'Aankondigingen' ||
+               subItem.label === 'Forum Moderatie' ||
+               subItem.label === 'Evenementenbeheer' ||
+               subItem.label === 'Voedingsplannen' ||
+               subItem.label === 'Ledenbeheer' ||
+               subItem.label === 'Social Feed' ||
+               subItem.label === 'Instellingen' ||
+               subItem.label === 'Project Logs' ? (
                           <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-bold bg-green-700 text-green-200">Live</span>
                         ) : (
                           <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-bold bg-red-700 text-red-200">Dummy</span>
@@ -332,7 +362,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-6 md:p-12 overflow-x-auto">
+        <main className="flex-1 p-6 md:p-12 overflow-x-auto bg-[#181F17]">
           {children}
         </main>
       </div>

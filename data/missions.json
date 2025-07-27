@@ -1,22 +1,70 @@
 {
+  "14d7c55b-4ccd-453f-b79f-403f306f1efb": [
+    {
+      "id": "1753429722499",
+      "title": "tesrtf",
+      "type": "Dagelijks",
+      "done": false,
+      "category": "Algemeen",
+      "icon": "🎯",
+      "badge": "Custom Badge",
+      "progress": 0,
+      "shared": false,
+      "accountabilityPartner": null,
+      "xp_reward": 15,
+      "last_completion_date": null,
+      "created_at": "2025-07-25T07:48:42.499Z"
+    },
+    {
+      "id": "1753429724174",
+      "title": "testts",
+      "type": "Dagelijks",
+      "done": false,
+      "category": "Algemeen",
+      "icon": "🎯",
+      "badge": "Custom Badge",
+      "progress": 0,
+      "shared": false,
+      "accountabilityPartner": null,
+      "xp_reward": 15,
+      "last_completion_date": null,
+      "created_at": "2025-07-25T07:48:44.174Z"
+    },
+    {
+      "id": "1753429725977",
+      "title": "tets",
+      "type": "Dagelijks",
+      "done": false,
+      "category": "Algemeen",
+      "icon": "🎯",
+      "badge": "Custom Badge",
+      "progress": 0,
+      "shared": false,
+      "accountabilityPartner": null,
+      "xp_reward": 15,
+      "last_completion_date": null,
+      "created_at": "2025-07-25T07:48:45.977Z"
+    }
+  ],
   "061e43d5-c89a-42bb-8a4c-04be2ce99a7e": [
     {
-      "id": "1753363297352",
-      "title": "sdfdffdsdf",
+      "id": "1753503735970",
+      "title": "20 push-ups",
       "type": "Dagelijks",
       "done": false,
-      "category": "Algemeen",
-      "icon": "🎯",
+      "category": "Fitness & Gezondheid",
+      "icon": "💪",
       "badge": "Custom Badge",
       "progress": 0,
       "shared": false,
       "accountabilityPartner": null,
-      "xp_reward": 15,
-      "last_completion_date": "2025-07-24"
+      "xp_reward": 75,
+      "last_completion_date": "2025-07-27",
+      "created_at": "2025-07-26T04:22:15.970Z"
     },
     {
-      "id": "1753363299390",
-      "title": "sdfsdffsd",
+      "id": "1753505340337",
+      "title": "Hier kan ik een nieuwe missie toevoegen",
       "type": "Dagelijks",
       "done": false,
       "category": "Algemeen",
@@ -26,35 +74,55 @@
       "shared": false,
       "accountabilityPartner": null,
       "xp_reward": 15,
-      "last_completion_date": "2025-07-24"
+      "last_completion_date": "2025-07-27",
+      "created_at": "2025-07-26T04:49:00.337Z"
+    }
+  ],
+  "3045524b-4ea1-4916-a64c-d8c8e3b78b40": [
+    {
+      "id": "1753509949551",
+      "title": "30 minuten wandelen",
+      "type": "Dagelijks",
+      "done": false,
+      "category": "Fitness & Gezondheid",
+      "icon": "🚶‍♂️",
+      "badge": "Custom Badge",
+      "progress": 0,
+      "shared": false,
+      "accountabilityPartner": null,
+      "xp_reward": 50,
+      "last_completion_date": null,
+      "created_at": "2025-07-26T06:05:49.551Z"
     },
     {
-      "id": "1753363304569",
-      "title": "sdffsddfsdffds",
+      "id": "1753509953490",
+      "title": "20 push-ups",
       "type": "Dagelijks",
       "done": false,
-      "category": "Algemeen",
-      "icon": "🎯",
+      "category": "Fitness & Gezondheid",
+      "icon": "💪",
       "badge": "Custom Badge",
       "progress": 0,
       "shared": false,
       "accountabilityPartner": null,
-      "xp_reward": 15,
-      "last_completion_date": "2025-07-24"
+      "xp_reward": 75,
+      "last_completion_date": null,
+      "created_at": "2025-07-26T06:05:53.490Z"
     },
     {
-      "id": "1753363914749",
-      "title": "21342344423",
+      "id": "1753509957503",
+      "title": "10 minuten mediteren",
       "type": "Dagelijks",
       "done": false,
-      "category": "Algemeen",
-      "icon": "🎯",
+      "category": "Mind & Focus",
+      "icon": "🧘‍♀️",
       "badge": "Custom Badge",
       "progress": 0,
       "shared": false,
       "accountabilityPartner": null,
-      "xp_reward": 15,
-      "last_completion_date": "2025-07-24"
+      "xp_reward": 80,
+      "last_completion_date": null,
+      "created_at": "2025-07-26T06:05:57.503Z"
     }
   ]
 }

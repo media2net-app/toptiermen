@@ -488,6 +488,8 @@ export async function POST(request: Request) {
 
     if (action === 'undo-day') {
       try {
+        const today = getTodayDate();
+        
         // Get user challenge
         const { data: userChallenge, error: userChallengeError } = await supabase
           .from('user_challenges')
@@ -508,25 +510,76 @@ export async function POST(request: Request) {
           });
         }
 
-        // Get the most recent completed day
-        const { data: recentLogs, error: logsError } = await supabase
+        // Get today's completion log first
+        const { data: todayLog } = await supabase
           .from('challenge_logs')
           .select('*')
           .eq('user_id', userId)
           .eq('challenge_id', challengeId)
+          .eq('activity_date', today)
           .eq('completed', true)
-          .order('activity_date', { ascending: false })
-          .limit(1);
+          .single();
 
-        if (logsError || !recentLogs || recentLogs.length === 0) {
-          return NextResponse.json({ 
-            success: false,
-            message: 'Geen voltooide dagen gevonden om ongedaan te maken!' 
-          });
+        let logToUndo;
+        let xpToRemove;
+
+        if (todayLog) {
+          // If today is completed, undo today's completion
+          logToUndo = todayLog;
+          xpToRemove = todayLog.xp_earned || 10;
+        } else {
+          // If today is not completed, check if we can undo yesterday's completion
+          const yesterday = new Date();
+          yesterday.setDate(yesterday.getDate() - 1);
+          const yesterdayStr = yesterday.toISOString().split('T')[0];
+          
+          const { data: yesterdayLog } = await supabase
+            .from('challenge_logs')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('challenge_id', challengeId)
+            .eq('activity_date', yesterdayStr)
+            .eq('completed', true)
+            .single();
+
+          if (yesterdayLog) {
+            logToUndo = yesterdayLog;
+            xpToRemove = yesterdayLog.xp_earned || 10;
+          } else {
+            // Get the most recent completed day (but only if it's today or yesterday)
+            const { data: recentLogs, error: logsError } = await supabase
+              .from('challenge_logs')
+              .select('*')
+              .eq('user_id', userId)
+              .eq('challenge_id', challengeId)
+              .eq('completed', true)
+              .in('activity_date', [today, yesterdayStr])
+              .order('activity_date', { ascending: false })
+              .limit(1);
+
+            if (logsError || !recentLogs || recentLogs.length === 0) {
+              return NextResponse.json({ 
+                success: false,
+                message: 'Je kunt alleen vandaag of gisteren ongedaan maken!' 
+              });
+            }
+
+            logToUndo = recentLogs[0];
+            xpToRemove = logToUndo.xp_earned || 10;
+          }
         }
 
-        const logToUndo = recentLogs[0];
-        const xpToRemove = logToUndo.xp_earned || 10;
+        // Prevent undoing days older than yesterday
+        const logDate = new Date(logToUndo.activity_date);
+        const twoDaysAgo = new Date();
+        twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+        
+        if (logDate < twoDaysAgo) {
+          return NextResponse.json({ 
+            success: false,
+            message: 'Je kunt alleen vandaag of gisteren ongedaan maken!' 
+          });
+        }
 
         // Delete the log entry
         const { error: deleteError } = await supabase

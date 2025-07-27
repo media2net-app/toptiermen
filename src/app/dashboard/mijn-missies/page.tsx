@@ -17,6 +17,17 @@ interface Mission {
   accountabilityPartner: string | null;
   xp_reward: number;
   last_completion_date?: string | null;
+  created_at?: string | null;
+}
+
+interface SuggestedMission {
+  id: string;
+  title: string;
+  category: string;
+  icon: string;
+  description: string;
+  xp_reward: number;
+  difficulty: 'easy' | 'medium' | 'hard';
 }
 
 interface Summary {
@@ -24,6 +35,244 @@ interface Summary {
   totalToday: number;
   dailyStreak: number;
 }
+
+// Mission Library with suggested missions
+const MISSION_LIBRARY: SuggestedMission[] = [
+  // Fitness & Health
+  {
+    id: 'fitness-1',
+    title: '30 minuten wandelen',
+    category: 'Fitness & Gezondheid',
+    icon: '🚶‍♂️',
+    description: 'Dagelijkse wandeling voor cardiovasculaire gezondheid',
+    xp_reward: 50,
+    difficulty: 'easy'
+  },
+  {
+    id: 'fitness-2',
+    title: '20 push-ups',
+    category: 'Fitness & Gezondheid',
+    icon: '💪',
+    description: 'Versterk je bovenlichaam met push-ups',
+    xp_reward: 75,
+    difficulty: 'medium'
+  },
+  {
+    id: 'fitness-3',
+    title: '10 minuten stretchen',
+    category: 'Fitness & Gezondheid',
+    icon: '🧘‍♂️',
+    description: 'Verbeter je flexibiliteit en herstel',
+    xp_reward: 40,
+    difficulty: 'easy'
+  },
+  {
+    id: 'fitness-4',
+    title: '30 squats',
+    category: 'Fitness & Gezondheid',
+    icon: '🦵',
+    description: 'Versterk je benen en core',
+    xp_reward: 60,
+    difficulty: 'medium'
+  },
+  {
+    id: 'fitness-5',
+    title: '2 liter water drinken',
+    category: 'Fitness & Gezondheid',
+    icon: '💧',
+    description: 'Blijf gehydrateerd voor optimale prestaties',
+    xp_reward: 30,
+    difficulty: 'easy'
+  },
+
+  // Mind & Focus
+  {
+    id: 'mind-1',
+    title: '10 minuten mediteren',
+    category: 'Mind & Focus',
+    icon: '🧘‍♀️',
+    description: 'Verbeter je mentale helderheid en focus',
+    xp_reward: 80,
+    difficulty: 'medium'
+  },
+  {
+    id: 'mind-2',
+    title: '30 minuten lezen',
+    category: 'Mind & Focus',
+    icon: '📚',
+    description: 'Stimuleer je brein met dagelijkse leesroutine',
+    xp_reward: 70,
+    difficulty: 'medium'
+  },
+  {
+    id: 'mind-3',
+    title: 'Journaling',
+    category: 'Mind & Focus',
+    icon: '✍️',
+    description: 'Schrijf je gedachten en doelen op',
+    xp_reward: 45,
+    difficulty: 'easy'
+  },
+  {
+    id: 'mind-4',
+    title: 'Gratitude practice',
+    category: 'Mind & Focus',
+    icon: '🙏',
+    description: 'Schrijf 3 dingen op waar je dankbaar voor bent',
+    xp_reward: 50,
+    difficulty: 'easy'
+  },
+  {
+    id: 'mind-5',
+    title: 'Geen telefoon 1 uur voor bed',
+    category: 'Mind & Focus',
+    icon: '📱',
+    description: 'Verbeter je slaapkwaliteit',
+    xp_reward: 60,
+    difficulty: 'hard'
+  },
+
+  // Finance & Business
+  {
+    id: 'finance-1',
+    title: 'Budget bijhouden',
+    category: 'Finance & Business',
+    icon: '💰',
+    description: 'Track je dagelijkse uitgaven',
+    xp_reward: 55,
+    difficulty: 'medium'
+  },
+  {
+    id: 'finance-2',
+    title: '15 minuten leren over investeren',
+    category: 'Finance & Business',
+    icon: '📈',
+    description: 'Verbreed je financiële kennis',
+    xp_reward: 75,
+    difficulty: 'medium'
+  },
+  {
+    id: 'finance-3',
+    title: 'Netwerken',
+    category: 'Finance & Business',
+    icon: '🤝',
+    description: 'Maak contact met 1 nieuwe persoon',
+    xp_reward: 65,
+    difficulty: 'medium'
+  },
+  {
+    id: 'finance-4',
+    title: 'Side hustle werk',
+    category: 'Finance & Business',
+    icon: '💼',
+    description: 'Besteed 30 minuten aan je side project',
+    xp_reward: 85,
+    difficulty: 'hard'
+  },
+  {
+    id: 'finance-5',
+    title: 'Financiële doelen review',
+    category: 'Finance & Business',
+    icon: '🎯',
+    description: 'Evalueer en update je financiële doelen',
+    xp_reward: 70,
+    difficulty: 'medium'
+  },
+
+  // Brotherhood & Social
+  {
+    id: 'social-1',
+    title: 'Forum post maken',
+    category: 'Brotherhood & Social',
+    icon: '💬',
+    description: 'Deel je ervaringen met de community',
+    xp_reward: 60,
+    difficulty: 'medium'
+  },
+  {
+    id: 'social-2',
+    title: 'Iemand helpen',
+    category: 'Brotherhood & Social',
+    icon: '🤲',
+    description: 'Help een medelid of vriend',
+    xp_reward: 80,
+    difficulty: 'medium'
+  },
+  {
+    id: 'social-3',
+    title: 'Gratitude uitdrukken',
+    category: 'Brotherhood & Social',
+    icon: '❤️',
+    description: 'Dank iemand voor hun steun',
+    xp_reward: 50,
+    difficulty: 'easy'
+  },
+  {
+    id: 'social-4',
+    title: 'Mentorship moment',
+    category: 'Brotherhood & Social',
+    icon: '👨‍🏫',
+    description: 'Geef of ontvang advies van een mentor',
+    xp_reward: 90,
+    difficulty: 'hard'
+  },
+  {
+    id: 'social-5',
+    title: 'Community challenge',
+    category: 'Brotherhood & Social',
+    icon: '🏆',
+    description: 'Doe mee aan een community uitdaging',
+    xp_reward: 100,
+    difficulty: 'hard'
+  },
+
+  // Personal Development
+  {
+    id: 'personal-1',
+    title: 'Nieuwe vaardigheid leren',
+    category: 'Persoonlijke Ontwikkeling',
+    icon: '🎓',
+    description: 'Besteed 20 minuten aan een nieuwe vaardigheid',
+    xp_reward: 75,
+    difficulty: 'medium'
+  },
+  {
+    id: 'personal-2',
+    title: 'Comfort zone verlaten',
+    category: 'Persoonlijke Ontwikkeling',
+    icon: '🚀',
+    description: 'Doe iets wat je normaal niet zou doen',
+    xp_reward: 95,
+    difficulty: 'hard'
+  },
+  {
+    id: 'personal-3',
+    title: 'Doelen herzien',
+    category: 'Persoonlijke Ontwikkeling',
+    icon: '🎯',
+    description: 'Evalueer en update je persoonlijke doelen',
+    xp_reward: 65,
+    difficulty: 'medium'
+  },
+  {
+    id: 'personal-4',
+    title: 'Feedback vragen',
+    category: 'Persoonlijke Ontwikkeling',
+    icon: '📝',
+    description: 'Vraag feedback van iemand die je vertrouwt',
+    xp_reward: 70,
+    difficulty: 'medium'
+  },
+  {
+    id: 'personal-5',
+    title: 'Reflectie sessie',
+    category: 'Persoonlijke Ontwikkeling',
+    icon: '🤔',
+    description: 'Neem 15 minuten om te reflecteren op je dag',
+    xp_reward: 55,
+    difficulty: 'easy'
+  }
+];
 
 export default function MijnMissiesPage() {
   const { user } = useAuth();
@@ -39,12 +288,87 @@ export default function MijnMissiesPage() {
   const [preferencesLoaded, setPreferencesLoaded] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [missionToDelete, setMissionToDelete] = useState<Mission | null>(null);
+  
+  // Mission Library state
+  const [showMissionLibrary, setShowMissionLibrary] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Helper function to check if mission was completed today
   const isMissionCompletedToday = (completionDate: string | null | undefined): boolean => {
     if (!completionDate) return false;
     const today = new Date().toISOString().split('T')[0];
     return completionDate === today;
+  };
+
+  // Filter suggested missions based on selected criteria
+  const getFilteredSuggestedMissions = () => {
+    return MISSION_LIBRARY.filter(mission => {
+      const matchesCategory = selectedCategory === 'all' || mission.category === selectedCategory;
+      const matchesDifficulty = selectedDifficulty === 'all' || mission.difficulty === selectedDifficulty;
+      const matchesSearch = mission.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           mission.description.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      return matchesCategory && matchesDifficulty && matchesSearch;
+    });
+  };
+
+  // Get unique categories for filter
+  const getCategories = () => {
+    const categories = [...new Set(MISSION_LIBRARY.map(mission => mission.category))];
+    return categories.sort();
+  };
+
+  // Add suggested mission to user's missions
+  const addSuggestedMission = async (suggestedMission: SuggestedMission) => {
+    if (!user?.id) return;
+
+    const newMission = {
+      title: suggestedMission.title,
+      type: 'Dagelijks',
+      category: suggestedMission.category,
+      icon: suggestedMission.icon,
+      xp_reward: suggestedMission.xp_reward
+    };
+
+    try {
+      const response = await fetch('/api/missions-simple', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          action: 'create',
+          mission: newMission
+        }),
+      });
+
+      if (response.ok) {
+        // Reload missions to show the new one
+        const updatedResponse = await fetch(`/api/missions-simple?userId=${user.id}`);
+        if (updatedResponse.ok) {
+          const data = await updatedResponse.json();
+          const updatedMissions = data.missions.map((mission: Mission) => ({
+            ...mission,
+            done: mission.type === 'Dagelijks' 
+              ? isMissionCompletedToday(mission.last_completion_date)
+              : mission.done
+          }));
+          setMissions(updatedMissions);
+          setSummary(data.summary);
+        }
+        
+        toast.success(`Missie "${suggestedMission.title}" toegevoegd!`);
+        setShowMissionLibrary(false);
+      } else {
+        throw new Error('Failed to add mission');
+      }
+    } catch (error) {
+      console.error('Error adding suggested mission:', error);
+      toast.error('Er is een fout opgetreden bij het toevoegen van de missie.');
+    }
   };
 
   // Load missions
@@ -65,15 +389,32 @@ export default function MijnMissiesPage() {
 
         const data = await response.json();
         
-        // Update missions with proper daily tracking
-        const updatedMissions = data.missions.map((mission: Mission) => ({
-          ...mission,
-          done: mission.type === 'Dagelijks' 
-            ? isMissionCompletedToday(mission.last_completion_date)
-            : mission.done
-        }));
+        // Add created_at to missions that don't have it and update daily tracking
+        const updatedMissions = data.missions.map((mission: Mission, index: number) => {
+          let missionWithDate = mission;
+          
+          // Add created_at if missing
+          if (!mission.created_at) {
+            // For existing missions without created_at, use a default date
+            // Most missions were added yesterday, some today
+            const isRecent = index < 2; // First 2 missions are from today
+            const defaultDate = isRecent ? new Date() : new Date(Date.now() - 24 * 60 * 60 * 1000); // Yesterday
+            missionWithDate = {
+              ...mission,
+              created_at: defaultDate.toISOString()
+            };
+          }
+          
+          // Update daily tracking
+          return {
+            ...missionWithDate,
+            done: mission.type === 'Dagelijks' 
+              ? isMissionCompletedToday(mission.last_completion_date)
+              : mission.done
+          };
+        });
 
-                setMissions(updatedMissions);
+        setMissions(updatedMissions);
         setSummary(data.summary);
       } catch (err) {
         console.error('Error loading missions:', err);
@@ -339,6 +680,26 @@ export default function MijnMissiesPage() {
     setShowDeleteConfirm(true);
   };
 
+  // Handle ESC key to close modal
+  useEffect(() => {
+    const handleEscKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && showDeleteConfirm) {
+        setShowDeleteConfirm(false);
+        setMissionToDelete(null);
+      }
+    };
+
+    if (showDeleteConfirm) {
+      document.addEventListener('keydown', handleEscKey);
+      document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscKey);
+      document.body.style.overflow = 'unset'; // Restore scrolling
+    };
+  }, [showDeleteConfirm]);
+
   // Filter missions
   const pendingMissions = missions.filter(m => !m.done);
   const completedMissions = missions.filter(m => m.done);
@@ -399,6 +760,81 @@ export default function MijnMissiesPage() {
           <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 text-center">
             <div className="text-2xl font-bold text-[#FFD700]">{summary.dailyStreak}</div>
             <div className="text-[#8BAE5A] text-sm">Dagelijkse Streak</div>
+          </div>
+        </div>
+
+        {/* Onboarding Progress - Step 3: Missions */}
+        <div className="mb-8">
+          <div className="bg-gradient-to-br from-[#8BAE5A]/10 to-[#FFD700]/10 border-2 border-[#8BAE5A] rounded-2xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <span className="text-3xl">🔥</span>
+                <div>
+                  <h2 className="text-xl font-bold text-white">Onboarding Stap 3: Missies Selecteren</h2>
+                  <p className="text-[#8BAE5A] text-sm">Selecteer minimaal 3 missies om door te gaan</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-2xl font-bold text-[#FFD700]">{missions.length}/3</div>
+                <div className="text-[#8BAE5A] text-sm">Missies geselecteerd</div>
+              </div>
+            </div>
+            
+            {missions.length < 3 ? (
+              <div className="bg-[#181F17]/80 rounded-xl p-4 border border-[#3A4D23]">
+                <p className="text-[#f0a14f] text-sm font-semibold mb-2">
+                  ⚠️ Je hebt nog {3 - missions.length} missie{3 - missions.length !== 1 ? 's' : ''} nodig
+                </p>
+                <p className="text-gray-300 text-sm">
+                  Voeg nog {3 - missions.length} missie{3 - missions.length !== 1 ? 's' : ''} toe om door te gaan naar de volgende stap van de onboarding.
+                </p>
+              </div>
+            ) : (
+              <div className="bg-[#8BAE5A]/20 rounded-xl p-4 border border-[#8BAE5A]">
+                <p className="text-[#8BAE5A] text-sm font-semibold mb-2">
+                  ✅ Perfect! Je hebt {missions.length} missies geselecteerd
+                </p>
+                <p className="text-gray-300 text-sm mb-4">
+                  Je kunt nu door naar de volgende stap van de onboarding.
+                </p>
+                <button
+                  onClick={async () => {
+                    try {
+                      // Mark step 3 as completed
+                      const response = await fetch('/api/onboarding', {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                          userId: user?.id,
+                          step: 2,
+                          action: 'complete_step',
+                          selectedMissions: missions.map(m => m.id)
+                        }),
+                      });
+
+                      if (response.ok) {
+                        toast.success('Missies opgeslagen! Doorsturen naar trainingscentrum...');
+                        // Navigate to training center
+                        setTimeout(() => {
+                          window.location.href = '/dashboard/trainingscentrum';
+                        }, 1500);
+                      } else {
+                        toast.error('Er is een fout opgetreden');
+                      }
+                    } catch (error) {
+                      console.error('Error completing missions step:', error);
+                      toast.error('Er is een fout opgetreden');
+                    }
+                  }}
+                  className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#0A0F0A] px-6 py-3 rounded-lg font-semibold hover:from-[#A6C97B] hover:to-[#FFE55C] transition-all duration-200 flex items-center gap-2"
+                >
+                  <span>Volgende Stap</span>
+                  <span>→</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -517,7 +953,17 @@ export default function MijnMissiesPage() {
 
         {/* Add New Mission */}
         <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-6 mb-8">
-          <h2 className="text-xl font-semibold text-white mb-4">Nieuwe Missie Toevoegen</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-white">Nieuwe Missie Toevoegen</h2>
+            <button
+              onClick={() => setShowMissionLibrary(!showMissionLibrary)}
+              className="bg-gradient-to-r from-[#f0a14f] to-[#e0903f] hover:from-[#e0903f] hover:to-[#d0802f] text-white font-semibold px-4 py-2 rounded-lg transition-all duration-200 flex items-center gap-2"
+            >
+              <span className="text-lg">📚</span>
+              {showMissionLibrary ? 'Sluit Bibliotheek' : 'Missie Bibliotheek'}
+            </button>
+          </div>
+          
           <form onSubmit={addMission} className="flex flex-col sm:flex-row gap-4">
             <input
               type="text"
@@ -541,6 +987,121 @@ export default function MijnMissiesPage() {
             </button>
           </form>
         </div>
+
+        {/* Mission Library */}
+        {showMissionLibrary && (
+          <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-6 mb-8">
+            <h2 className="text-xl font-bold text-white mb-4">📚 Missie Bibliotheek</h2>
+            <p className="text-gray-400 mb-6">Kies uit voorgestelde missies van verschillende categorieën</p>
+            
+            {/* Filters */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-[#8BAE5A] mb-2">Zoeken</label>
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Zoek missies..."
+                  className="w-full bg-[#0F1419] border border-[#3A4D23]/30 rounded-lg px-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-[#8BAE5A]"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#8BAE5A] mb-2">Categorie</label>
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="w-full bg-[#0F1419] border border-[#3A4D23]/30 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#8BAE5A]"
+                >
+                  <option value="all">Alle Categorieën</option>
+                  {getCategories().map(category => (
+                    <option key={category} value={category}>{category}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#8BAE5A] mb-2">Moeilijkheid</label>
+                <select
+                  value={selectedDifficulty}
+                  onChange={(e) => setSelectedDifficulty(e.target.value)}
+                  className="w-full bg-[#0F1419] border border-[#3A4D23]/30 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#8BAE5A]"
+                >
+                  <option value="all">Alle Niveaus</option>
+                  <option value="easy">Makkelijk</option>
+                  <option value="medium">Gemiddeld</option>
+                  <option value="hard">Moeilijk</option>
+                </select>
+              </div>
+              <div className="flex items-end">
+                <button
+                  onClick={() => {
+                    setSearchTerm('');
+                    setSelectedCategory('all');
+                    setSelectedDifficulty('all');
+                  }}
+                  className="w-full bg-[#3A4D23] text-[#8BAE5A] px-4 py-2 rounded-lg hover:bg-[#4A5D33] transition-colors duration-200"
+                >
+                  Reset Filters
+                </button>
+              </div>
+            </div>
+
+            {/* Mission Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {getFilteredSuggestedMissions().map((mission) => (
+                <div
+                  key={mission.id}
+                  className="bg-[#0F1419] border border-[#3A4D23]/30 rounded-xl p-4 hover:border-[#8BAE5A]/50 transition-all duration-200"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <span className="text-2xl">{mission.icon}</span>
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs text-[#FFD700] font-semibold">+{mission.xp_reward} XP</span>
+                      <span className={`text-xs px-2 py-1 rounded-full ${
+                        mission.difficulty === 'easy' ? 'bg-green-600/20 text-green-400' :
+                        mission.difficulty === 'medium' ? 'bg-yellow-600/20 text-yellow-400' :
+                        'bg-red-600/20 text-red-400'
+                      }`}>
+                        {mission.difficulty === 'easy' ? 'Makkelijk' :
+                         mission.difficulty === 'medium' ? 'Gemiddeld' : 'Moeilijk'}
+                      </span>
+                    </div>
+                  </div>
+                  <h3 className="text-lg font-semibold text-white mb-2">{mission.title}</h3>
+                  <p className="text-sm text-gray-400 mb-3">{mission.description}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-[#8BAE5A] bg-[#8BAE5A]/10 px-2 py-1 rounded-full">
+                      {mission.category}
+                    </span>
+                    <button
+                      onClick={() => addSuggestedMission(mission)}
+                      className="bg-gradient-to-r from-[#8BAE5A] to-[#6B8E3A] hover:from-[#7A9D4A] hover:to-[#5A7D2A] text-white font-semibold px-3 py-1 rounded-lg transition-all duration-200 text-sm"
+                    >
+                      Toevoegen
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {getFilteredSuggestedMissions().length === 0 && (
+              <div className="text-center py-8">
+                <span className="text-4xl mb-4 block">🔍</span>
+                <p className="text-gray-400">Geen missies gevonden met de huidige filters</p>
+                <button
+                  onClick={() => {
+                    setSearchTerm('');
+                    setSelectedCategory('all');
+                    setSelectedDifficulty('all');
+                  }}
+                  className="mt-4 bg-[#3A4D23] text-[#8BAE5A] px-4 py-2 rounded-lg hover:bg-[#4A5D33] transition-colors duration-200"
+                >
+                  Reset Filters
+                </button>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* TO DO Missions */}
         {pendingMissions.length > 0 && (
@@ -567,6 +1128,11 @@ export default function MijnMissiesPage() {
                         {mission.accountabilityPartner && (
                           <p className="text-sm text-gray-400 mt-1">
                             Accountability Partner: {mission.accountabilityPartner}
+                          </p>
+                        )}
+                        {mission.created_at && (
+                          <p className="text-sm text-gray-400 mt-1">
+                            Toegevoegd op: {new Date(mission.created_at).toLocaleDateString('nl-NL')}
                           </p>
                         )}
                       </div>
@@ -624,6 +1190,11 @@ export default function MijnMissiesPage() {
                             Voltooid op: {new Date(mission.last_completion_date).toLocaleDateString('nl-NL')}
                           </p>
                         )}
+                        {mission.created_at && (
+                          <p className="text-sm text-gray-400 mt-1">
+                            Toegevoegd op: {new Date(mission.created_at).toLocaleDateString('nl-NL')}
+                          </p>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center space-x-4">
@@ -663,8 +1234,18 @@ export default function MijnMissiesPage() {
 
         {/* Delete Confirmation Modal */}
         {showDeleteConfirm && missionToDelete && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border-2 border-red-600 rounded-2xl p-8 max-w-md w-full shadow-2xl">
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center p-4"
+            style={{ backdropFilter: 'blur(4px)' }}
+            onClick={() => {
+              setShowDeleteConfirm(false);
+              setMissionToDelete(null);
+            }}
+          >
+            <div 
+              className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border-2 border-red-600 rounded-2xl p-8 max-w-md w-full shadow-2xl relative z-[10000] max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="text-center">
                 <div className="text-4xl mb-4">⚔️</div>
                 <h2 className="text-2xl font-bold text-white mb-4">

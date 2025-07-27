@@ -20,13 +20,17 @@ import {
   CheckCircleIcon,
   ClockIcon,
   UserGroupIcon,
-  BoltIcon
+  BoltIcon,
+  ArrowPathIcon
 } from '@heroicons/react/24/outline';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'react-toastify';
 import SchemaBuilder from './SchemaBuilder';
 import ExerciseModal from './ExerciseModal';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import AdminCard from '@/components/admin/AdminCard';
+import AdminStatsCard from '@/components/admin/AdminStatsCard';
+import AdminButton from '@/components/admin/AdminButton';
 
 // Mock data - in real app this would come from API
 const mockSchemas = [
@@ -116,318 +120,6 @@ const mockExercises = [
     videoUrl: '/video-placeholder.jpg',
     instructions: 'Sta tussen de kabels, trek beide kabels naar elkaar toe in een vloeiende beweging.',
     difficulty: 'Intermediate'
-  },
-
-  // RUG - 5 meest populaire oefeningen
-  {
-    id: 6,
-    name: 'Pull-up',
-    primaryMuscle: 'Rug',
-    secondaryMuscles: ['Biceps', 'Onderarmen'],
-    equipment: 'Bodyweight',
-    videoUrl: '/video-placeholder.jpg',
-    instructions: 'Hang aan de pull-up bar, trek jezelf omhoog tot je kin over de stang is.',
-    difficulty: 'Advanced'
-  },
-  {
-    id: 7,
-    name: 'Deadlift',
-    primaryMuscle: 'Rug',
-    secondaryMuscles: ['Benen', 'Glutes', 'Core'],
-    equipment: 'Barbell',
-    videoUrl: '/video-placeholder.jpg',
-    instructions: 'Pak de stang op, houd je rug recht en til de stang op door je heupen te strekken.',
-    difficulty: 'Advanced'
-  },
-  {
-    id: 8,
-    name: 'Barbell Row',
-    primaryMuscle: 'Rug',
-    secondaryMuscles: ['Biceps', 'Onderarmen'],
-    equipment: 'Barbell',
-    videoUrl: '/video-placeholder.jpg',
-    instructions: 'Buig voorover, trek de stang naar je onderbuik terwijl je je ellebogen dicht bij je lichaam houdt.',
-    difficulty: 'Intermediate'
-  },
-  {
-    id: 9,
-    name: 'Lat Pulldown',
-    primaryMuscle: 'Rug',
-    secondaryMuscles: ['Biceps', 'Onderarmen'],
-    equipment: 'Machine',
-    videoUrl: '/video-placeholder.jpg',
-    instructions: 'Trek de stang naar je borst terwijl je je schouderbladen naar elkaar toe trekt.',
-    difficulty: 'Beginner'
-  },
-  {
-    id: 10,
-    name: 'Seated Cable Row',
-    primaryMuscle: 'Rug',
-    secondaryMuscles: ['Biceps', 'Onderarmen'],
-    equipment: 'Cable',
-    videoUrl: '/video-placeholder.jpg',
-    instructions: 'Zit rechtop, trek de handgrepen naar je buik terwijl je je rug recht houdt.',
-    difficulty: 'Beginner'
-  },
-
-  // BENEN - 5 meest populaire oefeningen
-  {
-    id: 11,
-    name: 'Squat',
-    primaryMuscle: 'Benen',
-    secondaryMuscles: ['Glutes', 'Core'],
-    equipment: 'Barbell',
-    videoUrl: '/video-placeholder.jpg',
-    instructions: 'Plaats de stang op je schouders, zak door je knieën tot je dijen parallel zijn aan de grond.',
-    difficulty: 'Beginner'
-  },
-  {
-    id: 12,
-    name: 'Deadlift',
-    primaryMuscle: 'Benen',
-    secondaryMuscles: ['Rug', 'Glutes', 'Core'],
-    equipment: 'Barbell',
-    videoUrl: '/video-placeholder.jpg',
-    instructions: 'Pak de stang op, houd je rug recht en til de stang op door je heupen te strekken.',
-    difficulty: 'Advanced'
-  },
-  {
-    id: 13,
-    name: 'Leg Press',
-    primaryMuscle: 'Benen',
-    secondaryMuscles: ['Glutes'],
-    equipment: 'Machine',
-    videoUrl: '/video-placeholder.jpg',
-    instructions: 'Zit in de machine, duw het platform weg met je voeten en laat gecontroleerd zakken.',
-    difficulty: 'Beginner'
-  },
-  {
-    id: 14,
-    name: 'Lunges',
-    primaryMuscle: 'Benen',
-    secondaryMuscles: ['Glutes', 'Core'],
-    equipment: 'Dumbbell',
-    videoUrl: '/video-placeholder.jpg',
-    instructions: 'Stap naar voren, zak door beide knieën en duw jezelf terug naar de startpositie.',
-    difficulty: 'Beginner'
-  },
-  {
-    id: 15,
-    name: 'Romanian Deadlift',
-    primaryMuscle: 'Benen',
-    secondaryMuscles: ['Rug', 'Glutes'],
-    equipment: 'Barbell',
-    videoUrl: '/video-placeholder.jpg',
-    instructions: 'Houd je benen recht, buig voorover en laat de stang langs je benen zakken.',
-    difficulty: 'Intermediate'
-  },
-
-  // SCHOUDERS - 5 meest populaire oefeningen
-  {
-    id: 16,
-    name: 'Overhead Press',
-    primaryMuscle: 'Schouders',
-    secondaryMuscles: ['Triceps', 'Core'],
-    equipment: 'Barbell',
-    videoUrl: '/video-placeholder.jpg',
-    instructions: 'Duw de stang van schouderhoogte omhoog tot je armen volledig gestrekt zijn.',
-    difficulty: 'Intermediate'
-  },
-  {
-    id: 17,
-    name: 'Dumbbell Shoulder Press',
-    primaryMuscle: 'Schouders',
-    secondaryMuscles: ['Triceps'],
-    equipment: 'Dumbbell',
-    videoUrl: '/video-placeholder.jpg',
-    instructions: 'Duw beide dumbbells gelijktijdig omhoog vanaf schouderhoogte.',
-    difficulty: 'Beginner'
-  },
-  {
-    id: 18,
-    name: 'Lateral Raises',
-    primaryMuscle: 'Schouders',
-    secondaryMuscles: ['Trapezius'],
-    equipment: 'Dumbbell',
-    videoUrl: '/video-placeholder.jpg',
-    instructions: 'Hef beide dumbbells zijwaarts omhoog tot schouderhoogte.',
-    difficulty: 'Beginner'
-  },
-  {
-    id: 19,
-    name: 'Front Raises',
-    primaryMuscle: 'Schouders',
-    secondaryMuscles: ['Voorste Deltavleugel'],
-    equipment: 'Dumbbell',
-    videoUrl: '/video-placeholder.jpg',
-    instructions: 'Hef beide dumbbells voorwaarts omhoog tot schouderhoogte.',
-    difficulty: 'Beginner'
-  },
-  {
-    id: 20,
-    name: 'Upright Rows',
-    primaryMuscle: 'Schouders',
-    secondaryMuscles: ['Trapezius', 'Biceps'],
-    equipment: 'Barbell',
-    videoUrl: '/video-placeholder.jpg',
-    instructions: 'Trek de stang omhoog langs je lichaam tot onder je kin.',
-    difficulty: 'Intermediate'
-  },
-
-  // ARMEN - 5 meest populaire oefeningen
-  {
-    id: 21,
-    name: 'Bicep Curl',
-    primaryMuscle: 'Armen',
-    secondaryMuscles: ['Onderarmen'],
-    equipment: 'Dumbbell',
-    videoUrl: '/video-placeholder.jpg',
-    instructions: 'Hef de dumbbells omhoog door je ellebogen te buigen, houd je bovenarmen stil.',
-    difficulty: 'Beginner'
-  },
-  {
-    id: 22,
-    name: 'Tricep Dip',
-    primaryMuscle: 'Armen',
-    secondaryMuscles: ['Borst', 'Schouders'],
-    equipment: 'Bodyweight',
-    videoUrl: '/video-placeholder.jpg',
-    instructions: 'Laat je lichaam zakken door je ellebogen te buigen en duw jezelf omhoog.',
-    difficulty: 'Intermediate'
-  },
-  {
-    id: 23,
-    name: 'Hammer Curl',
-    primaryMuscle: 'Armen',
-    secondaryMuscles: ['Onderarmen'],
-    equipment: 'Dumbbell',
-    videoUrl: '/video-placeholder.jpg',
-    instructions: 'Hef de dumbbells omhoog met je handpalmen naar elkaar toe gericht.',
-    difficulty: 'Beginner'
-  },
-  {
-    id: 24,
-    name: 'Tricep Pushdown',
-    primaryMuscle: 'Armen',
-    secondaryMuscles: [],
-    equipment: 'Cable',
-    videoUrl: '/video-placeholder.jpg',
-    instructions: 'Duw de kabel naar beneden door je ellebogen te strekken.',
-    difficulty: 'Beginner'
-  },
-  {
-    id: 25,
-    name: 'Preacher Curl',
-    primaryMuscle: 'Armen',
-    secondaryMuscles: ['Onderarmen'],
-    equipment: 'Barbell',
-    videoUrl: '/video-placeholder.jpg',
-    instructions: 'Voer bicep curls uit met je armen ondersteund op de preacher bank.',
-    difficulty: 'Intermediate'
-  },
-
-  // CORE - 5 meest populaire oefeningen
-  {
-    id: 26,
-    name: 'Plank',
-    primaryMuscle: 'Core',
-    secondaryMuscles: ['Schouders', 'Glutes'],
-    equipment: 'Bodyweight',
-    videoUrl: '/video-placeholder.jpg',
-    instructions: 'Houd je lichaam in een rechte lijn, ondersteund door je onderarmen en tenen.',
-    difficulty: 'Beginner'
-  },
-  {
-    id: 27,
-    name: 'Crunches',
-    primaryMuscle: 'Core',
-    secondaryMuscles: [],
-    equipment: 'Bodyweight',
-    videoUrl: '/video-placeholder.jpg',
-    instructions: 'Krul je bovenlichaam omhoog terwijl je je voeten op de grond houdt.',
-    difficulty: 'Beginner'
-  },
-  {
-    id: 28,
-    name: 'Russian Twist',
-    primaryMuscle: 'Core',
-    secondaryMuscles: ['Obliques'],
-    equipment: 'Dumbbell',
-    videoUrl: '/video-placeholder.jpg',
-    instructions: 'Draai je bovenlichaam van links naar rechts terwijl je je voeten van de grond houdt.',
-    difficulty: 'Intermediate'
-  },
-  {
-    id: 29,
-    name: 'Mountain Climbers',
-    primaryMuscle: 'Core',
-    secondaryMuscles: ['Schouders', 'Benen'],
-    equipment: 'Bodyweight',
-    videoUrl: '/video-placeholder.jpg',
-    instructions: 'Wissel snel je knieën af terwijl je in plank positie blijft.',
-    difficulty: 'Intermediate'
-  },
-  {
-    id: 30,
-    name: 'Leg Raises',
-    primaryMuscle: 'Core',
-    secondaryMuscles: ['Heupflexoren'],
-    equipment: 'Bodyweight',
-    videoUrl: '/video-placeholder.jpg',
-    instructions: 'Hef je benen omhoog terwijl je op je rug ligt, houd je onderrug op de grond.',
-    difficulty: 'Intermediate'
-  },
-
-  // GLUTES - 5 meest populaire oefeningen
-  {
-    id: 31,
-    name: 'Hip Thrust',
-    primaryMuscle: 'Glutes',
-    secondaryMuscles: ['Benen', 'Core'],
-    equipment: 'Barbell',
-    videoUrl: '/video-placeholder.jpg',
-    instructions: 'Leun tegen een bank, plaats de stang op je heupen en duw je heupen omhoog.',
-    difficulty: 'Intermediate'
-  },
-  {
-    id: 32,
-    name: 'Glute Bridge',
-    primaryMuscle: 'Glutes',
-    secondaryMuscles: ['Benen', 'Core'],
-    equipment: 'Bodyweight',
-    videoUrl: '/video-placeholder.jpg',
-    instructions: 'Lig op je rug, buig je knieën en duw je heupen omhoog.',
-    difficulty: 'Beginner'
-  },
-  {
-    id: 33,
-    name: 'Donkey Kicks',
-    primaryMuscle: 'Glutes',
-    secondaryMuscles: ['Benen'],
-    equipment: 'Bodyweight',
-    videoUrl: '/video-placeholder.jpg',
-    instructions: 'Op handen en knieën, schop je been omhoog en naar achteren.',
-    difficulty: 'Beginner'
-  },
-  {
-    id: 34,
-    name: 'Bulgarian Split Squat',
-    primaryMuscle: 'Glutes',
-    secondaryMuscles: ['Benen', 'Core'],
-    equipment: 'Dumbbell',
-    videoUrl: '/video-placeholder.jpg',
-    instructions: 'Plaats je achterste voet op een verhoging en voer squats uit met je voorste been.',
-    difficulty: 'Advanced'
-  },
-  {
-    id: 35,
-    name: 'Cable Kickback',
-    primaryMuscle: 'Glutes',
-    secondaryMuscles: ['Benen'],
-    equipment: 'Cable',
-    videoUrl: '/video-placeholder.jpg',
-    instructions: 'Schop je been naar achteren terwijl je voorover buigt en de kabel vasthoudt.',
-    difficulty: 'Beginner'
   }
 ];
 
@@ -803,6 +495,34 @@ export default function TrainingscentrumBeheer() {
         </div>
       </div>
 
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <AdminStatsCard
+          icon={<CalendarIcon className="w-6 h-6" />}
+          value={schemas.length}
+          title="Trainingsschema's"
+          color="blue"
+        />
+        <AdminStatsCard
+          icon={<PlayIcon className="w-6 h-6" />}
+          value={exercises.length}
+          title="Oefeningen"
+          color="green"
+        />
+        <AdminStatsCard
+          icon={<FireIcon className="w-6 h-6" />}
+          value={mockChallenges.length}
+          title="Challenges"
+          color="orange"
+        />
+        <AdminStatsCard
+          icon={<UserGroupIcon className="w-6 h-6" />}
+          value="2,139"
+          title="Actieve Gebruikers"
+          color="purple"
+        />
+      </div>
+
       {/* Tabs */}
       <div className="bg-[#232D1A] rounded-2xl p-2 border border-[#3A4D23]">
         <div className="flex space-x-2">
@@ -891,16 +611,16 @@ export default function TrainingscentrumBeheer() {
                 ))}
               </select>
             </div>
-            <button
+            <AdminButton
               onClick={() => { 
                 console.log('Open SchemaBuilder modal');
                 setShowNewSchemaModal(true);
               }}
-              className="px-6 py-3 rounded-xl bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#B6C948] transition-all duration-200 flex items-center gap-2"
+              variant="primary"
             >
-              <PlusIcon className="w-5 h-5" />
+              <PlusIcon className="w-5 h-5 mr-2" />
               Nieuw Trainingsschema
-            </button>
+            </AdminButton>
           </div>
 
           {/* Schemas Table */}
@@ -909,39 +629,44 @@ export default function TrainingscentrumBeheer() {
               <LoadingSpinner size="lg" text="Trainingsschema's laden..." />
             </div>
           ) : errorSchemas ? (
-            <div className="text-center py-12">
-              <ExclamationTriangleIcon className="w-12 h-12 text-red-400 mx-auto mb-4" />
-              <p className="text-red-400 text-lg mb-2">Fout bij het laden</p>
-              <p className="text-[#B6C948]/70 text-sm mb-4">{errorSchemas}</p>
-              <button
-                onClick={fetchSchemas}
-                className="px-4 py-2 rounded-xl bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#B6C948] transition-all duration-200"
-              >
-                Opnieuw proberen
-              </button>
-            </div>
+            <AdminCard>
+              <div className="text-center">
+                <ExclamationTriangleIcon className="w-12 h-12 text-red-400 mx-auto mb-4" />
+                <p className="text-red-400 text-lg mb-2">Fout bij het laden</p>
+                <p className="text-[#B6C948]/70 text-sm mb-4">{errorSchemas}</p>
+                <AdminButton
+                  onClick={fetchSchemas}
+                  variant="primary"
+                >
+                  <ArrowPathIcon className="w-4 h-4 mr-2" />
+                  Opnieuw proberen
+                </AdminButton>
+              </div>
+            </AdminCard>
           ) : filteredSchemas.length === 0 ? (
-            <div className="text-center py-12">
-              <CalendarIcon className="w-12 h-12 text-[#8BAE5A]/50 mx-auto mb-4" />
-              <p className="text-[#B6C948] text-lg mb-2">Geen trainingsschema's gevonden</p>
-              <p className="text-[#B6C948]/70 text-sm">
-                {searchTerm || filterCategory !== 'Alle Categorieën' 
-                  ? 'Probeer je zoekcriteria aan te passen.' 
-                  : 'Er zijn nog geen trainingsschema\'s toegevoegd.'}
-              </p>
-            </div>
+            <AdminCard>
+              <div className="text-center">
+                <CalendarIcon className="w-12 h-12 text-[#8BAE5A]/50 mx-auto mb-4" />
+                <p className="text-[#B6C948] text-lg mb-2">Geen trainingsschema's gevonden</p>
+                <p className="text-[#B6C948]/70 text-sm">
+                  {searchTerm || filterCategory !== 'Alle Categorieën' 
+                    ? 'Probeer je zoekcriteria aan te passen.' 
+                    : 'Er zijn nog geen trainingsschema\'s toegevoegd.'}
+                </p>
+              </div>
+            </AdminCard>
           ) : (
-            <div className="bg-[#232D1A] rounded-2xl border border-[#3A4D23] overflow-hidden">
+            <AdminCard>
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-[#181F17] border-b border-[#3A4D23]">
+                  <thead className="bg-[#181F17]">
                     <tr>
-                      <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Schema</th>
-                      <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Categorie</th>
-                      <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Dagen</th>
-                      <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Status</th>
-                      <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Gebruikers</th>
-                      <th className="px-6 py-4 text-center text-[#8BAE5A] font-semibold">Acties</th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-[#8BAE5A]">Schema</th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-[#8BAE5A]">Categorie</th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-[#8BAE5A]">Dagen</th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-[#8BAE5A]">Status</th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-[#8BAE5A]">Gebruikers</th>
+                      <th className="px-6 py-4 text-center text-sm font-medium text-[#8BAE5A]">Acties</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#3A4D23]">
@@ -976,27 +701,33 @@ export default function TrainingscentrumBeheer() {
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center justify-center gap-2">
-                            <button className="p-2 rounded-xl hover:bg-[#181F17] transition-colors duration-200">
-                              <EyeIcon className="w-4 h-4 text-[#B6C948]" />
-                            </button>
-                            <button 
+                            <AdminButton variant="secondary" size="sm">
+                              <EyeIcon className="w-4 h-4 mr-2" />
+                              Bekijk
+                            </AdminButton>
+                            <AdminButton 
                               onClick={() => {
                                 setEditingSchema(mapDbSchemaToForm(schema));
                                 setShowNewSchemaModal(true);
                               }}
-                              className="p-2 rounded-xl hover:bg-[#181F17] transition-colors duration-200"
+                              variant="secondary"
+                              size="sm"
                             >
-                              <PencilIcon className="w-4 h-4 text-[#B6C948]" />
-                            </button>
-                            <button className="p-2 rounded-xl hover:bg-[#181F17] transition-colors duration-200">
-                              <DocumentDuplicateIcon className="w-4 h-4 text-[#B6C948]" />
-                            </button>
-                            <button 
+                              <PencilIcon className="w-4 h-4 mr-2" />
+                              Bewerk
+                            </AdminButton>
+                            <AdminButton variant="secondary" size="sm">
+                              <DocumentDuplicateIcon className="w-4 h-4 mr-2" />
+                              Dupliceer
+                            </AdminButton>
+                            <AdminButton 
                               onClick={() => handleDeleteSchema(schema.id)}
-                              className="p-2 rounded-xl hover:bg-[#181F17] transition-colors duration-200"
+                              variant="danger"
+                              size="sm"
                             >
-                              <TrashIcon className="w-4 h-4 text-red-400" />
-                            </button>
+                              <TrashIcon className="w-4 h-4 mr-2" />
+                              Verwijder
+                            </AdminButton>
                           </div>
                         </td>
                       </tr>
@@ -1004,7 +735,7 @@ export default function TrainingscentrumBeheer() {
                   </tbody>
                 </table>
               </div>
-            </div>
+            </AdminCard>
           )}
         </div>
       )}
@@ -1059,27 +790,32 @@ export default function TrainingscentrumBeheer() {
               <LoadingSpinner size="lg" text="Oefeningen laden..." />
             </div>
           ) : errorExercises ? (
-            <div className="text-center py-12">
-              <ExclamationTriangleIcon className="w-12 h-12 text-red-400 mx-auto mb-4" />
-              <p className="text-red-400 text-lg mb-2">Fout bij het laden</p>
-              <p className="text-[#B6C948]/70 text-sm mb-4">{errorExercises}</p>
-              <button
-                onClick={fetchExercises}
-                className="px-4 py-2 rounded-xl bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#B6C948] transition-all duration-200"
-              >
-                Opnieuw proberen
-              </button>
-            </div>
+            <AdminCard>
+              <div className="text-center">
+                <ExclamationTriangleIcon className="w-12 h-12 text-red-400 mx-auto mb-4" />
+                <p className="text-red-400 text-lg mb-2">Fout bij het laden</p>
+                <p className="text-[#B6C948]/70 text-sm mb-4">{errorExercises}</p>
+                <AdminButton
+                  onClick={fetchExercises}
+                  variant="primary"
+                >
+                  <ArrowPathIcon className="w-4 h-4 mr-2" />
+                  Opnieuw proberen
+                </AdminButton>
+              </div>
+            </AdminCard>
           ) : filteredExercises.length === 0 ? (
-            <div className="text-center py-12">
-              <PlayIcon className="w-12 h-12 text-[#8BAE5A]/50 mx-auto mb-4" />
-              <p className="text-[#B6C948] text-lg mb-2">Geen oefeningen gevonden</p>
-              <p className="text-[#B6C948]/70 text-sm">
-                {searchTerm || filterMuscle !== 'Alle Spiergroepen' 
-                  ? 'Probeer je zoekcriteria aan te passen.' 
-                  : 'Er zijn nog geen oefeningen toegevoegd.'}
-              </p>
-            </div>
+            <AdminCard>
+              <div className="text-center">
+                <PlayIcon className="w-12 h-12 text-[#8BAE5A]/50 mx-auto mb-4" />
+                <p className="text-[#B6C948] text-lg mb-2">Geen oefeningen gevonden</p>
+                <p className="text-[#B6C948]/70 text-sm">
+                  {searchTerm || filterMuscle !== 'Alle Spiergroepen' 
+                    ? 'Probeer je zoekcriteria aan te passen.' 
+                    : 'Er zijn nog geen oefeningen toegevoegd.'}
+                </p>
+              </div>
+            </AdminCard>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredExercises.map((exercise) => (
@@ -1444,57 +1180,6 @@ export default function TrainingscentrumBeheer() {
           </div>
         </div>
       )}
-
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23]">
-          <div className="flex items-center gap-4">
-            <div className="p-3 rounded-xl bg-[#8BAE5A]/20">
-              <CalendarIcon className="w-6 h-6 text-[#8BAE5A]" />
-            </div>
-            <div>
-              <h3 className="text-2xl font-bold text-[#8BAE5A]">{mockSchemas.length}</h3>
-              <p className="text-[#B6C948] text-sm">Trainingsschema's</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23]">
-          <div className="flex items-center gap-4">
-            <div className="p-3 rounded-xl bg-[#8BAE5A]/20">
-              <PlayIcon className="w-6 h-6 text-[#8BAE5A]" />
-            </div>
-            <div>
-              <h3 className="text-2xl font-bold text-[#8BAE5A]">{exercises.length}</h3>
-              <p className="text-[#B6C948] text-sm">Oefeningen</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23]">
-          <div className="flex items-center gap-4">
-            <div className="p-3 rounded-xl bg-[#8BAE5A]/20">
-              <FireIcon className="w-6 h-6 text-[#8BAE5A]" />
-            </div>
-            <div>
-              <h3 className="text-2xl font-bold text-[#8BAE5A]">{mockChallenges.length}</h3>
-              <p className="text-[#B6C948] text-sm">Challenges</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23]">
-          <div className="flex items-center gap-4">
-            <div className="p-3 rounded-xl bg-[#8BAE5A]/20">
-              <CogIcon className="w-6 h-6 text-[#8BAE5A]" />
-            </div>
-            <div>
-              <h3 className="text-2xl font-bold text-[#8BAE5A]">2,139</h3>
-              <p className="text-[#B6C948] text-sm">Actieve Gebruikers</p>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* Schema Builder Modal */}
       <SchemaBuilder 

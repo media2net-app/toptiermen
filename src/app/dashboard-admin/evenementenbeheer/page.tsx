@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   PlusIcon,
   CalendarIcon,
@@ -28,33 +28,41 @@ import {
   CalendarDaysIcon,
   UserIcon,
   MagnifyingGlassIcon,
-  FunnelIcon
+  FunnelIcon,
+  ArrowPathIcon
 } from '@heroicons/react/24/outline';
+import AdminCard from '@/components/admin/AdminCard';
+import AdminStatsCard from '@/components/admin/AdminStatsCard';
+import AdminButton from '@/components/admin/AdminButton';
 
 // Types
 interface Event {
   id: string;
-  name: string;
-  type: 'online' | 'physical';
-  date: string;
-  time: string;
-  host: string;
-  location: {
-    type: 'online' | 'physical';
-    url?: string;
-    name?: string;
-    address?: string;
-    city?: string;
-    mapsEmbed?: string;
-  };
+  title: string;
   description: string;
-  agenda: string;
-  headerImage?: string;
-  status: 'draft' | 'published' | 'archived';
-  maxParticipants?: number;
-  visibility: 'public' | 'veteran_plus';
-  currentParticipants: number;
-  createdAt: string;
+  category_id?: string;
+  organizer_id: string;
+  location?: string;
+  start_date: string;
+  end_date: string;
+  max_participants?: number;
+  current_participants: number;
+  status: 'draft' | 'upcoming' | 'ongoing' | 'completed' | 'cancelled';
+  is_featured: boolean;
+  is_public: boolean;
+  registration_deadline?: string;
+  cover_image_url?: string;
+  created_at: string;
+  updated_at: string;
+  event_categories?: {
+    name: string;
+    color: string;
+    icon: string;
+  };
+  organizer?: {
+    full_name: string;
+    email: string;
+  };
 }
 
 interface Participant {
@@ -67,77 +75,16 @@ interface Participant {
   status: 'confirmed' | 'waitlist' | 'cancelled';
 }
 
-// Mock data
-const events: Event[] = [
-  {
-    id: '1',
-    name: 'Online Workshop: Onderhandelen als een Pro',
-    type: 'online',
-    date: '2024-02-15',
-    time: '19:00',
-    host: 'Rick Cuijpers',
-    location: {
-      type: 'online',
-      url: 'https://zoom.us/j/123456789'
-    },
-    description: 'Leer de kunst van effectief onderhandelen in deze interactieve workshop.',
-    agenda: '19:00 - Welkom en introductie\n19:15 - Basis onderhandelingstechnieken\n20:00 - Praktijkoefeningen\n20:45 - Q&A sessie\n21:00 - Afsluiting',
-    status: 'published',
-    maxParticipants: 50,
-    visibility: 'public',
-    currentParticipants: 35,
-    createdAt: '2024-01-15'
-  },
-  {
-    id: '2',
-    name: 'Fysieke Meetup: Amsterdam Brotherhood',
-    type: 'physical',
-    date: '2024-02-20',
-    time: '18:30',
-    host: 'Mike Anderson',
-    location: {
-      type: 'physical',
-      name: 'The Hub Amsterdam',
-      address: 'Herengracht 123',
-      city: 'Amsterdam'
-    },
-    description: 'Een avond vol connecties, inspiratie en groei.',
-    agenda: '18:30 - Inloop en netwerken\n19:00 - Welkom en introductie\n19:30 - Inspiratie sessie\n20:30 - Open discussie\n21:30 - Netwerken en afsluiting',
-    status: 'published',
-    maxParticipants: 25,
-    visibility: 'veteran_plus',
-    currentParticipants: 18,
-    createdAt: '2024-01-10'
-  }
-];
-
-const participants: Participant[] = [
-  {
-    id: '1',
-    name: 'Mark van der Berg',
-    email: 'mark@example.com',
-    rank: 'Veteran',
-    avatar: '/api/placeholder/40/40',
-    registrationDate: '2024-01-16',
-    status: 'confirmed'
-  },
-  {
-    id: '2',
-    name: 'Lucas de Vries',
-    email: 'lucas@example.com',
-    rank: 'Elite',
-    avatar: '/api/placeholder/40/40',
-    registrationDate: '2024-01-17',
-    status: 'confirmed'
-  }
-];
-
 export default function EventManagement() {
   const [activeTab, setActiveTab] = useState<'events' | 'participants'>('events');
   const [showEventModal, setShowEventModal] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<string>('');
   const [showEmailModal, setShowEmailModal] = useState(false);
+  const [events, setEvents] = useState<Event[]>([]);
+  const [participants, setParticipants] = useState<Participant[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState({
     status: 'all',
     type: 'all',
@@ -145,25 +92,19 @@ export default function EventManagement() {
   });
 
   const [eventForm, setEventForm] = useState({
-    name: '',
-    type: 'online' as 'online' | 'physical',
-    date: '',
-    time: '',
-    host: '',
-    location: {
-      type: 'online' as 'online' | 'physical',
-      url: '',
-      name: '',
-      address: '',
-      city: '',
-      mapsEmbed: ''
-    } as Event['location'],
+    title: '',
     description: '',
-    agenda: '',
-    headerImage: '',
-    status: 'draft' as 'draft' | 'published' | 'archived',
-    maxParticipants: '',
-    visibility: 'public' as 'public' | 'veteran_plus'
+    category_id: '',
+    organizer_id: '',
+    location: '',
+    start_date: '',
+    end_date: '',
+    max_participants: '',
+    is_featured: false,
+    is_public: true,
+    registration_deadline: '',
+    cover_image_url: '',
+    status: 'draft' as 'draft' | 'upcoming' | 'ongoing' | 'completed' | 'cancelled'
   });
 
   const [emailData, setEmailData] = useState({
@@ -171,28 +112,59 @@ export default function EventManagement() {
     message: ''
   });
 
+  // Fetch event management data
+  const fetchEventData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      console.log('📊 Fetching events data from database...');
+
+      const response = await fetch('/api/admin/events');
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setEvents(data.events || []);
+        console.log('✅ Events data loaded:', data.events?.length || 0, 'events');
+      } else {
+        throw new Error(data.error || 'Failed to fetch events data');
+      }
+
+      // For now, use empty participants array since we'll implement this later
+      setParticipants([]);
+
+    } catch (error) {
+      console.error('❌ Error loading events data:', error);
+      setError(error instanceof Error ? error.message : 'Failed to load events data');
+      
+      // Fallback to empty arrays
+      setEvents([]);
+      setParticipants([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchEventData();
+  }, []);
+
   const handleCreateEvent = () => {
     setEditingEvent(null);
     setEventForm({
-      name: '',
-      type: 'online',
-      date: '',
-      time: '',
-      host: '',
-      location: {
-        type: 'online',
-        url: '',
-        name: '',
-        address: '',
-        city: '',
-        mapsEmbed: ''
-      },
+      title: '',
       description: '',
-      agenda: '',
-      headerImage: '',
-      status: 'draft',
-      maxParticipants: '',
-      visibility: 'public'
+      category_id: '',
+      organizer_id: '',
+      location: '',
+      start_date: '',
+      end_date: '',
+      max_participants: '',
+      is_featured: false,
+      is_public: true,
+      registration_deadline: '',
+      cover_image_url: '',
+      status: 'draft'
     });
     setShowEventModal(true);
   };
@@ -200,18 +172,19 @@ export default function EventManagement() {
   const handleEditEvent = (event: Event) => {
     setEditingEvent(event);
     setEventForm({
-      name: event.name,
-      type: event.type,
-      date: event.date,
-      time: event.time,
-      host: event.host,
-      location: event.location,
+      title: event.title,
       description: event.description,
-      agenda: event.agenda,
-      headerImage: event.headerImage || '',
-      status: event.status,
-      maxParticipants: event.maxParticipants?.toString() || '',
-      visibility: event.visibility
+      category_id: event.category_id || '',
+      organizer_id: event.organizer_id,
+      location: event.location || '',
+      start_date: event.start_date,
+      end_date: event.end_date,
+      max_participants: event.max_participants?.toString() || '',
+      is_featured: event.is_featured,
+      is_public: event.is_public,
+      registration_deadline: event.registration_deadline || '',
+      cover_image_url: event.cover_image_url || '',
+      status: event.status
     });
     setShowEventModal(true);
   };
@@ -244,24 +217,162 @@ export default function EventManagement() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'published': return 'bg-green-600 text-white';
+      case 'upcoming': return 'bg-green-600 text-white';
+      case 'ongoing': return 'bg-blue-600 text-white';
+      case 'completed': return 'bg-gray-600 text-white';
+      case 'cancelled': return 'bg-red-600 text-white';
       case 'draft': return 'bg-yellow-600 text-white';
-      case 'archived': return 'bg-gray-600 text-white';
       default: return 'bg-gray-600 text-white';
     }
   };
 
-  const getTypeIcon = (type: string) => {
-    return type === 'online' ? <VideoCameraIcon className="w-4 h-4" /> : <MapPinIcon className="w-4 h-4" />;
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'upcoming': return <CalendarIcon className="w-4 h-4" />;
+      case 'ongoing': return <ClockIcon className="w-4 h-4" />;
+      case 'completed': return <CheckCircleIcon className="w-4 h-4" />;
+      case 'cancelled': return <XMarkIcon className="w-4 h-4" />;
+      case 'draft': return <DocumentTextIcon className="w-4 h-4" />;
+      default: return <CalendarIcon className="w-4 h-4" />;
+    }
   };
 
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-[#8BAE5A] mb-2">Evenementenbeheer</h1>
-        <p className="text-[#B6C948]">Evenementenbureau van Top Tier Men - Organiseer en beheer workshops en meetups</p>
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('nl-NL', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const filteredEvents = events.filter(event => {
+    if (filters.status !== 'all' && event.status !== filters.status) return false;
+    if (filters.dateRange.start && new Date(event.start_date) < new Date(filters.dateRange.start)) return false;
+    if (filters.dateRange.end && new Date(event.start_date) > new Date(filters.dateRange.end)) return false;
+    return true;
+  });
+
+  const stats = {
+    totalEvents: events.length,
+    upcomingEvents: events.filter(e => e.status === 'upcoming').length,
+    ongoingEvents: events.filter(e => e.status === 'ongoing').length,
+    totalParticipants: participants.length
+  };
+
+  if (loading) {
+    return (
+      <div className="space-y-8">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-[#8BAE5A] text-xl">Laden...</div>
+        </div>
       </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-8">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-red-500 text-xl">Error: {error}</div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-[#8BAE5A]">Evenementenbeheer</h1>
+          <p className="text-[#B6C948] mt-2">Beheer alle evenementen en deelnemers</p>
+        </div>
+        <div className="flex items-center gap-4">
+          <AdminButton 
+            onClick={fetchEventData} 
+            variant="secondary" 
+            icon={<ArrowPathIcon className="w-4 h-4" />}
+          >
+            Vernieuwen
+          </AdminButton>
+          <AdminButton 
+            onClick={handleCreateEvent} 
+            variant="primary" 
+            icon={<PlusIcon className="w-4 h-4" />}
+          >
+            Nieuw Evenement
+          </AdminButton>
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <AdminStatsCard
+          icon={<CalendarIcon className="w-6 h-6" />}
+          value={stats.totalEvents}
+          title="Totaal Evenementen"
+          color="blue"
+        />
+        <AdminStatsCard
+          icon={<ClockIcon className="w-6 h-6" />}
+          value={stats.upcomingEvents}
+          title="Aankomende Events"
+          color="green"
+        />
+        <AdminStatsCard
+          icon={<CheckCircleIcon className="w-6 h-6" />}
+          value={stats.ongoingEvents}
+          title="Lopende Events"
+          color="orange"
+        />
+        <AdminStatsCard
+          icon={<UsersIcon className="w-6 h-6" />}
+          value={stats.totalParticipants}
+          title="Totaal Deelnemers"
+          color="purple"
+        />
+      </div>
+
+      {/* Filters */}
+      <AdminCard>
+        <div className="flex flex-wrap gap-4 items-center">
+          <div className="flex items-center gap-2">
+            <FunnelIcon className="w-5 h-5 text-[#8BAE5A]" />
+            <span className="text-[#8BAE5A] font-medium">Filters:</span>
+          </div>
+          
+          <select 
+            value={filters.status} 
+            onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
+            className="px-3 py-2 rounded-lg bg-[#232D1A] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+          >
+            <option value="all">Alle Statussen</option>
+            <option value="draft">Concept</option>
+            <option value="upcoming">Aankomend</option>
+            <option value="ongoing">Lopend</option>
+            <option value="completed">Voltooid</option>
+            <option value="cancelled">Geannuleerd</option>
+          </select>
+
+          <input
+            type="date"
+            value={filters.dateRange.start}
+            onChange={(e) => setFilters(prev => ({ ...prev, dateRange: { ...prev.dateRange, start: e.target.value } }))}
+            className="px-3 py-2 rounded-lg bg-[#232D1A] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+            placeholder="Start datum"
+          />
+
+          <input
+            type="date"
+            value={filters.dateRange.end}
+            onChange={(e) => setFilters(prev => ({ ...prev, dateRange: { ...prev.dateRange, end: e.target.value } }))}
+            className="px-3 py-2 rounded-lg bg-[#232D1A] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+            placeholder="Eind datum"
+          />
+        </div>
+      </AdminCard>
 
       {/* Tab Navigation */}
       <div className="flex space-x-1 bg-[#181F17] rounded-lg p-1">
@@ -274,7 +385,7 @@ export default function EventManagement() {
           }`}
         >
           <CalendarIcon className="w-5 h-5" />
-          Evenementen Overzicht
+          Evenementen ({filteredEvents.length})
         </button>
         <button
           onClick={() => setActiveTab('participants')}
@@ -285,195 +396,136 @@ export default function EventManagement() {
           }`}
         >
           <UsersIcon className="w-5 h-5" />
-          Deelnemersbeheer
+          Deelnemers ({participants.length})
         </button>
       </div>
 
-      {/* Tab Content */}
+      {/* Content */}
       {activeTab === 'events' && (
         <div className="space-y-6">
-          {/* Action Button */}
-          <div className="flex justify-between items-center">
-            <button
-              onClick={handleCreateEvent}
-              className="flex items-center gap-2 px-6 py-3 bg-[#8BAE5A] text-black rounded-lg hover:bg-[#B6C948] transition-colors font-semibold"
-            >
-              <PlusIcon className="w-5 h-5" />
-              Nieuw Evenement Aanmaken
-            </button>
-          </div>
-
-          {/* Events Table */}
-          <div className="bg-[#232D1A] rounded-lg overflow-hidden border border-[#3A4D23]">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-[#181F17]">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-[#8BAE5A]">Datum & Tijd</th>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-[#8BAE5A]">Naam Evenement</th>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-[#8BAE5A]">Type</th>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-[#8BAE5A]">Status</th>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-[#8BAE5A]">Aanmeldingen</th>
-                    <th className="px-6 py-4 text-left text-sm font-medium text-[#8BAE5A]">Acties</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#3A4D23]">
-                  {events.map((event) => (
-                    <tr key={event.id} className="hover:bg-[#181F17]/50">
-                      <td className="px-6 py-4">
-                        <div className="text-sm">
-                          <div className="text-white font-medium">{new Date(event.date).toLocaleDateString('nl-NL')}</div>
-                          <div className="text-[#B6C948]">{event.time}</div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div>
-                          <div className="font-medium text-white">{event.name}</div>
-                          <div className="text-sm text-[#B6C948]">Host: {event.host}</div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          {getTypeIcon(event.type)}
-                          <span className="text-[#B6C948]">
-                            {event.type === 'online' ? 'Online Workshop' : 'Fysieke Meetup'}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(event.status)}`}>
-                          {event.status === 'published' ? 'Gepubliceerd' : 
-                           event.status === 'draft' ? 'Concept' : 'Gearchiveerd'}
+          {filteredEvents.length === 0 ? (
+            <AdminCard>
+              <div className="text-center py-12">
+                <CalendarIcon className="w-16 h-16 text-[#3A4D23] mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-[#8BAE5A] mb-2">Geen evenementen gevonden</h3>
+                <p className="text-[#B6C948] mb-6">Er zijn nog geen evenementen aangemaakt of de filters zijn te strikt.</p>
+                <AdminButton 
+                  onClick={handleCreateEvent} 
+                  variant="primary" 
+                  icon={<PlusIcon className="w-4 h-4" />}
+                >
+                  Eerste Evenement Aanmaken
+                </AdminButton>
+              </div>
+            </AdminCard>
+          ) : (
+            filteredEvents.map((event) => (
+              <AdminCard key={event.id}>
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-3">
+                      <h3 className="text-xl font-semibold text-[#8BAE5A]">{event.title}</h3>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${getStatusColor(event.status)}`}>
+                        {getStatusIcon(event.status)}
+                        {event.status}
+                      </span>
+                      {event.is_featured && (
+                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-yellow-600 text-white flex items-center gap-1">
+                          <StarIcon className="w-3 h-3" />
+                          Uitgelicht
                         </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm">
-                          <span className="text-white">{event.currentParticipants}</span>
-                          {event.maxParticipants && (
-                            <span className="text-[#B6C948]"> / {event.maxParticipants}</span>
-                          )}
+                      )}
+                    </div>
+                    
+                    <p className="text-[#B6C948] mb-4">{event.description}</p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div className="flex items-center gap-2 text-sm text-[#8BAE5A]">
+                        <CalendarIcon className="w-4 h-4" />
+                        <span>{formatDate(event.start_date)}</span>
+                      </div>
+                      {event.location && (
+                        <div className="flex items-center gap-2 text-sm text-[#8BAE5A]">
+                          <MapPinIcon className="w-4 h-4" />
+                          <span>{event.location}</span>
                         </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <button 
-                            onClick={() => handleEditEvent(event)}
-                            className="p-1 text-[#8BAE5A] hover:text-white transition-colors"
-                          >
-                            <PencilIcon className="w-4 h-4" />
-                          </button>
-                          <button className="p-1 text-[#8BAE5A] hover:text-white transition-colors">
-                            <EyeIcon className="w-4 h-4" />
-                          </button>
-                          <button className="p-1 text-[#8BAE5A] hover:text-white transition-colors">
-                            <DocumentDuplicateIcon className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                      )}
+                      <div className="flex items-center gap-2 text-sm text-[#8BAE5A]">
+                        <UsersIcon className="w-4 h-4" />
+                        <span>{event.current_participants} / {event.max_participants || '∞'} deelnemers</span>
+                      </div>
+                    </div>
+
+                    {event.organizer && (
+                      <div className="flex items-center gap-2 text-sm text-[#B6C948] mb-4">
+                        <UserIcon className="w-4 h-4" />
+                        <span>Organisator: {event.organizer.full_name}</span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <AdminButton 
+                      onClick={() => handleEditEvent(event)} 
+                      variant="secondary" 
+                      icon={<PencilIcon className="w-4 h-4" />}
+                    >
+                      Bewerken
+                    </AdminButton>
+                    <AdminButton 
+                      onClick={() => setSelectedEvent(event.id)} 
+                      variant="secondary" 
+                      icon={<EyeIcon className="w-4 h-4" />}
+                    >
+                      Bekijken
+                    </AdminButton>
+                  </div>
+                </div>
+              </AdminCard>
+            ))
+          )}
         </div>
       )}
 
       {activeTab === 'participants' && (
         <div className="space-y-6">
-          {/* Event Selection */}
-          <div className="bg-[#232D1A] rounded-lg p-6 border border-[#3A4D23]">
-            <div className="flex items-center gap-4">
-              <label className="text-[#B6C948] font-medium">Selecteer een evenement:</label>
-              <select
-                value={selectedEvent}
-                onChange={(e) => setSelectedEvent(e.target.value)}
-                className="flex-1 bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-              >
-                <option value="">Kies een evenement...</option>
-                {events.map((event) => (
-                  <option key={event.id} value={event.id}>
-                    {event.name} - {new Date(event.date).toLocaleDateString('nl-NL')}
-                  </option>
-                ))}
-              </select>
+          {participants.length === 0 ? (
+            <AdminCard>
+              <div className="text-center py-12">
+                <UsersIcon className="w-16 h-16 text-[#3A4D23] mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-[#8BAE5A] mb-2">Geen deelnemers</h3>
+                <p className="text-[#B6C948]">Er zijn nog geen deelnemers geregistreerd voor evenementen.</p>
+              </div>
+            </AdminCard>
+          ) : (
+            <div className="space-y-4">
+              {participants.map((participant) => (
+                <AdminCard key={participant.id}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <img 
+                        src={participant.avatar} 
+                        alt={participant.name}
+                        className="w-10 h-10 rounded-full"
+                      />
+                      <div>
+                        <h4 className="font-semibold text-[#8BAE5A]">{participant.name}</h4>
+                        <p className="text-sm text-[#B6C948]">{participant.email}</p>
+                        <p className="text-xs text-[#8BAE5A]">{participant.rank}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <span className="text-sm text-[#B6C948]">
+                        {new Date(participant.registrationDate).toLocaleDateString('nl-NL')}
+                      </span>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(participant.status)}`}>
+                        {participant.status}
+                      </span>
+                    </div>
+                  </div>
+                </AdminCard>
+              ))}
             </div>
-          </div>
-
-          {selectedEvent && (
-            <>
-              {/* Bulk Actions */}
-              <div className="flex gap-4">
-                <button
-                  onClick={() => setShowEmailModal(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  <EnvelopeIcon className="w-4 h-4" />
-                  E-mail alle deelnemers
-                </button>
-                <button
-                  onClick={handleExportParticipants}
-                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                >
-                  <ArrowDownTrayIcon className="w-4 h-4" />
-                  Exporteer Lijst (CSV)
-                </button>
-              </div>
-
-              {/* Participants Table */}
-              <div className="bg-[#232D1A] rounded-lg overflow-hidden border border-[#3A4D23]">
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-[#181F17]">
-                      <tr>
-                        <th className="px-6 py-4 text-left text-sm font-medium text-[#8BAE5A]">Deelnemer</th>
-                        <th className="px-6 py-4 text-left text-sm font-medium text-[#8BAE5A]">Rang</th>
-                        <th className="px-6 py-4 text-left text-sm font-medium text-[#8BAE5A]">E-mailadres</th>
-                        <th className="px-6 py-4 text-left text-sm font-medium text-[#8BAE5A]">Aanmelddatum</th>
-                        <th className="px-6 py-4 text-left text-sm font-medium text-[#8BAE5A]">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[#3A4D23]">
-                      {participants.map((participant) => (
-                        <tr key={participant.id} className="hover:bg-[#181F17]/50">
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-3">
-                              <img 
-                                src={participant.avatar} 
-                                alt={participant.name}
-                                className="w-10 h-10 rounded-full"
-                              />
-                              <span className="font-medium text-white">{participant.name}</span>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4">
-                            <span className="text-[#B6C948]">{participant.rank}</span>
-                          </td>
-                          <td className="px-6 py-4">
-                            <span className="text-[#B6C948]">{participant.email}</span>
-                          </td>
-                          <td className="px-6 py-4">
-                            <span className="text-[#B6C948]">
-                              {new Date(participant.registrationDate).toLocaleDateString('nl-NL')}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4">
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              participant.status === 'confirmed' ? 'bg-green-600 text-white' :
-                              participant.status === 'waitlist' ? 'bg-yellow-600 text-white' :
-                              'bg-red-600 text-white'
-                            }`}>
-                              {participant.status === 'confirmed' ? 'Bevestigd' :
-                               participant.status === 'waitlist' ? 'Wachtlijst' : 'Geannuleerd'}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </>
           )}
         </div>
       )}
@@ -481,231 +533,133 @@ export default function EventManagement() {
       {/* Event Modal */}
       {showEventModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-[#232D1A] rounded-2xl p-8 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-[#232D1A] rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-[#8BAE5A]">
-                {editingEvent ? 'Bewerk Evenement' : 'Nieuw Evenement'}
+                {editingEvent ? 'Evenement Bewerken' : 'Nieuw Evenement'}
               </h2>
-              <button
+              <button 
                 onClick={() => setShowEventModal(false)}
-                className="text-[#B6C948] hover:text-white transition-colors"
+                className="text-[#8BAE5A] hover:text-[#B6C948]"
               >
                 <XMarkIcon className="w-6 h-6" />
               </button>
             </div>
-
-            <div className="space-y-6">
-              {/* Section 1: Core Information */}
+            
+            <div className="space-y-4">
               <div>
-                <h3 className="text-[#8BAE5A] font-semibold mb-4">Kerninformatie</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-[#B6C948] text-sm mb-1">Naam Evenement</label>
-                    <input
-                      type="text"
-                      value={eventForm.name}
-                      onChange={(e) => setEventForm(prev => ({ ...prev, name: e.target.value }))}
-                      className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                      placeholder="Bijv. Online Workshop: Onderhandelen als een Pro"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[#B6C948] text-sm mb-1">Type Evenement</label>
-                    <select
-                      value={eventForm.type}
-                      onChange={(e) => setEventForm(prev => ({ 
-                        ...prev, 
-                        type: e.target.value as 'online' | 'physical',
-                        location: { ...prev.location, type: e.target.value as 'online' | 'physical' }
-                      }))}
-                      className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                    >
-                      <option value="online">Online</option>
-                      <option value="physical">Fysiek</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-[#B6C948] text-sm mb-1">Datum</label>
-                    <input
-                      type="date"
-                      value={eventForm.date}
-                      onChange={(e) => setEventForm(prev => ({ ...prev, date: e.target.value }))}
-                      className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[#B6C948] text-sm mb-1">Tijd</label>
-                    <input
-                      type="time"
-                      value={eventForm.time}
-                      onChange={(e) => setEventForm(prev => ({ ...prev, time: e.target.value }))}
-                      className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                    />
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-[#B6C948] text-sm mb-1">Host / Spreker</label>
-                    <input
-                      type="text"
-                      value={eventForm.host}
-                      onChange={(e) => setEventForm(prev => ({ ...prev, host: e.target.value }))}
-                      className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                      placeholder="Naam van de host of spreker"
-                    />
-                  </div>
+                <label className="block text-[#8BAE5A] font-medium mb-2">Titel</label>
+                <input
+                  type="text"
+                  value={eventForm.title}
+                  onChange={(e) => setEventForm(prev => ({ ...prev, title: e.target.value }))}
+                  className="w-full px-3 py-2 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-[#8BAE5A] font-medium mb-2">Beschrijving</label>
+                <textarea
+                  value={eventForm.description}
+                  onChange={(e) => setEventForm(prev => ({ ...prev, description: e.target.value }))}
+                  rows={4}
+                  className="w-full px-3 py-2 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[#8BAE5A] font-medium mb-2">Start Datum</label>
+                  <input
+                    type="datetime-local"
+                    value={eventForm.start_date}
+                    onChange={(e) => setEventForm(prev => ({ ...prev, start_date: e.target.value }))}
+                    className="w-full px-3 py-2 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[#8BAE5A] font-medium mb-2">Eind Datum</label>
+                  <input
+                    type="datetime-local"
+                    value={eventForm.end_date}
+                    onChange={(e) => setEventForm(prev => ({ ...prev, end_date: e.target.value }))}
+                    className="w-full px-3 py-2 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                  />
                 </div>
               </div>
-
-              {/* Section 2: Location */}
+              
               <div>
-                <h3 className="text-[#8BAE5A] font-semibold mb-4">Locatie</h3>
-                {eventForm.type === 'online' ? (
-                  <div>
-                    <label className="block text-[#B6C948] text-sm mb-1">Online URL</label>
-                    <input
-                      type="url"
-                      value={eventForm.location.url}
-                      onChange={(e) => setEventForm(prev => ({ 
-                        ...prev, 
-                        location: { ...prev.location, url: e.target.value }
-                      }))}
-                      className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                      placeholder="https://zoom.us/j/..."
-                    />
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-[#B6C948] text-sm mb-1">Locatienaam</label>
-                      <input
-                        type="text"
-                        value={eventForm.location.name}
-                        onChange={(e) => setEventForm(prev => ({ 
-                          ...prev, 
-                          location: { ...prev.location, name: e.target.value }
-                        }))}
-                        className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                        placeholder="Bijv. The Hub Amsterdam"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[#B6C948] text-sm mb-1">Stad</label>
-                      <input
-                        type="text"
-                        value={eventForm.location.city}
-                        onChange={(e) => setEventForm(prev => ({ 
-                          ...prev, 
-                          location: { ...prev.location, city: e.target.value }
-                        }))}
-                        className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                        placeholder="Amsterdam"
-                      />
-                    </div>
-                    <div className="md:col-span-2">
-                      <label className="block text-[#B6C948] text-sm mb-1">Adres</label>
-                      <input
-                        type="text"
-                        value={eventForm.location.address}
-                        onChange={(e) => setEventForm(prev => ({ 
-                          ...prev, 
-                          location: { ...prev.location, address: e.target.value }
-                        }))}
-                        className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                        placeholder="Herengracht 123"
-                      />
-                    </div>
-                  </div>
-                )}
+                <label className="block text-[#8BAE5A] font-medium mb-2">Locatie</label>
+                <input
+                  type="text"
+                  value={eventForm.location}
+                  onChange={(e) => setEventForm(prev => ({ ...prev, location: e.target.value }))}
+                  className="w-full px-3 py-2 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                  placeholder="Online URL of fysieke locatie"
+                />
               </div>
-
-              {/* Section 3: Content & Media */}
-              <div>
-                <h3 className="text-[#8BAE5A] font-semibold mb-4">Content & Media</h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-[#B6C948] text-sm mb-1">Header Afbeelding</label>
-                    <button className="flex items-center gap-2 px-4 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-[#B6C948] hover:bg-[#232D1A] transition-colors">
-                      <PhotoIcon className="w-4 h-4" />
-                      Upload Afbeelding
-                    </button>
-                  </div>
-                  <div>
-                    <label className="block text-[#B6C948] text-sm mb-1">Volledige Omschrijving</label>
-                    <textarea
-                      value={eventForm.description}
-                      onChange={(e) => setEventForm(prev => ({ ...prev, description: e.target.value }))}
-                      className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] h-32 resize-none"
-                      placeholder="Beschrijf het evenement in detail..."
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[#B6C948] text-sm mb-1">Agenda / Programma</label>
-                    <textarea
-                      value={eventForm.agenda}
-                      onChange={(e) => setEventForm(prev => ({ ...prev, agenda: e.target.value }))}
-                      className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] h-32 resize-none"
-                      placeholder="19:00 - Welkom en introductie&#10;19:15 - Hoofdprogramma&#10;20:30 - Q&A sessie&#10;21:00 - Afsluiting"
-                    />
-                  </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[#8BAE5A] font-medium mb-2">Max Deelnemers</label>
+                  <input
+                    type="number"
+                    value={eventForm.max_participants}
+                    onChange={(e) => setEventForm(prev => ({ ...prev, max_participants: e.target.value }))}
+                    className="w-full px-3 py-2 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[#8BAE5A] font-medium mb-2">Status</label>
+                  <select
+                    value={eventForm.status}
+                    onChange={(e) => setEventForm(prev => ({ ...prev, status: e.target.value as any }))}
+                    className="w-full px-3 py-2 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                  >
+                    <option value="draft">Concept</option>
+                    <option value="upcoming">Aankomend</option>
+                    <option value="ongoing">Lopend</option>
+                    <option value="completed">Voltooid</option>
+                    <option value="cancelled">Geannuleerd</option>
+                  </select>
                 </div>
               </div>
-
-              {/* Section 4: Settings & Rules */}
-              <div>
-                <h3 className="text-[#8BAE5A] font-semibold mb-4">Instellingen & Regels</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-[#B6C948] text-sm mb-1">Publicatiestatus</label>
-                    <select
-                      value={eventForm.status}
-                      onChange={(e) => setEventForm(prev => ({ ...prev, status: e.target.value as 'draft' | 'published' | 'archived' }))}
-                      className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                    >
-                      <option value="draft">Concept</option>
-                      <option value="published">Gepubliceerd</option>
-                      <option value="archived">Gearchiveerd</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-[#B6C948] text-sm mb-1">Maximum Deelnemers</label>
-                    <input
-                      type="number"
-                      value={eventForm.maxParticipants}
-                      onChange={(e) => setEventForm(prev => ({ ...prev, maxParticipants: e.target.value }))}
-                      className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                      placeholder="50"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[#B6C948] text-sm mb-1">Zichtbaarheid</label>
-                    <select
-                      value={eventForm.visibility}
-                      onChange={(e) => setEventForm(prev => ({ ...prev, visibility: e.target.value as 'public' | 'veteran_plus' }))}
-                      className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                    >
-                      <option value="public">Zichtbaar voor iedereen</option>
-                      <option value="veteran_plus">Exclusief voor rang Veteran en hoger</option>
-                    </select>
-                  </div>
-                </div>
+              
+              <div className="flex items-center gap-4">
+                <label className="flex items-center gap-2 text-[#8BAE5A]">
+                  <input
+                    type="checkbox"
+                    checked={eventForm.is_featured}
+                    onChange={(e) => setEventForm(prev => ({ ...prev, is_featured: e.target.checked }))}
+                    className="rounded border-[#3A4D23] bg-[#181F17] text-[#8BAE5A] focus:ring-[#8BAE5A]"
+                  />
+                  <span>Uitgelicht evenement</span>
+                </label>
+                <label className="flex items-center gap-2 text-[#8BAE5A]">
+                  <input
+                    type="checkbox"
+                    checked={eventForm.is_public}
+                    onChange={(e) => setEventForm(prev => ({ ...prev, is_public: e.target.checked }))}
+                    className="rounded border-[#3A4D23] bg-[#181F17] text-[#8BAE5A] focus:ring-[#8BAE5A]"
+                  />
+                  <span>Publiek zichtbaar</span>
+                </label>
               </div>
-
-              {/* Action Buttons */}
-              <div className="flex gap-4 pt-6 border-t border-[#3A4D23]">
-                <button
-                  onClick={handleSaveEvent}
-                  className="flex items-center gap-2 px-6 py-3 bg-[#8BAE5A] text-black rounded-lg hover:bg-[#B6C948] transition-colors font-semibold"
-                >
-                  <CheckCircleIcon className="w-5 h-5" />
-                  {editingEvent ? 'Bijwerken' : 'Aanmaken'}
-                </button>
-                <button
-                  onClick={() => setShowEventModal(false)}
-                  className="flex items-center gap-2 px-6 py-3 bg-[#181F17] border border-[#3A4D23] text-[#B6C948] rounded-lg hover:bg-[#232D1A] transition-colors"
-                >
-                  <XMarkIcon className="w-5 h-5" />
-                  Annuleren
-                </button>
-              </div>
+            </div>
+            
+            <div className="flex items-center justify-end gap-4 mt-6">
+              <AdminButton 
+                onClick={() => setShowEventModal(false)} 
+                variant="secondary"
+              >
+                Annuleren
+              </AdminButton>
+              <AdminButton 
+                onClick={handleSaveEvent} 
+                variant="primary"
+              >
+                {editingEvent ? 'Bijwerken' : 'Aanmaken'}
+              </AdminButton>
             </div>
           </div>
         </div>
@@ -714,57 +668,52 @@ export default function EventManagement() {
       {/* Email Modal */}
       {showEmailModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-[#232D1A] rounded-2xl p-8 max-w-2xl w-full mx-4">
+          <div className="bg-[#232D1A] rounded-lg p-6 w-full max-w-md">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-[#8BAE5A]">E-mail alle deelnemers</h2>
-              <button
+              <h2 className="text-2xl font-bold text-[#8BAE5A]">Email Sturen</h2>
+              <button 
                 onClick={() => setShowEmailModal(false)}
-                className="text-[#B6C948] hover:text-white transition-colors"
+                className="text-[#8BAE5A] hover:text-[#B6C948]"
               >
                 <XMarkIcon className="w-6 h-6" />
               </button>
             </div>
-
+            
             <div className="space-y-4">
               <div>
-                <label className="block text-[#B6C948] text-sm mb-1">Onderwerp</label>
+                <label className="block text-[#8BAE5A] font-medium mb-2">Onderwerp</label>
                 <input
                   type="text"
                   value={emailData.subject}
                   onChange={(e) => setEmailData(prev => ({ ...prev, subject: e.target.value }))}
-                  className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                  placeholder="Belangrijke update over het evenement"
+                  className="w-full px-3 py-2 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
                 />
               </div>
+              
               <div>
-                <label className="block text-[#B6C948] text-sm mb-1">Bericht</label>
+                <label className="block text-[#8BAE5A] font-medium mb-2">Bericht</label>
                 <textarea
                   value={emailData.message}
                   onChange={(e) => setEmailData(prev => ({ ...prev, message: e.target.value }))}
-                  className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] h-32 resize-none"
-                  placeholder="Schrijf je bericht hier..."
+                  rows={6}
+                  className="w-full px-3 py-2 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
                 />
               </div>
-              <div className="text-sm text-[#B6C948]">
-                Dit bericht wordt verzonden naar {participants.length} deelnemer(s).
-              </div>
             </div>
-
-            <div className="flex gap-4 pt-6 border-t border-[#3A4D23]">
-              <button
-                onClick={handleSendEmail}
-                className="flex items-center gap-2 px-6 py-3 bg-[#8BAE5A] text-black rounded-lg hover:bg-[#B6C948] transition-colors font-semibold"
+            
+            <div className="flex items-center justify-end gap-4 mt-6">
+              <AdminButton 
+                onClick={() => setShowEmailModal(false)} 
+                variant="secondary"
               >
-                <EnvelopeIcon className="w-5 h-5" />
-                Versturen
-              </button>
-              <button
-                onClick={() => setShowEmailModal(false)}
-                className="flex items-center gap-2 px-6 py-3 bg-[#181F17] border border-[#3A4D23] text-[#B6C948] rounded-lg hover:bg-[#232D1A] transition-colors"
-              >
-                <XMarkIcon className="w-5 h-5" />
                 Annuleren
-              </button>
+              </AdminButton>
+              <AdminButton 
+                onClick={handleSendEmail} 
+                variant="primary"
+              >
+                Versturen
+              </AdminButton>
             </div>
           </div>
         </div>

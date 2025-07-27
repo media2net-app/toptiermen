@@ -18,16 +18,21 @@ import {
   ClockIcon,
   ChatBubbleLeftRightIcon,
   ShieldCheckIcon,
-  DocumentTextIcon
+  DocumentTextIcon,
+  UserGroupIcon,
+  UserPlusIcon,
+  TrophyIcon,
+  InformationCircleIcon,
+  ArrowPathIcon
 } from '@heroicons/react/24/outline';
 import { toast } from 'react-toastify';
 import { useDebug } from '@/contexts/DebugContext';
-
+import { AdminCard, AdminStatsCard, AdminTable, AdminButton } from '@/components/admin';
 import { supabase } from '@/lib/supabase';
 
 const ranks = ['Rookie', 'Warrior', 'Elite', 'Legend'];
 const statuses = ['active', 'inactive', 'suspended'];
-const forumStatuses = ['active', 'muted', 'blocked'];
+
 
 export default function Ledenbeheer() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -46,87 +51,37 @@ export default function Ledenbeheer() {
     bio: '',
     mainGoal: '',
     rank: '',
-    forumStatus: '',
     status: '',
     adminNotes: ''
   });
   const [allMembers, setAllMembers] = useState<any[]>([]);
   const [loadingMembers, setLoadingMembers] = useState(false);
+  const [showAddUserModal, setShowAddUserModal] = useState(false);
+  const [addingUser, setAddingUser] = useState(false);
+  const [newUserData, setNewUserData] = useState({
+    email: '',
+    full_name: '',
+    username: '',
+    rank: 'Rookie',
+    status: 'active',
+    password: '',
+    confirmPassword: ''
+  });
 
-  // Haal leden op uit Supabase
-  useEffect(() => {
-    async function fetchMembers() {
-      setLoadingMembers(true);
-      try {
-        console.log('Fetching members from database...');
-        
-        // Fetch users and profiles separately since there's no foreign key relationship
-        const [usersResult, profilesResult] = await Promise.all([
-          supabase.from('users').select('*').order('created_at', { ascending: false }),
-          supabase.from('profiles').select('*')
-        ]);
-        
-        if (usersResult.error) {
-          console.error('Error fetching users:', usersResult.error);
-          toast.error('Fout bij het laden van leden', {
-            position: "top-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true
-          });
-          return;
-        }
-        
-        if (profilesResult.error) {
-          console.error('Error fetching profiles:', profilesResult.error);
-          // Continue with just users data
-        }
-        
-        const users = usersResult.data || [];
-        const profiles = profilesResult.data || [];
-        
-        console.log('Fetched users:', users.length, 'profiles:', profiles.length);
-        
-        // Create a map of profiles by user ID for quick lookup
-        const profilesMap = new Map();
-        profiles.forEach(profile => {
-          profilesMap.set(profile.id, profile);
-        });
-        
-        // Combine user and profile data
-        const combinedData = users.map(user => {
-          const profile = profilesMap.get(user.id);
-          return {
-            ...user,
-            ...(profile || {}),
-            // Use profile data as primary, fallback to user data
-            full_name: profile?.full_name || user.full_name,
-            rank: profile?.rank || user.rank || 'Rookie',
-            avatar_url: profile?.avatar_url,
-            bio: profile?.bio,
-            main_goal: profile?.main_goal,
-            points: profile?.points || 0,
-            missions_completed: profile?.missions_completed || 0,
-            posts: profile?.posts || 0,
-            badges: profile?.badges || 0
-          };
-        });
-        
-        console.log('Combined member details:', combinedData.map(m => ({
-          id: m.id,
-          email: m.email,
-          full_name: m.full_name,
-          rank: m.rank,
-          status: m.status,
-          created_at: m.created_at,
-          avatar_url: m.avatar_url
-        })));
-        
-        setAllMembers(combinedData);
-      } catch (err) {
-        console.error('Exception fetching members:', err);
+  // Fetch members function
+  const fetchMembers = async () => {
+    setLoadingMembers(true);
+    try {
+      console.log('🔄 Fetching members from database...');
+      
+      // Fetch users and profiles separately since there's no foreign key relationship
+      const [usersResult, profilesResult] = await Promise.all([
+        supabase.from('users').select('*').order('created_at', { ascending: false }),
+        supabase.from('profiles').select('*')
+      ]);
+      
+      if (usersResult.error) {
+        console.error('Error fetching users:', usersResult.error);
         toast.error('Fout bij het laden van leden', {
           position: "top-right",
           autoClose: 3000,
@@ -135,10 +90,87 @@ export default function Ledenbeheer() {
           pauseOnHover: true,
           draggable: true
         });
-      } finally {
-        setLoadingMembers(false);
+        return;
       }
+      
+      if (profilesResult.error) {
+        console.error('Error fetching profiles:', profilesResult.error);
+        // Continue with just users data
+      }
+      
+      const users = usersResult.data || [];
+      const profiles = profilesResult.data || [];
+      
+      console.log('📊 Fetched users:', users.length, 'profiles:', profiles.length);
+      
+      // Create a map of profiles by user ID for quick lookup
+      const profilesMap = new Map();
+      profiles.forEach(profile => {
+        profilesMap.set(profile.id, profile);
+      });
+      
+      // Combine user and profile data
+      const combinedData = users.map(user => {
+        const profile = profilesMap.get(user.id);
+        const combined = {
+          ...user,
+          ...(profile || {}),
+          // Use profile data as primary, fallback to user data
+          full_name: profile?.full_name || user.full_name,
+          username: profile?.display_name || user.username, // Use display_name from profile as username
+          rank: profile?.rank || user.rank || 'Rookie',
+          avatar_url: profile?.avatar_url,
+          bio: profile?.bio,
+          main_goal: profile?.main_goal,
+          points: profile?.points || 0,
+          missions_completed: profile?.missions_completed || 0,
+          posts: profile?.posts || 0,
+          badges: profile?.badges || 0
+        };
+        
+        // Debug log for specific users
+        if (user.email === 'henk@media2net.nl' || user.email === 'jeroen@media2net.nl') {
+          console.log(`🔍 ${user.email} data in fetchMembers:`, {
+            user: { full_name: user.full_name, username: user.username },
+            profile: { full_name: profile?.full_name, display_name: profile?.display_name },
+            combined: { full_name: combined.full_name, username: combined.username }
+          });
+        }
+        
+        return combined;
+      });
+      
+      console.log('Combined member details:', combinedData.map(m => ({
+        id: m.id,
+        email: m.email,
+        full_name: m.full_name,
+        username: m.username,
+        rank: m.rank,
+        status: m.status,
+        created_at: m.created_at,
+        avatar_url: m.avatar_url
+      })));
+      
+      console.log('📊 Setting allMembers with', combinedData.length, 'members');
+      
+      setAllMembers(combinedData);
+    } catch (err) {
+      console.error('Exception fetching members:', err);
+      toast.error('Fout bij het laden van leden', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
+      });
+    } finally {
+      setLoadingMembers(false);
     }
+  };
+
+  // Haal leden op uit Supabase
+  useEffect(() => {
     fetchMembers();
   }, []);
 
@@ -149,6 +181,17 @@ export default function Ledenbeheer() {
     const matchesStatus = selectedStatus === 'Alle Statussen' || member.status === selectedStatus;
     return matchesSearch && matchesRank && matchesStatus;
   });
+
+  // Calculate statistics
+  const totalMembers = allMembers.length;
+  const activeMembers = allMembers.filter(m => m.status === 'active').length;
+  const newMembersThisMonth = allMembers.filter(m => {
+    const createdAt = new Date(m.created_at);
+    const now = new Date();
+    return createdAt.getMonth() === now.getMonth() && createdAt.getFullYear() === now.getFullYear();
+  }).length;
+  const eliteMembers = allMembers.filter(m => m.rank === 'Elite' || m.rank === 'Legend').length;
+  const membersWithBadges = allMembers.filter(m => (m.badges || 0) > 5).length;
 
   // Pagination logic
   const totalPages = Math.ceil(filteredMembers.length / itemsPerPage);
@@ -201,7 +244,6 @@ export default function Ledenbeheer() {
       bio: member.bio || '',
       mainGoal: member.main_goal || '',
       rank: member.rank || '',
-      forumStatus: member.forum_status || '',
       status: member.status || '',
       adminNotes: member.admin_notes || ''
     });
@@ -212,6 +254,7 @@ export default function Ledenbeheer() {
   const handleSave = async () => {
     setIsLoading(true);
     try {
+      console.log('🔄 Saving member updates...', { editingMember, formData });
       // Update users table
       const userUpdates: any = {
         full_name: formData.name,
@@ -226,8 +269,7 @@ export default function Ledenbeheer() {
         display_name: formData.username,
         bio: formData.bio,
         main_goal: formData.mainGoal,
-        rank: formData.rank,
-        forum_status: formData.forumStatus
+        rank: formData.rank
       };
       
       // Update both tables
@@ -236,8 +278,35 @@ export default function Ledenbeheer() {
         supabase.from('profiles').update(profileUpdates).eq('id', editingMember.id)
       ]);
       
-      if (userResult.error) throw userResult.error;
-      if (profileResult.error) throw profileResult.error;
+      if (userResult.error) {
+        console.error('❌ Error updating users table:', userResult.error);
+        throw userResult.error;
+      }
+      if (profileResult.error) {
+        console.error('❌ Error updating profiles table:', profileResult.error);
+        throw profileResult.error;
+      }
+      
+      console.log('✅ Database updates successful:', { userResult, profileResult });
+      
+      // Update the local state immediately
+      setAllMembers(prevMembers => 
+        prevMembers.map(member => 
+          member.id === editingMember.id 
+            ? {
+                ...member,
+                full_name: formData.name,
+                username: formData.username,
+                display_name: formData.username, // Also update display_name for consistency
+                status: formData.status,
+                admin_notes: formData.adminNotes,
+                bio: formData.bio,
+                main_goal: formData.mainGoal,
+                rank: formData.rank
+              }
+            : member
+        )
+      );
       
       toast.success(`Profiel van ${formData.name} succesvol bijgewerkt`, {
         position: "top-right",
@@ -249,41 +318,6 @@ export default function Ledenbeheer() {
       });
       setShowEditModal(false);
       setEditingMember(null);
-      
-      // Refresh members with combined data
-      const [usersResult, profilesResult] = await Promise.all([
-        supabase.from('users').select('*').order('created_at', { ascending: false }),
-        supabase.from('profiles').select('*')
-      ]);
-      
-      if (usersResult.data) {
-        const users = usersResult.data;
-        const profiles = profilesResult.data || [];
-        
-        // Create a map of profiles by user ID for quick lookup
-        const profilesMap = new Map();
-        profiles.forEach(profile => {
-          profilesMap.set(profile.id, profile);
-        });
-        
-        const combinedData = users.map(user => {
-          const profile = profilesMap.get(user.id);
-          return {
-            ...user,
-            ...(profile || {}),
-            full_name: profile?.full_name || user.full_name,
-            rank: profile?.rank || user.rank || 'Rookie',
-            avatar_url: profile?.avatar_url,
-            bio: profile?.bio,
-            main_goal: profile?.main_goal,
-            points: profile?.points || 0,
-            missions_completed: profile?.missions_completed || 0,
-            posts: profile?.posts || 0,
-            badges: profile?.badges || 0
-          };
-        });
-        setAllMembers(combinedData);
-      }
     } catch (error) {
       toast.error('Er is een fout opgetreden bij het opslaan', {
         position: "top-right",
@@ -323,6 +357,166 @@ export default function Ledenbeheer() {
     }
   };
 
+  const handleAddNewUser = async () => {
+    // Validate form data
+    if (!newUserData.email || !newUserData.full_name || !newUserData.password) {
+      toast.error('Vul alle verplichte velden in', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
+      });
+      return;
+    }
+
+    if (newUserData.password !== newUserData.confirmPassword) {
+      toast.error('Wachtwoorden komen niet overeen', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
+      });
+      return;
+    }
+
+    if (newUserData.password.length < 6) {
+      toast.error('Wachtwoord moet minimaal 6 karakters bevatten', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
+      });
+      return;
+    }
+
+    setAddingUser(true);
+    try {
+      // Call the API route to create user
+      const response = await fetch('/api/admin/create-user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: newUserData.email,
+          full_name: newUserData.full_name,
+          username: newUserData.username,
+          rank: newUserData.rank,
+          status: newUserData.status,
+          password: newUserData.password
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success(data.message || `Gebruiker ${newUserData.full_name} succesvol aangemaakt!`, {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true
+        });
+
+        // Reset form and close modal
+        setNewUserData({
+          email: '',
+          full_name: '',
+          username: '',
+          rank: 'Rookie',
+          status: 'active',
+          password: '',
+          confirmPassword: ''
+        });
+        setShowAddUserModal(false);
+
+        // Refresh members list
+        fetchMembers();
+      } else {
+        throw new Error(data.error || 'Er is een fout opgetreden bij het aanmaken van de gebruiker');
+      }
+    } catch (error: any) {
+      console.error('Error creating user:', error);
+      toast.error(error.message || 'Er is een fout opgetreden bij het aanmaken van de gebruiker', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
+      });
+    } finally {
+      setAddingUser(false);
+    }
+  };
+
+  const handleOnboardingReset = async () => {
+    if (!editingMember?.id) return;
+
+    if (!confirm(`⚠️ VOLLEDIGE RESET: Weet je zeker dat je gebruiker ${editingMember.name || editingMember.email} volledig wilt resetten?\n\nDit zal ALLE data wissen:\n• Onboarding voortgang (stap 0)\n• Missies (database + bestanden)\n• Training schemas & voortgang\n• Voedingsplannen & voortgang\n• Challenges & streaks\n• XP punten & achievements\n• Forum posts\n• Voorkeuren\n• Badges & rangen\n• Dagelijkse/weekelijkse voortgang\n• Doelen & gewoontes\n• Workout sessies\n• Gebruikersstatistieken\n\nDe gebruiker start weer vanaf stap 0 en kan de volledige onboarding opnieuw doorlopen.`)) {
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      
+      const response = await fetch('/api/admin/reset-onboarding', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: editingMember.id
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success('✅ Gebruiker volledig gereset! Alle data gewist. Gebruiker kan nu vanaf stap 0 beginnen.', {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true
+        });
+        
+        // Refresh members list
+        fetchMembers();
+        setShowEditModal(false);
+      } else {
+        toast.error(data.error || 'Er is een fout opgetreden bij het resetten', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true
+        });
+      }
+    } catch (error) {
+      console.error('Error resetting onboarding:', error);
+      toast.error('Er is een fout opgetreden bij het resetten', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const getActivityIcon = (type: string) => {
     switch (type) {
       case 'login': return ClockIcon;
@@ -333,6 +527,73 @@ export default function Ledenbeheer() {
       case 'suspension': return ExclamationTriangleIcon;
       default: return ClockIcon;
     }
+  };
+
+  // Prepare table data for AdminTable
+  const tableData = currentMembers.map(member => ({
+    Lid: member.full_name || 'Onbekend',
+    Email: member.email || 'Geen e-mail',
+    Rang: member.rank || 'Rookie',
+    Status: getStatusText(member.status),
+    Punten: member.points || 0,
+    Missies: member.missions_completed || 0,
+    'Lid sinds': new Date(member.created_at).toLocaleDateString('nl-NL'),
+    'Laatste activiteit': member.last_login ? new Date(member.last_login).toLocaleDateString('nl-NL') : 'Niet beschikbaar'
+  }));
+
+  const tableHeaders = ['Lid', 'Email', 'Rang', 'Status', 'Punten', 'Missies', 'Lid sinds', 'Laatste activiteit'];
+
+  const renderActions = (item: any) => {
+    // Find member by email instead of name, since name can change
+    const member = currentMembers.find(m => m.email === item.Email);
+    if (!member) return null;
+
+    return (
+      <div className="flex gap-2">
+        <AdminButton
+          variant="secondary"
+          size="sm"
+          onClick={() => handleEditMember(member)}
+          icon={<EyeIcon className="w-4 h-4" />}
+        >
+          Bekijken
+        </AdminButton>
+        <AdminButton
+          variant="secondary"
+          size="sm"
+          onClick={() => handleEditMember(member)}
+          icon={<PencilIcon className="w-4 h-4" />}
+        >
+          Bewerken
+        </AdminButton>
+        <AdminButton
+          variant="danger"
+          size="sm"
+          onClick={async () => {
+            if (confirm(`⚠️ VOLLEDIGE RESET: Weet je zeker dat je gebruiker ${member.full_name || member.email} volledig wilt resetten?`)) {
+              try {
+                const response = await fetch('/api/admin/reset-onboarding', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ userId: member.id }),
+                });
+                if (response.ok) {
+                  toast.success('✅ Gebruiker volledig gereset!');
+                  fetchMembers();
+                } else {
+                  toast.error('Fout bij resetten');
+                }
+              } catch (error) {
+                toast.error('Fout bij resetten');
+              }
+            }
+          }}
+          icon={<ExclamationTriangleIcon className="w-4 h-4" />}
+        >
+          Reset
+        </AdminButton>
+      </div>
+    );
   };
 
   return (
@@ -350,31 +611,80 @@ export default function Ledenbeheer() {
           {loadingMembers && (
             <span className="text-[#B6C948] text-sm">Laden...</span>
           )}
+          <AdminButton 
+            variant="secondary" 
+            icon={<ArrowPathIcon className="w-5 h-5" />}
+            onClick={fetchMembers}
+            loading={loadingMembers}
+          >
+            Verversen
+          </AdminButton>
+          <AdminButton 
+            variant="primary" 
+            icon={<UserPlusIcon className="w-5 h-5" />}
+            onClick={() => setShowAddUserModal(true)}
+          >
+            Nieuwe Gebruiker Toevoegen
+          </AdminButton>
         </div>
       </div>
 
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <AdminStatsCard
+          title="Totaal aantal leden"
+          value={totalMembers}
+          icon={<UserGroupIcon className="w-8 h-8" />}
+          color="green"
+        />
+        <AdminStatsCard
+          title="Nieuwe leden deze maand"
+          value={newMembersThisMonth}
+          icon={<UserPlusIcon className="w-8 h-8" />}
+          color="blue"
+        />
+        <AdminStatsCard
+          title="Actieve leden"
+          value={activeMembers}
+          icon={<ShieldCheckIcon className="w-8 h-8" />}
+          color="green"
+        />
+        <AdminStatsCard
+          title="Elite leden"
+          value={eliteMembers}
+          icon={<TrophyIcon className="w-8 h-8" />}
+          color="purple"
+        />
+        <AdminStatsCard
+          title="Leden met badges"
+          value={membersWithBadges}
+          icon={<StarIcon className="w-8 h-8" />}
+          color="orange"
+        />
+      </div>
+
       {/* Search and Filters */}
-      <div className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23]">
+      <AdminCard title="Filters & Zoeken" icon={<FunnelIcon className="w-6 h-6" />}>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {/* Search */}
           <div className="relative">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#B6C948]" />
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
               placeholder="Zoek op naam of e-mail..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] placeholder-[#B6C948]"
+              className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#181F17] text-white border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] placeholder-gray-400"
             />
           </div>
 
           {/* Rank Filter */}
           <div className="relative">
-            <FunnelIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#B6C948]" />
+            <FunnelIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
             <select
               value={selectedRank}
               onChange={(e) => setSelectedRank(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] appearance-none"
+              className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#181F17] text-white border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] appearance-none"
             >
               {['Alle Rangen', ...ranks].map(rank => (
                 <option key={rank} value={rank}>{rank}</option>
@@ -384,11 +694,11 @@ export default function Ledenbeheer() {
 
           {/* Status Filter */}
           <div className="relative">
-            <FunnelIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#B6C948]" />
+            <FunnelIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] appearance-none"
+              className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#181F17] text-white border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] appearance-none"
             >
               {['Alle Statussen', ...statuses].map(status => (
                 <option key={status} value={status}>
@@ -399,177 +709,51 @@ export default function Ledenbeheer() {
           </div>
 
           {/* Export Button */}
-          <button className="px-6 py-3 rounded-xl bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#B6C948] transition-all duration-200">
+          <AdminButton variant="primary" icon={<DocumentTextIcon className="w-5 h-5" />}>
             Export CSV
-          </button>
+          </AdminButton>
         </div>
-      </div>
+      </AdminCard>
 
       {/* Members Table */}
-      <div className="bg-[#232D1A] rounded-2xl border border-[#3A4D23] overflow-hidden">
-        {loadingMembers ? (
-          <div className="p-8 text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
-            <p className="text-[#B6C948]">Leden laden...</p>
-          </div>
-        ) : allMembers.length === 0 ? (
-          <div className="p-8 text-center">
-            <UserIcon className="w-12 h-12 text-[#8BAE5A]/50 mx-auto mb-4" />
-            <p className="text-[#B6C948] text-lg mb-2">Geen leden gevonden</p>
-            <p className="text-[#B6C948]/70 text-sm">Er zijn nog geen gebruikers geregistreerd in het systeem.</p>
-          </div>
-        ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-[#181F17] border-b border-[#3A4D23]">
-              <tr>
-                <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Lid</th>
-                <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">E-mail</th>
-                <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Rang</th>
-                <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Status</th>
-                <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Punten</th>
-                <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Missies</th>
-                <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Lid sinds</th>
-                <th className="px-6 py-4 text-left text-[#8BAE5A] font-semibold">Laatste activiteit</th>
-                <th className="px-6 py-4 text-center text-[#8BAE5A] font-semibold">Acties</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#3A4D23]">
-              {currentMembers.map((member) => (
-                <tr key={member.id} className="hover:bg-[#181F17] transition-colors duration-200">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      {member.avatar_url ? (
-                        <img 
-                          src={member.avatar_url} 
-                          alt={member.full_name}
-                          className="w-10 h-10 rounded-full object-cover border-2 border-[#8BAE5A]/20"
-                          onError={(e) => {
-                            e.currentTarget.style.display = 'none';
-                            e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                          }}
-                        />
-                      ) : null}
-                      <div className={`w-10 h-10 rounded-full bg-[#8BAE5A]/20 flex items-center justify-center ${member.avatar_url ? 'hidden' : ''}`}>
-                        <UserIcon className="w-5 h-5 text-[#8BAE5A]" />
-                      </div>
-                      <div>
-                        <p className="text-[#8BAE5A] font-medium">{member.full_name}</p>
-                        <p className="text-[#B6C948] text-sm">ID: {member.id}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <EnvelopeIcon className="w-4 h-4 text-[#B6C948]" />
-                      <span className="text-[#B6C948]">{member.email}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getRankColor(member.rank)} bg-[#181F17]`}>
-                      {member.rank}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(member.status)} bg-[#181F17]`}>
-                      {getStatusText(member.status)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="text-[#8BAE5A] font-semibold">{member.points || 0}</span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="text-[#8BAE5A] font-semibold">{member.missions_completed || 0}</span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <CalendarIcon className="w-4 h-4 text-[#B6C948]" />
-                      <span className="text-[#B6C948]">
-                        {new Date(member.created_at).toLocaleDateString('nl-NL')}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="text-[#B6C948] text-sm">
-                      {member.last_login ? new Date(member.last_login).toLocaleDateString('nl-NL') : 'Niet beschikbaar'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center justify-center">
-                      <div className="relative">
-                        <button
-                          onClick={() => setSelectedMember(selectedMember === member.id ? null : member.id)}
-                          className="p-2 rounded-xl hover:bg-[#181F17] transition-colors duration-200"
-                        >
-                          <EllipsisVerticalIcon className="w-5 h-5 text-[#B6C948]" />
-                        </button>
-                        
-                        {selectedMember === member.id && (
-                          <div className="fixed w-48 bg-[#181F17] rounded-xl border border-[#3A4D23] shadow-lg z-50" style={{right: '2rem', top: 'calc(50% + 40px)'}}>
-                            <div className="py-2">
-                              <button className="w-full px-4 py-2 text-left text-[#B6C948] hover:bg-[#232D1A] flex items-center gap-2">
-                                <EyeIcon className="w-4 h-4" />
-                                Bekijk Profiel
-                              </button>
-                              <button 
-                                onClick={() => handleEditMember(member)}
-                                className="w-full px-4 py-2 text-left text-[#B6C948] hover:bg-[#232D1A] flex items-center gap-2"
-                              >
-                                <PencilIcon className="w-4 h-4" />
-                                Bewerk Gegevens
-                              </button>
-                              <button className="w-full px-4 py-2 text-left text-[#B6C948] hover:bg-[#232D1A] flex items-center gap-2">
-                                <KeyIcon className="w-4 h-4" />
-                                Reset Wachtwoord
-                              </button>
-                              <button className="w-full px-4 py-2 text-left text-[#B6C948] hover:bg-[#232D1A] flex items-center gap-2">
-                                <StarIcon className="w-4 h-4" />
-                                Promoveer/Degradeer
-                              </button>
-                              <button className="w-full px-4 py-2 text-left text-red-400 hover:bg-[#232D1A] flex items-center gap-2">
-                                <NoSymbolIcon className="w-4 h-4" />
-                                Blokkeer Gebruiker
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        )}
-      </div>
+      <AdminCard title="Leden Overzicht" icon={<UserGroupIcon className="w-6 h-6" />}>
+        <AdminTable
+          headers={tableHeaders}
+          data={tableData}
+          loading={loadingMembers}
+          emptyMessage="Geen leden gevonden"
+          actions={renderActions}
+        />
+      </AdminCard>
 
       {/* Pagination */}
       {allMembers.length > 0 && (
-      <div className="flex items-center justify-between">
-        <div className="text-[#B6C948] text-sm">
-          Toon {filteredMembers.length} van {allMembers.length} leden
+        <div className="flex items-center justify-between">
+          <div className="text-[#B6C948] text-sm">
+            Toon {filteredMembers.length} van {allMembers.length} leden
+          </div>
+          <div className="flex items-center gap-2">
+            <AdminButton
+              variant="secondary"
+              size="sm"
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              Vorige
+            </AdminButton>
+            <span className="px-4 py-2 text-[#8BAE5A] font-semibold">
+              {currentPage} van {totalPages}
+            </span>
+            <AdminButton
+              variant="secondary"
+              size="sm"
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              Volgende
+            </AdminButton>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-            className="px-4 py-2 rounded-xl bg-[#232D1A] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#181F17] transition disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Vorige
-          </button>
-          <span className="px-4 py-2 text-[#8BAE5A] font-semibold">
-            {currentPage} van {totalPages}
-          </span>
-          <button
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className="px-4 py-2 rounded-xl bg-[#232D1A] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#181F17] transition disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Volgende
-          </button>
-        </div>
-      </div>
       )}
 
       {/* Edit User Modal */}
@@ -746,23 +930,7 @@ export default function Ledenbeheer() {
                     <p className="text-xs text-gray-500 mt-1">Admin Actie: Hier kun je een gebruiker handmatig promoveren als beloning voor uitzonderlijke bijdragen.</p>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Forum Status
-                    </label>
-                    <select
-                      value={formData.forumStatus}
-                      onChange={(e) => setFormData({ ...formData, forumStatus: e.target.value })}
-                      className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                    >
-                      {forumStatuses.map(status => (
-                        <option key={status} value={status}>
-                          {status === 'active' ? 'Actief' : status === 'muted' ? 'Gedempt (Muted)' : 'Geblokkeerd'}
-                        </option>
-                      ))}
-                    </select>
-                    <p className="text-xs text-gray-500 mt-1">Admin Actie: Dit is de directe link naar de moderatie-tools. Hier kun je een gebruiker tijdelijk het zwijgen opleggen of volledig blokkeren van het forum.</p>
-                  </div>
+
 
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -782,14 +950,27 @@ export default function Ledenbeheer() {
                     <p className="text-xs text-gray-500 mt-1">Admin Actie: Deactiveer een account volledig als dat nodig is.</p>
                   </div>
 
-                  <div className="pt-4 border-t border-[#3A4D23]">
-                    <button
+                  <div className="pt-4 border-t border-[#3A4D23] space-y-3">
+                    <AdminButton
+                      variant="secondary"
                       onClick={handlePasswordReset}
-                      className="px-4 py-2 bg-[#181F17] text-[#8BAE5A] rounded-lg border border-[#3A4D23] hover:bg-[#232D1A] transition-colors flex items-center gap-2"
+                      icon={<KeyIcon className="w-4 h-4" />}
                     >
-                      <KeyIcon className="w-4 h-4" />
                       Verstuur Wachtwoord Reset E-mail
-                    </button>
+                    </AdminButton>
+                    
+                    <AdminButton
+                      variant="danger"
+                      onClick={handleOnboardingReset}
+                      disabled={isLoading}
+                      loading={isLoading}
+                      icon={<ExclamationTriangleIcon className="w-4 h-4" />}
+                    >
+                      VOLLEDIGE RESET
+                    </AdminButton>
+                    <p className="text-xs text-red-400">
+                      ⚠️ Dit wist ALLE data: missies, training, voeding, challenges, XP, badges, voortgang, etc. Gebruiker start vanaf stap 0.
+                    </p>
                   </div>
                 </div>
               )}
@@ -843,35 +1024,192 @@ export default function Ledenbeheer() {
 
             {/* Modal Footer */}
             <div className="p-6 border-t border-[#3A4D23] flex justify-end space-x-3">
-              <button
+              <AdminButton
+                variant="secondary"
                 onClick={() => setShowEditModal(false)}
-                className="px-6 py-2 bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-700 transition-colors"
               >
                 Annuleren
-              </button>
-              <button
+              </AdminButton>
+              <AdminButton
+                variant="primary"
                 onClick={handleSave}
                 disabled={isLoading}
-                className="px-6 py-2 bg-[#8BAE5A] text-[#0A0F0A] rounded-lg font-medium hover:bg-[#7A9D4A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                loading={isLoading}
+                icon={<CheckIcon className="w-4 h-4" />}
               >
-                {isLoading ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-[#0A0F0A] border-t-transparent rounded-full animate-spin"></div>
-                    Opslaan...
-                  </>
-                ) : (
-                  <>
-                    <CheckIcon className="w-4 h-4" />
-                    Opslaan
-                  </>
-                )}
-              </button>
+                Opslaan
+              </AdminButton>
             </div>
           </div>
         </div>
       )}
 
-      {/* Debug Panel is now global and doesn't need props */}
+      {/* Add New User Modal */}
+      {showAddUserModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#232D1A] border border-[#3A4D23] rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="p-6 border-b border-[#3A4D23]">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-bold text-[#8BAE5A]">
+                  Nieuwe Gebruiker Toevoegen
+                </h2>
+                <button
+                  onClick={() => setShowAddUserModal(false)}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <XMarkIcon className="w-6 h-6" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6 space-y-6">
+              {/* Email */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  E-mailadres *
+                </label>
+                <input
+                  type="email"
+                  value={newUserData.email}
+                  onChange={(e) => setNewUserData({ ...newUserData, email: e.target.value })}
+                  className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                  placeholder="gebruiker@voorbeeld.nl"
+                />
+              </div>
+
+              {/* Full Name */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Volledige Naam *
+                </label>
+                <input
+                  type="text"
+                  value={newUserData.full_name}
+                  onChange={(e) => setNewUserData({ ...newUserData, full_name: e.target.value })}
+                  className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                  placeholder="Jan Jansen"
+                />
+              </div>
+
+              {/* Username */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Username
+                </label>
+                <input
+                  type="text"
+                  value={newUserData.username}
+                  onChange={(e) => setNewUserData({ ...newUserData, username: e.target.value })}
+                  className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                  placeholder="@jan_jansen"
+                />
+              </div>
+
+              {/* Rank */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Rang
+                </label>
+                <select
+                  value={newUserData.rank}
+                  onChange={(e) => setNewUserData({ ...newUserData, rank: e.target.value })}
+                  className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                >
+                  {ranks.map(rank => (
+                    <option key={rank} value={rank}>{rank}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Status */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Status
+                </label>
+                <select
+                  value={newUserData.status}
+                  onChange={(e) => setNewUserData({ ...newUserData, status: e.target.value })}
+                  className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                >
+                  {statuses.map(status => (
+                    <option key={status} value={status}>
+                      {getStatusText(status)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Password */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Wachtwoord *
+                </label>
+                <input
+                  type="password"
+                  value={newUserData.password}
+                  onChange={(e) => setNewUserData({ ...newUserData, password: e.target.value })}
+                  className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                  placeholder="Minimaal 6 karakters"
+                />
+              </div>
+
+              {/* Confirm Password */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Bevestig Wachtwoord *
+                </label>
+                <input
+                  type="password"
+                  value={newUserData.confirmPassword}
+                  onChange={(e) => setNewUserData({ ...newUserData, confirmPassword: e.target.value })}
+                  className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                  placeholder="Herhaal wachtwoord"
+                />
+              </div>
+
+              {/* Info Box */}
+              <div className="bg-[#181F17] border border-[#3A4D23] rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <div className="text-[#8BAE5A] mt-0.5">
+                    <InformationCircleIcon className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-[#8BAE5A] font-medium mb-2">Wat gebeurt er na aanmaken?</h4>
+                    <ul className="text-gray-300 text-sm space-y-1">
+                      <li>• Gebruiker ontvangt een welkomst e-mail</li>
+                      <li>• Account wordt automatisch geactiveerd</li>
+                      <li>• Gebruiker start met onboarding stap 0</li>
+                      <li>• Alle basis profielgegevens worden ingesteld</li>
+                      <li>• Gebruiker kan direct inloggen met het wachtwoord</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-6 border-t border-[#3A4D23] flex justify-end space-x-3">
+              <AdminButton
+                variant="secondary"
+                onClick={() => setShowAddUserModal(false)}
+              >
+                Annuleren
+              </AdminButton>
+              <AdminButton
+                variant="primary"
+                onClick={handleAddNewUser}
+                disabled={addingUser}
+                loading={addingUser}
+                icon={<UserPlusIcon className="w-4 h-4" />}
+              >
+                Gebruiker Aanmaken
+              </AdminButton>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 

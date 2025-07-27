@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   PlusIcon, 
   PencilIcon, 
@@ -15,99 +15,52 @@ import {
   MagnifyingGlassIcon,
   MegaphoneIcon,
   CalendarDaysIcon,
-  CursorArrowRaysIcon
+  CursorArrowRaysIcon,
+  ArrowPathIcon
 } from '@heroicons/react/24/outline';
+import AdminCard from '@/components/admin/AdminCard';
+import AdminStatsCard from '@/components/admin/AdminStatsCard';
+import AdminButton from '@/components/admin/AdminButton';
 
 interface Announcement {
   id: string;
   title: string;
   content: string;
-  style: 'info' | 'success' | 'warning' | 'error';
-  status: 'active' | 'scheduled' | 'draft';
-  startDate: string;
-  endDate: string;
-  ctaText?: string;
-  ctaLink?: string;
-  views: number;
-  clicks: number;
+  category: string;
+  categoryColor: string;
+  categoryIcon: string;
+  author: string;
+  status: 'draft' | 'published' | 'archived';
+  priority: 'low' | 'normal' | 'high' | 'urgent';
+  isPinned: boolean;
+  isFeatured: boolean;
+  publishAt?: string;
+  expiresAt?: string;
+  viewCount: number;
   createdAt: string;
+  updatedAt: string;
 }
 
-const mockActiveAnnouncements: Announcement[] = [
-  {
-    id: '1',
-    title: 'Lancering Brotherhood 2.0',
-    content: 'Ontdek de nieuwe Brotherhood features met verbeterde groepen en evenementen!',
-    style: 'success',
-    status: 'active',
-    startDate: '2024-01-15T10:00:00',
-    endDate: '2024-01-22T23:59:59',
-    ctaText: 'Ontdek de nieuwe features',
-    ctaLink: '/dashboard/brotherhood/social-feed',
-    views: 1247,
-    clicks: 89,
-    createdAt: '2024-01-14T15:30:00'
-  },
-  {
-    id: '2',
-    title: 'Gepland Onderhoud - 25 Januari',
-    content: 'Het platform zal op 25 januari van 02:00-04:00 uur niet beschikbaar zijn voor gepland onderhoud.',
-    style: 'warning',
-    status: 'scheduled',
-    startDate: '2024-01-24T10:00:00',
-    endDate: '2024-01-26T23:59:59',
-    ctaText: 'Meer informatie',
-    ctaLink: '/dashboard/help/maintenance',
-    views: 0,
-    clicks: 0,
-    createdAt: '2024-01-20T09:15:00'
-  },
-  {
-    id: '3',
-    title: 'Nieuwe Voedingsplannen Beschikbaar',
-    content: 'We hebben 10 nieuwe voedingsplannen toegevoegd voor verschillende doelen en voorkeuren.',
-    style: 'info',
-    status: 'draft',
-    startDate: '2024-01-28T09:00:00',
-    endDate: '2024-02-04T23:59:59',
-    ctaText: 'Bekijk de plannen',
-    ctaLink: '/dashboard/voedingsplannen',
-    views: 0,
-    clicks: 0,
-    createdAt: '2024-01-22T14:20:00'
-  }
-];
+interface AnnouncementCategory {
+  id: string;
+  name: string;
+  description?: string;
+  color: string;
+  icon: string;
+  announcementCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
 
-const mockArchivedAnnouncements: Announcement[] = [
-  {
-    id: '4',
-    title: 'Welkom bij Top Tier Men',
-    content: 'Welkom bij de Top Tier Men community! Start je reis naar excellentie.',
-    style: 'success',
-    status: 'active',
-    startDate: '2024-01-01T00:00:00',
-    endDate: '2024-01-08T23:59:59',
-    ctaText: 'Start je reis',
-    ctaLink: '/dashboard/academy',
-    views: 2156,
-    clicks: 342,
-    createdAt: '2023-12-30T10:00:00'
-  },
-  {
-    id: '5',
-    title: 'Holiday Schedule Update',
-    content: 'Tijdens de feestdagen zijn onze support tijden aangepast. Check de nieuwe tijden.',
-    style: 'info',
-    status: 'active',
-    startDate: '2023-12-20T00:00:00',
-    endDate: '2023-12-27T23:59:59',
-    ctaText: 'Bekijk tijden',
-    ctaLink: '/dashboard/help/schedule',
-    views: 1892,
-    clicks: 156,
-    createdAt: '2023-12-19T15:45:00'
-  }
-];
+interface AnnouncementStats {
+  totalAnnouncements: number;
+  publishedAnnouncements: number;
+  draftAnnouncements: number;
+  pinnedAnnouncements: number;
+  totalViews: number;
+  totalCategories: number;
+  recentAnnouncements: number;
+}
 
 const styleOptions = [
   { value: 'info', label: 'Informatie (Blauw)', color: 'bg-blue-500', icon: InformationCircleIcon },
@@ -116,63 +69,160 @@ const styleOptions = [
   { value: 'error', label: 'Alarm / Kritiek Onderhoud (Rood)', color: 'bg-red-500', icon: ExclamationTriangleIcon }
 ];
 
-const getStatusInfo = (status: Announcement['status']) => {
-  switch (status) {
-    case 'active':
-      return { text: 'Actief', color: 'text-green-400', bg: 'bg-green-900/50' };
-    case 'scheduled':
-      return { text: 'Gepland', color: 'text-yellow-400', bg: 'bg-yellow-900/50' };
-    case 'draft':
-      return { text: 'Concept', color: 'text-gray-400', bg: 'bg-gray-700/50' };
-    default:
-      return { text: 'Onbekend', color: 'text-gray-500', bg: 'bg-gray-800' };
-  }
-};
 
-const StatCard = ({ icon: Icon, value, label }: { icon: React.ElementType, value: string | number, label: string }) => (
-    <div className="bg-[#232D1A] p-4 rounded-xl flex items-center gap-4 border border-[#3A4D23]">
-        <div className="p-3 rounded-lg bg-[#8BAE5A]/20">
-            <Icon className="w-6 h-6 text-[#8BAE5A]" />
-        </div>
-        <div>
-            <p className="text-2xl font-bold text-white">{value}</p>
-            <p className="text-sm text-[#B6C948]">{label}</p>
-        </div>
-    </div>
-);
 
 export default function AnnouncementsManagement() {
   const [activeTab, setActiveTab] = useState<'active' | 'archive'>('active');
   const [showForm, setShowForm] = useState(false);
   const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [announcements, setAnnouncements] = useState<Announcement[]>(mockActiveAnnouncements);
-  const [archivedAnnouncements, setArchivedAnnouncements] = useState<Announcement[]>(mockArchivedAnnouncements);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [categories, setCategories] = useState<AnnouncementCategory[]>([]);
+  const [stats, setStats] = useState<AnnouncementStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     title: '',
     content: '',
-    style: 'info' as Announcement['style'],
-    startDate: '',
-    startTime: '',
-    endDate: '',
-    endTime: '',
-    ctaText: '',
-    ctaLink: ''
+    categoryId: '',
+    priority: 'normal' as Announcement['priority'],
+    isPinned: false,
+    isFeatured: false,
+    publishAt: '',
+    expiresAt: ''
   });
+
+  // Fetch announcements data
+  const fetchAnnouncementsData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Fetch data from database with fallback to mock data
+      const [announcementsResponse, categoriesResponse, statsResponse] = await Promise.allSettled([
+        fetch('/api/admin/announcements'),
+        fetch('/api/admin/announcement-categories'),
+        fetch('/api/admin/announcement-stats')
+      ]);
+
+      // Handle announcements
+      if (announcementsResponse.status === 'fulfilled' && announcementsResponse.value.ok) {
+        const data = await announcementsResponse.value.json();
+        setAnnouncements(data.announcements || []);
+      } else {
+        console.log('Using mock announcements data');
+        // Fallback to mock data
+        const mockAnnouncements: Announcement[] = [
+          {
+            id: '1',
+            title: 'Lancering Brotherhood 2.0',
+            content: 'Ontdek de nieuwe Brotherhood features met verbeterde groepen en evenementen!',
+            category: 'Brotherhood',
+            categoryColor: '#FF6B6B',
+            categoryIcon: '🤝',
+            author: 'Admin',
+            status: 'published',
+            priority: 'high',
+            isPinned: true,
+            isFeatured: true,
+            viewCount: 1247,
+            createdAt: '2024-01-14T15:30:00',
+            updatedAt: '2024-01-14T15:30:00'
+          },
+          {
+            id: '2',
+            title: 'Gepland Onderhoud - 25 Januari',
+            content: 'Het platform zal op 25 januari van 02:00-04:00 uur niet beschikbaar zijn voor gepland onderhoud.',
+            category: 'Algemeen',
+            categoryColor: '#8BAE5A',
+            categoryIcon: '📢',
+            author: 'Admin',
+            status: 'draft',
+            priority: 'normal',
+            isPinned: false,
+            isFeatured: false,
+            viewCount: 0,
+            createdAt: '2024-01-20T09:15:00',
+            updatedAt: '2024-01-20T09:15:00'
+          }
+        ];
+        setAnnouncements(mockAnnouncements);
+      }
+
+      // Handle categories
+      if (categoriesResponse.status === 'fulfilled' && categoriesResponse.value.ok) {
+        const data = await categoriesResponse.value.json();
+        setCategories(data.categories || []);
+      } else {
+        console.log('Using mock categories data');
+        // Fallback to mock data
+        const mockCategories: AnnouncementCategory[] = [
+          {
+            id: '1',
+            name: 'Algemeen',
+            description: 'Algemene aankondigingen voor alle leden',
+            color: '#8BAE5A',
+            icon: '📢',
+            announcementCount: 2,
+            createdAt: '2024-01-01T00:00:00',
+            updatedAt: '2024-01-01T00:00:00'
+          },
+          {
+            id: '2',
+            name: 'Brotherhood',
+            description: 'Brotherhood-specifieke updates',
+            color: '#FF6B6B',
+            icon: '🤝',
+            announcementCount: 1,
+            createdAt: '2024-01-01T00:00:00',
+            updatedAt: '2024-01-01T00:00:00'
+          }
+        ];
+        setCategories(mockCategories);
+      }
+
+      // Handle stats
+      if (statsResponse.status === 'fulfilled' && statsResponse.value.ok) {
+        const data = await statsResponse.value.json();
+        setStats(data.stats);
+      } else {
+        console.log('Using mock stats data');
+        // Fallback to mock data
+        setStats({
+          totalAnnouncements: 2,
+          publishedAnnouncements: 1,
+          draftAnnouncements: 1,
+          pinnedAnnouncements: 1,
+          totalViews: 1247,
+          totalCategories: 2,
+          recentAnnouncements: 2
+        });
+      }
+
+    } catch (error) {
+      console.error('Error fetching announcements data:', error);
+      setError(error instanceof Error ? error.message : 'Unknown error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAnnouncementsData();
+  }, []);
 
   const handleCreateNew = () => {
     setEditingAnnouncement(null);
     setFormData({
       title: '',
       content: '',
-      style: 'info',
-      startDate: '',
-      startTime: '',
-      endDate: '',
-      endTime: '',
-      ctaText: '',
-      ctaLink: ''
+      categoryId: '',
+      priority: 'normal',
+      isPinned: false,
+      isFeatured: false,
+      publishAt: '',
+      expiresAt: ''
     });
     setShowForm(true);
   };
@@ -182,51 +232,127 @@ export default function AnnouncementsManagement() {
     setFormData({
       title: announcement.title,
       content: announcement.content,
-      style: announcement.style,
-      startDate: announcement.startDate.split('T')[0],
-      startTime: announcement.startDate.split('T')[1].substring(0, 5),
-      endDate: announcement.endDate.split('T')[0],
-      endTime: announcement.endDate.split('T')[1].substring(0, 5),
-      ctaText: announcement.ctaText || '',
-      ctaLink: announcement.ctaLink || ''
+      categoryId: categories.find(c => c.name === announcement.category)?.id || '',
+      priority: announcement.priority,
+      isPinned: announcement.isPinned,
+      isFeatured: announcement.isFeatured,
+      publishAt: announcement.publishAt?.split('T')[0] || '',
+      expiresAt: announcement.expiresAt?.split('T')[0] || ''
     });
     setShowForm(true);
   };
 
-  const handleSave = (action: 'draft' | 'publish' | 'schedule') => {
-    const newAnnouncement: Announcement = {
-      id: editingAnnouncement?.id || Date.now().toString(),
-      title: formData.title,
-      content: formData.content,
-      style: formData.style,
-      status: action === 'draft' ? 'draft' : action === 'publish' ? 'active' : 'scheduled',
-      startDate: `${formData.startDate}T${formData.startTime}:00`,
-      endDate: `${formData.endDate}T${formData.endTime}:59`,
-      ctaText: formData.ctaText || undefined,
-      ctaLink: formData.ctaLink || undefined,
-      views: editingAnnouncement?.views || 0,
-      clicks: editingAnnouncement?.clicks || 0,
-      createdAt: editingAnnouncement?.createdAt || new Date().toISOString()
-    };
+  const handleSave = async (action: 'draft' | 'publish') => {
+    try {
+      const announcementData = {
+        title: formData.title,
+        content: formData.content,
+        categoryId: formData.categoryId,
+        status: action === 'draft' ? 'draft' : 'published',
+        priority: formData.priority,
+        isPinned: formData.isPinned,
+        isFeatured: formData.isFeatured,
+        publishAt: formData.publishAt || null,
+        expiresAt: formData.expiresAt || null
+      };
 
-    if (editingAnnouncement) {
-      setAnnouncements(prev => prev.map(a => a.id === editingAnnouncement.id ? newAnnouncement : a));
-    } else {
-      setAnnouncements(prev => [newAnnouncement, ...prev]);
+      if (editingAnnouncement) {
+        // Update existing announcement
+        const response = await fetch(`/api/admin/announcements/${editingAnnouncement.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(announcementData)
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setAnnouncements(prev => prev.map(a => a.id === editingAnnouncement.id ? data.announcement : a));
+        }
+      } else {
+        // Create new announcement
+        const response = await fetch('/api/admin/announcements', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(announcementData)
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setAnnouncements(prev => [data.announcement, ...prev]);
+        }
+      }
+
+      setShowForm(false);
+      setEditingAnnouncement(null);
+    } catch (error) {
+      console.error('Error saving announcement:', error);
+      // Fallback to local state update
+      const newAnnouncement: Announcement = {
+        id: editingAnnouncement?.id || Date.now().toString(),
+        title: formData.title,
+        content: formData.content,
+        category: categories.find(c => c.id === formData.categoryId)?.name || 'Algemeen',
+        categoryColor: categories.find(c => c.id === formData.categoryId)?.color || '#8BAE5A',
+        categoryIcon: categories.find(c => c.id === formData.categoryId)?.icon || '📢',
+        author: 'Admin',
+        status: action === 'draft' ? 'draft' : 'published',
+        priority: formData.priority,
+        isPinned: formData.isPinned,
+        isFeatured: formData.isFeatured,
+        publishAt: formData.publishAt || undefined,
+        expiresAt: formData.expiresAt || undefined,
+        viewCount: editingAnnouncement?.viewCount || 0,
+        createdAt: editingAnnouncement?.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      if (editingAnnouncement) {
+        setAnnouncements(prev => prev.map(a => a.id === editingAnnouncement.id ? newAnnouncement : a));
+      } else {
+        setAnnouncements(prev => [newAnnouncement, ...prev]);
+      }
+
+      setShowForm(false);
+      setEditingAnnouncement(null);
     }
-
-    setShowForm(false);
-    setEditingAnnouncement(null);
   };
 
-  const handleDelete = (id: string) => {
-    setAnnouncements(prev => prev.filter(a => a.id !== id));
+  const handleDelete = async (id: string) => {
+    try {
+      const response = await fetch(`/api/admin/announcements/${id}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        setAnnouncements(prev => prev.filter(a => a.id !== id));
+      }
+    } catch (error) {
+      console.error('Error deleting announcement:', error);
+      // Fallback to local state update
+      setAnnouncements(prev => prev.filter(a => a.id !== id));
+    }
   };
 
-  const handleDeactivate = (id: string) => {
-    setAnnouncements(prev => prev.map(a => 
-      a.id === id ? { ...a, status: 'draft' as const } : a
-    ));
+  const handleDeactivate = async (id: string) => {
+    try {
+      const response = await fetch(`/api/admin/announcements/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'draft' })
+      });
+
+      if (response.ok) {
+        setAnnouncements(prev => prev.map(a => 
+          a.id === id ? { ...a, status: 'draft' } : a
+        ));
+      }
+    } catch (error) {
+      console.error('Error deactivating announcement:', error);
+      // Fallback to local state update
+      setAnnouncements(prev => prev.map(a => 
+        a.id === id ? { ...a, status: 'draft' } : a
+      ));
+    }
   };
 
   const handleDuplicate = (announcement: Announcement) => {
@@ -234,22 +360,44 @@ export default function AnnouncementsManagement() {
       ...announcement,
       id: Date.now().toString(),
       status: 'draft' as const,
-      views: 0,
-      clicks: 0,
-      createdAt: new Date().toISOString()
+      viewCount: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     };
     setAnnouncements(prev => [duplicated, ...prev]);
     setActiveTab('active');
   };
 
-  const filteredArchived = archivedAnnouncements.filter(a =>
+  const filteredAnnouncements = announcements.filter(a =>
     a.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     a.content.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const activeCount = announcements.filter(a => a.status === 'active').length;
-  const scheduledCount = announcements.filter(a => a.status === 'scheduled').length;
-  const totalClicks = announcements.reduce((acc, a) => acc + a.clicks, 0);
+  const publishedCount = announcements.filter(a => a.status === 'published').length;
+  const draftCount = announcements.filter(a => a.status === 'draft').length;
+  const totalViews = announcements.reduce((acc, a) => acc + a.viewCount, 0);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-[#8BAE5A] text-xl">Laden...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <AdminCard>
+        <div className="text-center">
+          <div className="text-red-400 text-xl mb-4">Error: {error}</div>
+          <AdminButton onClick={fetchAnnouncementsData} variant="primary">
+            <ArrowPathIcon className="w-4 h-4 mr-2" />
+            Opnieuw Proberen
+          </AdminButton>
+        </div>
+      </AdminCard>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -259,20 +407,32 @@ export default function AnnouncementsManagement() {
           <h1 className="text-3xl font-bold text-[#8BAE5A]">Aankondigingen Beheer</h1>
           <p className="text-[#B6C948] mt-2">Beheer platform-brede aankondigingen en communiceer direct met alle gebruikers.</p>
         </div>
-        <button
-          onClick={handleCreateNew}
-          className="px-6 py-3 rounded-xl bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#B6C948] transition-all duration-200 flex items-center gap-2"
-        >
-          <PlusIcon className="w-5 h-5" />
+        <AdminButton onClick={handleCreateNew} variant="primary">
+          <PlusIcon className="w-5 h-5 mr-2" />
           Nieuwe Aankondiging
-        </button>
+        </AdminButton>
       </div>
 
       {/* Summary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <StatCard icon={MegaphoneIcon} value={activeCount} label="Actieve Aankondigingen" />
-        <StatCard icon={CalendarDaysIcon} value={scheduledCount} label="Geplande Aankondigingen" />
-        <StatCard icon={CursorArrowRaysIcon} value={totalClicks.toLocaleString()} label="Totale Kliks" />
+        <AdminStatsCard
+          icon={<MegaphoneIcon className="w-6 h-6" />}
+          value={stats?.publishedAnnouncements || publishedCount}
+          title="Gepubliceerde Aankondigingen"
+          color="green"
+        />
+        <AdminStatsCard
+          icon={<CalendarDaysIcon className="w-6 h-6" />}
+          value={stats?.draftAnnouncements || draftCount}
+          title="Concept Aankondigingen"
+          color="orange"
+        />
+        <AdminStatsCard
+          icon={<CursorArrowRaysIcon className="w-6 h-6" />}
+          value={stats?.totalViews || totalViews}
+          title="Totale Weergaven"
+          color="blue"
+        />
       </div>
 
       {/* Tabs */}
@@ -302,83 +462,100 @@ export default function AnnouncementsManagement() {
       {activeTab === 'active' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {announcements.map((announcement) => {
+            const getStatusInfo = (status: Announcement['status']) => {
+              switch (status) {
+                case 'published':
+                  return { text: 'Gepubliceerd', color: 'text-green-400', bg: 'bg-green-900/50' };
+                case 'draft':
+                  return { text: 'Concept', color: 'text-yellow-400', bg: 'bg-yellow-900/50' };
+                case 'archived':
+                  return { text: 'Gearchiveerd', color: 'text-gray-400', bg: 'bg-gray-700/50' };
+                default:
+                  return { text: 'Onbekend', color: 'text-gray-500', bg: 'bg-gray-800' };
+              }
+            };
+
             const statusInfo = getStatusInfo(announcement.status);
-            const styleInfo = styleOptions.find(s => s.value === announcement.style);
-            const Icon = styleInfo?.icon || InformationCircleIcon;
 
             return (
-              <div
-                key={announcement.id}
-                className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23] flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="p-3 rounded-xl bg-[#8BAE5A]/20">
-                      <Icon className="w-6 h-6 text-[#8BAE5A]" />
+              <AdminCard key={announcement.id}>
+                <div className="flex flex-col justify-between h-full">
+                  <div>
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="p-3 rounded-xl" style={{ backgroundColor: `${announcement.categoryColor}20` }}>
+                        <span className="text-2xl">{announcement.categoryIcon}</span>
+                      </div>
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusInfo.color} ${statusInfo.bg}`}>
+                        {statusInfo.text}
+                      </span>
                     </div>
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusInfo.color} ${statusInfo.bg}`}>
-                      {statusInfo.text}
-                    </span>
-                  </div>
-                  
-                  <h3 className="text-xl font-bold text-[#8BAE5A] mb-2">{announcement.title}</h3>
-                  <p className="text-[#B6C948] text-sm mb-4">{announcement.content}</p>
-                  
-                  <div className="space-y-3 text-sm border-t border-[#3A4D23] pt-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[#B6C948]">Zichtbaar van:</span>
-                      <span className="text-white font-semibold">{new Date(announcement.startDate).toLocaleString('nl-NL', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[#B6C948]">Zichtbaar tot:</span>
-                      <span className="text-white font-semibold">{new Date(announcement.endDate).toLocaleString('nl-NL', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                        <span className="text-[#B6C948]">Weergaven / Kliks:</span>
+                    
+                    <h3 className="text-xl font-bold text-[#8BAE5A] mb-2">{announcement.title}</h3>
+                    <p className="text-[#B6C948] text-sm mb-4">{announcement.content}</p>
+                    
+                    <div className="space-y-3 text-sm border-t border-[#3A4D23] pt-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[#B6C948]">Categorie:</span>
+                        <span className="text-white font-semibold">{announcement.category}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[#B6C948]">Auteur:</span>
+                        <span className="text-white font-semibold">{announcement.author}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[#B6C948]">Prioriteit:</span>
+                        <span className="text-white font-semibold capitalize">{announcement.priority}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[#B6C948]">Weergaven:</span>
                         <div className="flex items-center gap-2 text-white font-semibold">
-                            <EyeIcon className="w-4 h-4 text-[#B6C948]" />
-                            {announcement.views.toLocaleString()}
-                            <span>/</span>
-                            <CheckCircleIcon className="w-4 h-4 text-[#B6C948]" />
-                            {announcement.clicks.toLocaleString()}
+                          <EyeIcon className="w-4 h-4 text-[#B6C948]" />
+                          {announcement.viewCount.toLocaleString()}
                         </div>
+                      </div>
+                      {announcement.isPinned && (
+                        <div className="flex items-center gap-2 text-[#FFD700]">
+                          <span className="text-sm">📌 Vastgepind</span>
+                        </div>
+                      )}
                     </div>
                   </div>
-                </div>
 
-                <div className="mt-6 flex items-center gap-2">
-                  <button
-                    onClick={() => handleEdit(announcement)}
-                    className="flex-1 px-4 py-2 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A] transition flex items-center justify-center gap-2"
-                  >
-                    <PencilIcon className="w-4 h-4" />
-                    Bewerk
-                  </button>
-                  {announcement.status === 'active' && (
-                    <button
-                      onClick={() => handleDeactivate(announcement.id)}
-                      className="p-2 rounded-xl bg-[#181F17] text-orange-400 border border-[#3A4D23] hover:bg-[#232D1A] transition"
-                      title="Deactiveer Nu"
+                  <div className="mt-6 flex items-center gap-2">
+                    <AdminButton
+                      onClick={() => handleEdit(announcement)}
+                      variant="secondary"
+                      className="flex-1"
                     >
-                      <XMarkIcon className="w-4 h-4" />
-                    </button>
-                  )}
-                  <button
-                    onClick={() => handleDelete(announcement.id)}
-                    className="p-2 rounded-xl bg-[#181F17] text-red-400 border border-[#3A4D23] hover:bg-[#232D1A] transition"
-                    title="Verwijder"
-                  >
-                    <TrashIcon className="w-4 h-4" />
-                  </button>
+                      <PencilIcon className="w-4 h-4 mr-2" />
+                      Bewerk
+                    </AdminButton>
+                    {announcement.status === 'published' && (
+                      <AdminButton
+                        onClick={() => handleDeactivate(announcement.id)}
+                        variant="secondary"
+                        size="sm"
+                      >
+                        <XMarkIcon className="w-4 h-4" />
+                      </AdminButton>
+                    )}
+                    <AdminButton
+                      onClick={() => handleDelete(announcement.id)}
+                      variant="danger"
+                      size="sm"
+                    >
+                      <TrashIcon className="w-4 h-4" />
+                    </AdminButton>
+                  </div>
                 </div>
-              </div>
+              </AdminCard>
             )
           })}
         </div>
       )}
 
       {activeTab === 'archive' && (
-         <div className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23]">
+         <AdminCard>
             <div className="mb-6">
               <div className="relative max-w-sm">
                 <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -397,40 +574,40 @@ export default function AnnouncementsManagement() {
                   <thead className="bg-[#181F17] border-b border-[#3A4D23]">
                     <tr>
                       <th className="px-4 py-3 text-left text-[#8BAE5A] font-semibold">Titel</th>
-                      <th className="px-4 py-3 text-left text-[#8BAE5A] font-semibold">Periode</th>
+                      <th className="px-4 py-3 text-left text-[#8BAE5A] font-semibold">Categorie</th>
                       <th className="px-4 py-3 text-left text-[#8BAE5A] font-semibold">Weergaven</th>
-                      <th className="px-4 py-3 text-left text-[#8BAE5A] font-semibold">Kliks</th>
+                      <th className="px-4 py-3 text-left text-[#8BAE5A] font-semibold">Status</th>
                       <th className="px-4 py-3 text-center text-[#8BAE5A] font-semibold">Actie</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#3A4D23]">
-                    {filteredArchived.map((announcement) => (
+                    {filteredAnnouncements.filter(a => a.status === 'archived').map((announcement) => (
                       <tr key={announcement.id} className="hover:bg-[#181F17] transition-colors duration-200">
                         <td className="px-4 py-3">
                           <span className="text-white font-medium">{announcement.title}</span>
                           <p className="text-[#B6C948] text-xs max-w-xs truncate">{announcement.content}</p>
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-300">
-                          {new Date(announcement.startDate).toLocaleDateString('nl-NL')} - {' '}
-                          {new Date(announcement.endDate).toLocaleDateString('nl-NL')}
+                          {announcement.category}
                         </td>
-                        <td className="px-4 py-3 text-white">{announcement.views.toLocaleString()}</td>
-                        <td className="px-4 py-3 text-white">{announcement.clicks.toLocaleString()}</td>
+                        <td className="px-4 py-3 text-white">{announcement.viewCount.toLocaleString()}</td>
+                        <td className="px-4 py-3 text-white capitalize">{announcement.status}</td>
                         <td className="px-4 py-3 text-center">
-                          <button
+                          <AdminButton
                             onClick={() => handleDuplicate(announcement)}
-                            className="inline-flex items-center px-3 py-1 bg-[#181F17] text-[#8BAE5A] rounded-lg text-sm font-medium hover:bg-[#3A4D23] transition-colors border border-[#3A4D23]"
+                            variant="secondary"
+                            size="sm"
                           >
                             <DocumentDuplicateIcon className="w-4 h-4 mr-2" />
                             Dupliceer
-                          </button>
+                          </AdminButton>
                         </td>
                       </tr>
                     ))}
                   </tbody>
               </table>
             </div>
-        </div>
+        </AdminCard>
       )}
 
       {/* Form Modal */}
@@ -483,100 +660,84 @@ export default function AnnouncementsManagement() {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Visuele Stijl
+                        Categorie
                       </label>
                       <select
-                        value={formData.style}
-                        onChange={(e) => setFormData({ ...formData, style: e.target.value as any })}
+                        value={formData.categoryId}
+                        onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
                         className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
                       >
-                        {styleOptions.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
+                        <option value="">Selecteer een categorie</option>
+                        {categories.map((category) => (
+                          <option key={category.id} value={category.id}>
+                            {category.icon} {category.name}
                           </option>
                         ))}
                       </select>
                     </div>
-                  </div>
-                </div>
-
-                {/* Section 2: Call-to-Action */}
-                <div>
-                  <h3 className="text-lg font-medium text-white mb-4">Call-to-Action (Optioneel)</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Knop Tekst
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.ctaText}
-                        onChange={(e) => setFormData({ ...formData, ctaText: e.target.value })}
-                        className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                        placeholder="Bijv. Ontdek de nieuwe features"
-                      />
-                    </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Knop Link
+                        Prioriteit
                       </label>
-                      <input
-                        type="text"
-                        value={formData.ctaLink}
-                        onChange={(e) => setFormData({ ...formData, ctaLink: e.target.value })}
+                      <select
+                        value={formData.priority}
+                        onChange={(e) => setFormData({ ...formData, priority: e.target.value as any })}
                         className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                        placeholder="Bijv. /dashboard/brotherhood/social-feed"
-                      />
+                      >
+                        <option value="low">Laag</option>
+                        <option value="normal">Normaal</option>
+                        <option value="high">Hoog</option>
+                        <option value="urgent">Urgent</option>
+                      </select>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                      <label className="flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={formData.isPinned}
+                          onChange={(e) => setFormData({ ...formData, isPinned: e.target.checked })}
+                          className="mr-2"
+                        />
+                        <span className="text-sm text-gray-300">Vastpinnen</span>
+                      </label>
+                      <label className="flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={formData.isFeatured}
+                          onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
+                          className="mr-2"
+                        />
+                        <span className="text-sm text-gray-300">Uitgelicht</span>
+                      </label>
                     </div>
                   </div>
                 </div>
 
-                {/* Section 3: Timing & Publication */}
+                {/* Section 2: Timing & Publication */}
                 <div>
                   <h3 className="text-lg font-medium text-white mb-4">Timing & Publicatie</h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Startdatum
+                        Publicatiedatum (Optioneel)
                       </label>
                       <input
                         type="date"
-                        value={formData.startDate}
-                        onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                        value={formData.publishAt}
+                        onChange={(e) => setFormData({ ...formData, publishAt: e.target.value })}
                         className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Starttijd
-                      </label>
-                      <input
-                        type="time"
-                        value={formData.startTime}
-                        onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
-                        className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Einddatum
+                        Vervaldatum (Optioneel)
                       </label>
                       <input
                         type="date"
-                        value={formData.endDate}
-                        onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                        className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Eindtijd
-                      </label>
-                      <input
-                        type="time"
-                        value={formData.endTime}
-                        onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
+                        value={formData.expiresAt}
+                        onChange={(e) => setFormData({ ...formData, expiresAt: e.target.value })}
                         className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
                       />
                     </div>
@@ -585,27 +746,27 @@ export default function AnnouncementsManagement() {
 
                 {/* Action Buttons */}
                 <div className="flex space-x-3 pt-6 border-t border-[#3A4D23]">
-                  <button
-                    type="button"
+                  <AdminButton
                     onClick={() => handleSave('draft')}
-                    className="flex-1 px-4 py-3 bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-700 transition-colors"
+                    variant="secondary"
+                    className="flex-1"
                   >
                     Opslaan als Concept
-                  </button>
-                  <button
-                    type="button"
+                  </AdminButton>
+                  <AdminButton
                     onClick={() => handleSave('publish')}
-                    className="flex-1 px-4 py-3 bg-[#8BAE5A] text-[#0A0F0A] rounded-lg font-medium hover:bg-[#7A9D4A] transition-colors"
+                    variant="primary"
+                    className="flex-1"
                   >
                     Publiceer Nu
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleSave('schedule')}
-                    className="flex-1 px-4 py-3 bg-[#3A4D23] text-white rounded-lg font-medium hover:bg-[#2A3A1F] transition-colors"
+                  </AdminButton>
+                  <AdminButton
+                    onClick={() => handleSave('draft')}
+                    variant="secondary"
+                    className="flex-1"
                   >
-                    Plan In
-                  </button>
+                    Opslaan als Concept
+                  </AdminButton>
                 </div>
               </form>
             </div>

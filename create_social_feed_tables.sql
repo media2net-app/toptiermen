@@ -1,143 +1,149 @@
--- Create social feed tables
--- This script creates the necessary tables for social feed functionality
-
--- Social Feed Posts table
-CREATE TABLE IF NOT EXISTS social_posts (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-    content TEXT NOT NULL,
-    post_type VARCHAR(50) DEFAULT 'text' CHECK (post_type IN ('text', 'checkin', 'achievement', 'question', 'motivation')),
-    location VARCHAR(255),
-    image_url TEXT,
-    video_url TEXT,
-    tags TEXT[],
-    is_public BOOLEAN DEFAULT true,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+-- Create social feed posts table
+CREATE TABLE IF NOT EXISTS social_feed_posts (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  content TEXT NOT NULL,
+  author_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  media_url TEXT,
+  media_type VARCHAR(10) CHECK (media_type IN ('image', 'video')),
+  likes_count INTEGER DEFAULT 0,
+  comments_count INTEGER DEFAULT 0,
+  is_pinned BOOLEAN DEFAULT false,
+  is_post_of_the_week BOOLEAN DEFAULT false,
+  is_hidden BOOLEAN DEFAULT false,
+  is_announcement BOOLEAN DEFAULT false,
+  cta_button_text VARCHAR(100),
+  cta_button_link TEXT,
+  reach_count INTEGER DEFAULT 0,
+  impressions_count INTEGER DEFAULT 0,
+  click_rate DECIMAL(5,2) DEFAULT 0,
+  status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'hidden', 'removed', 'pending')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Social Feed Likes table
-CREATE TABLE IF NOT EXISTS social_likes (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    post_id UUID REFERENCES social_posts(id) ON DELETE CASCADE,
-    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-    like_type VARCHAR(20) DEFAULT 'boks' CHECK (like_type IN ('boks', 'fire', 'respect', 'love')),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    UNIQUE(post_id, user_id)
+-- Create social feed comments table
+CREATE TABLE IF NOT EXISTS social_feed_comments (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  post_id UUID NOT NULL REFERENCES social_feed_posts(id) ON DELETE CASCADE,
+  author_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  content TEXT NOT NULL,
+  likes_count INTEGER DEFAULT 0,
+  status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'hidden', 'removed')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Social Feed Comments table
-CREATE TABLE IF NOT EXISTS social_comments (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    post_id UUID REFERENCES social_posts(id) ON DELETE CASCADE,
-    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-    content TEXT NOT NULL,
-    parent_comment_id UUID REFERENCES social_comments(id) ON DELETE CASCADE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+-- Create social feed reports table
+CREATE TABLE IF NOT EXISTS social_feed_reports (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  post_id UUID REFERENCES social_feed_posts(id) ON DELETE CASCADE,
+  comment_id UUID REFERENCES social_feed_comments(id) ON DELETE CASCADE,
+  reporter_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  reason VARCHAR(100) NOT NULL,
+  description TEXT,
+  status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'resolved', 'dismissed')),
+  priority VARCHAR(10) DEFAULT 'medium' CHECK (priority IN ('low', 'medium', 'high')),
+  moderator_id UUID REFERENCES auth.users(id),
+  moderator_notes TEXT,
+  resolved_at TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Social Feed Follows table (for following other users)
-CREATE TABLE IF NOT EXISTS social_follows (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    follower_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-    following_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    UNIQUE(follower_id, following_id)
+-- Create social feed likes table
+CREATE TABLE IF NOT EXISTS social_feed_likes (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  post_id UUID REFERENCES social_feed_posts(id) ON DELETE CASCADE,
+  comment_id UUID REFERENCES social_feed_comments(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(post_id, user_id),
+  UNIQUE(comment_id, user_id),
+  CHECK ((post_id IS NOT NULL AND comment_id IS NULL) OR (post_id IS NULL AND comment_id IS NOT NULL))
+);
+
+-- Create social feed notifications table
+CREATE TABLE IF NOT EXISTS social_feed_notifications (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  type VARCHAR(20) NOT NULL CHECK (type IN ('report', 'spam', 'engagement', 'system')),
+  message TEXT NOT NULL,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  is_read BOOLEAN DEFAULT false,
+  metadata JSONB,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create social feed engagement tracking table
+CREATE TABLE IF NOT EXISTS social_feed_engagement (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  post_id UUID NOT NULL REFERENCES social_feed_posts(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  action_type VARCHAR(20) NOT NULL CHECK (action_type IN ('view', 'like', 'comment', 'share', 'click')),
+  metadata JSONB,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Create indexes for better performance
-CREATE INDEX IF NOT EXISTS idx_social_posts_user_id ON social_posts(user_id);
-CREATE INDEX IF NOT EXISTS idx_social_posts_created_at ON social_posts(created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_social_posts_post_type ON social_posts(post_type);
-CREATE INDEX IF NOT EXISTS idx_social_likes_post_id ON social_likes(post_id);
-CREATE INDEX IF NOT EXISTS idx_social_likes_user_id ON social_likes(user_id);
-CREATE INDEX IF NOT EXISTS idx_social_comments_post_id ON social_comments(post_id);
-CREATE INDEX IF NOT EXISTS idx_social_comments_user_id ON social_comments(user_id);
-CREATE INDEX IF NOT EXISTS idx_social_follows_follower_id ON social_follows(follower_id);
-CREATE INDEX IF NOT EXISTS idx_social_follows_following_id ON social_follows(following_id);
+CREATE INDEX IF NOT EXISTS idx_social_feed_posts_author ON social_feed_posts(author_id);
+CREATE INDEX IF NOT EXISTS idx_social_feed_posts_status ON social_feed_posts(status);
+CREATE INDEX IF NOT EXISTS idx_social_feed_posts_created ON social_feed_posts(created_at);
+CREATE INDEX IF NOT EXISTS idx_social_feed_posts_pinned ON social_feed_posts(is_pinned);
+CREATE INDEX IF NOT EXISTS idx_social_feed_comments_post ON social_feed_comments(post_id);
+CREATE INDEX IF NOT EXISTS idx_social_feed_comments_author ON social_feed_comments(author_id);
+CREATE INDEX IF NOT EXISTS idx_social_feed_reports_post ON social_feed_reports(post_id);
+CREATE INDEX IF NOT EXISTS idx_social_feed_reports_status ON social_feed_reports(status);
+CREATE INDEX IF NOT EXISTS idx_social_feed_reports_priority ON social_feed_reports(priority);
+CREATE INDEX IF NOT EXISTS idx_social_feed_likes_post ON social_feed_likes(post_id);
+CREATE INDEX IF NOT EXISTS idx_social_feed_likes_user ON social_feed_likes(user_id);
+CREATE INDEX IF NOT EXISTS idx_social_feed_notifications_user ON social_feed_notifications(user_id);
+CREATE INDEX IF NOT EXISTS idx_social_feed_notifications_read ON social_feed_notifications(is_read);
+CREATE INDEX IF NOT EXISTS idx_social_feed_engagement_post ON social_feed_engagement(post_id);
+CREATE INDEX IF NOT EXISTS idx_social_feed_engagement_user ON social_feed_engagement(user_id);
 
 -- Enable Row Level Security
-ALTER TABLE social_posts ENABLE ROW LEVEL SECURITY;
-ALTER TABLE social_likes ENABLE ROW LEVEL SECURITY;
-ALTER TABLE social_comments ENABLE ROW LEVEL SECURITY;
-ALTER TABLE social_follows ENABLE ROW LEVEL SECURITY;
+ALTER TABLE social_feed_posts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE social_feed_comments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE social_feed_reports ENABLE ROW LEVEL SECURITY;
+ALTER TABLE social_feed_likes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE social_feed_notifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE social_feed_engagement ENABLE ROW LEVEL SECURITY;
 
--- RLS Policies for social_posts
-CREATE POLICY "Users can view public posts" ON social_posts
-    FOR SELECT USING (is_public = true);
+-- Create RLS policies
+-- Posts: Public read active, author write own, admin all
+CREATE POLICY "Posts public read" ON social_feed_posts FOR SELECT USING (status = 'active');
+CREATE POLICY "Posts author write" ON social_feed_posts FOR ALL USING (auth.uid() = author_id);
+CREATE POLICY "Posts admin all" ON social_feed_posts FOR ALL USING (auth.jwt() ->> 'role' = 'admin');
 
-CREATE POLICY "Users can view their own posts" ON social_posts
-    FOR SELECT USING (auth.uid() = user_id);
+-- Comments: Public read active, author write own, admin all
+CREATE POLICY "Comments public read" ON social_feed_comments FOR SELECT USING (status = 'active');
+CREATE POLICY "Comments author write" ON social_feed_comments FOR ALL USING (auth.uid() = author_id);
+CREATE POLICY "Comments admin all" ON social_feed_comments FOR ALL USING (auth.jwt() ->> 'role' = 'admin');
 
-CREATE POLICY "Users can create posts" ON social_posts
-    FOR INSERT WITH CHECK (auth.uid() = user_id);
+-- Reports: User can create, admin can read/write all
+CREATE POLICY "Reports user create" ON social_feed_reports FOR INSERT WITH CHECK (auth.uid() = reporter_id);
+CREATE POLICY "Reports user read own" ON social_feed_reports FOR SELECT USING (auth.uid() = reporter_id);
+CREATE POLICY "Reports admin all" ON social_feed_reports FOR ALL USING (auth.jwt() ->> 'role' = 'admin');
 
-CREATE POLICY "Users can update their own posts" ON social_posts
-    FOR UPDATE USING (auth.uid() = user_id);
+-- Likes: User can read/write own, admin can read all
+CREATE POLICY "Likes user own" ON social_feed_likes FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Likes admin read" ON social_feed_likes FOR SELECT USING (auth.jwt() ->> 'role' = 'admin');
 
-CREATE POLICY "Users can delete their own posts" ON social_posts
-    FOR DELETE USING (auth.uid() = user_id);
+-- Notifications: User can read/write own, admin can read all
+CREATE POLICY "Notifications user own" ON social_feed_notifications FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Notifications admin read" ON social_feed_notifications FOR SELECT USING (auth.jwt() ->> 'role' = 'admin');
 
--- RLS Policies for social_likes
-CREATE POLICY "Users can view likes" ON social_likes
-    FOR SELECT USING (true);
+-- Engagement: User can read/write own, admin can read all
+CREATE POLICY "Engagement user own" ON social_feed_engagement FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Engagement admin read" ON social_feed_engagement FOR SELECT USING (auth.jwt() ->> 'role' = 'admin');
 
-CREATE POLICY "Users can create likes" ON social_likes
-    FOR INSERT WITH CHECK (auth.uid() = user_id);
+-- Insert sample data
+INSERT INTO social_feed_posts (content, author_id, likes_count, comments_count, is_announcement) VALUES
+('Welkom bij Top Tier Men! Laten we samen groeien en onze doelen bereiken. 💪', (SELECT id FROM auth.users LIMIT 1), 15, 8, true),
+('Net mijn workout afgerond. Discipline is de sleutel tot succes! 🔥', (SELECT id FROM auth.users LIMIT 1), 23, 12, false),
+('Tips voor een gezonde levensstijl: consistentie boven perfectie!', (SELECT id FROM auth.users LIMIT 1), 18, 6, false)
+ON CONFLICT DO NOTHING;
 
-CREATE POLICY "Users can delete their own likes" ON social_likes
-    FOR DELETE USING (auth.uid() = user_id);
-
--- RLS Policies for social_comments
-CREATE POLICY "Users can view comments" ON social_comments
-    FOR SELECT USING (true);
-
-CREATE POLICY "Users can create comments" ON social_comments
-    FOR INSERT WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can update their own comments" ON social_comments
-    FOR UPDATE USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can delete their own comments" ON social_comments
-    FOR DELETE USING (auth.uid() = user_id);
-
--- RLS Policies for social_follows
-CREATE POLICY "Users can view follows" ON social_follows
-    FOR SELECT USING (true);
-
-CREATE POLICY "Users can create follows" ON social_follows
-    FOR INSERT WITH CHECK (auth.uid() = follower_id);
-
-CREATE POLICY "Users can delete their own follows" ON social_follows
-    FOR DELETE USING (auth.uid() = follower_id);
-
--- Insert some sample data
-INSERT INTO social_posts (user_id, content, post_type, tags) VALUES
-    ('9d6aa8ba-58ab-4188-9a9f-09380a67eb0c', '✅ Check-in: Meditatie en koude douche zijn binnen. Voelt goed om de dag zo te starten. Nu focussen op deep work. Wat is jullie #1 doel voor vandaag?', 'checkin', ARRAY['meditatie', 'koude-douche', 'deep-work']),
-    ('061e43d5-c89a-42bb-8a4c-04be2ce99a7e', '🔥 Net mijn PR gehaald op deadlift! 140kg voor 3 reps. Discipline betaalt zich uit. #progress #strength', 'achievement', ARRAY['deadlift', 'pr', 'strength']),
-    ('9d6aa8ba-58ab-4188-9a9f-09380a67eb0c', '💪 Vraag voor de Brotherhood: Wat is jullie favoriete manier om te herstellen na een zware training? Ik ben benieuwd naar jullie routines!', 'question', ARRAY['recovery', 'training', 'routine']),
-    ('061e43d5-c89a-42bb-8a4c-04be2ce99a7e', '📚 Net "Atomic Habits" uitgelezen. Game changer voor mijn productiviteit. Aanrader voor iedereen die zijn gewoontes wil verbeteren!', 'text', ARRAY['atomic-habits', 'productiviteit', 'gewoontes']),
-    ('9d6aa8ba-58ab-4188-9a9f-09380a67eb0c', '🎯 Mijn doel voor deze week: 5 dagen consistent mediteren en 3x trainen. Wie doet er mee? #accountability', 'motivation', ARRAY['meditatie', 'training', 'accountability']);
-
--- Insert some sample likes
-INSERT INTO social_likes (post_id, user_id, like_type) VALUES
-    ((SELECT id FROM social_posts WHERE content LIKE '%Check-in%' LIMIT 1), '061e43d5-c89a-42bb-8a4c-04be2ce99a7e', 'boks'),
-    ((SELECT id FROM social_posts WHERE content LIKE '%PR gehaald%' LIMIT 1), '9d6aa8ba-58ab-4188-9a9f-09380a67eb0c', 'fire'),
-    ((SELECT id FROM social_posts WHERE content LIKE '%Atomic Habits%' LIMIT 1), '9d6aa8ba-58ab-4188-9a9f-09380a67eb0c', 'respect');
-
--- Insert some sample comments
-INSERT INTO social_comments (post_id, user_id, content) VALUES
-    ((SELECT id FROM social_posts WHERE content LIKE '%Check-in%' LIMIT 1), '061e43d5-c89a-42bb-8a4c-04be2ce99a7e', 'Goed bezig! Ik ga vandaag ook mediteren. 💪'),
-    ((SELECT id FROM social_posts WHERE content LIKE '%PR gehaald%' LIMIT 1), '9d6aa8ba-58ab-4188-9a9f-09380a67eb0c', 'Sterk! 140kg is indrukwekkend. 🔥'),
-    ((SELECT id FROM social_posts WHERE content LIKE '%Atomic Habits%' LIMIT 1), '9d6aa8ba-58ab-4188-9a9f-09380a67eb0c', 'Eens! Dat boek heeft mijn leven veranderd.');
-
--- Insert some sample follows
-INSERT INTO social_follows (follower_id, following_id) VALUES
-    ('061e43d5-c89a-42bb-8a4c-04be2ce99a7e', '9d6aa8ba-58ab-4188-9a9f-09380a67eb0c'),
-    ('9d6aa8ba-58ab-4188-9a9f-09380a67eb0c', '061e43d5-c89a-42bb-8a4c-04be2ce99a7e');
-
--- Create a function to update the updated_at timestamp
+-- Create updated_at trigger function if it doesn't exist
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -146,9 +152,18 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
--- Create triggers to automatically update updated_at
-CREATE TRIGGER update_social_posts_updated_at BEFORE UPDATE ON social_posts
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+-- Create triggers for updated_at
+CREATE TRIGGER update_social_feed_posts_updated_at BEFORE UPDATE ON social_feed_posts FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_social_feed_comments_updated_at BEFORE UPDATE ON social_feed_comments FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_social_feed_reports_updated_at BEFORE UPDATE ON social_feed_reports FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TRIGGER update_social_comments_updated_at BEFORE UPDATE ON social_comments
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column(); 
+-- Grant permissions
+GRANT ALL ON social_feed_posts TO authenticated;
+GRANT ALL ON social_feed_comments TO authenticated;
+GRANT ALL ON social_feed_reports TO authenticated;
+GRANT ALL ON social_feed_likes TO authenticated;
+GRANT ALL ON social_feed_notifications TO authenticated;
+GRANT ALL ON social_feed_engagement TO authenticated;
+
+-- Grant usage on sequences
+GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO authenticated; 
