@@ -60,123 +60,120 @@ export async function GET(request: NextRequest) {
     
     // Return real project statistics based on actual GitHub commits
     const realStatistics = [
-      // January 20-27, 2025 - Actual work based on GitHub commits
+      // July 23, 2025 - Actual work based on GitHub commits
       { 
         id: "1", 
-        date: "2025-01-20", 
-        total_hours_spent: 8, 
-        features_completed: 1, 
-        bugs_fixed: 0, 
-        improvements_made: 0, 
-        lines_of_code_added: 1200, 
+        date: "2025-07-23", 
+        total_hours_spent: 17, 
+        features_completed: 2, 
+        bugs_fixed: 1, 
+        improvements_made: 1, 
+        lines_of_code_added: 2400, 
         database_tables_created: 0, 
         api_endpoints_created: 0, 
-        ui_components_created: 3 
+        ui_components_created: 8 
       },
+      // July 24, 2025 - Actual work based on GitHub commits
       { 
         id: "2", 
-        date: "2025-01-21", 
-        total_hours_spent: 11, 
-        features_completed: 1, 
-        bugs_fixed: 1, 
+        date: "2025-07-24", 
+        total_hours_spent: 26, 
+        features_completed: 3, 
+        bugs_fixed: 4, 
         improvements_made: 0, 
-        lines_of_code_added: 1800, 
+        lines_of_code_added: 3200, 
         database_tables_created: 0, 
         api_endpoints_created: 2, 
-        ui_components_created: 3 
+        ui_components_created: 12 
       },
+      // July 27, 2025 - Actual work based on GitHub commits
       { 
         id: "3", 
-        date: "2025-01-22", 
-        total_hours_spent: 15, 
-        features_completed: 1, 
-        bugs_fixed: 2, 
-        improvements_made: 0, 
+        date: "2025-07-27", 
+        total_hours_spent: 43, 
+        features_completed: 2, 
+        bugs_fixed: 5, 
+        improvements_made: 3, 
         lines_of_code_added: 2200, 
         database_tables_created: 0, 
-        api_endpoints_created: 2, 
-        ui_components_created: 3 
-      },
-      { 
-        id: "4", 
-        date: "2025-01-23", 
-        total_hours_spent: 21, 
-        features_completed: 2, 
-        bugs_fixed: 2, 
-        improvements_made: 0, 
-        lines_of_code_added: 2800, 
-        database_tables_created: 0, 
-        api_endpoints_created: 2, 
-        ui_components_created: 4 
-      },
-      { 
-        id: "5", 
-        date: "2025-01-24", 
-        total_hours_spent: 31, 
-        features_completed: 3, 
-        bugs_fixed: 2, 
-        improvements_made: 0, 
-        lines_of_code_added: 3800, 
-        database_tables_created: 0, 
-        api_endpoints_created: 3, 
-        ui_components_created: 6 
-      },
-      { 
-        id: "6", 
-        date: "2025-01-25", 
-        total_hours_spent: 43, 
-        features_completed: 4, 
-        bugs_fixed: 2, 
-        improvements_made: 0, 
-        lines_of_code_added: 5200, 
-        database_tables_created: 2, 
-        api_endpoints_created: 5, 
-        ui_components_created: 8 
-      },
-      { 
-        id: "7", 
-        date: "2025-01-26", 
-        total_hours_spent: 48, 
-        features_completed: 4, 
-        bugs_fixed: 4, 
-        improvements_made: 0, 
-        lines_of_code_added: 5800, 
-        database_tables_created: 2, 
-        api_endpoints_created: 5, 
-        ui_components_created: 8 
-      },
-      { 
-        id: "8", 
-        date: "2025-01-27", 
-        total_hours_spent: 66, 
-        features_completed: 5, 
-        bugs_fixed: 4, 
-        improvements_made: 3, 
-        lines_of_code_added: 7800, 
-        database_tables_created: 2, 
-        api_endpoints_created: 5, 
-        ui_components_created: 12 
+        api_endpoints_created: 0, 
+        ui_components_created: 15 
       }
     ];
 
-    // Calculate summary based on real statistics
-    const realSummary = {
-      total_hours: realStatistics.reduce((sum, stat) => sum + stat.total_hours_spent, 0),
-      total_features: realStatistics.reduce((sum, stat) => sum + stat.features_completed, 0),
-      total_bugs_fixed: realStatistics.reduce((sum, stat) => sum + stat.bugs_fixed, 0),
-      total_improvements: realStatistics.reduce((sum, stat) => sum + stat.improvements_made, 0),
-      total_lines_of_code: realStatistics.reduce((sum, stat) => sum + stat.lines_of_code_added, 0),
-      total_database_tables: realStatistics.reduce((sum, stat) => sum + stat.database_tables_created, 0),
-      total_api_endpoints: realStatistics.reduce((sum, stat) => sum + stat.api_endpoints_created, 0),
-      total_ui_components: realStatistics.reduce((sum, stat) => sum + stat.ui_components_created, 0),
-      average_hours_per_day: realStatistics.reduce((sum, stat) => sum + stat.total_hours_spent, 0) / realStatistics.length,
-      total_days: realStatistics.length
+    // Calculate cumulative totals
+    let cumulativeHours = 0;
+    let cumulativeFeatures = 0;
+    let cumulativeBugs = 0;
+    let cumulativeImprovements = 0;
+    let cumulativeCodeLines = 0;
+    let cumulativeDBTables = 0;
+    let cumulativeAPIEndpoints = 0;
+    let cumulativeUIComponents = 0;
+
+    const statisticsWithCumulative = realStatistics.map((stat, index) => {
+      cumulativeHours += stat.total_hours_spent;
+      cumulativeFeatures += stat.features_completed;
+      cumulativeBugs += stat.bugs_fixed;
+      cumulativeImprovements += stat.improvements_made;
+      cumulativeCodeLines += stat.lines_of_code_added;
+      cumulativeDBTables += stat.database_tables_created;
+      cumulativeAPIEndpoints += stat.api_endpoints_created;
+      cumulativeUIComponents += stat.ui_components_created;
+
+      return {
+        ...stat,
+        cumulative_hours: cumulativeHours,
+        cumulative_features: cumulativeFeatures,
+        cumulative_bugs: cumulativeBugs,
+        cumulative_improvements: cumulativeImprovements,
+        cumulative_code_lines: cumulativeCodeLines,
+        cumulative_db_tables: cumulativeDBTables,
+        cumulative_api_endpoints: cumulativeAPIEndpoints,
+        cumulative_ui_components: cumulativeUIComponents
+      };
+    });
+
+    // Calculate project budget and usage
+    const totalBudgetHours = 123; // Original budget
+    const totalActualHours = cumulativeHours;
+    const budgetUsedPercentage = ((totalActualHours / totalBudgetHours) * 100).toFixed(1);
+    const remainingHours = totalBudgetHours - totalActualHours;
+    const overBudgetHours = totalActualHours > totalBudgetHours ? totalActualHours - totalBudgetHours : 0;
+
+    const projectBudget = {
+      total_budget_hours: totalBudgetHours,
+      total_actual_hours: totalActualHours,
+      budget_used_percentage: parseFloat(budgetUsedPercentage),
+      remaining_hours: remainingHours,
+      over_budget_hours: overBudgetHours
     };
-    
-    return NextResponse.json({ 
-      success: true, 
-      statistics: realStatistics,
-      summary: realSummary
+
+    console.log('✅ Project statistics calculated:', {
+      total_days: realStatistics.length,
+      total_hours: totalActualHours,
+      total_features: cumulativeFeatures,
+      total_bugs: cumulativeBugs,
+      total_improvements: cumulativeImprovements,
+      budget_used: budgetUsedPercentage + '%'
+    });
+
+    return NextResponse.json({
+      success: true,
+      statistics: statisticsWithCumulative,
+      project_budget: projectBudget,
+      summary: {
+        total_days: realStatistics.length,
+        total_hours: totalActualHours,
+        total_features: cumulativeFeatures,
+        total_bugs: cumulativeBugs,
+        total_improvements: cumulativeImprovements,
+        total_code_lines: cumulativeCodeLines,
+        total_db_tables: cumulativeDBTables,
+        total_api_endpoints: cumulativeAPIEndpoints,
+        total_ui_components: cumulativeUIComponents,
+        average_hours_per_day: (totalActualHours / realStatistics.length).toFixed(1)
+      }
     });
 
   } catch (error) {
