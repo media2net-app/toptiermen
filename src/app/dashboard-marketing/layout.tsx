@@ -20,8 +20,7 @@ import {
   Bars3Icon,
   XMarkIcon,
   ExclamationTriangleIcon,
-  WrenchScrewdriverIcon,
-  CalculatorIcon
+  WrenchScrewdriverIcon
 } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 
@@ -41,7 +40,6 @@ const developmentNavigation = [
   { name: 'Marketing Plan', href: '/dashboard-marketing/marketingplan', icon: DocumentChartBarIcon },
   { name: 'Content', href: '/dashboard-marketing/content', icon: DocumentTextIcon },
   { name: 'Takenlijst', href: '/dashboard-marketing/takenlijst', icon: ClipboardDocumentListIcon },
-  { name: 'Prijsopgave', href: '/dashboard-marketing/prijsopgave', icon: CalculatorIcon },
 ];
 
 export default function MarketingLayout({
