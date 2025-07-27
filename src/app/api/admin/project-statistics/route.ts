@@ -14,87 +14,9 @@ export async function GET(request: NextRequest) {
     
           // Return real project statistics based on actual GitHub commits from May 29, 2025 to July 27, 2025 (162 total hours)
     const realStatistics = [
-      // May 28-29, 2025 - Initial Setup
+      // July 27, 2025 - All GitHub data combined (162 total hours)
       { 
         id: "1", 
-        date: "2025-05-29", 
-        total_hours_spent: 12, 
-        features_completed: 0, 
-        bugs_fixed: 0, 
-        improvements_made: 0, 
-        lines_of_code_added: 500, 
-        database_tables_created: 0, 
-        api_endpoints_created: 0, 
-        ui_components_created: 0 
-      },
-      // June 13, 2025 - Theme Update
-      { 
-        id: "2", 
-        date: "2025-06-13", 
-        total_hours_spent: 16, 
-        features_completed: 0, 
-        bugs_fixed: 0, 
-        improvements_made: 1, 
-        lines_of_code_added: 800, 
-        database_tables_created: 0, 
-        api_endpoints_created: 0, 
-        ui_components_created: 5 
-      },
-      // June 16, 2025 - Dashboard Improvements
-      { 
-        id: "3", 
-        date: "2025-06-16", 
-        total_hours_spent: 28, 
-        features_completed: 2, 
-        bugs_fixed: 3, 
-        improvements_made: 2, 
-        lines_of_code_added: 1200, 
-        database_tables_created: 0, 
-        api_endpoints_created: 2, 
-        ui_components_created: 8 
-      },
-      // June 17, 2025 - Mind & Focus Module
-      { 
-        id: "4", 
-        date: "2025-06-17", 
-        total_hours_spent: 40, 
-        features_completed: 3, 
-        bugs_fixed: 3, 
-        improvements_made: 3, 
-        lines_of_code_added: 2000, 
-        database_tables_created: 0, 
-        api_endpoints_created: 4, 
-        ui_components_created: 15 
-      },
-      // July 23, 2025 - Major System Overhaul
-      { 
-        id: "5", 
-        date: "2025-07-23", 
-        total_hours_spent: 68, 
-        features_completed: 6, 
-        bugs_fixed: 5, 
-        improvements_made: 4, 
-        lines_of_code_added: 3200, 
-        database_tables_created: 2, 
-        api_endpoints_created: 8, 
-        ui_components_created: 25 
-      },
-      // July 24, 2025 - Training System
-      { 
-        id: "6", 
-        date: "2025-07-24", 
-        total_hours_spent: 94, 
-        features_completed: 9, 
-        bugs_fixed: 9, 
-        improvements_made: 4, 
-        lines_of_code_added: 4400, 
-        database_tables_created: 2, 
-        api_endpoints_created: 10, 
-        ui_components_created: 37 
-      },
-      // July 27, 2025 - Final Phase
-      { 
-        id: "7", 
         date: "2025-07-27", 
         total_hours_spent: 162, 
         features_completed: 31, 
