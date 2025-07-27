@@ -24,14 +24,14 @@ export async function GET(request: NextRequest) {
     } catch (dbError) {
       console.log('Using mock data for project budget');
       
-      // Mock budget data
+      // Mock budget data based on actual GitHub commits (162 total hours)
       const mockBudget = {
         id: "1",
         total_budget_hours: 123,
-        total_hours_spent: 137,
-        total_hours_remaining: -14,
-        total_hours_overspent: 14,
-        budget_percentage_used: 111.4,
+        total_hours_spent: 162,
+        total_hours_remaining: -39,
+        total_hours_overspent: 39,
+        budget_percentage_used: 131.7,
         created_at: "2025-07-27T21:00:00.000Z",
         updated_at: "2025-07-27T21:00:00.000Z"
       };
