@@ -163,7 +163,7 @@ export default function ProfielDetail() {
   }
 
   const memberInterests = getMemberInterests(member.interests);
-  const displayRank = currentMemberRank ? currentMemberRank.name : (member.rank || 'Member');
+  const displayRank = currentMemberRank ? currentMemberRank.name : 'Member';
   const rankIcon = getRankIcon(displayRank);
   const avatarUrl = member.avatar_url || '/profielfoto.png';
   const memberBadges = badges.slice(0, Math.min(3, Math.floor((member.points || 0) / 100) + 1));
