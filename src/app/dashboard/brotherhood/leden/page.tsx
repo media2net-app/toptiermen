@@ -252,12 +252,12 @@ export default function LedenOverzicht() {
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
       {/* Header */}
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold text-white mb-1">De Broeders</h2>
-        <p className="text-[#8BAE5A] text-lg mb-2">Vind, connect en leer van de andere leden van Top Tier Men.</p>
-        <div className="flex items-center gap-4 text-[#FFD700] text-sm font-semibold">
+      <div className="mb-6 sm:mb-8">
+        <h2 className="text-2xl sm:text-3xl font-bold text-white mb-1">De Broeders</h2>
+        <p className="text-[#8BAE5A] text-sm sm:text-lg mb-2">Vind, connect en leer van de andere leden van Top Tier Men.</p>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-[#FFD700] text-xs sm:text-sm font-semibold">
           <span>Momenteel {members.length} actieve leden</span>
           <span className="flex items-center gap-1">
             <span 
@@ -271,57 +271,59 @@ export default function LedenOverzicht() {
         </div>
       </div>
       {/* Filters & Search */}
-      <div className="flex flex-col md:flex-row md:items-end gap-4 mb-8">
+      <div className="flex flex-col gap-3 sm:gap-4 mb-6 sm:mb-8">
         <input
           type="text"
-          className="flex-1 bg-[#232D1A]/80 rounded-xl p-3 text-white placeholder:text-[#8BAE5A] border border-[#3A4D23]/40"
+          className="w-full bg-[#232D1A]/80 rounded-xl p-3 text-white placeholder:text-[#8BAE5A] border border-[#3A4D23]/40 text-sm sm:text-base"
           placeholder="Zoek een lid op naam, trefwoord of motto..."
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
-        <select
-          className="bg-[#232D1A]/80 rounded-xl p-3 text-white border border-[#3A4D23]/40"
-          value={selectedRank}
-          onChange={e => setSelectedRank(e.target.value)}
-        >
-          <option value="">Alle rangen</option>
-          {ranks.map(r => <option key={r.name} value={r.name}>{r.icon} {r.name}</option>)}
-        </select>
-        <select
-          className="bg-[#232D1A]/80 rounded-xl p-3 text-white border border-[#3A4D23]/40"
-          value={selectedInterest}
-          onChange={e => setSelectedInterest(e.target.value)}
-        >
-          <option value="">Alle interesses</option>
-          {interests.map(i => <option key={i} value={i}>#{i}</option>)}
-        </select>
-        <input
-          type="text"
-          className="bg-[#232D1A]/80 rounded-xl p-3 text-white border border-[#3A4D23]/40"
-          placeholder="Locatie..."
-          value={location}
-          onChange={e => setLocation(e.target.value)}
-        />
-        <div className="flex gap-2 items-center">
-          <label className="flex items-center gap-1 text-[#8BAE5A] text-xs">
-            <input type="checkbox" checked={showNew} onChange={e => setShowNew(e.target.checked)} className="accent-[#FFD700]" /> Nieuwe leden
-          </label>
-          <label className="flex items-center gap-1 text-[#8BAE5A] text-xs">
-            <input type="checkbox" checked={showOnline} onChange={e => setShowOnline(e.target.checked)} className="accent-[#FFD700]" /> 
-            <span className="flex items-center gap-1">
-              <span 
-                className="w-2 h-2 bg-[#8BAE5A] rounded-full"
-                style={{
-                  animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
-                }}
-              ></span>
-              Online nu ({onlineCount})
-            </span>
-          </label>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <select
+            className="w-full bg-[#232D1A]/80 rounded-xl p-3 text-white border border-[#3A4D23]/40 text-sm sm:text-base"
+            value={selectedRank}
+            onChange={e => setSelectedRank(e.target.value)}
+          >
+            <option value="">Alle rangen</option>
+            {ranks.map(r => <option key={r.name} value={r.name}>{r.icon} {r.name}</option>)}
+          </select>
+          <select
+            className="w-full bg-[#232D1A]/80 rounded-xl p-3 text-white border border-[#3A4D23]/40 text-sm sm:text-base"
+            value={selectedInterest}
+            onChange={e => setSelectedInterest(e.target.value)}
+          >
+            <option value="">Alle interesses</option>
+            {interests.map(i => <option key={i} value={i}>#{i}</option>)}
+          </select>
+          <input
+            type="text"
+            className="w-full bg-[#232D1A]/80 rounded-xl p-3 text-white border border-[#3A4D23]/40 text-sm sm:text-base"
+            placeholder="Locatie..."
+            value={location}
+            onChange={e => setLocation(e.target.value)}
+          />
+          <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+            <label className="flex items-center gap-1 text-[#8BAE5A] text-xs">
+              <input type="checkbox" checked={showNew} onChange={e => setShowNew(e.target.checked)} className="accent-[#FFD700]" /> Nieuwe leden
+            </label>
+            <label className="flex items-center gap-1 text-[#8BAE5A] text-xs">
+              <input type="checkbox" checked={showOnline} onChange={e => setShowOnline(e.target.checked)} className="accent-[#FFD700]" /> 
+              <span className="flex items-center gap-1">
+                <span 
+                  className="w-2 h-2 bg-[#8BAE5A] rounded-full"
+                  style={{
+                    animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+                  }}
+                ></span>
+                Online nu ({onlineCount})
+              </span>
+            </label>
+          </div>
         </div>
       </div>
       {/* Leden Gallerij */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
         {filtered.map((m) => {
           const memberInterests = getMemberInterests(m.interests);
           const memberRank = m.current_rank?.name || m.fallback_rank || 'Recruit';
@@ -338,7 +340,7 @@ export default function LedenOverzicht() {
           const displayBadges = m.badges_count || 0;
           
           return (
-            <div key={m.id} className="bg-[#232D1A]/90 rounded-2xl shadow-xl border border-[#3A4D23]/40 p-5 flex flex-col items-center gap-3 hover:shadow-2xl transition-all">
+            <div key={m.id} className="bg-[#232D1A]/90 rounded-2xl shadow-xl border border-[#3A4D23]/40 p-4 sm:p-5 flex flex-col items-center gap-3 hover:shadow-2xl transition-all">
               <Link href={`/dashboard/brotherhood/leden/${m.id}`} className="w-full flex flex-col items-center gap-3 group cursor-pointer" style={{ textDecoration: 'none' }}>
                 <div className="relative">
                   <Image 
@@ -346,11 +348,11 @@ export default function LedenOverzicht() {
                     alt={memberName} 
                     width={80} 
                     height={80} 
-                    className="w-20 h-20 rounded-full border-2 border-[#8BAE5A] object-cover group-hover:scale-105 transition-transform" 
+                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-[#8BAE5A] object-cover group-hover:scale-105 transition-transform" 
                   />
                   {isMemberOnline && (
                     <span 
-                      className="absolute bottom-1 right-1 w-5 h-5 bg-[#8BAE5A] border-3 border-white rounded-full shadow-lg" 
+                      className="absolute bottom-1 right-1 w-4 h-4 sm:w-5 sm:h-5 bg-[#8BAE5A] border-3 border-white rounded-full shadow-lg" 
                       title="Online nu"
                       style={{
                         animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
@@ -359,37 +361,37 @@ export default function LedenOverzicht() {
                   )}
                   {isMemberNew && <span className="absolute -top-1 -right-1 bg-[#FFD700] text-[#181F17] text-xs px-2 py-1 rounded-full font-bold">Nieuw</span>}
                 </div>
-                <div className="text-lg font-bold text-white text-center group-hover:text-[#FFD700] transition-colors">{memberName}</div>
-                <div className="flex items-center gap-2 text-[#FFD700] font-semibold text-sm">
+                <div className="text-base sm:text-lg font-bold text-white text-center group-hover:text-[#FFD700] transition-colors break-words w-full">{memberName}</div>
+                <div className="flex items-center gap-2 text-[#FFD700] font-semibold text-xs sm:text-sm text-center">
                   <span>{rankIcon}</span>
-                  <span>{displayRank}</span>
+                  <span className="break-words">{displayRank}</span>
                 </div>
-                <div className="text-xs text-[#8BAE5A] mb-1">{m.location || 'Locatie onbekend'}</div>
+                <div className="text-xs text-[#8BAE5A] mb-1 text-center break-words">{m.location || 'Locatie onbekend'}</div>
                 {memberInterests.length > 0 && (
-                  <div className="flex flex-wrap gap-2 justify-center mb-2">
+                  <div className="flex flex-wrap gap-1 sm:gap-2 justify-center mb-2 w-full">
                     {memberInterests.slice(0, 2).map(tag => (
-                      <span key={tag} className="bg-[#3A4D23]/60 text-[#8BAE5A] px-2 py-0.5 rounded-full text-xs font-semibold">#{tag}</span>
+                      <span key={tag} className="bg-[#3A4D23]/60 text-[#8BAE5A] px-2 py-0.5 rounded-full text-xs font-semibold break-words">#{tag}</span>
                     ))}
                     {memberInterests.length > 2 && (
                       <span className="bg-[#3A4D23]/60 text-[#8BAE5A] px-2 py-0.5 rounded-full text-xs font-semibold">+{memberInterests.length - 2}</span>
                     )}
                   </div>
                 )}
-                <div className="text-xs text-[#FFD700] font-semibold">
+                <div className="text-xs text-[#FFD700] font-semibold text-center">
                   {displayXP} XP • {displayBadges} badges
                 </div>
-                <div className="text-xs text-[#8BAE5A]">
+                <div className="text-xs text-[#8BAE5A] text-center">
                   {mutualConnections} mutuals
                 </div>
               </Link>
               <div className="w-full mt-auto">
                 {isCurrentUser ? (
-                  <button className="w-full px-4 py-2 rounded-xl bg-[#3A4D23]/60 text-[#8BAE5A] font-bold shadow cursor-default" disabled>Jij bent dit</button>
+                  <button className="w-full px-3 sm:px-4 py-2 rounded-xl bg-[#3A4D23]/60 text-[#8BAE5A] font-bold shadow cursor-default text-sm sm:text-base" disabled>Jij bent dit</button>
                 ) : connectionStatus[m.id] === 'verzoek' ? (
-                  <button className="w-full px-4 py-2 rounded-xl bg-[#8BAE5A]/30 text-[#8BAE5A] font-bold shadow cursor-default" disabled>✓ Verzoek Verzonden</button>
+                  <button className="w-full px-3 sm:px-4 py-2 rounded-xl bg-[#8BAE5A]/30 text-[#8BAE5A] font-bold shadow cursor-default text-sm sm:text-base" disabled>✓ Verzoek Verzonden</button>
                 ) : (
                   <button
-                    className="w-full px-4 py-2 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold shadow hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all"
+                    className="w-full px-3 sm:px-4 py-2 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold shadow hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all text-sm sm:text-base"
                     onClick={() => handleConnect(m.id)}
                   >
                     + Maak Connectie
@@ -402,11 +404,11 @@ export default function LedenOverzicht() {
       </div>
       {filtered.length === 0 && (
         <div className="text-center py-12">
-          <div className="text-[#8BAE5A] text-lg">Geen leden gevonden met de geselecteerde filters.</div>
+          <div className="text-[#8BAE5A] text-base sm:text-lg">Geen leden gevonden met de geselecteerde filters.</div>
         </div>
       )}
       {notification && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#232D1A] text-[#8BAE5A] px-6 py-3 rounded-xl shadow-lg border border-[#3A4D23]/40 z-50 animate-fade-in">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#232D1A] text-[#8BAE5A] px-4 sm:px-6 py-3 rounded-xl shadow-lg border border-[#3A4D23]/40 z-50 animate-fade-in text-sm sm:text-base">
           {notification}
         </div>
       )}

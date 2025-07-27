@@ -361,11 +361,11 @@ const SocialFeedPage = () => {
   }, []);
 
   return (
-    <div className="w-full max-w-7xl mx-auto">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
       {/* Create Post Composer */}
-      <section className="mb-6">
-        <div className="bg-[#232D1A]/80 rounded-xl shadow-xl border border-[#3A4D23]/40 p-4 md:p-6">
-          <div className="flex items-start gap-4">
+      <section className="mb-4 sm:mb-6">
+        <div className="bg-[#232D1A]/80 rounded-xl shadow-xl border border-[#3A4D23]/40 p-3 sm:p-4 md:p-6">
+          <div className="flex items-start gap-3 sm:gap-4">
             {/* User avatar */}
             <div className="flex-shrink-0">
               <Image 
@@ -373,7 +373,7 @@ const SocialFeedPage = () => {
                 alt={user?.full_name || "User"} 
                 width={48} 
                 height={48} 
-                className="w-12 h-12 rounded-full border-2 border-[#8BAE5A] object-cover" 
+                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-[#8BAE5A] object-cover" 
               />
             </div>
             
@@ -383,28 +383,28 @@ const SocialFeedPage = () => {
                 <textarea
                   value={newPost}
                   onChange={(e) => setNewPost(e.target.value)}
-                  className="w-full border-none focus:ring-0 resize-none bg-[#181F17] text-white rounded-xl p-4 pr-12 placeholder:text-[#8BAE5A] text-base"
+                  className="w-full border-none focus:ring-0 resize-none bg-[#181F17] text-white rounded-xl p-3 sm:p-4 pr-10 sm:pr-12 placeholder:text-[#8BAE5A] text-sm sm:text-base"
                   rows={3}
                   placeholder={`Deel een overwinning, stel een vraag of zet je intentie voor vandaag, ${user?.full_name?.split(' ')[0] || 'Brother'}...`}
                   maxLength={500}
                 />
                 <button
                   onClick={() => setShowPostEmojiPicker(!showPostEmojiPicker)}
-                  className="absolute right-4 top-4 p-1 text-[#8BAE5A] hover:text-[#FFD700] transition-colors"
+                  className="absolute right-3 sm:right-4 top-3 sm:top-4 p-1 text-[#8BAE5A] hover:text-[#FFD700] transition-colors"
                 >
-                  <FaceSmileIcon className="w-5 h-5" />
+                  <FaceSmileIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
               </div>
               
               {/* Post Emoji Picker */}
               {showPostEmojiPicker && (
-                <div className="mt-3 bg-[#232D1A] border border-[#3A4D23] rounded-xl p-4">
-                  <div className="grid grid-cols-10 gap-2">
+                <div className="mt-3 bg-[#232D1A] border border-[#3A4D23] rounded-xl p-3 sm:p-4">
+                  <div className="grid grid-cols-8 sm:grid-cols-10 gap-1 sm:gap-2">
                     {popularEmojis.map((emoji, index) => (
                       <button
                         key={index}
                         onClick={() => addEmojiToPost(emoji)}
-                        className="w-8 h-8 text-lg hover:bg-[#3A4D23] rounded-lg transition-colors flex items-center justify-center"
+                        className="w-6 h-6 sm:w-8 sm:h-8 text-sm sm:text-lg hover:bg-[#3A4D23] rounded-lg transition-colors flex items-center justify-center"
                       >
                         {emoji}
                       </button>
@@ -414,29 +414,33 @@ const SocialFeedPage = () => {
               )}
               
               {/* Action buttons */}
-              <div className="flex flex-wrap items-center gap-3 mt-4">
-                <button className="flex items-center px-4 py-2 text-sm rounded-xl bg-[#232D1A] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#3A4D23] transition-colors">
-                  <PhotoIcon className="w-4 h-4 mr-2" />
-                  Foto/Video
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-3 sm:mt-4">
+                <button className="flex items-center px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-xl bg-[#232D1A] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#3A4D23] transition-colors">
+                  <PhotoIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Foto/Video</span>
+                  <span className="sm:hidden">Foto</span>
                 </button>
-                <button className="flex items-center px-4 py-2 text-sm rounded-xl bg-[#232D1A] text-[#FFD700] border border-[#3A4D23] hover:bg-[#3A4D23] transition-colors">
-                  <MapPinIcon className="w-4 h-4 mr-2" />
-                  Check-in
+                <button className="flex items-center px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-xl bg-[#232D1A] text-[#FFD700] border border-[#3A4D23] hover:bg-[#3A4D23] transition-colors">
+                  <MapPinIcon className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Check-in</span>
+                  <span className="sm:hidden">Locatie</span>
                 </button>
                 <button 
                   onClick={createPost}
                   disabled={!newPost.trim() || posting}
-                  className="ml-auto px-6 py-2 rounded-xl bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#B6C948] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="ml-auto px-4 sm:px-6 py-2 rounded-xl bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#B6C948] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
                 >
                   {posting ? (
                     <>
-                      <div className="w-4 h-4 border-2 border-[#181F17] border-t-transparent rounded-full animate-spin"></div>
-                      Posten...
+                      <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-[#181F17] border-t-transparent rounded-full animate-spin"></div>
+                      <span className="hidden sm:inline">Posten...</span>
+                      <span className="sm:hidden">...</span>
                     </>
                   ) : (
                     <>
-                      <PaperAirplaneIcon className="w-4 h-4" />
-                      Post
+                      <PaperAirplaneIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span className="hidden sm:inline">Post</span>
+                      <span className="sm:hidden">Post</span>
                     </>
                   )}
                 </button>
@@ -447,7 +451,7 @@ const SocialFeedPage = () => {
       </section>
 
       {/* Feed Filters */}
-      <section className="mb-6">
+      <section className="mb-4 sm:mb-6">
         <div className="flex overflow-x-auto hide-scrollbar">
           <div className="flex space-x-2 min-w-full">
             {[

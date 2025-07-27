@@ -741,58 +741,58 @@ export default function MijnMissiesPage() {
 
   return (
     <ClientLayout>
-      <div className="w-full max-w-7xl mx-auto">
-        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 drop-shadow-lg">Mijn Missies</h1>
-        <p className="text-[#8BAE5A] text-lg mb-8">Voltooi dagelijkse missies en verdien XP</p>
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 drop-shadow-lg">Mijn Missies</h1>
+        <p className="text-[#8BAE5A] text-sm sm:text-lg mb-6 sm:mb-8">Voltooi dagelijkse missies en verdien XP</p>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 text-center">
-            <div className="text-2xl font-bold text-[#FFD700]">{summary.completedToday}</div>
-            <div className="text-[#8BAE5A] text-sm">Vandaag Voltooid</div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
+          <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-3 sm:p-4 text-center">
+            <div className="text-xl sm:text-2xl font-bold text-[#FFD700]">{summary.completedToday}</div>
+            <div className="text-[#8BAE5A] text-xs sm:text-sm">Vandaag Voltooid</div>
           </div>
-          <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 text-center">
-            <div className="text-2xl font-bold text-[#FFD700]">{summary.totalToday}</div>
-            <div className="text-[#8BAE5A] text-sm">Totaal Vandaag</div>
+          <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-3 sm:p-4 text-center">
+            <div className="text-xl sm:text-2xl font-bold text-[#FFD700]">{summary.totalToday}</div>
+            <div className="text-[#8BAE5A] text-xs sm:text-sm">Totaal Vandaag</div>
           </div>
-          <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 text-center">
-            <div className="text-2xl font-bold text-[#FFD700]">{summary.dailyStreak}</div>
-            <div className="text-[#8BAE5A] text-sm">Dagelijkse Streak</div>
+          <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-3 sm:p-4 text-center">
+            <div className="text-xl sm:text-2xl font-bold text-[#FFD700]">{summary.dailyStreak}</div>
+            <div className="text-[#8BAE5A] text-xs sm:text-sm">Dagelijkse Streak</div>
           </div>
         </div>
 
         {/* Onboarding Progress - Step 3: Missions */}
-        <div className="mb-8">
-          <div className="bg-gradient-to-br from-[#8BAE5A]/10 to-[#FFD700]/10 border-2 border-[#8BAE5A] rounded-2xl p-6">
-            <div className="flex items-center justify-between mb-4">
+        <div className="mb-6 sm:mb-8">
+          <div className="bg-gradient-to-br from-[#8BAE5A]/10 to-[#FFD700]/10 border-2 border-[#8BAE5A] rounded-2xl p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
               <div className="flex items-center gap-3">
-                <span className="text-3xl">🔥</span>
+                <span className="text-2xl sm:text-3xl">🔥</span>
                 <div>
-                  <h2 className="text-xl font-bold text-white">Onboarding Stap 3: Missies Selecteren</h2>
-                  <p className="text-[#8BAE5A] text-sm">Selecteer minimaal 3 missies om door te gaan</p>
+                  <h2 className="text-lg sm:text-xl font-bold text-white">Onboarding Stap 3: Missies Selecteren</h2>
+                  <p className="text-[#8BAE5A] text-xs sm:text-sm">Selecteer minimaal 3 missies om door te gaan</p>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-2xl font-bold text-[#FFD700]">{missions.length}/3</div>
-                <div className="text-[#8BAE5A] text-sm">Missies geselecteerd</div>
+                <div className="text-xl sm:text-2xl font-bold text-[#FFD700]">{missions.length}/3</div>
+                <div className="text-[#8BAE5A] text-xs sm:text-sm">Missies geselecteerd</div>
               </div>
             </div>
             
             {missions.length < 3 ? (
-              <div className="bg-[#181F17]/80 rounded-xl p-4 border border-[#3A4D23]">
-                <p className="text-[#f0a14f] text-sm font-semibold mb-2">
+              <div className="bg-[#181F17]/80 rounded-xl p-3 sm:p-4 border border-[#3A4D23]">
+                <p className="text-[#f0a14f] text-xs sm:text-sm font-semibold mb-2">
                   ⚠️ Je hebt nog {3 - missions.length} missie{3 - missions.length !== 1 ? 's' : ''} nodig
                 </p>
-                <p className="text-gray-300 text-sm">
+                <p className="text-gray-300 text-xs sm:text-sm">
                   Voeg nog {3 - missions.length} missie{3 - missions.length !== 1 ? 's' : ''} toe om door te gaan naar de volgende stap van de onboarding.
                 </p>
               </div>
             ) : (
-              <div className="bg-[#8BAE5A]/20 rounded-xl p-4 border border-[#8BAE5A]">
-                <p className="text-[#8BAE5A] text-sm font-semibold mb-2">
+              <div className="bg-[#8BAE5A]/20 rounded-xl p-3 sm:p-4 border border-[#8BAE5A]">
+                <p className="text-[#8BAE5A] text-xs sm:text-sm font-semibold mb-2">
                   ✅ Perfect! Je hebt {missions.length} missies geselecteerd
                 </p>
-                <p className="text-gray-300 text-sm mb-4">
+                <p className="text-gray-300 text-xs sm:text-sm mb-4">
                   Je kunt nu door naar de volgende stap van de onboarding.
                 </p>
                 <button
@@ -826,7 +826,7 @@ export default function MijnMissiesPage() {
                       toast.error('Er is een fout opgetreden');
                     }
                   }}
-                  className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#0A0F0A] px-6 py-3 rounded-lg font-semibold hover:from-[#A6C97B] hover:to-[#FFE55C] transition-all duration-200 flex items-center gap-2"
+                  className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#0A0F0A] px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold hover:from-[#A6C97B] hover:to-[#FFE55C] transition-all duration-200 flex items-center gap-2 text-sm sm:text-base"
                 >
                   <span>Volgende Stap</span>
                   <span>→</span>
@@ -1103,56 +1103,58 @@ export default function MijnMissiesPage() {
 
         {/* TO DO Missions */}
         {pendingMissions.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-white mb-4">Te Doen</h2>
-            <div className="space-y-4">
+          <div className="mb-6 sm:mb-8">
+            <h2 className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4">Te Doen</h2>
+            <div className="space-y-3 sm:space-y-4">
               {pendingMissions.map((mission) => (
                 <div
                   key={mission.id}
-                  className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-6 hover:border-[#8BAE5A]/50 transition-all duration-200"
+                  className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 sm:p-6 hover:border-[#8BAE5A]/50 transition-all duration-200"
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className="text-3xl">{mission.icon}</div>
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-white">{mission.title}</h3>
-                        <div className="flex items-center space-x-4 mt-1">
-                          <span className="text-sm text-[#8BAE5A]">{mission.type}</span>
-                          <span className="text-sm text-gray-400">{mission.category}</span>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+                    <div className="flex items-start gap-3 sm:gap-4 flex-1 min-w-0">
+                      <div className="text-2xl sm:text-3xl flex-shrink-0">{mission.icon}</div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-base sm:text-lg font-semibold text-white break-words leading-tight">{mission.title}</h3>
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-1">
+                          <span className="text-xs sm:text-sm text-[#8BAE5A]">{mission.type}</span>
+                          <span className="text-xs sm:text-sm text-gray-400">{mission.category}</span>
                           {mission.shared && (
-                            <span className="text-sm text-[#FFD700]">👥 Gedeeld</span>
+                            <span className="text-xs sm:text-sm text-[#FFD700]">👥 Gedeeld</span>
                           )}
                         </div>
                         {mission.accountabilityPartner && (
-                          <p className="text-sm text-gray-400 mt-1">
+                          <p className="text-xs sm:text-sm text-gray-400 mt-1 break-words">
                             Accountability Partner: {mission.accountabilityPartner}
                           </p>
                         )}
                         {mission.created_at && (
-                          <p className="text-sm text-gray-400 mt-1">
+                          <p className="text-xs sm:text-sm text-gray-400 mt-1">
                             Toegevoegd op: {new Date(mission.created_at).toLocaleDateString('nl-NL')}
                           </p>
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center space-x-4">
+                    <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-4 flex-shrink-0">
                       <div className="text-right">
-                        <div className="text-lg font-bold text-[#FFD700]">+{mission.xp_reward} XP</div>
-                        <div className="text-sm text-gray-400">{mission.badge}</div>
+                        <div className="text-base sm:text-lg font-bold text-[#FFD700]">+{mission.xp_reward} XP</div>
+                        <div className="text-xs sm:text-sm text-gray-400">{mission.badge}</div>
                       </div>
-                      <button
-                        onClick={() => toggleMission(mission.id)}
-                        className="bg-gradient-to-r from-[#8BAE5A] to-[#6B8E3A] hover:from-[#7A9D4A] hover:to-[#5A7D2A] text-white font-semibold px-4 py-2 rounded-lg transition-all duration-200"
-                      >
-                        Voltooien
-                      </button>
-                      <button
-                        onClick={() => handleDeleteClick(mission)}
-                        className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold px-3 py-2 rounded-lg transition-all duration-200 text-sm"
-                        title="Verwijder missie"
-                      >
-                        🗑️
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => toggleMission(mission.id)}
+                          className="bg-gradient-to-r from-[#8BAE5A] to-[#6B8E3A] hover:from-[#7A9D4A] hover:to-[#5A7D2A] text-white font-semibold px-3 sm:px-4 py-2 rounded-lg transition-all duration-200 text-xs sm:text-sm"
+                        >
+                          Voltooien
+                        </button>
+                        <button
+                          onClick={() => handleDeleteClick(mission)}
+                          className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold px-2 sm:px-3 py-2 rounded-lg transition-all duration-200 text-xs sm:text-sm"
+                          title="Verwijder missie"
+                        >
+                          🗑️
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1164,55 +1166,57 @@ export default function MijnMissiesPage() {
         {/* Completed Missions */}
         {completedMissions.length > 0 && (
           <div>
-            <h2 className="text-2xl font-bold text-white mb-4">Voltooid</h2>
-            <div className="space-y-4">
+            <h2 className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4">Voltooid</h2>
+            <div className="space-y-3 sm:space-y-4">
               {completedMissions.map((mission) => (
                 <div
                   key={mission.id}
-                  className="bg-gradient-to-br from-[#1A1F2E] to-[#232D1A] border border-[#3A4D23]/50 rounded-xl p-6 opacity-75"
+                  className="bg-gradient-to-br from-[#1A1F2E] to-[#232D1A] border border-[#3A4D23]/50 rounded-xl p-4 sm:p-6 opacity-75"
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className="text-3xl">{mission.icon}</div>
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-white line-through">{mission.title}</h3>
-                        <div className="flex items-center space-x-4 mt-1">
-                          <span className="text-sm text-[#8BAE5A]">{mission.type}</span>
-                          <span className="text-sm text-gray-400">{mission.category}</span>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+                    <div className="flex items-start gap-3 sm:gap-4 flex-1 min-w-0">
+                      <div className="text-2xl sm:text-3xl flex-shrink-0">{mission.icon}</div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-base sm:text-lg font-semibold text-white line-through break-words leading-tight">{mission.title}</h3>
+                        <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-1">
+                          <span className="text-xs sm:text-sm text-[#8BAE5A]">{mission.type}</span>
+                          <span className="text-xs sm:text-sm text-gray-400">{mission.category}</span>
                           {mission.shared && (
-                            <span className="text-sm text-[#FFD700]">👥 Gedeeld</span>
+                            <span className="text-xs sm:text-sm text-[#FFD700]">👥 Gedeeld</span>
                           )}
                         </div>
                         {mission.last_completion_date && (
-                          <p className="text-sm text-gray-400 mt-1">
+                          <p className="text-xs sm:text-sm text-gray-400 mt-1">
                             Voltooid op: {new Date(mission.last_completion_date).toLocaleDateString('nl-NL')}
                           </p>
                         )}
                         {mission.created_at && (
-                          <p className="text-sm text-gray-400 mt-1">
+                          <p className="text-xs sm:text-sm text-gray-400 mt-1">
                             Toegevoegd op: {new Date(mission.created_at).toLocaleDateString('nl-NL')}
                           </p>
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center space-x-4">
+                    <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-4 flex-shrink-0">
                       <div className="text-right">
-                        <div className="text-lg font-bold text-[#FFD700]">+{mission.xp_reward} XP</div>
-                        <div className="text-sm text-gray-400">{mission.badge}</div>
+                        <div className="text-base sm:text-lg font-bold text-[#FFD700]">+{mission.xp_reward} XP</div>
+                        <div className="text-xs sm:text-sm text-gray-400">{mission.badge}</div>
                       </div>
-                      <button
-                        onClick={() => toggleMission(mission.id)}
-                        className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white font-semibold px-4 py-2 rounded-lg transition-all duration-200"
-                      >
-                        Ongedaan
-                      </button>
-                      <button
-                        onClick={() => handleDeleteClick(mission)}
-                        className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold px-3 py-2 rounded-lg transition-all duration-200 text-sm"
-                        title="Verwijder missie"
-                      >
-                        🗑️
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => toggleMission(mission.id)}
+                          className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white font-semibold px-3 sm:px-4 py-2 rounded-lg transition-all duration-200 text-xs sm:text-sm"
+                        >
+                          Ongedaan
+                        </button>
+                        <button
+                          onClick={() => handleDeleteClick(mission)}
+                          className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold px-2 sm:px-3 py-2 rounded-lg transition-all duration-200 text-xs sm:text-sm"
+                          title="Verwijder missie"
+                        >
+                          🗑️
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
