@@ -1,10 +1,18 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
+import { PostgrestError } from '@supabase/supabase-js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
+
+// Define types for better type safety
+interface UpdateTestResult {
+  success: boolean;
+  error: PostgrestError | Error | null;
+  result: any;
+}
 
 export async function GET() {
   try {
@@ -98,13 +106,14 @@ export async function GET() {
       console.log(`✅ Found ${missions?.length || 0} missions for Rob`);
     }
 
-    // Step 5: Test XP update functionality
-    let updateTest = { success: false, error: null, result: null };
+    // Step 5: Test XP update
+    let updateTest: UpdateTestResult = { success: false, error: null, result: null };
     
     if (xpRecord) {
+      const testXP = 100;
+      console.log(`🧪 Testing XP update: adding ${testXP} XP to Rob's account...`);
+      
       try {
-        // Try to update XP using the same method as the missions API
-        const testXP = 50;
         const { data: updateResult, error: updateError } = await supabase
           .rpc('exec_sql', {
             sql_query: `UPDATE user_xp SET total_xp = total_xp + ${testXP}, updated_at = NOW() WHERE user_id = '${robUser.id}' RETURNING total_xp;`
@@ -119,7 +128,7 @@ export async function GET() {
         }
       } catch (error) {
         console.error('❌ Exception during XP update test:', error);
-        updateTest = { success: false, error, result: null };
+        updateTest = { success: false, error: error as Error, result: null };
       }
     }
 

@@ -334,11 +334,11 @@ export default function PlatformSettings() {
               <label className="block text-[#B6C948] text-sm mb-2">Platform Naam</label>
               <input
                 type="text"
-                value={settings.general.platformName}
-                onChange={(e) => setSettings(prev => ({
+                value={currentSettings.general.platformName}
+                onChange={(e) => setSettings(prev => prev ? {
                   ...prev,
                   general: { ...prev.general, platformName: e.target.value }
-                }))}
+                } : null)}
                 className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
               />
             </div>
@@ -347,7 +347,7 @@ export default function PlatformSettings() {
               <label className="block text-[#B6C948] text-sm mb-2">Platform Logo</label>
               <div className="flex items-center gap-4">
                 <img 
-                  src={settings.general.logoUrl} 
+                  src={currentSettings.general.logoUrl} 
                   alt="Platform Logo" 
                   className="w-12 h-12 rounded-lg"
                 />
@@ -379,19 +379,19 @@ export default function PlatformSettings() {
               <button
                 onClick={handleMaintenanceModeToggle}
                 className={`relative inline-flex h-12 w-24 items-center rounded-full transition-colors ${
-                  settings.general.maintenanceMode 
+                  currentSettings.general.maintenanceMode 
                     ? 'bg-red-600' 
                     : 'bg-[#3A4D23]'
                 }`}
               >
                 <span
                   className={`inline-block h-8 w-8 transform rounded-full bg-white transition-transform ${
-                    settings.general.maintenanceMode ? 'translate-x-12' : 'translate-x-1'
+                    currentSettings.general.maintenanceMode ? 'translate-x-12' : 'translate-x-1'
                   }`}
                 />
               </button>
             </div>
-            {settings.general.maintenanceMode && (
+            {currentSettings.general.maintenanceMode && (
               <div className="mt-4 p-4 bg-red-900/20 border border-red-600/30 rounded-lg">
                 <div className="flex items-center gap-2 text-red-400">
                   <ExclamationTriangleIcon className="w-5 h-5" />
@@ -434,27 +434,27 @@ export default function PlatformSettings() {
               <button
                 onClick={handleXpSystemToggle}
                 className={`relative inline-flex h-10 w-20 items-center rounded-full transition-colors ${
-                  settings.gamification.xpSystemEnabled 
+                  currentSettings.gamification.xpSystemEnabled 
                     ? 'bg-[#8BAE5A]' 
                     : 'bg-[#3A4D23]'
                 }`}
               >
                 <span
                   className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
-                    settings.gamification.xpSystemEnabled ? 'translate-x-10' : 'translate-x-1'
+                    currentSettings.gamification.xpSystemEnabled ? 'translate-x-10' : 'translate-x-1'
                   }`}
                 />
               </button>
             </div>
 
-            {settings.gamification.xpSystemEnabled && (
+            {currentSettings.gamification.xpSystemEnabled && (
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div>
                     <label className="block text-[#B6C948] text-sm mb-1">XP Dagelijkse Missie</label>
                     <input
                       type="number"
-                      value={settings.gamification.xpDailyMission}
+                      value={currentSettings.gamification.xpDailyMission}
                       onChange={(e) => setSettings(prev => ({
                         ...prev,
                         gamification: { ...prev.gamification, xpDailyMission: parseInt(e.target.value) }
@@ -466,7 +466,7 @@ export default function PlatformSettings() {
                     <label className="block text-[#B6C948] text-sm mb-1">XP Academy Les</label>
                     <input
                       type="number"
-                      value={settings.gamification.xpAcademyLesson}
+                      value={currentSettings.gamification.xpAcademyLesson}
                       onChange={(e) => setSettings(prev => ({
                         ...prev,
                         gamification: { ...prev.gamification, xpAcademyLesson: parseInt(e.target.value) }
@@ -478,7 +478,7 @@ export default function PlatformSettings() {
                     <label className="block text-[#B6C948] text-sm mb-1">XP Forum Post</label>
                     <input
                       type="number"
-                      value={settings.gamification.xpForumPost}
+                      value={currentSettings.gamification.xpForumPost}
                       onChange={(e) => setSettings(prev => ({
                         ...prev,
                         gamification: { ...prev.gamification, xpForumPost: parseInt(e.target.value) }
@@ -490,7 +490,7 @@ export default function PlatformSettings() {
                     <label className="block text-[#B6C948] text-sm mb-1">XP Ontvangen Boks 👊</label>
                     <input
                       type="number"
-                      value={settings.gamification.xpReceivedBoks}
+                      value={currentSettings.gamification.xpReceivedBoks}
                       onChange={(e) => setSettings(prev => ({
                         ...prev,
                         gamification: { ...prev.gamification, xpReceivedBoks: parseInt(e.target.value) }
@@ -505,7 +505,7 @@ export default function PlatformSettings() {
                     <label className="block text-[#B6C948] text-sm mb-1">Streak Bonus Dagen</label>
                     <input
                       type="number"
-                      value={settings.gamification.streakBonusDays}
+                      value={currentSettings.gamification.streakBonusDays}
                       onChange={(e) => setSettings(prev => ({
                         ...prev,
                         gamification: { ...prev.gamification, streakBonusDays: parseInt(e.target.value) }
@@ -517,7 +517,7 @@ export default function PlatformSettings() {
                     <label className="block text-[#B6C948] text-sm mb-1">Streak Bonus XP</label>
                     <input
                       type="number"
-                      value={settings.gamification.streakBonusXp}
+                      value={currentSettings.gamification.streakBonusXp}
                       onChange={(e) => setSettings(prev => ({
                         ...prev,
                         gamification: { ...prev.gamification, streakBonusXp: parseInt(e.target.value) }
@@ -553,14 +553,14 @@ export default function PlatformSettings() {
             <button
               onClick={handleManualApprovalToggle}
               className={`relative inline-flex h-10 w-20 items-center rounded-full transition-colors ${
-                settings.community.manualApprovalRequired 
+                currentSettings.community.manualApprovalRequired 
                   ? 'bg-[#8BAE5A]' 
                   : 'bg-[#3A4D23]'
               }`}
             >
               <span
                 className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
-                  settings.community.manualApprovalRequired ? 'translate-x-10' : 'translate-x-1'
+                  currentSettings.community.manualApprovalRequired ? 'translate-x-10' : 'translate-x-1'
                 }`}
               />
             </button>
@@ -569,7 +569,7 @@ export default function PlatformSettings() {
           <div>
             <label className="block text-[#B6C948] text-sm mb-2">Forum & Feed Woordfilter</label>
             <textarea
-              value={settings.community.wordFilter}
+              value={currentSettings.community.wordFilter}
               onChange={(e) => setSettings(prev => ({
                 ...prev,
                 community: { ...prev.community, wordFilter: e.target.value }
@@ -585,7 +585,7 @@ export default function PlatformSettings() {
           <div>
             <label className="block text-[#B6C948] text-sm mb-2">Standaard Forumregels</label>
             <textarea
-              value={settings.community.forumRules}
+              value={currentSettings.community.forumRules}
               onChange={(e) => setSettings(prev => ({
                 ...prev,
                 community: { ...prev.community, forumRules: e.target.value }
@@ -613,7 +613,7 @@ export default function PlatformSettings() {
               <label className="block text-[#B6C948] text-sm mb-2">Afzender Naam</label>
               <input
                 type="text"
-                value={settings.email.senderName}
+                value={currentSettings.email.senderName}
                 onChange={(e) => setSettings(prev => ({
                   ...prev,
                   email: { ...prev.email, senderName: e.target.value }
@@ -626,7 +626,7 @@ export default function PlatformSettings() {
               <label className="block text-[#B6C948] text-sm mb-2">Afzender E-mailadres</label>
               <input
                 type="email"
-                value={settings.email.senderEmail}
+                value={currentSettings.email.senderEmail}
                 onChange={(e) => setSettings(prev => ({
                   ...prev,
                   email: { ...prev.email, senderEmail: e.target.value }
@@ -643,7 +643,7 @@ export default function PlatformSettings() {
               <div className="flex items-center justify-between p-4 bg-[#181F17] rounded-lg">
                 <div>
                   <div className="font-medium text-white">Welkomstmail na registratie</div>
-                  <div className="text-sm text-[#B6C948]">{settings.email.templates.welcome.subject}</div>
+                  <div className="text-sm text-[#B6C948]">{currentSettings.email.templates.welcome.subject}</div>
                 </div>
                 <button
                   onClick={() => handleEditEmailTemplate('welcome')}
@@ -657,7 +657,7 @@ export default function PlatformSettings() {
               <div className="flex items-center justify-between p-4 bg-[#181F17] rounded-lg">
                 <div>
                   <div className="font-medium text-white">Wachtwoord Reset E-mail</div>
-                  <div className="text-sm text-[#B6C948]">{settings.email.templates.passwordReset.subject}</div>
+                  <div className="text-sm text-[#B6C948]">{currentSettings.email.templates.passwordReset.subject}</div>
                 </div>
                 <button
                   onClick={() => handleEditEmailTemplate('passwordReset')}
@@ -671,7 +671,7 @@ export default function PlatformSettings() {
               <div className="flex items-center justify-between p-4 bg-[#181F17] rounded-lg">
                 <div>
                   <div className="font-medium text-white">Wekelijkse 'Social Proof' E-mail</div>
-                  <div className="text-sm text-[#B6C948]">{settings.email.templates.weeklyReminder.subject}</div>
+                  <div className="text-sm text-[#B6C948]">{currentSettings.email.templates.weeklyReminder.subject}</div>
                 </div>
                 <button
                   onClick={() => handleEditEmailTemplate('weeklyReminder')}
@@ -698,7 +698,7 @@ export default function PlatformSettings() {
             <label className="block text-[#B6C948] text-sm mb-2">Google Analytics ID</label>
             <input
               type="text"
-              value={settings.integrations.googleAnalyticsId}
+              value={currentSettings.integrations.googleAnalyticsId}
               onChange={(e) => setSettings(prev => ({
                 ...prev,
                 integrations: { ...prev.integrations, googleAnalyticsId: e.target.value }
@@ -713,7 +713,7 @@ export default function PlatformSettings() {
             <div className="relative">
               <input
                 type={showPassword.mailProvider ? 'text' : 'password'}
-                value={showPassword.mailProvider ? settings.integrations.mailProviderApiKey : getMaskedValue(settings.integrations.mailProviderApiKey)}
+                value={showPassword.mailProvider ? currentSettings.integrations.mailProviderApiKey : getMaskedValue(currentSettings.integrations.mailProviderApiKey)}
                 onChange={(e) => setSettings(prev => ({
                   ...prev,
                   integrations: { ...prev.integrations, mailProviderApiKey: e.target.value }
@@ -735,7 +735,7 @@ export default function PlatformSettings() {
             <div className="relative">
               <input
                 type={showPassword.paymentProvider ? 'text' : 'password'}
-                value={showPassword.paymentProvider ? settings.integrations.paymentProviderApiKey : getMaskedValue(settings.integrations.paymentProviderApiKey)}
+                value={showPassword.paymentProvider ? currentSettings.integrations.paymentProviderApiKey : getMaskedValue(currentSettings.integrations.paymentProviderApiKey)}
                 onChange={(e) => setSettings(prev => ({
                   ...prev,
                   integrations: { ...prev.integrations, paymentProviderApiKey: e.target.value }
