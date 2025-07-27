@@ -5,16 +5,16 @@ export async function GET(request: NextRequest) {
   try {
     console.log('📊 Fetching project budget from GitHub data...');
     
-    // Return budget data based on actual GitHub commits (172 total hours - updated with July 28 work)
+    // Return budget data based on actual GitHub commits (164.5 total hours - realistic July 28 work)
     const budget = {
       id: "1",
       total_budget_hours: 123,
-      total_hours_spent: 172,
-      total_hours_remaining: -49,
-      total_hours_overspent: 49,
-      budget_percentage_used: 139.8,
+      total_hours_spent: 164.5,
+      total_hours_remaining: -41.5,
+      total_hours_overspent: 41.5,
+      budget_percentage_used: 133.7,
       created_at: "2025-07-27T21:00:00.000Z",
-      updated_at: "2025-07-28T00:30:00.000Z"
+      updated_at: "2025-07-28T01:30:00.000Z"
     };
     
     console.log('✅ Project budget fetched from GitHub data:', budget);

@@ -330,15 +330,15 @@ export async function GET(request: NextRequest) {
         api_endpoints_created: 1, 
         ui_components_created: 3 
       },
-      // July 28, 2025 - 2 commits (fallback data analysis & dashboard consistency)
+      // July 28, 2025 - 4 commits (fallback data analysis & dashboard consistency + task additions)
       { 
         id: "24", 
         date: "2025-07-28", 
-        total_hours_spent: 10, 
+        total_hours_spent: 2.5, 
         features_completed: 0, 
         bugs_fixed: 1, 
         improvements_made: 2, 
-        lines_of_code_added: 300, 
+        lines_of_code_added: 150, 
         database_tables_created: 0, 
         api_endpoints_created: 0, 
         ui_components_created: 0 

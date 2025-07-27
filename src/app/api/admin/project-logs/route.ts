@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
     
     // Return actual project logs based on real GitHub commits from May 29, 2025 to July 28, 2025
     const actualLogs = [
-      // July 28, 2025 - Fallback Data Analysis & Dashboard Consistency
+      // July 28, 2025 - Fallback Data Analysis & Dashboard Consistency (Realistic hours based on 4 commits)
       {
         id: "log-2025-07-28-01",
         date: "2025-07-28",
@@ -16,12 +16,12 @@ export async function GET(request: NextRequest) {
         description: "Systematically analyze all admin dashboard pages for fallback data. Create detailed overview of 9 admin pages with fallback vs real data status. Identify 3 pages with full fallback data, 1 with partial fallback, and 5 with real data. Document 8 database tables and 8 API endpoints that need updates. Create fallback_data_overview.md with complete task breakdown and priorities",
         category: "analysis",
         priority: "high",
-        hours_spent: 6,
+        hours_spent: 1.5,
         status: "completed",
         tags: ["analysis", "fallback-data", "admin-dashboard", "documentation", "planning"],
         impact_score: 9,
         complexity_score: 7,
-        created_at: "2025-07-28T00:15:00.000Z"
+        created_at: "2025-07-28T00:45:00.000Z"
       },
       {
         id: "log-2025-07-28-02",
@@ -31,12 +31,12 @@ export async function GET(request: NextRequest) {
         description: "Update dashboard-stats API to use project-based statistics for 100% consistency with Project Logs. Add fetchProjectBasedStats function with GitHub-based metrics. Remove hardcoded fallback values and replace with real data or 0. Ensure academy modules, training schemas, and project hours match between dashboard and project logs. Fix data discrepancies after GitHub update",
         category: "bugfix",
         priority: "high",
-        hours_spent: 4,
+        hours_spent: 1,
         status: "completed",
         tags: ["dashboard", "consistency", "project-logs", "api", "data-sync"],
         impact_score: 8,
         complexity_score: 6,
-        created_at: "2025-07-28T00:10:00.000Z"
+        created_at: "2025-07-28T00:30:00.000Z"
       },
       // July 27, 2025 - Final Phase
       {
