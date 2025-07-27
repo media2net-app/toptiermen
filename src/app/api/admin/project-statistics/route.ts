@@ -78,7 +78,7 @@ export async function GET(request: NextRequest) {
     };
 
     console.log('✅ Project statistics calculated:', {
-      total_days: 8,
+      total_days: 18,
       total_hours: totalActualHours,
       total_features: cumulativeFeatures,
       total_bugs: cumulativeBugs,
@@ -91,7 +91,7 @@ export async function GET(request: NextRequest) {
       statistics: statisticsWithCumulative,
       project_budget: projectBudget,
       summary: {
-        total_days: 8, // 8 unique working days from May 28 to July 27
+        total_days: 18, // 18 unique working days from May 29 to July 27
         total_hours: totalActualHours,
         total_features: cumulativeFeatures,
         total_bugs: cumulativeBugs,
@@ -100,7 +100,7 @@ export async function GET(request: NextRequest) {
         total_db_tables: cumulativeDBTables,
         total_api_endpoints: cumulativeAPIEndpoints,
         total_ui_components: cumulativeUIComponents,
-        average_hours_per_day: (totalActualHours / 8).toFixed(1) // 8 unique working days from May 28 to July 27
+        average_hours_per_day: (totalActualHours / 18).toFixed(1) // 18 unique working days from May 29 to July 27
       }
     });
 
