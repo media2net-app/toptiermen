@@ -74,7 +74,7 @@ interface ProjectStatistics {
 interface StatisticsSummary {
   total_hours: number;
   total_features: number;
-  total_bugs_fixed: number;
+  total_bugs: number;
   total_improvements: number;
   total_lines_of_code: number;
   total_database_tables: number;
@@ -139,7 +139,7 @@ export default function ProjectLogs() {
 
       if (budgetResponse.ok) {
         const budgetData = await budgetResponse.json();
-        setBudgetData(budgetData.cumulative || null);
+        setBudgetData(budgetData.budget || null);
       }
 
       setError(null);
@@ -331,7 +331,7 @@ export default function ProjectLogs() {
                 <WrenchScrewdriverIcon className="w-6 h-6 text-[#8BAE5A]" />
                 <h3 className="text-lg font-semibold text-white">Bugs Opgelost</h3>
               </div>
-              <p className="text-2xl font-bold text-[#8BAE5A]">{summary?.total_bugs_fixed || 0}</p>
+              <p className="text-2xl font-bold text-[#8BAE5A]">{summary?.total_bugs || 0}</p>
             </div>
             <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-6">
               <div className="flex items-center gap-3 mb-2">
