@@ -20,6 +20,19 @@ export async function GET(request: NextRequest) {
         progress_percentage: 0,
         tags: ["fallback-conversion", "database", "admin-dashboard", "api"]
       },
+      // NEW MILESTONE FOR PLATFORM ENHANCEMENTS
+      {
+        id: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+        title: "Platform Enhancement & Monetization",
+        description: "Comprehensive platform verbeteringen: affiliate marketing, product pagina, test gebruikers systeem, Stripe/GA integratie, marketingplan en 7-dagen proefperiode. Focus op user acquisition en monetization.",
+        target_date: "2025-08-15",
+        status: "planned",
+        priority: "high",
+        total_tasks: 6,
+        completed_tasks: 0,
+        progress_percentage: 0,
+        tags: ["monetization", "affiliate", "product-page", "trial", "marketing"]
+      },
       {
         id: "11111111-1111-1111-1111-111111111113",
         title: "Frontend Database Integratie",
