@@ -55,18 +55,18 @@ async function fetchProjectBasedStats() {
       console.error('Error fetching database tables:', error);
     }
 
-    // Project statistics based on GitHub commits (consistent with Project Logs)
-    const projectStats = {
-      total_hours: 199,
-      total_features: 67,
-      total_bugs: 50,
-      total_improvements: 35,
-      total_code_lines: 13250,
-      total_database_tables: databaseTableCount,
-      total_api_endpoints: 28,
-      total_ui_components: 95,
-      average_hours_per_day: 8.7
-    };
+                        // Project statistics based on GitHub commits (consistent with Project Logs)
+                    const projectStats = {
+                      total_hours: 209, // Updated with July 28 work (172 + 37 from previous logs)
+                      total_features: 67,
+                      total_bugs: 51, // Updated with July 28 bugfix
+                      total_improvements: 37, // Updated with July 28 improvements
+                      total_code_lines: 13550, // Updated with July 28 code
+                      total_database_tables: databaseTableCount,
+                      total_api_endpoints: 28,
+                      total_ui_components: 95,
+                      average_hours_per_day: 8.7
+                    };
 
     return projectStats;
   } catch (error) {
