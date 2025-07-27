@@ -1,5 +1,5 @@
 'use client';
-import ClientLayout from '../../components/ClientLayout';
+import ClientLayout from '@/app/components/ClientLayout';
 import { useState, useEffect, useRef } from 'react';
 import { CameraIcon, TrashIcon, PlusIcon, UserGroupIcon, TrophyIcon, FireIcon, BookOpenIcon, ArrowDownTrayIcon, ShieldCheckIcon, BellIcon, PencilIcon, CheckIcon, XMarkIcon, ExclamationTriangleIcon } from '@heroicons/react/24/solid';
 import CropModal from '../../../components/CropModal';
