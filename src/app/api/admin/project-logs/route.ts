@@ -3,7 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase-admin';
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('📊 Fetching project logs from database...');
+    console.log('📊 Fetching project logs from GitHub data...');
     
     // Return actual project logs based on real GitHub commits from May 29, 2025 to July 27, 2025
     const actualLogs = [

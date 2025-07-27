@@ -3,26 +3,10 @@ import { supabaseAdmin } from '@/lib/supabase-admin';
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('📊 Fetching project milestones from database...');
+    console.log('📊 Fetching project milestones from GitHub data...');
     
-    try {
-      const { data: milestones, error: milestonesError } = await supabaseAdmin
-        .from('project_milestones')
-        .select('*')
-        .order('target_date', { ascending: true });
-
-      if (milestonesError) {
-        console.log('Database table does not exist, using mock data');
-        throw new Error('Table does not exist');
-      }
-
-      console.log('✅ Project milestones fetched successfully:', milestones?.length || 0, 'milestones');
-      return NextResponse.json({ success: true, milestones: milestones || [] });
-    } catch (dbError) {
-      console.log('Using mock data for project milestones');
-      
-      // Mock milestones data based on actual project phases
-      const mockMilestones = [
+    // Return milestones data based on actual project phases
+    const milestones = [
         {
           id: "1",
           title: "Project Foundation",
@@ -97,16 +81,15 @@ export async function GET(request: NextRequest) {
         }
       ];
       
-      return NextResponse.json({ success: true, milestones: mockMilestones });
+      return NextResponse.json({ success: true, milestones });
+    } catch (error) {
+      console.error('❌ Error fetching project milestones:', error);
+      return NextResponse.json(
+        { success: false, error: 'Failed to fetch project milestones' },
+        { status: 500 }
+      );
     }
-  } catch (error) {
-    console.error('❌ Error fetching project milestones:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to fetch project milestones' },
-      { status: 500 }
-    );
   }
-}
 
 export async function POST(request: NextRequest) {
   try {

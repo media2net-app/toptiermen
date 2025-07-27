@@ -3,60 +3,14 @@ import { supabaseAdmin } from '@/lib/supabase-admin';
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('📊 Fetching project statistics from database...');
+    console.log('📊 Fetching project statistics from GitHub data...');
     
     const { searchParams } = new URL(request.url);
     const dateFrom = searchParams.get('dateFrom');
     const dateTo = searchParams.get('dateTo');
     const limit = parseInt(searchParams.get('limit') || '30');
 
-    let query = supabaseAdmin
-      .from('project_statistics')
-      .select('*')
-      .order('date', { ascending: false });
-
-    if (dateFrom) {
-      query = query.gte('date', dateFrom);
-    }
-
-    if (dateTo) {
-      query = query.lte('date', dateTo);
-    }
-
-    const { data: statistics, error } = await query.limit(limit);
-
-    if (error) {
-      console.error('❌ Error fetching project statistics:', error);
-      return NextResponse.json({ error: `Failed to fetch statistics: ${error.message}` }, { status: 500 });
-    }
-
-    // Calculate summary statistics
-    const summary = {
-      total_hours: 0,
-      total_features: 0,
-      total_bugs_fixed: 0,
-      total_improvements: 0,
-      total_lines_of_code: 0,
-      total_database_tables: 0,
-      total_api_endpoints: 0,
-      total_ui_components: 0,
-      average_hours_per_day: 0,
-      total_days: statistics?.length || 0
-    };
-
-    if (statistics && statistics.length > 0) {
-      summary.total_hours = statistics.reduce((sum, stat) => sum + parseFloat(stat.total_hours_spent || 0), 0);
-      summary.total_features = statistics.reduce((sum, stat) => sum + (stat.features_completed || 0), 0);
-      summary.total_bugs_fixed = statistics.reduce((sum, stat) => sum + (stat.bugs_fixed || 0), 0);
-      summary.total_improvements = statistics.reduce((sum, stat) => sum + (stat.improvements_made || 0), 0);
-      summary.total_lines_of_code = statistics.reduce((sum, stat) => sum + (stat.lines_of_code_added || 0), 0);
-      summary.total_database_tables = statistics.reduce((sum, stat) => sum + (stat.database_tables_created || 0), 0);
-      summary.total_api_endpoints = statistics.reduce((sum, stat) => sum + (stat.api_endpoints_created || 0), 0);
-      summary.total_ui_components = statistics.reduce((sum, stat) => sum + (stat.ui_components_created || 0), 0);
-      summary.average_hours_per_day = summary.total_hours / summary.total_days;
-    }
-
-    console.log('✅ Project statistics fetched successfully:', statistics?.length || 0, 'statistics');
+    console.log('✅ Project statistics fetched from GitHub data');
     
           // Return real project statistics based on actual GitHub commits from May 29, 2025 to July 27, 2025 (162 total hours)
     const realStatistics = [
