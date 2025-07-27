@@ -35,6 +35,7 @@ interface UserProfile {
 const tabs = [
   { key: 'publiek', label: 'Mijn Publieke Profiel', icon: UserGroupIcon },
   { key: 'voortgang', label: 'Mijn Voortgang', icon: TrophyIcon },
+  { key: 'affiliate', label: 'Affiliate Marketing', icon: FireIcon },
   { key: 'instellingen', label: 'Account & Instellingen', icon: ShieldCheckIcon },
   { key: 'privacy', label: 'Privacy & Beveiliging', icon: BellIcon },
 ];
@@ -823,6 +824,202 @@ export default function MijnProfiel() {
                   />
                   <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#8BAE5A]"></div>
                 </label>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'affiliate' && (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-white mb-6">Affiliate Marketing</h2>
+            
+            {/* Affiliate Overview */}
+            <div className="bg-gradient-to-r from-[#3A4D23] to-[#4A5D33] rounded-lg p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-xl font-bold text-white">Verdien Geld met Brotherhood</h3>
+                  <p className="text-[#8BAE5A] text-sm">Deel je unieke affiliate link en verdien commissie op elke nieuwe lid</p>
+                </div>
+                <div className="w-12 h-12 bg-[#8BAE5A] rounded-lg flex items-center justify-center">
+                  <FireIcon className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div className="bg-[#232D1A] rounded-lg p-4 text-center">
+                  <div className="text-2xl font-bold text-[#8BAE5A] mb-1">€25</div>
+                  <div className="text-white text-sm">Per Nieuwe Lid</div>
+                </div>
+                <div className="bg-[#232D1A] rounded-lg p-4 text-center">
+                  <div className="text-2xl font-bold text-[#8BAE5A] mb-1">€5</div>
+                  <div className="text-white text-sm">Maandelijkse Commissie</div>
+                </div>
+                <div className="bg-[#232D1A] rounded-lg p-4 text-center">
+                  <div className="text-2xl font-bold text-[#8BAE5A] mb-1">10%</div>
+                  <div className="text-white text-sm">Extra Korting</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Affiliate Link Section */}
+            <div className="bg-[#181F17] rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-white mb-4">Jouw Affiliate Link</h3>
+              <div className="space-y-4">
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="text"
+                    value={`https://toptiermen.com/ref/${user?.id || 'your-id'}`}
+                    readOnly
+                    className="flex-1 bg-[#232D1A] text-white px-4 py-3 rounded-lg border border-[#3A4D23] focus:outline-none focus:border-[#8BAE5A]"
+                  />
+                  <button
+                    onClick={() => navigator.clipboard.writeText(`https://toptiermen.com/ref/${user?.id || 'your-id'}`)}
+                    className="px-4 py-3 bg-[#8BAE5A] text-white rounded-lg font-semibold hover:bg-[#9BBE6A] transition-colors"
+                  >
+                    Kopiëren
+                  </button>
+                </div>
+                <p className="text-[#8BAE5A] text-sm">
+                  Deel deze link met vrienden, familie en je netwerk. Voor elke nieuwe lid die zich registreert via jouw link, verdien je €25 direct en €5 per maand.
+                </p>
+              </div>
+            </div>
+
+            {/* Affiliate Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-[#181F17] rounded-lg p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[#8BAE5A] text-sm">Totaal Verdiend</span>
+                  <span className="text-white font-semibold">€0</span>
+                </div>
+                <div className="w-full bg-[#232D1A] rounded-full h-2">
+                  <div className="bg-[#8BAE5A] h-2 rounded-full" style={{ width: '0%' }}></div>
+                </div>
+              </div>
+              
+              <div className="bg-[#181F17] rounded-lg p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[#8BAE5A] text-sm">Aantal Referrals</span>
+                  <span className="text-white font-semibold">0</span>
+                </div>
+                <div className="w-full bg-[#232D1A] rounded-full h-2">
+                  <div className="bg-[#8BAE5A] h-2 rounded-full" style={{ width: '0%' }}></div>
+                </div>
+              </div>
+              
+              <div className="bg-[#181F17] rounded-lg p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[#8BAE5A] text-sm">Actieve Referrals</span>
+                  <span className="text-white font-semibold">0</span>
+                </div>
+                <div className="w-full bg-[#232D1A] rounded-full h-2">
+                  <div className="bg-[#8BAE5A] h-2 rounded-full" style={{ width: '0%' }}></div>
+                </div>
+              </div>
+              
+              <div className="bg-[#181F17] rounded-lg p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[#8BAE5A] text-sm">Maandelijkse Inkomsten</span>
+                  <span className="text-white font-semibold">€0</span>
+                </div>
+                <div className="w-full bg-[#232D1A] rounded-full h-2">
+                  <div className="bg-[#8BAE5A] h-2 rounded-full" style={{ width: '0%' }}></div>
+                </div>
+              </div>
+            </div>
+
+            {/* Marketing Materials */}
+            <div className="bg-[#181F17] rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-white mb-4">Marketing Materialen</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-[#232D1A] rounded-lg p-4">
+                  <h4 className="font-semibold text-white mb-2">Social Media Posts</h4>
+                  <p className="text-[#8BAE5A] text-sm mb-3">Kant-en-klare posts voor Instagram, Facebook en LinkedIn</p>
+                  <button className="w-full px-4 py-2 bg-[#8BAE5A] text-white rounded-lg font-semibold hover:bg-[#9BBE6A] transition-colors">
+                    Download Posts
+                  </button>
+                </div>
+                
+                <div className="bg-[#232D1A] rounded-lg p-4">
+                  <h4 className="font-semibold text-white mb-2">E-mail Templates</h4>
+                  <p className="text-[#8BAE5A] text-sm mb-3">Professionele e-mail templates voor je netwerk</p>
+                  <button className="w-full px-4 py-2 bg-[#8BAE5A] text-white rounded-lg font-semibold hover:bg-[#9BBE6A] transition-colors">
+                    Download Templates
+                  </button>
+                </div>
+                
+                <div className="bg-[#232D1A] rounded-lg p-4">
+                  <h4 className="font-semibold text-white mb-2">Banners & Graphics</h4>
+                  <p className="text-[#8BAE5A] text-sm mb-3">Visuele materialen voor websites en social media</p>
+                  <button className="w-full px-4 py-2 bg-[#8BAE5A] text-white rounded-lg font-semibold hover:bg-[#9BBE6A] transition-colors">
+                    Download Graphics
+                  </button>
+                </div>
+                
+                <div className="bg-[#232D1A] rounded-lg p-4">
+                  <h4 className="font-semibold text-white mb-2">Video Content</h4>
+                  <p className="text-[#8BAE5A] text-sm mb-3">Korte video's om Brotherhood te promoten</p>
+                  <button className="w-full px-4 py-2 bg-[#8BAE5A] text-white rounded-lg font-semibold hover:bg-[#9BBE6A] transition-colors">
+                    Download Videos
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Referral History */}
+            <div className="bg-[#181F17] rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-white mb-4">Referral Geschiedenis</h3>
+              <div className="text-center py-8">
+                <div className="w-16 h-16 bg-[#232D1A] rounded-full flex items-center justify-center mx-auto mb-4">
+                  <UserGroupIcon className="w-8 h-8 text-[#8BAE5A]" />
+                </div>
+                <p className="text-[#8BAE5A] text-sm">Nog geen referrals. Deel je affiliate link om te beginnen!</p>
+              </div>
+            </div>
+
+            {/* How It Works */}
+            <div className="bg-[#181F17] rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-white mb-4">Hoe Werkt Het?</h3>
+              <div className="space-y-4">
+                <div className="flex items-start space-x-4">
+                  <div className="w-8 h-8 bg-[#8BAE5A] rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <span className="text-white font-bold text-sm">1</span>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-white">Deel je Affiliate Link</h4>
+                    <p className="text-[#8BAE5A] text-sm">Kopieer en deel je unieke affiliate link met je netwerk</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start space-x-4">
+                  <div className="w-8 h-8 bg-[#8BAE5A] rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <span className="text-white font-bold text-sm">2</span>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-white">Nieuwe Leden Registreren</h4>
+                    <p className="text-[#8BAE5A] text-sm">Mensen registreren zich via jouw link en worden actieve leden</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start space-x-4">
+                  <div className="w-8 h-8 bg-[#8BAE5A] rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <span className="text-white font-bold text-sm">3</span>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-white">Verdien Commissie</h4>
+                    <p className="text-[#8BAE5A] text-sm">Je ontvangt €25 direct en €5 per maand voor elke actieve referral</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start space-x-4">
+                  <div className="w-8 h-8 bg-[#8BAE5A] rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <span className="text-white font-bold text-sm">4</span>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-white">Uitbetaling</h4>
+                    <p className="text-[#8BAE5A] text-sm">Maandelijkse uitbetaling van je verdiende commissies</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
