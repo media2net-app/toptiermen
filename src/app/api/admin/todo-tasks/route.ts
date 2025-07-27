@@ -5,8 +5,100 @@ export async function GET(request: NextRequest) {
   try {
     console.log('📊 Fetching todo tasks...');
     
-    // Return updated hardcoded tasks reflecting completed tasks
+    // Return updated hardcoded tasks reflecting completed tasks and new fallback data conversion tasks
     const hardcodedTasks = [
+      // NEW TASKS FOR FALLBACK DATA CONVERSION (July 29, 2025)
+      {
+        id: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+        title: "Planning & Todo Database Integratie",
+        description: "Volledige database integratie voor todo systeem. Aanmaken van todo_tasks, todo_subtasks, todo_milestones en todo_statistics tabellen. API endpoints koppelen aan echte database in plaats van hardcoded data. Real-time task tracking implementeren.",
+        category: "database",
+        priority: "critical",
+        estimated_hours: 12,
+        actual_hours: null,
+        status: "pending",
+        assigned_to: "Backend Team",
+        due_date: "2025-07-30",
+        start_date: "2025-07-29",
+        completion_date: null,
+        dependencies: [],
+        tags: ["todo", "database", "api", "fallback-conversion"],
+        progress_percentage: 0,
+        created_at: "2025-07-28T00:00:00Z"
+      },
+      {
+        id: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+        title: "Gebruikersbeheer Mock Data Vervangen",
+        description: "Mock data in gebruikersbeheer vervangen door echte database queries. Nieuwe API endpoint maken voor gebruikersbeheer. Real-time user status tracking implementeren. Gebruikersstatistieken koppelen aan echte data.",
+        category: "frontend",
+        priority: "high",
+        estimated_hours: 8,
+        actual_hours: null,
+        status: "pending",
+        assigned_to: "Frontend Team",
+        due_date: "2025-07-31",
+        start_date: "2025-07-29",
+        completion_date: null,
+        dependencies: [],
+        tags: ["users", "mock-data", "api", "fallback-conversion"],
+        progress_percentage: 0,
+        created_at: "2025-07-28T00:00:00Z"
+      },
+      {
+        id: "cccccccc-cccc-cccc-cccc-cccccccccccc",
+        title: "Forum Moderatie Database Setup",
+        description: "Database tabellen aanmaken voor forum_reports en forum_moderation_logs. API endpoints koppelen aan echte database. Real-time moderation tracking implementeren. Mock data vervangen door echte forum data.",
+        category: "database",
+        priority: "high",
+        estimated_hours: 10,
+        actual_hours: null,
+        status: "pending",
+        assigned_to: "Backend Team",
+        due_date: "2025-08-01",
+        start_date: "2025-07-29",
+        completion_date: null,
+        dependencies: [],
+        tags: ["forum", "moderation", "database", "fallback-conversion"],
+        progress_percentage: 0,
+        created_at: "2025-07-28T00:00:00Z"
+      },
+      {
+        id: "dddddddd-dddd-dddd-dddd-dddddddddddd",
+        title: "Book Reviews Database Integratie",
+        description: "Book reviews database tabel aanmaken en API koppelen aan database. Mock data vervangen door echte review data. Review moderation systeem implementeren.",
+        category: "database",
+        priority: "medium",
+        estimated_hours: 6,
+        actual_hours: null,
+        status: "pending",
+        assigned_to: "Backend Team",
+        due_date: "2025-08-02",
+        start_date: "2025-07-29",
+        completion_date: null,
+        dependencies: [],
+        tags: ["books", "reviews", "database", "fallback-conversion"],
+        progress_percentage: 0,
+        created_at: "2025-07-28T00:00:00Z"
+      },
+      {
+        id: "eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee",
+        title: "Fallback Data Analysis Documentatie",
+        description: "Comprehensive documentatie van alle fallback data conversies. Task breakdown en prioriteiten documenteren. Database schema's en API endpoints documenteren. Test procedures opstellen.",
+        category: "documentation",
+        priority: "medium",
+        estimated_hours: 4,
+        actual_hours: null,
+        status: "pending",
+        assigned_to: "Full Stack Team",
+        due_date: "2025-07-29",
+        start_date: "2025-07-29",
+        completion_date: null,
+        dependencies: [],
+        tags: ["documentation", "fallback-analysis", "planning"],
+        progress_percentage: 0,
+        created_at: "2025-07-28T00:00:00Z"
+      },
+      // COMPLETED TASKS (Previous work)
       {
         id: "11111111-1111-1111-1111-111111111111",
         title: "Boekenkamer Frontend Database Integratie",

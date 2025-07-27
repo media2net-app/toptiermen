@@ -7,12 +7,25 @@ export async function GET(request: NextRequest) {
     
     // Return hardcoded milestones for now while we fix the table creation issue
     const hardcodedMilestones = [
+      // NEW MILESTONE FOR FALLBACK DATA CONVERSION
+      {
+        id: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+        title: "Fallback Data naar Echte Data Conversie",
+        description: "Systematische conversie van alle fallback/mock data naar echte database data in admin dashboard. Planning & Todo, Gebruikersbeheer, Forum Moderatie en Book Reviews volledig database-gekoppeld maken.",
+        target_date: "2025-08-05",
+        status: "in_progress",
+        priority: "critical",
+        total_tasks: 5,
+        completed_tasks: 0,
+        progress_percentage: 0,
+        tags: ["fallback-conversion", "database", "admin-dashboard", "api"]
+      },
       {
         id: "11111111-1111-1111-1111-111111111113",
         title: "Frontend Database Integratie",
         description: "Alle frontend pagina's migreren van mock data naar echte database data",
         target_date: "2025-08-12",
-        status: "in_progress",
+        status: "planned",
         priority: "high",
         total_tasks: 2,
         completed_tasks: 0,

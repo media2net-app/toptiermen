@@ -5,32 +5,32 @@ export async function GET(request: NextRequest) {
   try {
     console.log('📊 Fetching todo statistics...');
     
-    // Return updated hardcoded statistics reflecting all tasks completed
+    // Return updated hardcoded statistics reflecting new fallback data conversion tasks
     const statistics = {
-      total_tasks: 10,
-      completed_tasks: 10, // All 10 tasks completed
-      pending_tasks: 0, // No pending tasks
+      total_tasks: 15, // 5 new tasks + 10 completed tasks
+      completed_tasks: 10, // Previous tasks completed
+      pending_tasks: 5, // 5 new fallback data conversion tasks
       in_progress_tasks: 0,
       blocked_tasks: 0,
-      total_estimated_hours: 192,
-      total_actual_hours: 192, // All estimated hours completed
-      average_completion_time: 19.2, // 192 hours / 10 tasks
+      total_estimated_hours: 242, // 192 completed + 50 new estimated hours
+      total_actual_hours: 192, // Only completed tasks have actual hours
+      average_completion_time: 19.2, // 192 hours / 10 completed tasks
       tasks_by_priority: {
-        critical: 0, // All critical tasks completed
-        high: 0, // All high priority tasks completed
-        medium: 0,
+        critical: 1, // 1 new critical task (Planning & Todo)
+        high: 2, // 2 new high priority tasks (Gebruikersbeheer, Forum Moderatie)
+        medium: 2, // 2 new medium priority tasks (Book Reviews, Documentatie)
         low: 0
       },
       tasks_by_category: {
-        frontend: 0, // All frontend tasks completed
-        backend: 0, // All backend tasks completed
-        database: 0, // All database tasks completed
-        api: 0, // All API tasks completed
-        testing: 0, // All testing tasks completed
+        frontend: 1, // 1 new frontend task (Gebruikersbeheer)
+        backend: 0, // No new backend tasks
+        database: 3, // 3 new database tasks (Planning & Todo, Forum Moderatie, Book Reviews)
+        api: 0, // No new API tasks
+        testing: 0, // No new testing tasks
         deployment: 0,
-        documentation: 0,
+        documentation: 1, // 1 new documentation task
         ui: 0,
-        integration: 0, // All integration tasks completed
+        integration: 0, // No new integration tasks
         optimization: 0
       }
     };
