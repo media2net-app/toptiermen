@@ -84,11 +84,12 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
       type: 'section',
       items: [
         { label: 'Ledenbeheer', icon: UserGroupIcon, href: '/dashboard-admin/ledenbeheer' },
-              { 
-        label: 'Onboarding Overzicht', 
-        icon: ClipboardIcon, 
-        href: '/dashboard-admin/onboarding-overview'
-      }
+        { label: 'Affiliate Beheer', icon: FireIcon, href: '/dashboard-admin/affiliate-beheer' },
+        { 
+          label: 'Onboarding Overzicht', 
+          icon: ClipboardIcon, 
+          href: '/dashboard-admin/onboarding-overview'
+        }
       ]
     },
     { 
