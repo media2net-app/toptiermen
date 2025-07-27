@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { DebugProvider, useDebug } from '@/contexts/DebugContext';
 import { clearAllCache, clearAppSpecificCache, checkForCacheIssues } from '@/lib/cache-utils';
+import PlanningStatusModal from './components/PlanningStatusModal';
 import { 
   HomeIcon, 
   UserGroupIcon, 
@@ -26,13 +27,22 @@ import {
   XMarkIcon,
   BugAntIcon,
   DocumentTextIcon,
-  ClipboardIcon
+  ClipboardIcon,
+  ListBulletIcon
 } from '@heroicons/react/24/outline';
 
-
+// Type definitions for menu items
+interface MenuItem {
+  label: string;
+  icon?: any;
+  href?: string;
+  badge?: string;
+  type?: string;
+  items?: MenuItem[];
+}
 
 const SidebarContent = ({ pathname }: { pathname: string }) => {
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['ANALYTICS', 'LEDEN', 'CONTENT', 'COMMUNITY', 'PLATFORM']));
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['Dashboard', 'ANALYTICS', 'LEDEN', 'CONTENT', 'COMMUNITY', 'PLATFORM']));
 
   const toggleSection = (sectionLabel: string) => {
     setExpandedSections(prev => {
@@ -46,13 +56,14 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
     });
   };
 
-  const adminMenu = [
+  const adminMenu: MenuItem[] = [
     { 
       label: 'Dashboard', 
       icon: HomeIcon, 
       href: '/dashboard-admin',
       items: [
-        { label: 'Project Logs', icon: DocumentTextIcon, href: '/dashboard-admin/project-logs' }
+        { label: 'Project Logs', icon: DocumentTextIcon, href: '/dashboard-admin/project-logs' },
+                  { label: 'Planning & To-Do', icon: ListBulletIcon, href: '/dashboard-admin/planning-todo', badge: 'Live' }
       ]
     },
     { 
@@ -141,30 +152,41 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
                       {subItem.icon && <subItem.icon className="w-5 h-5" />}
                       <span className="flex items-center gap-2">
                         {subItem.label}
-                        {/* Live Data Pages */}
-                        {subItem.label === 'Community Health' ||
-               subItem.label === 'Real-time Activiteit' ||
-               subItem.label === 'Academy' ||
-               subItem.label === 'Trainingscentrum' ||
-               subItem.label === 'Content Performance' ||
-               subItem.label === 'Actiegerichte Inzichten' ||
-               subItem.label === 'Financiële Metrics' ||
-               subItem.label === 'Gebruikers Segmentatie' ||
-               subItem.label === 'Technische Performance' ||
-               subItem.label === 'Onboarding Overzicht' ||
-               subItem.label === 'Badges & Rangen' ||
-               subItem.label === 'Boekenkamer' ||
-               subItem.label === 'Aankondigingen' ||
-               subItem.label === 'Forum Moderatie' ||
-               subItem.label === 'Evenementenbeheer' ||
-               subItem.label === 'Voedingsplannen' ||
-               subItem.label === 'Ledenbeheer' ||
-               subItem.label === 'Social Feed' ||
-               subItem.label === 'Instellingen' ||
-               subItem.label === 'Project Logs' ? (
-                          <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-bold bg-green-700 text-green-200">Live</span>
+                        {/* Badge Display Logic */}
+                        {subItem.badge ? (
+                          <span className={`ml-2 px-2 py-0.5 rounded-full text-xs font-bold ${
+                            subItem.badge === 'Live' 
+                              ? 'bg-green-700 text-green-200' 
+                              : 'bg-red-700 text-red-200'
+                          }`}>
+                            {subItem.badge}
+                          </span>
                         ) : (
-                          <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-bold bg-red-700 text-red-200">Dummy</span>
+                          // Fallback to old logic for backward compatibility
+                          (subItem.label === 'Community Health' ||
+                           subItem.label === 'Real-time Activiteit' ||
+                           subItem.label === 'Academy' ||
+                           subItem.label === 'Trainingscentrum' ||
+                           subItem.label === 'Content Performance' ||
+                           subItem.label === 'Actiegerichte Inzichten' ||
+                           subItem.label === 'Financiële Metrics' ||
+                           subItem.label === 'Gebruikers Segmentatie' ||
+                           subItem.label === 'Technische Performance' ||
+                           subItem.label === 'Onboarding Overzicht' ||
+                           subItem.label === 'Badges & Rangen' ||
+                           subItem.label === 'Boekenkamer' ||
+                           subItem.label === 'Aankondigingen' ||
+                           subItem.label === 'Forum Moderatie' ||
+                           subItem.label === 'Evenementenbeheer' ||
+                           subItem.label === 'Voedingsplannen' ||
+                           subItem.label === 'Ledenbeheer' ||
+                           subItem.label === 'Social Feed' ||
+                           subItem.label === 'Instellingen' ||
+                           subItem.label === 'Project Logs') ? (
+                            <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-bold bg-green-700 text-green-200">Live</span>
+                          ) : (
+                            <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-bold bg-red-700 text-red-200">Dummy</span>
+                          )
                         )}
                       </span>
                     </Link>
@@ -209,6 +231,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const { showDebug, setShowDebug } = useDebug();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [showPlanningModal, setShowPlanningModal] = useState(false);
 
   // Check authentication
   useEffect(() => {
@@ -223,6 +246,18 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
       router.push('/dashboard');
     }
   }, [loading, user, router]);
+
+  // Show planning status modal on first admin login
+  useEffect(() => {
+    if (!loading && isAuthenticated && user?.role === 'admin' && pathname === '/dashboard-admin') {
+      const today = new Date().toDateString();
+      const lastShownDate = sessionStorage.getItem('admin-planning-modal-date');
+      if (lastShownDate !== today) {
+        setShowPlanningModal(true);
+        sessionStorage.setItem('admin-planning-modal-date', today);
+      }
+    }
+  }, [loading, isAuthenticated, user, pathname]);
 
   const handleLogout = async () => {
     if (isLoggingOut) return; // Prevent double click
@@ -310,6 +345,15 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
               </button>
             </div>
             
+            {/* Planning Status Button */}
+            <button
+              onClick={() => setShowPlanningModal(true)}
+              className="px-3 py-1 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A] focus:outline-none focus:ring-1 focus:ring-[#8BAE5A] text-xs transition-colors"
+              title="Toon planning status"
+            >
+              📊 Status
+            </button>
+            
             {/* Debug Toggle */}
             <div className="flex items-center gap-2">
               <BugAntIcon className="w-4 h-4 text-[#B6C948]" />
@@ -366,6 +410,12 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
           {children}
         </main>
       </div>
+
+      {/* Planning Status Modal */}
+      <PlanningStatusModal 
+        isOpen={showPlanningModal} 
+        onClose={() => setShowPlanningModal(false)} 
+      />
     </div>
   );
 } 

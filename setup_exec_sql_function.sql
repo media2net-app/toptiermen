@@ -1,24 +1,35 @@
--- Setup SQL Execution Function voor AI Assistant
--- Voer dit uit in je Supabase SQL Editor
+-- Drop existing function if it exists
+DROP FUNCTION IF EXISTS exec_sql(text);
 
--- Maak een functie voor SQL uitvoering (alleen voor development!)
+-- Create a proper exec_sql function that returns query results
 CREATE OR REPLACE FUNCTION exec_sql(sql_query text)
-RETURNS json
-LANGUAGE plpgsql
-SECURITY DEFINER
-AS $$
+RETURNS json AS $$
+DECLARE
+    result json;
+    error_msg text;
 BEGIN
-  -- Voer de SQL uit
-  EXECUTE sql_query;
-  RETURN json_build_object('success', true, 'message', 'SQL executed successfully');
-EXCEPTION
-  WHEN OTHERS THEN
-    RETURN json_build_object('success', false, 'error', SQLERRM);
+    -- Execute the SQL query and return results as JSON
+    EXECUTE 'SELECT json_agg(t) FROM (' || sql_query || ') t' INTO result;
+    
+    -- If no results, return empty array
+    IF result IS NULL THEN
+        result := '[]'::json;
+    END IF;
+    
+    RETURN result;
+    
+EXCEPTION WHEN OTHERS THEN
+    -- Return error information
+    error_msg := SQLERRM;
+    RETURN json_build_object(
+        'error', error_msg,
+        'success', false
+    );
 END;
-$$;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Geef rechten aan de service role
+-- Grant execute permission to service_role
 GRANT EXECUTE ON FUNCTION exec_sql(text) TO service_role;
 
--- Test de functie
+-- Test the function
 SELECT exec_sql('SELECT 1 as test'); 

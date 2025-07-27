@@ -28,4 +28,23 @@ async function testConnection() {
   }
 }
 
+// Main execution block
+if (require.main === module) {
+  const sql = process.argv[2];
+  if (!sql) {
+    console.log('Usage: node scripts/db-admin.js "SELECT * FROM table;"');
+    process.exit(1);
+  }
+  
+  executeSQL(sql)
+    .then(result => {
+      console.log('✅ SQL executed successfully:');
+      console.log(JSON.stringify(result, null, 2));
+    })
+    .catch(error => {
+      console.error('❌ SQL execution failed:', error);
+      process.exit(1);
+    });
+}
+
 module.exports = { executeSQL, testConnection }; 
