@@ -338,7 +338,7 @@ export default function ProjectLogs() {
                 <CalendarIcon className="w-6 h-6 text-[#8BAE5A]" />
                 <h3 className="text-lg font-semibold text-white">Gemiddeld per Dag</h3>
               </div>
-              <p className="text-2xl font-bold text-[#8BAE5A]">{(summary?.average_hours_per_day || 0).toFixed(1)}h</p>
+              <p className="text-2xl font-bold text-[#8BAE5A]">{(Number(summary?.average_hours_per_day) || 0).toFixed(1)}h</p>
             </div>
           </div>
 
@@ -357,7 +357,7 @@ export default function ProjectLogs() {
                 <ArrowTrendingUpIcon className="w-6 h-6 text-[#8BAE5A]" />
                 <h3 className="text-lg font-semibold text-white">Budget Gebruikt</h3>
               </div>
-              <p className="text-2xl font-bold text-[#8BAE5A]">{(budgetData?.budget_percentage_used || 0).toFixed(1)}%</p>
+              <p className="text-2xl font-bold text-[#8BAE5A]">{(Number(budgetData?.budget_percentage_used) || 0).toFixed(1)}%</p>
               <p className="text-sm text-[#B6C948]">Van totaal budget</p>
             </div>
             <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-6">
@@ -365,7 +365,7 @@ export default function ProjectLogs() {
                 <ClockIcon className="w-6 h-6 text-[#8BAE5A]" />
                 <h3 className="text-lg font-semibold text-white">Resterend</h3>
               </div>
-              <p className="text-2xl font-bold text-[#8BAE5A]">{(budgetData?.total_hours_remaining || 123).toFixed(1)}h</p>
+              <p className="text-2xl font-bold text-[#8BAE5A]">{(Number(budgetData?.total_hours_remaining) || 123).toFixed(1)}h</p>
               <p className="text-sm text-[#B6C948]">Nog beschikbaar</p>
             </div>
             <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-6">
@@ -373,7 +373,7 @@ export default function ProjectLogs() {
                 <ExclamationTriangleIcon className="w-6 h-6 text-[#8BAE5A]" />
                 <h3 className="text-lg font-semibold text-white">Over Budget</h3>
               </div>
-              <p className="text-2xl font-bold text-[#8BAE5A]">{(budgetData?.total_hours_overspent || 0).toFixed(1)}h</p>
+              <p className="text-2xl font-bold text-[#8BAE5A]">{(Number(budgetData?.total_hours_overspent) || 0).toFixed(1)}h</p>
               <p className="text-sm text-[#B6C948]">Extra uren</p>
             </div>
           </div>
