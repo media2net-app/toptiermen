@@ -65,8 +65,8 @@ export default function MarketingLayout({
   const { user, loading } = useAuth();
   const router = useRouter();
 
-  // Check if user is Chiel (marketing user)
-  const isMarketingUser = user?.email === 'chiel@media2net.nl' || user?.full_name?.toLowerCase().includes('chiel');
+  // Check if user is admin (all admins have access to marketing dashboard)
+  const isMarketingUser = user?.role === 'admin';
 
   useEffect(() => {
     if (!loading && !isMarketingUser) {

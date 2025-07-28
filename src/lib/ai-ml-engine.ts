@@ -408,7 +408,7 @@ class AIMLEngine {
   }
 
   private analyzeTone(text: string): 'professional' | 'casual' | 'urgent' | 'friendly' | 'authoritative' {
-    const tones = ['professional', 'casual', 'urgent', 'friendly', 'authoritative'];
+    const tones: ('professional' | 'casual' | 'urgent' | 'friendly' | 'authoritative')[] = ['professional', 'casual', 'urgent', 'friendly', 'authoritative'];
     return tones[Math.floor(Math.random() * tones.length)];
   }
 
@@ -477,7 +477,7 @@ class AIMLEngine {
   }
 
   private assessImageQuality(imageUrl: string): 'high' | 'medium' | 'low' {
-    const qualities = ['high', 'medium', 'low'];
+    const qualities: ('high' | 'medium' | 'low')[] = ['high', 'medium', 'low'];
     return qualities[Math.floor(Math.random() * qualities.length)];
   }
 
@@ -499,7 +499,7 @@ class AIMLEngine {
 
   // Helper methods for Voice Analysis
   private analyzeVoiceTone(adData: any): 'excited' | 'calm' | 'urgent' | 'friendly' | 'professional' {
-    const tones = ['excited', 'calm', 'urgent', 'friendly', 'professional'];
+    const tones: ('excited' | 'calm' | 'urgent' | 'friendly' | 'professional')[] = ['excited', 'calm', 'urgent', 'friendly', 'professional'];
     return tones[Math.floor(Math.random() * tones.length)];
   }
 
@@ -520,7 +520,7 @@ class AIMLEngine {
   }
 
   private analyzeVoiceSentiment(adData: any): 'positive' | 'negative' | 'neutral' {
-    const sentiments = ['positive', 'negative', 'neutral'];
+    const sentiments: ('positive' | 'negative' | 'neutral')[] = ['positive', 'negative', 'neutral'];
     return sentiments[Math.floor(Math.random() * sentiments.length)];
   }
 
@@ -562,7 +562,7 @@ class AIMLEngine {
   }
 
   private assessChurnRisk(userData: any): 'low' | 'medium' | 'high' {
-    const risks = ['low', 'medium', 'high'];
+    const risks: ('low' | 'medium' | 'high')[] = ['low', 'medium', 'high'];
     return risks[Math.floor(Math.random() * risks.length)];
   }
 

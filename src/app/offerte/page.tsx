@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   CheckCircleIcon,
@@ -23,8 +23,10 @@ import {
   AcademicCapIcon,
   EyeIcon,
   PresentationChartLineIcon,
-  ExclamationTriangleIcon
+  ExclamationTriangleIcon,
+  ArrowLeftIcon
 } from '@heroicons/react/24/outline';
+import Link from 'next/link';
 
 interface SalesScenario {
   name: string;
@@ -44,6 +46,17 @@ interface SalesScenario {
 export default function OffertePage() {
   const [selectedScenario, setSelectedScenario] = useState<'A' | 'B'>('A');
   const [showDetails, setShowDetails] = useState(false);
+  const [showSignatureModal, setShowSignatureModal] = useState(false);
+  const [signatureData, setSignatureData] = useState({
+    name: '',
+    company: '',
+    email: '',
+    date: new Date().toISOString().split('T')[0]
+  });
+  const [isSigned, setIsSigned] = useState(false);
+  const [signedData, setSignedData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const scenarios: SalesScenario[] = [
     {
@@ -55,10 +68,10 @@ export default function OffertePage() {
       totalRevenue: 99975,
       totalCustomers: 239,
       roi: 567,
-      marketingBudget: 35850, // 239 customers / 2% conversion = 11,950 clicks * €0.30 CPC
-      totalInvestment: 50850, // €15,000 + €35,850
-      netProfit: 49125, // €99,975 - €50,850
-      marketingRoi: 179 // (€99,975 - €35,850) / €35,850 * 100
+      marketingBudget: 23900, // 239 customers / 3% conversion = 7,967 clicks * €0.30 CPC
+      totalInvestment: 38900, // €15,000 + €23,900
+      netProfit: 61075, // €99,975 - €38,900
+      marketingRoi: 256 // (€99,975 - €23,900) / €23,900 * 100
     },
     {
       name: 'Scenario B - Premium & Lifetime Focus',
@@ -69,10 +82,10 @@ export default function OffertePage() {
       totalRevenue: 100845,
       totalCustomers: 195,
       roi: 572,
-      marketingBudget: 29250, // 195 customers / 2% conversion = 9,750 clicks * €0.30 CPC
-      totalInvestment: 44250, // €15,000 + €29,250
-      netProfit: 56595, // €100,845 - €44,250
-      marketingRoi: 193 // (€100,845 - €29,250) / €29,250 * 100
+      marketingBudget: 19500, // 195 customers / 3% conversion = 6,500 clicks * €0.30 CPC
+      totalInvestment: 34500, // €15,000 + €19,500
+      netProfit: 66345, // €100,845 - €34,500
+      marketingRoi: 318 // (€100,845 - €19,500) / €19,500 * 100
     }
   ];
 
@@ -81,8 +94,122 @@ export default function OffertePage() {
   const investment = 15000;
   const targetRevenue = 100000;
 
+  // Check if user has already signed this proposal
+  useEffect(() => {
+    const checkSignatureStatus = async () => {
+      try {
+        const response = await fetch('/api/proposal-signatures?proposal_type=marketing');
+        const data = await response.json();
+        
+        if (data.success && data.signatures && data.signatures.length > 0) {
+          const latestSignature = data.signatures[0];
+          setIsSigned(true);
+          setSignedData({
+            name: latestSignature.client_name,
+            company: latestSignature.client_company,
+            date: latestSignature.signature_date,
+            signedAt: latestSignature.signed_at
+          });
+        }
+      } catch (error) {
+        console.error('Error checking signature status:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkSignatureStatus();
+  }, []);
+
+  const handleSignatureSubmit = async () => {
+    if (signatureData.name && signatureData.company && signatureData.email) {
+      setIsSubmitting(true);
+      try {
+        // Save signature to database
+        const response = await fetch('/api/proposal-signatures', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            proposal_type: 'marketing',
+            proposal_amount: 15000,
+            client_name: signatureData.name,
+            client_company: signatureData.company,
+            client_email: signatureData.email,
+            signature_date: signatureData.date,
+            proposal_details: {
+              scenario: selectedScenario,
+              investment: investment,
+              targetRevenue: targetRevenue
+            }
+          }),
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+          const signedInfo = {
+            ...signatureData,
+            signedAt: new Date().toISOString(),
+            proposalAmount: '€15.000',
+            proposalType: 'Marketing Voorstel Media2Net'
+          };
+          setSignedData(signedInfo);
+          setIsSigned(true);
+          setShowSignatureModal(false);
+          
+          console.log('Ondertekening opgeslagen:', data.signature);
+          
+          // Doorsturen naar bevestigingspagina
+          const params = new URLSearchParams({
+            name: signatureData.name,
+            company: signatureData.company,
+            date: signatureData.date
+          });
+          
+          setTimeout(() => {
+            window.location.href = `/offerte/bevestiging?${params.toString()}`;
+          }, 1500);
+        } else {
+          console.error('Error saving signature:', data.error);
+          alert('Er is een fout opgetreden bij het opslaan van de ondertekening. Probeer het opnieuw.');
+        }
+      } catch (error) {
+        console.error('Error submitting signature:', error);
+        alert('Er is een fout opgetreden bij het opslaan van de ondertekening. Probeer het opnieuw.');
+      } finally {
+        setIsSubmitting(false);
+      }
+    }
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    setSignatureData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+      {/* Back Button */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <Link 
+            href="/dashboard-marketing"
+            className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 border border-white/20 hover:border-white/30"
+          >
+            <ArrowLeftIcon className="w-4 h-4" />
+            Terug naar Marketing Dashboard
+          </Link>
+        </motion.div>
+      </div>
+
       {/* Header */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20"></div>
@@ -94,14 +221,14 @@ export default function OffertePage() {
           >
             <div className="flex items-center justify-center mb-6">
               <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center">
-                <TrophyIcon className="w-8 h-8 text-white" />
+                <div className="text-white font-bold text-lg">M2N</div>
               </div>
             </div>
             <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
-              Business Case
+              Voorstel marketing
             </h1>
             <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
-              Een bewezen strategie voor €100.000 omzet met €15.000 voorinvestering/financiering
+              De weg naar 100k omzet
             </p>
             <div className="bg-yellow-500/20 border border-yellow-500/30 rounded-lg p-4 mb-8 max-w-2xl mx-auto">
               <div className="flex items-center justify-center mb-2">
@@ -114,8 +241,10 @@ export default function OffertePage() {
               </p>
             </div>
             
+
+            
             {/* Key Metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -148,11 +277,24 @@ export default function OffertePage() {
                 transition={{ delay: 0.3 }}
                 className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20"
               >
+                <div className="flex items-center justify-center w-12 h-12 bg-orange-500/20 rounded-lg mb-4 mx-auto">
+                  <CalculatorIcon className="w-6 h-6 text-orange-400" />
+                </div>
+                <div className="text-2xl font-bold text-white mb-2">€19k-€24k</div>
+                <div className="text-gray-300">Marketing Budget</div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.4 }}
+                className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20"
+              >
                 <div className="flex items-center justify-center w-12 h-12 bg-blue-500/20 rounded-lg mb-4 mx-auto">
                   <ChartBarIcon className="w-6 h-6 text-blue-400" />
                 </div>
-                <div className="text-2xl font-bold text-white mb-2">567%</div>
-                <div className="text-gray-300">ROI</div>
+                <div className="text-2xl font-bold text-white mb-2">256-318%</div>
+                <div className="text-gray-300">Marketing ROI</div>
               </motion.div>
             </div>
           </motion.div>
@@ -270,13 +412,10 @@ export default function OffertePage() {
 
           <div className="mt-8 text-center">
             <div className="bg-gradient-to-r from-green-500/20 to-blue-500/20 rounded-xl p-6 border border-green-500/30">
-              <h3 className="text-xl font-bold text-white mb-3">
-                💡 De keuze is duidelijk, Rick
-              </h3>
+              
               <p className="text-gray-300 text-lg">
-                Met de voorinvestering krijg je <span className="text-green-400 font-bold">onbeperkte toegang</span> tot mijn expertise, 
-                <span className="text-green-400 font-bold"> volledige toewijding</span> aan jouw succes, en de 
-                <span className="text-green-400 font-bold"> garantie</span> dat we samen de €100.000 target behalen.
+                Met de voorinvestering krijg je <span className="text-green-400 font-bold">onbeperkte toegang</span> tot mijn expertise en de 
+                <span className="text-green-400 font-bold"> garantie van volledige toewijding</span> aan jouw project.
               </p>
             </div>
           </div>
@@ -440,11 +579,11 @@ export default function OffertePage() {
                       </div>
                       <div className="flex justify-between">
                         <span>Conversie percentage:</span>
-                        <span>2%</span>
+                        <span>3%</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Benodigde clicks:</span>
-                        <span>{(selectedScenarioData.totalCustomers / 0.02).toLocaleString()}</span>
+                        <span>{(selectedScenarioData.totalCustomers / 0.03).toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Gemiddelde CPC:</span>
@@ -602,270 +741,230 @@ export default function OffertePage() {
         </motion.div>
       </div>
 
-      {/* Investment Comparison Section */}
+      {/* Digital Signature Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.4 }}
-        >
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-white mb-4">
-              Waarom €15.000 Voorinvestering de Beste Keuze Is
-            </h2>
-            <p className="text-gray-300 max-w-2xl mx-auto">
-              Een directe vergelijking tussen de twee opties voor Rick
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-            {/* Option A - Current Service */}
-            <div className="bg-[#1A1F2E] border border-[#2D3748] rounded-xl p-8">
-              <div className="text-center mb-6">
-                <h3 className="text-2xl font-bold text-gray-400 mb-2">Huidige Dienstverlening</h3>
-                <p className="text-gray-500">20 uur per maand × €85</p>
-              </div>
-              
-              <div className="space-y-4 mb-6">
-                <div className="flex justify-between items-center p-3 bg-[#2D3748] rounded-lg">
-                  <span className="text-gray-300">Maandelijkse kosten:</span>
-                  <span className="text-white font-bold">€1.700</span>
-                </div>
-                <div className="flex justify-between items-center p-3 bg-[#2D3748] rounded-lg">
-                  <span className="text-gray-300">Jaarlijkse kosten:</span>
-                  <span className="text-white font-bold">€20.400</span>
-                </div>
-                <div className="flex justify-between items-center p-3 bg-[#2D3748] rounded-lg">
-                  <span className="text-gray-300">Tijdsinvestering:</span>
-                  <span className="text-red-400 font-bold">240 uur/jaar</span>
-                </div>
-                <div className="flex justify-between items-center p-3 bg-[#2D3748] rounded-lg">
-                  <span className="text-gray-300">ROI:</span>
-                  <span className="text-gray-400">Niet meetbaar</span>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <h4 className="text-white font-semibold mb-3">❌ Nadelen:</h4>
-                <ul className="space-y-2 text-gray-300 text-sm">
-                  <li className="flex items-start gap-2">
-                    <span className="text-red-400 mt-1">•</span>
-                    <span>Hoge maandelijkse kosten (€1.700)</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-red-400 mt-1">•</span>
-                    <span>Grote tijdsinvestering (20 uur/maand)</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-red-400 mt-1">•</span>
-                    <span>Geen eigenaarschap van het systeem</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-red-400 mt-1">•</span>
-                    <span>Afhankelijk van externe dienstverlener</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-red-400 mt-1">•</span>
-                    <span>Geen schaalbaarheid</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-
-            {/* Option B - One-time Investment */}
-            <div className="bg-gradient-to-br from-green-600/20 to-blue-600/20 border border-green-500/30 rounded-xl p-8 relative">
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                <span className="bg-gradient-to-r from-green-500 to-blue-500 text-white px-6 py-2 rounded-full text-sm font-bold">
-                  AANBEVOLEN
-                </span>
-              </div>
-              
-              <div className="text-center mb-6">
-                <h3 className="text-2xl font-bold text-white mb-2">Voorinvestering Optie</h3>
-                <p className="text-green-400">€15.000 eenmalig</p>
-              </div>
-              
-              <div className="space-y-4 mb-6">
-                <div className="flex justify-between items-center p-3 bg-[#2D3748] rounded-lg">
-                  <span className="text-gray-300">Eenmalige investering:</span>
-                  <span className="text-white font-bold">€15.000</span>
-                </div>
-                <div className="flex justify-between items-center p-3 bg-[#2D3748] rounded-lg">
-                  <span className="text-gray-300">Verwachte omzet:</span>
-                  <span className="text-green-400 font-bold">€100.000</span>
-                </div>
-                <div className="flex justify-between items-center p-3 bg-[#2D3748] rounded-lg">
-                  <span className="text-gray-300">Netto winst:</span>
-                  <span className="text-green-400 font-bold">€85.000</span>
-                </div>
-                <div className="flex justify-between items-center p-3 bg-[#2D3748] rounded-lg">
-                  <span className="text-gray-300">ROI:</span>
-                  <span className="text-green-400 font-bold">567%</span>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <h4 className="text-white font-semibold mb-3">✅ Voordelen:</h4>
-                <ul className="space-y-2 text-gray-300 text-sm">
-                  <li className="flex items-start gap-2">
-                    <span className="text-green-400 mt-1">•</span>
-                    <span>Eigenaarschap van het volledige systeem</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-green-400 mt-1">•</span>
-                    <span>Geen maandelijkse kosten na implementatie</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-green-400 mt-1">•</span>
-                    <span>Volledige controle en autonomie</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-green-400 mt-1">•</span>
-                    <span>Onbeperkte schaalbaarheid</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-green-400 mt-1">•</span>
-                    <span>Bewezen ROI van 567%</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          {/* Financial Comparison */}
-          <div className="bg-[#1A1F2E] border border-[#2D3748] rounded-xl p-8 mb-12">
-            <h3 className="text-2xl font-bold text-white text-center mb-6">Financiële Vergelijking</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="text-center p-4 bg-[#2D3748] rounded-lg">
-                <h4 className="text-white font-semibold mb-2">Jaar 1</h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Dienstverlening:</span>
-                    <span className="text-red-400">-€20.400</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Voorinvestering:</span>
-                    <span className="text-green-400">+€85.000</span>
-                  </div>
-                  <div className="border-t border-[#3A4D23] pt-2">
-                    <div className="flex justify-between font-bold">
-                      <span className="text-white">Verschil:</span>
-                      <span className="text-green-400">€105.400</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="text-center p-4 bg-[#2D3748] rounded-lg">
-                <h4 className="text-white font-semibold mb-2">Jaar 2</h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Dienstverlening:</span>
-                    <span className="text-red-400">-€20.400</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Voorinvestering:</span>
-                    <span className="text-green-400">+€100.000</span>
-                  </div>
-                  <div className="border-t border-[#3A4D23] pt-2">
-                    <div className="flex justify-between font-bold">
-                      <span className="text-white">Verschil:</span>
-                      <span className="text-green-400">€120.400</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="text-center p-4 bg-[#2D3748] rounded-lg">
-                <h4 className="text-white font-semibold mb-2">Jaar 3</h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Dienstverlening:</span>
-                    <span className="text-red-400">-€20.400</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Voorinvestering:</span>
-                    <span className="text-green-400">+€100.000</span>
-                  </div>
-                  <div className="border-t border-[#3A4D23] pt-2">
-                    <div className="flex justify-between font-bold">
-                      <span className="text-white">Verschil:</span>
-                      <span className="text-green-400">€120.400</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Rick's Decision */}
-          <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-2xl p-8 border border-white/20">
-            <h3 className="text-2xl font-bold text-white text-center mb-4">
-              Rick, Dit is Je Beslissing
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-center">
-              <div>
-                <h4 className="text-red-400 font-semibold mb-2">Blijf bij Dienstverlening</h4>
-                <p className="text-gray-300 text-sm">
-                  Betaal €20.400 per jaar voor 240 uur werk<br/>
-                  <span className="text-red-400 font-bold">Geen eigenaarschap</span>
-                </p>
-              </div>
-              <div>
-                <h4 className="text-green-400 font-semibold mb-2">Kies Voorinvestering</h4>
-                <p className="text-gray-300 text-sm">
-                  Betaal €15.000 eenmalig<br/>
-                  <span className="text-green-400 font-bold">Verdien €85.000+ per jaar</span>
-                </p>
-              </div>
-            </div>
-            
-            <div className="mt-6 p-4 bg-white/10 rounded-lg">
-              <p className="text-white font-semibold text-lg">
-                💡 De voorinvestering verdient zichzelf terug in 2,1 maanden
-              </p>
-              <p className="text-gray-300 text-sm mt-2">
-                Na 3 jaar: €316.200 voordeel ten opzichte van dienstverlening
-              </p>
-            </div>
-          </div>
-        </motion.div>
-      </div>
-
-      {/* CTA Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.5 }}
+          transition={{ delay: 1.6 }}
           className="text-center"
         >
           <div className="bg-gradient-to-r from-green-600/20 to-blue-600/20 rounded-2xl p-12 border border-green-500/30">
-            <h2 className="text-3xl font-bold text-white mb-4">
-              Maak de Slimme Keuze
+            <h2 className="text-3xl font-bold text-white mb-6">
+              Akkoord & Start Procedure
             </h2>
-            <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-              Rick, de cijfers spreken voor zich. €15.000 voorinvestering is de enige logische keuze 
-              voor een ondernemer die serieus wil groeien.
+            <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
+              Na digitale ondertekening ontvang je direct de factuur en gaan we van start
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 transform hover:scale-105">
-                Start Nu - €15.000 Investering
-              </button>
-              <button className="bg-white/10 hover:bg-white/20 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 border border-white/20">
-                Download Business Plan
-              </button>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="bg-white/10 rounded-xl p-6 border border-white/20">
+                <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                  <DocumentTextIcon className="w-6 h-6 text-blue-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2">1. Digitale Ondertekening</h3>
+                <p className="text-gray-300 text-sm">
+                  Rick ondertekent digitaal dat hij akkoord gaat met dit marketing voorstel
+                </p>
+              </div>
+              
+              <div className="bg-white/10 rounded-xl p-6 border border-white/20">
+                <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                  <CurrencyDollarIcon className="w-6 h-6 text-green-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2">2. Factuur & Betaling</h3>
+                <p className="text-gray-300 text-sm">
+                  Direct na ondertekening ontvang je de factuur voor de €15.000 voorinvestering
+                </p>
+              </div>
+              
+              <div className="bg-white/10 rounded-xl p-6 border border-white/20">
+                <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                  <RocketLaunchIcon className="w-6 h-6 text-purple-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2">3. Direct Start</h3>
+                <p className="text-gray-300 text-sm">
+                  Na betaling starten we direct met marketing activiteiten en informeren we je over planning
+                </p>
+              </div>
             </div>
 
-            <div className="mt-8 text-sm text-gray-400">
-              <p>✅ 567% ROI gegarandeerd</p>
-              <p>✅ €316.200 voordeel over 3 jaar</p>
-              <p>✅ Volledige eigenaarschap</p>
+            <div className="bg-white/10 rounded-xl p-8 border border-white/20 mb-8">
+              <h3 className="text-xl font-bold text-white mb-4">
+                Digitale Ondertekening
+              </h3>
+              <p className="text-gray-300 mb-6">
+                Door hieronder te ondertekenen ga je akkoord met het marketing voorstel van Media2Net 
+                voor een voorinvestering van €15.000 exclusief marketing kosten.
+              </p>
+              
+              <div className="flex justify-center mb-6">
+                {isLoading ? (
+                  <div className="bg-white/10 border border-white/20 rounded-lg p-4 text-center">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mx-auto mb-2"></div>
+                    <span className="text-gray-300 text-sm">Laden...</span>
+                  </div>
+                ) : !isSigned ? (
+                  <button 
+                    onClick={() => setShowSignatureModal(true)}
+                    disabled={isSubmitting}
+                    className="bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                  >
+                    {isSubmitting ? (
+                      <div className="flex items-center gap-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        Ondertekenen...
+                      </div>
+                    ) : (
+                      'Digitale Ondertekening'
+                    )}
+                  </button>
+                ) : (
+                  <div className="bg-green-500/20 border border-green-500/30 rounded-lg p-4 text-center">
+                    <div className="flex items-center justify-center mb-2">
+                      <CheckCircleIcon className="w-5 h-5 text-green-400 mr-2" />
+                      <span className="text-green-400 font-semibold">Ondertekend</span>
+                    </div>
+                    <p className="text-green-200 text-sm">
+                      Door {signedData?.name} op {new Date(signedData?.signedAt).toLocaleDateString('nl-NL')}
+                    </p>
+                  </div>
+                )}
+              </div>
+              
+              <div className="text-sm text-gray-400 space-y-1 mb-4">
+                <p>✅ Direct factuur na ondertekening</p>
+                <p>✅ Snelle start na betaling</p>
+                <p>✅ Volledige transparantie in planning</p>
+              </div>
+              
+              <div className="text-xs text-gray-500 text-center">
+                * Alle genoemde bedragen zijn exclusief 21% BTW
+              </div>
             </div>
           </div>
         </motion.div>
       </div>
+
+      {/* Digital Signature Modal */}
+      <AnimatePresence>
+        {showSignatureModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowSignatureModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-gray-900 border border-gray-700 rounded-2xl p-8 max-w-md w-full"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <DocumentTextIcon className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-2">
+                  Digitale Ondertekening
+                </h3>
+                <p className="text-gray-300 text-sm">
+                  Vul je gegevens in om akkoord te gaan met het marketing voorstel
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Naam *
+                  </label>
+                  <input
+                    type="text"
+                    value={signatureData.name}
+                    onChange={(e) => handleInputChange('name', e.target.value)}
+                    className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+                    placeholder="Volledige naam"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Bedrijf *
+                  </label>
+                  <input
+                    type="text"
+                    value={signatureData.company}
+                    onChange={(e) => handleInputChange('company', e.target.value)}
+                    className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+                    placeholder="Bedrijfsnaam"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    E-mailadres *
+                  </label>
+                  <input
+                    type="email"
+                    value={signatureData.email}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+                    placeholder="email@bedrijf.nl"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Datum
+                  </label>
+                  <input
+                    type="date"
+                    value={signatureData.date}
+                    onChange={(e) => handleInputChange('date', e.target.value)}
+                    className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+
+                <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4 mt-6">
+                  <p className="text-blue-200 text-sm text-center">
+                    Door te ondertekenen ga je akkoord met het marketing voorstel van Media2Net 
+                    voor een voorinvestering van €15.000 exclusief marketing kosten en BTW.
+                  </p>
+                </div>
+
+                <div className="flex gap-3 mt-6">
+                  <button
+                    onClick={() => setShowSignatureModal(false)}
+                    className="flex-1 px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors"
+                  >
+                    Annuleren
+                  </button>
+                  <button
+                    onClick={handleSignatureSubmit}
+                    disabled={!signatureData.name || !signatureData.company || !signatureData.email || isSubmitting}
+                    className="flex-1 px-4 py-3 bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-all duration-200"
+                  >
+                    {isSubmitting ? (
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        Opslaan...
+                      </div>
+                    ) : (
+                      'Ondertekenen'
+                    )}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 } 

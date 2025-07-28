@@ -374,16 +374,14 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
             >
               Ga naar Platform
             </Link>
-            {/* Marketing button - only visible for Chiel */}
-            {(user?.email === 'chiel@media2net.nl' || user?.full_name?.toLowerCase().includes('chiel')) && (
-              <Link 
-                href="/dashboard-marketing" 
-                className="px-4 py-2 rounded-xl bg-[#1E40AF] text-white text-sm font-semibold border border-[#1E40AF] hover:bg-[#1D4ED8] transition flex items-center gap-2"
-              >
-                <MegaphoneIcon className="w-4 h-4" />
-                Marketing
-              </Link>
-            )}
+            {/* Marketing button - visible for all admins */}
+            <Link 
+              href="/dashboard-marketing" 
+              className="px-4 py-2 rounded-xl bg-[#1E40AF] text-white text-sm font-semibold border border-[#1E40AF] hover:bg-[#1D4ED8] transition flex items-center gap-2"
+            >
+              <MegaphoneIcon className="w-4 h-4" />
+              Marketing
+            </Link>
             <button
               onClick={handleLogout}
               disabled={isLoggingOut}
