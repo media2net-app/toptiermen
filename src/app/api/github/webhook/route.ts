@@ -118,7 +118,7 @@ function determineCategory(commits: GitHubCommit[]): string {
   if (messages.includes('api') || messages.includes('endpoint') || messages.includes('route')) {
     return 'api';
   }
-  if (messages.includes('ui') || messages.includes('component') || message.includes('style')) {
+  if (messages.includes('ui') || messages.includes('component') || messages.includes('style')) {
     return 'ui';
   }
   if (messages.includes('test') || messages.includes('spec')) {
