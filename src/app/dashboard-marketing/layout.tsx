@@ -49,7 +49,6 @@ const navigation = [
 
 const developmentNavigation = [
   { name: 'Uitleg', href: '/dashboard-marketing/uitleg', icon: AcademicCapIcon },
-  { name: 'Marketing Plan', href: '/dashboard-marketing/marketingplan', icon: DocumentChartBarIcon },
   { name: 'Content', href: '/dashboard-marketing/content', icon: DocumentTextIcon },
   { name: 'Takenlijst', href: '/dashboard-marketing/takenlijst', icon: ClipboardDocumentListIcon },
   { name: 'Automatisering', href: '/dashboard-marketing/automatisering', icon: Cog6ToothIcon },

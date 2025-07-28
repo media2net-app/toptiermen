@@ -320,51 +320,7 @@ export default function UitlegPage() {
           </div>
         </div>
 
-        {/* Call to Action */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-8 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-          >
-            <StarIcon className="w-16 h-16 text-white mx-auto mb-4" />
-            <h2 className="text-3xl font-bold text-white mb-4">
-              Klaar om te <span className="text-yellow-300">Revolutioneren</span>?
-            </h2>
-            <p className="text-blue-100 text-lg mb-6 max-w-2xl mx-auto">
-              Dit systeem geeft je een voorsprong van 6-12 maanden op je concurrenten. 
-              De investering verdient zichzelf terug binnen 3 maanden.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
-                Start Gratis Trial
-              </button>
-              <button className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors">
-                Plan Demo
-              </button>
-            </div>
-          </motion.div>
-        </div>
 
-        {/* Footer Stats */}
-        <div className="mt-12 grid grid-cols-1 md:grid-cols-4 gap-6 text-center">
-          <div>
-            <div className="text-2xl font-bold text-blue-400">500+</div>
-            <div className="text-gray-400">Ads Geanalyseerd</div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-green-400">40%</div>
-            <div className="text-gray-400">ROI Verbetering</div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-purple-400">24/7</div>
-            <div className="text-gray-400">Monitoring</div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-yellow-400">99.9%</div>
-            <div className="text-gray-400">Uptime</div>
-          </div>
-        </div>
       </div>
     </div>
   );
