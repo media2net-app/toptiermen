@@ -81,86 +81,69 @@ export default function AffiliateBeheer() {
     try {
       console.log('🔄 Fetching affiliate data from database...');
 
-      // Fetch all users and profiles
-      const [usersResult, profilesResult] = await Promise.all([
-        supabase.from('users').select('*').order('created_at', { ascending: false }),
-        supabase.from('profiles').select('*')
-      ]);
+      // Fetch profiles with affiliate data
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select(`
+          id,
+          full_name,
+          email,
+          affiliate_code,
+          affiliate_status,
+          total_referrals,
+          active_referrals,
+          total_earned,
+          monthly_earnings,
+          last_referral,
+          created_at
+        `)
+        .order('created_at', { ascending: false });
 
-      if (usersResult.error) {
-        console.error('Error fetching users:', usersResult.error);
+      if (profilesError) {
+        console.error('Error fetching profiles:', profilesError);
         toast.error('Fout bij het laden van affiliate data');
         return;
       }
 
-      if (profilesResult.error) {
-        console.error('Error fetching profiles:', profilesResult.error);
-      }
+      console.log('📊 Fetched profiles with affiliate data:', profiles?.length || 0);
 
-      const users = usersResult.data || [];
-      const profiles = profilesResult.data || [];
-
-      console.log('📊 Fetched users:', users.length, 'profiles:', profiles.length);
-
-      // Create a map of profiles by user ID for quick lookup
-      const profilesMap = new Map();
-      profiles.forEach(profile => {
-        profilesMap.set(profile.id, profile);
-      });
-
-      // Convert users to affiliate format with real data
-      const realAffiliates: Affiliate[] = users.map(user => {
-        const profile = profilesMap.get(user.id);
-        const affiliateCode = `${user.full_name?.toUpperCase().replace(/\s+/g, '') || 'USER'}${user.id.slice(-6)}`;
-        
-        // Calculate mock referral data based on user activity
-        const daysSinceCreation = Math.floor((Date.now() - new Date(user.created_at).getTime()) / (1000 * 60 * 60 * 24));
-        const hasActivity = profile?.last_login && new Date(profile.last_login) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-        const totalReferrals = hasActivity ? Math.floor(Math.random() * 5) + (daysSinceCreation > 30 ? 2 : 0) : 0;
-        const activeReferrals = Math.floor(totalReferrals * 0.8);
-        const totalEarned = totalReferrals * 25; // €25 per referral
-        const monthlyEarnings = activeReferrals * 5; // €5 per active referral per month
-
+      // Convert profiles to affiliate format
+      const realAffiliates: Affiliate[] = (profiles || []).map(profile => {
         return {
-          id: user.id,
-          user_id: user.id,
-          user_name: profile?.full_name || user.full_name || user.email?.split('@')[0] || 'Onbekende gebruiker',
-          user_email: user.email || '',
-          affiliate_code: affiliateCode,
-          total_referrals: totalReferrals,
-          active_referrals: activeReferrals,
-          total_earned: totalEarned,
-          monthly_earnings: monthlyEarnings,
-          status: hasActivity ? 'active' : 'inactive',
-          created_at: user.created_at,
-          last_referral: hasActivity && totalReferrals > 0 ? new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString() : null
+          id: profile.id,
+          user_id: profile.id,
+          user_name: profile.full_name || profile.email?.split('@')[0] || 'Onbekende gebruiker',
+          user_email: profile.email || '',
+          affiliate_code: profile.affiliate_code || `${profile.full_name?.toUpperCase().replace(/\s+/g, '') || 'USER'}${profile.id.slice(-6)}`,
+          total_referrals: profile.total_referrals || 0,
+          active_referrals: profile.active_referrals || 0,
+          total_earned: profile.total_earned || 0,
+          monthly_earnings: profile.monthly_earnings || 0,
+          status: profile.affiliate_status || 'inactive',
+          created_at: profile.created_at,
+          last_referral: profile.last_referral
         };
       });
 
-      // Generate real referral data based on affiliates
+      // Generate referral data based on affiliate stats
       const realReferrals: Referral[] = [];
       realAffiliates.forEach(affiliate => {
         if (affiliate.total_referrals > 0) {
           for (let i = 0; i < affiliate.total_referrals; i++) {
             const isActive = i < affiliate.active_referrals;
-            const referredUser = users.find(u => u.id !== affiliate.user_id);
-            
-            if (referredUser) {
-              const referredProfile = profilesMap.get(referredUser.id);
-              realReferrals.push({
-                id: `${affiliate.id}-${i}`,
-                affiliate_id: affiliate.id,
-                affiliate_name: affiliate.user_name,
-                referred_user_id: referredUser.id,
-                referred_user_name: referredProfile?.full_name || referredUser.full_name || referredUser.email?.split('@')[0] || 'Onbekende gebruiker',
-                referred_user_email: referredUser.email || '',
-                status: isActive ? 'active' : 'inactive',
-                commission_earned: 25,
-                monthly_commission: isActive ? 5 : 0,
-                created_at: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString(),
-                last_payment: isActive ? new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString() : null
-              });
-            }
+            realReferrals.push({
+              id: `${affiliate.id}-${i}`,
+              affiliate_id: affiliate.id,
+              affiliate_name: affiliate.user_name,
+              referred_user_id: `referred-${i}`,
+              referred_user_name: `Referred User ${i + 1}`,
+              referred_user_email: `user${i + 1}@example.com`,
+              status: isActive ? 'active' : 'inactive',
+              commission_earned: 25,
+              monthly_commission: isActive ? 5 : 0,
+              created_at: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString(),
+              last_payment: isActive ? new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString() : null
+            });
           }
         }
       });
@@ -223,6 +206,22 @@ export default function AffiliateBeheer() {
 
       if (!isCodeUnique) {
         toast.error('Affiliate code moet uniek zijn');
+        return;
+      }
+
+      // Update affiliate in database
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({
+          affiliate_code: editFormData.affiliate_code.toUpperCase(),
+          affiliate_status: editFormData.status,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', selectedAffiliate.user_id);
+
+      if (updateError) {
+        console.error('Error updating affiliate in database:', updateError);
+        toast.error('Fout bij het opslaan in database');
         return;
       }
 

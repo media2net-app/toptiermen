@@ -175,27 +175,48 @@ export default function MijnProfiel() {
     if (!user) return;
 
     try {
-      // Generate affiliate code based on user data
-      const affiliateCode = `${profile?.full_name?.toUpperCase().replace(/\s+/g, '') || 'USER'}${user.id.slice(-6)}`;
-      
-      // Calculate mock affiliate data based on user activity
-      const daysSinceCreation = Math.floor((Date.now() - new Date(user.created_at || Date.now()).getTime()) / (1000 * 60 * 60 * 24));
-      const hasActivity = profile?.last_login && new Date(profile.last_login) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-      const totalReferrals = hasActivity ? Math.floor(Math.random() * 5) + (daysSinceCreation > 30 ? 2 : 0) : 0;
-      const activeReferrals = Math.floor(totalReferrals * 0.8);
-      const totalEarned = totalReferrals * 25;
-      const monthlyEarnings = activeReferrals * 5;
+      // Fetch affiliate data from profiles table
+      const { data: profileData, error } = await supabase
+        .from('profiles')
+        .select(`
+          affiliate_code,
+          affiliate_status,
+          total_referrals,
+          active_referrals,
+          total_earned,
+          monthly_earnings,
+          last_referral
+        `)
+        .eq('id', user.id)
+        .single();
 
+      if (error) {
+        console.error('Error fetching affiliate data:', error);
+        // Fallback to generated data if profile doesn't exist
+        const affiliateCode = `${profile?.full_name?.toUpperCase().replace(/\s+/g, '') || 'USER'}${user.id.slice(-6)}`;
+        setAffiliateData({
+          affiliate_code: affiliateCode,
+          total_referrals: 0,
+          active_referrals: 0,
+          total_earned: 0,
+          monthly_earnings: 0,
+          status: 'inactive'
+        });
+        setNewAffiliateCode(affiliateCode);
+        return;
+      }
+
+      // Use real data from database
       setAffiliateData({
-        affiliate_code: affiliateCode,
-        total_referrals: totalReferrals,
-        active_referrals: activeReferrals,
-        total_earned: totalEarned,
-        monthly_earnings: monthlyEarnings,
-        status: hasActivity ? 'active' : 'inactive'
+        affiliate_code: profileData.affiliate_code || `${profile?.full_name?.toUpperCase().replace(/\s+/g, '') || 'USER'}${user.id.slice(-6)}`,
+        total_referrals: profileData.total_referrals || 0,
+        active_referrals: profileData.active_referrals || 0,
+        total_earned: profileData.total_earned || 0,
+        monthly_earnings: profileData.monthly_earnings || 0,
+        status: profileData.affiliate_status || 'inactive'
       });
 
-      setNewAffiliateCode(affiliateCode);
+      setNewAffiliateCode(profileData.affiliate_code || `${profile?.full_name?.toUpperCase().replace(/\s+/g, '') || 'USER'}${user.id.slice(-6)}`);
     } catch (error) {
       console.error('Error fetching affiliate data:', error);
     }
@@ -214,6 +235,21 @@ export default function MijnProfiel() {
 
     setSavingAffiliateCode(true);
     try {
+      // Update affiliate code in database
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({
+          affiliate_code: newAffiliateCode.toUpperCase(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user?.id);
+
+      if (updateError) {
+        console.error('Error updating affiliate code in database:', updateError);
+        toast.error('Fout bij het opslaan in database');
+        return;
+      }
+
       // Update affiliate data in local state
       setAffiliateData(prev => ({
         ...prev,
