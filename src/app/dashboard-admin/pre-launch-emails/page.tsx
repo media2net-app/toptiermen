@@ -36,52 +36,68 @@ export default function PreLaunchEmailsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(20);
 
-  // Mock data
-  const mockEmails: PreLaunchEmail[] = [
-    {
-      id: '1',
-      email: 'john.doe@example.com',
-      name: 'John Doe',
-      source: 'Website Form',
-      subscribedAt: new Date('2024-01-15'),
-      status: 'active',
-      package: 'Premium',
-      notes: 'Interested in AI features'
-    },
-    {
-      id: '2',
-      email: 'jane.smith@example.com',
-      name: 'Jane Smith',
-      source: 'Social Media',
-      subscribedAt: new Date('2024-01-16'),
-      status: 'active',
-      package: 'Basic',
-      notes: 'Found via LinkedIn'
-    },
-    {
-      id: '3',
-      email: 'bob.wilson@example.com',
-      name: 'Bob Wilson',
-      source: 'Referral',
-      subscribedAt: new Date('2024-01-17'),
-      status: 'pending',
-      package: 'Ultimate',
-      notes: 'Referred by John Doe'
-    },
-    {
-      id: '4',
-      email: 'alice.brown@example.com',
-      name: 'Alice Brown',
-      source: 'Website Form',
-      subscribedAt: new Date('2024-01-18'),
-      status: 'unsubscribed',
-      package: 'Basic',
-      notes: 'Changed mind'
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch real data from database
+  const fetchEmails = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await fetch('/api/admin/prelaunch-emails');
+      const data = await response.json();
+
+      if (data.success) {
+        // Convert database format to component format
+        const formattedEmails = data.emails.map((email: any) => ({
+          id: email.id,
+          email: email.email,
+          name: email.name,
+          source: email.source,
+          subscribedAt: new Date(email.subscribed_at),
+          status: email.status,
+          package: email.package,
+          notes: email.notes
+        }));
+        
+        setEmails(formattedEmails);
+      } else {
+        // If it's a table setup error, try to setup the table
+        if (data.error && data.error.includes('42P01')) {
+          console.log('Table does not exist, setting up...');
+          await setupDatabase();
+          // Retry fetching after setup
+          setTimeout(() => fetchEmails(), 1000);
+        } else {
+          setError(data.error || 'Failed to fetch emails');
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching prelaunch emails:', err);
+      setError('Failed to load prelaunch emails');
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  // Setup database function
+  const setupDatabase = async () => {
+    try {
+      const response = await fetch('/api/admin/setup-prelaunch-emails', { method: 'POST' });
+      const data = await response.json();
+      if (data.success) {
+        console.log('Database setup completed successfully');
+      } else {
+        console.error('Database setup failed:', data.error);
+      }
+    } catch (err) {
+      console.error('Error setting up database:', err);
+    }
+  };
 
   useEffect(() => {
-    setEmails(mockEmails);
+    fetchEmails();
   }, []);
 
   useEffect(() => {
@@ -110,26 +126,80 @@ export default function PreLaunchEmailsPage() {
   const endIndex = startIndex + itemsPerPage;
   const currentEmails = filteredEmails.slice(startIndex, endIndex);
 
-  const addEmail = (emailData: Omit<PreLaunchEmail, 'id' | 'subscribedAt'>) => {
-    const newEmail: PreLaunchEmail = {
-      ...emailData,
-      id: Date.now().toString(),
-      subscribedAt: new Date()
-    };
-    setEmails([...emails, newEmail]);
-    setShowAddModal(false);
+  const addEmail = async (emailData: Omit<PreLaunchEmail, 'id' | 'subscribedAt'>) => {
+    try {
+      const response = await fetch('/api/admin/prelaunch-emails', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(emailData)
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        const newEmail: PreLaunchEmail = {
+          id: data.email.id,
+          email: data.email.email,
+          name: data.email.name,
+          source: data.email.source,
+          subscribedAt: new Date(data.email.subscribed_at),
+          status: data.email.status,
+          package: data.email.package,
+          notes: data.email.notes
+        };
+        setEmails([newEmail, ...emails]);
+        setShowAddModal(false);
+      } else {
+        alert('Error: ' + (data.error || 'Failed to add email'));
+      }
+    } catch (err) {
+      console.error('Error adding email:', err);
+      alert('Failed to add email');
+    }
   };
 
-  const updateEmail = (id: string, emailData: Partial<PreLaunchEmail>) => {
-    setEmails(emails.map(email => 
-      email.id === id ? { ...email, ...emailData } : email
-    ));
-    setEditingEmail(null);
+  const updateEmail = async (id: string, emailData: Partial<PreLaunchEmail>) => {
+    try {
+      const response = await fetch('/api/admin/prelaunch-emails', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, ...emailData })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setEmails(emails.map(email => 
+          email.id === id ? { ...email, ...emailData } : email
+        ));
+        setEditingEmail(null);
+      } else {
+        alert('Error: ' + (data.error || 'Failed to update email'));
+      }
+    } catch (err) {
+      console.error('Error updating email:', err);
+      alert('Failed to update email');
+    }
   };
 
-  const deleteEmail = (id: string) => {
+  const deleteEmail = async (id: string) => {
     if (confirm('Weet je zeker dat je deze e-mail wilt verwijderen?')) {
-      setEmails(emails.filter(email => email.id !== id));
+      try {
+        const response = await fetch(`/api/admin/prelaunch-emails?id=${id}`, {
+          method: 'DELETE'
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          setEmails(emails.filter(email => email.id !== id));
+        } else {
+          alert('Error: ' + (data.error || 'Failed to delete email'));
+        }
+      } catch (err) {
+        console.error('Error deleting email:', err);
+        alert('Failed to delete email');
+      }
     }
   };
 
@@ -151,15 +221,89 @@ export default function PreLaunchEmailsPage() {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0F1419] text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-400">Laden van prelaunch e-mails...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[#0F1419] text-white flex items-center justify-center">
+        <div className="text-center max-w-2xl mx-auto px-4">
+          <div className="text-red-500 mb-4 text-6xl">❌</div>
+          <h2 className="text-2xl font-bold text-white mb-4">Database Setup Required</h2>
+          <p className="text-red-400 mb-6">{error}</p>
+          
+          <div className="bg-[#1F2937] rounded-lg p-6 border border-[#374151] mb-6">
+            <h3 className="text-lg font-semibold text-white mb-3">📋 Setup Instructions:</h3>
+            <ol className="text-gray-300 text-left space-y-2">
+              <li>1. Ga naar je <strong>Supabase Dashboard</strong></li>
+              <li>2. Open de <strong>SQL Editor</strong></li>
+              <li>3. Kopieer en plak de SQL code uit <code className="bg-gray-800 px-2 py-1 rounded">setup_prelaunch_emails_manual.sql</code></li>
+              <li>4. Voer de SQL uit</li>
+              <li>5. Kom terug en klik op "Opnieuw proberen"</li>
+            </ol>
+          </div>
+          
+          <div className="flex gap-4 justify-center">
+            <button 
+              onClick={fetchEmails}
+              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg"
+            >
+              Opnieuw proberen
+            </button>
+            <button 
+              onClick={setupDatabase}
+              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
+            >
+              Setup Database
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#0F1419] text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Pre-launch E-mail Beheer</h1>
-          <p className="text-gray-400">
-            Beheer e-mail abonnementen voor de pre-launch campagne
-          </p>
+        <div className="mb-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-white mb-2">Pre-launch E-mail Beheer</h1>
+            <p className="text-gray-400">
+              Beheer e-mail abonnementen voor de pre-launch campagne
+            </p>
+          </div>
+          <button
+            onClick={async () => {
+              try {
+                setLoading(true);
+                const response = await fetch('/api/admin/setup-prelaunch-emails', { method: 'POST' });
+                const data = await response.json();
+                if (data.success) {
+                  alert('Database setup completed!');
+                  await fetchEmails();
+                } else {
+                  alert('Setup failed: ' + data.error);
+                }
+              } catch (err) {
+                alert('Setup failed');
+              } finally {
+                setLoading(false);
+              }
+            }}
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+          >
+            <PlusIcon className="w-4 h-4" />
+            Setup Database
+          </button>
         </div>
 
         {/* Stats */}
@@ -176,6 +320,67 @@ export default function PreLaunchEmailsPage() {
               <div className="ml-4">
                 <p className="text-sm text-gray-400">Totaal Abonnementen</p>
                 <p className="text-2xl font-bold text-white">{emails.length}</p>
+              </div>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="bg-[#1F2937] rounded-lg p-6 border border-[#374151]"
+          >
+            <div className="flex items-center">
+              <div className="p-2 bg-green-500/20 rounded-lg">
+                <CheckCircleIcon className="w-6 h-6 text-green-400" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm text-gray-400">Actieve Abonnementen</p>
+                <p className="text-2xl font-bold text-white">
+                  {emails.filter(email => email.status === 'active').length}
+                </p>
+              </div>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="bg-[#1F2937] rounded-lg p-6 border border-[#374151]"
+          >
+            <div className="flex items-center">
+              <div className="p-2 bg-yellow-500/20 rounded-lg">
+                <CalendarIcon className="w-6 h-6 text-yellow-400" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm text-gray-400">Deze Week</p>
+                <p className="text-2xl font-bold text-white">
+                  {emails.filter(email => {
+                    const weekAgo = new Date();
+                    weekAgo.setDate(weekAgo.getDate() - 7);
+                    return email.subscribedAt >= weekAgo;
+                  }).length}
+                </p>
+              </div>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="bg-[#1F2937] rounded-lg p-6 border border-[#374151]"
+          >
+            <div className="flex items-center">
+              <div className="p-2 bg-purple-500/20 rounded-lg">
+                <UserIcon className="w-6 h-6 text-purple-400" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm text-gray-400">Premium/Ultimate</p>
+                <p className="text-2xl font-bold text-white">
+                  {emails.filter(email => email.package === 'Premium' || email.package === 'Ultimate').length}
+                </p>
               </div>
             </div>
           </motion.div>

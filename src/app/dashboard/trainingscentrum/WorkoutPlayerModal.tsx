@@ -199,10 +199,6 @@ export default function WorkoutPlayerModal({ isOpen, onClose, onComplete, traini
                     </button>
                   </div>
                   <div className="flex flex-col md:flex-row gap-6">
-                    {/* Video/GIF */}
-                    <div className="w-full md:w-64 h-40 bg-[#181F17] rounded-xl flex items-center justify-center overflow-hidden">
-                      <span className="text-[#8BAE5A]">[Video/GIF]</span>
-                    </div>
                     {/* Instructies */}
                     <ul className="flex-1 list-disc pl-5 text-[#8BAE5A] text-sm">
                       {activeExercise.instructions.map((inst, i) => (

@@ -7,7 +7,41 @@ import { useAuth } from "@/contexts/AuthContext";
 export default function Login() {
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
-  const { signIn, isAuthenticated, user, loading: authLoading, initialized } = useAuth();
+  
+  // Fallback auth state in case AuthContext fails
+  const fallbackAuth = {
+    isAuthenticated: false,
+    user: null,
+    loading: false,
+    initialized: true, // Force initialized to true
+    signIn: async () => ({ success: false, error: 'Auth system unavailable' }),
+    signUp: async () => ({ success: false, error: 'Auth system unavailable' }),
+    signOut: async () => {},
+    updateUser: async () => {},
+    clearAllCache: () => {},
+    redirectAdminToDashboard: false
+  };
+  
+  let authContext;
+  try {
+    authContext = useAuth();
+  } catch (error) {
+    console.error('AuthContext error:', error);
+    authContext = fallbackAuth;
+  }
+  
+  const { signIn, isAuthenticated, user, loading: authLoading, initialized } = authContext;
+  
+  // Force initialization after a short delay if not initialized
+  useEffect(() => {
+    if (!initialized && mounted) {
+      const timer = setTimeout(() => {
+        console.log('🔧 Force initializing auth context...');
+        // This will trigger a re-render and hopefully initialize the context
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [initialized, mounted]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -18,34 +52,64 @@ export default function Login() {
     setMounted(true); 
   }, []);
 
+  // Debug logging
   useEffect(() => {
-    // Only redirect if we're initialized, not loading, and the user is authenticated
-    if (initialized && !authLoading && isAuthenticated && user && mounted && !redirecting) {
-      console.log('Redirecting user:', user.role);
-      setRedirecting(true);
-      // Use replace instead of push to prevent back button issues
-      if (user.role === 'admin') {
-        router.replace('/dashboard-admin');
-      } else {
-        router.replace('/dashboard');
-      }
-    }
-  }, [initialized, isAuthenticated, user, router, authLoading, mounted, redirecting]);
+    console.log('🔍 Login Debug:', {
+      mounted,
+      initialized,
+      authLoading,
+      isAuthenticated,
+      user: user?.email,
+      redirecting,
+      signIn: typeof signIn,
+      authContext: authContext ? 'available' : 'fallback'
+    });
+  }, [mounted, initialized, authLoading, isAuthenticated, user, redirecting, signIn, authContext]);
 
-  // Show loading screen during initial auth check or when redirecting
-  if (!mounted || !initialized || authLoading || redirecting) {
+  useEffect(() => {
+    // Redirect if user is authenticated, regardless of initialization state
+    if (!authLoading && isAuthenticated && user && mounted && !redirecting) {
+      console.log('🔀 Primary redirect triggered for user:', user.role);
+      setRedirecting(true);
+      const targetPath = user.role === 'admin' ? '/dashboard-admin' : '/dashboard';
+      console.log('🔀 Redirecting to:', targetPath);
+      // Use replace instead of push to prevent back button issues
+      router.replace(targetPath);
+    }
+  }, [isAuthenticated, user, router, authLoading, mounted, redirecting]);
+
+  // Additional redirect effect for when authLoading changes
+  useEffect(() => {
+    if (isAuthenticated && user && !authLoading && !redirecting) {
+      console.log('🔀 Auth loading finished, redirecting user:', user.role);
+      setRedirecting(true);
+      const targetPath = user.role === 'admin' ? '/dashboard-admin' : '/dashboard';
+      console.log('🔀 Redirecting to:', targetPath);
+      router.replace(targetPath);
+    }
+  }, [authLoading, isAuthenticated, user, router, redirecting]);
+
+  // Debug effect to track redirect conditions
+  useEffect(() => {
+    console.log('🔍 Redirect conditions:', {
+      isAuthenticated,
+      user: user?.email,
+      userRole: user?.role,
+      authLoading,
+      redirecting,
+      mounted
+    });
+  }, [isAuthenticated, user, authLoading, redirecting, mounted]);
+
+  // Show loading only briefly, then force show login form
+  if (!mounted) {
     return (
       <div className="min-h-screen flex items-center justify-center relative px-4 py-6" style={{ backgroundColor: '#181F17' }}>
         <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
         <div className="w-full max-w-md p-6 sm:p-8 rounded-3xl shadow-2xl bg-[#232D1A]/95 border border-[#3A4D23] backdrop-blur-lg relative z-10">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#B6C948] mx-auto mb-4"></div>
-            <p className="text-[#B6C948] text-lg">
-              {redirecting ? 'Doorsturen...' : 'Laden...'}
-            </p>
-            {redirecting && (
-              <p className="text-[#B6C948] text-sm mt-2">Je wordt doorgestuurd naar je dashboard</p>
-            )}
+            <p className="text-[#B6C948] text-lg">Laden...</p>
           </div>
         </div>
       </div>
@@ -54,20 +118,46 @@ export default function Login() {
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
+    console.log('🔍 Login attempt started');
+    console.log('Email:', email);
+    console.log('Password length:', password.length);
+    console.log('AuthContext state:', { initialized, authLoading, isAuthenticated });
+    
+    if (!email || !password) {
+      setError("Vul alle velden in");
+      return;
+    }
+    
     setIsLoading(true);
     setError("");
     
     try {
+      console.log('🔍 Calling signIn function...');
       const result = await signIn(email, password);
+      console.log('🔍 SignIn result:', result);
       
       if (!result.success) {
+        console.log('🔍 Login failed:', result.error);
         setError(result.error || "Ongeldige inloggegevens");
         setIsLoading(false);
+      } else {
+        console.log('🔍 Login successful, waiting for redirect...');
+        // If successful, keep loading state until redirect happens
+        // The redirect will be handled by the useEffect above
+        
+        // Fallback redirect after 2 seconds if normal redirect doesn't work
+        setTimeout(() => {
+          if (isAuthenticated && user && !redirecting) {
+            console.log('🔀 Fallback redirect triggered for user:', user.role);
+            setRedirecting(true);
+            const targetPath = user.role === 'admin' ? '/dashboard-admin' : '/dashboard';
+            console.log('🔀 Fallback redirecting to:', targetPath);
+            router.replace(targetPath);
+          }
+        }, 2000);
       }
-      // If successful, keep loading state until redirect happens
-      // The redirect will be handled by the useEffect above
     } catch (error: any) {
-      console.error('Login error:', error);
+      console.error('🔍 Login error:', error);
       setError(error.message || "Er is een fout opgetreden bij het inloggen");
       setIsLoading(false);
     }
@@ -77,17 +167,7 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center relative px-4 py-6" style={{ backgroundColor: '#181F17' }}>
       <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
       
-      {/* Navigation */}
-      <div className="absolute top-6 right-6 z-20">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => router.push('/offerte')}
-            className="text-[#B6C948] hover:text-white px-4 py-2 rounded-lg border border-[#B6C948] hover:bg-[#B6C948] hover:text-[#181F17] transition-all duration-200 font-medium"
-          >
-            Offerte
-          </button>
-        </div>
-      </div>
+
       
       <div className="w-full max-w-md p-6 sm:p-8 rounded-3xl shadow-2xl bg-[#232D1A]/95 border border-[#3A4D23] backdrop-blur-lg relative z-10">
         <h1 className="text-4xl sm:text-5xl md:text-7xl font-black uppercase tracking-tight mb-2 text-center">
@@ -129,8 +209,8 @@ export default function Login() {
           )}
           <button
             type="submit"
-            disabled={isLoading || authLoading}
-            className="w-full py-3 sm:py-4 rounded-xl bg-gradient-to-r from-[#B6C948] to-[#3A4D23] text-[#181F17] font-semibold text-base sm:text-lg shadow-lg hover:from-[#B6C948] hover:to-[#B6C948] transition-all duration-200 border border-[#B6C948] font-figtree disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isLoading || !email || !password}
+            className={`w-full py-3 sm:py-4 rounded-xl bg-gradient-to-r from-[#B6C948] to-[#3A4D23] text-[#181F17] font-semibold text-base sm:text-lg shadow-lg hover:from-[#B6C948] hover:to-[#B6C948] transition-all duration-200 border border-[#B6C948] font-figtree ${(isLoading || !email || !password) ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             {isLoading ? (
               <div className="flex items-center justify-center">

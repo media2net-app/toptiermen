@@ -77,7 +77,7 @@ const mockExercises = [
     primaryMuscle: 'Borst',
     secondaryMuscles: ['Triceps', 'Voorste Deltavleugel'],
     equipment: 'Barbell',
-    videoUrl: '/video-placeholder.jpg',
+    videoUrl: null,
     instructions: 'Ga liggen op de bank, pak de stang op schouderbreedte, laat zakken naar borst en duw omhoog.',
     difficulty: 'Intermediate'
   },
@@ -87,7 +87,7 @@ const mockExercises = [
     primaryMuscle: 'Borst',
     secondaryMuscles: ['Triceps', 'Voorste Deltavleugel'],
     equipment: 'Dumbbell',
-    videoUrl: '/video-placeholder.jpg',
+    videoUrl: null,
     instructions: 'Ga liggen met dumbbells op schouderhoogte, duw beide dumbbells gelijktijdig omhoog.',
     difficulty: 'Beginner'
   },
@@ -97,7 +97,7 @@ const mockExercises = [
     primaryMuscle: 'Borst',
     secondaryMuscles: ['Triceps', 'Voorste Deltavleugel', 'Core'],
     equipment: 'Bodyweight',
-    videoUrl: '/video-placeholder.jpg',
+    videoUrl: null,
     instructions: 'Start in plank positie, laat je lichaam zakken en duw jezelf omhoog.',
     difficulty: 'Beginner'
   },
@@ -107,7 +107,7 @@ const mockExercises = [
     primaryMuscle: 'Borst',
     secondaryMuscles: ['Triceps', 'Voorste Deltavleugel'],
     equipment: 'Barbell',
-    videoUrl: '/video-placeholder.jpg',
+    videoUrl: null,
     instructions: 'Bench press op een hellende bank (30-45 graden) voor focus op bovenste borst.',
     difficulty: 'Intermediate'
   },
@@ -117,7 +117,7 @@ const mockExercises = [
     primaryMuscle: 'Borst',
     secondaryMuscles: ['Voorste Deltavleugel'],
     equipment: 'Cable',
-    videoUrl: '/video-placeholder.jpg',
+    videoUrl: null,
     instructions: 'Sta tussen de kabels, trek beide kabels naar elkaar toe in een vloeiende beweging.',
     difficulty: 'Intermediate'
   }
@@ -340,6 +340,8 @@ export default function TrainingscentrumBeheer() {
 
   const handleUpdateExercise = async (id: number, exerciseData: any) => {
     try {
+      console.log('Updating exercise:', id, exerciseData);
+      
       const { data, error } = await supabase
         .from('exercises')
         .update(exerciseData)
@@ -349,7 +351,13 @@ export default function TrainingscentrumBeheer() {
       
       if (error) {
         console.error('Error updating exercise:', error);
-        toast.error('Fout bij het bijwerken van oefening');
+        console.error('Error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        toast.error(`Fout bij het bijwerken van oefening: ${error.message}`);
       } else {
         setExercises(exercises.map(ex => ex.id === id ? data : ex));
         setShowEditModal(false);
@@ -358,7 +366,7 @@ export default function TrainingscentrumBeheer() {
       }
     } catch (err) {
       console.error('Exception updating exercise:', err);
-      toast.error('Fout bij het bijwerken van oefening');
+      toast.error(`Fout bij het bijwerken van oefening: ${err instanceof Error ? err.message : 'Onbekende fout'}`);
     }
   };
 
@@ -820,14 +828,72 @@ export default function TrainingscentrumBeheer() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredExercises.map((exercise) => (
                 <div key={exercise.id} className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23] hover:border-[#8BAE5A] transition-all duration-300">
-                  {/* Video Preview */}
-                  {exercise.video_url && (
-                    <div className="mb-4 relative">
-                      <video 
-                        src={exercise.video_url} 
-                        className="w-full h-32 object-cover rounded-xl border border-[#3A4D23] bg-[#181F17]"
-                        controls
-                      />
+                  {/* Video Preview - Only show if there's a real video */}
+                  {exercise.video_url && exercise.video_url !== '/video-placeholder.jpg' && exercise.video_url !== 'video-placeholder.jpg' && (
+                    <div className="mb-4 relative group">
+                      <div className="aspect-video bg-[#181F17] rounded-xl border border-[#3A4D23] overflow-hidden">
+                        {/* Video Thumbnail with Play Button */}
+                        <div className="relative w-full h-full bg-gradient-to-br from-[#232D1A] to-[#181F17] flex items-center justify-center cursor-pointer">
+                          {/* Video Thumbnail (if available) */}
+                          <video
+                            src={exercise.video_url}
+                            className="absolute inset-0 w-full h-full object-cover opacity-30"
+                            preload="metadata"
+                            muted
+                            onLoadedMetadata={(e) => {
+                              const video = e.target as HTMLVideoElement;
+                              video.currentTime = 1; // Seek to 1 second for thumbnail
+                            }}
+                          />
+                          
+                          <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors" />
+                          <div className="relative z-10 text-center">
+                            <div className="w-16 h-16 bg-[#8BAE5A]/90 rounded-full flex items-center justify-center mx-auto mb-2 group-hover:bg-[#8BAE5A] transition-colors shadow-lg">
+                              <PlayIcon className="w-8 h-8 text-[#181F17]" />
+                            </div>
+                            <p className="text-[#8BAE5A] text-sm font-medium">Video beschikbaar</p>
+                            <p className="text-[#B6C948] text-xs">Hover om te bekijken</p>
+                          </div>
+                        </div>
+                        
+                        {/* Video Player (click to play) */}
+                        <div className="absolute inset-0 bg-black rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none group-hover:pointer-events-auto">
+                          <video
+                            src={exercise.video_url}
+                            className="w-full h-full object-cover rounded-xl"
+                            controls
+                            preload="none"
+                            muted
+                            onLoadStart={() => console.log('🎬 Video loading started:', exercise.name)}
+                            onCanPlay={() => console.log('✅ Video can play:', exercise.name)}
+                            onError={(e) => console.error('❌ Video error:', exercise.name, e)}
+                            onPlay={() => console.log('▶️ Video started playing:', exercise.name)}
+                            onPause={() => console.log('⏸️ Video paused:', exercise.name)}
+                            onEnded={() => console.log('🏁 Video ended:', exercise.name)}
+                          />
+                        </div>
+                      </div>
+                      
+                      {/* Video Info */}
+                      <div className="mt-2 text-center">
+                        <p className="text-[#8BAE5A] text-xs font-medium">{exercise.name} - Video</p>
+                        <p className="text-[#B6C948] text-xs">Hover om video te bekijken</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* No Video Indicator */}
+                  {(!exercise.video_url || exercise.video_url === '/video-placeholder.jpg' || exercise.video_url === 'video-placeholder.jpg') && (
+                    <div className="mb-4 p-4 bg-[#181F17] rounded-xl border border-[#3A4D23] border-dashed">
+                      <div className="text-center">
+                        <div className="w-12 h-12 bg-[#3A4D23]/50 rounded-full flex items-center justify-center mx-auto mb-2">
+                          <svg className="w-6 h-6 text-[#8BAE5A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                        <p className="text-[#8BAE5A] text-sm font-medium">Geen video</p>
+                        <p className="text-[#B6C948] text-xs">Voeg een video toe via bewerken</p>
+                      </div>
                     </div>
                   )}
                   
@@ -869,10 +935,6 @@ export default function TrainingscentrumBeheer() {
                     <div className="flex items-center justify-between">
                       <span className="text-[#B6C948] text-sm">Materiaal</span>
                       <span className="text-[#8BAE5A] font-semibold">{exercise.equipment}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[#B6C948] text-sm">Niveau</span>
-                      <span className="text-[#8BAE5A] font-semibold">{exercise.difficulty}</span>
                     </div>
                   </div>
 

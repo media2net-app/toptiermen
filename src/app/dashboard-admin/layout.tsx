@@ -292,7 +292,20 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#181F17] flex items-center justify-center">
-        <div className="text-[#8BAE5A] text-xl">Laden...</div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
+          <div className="text-[#8BAE5A] text-xl">Admin Dashboard laden...</div>
+          {/* Add timeout indicator */}
+          <div className="mt-4">
+            <p className="text-[#B6C948] text-sm">Beheerpaneel wordt geladen</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-2 text-[#8BAE5A] hover:text-[#B6C948] underline text-sm"
+            >
+              Pagina herladen als het te lang duurt
+            </button>
+          </div>
+        </div>
       </div>
     );
   }

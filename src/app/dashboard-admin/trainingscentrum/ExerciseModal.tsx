@@ -20,9 +20,7 @@ const equipmentTypes = [
   'Barbell', 'Dumbbell', 'Machine', 'Cable', 'Bodyweight', 'Kettlebell', 'Resistance Band', 'Cable Machine', 'Leg Press Machine', 'Lat Pulldown Machine', 'Leg Extension Machine', 'Leg Curl Machine', 'Calf Machine', 'Pull-up Bar', 'Dip Bars'
 ];
 
-const difficultyLevels = [
-  'Beginner', 'Intermediate', 'Advanced'
-];
+
 
 export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: ExerciseModalProps) {
   const [formData, setFormData] = useState({
@@ -32,7 +30,6 @@ export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: Exe
     equipment: '',
     video_url: '',
     instructions: '',
-    difficulty: '',
     worksheet_url: '' as string | null
   });
 
@@ -47,7 +44,6 @@ export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: Exe
         equipment: exercise.equipment || '',
         video_url: exercise.video_url || '',
         instructions: exercise.instructions || '',
-        difficulty: exercise.difficulty || '',
         worksheet_url: exercise.worksheet_url || null
       });
     } else {
@@ -58,7 +54,6 @@ export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: Exe
         equipment: '',
         video_url: '',
         instructions: '',
-        difficulty: '',
         worksheet_url: null
       });
     }
@@ -67,7 +62,7 @@ export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: Exe
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.primary_muscle || !formData.equipment || !formData.instructions || !formData.difficulty) {
+    if (!formData.name || !formData.primary_muscle || !formData.equipment || !formData.instructions) {
       alert('Vul alle verplichte velden in');
       return;
     }
@@ -237,22 +232,7 @@ export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: Exe
             />
           </div>
 
-          {/* Niveau */}
-          <div>
-            <label className="block text-[#8BAE5A] font-semibold mb-2">
-              Niveau *
-            </label>
-            <select
-              value={formData.difficulty}
-              onChange={(e) => setFormData({ ...formData, difficulty: e.target.value })}
-              className="w-full px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-            >
-              <option value="">Selecteer niveau</option>
-              {difficultyLevels.map(level => (
-                <option key={level} value={level}>{level}</option>
-              ))}
-            </select>
-          </div>
+
 
           {/* Buttons */}
           <div className="flex gap-4 pt-4">

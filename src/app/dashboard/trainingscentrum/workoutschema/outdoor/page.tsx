@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import Image from "next/image";
+
 import dynamic from "next/dynamic";
 const WorkoutPlayerModal = dynamic(() => import("../../WorkoutPlayerModal"), { ssr: false });
 
@@ -203,10 +203,6 @@ export default function OutdoorSchema() {
           {days[activeTab].exercises.map((ex, i) => (
             <div key={ex.name} className="bg-[#181F17] rounded-xl p-4 flex flex-col gap-2 shadow border border-[#3A4D23]/40">
               <div className="flex items-center gap-3 mb-2">
-                <div className="w-16 h-16 rounded-lg bg-[#232D1A] flex items-center justify-center overflow-hidden cursor-pointer">
-                  {/* Thumbnail, klikbaar voor video (voor nu alleen thumbnail) */}
-                  <Image src={ex.img} alt={ex.name} width={64} height={64} className="object-contain" />
-                </div>
                 <div className="flex-1">
                   <span className="font-bold text-white text-lg">{ex.name}</span>
                   <div className="text-[#8BAE5A] text-sm">{ex.sets} | Rust: {ex.rest}</div>

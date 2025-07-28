@@ -272,6 +272,16 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
           <p className="text-[#8BAE5A]">Laden...</p>
+          {/* Add timeout indicator */}
+          <div className="mt-4">
+            <p className="text-[#B6C948] text-sm">Dashboard wordt geladen</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-2 text-[#8BAE5A] hover:text-[#B6C948] underline text-sm"
+            >
+              Pagina herladen als het te lang duurt
+            </button>
+          </div>
         </div>
       </div>
     );
