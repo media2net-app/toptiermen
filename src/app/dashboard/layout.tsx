@@ -2,7 +2,7 @@
 import { HomeIcon, FireIcon, AcademicCapIcon, ChartBarIcon, CurrencyDollarIcon, UsersIcon, BookOpenIcon, StarIcon, UserCircleIcon, ChatBubbleLeftRightIcon, ChevronUpIcon, ChevronDownIcon, Bars3Icon, XMarkIcon, BellIcon, EnvelopeIcon, CheckCircleIcon, UserGroupIcon, TrophyIcon, CalendarDaysIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDebug } from '@/contexts/DebugContext';
@@ -173,7 +173,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: { collapse
 };
 
 function DashboardContent({ children }: { children: React.ReactNode }) {
-  const { user, signOut } = useAuth();
+  const { user, signOut, loading: authLoading } = useAuth();
   const { showDebug } = useDebug();
   const { isTransitioning } = useOnboarding();
   const router = useRouter();
@@ -183,13 +183,17 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [onboardingStatus, setOnboardingStatus] = useState<any>(null);
   const [showForcedOnboarding, setShowForcedOnboarding] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Check onboarding status on mount and when user changes
   useEffect(() => {
-    if (user) {
+    if (user && !authLoading) {
       checkOnboardingStatus();
+      setIsLoading(false);
+    } else if (!user && !authLoading) {
+      setIsLoading(false);
     }
-  }, [user]);
+  }, [user?.id, authLoading]); // Only depend on user ID and auth loading state
 
   // Show forced onboarding if user hasn't completed onboarding
   useEffect(() => {
@@ -206,7 +210,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
     }
   }, [onboardingStatus]);
 
-  const checkOnboardingStatus = async () => {
+  const checkOnboardingStatus = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -233,10 +237,28 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error('Error checking onboarding status:', error);
     }
-  };
+  }, [user?.id, router]);
 
   // Note: Admin users can now access both admin dashboard and regular dashboard
   // The redirect to admin dashboard only happens on initial login in AuthContext
+
+  // Show loading state while authentication is in progress
+  if (authLoading || isLoading) {
+    return (
+      <div className="min-h-screen bg-[#0A0F0A] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
+          <p className="text-[#8BAE5A]">Laden...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Redirect to login if no user
+  if (!user) {
+    router.push('/login');
+    return null;
+  }
 
   const handleLogout = async () => {
     try {
@@ -288,16 +310,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isMobileMenuOpen]);
 
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-[#0A0F0A] flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
-          <p className="text-[#8BAE5A]">Laden...</p>
-        </div>
-      </div>
-    );
-  }
+
 
   return (
     <div className="min-h-screen bg-[#0A0F0A] flex">

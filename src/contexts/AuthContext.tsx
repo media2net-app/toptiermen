@@ -43,7 +43,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const mountedRef = useRef(true);
   const initializationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const fetchUserProfile = useCallback(async (supabaseUser: SupabaseUser): Promise<User | null> => {
+  const fetchUserProfile = async (supabaseUser: SupabaseUser): Promise<User | null> => {
     try {
       console.log('Fetching user profile for:', supabaseUser.email);
       
@@ -78,7 +78,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       console.error('Error fetching user profile:', error);
       return null;
     }
-  }, []);
+  };
 
   // Initialize authentication state
   useEffect(() => {
@@ -178,7 +178,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
       subscription.unsubscribe();
     };
-  }, [fetchUserProfile]);
+  }, []);
 
   const signIn = async (email: string, password: string) => {
     if (!initialized) {
