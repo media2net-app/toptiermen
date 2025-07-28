@@ -12,8 +12,17 @@ import {
   CheckIcon,
   XMarkIcon,
   ArrowUpIcon,
-  ArrowDownIcon
+  ArrowDownIcon,
+  MagnifyingGlassIcon,
+  FunnelIcon,
+  ArrowPathIcon,
+  UserPlusIcon,
+  StarIcon,
+  ShieldCheckIcon,
+  TrophyIcon
 } from '@heroicons/react/24/outline';
+import { toast } from 'react-toastify';
+import { AdminCard, AdminStatsCard, AdminTable, AdminButton } from '@/components/admin';
 
 interface Affiliate {
   id: string;
@@ -53,10 +62,11 @@ export default function AffiliateBeheer() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState('Alle Statussen');
 
   // Mock data for demonstration
   useEffect(() => {
-    // Simulate loading
     setTimeout(() => {
       setAffiliates([
         {
@@ -159,6 +169,14 @@ export default function AffiliateBeheer() {
     conversionRate: affiliates.length > 0 ? (referrals.length / affiliates.length * 100).toFixed(1) : '0'
   };
 
+  const filteredAffiliates = affiliates.filter(affiliate => {
+    const matchesSearch = affiliate.user_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         affiliate.user_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         affiliate.affiliate_code.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = selectedStatus === 'Alle Statussen' || affiliate.status === selectedStatus;
+    return matchesSearch && matchesStatus;
+  });
+
   const handleStatusChange = (affiliateId: string, newStatus: 'active' | 'inactive' | 'suspended') => {
     setAffiliates(prev => prev.map(aff => 
       aff.id === affiliateId ? { ...aff, status: newStatus } : aff
@@ -170,417 +188,201 @@ export default function AffiliateBeheer() {
     setShowDeleteModal(false);
   };
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'active': return 'bg-green-500/20 text-green-500';
+      case 'inactive': return 'bg-gray-500/20 text-gray-400';
+      case 'suspended': return 'bg-red-500/20 text-red-500';
+      default: return 'bg-gray-500/20 text-gray-400';
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'active': return 'Actief';
+      case 'inactive': return 'Inactief';
+      case 'suspended': return 'Geschorst';
+      default: return status;
+    }
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0F1411] flex items-center justify-center">
+      <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A]"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0F1411] p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-white mb-2">Affiliate Beheer</h1>
-              <p className="text-[#8BAE5A]">Beheer affiliate programma en commissies</p>
-            </div>
-            <button
-              onClick={() => setShowAddModal(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-[#8BAE5A] text-white rounded-lg font-semibold hover:bg-[#9BBE6A] transition-colors"
-            >
-              <PlusIcon className="w-5 h-5" />
-              Nieuwe Affiliate
-            </button>
-          </div>
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-[#8BAE5A]">Affiliate Beheer</h1>
+          <p className="text-[#B6C948] mt-2">Beheer affiliate programma en commissies</p>
         </div>
-
-        {/* Tabs */}
-        <div className="flex space-x-1 mb-6 bg-[#181F17] rounded-lg p-1">
-          <button
-            onClick={() => setActiveTab('overview')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md font-semibold transition-colors ${
-              activeTab === 'overview'
-                ? 'bg-[#8BAE5A] text-white'
-                : 'text-[#8BAE5A] hover:text-white'
-            }`}
+        <div className="flex items-center gap-4">
+          <span className="text-[#8BAE5A] font-semibold">
+            {filteredAffiliates.length} van {affiliates.length} affiliates
+          </span>
+          {loading && (
+            <span className="text-[#B6C948] text-sm">Laden...</span>
+          )}
+          <AdminButton 
+            variant="secondary" 
+            icon={<ArrowPathIcon className="w-5 h-5" />}
+            onClick={() => window.location.reload()}
+            loading={loading}
           >
-            <ChartBarIcon className="w-5 h-5" />
-            Overzicht
-          </button>
-          <button
-            onClick={() => setActiveTab('affiliates')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md font-semibold transition-colors ${
-              activeTab === 'affiliates'
-                ? 'bg-[#8BAE5A] text-white'
-                : 'text-[#8BAE5A] hover:text-white'
-            }`}
+            Verversen
+          </AdminButton>
+          <AdminButton 
+            variant="primary" 
+            icon={<UserPlusIcon className="w-5 h-5" />}
+            onClick={() => setShowAddModal(true)}
           >
-            <UserGroupIcon className="w-5 h-5" />
-            Affiliates
-          </button>
-          <button
-            onClick={() => setActiveTab('referrals')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md font-semibold transition-colors ${
-              activeTab === 'referrals'
-                ? 'bg-[#8BAE5A] text-white'
-                : 'text-[#8BAE5A] hover:text-white'
-            }`}
-          >
-            <FireIcon className="w-5 h-5" />
-            Referrals
-          </button>
-          <button
-            onClick={() => setActiveTab('commissions')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md font-semibold transition-colors ${
-              activeTab === 'commissions'
-                ? 'bg-[#8BAE5A] text-white'
-                : 'text-[#8BAE5A] hover:text-white'
-            }`}
-          >
-            <CurrencyEuroIcon className="w-5 h-5" />
-            Commissies
-          </button>
+            Nieuwe Affiliate
+          </AdminButton>
         </div>
-
-        {/* Overview Tab */}
-        {activeTab === 'overview' && (
-          <div className="space-y-6">
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-[#181F17] rounded-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 bg-[#8BAE5A]/20 rounded-lg flex items-center justify-center">
-                    <UserGroupIcon className="w-6 h-6 text-[#8BAE5A]" />
-                  </div>
-                  <span className="text-[#8BAE5A] text-sm">Totaal</span>
-                </div>
-                <div className="text-2xl font-bold text-white mb-1">{stats.totalAffiliates}</div>
-                <div className="text-[#8BAE5A] text-sm">Affiliates</div>
-              </div>
-
-              <div className="bg-[#181F17] rounded-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center">
-                    <CheckIcon className="w-6 h-6 text-green-500" />
-                  </div>
-                  <span className="text-green-500 text-sm">Actief</span>
-                </div>
-                <div className="text-2xl font-bold text-white mb-1">{stats.activeAffiliates}</div>
-                <div className="text-[#8BAE5A] text-sm">Actieve Affiliates</div>
-              </div>
-
-              <div className="bg-[#181F17] rounded-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                    <FireIcon className="w-6 h-6 text-blue-500" />
-                  </div>
-                  <span className="text-blue-500 text-sm">+{stats.totalReferrals}</span>
-                </div>
-                <div className="text-2xl font-bold text-white mb-1">{stats.totalReferrals}</div>
-                <div className="text-[#8BAE5A] text-sm">Totaal Referrals</div>
-              </div>
-
-              <div className="bg-[#181F17] rounded-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center">
-                    <CurrencyEuroIcon className="w-6 h-6 text-yellow-500" />
-                  </div>
-                  <span className="text-yellow-500 text-sm">€{stats.totalCommissions}</span>
-                </div>
-                <div className="text-2xl font-bold text-white mb-1">€{stats.totalCommissions}</div>
-                <div className="text-[#8BAE5A] text-sm">Totaal Verdiend</div>
-              </div>
-            </div>
-
-            {/* Performance Chart */}
-            <div className="bg-[#181F17] rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-white mb-4">Affiliate Performance</h3>
-              <div className="space-y-4">
-                {affiliates.map(affiliate => (
-                  <div key={affiliate.id} className="flex items-center justify-between p-4 bg-[#232D1A] rounded-lg">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-10 h-10 bg-[#8BAE5A] rounded-full flex items-center justify-center">
-                        <span className="text-white font-semibold">
-                          {affiliate.user_name.charAt(0)}
-                        </span>
-                      </div>
-                      <div>
-                        <div className="font-semibold text-white">{affiliate.user_name}</div>
-                        <div className="text-[#8BAE5A] text-sm">{affiliate.user_email}</div>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-6">
-                      <div className="text-center">
-                        <div className="text-white font-semibold">{affiliate.total_referrals}</div>
-                        <div className="text-[#8BAE5A] text-sm">Referrals</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-white font-semibold">€{affiliate.total_earned}</div>
-                        <div className="text-[#8BAE5A] text-sm">Verdiend</div>
-                      </div>
-                      <div className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                        affiliate.status === 'active' 
-                          ? 'bg-green-500/20 text-green-500'
-                          : affiliate.status === 'inactive'
-                          ? 'bg-gray-500/20 text-gray-400'
-                          : 'bg-red-500/20 text-red-500'
-                      }`}>
-                        {affiliate.status === 'active' ? 'Actief' : 
-                         affiliate.status === 'inactive' ? 'Inactief' : 'Geschorst'}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Affiliates Tab */}
-        {activeTab === 'affiliates' && (
-          <div className="bg-[#181F17] rounded-lg overflow-hidden">
-            <div className="p-6 border-b border-[#232D1A]">
-              <h3 className="text-lg font-semibold text-white">Alle Affiliates</h3>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-[#232D1A]">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-[#8BAE5A] uppercase tracking-wider">
-                      Affiliate
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-[#8BAE5A] uppercase tracking-wider">
-                      Code
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-[#8BAE5A] uppercase tracking-wider">
-                      Referrals
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-[#8BAE5A] uppercase tracking-wider">
-                      Verdiensten
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-[#8BAE5A] uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-[#8BAE5A] uppercase tracking-wider">
-                      Acties
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#232D1A]">
-                  {affiliates.map(affiliate => (
-                    <tr key={affiliate.id} className="hover:bg-[#232D1A]/50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="w-10 h-10 bg-[#8BAE5A] rounded-full flex items-center justify-center mr-3">
-                            <span className="text-white font-semibold">
-                              {affiliate.user_name.charAt(0)}
-                            </span>
-                          </div>
-                          <div>
-                            <div className="text-sm font-medium text-white">{affiliate.user_name}</div>
-                            <div className="text-sm text-[#8BAE5A]">{affiliate.user_email}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-sm text-white font-mono">{affiliate.affiliate_code}</span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-white">{affiliate.total_referrals}</div>
-                        <div className="text-xs text-[#8BAE5A]">{affiliate.active_referrals} actief</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-white">€{affiliate.total_earned}</div>
-                        <div className="text-xs text-[#8BAE5A]">€{affiliate.monthly_earnings}/maand</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          affiliate.status === 'active' 
-                            ? 'bg-green-500/20 text-green-500'
-                            : affiliate.status === 'inactive'
-                            ? 'bg-gray-500/20 text-gray-400'
-                            : 'bg-red-500/20 text-red-500'
-                        }`}>
-                          {affiliate.status === 'active' ? 'Actief' : 
-                           affiliate.status === 'inactive' ? 'Inactief' : 'Geschorst'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={() => {
-                              setSelectedAffiliate(affiliate);
-                              setShowEditModal(true);
-                            }}
-                            className="text-[#8BAE5A] hover:text-white"
-                          >
-                            <PencilIcon className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => {
-                              setSelectedAffiliate(affiliate);
-                              setShowDeleteModal(true);
-                            }}
-                            className="text-red-500 hover:text-red-400"
-                          >
-                            <TrashIcon className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* Referrals Tab */}
-        {activeTab === 'referrals' && (
-          <div className="bg-[#181F17] rounded-lg overflow-hidden">
-            <div className="p-6 border-b border-[#232D1A]">
-              <h3 className="text-lg font-semibold text-white">Alle Referrals</h3>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-[#232D1A]">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-[#8BAE5A] uppercase tracking-wider">
-                      Affiliate
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-[#8BAE5A] uppercase tracking-wider">
-                      Referred User
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-[#8BAE5A] uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-[#8BAE5A] uppercase tracking-wider">
-                      Commissie
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-[#8BAE5A] uppercase tracking-wider">
-                      Datum
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#232D1A]">
-                  {referrals.map(referral => (
-                    <tr key={referral.id} className="hover:bg-[#232D1A]/50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-white">{referral.affiliate_name}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="w-8 h-8 bg-[#8BAE5A] rounded-full flex items-center justify-center mr-2">
-                            <span className="text-white text-xs font-semibold">
-                              {referral.referred_user_name.charAt(0)}
-                            </span>
-                          </div>
-                          <div>
-                            <div className="text-sm font-medium text-white">{referral.referred_user_name}</div>
-                            <div className="text-sm text-[#8BAE5A]">{referral.referred_user_email}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          referral.status === 'active' 
-                            ? 'bg-green-500/20 text-green-500'
-                            : referral.status === 'inactive'
-                            ? 'bg-gray-500/20 text-gray-400'
-                            : 'bg-red-500/20 text-red-500'
-                        }`}>
-                          {referral.status === 'active' ? 'Actief' : 
-                           referral.status === 'inactive' ? 'Inactief' : 'Geannuleerd'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-white">€{referral.commission_earned}</div>
-                        <div className="text-xs text-[#8BAE5A]">€{referral.monthly_commission}/maand</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-[#8BAE5A]">
-                        {new Date(referral.created_at).toLocaleDateString('nl-NL')}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* Commissions Tab */}
-        {activeTab === 'commissions' && (
-          <div className="space-y-6">
-            {/* Commission Summary */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-[#181F17] rounded-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center">
-                    <CurrencyEuroIcon className="w-6 h-6 text-green-500" />
-                  </div>
-                  <ArrowUpIcon className="w-5 h-5 text-green-500" />
-                </div>
-                <div className="text-2xl font-bold text-white mb-1">€{stats.totalCommissions}</div>
-                <div className="text-[#8BAE5A] text-sm">Totaal Uitbetaald</div>
-              </div>
-
-              <div className="bg-[#181F17] rounded-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                    <CurrencyEuroIcon className="w-6 h-6 text-blue-500" />
-                  </div>
-                  <ArrowUpIcon className="w-5 h-5 text-blue-500" />
-                </div>
-                <div className="text-2xl font-bold text-white mb-1">€{stats.monthlyCommissions}</div>
-                <div className="text-[#8BAE5A] text-sm">Deze Maand</div>
-              </div>
-
-              <div className="bg-[#181F17] rounded-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center">
-                    <CurrencyEuroIcon className="w-6 h-6 text-yellow-500" />
-                  </div>
-                  <ArrowDownIcon className="w-5 h-5 text-yellow-500" />
-                </div>
-                <div className="text-2xl font-bold text-white mb-1">€{stats.totalCommissions * 0.1}</div>
-                <div className="text-[#8BAE5A] text-sm">Openstaand</div>
-              </div>
-            </div>
-
-            {/* Commission History */}
-            <div className="bg-[#181F17] rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-white mb-4">Commissie Geschiedenis</h3>
-              <div className="space-y-4">
-                {referrals.map(referral => (
-                  <div key={referral.id} className="flex items-center justify-between p-4 bg-[#232D1A] rounded-lg">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-10 h-10 bg-[#8BAE5A] rounded-full flex items-center justify-center">
-                        <span className="text-white font-semibold">
-                          {referral.affiliate_name.charAt(0)}
-                        </span>
-                      </div>
-                      <div>
-                        <div className="font-semibold text-white">{referral.affiliate_name}</div>
-                        <div className="text-[#8BAE5A] text-sm">→ {referral.referred_user_name}</div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-white font-semibold">€{referral.commission_earned}</div>
-                      <div className="text-[#8BAE5A] text-sm">
-                        {new Date(referral.created_at).toLocaleDateString('nl-NL')}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
       </div>
+
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <AdminStatsCard
+          title="Totaal Affiliates"
+          value={stats.totalAffiliates}
+          icon={<UserGroupIcon className="w-8 h-8" />}
+          color="green"
+        />
+        <AdminStatsCard
+          title="Actieve Affiliates"
+          value={stats.activeAffiliates}
+          icon={<ShieldCheckIcon className="w-8 h-8" />}
+          color="blue"
+        />
+        <AdminStatsCard
+          title="Totaal Referrals"
+          value={stats.totalReferrals}
+          icon={<FireIcon className="w-8 h-8" />}
+          color="orange"
+        />
+        <AdminStatsCard
+          title="Totaal Verdiend"
+          value={`€${stats.totalCommissions}`}
+          icon={<CurrencyEuroIcon className="w-8 h-8" />}
+          color="green"
+        />
+        <AdminStatsCard
+          title="Maandelijkse Commissies"
+          value={`€${stats.monthlyCommissions}`}
+          icon={<StarIcon className="w-8 h-8" />}
+          color="purple"
+        />
+      </div>
+
+      {/* Search and Filters */}
+      <AdminCard title="Filters & Zoeken" icon={<FunnelIcon className="w-6 h-6" />}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Search */}
+          <div className="relative">
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Zoek op naam, e-mail of affiliate code..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#181F17] text-white border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] placeholder-gray-400"
+            />
+          </div>
+
+          {/* Status Filter */}
+          <div className="relative">
+            <FunnelIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#181F17] text-white border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] appearance-none"
+            >
+              {['Alle Statussen', 'active', 'inactive', 'suspended'].map(status => (
+                <option key={status} value={status}>
+                  {status === 'Alle Statussen' ? 'Alle Statussen' : getStatusText(status)}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </AdminCard>
+
+      {/* Affiliates Table */}
+      <AdminCard title="Affiliates Overzicht" icon={<UserGroupIcon className="w-6 h-6" />}>
+        <AdminTable
+          headers={['Affiliate', 'Affiliate Code', 'Referrals', 'Verdiensten', 'Status']}
+          data={filteredAffiliates.map(affiliate => ({
+            affiliate: (
+              <div className="flex items-center">
+                <div className="w-10 h-10 bg-[#8BAE5A] rounded-full flex items-center justify-center mr-3">
+                  <span className="text-white font-semibold">
+                    {affiliate.user_name.charAt(0)}
+                  </span>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-white">{affiliate.user_name}</div>
+                  <div className="text-sm text-[#8BAE5A]">{affiliate.user_email}</div>
+                </div>
+              </div>
+            ),
+            affiliate_code: (
+              <span className="text-sm text-white font-mono">{affiliate.affiliate_code}</span>
+            ),
+            referrals: (
+              <div>
+                <div className="text-sm text-white">{affiliate.total_referrals}</div>
+                <div className="text-xs text-[#8BAE5A]">{affiliate.active_referrals} actief</div>
+              </div>
+            ),
+            verdiensten: (
+              <div>
+                <div className="text-sm font-medium text-white">€{affiliate.total_earned}</div>
+                <div className="text-xs text-[#8BAE5A]">€{affiliate.monthly_earnings}/maand</div>
+              </div>
+            ),
+            status: (
+              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(affiliate.status)}`}>
+                {getStatusText(affiliate.status)}
+              </span>
+            )
+          }))}
+          actions={(item) => (
+            <div className="flex space-x-2">
+              <button
+                onClick={() => {
+                  const affiliate = filteredAffiliates.find(a => a.user_name === item.affiliate.props.children[1].props.children[0].props.children);
+                  if (affiliate) {
+                    setSelectedAffiliate(affiliate);
+                    setShowEditModal(true);
+                  }
+                }}
+                className="text-[#8BAE5A] hover:text-white"
+              >
+                <PencilIcon className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => {
+                  const affiliate = filteredAffiliates.find(a => a.user_name === item.affiliate.props.children[1].props.children[0].props.children);
+                  if (affiliate) {
+                    setSelectedAffiliate(affiliate);
+                    setShowDeleteModal(true);
+                  }
+                }}
+                className="text-red-500 hover:text-red-400"
+              >
+                <TrashIcon className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+        />
+      </AdminCard>
 
       {/* Add Affiliate Modal */}
       {showAddModal && (
