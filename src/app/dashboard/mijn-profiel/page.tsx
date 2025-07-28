@@ -607,42 +607,50 @@ export default function MijnProfiel() {
 
   return (
     <ClientLayout>
-      <div className="w-full max-w-7xl mx-auto">
-        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 drop-shadow-lg">Mijn Profiel</h1>
-        <p className="text-[#8BAE5A] text-lg mb-8">Beheer je profiel, voortgang en instellingen</p>
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 drop-shadow-lg">Mijn Profiel</h1>
+        <p className="text-[#8BAE5A] text-base sm:text-lg mb-6 sm:mb-8">Beheer je profiel, voortgang en instellingen</p>
       
-      {/* Tabs */}
-      <div className="flex gap-2 mb-8 overflow-x-auto">
+      {/* Tabs - Mobile Optimized */}
+      <div className="flex gap-1 sm:gap-2 mb-6 sm:mb-8 overflow-x-auto pb-2">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           return (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`px-4 py-2 rounded-xl font-semibold transition-all text-sm md:text-base whitespace-nowrap flex items-center gap-2 ${activeTab === tab.key ? 'bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] shadow' : 'bg-[#232D1A] text-[#8BAE5A] hover:bg-[#2A341F]'}`}
+              className={`px-2 sm:px-3 md:px-4 py-2 rounded-xl font-semibold transition-all text-xs sm:text-sm md:text-base whitespace-nowrap flex items-center gap-1 sm:gap-2 ${activeTab === tab.key ? 'bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] shadow' : 'bg-[#232D1A] text-[#8BAE5A] hover:bg-[#2A341F]'}`}
             >
-              <Icon className="w-4 h-4" />
-              {tab.label}
+              <Icon className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">{tab.label}</span>
+              <span className="sm:hidden">{tab.label.split(' ')[0]}</span>
             </button>
           );
         })}
       </div>
       
       {/* Tab Content */}
-      <div className="bg-[#232D1A]/80 rounded-2xl shadow-xl border border-[#3A4D23]/40 p-6 md:p-10">
+      <div className="bg-[#232D1A]/80 rounded-2xl shadow-xl border border-[#3A4D23]/40 p-4 sm:p-6 md:p-10">
         {activeTab === 'publiek' && profile && (
           <div className="space-y-8">
-            {/* Coverfoto */}
-            <div className="w-full h-40 md:h-56 rounded-2xl bg-gradient-to-r from-[#8BAE5A]/30 to-[#FFD700]/20 flex items-end justify-center overflow-hidden relative group">
+            {/* Coverfoto - Facebook Style */}
+            <div className="relative w-full h-48 sm:h-56 md:h-64 lg:h-72 rounded-2xl overflow-hidden bg-gradient-to-r from-[#8BAE5A]/30 to-[#FFD700]/20 group">
               {profile.cover_url ? (
-                <img src={profile.cover_url} alt="Coverfoto" className="w-full h-full object-cover" />
+                <img 
+                  src={profile.cover_url} 
+                  alt="Coverfoto" 
+                  className="w-full h-full object-cover" 
+                />
               ) : (
-                <span className="text-[#8BAE5A]/60 text-2xl md:text-3xl font-bold p-4">Geen coverfoto</span>
+                <div className="w-full h-full flex items-center justify-center">
+                  <span className="text-[#8BAE5A]/60 text-xl sm:text-2xl md:text-3xl font-bold">Geen coverfoto</span>
+                </div>
               )}
               
+              {/* Coverfoto Edit Overlay */}
               <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <label className="flex items-center gap-2 px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-xl font-semibold cursor-pointer hover:bg-[#A6C97B] transition-colors">
-                  <CameraIcon className="w-5 h-5" />
+                <label className="flex items-center gap-2 px-3 py-2 bg-[#8BAE5A] text-[#181F17] rounded-xl font-semibold cursor-pointer hover:bg-[#A6C97B] transition-colors text-sm">
+                  <CameraIcon className="w-4 h-4" />
                   {profile.cover_url ? 'Coverfoto wijzigen' : 'Coverfoto toevoegen'}
                   <input
                     type="file"
@@ -654,19 +662,23 @@ export default function MijnProfiel() {
               </div>
             </div>
             
-            {/* Profielfoto en basis info */}
-            <div className="flex flex-col md:flex-row gap-6 -mt-20 md:-mt-32">
-              {/* Profielfoto */}
-              <div className="w-28 h-28 rounded-full border-4 border-[#FFD700] bg-[#232D1A] flex items-center justify-center overflow-hidden shadow-lg relative group">
+            {/* Profielfoto - Overlapping Coverfoto */}
+            <div className="relative -mt-16 sm:-mt-20 md:-mt-24 lg:-mt-28 px-4 sm:px-6 md:px-8">
+              <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 lg:w-36 lg:h-36 rounded-full border-4 border-[#FFD700] bg-[#232D1A] flex items-center justify-center overflow-hidden shadow-xl relative group">
                 {profile.avatar_url ? (
-                  <img src={profile.avatar_url} alt="Profielfoto" className="w-full h-full object-cover" />
+                  <img 
+                    src={profile.avatar_url} 
+                    alt="Profielfoto" 
+                    className="w-full h-full object-cover" 
+                  />
                 ) : (
-                  <span className="text-[#8BAE5A]/60 text-3xl">Geen foto</span>
+                  <span className="text-[#8BAE5A]/60 text-2xl sm:text-3xl">Geen foto</span>
                 )}
                 
+                {/* Profielfoto Edit Overlay */}
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-full">
-                  <label className="flex items-center gap-2 px-3 py-1.5 bg-[#8BAE5A] text-[#181F17] rounded-lg font-semibold cursor-pointer hover:bg-[#A6C97B] transition-colors text-sm">
-                    <CameraIcon className="w-4 h-4" />
+                  <label className="flex items-center gap-1 px-2 py-1 bg-[#8BAE5A] text-[#181F17] rounded-lg font-semibold cursor-pointer hover:bg-[#A6C97B] transition-colors text-xs">
+                    <CameraIcon className="w-3 h-3" />
                     {profile.avatar_url ? 'Wijzigen' : 'Toevoegen'}
                     <input
                       type="file"
@@ -677,53 +689,54 @@ export default function MijnProfiel() {
                   </label>
                 </div>
               </div>
+            </div>
+            
+            {/* Basis info - Below Profile Picture */}
+            <div className="px-4 sm:px-6 md:px-8 space-y-4">
+              <div>
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-2">
+                  {editingField === 'display_name' ? (
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={editValue}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        className="bg-[#181F17] text-white px-3 py-1 rounded-lg border border-[#8BAE5A] focus:outline-none focus:border-[#FFD700] text-lg sm:text-xl md:text-2xl"
+                        placeholder="Display naam"
+                      />
+                      <button onClick={saveEdit} disabled={saving} className="text-[#8BAE5A] hover:text-[#FFD700]">
+                        <CheckIcon className="w-5 h-5" />
+                      </button>
+                      <button onClick={cancelEdit} className="text-red-400 hover:text-red-300">
+                        <XMarkIcon className="w-5 h-5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      {profile.display_name || profile.full_name}
+                      <button 
+                        onClick={() => startEditing('display_name', profile.display_name || profile.full_name)}
+                        className="text-[#8BAE5A] hover:text-[#FFD700] opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <PencilIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                      </button>
+                    </div>
+                  )}
+                </h2>
+                <p className="text-[#8BAE5A] text-sm sm:text-base">{profile.email}</p>
+              </div>
               
-              {/* Basis info */}
-              <div className="flex-1 space-y-4">
-                <div>
-                  <h2 className="text-2xl font-bold text-white mb-2">
-                    {editingField === 'display_name' ? (
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="text"
-                          value={editValue}
-                          onChange={(e) => setEditValue(e.target.value)}
-                          className="bg-[#181F17] text-white px-3 py-1 rounded-lg border border-[#8BAE5A] focus:outline-none focus:border-[#FFD700]"
-                          placeholder="Display naam"
-                        />
-                        <button onClick={saveEdit} disabled={saving} className="text-[#8BAE5A] hover:text-[#FFD700]">
-                          <CheckIcon className="w-5 h-5" />
-                        </button>
-                        <button onClick={cancelEdit} className="text-red-400 hover:text-red-300">
-                          <XMarkIcon className="w-5 h-5" />
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        {profile.display_name || profile.full_name}
-                        <button 
-                          onClick={() => startEditing('display_name', profile.display_name || profile.full_name)}
-                          className="text-[#8BAE5A] hover:text-[#FFD700] opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <PencilIcon className="w-4 h-4" />
-                        </button>
-                      </div>
-                    )}
-                  </h2>
-                  <p className="text-[#8BAE5A] text-sm">{profile.email}</p>
-                </div>
-                
-                <div className="flex flex-wrap gap-2">
-                  <span className="inline-block bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-white px-4 py-1 rounded-full text-sm font-semibold shadow">
-                    {currentRank ? `Level ${currentRank.rank_order} - ${currentRank.name}` : 'Beginner'}
-                  </span>
-                  <span className="inline-block bg-[#3A4D23] text-[#8BAE5A] px-4 py-1 rounded-full text-sm font-semibold">
-                    {currentXP} XP
-                  </span>
-                  <span className="inline-block bg-[#3A4D23] text-[#8BAE5A] px-4 py-1 rounded-full text-sm font-semibold">
-                    {userBadges.length} badges
-                  </span>
-                </div>
+              {/* Stats Badges */}
+              <div className="flex flex-wrap gap-2">
+                <span className="inline-block bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-white px-3 py-1 rounded-full text-xs sm:text-sm font-semibold shadow">
+                  {currentRank ? `Level ${currentRank.rank_order} - ${currentRank.name}` : 'Beginner'}
+                </span>
+                <span className="inline-block bg-[#3A4D23] text-[#8BAE5A] px-3 py-1 rounded-full text-xs sm:text-sm font-semibold">
+                  {currentXP} XP
+                </span>
+                <span className="inline-block bg-[#3A4D23] text-[#8BAE5A] px-3 py-1 rounded-full text-xs sm:text-sm font-semibold">
+                  {userBadges.length} badges
+                </span>
               </div>
             </div>
             
