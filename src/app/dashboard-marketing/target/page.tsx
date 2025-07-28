@@ -56,28 +56,28 @@ export default function TargetPage() {
         currentRevenue: 0,
         targetRevenue: 40000,
         progress: 0,
-        status: 'upcoming'
+        status: 'on-track'
       },
       {
         name: 'Facebook/Instagram',
         currentRevenue: 0,
         targetRevenue: 30000,
         progress: 0,
-        status: 'upcoming'
+        status: 'on-track'
       },
       {
         name: 'LinkedIn',
         currentRevenue: 0,
         targetRevenue: 15000,
         progress: 0,
-        status: 'upcoming'
+        status: 'on-track'
       },
       {
         name: 'Direct Sales',
         currentRevenue: 0,
         targetRevenue: 15000,
         progress: 0,
-        status: 'upcoming'
+        status: 'on-track'
       }
     ],
     milestones: [
