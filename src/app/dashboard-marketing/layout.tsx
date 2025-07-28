@@ -38,6 +38,7 @@ const navigation = [
   { name: 'Audience', href: '/dashboard-marketing/audience', icon: UserGroupIcon },
   { name: 'Budget', href: '/dashboard-marketing/budget', icon: CurrencyDollarIcon },
   { name: 'Target', href: '/dashboard-marketing/target', icon: FlagIcon },
+  { name: 'Offerte', href: '/offerte', icon: DocumentTextIcon },
   { name: 'Rapporten', href: '/dashboard-marketing/rapporten', icon: EyeIcon },
   { name: 'Concurentie', href: '/dashboard-marketing/concurentie', icon: BuildingStorefrontIcon },
           { name: 'Pre-launch', href: '/dashboard-marketing/pre-launch', icon: RocketLaunchIcon, badge: 'NEW' },
