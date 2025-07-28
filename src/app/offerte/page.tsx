@@ -22,7 +22,8 @@ import {
   GlobeAltIcon,
   AcademicCapIcon,
   EyeIcon,
-  PresentationChartLineIcon
+  PresentationChartLineIcon,
+  ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
 
 interface PricingTier {
@@ -194,6 +195,130 @@ export default function OffertePage() {
             </div>
           </motion.div>
         </div>
+      </div>
+
+      {/* Rick's Investment Choice - Key Message */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="bg-gradient-to-r from-blue-600/10 to-purple-600/10 rounded-2xl p-8 border border-blue-500/20"
+        >
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-center mb-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-blue-600 rounded-xl flex items-center justify-center">
+                <FireIcon className="w-6 h-6 text-white" />
+              </div>
+            </div>
+            <h2 className="text-3xl font-bold text-white mb-4">
+              Rick, hier is wat je krijgt met de voorinvestering van €15.000
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Option A - Upfront Investment */}
+            <div className="bg-white/5 rounded-xl p-6 border border-green-500/30">
+              <div className="flex items-center mb-4">
+                <div className="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center mr-3">
+                  <CheckCircleIcon className="w-5 h-5 text-green-400" />
+                </div>
+                <h3 className="text-xl font-bold text-white">Optie A: Voorinvestering €15.000</h3>
+              </div>
+              
+              <div className="space-y-4 text-gray-300">
+                <div className="flex items-start">
+                  <BoltIcon className="w-5 h-5 text-green-400 mt-1 mr-3 flex-shrink-0" />
+                  <div>
+                    <span className="font-semibold text-white">Onbeperkte uren beschikbaar</span>
+                    <p className="text-sm">Ik werk elke dag volle focus aan Top Tier Men marketing</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start">
+                  <RocketLaunchIcon className="w-5 h-5 text-green-400 mt-1 mr-3 flex-shrink-0" />
+                  <div>
+                    <span className="font-semibold text-white">Volledige toewijding</span>
+                    <p className="text-sm">Minder werk voor andere klanten = meer ruimte voor jouw project</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start">
+                  <TrophyIcon className="w-5 h-5 text-green-400 mt-1 mr-3 flex-shrink-0" />
+                  <div>
+                    <span className="font-semibold text-white">Snelle €100k behalen</span>
+                    <p className="text-sm">Volle energie en focus om zo snel mogelijk het target te bereiken</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start">
+                  <ShieldCheckIcon className="w-5 h-5 text-green-400 mt-1 mr-3 flex-shrink-0" />
+                  <div>
+                    <span className="font-semibold text-white">Geen urenlimiet</span>
+                    <p className="text-sm">Geen stress over tijd, gewoon resultaten behalen</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Option B - Hourly Basis */}
+            <div className="bg-white/5 rounded-xl p-6 border border-red-500/30">
+              <div className="flex items-center mb-4">
+                <div className="w-10 h-10 bg-red-500/20 rounded-lg flex items-center justify-center mr-3">
+                  <ClockIcon className="w-5 h-5 text-red-400" />
+                </div>
+                <h3 className="text-xl font-bold text-white">Optie B: Urenbasis (€85/uur)</h3>
+              </div>
+              
+              <div className="space-y-4 text-gray-300">
+                <div className="flex items-start">
+                  <ExclamationTriangleIcon className="w-5 h-5 text-red-400 mt-1 mr-3 flex-shrink-0" />
+                  <div>
+                    <span className="font-semibold text-white">Strikte urenlimiet</span>
+                    <p className="text-sm">Moeten heel zakelijk en precies bijhouden van elke minuut</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start">
+                  <CogIcon className="w-5 h-5 text-red-400 mt-1 mr-3 flex-shrink-0" />
+                  <div>
+                    <span className="font-semibold text-white">Administratieve overhead</span>
+                    <p className="text-sm">Tijdverspilling met urenregistratie en facturering</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start">
+                  <UserGroupIcon className="w-5 h-5 text-red-400 mt-1 mr-3 flex-shrink-0" />
+                  <div>
+                    <span className="font-semibold text-white">Gedeelde focus</span>
+                    <p className="text-sm">Moet nog steeds andere klanten bedienen</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start">
+                  <CalculatorIcon className="w-5 h-5 text-red-400 mt-1 mr-3 flex-shrink-0" />
+                  <div>
+                    <span className="font-semibold text-white">Onzekere kosten</span>
+                    <p className="text-sm">€20.400 per jaar (20u/maand) zonder garantie op resultaat</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-8 text-center">
+            <div className="bg-gradient-to-r from-green-500/20 to-blue-500/20 rounded-xl p-6 border border-green-500/30">
+              <h3 className="text-xl font-bold text-white mb-3">
+                💡 De keuze is duidelijk, Rick
+              </h3>
+              <p className="text-gray-300 text-lg">
+                Met de voorinvestering krijg je <span className="text-green-400 font-bold">onbeperkte toegang</span> tot mijn expertise, 
+                <span className="text-green-400 font-bold"> volledige toewijding</span> aan jouw succes, en de 
+                <span className="text-green-400 font-bold"> garantie</span> dat we samen de €100.000 target behalen.
+              </p>
+            </div>
+          </div>
+        </motion.div>
       </div>
 
       {/* Pricing Structure */}
