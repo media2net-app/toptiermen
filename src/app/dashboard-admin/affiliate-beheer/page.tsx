@@ -65,6 +65,11 @@ export default function AffiliateBeheer() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('Alle Statussen');
+  const [editFormData, setEditFormData] = useState({
+    status: 'active' as 'active' | 'inactive' | 'suspended',
+    affiliate_code: ''
+  });
+  const [saving, setSaving] = useState(false);
 
   // Fetch real affiliate data from database
   useEffect(() => {
@@ -189,6 +194,69 @@ export default function AffiliateBeheer() {
     const matchesStatus = selectedStatus === 'Alle Statussen' || affiliate.status === selectedStatus;
     return matchesSearch && matchesStatus;
   });
+
+  const handleEditAffiliate = (affiliate: Affiliate) => {
+    setSelectedAffiliate(affiliate);
+    setEditFormData({
+      status: affiliate.status,
+      affiliate_code: affiliate.affiliate_code
+    });
+    setShowEditModal(true);
+  };
+
+  const handleSaveAffiliate = async () => {
+    if (!selectedAffiliate) return;
+
+    setSaving(true);
+    try {
+      // Validate affiliate code
+      if (!editFormData.affiliate_code.trim()) {
+        toast.error('Affiliate code is verplicht');
+        return;
+      }
+
+      // Check if affiliate code is unique (excluding current affiliate)
+      const isCodeUnique = !affiliates.some(aff => 
+        aff.id !== selectedAffiliate.id && 
+        aff.affiliate_code.toLowerCase() === editFormData.affiliate_code.toLowerCase()
+      );
+
+      if (!isCodeUnique) {
+        toast.error('Affiliate code moet uniek zijn');
+        return;
+      }
+
+      // Update affiliate in local state
+      setAffiliates(prev => prev.map(aff => 
+        aff.id === selectedAffiliate.id 
+          ? { 
+              ...aff, 
+              status: editFormData.status,
+              affiliate_code: editFormData.affiliate_code.toUpperCase()
+            }
+          : aff
+      ));
+
+      // Update referrals if affiliate name changed
+      if (selectedAffiliate.user_name !== selectedAffiliate.user_name) {
+        setReferrals(prev => prev.map(ref => 
+          ref.affiliate_id === selectedAffiliate.id
+            ? { ...ref, affiliate_name: selectedAffiliate.user_name }
+            : ref
+        ));
+      }
+
+      toast.success('Affiliate succesvol bijgewerkt!');
+      setShowEditModal(false);
+      setSelectedAffiliate(null);
+
+    } catch (error) {
+      console.error('Error saving affiliate:', error);
+      toast.error('Fout bij het opslaan van affiliate');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleStatusChange = (affiliateId: string, newStatus: 'active' | 'inactive' | 'suspended') => {
     setAffiliates(prev => prev.map(aff => 
@@ -372,11 +440,11 @@ export default function AffiliateBeheer() {
                 onClick={() => {
                   const affiliate = filteredAffiliates.find(a => a.user_name === item.affiliate.props.children[1].props.children[0].props.children);
                   if (affiliate) {
-                    setSelectedAffiliate(affiliate);
-                    setShowEditModal(true);
+                    handleEditAffiliate(affiliate);
                   }
                 }}
-                className="text-[#8BAE5A] hover:text-white"
+                className="text-[#8BAE5A] hover:text-white transition-colors"
+                title="Bewerken"
               >
                 <PencilIcon className="w-4 h-4" />
               </button>
@@ -388,7 +456,8 @@ export default function AffiliateBeheer() {
                     setShowDeleteModal(true);
                   }
                 }}
-                className="text-red-500 hover:text-red-400"
+                className="text-red-500 hover:text-red-400 transition-colors"
+                title="Verwijderen"
               >
                 <TrashIcon className="w-4 h-4" />
               </button>
@@ -445,8 +514,21 @@ export default function AffiliateBeheer() {
             <h3 className="text-xl font-bold text-white mb-6">Affiliate Bewerken</h3>
             <div className="space-y-4">
               <div>
+                <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Gebruiker</label>
+                <input
+                  type="text"
+                  value={selectedAffiliate.user_name}
+                  disabled
+                  className="w-full bg-[#181F17] text-gray-400 px-3 py-2 rounded-lg border border-[#3A4D23] cursor-not-allowed"
+                />
+              </div>
+              <div>
                 <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Status</label>
-                <select className="w-full bg-[#181F17] text-white px-3 py-2 rounded-lg border border-[#3A4D23] focus:outline-none focus:border-[#8BAE5A]">
+                <select 
+                  value={editFormData.status}
+                  onChange={(e) => setEditFormData(prev => ({ ...prev, status: e.target.value as 'active' | 'inactive' | 'suspended' }))}
+                  className="w-full bg-[#181F17] text-white px-3 py-2 rounded-lg border border-[#3A4D23] focus:outline-none focus:border-[#8BAE5A]"
+                >
                   <option value="active">Actief</option>
                   <option value="inactive">Inactief</option>
                   <option value="suspended">Geschorst</option>
@@ -456,23 +538,38 @@ export default function AffiliateBeheer() {
                 <label className="block text-[#8BAE5A] text-sm font-medium mb-2">Affiliate Code</label>
                 <input
                   type="text"
-                  defaultValue={selectedAffiliate.affiliate_code}
+                  value={editFormData.affiliate_code}
+                  onChange={(e) => setEditFormData(prev => ({ ...prev, affiliate_code: e.target.value.toUpperCase() }))}
                   className="w-full bg-[#181F17] text-white px-3 py-2 rounded-lg border border-[#3A4D23] focus:outline-none focus:border-[#8BAE5A]"
+                  placeholder="UNIQUE123"
                 />
+                <p className="text-xs text-gray-400 mt-1">Code wordt automatisch naar hoofdletters geconverteerd</p>
               </div>
             </div>
             <div className="flex gap-3 mt-6">
               <button
-                onClick={() => setShowEditModal(false)}
-                className="flex-1 px-4 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded-lg font-semibold hover:bg-[#4A5D33] transition-colors"
+                onClick={() => {
+                  setShowEditModal(false);
+                  setSelectedAffiliate(null);
+                }}
+                disabled={saving}
+                className="flex-1 px-4 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded-lg font-semibold hover:bg-[#4A5D33] transition-colors disabled:opacity-50"
               >
                 Annuleren
               </button>
               <button
-                onClick={() => setShowEditModal(false)}
-                className="flex-1 px-4 py-2 bg-[#8BAE5A] text-white rounded-lg font-semibold hover:bg-[#9BBE6A] transition-colors"
+                onClick={handleSaveAffiliate}
+                disabled={saving}
+                className="flex-1 px-4 py-2 bg-[#8BAE5A] text-white rounded-lg font-semibold hover:bg-[#9BBE6A] transition-colors disabled:opacity-50 flex items-center justify-center"
               >
-                Opslaan
+                {saving ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Opslaan...
+                  </>
+                ) : (
+                  'Opslaan'
+                )}
               </button>
             </div>
           </div>
