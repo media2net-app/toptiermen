@@ -175,6 +175,8 @@ export default function MijnProfiel() {
     if (!user) return;
 
     try {
+      console.log('Fetching affiliate data for user:', user.id);
+      
       // Fetch affiliate data from profiles table
       const { data: profileData, error } = await supabase
         .from('profiles')
@@ -194,6 +196,7 @@ export default function MijnProfiel() {
         console.error('Error fetching affiliate data:', error);
         // Fallback to generated data if profile doesn't exist
         const affiliateCode = `${profile?.full_name?.toUpperCase().replace(/\s+/g, '') || 'USER'}${user.id.slice(-6)}`;
+        console.log('Using fallback affiliate code:', affiliateCode);
         setAffiliateData({
           affiliate_code: affiliateCode,
           total_referrals: 0,
@@ -206,9 +209,12 @@ export default function MijnProfiel() {
         return;
       }
 
+      console.log('Fetched affiliate data:', profileData);
+
       // Use real data from database
+      const affiliateCode = profileData.affiliate_code || `${profile?.full_name?.toUpperCase().replace(/\s+/g, '') || 'USER'}${user.id.slice(-6)}`;
       setAffiliateData({
-        affiliate_code: profileData.affiliate_code || `${profile?.full_name?.toUpperCase().replace(/\s+/g, '') || 'USER'}${user.id.slice(-6)}`,
+        affiliate_code: affiliateCode,
         total_referrals: profileData.total_referrals || 0,
         active_referrals: profileData.active_referrals || 0,
         total_earned: profileData.total_earned || 0,
@@ -216,7 +222,7 @@ export default function MijnProfiel() {
         status: profileData.affiliate_status || 'inactive'
       });
 
-      setNewAffiliateCode(profileData.affiliate_code || `${profile?.full_name?.toUpperCase().replace(/\s+/g, '') || 'USER'}${user.id.slice(-6)}`);
+      setNewAffiliateCode(affiliateCode);
     } catch (error) {
       console.error('Error fetching affiliate data:', error);
     }
@@ -233,28 +239,42 @@ export default function MijnProfiel() {
       return;
     }
 
+    if (!user?.id) {
+      toast.error('Gebruiker niet gevonden');
+      return;
+    }
+
     setSavingAffiliateCode(true);
     try {
+      console.log('Saving affiliate code:', newAffiliateCode.toUpperCase(), 'for user:', user.id);
+      
       // Update affiliate code in database
-      const { error: updateError } = await supabase
+      const { data, error: updateError } = await supabase
         .from('profiles')
         .update({
           affiliate_code: newAffiliateCode.toUpperCase(),
           updated_at: new Date().toISOString()
         })
-        .eq('id', user?.id);
+        .eq('id', user.id)
+        .select()
+        .single();
 
       if (updateError) {
         console.error('Error updating affiliate code in database:', updateError);
-        toast.error('Fout bij het opslaan in database');
+        toast.error(`Fout bij het opslaan in database: ${updateError.message}`);
         return;
       }
+
+      console.log('Successfully updated affiliate code:', data);
 
       // Update affiliate data in local state
       setAffiliateData(prev => ({
         ...prev,
         affiliate_code: newAffiliateCode.toUpperCase()
       }));
+
+      // Refresh affiliate data to ensure consistency
+      await fetchAffiliateData();
 
       toast.success('Affiliate code succesvol bijgewerkt!');
       setEditingAffiliateCode(false);
@@ -1013,11 +1033,13 @@ export default function MijnProfiel() {
                         onChange={(e) => setNewAffiliateCode(e.target.value.toUpperCase())}
                         className="flex-1 bg-[#232D1A] text-white px-4 py-3 rounded-lg border border-[#8BAE5A] focus:outline-none focus:border-[#FFD700]"
                         placeholder="JOUWCODE123"
+                        autoFocus
                       />
                       <button
                         onClick={saveAffiliateCode}
-                        disabled={savingAffiliateCode}
+                        disabled={savingAffiliateCode || !newAffiliateCode.trim()}
                         className="px-4 py-3 bg-[#8BAE5A] text-white rounded-lg font-semibold hover:bg-[#9BBE6A] transition-colors disabled:opacity-50 flex items-center"
+                        title="Opslaan"
                       >
                         {savingAffiliateCode ? (
                           <>
@@ -1032,6 +1054,7 @@ export default function MijnProfiel() {
                         onClick={cancelEditingAffiliateCode}
                         disabled={savingAffiliateCode}
                         className="px-4 py-3 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition-colors disabled:opacity-50"
+                        title="Annuleren"
                       >
                         <XMarkIcon className="w-4 h-4" />
                       </button>
@@ -1039,19 +1062,37 @@ export default function MijnProfiel() {
                     <p className="text-xs text-gray-400">Code wordt automatisch naar hoofdletters geconverteerd</p>
                   </div>
                 ) : (
-                  <div className="flex items-center space-x-3">
-                    <input
-                      type="text"
-                      value={`https://toptiermen.com/ref/${affiliateData.affiliate_code || user?.id || 'your-id'}`}
-                      readOnly
-                      className="flex-1 bg-[#232D1A] text-white px-4 py-3 rounded-lg border border-[#3A4D23] focus:outline-none focus:border-[#8BAE5A]"
-                    />
-                    <button
-                      onClick={() => navigator.clipboard.writeText(`https://toptiermen.com/ref/${affiliateData.affiliate_code || user?.id || 'your-id'}`)}
-                      className="px-4 py-3 bg-[#8BAE5A] text-white rounded-lg font-semibold hover:bg-[#9BBE6A] transition-colors"
-                    >
-                      Kopiëren
-                    </button>
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-3">
+                      <input
+                        type="text"
+                        value={affiliateData.affiliate_code || 'Geen code ingesteld'}
+                        readOnly
+                        className="flex-1 bg-[#232D1A] text-white px-4 py-3 rounded-lg border border-[#3A4D23] focus:outline-none focus:border-[#8BAE5A]"
+                      />
+                      <button
+                        onClick={() => navigator.clipboard.writeText(affiliateData.affiliate_code || '')}
+                        className="px-4 py-3 bg-[#8BAE5A] text-white rounded-lg font-semibold hover:bg-[#9BBE6A] transition-colors"
+                        title="Kopieer affiliate code"
+                      >
+                        Kopiëren
+                      </button>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <input
+                        type="text"
+                        value={`https://toptiermen.com/ref/${affiliateData.affiliate_code || user?.id || 'your-id'}`}
+                        readOnly
+                        className="flex-1 bg-[#232D1A] text-white px-4 py-3 rounded-lg border border-[#3A4D23] focus:outline-none focus:border-[#8BAE5A]"
+                      />
+                      <button
+                        onClick={() => navigator.clipboard.writeText(`https://toptiermen.com/ref/${affiliateData.affiliate_code || user?.id || 'your-id'}`)}
+                        className="px-4 py-3 bg-[#8BAE5A] text-white rounded-lg font-semibold hover:bg-[#9BBE6A] transition-colors"
+                        title="Kopieer affiliate link"
+                      >
+                        Kopiëren
+                      </button>
+                    </div>
                   </div>
                 )}
                 <p className="text-[#8BAE5A] text-sm">
