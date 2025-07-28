@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useRef } from 'react';
+import { motion, Reorder } from 'framer-motion';
 import { 
   ClipboardDocumentListIcon,
   CalendarIcon,
@@ -54,7 +54,6 @@ export default function TakenlijstPage() {
   const [selectedPriority, setSelectedPriority] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list');
   const [sortBy, setSortBy] = useState<'dueDate' | 'priority' | 'createdDate'>('dueDate');
-
   // Sample tasks for Rick
   const tasks: Task[] = [
     {
@@ -199,6 +198,9 @@ export default function TakenlijstPage() {
     }
   ];
 
+  const [tasksState, setTasksState] = useState<Task[]>(tasks);
+  const [draggedTask, setDraggedTask] = useState<Task | null>(null);
+
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'copy': return <DocumentTextIcon className="w-5 h-5" />;
@@ -263,7 +265,7 @@ export default function TakenlijstPage() {
     }
   };
 
-  const filteredTasks = tasks.filter(task => {
+  const filteredTasks = tasksState.filter(task => {
     const typeMatch = selectedType === 'all' || task.type === selectedType;
     const statusMatch = selectedStatus === 'all' || task.status === selectedStatus;
     const priorityMatch = selectedPriority === 'all' || task.priority === selectedPriority;
@@ -285,18 +287,143 @@ export default function TakenlijstPage() {
   });
 
   const stats = {
-    total: tasks.length,
-    pending: tasks.filter(task => task.status === 'pending').length,
-    inProgress: tasks.filter(task => task.status === 'in-progress').length,
-    completed: tasks.filter(task => task.status === 'completed').length,
-    overdue: tasks.filter(task => task.status === 'overdue').length,
-    critical: tasks.filter(task => task.priority === 'critical').length,
-    totalEstimatedHours: tasks.reduce((sum, task) => sum + task.estimatedHours, 0),
-    totalActualHours: tasks.filter(task => task.actualHours).reduce((sum, task) => sum + (task.actualHours || 0), 0)
+    total: tasksState.length,
+    pending: tasksState.filter(task => task.status === 'pending').length,
+    inProgress: tasksState.filter(task => task.status === 'in-progress').length,
+    completed: tasksState.filter(task => task.status === 'completed').length,
+    overdue: tasksState.filter(task => task.status === 'overdue').length,
+    critical: tasksState.filter(task => task.priority === 'critical').length,
+    totalEstimatedHours: tasksState.reduce((sum, task) => sum + task.estimatedHours, 0),
+    totalActualHours: tasksState.filter(task => task.actualHours).reduce((sum, task) => sum + (task.actualHours || 0), 0)
   };
 
   const isOverdue = (dueDate: string) => {
     return new Date(dueDate) < new Date();
+  };
+
+  // Drag & Drop Functions
+  const handleDragStart = (task: Task) => {
+    setDraggedTask(task);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedTask(null);
+  };
+
+  const handleDrop = (newStatus: string) => {
+    if (draggedTask) {
+      const updatedTasks = tasksState.map(task => 
+        task.id === draggedTask.id 
+          ? { ...task, status: newStatus as any }
+          : task
+      );
+      setTasksState(updatedTasks);
+      setDraggedTask(null);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  // Kanban Card Component
+  const KanbanCard = ({ task }: { task: Task }) => {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        draggable
+        onDragStart={() => handleDragStart(task)}
+        onDragEnd={handleDragEnd}
+        className={`bg-[#2D3748] border rounded-lg p-4 cursor-grab active:cursor-grabbing hover:border-[#8BAE5A] transition-all duration-200 ${
+          isOverdue(task.dueDate) && task.status !== 'completed' 
+            ? 'border-red-500/50 bg-red-500/5' 
+            : 'border-[#4A5568]'
+        } ${draggedTask?.id === task.id ? 'opacity-50 scale-95' : ''}`}
+      >
+        {/* Card Header */}
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex items-center gap-2">
+            {getTypeIcon(task.type)}
+            <span className="text-xs text-gray-400">{getTypeText(task.type)}</span>
+          </div>
+          <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getPriorityColor(task.priority)}`}>
+            {getPriorityText(task.priority)}
+          </span>
+        </div>
+
+        {/* Card Title */}
+        <h4 className="text-sm font-semibold text-white mb-2 line-clamp-2">
+          {task.title}
+        </h4>
+
+        {/* Card Meta */}
+        <div className="space-y-2 mb-3">
+          <div className="flex items-center gap-2 text-xs text-gray-400">
+            <UserIcon className="w-3 h-3" />
+            <span>{task.assignedTo}</span>
+          </div>
+          <div className="flex items-center gap-2 text-xs text-gray-400">
+            <CalendarIcon className="w-3 h-3" />
+            <span className={isOverdue(task.dueDate) && task.status !== 'completed' ? 'text-red-400' : ''}>
+              {new Date(task.dueDate).toLocaleDateString('nl-NL')}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 text-xs text-gray-400">
+            <ClockIcon className="w-3 h-3" />
+            <span>{task.estimatedHours}h</span>
+            {task.actualHours && (
+              <span className="text-[#8BAE5A]">({task.actualHours}h)</span>
+            )}
+          </div>
+        </div>
+
+        {/* Card Tags */}
+        <div className="flex flex-wrap gap-1 mb-3">
+          {task.tags.slice(0, 2).map((tag, index) => (
+            <span key={index} className="px-1.5 py-0.5 bg-[#1A1F2E] text-gray-300 text-xs rounded">
+              #{tag}
+            </span>
+          ))}
+          {task.tags.length > 2 && (
+            <span className="px-1.5 py-0.5 bg-[#1A1F2E] text-gray-400 text-xs rounded">
+              +{task.tags.length - 2}
+            </span>
+          )}
+        </div>
+
+        {/* Card Actions */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-gray-400">{task.platform}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <button className="p-1 text-gray-400 hover:text-white transition-colors">
+              <EyeIcon className="w-3 h-3" />
+            </button>
+            <button className="p-1 text-gray-400 hover:text-white transition-colors">
+              <PencilIcon className="w-3 h-3" />
+            </button>
+          </div>
+        </div>
+
+        {/* Progress Bar for In Progress Tasks */}
+        {task.status === 'in-progress' && task.actualHours && (
+          <div className="mt-3">
+            <div className="flex justify-between text-xs text-gray-400 mb-1">
+              <span>Voortgang</span>
+              <span>{Math.round((task.actualHours / task.estimatedHours) * 100)}%</span>
+            </div>
+            <div className="w-full bg-[#1A1F2E] rounded-full h-1.5">
+              <div 
+                className="bg-[#8BAE5A] h-1.5 rounded-full transition-all duration-300"
+                style={{ width: `${Math.min((task.actualHours / task.estimatedHours) * 100, 100)}%` }}
+              ></div>
+            </div>
+          </div>
+        )}
+      </motion.div>
+    );
   };
 
   return (
@@ -609,6 +736,195 @@ export default function TakenlijstPage() {
             </motion.div>
           ))}
         </div>
+      )}
+
+      {/* Kanban Board */}
+      {viewMode === 'kanban' && (
+        <div className="space-y-6">
+          {/* Kanban Board Header */}
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold text-white">Kanban Board - Workflow</h2>
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2 text-sm text-gray-400">
+                <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
+                <span>Wachtend: {tasksState.filter(t => t.status === 'pending').length}</span>
+              </div>
+              <div className="flex items-center space-x-2 text-sm text-gray-400">
+                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                <span>Bezig: {tasksState.filter(t => t.status === 'in-progress').length}</span>
+              </div>
+              <div className="flex items-center space-x-2 text-sm text-gray-400">
+                <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                <span>Review: {tasksState.filter(t => t.status === 'review').length}</span>
+              </div>
+              <div className="flex items-center space-x-2 text-sm text-gray-400">
+                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                <span>Voltooid: {tasksState.filter(t => t.status === 'completed').length}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Kanban Columns */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            {/* Pending Column */}
+            <div 
+              className={`bg-[#1A1F2E] border rounded-lg p-4 transition-all duration-200 ${
+                draggedTask ? 'border-[#8BAE5A] bg-[#8BAE5A]/5' : 'border-[#2D3748]'
+              }`}
+              onDrop={() => handleDrop('pending')}
+              onDragOver={handleDragOver}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                  <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
+                  Wachtend
+                </h3>
+                <span className="bg-gray-500/20 text-gray-300 text-sm px-2 py-1 rounded-full">
+                  {tasksState.filter(t => t.status === 'pending').length}
+                </span>
+              </div>
+              <div className="space-y-3 min-h-[200px]">
+                {tasksState.filter(t => t.status === 'pending').map((task) => (
+                  <KanbanCard key={task.id} task={task} />
+                ))}
+              </div>
+            </div>
+
+            {/* In Progress Column */}
+            <div 
+              className={`bg-[#1A1F2E] border rounded-lg p-4 transition-all duration-200 ${
+                draggedTask ? 'border-[#8BAE5A] bg-[#8BAE5A]/5' : 'border-[#2D3748]'
+              }`}
+              onDrop={() => handleDrop('in-progress')}
+              onDragOver={handleDragOver}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                  Bezig
+                </h3>
+                <span className="bg-blue-500/20 text-blue-300 text-sm px-2 py-1 rounded-full">
+                  {tasksState.filter(t => t.status === 'in-progress').length}
+                </span>
+              </div>
+              <div className="space-y-3 min-h-[200px]">
+                {tasksState.filter(t => t.status === 'in-progress').map((task) => (
+                  <KanbanCard key={task.id} task={task} />
+                ))}
+              </div>
+            </div>
+
+            {/* Review Column */}
+            <div 
+              className={`bg-[#1A1F2E] border rounded-lg p-4 transition-all duration-200 ${
+                draggedTask ? 'border-[#8BAE5A] bg-[#8BAE5A]/5' : 'border-[#2D3748]'
+              }`}
+              onDrop={() => handleDrop('review')}
+              onDragOver={handleDragOver}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                  <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                  Review
+                </h3>
+                <span className="bg-purple-500/20 text-purple-300 text-sm px-2 py-1 rounded-full">
+                  {tasksState.filter(t => t.status === 'review').length}
+                </span>
+              </div>
+              <div className="space-y-3 min-h-[200px]">
+                {tasksState.filter(t => t.status === 'review').map((task) => (
+                  <KanbanCard key={task.id} task={task} />
+                ))}
+              </div>
+            </div>
+
+            {/* Completed Column */}
+            <div 
+              className={`bg-[#1A1F2E] border rounded-lg p-4 transition-all duration-200 ${
+                draggedTask ? 'border-[#8BAE5A] bg-[#8BAE5A]/5' : 'border-[#2D3748]'
+              }`}
+              onDrop={() => handleDrop('completed')}
+              onDragOver={handleDragOver}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                  Voltooid
+                </h3>
+                <span className="bg-green-500/20 text-green-300 text-sm px-2 py-1 rounded-full">
+                  {tasksState.filter(t => t.status === 'completed').length}
+                </span>
+              </div>
+              <div className="space-y-3 min-h-[200px]">
+                {tasksState.filter(t => t.status === 'completed').map((task) => (
+                  <KanbanCard key={task.id} task={task} />
+                ))}
+              </div>
+            </div>
+
+            {/* Overdue Column */}
+            <div 
+              className={`bg-[#1A1F2E] border rounded-lg p-4 transition-all duration-200 ${
+                draggedTask ? 'border-[#8BAE5A] bg-[#8BAE5A]/5' : 'border-[#2D3748]'
+              }`}
+              onDrop={() => handleDrop('overdue')}
+              onDragOver={handleDragOver}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                  <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                  Te Laat
+                </h3>
+                <span className="bg-red-500/20 text-red-300 text-sm px-2 py-1 rounded-full">
+                  {tasksState.filter(t => t.status === 'overdue').length}
+                </span>
+              </div>
+              <div className="space-y-3 min-h-[200px]">
+                {tasksState.filter(t => t.status === 'overdue').map((task) => (
+                  <KanbanCard key={task.id} task={task} />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Kanban Instructions */}
+      {viewMode === 'kanban' && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.9 }}
+          className="bg-[#8BAE5A]/10 border border-[#8BAE5A]/30 rounded-lg p-6"
+        >
+          <div className="flex items-start space-x-4">
+            <div className="w-6 h-6 bg-[#8BAE5A] rounded-full flex items-center justify-center mt-1">
+              <span className="text-white text-sm font-bold">!</span>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-[#8BAE5A] mb-2">🎯 Kanban Board Gebruik</h3>
+              <p className="text-gray-300 mb-4">
+                Sleep taken tussen de verschillende kolommen om hun status te wijzigen. De taken worden automatisch 
+                bijgewerkt en de statistieken worden real-time bijgewerkt. Gebruik de lijst weergave voor gedetailleerde 
+                informatie over elke taak.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
+                  <span className="text-gray-300">Wachtend: Taken die nog moeten beginnen</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                  <span className="text-gray-300">Bezig: Taken in uitvoering</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                  <span className="text-gray-300">Review: Taken ter beoordeling</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
       )}
 
       {/* Development Notice */}

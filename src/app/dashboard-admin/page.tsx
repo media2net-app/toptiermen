@@ -119,6 +119,13 @@ export default function AdminDashboard() {
       console.log('📊 Fetching admin dashboard data for period:', selectedPeriod);
       
       const response = await fetch(`/api/admin/dashboard-stats?period=${selectedPeriod}`);
+      
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Server returned non-JSON response. Please try again.');
+      }
+
       const data = await response.json();
 
       if (response.ok && data.success) {

@@ -8,6 +8,42 @@ export async function GET(request: NextRequest) {
     
     console.log('📊 Fetching admin dashboard stats for period:', period);
 
+    // Test Supabase connection first
+    try {
+      const { data: testData, error: testError } = await supabaseAdmin
+        .from('users')
+        .select('id')
+        .limit(1);
+
+      if (testError) {
+        console.error('❌ Supabase connection test failed:', testError);
+        return NextResponse.json({ 
+          success: false,
+          error: `Database connection failed: ${testError.message}`,
+          stats: null
+        }, { 
+          status: 500,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+      }
+      
+      console.log('✅ Supabase connection test successful');
+    } catch (connectionError) {
+      console.error('❌ Supabase connection error:', connectionError);
+      return NextResponse.json({ 
+        success: false,
+        error: `Database connection error: ${connectionError instanceof Error ? connectionError.message : 'Unknown error'}`,
+        stats: null
+      }, { 
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+    }
+
     // Fetch real data from database
     const stats = await fetchRealDashboardStats(period);
 
@@ -26,9 +62,18 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error('❌ Error fetching admin dashboard stats:', error);
+    
+    // Return a proper JSON error response
     return NextResponse.json({ 
-      error: 'Failed to fetch admin dashboard stats' 
-    }, { status: 500 });
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to fetch admin dashboard stats',
+      stats: null
+    }, { 
+      status: 500,
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
   }
 }
 

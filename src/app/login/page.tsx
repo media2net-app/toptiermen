@@ -76,6 +76,19 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center relative px-4 py-6" style={{ backgroundColor: '#181F17' }}>
       <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
+      
+      {/* Navigation */}
+      <div className="absolute top-6 right-6 z-20">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => router.push('/offerte')}
+            className="text-[#B6C948] hover:text-white px-4 py-2 rounded-lg border border-[#B6C948] hover:bg-[#B6C948] hover:text-[#181F17] transition-all duration-200 font-medium"
+          >
+            Offerte
+          </button>
+        </div>
+      </div>
+      
       <div className="w-full max-w-md p-6 sm:p-8 rounded-3xl shadow-2xl bg-[#232D1A]/95 border border-[#3A4D23] backdrop-blur-lg relative z-10">
         <h1 className="text-4xl sm:text-5xl md:text-7xl font-black uppercase tracking-tight mb-2 text-center">
           <span className="text-white">TOP TIER </span>

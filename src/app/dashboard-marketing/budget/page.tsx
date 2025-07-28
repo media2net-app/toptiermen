@@ -35,6 +35,9 @@ interface CampaignBudget {
   remaining: number;
   dailyBudget: number;
   dailySpent: number;
+  cpc: number;
+  clicks: number;
+  impressions: number;
   status: 'active' | 'paused' | 'completed' | 'draft';
   startDate: string;
   endDate: string;
@@ -48,11 +51,22 @@ interface SpendingTrend {
   remaining: number;
 }
 
+interface CPCData {
+  platform: string;
+  averageCPC: number;
+  minCPC: number;
+  maxCPC: number;
+  industry: string;
+  targeting: string;
+  adType: string;
+}
+
 export default function BudgetPage() {
   const [timeRange, setTimeRange] = useState('30d');
   const [budgetData, setBudgetData] = useState<BudgetData | null>(null);
   const [campaignBudgets, setCampaignBudgets] = useState<CampaignBudget[]>([]);
   const [spendingTrends, setSpendingTrends] = useState<SpendingTrend[]>([]);
+  const [cpcData, setCpcData] = useState<CPCData[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddBudgetModal, setShowAddBudgetModal] = useState(false);
 
@@ -79,6 +93,9 @@ export default function BudgetPage() {
         remaining: 2200,
         dailyBudget: 100,
         dailySpent: 70,
+        cpc: 1.72,
+        clicks: 1628,
+        impressions: 45000,
         status: "active",
         startDate: "2025-07-01",
         endDate: "2025-08-31",
@@ -93,6 +110,9 @@ export default function BudgetPage() {
         remaining: 1600,
         dailyBudget: 80,
         dailySpent: 60,
+        cpc: 1.41,
+        clicks: 1702,
+        impressions: 38000,
         status: "active",
         startDate: "2025-07-15",
         endDate: "2025-09-15",
@@ -107,6 +127,9 @@ export default function BudgetPage() {
         remaining: 3800,
         dailyBudget: 150,
         dailySpent: 120,
+        cpc: 2.69,
+        clicks: 1561,
+        impressions: 25000,
         status: "active",
         startDate: "2025-06-01",
         endDate: "2025-12-31",
@@ -121,6 +144,9 @@ export default function BudgetPage() {
         remaining: 800,
         dailyBudget: 40,
         dailySpent: 0,
+        cpc: 1.72,
+        clicks: 698,
+        impressions: 18000,
         status: "paused",
         startDate: "2025-07-10",
         endDate: "2025-08-10",
@@ -135,6 +161,9 @@ export default function BudgetPage() {
         remaining: 3000,
         dailyBudget: 60,
         dailySpent: 0,
+        cpc: 5.26,
+        clicks: 0,
+        impressions: 0,
         status: "draft",
         startDate: "2025-08-01",
         endDate: "2025-09-30",
@@ -152,9 +181,68 @@ export default function BudgetPage() {
       { date: '2025-07-27', spent: 440, budget: 500, remaining: 2235 }
     ];
 
+    // Realistische CPC data voor verschillende platforms
+    const mockCpcData: CPCData[] = [
+      {
+        platform: "Google Ads",
+        averageCPC: 2.69,
+        minCPC: 1.50,
+        maxCPC: 4.50,
+        industry: "Fitness & Wellness",
+        targeting: "Broad",
+        adType: "Search"
+      },
+      {
+        platform: "Facebook",
+        averageCPC: 1.72,
+        minCPC: 0.80,
+        maxCPC: 3.20,
+        industry: "Fitness & Wellness",
+        targeting: "Interest-based",
+        adType: "Social"
+      },
+      {
+        platform: "Instagram",
+        averageCPC: 1.41,
+        minCPC: 0.70,
+        maxCPC: 2.80,
+        industry: "Fitness & Wellness",
+        targeting: "Interest-based",
+        adType: "Social"
+      },
+      {
+        platform: "LinkedIn",
+        averageCPC: 5.26,
+        minCPC: 3.00,
+        maxCPC: 8.00,
+        industry: "B2B Services",
+        targeting: "Professional",
+        adType: "Professional"
+      },
+      {
+        platform: "TikTok",
+        averageCPC: 1.00,
+        minCPC: 0.50,
+        maxCPC: 2.00,
+        industry: "Fitness & Wellness",
+        targeting: "Demographic",
+        adType: "Video"
+      },
+      {
+        platform: "YouTube",
+        averageCPC: 3.12,
+        minCPC: 1.80,
+        maxCPC: 5.00,
+        industry: "Fitness & Wellness",
+        targeting: "Interest-based",
+        adType: "Video"
+      }
+    ];
+
     setBudgetData(mockBudgetData);
     setCampaignBudgets(mockCampaignBudgets);
     setSpendingTrends(mockSpendingTrends);
+    setCpcData(mockCpcData);
     setLoading(false);
   }, []);
 
@@ -328,6 +416,7 @@ export default function BudgetPage() {
                 <th className="px-4 py-2 text-left text-xs font-medium text-gray-300 uppercase">Uitgegeven</th>
                 <th className="px-4 py-2 text-left text-xs font-medium text-gray-300 uppercase">Resterend</th>
                 <th className="px-4 py-2 text-left text-xs font-medium text-gray-300 uppercase">Dagelijks</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-300 uppercase">CPC</th>
                 <th className="px-4 py-2 text-left text-xs font-medium text-gray-300 uppercase">Gebruik</th>
                 <th className="px-4 py-2 text-left text-xs font-medium text-gray-300 uppercase">Status</th>
                 <th className="px-4 py-2 text-left text-xs font-medium text-gray-300 uppercase">Acties</th>
@@ -342,6 +431,12 @@ export default function BudgetPage() {
                   <td className="px-4 py-2 text-sm text-gray-300">€{campaign.spent.toLocaleString()}</td>
                   <td className="px-4 py-2 text-sm text-gray-300">€{campaign.remaining.toLocaleString()}</td>
                   <td className="px-4 py-2 text-sm text-gray-300">€{campaign.dailyBudget}/€{campaign.dailySpent}</td>
+                  <td className="px-4 py-2 text-sm">
+                    <div className="flex flex-col">
+                      <span className="text-white font-medium">€{campaign.cpc.toFixed(2)}</span>
+                      <span className="text-gray-400 text-xs">{campaign.clicks.toLocaleString()} clicks</span>
+                    </div>
+                  </td>
                   <td className="px-4 py-2 text-sm">
                     <span className={getUtilizationColor(campaign.utilization)}>
                       {campaign.utilization}%
@@ -366,6 +461,70 @@ export default function BudgetPage() {
               ))}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      {/* CPC Data Section */}
+      <div className="bg-[#1A1F2E] border border-[#2D3748] rounded-lg p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-white">CPC (Cost Per Click) Per Platform</h2>
+          <div className="text-sm text-gray-400">Fitness & Wellness Industry</div>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+          {cpcData.map((platform) => (
+            <div key={platform.platform} className="bg-[#2D3748] border border-[#3A4D23] rounded-lg p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-white font-semibold">{platform.platform}</h3>
+                <span className={`px-2 py-1 rounded text-xs font-medium ${
+                  platform.averageCPC >= 4 ? 'bg-red-900/20 text-red-400' :
+                  platform.averageCPC >= 2 ? 'bg-yellow-900/20 text-yellow-400' :
+                  'bg-green-900/20 text-green-400'
+                }`}>
+                  {platform.adType}
+                </span>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-400 text-sm">Gemiddelde CPC:</span>
+                  <span className="text-white font-bold">€{platform.averageCPC.toFixed(2)}</span>
+                </div>
+                
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-400 text-sm">Min CPC:</span>
+                  <span className="text-green-400 text-sm">€{platform.minCPC.toFixed(2)}</span>
+                </div>
+                
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-400 text-sm">Max CPC:</span>
+                  <span className="text-red-400 text-sm">€{platform.maxCPC.toFixed(2)}</span>
+                </div>
+                
+                <div className="pt-2 border-t border-[#3A4D23]">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-gray-400">Targeting:</span>
+                    <span className="text-[#8BAE5A]">{platform.targeting}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        <div className="mt-6 p-4 bg-[#2D3748] border border-[#3A4D23] rounded-lg">
+          <h4 className="text-white font-semibold mb-3">💡 CPC Inzichten</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div>
+              <p className="text-gray-300 mb-2"><strong>Hoogste CPC:</strong> LinkedIn (€5.26) - B2B targeting</p>
+              <p className="text-gray-300 mb-2"><strong>Laagste CPC:</strong> TikTok (€1.00) - Video content</p>
+              <p className="text-gray-300"><strong>Google Ads:</strong> €2.69 - Zoekmachine marketing</p>
+            </div>
+            <div>
+              <p className="text-gray-300 mb-2"><strong>Facebook/Instagram:</strong> €1.72/€1.41 - Social targeting</p>
+              <p className="text-gray-300 mb-2"><strong>YouTube:</strong> €3.12 - Video advertising</p>
+              <p className="text-gray-300"><strong>Tip:</strong> Combineer platforms voor optimale ROI</p>
+            </div>
+          </div>
         </div>
       </div>
 

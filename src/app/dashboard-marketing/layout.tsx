@@ -20,7 +20,12 @@ import {
   Bars3Icon,
   XMarkIcon,
   ExclamationTriangleIcon,
-  WrenchScrewdriverIcon
+  WrenchScrewdriverIcon,
+  BuildingStorefrontIcon,
+  AcademicCapIcon,
+  StarIcon,
+  RocketLaunchIcon,
+  FlagIcon
 } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 
@@ -32,14 +37,22 @@ const navigation = [
   { name: 'Conversies', href: '/dashboard-marketing/conversies', icon: CursorArrowRaysIcon },
   { name: 'Audience', href: '/dashboard-marketing/audience', icon: UserGroupIcon },
   { name: 'Budget', href: '/dashboard-marketing/budget', icon: CurrencyDollarIcon },
+  { name: 'Target', href: '/dashboard-marketing/target', icon: FlagIcon },
   { name: 'Rapporten', href: '/dashboard-marketing/rapporten', icon: EyeIcon },
+  { name: 'Concurentie', href: '/dashboard-marketing/concurentie', icon: BuildingStorefrontIcon },
+          { name: 'Pre-launch', href: '/dashboard-marketing/pre-launch', icon: RocketLaunchIcon, badge: 'NEW' },
+        { name: 'AI Insights', href: '/dashboard-marketing/ai-insights', icon: AcademicCapIcon, badge: 'AI' },
+  { name: 'Executive Dashboard', href: '/dashboard-marketing/executive-dashboard', icon: StarIcon },
+  { name: 'Report Builder', href: '/dashboard-marketing/report-builder', icon: DocumentTextIcon },
   { name: 'Instellingen', href: '/dashboard-marketing/instellingen', icon: Cog6ToothIcon },
 ];
 
 const developmentNavigation = [
+  { name: 'Uitleg', href: '/dashboard-marketing/uitleg', icon: AcademicCapIcon },
   { name: 'Marketing Plan', href: '/dashboard-marketing/marketingplan', icon: DocumentChartBarIcon },
   { name: 'Content', href: '/dashboard-marketing/content', icon: DocumentTextIcon },
   { name: 'Takenlijst', href: '/dashboard-marketing/takenlijst', icon: ClipboardDocumentListIcon },
+  { name: 'Automatisering', href: '/dashboard-marketing/automatisering', icon: Cog6ToothIcon },
 ];
 
 export default function MarketingLayout({
@@ -146,15 +159,22 @@ export default function MarketingLayout({
                       <Link
                         key={item.name}
                         href={item.href}
-                        className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                           isActive
                             ? 'bg-[#3B82F6] text-white border border-[#3B82F6]'
                             : 'text-gray-300 hover:bg-gray-800 hover:text-white'
                         }`}
                         onClick={() => setSidebarOpen(false)}
                       >
-                        <item.icon className="w-5 h-5" />
-                        <span>{item.name}</span>
+                        <div className="flex items-center space-x-3">
+                          <item.icon className="w-5 h-5" />
+                          <span>{item.name}</span>
+                        </div>
+                        {item.badge && (
+                          <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold">
+                            {item.badge}
+                          </span>
+                        )}
                       </Link>
                     );
                   })}
@@ -200,14 +220,21 @@ export default function MarketingLayout({
                   <Link
                     key={item.name}
                     href={item.href}
-                    className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                       isActive
                         ? 'bg-[#3B82F6] text-white border border-[#3B82F6]'
                         : 'text-gray-300 hover:bg-gray-800 hover:text-white'
                     }`}
                   >
-                    <item.icon className="w-5 h-5" />
-                    <span>{item.name}</span>
+                    <div className="flex items-center space-x-3">
+                      <item.icon className="w-5 h-5" />
+                      <span>{item.name}</span>
+                    </div>
+                    {item.badge && (
+                      <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold">
+                        {item.badge}
+                      </span>
+                    )}
                   </Link>
                 );
               })}

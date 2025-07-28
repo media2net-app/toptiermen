@@ -230,6 +230,18 @@ export default function Register() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#181F17]">
+      {/* Navigation */}
+      <div className="absolute top-6 right-6 z-20">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => router.push('/offerte')}
+            className="text-[#B6C948] hover:text-white px-4 py-2 rounded-lg border border-[#B6C948] hover:bg-[#B6C948] hover:text-[#181F17] transition-all duration-200 font-medium"
+          >
+            Offerte
+          </button>
+        </div>
+      </div>
+      
       <div className="w-full max-w-4xl p-10 rounded-3xl shadow-2xl bg-[#232D1A]/95 border border-[#3A4D23] backdrop-blur-lg">
         {step === 'intro' && (
           <div className="flex flex-col items-start justify-center gap-8 text-left">
