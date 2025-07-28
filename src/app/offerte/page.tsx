@@ -88,18 +88,18 @@ export default function OffertePage() {
       marketingRoi: 318 // (€100,845 - €19,500) / €19,500 * 100
     },
     {
-      name: 'Scenario C - 6 & 12 Maand Mix',
-      description: 'Mix van kortingen met focus op langdurige commitment',
-      basicSales: 120,
-      premiumSales: 90,
-      ultimateSales: 12,
-      totalRevenue: 102150,
-      totalCustomers: 222,
-      roi: 581,
-      marketingBudget: 22200, // 222 customers / 3% conversion = 7,400 clicks * €0.30 CPC
-      totalInvestment: 37200, // €15,000 + €22,200
-      netProfit: 64950, // €102,150 - €37,200
-      marketingRoi: 360 // (€102,150 - €22,200) / €22,200 * 100
+      name: 'Scenario C - 12 Maand Focus',
+      description: 'Focus op 12-maand abonnementen met hogere waarde per conversie',
+      basicSales: 80,
+      premiumSales: 55,
+      ultimateSales: 8,
+      totalRevenue: 100200,
+      totalCustomers: 143,
+      roi: 644,
+      marketingBudget: 14300, // 143 customers / 3% conversion = 4,767 clicks * €0.30 CPC
+      totalInvestment: 29300, // €15,000 + €14,300
+      netProfit: 70900, // €100,200 - €29,300
+      marketingRoi: 521 // (€100,200 - €14,300) / €14,300 * 100
     }
   ];
 
@@ -552,23 +552,15 @@ export default function OffertePage() {
                     {selectedScenario === 'C' ? (
                       <>
                         <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
-                          <span className="text-gray-300">Basic 6-maand (€264 - 10% korting)</span>
-                          <span className="text-white font-medium">{Math.floor(selectedScenarioData.basicSales * 0.6)}x</span>
+                          <span className="text-gray-300">Basic 12-maand (€529 - 10% korting)</span>
+                          <span className="text-white font-medium">{selectedScenarioData.basicSales}x</span>
                         </div>
                         <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
-                          <span className="text-gray-300">Basic 12-maand (€235 - 20% korting)</span>
-                          <span className="text-white font-medium">{Math.floor(selectedScenarioData.basicSales * 0.4)}x</span>
+                          <span className="text-gray-300">Premium 12-maand (€853 - 10% korting)</span>
+                          <span className="text-white font-medium">{selectedScenarioData.premiumSales}x</span>
                         </div>
                         <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
-                          <span className="text-gray-300">Premium 6-maand (€427 - 10% korting)</span>
-                          <span className="text-white font-medium">{Math.floor(selectedScenarioData.premiumSales * 0.6)}x</span>
-                        </div>
-                        <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
-                          <span className="text-gray-300">Premium 12-maand (€379 - 20% korting)</span>
-                          <span className="text-white font-medium">{Math.floor(selectedScenarioData.premiumSales * 0.4)}x</span>
-                        </div>
-                        <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
-                          <span className="text-gray-300">Ultimate 12-maand (€1.596 - 20% korting)</span>
+                          <span className="text-gray-300">Ultimate Lifetime (€1.995)</span>
                           <span className="text-white font-medium">{selectedScenarioData.ultimateSales}x</span>
                         </div>
                       </>
