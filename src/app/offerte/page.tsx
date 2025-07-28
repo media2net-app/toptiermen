@@ -109,7 +109,7 @@ export default function OffertePage() {
       ultimateSales: 9,
       totalRevenue: 99975,
       totalCustomers: 239,
-      roi: 900
+      roi: 567
     },
     {
       name: 'Scenario B - Premium & Lifetime Focus',
@@ -119,13 +119,13 @@ export default function OffertePage() {
       ultimateSales: 15,
       totalRevenue: 100845,
       totalCustomers: 195,
-      roi: 908
+      roi: 572
     }
   ];
 
   const selectedScenarioData = scenarios[selectedScenario === 'A' ? 0 : 1];
 
-  const investment = 10000;
+  const investment = 15000;
   const targetRevenue = 100000;
 
   return (
@@ -148,7 +148,7 @@ export default function OffertePage() {
               Business Case
             </h1>
             <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
-              Een bewezen strategie voor €100.000 omzet met slechts €10.000 voorinvestering
+              Een bewezen strategie voor €100.000 omzet met €15.000 voorinvestering/financiering
             </p>
             
             {/* Key Metrics */}
@@ -162,7 +162,7 @@ export default function OffertePage() {
                 <div className="flex items-center justify-center w-12 h-12 bg-red-500/20 rounded-lg mb-4 mx-auto">
                   <CurrencyDollarIcon className="w-6 h-6 text-red-400" />
                 </div>
-                <div className="text-2xl font-bold text-white mb-2">€10.000</div>
+                <div className="text-2xl font-bold text-white mb-2">€15.000</div>
                 <div className="text-gray-300">Voorinvestering</div>
               </motion.div>
 
@@ -188,7 +188,7 @@ export default function OffertePage() {
                 <div className="flex items-center justify-center w-12 h-12 bg-blue-500/20 rounded-lg mb-4 mx-auto">
                   <ChartBarIcon className="w-6 h-6 text-blue-400" />
                 </div>
-                <div className="text-2xl font-bold text-white mb-2">900%</div>
+                <div className="text-2xl font-bold text-white mb-2">567%</div>
                 <div className="text-gray-300">ROI</div>
               </motion.div>
             </div>
@@ -611,13 +611,13 @@ export default function OffertePage() {
               
               <div className="text-center mb-6">
                 <h3 className="text-2xl font-bold text-white mb-2">Voorinvestering Optie</h3>
-                <p className="text-green-400">€10.000 eenmalig</p>
+                <p className="text-green-400">€15.000 eenmalig</p>
               </div>
               
               <div className="space-y-4 mb-6">
                 <div className="flex justify-between items-center p-3 bg-[#2D3748] rounded-lg">
                   <span className="text-gray-300">Eenmalige investering:</span>
-                  <span className="text-white font-bold">€10.000</span>
+                  <span className="text-white font-bold">€15.000</span>
                 </div>
                 <div className="flex justify-between items-center p-3 bg-[#2D3748] rounded-lg">
                   <span className="text-gray-300">Verwachte omzet:</span>
@@ -625,11 +625,11 @@ export default function OffertePage() {
                 </div>
                 <div className="flex justify-between items-center p-3 bg-[#2D3748] rounded-lg">
                   <span className="text-gray-300">Netto winst:</span>
-                  <span className="text-green-400 font-bold">€90.000</span>
+                  <span className="text-green-400 font-bold">€85.000</span>
                 </div>
                 <div className="flex justify-between items-center p-3 bg-[#2D3748] rounded-lg">
                   <span className="text-gray-300">ROI:</span>
-                  <span className="text-green-400 font-bold">900%</span>
+                  <span className="text-green-400 font-bold">567%</span>
                 </div>
               </div>
 
@@ -654,7 +654,7 @@ export default function OffertePage() {
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-green-400 mt-1">•</span>
-                    <span>Bewezen ROI van 900%</span>
+                    <span>Bewezen ROI van 567%</span>
                   </li>
                 </ul>
               </div>
@@ -674,12 +674,12 @@ export default function OffertePage() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-400">Voorinvestering:</span>
-                    <span className="text-green-400">+€90.000</span>
+                    <span className="text-green-400">+€85.000</span>
                   </div>
                   <div className="border-t border-[#3A4D23] pt-2">
                     <div className="flex justify-between font-bold">
                       <span className="text-white">Verschil:</span>
-                      <span className="text-green-400">€110.400</span>
+                      <span className="text-green-400">€105.400</span>
                     </div>
                   </div>
                 </div>
@@ -743,18 +743,18 @@ export default function OffertePage() {
               <div>
                 <h4 className="text-green-400 font-semibold mb-2">Kies Voorinvestering</h4>
                 <p className="text-gray-300 text-sm">
-                  Betaal €10.000 eenmalig<br/>
-                  <span className="text-green-400 font-bold">Verdien €90.000+ per jaar</span>
+                  Betaal €15.000 eenmalig<br/>
+                  <span className="text-green-400 font-bold">Verdien €85.000+ per jaar</span>
                 </p>
               </div>
             </div>
             
             <div className="mt-6 p-4 bg-white/10 rounded-lg">
               <p className="text-white font-semibold text-lg">
-                💡 De voorinvestering verdient zichzelf terug in 1,3 maanden
+                💡 De voorinvestering verdient zichzelf terug in 2,1 maanden
               </p>
               <p className="text-gray-300 text-sm mt-2">
-                Na 3 jaar: €351.200 voordeel ten opzichte van dienstverlening
+                Na 3 jaar: €316.200 voordeel ten opzichte van dienstverlening
               </p>
             </div>
           </div>
@@ -774,13 +774,13 @@ export default function OffertePage() {
               Maak de Slimme Keuze
             </h2>
             <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-              Rick, de cijfers spreken voor zich. €10.000 voorinvestering is de enige logische keuze 
+              Rick, de cijfers spreken voor zich. €15.000 voorinvestering is de enige logische keuze 
               voor een ondernemer die serieus wil groeien.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button className="bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 transform hover:scale-105">
-                Start Nu - €10.000 Investering
+                Start Nu - €15.000 Investering
               </button>
               <button className="bg-white/10 hover:bg-white/20 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 border border-white/20">
                 Download Business Plan
@@ -788,8 +788,8 @@ export default function OffertePage() {
             </div>
 
             <div className="mt-8 text-sm text-gray-400">
-              <p>✅ 900% ROI gegarandeerd</p>
-              <p>✅ €351.200 voordeel over 3 jaar</p>
+              <p>✅ 567% ROI gegarandeerd</p>
+              <p>✅ €316.200 voordeel over 3 jaar</p>
               <p>✅ Volledige eigenaarschap</p>
             </div>
           </div>

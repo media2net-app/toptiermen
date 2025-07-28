@@ -55,221 +55,185 @@ export default function MarketingPlanPage() {
   const [selectedPhase, setSelectedPhase] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'overview' | 'detailed' | 'timeline'>('overview');
 
-  // Marketing Plan Data - 6 Maanden Online Marketing Voorstel
+  // Marketing Plan Data - €100.000 Omzet Target Voorstel
   const marketingPhases: MarketingPhase[] = [
     {
       id: 'phase-1',
-      title: 'Maand 1: Setup & Strategie',
-      description: 'Platform setup, doelgroepanalyse en basis strategie',
+      title: 'Fase 1: Platform Setup & Strategie',
+      description: 'Marketing dashboard integratie en doelgroepanalyse voor €100k target',
       startDate: '2025-08-01',
       endDate: '2025-08-31',
       status: 'planned',
-      budget: 850,
-      expectedROI: 120,
+      budget: 2500,
+      expectedROI: 150,
       tasks: [
         {
           id: 'task-1-1',
-          title: 'Marketing Module Integratie',
-          description: 'Inbouwen van marketing dashboard voor 100% transparantie',
+          title: 'Marketing Dashboard Integratie',
+          description: 'Complete marketing module voor 100% transparantie en €100k tracking',
           status: 'planned',
           priority: 'critical',
           assignedTo: 'Development Team',
           dueDate: '2025-08-10',
-          estimatedHours: 8,
-          budget: 680,
+          estimatedHours: 12,
+          budget: 1500,
           channel: 'Development'
         },
         {
           id: 'task-1-2',
-          title: 'Doelgroepanalyse & Strategie',
-          description: 'Analyse van primaire doelgroep en marketing strategie',
+          title: '€100k Omzet Strategie',
+          description: 'Doelgroepanalyse en roadmap naar €100.000 omzet target',
           status: 'planned',
-          priority: 'high',
+          priority: 'critical',
           assignedTo: 'Marketing Team',
           dueDate: '2025-08-20',
-          estimatedHours: 2,
-          budget: 170,
+          estimatedHours: 8,
+          budget: 1000,
           channel: 'Strategy'
         }
       ]
     },
     {
       id: 'phase-2',
-      title: 'Maand 2: Campagne Setup',
-      description: 'Facebook/Instagram ads setup en eerste campagnes',
+      title: 'Fase 2: Multi-Platform Campagne Setup',
+      description: 'Facebook, Instagram en Google Ads setup voor maximale reach',
       startDate: '2025-09-01',
       endDate: '2025-09-30',
       status: 'planned',
-      budget: 850,
-      expectedROI: 150,
+      budget: 3500,
+      expectedROI: 200,
       tasks: [
         {
           id: 'task-2-1',
-          title: 'Facebook Ads Setup',
-          description: 'Account setup, pixel installatie en eerste campagnes',
+          title: 'Facebook & Instagram Ads',
+          description: 'Complete social media campagne setup voor €100k target',
           status: 'planned',
           priority: 'critical',
           assignedTo: 'Marketing Team',
           dueDate: '2025-09-15',
-          estimatedHours: 6,
-          budget: 510,
-          channel: 'Facebook'
+          estimatedHours: 10,
+          budget: 2000,
+          channel: 'Social Media'
         },
         {
           id: 'task-2-2',
-          title: 'Instagram Ads Setup',
-          description: 'Instagram Business account en Reels campagnes',
+          title: 'Google Ads Setup',
+          description: 'Search en Display campagnes voor directe conversies',
           status: 'planned',
-          priority: 'high',
+          priority: 'critical',
           assignedTo: 'Marketing Team',
           dueDate: '2025-09-30',
-          estimatedHours: 4,
-          budget: 340,
-          channel: 'Instagram'
+          estimatedHours: 8,
+          budget: 1500,
+          channel: 'Google Ads'
         }
       ]
     },
     {
       id: 'phase-3',
-      title: 'Maand 3: Google Ads & Optimalisatie',
-      description: 'Google Ads setup en Facebook campagnes optimaliseren',
+      title: 'Fase 3: LinkedIn B2B & Content',
+      description: 'B2B campagnes en content optimalisatie voor business development',
       startDate: '2025-10-01',
       endDate: '2025-10-31',
       status: 'planned',
-      budget: 850,
-      expectedROI: 180,
+      budget: 3000,
+      expectedROI: 250,
       tasks: [
         {
           id: 'task-3-1',
-          title: 'Google Ads Setup',
-          description: 'Search en Display campagnes voor Brotherhood platform',
+          title: 'LinkedIn B2B Campagnes',
+          description: 'Business development en partnership campagnes',
           status: 'planned',
-          priority: 'critical',
+          priority: 'high',
           assignedTo: 'Marketing Team',
           dueDate: '2025-10-15',
-          estimatedHours: 7,
-          budget: 595,
-          channel: 'Google Ads'
+          estimatedHours: 8,
+          budget: 1800,
+          channel: 'LinkedIn'
         },
         {
           id: 'task-3-2',
-          title: 'Facebook Optimalisatie',
-          description: 'A/B testing en optimalisatie van bestaande campagnes',
+          title: 'Content & Landing Pages',
+          description: 'High-converting content en landing page optimalisatie',
           status: 'planned',
           priority: 'high',
           assignedTo: 'Marketing Team',
           dueDate: '2025-10-31',
-          estimatedHours: 3,
-          budget: 255,
-          channel: 'Optimization'
-        }
-      ]
-    },
-    {
-      id: 'phase-4',
-      title: 'Maand 4: LinkedIn & Content',
-      description: 'LinkedIn B2B campagnes en content optimalisatie',
-      startDate: '2025-11-01',
-      endDate: '2025-11-30',
-      status: 'planned',
-      budget: 850,
-      expectedROI: 200,
-      tasks: [
-        {
-          id: 'task-4-1',
-          title: 'LinkedIn Ads Setup',
-          description: 'B2B campagnes voor business development en partnerships',
-          status: 'planned',
-          priority: 'high',
-          assignedTo: 'Marketing Team',
-          dueDate: '2025-11-15',
           estimatedHours: 6,
-          budget: 510,
-          channel: 'LinkedIn'
-        },
-        {
-          id: 'task-4-2',
-          title: 'Content Optimalisatie',
-          description: 'Landing pages en ad creatives optimaliseren',
-          status: 'planned',
-          priority: 'medium',
-          assignedTo: 'Marketing Team',
-          dueDate: '2025-11-30',
-          estimatedHours: 4,
-          budget: 340,
+          budget: 1200,
           channel: 'Content'
         }
       ]
     },
     {
-      id: 'phase-5',
-      title: 'Maand 5: Scaling & Analytics',
-      description: 'Campagnes opschalen en geavanceerde analytics',
-      startDate: '2025-12-01',
-      endDate: '2025-12-31',
+      id: 'phase-4',
+      title: 'Fase 4: Scaling & Performance',
+      description: 'Campagnes opschalen en geavanceerde performance tracking',
+      startDate: '2025-11-01',
+      endDate: '2025-11-30',
       status: 'planned',
-      budget: 850,
-      expectedROI: 250,
+      budget: 3000,
+      expectedROI: 300,
       tasks: [
         {
-          id: 'task-5-1',
+          id: 'task-4-1',
           title: 'Campagne Scaling',
-          description: 'Succesvolle campagnes opschalen naar grotere budgetten',
+          description: 'Succesvolle campagnes opschalen naar €100k target',
           status: 'planned',
           priority: 'critical',
           assignedTo: 'Marketing Team',
-          dueDate: '2025-12-15',
-          estimatedHours: 5,
-          budget: 425,
+          dueDate: '2025-11-15',
+          estimatedHours: 8,
+          budget: 1800,
           channel: 'Scaling'
         },
         {
-          id: 'task-5-2',
-          title: 'Geavanceerde Analytics',
-          description: 'ROI tracking en geavanceerde rapportages',
+          id: 'task-4-2',
+          title: 'Performance Analytics',
+          description: 'ROI tracking en €100k target monitoring',
           status: 'planned',
           priority: 'high',
           assignedTo: 'Analytics Team',
-          dueDate: '2025-12-31',
-          estimatedHours: 5,
-          budget: 425,
+          dueDate: '2025-11-30',
+          estimatedHours: 6,
+          budget: 1200,
           channel: 'Analytics'
         }
       ]
     },
     {
-      id: 'phase-6',
-      title: 'Maand 6: Optimalisatie & Rapportage',
-      description: 'Finale optimalisatie en complete resultaten rapportage',
-      startDate: '2025-01-01',
-      endDate: '2025-01-31',
+      id: 'phase-5',
+      title: 'Fase 5: Optimalisatie & €100k Target',
+      description: 'Finale optimalisatie voor het bereiken van €100.000 omzet',
+      startDate: '2025-12-01',
+      endDate: '2025-12-31',
       status: 'planned',
-      budget: 850,
-      expectedROI: 300,
+      budget: 3000,
+      expectedROI: 350,
       tasks: [
         {
-          id: 'task-6-1',
-          title: 'Finale Optimalisatie',
-          description: 'Alle campagnes optimaliseren voor maximale ROI',
+          id: 'task-5-1',
+          title: '€100k Target Optimalisatie',
+          description: 'Alle campagnes optimaliseren voor €100.000 omzet target',
           status: 'planned',
           priority: 'critical',
           assignedTo: 'Marketing Team',
-          dueDate: '2025-01-15',
-          estimatedHours: 6,
-          budget: 510,
+          dueDate: '2025-12-15',
+          estimatedHours: 10,
+          budget: 2000,
           channel: 'Optimization'
         },
         {
-          id: 'task-6-2',
-          title: 'Complete Rapportage',
-          description: '6-maanden resultaten en aanbevelingen voor vervolg',
+          id: 'task-5-2',
+          title: 'Target Achievement Tracking',
+          description: 'Real-time monitoring van €100k target progressie',
           status: 'planned',
-          priority: 'high',
+          priority: 'critical',
           assignedTo: 'Marketing Team',
-          dueDate: '2025-01-31',
-          estimatedHours: 4,
-          budget: 340,
-          channel: 'Reporting'
+          dueDate: '2025-12-31',
+          estimatedHours: 5,
+          budget: 1000,
+          channel: 'Tracking'
         }
       ]
     }
@@ -321,7 +285,7 @@ export default function MarketingPlanPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Marketing Plan</h1>
-          <p className="text-gray-400 mt-1">6-maanden online marketing voorstel voor Rick (€85/uur, 10u/maand)</p>
+          <p className="text-gray-400 mt-1">€100.000 Omzet Target Voorstel voor Rick (€15,000 upfront)</p>
         </div>
         <div className="flex items-center space-x-4">
           <div className="bg-orange-500/20 border border-orange-500/30 rounded-lg px-4 py-2">
