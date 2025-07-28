@@ -20,9 +20,9 @@ import {
   FireIcon,
   BoltIcon,
   GlobeAltIcon,
-  CpuChipIcon,
+  AcademicCapIcon,
   EyeIcon,
-  ChartBarSquareIcon
+  PresentationChartLineIcon
 } from '@heroicons/react/24/outline';
 
 interface PricingTier {
