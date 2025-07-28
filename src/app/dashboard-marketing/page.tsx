@@ -16,7 +16,8 @@ import {
   ClockIcon,
   FireIcon,
   StarIcon,
-  DocumentChartBarIcon
+  DocumentChartBarIcon,
+  DocumentTextIcon
 } from '@heroicons/react/24/outline';
 import CampaignModal from '@/components/marketing/CampaignModal';
 
@@ -504,11 +505,11 @@ export default function MarketingDashboard() {
         </div>
         <div className="flex items-center space-x-4">
           <Link 
-            href="/dashboard-marketing/marketingplan"
-            className="bg-yellow-500/20 border border-yellow-500/30 text-yellow-500 px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors hover:bg-yellow-500/30"
+            href="/offerte"
+            className="bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-all duration-200 transform hover:scale-105 font-semibold shadow-lg"
           >
-            <DocumentChartBarIcon className="w-5 h-5" />
-            <span>Marketing Plan</span>
+            <DocumentTextIcon className="w-5 h-5" />
+            <span>Offerte</span>
           </Link>
           <button className="bg-[#3A4D23] hover:bg-[#4A5D33] text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
             <PlusIcon className="w-5 h-5" />
