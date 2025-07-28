@@ -43,7 +43,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         .single();
       
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Profile fetch timeout')), 5000)
+        setTimeout(() => reject(new Error('Profile fetch timeout')), 10000)
       );
       
       const { data: profile, error } = await Promise.race([profilePromise, timeoutPromise]) as any;
@@ -74,19 +74,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       try {
         console.log('🔧 Initializing authentication...');
         
-        // Set a timeout for initialization - reduced to 3 seconds
+        // Set a timeout for initialization - increased for production
         initializationTimeoutRef.current = setTimeout(() => {
           if (mounted && mountedRef.current) {
             console.log('⚠️ Auth initialization timeout, proceeding anyway');
             setLoading(false);
             setInitialized(true);
           }
-        }, 3000); // Increased to 3 seconds for better reliability
+        }, 8000); // Increased to 8 seconds for production reliability
 
         // Get initial session with timeout
         const sessionPromise = supabase.auth.getSession();
         const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Session fetch timeout')), 5000)
+          setTimeout(() => reject(new Error('Session fetch timeout')), 10000)
         );
         
         const { data: { session }, error } = await Promise.race([sessionPromise, timeoutPromise]) as any;
@@ -190,7 +190,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setLoading(false);
         setInitialized(true);
       }
-    }, 10000); // 10 second global timeout
+    }, 15000); // 15 second global timeout for production
 
     return () => clearTimeout(globalTimeout);
   }, [loading]);
@@ -228,7 +228,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       // Add timeout
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Sign in timeout')), 15000)
+        setTimeout(() => reject(new Error('Sign in timeout')), 20000)
       );
       
       const signInPromise = supabase.auth.signInWithPassword({
