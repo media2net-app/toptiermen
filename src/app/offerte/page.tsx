@@ -35,6 +35,10 @@ interface SalesScenario {
   totalRevenue: number;
   totalCustomers: number;
   roi: number;
+  marketingBudget: number;
+  totalInvestment: number;
+  netProfit: number;
+  marketingRoi: number;
 }
 
 export default function OffertePage() {
@@ -50,7 +54,11 @@ export default function OffertePage() {
       ultimateSales: 9,
       totalRevenue: 99975,
       totalCustomers: 239,
-      roi: 567
+      roi: 567,
+      marketingBudget: 35850, // 239 customers / 2% conversion = 11,950 clicks * €0.30 CPC
+      totalInvestment: 50850, // €15,000 + €35,850
+      netProfit: 49125, // €99,975 - €50,850
+      marketingRoi: 179 // (€99,975 - €35,850) / €35,850 * 100
     },
     {
       name: 'Scenario B - Premium & Lifetime Focus',
@@ -60,7 +68,11 @@ export default function OffertePage() {
       ultimateSales: 15,
       totalRevenue: 100845,
       totalCustomers: 195,
-      roi: 572
+      roi: 572,
+      marketingBudget: 29250, // 195 customers / 2% conversion = 9,750 clicks * €0.30 CPC
+      totalInvestment: 44250, // €15,000 + €29,250
+      netProfit: 56595, // €100,845 - €44,250
+      marketingRoi: 193 // (€100,845 - €29,250) / €29,250 * 100
     }
   ];
 
@@ -91,6 +103,16 @@ export default function OffertePage() {
             <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
               Een bewezen strategie voor €100.000 omzet met €15.000 voorinvestering/financiering
             </p>
+            <div className="bg-yellow-500/20 border border-yellow-500/30 rounded-lg p-4 mb-8 max-w-2xl mx-auto">
+              <div className="flex items-center justify-center mb-2">
+                <ExclamationTriangleIcon className="w-5 h-5 text-yellow-400 mr-2" />
+                <span className="text-yellow-400 font-semibold">Belangrijke Opmerking</span>
+              </div>
+              <p className="text-yellow-200 text-sm text-center">
+                <strong>€15.000 voorinvestering is exclusief marketing kosten.</strong> 
+                Hieronder vind je realistische schattingen van de benodigde marketing budgetten.
+              </p>
+            </div>
             
             {/* Key Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
@@ -380,11 +402,19 @@ export default function OffertePage() {
                 </div>
 
                 <div>
-                  <h4 className="text-lg font-semibold text-white mb-4">ROI Analyse</h4>
+                  <h4 className="text-lg font-semibold text-white mb-4">Investering & ROI Analyse</h4>
                   <div className="space-y-3">
                     <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
-                      <span className="text-gray-300">Investering</span>
+                      <span className="text-gray-300">Voorinvestering (Excl. Marketing)</span>
                       <span className="text-red-400 font-medium">€{investment.toLocaleString()}</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-orange-500/20 border border-orange-500/30 rounded-lg">
+                      <span className="text-orange-300">Marketing Budget (2% conversie, €0.30 CPC)</span>
+                      <span className="text-orange-400 font-medium">€{selectedScenarioData.marketingBudget.toLocaleString()}</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-red-500/20 border border-red-500/30 rounded-lg">
+                      <span className="text-red-300">Totale Investering</span>
+                      <span className="text-red-400 font-bold">€{selectedScenarioData.totalInvestment.toLocaleString()}</span>
                     </div>
                     <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
                       <span className="text-gray-300">Verwachte Omzet</span>
@@ -392,11 +422,38 @@ export default function OffertePage() {
                     </div>
                     <div className="flex items-center justify-between p-3 bg-green-500/20 border border-green-500/30 rounded-lg">
                       <span className="text-green-300">Netto Winst</span>
-                      <span className="text-green-400 font-bold">€{(selectedScenarioData.totalRevenue - investment).toLocaleString()}</span>
+                      <span className="text-green-400 font-bold">€{selectedScenarioData.netProfit.toLocaleString()}</span>
                     </div>
                     <div className="flex items-center justify-between p-3 bg-blue-500/20 border border-blue-500/30 rounded-lg">
-                      <span className="text-blue-300">ROI</span>
-                      <span className="text-blue-400 font-bold">{selectedScenarioData.roi}%</span>
+                      <span className="text-blue-300">Marketing ROI</span>
+                      <span className="text-blue-400 font-bold">{selectedScenarioData.marketingRoi}%</span>
+                    </div>
+                  </div>
+                  
+                  {/* Marketing Budget Breakdown */}
+                  <div className="mt-6 p-4 bg-gray-800/50 rounded-lg border border-gray-700">
+                    <h5 className="text-sm font-semibold text-gray-300 mb-3">Marketing Budget Breakdown</h5>
+                    <div className="space-y-2 text-xs text-gray-400">
+                      <div className="flex justify-between">
+                        <span>Benodigde klanten:</span>
+                        <span>{selectedScenarioData.totalCustomers}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Conversie percentage:</span>
+                        <span>2%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Benodigde clicks:</span>
+                        <span>{(selectedScenarioData.totalCustomers / 0.02).toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Gemiddelde CPC:</span>
+                        <span>€0.30</span>
+                      </div>
+                      <div className="flex justify-between font-medium text-orange-400">
+                        <span>Marketing budget:</span>
+                        <span>€{selectedScenarioData.marketingBudget.toLocaleString()}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -524,6 +581,23 @@ export default function OffertePage() {
                 Na het behalen van de €100k target, kan het systeem verder schalen naar €500k+ omzet.
               </p>
             </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 1.4 }}
+              className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-orange-500/20 rounded-lg flex items-center justify-center">
+                  <CalculatorIcon className="w-5 h-5 text-orange-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-white">Realistische Marketing Budgetten</h3>
+              </div>
+              <p className="text-gray-300 text-sm">
+                Met 2% conversie en €0,30 CPC zijn de marketing budgetten €29k-€36k - volledig haalbaar en voorspelbaar.
+              </p>
+            </motion.div>
           </div>
         </motion.div>
       </div>
@@ -537,7 +611,7 @@ export default function OffertePage() {
         >
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-white mb-4">
-              Waarom €10.000 Voorinvestering de Beste Keuze Is
+              Waarom €15.000 Voorinvestering de Beste Keuze Is
             </h2>
             <p className="text-gray-300 max-w-2xl mx-auto">
               Een directe vergelijking tussen de twee opties voor Rick
