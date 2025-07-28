@@ -185,31 +185,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
   const [showForcedOnboarding, setShowForcedOnboarding] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Check onboarding status on mount and when user changes
-  useEffect(() => {
-    if (user && !authLoading) {
-      checkOnboardingStatus();
-      setIsLoading(false);
-    } else if (!user && !authLoading) {
-      setIsLoading(false);
-    }
-  }, [user?.id, authLoading]); // Only depend on user ID and auth loading state
-
-  // Show forced onboarding if user hasn't completed onboarding
-  useEffect(() => {
-    if (onboardingStatus && !onboardingStatus.onboarding_completed) {
-      // Only show modal for steps 0 and 1 (welcome video and goal setting)
-      // For other steps, let the user navigate to the specific pages
-      if (onboardingStatus.current_step <= 1) {
-        setShowForcedOnboarding(true);
-      } else {
-        setShowForcedOnboarding(false);
-      }
-    } else if (onboardingStatus?.onboarding_completed) {
-      setShowForcedOnboarding(false);
-    }
-  }, [onboardingStatus]);
-
+  // Define checkOnboardingStatus function first (before useEffect hooks)
   const checkOnboardingStatus = useCallback(async () => {
     if (!user) return;
 
@@ -239,8 +215,55 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
     }
   }, [user?.id, router]);
 
-  // Note: Admin users can now access both admin dashboard and regular dashboard
-  // The redirect to admin dashboard only happens on initial login in AuthContext
+  // Check onboarding status on mount and when user changes
+  useEffect(() => {
+    if (user && !authLoading) {
+      checkOnboardingStatus();
+      setIsLoading(false);
+    } else if (!user && !authLoading) {
+      setIsLoading(false);
+    }
+  }, [user?.id, authLoading, checkOnboardingStatus]);
+
+  // Show forced onboarding if user hasn't completed onboarding
+  useEffect(() => {
+    if (onboardingStatus && !onboardingStatus.onboarding_completed) {
+      // Only show modal for steps 0 and 1 (welcome video and goal setting)
+      // For other steps, let the user navigate to the specific pages
+      if (onboardingStatus.current_step <= 1) {
+        setShowForcedOnboarding(true);
+      } else {
+        setShowForcedOnboarding(false);
+      }
+    } else if (onboardingStatus?.onboarding_completed) {
+      setShowForcedOnboarding(false);
+    }
+  }, [onboardingStatus]);
+
+  // Mobile menu resize handler
+  useEffect(() => {
+    // Close mobile menu on resize to desktop
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Mobile menu click outside handler
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as HTMLElement;
+      if (isMobileMenuOpen && !target.closest('.mobile-menu')) {
+        setIsMobileMenuOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isMobileMenuOpen]);
 
   // Show loading state while authentication is in progress
   if (authLoading || isLoading) {
@@ -286,29 +309,6 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
       setIsLoggingOut(false);
     }
   };
-
-  useEffect(() => {
-    // Close mobile menu on resize to desktop
-    const handleResize = () => {
-      if (window.innerWidth >= 768) {
-        setIsMobileMenuOpen(false);
-      }
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      const target = event.target as HTMLElement;
-      if (isMobileMenuOpen && !target.closest('.mobile-menu')) {
-        setIsMobileMenuOpen(false);
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isMobileMenuOpen]);
 
 
 
