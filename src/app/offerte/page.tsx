@@ -544,11 +544,11 @@ export default function OffertePage() {
                   <h4 className="text-lg font-semibold text-white mb-4">Investering & ROI Analyse</h4>
                   <div className="space-y-3">
                     <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
-                      <span className="text-gray-300">Voorinvestering (Excl. Marketing)</span>
+                      <span className="text-gray-300">Voorinvestering</span>
                       <span className="text-red-400 font-medium">€{investment.toLocaleString()}</span>
                     </div>
                     <div className="flex items-center justify-between p-3 bg-orange-500/20 border border-orange-500/30 rounded-lg">
-                      <span className="text-orange-300">Marketing Budget (2% conversie, €0.30 CPC)</span>
+                      <span className="text-orange-300">Marketing Budget (3% conversie, €0.30 CPC)</span>
                       <span className="text-orange-400 font-medium">€{selectedScenarioData.marketingBudget.toLocaleString()}</span>
                     </div>
                     <div className="flex items-center justify-between p-3 bg-red-500/20 border border-red-500/30 rounded-lg">
