@@ -268,7 +268,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
   // Show loading state while authentication is in progress
   if (authLoading || isLoading) {
     return (
-      <div className="min-h-screen bg-[#0A0F0A] flex items-center justify-center">
+      <div className="min-h-screen bg-[#0A0F0A] flex items-center justify-center" suppressHydrationWarning>
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
           <p className="text-[#8BAE5A]">Laden...</p>
@@ -323,7 +323,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
 
   return (
-    <div className="min-h-screen bg-[#0A0F0A] flex">
+    <div className="min-h-screen bg-[#0A0F0A] flex" suppressHydrationWarning>
       {/* Sidebar */}
       <div className={`bg-[#232D1A] border-r border-[#3A4D23] transition-all duration-300 ease-in-out ${
         sidebarCollapsed ? 'w-16' : 'w-64 lg:w-72'

@@ -1,7 +1,7 @@
 "use client";
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
-import { CloudArrowUpIcon, XMarkIcon, PlayIcon, CheckIcon } from '@heroicons/react/24/outline';
+import { CloudArrowUpIcon, XMarkIcon, PlayIcon, CheckIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { toast } from 'react-toastify';
 
 interface VideoUploadProps {
@@ -23,33 +23,10 @@ export default function VideoUpload({
   const [uploadedBytes, setUploadedBytes] = useState(0);
   const [totalBytes, setTotalBytes] = useState(0);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
-
-  // Simulate upload progress
-  useEffect(() => {
-    if (isUploading && uploadProgress < 90) {
-      const interval = setInterval(() => {
-        setUploadProgress(prev => {
-          const newProgress = prev + Math.random() * 10;
-          console.log('📈 Progress update:', { 
-            previous: prev, 
-            new: newProgress, 
-            isUploading 
-          });
-          if (newProgress < 90) {
-            return newProgress;
-          }
-          return prev;
-        });
-      }, 500);
-
-      return () => {
-        console.log('🛑 Clearing progress interval');
-        clearInterval(interval);
-      };
-    }
-  }, [isUploading, uploadProgress]);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 Bytes';
@@ -59,145 +36,185 @@ export default function VideoUpload({
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  const validateAndUploadFile = async (file: File) => {
-    console.log('🚀 Starting video upload process...', { 
-      fileName: file.name, 
-      fileSize: file.size, 
-      fileType: file.type,
-      bucketName,
-      folderPath 
-    });
-
-    // Validate file type
-    if (!file.type.startsWith('video/')) {
-      console.error('❌ Invalid file type:', file.type);
-      toast.error('Alleen video bestanden zijn toegestaan');
-      return;
-    }
-
-    // Validate file size (max 500MB)
-    if (file.size > 500 * 1024 * 1024) {
-      console.error('❌ File too large:', file.size, 'bytes');
-      toast.error('Video bestand is te groot. Maximum 500MB toegestaan.');
-      return;
-    }
-
-    setIsUploading(true);
+  const resetUploadState = useCallback(() => {
+    setIsUploading(false);
     setUploadProgress(0);
-    setUploadStatus('Voorbereiden...');
+    setUploadStatus('');
     setUploadedBytes(0);
-    setTotalBytes(file.size);
+    setTotalBytes(0);
+    setRetryCount(0);
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+  }, []);
 
-    console.log('🔄 Initial state set:', { 
-      isUploading: true, 
-      progress: 0, 
-      status: 'Voorbereiden...',
-      uploadedBytes: 0,
-      totalBytes: file.size 
-    });
+  const validateFile = (file: File): string | null => {
+    // Check file type
+    if (!file.type.startsWith('video/')) {
+      return 'Alleen video bestanden zijn toegestaan';
+    }
 
-    try {
-      // Generate unique filename
-      const timestamp = Date.now();
-      const fileName = `${timestamp}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-      const filePath = `${folderPath}/${fileName}`;
+    // Check file size (max 500MB)
+    if (file.size > 500 * 1024 * 1024) {
+      return 'Video bestand is te groot. Maximum 500MB toegestaan.';
+    }
 
-      console.log('📁 Generated file path:', { fileName, filePath });
+    // Check if file is empty
+    if (file.size === 0) {
+      return 'Video bestand is leeg';
+    }
 
-      setUploadStatus('Uploaden naar server...');
-      setUploadProgress(10);
+    return null;
+  };
 
-      console.log('⬆️ Starting Supabase upload...');
-      
-      // Direct upload to Supabase Storage
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from(bucketName)
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false
+  const uploadWithRetry = async (file: File, maxRetries = 3): Promise<string> => {
+    let lastError: Error | null = null;
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`🚀 Upload attempt ${attempt}/${maxRetries} for ${file.name}`);
+        
+        // Create new abort controller for this attempt
+        abortControllerRef.current = new AbortController();
+        
+        // Generate unique filename
+        const timestamp = Date.now();
+        const randomId = Math.random().toString(36).substring(2, 15);
+        const fileName = `${timestamp}-${randomId}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+        const filePath = `${folderPath}/${fileName}`;
+
+        console.log('📁 File path:', filePath);
+
+        // Update status
+        setUploadStatus(attempt > 1 ? `Opnieuw proberen (${attempt}/${maxRetries})...` : 'Uploaden naar server...');
+        setUploadProgress(10);
+
+        // Upload to Supabase with timeout
+        const uploadPromise = supabase.storage
+          .from(bucketName)
+          .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: false
+          });
+
+        // Add timeout
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Upload timeout - probeer opnieuw')), 300000); // 5 minutes
         });
 
-      console.log('📤 Upload response:', { uploadData, uploadError });
+        const { data: uploadData, error: uploadError } = await Promise.race([
+          uploadPromise,
+          timeoutPromise
+        ]) as any;
 
-      if (uploadError) {
-        console.error('❌ Upload failed:', uploadError);
-        throw new Error(`Upload mislukt: ${uploadError.message}`);
+        if (uploadError) {
+          // Handle specific Supabase errors
+          if (uploadError.message.includes('File size limit exceeded')) {
+            throw new Error('Bestand is te groot (max 500MB)');
+          } else if (uploadError.message.includes('Invalid file type')) {
+            throw new Error('Ongeldig bestandstype - alleen video bestanden toegestaan');
+          } else if (uploadError.message.includes('Bucket not found')) {
+            throw new Error('Storage bucket niet gevonden - neem contact op met support');
+          } else {
+            throw new Error(`Upload mislukt: ${uploadError.message}`);
+          }
+        }
+
+        console.log('✅ Upload successful');
+        setUploadProgress(80);
+        setUploadStatus('Video verwerken...');
+
+        // Get public URL
+        const { data: urlData } = supabase.storage
+          .from(bucketName)
+          .getPublicUrl(filePath);
+
+        if (!urlData?.publicUrl) {
+          throw new Error('Kon geen publieke URL genereren');
+        }
+
+        console.log('🔗 Public URL generated:', urlData.publicUrl);
+        setUploadProgress(100);
+        setUploadStatus('Voltooid!');
+        setUploadedBytes(file.size);
+
+        // Success - return the URL
+        return urlData.publicUrl;
+
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error('Unknown error');
+        console.error(`❌ Upload attempt ${attempt} failed:`, lastError.message);
+
+        // If this was the last attempt, throw the error
+        if (attempt === maxRetries) {
+          throw lastError;
+        }
+
+        // Wait before retrying (exponential backoff)
+        const waitTime = Math.min(1000 * Math.pow(2, attempt - 1), 10000);
+        console.log(`⏳ Waiting ${waitTime}ms before retry...`);
+        setUploadStatus(`Wachten voor nieuwe poging... (${waitTime/1000}s)`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
       }
+    }
 
-      console.log('✅ Upload successful, getting public URL...');
-      setUploadProgress(95);
-      setUploadStatus('Video verwerken...');
-      setUploadedBytes(file.size);
+    throw lastError || new Error('Upload mislukt na alle pogingen');
+  };
 
-      console.log('📊 Progress set to 95%:', { 
-        progress: 95, 
-        status: 'Video verwerken...',
-        uploadedBytes: file.size 
+  const handleFileUpload = async (file: File) => {
+    // Validate file first
+    const validationError = validateFile(file);
+    if (validationError) {
+      toast.error(validationError);
+      return;
+    }
+
+    // Reset state
+    resetUploadState();
+    setIsUploading(true);
+    setTotalBytes(file.size);
+
+    try {
+      console.log('🎬 Starting video upload:', {
+        name: file.name,
+        size: formatFileSize(file.size),
+        type: file.type
       });
 
-      // Get the public URL
-      const { data: urlData } = supabase.storage
-        .from(bucketName)
-        .getPublicUrl(filePath);
-
-      console.log('🔗 Public URL data:', urlData);
-
-      if (!urlData?.publicUrl) {
-        console.error('❌ No public URL returned');
-        throw new Error('Kon geen publieke URL genereren voor de video');
-      }
-
-      setUploadProgress(100);
-      setUploadStatus('Voltooid!');
-      setUploadedBytes(file.size);
-
-      console.log('📊 Progress set to 100%:', { 
-        progress: 100, 
-        status: 'Voltooid!',
-        uploadedBytes: file.size 
-      });
-
-      console.log('🎉 Upload process completed successfully!', { 
-        publicUrl: urlData.publicUrl,
-        finalProgress: 100 
-      });
-
-      onVideoUploaded(urlData.publicUrl);
+      const publicUrl = await uploadWithRetry(file);
+      
+      console.log('🎉 Upload completed successfully!');
+      
+      // Call the callback
+      onVideoUploaded(publicUrl);
       toast.success('Video succesvol geüpload!');
 
-      // Reset after a short delay
+      // Reset after a short delay to show completion
       setTimeout(() => {
-        console.log('🔄 Resetting upload state...');
-        setIsUploading(false);
-        setUploadProgress(0);
-        setUploadStatus('');
-        setUploadedBytes(0);
-        setTotalBytes(0);
+        resetUploadState();
       }, 2000);
 
     } catch (error) {
-      console.error('💥 Upload process failed:', error);
-      console.error('📊 Error details:', {
-        errorType: error?.constructor?.name,
-        errorMessage: error instanceof Error ? error.message : 'Unknown error',
-        errorStack: error instanceof Error ? error.stack : 'No stack trace',
-        currentProgress: uploadProgress,
-        currentStatus: uploadStatus
-      });
+      console.error('💥 Upload failed:', error);
       
-      toast.error(error instanceof Error ? error.message : 'Video upload mislukt');
-      setIsUploading(false);
-      setUploadProgress(0);
-      setUploadStatus('');
-      setUploadedBytes(0);
-      setTotalBytes(0);
+      const errorMessage = error instanceof Error ? error.message : 'Upload mislukt';
+      toast.error(errorMessage);
+      
+      resetUploadState();
     }
   };
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileInputChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    await validateAndUploadFile(file);
+    
+    // Reset input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+    
+    await handleFileUpload(file);
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -216,7 +233,7 @@ export default function VideoUpload({
     
     const files = Array.from(e.dataTransfer.files);
     if (files.length > 0) {
-      await validateAndUploadFile(files[0]);
+      await handleFileUpload(files[0]);
     }
   };
 
@@ -229,23 +246,34 @@ export default function VideoUpload({
       const fileName = urlParts[urlParts.length - 1];
       const filePath = `${folderPath}/${fileName}`;
 
-      // Remove from storage
+      console.log('🗑️ Removing video:', filePath);
+
       const { error } = await supabase.storage
         .from(bucketName)
         .remove([filePath]);
 
       if (error) {
-        console.error('Error removing video:', error);
-        toast.error('Kon video niet verwijderen');
+        console.error('❌ Error removing video:', error);
+        toast.error('Fout bij verwijderen video');
         return;
       }
 
+      console.log('✅ Video removed successfully');
       onVideoUploaded('');
       toast.success('Video verwijderd');
+
     } catch (error) {
-      console.error('Error removing video:', error);
-      toast.error('Kon video niet verwijderen');
+      console.error('💥 Error in removeVideo:', error);
+      toast.error('Fout bij verwijderen video');
     }
+  };
+
+  const handleCancelUpload = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    resetUploadState();
+    toast.info('Upload geannuleerd');
   };
 
   return (
@@ -301,7 +329,7 @@ export default function VideoUpload({
           ref={fileInputRef}
           type="file"
           accept="video/*"
-          onChange={handleFileUpload}
+          onChange={handleFileInputChange}
           disabled={isUploading}
           className="hidden"
           id="video-upload"
@@ -322,25 +350,50 @@ export default function VideoUpload({
         {/* Enhanced Upload Progress */}
         {isUploading && (
           <div className="mt-6 p-4 bg-[#181F17] rounded-xl border border-[#3A4D23]">
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-3">
               <span className="text-[#8BAE5A] font-semibold text-sm">{uploadStatus}</span>
-              <span className="text-[#B6C948] text-sm font-mono">{Math.round(uploadProgress)}%</span>
+              <div className="flex items-center gap-2">
+                <span className="text-[#B6C948] text-sm font-mono">{Math.round(uploadProgress)}%</span>
+                {uploadProgress < 100 && (
+                  <button
+                    onClick={handleCancelUpload}
+                    className="text-[#FF6B6B] hover:text-[#FF5252] text-xs underline"
+                  >
+                    Annuleren
+                  </button>
+                )}
+              </div>
             </div>
             
-            <div className="w-full bg-[#3A4D23] rounded-full h-3 mb-3">
+            <div className="w-full bg-[#3A4D23] rounded-full h-3 mb-3 relative overflow-hidden">
               <div
                 className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] h-3 rounded-full transition-all duration-300 ease-out"
                 style={{ width: `${uploadProgress}%` }}
               />
+              {uploadProgress > 0 && uploadProgress < 100 && (
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse" />
+              )}
             </div>
             
             <div className="flex items-center justify-between text-xs text-[#B6C948]">
-              <span>{formatFileSize(uploadedBytes)} / {formatFileSize(totalBytes)}</span>
-              <span>{uploadProgress >= 100 ? '✓' : '⏳'}</span>
+              <span>{formatFileSize(totalBytes)}</span>
+              <span className="flex items-center gap-1">
+                {uploadProgress >= 100 ? (
+                  <>
+                    <CheckIcon className="w-3 h-3 text-[#8BAE5A]" />
+                    <span>Voltooid</span>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-3 h-3 border-2 border-[#8BAE5A] border-t-transparent rounded-full animate-spin" />
+                    <span>Bezig...</span>
+                  </>
+                )}
+              </span>
             </div>
             
             {uploadProgress >= 100 && (
-              <div className="mt-3 p-2 bg-[#8BAE5A]/10 border border-[#8BAE5A] rounded-lg">
+              <div className="mt-3 p-3 bg-[#8BAE5A]/10 border border-[#8BAE5A] rounded-lg">
                 <div className="flex items-center justify-center gap-2 text-[#8BAE5A] text-sm">
                   <CheckIcon className="w-4 h-4" />
                   <span>Video succesvol geüpload!</span>
