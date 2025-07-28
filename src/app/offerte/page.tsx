@@ -44,7 +44,7 @@ interface SalesScenario {
 }
 
 export default function OffertePage() {
-  const [selectedScenario, setSelectedScenario] = useState<'A' | 'B'>('A');
+  const [selectedScenario, setSelectedScenario] = useState<'A' | 'B' | 'C'>('A');
   const [showDetails, setShowDetails] = useState(false);
   const [showSignatureModal, setShowSignatureModal] = useState(false);
   const [signatureData, setSignatureData] = useState({
@@ -86,10 +86,24 @@ export default function OffertePage() {
       totalInvestment: 34500, // €15,000 + €19,500
       netProfit: 66345, // €100,845 - €34,500
       marketingRoi: 318 // (€100,845 - €19,500) / €19,500 * 100
+    },
+    {
+      name: 'Scenario C - 6 & 12 Maand Mix',
+      description: 'Mix van kortingen met focus op langdurige commitment',
+      basicSales: 120,
+      premiumSales: 90,
+      ultimateSales: 12,
+      totalRevenue: 102150,
+      totalCustomers: 222,
+      roi: 581,
+      marketingBudget: 22200, // 222 customers / 3% conversion = 7,400 clicks * €0.30 CPC
+      totalInvestment: 37200, // €15,000 + €22,200
+      netProfit: 64950, // €102,150 - €37,200
+      marketingRoi: 360 // (€102,150 - €22,200) / €22,200 * 100
     }
   ];
 
-  const selectedScenarioData = scenarios[selectedScenario === 'A' ? 0 : 1];
+  const selectedScenarioData = scenarios[selectedScenario === 'A' ? 0 : selectedScenario === 'B' ? 1 : 2];
 
   const investment = 15000;
   const targetRevenue = 100000;
@@ -434,7 +448,7 @@ export default function OffertePage() {
               Schatting Verkoopverdeling tot €100.000 Omzet
             </h2>
             <p className="text-gray-300 max-w-2xl mx-auto">
-              Twee realistische scenario's om de omzet target te behalen
+              Drie realistische scenario's om de omzet target te behalen
             </p>
           </div>
 
@@ -443,23 +457,33 @@ export default function OffertePage() {
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-1 border border-white/20">
               <button
                 onClick={() => setSelectedScenario('A')}
-                className={`px-6 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                   selectedScenario === 'A'
                     ? 'bg-blue-500 text-white'
                     : 'text-gray-300 hover:text-white'
                 }`}
               >
-                Scenario A - Realistisch
+                Scenario A
               </button>
               <button
                 onClick={() => setSelectedScenario('B')}
-                className={`px-6 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                   selectedScenario === 'B'
                     ? 'bg-blue-500 text-white'
                     : 'text-gray-300 hover:text-white'
                 }`}
               >
-                Scenario B - Premium Focus
+                Scenario B
+              </button>
+              <button
+                onClick={() => setSelectedScenario('C')}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  selectedScenario === 'C'
+                    ? 'bg-blue-500 text-white'
+                    : 'text-gray-300 hover:text-white'
+                }`}
+              >
+                Scenario C
               </button>
             </div>
           </div>
@@ -525,18 +549,45 @@ export default function OffertePage() {
                 <div>
                   <h4 className="text-lg font-semibold text-white mb-4">Verkoop Breakdown</h4>
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
-                      <span className="text-gray-300">Basic Tier (€294)</span>
-                      <span className="text-white font-medium">{selectedScenarioData.basicSales}x</span>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
-                      <span className="text-gray-300">Premium Tier (€474)</span>
-                      <span className="text-white font-medium">{selectedScenarioData.premiumSales}x</span>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
-                      <span className="text-gray-300">Ultimate Tier (€1.995)</span>
-                      <span className="text-white font-medium">{selectedScenarioData.ultimateSales}x</span>
-                    </div>
+                    {selectedScenario === 'C' ? (
+                      <>
+                        <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                          <span className="text-gray-300">Basic 6-maand (€264 - 10% korting)</span>
+                          <span className="text-white font-medium">{Math.floor(selectedScenarioData.basicSales * 0.6)}x</span>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                          <span className="text-gray-300">Basic 12-maand (€235 - 20% korting)</span>
+                          <span className="text-white font-medium">{Math.floor(selectedScenarioData.basicSales * 0.4)}x</span>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                          <span className="text-gray-300">Premium 6-maand (€427 - 10% korting)</span>
+                          <span className="text-white font-medium">{Math.floor(selectedScenarioData.premiumSales * 0.6)}x</span>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                          <span className="text-gray-300">Premium 12-maand (€379 - 20% korting)</span>
+                          <span className="text-white font-medium">{Math.floor(selectedScenarioData.premiumSales * 0.4)}x</span>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                          <span className="text-gray-300">Ultimate 12-maand (€1.596 - 20% korting)</span>
+                          <span className="text-white font-medium">{selectedScenarioData.ultimateSales}x</span>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                          <span className="text-gray-300">Basic Tier (€294)</span>
+                          <span className="text-white font-medium">{selectedScenarioData.basicSales}x</span>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                          <span className="text-gray-300">Premium Tier (€474)</span>
+                          <span className="text-white font-medium">{selectedScenarioData.premiumSales}x</span>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                          <span className="text-gray-300">Ultimate Tier (€1.995)</span>
+                          <span className="text-white font-medium">{selectedScenarioData.ultimateSales}x</span>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
 
