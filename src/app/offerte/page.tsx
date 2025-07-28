@@ -26,16 +26,6 @@ import {
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
 
-interface PricingTier {
-  name: string;
-  price: number;
-  minMonths: number;
-  revenuePerSale: number;
-  features: string[];
-  color: string;
-  popular?: boolean;
-}
-
 interface SalesScenario {
   name: string;
   description: string;
@@ -50,56 +40,6 @@ interface SalesScenario {
 export default function OffertePage() {
   const [selectedScenario, setSelectedScenario] = useState<'A' | 'B'>('A');
   const [showDetails, setShowDetails] = useState(false);
-
-  const pricingTiers: PricingTier[] = [
-    {
-      name: 'Basic Tier',
-      price: 49,
-      minMonths: 6,
-      revenuePerSale: 294,
-      color: 'blue',
-      features: [
-        'Competitive Intelligence Dashboard',
-        'Basic Ad Library Access',
-        'Monthly Reports',
-        'Email Support',
-        '2 User Accounts'
-      ]
-    },
-    {
-      name: 'Premium Tier',
-      price: 79,
-      minMonths: 6,
-      revenuePerSale: 474,
-      color: 'purple',
-      popular: true,
-      features: [
-        'All Basic Features',
-        'Advanced AI Insights',
-        'Real-time Alerts',
-        'Custom Report Builder',
-        'Executive Dashboard',
-        'Priority Support',
-        '5 User Accounts'
-      ]
-    },
-    {
-      name: 'Ultimate Tier',
-      price: 1995,
-      minMonths: 0, // Lifetime
-      revenuePerSale: 1995,
-      color: 'gold',
-      features: [
-        'All Premium Features',
-        'Lifetime Access',
-        'White-label Solution',
-        'Custom Integrations',
-        'Dedicated Account Manager',
-        'API Access',
-        'Unlimited Users'
-      ]
-    }
-  ];
 
   const scenarios: SalesScenario[] = [
     {
@@ -317,74 +257,6 @@ export default function OffertePage() {
                 <span className="text-green-400 font-bold"> garantie</span> dat we samen de €100.000 target behalen.
               </p>
             </div>
-          </div>
-        </motion.div>
-      </div>
-
-      {/* Pricing Structure */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-        >
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-white mb-4">
-              Nieuwe Prijsstructuur (6 maanden minimum)
-            </h2>
-            <p className="text-gray-300 max-w-2xl mx-auto">
-              Door minimale afname van 6 maanden per klant, verhogen we de gemiddelde orderwaarde aanzienlijk
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-            {pricingTiers.map((tier, index) => (
-              <motion.div
-                key={tier.name}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 + index * 0.1 }}
-                className={`relative bg-white/10 backdrop-blur-sm rounded-xl p-6 border ${
-                  tier.popular 
-                    ? 'border-purple-500/50 ring-2 ring-purple-500/20' 
-                    : 'border-white/20'
-                }`}
-              >
-                {tier.popular && (
-                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                    <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-1 rounded-full text-sm font-medium">
-                      Meest Populair
-                    </span>
-                  </div>
-                )}
-
-                <div className="text-center mb-6">
-                  <h3 className="text-xl font-bold text-white mb-2">{tier.name}</h3>
-                  <div className="text-3xl font-bold text-white mb-1">
-                    €{tier.price}
-                    <span className="text-lg text-gray-400">/maand</span>
-                  </div>
-                  <div className="text-sm text-gray-400 mb-4">
-                    {tier.minMonths > 0 ? `${tier.minMonths} maanden minimum` : 'Lifetime'}
-                  </div>
-                  <div className="bg-green-500/20 border border-green-500/30 rounded-lg p-3">
-                    <div className="text-lg font-bold text-green-400">
-                      €{tier.revenuePerSale.toLocaleString()}
-                    </div>
-                    <div className="text-sm text-green-300">Omzet per verkoop</div>
-                  </div>
-                </div>
-
-                <ul className="space-y-3">
-                  {tier.features.map((feature, featureIndex) => (
-                    <li key={featureIndex} className="flex items-start gap-3">
-                      <CheckCircleIcon className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
-                      <span className="text-gray-300 text-sm">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
-            ))}
           </div>
         </motion.div>
       </div>
