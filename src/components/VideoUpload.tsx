@@ -37,6 +37,7 @@ export default function VideoUpload({
   };
 
   const resetUploadState = useCallback(() => {
+    console.log('🔄 Resetting upload state...');
     setIsUploading(false);
     setUploadProgress(0);
     setUploadStatus('');
@@ -100,7 +101,7 @@ export default function VideoUpload({
 
         // Add timeout
         const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Upload timeout - probeer opnieuw')), 300000); // 5 minutes
+          setTimeout(() => reject(new Error('Upload timeout - probeer opnieuw')), 600000); // 10 minutes
         });
 
         const { data: uploadData, error: uploadError } = await Promise.race([
@@ -122,7 +123,7 @@ export default function VideoUpload({
         }
 
         console.log('✅ Upload successful');
-        setUploadProgress(80);
+        setUploadProgress(90);
         setUploadStatus('Video verwerken...');
 
         // Get public URL
@@ -190,10 +191,8 @@ export default function VideoUpload({
       onVideoUploaded(publicUrl);
       toast.success('Video succesvol geüpload!');
 
-      // Reset after a short delay to show completion
-      setTimeout(() => {
-        resetUploadState();
-      }, 2000);
+      // Reset immediately to prevent stuck state
+      resetUploadState();
 
     } catch (error) {
       console.error('💥 Upload failed:', error);
