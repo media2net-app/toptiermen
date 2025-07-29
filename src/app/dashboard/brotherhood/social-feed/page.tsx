@@ -369,7 +369,7 @@ const SocialFeedPage = () => {
             {/* User avatar */}
             <div className="flex-shrink-0">
               <Image 
-                src={user?.avatar_url || "/profielfoto.png"} 
+                src="/profielfoto.png" 
                 alt={user?.full_name || "User"} 
                 width={48} 
                 height={48} 
@@ -671,7 +671,7 @@ const SocialFeedPage = () => {
             <div className="p-6 border-t border-[#3A4D23] bg-[#181F17]">
               <div className="flex gap-3">
                 <Image 
-                  src={user?.avatar_url || "/profielfoto.png"} 
+                  src="/profielfoto.png" 
                   alt={user?.full_name || "User"} 
                   width={32} 
                   height={32} 
