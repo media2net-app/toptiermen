@@ -205,9 +205,9 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-[#8BAE5A]">Elite Command Center</h1>
+          <h1 className="text-2xl lg:text-3xl font-bold text-[#8BAE5A]">Elite Command Center</h1>
           <p className="text-[#B6C948] mt-2">Strategisch overzicht van je Top Tier Men platform</p>
           {dashboardStats && (
             <p className="text-gray-400 text-sm mt-1">
@@ -215,12 +215,12 @@ export default function AdminDashboard() {
             </p>
           )}
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
           {activeTab !== 'realtime' && (
             <select 
               value={selectedPeriod} 
               onChange={(e) => setSelectedPeriod(e.target.value as '7d' | '30d' | '90d')}
-              className="px-4 py-2 rounded-xl bg-[#232D1A] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+              className="px-3 py-2 rounded-xl bg-[#232D1A] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] text-sm"
             >
               <option value="7d">Laatste 7 dagen</option>
               <option value="30d">Laatste 30 dagen</option>
@@ -228,7 +228,7 @@ export default function AdminDashboard() {
             </select>
           )}
           {activeTab === 'realtime' && (
-            <div className="px-4 py-2 rounded-xl bg-[#232D1A] text-[#8BAE5A] border border-[#3A4D23]">
+            <div className="px-3 py-2 rounded-xl bg-[#232D1A] text-[#8BAE5A] border border-[#3A4D23]">
               <span className="text-sm">🔄 Live Data</span>
             </div>
           )}
@@ -236,17 +236,19 @@ export default function AdminDashboard() {
             onClick={fetchDashboardData} 
             variant="secondary" 
             icon={<ArrowPathIcon className="w-4 h-4" />}
+            className="text-sm"
           >
-            Vernieuwen
+            <span className="hidden sm:inline">Vernieuwen</span>
+            <span className="sm:hidden">🔄</span>
           </AdminButton>
         </div>
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex space-x-1 bg-[#181F17] rounded-lg p-1 overflow-x-auto">
+      <div className="flex space-x-1 bg-[#181F17] rounded-lg p-1 overflow-x-auto scrollbar-hide">
         <button
           onClick={() => setActiveTab('overview')}
-          className={`flex-shrink-0 py-3 px-4 rounded-md font-medium transition-colors ${
+          className={`flex-shrink-0 py-2 px-3 sm:py-3 sm:px-4 rounded-md font-medium transition-colors text-sm whitespace-nowrap ${
             activeTab === 'overview'
               ? 'bg-[#8BAE5A] text-black'
               : 'text-white/60 hover:text-white'
@@ -256,7 +258,7 @@ export default function AdminDashboard() {
         </button>
         <button
           onClick={() => setActiveTab('content')}
-          className={`flex-shrink-0 py-3 px-4 rounded-md font-medium transition-colors ${
+          className={`flex-shrink-0 py-2 px-3 sm:py-3 sm:px-4 rounded-md font-medium transition-colors text-sm whitespace-nowrap ${
             activeTab === 'content'
               ? 'bg-[#8BAE5A] text-black'
               : 'text-white/60 hover:text-white'
@@ -266,7 +268,7 @@ export default function AdminDashboard() {
         </button>
         <button
           onClick={() => setActiveTab('actions')}
-          className={`flex-shrink-0 py-3 px-4 rounded-md font-medium transition-colors ${
+          className={`flex-shrink-0 py-2 px-3 sm:py-3 sm:px-4 rounded-md font-medium transition-colors text-sm whitespace-nowrap ${
             activeTab === 'actions'
               ? 'bg-[#8BAE5A] text-black'
               : 'text-white/60 hover:text-white'
@@ -276,7 +278,7 @@ export default function AdminDashboard() {
         </button>
         <button
           onClick={() => setActiveTab('financial')}
-          className={`flex-shrink-0 py-3 px-4 rounded-md font-medium transition-colors ${
+          className={`flex-shrink-0 py-2 px-3 sm:py-3 sm:px-4 rounded-md font-medium transition-colors text-sm whitespace-nowrap ${
             activeTab === 'financial'
               ? 'bg-[#8BAE5A] text-black'
               : 'text-white/60 hover:text-white'
@@ -286,7 +288,7 @@ export default function AdminDashboard() {
         </button>
         <button
           onClick={() => setActiveTab('users')}
-          className={`flex-shrink-0 py-3 px-4 rounded-md font-medium transition-colors ${
+          className={`flex-shrink-0 py-2 px-3 sm:py-3 sm:px-4 rounded-md font-medium transition-colors text-sm whitespace-nowrap ${
             activeTab === 'users'
               ? 'bg-[#8BAE5A] text-black'
               : 'text-white/60 hover:text-white'
@@ -296,7 +298,7 @@ export default function AdminDashboard() {
         </button>
         <button
           onClick={() => setActiveTab('realtime')}
-          className={`flex-shrink-0 py-3 px-4 rounded-md font-medium transition-colors ${
+          className={`flex-shrink-0 py-2 px-3 sm:py-3 sm:px-4 rounded-md font-medium transition-colors text-sm whitespace-nowrap ${
             activeTab === 'realtime'
               ? 'bg-[#8BAE5A] text-black'
               : 'text-white/60 hover:text-white'
@@ -306,7 +308,7 @@ export default function AdminDashboard() {
         </button>
         <button
           onClick={() => setActiveTab('technical')}
-          className={`flex-shrink-0 py-3 px-4 rounded-md font-medium transition-colors ${
+          className={`flex-shrink-0 py-2 px-3 sm:py-3 sm:px-4 rounded-md font-medium transition-colors text-sm whitespace-nowrap ${
             activeTab === 'technical'
               ? 'bg-[#8BAE5A] text-black'
               : 'text-white/60 hover:text-white'
@@ -344,7 +346,7 @@ export default function AdminDashboard() {
                       Gebaseerd op engagement, content creatie en activiteit
                     </div>
                     <div className="mt-2 text-xs text-gray-400">
-                      Onboarding rate: {dashboardStats?.onboardingRate || 0}% | 
+                      Onboarding rate: {(dashboardStats?.onboardingRate || 0).toFixed(1)}% | 
                       Actieve gebruikers: {dashboardStats?.activeUsers || 0} | 
                       Recente posts: {dashboardStats?.postsLastWeek || 0}
                     </div>
@@ -361,7 +363,7 @@ export default function AdminDashboard() {
             icon={<UserGroupIcon className="w-6 h-6" />}
             gradient
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {loading && !dataLoaded ? (
                 // Skeleton loading voor ledenstatistieken
                 <>
@@ -467,7 +469,7 @@ export default function AdminDashboard() {
           icon={<AcademicCapIcon className="w-6 h-6" />}
           gradient
         >
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {loading && !dataLoaded ? (
               // Skeleton loading voor content performance
               <>
@@ -561,7 +563,7 @@ export default function AdminDashboard() {
           icon={<ExclamationTriangleIcon className="w-6 h-6" />}
           gradient
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {loading && !dataLoaded ? (
               // Skeleton loading voor actions
               <>
@@ -642,7 +644,7 @@ export default function AdminDashboard() {
           <div className="text-center py-8">
             <div className="text-2xl font-bold text-[#8BAE5A] mb-4">Financiële Metrics</div>
             <p className="text-[#B6C948] mb-6">Maandelijkse terugkerende inkomsten en andere financiële indicatoren</p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-2xl mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-2xl mx-auto">
               <div className="bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]">
                 <div className="text-3xl font-bold text-[#8BAE5A] mb-2">€0</div>
                 <div className="text-gray-400 text-sm">MRR</div>
@@ -672,7 +674,7 @@ export default function AdminDashboard() {
           icon={<UsersIcon className="w-6 h-6" />}
           gradient
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {loading && !dataLoaded ? (
               // Skeleton loading voor users
               <>
@@ -710,7 +712,7 @@ export default function AdminDashboard() {
               </>
             )}
           </div>
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
             {loading && !dataLoaded ? (
               // Skeleton loading voor users details
               <>
@@ -766,7 +768,7 @@ export default function AdminDashboard() {
           icon={<ClockIcon className="w-6 h-6" />}
           gradient
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {loading && !dataLoaded ? (
               // Skeleton loading voor realtime
               <>
@@ -826,7 +828,7 @@ export default function AdminDashboard() {
           icon={<WrenchScrewdriverIcon className="w-6 h-6" />}
           gradient
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {loading && !dataLoaded ? (
               // Skeleton loading voor technical
               <>
