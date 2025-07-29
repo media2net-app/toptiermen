@@ -442,23 +442,25 @@ export default function AdminBoekenkamerPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-[#8BAE5A]">Boekenkamer Beheer</h1>
-          <p className="text-[#B6C948] mt-2">Beheer je gecureerde bibliotheek en gebruikersreviews</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#8BAE5A]">Boekenkamer Beheer</h1>
+          <p className="text-[#B6C948] mt-2 text-sm sm:text-base">Beheer je gecureerde bibliotheek en gebruikersreviews</p>
         </div>
         <AdminButton 
           onClick={fetchBookData} 
           variant="secondary" 
           icon={<ArrowPathIcon className="w-4 h-4" />}
+          className="text-sm"
         >
-          Vernieuwen
+          <span className="hidden sm:inline">Vernieuwen</span>
+          <span className="sm:hidden">🔄</span>
         </AdminButton>
       </div>
 
       {/* Book Statistics */}
       {bookStats && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <AdminStatsCard
             title="Totaal Boeken"
             value={bookStats.totalBooks}
@@ -487,36 +489,39 @@ export default function AdminBoekenkamerPage() {
       )}
 
       {/* Tab Navigation */}
-      <div className="flex space-x-1 bg-[#181F17] rounded-lg p-1">
+      <div className="flex space-x-1 bg-[#181F17] rounded-lg p-1 overflow-x-auto scrollbar-hide">
         <button
           onClick={() => setActiveTab('books')}
-          className={`flex-1 py-3 px-4 rounded-md font-medium transition-colors ${
+          className={`flex-shrink-0 py-2 px-3 sm:py-3 sm:px-4 rounded-md font-medium transition-colors text-sm whitespace-nowrap ${
             activeTab === 'books'
               ? 'bg-[#8BAE5A] text-black'
               : 'text-white/60 hover:text-white'
           }`}
         >
-          Boeken Beheren
+          <span className="hidden sm:inline">Boeken Beheren</span>
+          <span className="sm:hidden">Boeken</span>
         </button>
         <button
           onClick={() => setActiveTab('categories')}
-          className={`flex-1 py-3 px-4 rounded-md font-medium transition-colors ${
+          className={`flex-shrink-0 py-2 px-3 sm:py-3 sm:px-4 rounded-md font-medium transition-colors text-sm whitespace-nowrap ${
             activeTab === 'categories'
               ? 'bg-[#8BAE5A] text-black'
               : 'text-white/60 hover:text-white'
           }`}
         >
-          Categorieën Beheren
+          <span className="hidden sm:inline">Categorieën Beheren</span>
+          <span className="sm:hidden">Cats</span>
         </button>
         <button
           onClick={() => setActiveTab('reviews')}
-          className={`flex-1 py-3 px-4 rounded-md font-medium transition-colors ${
+          className={`flex-shrink-0 py-2 px-3 sm:py-3 sm:px-4 rounded-md font-medium transition-colors text-sm whitespace-nowrap ${
             activeTab === 'reviews'
               ? 'bg-[#8BAE5A] text-black'
               : 'text-white/60 hover:text-white'
           }`}
         >
-          Reviews Beheren
+          <span className="hidden sm:inline">Reviews Beheren</span>
+          <span className="sm:hidden">Reviews</span>
         </button>
       </div>
 

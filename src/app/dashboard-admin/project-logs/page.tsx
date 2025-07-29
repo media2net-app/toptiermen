@@ -247,63 +247,67 @@ export default function ProjectLogs() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-[#8BAE5A] mb-2">Project Logs</h1>
-        <p className="text-[#B6C948]">Volledig overzicht van de ontwikkeling van Top Tier Men</p>
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#8BAE5A] mb-2">Project Logs</h1>
+        <p className="text-[#B6C948] text-sm sm:text-base">Volledig overzicht van de ontwikkeling van Top Tier Men</p>
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex space-x-1 bg-[#232D1A] p-1 rounded-lg">
+      <div className="flex space-x-1 bg-[#232D1A] p-1 rounded-lg overflow-x-auto scrollbar-hide">
         <button
           onClick={() => setActiveTab('overview')}
-          className={`flex-1 px-4 py-2 rounded-md font-medium transition-colors ${
+          className={`flex-shrink-0 px-3 py-2 sm:px-4 rounded-md font-medium transition-colors text-sm whitespace-nowrap ${
             activeTab === 'overview'
               ? 'bg-[#8BAE5A] text-[#181F17]'
               : 'text-[#B6C948] hover:text-[#8BAE5A]'
           }`}
         >
           <div className="flex items-center justify-center gap-2">
-            <ChartBarIcon className="w-5 h-5" />
-            Overzicht
+            <ChartBarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="hidden sm:inline">Overzicht</span>
+            <span className="sm:hidden">Over</span>
           </div>
         </button>
         <button
           onClick={() => setActiveTab('logs')}
-          className={`flex-1 px-4 py-2 rounded-md font-medium transition-colors ${
+          className={`flex-shrink-0 px-3 py-2 sm:px-4 rounded-md font-medium transition-colors text-sm whitespace-nowrap ${
             activeTab === 'logs'
               ? 'bg-[#8BAE5A] text-[#181F17]'
               : 'text-[#B6C948] hover:text-[#8BAE5A]'
           }`}
         >
           <div className="flex items-center justify-center gap-2">
-            <DocumentTextIcon className="w-5 h-5" />
-            Dagelijkse Logs
+            <DocumentTextIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="hidden sm:inline">Dagelijkse Logs</span>
+            <span className="sm:hidden">Logs</span>
           </div>
         </button>
         <button
           onClick={() => setActiveTab('milestones')}
-          className={`flex-1 px-4 py-2 rounded-md font-medium transition-colors ${
+          className={`flex-shrink-0 px-3 py-2 sm:px-4 rounded-md font-medium transition-colors text-sm whitespace-nowrap ${
             activeTab === 'milestones'
               ? 'bg-[#8BAE5A] text-[#181F17]'
               : 'text-[#B6C948] hover:text-[#8BAE5A]'
           }`}
         >
           <div className="flex items-center justify-center gap-2">
-            <TrophyIcon className="w-5 h-5" />
-            Milestones
+            <TrophyIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="hidden sm:inline">Milestones</span>
+            <span className="sm:hidden">Miles</span>
           </div>
         </button>
         <button
           onClick={() => setActiveTab('statistics')}
-          className={`flex-1 px-4 py-2 rounded-md font-medium transition-colors ${
+          className={`flex-shrink-0 px-3 py-2 sm:px-4 rounded-md font-medium transition-colors text-sm whitespace-nowrap ${
             activeTab === 'statistics'
               ? 'bg-[#8BAE5A] text-[#181F17]'
               : 'text-[#B6C948] hover:text-[#8BAE5A]'
           }`}
         >
-                      <div className="flex items-center justify-center gap-2">
-              <ArrowTrendingUpIcon className="w-5 h-5" />
-              Statistieken
-            </div>
+          <div className="flex items-center justify-center gap-2">
+            <ArrowTrendingUpIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="hidden sm:inline">Statistieken</span>
+            <span className="sm:hidden">Stats</span>
+          </div>
         </button>
       </div>
 
@@ -311,7 +315,7 @@ export default function ProjectLogs() {
       {activeTab === 'overview' && (
         <div className="space-y-6">
           {/* Summary Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-6">
               <div className="flex items-center gap-3 mb-2">
                 <ClockIcon className="w-6 h-6 text-[#8BAE5A]" />
@@ -343,7 +347,7 @@ export default function ProjectLogs() {
           </div>
 
           {/* Budget Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-6">
               <div className="flex items-center gap-3 mb-2">
                 <CurrencyDollarIcon className="w-6 h-6 text-[#8BAE5A]" />
@@ -531,7 +535,7 @@ export default function ProjectLogs() {
       {activeTab === 'statistics' && (
         <div className="space-y-6">
           {/* Summary Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-6">
               <div className="flex items-center gap-3 mb-2">
                 <ClockIcon className="w-6 h-6 text-[#8BAE5A]" />

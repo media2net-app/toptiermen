@@ -305,12 +305,12 @@ export default function PlanningTodo() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[#8BAE5A] mb-2">Planning & To-Do</h1>
-          <p className="text-[#B6C948]">Overzicht van openstaande taken tot 1 September 2025</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#8BAE5A] mb-2">Planning & To-Do</h1>
+          <p className="text-[#B6C948] text-sm sm:text-base">Overzicht van openstaande taken tot 1 September 2025</p>
         </div>
 
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="bg-[#232D1A] rounded-lg p-6 border border-[#3A4D23]">
             <div className="flex items-center justify-between">
               <div>
@@ -354,7 +354,7 @@ export default function PlanningTodo() {
 
         {/* Tabs */}
         <div className="bg-[#232D1A] rounded-lg border border-[#3A4D23] mb-6">
-          <div className="flex border-b border-[#3A4D23]">
+          <div className="flex border-b border-[#3A4D23] overflow-x-auto scrollbar-hide">
             {[
               { id: 'overview', label: 'Overzicht', icon: ChartBarIcon },
               { id: 'tasks', label: 'Taken', icon: ListBulletIcon },
@@ -364,14 +364,15 @@ export default function PlanningTodo() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
+                className={`flex-shrink-0 flex items-center px-4 sm:px-6 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
                   activeTab === tab.id
                     ? 'border-[#8BAE5A] text-[#8BAE5A]'
                     : 'border-transparent text-[#B6C948] hover:text-[#8BAE5A]'
                 }`}
               >
-                <tab.icon className="h-5 w-5 mr-2" />
-                {tab.label}
+                <tab.icon className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+                <span className="hidden sm:inline">{tab.label}</span>
+                <span className="sm:hidden">{tab.label === 'Overzicht' ? 'Over' : tab.label === 'Milestones' ? 'Miles' : tab.label === 'Statistieken' ? 'Stats' : tab.label}</span>
               </button>
             ))}
           </div>
@@ -384,7 +385,7 @@ export default function PlanningTodo() {
               {/* Priority Overview */}
               <div>
                 <h3 className="text-lg font-semibold text-white mb-4">Prioriteiten Overzicht</h3>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="bg-red-900/20 border border-red-700 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-red-400 font-medium">Kritiek</span>
@@ -667,7 +668,7 @@ export default function PlanningTodo() {
 
           {activeTab === 'statistics' && (
             <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="bg-[#3A4D23]/40 border border-[#3A4D23] rounded-lg p-6">
                   <h3 className="text-white font-semibold text-lg mb-4">Taak Status Verdeling</h3>
                   <div className="space-y-3">

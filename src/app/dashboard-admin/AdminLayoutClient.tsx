@@ -308,8 +308,8 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
     <div className="min-h-screen bg-[#181F17]" suppressHydrationWarning>
       {/* Top Navigation Bar */}
       <div className="bg-[#232D1A] border-b border-[#3A4D23] px-4 sm:px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div className="flex items-center justify-between lg:justify-start gap-4">
             <button
               onClick={() => setIsMobileMenuOpen(true)}
               className="lg:hidden p-2 text-[#8BAE5A]"
@@ -317,9 +317,56 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
               <Bars3Icon className="w-6 h-6" />
             </button>
             <h1 className="text-xl md:text-2xl font-bold text-[#8BAE5A]">Admin Panel</h1>
+            <span className="text-[#B6C948] text-xs font-medium lg:hidden">Cache:</span>
           </div>
-          <div className="flex items-center gap-4">
-            <span className="hidden sm:inline text-[#8BAE5A] text-sm">
+          
+          {/* Mobile Cache Controls */}
+          <div className="flex items-center gap-2 lg:hidden">
+            <button
+              onClick={() => {
+                localStorage.clear();
+                sessionStorage.clear();
+                alert('App cache opgeruimd!');
+              }}
+              className="px-2 py-1 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A] focus:outline-none focus:ring-1 focus:ring-[#8BAE5A] text-xs transition-colors"
+              title="Ruim app cache op"
+            >
+              🧹
+            </button>
+            <button
+              onClick={() => {
+                if (confirm('Weet je zeker dat je ALLE cache wilt opruimen? Dit zal de pagina herladen.')) {
+                  window.location.reload();
+                }
+              }}
+              className="px-2 py-1 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A] focus:outline-none focus:ring-1 focus:ring-[#8BAE5A] text-xs transition-colors"
+              title="Ruim alle cache op en herlaad"
+            >
+              🔄
+            </button>
+            <button
+              onClick={() => setShowPlanningModal(true)}
+              className="px-2 py-1 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A] focus:outline-none focus:ring-1 focus:ring-[#8BAE5A] text-xs transition-colors"
+              title="Toon planning status"
+            >
+              📊
+            </button>
+            <div className="flex items-center gap-1">
+              <BugAntIcon className="w-3 h-3 text-[#B6C948]" />
+              <select
+                value={showDebug ? 'true' : 'false'}
+                onChange={(e) => setShowDebug(e.target.value === 'true')}
+                className="px-1 py-1 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-1 focus:ring-[#8BAE5A] text-xs"
+              >
+                <option value="false">OFF</option>
+                <option value="true">ON</option>
+              </select>
+            </div>
+          </div>
+          
+          {/* Desktop Controls */}
+          <div className="hidden lg:flex items-center gap-4">
+            <span className="text-[#8BAE5A] text-sm">
               {user?.email || 'Admin'}
             </span>
             
@@ -419,7 +466,7 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-6 md:p-12 overflow-x-auto bg-[#181F17]">
+        <main className="flex-1 p-4 sm:p-6 md:p-12 overflow-x-auto bg-[#181F17]">
           {children}
         </main>
       </div>
