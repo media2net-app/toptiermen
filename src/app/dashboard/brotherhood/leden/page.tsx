@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/contexts/AuthContext';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { Database } from '@/types/database.types';
 
 type User = Database['public']['Tables']['users']['Row'];
@@ -48,7 +48,7 @@ const ranks = [
 const interests = ['Finance', 'Fitness', 'Mindset', 'Vaderschap', 'Digitale Nomaden', 'Ondernemerschap'];
 
 export default function LedenOverzicht() {
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   const [members, setMembers] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

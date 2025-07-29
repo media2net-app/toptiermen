@@ -8,7 +8,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import Link from 'next/link';
 
 import OnboardingWidget from '../components/OnboardingWidget';
-import { useAuth } from '@/contexts/AuthContext';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
 interface DashboardStats {
   missions: {
@@ -69,7 +69,7 @@ export default function Dashboard() {
   const [hasDismissedAlmost, setHasDismissedAlmost] = useState(false);
   const [preferencesLoaded, setPreferencesLoaded] = useState(false);
 
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
 
   // Fetch dashboard stats
   useEffect(() => {

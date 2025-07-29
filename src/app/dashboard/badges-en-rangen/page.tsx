@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { FaMedal, FaDumbbell, FaBrain, FaUsers, FaFire, FaCrown, FaStar, FaTrophy, FaLock, FaBolt, FaBookOpen, FaRunning, FaSnowflake, FaUserShield, FaFlag, FaCheckCircle, FaChevronUp, FaChevronDown } from 'react-icons/fa';
 import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/contexts/AuthContext';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { 
   getRanks, 
   getBadgeCategories, 
@@ -75,7 +75,7 @@ function BadgeModal({ badge, open, onClose }: { badge: any, open: boolean, onClo
 }
 
 export default function BadgesRangen() {
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   const [showRanks, setShowRanks] = useState(true);
   const [showBadge, setShowBadge] = useState<any>(null);
   const [showXpHistory, setShowXpHistory] = useState(false);

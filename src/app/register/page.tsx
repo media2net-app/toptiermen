@@ -2,14 +2,15 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { FaCheck } from "react-icons/fa6";
-import { useAuth } from "@/contexts/AuthContext";
+import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import EmailVerificationModal from "@/components/EmailVerificationModal";
 import WelcomeEmailModal from "@/components/WelcomeEmailModal";
 import PaymentModal from "@/components/PaymentModal";
 
 export default function Register() {
   const router = useRouter();
-  const { signUp, isAuthenticated, user } = useAuth();
+  const { signUp, user } = useSupabaseAuth();
+  const isAuthenticated = !!user;
   const [step, setStep] = useState<'intro'|'intake'|'approved'|'rejected'|'register'|'package'|'registration'|'payment'|'success'>('intro');
   const [intake, setIntake] = useState({
     goal: '',
@@ -41,7 +42,7 @@ export default function Register() {
   // Check if user is already logged in
   useEffect(() => {
     if (isAuthenticated && user) {
-      if (user.role === 'admin') {
+              if (user.role?.toLowerCase() === 'admin') {
         router.push('/dashboard-admin');
       } else {
         router.push('/dashboard');

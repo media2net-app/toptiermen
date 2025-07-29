@@ -36,6 +36,62 @@ async function setupPrelaunchEmailsTable(supabase: any) {
         status: 'active',
         package: 'Ultimate',
         notes: 'Business client - looking for comprehensive solution'
+      },
+      {
+        email: 'chiel@media2net.nl',
+        name: 'Chiel van der Weide',
+        source: 'Website Form',
+        status: 'active',
+        package: 'Premium',
+        notes: 'Founder - early adopter'
+      },
+      {
+        email: 'rob@example.com',
+        name: 'Rob van Dijk',
+        source: 'Social Media',
+        status: 'pending',
+        package: 'Basic',
+        notes: 'Interested in basic package'
+      },
+      {
+        email: 'sarah@fitnesspro.nl',
+        name: 'Sarah Johnson',
+        source: 'Email Campaign',
+        status: 'active',
+        package: 'Ultimate',
+        notes: 'Professional trainer - high value prospect'
+      },
+      {
+        email: 'mike@startup.io',
+        name: 'Mike Chen',
+        source: 'Referral',
+        status: 'active',
+        package: 'Premium',
+        notes: 'Referred by existing client'
+      },
+      {
+        email: 'lisa@healthcoach.com',
+        name: 'Lisa van der Berg',
+        source: 'Website Form',
+        status: 'unsubscribed',
+        package: 'Basic',
+        notes: 'Changed mind about subscription'
+      },
+      {
+        email: 'david@corporate.nl',
+        name: 'David Smith',
+        source: 'Direct Contact',
+        status: 'active',
+        package: 'Ultimate',
+        notes: 'Corporate wellness program'
+      },
+      {
+        email: 'anna@personal.nl',
+        name: 'Anna de Vries',
+        source: 'Social Media',
+        status: 'pending',
+        package: 'Premium',
+        notes: 'Influencer - potential partnership'
       }
     ];
 

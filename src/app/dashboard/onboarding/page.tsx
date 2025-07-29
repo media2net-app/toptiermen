@@ -1,11 +1,11 @@
 'use client';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
 export default function OnboardingDashboard() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
 
   useEffect(() => {
     if (user) {

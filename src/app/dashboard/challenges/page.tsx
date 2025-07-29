@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { toast } from 'react-toastify';
 import ClientLayout from '../../components/ClientLayout';
 
@@ -36,7 +36,7 @@ interface ChallengeSummary {
 }
 
 export default function ChallengesPage() {
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [summary, setSummary] = useState<ChallengeSummary | null>(null);
   const [loading, setLoading] = useState(true);

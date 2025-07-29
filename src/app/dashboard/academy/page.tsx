@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { LockClosedIcon } from '@heroicons/react/24/outline';
 import PageLayout from '@/components/PageLayout';
-import { useAuth } from "@/contexts/AuthContext";
+import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { supabase } from "@/lib/supabase";
 
 interface Module {
@@ -38,7 +38,7 @@ interface UnlockData {
 }
 
 export default function AcademyPage() {
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   const [modules, setModules] = useState<Module[]>([]);
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [progressData, setProgressData] = useState<ProgressData>({});

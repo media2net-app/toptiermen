@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { CameraIcon, TrashIcon, PlusIcon, UserGroupIcon, TrophyIcon, FireIcon, BookOpenIcon, ArrowDownTrayIcon, ShieldCheckIcon, BellIcon, PencilIcon, CheckIcon, XMarkIcon, ExclamationTriangleIcon } from '@heroicons/react/24/solid';
 import CropModal from '../../../components/CropModal';
 import { toast } from 'react-toastify';
-import { useAuth } from '@/contexts/AuthContext';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { supabase } from '@/lib/supabase';
 import { convertHeicToJpeg, isHeicFile } from '@/lib/heic-converter';
 
@@ -48,7 +48,7 @@ const interestOptions = [
 ];
 
 export default function MijnProfiel() {
-  const { user, updateUser, signOut } = useAuth();
+  const { user, updateUser, signOut } = useSupabaseAuth();
   const [activeTab, setActiveTab] = useState('publiek');
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);

@@ -363,14 +363,14 @@ async function fetchRealDashboardStats(period: string) {
     try {
       const { data: academyProgress, error: progressError } = await supabaseAdmin
         .from('user_academy_progress')
-        .select('completed');
+        .select('progress_percentage');
 
       if (progressError) {
         console.log('⚠️ Error fetching academy progress:', progressError);
         academyCompletionRate = 0; // No fallback, show real data
       } else {
         const totalProgress = academyProgress?.length || 0;
-        const completedProgress = academyProgress?.filter(p => p.completed).length || 0;
+        const completedProgress = academyProgress?.filter(p => p.progress_percentage >= 100).length || 0;
         academyCompletionRate = totalProgress > 0 ? Math.round((completedProgress / totalProgress) * 100) : 0;
       }
     } catch (error) {
@@ -392,14 +392,14 @@ async function fetchRealDashboardStats(period: string) {
     try {
       const { data: trainingProgress, error: trainingProgressError } = await supabaseAdmin
         .from('user_training_progress')
-        .select('completed');
+        .select('progress_percentage');
 
       if (trainingProgressError) {
         console.log('⚠️ Error fetching training progress:', trainingProgressError);
         trainingCompletionRate = 0; // No fallback, show real data
       } else {
         const totalProgress = trainingProgress?.length || 0;
-        const completedProgress = trainingProgress?.filter(p => p.completed).length || 0;
+        const completedProgress = trainingProgress?.filter(p => p.progress_percentage >= 100).length || 0;
         trainingCompletionRate = totalProgress > 0 ? Math.round((completedProgress / totalProgress) * 100) : 0;
       }
     } catch (error) {

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { 
   ChartBarIcon,
   MegaphoneIcon,
@@ -62,11 +62,11 @@ export default function MarketingLayout({
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
-  const { user, loading } = useAuth();
+  const { user, loading } = useSupabaseAuth();
   const router = useRouter();
 
   // Check if user is admin (all admins have access to marketing dashboard)
-  const isMarketingUser = user?.role === 'admin';
+      const isMarketingUser = user?.role?.toLowerCase() === 'admin';
 
   useEffect(() => {
     if (!loading && !isMarketingUser) {

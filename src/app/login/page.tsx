@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { LockClosedIcon, EnvelopeIcon } from "@heroicons/react/24/solid";
-import { useAuth } from "@/contexts/AuthContext";
+import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 
 export default function Login() {
   const [mounted, setMounted] = useState(false);
@@ -24,13 +24,15 @@ export default function Login() {
   
   let authContext;
   try {
-    authContext = useAuth();
+    authContext = useSupabaseAuth();
   } catch (error) {
     console.error('AuthContext error:', error);
     authContext = fallbackAuth;
   }
   
-  const { signIn, isAuthenticated, user, loading: authLoading, initialized } = authContext;
+  const { signIn, user, loading: authLoading } = authContext;
+  const isAuthenticated = !!user;
+  const initialized = !authLoading;
   
   // Force initialization after a short delay if not initialized
   useEffect(() => {
@@ -71,7 +73,7 @@ export default function Login() {
     if (!authLoading && isAuthenticated && user && mounted && !redirecting) {
       console.log('🔀 Primary redirect triggered for user:', user.role);
       setRedirecting(true);
-      const targetPath = user.role === 'admin' ? '/dashboard-admin' : '/dashboard';
+      const targetPath = user.role?.toLowerCase() === 'admin' ? '/dashboard-admin' : '/dashboard';
       console.log('🔀 Redirecting to:', targetPath);
       // Use replace instead of push to prevent back button issues
       router.replace(targetPath);
@@ -83,7 +85,7 @@ export default function Login() {
     if (isAuthenticated && user && !authLoading && !redirecting) {
       console.log('🔀 Auth loading finished, redirecting user:', user.role);
       setRedirecting(true);
-      const targetPath = user.role === 'admin' ? '/dashboard-admin' : '/dashboard';
+      const targetPath = user.role?.toLowerCase() === 'admin' ? '/dashboard-admin' : '/dashboard';
       console.log('🔀 Redirecting to:', targetPath);
       router.replace(targetPath);
     }
@@ -150,7 +152,7 @@ export default function Login() {
           if (isAuthenticated && user && !redirecting) {
             console.log('🔀 Fallback redirect triggered for user:', user.role);
             setRedirecting(true);
-            const targetPath = user.role === 'admin' ? '/dashboard-admin' : '/dashboard';
+            const targetPath = user.role?.toLowerCase() === 'admin' ? '/dashboard-admin' : '/dashboard';
             console.log('🔀 Fallback redirecting to:', targetPath);
             router.replace(targetPath);
           }

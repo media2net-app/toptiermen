@@ -11,7 +11,7 @@ import {
   CheckIcon
 } from '@heroicons/react/24/outline';
 import PageLayout from '@/components/PageLayout';
-import { useAuth } from "@/contexts/AuthContext";
+import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { supabase } from "@/lib/supabase";
 import MealEditModal from './MealEditModal';
 import WeekPlanView from './WeekPlanView';
@@ -104,7 +104,7 @@ const dietTypes = [
 
 
 export default function VoedingsplannenPage() {
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [userData, setUserData] = useState<UserData>({
     age: 0,

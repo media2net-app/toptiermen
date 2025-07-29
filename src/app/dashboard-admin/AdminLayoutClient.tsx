@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useDebug } from '@/contexts/DebugContext';
 import { clearAllCache, clearAppSpecificCache, checkForCacheIssues } from '@/lib/cache-utils';
 import PlanningStatusModal from './components/PlanningStatusModal';
@@ -219,7 +219,8 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
 export default function AdminLayoutClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, loading, signOut, isAuthenticated } = useAuth();
+  const { user, loading, signOut } = useSupabaseAuth();
+  const isAuthenticated = !!user;
   const { showDebug, setShowDebug } = useDebug();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -234,14 +235,14 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
 
   // Check admin role
   useEffect(() => {
-    if (!loading && user && user.role !== 'admin') {
+            if (!loading && user && user.role?.toLowerCase() !== 'admin') {
       router.push('/dashboard');
     }
   }, [loading, user, router]);
 
   // Show planning status modal on first admin login
   useEffect(() => {
-    if (!loading && isAuthenticated && user?.role === 'admin' && pathname === '/dashboard-admin') {
+            if (!loading && isAuthenticated && user?.role?.toLowerCase() === 'admin' && pathname === '/dashboard-admin') {
       const today = new Date().toDateString();
       const lastShownDate = sessionStorage.getItem('admin-planning-modal-date');
       if (lastShownDate !== today) {
@@ -300,7 +301,7 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
   }
 
   // Show unauthorized message if not authenticated or not admin
-  if (!isAuthenticated || (user && user.role !== 'admin')) {
+          if (!isAuthenticated || (user && user.role?.toLowerCase() !== 'admin')) {
     return null; // Will redirect to appropriate page
   }
 

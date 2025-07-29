@@ -7,7 +7,7 @@ import Image from 'next/image';
 import { FaUsers, FaTrophy, FaCalendarAlt, FaComments } from 'react-icons/fa';
 import BrotherhoodSubNav from "./SubNav";
 import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/contexts/AuthContext';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
 interface Group {
   id: string;
@@ -39,7 +39,7 @@ interface Topic {
 }
 
 export default function Brotherhood() {
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   const [myGroups, setMyGroups] = useState<Group[]>([]);
   const [myConnections, setMyConnections] = useState<Connection[]>([]);
   const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);

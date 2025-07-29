@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useRouter } from 'next/navigation';
 import { 
   CheckCircleIcon, 
@@ -31,7 +31,7 @@ interface Statistics {
 }
 
 export default function OnboardingOverviewPage() {
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
   const [statistics, setStatistics] = useState<Statistics | null>(null);
@@ -42,7 +42,7 @@ export default function OnboardingOverviewPage() {
 
   // Check if user is admin
   useEffect(() => {
-    if (user && user.role !== 'admin') {
+            if (user && user.role?.toLowerCase() !== 'admin') {
       router.push('/dashboard');
     }
   }, [user, router]);
@@ -68,7 +68,7 @@ export default function OnboardingOverviewPage() {
   };
 
   useEffect(() => {
-    if (user?.role === 'admin') {
+            if (user?.role?.toLowerCase() === 'admin') {
       fetchOnboardingStatus();
     }
   }, [user]);
@@ -109,7 +109,7 @@ export default function OnboardingOverviewPage() {
     });
   };
 
-  if (!user || user.role !== 'admin') {
+          if (!user || user.role?.toLowerCase() !== 'admin') {
     return (
       <div className="min-h-screen bg-[#0A0F0A] flex items-center justify-center">
         <div className="text-center">
@@ -308,11 +308,11 @@ export default function OnboardingOverviewPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        user.role === 'admin' 
+                        user.role?.toLowerCase() === 'admin' 
                           ? 'bg-red-100 text-red-800' 
                           : 'bg-[#8BAE5A]/20 text-[#8BAE5A]'
                       }`}>
-                        {user.role === 'admin' ? 'Admin' : 'Lid'}
+                        {user.role?.toLowerCase() === 'admin' ? 'Admin' : 'Lid'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">

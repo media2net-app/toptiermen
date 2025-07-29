@@ -1,14 +1,14 @@
 'use client';
 
-import { AuthProvider } from '@/contexts/AuthContext';
+import { SupabaseAuthProvider } from '@/contexts/SupabaseAuthContext';
 import { DebugProvider } from '@/contexts/DebugContext';
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <AuthProvider>
+    <SupabaseAuthProvider>
       <DebugProvider>
         {children}
       </DebugProvider>
-    </AuthProvider>
+    </SupabaseAuthProvider>
   );
 } 

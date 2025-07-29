@@ -24,7 +24,7 @@ import {
   AcademicCapIcon as AcademicCapIconSolid,
   ArrowPathIcon
 } from '@heroicons/react/24/outline';
-import { useAuth } from '../../contexts/AuthContext';
+import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
 import { AdminCard, AdminStatsCard, AdminButton } from '../../components/admin';
 
 interface DashboardStats {
@@ -88,7 +88,7 @@ interface DashboardStats {
 export default function AdminDashboard() {
   const searchParams = useSearchParams();
   const [selectedPeriod, setSelectedPeriod] = useState<'7d' | '30d' | '90d'>('7d');
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   
   // State voor echte data - geoptimaliseerd voor performance
   const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(null);

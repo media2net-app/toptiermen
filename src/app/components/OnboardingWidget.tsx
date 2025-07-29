@@ -4,7 +4,7 @@ import { CheckCircleIcon, XMarkIcon, ArrowRightIcon } from '@heroicons/react/24/
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
 interface OnboardingStep {
   id: string;
@@ -20,7 +20,7 @@ interface OnboardingWidgetProps {
 }
 
 export default function OnboardingWidget({ isVisible, onComplete }: OnboardingWidgetProps) {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser } = useSupabaseAuth();
   const router = useRouter();
   const [steps, setSteps] = useState<OnboardingStep[]>([
     {

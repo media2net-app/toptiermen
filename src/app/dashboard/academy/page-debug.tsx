@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import PageLayout from '@/components/PageLayout';
-import { useAuth } from "@/contexts/AuthContext";
+import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { supabase } from "@/lib/supabase";
 
 interface Module {
@@ -20,7 +20,7 @@ interface Lesson {
 }
 
 export default function AcademyDebugPage() {
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [modules, setModules] = useState<Module[]>([]);

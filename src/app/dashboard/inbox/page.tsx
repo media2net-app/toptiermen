@@ -2,7 +2,7 @@
 import ClientLayout from '../../components/ClientLayout';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/contexts/AuthContext';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
 interface ChatMessage {
   fromMe: boolean;
@@ -30,7 +30,7 @@ interface Profile {
 }
 
 export default function Inbox() {
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [selected, setSelected] = useState<number | null>(null);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);

@@ -1,15 +1,10 @@
 {
-  "rewrites": [
-    {
-      "source": "/",
-      "destination": "/login"
-    }
-  ],
-  "redirects": [
-    {
-      "source": "/",
-      "destination": "/login",
-      "permanent": true
-    }
-  ]
+  "buildCommand": "cp prisma/schema.vercel.prisma prisma/schema.prisma && prisma generate --no-engine && next build",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "env": {
+    "DATABASE_URL": "@database_url",
+    "NEXTAUTH_SECRET": "@nextauth_secret",
+    "NEXTAUTH_URL": "@nextauth_url"
+  }
 } 

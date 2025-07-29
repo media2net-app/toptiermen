@@ -15,7 +15,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { toast } from 'react-toastify';
 import PageLayout from '@/components/PageLayout';
-import { useAuth } from "@/contexts/AuthContext";
+import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from 'next/navigation';
@@ -90,7 +90,7 @@ const dietTypes = [
 ];
 
 export default function TrainingscentrumPage() {
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   const { isOnboarding, currentStep: onboardingStep, completeStep } = useOnboarding();
   const router = useRouter();
   const [selectedOption, setSelectedOption] = useState<'training' | 'nutrition' | null>(null);

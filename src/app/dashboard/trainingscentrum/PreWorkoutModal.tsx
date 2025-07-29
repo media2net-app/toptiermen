@@ -11,7 +11,7 @@ import {
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
 interface PreWorkoutModalProps {
   isOpen: boolean;
@@ -39,7 +39,7 @@ export default function PreWorkoutModal({
   estimatedDuration
 }: PreWorkoutModalProps) {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   const [selectedMode, setSelectedMode] = useState<'interactive' | 'quick'>('interactive');
   const [checklist, setChecklist] = useState<ChecklistItem[]>([
     { id: 'warmup', label: 'Warm-up doen (5 min)', checked: false },

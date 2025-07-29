@@ -1,0 +1,237 @@
+// This is your Prisma schema file for Vercel deployment,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "/app/generated/prisma-client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =====================================================
+// AUTHENTICATION & USERS
+// =====================================================
+
+model User {
+  id                    String   @id @default(cuid())
+  email                 String   @unique
+  password              String?
+  fullName              String   @map("full_name")
+  avatarUrl             String?  @map("avatar_url")
+  coverUrl              String?  @map("cover_url")
+  rank                  String   @default("Beginner")
+  points                Int      @default(0)
+  missionsCompleted     Int      @default(0) @map("missions_completed")
+  lastLogin             DateTime? @map("last_login")
+  bio                   String?
+  location              String?
+  interests             Json?
+  role                  UserRole @default(USER)
+  username              String?  @unique
+  forumStatus           String   @default("member") @map("forum_status")
+  status                UserStatus @default(ACTIVE)
+  mainGoal              String?  @map("main_goal")
+  adminNotes            String?  @map("admin_notes")
+  posts                 Int      @default(0)
+  badges                Int      @default(0)
+  recentActivity        Json?    @map("recent_activity")
+  selectedSchemaId      String?  @map("selected_schema_id")
+  selectedNutritionPlan String?  @map("selected_nutrition_plan")
+  nutritionProfile      Json?    @map("nutrition_profile")
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  goals                 UserGoal[]
+  missions              UserMission[]
+  habits                UserHabit[]
+  habitLogs             UserHabitLog[]
+  onboardingStatus      UserOnboardingStatus?
+  nutritionPlans        UserNutritionPlan[]
+  bookReviews           BookReview[]
+  eventParticipants     EventParticipant[]
+  forumPosts            ForumPost[]
+  forumComments         ForumComment[]
+  userXp                UserXp?
+  xpTransactions        XpTransaction[]
+  userBadges            UserBadge[]
+  userStreaks           UserStreak[]
+  academyProgress       UserAcademyProgress[]
+  trainingProgress      UserTrainingProgress[]
+  todoTasks             TodoTask[]
+  workoutSessions       WorkoutSession[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+// =====================================================
+// PRELAUNCH EMAILS
+// =====================================================
+
+model PrelaunchEmail {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String?
+  source       String   @default("Manual")
+  status       EmailStatus @default(ACTIVE)
+  package      PackageType?
+  notes        String?
+  subscribedAt DateTime @default(now()) @map("subscribed_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("prelaunch_emails")
+}
+
+enum EmailStatus {
+  ACTIVE
+  PENDING
+  UNSUBSCRIBED
+}
+
+enum PackageType {
+  BASIC
+  PREMIUM
+  ULTIMATE
+}
+
+// =====================================================
+// USER GOALS & MISSIONS
+// =====================================================
+
+model UserGoal {
+  id                String   @id @default(cuid())
+  userId            String   @map("user_id")
+  title             String
+  description       String?
+  category          String
+  targetValue       Decimal? @map("target_value") @db.Decimal(10, 2)
+  currentValue      Decimal  @default(0) @map("current_value") @db.Decimal(10, 2)
+  unit              String?
+  deadline          DateTime?
+  progressPercentage Int     @default(0) @map("progress_percentage")
+  isActive          Boolean  @default(true) @map("is_active")
+  isPrimary         Boolean  @default(false) @map("is_primary")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, isPrimary], name: "unique_user_primary_goal")
+  @@map("user_goals")
+}
+
+model UserMission {
+  id                String   @id @default(cuid())
+  userId            String   @map("user_id")
+  title             String
+  description       String?
+  category          String
+  difficulty        MissionDifficulty @default(EASY)
+  points            Int      @default(10)
+  status            MissionStatus @default(PENDING)
+  dueDate           DateTime? @map("due_date")
+  completedAt       DateTime? @map("completed_at")
+  proof             String?
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_missions")
+}
+
+enum MissionDifficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum MissionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  SKIPPED
+}
+
+// =====================================================
+// BOOKS & REVIEWS
+// =====================================================
+
+model BookCategory {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  color       String   @default("#8BAE5A")
+  icon        String?
+  bookCount   Int      @default(0) @map("book_count")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  books       Book[]
+
+  @@map("book_categories")
+}
+
+model Book {
+  id            Int      @id @default(autoincrement())
+  title         String   @unique
+  author        String
+  coverUrl      String?  @map("cover_url")
+  description   String?
+  categories    String[]
+  affiliateBol  String?  @map("affiliate_bol")
+  affiliateAmazon String? @map("affiliate_amazon")
+  status        BookStatus @default(DRAFT)
+  averageRating Decimal  @default(0) @map("average_rating") @db.Decimal(3, 2)
+  reviewCount   Int      @default(0) @map("review_count")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  category     BookCategory @relation(fields: [categoryId], references: [id])
+  categoryId   Int          @map("category_id")
+  reviews      BookReview[]
+
+  @@map("books")
+}
+
+model BookReview {
+  id        Int      @id @default(autoincrement())
+  bookId    Int      @map("book_id")
+  userId    String   @map("user_id")
+  rating    Int
+  text      String
+  status    ReviewStatus @default(PENDING)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("book_reviews")
+}
+
+enum BookStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+} 

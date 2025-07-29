@@ -11,7 +11,7 @@ import {
   ArrowLeftIcon
 } from '@heroicons/react/24/outline';
 import PageLayout from '@/components/PageLayout';
-import { useAuth } from "@/contexts/AuthContext";
+import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { supabase } from "@/lib/supabase";
 import { useParams, useRouter } from 'next/navigation';
 
@@ -56,7 +56,7 @@ interface UserProgress {
 }
 
 export default function TrainingSchemaViewPage() {
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   const params = useParams();
   const router = useRouter();
   const schemaId = params?.id as string;

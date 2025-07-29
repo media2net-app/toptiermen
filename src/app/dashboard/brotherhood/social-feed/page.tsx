@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { useAuth } from '@/contexts/AuthContext';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'react-toastify';
 import { 
@@ -51,7 +51,7 @@ interface Post {
 }
 
 const SocialFeedPage = () => {
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [newPost, setNewPost] = useState('');

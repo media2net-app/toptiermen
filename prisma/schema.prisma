@@ -1,0 +1,620 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_PRISMA_URL")
+}
+
+// =====================================================
+// AUTHENTICATION & USERS
+// =====================================================
+
+model User {
+  id                    String   @id @default(cuid())
+  email                 String   @unique
+  password              String?
+  fullName              String   @map("full_name")
+  avatarUrl             String?  @map("avatar_url")
+  coverUrl              String?  @map("cover_url")
+  rank                  String   @default("Beginner")
+  points                Int      @default(0)
+  missionsCompleted     Int      @default(0) @map("missions_completed")
+  lastLogin             DateTime? @map("last_login")
+  bio                   String?
+  location              String?
+  interests             Json?
+  role                  UserRole @default(USER)
+  username              String?  @unique
+  forumStatus           String   @default("member") @map("forum_status")
+  status                UserStatus @default(ACTIVE)
+  mainGoal              String?  @map("main_goal")
+  adminNotes            String?  @map("admin_notes")
+  posts                 Int      @default(0)
+  badges                Int      @default(0)
+  recentActivity        Json?    @map("recent_activity")
+  selectedSchemaId      String?  @map("selected_schema_id")
+  selectedNutritionPlan String?  @map("selected_nutrition_plan")
+  nutritionProfile      Json?    @map("nutrition_profile")
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  goals                 UserGoal[]
+  missions              UserMission[]
+  habits                UserHabit[]
+  habitLogs             UserHabitLog[]
+  onboardingStatus      UserOnboardingStatus?
+  nutritionPlans        UserNutritionPlan[]
+  bookReviews           BookReview[]
+  eventParticipants     EventParticipant[]
+  forumPosts            ForumPost[]
+  forumComments         ForumComment[]
+  userXp                UserXp?
+  xpTransactions        XpTransaction[]
+  userBadges            UserBadge[]
+  userStreaks           UserStreak[]
+  academyProgress       UserAcademyProgress[]
+  trainingProgress      UserTrainingProgress[]
+  todoTasks             TodoTask[]
+  workoutSessions       WorkoutSession[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+// =====================================================
+// PRELAUNCH EMAILS
+// =====================================================
+
+model PrelaunchEmail {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String?
+  source       String   @default("Manual")
+  status       EmailStatus @default(ACTIVE)
+  package      PackageType?
+  notes        String?
+  subscribedAt DateTime @default(now()) @map("subscribed_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("prelaunch_emails")
+}
+
+enum EmailStatus {
+  ACTIVE
+  PENDING
+  UNSUBSCRIBED
+}
+
+enum PackageType {
+  BASIC
+  PREMIUM
+  ULTIMATE
+}
+
+// =====================================================
+// USER GOALS & MISSIONS
+// =====================================================
+
+model UserGoal {
+  id                String   @id @default(cuid())
+  userId            String   @map("user_id")
+  title             String
+  description       String?
+  category          String
+  targetValue       Decimal? @map("target_value") @db.Decimal(10, 2)
+  currentValue      Decimal  @default(0) @map("current_value") @db.Decimal(10, 2)
+  unit              String?
+  deadline          DateTime?
+  progressPercentage Int     @default(0) @map("progress_percentage")
+  isActive          Boolean  @default(true) @map("is_active")
+  isPrimary         Boolean  @default(false) @map("is_primary")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, isPrimary], name: "unique_user_primary_goal")
+  @@map("user_goals")
+}
+
+model UserMission {
+  id                String   @id @default(cuid())
+  userId            String   @map("user_id")
+  title             String
+  description       String?
+  category          String
+  difficulty        MissionDifficulty @default(EASY)
+  points            Int      @default(10)
+  status            MissionStatus @default(PENDING)
+  dueDate           DateTime? @map("due_date")
+  completedAt       DateTime? @map("completed_at")
+  proof             String?
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_missions")
+}
+
+enum MissionDifficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum MissionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  SKIPPED
+}
+
+// =====================================================
+// USER HABITS
+// =====================================================
+
+model UserHabit {
+  id                String   @id @default(cuid())
+  userId            String   @map("user_id")
+  title             String
+  description       String?
+  frequency         String
+  targetCount       Int      @default(1) @map("target_count")
+  currentStreak     Int      @default(0) @map("current_streak")
+  longestStreak     Int      @default(0) @map("longest_streak")
+  totalCompletions  Int      @default(0) @map("total_completions")
+  isActive          Boolean  @default(true) @map("is_active")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  habitLogs         UserHabitLog[]
+
+  @@map("user_habits")
+}
+
+model UserHabitLog {
+  id          String   @id @default(cuid())
+  userId      String   @map("user_id")
+  habitId     String   @map("habit_id")
+  completedAt DateTime @default(now()) @map("completed_at")
+  notes       String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  habit       UserHabit @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@map("user_habit_logs")
+}
+
+// =====================================================
+// USER ONBOARDING
+// =====================================================
+
+model UserOnboardingStatus {
+  id                    String   @id @default(cuid())
+  userId                String   @unique @map("user_id")
+  welcomeVideoShown     Boolean  @default(false) @map("welcome_video_shown")
+  onboardingCompleted   Boolean  @default(false) @map("onboarding_completed")
+  goalSet               Boolean  @default(false) @map("goal_set")
+  missionsSelected      Boolean  @default(false) @map("missions_selected")
+  trainingSchemaSelected Boolean  @default(false) @map("training_schema_selected")
+  nutritionPlanSelected Boolean  @default(false) @map("nutrition_plan_selected")
+  challengeStarted      Boolean  @default(false) @map("challenge_started")
+  completedSteps        Json     @default("[]") @map("completed_steps")
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_onboarding_status")
+}
+
+// =====================================================
+// NUTRITION PLANS
+// =====================================================
+
+model UserNutritionPlan {
+  id            String   @id @default(cuid())
+  userId        String   @map("user_id")
+  planType      String   @map("plan_type")
+  nutritionGoals Json    @map("nutrition_goals")
+  userData      Json     @map("user_data")
+  weekPlan      Json     @map("week_plan")
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, isActive], name: "unique_user_active_plan")
+  @@map("user_nutrition_plans")
+}
+
+
+
+// =====================================================
+// WORKOUT TRACKING
+// =====================================================
+
+model WorkoutSession {
+  id              String   @id @default(cuid())
+  userId          String   @map("user_id")
+  schemaId        String   @map("schema_id")
+  dayNumber       Int      @map("day_number")
+  startedAt       DateTime @default(now()) @map("started_at")
+  completedAt     DateTime? @map("completed_at")
+  durationMinutes Int?     @map("duration_minutes")
+  mode            WorkoutMode @default(INTERACTIVE)
+  notes           String?
+  rating          Int?
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("workout_sessions")
+}
+
+
+
+enum WorkoutMode {
+  INTERACTIVE
+  QUICK
+}
+
+// =====================================================
+// BOOKS & REVIEWS
+// =====================================================
+
+model BookCategory {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  color       String   @default("#8BAE5A")
+  icon        String?
+  bookCount   Int      @default(0) @map("book_count")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  books       Book[]
+
+  @@map("book_categories")
+}
+
+model Book {
+  id            Int      @id @default(autoincrement())
+  title         String   @unique
+  author        String
+  coverUrl      String?  @map("cover_url")
+  description   String?
+  categories    String[]
+  affiliateBol  String?  @map("affiliate_bol")
+  affiliateAmazon String? @map("affiliate_amazon")
+  status        BookStatus @default(DRAFT)
+  averageRating Decimal  @default(0) @map("average_rating") @db.Decimal(3, 2)
+  reviewCount   Int      @default(0) @map("review_count")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  category     BookCategory @relation(fields: [categoryId], references: [id])
+  categoryId   Int          @map("category_id")
+  reviews      BookReview[]
+
+  @@map("books")
+}
+
+model BookReview {
+  id        Int      @id @default(autoincrement())
+  bookId    Int      @map("book_id")
+  userId    String   @map("user_id")
+  rating    Int
+  text      String
+  status    ReviewStatus @default(PENDING)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("book_reviews")
+}
+
+enum BookStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// =====================================================
+// EVENTS
+// =====================================================
+
+model EventCategory {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  color       String   @default("#8BAE5A")
+  icon        String?
+  eventCount  Int      @default(0) @map("event_count")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  events      Event[]
+
+  @@map("event_categories")
+}
+
+model Event {
+  id                  String   @id @default(cuid())
+  title               String
+  description         String
+  categoryId          String?  @map("category_id")
+  organizerId         String   @map("organizer_id")
+  location            String?
+  startDate           DateTime @map("start_date")
+  endDate             DateTime @map("end_date")
+  maxParticipants     Int?     @map("max_participants")
+  currentParticipants Int      @default(0) @map("current_participants")
+  status              EventStatus @default(UPCOMING)
+  isFeatured          Boolean  @default(false) @map("is_featured")
+  isPublic            Boolean  @default(true) @map("is_public")
+  registrationDeadline DateTime? @map("registration_deadline")
+  coverImageUrl       String?  @map("cover_image_url")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  category            EventCategory? @relation(fields: [categoryId], references: [id])
+  participants        EventParticipant[]
+
+  @@map("events")
+}
+
+model EventParticipant {
+  id        String   @id @default(cuid())
+  eventId   String   @map("event_id")
+  userId    String   @map("user_id")
+  status    ParticipantStatus @default(REGISTERED)
+  joinedAt  DateTime @default(now()) @map("joined_at")
+
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+  @@map("event_participants")
+}
+
+enum EventStatus {
+  DRAFT
+  UPCOMING
+  ONGOING
+  COMPLETED
+  CANCELLED
+}
+
+enum ParticipantStatus {
+  REGISTERED
+  CONFIRMED
+  CANCELLED
+  WAITLISTED
+}
+
+// =====================================================
+// FORUM
+// =====================================================
+
+model ForumPost {
+  id          String   @id @default(cuid())
+  title       String
+  content     String
+  authorId    String   @map("author_id")
+  category    String
+  tags        String[]
+  likes       Int      @default(0)
+  views       Int      @default(0)
+  isPinned    Boolean  @default(false) @map("is_pinned")
+  isLocked    Boolean  @default(false) @map("is_locked")
+  parentId    String?  @map("parent_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  parent      ForumPost? @relation("PostReplies", fields: [parentId], references: [id])
+  replies     ForumPost[] @relation("PostReplies")
+  comments    ForumComment[]
+
+  @@map("forum_posts")
+}
+
+model ForumComment {
+  id        String   @id @default(cuid())
+  content   String
+  authorId  String   @map("author_id")
+  postId    String   @map("post_id")
+  likes     Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  post      ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@map("forum_comments")
+}
+
+// =====================================================
+// XP & BADGES SYSTEM
+// =====================================================
+
+model UserXp {
+  id              String   @id @default(cuid())
+  userId          String   @unique @map("user_id")
+  totalXp         Int      @default(0) @map("total_xp")
+  currentRankId   Int?     @map("current_rank_id")
+  rankAchievedAt  DateTime? @map("rank_achieved_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_xp")
+}
+
+model XpTransaction {
+  id          String   @id @default(cuid())
+  userId      String   @map("user_id")
+  xpAmount    Int      @map("xp_amount")
+  reason      String
+  source      String
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("xp_transactions")
+}
+
+model UserBadge {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  badgeId   Int      @map("badge_id")
+  earnedAt  DateTime @default(now()) @map("earned_at")
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeId])
+  @@map("user_badges")
+}
+
+model UserStreak {
+  id                String   @id @default(cuid())
+  userId            String   @map("user_id")
+  streakType        String   @map("streak_type")
+  currentStreak     Int      @default(0) @map("current_streak")
+  longestStreak     Int      @default(0) @map("longest_streak")
+  lastCompletionDate DateTime? @map("last_completion_date")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, streakType])
+  @@map("user_streaks")
+}
+
+// =====================================================
+// ACADEMY & TRAINING PROGRESS
+// =====================================================
+
+model UserAcademyProgress {
+  id                  String   @id @default(cuid())
+  userId              String   @map("user_id")
+  courseId            String   @map("course_id")
+  progressPercentage  Int      @default(0) @map("progress_percentage")
+  completedLessons    String[] @default([]) @map("completed_lessons")
+  lastAccessed        DateTime @default(now()) @map("last_accessed")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@map("user_academy_progress")
+}
+
+model UserTrainingProgress {
+  id                  String   @id @default(cuid())
+  userId              String   @map("user_id")
+  trainingId          String   @map("training_id")
+  progressPercentage  Int      @default(0) @map("progress_percentage")
+  completedExercises  String[] @default([]) @map("completed_exercises")
+  totalWorkouts       Int      @default(0) @map("total_workouts")
+  lastWorkoutDate     DateTime? @map("last_workout_date")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, trainingId])
+  @@map("user_training_progress")
+}
+
+// =====================================================
+// TODO & PLANNING
+// =====================================================
+
+model TodoTask {
+  id                  String   @id @default(cuid())
+  title               String
+  description         String
+  category            TodoCategory
+  priority            TodoPriority @default(MEDIUM)
+  estimatedHours      Decimal  @map("estimated_hours") @db.Decimal(4, 2)
+  actualHours         Decimal  @default(0) @map("actual_hours") @db.Decimal(4, 2)
+  status              TodoStatus @default(PENDING)
+  assignedTo          String   @map("assigned_to")
+  dueDate             DateTime @map("due_date")
+  startDate           DateTime @map("start_date")
+  completionDate      DateTime? @map("completion_date")
+  dependencies        String[]
+  tags                String[]
+  progressPercentage  Int      @default(0) @map("progress_percentage")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId              String   @map("user_id")
+
+  @@map("todo_tasks")
+}
+
+
+
+enum TodoCategory {
+  FRONTEND
+  BACKEND
+  DATABASE
+  API
+  TESTING
+  DEPLOYMENT
+  DOCUMENTATION
+  UI
+  INTEGRATION
+  OPTIMIZATION
+}
+
+enum TodoPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum TodoStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  BLOCKED
+  CANCELLED
+}

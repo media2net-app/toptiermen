@@ -13,7 +13,7 @@ import {
   TrophyIcon,
   ClockIcon
 } from '@heroicons/react/24/outline';
-import { useAuth } from '../../../contexts/AuthContext';
+import { useSupabaseAuth } from '../../../contexts/SupabaseAuthContext';
 import { AdminCard, AdminStatsCard, AdminTable, AdminButton } from '../../../components/admin';
 
 interface User {
@@ -86,7 +86,7 @@ const mockUsers: User[] = [
 ];
 
 export default function Gebruikersbeheer() {
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   const [users, setUsers] = useState<User[]>(mockUsers);
   const [filteredUsers, setFilteredUsers] = useState<User[]>(mockUsers);
   const [loading, setLoading] = useState(false);

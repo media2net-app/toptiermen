@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
-import { useAuth } from '@/contexts/AuthContext';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useDebug } from '@/contexts/DebugContext';
 import { OnboardingProvider, useOnboarding } from '@/contexts/OnboardingContext';
 import DebugPanel from '@/components/DebugPanel';
@@ -173,7 +173,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: { collapse
 };
 
 function DashboardContent({ children }: { children: React.ReactNode }) {
-  const { user, signOut, loading: authLoading } = useAuth();
+  const { user, signOut, loading: authLoading } = useSupabaseAuth();
   const { showDebug } = useDebug();
   const { isTransitioning } = useOnboarding();
   const router = useRouter();
@@ -362,7 +362,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
                     {user.email}
                   </p>
                   <p className="text-[#8BAE5A] text-xs">
-                    {user.role === 'admin' ? 'Admin' : 'Lid'}
+                    {user.role?.toLowerCase() === 'admin' ? 'Admin' : 'Lid'}
                   </p>
                 </div>
               )}
@@ -408,7 +408,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
           <div className="flex items-center gap-2 sm:gap-4">
             {/* Admin Dashboard Button */}
-            {user.role === 'admin' && (
+            {user.role?.toLowerCase() === 'admin' && (
               <Link
                 href="/dashboard-admin"
                 className="px-2 sm:px-3 md:px-4 py-2 bg-[#8BAE5A] text-[#0A0F0A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold flex items-center gap-1 md:gap-2 text-xs sm:text-sm md:text-base"

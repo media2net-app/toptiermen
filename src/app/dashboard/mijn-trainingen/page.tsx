@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { LockClosedIcon, PlayIcon, CalendarIcon, ChartBarIcon, ArrowRightIcon, CheckIcon } from '@heroicons/react/24/solid';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '../../../contexts/AuthContext';
+import { useSupabaseAuth } from '../../../contexts/SupabaseAuthContext';
 import PreWorkoutModal from '../trainingscentrum/PreWorkoutModal';
 
 interface TrainingSchema {
@@ -43,7 +43,7 @@ interface TrainingData {
 }
 
 export default function MijnTrainingen() {
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   const router = useRouter();
   const [trainingData, setTrainingData] = useState<TrainingData | null>(null);
   const [loading, setLoading] = useState(true);
