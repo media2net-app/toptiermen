@@ -90,10 +90,11 @@ export default function AdminDashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState<'7d' | '30d' | '90d'>('7d');
   const { user } = useAuth();
   
-  // State voor echte data
+  // State voor echte data - geoptimaliseerd voor performance
   const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Start met false voor snelle UI
   const [error, setError] = useState<string | null>(null);
+  const [dataLoaded, setDataLoaded] = useState(false); // Track of data is geladen
 
   // Read tab from URL parameter and set initial active tab
   const tabFromUrl = searchParams?.get('tab') as 'overview' | 'content' | 'actions' | 'financial' | 'users' | 'realtime' | 'technical';
@@ -108,7 +109,7 @@ export default function AdminDashboard() {
     }
   }, [tabFromUrl]);
 
-  // Fetch real dashboard data
+  // Fetch real dashboard data - geoptimaliseerd voor performance
   const fetchDashboardData = async () => {
     if (!user) return;
 
@@ -130,6 +131,7 @@ export default function AdminDashboard() {
 
       if (response.ok && data.success) {
         setDashboardStats(data.stats);
+        setDataLoaded(true);
         console.log('✅ Admin dashboard data loaded:', data.stats);
       } else {
         throw new Error(data.error || 'Failed to fetch dashboard data');
@@ -142,13 +144,18 @@ export default function AdminDashboard() {
     }
   };
 
-  // Fetch data on mount and when period changes
+  // Fetch data on mount and when period changes - geoptimaliseerd voor performance
   useEffect(() => {
-    fetchDashboardData();
+    // Start data loading after a short delay to show UI first
+    const timer = setTimeout(() => {
+      fetchDashboardData();
+    }, 100); // 100ms delay voor snelle UI rendering
+
+    return () => clearTimeout(timer);
   }, [user, selectedPeriod]);
 
-  // Loading state
-  if (loading) {
+  // Loading state - alleen tonen als er nog geen data is geladen
+  if (loading && !dataLoaded) {
     return (
       <div className="min-h-screen bg-[#181F17] flex items-center justify-center">
         <div className="text-center">
@@ -178,6 +185,21 @@ export default function AdminDashboard() {
   const getTrendIcon = (value: number, threshold: number = 0) => {
     if (value > threshold) return <ArrowUpIcon className="w-4 h-4 text-green-400" />;
     return <ArrowDownIcon className="w-4 h-4 text-red-400" />;
+  };
+
+  // Skeleton loading component voor betere UX
+  const SkeletonCard = ({ className = "" }: { className?: string }) => (
+    <div className={`bg-[#232D1A] rounded-xl p-6 border border-[#3A4D23] animate-pulse ${className}`}>
+      <div className="h-4 bg-[#3A4D23] rounded mb-3 w-3/4"></div>
+      <div className="h-8 bg-[#3A4D23] rounded mb-2 w-1/2"></div>
+      <div className="h-3 bg-[#3A4D23] rounded w-2/3"></div>
+    </div>
+  );
+
+  // Helper function om data veilig weer te geven
+  const getDisplayValue = (value: number | undefined, loading: boolean, fallback: string = "0") => {
+    if (loading) return "Laden...";
+    return value !== undefined ? value.toString() : fallback;
   };
 
   return (
@@ -294,7 +316,7 @@ export default function AdminDashboard() {
         </button>
       </div>
 
-      {activeTab === 'overview' && dashboardStats && (
+      {activeTab === 'overview' && (
         <>
           {/* Community Health Score */}
           <AdminCard
@@ -305,18 +327,29 @@ export default function AdminDashboard() {
           >
             <div className="flex items-center justify-center">
               <div className="text-center">
-                <div className="text-4xl font-bold text-[#8BAE5A] mb-2">
-                  {dashboardStats.communityHealthScore}/100
-                </div>
-                <div className="text-sm text-[#B6C948]">Gezondheidsscore</div>
-                <div className="mt-4 text-xs text-gray-400">
-                  Gebaseerd op engagement, content creatie en activiteit
-                </div>
-                <div className="mt-2 text-xs text-gray-400">
-                  Onboarding rate: {dashboardStats.onboardingRate}% | 
-                  Actieve gebruikers: {dashboardStats.activeUsers} | 
-                  Recente posts: {dashboardStats.postsLastWeek}
-                </div>
+                {loading && !dataLoaded ? (
+                  <div className="animate-pulse">
+                    <div className="h-12 bg-[#3A4D23] rounded mb-2 w-32 mx-auto"></div>
+                    <div className="h-4 bg-[#3A4D23] rounded mb-4 w-24 mx-auto"></div>
+                    <div className="h-3 bg-[#3A4D23] rounded mb-2 w-48 mx-auto"></div>
+                    <div className="h-3 bg-[#3A4D23] rounded w-56 mx-auto"></div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="text-4xl font-bold text-[#8BAE5A] mb-2">
+                      {dashboardStats?.communityHealthScore || 0}/100
+                    </div>
+                    <div className="text-sm text-[#B6C948]">Gezondheidsscore</div>
+                    <div className="mt-4 text-xs text-gray-400">
+                      Gebaseerd op engagement, content creatie en activiteit
+                    </div>
+                    <div className="mt-2 text-xs text-gray-400">
+                      Onboarding rate: {dashboardStats?.onboardingRate || 0}% | 
+                      Actieve gebruikers: {dashboardStats?.activeUsers || 0} | 
+                      Recente posts: {dashboardStats?.postsLastWeek || 0}
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </AdminCard>
@@ -329,34 +362,46 @@ export default function AdminDashboard() {
             gradient
           >
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <AdminStatsCard
-                title="Actieve leden deze maand"
-                value={dashboardStats.activeMembersThisMonth}
-                icon={<UserGroupIcon className="w-8 h-8" />}
-                color="green"
-                trend={dashboardStats.activeMembersThisMonth > 0 ? 1 : -1}
-              />
-              <AdminStatsCard
-                title="Nieuwe aanmeldingen deze week"
-                value={dashboardStats.newRegistrationsThisWeek}
-                icon={<UserIcon className="w-8 h-8" />}
-                color="blue"
-                trend={dashboardStats.newRegistrationsThisWeek > 0 ? 1 : -1}
-              />
-              <AdminStatsCard
-                title="Gem. dagelijkse logins"
-                value={dashboardStats.averageDailyLogins}
-                icon={<ClockIcon className="w-8 h-8" />}
-                color="orange"
-                trend={dashboardStats.averageDailyLogins > 0 ? 1 : -1}
-              />
-              <AdminStatsCard
-                title="Actief coachingpakket"
-                value={dashboardStats.activeCoachingPackages}
-                icon={<TrophyIcon className="w-8 h-8" />}
-                color="purple"
-                trend={dashboardStats.activeCoachingPackages > 0 ? 1 : -1}
-              />
+              {loading && !dataLoaded ? (
+                // Skeleton loading voor ledenstatistieken
+                <>
+                  <SkeletonCard />
+                  <SkeletonCard />
+                  <SkeletonCard />
+                  <SkeletonCard />
+                </>
+              ) : (
+                <>
+                  <AdminStatsCard
+                    title="Actieve leden deze maand"
+                    value={dashboardStats?.activeMembersThisMonth || 0}
+                    icon={<UserGroupIcon className="w-8 h-8" />}
+                    color="green"
+                    trend={(dashboardStats?.activeMembersThisMonth || 0) > 0 ? 1 : -1}
+                  />
+                  <AdminStatsCard
+                    title="Nieuwe aanmeldingen deze week"
+                    value={dashboardStats?.newRegistrationsThisWeek || 0}
+                    icon={<UserIcon className="w-8 h-8" />}
+                    color="blue"
+                    trend={(dashboardStats?.newRegistrationsThisWeek || 0) > 0 ? 1 : -1}
+                  />
+                  <AdminStatsCard
+                    title="Gem. dagelijkse logins"
+                    value={dashboardStats?.averageDailyLogins || 0}
+                    icon={<ClockIcon className="w-8 h-8" />}
+                    color="orange"
+                    trend={(dashboardStats?.averageDailyLogins || 0) > 0 ? 1 : -1}
+                  />
+                  <AdminStatsCard
+                    title="Actief coachingpakket"
+                    value={dashboardStats?.activeCoachingPackages || 0}
+                    icon={<TrophyIcon className="w-8 h-8" />}
+                    color="purple"
+                    trend={(dashboardStats?.activeCoachingPackages || 0) > 0 ? 1 : -1}
+                  />
+                </>
+              )}
             </div>
           </AdminCard>
 
@@ -368,42 +413,54 @@ export default function AdminDashboard() {
             gradient
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <AdminStatsCard
-                title="Posts afgelopen 7 dagen"
-                value={dashboardStats.postsLastWeek}
-                icon={<ChatBubbleLeftRightIcon className="w-8 h-8" />}
-                color="green"
-                trend={dashboardStats.postsLastWeek > 0 ? 1 : -1}
-              />
-              <AdminStatsCard
-                title="Meest actieve gebruiker"
-                value={dashboardStats.mostActiveUser.posts}
-                subtitle={dashboardStats.mostActiveUser.name}
-                icon={<StarIcon className="w-8 h-8" />}
-                color="orange"
-                trend={dashboardStats.mostActiveUser.posts > 0 ? 1 : -1}
-              />
-              <AdminStatsCard
-                title="Rapportages laatste week"
-                value={dashboardStats.reportsLastWeek}
-                icon={<ExclamationTriangleIcon className="w-8 h-8" />}
-                color="red"
-                trend={dashboardStats.reportsLastWeek > 0 ? 1 : -1}
-              />
-              <AdminStatsCard
-                title="Populairste squad"
-                value={dashboardStats.mostPopularSquad.members}
-                subtitle={dashboardStats.mostPopularSquad.name}
-                icon={<UsersIcon className="w-8 h-8" />}
-                color="blue"
-                trend={dashboardStats.mostPopularSquad.members > 0 ? 1 : -1}
-              />
+              {loading && !dataLoaded ? (
+                // Skeleton loading voor communityactiviteit
+                <>
+                  <SkeletonCard />
+                  <SkeletonCard />
+                  <SkeletonCard />
+                  <SkeletonCard />
+                </>
+              ) : (
+                <>
+                  <AdminStatsCard
+                    title="Posts afgelopen 7 dagen"
+                    value={dashboardStats?.postsLastWeek || 0}
+                    icon={<ChatBubbleLeftRightIcon className="w-8 h-8" />}
+                    color="green"
+                    trend={(dashboardStats?.postsLastWeek || 0) > 0 ? 1 : -1}
+                  />
+                  <AdminStatsCard
+                    title="Meest actieve gebruiker"
+                    value={dashboardStats?.mostActiveUser?.posts || 0}
+                    subtitle={dashboardStats?.mostActiveUser?.name || "N/A"}
+                    icon={<StarIcon className="w-8 h-8" />}
+                    color="orange"
+                    trend={(dashboardStats?.mostActiveUser?.posts || 0) > 0 ? 1 : -1}
+                  />
+                  <AdminStatsCard
+                    title="Rapportages laatste week"
+                    value={dashboardStats?.reportsLastWeek || 0}
+                    icon={<ExclamationTriangleIcon className="w-8 h-8" />}
+                    color="red"
+                    trend={(dashboardStats?.reportsLastWeek || 0) > 0 ? 1 : -1}
+                  />
+                  <AdminStatsCard
+                    title="Populairste squad"
+                    value={dashboardStats?.mostPopularSquad?.members || 0}
+                    subtitle={dashboardStats?.mostPopularSquad?.name || "N/A"}
+                    icon={<UsersIcon className="w-8 h-8" />}
+                    color="blue"
+                    trend={(dashboardStats?.mostPopularSquad?.members || 0) > 0 ? 1 : -1}
+                  />
+                </>
+              )}
             </div>
           </AdminCard>
         </>
       )}
 
-      {activeTab === 'content' && dashboardStats && (
+      {activeTab === 'content' && (
         <AdminCard
           title="Content Performance"
           subtitle="Analyse van academy, training en forum prestaties"
@@ -411,82 +468,93 @@ export default function AdminDashboard() {
           gradient
         >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Academy Performance */}
-            <div className="bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 rounded-lg bg-[#8BAE5A]/20">
-                  <AcademicCapIcon className="w-6 h-6 text-[#8BAE5A]" />
+            {loading && !dataLoaded ? (
+              // Skeleton loading voor content performance
+              <>
+                <SkeletonCard />
+                <SkeletonCard />
+                <SkeletonCard />
+              </>
+            ) : (
+              <>
+                {/* Academy Performance */}
+                <div className="bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 rounded-lg bg-[#8BAE5A]/20">
+                      <AcademicCapIcon className="w-6 h-6 text-[#8BAE5A]" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-white">Academy</h3>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Modules</span>
+                      <span className="text-white font-semibold">{dashboardStats?.contentPerformance?.academy?.totalModules || 0}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Lessen</span>
+                      <span className="text-white font-semibold">{dashboardStats?.contentPerformance?.academy?.totalLessons || 0}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Voltooiingspercentage</span>
+                      <span className="text-[#8BAE5A] font-semibold">{dashboardStats?.contentPerformance?.academy?.averageCompletionRate || 0}%</span>
+                    </div>
+                  </div>
                 </div>
-                <h3 className="text-lg font-semibold text-white">Academy</h3>
-              </div>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Modules</span>
-                  <span className="text-white font-semibold">{dashboardStats.contentPerformance.academy.totalModules}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Lessen</span>
-                  <span className="text-white font-semibold">{dashboardStats.contentPerformance.academy.totalLessons}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Voltooiingspercentage</span>
-                  <span className="text-[#8BAE5A] font-semibold">{dashboardStats.contentPerformance.academy.averageCompletionRate}%</span>
-                </div>
-              </div>
-            </div>
 
-            {/* Training Performance */}
-            <div className="bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 rounded-lg bg-[#f0a14f]/20">
-                  <FireIcon className="w-6 h-6 text-[#f0a14f]" />
+                {/* Training Performance */}
+                <div className="bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 rounded-lg bg-[#f0a14f]/20">
+                      <FireIcon className="w-6 h-6 text-[#f0a14f]" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-white">Training</h3>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Schema's</span>
+                      <span className="text-white font-semibold">{dashboardStats?.contentPerformance?.training?.totalSchemas || 0}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Actieve gebruikers</span>
+                      <span className="text-white font-semibold">{dashboardStats?.contentPerformance?.training?.activeUsers || 0}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Voltooiingspercentage</span>
+                      <span className="text-[#f0a14f] font-semibold">{dashboardStats?.contentPerformance?.training?.averageCompletionRate || 0}%</span>
+                    </div>
+                  </div>
                 </div>
-                <h3 className="text-lg font-semibold text-white">Training</h3>
-              </div>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Schema's</span>
-                  <span className="text-white font-semibold">{dashboardStats.contentPerformance.training.totalSchemas}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Actieve gebruikers</span>
-                  <span className="text-white font-semibold">{dashboardStats.contentPerformance.training.activeUsers}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Voltooiingspercentage</span>
-                  <span className="text-[#f0a14f] font-semibold">{dashboardStats.contentPerformance.training.averageCompletionRate}%</span>
-                </div>
-              </div>
-            </div>
 
-            {/* Forum Performance */}
-            <div className="bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 rounded-lg bg-[#FFD700]/20">
-                  <ChatBubbleLeftRightIcon className="w-6 h-6 text-[#FFD700]" />
+                {/* Forum Performance */}
+                <div className="bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 rounded-lg bg-[#FFD700]/20">
+                      <ChatBubbleLeftRightIcon className="w-6 h-6 text-[#FFD700]" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-white">Forum</h3>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Totaal posts</span>
+                      <span className="text-white font-semibold">{dashboardStats?.contentPerformance?.forum?.totalPosts || 0}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Recente posts</span>
+                      <span className="text-white font-semibold">{dashboardStats?.contentPerformance?.forum?.recentPosts || 0}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Gem. response tijd</span>
+                      <span className="text-[#FFD700] font-semibold">{dashboardStats?.contentPerformance?.forum?.averageResponseTime || 0}h</span>
+                    </div>
+                  </div>
                 </div>
-                <h3 className="text-lg font-semibold text-white">Forum</h3>
-              </div>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Totaal posts</span>
-                  <span className="text-white font-semibold">{dashboardStats.contentPerformance.forum.totalPosts}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Recente posts</span>
-                  <span className="text-white font-semibold">{dashboardStats.contentPerformance.forum.recentPosts}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Gem. response tijd</span>
-                  <span className="text-[#FFD700] font-semibold">{dashboardStats.contentPerformance.forum.averageResponseTime}h</span>
-                </div>
-              </div>
-            </div>
+              </>
+            )}
           </div>
         </AdminCard>
       )}
 
-      {activeTab === 'actions' && dashboardStats && (
+      {activeTab === 'actions' && (
         <AdminCard
           title="Actiegerichte Inzichten"
           subtitle="Identificeer risico's en kansen"
@@ -494,67 +562,77 @@ export default function AdminDashboard() {
           gradient
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* User Engagement Insights */}
-            <div className="bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]">
-              <h3 className="text-lg font-semibold text-white mb-4">Gebruikers Engagement</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Gebruikers met XP</span>
-                  <span className="text-white font-semibold">{dashboardStats.userEngagement.usersWithXP}</span>
+            {loading && !dataLoaded ? (
+              // Skeleton loading voor actions
+              <>
+                <SkeletonCard />
+                <SkeletonCard />
+              </>
+            ) : (
+              <>
+                {/* User Engagement Insights */}
+                <div className="bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]">
+                  <h3 className="text-lg font-semibold text-white mb-4">Gebruikers Engagement</h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Gebruikers met XP</span>
+                      <span className="text-white font-semibold">{dashboardStats?.userEngagement?.usersWithXP || 0}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Gebruikers met badges</span>
+                      <span className="text-white font-semibold">{dashboardStats?.userEngagement?.usersWithBadges || 0}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Gemiddelde XP</span>
+                      <span className="text-[#8BAE5A] font-semibold">{dashboardStats?.userEngagement?.averageXP || 0}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Voltooide missies</span>
+                      <span className="text-[#f0a14f] font-semibold">{dashboardStats?.userEngagement?.completedMissions || 0}</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Gebruikers met badges</span>
-                  <span className="text-white font-semibold">{dashboardStats.userEngagement.usersWithBadges}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Gemiddelde XP</span>
-                  <span className="text-[#8BAE5A] font-semibold">{dashboardStats.userEngagement.averageXP}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Voltooide missies</span>
-                  <span className="text-[#f0a14f] font-semibold">{dashboardStats.userEngagement.completedMissions}</span>
-                </div>
-              </div>
-            </div>
 
-            {/* Action Items */}
-            <div className="bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]">
-              <h3 className="text-lg font-semibold text-white mb-4">Aanbevolen Acties</h3>
-              <div className="space-y-3">
-                {dashboardStats.onboardingRate < 50 && (
-                  <div className="flex items-center gap-3 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
-                    <ExclamationTriangleIcon className="w-5 h-5 text-red-400" />
-                    <div>
-                      <div className="text-white font-medium">Lage onboarding rate</div>
-                      <div className="text-gray-400 text-sm">Verbetert onboarding proces</div>
-                    </div>
+                {/* Action Items */}
+                <div className="bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]">
+                  <h3 className="text-lg font-semibold text-white mb-4">Aanbevolen Acties</h3>
+                  <div className="space-y-3">
+                    {(dashboardStats?.onboardingRate || 0) < 50 && (
+                      <div className="flex items-center gap-3 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+                        <ExclamationTriangleIcon className="w-5 h-5 text-red-400" />
+                        <div>
+                          <div className="text-white font-medium">Lage onboarding rate</div>
+                          <div className="text-gray-400 text-sm">Verbetert onboarding proces</div>
+                        </div>
+                      </div>
+                    )}
+                    {(dashboardStats?.postsLastWeek || 0) < 10 && (
+                      <div className="flex items-center gap-3 p-3 bg-orange-500/10 border border-orange-500/20 rounded-lg">
+                        <ChatBubbleLeftRightIcon className="w-5 h-5 text-orange-400" />
+                        <div>
+                          <div className="text-white font-medium">Weinig forum activiteit</div>
+                          <div className="text-gray-400 text-sm">Stimuleer community discussies</div>
+                        </div>
+                      </div>
+                    )}
+                    {(dashboardStats?.activeUsers || 0) < (dashboardStats?.totalUsers || 0) * 0.3 && (
+                      <div className="flex items-center gap-3 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                        <UserIcon className="w-5 h-5 text-yellow-400" />
+                        <div>
+                          <div className="text-white font-medium">Lage gebruikersactiviteit</div>
+                          <div className="text-gray-400 text-sm">Verhoog engagement strategieën</div>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
-                {dashboardStats.postsLastWeek < 10 && (
-                  <div className="flex items-center gap-3 p-3 bg-orange-500/10 border border-orange-500/20 rounded-lg">
-                    <ChatBubbleLeftRightIcon className="w-5 h-5 text-orange-400" />
-                    <div>
-                      <div className="text-white font-medium">Weinig forum activiteit</div>
-                      <div className="text-gray-400 text-sm">Stimuleer community discussies</div>
-                    </div>
-                  </div>
-                )}
-                {dashboardStats.activeUsers < dashboardStats.totalUsers * 0.3 && (
-                  <div className="flex items-center gap-3 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-                    <UserIcon className="w-5 h-5 text-yellow-400" />
-                    <div>
-                      <div className="text-white font-medium">Lage gebruikersactiviteit</div>
-                      <div className="text-gray-400 text-sm">Verhoog engagement strategieën</div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
+                </div>
+              </>
+            )}
           </div>
         </AdminCard>
       )}
 
-      {activeTab === 'financial' && dashboardStats && (
+      {activeTab === 'financial' && (
         <AdminCard
           title="Financiële Metrics"
           subtitle="MRR, LTV en andere financiële KPI's"
@@ -587,7 +665,7 @@ export default function AdminDashboard() {
         </AdminCard>
       )}
 
-      {activeTab === 'users' && dashboardStats && (
+      {activeTab === 'users' && (
         <AdminCard
           title="Gebruikers Segmentatie"
           subtitle="Analyse van gebruikersgroepen en gedrag"
@@ -595,71 +673,93 @@ export default function AdminDashboard() {
           gradient
         >
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <AdminStatsCard
-              title="Totaal Gebruikers"
-              value={dashboardStats.totalUsers}
-              icon={<UsersIcon className="w-8 h-8" />}
-              color="blue"
-            />
-            <AdminStatsCard
-              title="Actieve Gebruikers"
-              value={dashboardStats.activeUsers}
-              icon={<UserIcon className="w-8 h-8" />}
-              color="green"
-            />
-            <AdminStatsCard
-              title="Onboarding Voltooid"
-              value={dashboardStats.completedOnboarding}
-              icon={<TrophyIcon className="w-8 h-8" />}
-              color="orange"
-            />
-            <AdminStatsCard
-              title="Gemiddelde XP"
-              value={dashboardStats.userEngagement.averageXP}
-              icon={<StarIcon className="w-8 h-8" />}
-              color="purple"
-            />
+            {loading && !dataLoaded ? (
+              // Skeleton loading voor users
+              <>
+                <SkeletonCard />
+                <SkeletonCard />
+                <SkeletonCard />
+                <SkeletonCard />
+              </>
+            ) : (
+              <>
+                <AdminStatsCard
+                  title="Totaal Gebruikers"
+                  value={dashboardStats?.totalUsers || 0}
+                  icon={<UsersIcon className="w-8 h-8" />}
+                  color="blue"
+                />
+                <AdminStatsCard
+                  title="Actieve Gebruikers"
+                  value={dashboardStats?.activeUsers || 0}
+                  icon={<UserIcon className="w-8 h-8" />}
+                  color="green"
+                />
+                <AdminStatsCard
+                  title="Onboarding Voltooid"
+                  value={dashboardStats?.completedOnboarding || 0}
+                  icon={<TrophyIcon className="w-8 h-8" />}
+                  color="orange"
+                />
+                <AdminStatsCard
+                  title="Gemiddelde XP"
+                  value={dashboardStats?.userEngagement?.averageXP || 0}
+                  icon={<StarIcon className="w-8 h-8" />}
+                  color="purple"
+                />
+              </>
+            )}
           </div>
           <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]">
-              <h3 className="text-lg font-semibold text-white mb-4">Gebruikers Distributie</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Nieuwe gebruikers</span>
-                  <span className="text-white">{dashboardStats.newRegistrationsThisWeek}</span>
+            {loading && !dataLoaded ? (
+              // Skeleton loading voor users details
+              <>
+                <SkeletonCard />
+                <SkeletonCard />
+              </>
+            ) : (
+              <>
+                <div className="bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]">
+                  <h3 className="text-lg font-semibold text-white mb-4">Gebruikers Distributie</h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Nieuwe gebruikers</span>
+                      <span className="text-white">{dashboardStats?.newRegistrationsThisWeek || 0}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Actieve gebruikers</span>
+                      <span className="text-white">{dashboardStats?.activeUsers || 0}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Inactieve gebruikers</span>
+                      <span className="text-white">{(dashboardStats?.totalUsers || 0) - (dashboardStats?.activeUsers || 0)}</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Actieve gebruikers</span>
-                  <span className="text-white">{dashboardStats.activeUsers}</span>
+                <div className="bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]">
+                  <h3 className="text-lg font-semibold text-white mb-4">Engagement Metrics</h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Gebruikers met XP</span>
+                      <span className="text-white">{dashboardStats?.userEngagement?.usersWithXP || 0}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Gebruikers met badges</span>
+                      <span className="text-white">{dashboardStats?.userEngagement?.usersWithBadges || 0}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Voltooide missies</span>
+                      <span className="text-white">{dashboardStats?.userEngagement?.completedMissions || 0}</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Inactieve gebruikers</span>
-                  <span className="text-white">{dashboardStats.totalUsers - dashboardStats.activeUsers}</span>
-                </div>
-              </div>
-            </div>
-            <div className="bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]">
-              <h3 className="text-lg font-semibold text-white mb-4">Engagement Metrics</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Gebruikers met XP</span>
-                  <span className="text-white">{dashboardStats.userEngagement.usersWithXP}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Gebruikers met badges</span>
-                  <span className="text-white">{dashboardStats.userEngagement.usersWithBadges}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Voltooide missies</span>
-                  <span className="text-white">{dashboardStats.userEngagement.completedMissions}</span>
-                </div>
-              </div>
-            </div>
+              </>
+            )}
           </div>
         </AdminCard>
       )}
 
-      {activeTab === 'realtime' && dashboardStats && (
+      {activeTab === 'realtime' && (
         <AdminCard
           title="Real-time Activiteit"
           subtitle="Live tracking van platform activiteit"
@@ -667,30 +767,42 @@ export default function AdminDashboard() {
           gradient
         >
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <AdminStatsCard
-              title="Huidige Online"
-              value={dashboardStats.activeUsers}
-              icon={<EyeIcon className="w-8 h-8" />}
-              color="green"
-            />
-            <AdminStatsCard
-              title="Recente Posts"
-              value={dashboardStats.postsLastWeek}
-              icon={<ChatBubbleLeftRightIcon className="w-8 h-8" />}
-              color="blue"
-            />
-            <AdminStatsCard
-              title="Actieve Missies"
-              value={dashboardStats.userEngagement.completedMissions}
-              icon={<FireIcon className="w-8 h-8" />}
-              color="orange"
-            />
-            <AdminStatsCard
-              title="Gemiddelde XP"
-              value={dashboardStats.userEngagement.averageXP}
-              icon={<StarIcon className="w-8 h-8" />}
-              color="purple"
-            />
+            {loading && !dataLoaded ? (
+              // Skeleton loading voor realtime
+              <>
+                <SkeletonCard />
+                <SkeletonCard />
+                <SkeletonCard />
+                <SkeletonCard />
+              </>
+            ) : (
+              <>
+                <AdminStatsCard
+                  title="Huidige Online"
+                  value={dashboardStats?.activeUsers || 0}
+                  icon={<EyeIcon className="w-8 h-8" />}
+                  color="green"
+                />
+                <AdminStatsCard
+                  title="Recente Posts"
+                  value={dashboardStats?.postsLastWeek || 0}
+                  icon={<ChatBubbleLeftRightIcon className="w-8 h-8" />}
+                  color="blue"
+                />
+                <AdminStatsCard
+                  title="Actieve Missies"
+                  value={dashboardStats?.userEngagement?.completedMissions || 0}
+                  icon={<FireIcon className="w-8 h-8" />}
+                  color="orange"
+                />
+                <AdminStatsCard
+                  title="Gemiddelde XP"
+                  value={dashboardStats?.userEngagement?.averageXP || 0}
+                  icon={<StarIcon className="w-8 h-8" />}
+                  color="purple"
+                />
+              </>
+            )}
           </div>
           <div className="mt-6 bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]">
             <h3 className="text-lg font-semibold text-white mb-4">Live Activiteit</h3>
@@ -707,7 +819,7 @@ export default function AdminDashboard() {
         </AdminCard>
       )}
 
-      {activeTab === 'technical' && dashboardStats && (
+      {activeTab === 'technical' && (
         <AdminCard
           title="Technische Performance"
           subtitle="API response times, uptime en error monitoring"
@@ -715,30 +827,42 @@ export default function AdminDashboard() {
           gradient
         >
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <AdminStatsCard
-              title="API Response Time"
-              value="245ms"
-              icon={<ClockIcon className="w-8 h-8" />}
-              color="green"
-            />
-            <AdminStatsCard
-              title="System Uptime"
-              value="99.8%"
-              icon={<ChartBarIcon className="w-8 h-8" />}
-              color="green"
-            />
-            <AdminStatsCard
-              title="Active Users"
-              value={dashboardStats.activeUsers}
-              icon={<UsersIcon className="w-8 h-8" />}
-              color="blue"
-            />
-            <AdminStatsCard
-              title="Database Size"
-              value="2.4GB"
-              icon={<WrenchScrewdriverIcon className="w-8 h-8" />}
-              color="purple"
-            />
+            {loading && !dataLoaded ? (
+              // Skeleton loading voor technical
+              <>
+                <SkeletonCard />
+                <SkeletonCard />
+                <SkeletonCard />
+                <SkeletonCard />
+              </>
+            ) : (
+              <>
+                <AdminStatsCard
+                  title="API Response Time"
+                  value="245ms"
+                  icon={<ClockIcon className="w-8 h-8" />}
+                  color="green"
+                />
+                <AdminStatsCard
+                  title="System Uptime"
+                  value="99.8%"
+                  icon={<ChartBarIcon className="w-8 h-8" />}
+                  color="green"
+                />
+                <AdminStatsCard
+                  title="Active Users"
+                  value={dashboardStats?.activeUsers || 0}
+                  icon={<UsersIcon className="w-8 h-8" />}
+                  color="blue"
+                />
+                <AdminStatsCard
+                  title="Database Size"
+                  value="2.4GB"
+                  icon={<WrenchScrewdriverIcon className="w-8 h-8" />}
+                  color="purple"
+                />
+              </>
+            )}
           </div>
           <div className="mt-6 bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]">
             <h3 className="text-lg font-semibold text-white mb-4">Performance Metrics</h3>
