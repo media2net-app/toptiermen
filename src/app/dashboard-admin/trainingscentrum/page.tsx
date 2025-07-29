@@ -32,6 +32,7 @@ import AdminCard from '@/components/admin/AdminCard';
 import AdminStatsCard from '@/components/admin/AdminStatsCard';
 import AdminButton from '@/components/admin/AdminButton';
 import SessionTest from '@/components/SessionTest';
+import EnvironmentDebug from '@/components/EnvironmentDebug';
 
 // Mock data - in real app this would come from API
 const mockSchemas = [
@@ -504,9 +505,10 @@ export default function TrainingscentrumBeheer() {
         </div>
       </div>
       
-      {/* Session Test Component */}
-      <div className="mb-6">
+      {/* Debug Components */}
+      <div className="mb-6 space-y-4">
         <SessionTest />
+        <EnvironmentDebug />
       </div>
 
       {/* Stats */}

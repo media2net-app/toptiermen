@@ -10,17 +10,36 @@ export default function SessionTest() {
     try {
       console.log('🧪 Testing session...');
       
+      // Check if supabase client is initialized
+      if (!supabase) {
+        setTestResult({ success: false, error: 'Supabase client niet geïnitialiseerd' });
+        return;
+      }
+      
       // Get current session
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      console.log('🔍 Session check:', { session: !!session, error: sessionError });
+      console.log('🔍 Session check:', { 
+        session: !!session, 
+        error: sessionError,
+        accessToken: session?.access_token ? 'Present' : 'Missing',
+        refreshToken: session?.refresh_token ? 'Present' : 'Missing'
+      });
       
       if (sessionError) {
-        setTestResult({ success: false, error: sessionError.message });
+        setTestResult({ 
+          success: false, 
+          error: sessionError.message,
+          details: 'Session error occurred'
+        });
         return;
       }
       
       if (!session?.access_token) {
-        setTestResult({ success: false, error: 'Geen access token gevonden' });
+        setTestResult({ 
+          success: false, 
+          error: 'Geen access token gevonden',
+          details: 'User is not authenticated or session expired'
+        });
         return;
       }
 
