@@ -1,3 +1,5 @@
+'use client';
+
 import { DebugProvider } from '@/contexts/DebugContext';
 import AdminLayoutClient from './AdminLayoutClient';
 
