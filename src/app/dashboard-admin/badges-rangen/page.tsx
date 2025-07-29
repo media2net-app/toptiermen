@@ -267,41 +267,45 @@ export default function AdminBadgesRangenPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-[#8BAE5A]">Badges & Rangen Beheer</h1>
-          <p className="text-[#B6C948] mt-2">Game Design Studio - Beheer het gamification systeem</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#8BAE5A]">Badges & Rangen Beheer</h1>
+          <p className="text-[#B6C948] mt-2 text-sm sm:text-base">Game Design Studio - Beheer het gamification systeem</p>
         </div>
         <AdminButton 
           onClick={fetchBadgeData} 
           variant="secondary" 
           icon={<ArrowPathIcon className="w-4 h-4" />}
+          className="text-sm"
         >
-          Vernieuwen
+          <span className="hidden sm:inline">Vernieuwen</span>
+          <span className="sm:hidden">🔄</span>
         </AdminButton>
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex space-x-1 bg-[#181F17] rounded-lg p-1">
+      <div className="flex space-x-1 bg-[#181F17] rounded-lg p-1 overflow-x-auto scrollbar-hide">
         <button
           onClick={() => setActiveTab('badges')}
-          className={`flex-1 py-3 px-4 rounded-md font-medium transition-colors ${
+          className={`flex-shrink-0 py-2 px-3 sm:py-3 sm:px-4 rounded-md font-medium transition-colors text-sm whitespace-nowrap ${
             activeTab === 'badges'
               ? 'bg-[#8BAE5A] text-black'
               : 'text-white/60 hover:text-white'
           }`}
         >
-          Badges Beheren
+          <span className="hidden sm:inline">Badges Beheren</span>
+          <span className="sm:hidden">Badges</span>
         </button>
         <button
           onClick={() => setActiveTab('ranks')}
-          className={`flex-1 py-3 px-4 rounded-md font-medium transition-colors ${
+          className={`flex-shrink-0 py-2 px-3 sm:py-3 sm:px-4 rounded-md font-medium transition-colors text-sm whitespace-nowrap ${
             activeTab === 'ranks'
               ? 'bg-[#8BAE5A] text-black'
               : 'text-white/60 hover:text-white'
           }`}
         >
-          Rangen Beheren
+          <span className="hidden sm:inline">Rangen Beheren</span>
+          <span className="sm:hidden">Rangen</span>
         </button>
       </div>
 
@@ -309,7 +313,7 @@ export default function AdminBadgesRangenPage() {
         <>
           {/* Badge Statistics */}
           {badgeStats && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               <AdminStatsCard
                 title="Totaal Badges"
                 value={badgeStats.totalBadges}
@@ -344,21 +348,25 @@ export default function AdminBadgesRangenPage() {
             icon={<TrophyIcon className="w-6 h-6" />}
             gradient
           >
-            <div className="flex justify-between items-center mb-6">
-              <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
+              <div className="flex flex-wrap gap-2 sm:gap-3">
                 <AdminButton
                   onClick={() => exportData('badges')}
                   variant="secondary"
                   icon={<ArrowDownTrayIcon className="w-4 h-4" />}
+                  className="text-sm"
                 >
-                  Exporteren
+                  <span className="hidden sm:inline">Exporteren</span>
+                  <span className="sm:hidden">Export</span>
                 </AdminButton>
                 <label className="cursor-pointer">
                   <AdminButton
                     variant="secondary"
                     icon={<ArrowUpTrayIcon className="w-4 h-4" />}
+                    className="text-sm"
                   >
-                    Importeren
+                    <span className="hidden sm:inline">Importeren</span>
+                    <span className="sm:hidden">Import</span>
                   </AdminButton>
                   <input
                     type="file"
@@ -374,8 +382,10 @@ export default function AdminBadgesRangenPage() {
                   }}
                   variant="primary"
                   icon={<PlusIcon className="w-4 h-4" />}
+                  className="text-sm"
                 >
-                  Nieuwe Badge Ontwerpen
+                  <span className="hidden sm:inline">Nieuwe Badge Ontwerpen</span>
+                  <span className="sm:hidden">Nieuwe Badge</span>
                 </AdminButton>
               </div>
             </div>
@@ -466,7 +476,7 @@ export default function AdminBadgesRangenPage() {
         <>
           {/* Rank Statistics */}
           {rankStats && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               <AdminStatsCard
                 title="Totaal Rangen"
                 value={rankStats.totalRanks}
@@ -501,21 +511,25 @@ export default function AdminBadgesRangenPage() {
             icon={<UserGroupIcon className="w-6 h-6" />}
             gradient
           >
-            <div className="flex justify-between items-center mb-6">
-              <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
+              <div className="flex flex-wrap gap-2 sm:gap-3">
                 <AdminButton
                   onClick={() => exportData('ranks')}
                   variant="secondary"
                   icon={<ArrowDownTrayIcon className="w-4 h-4" />}
+                  className="text-sm"
                 >
-                  Exporteren
+                  <span className="hidden sm:inline">Exporteren</span>
+                  <span className="sm:hidden">Export</span>
                 </AdminButton>
                 <label className="cursor-pointer">
                   <AdminButton
                     variant="secondary"
                     icon={<ArrowUpTrayIcon className="w-4 h-4" />}
+                    className="text-sm"
                   >
-                    Importeren
+                    <span className="hidden sm:inline">Importeren</span>
+                    <span className="sm:hidden">Import</span>
                   </AdminButton>
                   <input
                     type="file"
@@ -531,8 +545,10 @@ export default function AdminBadgesRangenPage() {
                   }}
                   variant="primary"
                   icon={<PlusIcon className="w-4 h-4" />}
+                  className="text-sm"
                 >
-                  Nieuwe Rang Toevoegen
+                  <span className="hidden sm:inline">Nieuwe Rang Toevoegen</span>
+                  <span className="sm:hidden">Nieuwe Rang</span>
                 </AdminButton>
               </div>
             </div>
