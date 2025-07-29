@@ -3,10 +3,17 @@ import { createClient } from '@supabase/supabase-js';
 import fs from 'fs';
 import path from 'path';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Initialize Supabase client with proper error handling
+const getSupabaseClient = () => {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error('Missing Supabase environment variables');
+  }
+  
+  return createClient(supabaseUrl, supabaseKey);
+};
 
 export async function POST(request: Request) {
   try {
@@ -20,6 +27,9 @@ export async function POST(request: Request) {
     }
 
     console.log('🔄 Admin performing FULL reset for user:', userId);
+
+    // Initialize Supabase client
+    const supabase = getSupabaseClient();
 
     // 1. Reset onboarding status to initial state
     const { error: onboardingError } = await supabase
