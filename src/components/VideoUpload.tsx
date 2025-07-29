@@ -91,7 +91,7 @@ export default function VideoUpload({
         console.log('📁 File path:', filePath);
 
         // Start upload phase
-        setUploadStatus(attempt > 1 ? `Opnieuw proberen (${attempt}/${maxRetries})...` : 'Uploaden naar server...');
+        setUploadStatus(attempt > 1 ? `Opnieuw proberen (${attempt}/${maxRetries})...` : 'Uploaden naar S3...');
         setUploadProgress(0);
 
         // Simulate upload progress
@@ -102,35 +102,37 @@ export default function VideoUpload({
           });
         }, 500);
 
-        // Simple upload without timeout race
-        console.log('📤 Starting upload to Supabase...');
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from(bucketName)
-          .upload(filePath, file, {
-            cacheControl: '3600',
-            upsert: false
-          });
+        // Upload to S3 via API
+        console.log('📤 Starting upload to S3...');
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('folder', folderPath);
+
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.access_token) {
+          throw new Error('Geen toegangstoken gevonden');
+        }
+
+        const response = await fetch('/api/upload/s3', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+          body: formData,
+        });
+
+        const result = await response.json();
 
         // Clear upload progress interval
         if (uploadProgressInterval) {
           clearInterval(uploadProgressInterval);
         }
 
-        if (uploadError) {
-          console.error('❌ Upload error:', uploadError);
-          // Handle specific Supabase errors
-          if (uploadError.message.includes('File size limit exceeded')) {
-            throw new Error('Bestand is te groot (max 500MB)');
-          } else if (uploadError.message.includes('Invalid file type')) {
-            throw new Error('Ongeldig bestandstype - alleen video bestanden toegestaan');
-          } else if (uploadError.message.includes('Bucket not found')) {
-            throw new Error('Storage bucket niet gevonden - neem contact op met support');
-          } else {
-            throw new Error(`Upload mislukt: ${uploadError.message}`);
-          }
+        if (!response.ok || !result.success) {
+          throw new Error(result.error || 'Upload mislukt');
         }
 
-        console.log('✅ Upload successful');
+        console.log('✅ S3 upload successful');
         setUploadProgress(100);
         setUploadStatus('Upload voltooid! Video verwerken...');
 
@@ -146,27 +148,18 @@ export default function VideoUpload({
           });
         }, 300);
 
-        // Get public URL
-        const { data: urlData } = supabase.storage
-          .from(bucketName)
-          .getPublicUrl(filePath);
-
         // Clear processing progress interval
         if (processingProgressInterval) {
           clearInterval(processingProgressInterval);
         }
 
-        if (!urlData?.publicUrl) {
-          throw new Error('Kon geen publieke URL genereren');
-        }
-
-        console.log('🔗 Public URL generated:', urlData.publicUrl);
+        console.log('🔗 S3 URL generated:', result.url);
         setUploadProgress(100);
         setUploadStatus('Voltooid!');
         setUploadedBytes(file.size);
 
         // Success - return the URL
-        return urlData.publicUrl;
+        return result.url;
 
       } catch (error) {
         // Clear any active intervals
