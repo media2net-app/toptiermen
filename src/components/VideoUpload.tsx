@@ -73,6 +73,9 @@ export default function VideoUpload({
     let lastError: Error | null = null;
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      let uploadProgressInterval: NodeJS.Timeout | undefined;
+      let processingProgressInterval: NodeJS.Timeout | undefined;
+      
       try {
         console.log(`🚀 Upload attempt ${attempt}/${maxRetries} for ${file.name}`);
         
@@ -87,29 +90,34 @@ export default function VideoUpload({
 
         console.log('📁 File path:', filePath);
 
-        // Update status
+        // Start upload phase
         setUploadStatus(attempt > 1 ? `Opnieuw proberen (${attempt}/${maxRetries})...` : 'Uploaden naar server...');
-        setUploadProgress(10);
+        setUploadProgress(0);
 
-        // Upload to Supabase with timeout
-        const uploadPromise = supabase.storage
+        // Simulate upload progress
+        uploadProgressInterval = setInterval(() => {
+          setUploadProgress(prev => {
+            if (prev >= 95) return prev;
+            return prev + Math.random() * 3 + 1;
+          });
+        }, 500);
+
+        // Simple upload without timeout race
+        console.log('📤 Starting upload to Supabase...');
+        const { data: uploadData, error: uploadError } = await supabase.storage
           .from(bucketName)
           .upload(filePath, file, {
             cacheControl: '3600',
             upsert: false
           });
 
-        // Add timeout
-        const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Upload timeout - probeer opnieuw')), 600000); // 10 minutes
-        });
-
-        const { data: uploadData, error: uploadError } = await Promise.race([
-          uploadPromise,
-          timeoutPromise
-        ]) as any;
+        // Clear upload progress interval
+        if (uploadProgressInterval) {
+          clearInterval(uploadProgressInterval);
+        }
 
         if (uploadError) {
+          console.error('❌ Upload error:', uploadError);
           // Handle specific Supabase errors
           if (uploadError.message.includes('File size limit exceeded')) {
             throw new Error('Bestand is te groot (max 500MB)');
@@ -123,13 +131,30 @@ export default function VideoUpload({
         }
 
         console.log('✅ Upload successful');
-        setUploadProgress(90);
+        setUploadProgress(100);
+        setUploadStatus('Upload voltooid! Video verwerken...');
+
+        // Start processing phase
+        setUploadProgress(0);
         setUploadStatus('Video verwerken...');
+
+        // Simulate processing progress
+        processingProgressInterval = setInterval(() => {
+          setUploadProgress(prev => {
+            if (prev >= 95) return prev;
+            return prev + Math.random() * 5 + 2;
+          });
+        }, 300);
 
         // Get public URL
         const { data: urlData } = supabase.storage
           .from(bucketName)
           .getPublicUrl(filePath);
+
+        // Clear processing progress interval
+        if (processingProgressInterval) {
+          clearInterval(processingProgressInterval);
+        }
 
         if (!urlData?.publicUrl) {
           throw new Error('Kon geen publieke URL genereren');
@@ -144,6 +169,14 @@ export default function VideoUpload({
         return urlData.publicUrl;
 
       } catch (error) {
+        // Clear any active intervals
+        if (uploadProgressInterval) {
+          clearInterval(uploadProgressInterval);
+        }
+        if (processingProgressInterval) {
+          clearInterval(processingProgressInterval);
+        }
+        
         lastError = error instanceof Error ? error : new Error('Unknown error');
         console.error(`❌ Upload attempt ${attempt} failed:`, lastError.message);
 
