@@ -31,6 +31,7 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import AdminCard from '@/components/admin/AdminCard';
 import AdminStatsCard from '@/components/admin/AdminStatsCard';
 import AdminButton from '@/components/admin/AdminButton';
+import SessionTest from '@/components/SessionTest';
 
 // Mock data - in real app this would come from API
 const mockSchemas = [
@@ -501,6 +502,11 @@ export default function TrainingscentrumBeheer() {
           <h1 className="text-3xl font-bold text-[#8BAE5A]">Trainingscentrum Beheer</h1>
           <p className="text-[#B6C948] mt-2">Beheer trainingsschema's, oefeningen en challenges</p>
         </div>
+      </div>
+      
+      {/* Session Test Component */}
+      <div className="mb-6">
+        <SessionTest />
       </div>
 
       {/* Stats */}
