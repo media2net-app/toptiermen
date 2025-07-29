@@ -3,6 +3,7 @@ import React, { createContext, useContext, useEffect, useState, useRef } from 'r
 import { supabase } from '@/lib/supabase';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { Database } from '@/types/database.types';
+import { trackAuthPerformance } from '@/lib/performance-monitor';
 
 type User = Database['public']['Tables']['users']['Row'] & {
   role: 'user' | 'admin';
@@ -74,19 +75,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       try {
         console.log('🔧 Initializing authentication...');
         
-        // Set a timeout for initialization - increased for production
+        // Set a timeout for initialization - optimized for performance
         initializationTimeoutRef.current = setTimeout(() => {
           if (mounted && mountedRef.current) {
             console.log('⚠️ Auth initialization timeout, proceeding anyway');
             setLoading(false);
             setInitialized(true);
           }
-        }, 8000); // Increased to 8 seconds for production reliability
+        }, 5000); // Reduced to 5 seconds for better UX
 
-        // Get initial session with timeout
+        // Get initial session with optimized timeout
         const sessionPromise = supabase.auth.getSession();
         const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Session fetch timeout')), 10000)
+          setTimeout(() => reject(new Error('Session fetch timeout')), 8000)
         );
         
         const { data: { session }, error } = await Promise.race([sessionPromise, timeoutPromise]) as any;
@@ -190,7 +191,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setLoading(false);
         setInitialized(true);
       }
-    }, 15000); // 15 second global timeout for production
+    }, 10000); // 10 second global timeout for better performance
 
     return () => clearTimeout(globalTimeout);
   }, [loading]);
@@ -222,13 +223,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setInitialized(true);
     }
 
+    trackAuthPerformance.signIn();
     setLoading(true);
     try {
       console.log('Signing in:', email);
       
       // Add timeout
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Sign in timeout')), 20000)
+        setTimeout(() => reject(new Error('Sign in timeout')), 15000)
       );
       
       const signInPromise = supabase.auth.signInWithPassword({
@@ -248,8 +250,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (userProfile) {
           setUser(userProfile);
           setLoading(false); // Explicitly reset loading state
+          trackAuthPerformance.signInComplete();
           return { success: true };
         } else {
+          trackAuthPerformance.signInComplete();
           return { success: false, error: 'Failed to load user profile' };
         }
       }

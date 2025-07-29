@@ -4,9 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:clean": "rm -rf .next && next dev",
     "build": "next build",
+    "build:analyze": "ANALYZE=true next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "cache:clear": "rm -rf .next && rm -rf node_modules/.cache",
+    "performance:check": "npm run build && npm run start"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.4",

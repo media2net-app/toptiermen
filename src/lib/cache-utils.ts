@@ -2,10 +2,10 @@
  * Cache utility functions to help resolve loading issues
  */
 
-// Timeout utility for async operations
+// Timeout utility for async operations - optimized for performance
 export const withTimeout = <T>(
   promise: Promise<T>,
-  timeoutMs: number = 10000,
+  timeoutMs: number = 8000, // Reduced default timeout
   errorMessage: string = 'Operation timed out'
 ): Promise<T> => {
   return Promise.race([
@@ -26,7 +26,7 @@ export const safeAsync = async <T>(
     retries?: number;
   } = {}
 ): Promise<T | null> => {
-  const { timeout = 10000, defaultValue = null, onError, retries = 0 } = options;
+  const { timeout = 8000, defaultValue = null, onError, retries = 0 } = options;
   
   let lastError: Error;
   
@@ -58,7 +58,7 @@ export const safeAsync = async <T>(
 export class LoadingStateManager {
   private loadingStates = new Map<string, { timeout: NodeJS.Timeout; startTime: number }>();
   
-  startLoading(key: string, timeoutMs: number = 15000, onTimeout?: () => void): void {
+  startLoading(key: string, timeoutMs: number = 12000, onTimeout?: () => void): void {
     // Clear any existing timeout for this key
     this.clearLoading(key);
     
