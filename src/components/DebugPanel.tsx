@@ -7,7 +7,7 @@ import { supabase } from '@/lib/supabase';
 
 export default function DebugPanel() {
   const { showDebug, toggleDebug } = useDebug();
-  const { user, loading, clearAllCache } = useSupabaseAuth();
+  const { user, loading } = useSupabaseAuth();
   const [cacheInfo, setCacheInfo] = useState<any>({});
   const [cacheIssues, setCacheIssues] = useState<any>({});
   const [loadingStates, setLoadingStates] = useState<Array<{ key: string; duration: number }>>([]);
@@ -38,7 +38,7 @@ export default function DebugPanel() {
 
   const handleForceReload = () => {
     if (typeof window !== 'undefined') {
-      clearAllCache();
+      window.location.reload();
     }
   };
 
@@ -212,7 +212,7 @@ export default function DebugPanel() {
           <h3 className="text-sm font-semibold text-green-400 mb-2">Quick Actions</h3>
           <div className="flex flex-wrap gap-2">
             <button
-              onClick={() => clearAllCache()}
+              onClick={() => window.location.reload()}
               className="px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700"
             >
               Clear App Cache
