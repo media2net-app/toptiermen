@@ -277,14 +277,21 @@ export default function VideoUpload({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" onClick={(e) => e.stopPropagation()}>
       {/* Current Video Display */}
       {currentVideoUrl && (
-        <div className="relative bg-[#181F17] rounded-xl p-4 border border-[#3A4D23]">
+        <div 
+          className="relative bg-[#181F17] rounded-xl p-4 border border-[#3A4D23]"
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className="flex items-center justify-between mb-2">
             <span className="text-[#8BAE5A] font-semibold">Huidige Video</span>
             <button
-              onClick={removeVideo}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                removeVideo();
+              }}
               className="text-red-500 hover:text-red-400 transition-colors"
             >
               <XMarkIcon className="w-5 h-5" />
@@ -306,6 +313,7 @@ export default function VideoUpload({
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
+        onClick={(e) => e.stopPropagation()}
         className={`border-2 border-dashed rounded-xl p-6 text-center transition-all duration-200 ${
           isDragOver 
             ? 'border-[#8BAE5A] bg-[#8BAE5A]/5' 
