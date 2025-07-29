@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useDebug } from '@/contexts/DebugContext';
-import { clearAllCache, clearAppSpecificCache, checkForCacheIssues } from '@/lib/cache-utils';
 import PlanningStatusModal from './components/PlanningStatusModal';
 import { 
   HomeIcon, 
@@ -329,7 +328,8 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
               <span className="text-[#B6C948] text-xs font-medium">Cache:</span>
               <button
                 onClick={() => {
-                  clearAppSpecificCache();
+                  localStorage.clear();
+                  sessionStorage.clear();
                   alert('App cache opgeruimd!');
                 }}
                 className="px-2 py-1 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A] focus:outline-none focus:ring-1 focus:ring-[#8BAE5A] text-xs transition-colors"
@@ -340,7 +340,7 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
               <button
                 onClick={() => {
                   if (confirm('Weet je zeker dat je ALLE cache wilt opruimen? Dit zal de pagina herladen.')) {
-                    clearAllCache();
+                    window.location.reload();
                   }
                 }}
                 className="px-2 py-1 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A] focus:outline-none focus:ring-1 focus:ring-[#8BAE5A] text-xs transition-colors"
