@@ -21,22 +21,39 @@ export async function POST(request: NextRequest) {
     
     // Check authentication
     const authHeader = request.headers.get('authorization');
+    console.log('🔍 Auth header present:', !!authHeader);
+    
     if (!authHeader) {
+      console.error('❌ No authorization header');
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'Geen autorisatie header gevonden' },
         { status: 401 }
       );
     }
 
     const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error } = await supabase.auth.getUser(token);
+    console.log('🔍 Token length:', token.length);
     
-    if (error || !user) {
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+    console.log('🔍 User auth result:', { user: !!user, error: error?.message });
+    
+    if (error) {
+      console.error('❌ Auth error:', error);
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: `Authenticatie fout: ${error.message}` },
         { status: 401 }
       );
     }
+    
+    if (!user) {
+      console.error('❌ No user found');
+      return NextResponse.json(
+        { error: 'Geen gebruiker gevonden' },
+        { status: 401 }
+      );
+    }
+    
+    console.log('✅ User authenticated:', user.id);
 
     const formData = await request.formData();
     const file = formData.get('file') as File;

@@ -108,10 +108,21 @@ export default function VideoUpload({
         formData.append('file', file);
         formData.append('folder', folderPath);
 
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session?.access_token) {
-          throw new Error('Geen toegangstoken gevonden');
+        // Get current session with better error handling
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        console.log('🔍 Session check:', { session: !!session, error: sessionError });
+        
+        if (sessionError) {
+          console.error('❌ Session error:', sessionError);
+          throw new Error('Authenticatie fout: ' + sessionError.message);
         }
+        
+        if (!session?.access_token) {
+          console.error('❌ No access token found');
+          throw new Error('Geen toegangstoken gevonden - log opnieuw in');
+        }
+
+        console.log('✅ Access token found, proceeding with upload...');
 
         const response = await fetch('/api/upload/s3', {
           method: 'POST',
