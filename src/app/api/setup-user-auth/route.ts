@@ -1,16 +1,26 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+// Initialize Supabase client with proper error handling
+const getSupabaseClient = () => {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  
+  if (!supabaseUrl || !supabaseServiceKey) {
+    throw new Error('Missing Supabase environment variables');
+  }
+  
+  return createClient(supabaseUrl, supabaseServiceKey);
+};
 
 export async function POST(request: Request) {
   try {
     const { email, password, fullName } = await request.json();
     
     console.log('🔧 Setting up Supabase Auth for:', email);
+    
+    // Initialize Supabase client
+    const supabase = getSupabaseClient();
     
     // First, check if user already exists in auth by trying to sign in
     const { data: existingUser, error: checkError } = await supabase.auth.signInWithPassword({
