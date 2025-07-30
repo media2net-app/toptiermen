@@ -358,6 +358,7 @@ export async function POST(request: Request) {
 // Helper function to update daily streak
 async function updateDailyStreak(userId: string, today: string) {
   try {
+    const supabase = getSupabaseClient();
     const { data: currentStreak } = await supabase
       .from('user_daily_streaks')
       .select('*')
