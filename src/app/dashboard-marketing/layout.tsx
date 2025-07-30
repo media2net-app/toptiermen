@@ -25,7 +25,8 @@ import {
   AcademicCapIcon,
   StarIcon,
   RocketLaunchIcon,
-  FlagIcon
+  FlagIcon,
+  MicrophoneIcon
 } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 
@@ -43,6 +44,7 @@ const navigation = [
   { name: 'Concurentie', href: '/dashboard-marketing/concurentie', icon: BuildingStorefrontIcon },
           { name: 'Pre-launch', href: '/dashboard-marketing/pre-launch', icon: RocketLaunchIcon, badge: 'NEW' },
         { name: 'AI Insights', href: '/dashboard-marketing/ai-insights', icon: AcademicCapIcon, badge: 'AI' },
+        { name: 'AI Voice', href: '/dashboard-marketing/ai-voice', icon: MicrophoneIcon, badge: 'BETA' },
   { name: 'Executive Dashboard', href: '/dashboard-marketing/executive-dashboard', icon: StarIcon },
   { name: 'Report Builder', href: '/dashboard-marketing/report-builder', icon: DocumentTextIcon },
   { name: 'Instellingen', href: '/dashboard-marketing/instellingen', icon: Cog6ToothIcon },

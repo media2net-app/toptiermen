@@ -26,7 +26,7 @@ interface PreLaunchEmail {
   source: string;
   subscribedAt: Date;
   status: string;
-  package: string;
+  interestLevel: string;
   notes?: string;
 }
 
@@ -45,7 +45,7 @@ export default function PreLaunchEmails() {
     name: '',
     source: '',
     status: 'ACTIVE',
-    package: 'BASIC',
+    interestLevel: 'BASIC',
     notes: ''
   });
 
@@ -54,7 +54,7 @@ export default function PreLaunchEmails() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('/api/admin/prelaunch-emails-live');
+      const response = await fetch('/api/admin/prelaunch-emails');
       const data = await response.json();
 
       if (data.success) {
@@ -63,14 +63,14 @@ export default function PreLaunchEmails() {
           email: email.email,
           name: email.name,
           source: email.source,
-          subscribedAt: new Date(email.subscribedAt),
-          status: email.status.toLowerCase(),
-          package: email.package,
+          subscribedAt: new Date(email.subscribed_at || email.subscribedAt),
+          status: email.status?.toLowerCase() || 'active',
+          interestLevel: email.package?.toUpperCase() || 'BASIC',
           notes: email.notes
         }));
         setEmails(formattedEmails);
-        } else {
-          setError(data.error || 'Failed to fetch emails');
+      } else {
+        setError(data.error || 'Failed to fetch emails');
       }
     } catch (err) {
       console.error('Error fetching prelaunch emails:', err);
@@ -99,79 +99,107 @@ export default function PreLaunchEmails() {
   const active = emails.filter(e => e.status === 'active').length;
   const pending = emails.filter(e => e.status === 'pending').length;
   const unsubscribed = emails.filter(e => e.status === 'unsubscribed').length;
-  const premium = emails.filter(e => e.package === 'PREMIUM').length;
-  const ultimate = emails.filter(e => e.package === 'ULTIMATE').length;
-
-  const weekAgo = new Date();
-  weekAgo.setDate(weekAgo.getDate() - 7);
-  const thisWeek = emails.filter(e => e.subscribedAt >= weekAgo).length;
 
   const addEmail = async () => {
+    // Validate form data
+    if (!formData.email) {
+      toast.error('E-mail adres is verplicht');
+      return;
+    }
+
+    if (!formData.name) {
+      toast.error('Naam is verplicht');
+      return;
+    }
+
     try {
-      const response = await fetch('/api/admin/prelaunch-emails-live', {
+      const response = await fetch('/api/admin/prelaunch-emails', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          ...formData,
+          status: formData.status.toLowerCase(),
+          package: formData.interestLevel.toUpperCase()
+        })
       });
 
       const data = await response.json();
       if (data.success) {
-        toast.success('E-mail succesvol toegevoegd');
+        toast.success('Lead succesvol toegevoegd');
         setShowAddModal(false);
-        setFormData({ email: '', name: '', source: '', status: 'ACTIVE', package: 'BASIC', notes: '' });
+        setFormData({ email: '', name: '', source: '', status: 'ACTIVE', interestLevel: 'BASIC', notes: '' });
         fetchEmails();
       } else {
         toast.error(data.error || 'Fout bij toevoegen');
       }
     } catch (err) {
-      toast.error('Fout bij toevoegen van e-mail');
+      console.error('Error adding email:', err);
+      toast.error('Fout bij toevoegen van lead');
     }
   };
 
   const updateEmail = async () => {
     if (!editingEmail) return;
     
+    // Validate form data
+    if (!formData.email) {
+      toast.error('E-mail adres is verplicht');
+      return;
+    }
+
+    if (!formData.name) {
+      toast.error('Naam is verplicht');
+      return;
+    }
+    
     try {
-      const response = await fetch(`/api/admin/prelaunch-emails-live`, {
+      const response = await fetch(`/api/admin/prelaunch-emails`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: editingEmail.id, ...formData })
+        body: JSON.stringify({ 
+          id: editingEmail.id, 
+          ...formData,
+          status: formData.status.toLowerCase(),
+          package: formData.interestLevel.toUpperCase()
+        })
       });
 
       const data = await response.json();
       if (data.success) {
-        toast.success('E-mail succesvol bijgewerkt');
+        toast.success('Lead succesvol bijgewerkt');
         setShowEditModal(false);
         setEditingEmail(null);
-        setFormData({ email: '', name: '', source: '', status: 'ACTIVE', package: 'BASIC', notes: '' });
+        setFormData({ email: '', name: '', source: '', status: 'ACTIVE', interestLevel: 'BASIC', notes: '' });
         fetchEmails();
       } else {
         toast.error(data.error || 'Fout bij bijwerken');
       }
     } catch (err) {
-      toast.error('Fout bij bijwerken van e-mail');
+      console.error('Error updating email:', err);
+      toast.error('Fout bij bijwerken van lead');
     }
   };
 
   const deleteEmail = async (id: string) => {
-    if (!confirm('Weet je zeker dat je deze e-mail wilt verwijderen?')) return;
+    if (!confirm('Weet je zeker dat je deze lead wilt verwijderen?')) return;
     
     try {
-      const response = await fetch(`/api/admin/prelaunch-emails-live`, {
+      const response = await fetch(`/api/admin/prelaunch-emails`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id })
-        });
+      });
 
-        const data = await response.json();
-        if (data.success) {
-        toast.success('E-mail succesvol verwijderd');
+      const data = await response.json();
+      if (data.success) {
+        toast.success('Lead succesvol verwijderd');
         fetchEmails();
-        } else {
+      } else {
         toast.error(data.error || 'Fout bij verwijderen');
       }
     } catch (err) {
-      toast.error('Fout bij verwijderen van e-mail');
+      console.error('Error deleting email:', err);
+      toast.error('Fout bij verwijderen van lead');
     }
   };
 
@@ -193,12 +221,21 @@ export default function PreLaunchEmails() {
     }
   };
 
-  const getPackageColor = (packageType: string) => {
-    switch (packageType) {
+  const getInterestLevelColor = (level: string) => {
+    switch (level) {
       case 'PREMIUM': return 'text-[#C49C48]';
       case 'ULTIMATE': return 'text-purple-400';
       case 'BASIC': return 'text-[#8BAE5A]';
       default: return 'text-[#B6C948]';
+    }
+  };
+
+  const getInterestLevelText = (level: string) => {
+    switch (level) {
+      case 'BASIC': return 'Basis Interesse';
+      case 'PREMIUM': return 'Hoge Interesse';
+      case 'ULTIMATE': return 'Zeer Hoge Interesse';
+      default: return level;
     }
   };
 
@@ -220,7 +257,7 @@ export default function PreLaunchEmails() {
       name: email.name,
       source: email.source,
       status: email.status.toUpperCase(),
-      package: email.package,
+      interestLevel: email.interestLevel.toUpperCase(),
       notes: email.notes || ''
     });
     setShowEditModal(true);
@@ -232,11 +269,11 @@ export default function PreLaunchEmails() {
     'NAAM': email.name,
     'BRON': email.source,
     'STATUS': getStatusText(email.status),
-    'PAKKET': email.package,
+    'INTERESSE': getInterestLevelText(email.interestLevel),
     'DATUM': email.subscribedAt.toLocaleDateString('nl-NL')
   }));
 
-  const tableHeaders = ['E-MAIL', 'NAAM', 'BRON', 'STATUS', 'PAKKET', 'DATUM'];
+  const tableHeaders = ['E-MAIL', 'NAAM', 'BRON', 'STATUS', 'INTERESSE', 'DATUM'];
 
   const renderActions = (item: any) => {
     const email = filteredEmails.find(e => e.email === item['E-MAIL']);
@@ -269,117 +306,85 @@ export default function PreLaunchEmails() {
         {/* Header */}
       <div className="flex items-center justify-between">
           <div>
-          <h1 className="text-3xl font-bold text-[#8BAE5A]">Pre-launch E-mail Beheer</h1>
-          <p className="text-[#B6C948] mt-2">Beheer e-mail abonnementen voor de pre-launch campagne</p>
+          <h1 className="text-3xl font-bold text-[#8BAE5A]">Pre-launch Lead Beheer</h1>
+          <p className="text-[#B6C948] mt-2">Beheer leads voor de pre-launch campagne - nog geen aanschaf gedaan</p>
         </div>
         <div className="flex items-center gap-4">
           <span className="text-[#8BAE5A] font-semibold">
-            {filteredEmails.length} van {emails.length} e-mails
+            {filteredEmails.length} van {emails.length} leads
           </span>
           {loading && (
             <span className="text-[#B6C948] text-sm">Laden...</span>
           )}
-          <AdminButton 
-            variant="secondary" 
-            icon={<ArrowPathIcon className="w-5 h-5" />}
-            onClick={fetchEmails}
-            loading={loading}
-          >
-            Verversen
-          </AdminButton>
-          <AdminButton 
-            variant="primary" 
-            icon={<PlusIcon className="w-5 h-5" />}
+          <AdminButton
             onClick={() => setShowAddModal(true)}
+            icon={<PlusIcon className="w-4 h-4" />}
           >
-            E-mail Toevoegen
+            Lead Toevoegen
           </AdminButton>
-              </div>
-            </div>
+        </div>
+      </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <AdminStatsCard
-          title="Totaal Abonnementen"
+          title="Totaal Leads"
           value={total}
-          icon={<EnvelopeIcon className="w-8 h-8" />}
-          color="green"
-        />
-        <AdminStatsCard
-          title="Actieve Abonnementen"
-          value={active}
-          icon={<CheckCircleIcon className="w-8 h-8" />}
-          color="green"
-        />
-        <AdminStatsCard
-          title="Deze Week"
-          value={thisWeek}
-          icon={<CalendarIcon className="w-8 h-8" />}
+          icon={<EnvelopeIcon className="w-6 h-6" />}
           color="blue"
         />
         <AdminStatsCard
-          title="In Afwachting"
-          value={pending}
-          icon={<ExclamationTriangleIcon className="w-8 h-8" />}
-          color="orange"
+          title="Actieve Leads"
+          value={active}
+          icon={<CheckCircleIcon className="w-6 h-6" />}
+          color="green"
         />
+                  <AdminStatsCard
+            title="In Afwachting"
+            value={pending}
+            icon={<ExclamationTriangleIcon className="w-6 h-6" />}
+            color="orange"
+          />
         <AdminStatsCard
           title="Uitgeschreven"
           value={unsubscribed}
-          icon={<XCircleIcon className="w-8 h-8" />}
+          icon={<XCircleIcon className="w-6 h-6" />}
           color="red"
         />
-        <AdminStatsCard
-          title="Premium/Ultimate"
-          value={premium + ultimate}
-          icon={<ChartBarIcon className="w-8 h-8" />}
-          color="purple"
-        />
-        <AdminStatsCard
-          title="Premium Pakketten"
-          value={premium + ultimate}
-          icon={<UserIcon className="w-8 h-8" />}
-          color="orange"
-        />
-        </div>
+      </div>
 
-      {/* Search and Filters */}
-      <AdminCard title="Filters & Zoeken" icon={<FunnelIcon className="w-6 h-6" />}>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {/* Search */}
-          <div className="relative">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Zoek op e-mail, naam, bron of notities..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#181F17] text-white border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] placeholder-gray-400"
-            />
+      {/* Filters */}
+      <AdminCard>
+        <div className="flex flex-col lg:flex-row gap-4">
+          <div className="flex-1">
+            <div className="relative">
+              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#B6C948]" />
+              <input
+                type="text"
+                placeholder="Zoeken in leads..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-[#8BAE5A] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+              />
+            </div>
           </div>
-
-          {/* Status Filter */}
-          <div className="relative">
-            <FunnelIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+          
+          <div className="flex gap-4">
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#181F17] text-white border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] appearance-none"
+              className="px-4 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-[#8BAE5A] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
             >
               <option value="all">Alle Statussen</option>
               <option value="active">Actief</option>
               <option value="pending">In Afwachting</option>
               <option value="unsubscribed">Uitgeschreven</option>
             </select>
-          </div>
-
-          {/* Source Filter */}
-          <div className="relative">
-            <FunnelIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            
             <select
               value={sourceFilter}
               onChange={(e) => setSourceFilter(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#181F17] text-white border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] appearance-none"
+              className="px-4 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-[#8BAE5A] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
             >
               <option value="all">Alle Bronnen</option>
               <option value="Social Media">Social Media</option>
@@ -389,70 +394,52 @@ export default function PreLaunchEmails() {
               <option value="Email Campaign">Email Campaign</option>
             </select>
           </div>
-
-          {/* Export Button */}
-          <AdminButton variant="primary" icon={<DocumentTextIcon className="w-5 h-5" />}>
-            Export CSV
-          </AdminButton>
         </div>
       </AdminCard>
 
-      {/* Emails Table */}
-      <AdminCard title="E-mails Overzicht" icon={<EnvelopeIcon className="w-6 h-6" />}>
+      {/* Table */}
+      <AdminCard>
         <AdminTable
           headers={tableHeaders}
           data={tableData}
-          loading={loading}
-          emptyMessage="Geen e-mails gevonden"
           actions={renderActions}
+          loading={loading}
         />
       </AdminCard>
 
-      {/* Add Email Modal */}
+      {/* Add Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
-          <div className="bg-[#232D1A] border border-[#3A4D23] rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-[#3A4D23]">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-[#8BAE5A]">E-mail Toevoegen</h2>
-                        <button
-                  onClick={() => setShowAddModal(false)}
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
-                  <XCircleIcon className="w-6 h-6" />
-                        </button>
-                      </div>
-            </div>
-
-            <div className="p-6 space-y-6">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-[#232D1A] p-6 rounded-xl border border-[#3A4D23] w-full max-w-md">
+            <h2 className="text-xl font-semibold mb-4 text-[#8BAE5A]">Nieuwe Lead Toevoegen</h2>
+            
+            <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">E-mailadres *</label>
+                <label className="block text-sm font-medium text-[#B6C948] mb-2">E-mail *</label>
                 <input
                   type="email"
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                  placeholder="gebruiker@voorbeeld.nl"
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-[#8BAE5A] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
                 />
               </div>
-
+              
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Naam *</label>
+                <label className="block text-sm font-medium text-[#B6C948] mb-2">Naam *</label>
                 <input
                   type="text"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                  placeholder="Jan Jansen"
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-[#8BAE5A] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
                 />
               </div>
-
+              
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Bron</label>
+                <label className="block text-sm font-medium text-[#B6C948] mb-2">Bron</label>
                 <select
                   value={formData.source}
-                  onChange={(e) => setFormData({ ...formData, source: e.target.value })}
-                  className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                  onChange={(e) => setFormData({...formData, source: e.target.value})}
+                  className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-[#8BAE5A] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
                 >
                   <option value="">Selecteer bron</option>
                   <option value="Social Media">Social Media</option>
@@ -462,168 +449,161 @@ export default function PreLaunchEmails() {
                   <option value="Email Campaign">Email Campaign</option>
                 </select>
               </div>
-
+              
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Status</label>
+                <label className="block text-sm font-medium text-[#B6C948] mb-2">Status</label>
                 <select
                   value={formData.status}
-                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                  className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                  onChange={(e) => setFormData({...formData, status: e.target.value})}
+                  className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-[#8BAE5A] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
                 >
                   <option value="ACTIVE">Actief</option>
                   <option value="PENDING">In Afwachting</option>
                   <option value="UNSUBSCRIBED">Uitgeschreven</option>
                 </select>
-          </div>
-
+              </div>
+              
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Pakket</label>
+                <label className="block text-sm font-medium text-[#B6C948] mb-2">Interesse Niveau</label>
                 <select
-                  value={formData.package}
-                  onChange={(e) => setFormData({ ...formData, package: e.target.value })}
-                  className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                  value={formData.interestLevel}
+                  onChange={(e) => setFormData({...formData, interestLevel: e.target.value})}
+                  className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-[#8BAE5A] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
                 >
-                  <option value="BASIC">BASIC</option>
-                  <option value="PREMIUM">PREMIUM</option>
-                  <option value="ULTIMATE">ULTIMATE</option>
+                  <option value="BASIC">Basis Interesse</option>
+                  <option value="PREMIUM">Hoge Interesse</option>
+                  <option value="ULTIMATE">Zeer Hoge Interesse</option>
                 </select>
-        </div>
-
+              </div>
+              
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Notities</label>
+                <label className="block text-sm font-medium text-[#B6C948] mb-2">Notities</label>
                 <textarea
                   value={formData.notes}
-                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  onChange={(e) => setFormData({...formData, notes: e.target.value})}
                   rows={3}
-                  className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                  placeholder="Optionele notities..."
+                  className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-[#8BAE5A] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
                 />
               </div>
             </div>
-
-            <div className="p-6 border-t border-[#3A4D23] flex justify-end space-x-3">
+            
+            <div className="flex gap-3 mt-6">
               <AdminButton
-                variant="secondary"
-                onClick={() => setShowAddModal(false)}
-              >
-                Annuleren
-              </AdminButton>
-              <AdminButton
-                variant="primary"
                 onClick={addEmail}
-                icon={<PlusIcon className="w-4 h-4" />}
+                className="flex-1"
               >
                 Toevoegen
               </AdminButton>
-            </div>
+              <AdminButton
+                variant="secondary"
+                onClick={() => setShowAddModal(false)}
+                className="flex-1"
+              >
+                Annuleren
+              </AdminButton>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-      {/* Edit Email Modal */}
+      {/* Edit Modal */}
       {showEditModal && editingEmail && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
-          <div className="bg-[#232D1A] border border-[#3A4D23] rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-[#3A4D23]">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-[#8BAE5A]">E-mail Bewerken</h2>
-                <button
-                  onClick={() => setShowEditModal(false)}
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
-                  <XCircleIcon className="w-6 h-6" />
-                </button>
-              </div>
-      </div>
-
-            <div className="p-6 space-y-6">
-                <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">E-mailadres *</label>
-                  <input
-                    type="email"
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-[#232D1A] p-6 rounded-xl border border-[#3A4D23] w-full max-w-md">
+            <h2 className="text-xl font-semibold mb-4 text-[#8BAE5A]">Lead Bewerken</h2>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-[#B6C948] mb-2">E-mail *</label>
+                <input
+                  type="email"
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                  />
-                </div>
-
-                <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Naam *</label>
-                  <input
-                    type="text"
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-[#8BAE5A] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-[#B6C948] mb-2">Naam *</label>
+                <input
+                  type="text"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                  />
-                </div>
-
-                <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Bron</label>
-                  <select
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-[#8BAE5A] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-[#B6C948] mb-2">Bron</label>
+                <select
                   value={formData.source}
-                  onChange={(e) => setFormData({ ...formData, source: e.target.value })}
-                  className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                  onChange={(e) => setFormData({...formData, source: e.target.value})}
+                  className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-[#8BAE5A] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
                 >
+                  <option value="">Selecteer bron</option>
                   <option value="Social Media">Social Media</option>
                   <option value="Direct Contact">Direct Contact</option>
-                    <option value="Website Form">Website Form</option>
-                    <option value="Referral">Referral</option>
-                    <option value="Email Campaign">Email Campaign</option>
-                  </select>
-                </div>
-
-                <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Status</label>
-                  <select
+                  <option value="Website Form">Website Form</option>
+                  <option value="Referral">Referral</option>
+                  <option value="Email Campaign">Email Campaign</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-[#B6C948] mb-2">Status</label>
+                <select
                   value={formData.status}
-                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                  className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                  onChange={(e) => setFormData({...formData, status: e.target.value})}
+                  className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-[#8BAE5A] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
                 >
                   <option value="ACTIVE">Actief</option>
                   <option value="PENDING">In Afwachting</option>
                   <option value="UNSUBSCRIBED">Uitgeschreven</option>
-                  </select>
-                </div>
-
-                <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Pakket</label>
-                  <select
-                  value={formData.package}
-                  onChange={(e) => setFormData({ ...formData, package: e.target.value })}
-                  className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                >
-                  <option value="BASIC">BASIC</option>
-                  <option value="PREMIUM">PREMIUM</option>
-                  <option value="ULTIMATE">ULTIMATE</option>
-                  </select>
-                </div>
-
-                <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Notities</label>
-                  <textarea
-                  value={formData.notes}
-                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                    rows={3}
-                  className="w-full bg-[#181F17] border border-[#3A4D23] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                  />
-                </div>
+                </select>
               </div>
-
-            <div className="p-6 border-t border-[#3A4D23] flex justify-end space-x-3">
+              
+              <div>
+                <label className="block text-sm font-medium text-[#B6C948] mb-2">Interesse Niveau</label>
+                <select
+                  value={formData.interestLevel}
+                  onChange={(e) => setFormData({...formData, interestLevel: e.target.value})}
+                  className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-[#8BAE5A] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                >
+                  <option value="BASIC">Basis Interesse</option>
+                  <option value="PREMIUM">Hoge Interesse</option>
+                  <option value="ULTIMATE">Zeer Hoge Interesse</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-[#B6C948] mb-2">Notities</label>
+                <textarea
+                  value={formData.notes}
+                  onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                  rows={3}
+                  className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-[#8BAE5A] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                />
+              </div>
+            </div>
+            
+            <div className="flex gap-3 mt-6">
+              <AdminButton
+                onClick={updateEmail}
+                className="flex-1"
+              >
+                Bijwerken
+              </AdminButton>
               <AdminButton
                 variant="secondary"
-                onClick={() => setShowEditModal(false)}
-                >
-                  Annuleren
-              </AdminButton>
-              <AdminButton
-                variant="primary"
-                onClick={updateEmail}
-                icon={<PencilIcon className="w-4 h-4" />}
+                onClick={() => {
+                  setShowEditModal(false);
+                  setEditingEmail(null);
+                }}
+                className="flex-1"
               >
-                Opslaan
+                Annuleren
               </AdminButton>
-              </div>
+            </div>
           </div>
         </div>
       )}

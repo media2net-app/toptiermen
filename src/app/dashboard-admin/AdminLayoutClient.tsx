@@ -27,7 +27,9 @@ import {
   BugAntIcon,
   DocumentTextIcon,
   ClipboardIcon,
-  ListBulletIcon
+  ListBulletIcon,
+  RocketLaunchIcon,
+  EnvelopeIcon
 } from '@heroicons/react/24/outline';
 
 // Type definitions for menu items
@@ -41,7 +43,7 @@ interface MenuItem {
 }
 
 const SidebarContent = ({ pathname }: { pathname: string }) => {
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['Dashboard', 'ANALYTICS', 'LEDEN', 'CONTENT', 'COMMUNITY', 'PLATFORM']));
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['Dashboard', 'ANALYTICS', 'LEDEN', 'CONTENT', 'COMMUNITY', 'PRE LAUNCH', 'PLATFORM']));
 
   const toggleSection = (sectionLabel: string) => {
     setExpandedSections(prev => {
@@ -112,12 +114,19 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
       ]
     },
     { 
+      label: 'PRE LAUNCH', 
+      type: 'section',
+      items: [
+        { label: 'Pre-launch E-mails', icon: DocumentTextIcon, href: '/dashboard-admin/pre-launch-emails', badge: 'NEW' },
+        { label: 'Email Trechter', icon: EnvelopeIcon, href: '/dashboard-admin/email-trechter', badge: 'NEW' }
+      ]
+    },
+    { 
       label: 'PLATFORM', 
       type: 'section',
       items: [
         { label: 'Instellingen', icon: Cog6ToothIcon, href: '/dashboard-admin/instellingen' },
-        { label: 'Aankondigingen', icon: MegaphoneIcon, href: '/dashboard-admin/aankondigingen' },
-        { label: 'Pre-launch E-mails', icon: DocumentTextIcon, href: '/dashboard-admin/pre-launch-emails', badge: 'NEW' }
+        { label: 'Aankondigingen', icon: MegaphoneIcon, href: '/dashboard-admin/aankondigingen' }
       ]
     },
   ];

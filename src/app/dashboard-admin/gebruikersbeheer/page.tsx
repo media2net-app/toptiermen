@@ -30,70 +30,57 @@ interface User {
   createdAt: string;
 }
 
-const mockUsers: User[] = [
-  {
-    id: '1',
-    username: '@discipline_daniel',
-    name: 'Daniel Visser',
-    email: 'daniel@mail.com',
-    rank: 'Alpha',
-    package: 'Warrior',
-    lastLogin: '27 mei 2025',
-    status: 'Actief',
-    onboardingCompleted: true,
-    badges: 15,
-    createdAt: '2024-01-15'
-  },
-  {
-    id: '2',
-    username: '@younglion',
-    name: 'Sem Jansen',
-    email: 'sem@outlook.com',
-    rank: 'Recruit',
-    package: 'Gratis',
-    lastLogin: '26 mei 2025',
-    status: 'Inactief',
-    onboardingCompleted: false,
-    badges: 3,
-    createdAt: '2024-03-20'
-  },
-  {
-    id: '3',
-    username: '@thegrindcoach',
-    name: 'Rico Bakker',
-    email: 'rico@grind.nl',
-    rank: 'Legion Commander',
-    package: 'Alpha',
-    lastLogin: '27 mei 2025',
-    status: 'Actief',
-    onboardingCompleted: true,
-    badges: 28,
-    createdAt: '2023-11-10'
-  },
-  {
-    id: '4',
-    username: '@marcobeginner',
-    name: 'Marco D.',
-    email: 'marco.d@gmail.com',
-    rank: 'Initiate',
-    package: 'Recruit',
-    lastLogin: '18 mei 2025',
-    status: 'Geblokkeerd',
-    onboardingCompleted: true,
-    badges: 7,
-    createdAt: '2024-02-05'
-  },
-];
+// Users are now loaded from database via fetchUsers()
 
 export default function Gebruikersbeheer() {
   const { user } = useSupabaseAuth();
-  const [users, setUsers] = useState<User[]>(mockUsers);
-  const [filteredUsers, setFilteredUsers] = useState<User[]>(mockUsers);
-  const [loading, setLoading] = useState(false);
+  const [users, setUsers] = useState<User[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRank, setSelectedRank] = useState('Alle rangen');
   const [selectedPackage, setSelectedPackage] = useState('Alle pakketten');
   const [selectedStatus, setSelectedStatus] = useState('Status: Alles');
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/admin/users');
+      const data = await response.json();
+      
+      if (data.success && data.users) {
+        const formattedUsers = data.users.map((user: any) => ({
+          id: user.id,
+          username: user.username || `@${user.email?.split('@')[0]}`,
+          name: user.full_name || user.name || 'Onbekend',
+          email: user.email,
+          rank: user.rank || 'Recruit',
+          package: user.subscription_tier || 'Gratis',
+          lastLogin: user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleDateString('nl-NL') : 'Nooit',
+          status: user.status || 'Actief',
+          onboardingCompleted: user.onboarding_completed || false,
+          badges: user.badge_count || 0,
+          createdAt: user.created_at ? new Date(user.created_at).toLocaleDateString('nl-NL') : 'Onbekend'
+        }));
+        setUsers(formattedUsers);
+        setFilteredUsers(formattedUsers);
+      } else {
+        console.error('Failed to fetch users:', data.error);
+        setUsers([]);
+        setFilteredUsers([]);
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      setUsers([]);
+      setFilteredUsers([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   // Calculate statistics
   const totalUsers = users.length;

@@ -1,14 +1,31 @@
 import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { createClient } from '@supabase/supabase-js';
+
+// Use the same client setup as the auth context
+const getSupabaseClient = () => {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error('Missing Supabase environment variables');
+  }
+  
+  return createClient(supabaseUrl, supabaseAnonKey);
+};
 
 export default function SessionTest() {
   const [testResult, setTestResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const { user } = useSupabaseAuth(); // Get user from context
 
   const testSession = async () => {
     setLoading(true);
     try {
       console.log('🧪 Testing session...');
+      console.log('👤 User from context:', user);
+      
+      const supabase = getSupabaseClient();
       
       // Check if supabase client is initialized
       if (!supabase) {

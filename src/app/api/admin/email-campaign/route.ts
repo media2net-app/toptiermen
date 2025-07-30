@@ -3,123 +3,94 @@ import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 
-// Helper function to handle GET requests with admin client
-async function handleGetWithAdminClient(request: NextRequest, supabaseAdmin: any) {
+// Helper function to handle all operations with admin client
+async function handleWithAdminClient(method: string, request: NextRequest, supabaseAdmin: any) {
   try {
-    // Get query parameters
-    const { searchParams } = new URL(request.url);
-    const status = searchParams.get('status');
-    const source = searchParams.get('source');
-    const search = searchParams.get('search');
+    if (method === 'GET') {
+      // Get all email steps
+      const { data: steps, error } = await supabaseAdmin
+        .from('email_campaign_steps')
+        .select('*')
+        .order('step_number', { ascending: true });
 
-    let query = supabaseAdmin
-      .from('prelaunch_emails')
-      .select('*')
-      .order('subscribed_at', { ascending: false });
-
-    // Apply filters
-    if (status && status !== 'all') {
-      query = query.eq('status', status);
-    }
-
-    if (source && source !== 'all') {
-      query = query.eq('source', source);
-    }
-
-    if (search) {
-      query = query.or(`email.ilike.%${search}%,name.ilike.%${search}%,notes.ilike.%${search}%`);
-    }
-
-    const { data: emails, error } = await query;
-
-    if (error) {
-      console.error('Error fetching prelaunch emails with admin client:', error);
-      return NextResponse.json({ error: 'Failed to fetch emails' }, { status: 500 });
-    }
-
-    console.log(`✅ Found ${emails?.length || 0} prelaunch emails`);
-
-    return NextResponse.json({ 
-      success: true, 
-      emails: emails || [],
-      total: emails?.length || 0
-    });
-
-  } catch (error) {
-    console.error('Error in handleGetWithAdminClient:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
-  }
-}
-
-// Helper function to handle all CRUD operations with admin client
-async function handleCRUDWithAdminClient(method: string, request: NextRequest, supabaseAdmin: any) {
-  try {
-    const body = await request.json();
-    
-    if (method === 'POST') {
-      const { email, name, source, status, package: packageType, notes } = body;
-
-      if (!email) {
-        return NextResponse.json({ error: 'Email is required' }, { status: 400 });
+      if (error) {
+        console.error('Error fetching email steps:', error);
+        return NextResponse.json({ error: 'Failed to fetch email steps' }, { status: 500 });
       }
 
-      const { data: emailRecord, error } = await supabaseAdmin
-        .from('prelaunch_emails')
+      return NextResponse.json({ 
+        success: true, 
+        steps: steps || []
+      });
+    }
+
+    if (method === 'POST') {
+      const body = await request.json();
+      const { stepNumber, name, subject, content, delayDays, status } = body;
+
+      if (!name || !subject) {
+        return NextResponse.json({ error: 'Name and subject are required' }, { status: 400 });
+      }
+
+      const { data: step, error } = await supabaseAdmin
+        .from('email_campaign_steps')
         .insert({
-          email,
+          step_number: stepNumber,
           name,
-          source: source || 'Manual',
-          status: status || 'active',
-          package: packageType || 'BASIC', // Keep as 'package' in DB for compatibility
-          notes
+          subject,
+          content: content || '',
+          delay_days: delayDays || 0,
+          status: status || 'draft'
         })
         .select()
         .single();
 
       if (error) {
-        console.error('Error creating prelaunch email:', error);
-        return NextResponse.json({ error: 'Failed to create email: ' + error.message }, { status: 500 });
+        console.error('Error creating email step:', error);
+        return NextResponse.json({ error: 'Failed to create email step' }, { status: 500 });
       }
 
       return NextResponse.json({ 
         success: true, 
-        email: emailRecord 
+        step 
       });
     }
 
     if (method === 'PUT') {
-      const { id, email, name, source, status, package: packageType, notes } = body;
+      const body = await request.json();
+      const { id, stepNumber, name, subject, content, delayDays, status } = body;
 
       if (!id) {
         return NextResponse.json({ error: 'ID is required' }, { status: 400 });
       }
 
-      const { data: emailRecord, error } = await supabaseAdmin
-        .from('prelaunch_emails')
+      const { data: step, error } = await supabaseAdmin
+        .from('email_campaign_steps')
         .update({
-          email,
+          step_number: stepNumber,
           name,
-          source,
-          status,
-          package: packageType,
-          notes
+          subject,
+          content: content || '',
+          delay_days: delayDays || 0,
+          status: status || 'draft'
         })
         .eq('id', id)
         .select()
         .single();
 
       if (error) {
-        console.error('Error updating prelaunch email:', error);
-        return NextResponse.json({ error: 'Failed to update email: ' + error.message }, { status: 500 });
+        console.error('Error updating email step:', error);
+        return NextResponse.json({ error: 'Failed to update email step' }, { status: 500 });
       }
 
       return NextResponse.json({ 
         success: true, 
-        email: emailRecord 
+        step 
       });
     }
 
     if (method === 'DELETE') {
+      const body = await request.json();
       const { id } = body;
 
       if (!id) {
@@ -127,23 +98,23 @@ async function handleCRUDWithAdminClient(method: string, request: NextRequest, s
       }
 
       const { error } = await supabaseAdmin
-        .from('prelaunch_emails')
+        .from('email_campaign_steps')
         .delete()
         .eq('id', id);
 
       if (error) {
-        console.error('Error deleting prelaunch email:', error);
-        return NextResponse.json({ error: 'Failed to delete email: ' + error.message }, { status: 500 });
+        console.error('Error deleting email step:', error);
+        return NextResponse.json({ error: 'Failed to delete email step' }, { status: 500 });
       }
 
       return NextResponse.json({ 
         success: true, 
-        message: 'Email deleted successfully' 
+        message: 'Email step deleted successfully' 
       });
     }
 
   } catch (error) {
-    console.error(`Error in ${method} /api/admin/prelaunch-emails:`, error);
+    console.error(`Error in ${method} /api/admin/email-campaign:`, error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -155,9 +126,9 @@ export async function GET(request: NextRequest) {
     
     if (sessionError || !session) {
       console.error('Session error in GET:', sessionError);
-      // TEMPORARY: Use admin client for GET requests to display data
+      // TEMPORARY: Use admin client as fallback
       console.log('⚠️ Using admin client as fallback for GET request');
-      return await handleGetWithAdminClient(request, supabaseAdmin);
+      return await handleWithAdminClient('GET', request, supabaseAdmin);
     }
 
     const user = session.user;
@@ -173,7 +144,7 @@ export async function GET(request: NextRequest) {
       console.error('User error:', userError);
       // TEMPORARY: Use admin client as fallback
       console.log('⚠️ Using admin client as fallback due to user error');
-      return await handleGetWithAdminClient(request, supabaseAdmin);
+      return await handleWithAdminClient('GET', request, supabaseAdmin);
     }
 
     if (!userData || userData.role !== 'admin') {
@@ -184,10 +155,10 @@ export async function GET(request: NextRequest) {
     console.log('Admin access granted for:', user.email);
 
     // Use admin client for all operations to ensure consistency
-    return await handleGetWithAdminClient(request, supabaseAdmin);
+    return await handleWithAdminClient('GET', request, supabaseAdmin);
 
   } catch (error) {
-    console.error('Error in GET /api/admin/prelaunch-emails:', error);
+    console.error('Error in GET /api/admin/email-campaign:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -203,13 +174,13 @@ export async function POST(request: NextRequest) {
       console.error('Session error:', sessionError);
       // TEMPORARY: Use admin client as fallback
       console.log('⚠️ Using admin client as fallback for POST request');
-      return await handleCRUDWithAdminClient('POST', request, supabaseAdmin);
+      return await handleWithAdminClient('POST', request, supabaseAdmin);
     }
 
     const user = session.user;
     console.log('User authenticated:', user.email);
 
-    // Check if user is admin - use users table instead of profiles
+    // Check if user is admin
     const { data: userData, error: userError } = await supabase
       .from('users')
       .select('role')
@@ -220,7 +191,7 @@ export async function POST(request: NextRequest) {
       console.error('User error:', userError);
       // TEMPORARY: Use admin client as fallback
       console.log('⚠️ Using admin client as fallback due to user error');
-      return await handleCRUDWithAdminClient('POST', request, supabaseAdmin);
+      return await handleWithAdminClient('POST', request, supabaseAdmin);
     }
 
     if (!userData || userData.role !== 'admin') {
@@ -231,10 +202,10 @@ export async function POST(request: NextRequest) {
     console.log('Admin access granted for:', user.email);
 
     // Use admin client for all operations to ensure consistency
-    return await handleCRUDWithAdminClient('POST', request, supabaseAdmin);
+    return await handleWithAdminClient('POST', request, supabaseAdmin);
 
   } catch (error) {
-    console.error('Error in POST /api/admin/prelaunch-emails:', error);
+    console.error('Error in POST /api/admin/email-campaign:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -250,13 +221,13 @@ export async function PUT(request: NextRequest) {
       console.error('Session error:', sessionError);
       // TEMPORARY: Use admin client as fallback
       console.log('⚠️ Using admin client as fallback for PUT request');
-      return await handleCRUDWithAdminClient('PUT', request, supabaseAdmin);
+      return await handleWithAdminClient('PUT', request, supabaseAdmin);
     }
 
     const user = session.user;
     console.log('User authenticated:', user.email);
 
-    // Check if user is admin - use users table instead of profiles
+    // Check if user is admin
     const { data: userData, error: userError } = await supabase
       .from('users')
       .select('role')
@@ -267,7 +238,7 @@ export async function PUT(request: NextRequest) {
       console.error('User error:', userError);
       // TEMPORARY: Use admin client as fallback
       console.log('⚠️ Using admin client as fallback due to user error');
-      return await handleCRUDWithAdminClient('PUT', request, supabaseAdmin);
+      return await handleWithAdminClient('PUT', request, supabaseAdmin);
     }
 
     if (!userData || userData.role !== 'admin') {
@@ -278,10 +249,10 @@ export async function PUT(request: NextRequest) {
     console.log('Admin access granted for:', user.email);
 
     // Use admin client for all operations to ensure consistency
-    return await handleCRUDWithAdminClient('PUT', request, supabaseAdmin);
+    return await handleWithAdminClient('PUT', request, supabaseAdmin);
 
   } catch (error) {
-    console.error('Error in PUT /api/admin/prelaunch-emails:', error);
+    console.error('Error in PUT /api/admin/email-campaign:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -297,13 +268,13 @@ export async function DELETE(request: NextRequest) {
       console.error('Session error:', sessionError);
       // TEMPORARY: Use admin client as fallback
       console.log('⚠️ Using admin client as fallback for DELETE request');
-      return await handleCRUDWithAdminClient('DELETE', request, supabaseAdmin);
+      return await handleWithAdminClient('DELETE', request, supabaseAdmin);
     }
 
     const user = session.user;
     console.log('User authenticated:', user.email);
 
-    // Check if user is admin - use users table instead of profiles
+    // Check if user is admin
     const { data: userData, error: userError } = await supabase
       .from('users')
       .select('role')
@@ -314,7 +285,7 @@ export async function DELETE(request: NextRequest) {
       console.error('User error:', userError);
       // TEMPORARY: Use admin client as fallback
       console.log('⚠️ Using admin client as fallback due to user error');
-      return await handleCRUDWithAdminClient('DELETE', request, supabaseAdmin);
+      return await handleWithAdminClient('DELETE', request, supabaseAdmin);
     }
 
     if (!userData || userData.role !== 'admin') {
@@ -325,10 +296,10 @@ export async function DELETE(request: NextRequest) {
     console.log('Admin access granted for:', user.email);
 
     // Use admin client for all operations to ensure consistency
-    return await handleCRUDWithAdminClient('DELETE', request, supabaseAdmin);
+    return await handleWithAdminClient('DELETE', request, supabaseAdmin);
 
   } catch (error) {
-    console.error('Error in DELETE /api/admin/prelaunch-emails:', error);
+    console.error('Error in DELETE /api/admin/email-campaign:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 } 

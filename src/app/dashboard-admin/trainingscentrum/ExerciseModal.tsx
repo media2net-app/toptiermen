@@ -201,7 +201,10 @@ export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: Exe
             </label>
             <VideoUpload
               currentVideoUrl={formData.video_url}
-              onVideoUploaded={(url) => setFormData({ ...formData, video_url: url })}
+              onVideoUploaded={(url) => {
+                console.log('🔗 Video URL received in ExerciseModal:', url);
+                setFormData({ ...formData, video_url: url });
+              }}
               bucketName="workout-videos"
               folderPath="exercises"
             />
