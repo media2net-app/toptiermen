@@ -80,17 +80,17 @@ export async function GET(request: NextRequest) {
       status: review.status,
       created_at: review.created_at,
       updated_at: review.updated_at,
-      book: review.books ? {
-        id: review.books.id,
-        title: review.books.title,
-        author: review.books.author,
-        cover_url: review.books.cover_url
+      book: review.books && review.books.length > 0 ? {
+        id: review.books[0].id,
+        title: review.books[0].title,
+        author: review.books[0].author,
+        cover_url: review.books[0].cover_url
       } : null,
-      user: review.users ? {
-        id: review.users.id,
-        full_name: review.users.full_name || 'Onbekend',
-        username: review.users.username || `@${review.users.email?.split('@')[0]}`,
-        email: review.users.email
+      user: review.users && review.users.length > 0 ? {
+        id: review.users[0].id,
+        full_name: review.users[0].full_name || 'Onbekend',
+        username: review.users[0].username || `@${review.users[0].email?.split('@')[0]}`,
+        email: review.users[0].email
       } : null
     })) || [];
 
