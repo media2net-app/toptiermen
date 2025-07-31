@@ -78,12 +78,12 @@ export async function GET(request: NextRequest) {
       role: user.role || 'user',
       points: user.points || 0,
       missions_completed: user.missions_completed || 0,
-      rank: user.profiles?.rank || 'Recruit',
-      subscription_tier: user.profiles?.subscription_tier || 'Gratis',
-      onboarding_completed: user.profiles?.onboarding_completed || false,
-      last_login_at: user.profiles?.last_login_at,
-      badge_count: user.profiles?.badge_count || 0,
-      streak_count: user.profiles?.streak_count || 0,
+      rank: user.profiles && user.profiles.length > 0 ? user.profiles[0].rank || 'Recruit' : 'Recruit',
+      subscription_tier: user.profiles && user.profiles.length > 0 ? user.profiles[0].subscription_tier || 'Gratis' : 'Gratis',
+      onboarding_completed: user.profiles && user.profiles.length > 0 ? user.profiles[0].onboarding_completed || false : false,
+      last_login_at: user.profiles && user.profiles.length > 0 ? user.profiles[0].last_login_at : null,
+      badge_count: user.profiles && user.profiles.length > 0 ? user.profiles[0].badge_count || 0 : 0,
+      streak_count: user.profiles && user.profiles.length > 0 ? user.profiles[0].streak_count || 0 : 0,
       created_at: user.created_at,
       updated_at: user.updated_at
     })) || [];
