@@ -48,7 +48,7 @@ export const supabase = createClient(finalSupabaseUrl, finalSupabaseAnonKey, {
   }
 });
 
-// Test the connection on client side
+// Test the connection on client side only
 if (typeof window !== 'undefined') {
   supabase.auth.getSession().then(({ data, error }) => {
     if (error) {

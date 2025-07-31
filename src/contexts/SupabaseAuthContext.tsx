@@ -9,11 +9,47 @@ const getSupabaseClient = () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error('Missing Supabase environment variables');
+  // Check if environment variables are properly configured
+  if (!supabaseUrl || supabaseUrl === 'https://placeholder.supabase.co') {
+    console.error('❌ NEXT_PUBLIC_SUPABASE_URL is not configured properly');
+    console.error('Please create a .env.local file with your Supabase credentials');
   }
+
+  if (!supabaseAnonKey || supabaseAnonKey === 'placeholder-key') {
+    console.error('❌ NEXT_PUBLIC_SUPABASE_ANON_KEY is not configured properly');
+    console.error('Please create a .env.local file with your Supabase credentials');
+  }
+
+  // Use fallback values for development, but warn the user
+  const finalSupabaseUrl = supabaseUrl || 'https://placeholder.supabase.co';
+  const finalSupabaseAnonKey = supabaseAnonKey || 'placeholder-key';
   
-  return createClient(supabaseUrl, supabaseAnonKey);
+  return createClient(finalSupabaseUrl, finalSupabaseAnonKey, {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true,
+      storageKey: 'toptiermen-auth',
+      storage: {
+        getItem: (key: string) => {
+          if (typeof window !== 'undefined') {
+            return localStorage.getItem(key);
+          }
+          return null;
+        },
+        setItem: (key: string, value: string) => {
+          if (typeof window !== 'undefined') {
+            localStorage.setItem(key, value);
+          }
+        },
+        removeItem: (key: string) => {
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem(key);
+          }
+        }
+      }
+    }
+  });
 };
 
 const supabase = getSupabaseClient();

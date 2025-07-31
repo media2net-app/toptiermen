@@ -28,15 +28,17 @@ export const supabaseAdmin = createClient(finalSupabaseUrl, finalSupabaseService
   }
 });
 
-// Test the admin connection
-supabaseAdmin.auth.getSession().then(({ data, error }) => {
-  if (error) {
-    console.error('❌ Failed to connect to Supabase Admin:', error.message);
-    if (error.message.includes('Invalid API key') || error.message.includes('Project not found')) {
-      console.error('This usually means your SUPABASE_SERVICE_ROLE_KEY is not configured correctly');
-      console.error('Please check ENVIRONMENT_SETUP.md for instructions');
+// Test the admin connection on client side only
+if (typeof window !== 'undefined') {
+  supabaseAdmin.auth.getSession().then(({ data, error }) => {
+    if (error) {
+      console.error('❌ Failed to connect to Supabase Admin:', error.message);
+      if (error.message.includes('Invalid API key') || error.message.includes('Project not found')) {
+        console.error('This usually means your SUPABASE_SERVICE_ROLE_KEY is not configured correctly');
+        console.error('Please check ENVIRONMENT_SETUP.md for instructions');
+      }
+    } else {
+      console.log('✅ Supabase Admin connection successful');
     }
-  } else {
-    console.log('✅ Supabase Admin connection successful');
-  }
-}); 
+  });
+} 
