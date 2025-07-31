@@ -49,8 +49,39 @@ export default function EmailTrechter() {
       id: '1',
       stepNumber: 1,
       name: 'Welkom & Introductie',
-      subject: 'Welkom bij Toptiermen - Jouw reis naar succes begint hier',
-      content: '',
+      subject: '🎯 Welkom bij Toptiermen - Jouw reis naar succes begint hier',
+      content: `Beste {{name}},
+
+Welkom bij Toptiermen! 🚀
+
+We zijn verheugd dat je interesse hebt getoond in onze exclusieve community van top performers. Je hebt de eerste stap gezet naar een leven van buitengewone prestaties en persoonlijke groei.
+
+**Wat maakt Toptiermen uniek?**
+
+🏆 **Persoonlijke Mastery**: Ontwikkel jezelf tot de beste versie van jezelf
+🤝 **Elite Community**: Word onderdeel van een selecte groep gelijkgestemden
+📈 **Bewezen Methoden**: Strategieën die al honderden mensen naar succes hebben geleid
+🎯 **Resultaatgericht**: Meetbare verbeteringen in alle levensgebieden
+⚡ **24/7 Support**: Altijd toegang tot coaching en motivatie
+
+**Wat je kunt verwachten:**
+• Persoonlijke begeleiding van ervaren coaches
+• Een community die je motiveert en ondersteunt
+• Bewezen strategieën voor succes in werk, gezondheid en relaties
+• Directe toegang tot alle premium features
+• Exclusieve workshops en masterclasses
+
+**Interesse niveau: {{interestLevel}}**
+
+We hebben je geregistreerd met interesse niveau: {{interestLevel}}. Dit helpt ons om je de meest relevante informatie te sturen.
+
+Binnenkort ontvang je meer details over hoe we jou kunnen helpen je doelen te bereiken.
+
+Met vriendelijke groet,
+Het Toptiermen Team
+
+---
+*"Succes is niet toevallig. Het is een keuze, een gewoonte, een levensstijl."*`,
       delayDays: 0,
       status: 'draft',
       sentCount: 0,
@@ -61,8 +92,49 @@ export default function EmailTrechter() {
       id: '2',
       stepNumber: 2,
       name: 'Waarde & Voordelen',
-      subject: 'Ontdek hoe Toptiermen jouw leven kan veranderen',
-      content: '',
+      subject: '💎 Ontdek hoe Toptiermen jouw leven kan veranderen',
+      content: `Beste {{name}},
+
+Hopelijk heb je onze eerste email kunnen lezen. Vandaag willen we je meer vertellen over de concrete voordelen van Toptiermen.
+
+**Wat maakt ons uniek:**
+
+🎯 **Persoonlijke coaching van ervaren professionals**
+Onze coaches hebben honderden mensen geholpen hun doelen te bereiken. Ze begrijpen de uitdagingen die je tegenkomt en weten hoe je ze kunt overwinnen.
+
+🏆 **Een community van gelijkgestemden**
+Je wordt onderdeel van een selecte groep mannen die net als jij streven naar excellentie. Deze community motiveert, inspireert en ondersteunt je op je reis.
+
+📊 **Bewezen resultaten**
+Onze methoden zijn getest en bewezen effectief. Gemiddeld zien onze leden binnen 3 maanden:
+• 40% meer energie en focus
+• 60% betere prestaties op werk
+• 80% verbetering in relaties
+• 100% meer zelfvertrouwen
+
+⚡ **24/7 toegang tot support**
+Je staat er niet alleen voor. Ons team is altijd beschikbaar om je vragen te beantwoorden en je te motiveren.
+
+**Wat je krijgt:**
+
+✅ **Persoonlijk actieplan** - Op maat gemaakt voor jouw doelen
+✅ **Dagelijkse coaching** - Motivatie en begeleiding wanneer je het nodig hebt
+✅ **Exclusieve workshops** - Maandelijkse live sessies met experts
+✅ **Community toegang** - Connect met gelijkgestemden
+✅ **Premium content** - Toegang tot alle trainingsmateriaal
+✅ **Resultaat tracking** - Meet je voortgang en vier je successen
+
+**Interesse niveau: {{interestLevel}}**
+
+Gezien je interesse niveau ({{interestLevel}}), denken we dat je perfect past in onze community.
+
+Binnenkort ontvang je meer informatie over hoe je kunt beginnen.
+
+Met vriendelijke groet,
+Het Toptiermen Team
+
+---
+*"De beste investering die je kunt doen, is in jezelf."*`,
       delayDays: 3,
       status: 'draft',
       sentCount: 0,
@@ -73,8 +145,53 @@ export default function EmailTrechter() {
       id: '3',
       stepNumber: 3,
       name: 'Call-to-Action',
-      subject: 'Beperkte tijd: Schrijf je nu in voor 1 september',
-      content: '',
+      subject: '⏰ Beperkte tijd: Schrijf je nu in voor 1 september',
+      content: `Beste {{name}},
+
+Dit is je laatste kans om je aan te melden voor Toptiermen!
+
+**Waarom nu actie ondernemen?**
+
+🚨 **Beperkte beschikbaarheid**: We accepteren slechts 50 nieuwe leden per maand
+💰 **Speciale aanbieding**: 50% korting op je eerste maand (alleen geldig tot 1 september)
+🎯 **Directe start**: Begin vandaag nog met je persoonlijke groei
+🏆 **Exclusieve toegang**: Word onderdeel van onze elite community
+
+**Wat je mist als je niet nu actie onderneemt:**
+
+❌ Toegang tot persoonlijke coaching
+❌ Deelname aan exclusieve workshops
+❌ Community van gelijkgestemden
+❌ Bewezen strategieën voor succes
+❌ 24/7 support en motivatie
+
+**Wat je krijgt als je nu besluit:**
+
+✅ **Directe toegang** tot alle premium features
+✅ **Persoonlijk actieplan** binnen 24 uur
+✅ **Eerste coaching sessie** binnen 48 uur
+✅ **Community toegang** direct na aanmelding
+✅ **50% korting** op je eerste maand
+
+**Interesse niveau: {{interestLevel}}**
+
+Gezien je interesse niveau ({{interestLevel}}), weten we dat je serieus bent over persoonlijke groei. Laat deze kans niet voorbij gaan!
+
+**Klik hier om je nu aan te melden:**
+[INSCHRIJVEN VOOR TOPTIERMEN]
+
+**Of bel ons direct:**
+📞 +31 6 12345678
+
+**Deadline: 1 september 2025**
+
+Na deze datum sluiten we de inschrijvingen voor de komende maand.
+
+Met vriendelijke groet,
+Het Toptiermen Team
+
+---
+*"De beste tijd om te planten was 20 jaar geleden. De tweede beste tijd is nu."*`,
       delayDays: 7,
       status: 'draft',
       sentCount: 0,
@@ -490,22 +607,57 @@ export default function EmailTrechter() {
       {/* Email Preview Modal */}
       {showPreview && selectedStep && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-[#232D1A] p-6 rounded-xl border border-[#3A4D23] w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-[#232D1A] p-6 rounded-xl border border-[#3A4D23] w-full max-w-4xl max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-semibold mb-4 text-[#8BAE5A]">
               Email Preview: {selectedStep.name}
             </h2>
             
-            <div className="bg-white text-black p-6 rounded-lg">
-              <div className="mb-4">
-                <strong>Onderwerp:</strong> {selectedStep.subject}
-              </div>
-              <div className="mb-4">
-                <strong>Na:</strong> {selectedStep.delayDays} dagen
-              </div>
-              <div className="border-t pt-4">
-                <div className="whitespace-pre-wrap">
-                  {selectedStep.content || 'Nog geen content ingevuld...'}
+            <div className="bg-white text-black p-6 rounded-lg shadow-lg">
+              {/* Email Header */}
+              <div className="border-b border-gray-200 pb-4 mb-4">
+                <div className="mb-2">
+                  <strong className="text-gray-700">Onderwerp:</strong> {selectedStep.subject}
                 </div>
+                <div className="mb-2">
+                  <strong className="text-gray-700">Verzonden na:</strong> {selectedStep.delayDays === 0 ? 'Direct' : `${selectedStep.delayDays} dagen`}
+                </div>
+                <div>
+                  <strong className="text-gray-700">Status:</strong> 
+                  <span className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${
+                    selectedStep.status === 'active' ? 'bg-green-100 text-green-800' :
+                    selectedStep.status === 'paused' ? 'bg-yellow-100 text-yellow-800' :
+                    'bg-gray-100 text-gray-800'
+                  }`}>
+                    {selectedStep.status === 'active' ? 'Actief' : 
+                     selectedStep.status === 'paused' ? 'Gepauzeerd' : 'Concept'}
+                  </span>
+                </div>
+              </div>
+              
+              {/* Email Content */}
+              <div className="prose prose-sm max-w-none">
+                <div 
+                  className="whitespace-pre-wrap text-gray-800 leading-relaxed"
+                  style={{
+                    fontFamily: 'Arial, sans-serif',
+                    lineHeight: '1.6'
+                  }}
+                >
+                  {selectedStep.content ? (
+                    selectedStep.content
+                      .replace(/\{\{name\}\}/g, 'John Doe')
+                      .replace(/\{\{email\}\}/g, 'john.doe@example.com')
+                      .replace(/\{\{interestLevel\}\}/g, 'Hoog')
+                  ) : (
+                    <div className="text-gray-500 italic">Nog geen content ingevuld...</div>
+                  )}
+                </div>
+              </div>
+              
+              {/* Email Footer */}
+              <div className="border-t border-gray-200 pt-4 mt-6 text-xs text-gray-500">
+                <p>Dit is een preview van de e-mail. Variabelen zijn vervangen door voorbeeldwaarden.</p>
+                <p>Beschikbare variabelen: {{name}}, {{email}}, {{interestLevel}}</p>
               </div>
             </div>
             
