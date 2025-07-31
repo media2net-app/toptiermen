@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   CalculatorIcon, 
   HeartIcon, 
-  SparklesIcon,
+  StarIcon,
   ShoppingCartIcon,
   ArrowRightIcon,
   CheckIcon

@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   CalendarIcon, 
   FireIcon, 
-  SparklesIcon,
+  StarIcon,
   PlayIcon,
   CheckIcon,
   ArrowRightIcon,

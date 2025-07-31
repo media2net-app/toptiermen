@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { StarIcon, TrophyIcon, SparklesIcon } from '@heroicons/react/24/outline';
+import { StarIcon, TrophyIcon } from '@heroicons/react/24/outline';
 
 interface RankCardProps {
   rank: {
@@ -160,10 +160,10 @@ export default function RankCard({
       {/* Status Indicator */}
       {isUnlocked && (
         <div className="absolute bottom-2 left-2">
-          <div className="flex items-center gap-1 text-green-400 text-xs">
-            <SparklesIcon className="w-4 h-4" />
-            <span>Unlocked</span>
-          </div>
+                            <div className="flex items-center gap-1 text-green-400 text-xs">
+                    <StarIcon className="w-4 h-4" />
+                    <span>Unlocked</span>
+                  </div>
         </div>
       )}
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { BadgeCheckIcon, LockClosedIcon, ClockIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon, LockClosedIcon, ClockIcon } from '@heroicons/react/24/outline';
 
 interface BadgeCardProps {
   badge: {
@@ -46,7 +46,7 @@ export default function BadgeCard({ badge, userBadge, onBadgeClick }: BadgeCardP
 
   const getStatusIcon = () => {
     if (userBadge?.status === 'unlocked') {
-      return <BadgeCheckIcon className="w-6 h-6 text-green-500" />;
+      return <CheckCircleIcon className="w-6 h-6 text-green-500" />;
     } else if (userBadge?.status === 'progress') {
       return <ClockIcon className="w-6 h-6 text-yellow-500" />;
     } else {
