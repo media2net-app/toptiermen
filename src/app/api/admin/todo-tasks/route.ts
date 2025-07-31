@@ -759,7 +759,7 @@ function getHardcodedTasks() {
     },
     // Rick's tasks
     {
-      id: "rick-001-video-upload-fix",
+      id: "chiel-001-video-upload-fix",
       title: "Video Upload Functionaliteit Fix",
       description: "Video upload systeem repareren en optimaliseren. Ondersteuning voor verschillende video formaten. Progress tracking implementeren. Error handling verbeteren.",
       category: "video",
@@ -767,7 +767,7 @@ function getHardcodedTasks() {
       estimated_hours: 6,
       actual_hours: 0,
       status: "pending",
-      assigned_to: "Rick",
+      assigned_to: "Chiel",
       due_date: "2025-08-06",
       start_date: "2025-08-05",
       completion_date: null,
@@ -807,7 +807,7 @@ function getHardcodedTasks() {
       due_date: "2025-08-10",
       start_date: "2025-08-07",
       completion_date: null,
-      dependencies: ["rick-001-video-upload-fix"],
+      dependencies: ["chiel-001-video-upload-fix"],
       tags: ["video", "production", "training", "academy"],
       progress_percentage: 0,
       created_at: "2025-07-31T00:00:00Z"
@@ -831,7 +831,7 @@ function getHardcodedTasks() {
       created_at: "2025-07-31T00:00:00Z"
     },
     {
-      id: "chiel-001-badges-design",
+      id: "chiel-002-badges-design",
       title: "Badges en Rangen Systeem Ontwerpen",
       description: "Compleet badges en rangen systeem ontwerpen. Visuele badges, progress tracking, achievement system. Gamification elementen implementeren.",
       category: "design",
