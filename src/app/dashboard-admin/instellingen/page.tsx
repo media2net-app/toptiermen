@@ -176,6 +176,28 @@ export default function AdminSettings() {
     }
   };
 
+  const testGoogleAnalytics = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/admin/test-google-analytics', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        setMessage({ type: 'success', text: 'Google Analytics configuratie succesvol!' });
+      } else {
+        setMessage({ type: 'error', text: data.message || 'Google Analytics configuratie mislukt' });
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Fout bij het testen van Google Analytics configuratie' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const tabs = [
     { id: 'stripe', name: 'Stripe Configuratie', icon: CreditCardIcon },
     { id: 'email', name: 'Email Instellingen', icon: EnvelopeIcon },
@@ -503,6 +525,14 @@ export default function AdminSettings() {
                   className="w-full px-4 py-2 bg-[#B6C948] text-[#181F17] font-semibold rounded-lg hover:bg-[#8BAE5A] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? 'Opslaan...' : 'Platform Configuratie Opslaan'}
+                </button>
+
+                <button
+                  onClick={testGoogleAnalytics}
+                  disabled={isLoading}
+                  className="w-full px-4 py-2 bg-[#8BAE5A] text-[#181F17] font-semibold rounded-lg hover:bg-[#B6C948] disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isLoading ? 'Testen...' : 'Test Google Analytics'}
                 </button>
               </div>
             </div>

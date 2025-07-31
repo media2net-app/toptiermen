@@ -3,6 +3,7 @@ import { Inter, Figtree } from 'next/font/google';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Providers from './components/Providers';
+import GoogleAnalytics from './components/GoogleAnalytics';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -33,6 +34,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.className} ${figtree.className}`}>
+      <head>
+        <GoogleAnalytics />
+      </head>
       <body>
         <Providers>
           {children}

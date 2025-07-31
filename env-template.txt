@@ -5,5 +5,28 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_here
 # Database Access (voor AI Assistant)
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
 
+# Stripe Configuration
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_publishable_key_here
+STRIPE_SECRET_KEY=sk_test_your_secret_key_here
+STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret_here
+
+# Google Analytics Configuration
+NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
+
+# Email Configuration (Resend)
+RESEND_API_KEY=re_your_resend_api_key_here
+
+# Site Configuration
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+
 # Voeg hier je service role key toe die je ophaalt uit:
 # Supabase Dashboard → Settings → API → service_role key 
+
+# Stripe Keys haal je op uit:
+# Stripe Dashboard → Developers → API Keys
+
+# Google Analytics ID haal je op uit:
+# Google Analytics → Admin → Data Streams → Web Stream → Measurement ID
+
+# Resend API Key haal je op uit:
+# Resend Dashboard → API Keys → Create API Key 

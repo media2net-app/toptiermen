@@ -3,132 +3,339 @@ import { supabaseAdmin } from '@/lib/supabase-admin';
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('📊 Fetching book reviews from database...');
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '20');
+    const bookId = searchParams.get('bookId');
+    const status = searchParams.get('status') || '';
+    const rating = searchParams.get('rating');
 
-    // Try to fetch from database first
-    try {
-      const { data: reviews, error: reviewsError } = await supabaseAdmin
-        .from('book_reviews')
-        .select(`
-          *,
-          books(title),
-          profiles(full_name)
-        `)
-        .order('submitted_at', { ascending: false });
+    // Calculate offset
+    const offset = (page - 1) * limit;
 
-      if (reviewsError) {
-        console.log('Database table does not exist, using mock data');
-        throw new Error('Table does not exist');
-      }
+    // Build query
+    let query = supabaseAdmin
+      .from('book_reviews')
+      .select(`
+        id,
+        book_id,
+        user_id,
+        rating,
+        text,
+        status,
+        created_at,
+        updated_at,
+        books!inner(
+          id,
+          title,
+          author,
+          cover_url
+        ),
+        users!inner(
+          id,
+          full_name,
+          username,
+          email
+        )
+      `)
+      .order('created_at', { ascending: false });
 
-      console.log(`📊 Found ${reviews?.length || 0} reviews from database`);
-
-      return NextResponse.json({ 
-        success: true, 
-        reviews: reviews || []
-      });
-
-    } catch (dbError) {
-      console.log('Using mock data for book reviews');
-      
-      // Return mock data
-      const mockReviews = [
-        {
-          id: "1",
-          bookId: "1",
-          bookTitle: "Can't Hurt Me",
-          userId: "user1",
-          userName: "Rob van der Berg",
-          rating: 5,
-          text: "Dit boek heeft mijn leven veranderd. David Goggins' verhaal is inspirerend en motiverend. Een must-read voor iedereen die meer uit zichzelf wil halen.",
-          status: "approved",
-          submittedAt: "2025-07-25T10:30:00.000Z"
-        },
-        {
-          id: "2",
-          bookId: "1",
-          bookTitle: "Can't Hurt Me",
-          userId: "user2",
-          userName: "Chiel de Vries",
-          rating: 4,
-          text: "Zeer krachtig boek. Goggins' aanpak is extreem maar effectief. Niet voor iedereen, maar wel zeer waardevol.",
-          status: "approved",
-          submittedAt: "2025-07-24T14:20:00.000Z"
-        },
-        {
-          id: "3",
-          bookId: "2",
-          bookTitle: "Atomic Habits",
-          userId: "user3",
-          userName: "Mark Jansen",
-          rating: 5,
-          text: "Fantastisch boek over gewoontes. James Clear legt complexe concepten uit op een begrijpelijke manier. Praktisch en toepasbaar.",
-          status: "pending",
-          submittedAt: "2025-07-26T09:15:00.000Z"
-        },
-        {
-          id: "4",
-          bookId: "2",
-          bookTitle: "Atomic Habits",
-          userId: "user4",
-          userName: "Tom Bakker",
-          rating: 4,
-          text: "Goed boek met veel praktische tips. De 1% verbetering per dag is een krachtig concept.",
-          status: "approved",
-          submittedAt: "2025-07-23T16:45:00.000Z"
-        },
-        {
-          id: "5",
-          bookId: "3",
-          bookTitle: "Rich Dad Poor Dad",
-          userId: "user5",
-          userName: "Alex Smit",
-          rating: 3,
-          text: "Interessante perspectieven op geld, maar soms wat simplistisch. Goed voor beginners.",
-          status: "rejected",
-          submittedAt: "2025-07-22T11:30:00.000Z"
-        }
-      ];
-
-      return NextResponse.json({ 
-        success: true, 
-        reviews: mockReviews
-      });
+    // Apply filters
+    if (bookId) {
+      query = query.eq('book_id', bookId);
     }
 
+    if (status) {
+      query = query.eq('status', status);
+    }
+
+    if (rating) {
+      query = query.eq('rating', parseInt(rating));
+    }
+
+    // Get total count for pagination
+    const { count } = await supabaseAdmin
+      .from('book_reviews')
+      .select('*', { count: 'exact', head: true });
+
+    // Get paginated results
+    const { data: reviews, error } = await query
+      .range(offset, offset + limit - 1);
+
+    if (error) {
+      console.error('Error fetching book reviews:', error);
+      return NextResponse.json(
+        { error: 'Failed to fetch book reviews' },
+        { status: 500 }
+      );
+    }
+
+    // Format reviews data
+    const formattedReviews = reviews?.map(review => ({
+      id: review.id,
+      book_id: review.book_id,
+      user_id: review.user_id,
+      rating: review.rating,
+      text: review.text,
+      status: review.status,
+      created_at: review.created_at,
+      updated_at: review.updated_at,
+      book: {
+        id: review.books.id,
+        title: review.books.title,
+        author: review.books.author,
+        cover_url: review.books.cover_url
+      },
+      user: {
+        id: review.users.id,
+        full_name: review.users.full_name || 'Onbekend',
+        username: review.users.username || `@${review.users.email?.split('@')[0]}`,
+        email: review.users.email
+      }
+    })) || [];
+
+    return NextResponse.json({
+      success: true,
+      reviews: formattedReviews,
+      pagination: {
+        page,
+        limit,
+        total: count || 0,
+        totalPages: Math.ceil((count || 0) / limit)
+      }
+    });
+
   } catch (error) {
-    console.error('Error fetching book reviews:', error);
-    return NextResponse.json({ 
-      error: 'Failed to fetch book reviews' 
-    }, { status: 500 });
+    console.error('Error in book reviews API:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    console.log('📊 Creating new book review:', body);
+    const { action, reviewId, data } = body;
 
-    const { data: review, error } = await supabaseAdmin
-      .from('book_reviews')
-      .insert([body])
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Error creating book review:', error);
-      return NextResponse.json({ error: 'Failed to create book review' }, { status: 500 });
+    switch (action) {
+      case 'approve_review':
+        return await approveReview(reviewId);
+      
+      case 'reject_review':
+        return await rejectReview(reviewId, data.reason);
+      
+      case 'update_review':
+        return await updateReview(reviewId, data);
+      
+      case 'delete_review':
+        return await deleteReview(reviewId);
+      
+      default:
+        return NextResponse.json(
+          { error: 'Invalid action' },
+          { status: 400 }
+        );
     }
 
-    return NextResponse.json({ 
-      success: true, 
-      review 
+  } catch (error) {
+    console.error('Error in book reviews API POST:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+async function approveReview(reviewId: string) {
+  try {
+    // Update review status
+    const { error: reviewError } = await supabaseAdmin
+      .from('book_reviews')
+      .update({ 
+        status: 'approved',
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', reviewId);
+
+    if (reviewError) {
+      console.error('Error approving review:', reviewError);
+      return NextResponse.json(
+        { error: 'Failed to approve review' },
+        { status: 500 }
+      );
+    }
+
+    // Update book average rating
+    await updateBookRating(reviewId);
+
+    return NextResponse.json({
+      success: true,
+      message: 'Review approved successfully'
     });
 
   } catch (error) {
-    console.error('Error creating book review:', error);
-    return NextResponse.json({ 
-      error: 'Failed to create book review' 
-    }, { status: 500 });
+    console.error('Error approving review:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+async function rejectReview(reviewId: string, reason?: string) {
+  try {
+    const { error } = await supabaseAdmin
+      .from('book_reviews')
+      .update({ 
+        status: 'rejected',
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', reviewId);
+
+    if (error) {
+      console.error('Error rejecting review:', error);
+      return NextResponse.json(
+        { error: 'Failed to reject review' },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Review rejected successfully'
+    });
+
+  } catch (error) {
+    console.error('Error rejecting review:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+async function updateReview(reviewId: string, data: any) {
+  try {
+    const { error } = await supabaseAdmin
+      .from('book_reviews')
+      .update({
+        rating: data.rating,
+        text: data.text,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', reviewId);
+
+    if (error) {
+      console.error('Error updating review:', error);
+      return NextResponse.json(
+        { error: 'Failed to update review' },
+        { status: 500 }
+      );
+    }
+
+    // Update book average rating
+    await updateBookRating(reviewId);
+
+    return NextResponse.json({
+      success: true,
+      message: 'Review updated successfully'
+    });
+
+  } catch (error) {
+    console.error('Error updating review:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+async function deleteReview(reviewId: string) {
+  try {
+    // Get review info before deletion
+    const { data: review } = await supabaseAdmin
+      .from('book_reviews')
+      .select('book_id')
+      .eq('id', reviewId)
+      .single();
+
+    // Delete the review
+    const { error } = await supabaseAdmin
+      .from('book_reviews')
+      .delete()
+      .eq('id', reviewId);
+
+    if (error) {
+      console.error('Error deleting review:', error);
+      return NextResponse.json(
+        { error: 'Failed to delete review' },
+        { status: 500 }
+      );
+    }
+
+    // Update book average rating if review was approved
+    if (review?.book_id) {
+      await updateBookRatingByBookId(review.book_id);
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Review deleted successfully'
+    });
+
+  } catch (error) {
+    console.error('Error deleting review:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+async function updateBookRating(reviewId: string) {
+  try {
+    // Get the book_id for this review
+    const { data: review } = await supabaseAdmin
+      .from('book_reviews')
+      .select('book_id')
+      .eq('id', reviewId)
+      .single();
+
+    if (review?.book_id) {
+      await updateBookRatingByBookId(review.book_id);
+    }
+  } catch (error) {
+    console.error('Error updating book rating:', error);
+  }
+}
+
+async function updateBookRatingByBookId(bookId: string) {
+  try {
+    // Calculate new average rating and review count
+    const { data: stats } = await supabaseAdmin
+      .from('book_reviews')
+      .select('rating')
+      .eq('book_id', bookId)
+      .eq('status', 'approved');
+
+    if (stats && stats.length > 0) {
+      const totalRating = stats.reduce((sum, review) => sum + review.rating, 0);
+      const averageRating = totalRating / stats.length;
+      const reviewCount = stats.length;
+
+      // Update book with new stats
+      await supabaseAdmin
+        .from('books')
+        .update({
+          average_rating: Math.round(averageRating * 100) / 100,
+          review_count: reviewCount,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', bookId);
+    }
+  } catch (error) {
+    console.error('Error updating book rating by book ID:', error);
   }
 } 
