@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
         actual_hours: 0,
         status: "pending",
         assigned_to: "Chiel",
-        due_date: "2025-08-07",
+        due_date: "2025-08-05",
         priority: "high",
         order_index: 2,
         created_at: "2025-07-27T10:00:00Z"
@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
         actual_hours: 0,
         status: "pending",
         assigned_to: "Chiel",
-        due_date: "2025-08-10",
+        due_date: "2025-08-05",
         priority: "high",
         order_index: 3,
         created_at: "2025-07-27T10:00:00Z"
@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
         actual_hours: 0,
         status: "pending",
         assigned_to: "Chiel",
-        due_date: "2025-08-08",
+        due_date: "2025-08-05",
         priority: "high",
         order_index: 2,
         created_at: "2025-07-27T10:00:00Z"
@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
         actual_hours: 0,
         status: "pending",
         assigned_to: "Chiel",
-        due_date: "2025-08-03",
+        due_date: "2025-08-05",
         priority: "high",
         order_index: 1,
         created_at: "2025-07-27T10:00:00Z"
@@ -121,7 +121,7 @@ export async function GET(request: NextRequest) {
         actual_hours: 0,
         status: "pending",
         assigned_to: "Chiel",
-        due_date: "2025-08-06",
+        due_date: "2025-08-05",
         priority: "critical",
         order_index: 1,
         created_at: "2025-07-27T10:00:00Z"
@@ -135,7 +135,7 @@ export async function GET(request: NextRequest) {
         actual_hours: 0,
         status: "pending",
         assigned_to: "Chiel",
-        due_date: "2025-08-10",
+        due_date: "2025-08-05",
         priority: "critical",
         order_index: 2,
         created_at: "2025-07-27T10:00:00Z"
@@ -149,7 +149,7 @@ export async function GET(request: NextRequest) {
         actual_hours: 0,
         status: "pending",
         assigned_to: "Chiel",
-        due_date: "2025-08-14",
+        due_date: "2025-08-05",
         priority: "critical",
         order_index: 3,
         created_at: "2025-07-27T10:00:00Z"
