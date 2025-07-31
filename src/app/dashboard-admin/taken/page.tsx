@@ -435,7 +435,7 @@ export default function TakenPage() {
         </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-6 gap-6 mb-8">
         <div className="bg-[#232D1A] p-6 rounded-xl border border-[#3A4D23]">
           <div className="flex items-center justify-between">
             <div>
@@ -480,6 +480,30 @@ export default function TakenPage() {
             </div>
             <div className="w-12 h-12 bg-[#3A4D23] rounded-lg flex items-center justify-center">
               <ClockIcon className="w-6 h-6 text-[#8BAE5A]" />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-[#232D1A] p-6 rounded-xl border border-[#3A4D23]">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-[#B6C948] text-sm font-medium">Open Taken Rick</p>
+              <p className="text-[#8BAE5A] text-2xl font-bold">{allTasks.filter(t => t.assigned_to === 'Rick' && t.status === 'pending').length}</p>
+            </div>
+            <div className="w-12 h-12 bg-[#3A4D23] rounded-lg flex items-center justify-center">
+              <UserIcon className="w-6 h-6 text-[#8BAE5A]" />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-[#232D1A] p-6 rounded-xl border border-[#3A4D23]">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-[#B6C948] text-sm font-medium">Open Taken Chiel</p>
+              <p className="text-[#8BAE5A] text-2xl font-bold">{allTasks.filter(t => t.assigned_to === 'Chiel' && t.status === 'pending').length}</p>
+            </div>
+            <div className="w-12 h-12 bg-[#3A4D23] rounded-lg flex items-center justify-center">
+              <UserIcon className="w-6 h-6 text-[#8BAE5A]" />
             </div>
           </div>
         </div>
