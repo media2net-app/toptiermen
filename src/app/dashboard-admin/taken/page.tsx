@@ -64,8 +64,8 @@ export default function TakenPage() {
     title: '',
     description: '',
     assigned_to: '',
-    priority: 'medium' as const,
-    status: 'pending' as const,
+    priority: 'medium' as 'low' | 'medium' | 'high' | 'critical',
+    status: 'pending' as 'pending' | 'in_progress' | 'completed' | 'blocked',
     due_date: '',
     estimated_hours: 0,
     category: 'development'
