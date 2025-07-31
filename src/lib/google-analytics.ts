@@ -6,6 +6,11 @@ declare global {
   }
 }
 
+// Extend Window interface for Google Analytics
+interface Window {
+  dataLayer: any[];
+}
+
 // Initialize Google Analytics
 export const initGA = () => {
   const gaId = process.env.NEXT_PUBLIC_GA_ID;
@@ -22,16 +27,20 @@ export const initGA = () => {
   document.head.appendChild(script);
 
   // Initialize gtag
-  (window as any).dataLayer = (window as any).dataLayer || [];
-  window.gtag = function() {
-    (window as any).dataLayer.push(arguments);
-  };
+  if (typeof window !== 'undefined') {
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function() {
+      window.dataLayer.push(arguments);
+    };
+  }
 
-  window.gtag('js', new Date());
-  window.gtag('config', gaId, {
-    page_title: document.title,
-    page_location: window.location.href,
-  });
+  if (typeof window !== 'undefined') {
+    window.gtag('js', new Date());
+    window.gtag('config', gaId, {
+      page_title: document.title,
+      page_location: window.location.href,
+    });
+  }
 };
 
 // Track page views
