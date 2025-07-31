@@ -25,13 +25,13 @@ export async function GET(request: NextRequest) {
         status,
         created_at,
         updated_at,
-        books!inner(
+        books(
           id,
           title,
           author,
           cover_url
         ),
-        users!inner(
+        users(
           id,
           full_name,
           username,
@@ -80,18 +80,18 @@ export async function GET(request: NextRequest) {
       status: review.status,
       created_at: review.created_at,
       updated_at: review.updated_at,
-      book: {
+      book: review.books ? {
         id: review.books.id,
         title: review.books.title,
         author: review.books.author,
         cover_url: review.books.cover_url
-      },
-      user: {
+      } : null,
+      user: review.users ? {
         id: review.users.id,
         full_name: review.users.full_name || 'Onbekend',
         username: review.users.username || `@${review.users.email?.split('@')[0]}`,
         email: review.users.email
-      }
+      } : null
     })) || [];
 
     return NextResponse.json({
