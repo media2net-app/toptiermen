@@ -72,7 +72,7 @@ export default function AdminTable({
                     ? 'completed-task-row bg-[#1A2D17] border-l-4 border-[#8BAE5A] hover:bg-[#2A3D27]' 
                     : 'pending-task-row hover:bg-[#232D1A]'
                 }`}>
-                  {item.map((value: any, colIndex) => (
+                  {item.map((value: any, colIndex: number) => (
                     <td key={colIndex} className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                       {typeof value === 'boolean' ? (
                         <span className={`inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full ${
