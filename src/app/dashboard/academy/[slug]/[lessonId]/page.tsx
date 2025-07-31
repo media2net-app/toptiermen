@@ -6,6 +6,8 @@ import { useState, useEffect } from "react";
 import { supabase } from '@/lib/supabase';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import PageLayout from '@/components/PageLayout';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface Module {
   id: string;
@@ -43,7 +45,6 @@ export default function LessonDetailPage() {
   const [saving, setSaving] = useState(false);
   const [completedLessonIds, setCompletedLessonIds] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [videoLoading, setVideoLoading] = useState(true);
 
   // Simplified data fetching
   useEffect(() => {
@@ -55,7 +56,6 @@ export default function LessonDetailPage() {
 
       setLoading(true);
       setError(null);
-      setVideoLoading(true);
 
       try {
         console.log('Fetching lesson data for:', { moduleId, lessonId });
@@ -269,29 +269,26 @@ export default function LessonDetailPage() {
             </div>
           </div>
 
-          {/* Video content */}
+          {/* Video content - Temporarily disabled */}
           {lesson.video_url && (
             <div className="mb-6">
-              <div className="aspect-video bg-black rounded-lg overflow-hidden relative">
-                {videoLoading && (
-                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/70">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mb-4"></div>
-                    <div className="text-[#8BAE5A] text-lg font-semibold">Video laden...</div>
+              <div className="aspect-video bg-[#232D1A] rounded-lg overflow-hidden relative border border-[#3A4D23] flex items-center justify-center">
+                <div className="text-center p-8">
+                  <div className="w-16 h-16 bg-[#8BAE5A]/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-[#8BAE5A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
                   </div>
-                )}
-                <video
-                  src={lesson.video_url}
-                  controls
-                  autoPlay
-                  muted
-                  className="w-full h-full"
-                  poster="/video-placeholder.svg"
-                  onCanPlay={() => setVideoLoading(false)}
-                  onLoadedData={() => setVideoLoading(false)}
-                  onError={() => setVideoLoading(false)}
-                >
-                  Je browser ondersteunt geen video afspelen.
-                </video>
+                  <h3 className="text-lg font-semibold text-[#8BAE5A] mb-2">
+                    Video functionaliteit tijdelijk niet beschikbaar
+                  </h3>
+                  <p className="text-[#B6C948] text-sm mb-3">
+                    Op dit moment is video afspelen niet mogelijk gezien we het systeem aan het updaten zijn
+                  </p>
+                  <p className="text-[#8BAE5A] text-xs">
+                    🚧 Video functionaliteit wordt momenteel geüpdatet voor betere prestaties en stabiliteit
+                  </p>
+                </div>
               </div>
             </div>
           )}
@@ -300,10 +297,39 @@ export default function LessonDetailPage() {
           {lesson.content && (
             <div className="mb-6">
               <div className="prose prose-invert max-w-none">
-                <div 
-                  className="text-gray-300"
-                  dangerouslySetInnerHTML={{ __html: lesson.content }}
-                />
+                <div className="text-gray-300">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      h1: ({children}) => <h1 className="text-2xl font-bold text-[#8BAE5A] mb-4 mt-6">{children}</h1>,
+                      h2: ({children}) => <h2 className="text-xl font-bold text-[#8BAE5A] mb-3 mt-5">{children}</h2>,
+                      h3: ({children}) => <h3 className="text-lg font-semibold text-[#8BAE5A] mb-2 mt-4">{children}</h3>,
+                      p: ({children}) => <p className="mb-3 text-gray-300 leading-relaxed">{children}</p>,
+                      ul: ({children}) => <ul className="list-disc list-inside mb-4 space-y-1 text-gray-300">{children}</ul>,
+                      ol: ({children}) => <ol className="list-decimal list-inside mb-4 space-y-1 text-gray-300">{children}</ol>,
+                      li: ({children, ...props}: any) => {
+                        if (props.checked !== null && props.checked !== undefined) {
+                          return (
+                            <li className="flex items-center gap-2 text-gray-300">
+                              <input 
+                                type="checkbox" 
+                                checked={props.checked} 
+                                readOnly 
+                                className="w-4 h-4 text-[#8BAE5A] bg-[#232D1A] border-[#3A4D23] rounded focus:ring-[#8BAE5A] focus:ring-2"
+                              />
+                              <span>{children}</span>
+                            </li>
+                          );
+                        }
+                        return <li className="text-gray-300">{children}</li>;
+                      },
+                      strong: ({children}) => <strong className="font-semibold text-[#B6C948]">{children}</strong>,
+                      blockquote: ({children}) => <blockquote className="border-l-4 border-[#8BAE5A] pl-4 italic text-[#8BAE5A] mb-4">{children}</blockquote>,
+                    }}
+                  >
+                    {lesson.content}
+                  </ReactMarkdown>
+                </div>
               </div>
             </div>
           )}

@@ -76,3 +76,34 @@ body {
 .animate-fade-in-up {
   animation: fade-in-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
+
+/* Completed Task Styling */
+.completed-task-row {
+  background-color: #1A2D17 !important;
+  border-left: 4px solid #8BAE5A !important;
+}
+
+.completed-task-row:hover {
+  background-color: #2A3D27 !important;
+}
+
+.completed-status-indicator {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+}
+
+.completed-status-circle {
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+  border-radius: 50% !important;
+  background-color: #8BAE5A !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.completed-status-text {
+  color: #8BAE5A !important;
+  font-weight: 500 !important;
+}

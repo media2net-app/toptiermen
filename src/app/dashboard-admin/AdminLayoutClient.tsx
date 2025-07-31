@@ -61,11 +61,7 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
     { 
       label: 'Dashboard', 
       icon: HomeIcon, 
-      href: '/dashboard-admin',
-      items: [
-        { label: 'Project Logs', icon: DocumentTextIcon, href: '/dashboard-admin/project-logs' },
-        { label: 'Planning & To-Do', icon: ListBulletIcon, href: '/dashboard-admin/planning-todo', badge: 'Live' }
-      ]
+      href: '/dashboard-admin'
     },
     { 
       label: 'ANALYTICS', 
@@ -90,7 +86,8 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
           label: 'Onboarding Overzicht', 
           icon: ClipboardIcon, 
           href: '/dashboard-admin/onboarding-overview'
-        }
+        },
+        { label: 'Taken', icon: ListBulletIcon, href: '/dashboard-admin/taken', badge: 'NEW' }
       ]
     },
     { 
@@ -250,12 +247,17 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
 
   // Show planning status modal on first admin login
   useEffect(() => {
-            if (!loading && isAuthenticated && user?.role?.toLowerCase() === 'admin' && pathname === '/dashboard-admin') {
+    if (!loading && isAuthenticated && user?.role?.toLowerCase() === 'admin' && pathname === '/dashboard-admin') {
       const today = new Date().toDateString();
       const lastShownDate = sessionStorage.getItem('admin-planning-modal-date');
       if (lastShownDate !== today) {
-        setShowPlanningModal(true);
-        sessionStorage.setItem('admin-planning-modal-date', today);
+        // Add a small delay to ensure the page is fully loaded
+        const timer = setTimeout(() => {
+          setShowPlanningModal(true);
+          sessionStorage.setItem('admin-planning-modal-date', today);
+        }, 1000);
+        
+        return () => clearTimeout(timer);
       }
     }
   }, [loading, isAuthenticated, user, pathname]);

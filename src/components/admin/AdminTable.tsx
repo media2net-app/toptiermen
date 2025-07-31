@@ -60,30 +60,41 @@ export default function AdminTable({
             </tr>
           </thead>
           <tbody className="divide-y divide-[#3A4D23]">
-            {data.map((item, rowIndex) => (
-              <tr key={rowIndex} className="hover:bg-[#181F17]/50 transition-colors">
-                {Object.values(item).map((value: any, colIndex) => (
-                  <td key={colIndex} className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                    {typeof value === 'boolean' ? (
-                      <span className={`inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full ${
-                        value 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {value ? 'Ja' : 'Nee'}
-                      </span>
-                    ) : (
-                      value
-                    )}
-                  </td>
-                ))}
-                {actions && (
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                    {actions(item)}
-                  </td>
-                )}
-              </tr>
-            ))}
+            {data.map((item, rowIndex) => {
+              // Check if this is a completed task by looking at the status column (index 3)
+              const isCompleted = item[3] && item[3].props && item[3].props.children && 
+                item[3].props.children[1] && item[3].props.children[1].props && 
+                item[3].props.children[1].props.children === 'Voltooid';
+              
+              return (
+                <tr key={rowIndex} className={`transition-all duration-300 ${
+                  isCompleted 
+                    ? 'completed-task-row bg-[#1A2D17] border-l-4 border-[#8BAE5A] hover:bg-[#2A3D27]' 
+                    : 'pending-task-row hover:bg-[#232D1A]'
+                }`}>
+                  {item.map((value: any, colIndex) => (
+                    <td key={colIndex} className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      {typeof value === 'boolean' ? (
+                        <span className={`inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full ${
+                          value 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-red-100 text-red-800'
+                        }`}>
+                          {value ? 'Ja' : 'Nee'}
+                        </span>
+                      ) : (
+                        value
+                      )}
+                    </td>
+                  ))}
+                  {actions && (
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      {actions(item)}
+                    </td>
+                  )}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
