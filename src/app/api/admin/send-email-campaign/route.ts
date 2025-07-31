@@ -34,14 +34,145 @@ export async function POST(request: NextRequest) {
 
 async function sendTestEmail(stepId: string) {
   try {
-    // Get email step details
-    const { data: step, error: stepError } = await supabaseAdmin
-      .from('email_campaign_steps')
-      .select('*')
-      .eq('id', stepId)
-      .single();
+    // Hardcoded email steps for now
+    const hardcodedSteps = {
+      '1': {
+        name: 'Welkom & Introductie',
+        subject: '🎯 Welkom bij Toptiermen - Jouw reis naar succes begint hier',
+        content: `Beste {{name}},
 
-    if (stepError || !step) {
+Welkom bij Toptiermen! 🚀
+
+We zijn verheugd dat je interesse hebt getoond in onze exclusieve community van top performers. Je hebt de eerste stap gezet naar een leven van buitengewone prestaties en persoonlijke groei.
+
+**Wat maakt Toptiermen uniek?**
+
+🏆 **Persoonlijke Mastery**: Ontwikkel jezelf tot de beste versie van jezelf
+🤝 **Elite Community**: Word onderdeel van een selecte groep gelijkgestemden
+📈 **Bewezen Methoden**: Strategieën die al honderden mensen naar succes hebben geleid
+🎯 **Resultaatgericht**: Meetbare verbeteringen in alle levensgebieden
+⚡ **24/7 Support**: Altijd toegang tot coaching en motivatie
+
+**Wat je kunt verwachten:**
+• Persoonlijke begeleiding van ervaren coaches
+• Een community die je motiveert en ondersteunt
+• Bewezen strategieën voor succes in werk, gezondheid en relaties
+• Directe toegang tot alle premium features
+• Exclusieve workshops en masterclasses
+
+**Interesse niveau: {{interestLevel}}**
+
+We hebben je geregistreerd met interesse niveau: {{interestLevel}}. Dit helpt ons om je de meest relevante informatie te sturen.
+
+Binnenkort ontvang je meer details over hoe we jou kunnen helpen je doelen te bereiken.
+
+Met vriendelijke groet,
+Het Toptiermen Team
+
+---
+*"Succes is niet toevallig. Het is een keuze, een gewoonte, een levensstijl."*`
+      },
+      '2': {
+        name: 'Waarde & Voordelen',
+        subject: '💎 Ontdek hoe Toptiermen jouw leven kan veranderen',
+        content: `Beste {{name}},
+
+Hopelijk heb je onze eerste email kunnen lezen. Vandaag willen we je meer vertellen over de concrete voordelen van Toptiermen.
+
+**Wat maakt ons uniek:**
+
+🎯 **Persoonlijke coaching van ervaren professionals**
+Onze coaches hebben honderden mensen geholpen hun doelen te bereiken. Ze begrijpen de uitdagingen die je tegenkomt en weten hoe je ze kunt overwinnen.
+
+🏆 **Een community van gelijkgestemden**
+Je wordt onderdeel van een selecte groep mannen die net als jij streven naar excellentie. Deze community motiveert, inspireert en ondersteunt je op je reis.
+
+📊 **Bewezen resultaten**
+Onze methoden zijn getest en bewezen effectief. Gemiddeld zien onze leden binnen 3 maanden:
+• 40% meer energie en focus
+• 60% betere prestaties op werk
+• 80% verbetering in relaties
+• 100% meer zelfvertrouwen
+
+⚡ **24/7 toegang tot support**
+Je staat er niet alleen voor. Ons team is altijd beschikbaar om je vragen te beantwoorden en je te motiveren.
+
+**Wat je krijgt:**
+
+✅ **Persoonlijk actieplan** - Op maat gemaakt voor jouw doelen
+✅ **Dagelijkse coaching** - Motivatie en begeleiding wanneer je het nodig hebt
+✅ **Exclusieve workshops** - Maandelijkse live sessies met experts
+✅ **Community toegang** - Connect met gelijkgestemden
+✅ **Premium content** - Toegang tot alle trainingsmateriaal
+✅ **Resultaat tracking** - Meet je voortgang en vier je successen
+
+**Interesse niveau: {{interestLevel}}**
+
+Gezien je interesse niveau ({{interestLevel}}), denken we dat je perfect past in onze community.
+
+Binnenkort ontvang je meer informatie over hoe je kunt beginnen.
+
+Met vriendelijke groet,
+Het Toptiermen Team
+
+---
+*"De beste investering die je kunt doen, is in jezelf."*`
+      },
+      '3': {
+        name: 'Call-to-Action',
+        subject: '⏰ Beperkte tijd: Schrijf je nu in voor 1 september',
+        content: `Beste {{name}},
+
+Dit is je laatste kans om je aan te melden voor Toptiermen!
+
+**Waarom nu actie ondernemen?**
+
+🚨 **Beperkte beschikbaarheid**: We accepteren slechts 50 nieuwe leden per maand
+💰 **Speciale aanbieding**: 50% korting op je eerste maand (alleen geldig tot 1 september)
+🎯 **Directe start**: Begin vandaag nog met je persoonlijke groei
+🏆 **Exclusieve toegang**: Word onderdeel van onze elite community
+
+**Wat je mist als je niet nu actie onderneemt:**
+
+❌ Toegang tot persoonlijke coaching
+❌ Deelname aan exclusieve workshops
+❌ Community van gelijkgestemden
+❌ Bewezen strategieën voor succes
+❌ 24/7 support en motivatie
+
+**Wat je krijgt als je nu besluit:**
+
+✅ **Directe toegang** tot alle premium features
+✅ **Persoonlijk actieplan** binnen 24 uur
+✅ **Eerste coaching sessie** binnen 48 uur
+✅ **Community toegang** direct na aanmelding
+✅ **50% korting** op je eerste maand
+
+**Interesse niveau: {{interestLevel}}**
+
+Gezien je interesse niveau ({{interestLevel}}), weten we dat je serieus bent over persoonlijke groei. Laat deze kans niet voorbij gaan!
+
+**Klik hier om je nu aan te melden:**
+[INSCHRIJVEN VOOR TOPTIERMEN]
+
+**Of bel ons direct:**
+📞 +31 6 12345678
+
+**Deadline: 1 september 2025**
+
+Na deze datum sluiten we de inschrijvingen voor de komende maand.
+
+Met vriendelijke groet,
+Het Toptiermen Team
+
+---
+*"De beste tijd om te planten was 20 jaar geleden. De tweede beste tijd is nu."*`
+      }
+    };
+
+    const step = hardcodedSteps[stepId as keyof typeof hardcodedSteps];
+
+    if (!step) {
       return NextResponse.json({ 
         error: 'Email step not found' 
       }, { status: 404 });
@@ -70,14 +201,25 @@ async function sendTestEmail(stepId: string) {
 
 async function sendToLeads(stepId: string) {
   try {
-    // Get email step details
-    const { data: step, error: stepError } = await supabaseAdmin
-      .from('email_campaign_steps')
-      .select('*')
-      .eq('id', stepId)
-      .single();
+    // Hardcoded email steps for now
+    const hardcodedSteps = {
+      '1': {
+        name: 'Welkom & Introductie',
+        subject: '🎯 Welkom bij Toptiermen - Jouw reis naar succes begint hier'
+      },
+      '2': {
+        name: 'Waarde & Voordelen',
+        subject: '💎 Ontdek hoe Toptiermen jouw leven kan veranderen'
+      },
+      '3': {
+        name: 'Call-to-Action',
+        subject: '⏰ Beperkte tijd: Schrijf je nu in voor 1 september'
+      }
+    };
 
-    if (stepError || !step) {
+    const step = hardcodedSteps[stepId as keyof typeof hardcodedSteps];
+
+    if (!step) {
       return NextResponse.json({ 
         error: 'Email step not found' 
       }, { status: 404 });
