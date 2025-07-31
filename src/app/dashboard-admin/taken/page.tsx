@@ -60,12 +60,21 @@ export default function TakenPage() {
   const [loadingTasks, setLoadingTasks] = useState(false);
   const [showAddTaskModal, setShowAddTaskModal] = useState(false);
   const [addingTask, setAddingTask] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    title: string;
+    description: string;
+    assigned_to: string;
+    priority: 'low' | 'medium' | 'high' | 'critical';
+    status: 'pending' | 'in_progress' | 'completed' | 'blocked';
+    due_date: string;
+    estimated_hours: number;
+    category: string;
+  }>({
     title: '',
     description: '',
     assigned_to: '',
-    priority: 'medium' as 'low' | 'medium' | 'high' | 'critical',
-    status: 'pending' as 'pending' | 'in_progress' | 'completed' | 'blocked',
+    priority: 'medium',
+    status: 'pending',
     due_date: '',
     estimated_hours: 0,
     category: 'development'
@@ -182,8 +191,8 @@ export default function TakenPage() {
       title: task.title,
       description: task.description,
       assigned_to: task.assigned_to,
-      priority: task.priority,
-      status: task.status,
+      priority: task.priority as 'low' | 'medium' | 'high' | 'critical',
+      status: task.status as 'pending' | 'in_progress' | 'completed' | 'blocked',
       due_date: task.due_date,
       estimated_hours: task.estimated_hours,
       category: task.category
