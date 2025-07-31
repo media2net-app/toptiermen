@@ -723,7 +723,7 @@ Het Toptiermen Team
               {/* Email Footer */}
               <div className="border-t border-gray-200 pt-4 mt-6 text-xs text-gray-500">
                 <p>Dit is een preview van de e-mail. Variabelen zijn vervangen door voorbeeldwaarden.</p>
-                <p>Beschikbare variabelen: {{name}}, {{email}}, {{interestLevel}}</p>
+                <p>Beschikbare variabelen: {'{{name}}'}, {'{{email}}'}, {'{{interestLevel}}'}</p>
               </div>
             </div>
             
