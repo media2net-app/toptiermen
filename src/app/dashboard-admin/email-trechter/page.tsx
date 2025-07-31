@@ -83,7 +83,7 @@ Het Toptiermen Team
 ---
 *"Succes is niet toevallig. Het is een keuze, een gewoonte, een levensstijl."*`,
       delayDays: 0,
-      status: 'draft',
+      status: 'active',
       sentCount: 0,
       openRate: 0,
       clickRate: 0
@@ -136,7 +136,7 @@ Het Toptiermen Team
 ---
 *"De beste investering die je kunt doen, is in jezelf."*`,
       delayDays: 3,
-      status: 'draft',
+      status: 'active',
       sentCount: 0,
       openRate: 0,
       clickRate: 0
@@ -193,7 +193,7 @@ Het Toptiermen Team
 ---
 *"De beste tijd om te planten was 20 jaar geleden. De tweede beste tijd is nu."*`,
       delayDays: 7,
-      status: 'draft',
+      status: 'active',
       sentCount: 0,
       openRate: 0,
       clickRate: 0
@@ -325,6 +325,50 @@ Het Toptiermen Team
       toast.success('Email campagne gepauzeerd');
     } catch (error) {
       toast.error('Fout bij pauzeren van campagne');
+    }
+  };
+
+  const sendTestEmail = async (stepId: string) => {
+    try {
+      const response = await fetch('/api/admin/send-email-campaign', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ stepId, action: 'send_test' })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        toast.success(`Test email voorbereid: ${data.step.name}`);
+      } else {
+        toast.error(data.error || 'Fout bij verzenden test email');
+      }
+    } catch (error) {
+      console.error('Error sending test email:', error);
+      toast.error('Fout bij verzenden test email');
+    }
+  };
+
+  const sendToLeads = async (stepId: string) => {
+    try {
+      const response = await fetch('/api/admin/send-email-campaign', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ stepId, action: 'send_to_leads' })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        toast.success(`Email campagne voorbereid voor ${data.sentCount} leads`);
+        // Refresh campaign data
+        fetchCampaignData();
+      } else {
+        toast.error(data.error || 'Fout bij verzenden naar leads');
+      }
+    } catch (error) {
+      console.error('Error sending to leads:', error);
+      toast.error('Fout bij verzenden naar leads');
     }
   };
 
@@ -490,6 +534,28 @@ Het Toptiermen Team
                 >
                   Bewerken
                 </AdminButton>
+                
+                {step.status === 'active' && (
+                  <>
+                    <AdminButton
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => sendTestEmail(step.id)}
+                      icon={<EnvelopeIcon className="w-4 h-4" />}
+                    >
+                      Test Email
+                    </AdminButton>
+                    
+                    <AdminButton
+                      variant="primary"
+                      size="sm"
+                      onClick={() => sendToLeads(step.id)}
+                      icon={<UserGroupIcon className="w-4 h-4" />}
+                    >
+                      Verzend naar Leads
+                    </AdminButton>
+                  </>
+                )}
                 
                 {step.status !== 'completed' && (
                   <AdminButton
