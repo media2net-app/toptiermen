@@ -22,9 +22,9 @@ export const initGA = () => {
   document.head.appendChild(script);
 
   // Initialize gtag
-  window.dataLayer = window.dataLayer || [];
+  (window as any).dataLayer = (window as any).dataLayer || [];
   window.gtag = function() {
-    window.dataLayer.push(arguments);
+    (window as any).dataLayer.push(arguments);
   };
 
   window.gtag('js', new Date());
