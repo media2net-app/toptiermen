@@ -225,95 +225,95 @@ export default function VideoIdeeenIbizaPage() {
         
         <div className="relative z-10 px-6 py-16 text-center">
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
-              Video Ideeën
-              <span className="block text-[#8BAE5A]">Ibiza</span>
-            </h1>
-            <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-              Ontdek de exclusieve video concepten die Rick in Ibiza gaat opnemen voor de Top Tier Men community
-            </p>
+                         <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold text-white mb-4 sm:mb-6">
+               Video Ideeën
+               <span className="block text-[#8BAE5A]">Ibiza</span>
+             </h1>
+             <p className="text-lg sm:text-xl text-gray-300 mb-6 sm:mb-8 max-w-2xl mx-auto px-4">
+               Ontdek de exclusieve video concepten die Rick in Ibiza gaat opnemen voor de Top Tier Men community
+             </p>
             
-            {/* Countdown Banner */}
-            <div className="bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] p-6 rounded-2xl mb-8">
-              <div className="flex items-center justify-center gap-8">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-white">{daysUntilLaunch}</div>
-                  <div className="text-sm text-white/80">Dagen tot Launch</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-white">1</div>
-                  <div className="text-sm text-white/80">September</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-white">2025</div>
-                  <div className="text-sm text-white/80">Top Tier Men</div>
-                </div>
-              </div>
-              <div className="text-center mt-4">
-                <a 
-                  href="/offerte" 
-                  className="inline-flex items-center gap-2 bg-white text-[#8BAE5A] px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
-                >
-                  Pre-register Nu
-                  <ArrowRightIcon className="w-4 h-4" />
-                </a>
-              </div>
-            </div>
+                         {/* Countdown Banner */}
+             <div className="bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] p-4 sm:p-6 rounded-2xl mb-6 sm:mb-8 mx-4">
+               <div className="flex items-center justify-center gap-4 sm:gap-8 flex-wrap">
+                 <div className="text-center">
+                   <div className="text-2xl sm:text-3xl font-bold text-white">{daysUntilLaunch}</div>
+                   <div className="text-xs sm:text-sm text-white/80">Dagen tot Launch</div>
+                 </div>
+                 <div className="text-center">
+                   <div className="text-2xl sm:text-3xl font-bold text-white">1</div>
+                   <div className="text-xs sm:text-sm text-white/80">September</div>
+                 </div>
+                 <div className="text-center">
+                   <div className="text-2xl sm:text-3xl font-bold text-white">2025</div>
+                   <div className="text-xs sm:text-sm text-white/80">Top Tier Men</div>
+                 </div>
+               </div>
+               <div className="text-center mt-4">
+                 <a 
+                   href="/offerte" 
+                   className="inline-flex items-center gap-2 bg-white text-[#8BAE5A] px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors text-sm sm:text-base"
+                 >
+                   Pre-register Nu
+                   <ArrowRightIcon className="w-4 h-4" />
+                 </a>
+               </div>
+             </div>
           </div>
         </div>
       </div>
 
-      {/* Stats Section */}
-      <div className="px-6 py-12">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-            <div className="bg-black/50 backdrop-blur-sm border border-gray-800 p-6 rounded-xl">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-400 text-sm">Totaal Video's</p>
-                  <p className="text-2xl font-bold text-white">{videoIdeas.length}</p>
-                </div>
-                <VideoCameraIcon className="w-8 h-8 text-[#8BAE5A]" />
-              </div>
-            </div>
+             {/* Stats Section */}
+       <div className="px-4 sm:px-6 py-8 sm:py-12">
+         <div className="max-w-7xl mx-auto">
+           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-12">
+                         <div className="bg-black/50 backdrop-blur-sm border border-gray-800 p-4 sm:p-6 rounded-xl">
+               <div className="flex items-center justify-between">
+                 <div>
+                   <p className="text-gray-400 text-xs sm:text-sm">Totaal Video's</p>
+                   <p className="text-xl sm:text-2xl font-bold text-white">{videoIdeas.length}</p>
+                 </div>
+                 <VideoCameraIcon className="w-6 h-6 sm:w-8 sm:h-8 text-[#8BAE5A]" />
+               </div>
+             </div>
             
-            <div className="bg-black/50 backdrop-blur-sm border border-gray-800 p-6 rounded-xl">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-400 text-sm">Hoog Prioriteit</p>
-                  <p className="text-2xl font-bold text-white">
-                    {videoIdeas.filter(idea => idea.priority === 'hoog').length}
-                  </p>
-                </div>
-                <StarIcon className="w-8 h-8 text-red-500" />
-              </div>
-            </div>
+                         <div className="bg-black/50 backdrop-blur-sm border border-gray-800 p-4 sm:p-6 rounded-xl">
+               <div className="flex items-center justify-between">
+                 <div>
+                   <p className="text-gray-400 text-xs sm:text-sm">Hoog Prioriteit</p>
+                   <p className="text-xl sm:text-2xl font-bold text-white">
+                     {videoIdeas.filter(idea => idea.priority === 'hoog').length}
+                   </p>
+                 </div>
+                 <StarIcon className="w-6 h-6 sm:w-8 sm:h-8 text-red-500" />
+               </div>
+             </div>
             
-            <div className="bg-black/50 backdrop-blur-sm border border-gray-800 p-6 rounded-xl">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-400 text-sm">Ibiza Locaties</p>
-                  <p className="text-2xl font-bold text-white">8</p>
-                </div>
-                <MapPinIcon className="w-8 h-8 text-blue-500" />
-              </div>
-            </div>
+                         <div className="bg-black/50 backdrop-blur-sm border border-gray-800 p-4 sm:p-6 rounded-xl">
+               <div className="flex items-center justify-between">
+                 <div>
+                   <p className="text-gray-400 text-xs sm:text-sm">Ibiza Locaties</p>
+                   <p className="text-xl sm:text-2xl font-bold text-white">8</p>
+                 </div>
+                 <MapPinIcon className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500" />
+               </div>
+             </div>
             
-            <div className="bg-black/50 backdrop-blur-sm border border-gray-800 p-6 rounded-xl">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-400 text-sm">Rick als Autoriteit</p>
-                  <p className="text-2xl font-bold text-white">100%</p>
-                </div>
-                <UserIcon className="w-8 h-8 text-[#B6C948]" />
-              </div>
-            </div>
+                         <div className="bg-black/50 backdrop-blur-sm border border-gray-800 p-4 sm:p-6 rounded-xl">
+               <div className="flex items-center justify-between">
+                 <div>
+                   <p className="text-gray-400 text-xs sm:text-sm">Rick als Autoriteit</p>
+                   <p className="text-xl sm:text-2xl font-bold text-white">100%</p>
+                 </div>
+                 <UserIcon className="w-6 h-6 sm:w-8 sm:h-8 text-[#B6C948]" />
+               </div>
+             </div>
           </div>
 
-          {/* Filters */}
-          <div className="bg-black/50 backdrop-blur-sm border border-gray-800 p-6 rounded-xl mb-8">
-            <h2 className="text-xl font-semibold text-white mb-4">Filter Video's</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     {/* Filters */}
+           <div className="bg-black/50 backdrop-blur-sm border border-gray-800 p-4 sm:p-6 rounded-xl mb-6 sm:mb-8">
+             <h2 className="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4">Filter Video's</h2>
+             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-400 mb-2">Categorie</label>
                 <select
@@ -346,45 +346,45 @@ export default function VideoIdeeenIbizaPage() {
             </div>
           </div>
 
-          {/* Video Ideas Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {filteredIdeas.map((idea) => (
-              <div key={idea.id} className="bg-black/50 backdrop-blur-sm border border-gray-800 rounded-xl p-6 hover:border-[#8BAE5A]/50 transition-all duration-300">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    {getCategoryIcon(idea.category)}
-                    <h3 className="text-xl font-semibold text-white">{idea.title}</h3>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(idea.priority)}`}>
-                      {idea.priority}
-                    </span>
-                  </div>
-                </div>
+                     {/* Video Ideas Grid */}
+           <div className="grid grid-cols-1 gap-6 sm:gap-8">
+                         {filteredIdeas.map((idea) => (
+               <div key={idea.id} className="bg-black/50 backdrop-blur-sm border border-gray-800 rounded-xl p-4 sm:p-6 hover:border-[#8BAE5A]/50 transition-all duration-300">
+                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-4 gap-3">
+                   <div className="flex items-center gap-3">
+                     {getCategoryIcon(idea.category)}
+                     <h3 className="text-lg sm:text-xl font-semibold text-white">{idea.title}</h3>
+                   </div>
+                   <div className="flex items-center gap-2">
+                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(idea.priority)}`}>
+                       {idea.priority}
+                     </span>
+                   </div>
+                 </div>
                 
                 <p className="text-gray-400 mb-4">{idea.description}</p>
                 
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div className="flex items-center gap-2 text-sm text-gray-400">
-                    <MapPinIcon className="w-4 h-4" />
-                    <span>{idea.location}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-400">
-                    <ClockIcon className="w-4 h-4" />
-                    <span>{idea.estimatedDuration}</span>
-                  </div>
-                </div>
+                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4">
+                   <div className="flex items-center gap-2 text-sm text-gray-400">
+                     <MapPinIcon className="w-4 h-4 flex-shrink-0" />
+                     <span className="truncate">{idea.location}</span>
+                   </div>
+                   <div className="flex items-center gap-2 text-sm text-gray-400">
+                     <ClockIcon className="w-4 h-4 flex-shrink-0" />
+                     <span>{idea.estimatedDuration}</span>
+                   </div>
+                 </div>
                 
-                <div className="mb-4">
-                  <h4 className="text-sm font-medium text-white mb-2">Kernboodschappen:</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {idea.keyMessages.map((message, index) => (
-                      <span key={index} className="bg-[#8BAE5A]/20 text-[#8BAE5A] px-2 py-1 rounded text-xs border border-[#8BAE5A]/30">
-                        {message}
-                      </span>
-                    ))}
-                  </div>
-                </div>
+                                 <div className="mb-4">
+                   <h4 className="text-sm font-medium text-white mb-2">Kernboodschappen:</h4>
+                   <div className="flex flex-wrap gap-1 sm:gap-2">
+                     {idea.keyMessages.map((message, index) => (
+                       <span key={index} className="bg-[#8BAE5A]/20 text-[#8BAE5A] px-2 py-1 rounded text-xs border border-[#8BAE5A]/30 whitespace-nowrap">
+                         {message}
+                       </span>
+                     ))}
+                   </div>
+                 </div>
                 
                 <div className="mb-4">
                   <h4 className="text-sm font-medium text-white mb-2">Doelgroep:</h4>
@@ -398,49 +398,49 @@ export default function VideoIdeeenIbizaPage() {
                   </div>
                 )}
                 
-                <div className="flex items-center justify-between pt-4 border-t border-gray-800">
-                  <div className="flex items-center gap-4 text-sm text-gray-400">
-                    <span>Door: {idea.assignedTo}</span>
-                    <span>•</span>
-                    <span>{idea.createdAt}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(idea.status)}`}>
-                      {idea.status}
-                    </span>
-                  </div>
-                </div>
+                                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pt-4 border-t border-gray-800 gap-2">
+                   <div className="flex items-center gap-2 sm:gap-4 text-sm text-gray-400">
+                     <span>Door: {idea.assignedTo}</span>
+                     <span className="hidden sm:inline">•</span>
+                     <span>{idea.createdAt}</span>
+                   </div>
+                   <div className="flex items-center gap-2">
+                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(idea.status)}`}>
+                       {idea.status}
+                     </span>
+                   </div>
+                 </div>
               </div>
             ))}
           </div>
 
-          {/* Call to Action */}
-          <div className="mt-16 text-center">
-            <div className="bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] p-8 rounded-2xl">
-              <h2 className="text-3xl font-bold text-white mb-4">
-                Klaar om een Top Tier Man te worden?
-              </h2>
-              <p className="text-white/90 mb-6 max-w-2xl mx-auto">
-                Deze video's zijn slechts het begin. Word lid van de meest exclusieve community van high performers en begin je reis naar succes.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <a 
-                  href="/offerte" 
-                  className="inline-flex items-center gap-2 bg-white text-[#8BAE5A] px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
-                >
-                  Pre-register Nu
-                  <ArrowRightIcon className="w-4 h-4" />
-                </a>
-                <a 
-                  href="/login" 
-                  className="inline-flex items-center gap-2 border-2 border-white text-white px-8 py-4 rounded-lg font-semibold hover:bg-white hover:text-[#8BAE5A] transition-colors"
-                >
-                  Login
-                  <ArrowRightIcon className="w-4 h-4" />
-                </a>
-              </div>
-            </div>
-          </div>
+                     {/* Call to Action */}
+           <div className="mt-12 sm:mt-16 text-center px-4">
+             <div className="bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] p-6 sm:p-8 rounded-2xl">
+               <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3 sm:mb-4">
+                 Klaar om een Top Tier Man te worden?
+               </h2>
+               <p className="text-white/90 mb-4 sm:mb-6 max-w-2xl mx-auto text-sm sm:text-base">
+                 Deze video's zijn slechts het begin. Word lid van de meest exclusieve community van high performers en begin je reis naar succes.
+               </p>
+               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+                 <a 
+                   href="/offerte" 
+                   className="inline-flex items-center justify-center gap-2 bg-white text-[#8BAE5A] px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold hover:bg-gray-100 transition-colors text-sm sm:text-base"
+                 >
+                   Pre-register Nu
+                   <ArrowRightIcon className="w-4 h-4" />
+                 </a>
+                 <a 
+                   href="/login" 
+                   className="inline-flex items-center justify-center gap-2 border-2 border-white text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold hover:bg-white hover:text-[#8BAE5A] transition-colors text-sm sm:text-base"
+                 >
+                   Login
+                   <ArrowRightIcon className="w-4 h-4" />
+                 </a>
+               </div>
+             </div>
+           </div>
         </div>
       </div>
     </div>
