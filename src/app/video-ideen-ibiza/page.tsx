@@ -115,20 +115,38 @@ interface VideoIdea {
   assignedTo: string;
 }
 
-const videoIdeas: VideoIdea[] = [
+const videoIdeasData = [
   {
     id: '1',
     title: 'Become a Top Tier Man - Ibiza Sunrise Motivation',
-    description: 'Rick op een Ibiza klif tijdens zonsopgang, sprekend over wat het betekent om een Top Tier Man te zijn. Motiverende voice-over over discipline en mindset.',
+    description: {
+      nl: 'Rick op een Ibiza klif tijdens zonsopgang, sprekend over wat het betekent om een Top Tier Man te zijn. Motiverende voice-over over discipline en mindset.',
+      en: 'Rick on an Ibiza cliff during sunrise, speaking about what it means to be a Top Tier Man. Motivational voice-over about discipline and mindset.'
+    },
     category: 'promotie',
     priority: 'hoog',
     status: 'concept',
-    location: 'Cala Comte Klif (Zonsopgang)',
-    estimatedDuration: '30-45 seconden',
-    targetAudience: 'Ambitieuze mannen (25-45 jaar)',
+    location: {
+      nl: 'Cala Comte Klif (Zonsopgang)',
+      en: 'Cala Comte Cliff (Sunrise)'
+    },
+    estimatedDuration: {
+      nl: '30-45 seconden',
+      en: '30-45 seconds'
+    },
+    targetAudience: {
+      nl: 'Ambitieuze mannen (25-45 jaar)',
+      en: 'Ambitious men (25-45 years)'
+    },
     keyMessages: ['Become a Top Tier Man', 'Discipline', 'Mindset', 'Launch 1 September', 'Pre-register now'],
-    requiredProps: ['Camera setup', 'Microfoon', 'Zonsopgang timing', 'Countdown overlay'],
-    notes: 'Opname tijdens zonsopgang (6:30 AM). Rick spreekt direct in camera over Top Tier Man concept. HOOK: Start met spectaculaire drone shot van klif en Rick silhouette.',
+    requiredProps: {
+      nl: ['Camera setup', 'Microfoon', 'Zonsopgang timing', 'Countdown overlay'],
+      en: ['Camera setup', 'Microphone', 'Sunrise timing', 'Countdown overlay']
+    },
+    notes: {
+      nl: 'Opname tijdens zonsopgang (6:30 AM). Rick spreekt direct in camera over Top Tier Man concept. HOOK: Start met spectaculaire drone shot van klif en Rick silhouette.',
+      en: 'Recording during sunrise (6:30 AM). Rick speaks directly to camera about Top Tier Man concept. HOOK: Start with spectacular drone shot of cliff and Rick silhouette.'
+    },
     cameraInstructions: 'CAMERA: Start with dramatic drone shot of cliff and Rick silhouette. Wide shot of Rick on cliff with sunrise background. Rick in center frame, cliff and sea visible. Medium close-up shots for emotion. Ensure golden hour lighting. STABILIZATION: Gimbal or tripod for smooth movements. AUDIO: Lavalier microphone for Rick, wind protection. LIGHTING: Natural light, ND filter for sunrise. COMPOSITION: Rule of thirds, Rick on 1/3 line, sunrise on 2/3. DRONE: Aerial shots of cliff and Rick for opening/closing. HOOK: First 3 seconds must be visually stunning with dramatic sunrise and Rick silhouette.',
     dutchScript: 'Discipline is de brug tussen doelen en prestaties. Ben je klaar om een Top Tier Man te worden? Lancering 1 september. Pre-registreer nu voor exclusieve vroege toegang.',
     englishScript: 'Discipline is the bridge between goals and accomplishment. Are you ready to become a Top Tier Man? Join the most exclusive community of high performers.',
@@ -139,16 +157,34 @@ const videoIdeas: VideoIdea[] = [
   {
     id: '2',
     title: 'Boxing Training Session - Discipline in Action',
-    description: 'Rick tijdens zijn boks PT sessie op zaterdag. Toont discipline en fysieke uitdaging. Voice-over over doorzettingsvermogen.',
+    description: {
+      nl: 'Rick tijdens zijn boks PT sessie op zaterdag. Toont discipline en fysieke uitdaging. Voice-over over doorzettingsvermogen.',
+      en: 'Rick during his boxing PT session on Saturday. Shows discipline and physical challenge. Voice-over about perseverance.'
+    },
     category: 'lifestyle',
     priority: 'hoog',
     status: 'concept',
-    location: 'Ibiza Boxing Gym',
-    estimatedDuration: '45-60 seconden',
-    targetAudience: 'Fitness geïnteresseerden',
+    location: {
+      nl: 'Ibiza Boxing Gym',
+      en: 'Ibiza Boxing Gym'
+    },
+    estimatedDuration: {
+      nl: '45-60 seconden',
+      en: '45-60 seconds'
+    },
+    targetAudience: {
+      nl: 'Fitness geïnteresseerden',
+      en: 'Fitness enthusiasts'
+    },
     keyMessages: ['Discipline in Action', 'Physical Challenge', 'Mental Strength', 'Top Tier Performance'],
-    requiredProps: ['Boxing gloves', 'Training gear', 'Camera setup', 'Gym access'],
-    notes: 'Opname tijdens zaterdag boks sessie. Rick toont intense training. HOOK: Start met slow motion punch impact.',
+    requiredProps: {
+      nl: ['Boxing gloves', 'Training gear', 'Camera setup', 'Gym access'],
+      en: ['Boxing gloves', 'Training gear', 'Camera setup', 'Gym access']
+    },
+    notes: {
+      nl: 'Opname tijdens zaterdag boks sessie. Rick toont intense training. HOOK: Start met slow motion punch impact.',
+      en: 'Recording during Saturday boxing session. Rick shows intense training. HOOK: Start with slow motion punch impact.'
+    },
     cameraInstructions: 'CAMERA: Start with slow motion punch impact shot. Handheld for dynamic movement. Close-up shots of Rick\'s face during training. Wide shots of full training session. Medium shots of technique. STABILIZATION: Gimbal for smooth movements, handheld for raw energy. AUDIO: Lavalier microphone under shirt, gym sounds in background. LIGHTING: Gym lighting + LED panels for fill light. COMPOSITION: Rick always in center frame, focus on movement and intensity. SLOW MOTION: For impact shots and technique demonstrations. B-ROLL: Close-ups of gloves, sweat, focus in eyes. HOOK: First 3 seconds must show intense physical action with slow motion impact.',
     dutchScript: 'Discipline is doen wat er gedaan moet worden, ook als je er geen zin in hebt. Dit is wat Top Tier Men onderscheidt van de rest. Ben je klaar om je grenzen te verleggen? Lancering 1 september.',
     englishScript: 'Discipline is doing what needs to be done, even when you don\'t want to. This is what separates Top Tier Men from the rest. Are you ready to push your limits?',
@@ -285,6 +321,17 @@ export default function VideoIdeeenIbizaPage() {
   const [language, setLanguage] = useState<'nl' | 'en'>('nl');
 
   const t = translations[language];
+
+  // Transform video data based on selected language
+  const videoIdeas: VideoIdea[] = videoIdeasData.map(idea => ({
+    ...idea,
+    description: typeof idea.description === 'string' ? idea.description : idea.description[language],
+    location: typeof idea.location === 'string' ? idea.location : idea.location[language],
+    estimatedDuration: typeof idea.estimatedDuration === 'string' ? idea.estimatedDuration : idea.estimatedDuration[language],
+    targetAudience: typeof idea.targetAudience === 'string' ? idea.targetAudience : idea.targetAudience[language],
+    requiredProps: Array.isArray(idea.requiredProps) ? idea.requiredProps : idea.requiredProps[language],
+    notes: typeof idea.notes === 'string' ? idea.notes : idea.notes[language]
+  }));
 
   const getStatusColor = (status: string) => {
     switch (status) {
