@@ -94,6 +94,27 @@ const translations = {
   }
 };
 
+interface VideoIdeaData {
+  id: string;
+  title: string;
+  description: string | { nl: string; en: string };
+  category: 'promotie' | 'tutorial' | 'testimonial' | 'lifestyle' | 'behind-the-scenes';
+  priority: 'hoog' | 'medium' | 'laag';
+  status: 'concept' | 'in-opname' | 'bewerking' | 'klaar' | 'gepubliceerd';
+  location: string | { nl: string; en: string };
+  estimatedDuration: string | { nl: string; en: string };
+  targetAudience: string | { nl: string; en: string };
+  keyMessages: string[];
+  requiredProps: string[] | { nl: string[]; en: string[] };
+  notes: string | { nl: string; en: string };
+  cameraInstructions: string;
+  dutchScript: string;
+  englishScript: string;
+  deadline: string;
+  createdAt: string;
+  assignedTo: string;
+}
+
 interface VideoIdea {
   id: string;
   title: string;
@@ -115,7 +136,7 @@ interface VideoIdea {
   assignedTo: string;
 }
 
-const videoIdeasData = [
+const videoIdeasData: VideoIdeaData[] = [
   {
     id: '1',
     title: 'Become a Top Tier Man - Ibiza Sunrise Motivation',
@@ -331,7 +352,7 @@ export default function VideoIdeeenIbizaPage() {
     targetAudience: typeof idea.targetAudience === 'string' ? idea.targetAudience : idea.targetAudience[language],
     requiredProps: Array.isArray(idea.requiredProps) ? idea.requiredProps : idea.requiredProps[language],
     notes: typeof idea.notes === 'string' ? idea.notes : idea.notes[language]
-  }));
+  })) as VideoIdea[];
 
   const getStatusColor = (status: string) => {
     switch (status) {
