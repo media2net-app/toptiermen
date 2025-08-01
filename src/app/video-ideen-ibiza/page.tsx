@@ -29,6 +29,7 @@ interface VideoIdea {
   keyMessages: string[];
   requiredProps: string[];
   notes: string;
+  cameraInstructions: string;
   createdAt: string;
   assignedTo: string;
 }
@@ -47,6 +48,7 @@ const videoIdeas: VideoIdea[] = [
     keyMessages: ['Become a Top Tier Man', 'Discipline', 'Mindset', 'Launch 1 September', 'Pre-register now'],
     requiredProps: ['Camera setup', 'Microfoon', 'Zonsopgang timing', 'Countdown overlay'],
     notes: 'Opname tijdens zonsopgang (6:30 AM). Rick spreekt direct in camera over Top Tier Man concept. Voice-over: "Discipline is the bridge between goals and accomplishment. Are you ready to become a Top Tier Man? Launch September 1st. Pre-register now."',
+    cameraInstructions: 'CAMERA: Wide shot van Rick op klif met zonsopgang op achtergrond. Rick in center frame, klif en zee zichtbaar. Medium close-up shots voor emotie. Zorg voor golden hour belichting. STABILISATIE: Gimbal of tripod voor vloeiende bewegingen. AUDIO: Lavalier microfoon voor Rick, wind protection. BELICHTING: Natuurlijk licht, ND filter voor zonsopgang. COMPOSITIE: Rule of thirds, Rick op 1/3 lijn, zonsopgang op 2/3. DRONE: Aerial shots van klif en Rick voor opening/closing.',
     createdAt: '2024-12-19',
     assignedTo: 'Rick'
   },
@@ -63,6 +65,7 @@ const videoIdeas: VideoIdea[] = [
     keyMessages: ['Discipline in Action', 'Physical Challenge', 'Mental Strength', 'Top Tier Performance'],
     requiredProps: ['Boxing gloves', 'Training gear', 'Camera setup', 'Gym access'],
     notes: 'Opname tijdens zaterdag boks sessie. Rick toont intense training. Voice-over: "Discipline is doing what needs to be done, even when you don\'t want to. This is what separates Top Tier Men from the rest. Are you ready to push your limits?"',
+    cameraInstructions: 'CAMERA: Handheld voor dynamische beweging. Close-up shots van Rick\'s gezicht tijdens training. Wide shots van volledige training sessie. Medium shots van techniek. STABILISATIE: Gimbal voor vloeiende bewegingen, handheld voor rauwe energie. AUDIO: Lavalier microfoon onder shirt, gym geluiden op achtergrond. BELICHTING: Gym belichting + LED panels voor fill light. COMPOSITIE: Rick altijd in center frame, focus op beweging en intensiteit. SLOW MOTION: Voor impact shots en techniek demonstraties. B-ROLL: Close-ups van handschoenen, zweet, focus in ogen.',
     createdAt: '2024-12-19',
     assignedTo: 'Rick'
   },
@@ -79,6 +82,7 @@ const videoIdeas: VideoIdea[] = [
     keyMessages: ['Mindset Mastery', 'Mental Clarity', 'Inner Strength', 'Top Tier Mindset'],
     requiredProps: ['Meditation setup', 'Beach access', 'Quiet location', 'Natural sound'],
     notes: 'Vroege ochtend op rustige beach. Rick in meditatie pose, sprekend over mindset. Voice-over: "Your mindset determines your reality. Top Tier Men master their thoughts before they master their actions. Launch September 1st."',
+    cameraInstructions: 'CAMERA: Wide shot van Rick op beach met zee op achtergrond. Close-up van Rick\'s gezicht in meditatie. Medium shot van volledige pose. STABILISATIE: Tripod voor stabiele shots, geen beweging. AUDIO: Lavalier microfoon, natuurlijke beach geluiden (golven, vogels). BELICHTING: Soft morning light, geen harde schaduwen. COMPOSITIE: Rick in center, zee op achtergrond. Rule of thirds. SLOW MOTION: Voor meditatie bewegingen en ademhaling. B-ROLL: Close-ups van handen, voeten in zand, golven, vogels.',
     createdAt: '2024-12-19',
     assignedTo: 'Rick'
   },
@@ -95,6 +99,7 @@ const videoIdeas: VideoIdea[] = [
     keyMessages: ['Countdown to Launch', 'Pre-register now', 'Exclusive Access', '1 September'],
     requiredProps: ['Countdown timer overlay', 'Sunset timing', 'Camera setup', 'Dramatic lighting'],
     notes: 'Opname tijdens zonsondergang. Rick spreekt over de countdown. Voice-over: "The countdown has begun. September 1st, 2025. Become a Top Tier Man. Pre-register now for exclusive early access. Don\'t miss your chance to join the elite."',
+    cameraInstructions: 'CAMERA: Wide shot van Rick met Es Vedrà op achtergrond. Medium close-up voor countdown moment. Rick in silhouette tegen sunset. STABILISATIE: Tripod voor stabiele shots. AUDIO: Lavalier microfoon, wind protection. BELICHTING: Sunset belichting, Rick in silhouette, Es Vedrà verlicht. COMPOSITIE: Rick op 1/3 lijn, Es Vedrà op 2/3. DRAMATIC: Silhouette shots van Rick tegen sunset. B-ROLL: Time-lapse van sunset, Es Vedrà shots. OVERLAY: Countdown timer in post-productie.',
     createdAt: '2024-12-19',
     assignedTo: 'Rick'
   },
@@ -111,6 +116,7 @@ const videoIdeas: VideoIdea[] = [
     keyMessages: ['Success Mindset', 'Luxury Lifestyle', 'Top Tier Living', 'Elite Community'],
     requiredProps: ['Villa access', 'Luxury setting', 'Professional lighting', 'Lifestyle props'],
     notes: 'Rick in villa setting, sprekend over succes mindset. Voice-over: "Success is not accidental. Top Tier Men think differently, act differently, live differently. Join the elite. Launch September 1st."',
+    cameraInstructions: 'CAMERA: Wide shots van villa interieur met Rick. Medium shots van Rick sprekend. Close-ups van lifestyle details. STABILISATIE: Tripod voor interviews, handheld voor lifestyle shots. AUDIO: Lavalier microfoon, villa ambiance. BELICHTING: Natural light + LED panels voor fill. COMPOSITIE: Rick in center, villa details op achtergrond. B-ROLL: Villa exterieur, pool, uitzicht, lifestyle items. MOVEMENT: Slow pan shots van villa interieur. LIGHTING: Warm, luxury feel met golden hour light.',
     createdAt: '2024-12-19',
     assignedTo: 'Rick'
   },
@@ -127,6 +133,7 @@ const videoIdeas: VideoIdea[] = [
     keyMessages: ['Physical Discipline', 'Beach Training', 'Consistency', 'Top Tier Fitness'],
     requiredProps: ['Workout equipment', 'Beach access', 'Training gear', 'Camera setup'],
     notes: 'Rick doet intense beach workout. Voice-over: "Discipline is consistency in action. Every rep, every set, every day. This is how Top Tier Men build their bodies and their character. Are you ready to commit?"',
+    cameraInstructions: 'CAMERA: Wide shots van Rick op beach met zee op achtergrond. Medium shots van workout bewegingen. Close-ups van spieren en focus. STABILISATIE: Gimbal voor vloeiende bewegingen, handheld voor energie. AUDIO: Lavalier microfoon, beach geluiden op achtergrond. BELICHTING: Natural sunlight, reflectors voor fill light. COMPOSITIE: Rick in center, zee op achtergrond. SLOW MOTION: Voor workout bewegingen en impact shots. B-ROLL: Close-ups van zand, golven, workout equipment. MOVEMENT: Dynamic camera movements die workout volgen.',
     createdAt: '2024-12-19',
     assignedTo: 'Rick'
   },
@@ -143,6 +150,7 @@ const videoIdeas: VideoIdea[] = [
     keyMessages: ['Become Elite', 'Top Tier Community', 'Exclusive Access', 'Pre-register'],
     requiredProps: ['Rooftop access', 'City view', 'Professional audio', 'Dramatic backdrop'],
     notes: 'Rick op rooftop met Ibiza uitzicht. Voice-over: "Elite is not a title, it\'s a choice. Top Tier Men choose excellence every day. Join the most exclusive community of high performers. Launch September 1st. Pre-register now."',
+    cameraInstructions: 'CAMERA: Wide shot van Rick op rooftop met Ibiza skyline. Medium close-up voor motivatie momenten. Rick in center met city view op achtergrond. STABILISATIE: Tripod voor stabiele shots. AUDIO: Lavalier microfoon, wind protection. BELICHTING: Golden hour light, city lights op achtergrond. COMPOSITIE: Rick op 1/3 lijn, city view op 2/3. DRAMATIC: Rick in silhouette tegen sunset/city lights. B-ROLL: City skyline, rooftop details, Ibiza landmarks. MOVEMENT: Slow pan van city view naar Rick.',
     createdAt: '2024-12-19',
     assignedTo: 'Rick'
   },
@@ -159,6 +167,7 @@ const videoIdeas: VideoIdea[] = [
     keyMessages: ['Success Energy', 'Nightlife Balance', 'Top Tier Lifestyle', 'Work Hard, Play Hard'],
     requiredProps: ['Club access', 'Night lighting', 'Audio setup', 'Lifestyle props'],
     notes: 'Rick in club setting, sprekend over balans. Voice-over: "Top Tier Men know how to work hard and play hard. Success is not just about business, it\'s about living life to the fullest. Join the elite. Launch September 1st."',
+    cameraInstructions: 'CAMERA: Wide shots van club met Rick. Medium shots van Rick sprekend. Close-ups van club energie. STABILISATIE: Handheld voor dynamische energie, gimbal voor vloeiende shots. AUDIO: Lavalier microfoon, club muziek op achtergrond. BELICHTING: Club lighting + LED panels voor Rick\'s gezicht. COMPOSITIE: Rick in center, club ambiance op achtergrond. B-ROLL: Club interieur, mensen, dansen, drinks. MOVEMENT: Dynamic camera movements die club energie volgen. LIGHTING: Neon lights, club atmosphere, Rick goed belicht.',
     createdAt: '2024-12-19',
     assignedTo: 'Rick'
   }
@@ -391,12 +400,22 @@ export default function VideoIdeeenIbizaPage() {
                   <p className="text-sm text-gray-400">{idea.targetAudience}</p>
                 </div>
                 
-                {idea.notes && (
-                  <div className="mb-4 p-3 bg-gray-900/50 rounded-lg border border-gray-700">
-                    <h4 className="text-sm font-medium text-white mb-1">Opname Details:</h4>
-                    <p className="text-sm text-gray-400">{idea.notes}</p>
-                  </div>
-                )}
+                                 {idea.notes && (
+                   <div className="mb-4 p-3 bg-gray-900/50 rounded-lg border border-gray-700">
+                     <h4 className="text-sm font-medium text-white mb-1">Opname Details:</h4>
+                     <p className="text-sm text-gray-400">{idea.notes}</p>
+                   </div>
+                 )}
+                 
+                 {idea.cameraInstructions && (
+                   <div className="mb-4 p-3 bg-blue-900/20 rounded-lg border border-blue-700/30">
+                     <h4 className="text-sm font-medium text-blue-300 mb-2 flex items-center gap-2">
+                       <VideoCameraIcon className="w-4 h-4" />
+                       Camera Instructies
+                     </h4>
+                     <p className="text-sm text-blue-200 leading-relaxed">{idea.cameraInstructions}</p>
+                   </div>
+                 )}
                 
                                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pt-4 border-t border-gray-800 gap-2">
                    <div className="flex items-center gap-2 sm:gap-4 text-sm text-gray-400">
