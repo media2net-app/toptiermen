@@ -345,14 +345,25 @@ export default function VideoIdeeenIbizaPage() {
 
   // Transform video data based on selected language
   const videoIdeas: VideoIdea[] = videoIdeasData.map(idea => ({
-    ...idea,
+    id: idea.id,
+    title: idea.title,
     description: typeof idea.description === 'string' ? idea.description : idea.description[language],
+    category: idea.category,
+    priority: idea.priority,
+    status: idea.status,
     location: typeof idea.location === 'string' ? idea.location : idea.location[language],
     estimatedDuration: typeof idea.estimatedDuration === 'string' ? idea.estimatedDuration : idea.estimatedDuration[language],
     targetAudience: typeof idea.targetAudience === 'string' ? idea.targetAudience : idea.targetAudience[language],
+    keyMessages: idea.keyMessages,
     requiredProps: Array.isArray(idea.requiredProps) ? idea.requiredProps : idea.requiredProps[language],
-    notes: typeof idea.notes === 'string' ? idea.notes : idea.notes[language]
-  })) as VideoIdea[];
+    notes: typeof idea.notes === 'string' ? idea.notes : idea.notes[language],
+    cameraInstructions: idea.cameraInstructions,
+    dutchScript: idea.dutchScript,
+    englishScript: idea.englishScript,
+    deadline: idea.deadline,
+    createdAt: idea.createdAt,
+    assignedTo: idea.assignedTo
+  }));
 
   const getStatusColor = (status: string) => {
     switch (status) {
