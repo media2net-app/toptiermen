@@ -276,15 +276,7 @@ export default function VideoIdeeenIbizaPage() {
                    <div className="text-xs sm:text-sm text-white/80">Top Tier Men</div>
                  </div>
                </div>
-               <div className="text-center mt-4">
-                 <a 
-                   href="/offerte" 
-                   className="inline-flex items-center gap-2 bg-white text-[#8BAE5A] px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors text-sm sm:text-base"
-                 >
-                   Pre-register Nu
-                   <ArrowRightIcon className="w-4 h-4" />
-                 </a>
-               </div>
+
              </div>
           </div>
         </div>
@@ -473,33 +465,7 @@ export default function VideoIdeeenIbizaPage() {
             ))}
           </div>
 
-                     {/* Call to Action */}
-           <div className="mt-12 sm:mt-16 text-center px-4">
-             <div className="bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] p-6 sm:p-8 rounded-2xl">
-               <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3 sm:mb-4">
-                 Klaar om een Top Tier Man te worden?
-               </h2>
-               <p className="text-white/90 mb-4 sm:mb-6 max-w-2xl mx-auto text-sm sm:text-base">
-                 Deze video's zijn slechts het begin. Word lid van de meest exclusieve community van high performers en begin je reis naar succes.
-               </p>
-               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-                 <a 
-                   href="/offerte" 
-                   className="inline-flex items-center justify-center gap-2 bg-white text-[#8BAE5A] px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold hover:bg-gray-100 transition-colors text-sm sm:text-base"
-                 >
-                   Pre-register Nu
-                   <ArrowRightIcon className="w-4 h-4" />
-                 </a>
-                 <a 
-                   href="/login" 
-                   className="inline-flex items-center justify-center gap-2 border-2 border-white text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold hover:bg-white hover:text-[#8BAE5A] transition-colors text-sm sm:text-base"
-                 >
-                   Login
-                   <ArrowRightIcon className="w-4 h-4" />
-                 </a>
-               </div>
-             </div>
-           </div>
+
         </div>
       </div>
     </div>
