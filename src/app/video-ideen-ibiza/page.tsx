@@ -16,6 +16,84 @@ import {
   ArrowRightIcon
 } from '@heroicons/react/24/outline';
 
+// Language translations
+const translations = {
+  nl: {
+    title: 'Video Ideeën',
+    subtitle: 'Ibiza',
+    description: 'Ontdek de exclusieve video concepten die Rick in Ibiza gaat opnemen voor de Top Tier Men community',
+    daysUntilLaunch: 'Dagen tot Launch',
+    september: 'September',
+    topTierMen: 'Top Tier Men',
+    totalVideos: 'Totaal Video\'s',
+    highPriority: 'Hoog Prioriteit',
+    ibizaLocations: 'Ibiza Locaties',
+    rickAsAuthority: 'Rick als Autoriteit',
+    filterVideos: 'Filter Video\'s',
+    allCategories: 'Alle Categorieën',
+    promotion: 'Promotie',
+    tutorial: 'Tutorial',
+    testimonial: 'Testimonial',
+    lifestyle: 'Lifestyle',
+    behindTheScenes: 'Behind-the-Scenes',
+    allPriorities: 'Alle Prioriteiten',
+    high: 'Hoog',
+    medium: 'Medium',
+    low: 'Laag',
+    deadlineAlert: '⚠️ Deadline Alert',
+    deadlineText: 'Uiterlijke opleverdatum voor alle video\'s: 8 augustus 2025',
+    campaignStart: 'Video campagnes starten op 11 augustus 2025 - 3 weken voor lancering 1 september',
+    keyMessages: 'Kernboodschappen:',
+    targetAudience: 'Doelgroep:',
+    recordingDetails: 'Opname Details:',
+    cameraInstructions: 'Camera Instructies',
+    dutchVoiceover: 'Nederlandse Voice-over',
+    englishVoiceover: 'English Voice-over',
+    deadlineLabel: 'Uiterlijke Opleverdatum:',
+    deadlineContext: 'Voor video campagne start 11-08-2025',
+    by: 'Door:',
+    priority: 'Prioriteit',
+    status: 'Status'
+  },
+  en: {
+    title: 'Video Ideas',
+    subtitle: 'Ibiza',
+    description: 'Discover the exclusive video concepts that Rick will film in Ibiza for the Top Tier Men community',
+    daysUntilLaunch: 'Days until Launch',
+    september: 'September',
+    topTierMen: 'Top Tier Men',
+    totalVideos: 'Total Videos',
+    highPriority: 'High Priority',
+    ibizaLocations: 'Ibiza Locations',
+    rickAsAuthority: 'Rick as Authority',
+    filterVideos: 'Filter Videos',
+    allCategories: 'All Categories',
+    promotion: 'Promotion',
+    tutorial: 'Tutorial',
+    testimonial: 'Testimonial',
+    lifestyle: 'Lifestyle',
+    behindTheScenes: 'Behind-the-Scenes',
+    allPriorities: 'All Priorities',
+    high: 'High',
+    medium: 'Medium',
+    low: 'Low',
+    deadlineAlert: '⚠️ Deadline Alert',
+    deadlineText: 'Final delivery deadline for all videos: August 8, 2025',
+    campaignStart: 'Video campaigns start on August 11, 2025 - 3 weeks before September 1 launch',
+    keyMessages: 'Key Messages:',
+    targetAudience: 'Target Audience:',
+    recordingDetails: 'Recording Details:',
+    cameraInstructions: 'Camera Instructions',
+    dutchVoiceover: 'Dutch Voice-over',
+    englishVoiceover: 'English Voice-over',
+    deadlineLabel: 'Final Delivery Deadline:',
+    deadlineContext: 'For video campaign start 11-08-2025',
+    by: 'By:',
+    priority: 'Priority',
+    status: 'Status'
+  }
+};
+
 interface VideoIdea {
   id: string;
   title: string;
@@ -204,6 +282,9 @@ export default function VideoIdeeenIbizaPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('alle');
   const [selectedPriority, setSelectedPriority] = useState<string>('alle');
   const [showDeadlineWarning, setShowDeadlineWarning] = useState<boolean>(true);
+  const [language, setLanguage] = useState<'nl' | 'en'>('nl');
+
+  const t = translations[language];
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -255,19 +336,49 @@ export default function VideoIdeeenIbizaPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0F1419] via-[#1a1f2e] to-[#0F1419]">
+      {/* Language Switcher */}
+      <div className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-sm border-b border-gray-800">
+        <div className="flex justify-end px-4 py-2">
+          <div className="flex items-center gap-2 bg-gray-900/50 rounded-lg p-1 border border-gray-700">
+            <button
+              onClick={() => setLanguage('nl')}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+                language === 'nl' 
+                  ? 'bg-[#8BAE5A] text-white shadow-lg' 
+                  : 'text-gray-400 hover:text-white hover:bg-gray-800'
+              }`}
+            >
+              <span className="text-lg">🇳🇱</span>
+              <span className="hidden sm:inline">Nederlands</span>
+            </button>
+            <button
+              onClick={() => setLanguage('en')}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+                language === 'en' 
+                  ? 'bg-[#8BAE5A] text-white shadow-lg' 
+                  : 'text-gray-400 hover:text-white hover:bg-gray-800'
+              }`}
+            >
+              <span className="text-lg">🇬🇧</span>
+              <span className="hidden sm:inline">English</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* Header */}
-      <div className="relative overflow-hidden">
+      <div className="relative overflow-hidden pt-16">
         {/* Background Pattern */}
         <div className="absolute inset-0 bg-[url('/images/brotherhood/ardennen.png')] bg-cover bg-center opacity-10"></div>
         
         <div className="relative z-10 px-6 py-16 text-center">
           <div className="max-w-4xl mx-auto">
                          <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold text-white mb-4 sm:mb-6">
-               Video Ideeën
-               <span className="block text-[#8BAE5A]">Ibiza</span>
+               {t.title}
+               <span className="block text-[#8BAE5A]">{t.subtitle}</span>
              </h1>
              <p className="text-lg sm:text-xl text-gray-300 mb-6 sm:mb-8 max-w-2xl mx-auto px-4">
-               Ontdek de exclusieve video concepten die Rick in Ibiza gaat opnemen voor de Top Tier Men community
+               {t.description}
              </p>
             
                          {/* Countdown Banner */}
@@ -275,15 +386,15 @@ export default function VideoIdeeenIbizaPage() {
                <div className="flex items-center justify-center gap-4 sm:gap-8 flex-wrap">
                  <div className="text-center">
                    <div className="text-2xl sm:text-3xl font-bold text-white">{daysUntilLaunch}</div>
-                   <div className="text-xs sm:text-sm text-white/80">Dagen tot Launch</div>
+                   <div className="text-xs sm:text-sm text-white/80">{t.daysUntilLaunch}</div>
                  </div>
                  <div className="text-center">
                    <div className="text-2xl sm:text-3xl font-bold text-white">1</div>
-                   <div className="text-xs sm:text-sm text-white/80">September</div>
+                   <div className="text-xs sm:text-sm text-white/80">{t.september}</div>
                  </div>
                  <div className="text-center">
                    <div className="text-2xl sm:text-3xl font-bold text-white">2025</div>
-                   <div className="text-xs sm:text-sm text-white/80">Top Tier Men</div>
+                   <div className="text-xs sm:text-sm text-white/80">{t.topTierMen}</div>
                  </div>
                </div>
 
@@ -299,7 +410,7 @@ export default function VideoIdeeenIbizaPage() {
                          <div className="bg-black/50 backdrop-blur-sm border border-gray-800 p-4 sm:p-6 rounded-xl">
                <div className="flex items-center justify-between">
                  <div>
-                   <p className="text-gray-400 text-xs sm:text-sm">Totaal Video's</p>
+                   <p className="text-gray-400 text-xs sm:text-sm">{t.totalVideos}</p>
                    <p className="text-xl sm:text-2xl font-bold text-white">{videoIdeas.length}</p>
                  </div>
                  <VideoCameraIcon className="w-6 h-6 sm:w-8 sm:h-8 text-[#8BAE5A]" />
@@ -309,7 +420,7 @@ export default function VideoIdeeenIbizaPage() {
                          <div className="bg-black/50 backdrop-blur-sm border border-gray-800 p-4 sm:p-6 rounded-xl">
                <div className="flex items-center justify-between">
                  <div>
-                   <p className="text-gray-400 text-xs sm:text-sm">Hoog Prioriteit</p>
+                   <p className="text-gray-400 text-xs sm:text-sm">{t.highPriority}</p>
                    <p className="text-xl sm:text-2xl font-bold text-white">
                      {videoIdeas.filter(idea => idea.priority === 'hoog').length}
                    </p>
@@ -321,7 +432,7 @@ export default function VideoIdeeenIbizaPage() {
                          <div className="bg-black/50 backdrop-blur-sm border border-gray-800 p-4 sm:p-6 rounded-xl">
                <div className="flex items-center justify-between">
                  <div>
-                   <p className="text-gray-400 text-xs sm:text-sm">Ibiza Locaties</p>
+                   <p className="text-gray-400 text-xs sm:text-sm">{t.ibizaLocations}</p>
                    <p className="text-xl sm:text-2xl font-bold text-white">8</p>
                  </div>
                  <MapPinIcon className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500" />
@@ -331,7 +442,7 @@ export default function VideoIdeeenIbizaPage() {
                          <div className="bg-black/50 backdrop-blur-sm border border-gray-800 p-4 sm:p-6 rounded-xl">
                <div className="flex items-center justify-between">
                  <div>
-                   <p className="text-gray-400 text-xs sm:text-sm">Rick als Autoriteit</p>
+                   <p className="text-gray-400 text-xs sm:text-sm">{t.rickAsAuthority}</p>
                    <p className="text-xl sm:text-2xl font-bold text-white">100%</p>
                  </div>
                  <UserIcon className="w-6 h-6 sm:w-8 sm:h-8 text-[#B6C948]" />
@@ -346,12 +457,12 @@ export default function VideoIdeeenIbizaPage() {
                  <div className="flex items-center gap-3">
                    <CalendarIcon className="w-6 h-6 text-red-400 flex-shrink-0 mt-1" />
                    <div>
-                     <h2 className="text-lg sm:text-xl font-semibold text-red-300 mb-2">⚠️ Deadline Alert</h2>
+                     <h2 className="text-lg sm:text-xl font-semibold text-red-300 mb-2">{t.deadlineAlert}</h2>
                      <p className="text-red-200 text-sm sm:text-base">
-                       <strong>Uiterlijke opleverdatum voor alle video's: 8 augustus 2025</strong>
+                       <strong>{t.deadlineText}</strong>
                      </p>
                      <p className="text-red-300 text-xs sm:text-sm mt-1">
-                       Video campagnes starten op 11 augustus 2025 - 3 weken voor lancering 1 september
+                       {t.campaignStart}
                      </p>
                    </div>
                  </div>
@@ -367,7 +478,7 @@ export default function VideoIdeeenIbizaPage() {
 
                      {/* Filters */}
            <div className="bg-black/50 backdrop-blur-sm border border-gray-800 p-4 sm:p-6 rounded-xl mb-6 sm:mb-8">
-             <h2 className="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4">Filter Video's</h2>
+             <h2 className="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4">{t.filterVideos}</h2>
              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-400 mb-2">Categorie</label>
@@ -376,26 +487,26 @@ export default function VideoIdeeenIbizaPage() {
                   onChange={(e) => setSelectedCategory(e.target.value)}
                   className="w-full bg-gray-900 border border-gray-700 text-white rounded-lg px-3 py-2"
                 >
-                  <option value="alle">Alle Categorieën</option>
-                  <option value="promotie">Promotie</option>
-                  <option value="tutorial">Tutorial</option>
-                  <option value="testimonial">Testimonial</option>
-                  <option value="lifestyle">Lifestyle</option>
-                  <option value="behind-the-scenes">Behind-the-Scenes</option>
+                  <option value="alle">{t.allCategories}</option>
+                  <option value="promotie">{t.promotion}</option>
+                  <option value="tutorial">{t.tutorial}</option>
+                  <option value="testimonial">{t.testimonial}</option>
+                  <option value="lifestyle">{t.lifestyle}</option>
+                  <option value="behind-the-scenes">{t.behindTheScenes}</option>
                 </select>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">Prioriteit</label>
+                <label className="block text-sm font-medium text-gray-400 mb-2">{t.priority}</label>
                 <select
                   value={selectedPriority}
                   onChange={(e) => setSelectedPriority(e.target.value)}
                   className="w-full bg-gray-900 border border-gray-700 text-white rounded-lg px-3 py-2"
                 >
-                  <option value="alle">Alle Prioriteiten</option>
-                  <option value="hoog">Hoog</option>
-                  <option value="medium">Medium</option>
-                  <option value="laag">Laag</option>
+                  <option value="alle">{t.allPriorities}</option>
+                  <option value="hoog">{t.high}</option>
+                  <option value="medium">{t.medium}</option>
+                  <option value="laag">{t.low}</option>
                 </select>
               </div>
             </div>
@@ -433,16 +544,16 @@ export default function VideoIdeeenIbizaPage() {
                  <div className="mb-4 p-3 bg-red-900/20 rounded-lg border border-red-700/30">
                    <div className="flex items-center gap-2 text-sm text-red-300">
                      <CalendarIcon className="w-4 h-4" />
-                     <span className="font-medium">Uiterlijke Opleverdatum:</span>
-                     <span className="text-red-200 font-bold">{idea.deadline}</span>
-                   </div>
-                   <p className="text-xs text-red-300 mt-1">
-                     Voor video campagne start 11-08-2025
-                   </p>
+                                        <span className="font-medium">{t.deadlineLabel}</span>
+                   <span className="text-red-200 font-bold">{idea.deadline}</span>
+                 </div>
+                 <p className="text-xs text-red-300 mt-1">
+                   {t.deadlineContext}
+                 </p>
                  </div>
                 
                                  <div className="mb-4">
-                   <h4 className="text-sm font-medium text-white mb-2">Kernboodschappen:</h4>
+                   <h4 className="text-sm font-medium text-white mb-2">{t.keyMessages}</h4>
                    <div className="flex flex-wrap gap-1 sm:gap-2">
                      {idea.keyMessages.map((message, index) => (
                        <span key={index} className="bg-[#8BAE5A]/20 text-[#8BAE5A] px-2 py-1 rounded text-xs border border-[#8BAE5A]/30 whitespace-nowrap">
@@ -453,13 +564,13 @@ export default function VideoIdeeenIbizaPage() {
                  </div>
                 
                 <div className="mb-4">
-                  <h4 className="text-sm font-medium text-white mb-2">Doelgroep:</h4>
+                  <h4 className="text-sm font-medium text-white mb-2">{t.targetAudience}</h4>
                   <p className="text-sm text-gray-400">{idea.targetAudience}</p>
                 </div>
                 
                                  {idea.notes && (
                    <div className="mb-4 p-3 bg-gray-900/50 rounded-lg border border-gray-700">
-                     <h4 className="text-sm font-medium text-white mb-1">Opname Details:</h4>
+                     <h4 className="text-sm font-medium text-white mb-1">{t.recordingDetails}</h4>
                      <p className="text-sm text-gray-400">{idea.notes}</p>
                    </div>
                  )}
@@ -468,7 +579,7 @@ export default function VideoIdeeenIbizaPage() {
                    <div className="mb-4 p-3 bg-blue-900/20 rounded-lg border border-blue-700/30">
                      <h4 className="text-sm font-medium text-blue-300 mb-2 flex items-center gap-2">
                        <VideoCameraIcon className="w-4 h-4" />
-                       Camera Instructies
+                       {t.cameraInstructions}
                      </h4>
                      <p className="text-sm text-blue-200 leading-relaxed">{idea.cameraInstructions}</p>
                    </div>
@@ -479,7 +590,7 @@ export default function VideoIdeeenIbizaPage() {
                      <div className="p-3 bg-green-900/20 rounded-lg border border-green-700/30">
                        <h4 className="text-sm font-medium text-green-300 mb-2 flex items-center gap-2">
                          <span className="text-xs bg-green-600 text-white px-2 py-1 rounded">NL</span>
-                         Nederlandse Voice-over
+                         {t.dutchVoiceover}
                        </h4>
                        <p className="text-sm text-green-200 leading-relaxed">{idea.dutchScript}</p>
                      </div>
@@ -489,7 +600,7 @@ export default function VideoIdeeenIbizaPage() {
                      <div className="p-3 bg-purple-900/20 rounded-lg border border-purple-700/30">
                        <h4 className="text-sm font-medium text-purple-300 mb-2 flex items-center gap-2">
                          <span className="text-xs bg-purple-600 text-white px-2 py-1 rounded">EN</span>
-                         English Voice-over
+                         {t.englishVoiceover}
                        </h4>
                        <p className="text-sm text-purple-200 leading-relaxed">{idea.englishScript}</p>
                      </div>
@@ -498,7 +609,7 @@ export default function VideoIdeeenIbizaPage() {
                 
                                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pt-4 border-t border-gray-800 gap-2">
                    <div className="flex items-center gap-2 sm:gap-4 text-sm text-gray-400">
-                     <span>Door: {idea.assignedTo}</span>
+                     <span>{t.by}: {idea.assignedTo}</span>
                      <span className="hidden sm:inline">•</span>
                      <span>{idea.createdAt}</span>
                    </div>
