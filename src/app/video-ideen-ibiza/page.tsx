@@ -32,6 +32,7 @@ interface VideoIdea {
   cameraInstructions: string;
   dutchScript: string;
   englishScript: string;
+  deadline: string;
   createdAt: string;
   assignedTo: string;
 }
@@ -53,6 +54,7 @@ const videoIdeas: VideoIdea[] = [
     cameraInstructions: 'CAMERA: Start with dramatic drone shot of cliff and Rick silhouette. Wide shot of Rick on cliff with sunrise background. Rick in center frame, cliff and sea visible. Medium close-up shots for emotion. Ensure golden hour lighting. STABILIZATION: Gimbal or tripod for smooth movements. AUDIO: Lavalier microphone for Rick, wind protection. LIGHTING: Natural light, ND filter for sunrise. COMPOSITION: Rule of thirds, Rick on 1/3 line, sunrise on 2/3. DRONE: Aerial shots of cliff and Rick for opening/closing. HOOK: First 3 seconds must be visually stunning with dramatic sunrise and Rick silhouette.',
     dutchScript: 'Discipline is de brug tussen doelen en prestaties. Ben je klaar om een Top Tier Man te worden? Lancering 1 september. Pre-registreer nu voor exclusieve vroege toegang.',
     englishScript: 'Discipline is the bridge between goals and accomplishment. Are you ready to become a Top Tier Man? Join the most exclusive community of high performers.',
+    deadline: '08-08-2025',
     createdAt: '2024-12-19',
     assignedTo: 'Rick'
   },
@@ -72,6 +74,7 @@ const videoIdeas: VideoIdea[] = [
     cameraInstructions: 'CAMERA: Start with slow motion punch impact shot. Handheld for dynamic movement. Close-up shots of Rick\'s face during training. Wide shots of full training session. Medium shots of technique. STABILIZATION: Gimbal for smooth movements, handheld for raw energy. AUDIO: Lavalier microphone under shirt, gym sounds in background. LIGHTING: Gym lighting + LED panels for fill light. COMPOSITION: Rick always in center frame, focus on movement and intensity. SLOW MOTION: For impact shots and technique demonstrations. B-ROLL: Close-ups of gloves, sweat, focus in eyes. HOOK: First 3 seconds must show intense physical action with slow motion impact.',
     dutchScript: 'Discipline is doen wat er gedaan moet worden, ook als je er geen zin in hebt. Dit is wat Top Tier Men onderscheidt van de rest. Ben je klaar om je grenzen te verleggen? Lancering 1 september.',
     englishScript: 'Discipline is doing what needs to be done, even when you don\'t want to. This is what separates Top Tier Men from the rest. Are you ready to push your limits?',
+    deadline: '08-08-2025',
     createdAt: '2024-12-19',
     assignedTo: 'Rick'
   },
@@ -91,6 +94,7 @@ const videoIdeas: VideoIdea[] = [
     cameraInstructions: 'CAMERA: Start with peaceful beach shot with waves. Wide shot of Rick on beach with sea background. Close-up of Rick\'s face in meditation. Medium shot of full pose. STABILIZATION: Tripod for stable shots, no movement. AUDIO: Lavalier microphone, natural beach sounds (waves, birds). LIGHTING: Soft morning light, no harsh shadows. COMPOSITION: Rick in center, sea in background. Rule of thirds. SLOW MOTION: For meditation movements and breathing. B-ROLL: Close-ups of hands, feet in sand, waves, birds. HOOK: First 3 seconds must show peaceful beach atmosphere with gentle waves.',
     dutchScript: 'Je mindset bepaalt je realiteit. Top Tier Men beheersen hun gedachten voordat ze hun acties beheersen. Lancering 1 september.',
     englishScript: 'Your mindset determines your reality. Top Tier Men master their thoughts before they master their actions.',
+    deadline: '08-08-2025',
     createdAt: '2024-12-19',
     assignedTo: 'Rick'
   },
@@ -110,6 +114,7 @@ const videoIdeas: VideoIdea[] = [
     cameraInstructions: 'CAMERA: Start with spectacular sunset time-lapse. Wide shot of Rick with Es Vedrà background. Medium close-up for countdown moment. Rick in silhouette against sunset. STABILIZATION: Tripod for stable shots. AUDIO: Lavalier microphone, wind protection. LIGHTING: Sunset lighting, Rick in silhouette, Es Vedrà illuminated. COMPOSITION: Rick on 1/3 line, Es Vedrà on 2/3. DRAMATIC: Silhouette shots of Rick against sunset. B-ROLL: Time-lapse of sunset, Es Vedrà shots. OVERLAY: Countdown timer in post-production. HOOK: First 3 seconds must show dramatic sunset time-lapse with Es Vedrà.',
     dutchScript: 'De countdown is begonnen. 1 september 2025. Word een Top Tier Man. Pre-registreer nu voor exclusieve vroege toegang. Mis je kans niet om bij de elite te horen.',
     englishScript: 'The countdown has begun. Become a Top Tier Man. Join the most exclusive community of high performers.',
+    deadline: '08-08-2025',
     createdAt: '2024-12-19',
     assignedTo: 'Rick'
   },
@@ -129,6 +134,7 @@ const videoIdeas: VideoIdea[] = [
     cameraInstructions: 'CAMERA: Start with luxury villa exterior shot. Wide shots of villa interior with Rick. Medium shots of Rick speaking. Close-ups of lifestyle details. STABILIZATION: Tripod for interviews, handheld for lifestyle shots. AUDIO: Lavalier microphone, villa ambiance. LIGHTING: Natural light + LED panels for fill. COMPOSITION: Rick in center, villa details in background. B-ROLL: Villa exterior, pool, view, lifestyle items. MOVEMENT: Slow pan shots of villa interior. LIGHTING: Warm, luxury feel with golden hour light. HOOK: First 3 seconds must show luxury villa exterior with pool and sea view.',
     dutchScript: 'Succes is niet toevallig. Top Tier Men denken anders, handelen anders, leven anders. Sluit je aan bij de elite. Lancering 1 september.',
     englishScript: 'Success is not accidental. Top Tier Men think differently, act differently, live differently. Join the elite.',
+    deadline: '08-08-2025',
     createdAt: '2024-12-19',
     assignedTo: 'Rick'
   },
@@ -148,6 +154,7 @@ const videoIdeas: VideoIdea[] = [
     cameraInstructions: 'CAMERA: Start with dynamic workout movement. Wide shots of Rick on beach with sea background. Medium shots of workout movements. Close-ups of muscles and focus. STABILIZATION: Gimbal for smooth movements, handheld for energy. AUDIO: Lavalier microphone, beach sounds in background. LIGHTING: Natural sunlight, reflectors for fill light. COMPOSITION: Rick in center, sea in background. SLOW MOTION: For workout movements and impact shots. B-ROLL: Close-ups of sand, waves, workout equipment. MOVEMENT: Dynamic camera movements following workout. HOOK: First 3 seconds must show intense beach workout with dramatic movement.',
     dutchScript: 'Discipline is consistentie in actie. Elke rep, elke set, elke dag. Zo bouwen Top Tier Men hun lichaam en karakter op. Ben je klaar om te committeren? Lancering 1 september.',
     englishScript: 'Discipline is consistency in action. Every rep, every set, every day. This is how Top Tier Men build their bodies and their character. Are you ready to commit?',
+    deadline: '08-08-2025',
     createdAt: '2024-12-19',
     assignedTo: 'Rick'
   },
@@ -167,6 +174,7 @@ const videoIdeas: VideoIdea[] = [
     cameraInstructions: 'CAMERA: Start with spectacular city skyline shot. Wide shot of Rick on rooftop with Ibiza skyline. Medium close-up for motivation moments. Rick in center with city view background. STABILIZATION: Tripod for stable shots. AUDIO: Lavalier microphone, wind protection. LIGHTING: Golden hour light, city lights in background. COMPOSITION: Rick on 1/3 line, city view on 2/3. DRAMATIC: Rick in silhouette against sunset/city lights. B-ROLL: City skyline, rooftop details, Ibiza landmarks. MOVEMENT: Slow pan from city view to Rick. HOOK: First 3 seconds must show dramatic city skyline with sunset colors.',
     dutchScript: 'Elite is geen titel, het is een keuze. Top Tier Men kiezen elke dag voor excellentie. Sluit je aan bij de meest exclusieve community van high performers. Lancering 1 september. Pre-registreer nu.',
     englishScript: 'Elite is not a title, it\'s a choice. Top Tier Men choose excellence every day. Join the most exclusive community of high performers.',
+    deadline: '08-08-2025',
     createdAt: '2024-12-19',
     assignedTo: 'Rick'
   },
@@ -186,6 +194,7 @@ const videoIdeas: VideoIdea[] = [
     cameraInstructions: 'CAMERA: Start with energetic club atmosphere. Wide shots of club with Rick. Medium shots of Rick speaking. Close-ups of club energy. STABILIZATION: Handheld for dynamic energy, gimbal for smooth shots. AUDIO: Lavalier microphone, club music in background. LIGHTING: Club lighting + LED panels for Rick\'s face. COMPOSITION: Rick in center, club ambiance in background. B-ROLL: Club interior, people, dancing, drinks. MOVEMENT: Dynamic camera movements following club energy. LIGHTING: Neon lights, club atmosphere, Rick well lit. HOOK: First 3 seconds must show energetic club atmosphere with neon lights and people.',
     dutchScript: 'Top Tier Men weten hoe ze hard moeten werken en hard moeten spelen. Succes gaat niet alleen over business, het gaat over het leven ten volste leven. Sluit je aan bij de elite. Lancering 1 september.',
     englishScript: 'Top Tier Men know how to work hard and play hard. Success is not just about business, it\'s about living life to the fullest. Join the elite.',
+    deadline: '08-08-2025',
     createdAt: '2024-12-19',
     assignedTo: 'Rick'
   }
@@ -194,6 +203,7 @@ const videoIdeas: VideoIdea[] = [
 export default function VideoIdeeenIbizaPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('alle');
   const [selectedPriority, setSelectedPriority] = useState<string>('alle');
+  const [showDeadlineWarning, setShowDeadlineWarning] = useState<boolean>(true);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -329,6 +339,32 @@ export default function VideoIdeeenIbizaPage() {
              </div>
           </div>
 
+                     {/* Deadline Warning */}
+           {showDeadlineWarning && (
+             <div className="bg-red-900/20 backdrop-blur-sm border border-red-700/30 p-4 sm:p-6 rounded-xl mb-6 sm:mb-8">
+               <div className="flex items-start justify-between">
+                 <div className="flex items-center gap-3">
+                   <CalendarIcon className="w-6 h-6 text-red-400 flex-shrink-0 mt-1" />
+                   <div>
+                     <h2 className="text-lg sm:text-xl font-semibold text-red-300 mb-2">⚠️ Deadline Alert</h2>
+                     <p className="text-red-200 text-sm sm:text-base">
+                       <strong>Uiterlijke opleverdatum voor alle video's: 8 augustus 2025</strong>
+                     </p>
+                     <p className="text-red-300 text-xs sm:text-sm mt-1">
+                       Video campagnes starten op 11 augustus 2025 - 3 weken voor lancering 1 september
+                     </p>
+                   </div>
+                 </div>
+                 <button
+                   onClick={() => setShowDeadlineWarning(false)}
+                   className="text-red-400 hover:text-red-300 text-sm"
+                 >
+                   ✕
+                 </button>
+               </div>
+             </div>
+           )}
+
                      {/* Filters */}
            <div className="bg-black/50 backdrop-blur-sm border border-gray-800 p-4 sm:p-6 rounded-xl mb-6 sm:mb-8">
              <h2 className="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4">Filter Video's</h2>
@@ -392,6 +428,17 @@ export default function VideoIdeeenIbizaPage() {
                      <ClockIcon className="w-4 h-4 flex-shrink-0" />
                      <span>{idea.estimatedDuration}</span>
                    </div>
+                 </div>
+                 
+                 <div className="mb-4 p-3 bg-red-900/20 rounded-lg border border-red-700/30">
+                   <div className="flex items-center gap-2 text-sm text-red-300">
+                     <CalendarIcon className="w-4 h-4" />
+                     <span className="font-medium">Uiterlijke Opleverdatum:</span>
+                     <span className="text-red-200 font-bold">{idea.deadline}</span>
+                   </div>
+                   <p className="text-xs text-red-300 mt-1">
+                     Voor video campagne start 11-08-2025
+                   </p>
                  </div>
                 
                                  <div className="mb-4">
