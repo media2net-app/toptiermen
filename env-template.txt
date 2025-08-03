@@ -22,6 +22,11 @@ RESEND_API_KEY=re_your_resend_api_key_here
 # Voeg toe: BLOB_READ_WRITE_TOKEN
 BLOB_READ_WRITE_TOKEN=your_vercel_blob_token_here
 
+# Spoonacular API Configuration
+# Haal je gratis API key op uit: https://spoonacular.com/food-api
+# Free tier: 150 requests per dag
+NEXT_PUBLIC_SPOONACULAR_API_KEY=your_spoonacular_api_key_here
+
 # Site Configuration
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
@@ -40,4 +45,8 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 # Vercel Blob Token haal je op uit:
 # Vercel Dashboard → Your Project → Settings → Environment Variables → Add New
 # Name: BLOB_READ_WRITE_TOKEN
-# Value: Je Vercel Blob token (verkrijgbaar via Vercel CLI of Dashboard) 
+# Value: Je Vercel Blob token (verkrijgbaar via Vercel CLI of Dashboard)
+
+# Spoonacular API Key haal je op uit:
+# https://spoonacular.com/food-api → Get API Key → Free Plan
+# Free tier: 150 requests per dag, perfect voor ontwikkeling en kleine projecten 
