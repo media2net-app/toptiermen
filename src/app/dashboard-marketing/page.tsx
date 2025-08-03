@@ -17,7 +17,10 @@ import {
   FireIcon,
   StarIcon,
   DocumentChartBarIcon,
-  DocumentTextIcon
+  DocumentTextIcon,
+  ExclamationTriangleIcon,
+  CalendarIcon,
+  InformationCircleIcon
 } from '@heroicons/react/24/outline';
 import CampaignModal from '@/components/marketing/CampaignModal';
 
@@ -76,7 +79,7 @@ export default function MarketingDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCampaign, setSelectedCampaign] = useState<any>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   // Mock data for now
   useEffect(() => {
@@ -439,12 +442,12 @@ export default function MarketingDashboard() {
     const campaignData = (window as any).extendedCampaignData?.[campaignId];
     if (campaignData) {
       setSelectedCampaign(campaignData);
-      setIsModalOpen(true);
+      setShowModal(true);
     }
   };
 
   const handleCloseModal = () => {
-    setIsModalOpen(false);
+    setShowModal(false);
     setSelectedCampaign(null);
   };
 
@@ -504,13 +507,6 @@ export default function MarketingDashboard() {
           <p className="text-gray-400 mt-1">Beheer je marketing activiteiten en prestaties</p>
         </div>
         <div className="flex items-center space-x-4">
-          <Link 
-            href="/offerte"
-            className="bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-all duration-200 transform hover:scale-105 font-semibold shadow-lg"
-          >
-            <DocumentTextIcon className="w-5 h-5" />
-            <span>Offerte</span>
-          </Link>
           <button className="bg-[#3A4D23] hover:bg-[#4A5D33] text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
             <PlusIcon className="w-5 h-5" />
             <span>Nieuwe Campagne</span>
@@ -753,9 +749,86 @@ export default function MarketingDashboard() {
       {/* Campaign Modal */}
       <CampaignModal
         campaign={selectedCampaign}
-        isOpen={isModalOpen}
+        isOpen={showModal}
         onClose={handleCloseModal}
       />
+
+      {/* Dummy Data Popup - Non-dismissible */}
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+        <div className="bg-gradient-to-br from-blue-600 to-blue-800 text-white p-8 rounded-2xl shadow-2xl max-w-2xl mx-4 border-2 border-blue-400">
+          <div className="text-center">
+            {/* Header */}
+            <div className="flex items-center justify-center mb-6">
+              <InformationCircleIcon className="w-12 h-12 text-blue-200 mr-4" />
+              <h2 className="text-3xl font-bold text-white">Marketing Dashboard</h2>
+            </div>
+            
+            {/* Main Message */}
+            <div className="space-y-4 mb-8">
+              <div className="bg-blue-700/50 rounded-lg p-4 border border-blue-400">
+                <div className="flex items-center mb-3">
+                  <ExclamationTriangleIcon className="w-6 h-6 text-yellow-300 mr-2" />
+                  <span className="text-lg font-semibold text-yellow-300">Let Op: Dummy Data</span>
+                </div>
+                <p className="text-blue-100 text-lg leading-relaxed">
+                  Het marketing dashboard toont momenteel <strong>dummy data</strong> voor demonstratiedoeleinden. 
+                  Alle cijfers, campagnes en statistieken zijn gesimuleerd.
+                </p>
+              </div>
+              
+              <div className="bg-green-700/50 rounded-lg p-4 border border-green-400">
+                <div className="flex items-center mb-3">
+                  <CalendarIcon className="w-6 h-6 text-green-300 mr-2" />
+                  <span className="text-lg font-semibold text-green-300">Launch Datum</span>
+                </div>
+                <p className="text-green-100 text-lg leading-relaxed">
+                  <strong>22 Augustus 2024</strong> - Het marketing dashboard wordt volledig operationeel 
+                  met echte campagnes en live data.
+                </p>
+              </div>
+            </div>
+            
+            {/* Features List */}
+            <div className="bg-white/10 rounded-lg p-6 mb-8">
+              <h3 className="text-xl font-semibold mb-4 text-blue-200">Wat komt er op 22 Augustus?</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-left">
+                <div className="flex items-center">
+                  <div className="w-2 h-2 bg-green-400 rounded-full mr-3"></div>
+                  <span className="text-blue-100">Echte campagne data</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-2 h-2 bg-green-400 rounded-full mr-3"></div>
+                  <span className="text-blue-100">Live analytics</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-2 h-2 bg-green-400 rounded-full mr-3"></div>
+                  <span className="text-blue-100">Campagne beheer</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-2 h-2 bg-green-400 rounded-full mr-3"></div>
+                  <span className="text-blue-100">Real-time rapportages</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-2 h-2 bg-green-400 rounded-full mr-3"></div>
+                  <span className="text-blue-100">Budget tracking</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-2 h-2 bg-green-400 rounded-full mr-3"></div>
+                  <span className="text-blue-100">Performance monitoring</span>
+                </div>
+              </div>
+            </div>
+            
+            {/* Footer */}
+            <div className="bg-blue-900/50 rounded-lg p-4 border border-blue-500">
+              <p className="text-blue-200 text-sm">
+                <strong>Tip:</strong> Je kunt nu al door het dashboard navigeren om de interface te verkennen. 
+                Alle functionaliteit wordt op 22 Augustus geactiveerd.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 } 

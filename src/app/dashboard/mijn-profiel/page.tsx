@@ -53,6 +53,7 @@ export default function MijnProfiel() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   // Edit states
   const [editingField, setEditingField] = useState<string | null>(null);
@@ -93,11 +94,30 @@ export default function MijnProfiel() {
   // Fetch user profile
   useEffect(() => {
     if (user) {
-      fetchUserProfile();
-      fetchBadgesAndRanks();
-      fetchAffiliateData();
+      fetchAllData();
+    } else {
+      setLoading(false);
     }
   }, [user]);
+
+  const fetchAllData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Fetch all data in parallel
+      await Promise.all([
+        fetchUserProfile(),
+        fetchBadgesAndRanks(),
+        fetchAffiliateData()
+      ]);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      setError('Er is een fout opgetreden bij het laden van je profiel');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchUserProfile = async () => {
     try {
@@ -118,8 +138,7 @@ export default function MijnProfiel() {
       }
     } catch (error) {
       console.error('Error:', error);
-    } finally {
-      setLoading(false);
+      throw error; // Re-throw to be caught by fetchAllData
     }
   };
 
@@ -308,11 +327,13 @@ export default function MijnProfiel() {
 
       if (error) {
         console.error('Error creating profile:', error);
+        throw error;
       } else {
         setProfile(data);
       }
     } catch (error) {
       console.error('Error:', error);
+      throw error;
     }
   };
 
@@ -612,14 +633,70 @@ export default function MijnProfiel() {
   };
 
   if (!user) {
-    return <div className="text-white">Gebruiker niet gevonden.</div>;
+    return (
+      <ClientLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="text-[#8BAE5A] text-xl mb-4">Gebruiker niet gevonden</div>
+            <button 
+              onClick={() => signOut()} 
+              className="px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg font-semibold hover:bg-[#A6C97B] transition-colors"
+            >
+              Opnieuw inloggen
+            </button>
+          </div>
+        </div>
+      </ClientLayout>
+    );
   }
 
   if (loading) {
     return (
       <ClientLayout>
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A]"></div>
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
+            <div className="text-[#8BAE5A] text-lg">Profiel laden...</div>
+            <div className="text-[#B6C948] text-sm mt-2">Even geduld a.u.b.</div>
+          </div>
+        </div>
+      </ClientLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <ClientLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="text-red-400 text-xl mb-4">Er is een fout opgetreden</div>
+            <div className="text-[#8BAE5A] text-sm mb-4">{error}</div>
+            <button 
+              onClick={fetchAllData} 
+              className="px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg font-semibold hover:bg-[#A6C97B] transition-colors"
+            >
+              Opnieuw proberen
+            </button>
+          </div>
+        </div>
+      </ClientLayout>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <ClientLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="text-[#8BAE5A] text-xl mb-4">Profiel niet gevonden</div>
+            <div className="text-[#B6C948] text-sm mb-4">Je profiel wordt aangemaakt...</div>
+            <button 
+              onClick={fetchAllData} 
+              className="px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg font-semibold hover:bg-[#A6C97B] transition-colors"
+            >
+              Opnieuw proberen
+            </button>
+          </div>
         </div>
       </ClientLayout>
     );

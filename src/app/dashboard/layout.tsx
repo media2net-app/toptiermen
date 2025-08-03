@@ -9,6 +9,8 @@ import { useDebug } from '@/contexts/DebugContext';
 import { OnboardingProvider, useOnboarding } from '@/contexts/OnboardingContext';
 import DebugPanel from '@/components/DebugPanel';
 import ForcedOnboardingModal from '@/components/ForcedOnboardingModal';
+import TestUserFeedback from '@/components/TestUserFeedback';
+import { useTestUser } from '@/hooks/useTestUser';
 
 import Image from 'next/image';
 // import MobileNav from '../components/MobileNav';
@@ -174,11 +176,14 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: { collapse
 };
 
 function DashboardContent({ children }: { children: React.ReactNode }) {
-  const { user, signOut, loading: authLoading } = useSupabaseAuth();
-  const { showDebug } = useDebug();
-  const { isTransitioning } = useOnboarding();
-  const router = useRouter();
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, loading, logoutAndRedirect } = useSupabaseAuth();
+  const isAuthenticated = !!user;
+  const { showDebug } = useDebug();
+  const { isOnboarding, currentStep, isTransitioning } = useOnboarding();
+  const isTestUser = useTestUser();
+  
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -218,13 +223,13 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
   // Check onboarding status on mount and when user changes
   useEffect(() => {
-    if (user && !authLoading) {
+    if (user && !loading) {
       checkOnboardingStatus();
       setIsLoading(false);
-    } else if (!user && !authLoading) {
+    } else if (!user && !loading) {
       setIsLoading(false);
     }
-  }, [user?.id, authLoading, checkOnboardingStatus]);
+  }, [user?.id, loading, checkOnboardingStatus]);
 
   // Show forced onboarding if user hasn't completed onboarding
   useEffect(() => {
@@ -267,7 +272,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
   }, [isMobileMenuOpen]);
 
   // Show loading state while authentication is in progress
-  if (authLoading || isLoading) {
+  if (loading || isLoading) {
     return (
       <div className="min-h-screen bg-[#0A0F0A] flex items-center justify-center" suppressHydrationWarning>
         <div className="text-center">
@@ -298,25 +303,9 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
     try {
       console.log('Dashboard logout initiated...');
       setIsLoggingOut(true);
-      await signOut();
-      
-      // Force redirect after a short delay to ensure cleanup
-      setTimeout(() => {
-        window.location.href = '/login';
-      }, 500);
-      
+      await logoutAndRedirect();
     } catch (error) {
       console.error('Error logging out:', error);
-      
-      // Show user feedback
-      alert('Er is een fout opgetreden bij het uitloggen. Probeer het opnieuw.');
-      
-      // Fallback: force redirect even if signOut fails
-      setTimeout(() => {
-        window.location.href = '/login';
-      }, 1000);
-      
-    } finally {
       setIsLoggingOut(false);
     }
   };
@@ -495,6 +484,17 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
       {/* Debug Panel */}
       {showDebug && <DebugPanel />}
+
+      {/* Test User Feedback */}
+      <TestUserFeedback 
+        isTestUser={isTestUser}
+        currentPage={pathname || '/'}
+        userRole={user?.role}
+        onNoteCreated={(note) => {
+          console.log('Test note created:', note);
+          // In a real app, this would send the note to the server
+        }}
+      />
     </div>
   );
 }

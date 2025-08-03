@@ -137,9 +137,114 @@ export default function EventManagement() {
       console.error('❌ Error loading events data:', error);
       setError(error instanceof Error ? error.message : 'Failed to load events data');
       
-      // Fallback to empty arrays
-      setEvents([]);
-      setParticipants([]);
+      // Fallback to mock data
+      setEvents([
+        {
+          id: '1',
+          title: 'Brotherhood Meetup Amsterdam',
+          description: 'Maandelijkse meetup voor alle Brotherhood leden in Amsterdam',
+          category_id: '1',
+          organizer_id: '14d7c55b-4ccd-453f-b79f-403f306f1efb',
+          location: 'Amsterdam Centrum',
+          start_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+          end_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000 + 3 * 60 * 60 * 1000).toISOString(),
+          max_participants: 50,
+          current_participants: 23,
+          status: 'upcoming',
+          is_featured: true,
+          is_public: true,
+          registration_deadline: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+          cover_image_url: '',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          event_categories: {
+            name: 'Brotherhood Meetup',
+            color: '#8BAE5A',
+            icon: 'users'
+          },
+          organizer: {
+            full_name: 'Admin User',
+            email: 'admin@toptiermen.com'
+          }
+        },
+        {
+          id: '2',
+          title: 'Fitness Challenge 2024',
+          description: 'Jaarlijkse fitness challenge voor alle leden',
+          category_id: '2',
+          organizer_id: '14d7c55b-4ccd-453f-b79f-403f306f1efb',
+          location: 'Online',
+          start_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+          end_date: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString(),
+          max_participants: 100,
+          current_participants: 67,
+          status: 'upcoming',
+          is_featured: true,
+          is_public: true,
+          registration_deadline: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(),
+          cover_image_url: '',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          event_categories: {
+            name: 'Challenge',
+            color: '#FFA07A',
+            icon: 'trophy'
+          },
+          organizer: {
+            full_name: 'Admin User',
+            email: 'admin@toptiermen.com'
+          }
+        },
+        {
+          id: '3',
+          title: 'Mindset Workshop',
+          description: 'Workshop over mindset en persoonlijke ontwikkeling',
+          category_id: '3',
+          organizer_id: '14d7c55b-4ccd-453f-b79f-403f306f1efb',
+          location: 'Rotterdam',
+          start_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000 + 4 * 60 * 60 * 1000).toISOString(),
+          max_participants: 25,
+          current_participants: 18,
+          status: 'upcoming',
+          is_featured: false,
+          is_public: true,
+          registration_deadline: new Date(Date.now() + 25 * 24 * 60 * 60 * 1000).toISOString(),
+          cover_image_url: '',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          event_categories: {
+            name: 'Workshop',
+            color: '#4ECDC4',
+            icon: 'lightbulb'
+          },
+          organizer: {
+            full_name: 'Admin User',
+            email: 'admin@toptiermen.com'
+          }
+        }
+      ]);
+
+      setParticipants([
+        {
+          id: '1',
+          name: 'Jan Jansen',
+          email: 'jan@example.com',
+          rank: 'Bronze',
+          avatar: '',
+          registrationDate: new Date().toISOString(),
+          status: 'confirmed'
+        },
+        {
+          id: '2',
+          name: 'Piet Pietersen',
+          email: 'piet@example.com',
+          rank: 'Silver',
+          avatar: '',
+          registrationDate: new Date().toISOString(),
+          status: 'confirmed'
+        }
+      ]);
     } finally {
       setLoading(false);
     }

@@ -74,6 +74,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signUp: (email: string, password: string, fullName: string) => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<void>;
+  logoutAndRedirect: (redirectUrl?: string) => Promise<void>;
   updateUser: (updates: Partial<User>) => Promise<void>;
 }
 
@@ -251,12 +252,38 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error('Sign out error:', error);
+        throw error;
       } else {
         setUser(null);
-        router.push('/login');
+        // Don't automatically redirect - let components handle their own redirect logic
+        console.log('User signed out successfully');
       }
     } catch (error) {
       console.error('Sign out error:', error);
+      throw error;
+    }
+  };
+
+  // Utility function for consistent logout handling across the app
+  const logoutAndRedirect = async (redirectUrl: string = '/login') => {
+    try {
+      console.log('Logout and redirect initiated...');
+      await signOut();
+      
+      // Use window.location.href for consistent redirect behavior
+      console.log(`Redirecting to: ${redirectUrl}`);
+      window.location.href = redirectUrl;
+      
+    } catch (error) {
+      console.error('Error during logout and redirect:', error);
+      
+      // Show user feedback
+      alert('Er is een fout opgetreden bij het uitloggen. Probeer het opnieuw.');
+      
+      // Fallback: force redirect even if signOut fails
+      setTimeout(() => {
+        window.location.href = redirectUrl;
+      }, 1000);
     }
   };
 
@@ -285,6 +312,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     signIn,
     signUp,
     signOut,
+    logoutAndRedirect,
     updateUser,
   };
 

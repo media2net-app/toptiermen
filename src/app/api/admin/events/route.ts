@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase-admin';
+import { supabase } from '@/lib/supabase';
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    let query = supabaseAdmin
+    let query = supabase
       .from('events')
       .select('*')
       .order('created_at', { ascending: false });
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { title, description, category_id, organizer_id, location, start_date, end_date, max_participants, is_featured, is_public, registration_deadline, cover_image_url } = body;
 
-    const { data: event, error } = await supabaseAdmin
+    const { data: event, error } = await supabase
       .from('events')
       .insert({
         title,

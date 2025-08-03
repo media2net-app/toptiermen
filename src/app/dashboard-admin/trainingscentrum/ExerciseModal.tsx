@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import VideoUpload from '@/components/VideoUpload';
 import PDFUpload from '@/components/PDFUpload';
+import { toast } from 'react-hot-toast';
 
 interface ExerciseModalProps {
   isOpen: boolean;
@@ -13,14 +14,12 @@ interface ExerciseModalProps {
 }
 
 const muscleGroups = [
-  'Borst', 'Rug', 'Benen', 'Schouders', 'Armen', 'Core', 'Glutes', 'Biceps', 'Triceps', 'Algemeen'
+  'Borst', 'Rug', 'Benen', 'Schouders', 'Armen', 'Core'
 ];
 
 const equipmentTypes = [
   'Barbell', 'Dumbbell', 'Machine', 'Cable', 'Bodyweight', 'Kettlebell', 'Resistance Band', 'Cable Machine', 'Leg Press Machine', 'Lat Pulldown Machine', 'Leg Extension Machine', 'Leg Curl Machine', 'Calf Machine', 'Pull-up Bar', 'Dip Bars'
 ];
-
-
 
 export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: ExerciseModalProps) {
   const [formData, setFormData] = useState({
@@ -34,6 +33,7 @@ export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: Exe
   });
 
   const [newSecondaryMuscle, setNewSecondaryMuscle] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     if (exercise) {
@@ -63,11 +63,40 @@ export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: Exe
     e.preventDefault();
     
     if (!formData.name || !formData.primary_muscle || !formData.equipment || !formData.instructions) {
-      alert('Vul alle verplichte velden in');
+      toast.error('Vul alle verplichte velden in');
       return;
     }
 
+    // Prevent submission if upload is in progress
+    if (isUploading) {
+      toast.error('Wacht tot de video upload is voltooid');
+      return;
+    }
+
+    console.log('💾 Saving exercise data:', formData);
     onSave(formData);
+  };
+
+  const handleVideoUploaded = (url: string) => {
+    console.log('🎯 ===== VIDEO UPLOADED CALLBACK IN EXERCISE MODAL =====');
+    console.log('📱 Received URL:', url);
+    console.log('📱 Previous video_url:', formData.video_url);
+    
+    setFormData(prev => ({ ...prev, video_url: url }));
+    setIsUploading(false);
+    toast.success('Video succesvol geüpload!');
+    console.log('✅ Exercise modal state updated with new video URL');
+  };
+
+  const handleVideoUploadStart = () => {
+    console.log('🚀 Video upload started in exercise modal');
+    setIsUploading(true);
+  };
+
+  const handleVideoUploadError = (error: string) => {
+    console.error('❌ Video upload error in exercise modal:', error);
+    setIsUploading(false);
+    toast.error(`Video upload mislukt: ${error}`);
   };
 
   const addSecondaryMuscle = () => {
@@ -95,10 +124,21 @@ export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: Exe
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold text-[#8BAE5A]">
             {exercise ? 'Bewerk Oefening' : 'Nieuwe Oefening'}
+            {isUploading && (
+              <span className="ml-2 text-sm text-[#B6C948]">
+                (Video uploaden...)
+              </span>
+            )}
           </h2>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl hover:bg-[#181F17] transition-colors duration-200"
+            disabled={isUploading}
+            className={`p-2 rounded-xl transition-colors duration-200 ${
+              isUploading 
+                ? 'opacity-50 cursor-not-allowed' 
+                : 'hover:bg-[#181F17]'
+            }`}
+            title={isUploading ? 'Wacht tot upload voltooid is' : 'Sluiten'}
           >
             <XMarkIcon className="w-6 h-6 text-[#B6C948]" />
           </button>
@@ -116,6 +156,7 @@ export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: Exe
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               className="w-full px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] placeholder-[#B6C948]"
               placeholder="Bijv. Bench Press"
+              disabled={isUploading}
             />
           </div>
 
@@ -128,6 +169,7 @@ export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: Exe
               value={formData.primary_muscle}
               onChange={(e) => setFormData({ ...formData, primary_muscle: e.target.value })}
               className="w-full px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+              disabled={isUploading}
             >
               <option value="">Selecteer spiergroep</option>
               {muscleGroups.map(group => (
@@ -149,11 +191,17 @@ export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: Exe
                 onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSecondaryMuscle())}
                 className="flex-1 px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] placeholder-[#B6C948]"
                 placeholder="Voeg spiergroep toe"
+                disabled={isUploading}
               />
               <button
                 type="button"
                 onClick={addSecondaryMuscle}
-                className="px-4 py-3 rounded-xl bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#B6C948] transition-all duration-200"
+                disabled={isUploading}
+                className={`px-4 py-3 rounded-xl font-semibold transition-all duration-200 ${
+                  isUploading
+                    ? 'bg-[#3A4D23] text-[#8BAE5A] opacity-50 cursor-not-allowed'
+                    : 'bg-[#8BAE5A] text-[#181F17] hover:bg-[#B6C948]'
+                }`}
               >
                 Toevoegen
               </button>
@@ -168,7 +216,10 @@ export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: Exe
                   <button
                     type="button"
                     onClick={() => removeSecondaryMuscle(muscle)}
-                    className="hover:text-red-400"
+                    disabled={isUploading}
+                    className={`hover:text-red-400 ${
+                      isUploading ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
                   >
                     ×
                   </button>
@@ -186,6 +237,7 @@ export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: Exe
               value={formData.equipment}
               onChange={(e) => setFormData({ ...formData, equipment: e.target.value })}
               className="w-full px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+              disabled={isUploading}
             >
               <option value="">Selecteer materiaal</option>
               {equipmentTypes.map(equipment => (
@@ -201,10 +253,9 @@ export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: Exe
             </label>
             <VideoUpload
               currentVideoUrl={formData.video_url}
-              onVideoUploaded={(url) => {
-                console.log('🔗 Video URL received in ExerciseModal:', url);
-                setFormData({ ...formData, video_url: url });
-              }}
+              onVideoUploaded={handleVideoUploaded}
+              onVideoUploadStart={handleVideoUploadStart}
+              onVideoUploadError={handleVideoUploadError}
             />
           </div>
 
@@ -230,25 +281,34 @@ export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: Exe
               rows={4}
               className="w-full px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] placeholder-[#B6C948] resize-none"
               placeholder="Beschrijf hoe de oefening uitgevoerd moet worden..."
+              disabled={isUploading}
             />
           </div>
-
-
 
           {/* Buttons */}
           <div className="flex gap-4 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-6 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A] transition-all duration-200 font-semibold"
+              disabled={isUploading}
+              className={`flex-1 px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
+                isUploading
+                  ? 'bg-[#3A4D23] text-[#8BAE5A] opacity-50 cursor-not-allowed'
+                  : 'bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A]'
+              }`}
             >
-              Annuleren
+              {isUploading ? 'Wachten...' : 'Annuleren'}
             </button>
             <button
               type="submit"
-              className="flex-1 px-6 py-3 rounded-xl bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#B6C948] transition-all duration-200"
+              disabled={isUploading}
+              className={`flex-1 px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
+                isUploading
+                  ? 'bg-[#3A4D23] text-[#8BAE5A] opacity-50 cursor-not-allowed'
+                  : 'bg-[#8BAE5A] text-[#181F17] hover:bg-[#B6C948]'
+              }`}
             >
-              {exercise ? 'Bijwerken' : 'Toevoegen'}
+              {isUploading ? 'Uploaden...' : (exercise ? 'Bijwerken' : 'Toevoegen')}
             </button>
           </div>
         </form>

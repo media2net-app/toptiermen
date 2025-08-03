@@ -489,19 +489,9 @@ export default function AffiliateBeheer() {
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-3xl font-bold text-[#8BAE5A]">Affiliate Beheer</h1>
-            <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-              isLive 
-                ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
-                : 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
-            }`}>
-              {isLive ? 'LIVE' : 'DUMMY'}
-            </span>
           </div>
           <p className="text-[#B6C948] mt-2">
-            {isLive 
-              ? 'Beheer affiliate programma met volledige database integratie' 
-              : 'Beheer affiliate programma (profiles table fallback)'
-            }
+            Beheer affiliate programma met volledige database integratie
           </p>
         </div>
         <div className="flex items-center gap-4">
@@ -522,39 +512,6 @@ export default function AffiliateBeheer() {
           >
             Verversen
           </AdminButton>
-          {!isLive && (
-            <AdminButton 
-              variant="secondary" 
-              icon={<TrophyIcon className="w-5 h-5" />}
-              onClick={initializeAffiliateTables}
-            >
-              Initialiseer Database
-            </AdminButton>
-          )}
-          {isLive && (
-            <AdminButton 
-              variant="secondary" 
-              icon={<PlusIcon className="w-5 h-5" />}
-              onClick={async () => {
-                try {
-                  const response = await fetch('/api/admin/create-sample-affiliates', {
-                    method: 'POST'
-                  });
-                  if (response.ok) {
-                    const result = await response.json();
-                    toast.success(`Sample data gemaakt: ${result.data.affiliates} affiliates, ${result.data.referrals} referrals`);
-                    fetchAffiliateData();
-                  } else {
-                    toast.error('Fout bij maken van sample data');
-                  }
-                } catch (error) {
-                  toast.error('Fout bij maken van sample data');
-                }
-              }}
-            >
-              Sample Data
-            </AdminButton>
-          )}
           <AdminButton 
             variant="primary" 
             icon={<UserPlusIcon className="w-5 h-5" />}

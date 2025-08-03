@@ -5,6 +5,34 @@ import { AdminCard, AdminStatsCard, AdminButton } from '../../../components/admi
 import BadgeModal from './components/BadgeModal';
 import RankModal from './components/RankModal';
 
+// Icon mapping function
+const getIconDisplay = (iconName: string): string => {
+  const iconMap: { [key: string]: string } = {
+    'FaBolt': '⚡',
+    'FaFire': '🔥',
+    'FaBookOpen': '📖',
+    'FaRunning': '🏃',
+    'FaDumbbell': '🏋️',
+    'FaSnowflake': '❄️',
+    'FaMedal': '🏅',
+    'FaUsers': '👥',
+    'FaTrophy': '🏆',
+    'FaStar': '⭐',
+    'FaHeart': '❤️',
+    'FaBrain': '🧠',
+    'FaDollarSign': '💰',
+    'FaClock': '⏰',
+    'FaCheck': '✅',
+    'FaTarget': '🎯',
+    'FaLightbulb': '💡',
+    'FaShield': '🛡️',
+    'FaCrown': '👑',
+    'FaGem': '💎'
+  };
+  
+  return iconMap[iconName] || '🏆'; // Default to trophy if not found
+};
+
 // Types
 interface Badge {
   id: string;
@@ -96,25 +124,241 @@ export default function AdminBadgesRangenPage() {
           id: '1',
           name: 'First Workout',
           description: 'Complete your first workout',
-          icon: '🏋️',
+          icon: 'FaDumbbell',
           category: 'Training',
           levels: [],
           trigger: 'workout_completed',
-          conditions: [{ field: 'total_count', operator: 'equals', value: '1' }],
+          conditions: [{ 
+            field: 'total_workouts', 
+            operator: 'equals', 
+            value: '1',
+            unit: 'workouts',
+            timePeriod: 'lifetime'
+          }],
           isActive: true,
-          ruleLogic: 'AND'
+          ruleLogic: 'AND',
+          timeWindow: 0,
+          cooldown: 0
         },
         {
           id: '2',
           name: 'Streak Master',
           description: 'Complete 7 workouts in a row',
-          icon: '🔥',
+          icon: 'FaFire',
           category: 'Training',
           levels: [],
           trigger: 'workout_completed',
-          conditions: [{ field: 'streak_days', operator: 'greater_than', value: '6' }],
+          conditions: [{ 
+            field: 'streak_days', 
+            operator: 'greater_than_or_equal', 
+            value: '7',
+            unit: 'days',
+            timePeriod: 'consecutive'
+          }],
           isActive: true,
-          ruleLogic: 'AND'
+          ruleLogic: 'AND',
+          timeWindow: 7,
+          cooldown: 0
+        },
+        {
+          id: '3',
+          name: 'Early Bird',
+          description: '5 dagen vroeg op',
+          icon: 'FaClock',
+          category: 'Lifestyle',
+          levels: [],
+          trigger: 'early_wake',
+          conditions: [{ 
+            field: 'early_wake_days', 
+            operator: 'greater_than_or_equal', 
+            value: '5',
+            unit: 'days',
+            timePeriod: 'consecutive'
+          }],
+          isActive: true,
+          ruleLogic: 'AND',
+          timeWindow: 5,
+          cooldown: 0
+        },
+        {
+          id: '4',
+          name: 'No Excuses',
+          description: '10 dagen geen excuus',
+          icon: 'FaCheck',
+          category: 'Lifestyle',
+          levels: [],
+          trigger: 'daily_check',
+          conditions: [{ 
+            field: 'no_excuse_days', 
+            operator: 'greater_than_or_equal', 
+            value: '10',
+            unit: 'days',
+            timePeriod: 'consecutive'
+          }],
+          isActive: true,
+          ruleLogic: 'AND',
+          timeWindow: 10,
+          cooldown: 0
+        },
+        {
+          id: '5',
+          name: 'Bookworm',
+          description: 'Eerste boek uitgelezen',
+          icon: 'FaBookOpen',
+          category: 'Learning',
+          levels: [],
+          trigger: 'book_completed',
+          conditions: [{ 
+            field: 'books_completed', 
+            operator: 'greater_than', 
+            value: '0',
+            unit: 'books',
+            timePeriod: 'lifetime'
+          }],
+          isActive: true,
+          ruleLogic: 'AND',
+          timeWindow: 0,
+          cooldown: 0
+        },
+        {
+          id: '6',
+          name: 'Social Butterfly',
+          description: 'Eerste post gedeeld',
+          icon: 'FaUsers',
+          category: 'Social',
+          levels: [],
+          trigger: 'post_shared',
+          conditions: [{ 
+            field: 'posts_shared', 
+            operator: 'greater_than', 
+            value: '0',
+            unit: 'posts',
+            timePeriod: 'lifetime'
+          }],
+          isActive: true,
+          ruleLogic: 'AND',
+          timeWindow: 0,
+          cooldown: 0
+        },
+        {
+          id: '7',
+          name: 'Mind Master',
+          description: '7 dagen meditatie',
+          icon: 'FaBrain',
+          category: 'Mind',
+          levels: [],
+          trigger: 'meditation_completed',
+          conditions: [{ 
+            field: 'meditation_days', 
+            operator: 'greater_than_or_equal', 
+            value: '7',
+            unit: 'days',
+            timePeriod: 'consecutive'
+          }],
+          isActive: true,
+          ruleLogic: 'AND',
+          timeWindow: 7,
+          cooldown: 0
+        },
+        {
+          id: '8',
+          name: 'Financial Freedom',
+          description: 'Eerste investering gedaan',
+          icon: 'FaDollarSign',
+          category: 'Finance',
+          levels: [],
+          trigger: 'investment_made',
+          conditions: [{ 
+            field: 'investments_count', 
+            operator: 'greater_than', 
+            value: '0',
+            unit: 'investments',
+            timePeriod: 'lifetime'
+          }],
+          isActive: true,
+          ruleLogic: 'AND',
+          timeWindow: 0,
+          cooldown: 0
+        },
+        {
+          id: '9',
+          name: 'Goal Setter',
+          description: '3 doelen gesteld en bereikt',
+          icon: 'FaTarget',
+          category: 'Goals',
+          levels: [],
+          trigger: 'goal_completed',
+          conditions: [{ 
+            field: 'goals_completed', 
+            operator: 'greater_than_or_equal', 
+            value: '3',
+            unit: 'goals',
+            timePeriod: 'lifetime'
+          }],
+          isActive: true,
+          ruleLogic: 'AND',
+          timeWindow: 0,
+          cooldown: 0
+        },
+        {
+          id: '10',
+          name: 'Consistency King',
+          description: '30 dagen consistent',
+          icon: 'FaCrown',
+          category: 'Lifestyle',
+          levels: [],
+          trigger: 'daily_check',
+          conditions: [{ 
+            field: 'consistent_days', 
+            operator: 'greater_than_or_equal', 
+            value: '30',
+            unit: 'days',
+            timePeriod: 'consecutive'
+          }],
+          isActive: true,
+          ruleLogic: 'AND',
+          timeWindow: 30,
+          cooldown: 7
+        },
+        {
+          id: '11',
+          name: 'Speed Demon',
+          description: '5 workouts onder 30 minuten',
+          icon: 'FaBolt',
+          category: 'Training',
+          levels: [],
+          trigger: 'workout_completed',
+          conditions: [{ 
+            field: 'fast_workouts', 
+            operator: 'greater_than_or_equal', 
+            value: '5',
+            unit: 'workouts',
+            timePeriod: 'lifetime'
+          }],
+          isActive: true,
+          ruleLogic: 'AND',
+          timeWindow: 0,
+          cooldown: 0
+        },
+        {
+          id: '12',
+          name: 'Knowledge Seeker',
+          description: '10 artikelen gelezen',
+          icon: 'FaLightbulb',
+          category: 'Learning',
+          levels: [],
+          trigger: 'article_read',
+          conditions: [{ 
+            field: 'articles_read', 
+            operator: 'greater_than_or_equal', 
+            value: '10',
+            unit: 'articles',
+            timePeriod: 'lifetime'
+          }],
+          isActive: true,
+          ruleLogic: 'AND',
+          timeWindow: 0,
+          cooldown: 0
         }
       ]);
       setRanks([
@@ -397,7 +641,7 @@ export default function AdminBadgesRangenPage() {
                     {badges.map((badge) => (
                       <tr key={badge.id} className="hover:bg-[#232D1A]/50 transition-colors">
                         <td className="px-6 py-4">
-                          <span className="text-2xl">{badge.icon}</span>
+                          <span className="text-2xl">{getIconDisplay(badge.icon)}</span>
                         </td>
                         <td className="px-6 py-4">
                           <div>
@@ -610,22 +854,47 @@ export default function AdminBadgesRangenPage() {
           badge={editingBadge}
           availableActions={[
             { value: 'workout_completed', label: 'Workout Voltooid', type: 'number' },
-            { value: 'streak_reached', label: 'Streak Bereikt', type: 'number' },
-            { value: 'goal_achieved', label: 'Doel Behaald', type: 'boolean' },
-            { value: 'community_contribution', label: 'Community Bijdrage', type: 'text' },
-            { value: 'learning_completed', label: 'Leermodule Voltooid', type: 'number' },
-            { value: 'financial_milestone', label: 'Financiële Mijlpaal', type: 'number' }
+            { value: 'early_wake', label: 'Vroeg Opstaan', type: 'number' },
+            { value: 'daily_check', label: 'Dagelijkse Check', type: 'number' },
+            { value: 'book_completed', label: 'Boek Uitgelezen', type: 'number' },
+            { value: 'post_shared', label: 'Post Gedeeld', type: 'number' },
+            { value: 'meditation_completed', label: 'Meditatie Voltooid', type: 'number' },
+            { value: 'investment_made', label: 'Investering Gedaan', type: 'number' },
+            { value: 'goal_completed', label: 'Doel Voltooid', type: 'number' },
+            { value: 'article_read', label: 'Artikel Gelezen', type: 'number' }
           ]}
           getConditionsForAction={(action: string) => {
             const conditions: { [key: string]: Array<{ value: string; label: string; type: 'text' | 'number' }> } = {
               workout_completed: [
-                { value: 'total_count', label: 'Totaal aantal workouts', type: 'number' },
+                { value: 'total_workouts', label: 'Totaal aantal workouts', type: 'number' },
                 { value: 'streak_days', label: 'Aantal dagen op rij', type: 'number' },
+                { value: 'fast_workouts', label: 'Snelle workouts (<30 min)', type: 'number' },
                 { value: 'workout_type', label: 'Type workout', type: 'text' }
               ],
-              streak_reached: [
-                { value: 'days', label: 'Aantal dagen', type: 'number' },
-                { value: 'activity_type', label: 'Type activiteit', type: 'text' }
+              early_wake: [
+                { value: 'early_wake_days', label: 'Aantal dagen vroeg op', type: 'number' }
+              ],
+              daily_check: [
+                { value: 'no_excuse_days', label: 'Dagen zonder excuus', type: 'number' },
+                { value: 'consistent_days', label: 'Consistente dagen', type: 'number' }
+              ],
+              book_completed: [
+                { value: 'books_completed', label: 'Aantal boeken uitgelezen', type: 'number' }
+              ],
+              post_shared: [
+                { value: 'posts_shared', label: 'Aantal posts gedeeld', type: 'number' }
+              ],
+              meditation_completed: [
+                { value: 'meditation_days', label: 'Aantal meditatie dagen', type: 'number' }
+              ],
+              investment_made: [
+                { value: 'investments_count', label: 'Aantal investeringen', type: 'number' }
+              ],
+              goal_completed: [
+                { value: 'goals_completed', label: 'Aantal doelen voltooid', type: 'number' }
+              ],
+              article_read: [
+                { value: 'articles_read', label: 'Aantal artikelen gelezen', type: 'number' }
               ]
             };
             return conditions[action] || [];
@@ -633,9 +902,12 @@ export default function AdminBadgesRangenPage() {
           operators={[
             { value: 'equals', label: 'is gelijk aan' },
             { value: 'greater_than', label: 'is groter dan' },
+            { value: 'greater_than_or_equal', label: 'is groter dan of gelijk aan' },
             { value: 'less_than', label: 'is kleiner dan' },
+            { value: 'less_than_or_equal', label: 'is kleiner dan of gelijk aan' },
             { value: 'contains', label: 'bevat' },
-            { value: 'starts_with', label: 'begint met' }
+            { value: 'starts_with', label: 'begint met' },
+            { value: 'ends_with', label: 'eindigt met' }
           ]}
         />
       )}

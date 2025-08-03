@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { XMarkIcon, PlusIcon, TrashIcon, PhotoIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
+import { toast } from 'react-hot-toast';
 
 interface BadgeCondition {
   id: string;
@@ -73,6 +74,42 @@ const OPERATORS = [
   { value: 'less_equal', label: 'Is kleiner dan of gelijk aan' },
   { value: 'contains', label: 'Bevat' },
   { value: 'not_contains', label: 'Bevat niet' }
+];
+
+// Icon mapping function (same as in main page)
+const getIconDisplay = (iconName: string): string => {
+  const iconMap: { [key: string]: string } = {
+    'FaBolt': '⚡',
+    'FaFire': '🔥',
+    'FaBookOpen': '📖',
+    'FaRunning': '🏃',
+    'FaDumbbell': '🏋️',
+    'FaSnowflake': '❄️',
+    'FaMedal': '🏅',
+    'FaUsers': '👥',
+    'FaTrophy': '🏆',
+    'FaStar': '⭐',
+    'FaHeart': '❤️',
+    'FaBrain': '🧠',
+    'FaDollarSign': '💰',
+    'FaClock': '⏰',
+    'FaCheck': '✅',
+    'FaTarget': '🎯',
+    'FaLightbulb': '💡',
+    'FaShield': '🛡️',
+    'FaCrown': '👑',
+    'FaGem': '💎'
+  };
+  
+  return iconMap[iconName] || '🏆'; // Default to trophy if not found
+};
+
+// Available icons for selection
+const AVAILABLE_ICONS = [
+  'FaBolt', 'FaFire', 'FaBookOpen', 'FaRunning', 'FaDumbbell', 
+  'FaSnowflake', 'FaMedal', 'FaUsers', 'FaTrophy', 'FaStar',
+  'FaHeart', 'FaBrain', 'FaDollarSign', 'FaClock', 'FaCheck',
+  'FaTarget', 'FaLightbulb', 'FaShield', 'FaCrown', 'FaGem'
 ];
 
 export default function BadgeModal({ 
@@ -187,6 +224,24 @@ export default function BadgeModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate required fields
+    if (!form.name || !form.description || !form.trigger) {
+      toast.error('Vul alle verplichte velden in');
+      return;
+    }
+
+    if (conditions.length === 0) {
+      toast.error('Voeg minimaal één voorwaarde toe');
+      return;
+    }
+
+    // Validate conditions
+    const invalidConditions = conditions.filter(c => !c.action || !c.operator || !c.value);
+    if (invalidConditions.length > 0) {
+      toast.error('Vul alle voorwaarde velden in');
+      return;
+    }
     
     const badgeData: Badge = {
       id: badge?.id || Date.now().toString(),
@@ -424,7 +479,36 @@ export default function BadgeModal({
                     Icoon
                   </label>
                   <div className="space-y-4">
-                    {/* Icon Upload */}
+                    {/* Icon Selector */}
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-[#8BAE5A] mb-2">
+                        Selecteer Icoon
+                      </label>
+                      <div className="grid grid-cols-5 gap-2 max-h-40 overflow-y-auto bg-[#181F17] border border-[#3A4D23] rounded-lg p-3">
+                        {AVAILABLE_ICONS.map((iconName) => (
+                          <button
+                            key={iconName}
+                            type="button"
+                            onClick={() => setForm((prev) => ({ ...prev, icon: iconName }))}
+                            className={`p-2 rounded-lg text-2xl hover:bg-[#3A4D23] transition-colors ${
+                              form.icon === iconName 
+                                ? 'bg-[#8BAE5A] text-black' 
+                                : 'bg-[#232D1A] text-white'
+                            }`}
+                            title={iconName}
+                          >
+                            {getIconDisplay(iconName)}
+                          </button>
+                        ))}
+                      </div>
+                      {form.icon && (
+                        <div className="mt-2 text-sm text-gray-400">
+                          Geselecteerd: {form.icon} {getIconDisplay(form.icon)}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Icon Upload (existing code) */}
                     <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
                       {iconPreview ? (
                         <div className="space-y-4">
@@ -464,11 +548,11 @@ export default function BadgeModal({
                               onClick={() => document.getElementById('icon-upload')?.click()}
                               className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
                             >
-                              Icoon Uploaden
+                              Custom Icoon Uploaden
                             </button>
                           </div>
                           <p className="mt-2 text-sm text-gray-500">
-                            SVG, PNG of JPEG (max 2MB)
+                            SVG, PNG of JPEG (max 2MB) - Optioneel
                           </p>
                         </div>
                       )}

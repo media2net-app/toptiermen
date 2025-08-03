@@ -26,6 +26,13 @@ interface EmailConfig {
   apiKey: string;
   fromEmail: string;
   fromName: string;
+  // SMTP Configuration
+  smtpHost: string;
+  smtpPort: string;
+  smtpSecure: boolean;
+  smtpUsername: string;
+  smtpPassword: string;
+  useManualSmtp: boolean;
 }
 
 interface PlatformConfig {
@@ -56,7 +63,14 @@ export default function AdminSettings() {
     provider: 'resend',
     apiKey: '',
     fromEmail: '',
-    fromName: ''
+    fromName: '',
+    // SMTP Configuration
+    smtpHost: '',
+    smtpPort: '',
+    smtpSecure: false,
+    smtpUsername: '',
+    smtpPassword: '',
+    useManualSmtp: false
   });
 
   // Platform Configuration
@@ -87,7 +101,14 @@ export default function AdminSettings() {
         provider: 'resend',
         apiKey: process.env.RESEND_API_KEY || '',
         fromEmail: 'noreply@toptiermen.com',
-        fromName: 'Top Tier Men'
+        fromName: 'Top Tier Men',
+        // SMTP Configuration
+        smtpHost: '',
+        smtpPort: '',
+        smtpSecure: false,
+        smtpUsername: '',
+        smtpPassword: '',
+        useManualSmtp: false
       });
 
       setPlatformConfig({
@@ -134,10 +155,33 @@ export default function AdminSettings() {
   const saveEmailConfig = async () => {
     setIsLoading(true);
     try {
-      // Save email configuration
+      // In a real app, you'd save this to the database
+      // For now, we'll just show a success message
       setMessage({ type: 'success', text: 'Email configuratie opgeslagen!' });
     } catch (error) {
       setMessage({ type: 'error', text: 'Fout bij het opslaan van email configuratie' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const testEmailConfig = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/admin/test-email-config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(emailConfig)
+      });
+      
+      if (response.ok) {
+        setMessage({ type: 'success', text: 'Test email succesvol verzonden! Check je inbox.' });
+      } else {
+        const error = await response.json();
+        setMessage({ type: 'error', text: `Email test mislukt: ${error.message}` });
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Fout bij het testen van email configuratie' });
     } finally {
       setIsLoading(false);
     }
@@ -373,72 +417,252 @@ export default function AdminSettings() {
               Email Instellingen
             </h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-[#B6C948] font-medium mb-2">
-                    Email Provider
-                  </label>
-                  <select
-                    value={emailConfig.provider}
-                    onChange={(e) => setEmailConfig(prev => ({ ...prev, provider: e.target.value }))}
-                    className="w-full p-3 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white focus:border-[#B6C948] focus:outline-none"
-                  >
-                    <option value="resend">Resend</option>
-                    <option value="sendgrid">SendGrid</option>
-                    <option value="mailgun">Mailgun</option>
-                  </select>
+            {/* Email Provider Selection */}
+            <div className="mb-6">
+              <label className="block text-[#B6C948] font-medium mb-2">
+                Email Configuratie Type
+              </label>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2 text-[#8BAE5A]">
+                  <input
+                    type="radio"
+                    name="emailType"
+                    checked={!emailConfig.useManualSmtp}
+                    onChange={() => setEmailConfig(prev => ({ ...prev, useManualSmtp: false }))}
+                    className="accent-[#B6C948]"
+                  />
+                  API Provider (Resend, SendGrid, etc.)
+                </label>
+                <label className="flex items-center gap-2 text-[#8BAE5A]">
+                  <input
+                    type="radio"
+                    name="emailType"
+                    checked={emailConfig.useManualSmtp}
+                    onChange={() => setEmailConfig(prev => ({ ...prev, useManualSmtp: true }))}
+                    className="accent-[#B6C948]"
+                  />
+                  Handmatige SMTP Configuratie
+                </label>
+              </div>
+            </div>
+
+            {!emailConfig.useManualSmtp ? (
+              /* API Provider Configuration */
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-[#B6C948] font-medium mb-2">
+                      Email Provider
+                    </label>
+                    <select
+                      value={emailConfig.provider}
+                      onChange={(e) => setEmailConfig(prev => ({ ...prev, provider: e.target.value }))}
+                      className="w-full p-3 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white focus:border-[#B6C948] focus:outline-none"
+                    >
+                      <option value="resend">Resend</option>
+                      <option value="sendgrid">SendGrid</option>
+                      <option value="mailgun">Mailgun</option>
+                      <option value="aws-ses">AWS SES</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[#B6C948] font-medium mb-2">
+                      API Key
+                    </label>
+                    <input
+                      type="password"
+                      value={emailConfig.apiKey}
+                      onChange={(e) => setEmailConfig(prev => ({ ...prev, apiKey: e.target.value }))}
+                      className="w-full p-3 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white focus:border-[#B6C948] focus:outline-none"
+                      placeholder="API key..."
+                    />
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-[#B6C948] font-medium mb-2">
-                    API Key
-                  </label>
-                  <input
-                    type="password"
-                    value={emailConfig.apiKey}
-                    onChange={(e) => setEmailConfig(prev => ({ ...prev, apiKey: e.target.value }))}
-                    className="w-full p-3 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white focus:border-[#B6C948] focus:outline-none"
-                    placeholder="API key..."
-                  />
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-[#B6C948] font-medium mb-2">
+                      Van Email
+                    </label>
+                    <input
+                      type="email"
+                      value={emailConfig.fromEmail}
+                      onChange={(e) => setEmailConfig(prev => ({ ...prev, fromEmail: e.target.value }))}
+                      className="w-full p-3 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white focus:border-[#B6C948] focus:outline-none"
+                      placeholder="noreply@toptiermen.com"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[#B6C948] font-medium mb-2">
+                      Van Naam
+                    </label>
+                    <input
+                      type="text"
+                      value={emailConfig.fromName}
+                      onChange={(e) => setEmailConfig(prev => ({ ...prev, fromName: e.target.value }))}
+                      className="w-full p-3 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white focus:border-[#B6C948] focus:outline-none"
+                      placeholder="Top Tier Men"
+                    />
+                  </div>
                 </div>
               </div>
+            ) : (
+              /* Manual SMTP Configuration */
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-[#B6C948] font-medium mb-2">
+                        SMTP Host
+                      </label>
+                      <input
+                        type="text"
+                        value={emailConfig.smtpHost}
+                        onChange={(e) => setEmailConfig(prev => ({ ...prev, smtpHost: e.target.value }))}
+                        className="w-full p-3 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white focus:border-[#B6C948] focus:outline-none"
+                        placeholder="smtp.gmail.com"
+                      />
+                    </div>
 
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-[#B6C948] font-medium mb-2">
-                    Van Email
-                  </label>
-                  <input
-                    type="email"
-                    value={emailConfig.fromEmail}
-                    onChange={(e) => setEmailConfig(prev => ({ ...prev, fromEmail: e.target.value }))}
-                    className="w-full p-3 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white focus:border-[#B6C948] focus:outline-none"
-                    placeholder="noreply@toptiermen.com"
-                  />
+                    <div>
+                      <label className="block text-[#B6C948] font-medium mb-2">
+                        SMTP Port
+                      </label>
+                      <input
+                        type="number"
+                        value={emailConfig.smtpPort}
+                        onChange={(e) => setEmailConfig(prev => ({ ...prev, smtpPort: e.target.value }))}
+                        className="w-full p-3 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white focus:border-[#B6C948] focus:outline-none"
+                        placeholder="587"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[#B6C948] font-medium mb-2">
+                        SMTP Gebruikersnaam
+                      </label>
+                      <input
+                        type="text"
+                        value={emailConfig.smtpUsername}
+                        onChange={(e) => setEmailConfig(prev => ({ ...prev, smtpUsername: e.target.value }))}
+                        className="w-full p-3 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white focus:border-[#B6C948] focus:outline-none"
+                        placeholder="jouw@email.com"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-[#B6C948] font-medium mb-2">
+                        SMTP Wachtwoord
+                      </label>
+                      <input
+                        type="password"
+                        value={emailConfig.smtpPassword}
+                        onChange={(e) => setEmailConfig(prev => ({ ...prev, smtpPassword: e.target.value }))}
+                        className="w-full p-3 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white focus:border-[#B6C948] focus:outline-none"
+                        placeholder="App wachtwoord of wachtwoord"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[#B6C948] font-medium mb-2">
+                        Van Email
+                      </label>
+                      <input
+                        type="email"
+                        value={emailConfig.fromEmail}
+                        onChange={(e) => setEmailConfig(prev => ({ ...prev, fromEmail: e.target.value }))}
+                        className="w-full p-3 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white focus:border-[#B6C948] focus:outline-none"
+                        placeholder="noreply@toptiermen.com"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[#B6C948] font-medium mb-2">
+                        Van Naam
+                      </label>
+                      <input
+                        type="text"
+                        value={emailConfig.fromName}
+                        onChange={(e) => setEmailConfig(prev => ({ ...prev, fromName: e.target.value }))}
+                        className="w-full p-3 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white focus:border-[#B6C948] focus:outline-none"
+                        placeholder="Top Tier Men"
+                      />
+                    </div>
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-[#B6C948] font-medium mb-2">
-                    Van Naam
-                  </label>
-                  <input
-                    type="text"
-                    value={emailConfig.fromName}
-                    onChange={(e) => setEmailConfig(prev => ({ ...prev, fromName: e.target.value }))}
-                    className="w-full p-3 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white focus:border-[#B6C948] focus:outline-none"
-                    placeholder="Top Tier Men"
-                  />
+                {/* SSL/TLS Configuration */}
+                <div className="bg-[#232D1A] p-4 rounded-lg border border-[#3A4D23]">
+                  <h3 className="text-[#B6C948] font-semibold mb-3">SSL/TLS Configuratie</h3>
+                  <div className="space-y-3">
+                    <label className="flex items-center gap-2 text-[#8BAE5A]">
+                      <input
+                        type="checkbox"
+                        checked={emailConfig.smtpSecure}
+                        onChange={(e) => setEmailConfig(prev => ({ ...prev, smtpSecure: e.target.checked }))}
+                        className="accent-[#B6C948]"
+                      />
+                      Gebruik SSL/TLS (STARTTLS)
+                    </label>
+                    <p className="text-[#8BAE5A] text-sm">
+                      Voor Gmail: Port 587 met SSL/TLS aan, voor andere providers: check de documentatie
+                    </p>
+                  </div>
                 </div>
 
-                <button
-                  onClick={saveEmailConfig}
-                  disabled={isLoading}
-                  className="w-full px-4 py-2 bg-[#B6C948] text-[#181F17] font-semibold rounded-lg hover:bg-[#8BAE5A] disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isLoading ? 'Opslaan...' : 'Email Configuratie Opslaan'}
-                </button>
+                {/* Common SMTP Settings */}
+                <div className="bg-[#232D1A] p-4 rounded-lg border border-[#3A4D23]">
+                  <h3 className="text-[#B6C948] font-semibold mb-3">Veelgebruikte SMTP Instellingen</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <h4 className="text-[#8BAE5A] font-medium mb-2">Gmail</h4>
+                      <p className="text-gray-400">Host: smtp.gmail.com</p>
+                      <p className="text-gray-400">Port: 587</p>
+                      <p className="text-gray-400">SSL: Aan</p>
+                    </div>
+                    <div>
+                      <h4 className="text-[#8BAE5A] font-medium mb-2">Outlook/Hotmail</h4>
+                      <p className="text-gray-400">Host: smtp-mail.outlook.com</p>
+                      <p className="text-gray-400">Port: 587</p>
+                      <p className="text-gray-400">SSL: Aan</p>
+                    </div>
+                    <div>
+                      <h4 className="text-[#8BAE5A] font-medium mb-2">Yahoo</h4>
+                      <p className="text-gray-400">Host: smtp.mail.yahoo.com</p>
+                      <p className="text-gray-400">Port: 587</p>
+                      <p className="text-gray-400">SSL: Aan</p>
+                    </div>
+                    <div>
+                      <h4 className="text-[#8BAE5A] font-medium mb-2">Custom Server</h4>
+                      <p className="text-gray-400">Host: jouw-smtp-server.com</p>
+                      <p className="text-gray-400">Port: 25, 465, of 587</p>
+                      <p className="text-gray-400">SSL: Volgens server configuratie</p>
+                    </div>
+                  </div>
+                </div>
               </div>
+            )}
+
+            {/* Save Button */}
+            <div className="mt-6 flex gap-4">
+              <button
+                onClick={testEmailConfig}
+                disabled={isLoading || (!emailConfig.useManualSmtp && !emailConfig.apiKey) || (emailConfig.useManualSmtp && (!emailConfig.smtpHost || !emailConfig.smtpPort || !emailConfig.smtpUsername))}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading ? 'Testen...' : 'Test Email Configuratie'}
+              </button>
+              <button
+                onClick={saveEmailConfig}
+                disabled={isLoading}
+                className="flex-1 px-4 py-2 bg-[#B6C948] text-[#181F17] font-semibold rounded-lg hover:bg-[#8BAE5A] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading ? 'Opslaan...' : 'Email Configuratie Opslaan'}
+              </button>
             </div>
           </div>
         </div>

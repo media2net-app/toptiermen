@@ -146,40 +146,9 @@ export default function AdminDashboard() {
 
   // Fetch data on mount and when period changes - geoptimaliseerd voor performance
   useEffect(() => {
-    // Start data loading after a short delay to show UI first
-    const timer = setTimeout(() => {
-      fetchDashboardData();
-    }, 100); // 100ms delay voor snelle UI rendering
-
-    return () => clearTimeout(timer);
+    // Start data loading immediately to show UI first
+    fetchDashboardData();
   }, [user, selectedPeriod]);
-
-  // Loading state - alleen tonen als er nog geen data is geladen
-  if (loading && !dataLoaded) {
-    return (
-      <div className="min-h-screen bg-[#181F17] flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
-          <p className="text-[#8BAE5A]">Laden van dashboard data...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Error state
-  if (error) {
-    return (
-      <div className="min-h-screen bg-[#181F17] flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-red-400 text-xl mb-4">❌ Fout</div>
-          <p className="text-gray-400 mb-4">{error}</p>
-          <AdminButton onClick={fetchDashboardData} variant="primary">
-            Opnieuw Proberen
-          </AdminButton>
-        </div>
-      </div>
-    );
-  }
 
   // Helper function to get trend icon
   const getTrendIcon = (value: number, threshold: number = 0) => {
@@ -198,7 +167,7 @@ export default function AdminDashboard() {
 
   // Helper function om data veilig weer te geven
   const getDisplayValue = (value: number | undefined, loading: boolean, fallback: string = "0") => {
-    if (loading) return "Laden...";
+    if (loading) return "Gegevens laden...";
     return value !== undefined ? value.toString() : fallback;
   };
 
@@ -207,11 +176,23 @@ export default function AdminDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-[#8BAE5A]">Elite Command Center</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold text-[#8BAE5A]">Admin Panel</h1>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse shadow-lg shadow-green-400/50"></div>
+              <span className="text-green-400 text-sm font-medium">Live</span>
+            </div>
+          </div>
           <p className="text-[#B6C948] mt-2">Strategisch overzicht van je Top Tier Men platform</p>
           {dashboardStats && (
             <p className="text-gray-400 text-sm mt-1">
               Laatste update: {new Date(dashboardStats.lastUpdated).toLocaleString('nl-NL')}
+            </p>
+          )}
+          {loading && !dataLoaded && (
+            <p className="text-[#8BAE5A] text-sm mt-1 flex items-center gap-2">
+              <div className="animate-spin rounded-full h-3 w-3 border-b border-[#8BAE5A]"></div>
+              Gegevens laden...
             </p>
           )}
         </div>
@@ -227,17 +208,13 @@ export default function AdminDashboard() {
               <option value="90d">Laatste 90 dagen</option>
             </select>
           )}
-          {activeTab === 'realtime' && (
-            <div className="px-4 py-2 rounded-xl bg-[#232D1A] text-[#8BAE5A] border border-[#3A4D23]">
-              <span className="text-sm">🔄 Live Data</span>
-            </div>
-          )}
           <AdminButton 
             onClick={fetchDashboardData} 
             variant="secondary" 
             icon={<ArrowPathIcon className="w-4 h-4" />}
+            disabled={loading}
           >
-            Vernieuwen
+            {loading ? 'Laden...' : 'Vernieuwen'}
           </AdminButton>
         </div>
       </div>
@@ -315,6 +292,20 @@ export default function AdminDashboard() {
           Technische Performance
         </button>
       </div>
+
+      {/* Error state */}
+      {error && (
+        <div className="bg-red-900/20 border border-red-500/50 rounded-xl p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <ExclamationTriangleIcon className="w-6 h-6 text-red-400" />
+            <h3 className="text-red-400 font-semibold">Fout bij laden van gegevens</h3>
+          </div>
+          <p className="text-gray-300 mb-4">{error}</p>
+          <AdminButton onClick={fetchDashboardData} variant="primary">
+            Opnieuw Proberen
+          </AdminButton>
+        </div>
+      )}
 
       {activeTab === 'overview' && (
         <>
@@ -762,7 +753,7 @@ export default function AdminDashboard() {
       {activeTab === 'realtime' && (
         <AdminCard
           title="Real-time Activiteit"
-          subtitle="Live tracking van platform activiteit"
+          subtitle="Tracking van platform activiteit"
           icon={<ClockIcon className="w-6 h-6" />}
           gradient
         >
@@ -805,13 +796,13 @@ export default function AdminDashboard() {
             )}
           </div>
           <div className="mt-6 bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]">
-            <h3 className="text-lg font-semibold text-white mb-4">Live Activiteit</h3>
+            <h3 className="text-lg font-semibold text-white mb-4">Platform Activiteit</h3>
             <div className="text-center py-8">
               <div className="text-2xl font-bold text-[#8BAE5A] mb-2">Real-time Dashboard</div>
-              <p className="text-[#B6C948]">Live updates van gebruikersactiviteit en trending content</p>
+              <p className="text-[#B6C948]">Updates van gebruikersactiviteit en trending content</p>
               <div className="mt-6">
                 <AdminButton variant="primary" size="lg">
-                  Bekijk Live Dashboard
+                  Bekijk Dashboard
                 </AdminButton>
               </div>
             </div>

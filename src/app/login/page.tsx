@@ -2,17 +2,12 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { LockClosedIcon, EnvelopeIcon } from "@heroicons/react/24/solid";
-import { createClient } from '@supabase/supabase-js';
-
-// Create Supabase client
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
 export default function Login() {
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
+  const { user, loading, signIn } = useSupabaseAuth();
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,44 +21,44 @@ export default function Login() {
 
   // Check if user is already authenticated
   useEffect(() => {
-    const checkAuth = async () => {
-      if (!mounted) return;
+    if (!mounted || loading) return;
+    
+    if (user) {
+      console.log('User already authenticated:', user.role);
+      setRedirecting(true);
+      const targetPath = user.role?.toLowerCase() === 'admin' ? '/dashboard-admin' : '/dashboard';
       
+      // Try router.replace first, fallback to window.location
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error('Session error:', error);
-          return;
-        }
-
-        if (session?.user) {
-          // Get user profile
-          const { data: profile, error: profileError } = await supabase
-            .from('users')
-            .select('*')
-            .eq('id', session.user.id)
-            .single();
-
-          if (profileError) {
-            console.error('Profile error:', profileError);
-            return;
+        router.replace(targetPath);
+        // Add a fallback redirect in case router.replace doesn't work
+        setTimeout(() => {
+          if (window.location.pathname === '/login') {
+            console.log('🔍 Router redirect failed, using window.location fallback');
+            window.location.href = targetPath;
           }
-
-          if (profile) {
-            console.log('User already authenticated:', profile.role);
-            setRedirecting(true);
-            const targetPath = profile.role?.toLowerCase() === 'admin' ? '/dashboard-admin' : '/dashboard';
-            router.replace(targetPath);
-          }
-        }
-      } catch (error) {
-        console.error('Auth check error:', error);
+        }, 2000);
+      } catch (redirectError) {
+        console.error('🔍 Router redirect error:', redirectError);
+        // Fallback to window.location
+        window.location.href = targetPath;
       }
-    };
+    }
+  }, [mounted, loading, user, router]);
 
-    checkAuth();
-  }, [mounted, router]);
+  // Timeout mechanism to prevent getting stuck
+  useEffect(() => {
+    if (redirecting) {
+      const timeout = setTimeout(() => {
+        if (window.location.pathname === '/login') {
+          console.log('🔍 Redirect timeout, forcing reload');
+          window.location.reload();
+        }
+      }, 10000); // 10 second timeout
+
+      return () => clearTimeout(timeout);
+    }
+  }, [redirecting]);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -79,40 +74,20 @@ export default function Login() {
     
     try {
       console.log('🔍 Calling signIn...');
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const result = await signIn(email, password);
 
-      if (error) {
-        console.error('Sign in error:', error);
-        setError(error.message || "Ongeldige inloggegevens");
+      if (!result.success) {
+        console.error('Sign in error:', result.error);
+        setError(result.error || "Ongeldige inloggegevens");
         setIsLoading(false);
         return;
       }
 
-      if (data.user) {
-        // Get user profile
-        const { data: profile, error: profileError } = await supabase
-          .from('users')
-          .select('*')
-          .eq('id', data.user.id)
-          .single();
-
-        if (profileError) {
-          console.error('Profile error:', profileError);
-          setError('Error getting user profile');
-          setIsLoading(false);
-          return;
-        }
-
-        if (profile) {
-          console.log('🔍 Login successful, redirecting...');
-          setRedirecting(true);
-          const targetPath = profile.role?.toLowerCase() === 'admin' ? '/dashboard-admin' : '/dashboard';
-          router.replace(targetPath);
-        }
-      }
+      console.log('🔍 Login successful, redirecting...');
+      setRedirecting(true);
+      
+      // The redirect will be handled by the useEffect above when user state updates
+      
     } catch (error: any) {
       console.error('🔍 Login error:', error);
       setError(error.message || "Er is een fout opgetreden bij het inloggen");
@@ -121,7 +96,7 @@ export default function Login() {
   }
 
   // Show loading state while checking authentication
-  if (!mounted) {
+  if (!mounted || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center relative px-4 py-6" style={{ backgroundColor: '#181F17' }}>
         <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
@@ -129,6 +104,29 @@ export default function Login() {
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#B6C948] mx-auto mb-4"></div>
             <p className="text-[#B6C948] text-lg">Laden...</p>
+            <p className="text-[#8BAE5A] text-sm mt-2">Authenticatie wordt gecontroleerd</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show redirecting state
+  if (redirecting) {
+    return (
+      <div className="min-h-screen flex items-center justify-center relative px-4 py-6" style={{ backgroundColor: '#181F17' }}>
+        <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
+        <div className="w-full max-w-md p-6 sm:p-8 rounded-3xl shadow-2xl bg-[#232D1A]/95 border border-[#3A4D23] backdrop-blur-lg relative z-10">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#B6C948] mx-auto mb-4"></div>
+            <p className="text-[#B6C948] text-lg">Doorsturen naar dashboard...</p>
+            <p className="text-[#8BAE5A] text-sm mt-2">Je wordt automatisch doorgestuurd</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-4 text-[#8BAE5A] hover:text-[#B6C948] underline text-sm"
+            >
+              Handmatig herladen als het te lang duurt
+            </button>
           </div>
         </div>
       </div>

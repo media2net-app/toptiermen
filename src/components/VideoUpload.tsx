@@ -6,12 +6,16 @@ import { toast } from 'react-hot-toast';
 interface VideoUploadProps {
   currentVideoUrl?: string;
   onVideoUploaded: (url: string) => void;
+  onVideoUploadStart?: () => void;
+  onVideoUploadError?: (error: string) => void;
   className?: string;
 }
 
 export default function VideoUpload({
   currentVideoUrl,
   onVideoUploaded,
+  onVideoUploadStart,
+  onVideoUploadError,
   className = ""
 }: VideoUploadProps) {
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -80,6 +84,11 @@ export default function VideoUpload({
       type: file.type,
       lastModified: new Date(file.lastModified).toISOString()
     });
+
+    // Call upload start callback
+    if (onVideoUploadStart) {
+      onVideoUploadStart();
+    }
 
     setIsUploading(true);
     setIsProcessing(false);
@@ -190,6 +199,12 @@ export default function VideoUpload({
           fileSize: file.size,
           fileType: file.type
         });
+        
+        // Call error callback
+        if (onVideoUploadError) {
+          onVideoUploadError(error.message);
+        }
+        
         throw error;
       }
 
@@ -197,7 +212,13 @@ export default function VideoUpload({
         console.error('❌ ===== NO PATH ERROR =====');
         console.error('🚨 Upload succeeded but no path returned');
         console.error('📊 Upload result:', data);
-        throw new Error('No file path returned from upload');
+        
+        const errorMsg = 'No file path returned from upload';
+        if (onVideoUploadError) {
+          onVideoUploadError(errorMsg);
+        }
+        
+        throw new Error(errorMsg);
       }
 
       console.log('✅ ===== UPLOAD SUCCESS =====');
@@ -282,7 +303,13 @@ export default function VideoUpload({
         timeRemaining
       });
       
-      toast.error(`Upload mislukt: ${error.message || 'Onbekende fout'}`);
+      // Call error callback if provided
+      if (onVideoUploadError) {
+        onVideoUploadError(error.message || 'Onbekende fout');
+      } else {
+        toast.error(`Upload mislukt: ${error.message || 'Onbekende fout'}`);
+      }
+      
       setUploadProgress(0);
       setProcessingProgress(0);
       setUploadStatus('Fout opgetreden');

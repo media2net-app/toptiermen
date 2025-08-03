@@ -30,7 +30,8 @@ import {
   ListBulletIcon,
   RocketLaunchIcon,
   EnvelopeIcon,
-  EyeIcon
+  EyeIcon,
+  UserIcon
 } from '@heroicons/react/24/outline';
 
 // Type definitions for menu items
@@ -84,6 +85,7 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
       type: 'section',
       items: [
         { label: 'Ledenbeheer', icon: UserGroupIcon, href: '/dashboard-admin/ledenbeheer' },
+        { label: 'Test gebruikers', icon: UserIcon, href: '/dashboard-admin/test-gebruikers' },
         { label: 'Affiliate Beheer', icon: FireIcon, href: '/dashboard-admin/affiliate-beheer' },
         { 
           label: 'Onboarding Overzicht', 
@@ -162,40 +164,6 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
                       {subItem.icon && <subItem.icon className="w-5 h-5" />}
                       <span className="flex items-center gap-2">
                         {subItem.label}
-                        {subItem.badge ? (
-                          <span className={`ml-2 px-2 py-0.5 rounded-full text-xs font-bold ${
-                            subItem.badge === 'Live' 
-                              ? 'bg-green-700 text-green-200' 
-                              : 'bg-red-700 text-red-200'
-                          }`}>
-                            {subItem.badge}
-                          </span>
-                        ) : (
-                          (subItem.label === 'Community Health' ||
-                           subItem.label === 'Real-time Activiteit' ||
-                           subItem.label === 'Academy' ||
-                           subItem.label === 'Trainingscentrum' ||
-                           subItem.label === 'Content Performance' ||
-                           subItem.label === 'Actiegerichte Inzichten' ||
-                           subItem.label === 'Financiële Metrics' ||
-                           subItem.label === 'Gebruikers Segmentatie' ||
-                           subItem.label === 'Technische Performance' ||
-                           subItem.label === 'Onboarding Overzicht' ||
-                           subItem.label === 'Badges & Rangen' ||
-                           subItem.label === 'Boekenkamer' ||
-                           subItem.label === 'Aankondigingen' ||
-                           subItem.label === 'Forum Moderatie' ||
-                           subItem.label === 'Evenementenbeheer' ||
-                           subItem.label === 'Voedingsplannen' ||
-                           subItem.label === 'Ledenbeheer' ||
-                           subItem.label === 'Social Feed' ||
-                           subItem.label === 'Instellingen' ||
-                           subItem.label === 'Project Logs') ? (
-                            <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-bold bg-green-700 text-green-200">Live</span>
-                          ) : (
-                            <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-bold bg-red-700 text-red-200">Dummy</span>
-                          )
-                        )}
                       </span>
                     </Link>
                   ))}
@@ -227,7 +195,7 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
 export default function AdminLayoutClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, loading, signOut } = useSupabaseAuth();
+  const { user, loading, logoutAndRedirect } = useSupabaseAuth();
   const isAuthenticated = !!user;
   const { showDebug, setShowDebug } = useDebug();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -271,24 +239,10 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
     setIsLoggingOut(true);
     try {
       console.log('Admin logout initiated...');
-      await signOut();
-      
-      // Force redirect after a short delay to ensure cleanup
-      setTimeout(() => {
-        window.location.href = '/login';
-      }, 500);
-      
+      await logoutAndRedirect();
     } catch (error) {
       console.error('Error logging out:', error);
       setIsLoggingOut(false);
-      
-      // Show user feedback
-      alert('Er is een fout opgetreden bij het uitloggen. Probeer het opnieuw.');
-      
-      // Fallback: force redirect even if signOut fails
-      setTimeout(() => {
-        window.location.href = '/login';
-      }, 1000);
     }
   };
 
@@ -314,7 +268,7 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
   }
 
   // Show unauthorized message if not authenticated or not admin
-          if (!isAuthenticated || (user && user.role?.toLowerCase() !== 'admin')) {
+  if (!isAuthenticated || (user && user.role?.toLowerCase() !== 'admin')) {
     return null; // Will redirect to appropriate page
   }
 
@@ -331,6 +285,12 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
               <Bars3Icon className="w-6 h-6" />
             </button>
             <h1 className="text-xl md:text-2xl font-bold text-[#8BAE5A]">Admin Panel</h1>
+            {loading && (
+              <div className="flex items-center gap-2 text-[#8BAE5A] text-sm">
+                <div className="animate-spin rounded-full h-3 w-3 border-b border-[#8BAE5A]"></div>
+                Gegevens laden...
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-4">
             <span className="hidden sm:inline text-[#8BAE5A] text-sm">

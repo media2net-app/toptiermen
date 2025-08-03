@@ -571,7 +571,7 @@ Het Toptiermen Team
               </div>
               
               {/* Actions */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 h-9">
                 <AdminButton
                   variant="secondary"
                   size="sm"

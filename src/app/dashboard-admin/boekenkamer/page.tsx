@@ -70,13 +70,22 @@ export default function AdminBoekenkamerPage() {
 
       console.log('📚 Fetching book data from database...');
 
-      // Fetch all data in parallel
-      const [booksResponse, categoriesResponse, reviewsResponse, statsResponse] = await Promise.all([
+      // Fetch all data in parallel with timeout
+      const timeoutPromise = new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error('Request timeout')), 10000)
+      );
+
+      const dataPromise = Promise.all([
         fetch('/api/admin/books'),
         fetch('/api/admin/book-categories'),
         fetch('/api/admin/book-reviews'),
         fetch('/api/admin/book-stats')
       ]);
+
+      const [booksResponse, categoriesResponse, reviewsResponse, statsResponse] = await Promise.race([
+        dataPromise,
+        timeoutPromise
+      ]) as [Response, Response, Response, Response];
 
       // Parse responses
       const booksData = await booksResponse.json();
@@ -238,6 +247,16 @@ export default function AdminBoekenkamerPage() {
 
   useEffect(() => {
     fetchBookData();
+    
+    // Auto-retry after 15 seconds if still loading
+    const timeoutId = setTimeout(() => {
+      if (loading) {
+        console.log('⚠️ Auto-retry after timeout');
+        fetchBookData();
+      }
+    }, 15000);
+
+    return () => clearTimeout(timeoutId);
   }, []);
 
   const handleAddBook = () => {
@@ -419,7 +438,15 @@ export default function AdminBoekenkamerPage() {
       <div className="min-h-screen bg-[#181F17] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
-          <p className="text-[#8BAE5A]">Laden van boekenkamer data...</p>
+          <p className="text-[#8BAE5A] mb-4">Laden van boekenkamer data...</p>
+          <p className="text-[#B6C948] text-sm mb-4">Dit kan even duren</p>
+          <AdminButton 
+            onClick={fetchBookData} 
+            variant="secondary"
+            className="mt-4"
+          >
+            Opnieuw Proberen
+          </AdminButton>
         </div>
       </div>
     );

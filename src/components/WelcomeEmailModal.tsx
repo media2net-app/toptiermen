@@ -7,9 +7,11 @@ import {
   UserIcon,
   CogIcon,
   RocketLaunchIcon,
-  XMarkIcon
+  XMarkIcon,
+  EyeIcon
 } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
+import { getWelcomeEmailTemplate } from '@/lib/email-templates';
 
 interface WelcomeEmailModalProps {
   isOpen: boolean;
@@ -26,6 +28,7 @@ export default function WelcomeEmailModal({
 }: WelcomeEmailModalProps) {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
+  const [showEmailPreview, setShowEmailPreview] = useState(false);
 
   const welcomeSteps = [
     {
@@ -66,9 +69,55 @@ export default function WelcomeEmailModal({
     onComplete();
   };
 
+  const handleShowEmailPreview = () => {
+    setShowEmailPreview(true);
+  };
+
+  const handleCloseEmailPreview = () => {
+    setShowEmailPreview(false);
+  };
+
   if (!isOpen) return null;
 
   const currentWelcomeStep = welcomeSteps[currentStep];
+  const emailTemplate = getWelcomeEmailTemplate(userName, 'https://toptiermen.com/dashboard');
+
+  if (showEmailPreview) {
+    return (
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
+          <div className="flex justify-between items-center p-6 border-b border-gray-200">
+            <h2 className="text-2xl font-bold text-gray-800">Email Preview: Welkom & Introductie</h2>
+            <button
+              onClick={handleCloseEmailPreview}
+              className="text-gray-500 hover:text-gray-700 transition-colors"
+            >
+              <XMarkIcon className="w-6 h-6" />
+            </button>
+          </div>
+          
+          <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+            <div className="bg-gray-100 p-4 rounded-lg mb-4">
+              <div className="text-sm text-gray-600 mb-2">
+                <strong>Onderwerp:</strong> {emailTemplate.subject}
+              </div>
+              <div className="text-sm text-gray-600 mb-2">
+                <strong>Verzonden na:</strong> Direct
+              </div>
+              <div className="text-sm text-gray-600">
+                <strong>Status:</strong> <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Actief</span>
+              </div>
+            </div>
+            
+            <div 
+              className="bg-white border border-gray-200 rounded-lg overflow-hidden"
+              dangerouslySetInnerHTML={{ __html: emailTemplate.html }}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -99,51 +148,41 @@ export default function WelcomeEmailModal({
           </p>
         </div>
 
-        {/* Progress indicator */}
-        <div className="flex justify-center mb-6">
-          <div className="flex space-x-2">
-            {welcomeSteps.map((_, index) => (
-              <div
-                key={index}
-                className={`w-3 h-3 rounded-full transition-colors ${
-                  index <= currentStep ? 'bg-[#B6C948]' : 'bg-[#3A4D23]'
-                }`}
-              />
-            ))}
-          </div>
+        <div className="flex gap-3 mb-6">
+          <button
+            onClick={handleShowEmailPreview}
+            className="flex-1 px-4 py-2 bg-[#3A4D23] text-[#B6C948] font-semibold rounded-lg hover:bg-[#4A5D33] transition-colors flex items-center justify-center gap-2"
+          >
+            <EyeIcon className="w-4 h-4" />
+            Email Preview
+          </button>
         </div>
 
         <div className="flex gap-3">
           <button
             onClick={handleSkip}
-            className="flex-1 py-3 px-4 border border-[#3A4D23] text-[#B6C948] font-semibold rounded-xl hover:bg-[#3A4D23] transition-colors"
+            className="flex-1 px-4 py-2 bg-[#3A4D23] text-[#B6C948] font-semibold rounded-lg hover:bg-[#4A5D33] transition-colors"
           >
             Overslaan
           </button>
-          
           <button
             onClick={handleNext}
-            className="flex-1 py-3 px-4 bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] text-[#181F17] font-semibold rounded-xl hover:from-[#8BAE5A] hover:to-[#B6C948] transition-all duration-200"
+            className="flex-1 px-4 py-2 bg-[#8BAE5A] text-black font-semibold rounded-lg hover:bg-[#A6C97B] transition-colors"
           >
             {currentWelcomeStep.action}
           </button>
         </div>
 
-        {/* Quick tips */}
-        <div className="mt-6 p-4 bg-[#181F17] rounded-xl border border-[#3A4D23]">
-          <div className="flex items-start gap-3">
-            <CheckCircleIcon className="w-5 h-5 text-[#B6C948] mt-0.5 flex-shrink-0" />
-            <div className="text-left">
-              <p className="text-[#B6C948] text-sm font-semibold mb-1">
-                Tip van de dag
-              </p>
-              <p className="text-[#8BAE5A] text-xs">
-                {currentStep === 0 && "Neem de tijd om je profiel goed in te vullen. Dit helpt ons om content aan te bieden die perfect bij jou past."}
-                {currentStep === 1 && "Upload een profielfoto om je profiel persoonlijker te maken en jezelf te motiveren."}
-                {currentStep === 2 && "Stel realistische doelen in. Kleine stappen leiden tot grote veranderingen."}
-                {currentStep === 3 && "Begin met je eerste missie. Consistentie is belangrijker dan perfectie."}
-              </p>
-            </div>
+        <div className="mt-6 text-center">
+          <div className="flex justify-center space-x-2">
+            {welcomeSteps.map((_, index) => (
+              <div
+                key={index}
+                className={`w-2 h-2 rounded-full ${
+                  index === currentStep ? 'bg-[#8BAE5A]' : 'bg-[#3A4D23]'
+                }`}
+              />
+            ))}
           </div>
         </div>
       </div>

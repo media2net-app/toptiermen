@@ -234,12 +234,7 @@ export default function Register() {
       {/* Navigation */}
       <div className="absolute top-6 right-6 z-20">
         <div className="flex items-center gap-4">
-          <button
-            onClick={() => router.push('/offerte')}
-            className="text-[#B6C948] hover:text-white px-4 py-2 rounded-lg border border-[#B6C948] hover:bg-[#B6C948] hover:text-[#181F17] transition-all duration-200 font-medium"
-          >
-            Offerte
-          </button>
+          {/* Offerte button removed */}
         </div>
       </div>
       
