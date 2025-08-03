@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
+import { XMarkIcon, ClockIcon, UsersIcon, HeartIcon, ThumbUpIcon } from '@heroicons/react/24/outline';
 
 interface Recipe {
   id: number;
@@ -11,6 +12,24 @@ interface Recipe {
   servings: number;
   healthScore: number;
   aggregateLikes: number;
+  instructions?: string;
+  extendedIngredients?: Array<{
+    original: string;
+    name: string;
+    amount: number;
+    unit: string;
+  }>;
+  nutrition?: {
+    nutrients: Array<{
+      name: string;
+      amount: number;
+      unit: string;
+    }>;
+  };
+  summary?: string;
+  cuisines?: string[];
+  dishTypes?: string[];
+  diets?: string[];
 }
 
 interface MealPlan {
@@ -34,6 +53,8 @@ export default function SpoonacularTest() {
   const [mealPlan, setMealPlan] = useState<MealPlan | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'search' | 'mealplan' | 'quick'>('search');
+  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
+  const [loadingRecipe, setLoadingRecipe] = useState(false);
 
   const searchRecipes = async () => {
     if (!searchQuery.trim()) {
@@ -180,6 +201,37 @@ export default function SpoonacularTest() {
     }
   };
 
+  const getRecipeDetails = async (recipeId: number) => {
+    setLoadingRecipe(true);
+    try {
+      const response = await fetch(`/api/spoonacular?action=recipe&id=${recipeId}`);
+      const result = await response.json();
+
+      if (result.success) {
+        setSelectedRecipe(result.data);
+      } else {
+        toast.error(result.error || 'Fout bij ophalen van recept details');
+      }
+    } catch (error) {
+      console.error('Recipe details error:', error);
+      toast.error('Fout bij ophalen van recept details');
+    } finally {
+      setLoadingRecipe(false);
+    }
+  };
+
+  const getNutritionInfo = (recipe: Recipe) => {
+    if (!recipe.nutrition?.nutrients) return null;
+    
+    const nutrients = recipe.nutrition.nutrients;
+    return {
+      calories: nutrients.find(n => n.name === 'Calories')?.amount || 0,
+      protein: nutrients.find(n => n.name === 'Protein')?.amount || 0,
+      fat: nutrients.find(n => n.name === 'Fat')?.amount || 0,
+      carbs: nutrients.find(n => n.name === 'Carbohydrates')?.amount || 0,
+    };
+  };
+
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6">
       <div className="text-center">
@@ -247,7 +299,11 @@ export default function SpoonacularTest() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {recipes.map((recipe) => (
-              <div key={recipe.id} className="bg-[#181F17] rounded-lg overflow-hidden border border-[#3A4D23]">
+              <div 
+                key={recipe.id} 
+                className="bg-[#181F17] rounded-lg overflow-hidden border border-[#3A4D23] cursor-pointer hover:border-[#8BAE5A] transition-all duration-200 hover:shadow-lg"
+                onClick={() => getRecipeDetails(recipe.id)}
+              >
                 <img 
                   src={recipe.image} 
                   alt={recipe.title}
@@ -258,12 +314,24 @@ export default function SpoonacularTest() {
                     {recipe.title}
                   </h3>
                   <div className="flex justify-between text-sm text-[#B6C948] mb-2">
-                    <span>⏱️ {recipe.readyInMinutes} min</span>
-                    <span>👥 {recipe.servings} personen</span>
+                    <span className="flex items-center gap-1">
+                      <ClockIcon className="w-4 h-4" />
+                      {recipe.readyInMinutes} min
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <UsersIcon className="w-4 h-4" />
+                      {recipe.servings} personen
+                    </span>
                   </div>
                   <div className="flex justify-between text-sm text-[#B6C948]">
-                    <span>❤️ {recipe.healthScore}/100</span>
-                    <span>👍 {recipe.aggregateLikes}</span>
+                    <span className="flex items-center gap-1">
+                      <HeartIcon className="w-4 h-4" />
+                      {recipe.healthScore}/100
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <ThumbUpIcon className="w-4 h-4" />
+                      {recipe.aggregateLikes}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -310,7 +378,11 @@ export default function SpoonacularTest() {
                   <h3 className="text-[#B6C948] font-semibold mb-3">Maaltijden</h3>
                   <div className="space-y-3">
                     {mealPlan.meals.map((meal, index) => (
-                      <div key={meal.id} className="flex items-center gap-3 p-3 bg-[#232D1A] rounded-lg">
+                      <div 
+                        key={meal.id} 
+                        className="flex items-center gap-3 p-3 bg-[#232D1A] rounded-lg cursor-pointer hover:bg-[#2A3620] transition-colors"
+                        onClick={() => getRecipeDetails(meal.id)}
+                      >
                         <div className="w-8 h-8 bg-[#8BAE5A] rounded-full flex items-center justify-center text-[#0A0F0A] font-bold text-sm">
                           {index + 1}
                         </div>
@@ -381,7 +453,11 @@ export default function SpoonacularTest() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {recipes.map((recipe) => (
-              <div key={recipe.id} className="bg-[#181F17] rounded-lg overflow-hidden border border-[#3A4D23]">
+              <div 
+                key={recipe.id} 
+                className="bg-[#181F17] rounded-lg overflow-hidden border border-[#3A4D23] cursor-pointer hover:border-[#8BAE5A] transition-all duration-200 hover:shadow-lg"
+                onClick={() => getRecipeDetails(recipe.id)}
+              >
                 <img 
                   src={recipe.image} 
                   alt={recipe.title}
@@ -392,16 +468,141 @@ export default function SpoonacularTest() {
                     {recipe.title}
                   </h3>
                   <div className="flex justify-between text-sm text-[#B6C948] mb-2">
-                    <span>⏱️ {recipe.readyInMinutes} min</span>
-                    <span>👥 {recipe.servings} personen</span>
+                    <span className="flex items-center gap-1">
+                      <ClockIcon className="w-4 h-4" />
+                      {recipe.readyInMinutes} min
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <UsersIcon className="w-4 h-4" />
+                      {recipe.servings} personen
+                    </span>
                   </div>
                   <div className="flex justify-between text-sm text-[#B6C948]">
-                    <span>❤️ {recipe.healthScore}/100</span>
-                    <span>👍 {recipe.aggregateLikes}</span>
+                    <span className="flex items-center gap-1">
+                      <HeartIcon className="w-4 h-4" />
+                      {recipe.healthScore}/100
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <ThumbUpIcon className="w-4 h-4" />
+                      {recipe.aggregateLikes}
+                    </span>
                   </div>
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Recipe Details Modal */}
+      {selectedRecipe && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#181F17] border border-[#3A4D23] rounded-2xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-[#8BAE5A]">
+                {selectedRecipe.title}
+              </h2>
+              <button
+                onClick={() => setSelectedRecipe(null)}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <XMarkIcon className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Recipe Image */}
+              <div>
+                <img 
+                  src={selectedRecipe.image} 
+                  alt={selectedRecipe.title}
+                  className="w-full rounded-lg"
+                />
+              </div>
+
+              {/* Recipe Info */}
+              <div className="space-y-4">
+                {/* Basic Info */}
+                <div className="flex gap-4 text-sm text-[#B6C948]">
+                  <span className="flex items-center gap-1">
+                    <ClockIcon className="w-4 h-4" />
+                    {selectedRecipe.readyInMinutes} minuten
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <UsersIcon className="w-4 h-4" />
+                    {selectedRecipe.servings} personen
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <HeartIcon className="w-4 h-4" />
+                    {selectedRecipe.healthScore}/100
+                  </span>
+                </div>
+
+                {/* Nutrition Info */}
+                {getNutritionInfo(selectedRecipe) && (
+                  <div>
+                    <h3 className="text-[#B6C948] font-semibold mb-2">Voedingswaarden</h3>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div className="bg-[#232D1A] p-2 rounded">
+                        <span className="text-white">Calorieën:</span>
+                        <span className="text-[#8BAE5A] ml-2">{getNutritionInfo(selectedRecipe)?.calories}</span>
+                      </div>
+                      <div className="bg-[#232D1A] p-2 rounded">
+                        <span className="text-white">Eiwitten:</span>
+                        <span className="text-[#8BAE5A] ml-2">{getNutritionInfo(selectedRecipe)?.protein}g</span>
+                      </div>
+                      <div className="bg-[#232D1A] p-2 rounded">
+                        <span className="text-white">Vetten:</span>
+                        <span className="text-[#8BAE5A] ml-2">{getNutritionInfo(selectedRecipe)?.fat}g</span>
+                      </div>
+                      <div className="bg-[#232D1A] p-2 rounded">
+                        <span className="text-white">Koolhydraten:</span>
+                        <span className="text-[#8BAE5A] ml-2">{getNutritionInfo(selectedRecipe)?.carbs}g</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Ingredients */}
+                {selectedRecipe.extendedIngredients && (
+                  <div>
+                    <h3 className="text-[#B6C948] font-semibold mb-2">Ingrediënten</h3>
+                    <div className="space-y-1">
+                      {selectedRecipe.extendedIngredients.map((ingredient, index) => (
+                        <div key={index} className="text-white text-sm">
+                          • {ingredient.original}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Instructions */}
+                {selectedRecipe.instructions && (
+                  <div>
+                    <h3 className="text-[#B6C948] font-semibold mb-2">Bereidingswijze</h3>
+                    <div 
+                      className="text-white text-sm leading-relaxed"
+                      dangerouslySetInnerHTML={{ __html: selectedRecipe.instructions }}
+                    />
+                  </div>
+                )}
+
+                {/* Tags */}
+                <div className="flex flex-wrap gap-2">
+                  {selectedRecipe.cuisines?.map((cuisine, index) => (
+                    <span key={index} className="px-2 py-1 bg-[#8BAE5A] text-[#0A0F0A] text-xs rounded">
+                      {cuisine}
+                    </span>
+                  ))}
+                  {selectedRecipe.diets?.map((diet, index) => (
+                    <span key={index} className="px-2 py-1 bg-[#FFD700] text-[#0A0F0A] text-xs rounded">
+                      {diet}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
