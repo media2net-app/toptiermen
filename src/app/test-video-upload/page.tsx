@@ -1,302 +1,142 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { toast, Toaster } from 'react-hot-toast';
-import { supabase } from '@/lib/supabase';
 
-// Import VideoUpload component
+import { useState } from 'react';
 import VideoUpload from '@/components/VideoUpload';
+import { toast } from 'react-hot-toast';
 
 export default function TestVideoUpload() {
-  const [uploadedVideoUrl, setUploadedVideoUrl] = useState<string | null>(null);
-  const [debugInfo, setDebugInfo] = useState<any>({});
-  const [supabaseFiles, setSupabaseFiles] = useState<any[]>([]);
-  const [loadingFiles, setLoadingFiles] = useState(false);
-
-  useEffect(() => {
-    // Debug environment variables
-    const fetchDebugInfo = async () => {
-      try {
-        console.log('🔍 Checking Supabase configuration...');
-        
-        // Check if supabase client is available
-        if (!supabase) {
-          console.error('❌ Supabase client not available');
-          setDebugInfo({
-            hasSupabaseUrl: false,
-            hasSupabaseKey: false,
-            supabaseUrl: 'Client not available',
-            supabaseKeyStart: 'Client not available',
-            isConfigured: false,
-            error: 'Supabase client not initialized'
-          });
-          return;
-        }
-
-        console.log('✅ Supabase client available, testing connection...');
-
-        // Test connection by trying to list buckets
-        const { data: buckets, error } = await supabase.storage.listBuckets();
-        
-        if (error) {
-          console.error('❌ Supabase connection failed:', error);
-          setDebugInfo({
-            hasSupabaseUrl: true, // Client exists, so URL is configured
-            hasSupabaseKey: true, // Client exists, so key is configured
-            supabaseUrl: 'Configured (client loaded)',
-            supabaseKeyStart: 'Configured (client loaded)',
-            isConfigured: false,
-            buckets: [],
-            error: error.message
-          });
-        } else {
-          console.log('✅ Supabase connection successful');
-          setDebugInfo({
-            hasSupabaseUrl: true,
-            hasSupabaseKey: true,
-            supabaseUrl: 'Configured (client loaded)',
-            supabaseKeyStart: 'Configured (client loaded)',
-            isConfigured: true,
-            buckets: buckets?.map(b => b.name) || [],
-            error: null
-          });
-        }
-      } catch (error) {
-        console.error('❌ Failed to fetch debug info:', error);
-        setDebugInfo({
-          hasSupabaseUrl: true, // Client exists, so URL is configured
-          hasSupabaseKey: true, // Client exists, so key is configured
-          supabaseUrl: 'Configured (client loaded)',
-          supabaseKeyStart: 'Configured (client loaded)',
-          isConfigured: false,
-          error: 'Connection failed'
-        });
-      }
-    };
-
-    fetchDebugInfo();
-    fetchSupabaseFiles();
-  }, []);
-
-  const fetchSupabaseFiles = async () => {
-    setLoadingFiles(true);
-    try {
-      if (!supabase) {
-        console.error('Supabase client not available');
-        return;
-      }
-
-      const { data: files, error } = await supabase.storage
-        .from('workout-videos')
-        .list('exercises', {
-          limit: 100,
-          offset: 0
-        });
-      
-      if (error) {
-        console.error('Failed to fetch Supabase files:', error);
-      } else {
-        setSupabaseFiles(files || []);
-        console.log('📂 Supabase files loaded:', files);
-      }
-    } catch (error) {
-      console.error('Failed to fetch Supabase files:', error);
-    } finally {
-      setLoadingFiles(false);
-    }
-  };
+  const [uploadedUrl, setUploadedUrl] = useState<string>('');
+  const [isUploading, setIsUploading] = useState(false);
 
   const handleVideoUploaded = (url: string) => {
-    console.log('🎯 ===== VIDEO UPLOADED CALLBACK =====');
-    console.log('📱 Received URL:', url);
-    console.log('📱 Previous uploadedVideoUrl:', uploadedVideoUrl);
-    
-    setUploadedVideoUrl(url);
+    console.log('🎯 Video uploaded successfully:', url);
+    setUploadedUrl(url);
+    setIsUploading(false);
     toast.success('Video succesvol geüpload!');
-    console.log('✅ State updated with new URL');
-    
-    // Refresh the file list after upload
-    setTimeout(() => {
-      console.log('🔄 Refreshing file list...');
-      fetchSupabaseFiles();
-    }, 1000);
+  };
+
+  const handleVideoUploadStart = () => {
+    console.log('🚀 Video upload started');
+    setIsUploading(true);
+  };
+
+  const handleVideoUploadError = (error: string) => {
+    console.error('❌ Video upload error:', error);
+    setIsUploading(false);
+    toast.error(`Video upload mislukt: ${error}`);
   };
 
   return (
-    <div className="p-6 bg-[#0A0F0A] min-h-screen">
+    <div className="min-h-screen bg-[#0A0F0A] p-8">
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[#8BAE5A] mb-2">Video Upload Test</h1>
-          <p className="text-[#B6C948]">Test de video upload functionaliteit met Supabase Storage</p>
+          <h1 className="text-3xl font-bold text-[#8BAE5A] mb-4">
+            Video Upload Test
+          </h1>
+          <p className="text-[#B6C948]">
+            Test pagina voor het diagnosticeren van video upload problemen in het trainingscentrum.
+          </p>
         </div>
 
-        {/* Debug Information */}
-        <div className="mb-6 bg-[#232D1A] border border-[#3A4D23] rounded-xl p-6">
-          <h2 className="text-xl font-semibold text-[#8BAE5A] mb-4">Debug Informatie</h2>
-          <div className="space-y-2 text-[#B6C948] text-sm">
-            <div>Has Supabase URL: {debugInfo.hasSupabaseUrl ? '✅' : '❌'}</div>
-            <div>Has Supabase Key: {debugInfo.hasSupabaseKey ? '✅' : '❌'}</div>
-            <div>Supabase URL: {debugInfo.supabaseUrl}</div>
-            <div>Supabase Key Start: {debugInfo.supabaseKeyStart}</div>
-            <div>Is Configured: {debugInfo.isConfigured ? '✅' : '❌'}</div>
-            {debugInfo.buckets && (
-              <div>Available Buckets: {debugInfo.buckets.join(', ')}</div>
-            )}
-            {debugInfo.error && (
-              <div className="text-red-400">Error: {debugInfo.error}</div>
-            )}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Video Upload Component */}
+          <div className="bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]">
+            <h2 className="text-xl font-semibold text-[#8BAE5A] mb-4">
+              Video Upload Test
+            </h2>
+            <VideoUpload
+              currentVideoUrl={uploadedUrl}
+              onVideoUploaded={handleVideoUploaded}
+              onVideoUploadStart={handleVideoUploadStart}
+              onVideoUploadError={handleVideoUploadError}
+            />
           </div>
-        </div>
 
-        <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-6">
-          <h2 className="text-xl font-semibold text-[#8BAE5A] mb-4">Upload Video</h2>
-          
-          <VideoUpload
-            currentVideoUrl={uploadedVideoUrl || ''}
-            onVideoUploaded={handleVideoUploaded}
-            className="mb-6"
-          />
+          {/* Debug Information */}
+          <div className="bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]">
+            <h2 className="text-xl font-semibold text-[#8BAE5A] mb-4">
+              Debug Informatie
+            </h2>
+            
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-[#B6C948] font-semibold mb-2">Upload Status</h3>
+                <div className="bg-[#232D1A] rounded-lg p-3">
+                  <p className="text-sm text-white">
+                    Status: {isUploading ? 'Uploading...' : 'Ready'}
+                  </p>
+                  {uploadedUrl && (
+                    <p className="text-sm text-[#8BAE5A] mt-2">
+                      URL: {uploadedUrl}
+                    </p>
+                  )}
+                </div>
+              </div>
 
-          {uploadedVideoUrl && uploadedVideoUrl.trim() && (
-            <div className="mt-6">
-              <h3 className="text-lg font-semibold text-[#8BAE5A] mb-3">Geüploade Video:</h3>
-              <div className="bg-[#181F17] rounded-lg p-4">
-                <video 
-                  controls 
-                  className="w-full max-w-2xl mx-auto rounded-lg"
-                  src={uploadedVideoUrl}
-                >
-                  Je browser ondersteunt geen video afspelen.
-                </video>
-                <div className="mt-3">
-                  <p className="text-[#B6C948] text-sm">Video URL:</p>
-                  <code className="text-[#8BAE5A] text-xs break-all bg-[#181F17] p-2 rounded block mt-1">
-                    {uploadedVideoUrl}
-                  </code>
+              <div>
+                <h3 className="text-[#B6C948] font-semibold mb-2">Environment Variables</h3>
+                <div className="bg-[#232D1A] rounded-lg p-3">
+                  <p className="text-sm text-white">
+                    Supabase URL: {process.env.NEXT_PUBLIC_SUPABASE_URL ? '✅ Configured' : '❌ Missing'}
+                  </p>
+                  <p className="text-sm text-white">
+                    Supabase Key: {process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? '✅ Configured' : '❌ Missing'}
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-[#B6C948] font-semibold mb-2">Test Actions</h3>
+                <div className="space-y-2">
+                  <button
+                    onClick={() => {
+                      fetch('/api/test-supabase')
+                        .then(res => res.json())
+                        .then(data => {
+                          console.log('Supabase test result:', data);
+                          toast.success('Supabase test completed - check console');
+                        })
+                        .catch(err => {
+                          console.error('Supabase test failed:', err);
+                          toast.error('Supabase test failed');
+                        });
+                    }}
+                    className="w-full bg-[#8BAE5A] hover:bg-[#B6C948] text-[#0A0F0A] font-bold py-2 px-4 rounded-lg transition-colors"
+                  >
+                    Test Supabase Connection
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      const testFile = new File(['test content'], 'test.txt', { type: 'text/plain' });
+                      console.log('Test file created:', testFile);
+                      toast.success('Test file created - check console');
+                    }}
+                    className="w-full bg-[#FFD700] hover:bg-[#FFA500] text-[#0A0F0A] font-bold py-2 px-4 rounded-lg transition-colors"
+                  >
+                    Create Test File
+                  </button>
                 </div>
               </div>
             </div>
-          )}
-        </div>
-
-        <div className="mt-6 bg-[#232D1A] border border-[#3A4D23] rounded-xl p-6">
-          <h2 className="text-xl font-semibold text-[#8BAE5A] mb-4">Status Informatie</h2>
-          <div className="space-y-3 text-[#B6C948]">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-[#8BAE5A] rounded-full"></div>
-              <span>Supabase Storage: workout-videos bucket (exercises folder)</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-[#8BAE5A] rounded-full"></div>
-              <span>NEXT_PUBLIC_SUPABASE_URL: Geconfigureerd</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-[#8BAE5A] rounded-full"></div>
-              <span>NEXT_PUBLIC_SUPABASE_ANON_KEY: Geconfigureerd</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-[#8BAE5A] rounded-full"></div>
-              <span>Video Upload: Beschikbaar</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-[#8BAE5A] rounded-full"></div>
-              <span>Ondersteunde formaten: MP4, MOV, AVI, WEBM, MKV, QuickTime</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-[#8BAE5A] rounded-full"></div>
-              <span>Maximum grootte: 500MB</span>
-            </div>
           </div>
         </div>
 
-        {/* Supabase Storage Directory View */}
-        <div className="mt-6 bg-[#232D1A] border border-[#3A4D23] rounded-xl p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-[#8BAE5A]">Supabase Storage Directory View</h2>
-            <button 
-              onClick={fetchSupabaseFiles}
-              disabled={loadingFiles}
-              className="px-4 py-2 bg-[#8BAE5A] text-[#0A0F0A] rounded-lg hover:bg-[#B6C948] transition-colors disabled:opacity-50"
-            >
-              {loadingFiles ? 'Laden...' : 'Ververs'}
-            </button>
+        {/* Instructions */}
+        <div className="mt-8 bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]">
+          <h2 className="text-xl font-semibold text-[#8BAE5A] mb-4">
+            Test Instructies
+          </h2>
+          <div className="space-y-2 text-[#B6C948]">
+            <p>1. Open de browser console (F12) om debug informatie te zien</p>
+            <p>2. Probeer een video bestand te uploaden</p>
+            <p>3. Controleer de console voor foutmeldingen</p>
+            <p>4. Test de Supabase verbinding met de knop hierboven</p>
+            <p>5. Ondersteunde formaten: MP4, MOV, AVI, WEBM, MKV, QuickTime</p>
+            <p>6. Maximum bestandsgrootte: 500MB</p>
           </div>
-          
-          {loadingFiles ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="w-6 h-6 border-2 border-[#3A4D23] border-t-[#8BAE5A] rounded-full animate-spin"></div>
-              <span className="ml-3 text-[#B6C948]">Bestanden laden...</span>
-            </div>
-          ) : supabaseFiles.length === 0 ? (
-            <div className="text-center py-8 text-[#B6C948]">
-              <p>Geen bestanden gevonden in Supabase Storage</p>
-              <p className="text-sm mt-2">Upload een video om te beginnen</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              <div className="text-sm text-[#B6C948] mb-3">
-                Totaal: {supabaseFiles.length} bestand(en)
-              </div>
-              {supabaseFiles.map((file, index) => {
-                const publicUrl = supabase?.storage
-                  .from('workout-videos')
-                  .getPublicUrl(`exercises/${file.name}`).data.publicUrl;
-                
-                return (
-                  <div key={index} className="bg-[#181F17] border border-[#3A4D23] rounded-lg p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <h3 className="text-[#8BAE5A] font-semibold">{file.name}</h3>
-                        <div className="text-sm text-[#B6C948] mt-1 space-y-1">
-                          <div>Grootte: {(file.metadata?.size / 1024 / 1024).toFixed(2)} MB</div>
-                          <div>Type: {file.metadata?.mimetype}</div>
-                          <div>Geüpload: {new Date(file.updated_at).toLocaleString('nl-NL')}</div>
-                        </div>
-                      </div>
-                      <div className="ml-4">
-                        <a 
-                          href={publicUrl} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="px-3 py-1 bg-[#3A4D23] text-[#8BAE5A] rounded hover:bg-[#8BAE5A] hover:text-[#0A0F0A] transition-colors text-sm"
-                        >
-                          Bekijk
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
         </div>
       </div>
-      
-      {/* Toast notifications */}
-      <Toaster 
-        position="bottom-right"
-        toastOptions={{
-          duration: 4000,
-          style: {
-            background: '#232D1A',
-            color: '#B6C948',
-            border: '1px solid #3A4D23',
-          },
-          success: {
-            style: {
-              background: '#0A0F0A',
-              color: '#8BAE5A',
-              border: '1px solid #8BAE5A',
-            },
-          },
-          error: {
-            style: {
-              background: '#0A0F0A',
-              color: '#ef4444',
-              border: '1px solid #ef4444',
-            },
-          },
-        }}
-      />
     </div>
   );
 } 

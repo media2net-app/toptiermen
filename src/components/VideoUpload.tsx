@@ -172,6 +172,24 @@ export default function VideoUpload({
         hasFrom: !!supabase?.storage?.from
       });
 
+      // Check if bucket exists first
+      console.log('🔍 Checking if workout-videos bucket exists...');
+      const { data: buckets, error: bucketError } = await supabase.storage.listBuckets();
+      
+      if (bucketError) {
+        console.error('❌ Failed to list buckets:', bucketError);
+        throw new Error(`Bucket listing failed: ${bucketError.message}`);
+      }
+
+      const workoutBucket = buckets?.find(bucket => bucket.id === 'workout-videos');
+      if (!workoutBucket) {
+        console.error('❌ workout-videos bucket not found');
+        console.log('📋 Available buckets:', buckets?.map(b => b.id));
+        throw new Error('workout-videos bucket not found. Available buckets: ' + buckets?.map(b => b.id).join(', '));
+      }
+
+      console.log('✅ workout-videos bucket found:', workoutBucket);
+
       const uploadStartTime = Date.now();
       const { data, error } = await supabase.storage
         .from('workout-videos')
@@ -197,7 +215,8 @@ export default function VideoUpload({
           bucket: 'workout-videos',
           path: filePath,
           fileSize: file.size,
-          fileType: file.type
+          fileType: file.type,
+          uploadDuration
         });
         
         // Call error callback
