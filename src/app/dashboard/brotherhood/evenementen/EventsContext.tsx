@@ -167,7 +167,7 @@ export function EventsProvider({ children }: { children: ReactNode }) {
   const [userRsvps, setUserRsvps] = useState<Set<number>>(new Set());
 
   const rsvpToEvent = (eventId: number) => {
-    setUserRsvps(prev => new Set([...prev, eventId]));
+    setUserRsvps(prev => new Set(Array.from(prev).concat(eventId)));
   };
 
   const cancelRsvp = (eventId: number) => {

@@ -148,7 +148,7 @@ export default function ProductenPage() {
 
   const removeFromCart = (productId: string) => {
     setCart(prevCart => prevCart.filter(item => item.product.id !== productId));
-    toast.info('Product verwijderd uit winkelwagen');
+    toast('Product verwijderd uit winkelwagen');
   };
 
   const updateCartQuantity = (productId: string, quantity: number) => {

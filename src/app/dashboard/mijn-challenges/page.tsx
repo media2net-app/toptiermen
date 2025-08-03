@@ -182,7 +182,7 @@ export default function MijnChallenges() {
     setShowAddChallenge(false);
     
     if (newChallenge.shared) {
-      toast.info('🔥 Je challenge is gedeeld met de Brotherhood!');
+      toast('🔥 Je challenge is gedeeld met de Brotherhood!');
     }
   };
 

@@ -352,7 +352,7 @@ export async function POST(request: Request) {
               const today = getTodayDate();
               const isCompletedToday = mission.type === 'Dagelijks' ? isMissionCompletedToday(mission.last_completion_date) : !!mission.last_completion_date;
               
-              let newCompletionDate = null;
+              let newCompletionDate: string | null = null;
               let isNowCompleted = false;
               
               if (mission.type === 'Dagelijks') {
@@ -457,7 +457,7 @@ export async function POST(request: Request) {
         const isCompletedToday = isMissionCompletedToday(existingMission.last_completion_date);
         
         let xpEarned = 0;
-        let newCompletionDate = null;
+        let newCompletionDate: string | null = null;
         let isNowCompleted = false;
 
         if (existingMission.frequency_type === 'daily') {

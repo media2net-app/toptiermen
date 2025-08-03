@@ -101,7 +101,7 @@ export default function OnboardingWidget({ isVisible, onComplete }: OnboardingWi
       if (nutritionCompleted) allCompletedIds.add('nutrition');
 
       // Update localStorage with combined list
-      localStorage.setItem('onboardingCompletedSteps', JSON.stringify([...allCompletedIds]));
+      localStorage.setItem('onboardingCompletedSteps', JSON.stringify(Array.from(allCompletedIds)));
 
       // Update steps state
       const updatedSteps = steps.map(step => ({

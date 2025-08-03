@@ -127,7 +127,7 @@ export default function Dashboard() {
       // Show toast notification when all missions are completed
       if (allDailyCompleted && !wasCompletedBefore && !loading && !hasDismissedDaily) {
         toast.success('🏆 Alle dagelijkse missies volbracht! Je bent een echte Top Tier Man! Morgen staan er weer nieuwe uitdagingen klaar! 💪', {
-          autoClose: 6000,
+          duration: 6000,
           position: "top-center",
           style: {
             background: '#232D1A',
@@ -143,8 +143,8 @@ export default function Dashboard() {
       
       // Show encouragement when almost completed
       if (almostCompleted && !allDailyCompleted && !wasAlmostCompletedBefore && !loading && !hasDismissedAlmost) {
-        toast.info('🔥 Bijna alle missies volbracht! Nog even doorzetten voor de perfecte dag! 💪', {
-          autoClose: 4000,
+        toast('🔥 Bijna alle missies volbracht! Nog even doorzetten voor de perfecte dag! 💪', {
+          duration: 4000,
           position: "top-center",
           style: {
             background: '#232D1A',

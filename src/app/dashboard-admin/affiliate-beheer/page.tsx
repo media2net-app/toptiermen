@@ -380,7 +380,7 @@ export default function AffiliateBeheer() {
       }
 
       // Update affiliate in database - try affiliates table first, fallback to profiles
-      let updateError = null;
+      let updateError: any = null;
       
       // Try to update in affiliates table
       const { error: affiliatesUpdateError } = await supabase

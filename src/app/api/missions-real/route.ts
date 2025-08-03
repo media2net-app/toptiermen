@@ -29,7 +29,7 @@ export async function GET(request: Request) {
     console.log('🔍 Fetching real missions for user:', userId);
 
     // Fetch user missions - try with a simple table structure first
-    let missions = [];
+    let missions: any[] = [];
     
     // Try to fetch from user_missions table (if it exists)
     const { data: userMissions, error: missionsError } = await supabase

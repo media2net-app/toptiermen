@@ -34,7 +34,7 @@ export async function POST(request: Request) {
       .eq('id', sessionId)
       .single();
 
-    let durationMinutes = null;
+    let durationMinutes: number | null = null;
     if (session?.started_at) {
       const startTime = new Date(session.started_at);
       const endTime = new Date();

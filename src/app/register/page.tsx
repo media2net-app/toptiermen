@@ -209,7 +209,7 @@ export default function Register() {
         setRegisteredEmail(registration.email);
         setShowEmailVerification(true);
       } else {
-        setError(result.error || 'Er is een fout opgetreden bij het registreren');
+        setError('Er is een fout opgetreden bij het registreren');
       }
     } catch (error: any) {
       setError(error.message || 'Er is een fout opgetreden bij het registreren');

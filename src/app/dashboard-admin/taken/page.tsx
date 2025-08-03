@@ -96,22 +96,14 @@ export default function TakenPage() {
         console.error('Error fetching tasks:', data.error);
         toast.error('Fout bij het laden van taken', {
           position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true
+          duration: 3000,
         });
       }
     } catch (error) {
       console.error('Error fetching tasks:', error);
       toast.error('Fout bij het laden van taken', {
         position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true
+        duration: 3000,
       });
     } finally {
       setLoadingTasks(false);
@@ -214,11 +206,7 @@ export default function TakenPage() {
       if (response.ok) {
         toast.success('Taak succesvol bijgewerkt', {
           position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true
+          duration: 3000,
         });
         setShowEditModal(false);
         setEditingTask(null);
@@ -230,11 +218,7 @@ export default function TakenPage() {
       console.error('Error updating task:', error);
       toast.error('Fout bij het bijwerken van taak', {
         position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true
+        duration: 3000,
       });
     } finally {
       setIsLoading(false);
@@ -252,11 +236,7 @@ export default function TakenPage() {
       if (response.ok) {
         toast.success('Taak succesvol verwijderd', {
           position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true
+          duration: 3000,
         });
         fetchTasks();
       } else {
@@ -266,11 +246,7 @@ export default function TakenPage() {
       console.error('Error deleting task:', error);
       toast.error('Fout bij het verwijderen van taak', {
         position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true
+        duration: 3000,
       });
     }
   };
@@ -279,11 +255,7 @@ export default function TakenPage() {
     if (!formData.title || !formData.description || !formData.assigned_to || !formData.due_date) {
       toast.error('Vul alle verplichte velden in', {
         position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true
+        duration: 3000,
       });
       return;
     }
@@ -299,11 +271,7 @@ export default function TakenPage() {
       if (response.ok) {
         toast.success('Taak succesvol toegevoegd', {
           position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true
+          duration: 3000,
         });
         setShowAddTaskModal(false);
         setFormData({
@@ -324,11 +292,7 @@ export default function TakenPage() {
       console.error('Error adding task:', error);
       toast.error('Fout bij het toevoegen van taak', {
         position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true
+        duration: 3000,
       });
     } finally {
       setAddingTask(false);

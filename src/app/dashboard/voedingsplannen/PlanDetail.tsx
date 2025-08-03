@@ -67,7 +67,7 @@ export default function PlanDetail({ slug, onBack }: PlanDetailProps) {
       <div className="flex flex-col gap-6">
         {plan.meals.map((meal, idx) => {
           // Simpele portieberekening: hoofdmaaltijd = 1/4, snack = 1/8 van dagtotaal
-          let portion = null;
+          let portion: any = null;
           if (macro) {
             const divider = meal.name === "Snack" ? 8 : 4;
             portion = {

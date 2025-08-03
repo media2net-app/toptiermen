@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    let ads = [];
+    let ads: any[] = [];
 
     if (competitorName) {
       // Search for ads by competitor name
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    let ads = [];
+    let ads: any[] = [];
 
     if (pageIds && pageIds.length > 0) {
       // Get ads from specific page IDs

@@ -442,7 +442,7 @@ export default function MijnMissiesPage() {
       // Show toast notification when all missions are completed
       if (allDailyCompleted && !wasCompletedBefore && !loading) {
         toast.success('🏆 Alle dagelijkse missies volbracht! Je bent een echte Top Tier Man! Morgen staan er weer nieuwe uitdagingen klaar! 💪', {
-          autoClose: 6000,
+          duration: 6000,
           position: "top-center",
           style: {
             background: '#232D1A',
@@ -458,18 +458,15 @@ export default function MijnMissiesPage() {
 
       // Show encouragement when almost completed
       if (almostCompleted && !allDailyCompleted && !wasAlmostCompletedBefore && !loading) {
-        toast.info('🔥 Bijna alle missies volbracht! Nog even doorzetten voor de perfecte dag! 💪', {
-          autoClose: 4000,
+        toast('🔥 Bijna alle missies volbracht! Nog even doorzetten voor de perfecte dag! 💪', {
+          duration: 4000,
           position: "top-center",
           style: {
-            background: '#232D1A',
-            color: '#f0a14f',
-            border: '2px solid #f0a14f',
-            borderRadius: '12px',
-            fontSize: '16px',
+            background: '#FFD700',
+            color: '#232D1A',
             fontWeight: 'bold',
-            maxWidth: '500px'
-          }
+            fontSize: '1.1rem',
+          },
         });
       }
     }
@@ -577,7 +574,7 @@ export default function MijnMissiesPage() {
         if (data.xpEarned > 0) {
           toast.success(`🎉 ${data.message || `Missie voltooid! +${data.xpEarned} XP verdiend!`}`);
         } else if (data.xpEarned < 0) {
-          toast.info(`Missie ongedaan gemaakt. ${Math.abs(data.xpEarned)} XP afgetrokken.`);
+          toast(`Missie ongedaan gemaakt. ${Math.abs(data.xpEarned)} XP afgetrokken.`);
         }
       }
     } catch (err) {

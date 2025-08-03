@@ -98,7 +98,7 @@ const SocialFeedPage = () => {
       if (postsError) throw postsError;
 
       // Get user data for all posts
-      const userIds = [...new Set(postsData.map(post => post.user_id))];
+      const userIds = Array.from(new Set(postsData.map(post => post.user_id)));
       const { data: usersData } = await supabase
         .from('profiles')
         .select('id, full_name, avatar_url, rank')
@@ -208,7 +208,7 @@ const SocialFeedPage = () => {
       if (commentsError) throw commentsError;
 
       // Get user data for comments
-      const userIds = [...new Set(commentsData.map(comment => comment.user_id))];
+      const userIds = Array.from(new Set(commentsData.map(comment => comment.user_id)));
       const { data: usersData } = await supabase
         .from('profiles')
         .select('id, full_name, avatar_url, rank')

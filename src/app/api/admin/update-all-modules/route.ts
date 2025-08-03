@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
     console.log('🚀 Updating all modules with comprehensive content...');
 
     // Update all modules with detailed content
-    const updateResults = [];
+    const updateResults: any[] = [];
 
     // 1. Update Discipline & Identiteit Module (already done, but let's ensure it's complete)
     const disciplineModule = await updateDisciplineModule();

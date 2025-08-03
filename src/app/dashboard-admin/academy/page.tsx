@@ -474,7 +474,7 @@ export default function AcademyManagement() {
       // Reorder lessons logic would go here
       toast.success('Volgorde van lessen bijgewerkt', {
         position: "top-right",
-        autoClose: 2000
+        duration: 2000
       });
     }
     setDragIndex(null);

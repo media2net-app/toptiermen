@@ -123,7 +123,7 @@ class TikTokAdsAPI {
     country: string = 'NL'
   ): Promise<any[]> {
     try {
-      const trends = [];
+      const trends: any[] = [];
       
       for (const keyword of keywords) {
         trends.push({

@@ -155,7 +155,7 @@ export default function WorkoutPage() {
 
   const pauseWorkout = () => {
     setIsTimerRunning(false);
-    toast.info('Workout gepauzeerd');
+    toast('Workout gepauzeerd');
   };
 
   const resumeWorkout = () => {

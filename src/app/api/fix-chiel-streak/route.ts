@@ -68,8 +68,8 @@ export async function POST(request: Request) {
     console.log('📋 Available tables:', tables);
 
     // Check current streak data (try different possible table names)
-    let currentStreak = null;
-    let streakError = null;
+    let currentStreak: any = null;
+    let streakError: any = null;
 
     // Try user_daily_streaks first
     const { data: streak1, error: error1 } = await supabase

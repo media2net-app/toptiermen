@@ -368,7 +368,7 @@ export default function MijnProfiel() {
     
     const currentInterests = profile.interests || [];
     if (currentInterests.includes(interest)) {
-      toast.info('Deze interesse heb je al toegevoegd');
+      toast('Deze interesse heb je al toegevoegd');
       return;
     }
 
@@ -544,7 +544,7 @@ export default function MijnProfiel() {
       const processedFile = await convertHeicToJpeg(file);
       
       if (isHeicFile(file)) {
-        toast.info('HEIC bestand gedetecteerd. Probeer de foto eerst naar JPEG te converteren op je telefoon voor betere kwaliteit.');
+        toast('HEIC bestand gedetecteerd. Probeer de foto eerst naar JPEG te converteren op je telefoon voor betere kwaliteit.');
       }
       
       const reader = new FileReader();

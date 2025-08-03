@@ -203,7 +203,7 @@ export async function GET(request: Request) {
         .eq('user_id', userId)
         .single();
 
-      let rankData = null;
+      let rankData: any = null;
       if (!xpError && xpData?.current_rank_id) {
         const { data: rank, error: rankError } = await supabase
           .from('ranks')

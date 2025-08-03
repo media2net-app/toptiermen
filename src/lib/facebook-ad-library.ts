@@ -286,7 +286,7 @@ class FacebookAdLibraryAPI {
     const targeting = ad.targeting;
     if (!targeting) return 'Unknown';
     
-    const parts = [];
+    const parts: string[] = [];
     if (targeting.age_min && targeting.age_max) {
       parts.push(`${targeting.age_min}-${targeting.age_max} jaar`);
     }
@@ -301,7 +301,7 @@ class FacebookAdLibraryAPI {
   }
 
   private extractCreativeElements(ad: FacebookAdData): string[] {
-    const elements = [];
+    const elements: string[] = [];
     
     if (ad.ad_creative_body) elements.push('Text content');
     if (ad.ad_creative_link_title) elements.push('Link title');
@@ -312,7 +312,7 @@ class FacebookAdLibraryAPI {
   }
 
   private analyzeStrengths(ad: FacebookAdData): string[] {
-    const strengths = [];
+    const strengths: string[] = [];
     
     if (ad.ad_creative_body && ad.ad_creative_body.length > 50) {
       strengths.push('Detaillierte content');
@@ -328,7 +328,7 @@ class FacebookAdLibraryAPI {
   }
 
   private analyzeWeaknesses(ad: FacebookAdData): string[] {
-    const weaknesses = [];
+    const weaknesses: string[] = [];
     
     if (!ad.ad_creative_body || ad.ad_creative_body.length < 20) {
       weaknesses.push('Korte content');
@@ -344,7 +344,7 @@ class FacebookAdLibraryAPI {
   }
 
   private generateInsights(ad: FacebookAdData): string {
-    const insights = [];
+    const insights: string[] = [];
     
     if (ad.spend) {
       insights.push(`Spend range: €${ad.spend.lower_bound} - €${ad.spend.upper_bound}`);

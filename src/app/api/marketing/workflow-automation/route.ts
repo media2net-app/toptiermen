@@ -449,7 +449,7 @@ export async function POST(request: NextRequest) {
 }
 
 function generateRecommendations(input: any): string[] {
-  const recommendations = [];
+  const recommendations: string[] = [];
 
   if (input.spend && input.spend > 10000) {
     recommendations.push('Consider increasing budget allocation for high-performing campaigns');

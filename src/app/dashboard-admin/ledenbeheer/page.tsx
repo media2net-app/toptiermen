@@ -84,11 +84,7 @@ export default function Ledenbeheer() {
         console.error('Error fetching users:', usersResult.error);
         toast.error('Fout bij het laden van leden', {
           position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true
+          duration: 3000,
         });
         return;
       }
@@ -158,11 +154,7 @@ export default function Ledenbeheer() {
       console.error('Exception fetching members:', err);
       toast.error('Fout bij het laden van leden', {
         position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true
+        duration: 3000,
       });
     } finally {
       setLoadingMembers(false);
@@ -310,22 +302,14 @@ export default function Ledenbeheer() {
       
       toast.success(`Profiel van ${formData.name} succesvol bijgewerkt`, {
         position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true
+        duration: 3000,
       });
       setShowEditModal(false);
       setEditingMember(null);
     } catch (error) {
       toast.error('Er is een fout opgetreden bij het opslaan', {
         position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true
+        duration: 3000,
       });
     } finally {
       setIsLoading(false);
@@ -339,20 +323,12 @@ export default function Ledenbeheer() {
       
       toast.success('Wachtwoord reset e-mail verzonden', {
         position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true
+        duration: 3000,
       });
     } catch (error) {
       toast.error('Er is een fout opgetreden bij het verzenden van de e-mail', {
         position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true
+        duration: 3000,
       });
     }
   };
@@ -362,11 +338,7 @@ export default function Ledenbeheer() {
     if (!newUserData.email || !newUserData.full_name || !newUserData.password) {
       toast.error('Vul alle verplichte velden in', {
         position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true
+        duration: 3000,
       });
       return;
     }
@@ -374,11 +346,7 @@ export default function Ledenbeheer() {
     if (newUserData.password !== newUserData.confirmPassword) {
       toast.error('Wachtwoorden komen niet overeen', {
         position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true
+        duration: 3000,
       });
       return;
     }
@@ -386,11 +354,7 @@ export default function Ledenbeheer() {
     if (newUserData.password.length < 6) {
       toast.error('Wachtwoord moet minimaal 6 karakters bevatten', {
         position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true
+        duration: 3000,
       });
       return;
     }
@@ -418,11 +382,7 @@ export default function Ledenbeheer() {
       if (response.ok) {
         toast.success(data.message || `Gebruiker ${newUserData.full_name} succesvol aangemaakt!`, {
           position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true
+          duration: 3000,
         });
 
         // Reset form and close modal
@@ -446,11 +406,7 @@ export default function Ledenbeheer() {
       console.error('Error creating user:', error);
       toast.error(error.message || 'Er is een fout opgetreden bij het aanmaken van de gebruiker', {
         position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true
+        duration: 3000,
       });
     } finally {
       setAddingUser(false);
@@ -482,11 +438,7 @@ export default function Ledenbeheer() {
       if (response.ok) {
         toast.success('✅ Gebruiker volledig gereset! Alle data gewist. Gebruiker kan nu vanaf stap 0 beginnen.', {
           position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true
+          duration: 5000,
         });
         
         // Refresh members list
@@ -495,22 +447,14 @@ export default function Ledenbeheer() {
       } else {
         toast.error(data.error || 'Er is een fout opgetreden bij het resetten', {
           position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true
+          duration: 3000,
         });
       }
     } catch (error) {
       console.error('Error resetting onboarding:', error);
       toast.error('Er is een fout opgetreden bij het resetten', {
         position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true
+        duration: 3000,
       });
     } finally {
       setIsLoading(false);

@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
     };
 
     // Fetch data from each platform
-    const fetchPromises = [];
+    const fetchPromises: Promise<void>[] = [];
 
     if (platforms.includes('facebook') && facebookAdLibrary) {
       fetchPromises.push(
@@ -343,7 +343,7 @@ function determinePerformance(ad: any): 'excellent' | 'good' | 'average' | 'poor
  * Generate insights based on ad data and platform
  */
 function generateInsights(ad: any, platform: string): string {
-  const insights = [];
+  const insights: string[] = [];
 
   if (ad.ctr > 0.05) {
     insights.push(`Hoge CTR van ${(ad.ctr * 100).toFixed(1)}% wijst op sterke targeting`);

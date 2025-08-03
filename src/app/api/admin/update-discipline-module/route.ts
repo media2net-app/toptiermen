@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const updateResults = [];
+    const updateResults: any[] = [];
 
     // Update lesson 1: De Basis van Discipline (already good, but ensure it's complete)
     const lesson1Content = `Discipline is de fundering van alle succes. In deze les leer je wat discipline echt betekent en hoe je het kunt ontwikkelen.

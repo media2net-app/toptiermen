@@ -388,7 +388,7 @@ class GoogleAdsAPI {
     country: string = 'NL'
   ): Promise<any[]> {
     try {
-      const insights = [];
+      const insights: any[] = [];
       
       for (const keyword of keywords) {
         const query = `

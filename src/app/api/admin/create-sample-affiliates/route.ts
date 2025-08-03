@@ -24,8 +24,8 @@ export async function POST(request: NextRequest) {
 
     console.log(`📊 Found ${profiles.length} users to create affiliates for`);
 
-    const createdAffiliates = [];
-    const createdReferrals = [];
+    const createdAffiliates: any[] = [];
+    const createdReferrals: any[] = [];
 
     // Create affiliates for each user
     for (let i = 0; i < Math.min(profiles.length, 5); i++) {
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create some commission payments
-    const createdPayments = [];
+    const createdPayments: any[] = [];
     for (const affiliate of createdAffiliates) {
       if (affiliate.status === 'active') {
         const { data: payment, error: paymentError } = await supabaseAdmin
