@@ -1,4 +1,4 @@
-import ClientLayout from '@/components/ClientLayout';
+import ClientLayout from '@/app/components/ClientLayout';
 import Link from 'next/link';
 import { FaLeaf, FaLungs, FaBrain } from 'react-icons/fa6';
 import { FaRegSmileBeam } from 'react-icons/fa';
