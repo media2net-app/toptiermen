@@ -15,7 +15,8 @@ import {
   TrashIcon,
   EyeIcon,
   DocumentTextIcon,
-  CalendarIcon
+  CalendarIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
 import { AdminCard, AdminStatsCard, AdminButton } from '@/components/admin';
@@ -733,27 +734,50 @@ Het Toptiermen Team
 
       {/* Email Preview Modal */}
       {showPreview && selectedStep && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-[#232D1A] p-6 rounded-xl border border-[#3A4D23] w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-semibold mb-4 text-[#8BAE5A]">
-              Email Preview: {selectedStep.name}
-            </h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold text-[#8BAE5A]">
+                Email Preview: {selectedStep.name}
+              </h2>
+              <button
+                onClick={() => {
+                  setShowPreview(false);
+                  setSelectedStep(null);
+                }}
+                className="text-[#B6C948] hover:text-white transition-colors"
+              >
+                <XMarkIcon className="w-6 h-6" />
+              </button>
+            </div>
             
-            <div className="bg-white text-black p-6 rounded-lg shadow-lg">
+            <div className="bg-white text-black rounded-lg shadow-lg overflow-hidden">
               {/* Email Header */}
-              <div className="border-b border-gray-200 pb-4 mb-4">
-                <div className="mb-2">
-                  <strong className="text-gray-700">Onderwerp:</strong> {selectedStep.subject}
+              <div className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] p-4 text-white">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                      <span className="text-xl font-bold">T</span>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold">Toptiermen</h3>
+                      <p className="text-sm opacity-90">Broederschap van Top Performers</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-sm opacity-90">Verzonden na:</div>
+                    <div className="font-semibold">{selectedStep.delayDays === 0 ? 'Direct' : `${selectedStep.delayDays} dagen`}</div>
+                  </div>
                 </div>
-                <div className="mb-2">
-                  <strong className="text-gray-700">Verzonden na:</strong> {selectedStep.delayDays === 0 ? 'Direct' : `${selectedStep.delayDays} dagen`}
-                </div>
-                <div>
-                  <strong className="text-gray-700">Status:</strong> 
-                  <span className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${
-                    selectedStep.status === 'active' ? 'bg-green-100 text-green-800' :
-                    selectedStep.status === 'paused' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-gray-100 text-gray-800'
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-sm opacity-90 mb-1">Onderwerp:</div>
+                    <div className="font-semibold text-lg">{selectedStep.subject}</div>
+                  </div>
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    selectedStep.status === 'active' ? 'bg-green-500 text-white' :
+                    selectedStep.status === 'paused' ? 'bg-yellow-500 text-white' :
+                    'bg-gray-500 text-white'
                   }`}>
                     {selectedStep.status === 'active' ? 'Actief' : 
                      selectedStep.status === 'paused' ? 'Gepauzeerd' : 'Concept'}
@@ -762,29 +786,209 @@ Het Toptiermen Team
               </div>
               
               {/* Email Content */}
-              <div className="prose prose-sm max-w-none">
-                <div 
-                  className="whitespace-pre-wrap text-gray-800 leading-relaxed"
-                  style={{
-                    fontFamily: 'Arial, sans-serif',
-                    lineHeight: '1.6'
-                  }}
-                >
-                  {selectedStep.content ? (
-                    selectedStep.content
-                      .replace(/\{\{name\}\}/g, 'John Doe')
-                      .replace(/\{\{email\}\}/g, 'john.doe@example.com')
-                      .replace(/\{\{interestLevel\}\}/g, 'Hoog')
-                  ) : (
-                    <div className="text-gray-500 italic">Nog geen content ingevuld...</div>
-                  )}
+              <div className="p-6">
+                {/* Hero Section */}
+                <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] rounded-xl p-6 mb-6 text-white">
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] rounded-full flex items-center justify-center mx-auto mb-4">
+                      <span className="text-2xl font-bold text-white">T</span>
+                    </div>
+                    <h1 className="text-2xl font-bold mb-2">🚀 Welkom bij Toptiermen!</h1>
+                    <p className="text-[#B6C948] text-lg">Jouw reis naar succes begint hier</p>
+                  </div>
+                </div>
+
+                {/* Main Content */}
+                <div className="prose prose-sm max-w-none">
+                  <div 
+                    className="text-gray-800 leading-relaxed"
+                    style={{
+                      fontFamily: 'Arial, sans-serif',
+                      lineHeight: '1.6'
+                    }}
+                  >
+                    {selectedStep.content ? (
+                      <div className="space-y-6">
+                        {/* Greeting */}
+                        <div className="bg-gradient-to-r from-[#8BAE5A]/10 to-[#FFD700]/10 p-4 rounded-lg border-l-4 border-[#8BAE5A]">
+                          <p className="text-lg font-semibold text-[#181F17]">
+                            {selectedStep.content.split('\n')[0].replace(/\{\{name\}\}/g, 'John Doe')}
+                          </p>
+                        </div>
+
+                        {/* Content with enhanced styling */}
+                        {selectedStep.content
+                          .split('\n')
+                          .slice(1)
+                          .map((line, index) => {
+                            if (line.includes('**Wat maakt Toptiermen uniek?**')) {
+                              return (
+                                <div key={index} className="bg-gradient-to-r from-[#8BAE5A]/5 to-[#FFD700]/5 p-4 rounded-lg">
+                                  <h2 className="text-xl font-bold text-[#181F17] mb-4 flex items-center gap-2">
+                                    <span className="text-2xl">🏆</span>
+                                    Wat maakt Toptiermen uniek?
+                                  </h2>
+                                </div>
+                              );
+                            }
+                            
+                            if (line.includes('**De Broederschap**')) {
+                              return (
+                                <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
+                                  <div className="bg-gradient-to-br from-[#8BAE5A]/10 to-[#FFD700]/10 p-4 rounded-lg border border-[#8BAE5A]/20">
+                                    <div className="flex items-center gap-3 mb-2">
+                                      <span className="text-2xl">🏆</span>
+                                      <h3 className="font-bold text-[#181F17]">De Broederschap</h3>
+                                    </div>
+                                    <p className="text-gray-700">Exclusieve community van top performers die elkaar naar succes duwen</p>
+                                  </div>
+                                  
+                                  <div className="bg-gradient-to-br from-[#FFD700]/10 to-[#8BAE5A]/10 p-4 rounded-lg border border-[#FFD700]/20">
+                                    <div className="flex items-center gap-3 mb-2">
+                                      <span className="text-2xl">🎯</span>
+                                      <h3 className="font-bold text-[#181F17]">Wekelijkse Video Calls</h3>
+                                    </div>
+                                    <p className="text-gray-700">Wekelijkse progress evaluatie en accountability sessies</p>
+                                  </div>
+                                  
+                                  <div className="bg-gradient-to-br from-[#8BAE5A]/10 to-[#FFD700]/10 p-4 rounded-lg border border-[#8BAE5A]/20">
+                                    <div className="flex items-center gap-3 mb-2">
+                                      <span className="text-2xl">🧗</span>
+                                      <h3 className="font-bold text-[#181F17]">Persoonlijke Transformatie</h3>
+                                    </div>
+                                    <p className="text-gray-700">Ontwikkel je tot een echte "Top Tier Man"</p>
+                                  </div>
+                                  
+                                  <div className="bg-gradient-to-br from-[#FFD700]/10 to-[#8BAE5A]/10 p-4 rounded-lg border border-[#FFD700]/20">
+                                    <div className="flex items-center gap-3 mb-2">
+                                      <span className="text-2xl">💡</span>
+                                      <h3 className="font-bold text-[#181F17]">Bewezen Methoden</h3>
+                                    </div>
+                                    <p className="text-gray-700">Strategieën die al duizenden mannen naar succes hebben gebracht</p>
+                                  </div>
+                                </div>
+                              );
+                            }
+                            
+                            if (line.includes('**Wat je de komende 6 maanden kunt verwachten:**')) {
+                              return (
+                                <div key={index} className="bg-gradient-to-r from-[#181F17]/5 to-[#232D1A]/5 p-4 rounded-lg my-6">
+                                  <h2 className="text-xl font-bold text-[#181F17] mb-4 flex items-center gap-2">
+                                    <span className="text-2xl">📈</span>
+                                    Wat je de komende 6 maanden kunt verwachten:
+                                  </h2>
+                                </div>
+                              );
+                            }
+                            
+                            if (line.includes('**Maand 1-2: Foundation**')) {
+                              return (
+                                <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-4 my-6">
+                                  <div className="bg-gradient-to-br from-[#8BAE5A]/10 to-[#FFD700]/10 p-4 rounded-lg border border-[#8BAE5A]/20">
+                                    <div className="flex items-center gap-2 mb-3">
+                                      <span className="text-xl">🌱</span>
+                                      <h3 className="font-bold text-[#181F17]">Maand 1-2: Foundation</h3>
+                                    </div>
+                                    <ul className="text-sm text-gray-700 space-y-1">
+                                      <li>• Academy modules toegang</li>
+                                      <li>• Training content</li>
+                                      <li>• Persoonlijke voedingsplannen</li>
+                                      <li>• Community introductie</li>
+                                      <li>• Eerste wekelijkse video call</li>
+                                    </ul>
+                                  </div>
+                                  
+                                  <div className="bg-gradient-to-br from-[#FFD700]/10 to-[#8BAE5A]/10 p-4 rounded-lg border border-[#FFD700]/20">
+                                    <div className="flex items-center gap-2 mb-3">
+                                      <span className="text-xl">🚀</span>
+                                      <h3 className="font-bold text-[#181F17]">Maand 3-4: Growth</h3>
+                                    </div>
+                                    <ul className="text-sm text-gray-700 space-y-1">
+                                      <li>• Diepgaande coaching sessies</li>
+                                      <li>• Community challenges</li>
+                                      <li>• Accountability</li>
+                                      <li>• Wekelijkse evaluaties</li>
+                                      <li>• Progress tracking</li>
+                                    </ul>
+                                  </div>
+                                  
+                                  <div className="bg-gradient-to-br from-[#8BAE5A]/10 to-[#FFD700]/10 p-4 rounded-lg border border-[#8BAE5A]/20">
+                                    <div className="flex items-center gap-2 mb-3">
+                                      <span className="text-xl">👑</span>
+                                      <h3 className="font-bold text-[#181F17]">Maand 5-6: Mastery</h3>
+                                    </div>
+                                    <ul className="text-sm text-gray-700 space-y-1">
+                                      <li>• Advanced strategieën</li>
+                                      <li>• Leadership development</li>
+                                      <li>• Top Tier Man voorbereiding</li>
+                                      <li>• Levensveranderende resultaten</li>
+                                    </ul>
+                                  </div>
+                                </div>
+                              );
+                            }
+                            
+                            if (line.includes('**Interesse niveau:**')) {
+                              return (
+                                <div key={index} className="bg-gradient-to-r from-[#FFD700]/10 to-[#8BAE5A]/10 p-4 rounded-lg border border-[#FFD700]/20 my-4">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <span className="text-xl">⭐</span>
+                                    <h3 className="font-bold text-[#181F17]">Interesse niveau: Hoog</h3>
+                                  </div>
+                                  <p className="text-gray-700">Als Hoog lid krijg je toegang tot exclusieve features en prioriteit bij alle services.</p>
+                                </div>
+                              );
+                            }
+                            
+                            if (line.includes('Met vriendelijke groet,')) {
+                              return (
+                                <div key={index} className="bg-gradient-to-r from-[#181F17]/5 to-[#232D1A]/5 p-4 rounded-lg border-l-4 border-[#8BAE5A] my-4">
+                                  <p className="font-semibold text-[#181F17]">Met vriendelijke groet,</p>
+                                  <p className="text-[#8BAE5A] font-bold">Het Toptiermen Team</p>
+                                  <div className="mt-3 p-3 bg-[#8BAE5A]/10 rounded-lg">
+                                    <p className="text-sm italic text-gray-600">
+                                      "Alleen ga je sneller, samen kom je verder. In de broederschap kom je het verst."
+                                    </p>
+                                  </div>
+                                </div>
+                              );
+                            }
+                            
+                            // Regular content
+                            if (line.trim() && !line.startsWith('**') && !line.startsWith('•')) {
+                              return <p key={index} className="text-gray-700">{line.replace(/\{\{name\}\}/g, 'John Doe').replace(/\{\{email\}\}/g, 'john.doe@example.com').replace(/\{\{interestLevel\}\}/g, 'Hoog')}</p>;
+                            }
+                            
+                            return null;
+                          })}
+                      </div>
+                    ) : (
+                      <div className="text-gray-500 italic text-center py-8">
+                        <div className="text-4xl mb-4">📧</div>
+                        <p>Nog geen content ingevuld...</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
               
               {/* Email Footer */}
-              <div className="border-t border-gray-200 pt-4 mt-6 text-xs text-gray-500">
-                <p>Dit is een preview van de e-mail. Variabelen zijn vervangen door voorbeeldwaarden.</p>
-                <p>Beschikbare variabelen: {'{{name}}'}, {'{{email}}'}, {'{{interestLevel}}'}</p>
+              <div className="bg-gradient-to-r from-[#181F17] to-[#232D1A] p-4 text-white">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] rounded-full flex items-center justify-center">
+                      <span className="text-sm font-bold">T</span>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold">Toptiermen</p>
+                      <p className="text-xs text-[#B6C948]">Broederschap van Top Performers</p>
+                    </div>
+                  </div>
+                  <div className="text-right text-xs text-[#B6C948]">
+                    <p>Dit is een preview van de e-mail</p>
+                    <p>Variabelen zijn vervangen door voorbeeldwaarden</p>
+                  </div>
+                </div>
               </div>
             </div>
             

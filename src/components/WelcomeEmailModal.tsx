@@ -96,23 +96,200 @@ export default function WelcomeEmailModal({
             </button>
           </div>
           
-          <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-            <div className="bg-gray-100 p-4 rounded-lg mb-4">
-              <div className="text-sm text-gray-600 mb-2">
-                <strong>Onderwerp:</strong> {emailTemplate.subject}
+          <div className="overflow-y-auto max-h-[calc(90vh-120px)]">
+            {/* Email Header */}
+            <div className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] p-4 text-white">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                    <span className="text-xl font-bold">T</span>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold">Toptiermen</h3>
+                    <p className="text-sm opacity-90">Broederschap van Top Performers</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm opacity-90">Verzonden na:</div>
+                  <div className="font-semibold">Direct</div>
+                </div>
               </div>
-              <div className="text-sm text-gray-600 mb-2">
-                <strong>Verzonden na:</strong> Direct
-              </div>
-              <div className="text-sm text-gray-600">
-                <strong>Status:</strong> <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Actief</span>
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm opacity-90 mb-1">Onderwerp:</div>
+                  <div className="font-semibold text-lg">{emailTemplate.subject}</div>
+                </div>
+                <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium">
+                  Actief
+                </span>
               </div>
             </div>
             
-            <div 
-              className="bg-white border border-gray-200 rounded-lg overflow-hidden"
-              dangerouslySetInnerHTML={{ __html: emailTemplate.html }}
-            />
+            {/* Email Content */}
+            <div className="p-6">
+              {/* Hero Section */}
+              <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] rounded-xl p-6 mb-6 text-white">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl font-bold text-white">T</span>
+                  </div>
+                  <h1 className="text-2xl font-bold mb-2">🚀 Welkom bij Toptiermen!</h1>
+                  <p className="text-[#B6C948] text-lg">Jouw reis naar succes begint hier</p>
+                </div>
+              </div>
+
+              {/* Main Content */}
+              <div className="space-y-6">
+                {/* Greeting */}
+                <div className="bg-gradient-to-r from-[#8BAE5A]/10 to-[#FFD700]/10 p-4 rounded-lg border-l-4 border-[#8BAE5A]">
+                  <p className="text-lg font-semibold text-[#181F17]">
+                    Beste {userName},
+                  </p>
+                </div>
+
+                {/* Welcome Message */}
+                <div className="bg-gradient-to-r from-[#8BAE5A]/5 to-[#FFD700]/5 p-4 rounded-lg">
+                  <p className="text-gray-700 leading-relaxed">
+                    We zijn verheugd dat je interesse hebt getoond in onze exclusieve broederschap van top performers. 
+                    Je hebt de eerste stap gezet naar een leven van buitengewone prestaties en persoonlijke transformatie.
+                  </p>
+                </div>
+
+                {/* What makes Toptiermen unique */}
+                <div className="bg-gradient-to-r from-[#8BAE5A]/5 to-[#FFD700]/5 p-4 rounded-lg">
+                  <h2 className="text-xl font-bold text-[#181F17] mb-4 flex items-center gap-2">
+                    <span className="text-2xl">🏆</span>
+                    Wat maakt Toptiermen uniek?
+                  </h2>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-gradient-to-br from-[#8BAE5A]/10 to-[#FFD700]/10 p-4 rounded-lg border border-[#8BAE5A]/20">
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="text-2xl">🏆</span>
+                        <h3 className="font-bold text-[#181F17]">De Broederschap</h3>
+                      </div>
+                      <p className="text-gray-700">Exclusieve community van top performers die elkaar naar succes duwen</p>
+                    </div>
+                    
+                    <div className="bg-gradient-to-br from-[#FFD700]/10 to-[#8BAE5A]/10 p-4 rounded-lg border border-[#FFD700]/20">
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="text-2xl">🎯</span>
+                        <h3 className="font-bold text-[#181F17]">Wekelijkse Video Calls</h3>
+                      </div>
+                      <p className="text-gray-700">Wekelijkse progress evaluatie en accountability sessies</p>
+                    </div>
+                    
+                    <div className="bg-gradient-to-br from-[#8BAE5A]/10 to-[#FFD700]/10 p-4 rounded-lg border border-[#8BAE5A]/20">
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="text-2xl">🧗</span>
+                        <h3 className="font-bold text-[#181F17]">Persoonlijke Transformatie</h3>
+                      </div>
+                      <p className="text-gray-700">Ontwikkel je tot een echte "Top Tier Man"</p>
+                    </div>
+                    
+                    <div className="bg-gradient-to-br from-[#FFD700]/10 to-[#8BAE5A]/10 p-4 rounded-lg border border-[#FFD700]/20">
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="text-2xl">💡</span>
+                        <h3 className="font-bold text-[#181F17]">Bewezen Methoden</h3>
+                      </div>
+                      <p className="text-gray-700">Strategieën die al duizenden mannen naar succes hebben gebracht</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 6 Month Journey */}
+                <div className="bg-gradient-to-r from-[#181F17]/5 to-[#232D1A]/5 p-4 rounded-lg">
+                  <h2 className="text-xl font-bold text-[#181F17] mb-4 flex items-center gap-2">
+                    <span className="text-2xl">📈</span>
+                    Wat je de komende 6 maanden kunt verwachten:
+                  </h2>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-gradient-to-br from-[#8BAE5A]/10 to-[#FFD700]/10 p-4 rounded-lg border border-[#8BAE5A]/20">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-xl">🌱</span>
+                        <h3 className="font-bold text-[#181F17]">Maand 1-2: Foundation</h3>
+                      </div>
+                      <ul className="text-sm text-gray-700 space-y-1">
+                        <li>• Academy modules toegang</li>
+                        <li>• Training content</li>
+                        <li>• Persoonlijke voedingsplannen</li>
+                        <li>• Community introductie</li>
+                        <li>• Eerste wekelijkse video call</li>
+                      </ul>
+                    </div>
+                    
+                    <div className="bg-gradient-to-br from-[#FFD700]/10 to-[#8BAE5A]/10 p-4 rounded-lg border border-[#FFD700]/20">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-xl">🚀</span>
+                        <h3 className="font-bold text-[#181F17]">Maand 3-4: Growth</h3>
+                      </div>
+                      <ul className="text-sm text-gray-700 space-y-1">
+                        <li>• Diepgaande coaching sessies</li>
+                        <li>• Community challenges</li>
+                        <li>• Accountability</li>
+                        <li>• Wekelijkse evaluaties</li>
+                        <li>• Progress tracking</li>
+                      </ul>
+                    </div>
+                    
+                    <div className="bg-gradient-to-br from-[#8BAE5A]/10 to-[#FFD700]/10 p-4 rounded-lg border border-[#8BAE5A]/20">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-xl">👑</span>
+                        <h3 className="font-bold text-[#181F17]">Maand 5-6: Mastery</h3>
+                      </div>
+                      <ul className="text-sm text-gray-700 space-y-1">
+                        <li>• Advanced strategieën</li>
+                        <li>• Leadership development</li>
+                        <li>• Top Tier Man voorbereiding</li>
+                        <li>• Levensveranderende resultaten</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Call to Action */}
+                <div className="bg-gradient-to-r from-[#FFD700]/10 to-[#8BAE5A]/10 p-4 rounded-lg border border-[#FFD700]/20 text-center">
+                  <h3 className="font-bold text-[#181F17] mb-2">🚀 Klaar om te beginnen?</h3>
+                  <p className="text-gray-700 mb-4">
+                    Binnenkort ontvang je je persoonlijke inschrijflink voor de lancering.
+                  </p>
+                  <div className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-white px-6 py-3 rounded-lg font-semibold inline-block">
+                    Start Je Reis Nu
+                  </div>
+                </div>
+
+                {/* Signature */}
+                <div className="bg-gradient-to-r from-[#181F17]/5 to-[#232D1A]/5 p-4 rounded-lg border-l-4 border-[#8BAE5A]">
+                  <p className="font-semibold text-[#181F17]">Met vriendelijke groet,</p>
+                  <p className="text-[#8BAE5A] font-bold">Het Toptiermen Team</p>
+                  <div className="mt-3 p-3 bg-[#8BAE5A]/10 rounded-lg">
+                    <p className="text-sm italic text-gray-600">
+                      "Alleen ga je sneller, samen kom je verder. In de broederschap kom je het verst."
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Email Footer */}
+            <div className="bg-gradient-to-r from-[#181F17] to-[#232D1A] p-4 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] rounded-full flex items-center justify-center">
+                    <span className="text-sm font-bold">T</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold">Toptiermen</p>
+                    <p className="text-xs text-[#B6C948]">Broederschap van Top Performers</p>
+                  </div>
+                </div>
+                <div className="text-right text-xs text-[#B6C948]">
+                  <p>Dit is een preview van de e-mail</p>
+                  <p>Variabelen zijn vervangen door voorbeeldwaarden</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
