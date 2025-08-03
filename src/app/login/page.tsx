@@ -2,48 +2,18 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { LockClosedIcon, EnvelopeIcon } from "@heroicons/react/24/solid";
-import { useSupabaseAuth } from "../../contexts/SupabaseAuthContext";
+import { createClient } from '@supabase/supabase-js';
+
+// Create Supabase client
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export default function Login() {
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
   
-  // Fallback auth state in case AuthContext fails
-  const fallbackAuth = {
-    isAuthenticated: false,
-    user: null,
-    loading: false,
-    initialized: true, // Force initialized to true
-    signIn: async () => ({ success: false, error: 'Auth system unavailable' }),
-    signUp: async () => ({ success: false, error: 'Auth system unavailable' }),
-    signOut: async () => {},
-    updateUser: async () => {},
-    clearAllCache: () => {},
-    redirectAdminToDashboard: false
-  };
-  
-  let authContext;
-  try {
-    authContext = useSupabaseAuth();
-  } catch (error) {
-    console.error('AuthContext error:', error);
-    authContext = fallbackAuth;
-  }
-  
-  const { signIn, user, loading: authLoading } = authContext;
-  const isAuthenticated = !!user;
-  const initialized = !authLoading;
-  
-  // Force initialization after a short delay if not initialized
-  useEffect(() => {
-    if (!initialized && mounted) {
-      const timer = setTimeout(() => {
-        console.log('🔧 Force initializing auth context...');
-        // This will trigger a re-render and hopefully initialize the context
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [initialized, mounted]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -54,56 +24,103 @@ export default function Login() {
     setMounted(true); 
   }, []);
 
-  // Debug logging
+  // Check if user is already authenticated
   useEffect(() => {
-    console.log('🔍 Login Debug:', {
-      mounted,
-      initialized,
-      authLoading,
-      isAuthenticated,
-      user: user?.email,
-      redirecting,
-      signIn: typeof signIn,
-      authContext: authContext ? 'available' : 'fallback'
-    });
-  }, [mounted, initialized, authLoading, isAuthenticated, user, redirecting, signIn, authContext]);
+    const checkAuth = async () => {
+      if (!mounted) return;
+      
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Session error:', error);
+          return;
+        }
 
-  useEffect(() => {
-    // Redirect if user is authenticated, regardless of initialization state
-    if (!authLoading && isAuthenticated && user && mounted && !redirecting) {
-      console.log('🔀 Primary redirect triggered for user:', user.role);
-      setRedirecting(true);
-      const targetPath = user.role?.toLowerCase() === 'admin' ? '/dashboard-admin' : '/dashboard';
-      console.log('🔀 Redirecting to:', targetPath);
-      // Use replace instead of push to prevent back button issues
-      router.replace(targetPath);
+        if (session?.user) {
+          // Get user profile
+          const { data: profile, error: profileError } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+
+          if (profileError) {
+            console.error('Profile error:', profileError);
+            return;
+          }
+
+          if (profile) {
+            console.log('User already authenticated:', profile.role);
+            setRedirecting(true);
+            const targetPath = profile.role?.toLowerCase() === 'admin' ? '/dashboard-admin' : '/dashboard';
+            router.replace(targetPath);
+          }
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+      }
+    };
+
+    checkAuth();
+  }, [mounted, router]);
+
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault();
+    console.log('🔍 Login attempt started');
+    
+    if (!email || !password) {
+      setError("Vul alle velden in");
+      return;
     }
-  }, [isAuthenticated, user, router, authLoading, mounted, redirecting]);
+    
+    setIsLoading(true);
+    setError("");
+    
+    try {
+      console.log('🔍 Calling signIn...');
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-  // Additional redirect effect for when authLoading changes
-  useEffect(() => {
-    if (isAuthenticated && user && !authLoading && !redirecting) {
-      console.log('🔀 Auth loading finished, redirecting user:', user.role);
-      setRedirecting(true);
-      const targetPath = user.role?.toLowerCase() === 'admin' ? '/dashboard-admin' : '/dashboard';
-      console.log('🔀 Redirecting to:', targetPath);
-      router.replace(targetPath);
+      if (error) {
+        console.error('Sign in error:', error);
+        setError(error.message || "Ongeldige inloggegevens");
+        setIsLoading(false);
+        return;
+      }
+
+      if (data.user) {
+        // Get user profile
+        const { data: profile, error: profileError } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', data.user.id)
+          .single();
+
+        if (profileError) {
+          console.error('Profile error:', profileError);
+          setError('Error getting user profile');
+          setIsLoading(false);
+          return;
+        }
+
+        if (profile) {
+          console.log('🔍 Login successful, redirecting...');
+          setRedirecting(true);
+          const targetPath = profile.role?.toLowerCase() === 'admin' ? '/dashboard-admin' : '/dashboard';
+          router.replace(targetPath);
+        }
+      }
+    } catch (error: any) {
+      console.error('🔍 Login error:', error);
+      setError(error.message || "Er is een fout opgetreden bij het inloggen");
+      setIsLoading(false);
     }
-  }, [authLoading, isAuthenticated, user, router, redirecting]);
+  }
 
-  // Debug effect to track redirect conditions
-  useEffect(() => {
-    console.log('🔍 Redirect conditions:', {
-      isAuthenticated,
-      user: user?.email,
-      userRole: user?.role,
-      authLoading,
-      redirecting,
-      mounted
-    });
-  }, [isAuthenticated, user, authLoading, redirecting, mounted]);
-
-  // Show loading only briefly, then force show login form
+  // Show loading state while checking authentication
   if (!mounted) {
     return (
       <div className="min-h-screen flex items-center justify-center relative px-4 py-6" style={{ backgroundColor: '#181F17' }}>
@@ -118,65 +135,16 @@ export default function Login() {
     );
   }
 
-  async function handleLogin(e: React.FormEvent) {
-    e.preventDefault();
-    console.log('🔍 Login attempt started');
-    console.log('Email:', email);
-    console.log('Password length:', password.length);
-    console.log('AuthContext state:', { initialized, authLoading, isAuthenticated });
-    
-    if (!email || !password) {
-      setError("Vul alle velden in");
-      return;
-    }
-    
-    setIsLoading(true);
-    setError("");
-    
-    try {
-      console.log('🔍 Calling signIn function...');
-      const result = await signIn(email, password);
-      console.log('🔍 SignIn result:', result);
-      
-      if (!result.success) {
-        console.log('🔍 Login failed:', result.error);
-        setError(result.error || "Ongeldige inloggegevens");
-        setIsLoading(false);
-      } else {
-        console.log('🔍 Login successful, waiting for redirect...');
-        // If successful, keep loading state until redirect happens
-        // The redirect will be handled by the useEffect above
-        
-        // Fallback redirect after 2 seconds if normal redirect doesn't work
-        setTimeout(() => {
-          if (isAuthenticated && user && !redirecting) {
-            console.log('🔀 Fallback redirect triggered for user:', user.role);
-            setRedirecting(true);
-            const targetPath = user.role?.toLowerCase() === 'admin' ? '/dashboard-admin' : '/dashboard';
-            console.log('🔀 Fallback redirecting to:', targetPath);
-            router.replace(targetPath);
-          }
-        }, 2000);
-      }
-    } catch (error: any) {
-      console.error('🔍 Login error:', error);
-      setError(error.message || "Er is een fout opgetreden bij het inloggen");
-      setIsLoading(false);
-    }
-  }
-
   return (
     <div className="min-h-screen flex items-center justify-center relative px-4 py-6" style={{ backgroundColor: '#181F17' }}>
       <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
-      
-
       
       <div className="w-full max-w-md p-6 sm:p-8 rounded-3xl shadow-2xl bg-[#232D1A]/95 border border-[#3A4D23] backdrop-blur-lg relative z-10">
         <h1 className="text-4xl sm:text-5xl md:text-7xl font-black uppercase tracking-tight mb-2 text-center">
           <span className="text-white">TOP TIER </span>
           <span className="text-[#8BAE5A]">MEN</span>
         </h1>
-        <p className="text-[#8BAE5A] text-center mb-6 sm:mb-8 text-base sm:text-lg font-figtree">Log in op je dashboard</p>
+        <p className="text-[#B6C948] text-center mb-6 sm:mb-8 text-base sm:text-lg font-figtree">Log in op je dashboard</p>
         <form onSubmit={handleLogin} className="flex flex-col gap-6">
           <div className="relative">
             <EnvelopeIcon className="w-5 h-5 text-[#B6C948] absolute left-3 top-1/2 -translate-y-1/2" />
@@ -217,21 +185,22 @@ export default function Login() {
             {isLoading ? (
               <div className="flex items-center justify-center">
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#181F17] mr-2"></div>
-                Inloggen...
+                <span>Inloggen...</span>
               </div>
             ) : (
-              'Inloggen'
+              "Inloggen"
             )}
           </button>
-          <button
-            type="button"
-            onClick={() => router.push('/register')}
-            disabled={isLoading || authLoading}
-            className="w-full mt-2 py-3 sm:py-4 rounded-xl border border-[#B6C948] text-[#B6C948] font-semibold text-base sm:text-lg hover:bg-[#B6C948] hover:text-[#181F17] transition-all duration-200 font-figtree disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Nog geen account? Registreren
-          </button>
         </form>
+        
+        <div className="mt-6 text-center">
+          <p className="text-[#B6C948] text-sm font-figtree">
+            Nog geen account?{" "}
+            <a href="/register" className="text-[#8BAE5A] hover:text-white transition-colors font-semibold">
+              Registreer hier
+            </a>
+          </p>
+        </div>
       </div>
     </div>
   );
