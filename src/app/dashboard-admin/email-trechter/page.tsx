@@ -16,10 +16,12 @@ import {
   EyeIcon,
   DocumentTextIcon,
   CalendarIcon,
-  XMarkIcon
+  XMarkIcon,
+  SparklesIcon,
+  WrenchScrewdriverIcon
 } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
-import { AdminCard, AdminStatsCard, AdminButton } from '@/components/admin';
+import { AdminCard, AdminStatsCard, AdminButton, AdminTable, EmailBuilder, SimpleEmailEditor } from '@/components/admin';
 
 interface EmailStep {
   id: string;
@@ -33,6 +35,7 @@ interface EmailStep {
   openRate: number;
   clickRate: number;
   scheduledDate?: Date;
+  design?: string; // Added for EmailBuilder
 }
 
 interface CampaignStats {
@@ -275,6 +278,11 @@ Het Toptiermen Team
   const [showEmailEditor, setShowEmailEditor] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [campaignStatus, setCampaignStatus] = useState<'draft' | 'active' | 'paused'>('draft');
+  
+  const [showEmailBuilder, setShowEmailBuilder] = useState(false);
+  const [showSimpleEditor, setShowSimpleEditor] = useState(false);
+  const [selectedStepForEdit, setSelectedStepForEdit] = useState<EmailStep | null>(null);
+  const [editorMode, setEditorMode] = useState<'simple' | 'advanced'>('simple');
 
   // Fetch campaign data
   useEffect(() => {
@@ -313,7 +321,8 @@ Het Toptiermen Team
           status: step.status,
           sentCount: step.sent_count || 0,
           openRate: step.open_rate || 0,
-          clickRate: step.click_rate || 0
+          clickRate: step.click_rate || 0,
+          design: step.design // Add design to the fetched step
         }));
         setEmailSteps(formattedSteps);
       }
@@ -434,13 +443,107 @@ Het Toptiermen Team
     }
   };
 
+  const deleteEmailStep = async (stepId: string) => {
+    if (window.confirm('Weet je zeker dat je deze email stap wilt verwijderen?')) {
+      try {
+        const response = await fetch(`/api/admin/email-campaign/${stepId}`, {
+          method: 'DELETE',
+        });
+        const data = await response.json();
+        if (data.success) {
+          setEmailSteps(prev => prev.filter(step => step.id !== stepId));
+          toast.success('Email stap succesvol verwijderd.');
+        } else {
+          toast.error(data.error || 'Fout bij verwijderen van email stap');
+        }
+      } catch (error) {
+        console.error('Error deleting email step:', error);
+        toast.error('Fout bij verwijderen van email stap');
+      }
+    }
+  };
+
+  const handleOpenEmailEditor = (step?: EmailStep, mode: 'simple' | 'advanced' = 'simple') => {
+    setSelectedStepForEdit(step || null);
+    setEditorMode(mode);
+    
+    if (mode === 'simple') {
+      setShowSimpleEditor(true);
+    } else {
+      setShowEmailBuilder(true);
+    }
+  };
+
+  const handleSaveSimpleEmail = (content: string) => {
+    if (selectedStepForEdit) {
+      // Update existing step
+      const updatedSteps = emailSteps.map(step => 
+        step.id === selectedStepForEdit.id 
+          ? { ...step, content: content }
+          : step
+      );
+      setEmailSteps(updatedSteps);
+      toast.success('Email succesvol bijgewerkt!');
+    } else {
+      // Create new step
+      const newStep: EmailStep = {
+        id: Date.now().toString(),
+        stepNumber: emailSteps.length + 1,
+        name: 'Nieuwe Email',
+        subject: 'Nieuw onderwerp',
+        content: content,
+        delayDays: 0,
+        status: 'draft',
+        sentCount: 0,
+        openRate: 0,
+        clickRate: 0
+      };
+      setEmailSteps([...emailSteps, newStep]);
+      toast.success('Nieuwe email succesvol aangemaakt!');
+    }
+    setShowSimpleEditor(false);
+    setSelectedStepForEdit(null);
+  };
+
+  const handleSaveAdvancedEmail = (html: string, design: any) => {
+    if (selectedStepForEdit) {
+      // Update existing step
+      const updatedSteps = emailSteps.map(step => 
+        step.id === selectedStepForEdit.id 
+          ? { ...step, content: html, design: JSON.stringify(design) }
+          : step
+      );
+      setEmailSteps(updatedSteps);
+      toast.success('Email succesvol bijgewerkt!');
+    } else {
+      // Create new step
+      const newStep: EmailStep = {
+        id: Date.now().toString(),
+        stepNumber: emailSteps.length + 1,
+        name: 'Nieuwe Email',
+        subject: 'Nieuw onderwerp',
+        content: html,
+        design: JSON.stringify(design),
+        delayDays: 0,
+        status: 'draft',
+        sentCount: 0,
+        openRate: 0,
+        clickRate: 0
+      };
+      setEmailSteps([...emailSteps, newStep]);
+      toast.success('Nieuwe email succesvol aangemaakt!');
+    }
+    setShowEmailBuilder(false);
+    setSelectedStepForEdit(null);
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'text-green-400';
-      case 'paused': return 'text-yellow-400';
-      case 'completed': return 'text-blue-400';
-      case 'draft': return 'text-gray-400';
-      default: return 'text-gray-400';
+      case 'active': return 'bg-green-500 text-white';
+      case 'paused': return 'bg-yellow-500 text-white';
+      case 'completed': return 'bg-blue-500 text-white';
+      case 'draft': return 'bg-gray-500 text-white';
+      default: return 'bg-gray-500 text-white';
     }
   };
 
@@ -469,6 +572,13 @@ Het Toptiermen Team
               {campaignStatus === 'active' ? 'Actief' : campaignStatus === 'paused' ? 'Gepauzeerd' : 'Concept'}
             </span>
           </span>
+          <AdminButton
+            onClick={() => handleOpenEmailEditor()}
+            icon={<PlusIcon className="w-4 h-4" />}
+            variant="primary"
+          >
+            Nieuwe Email
+          </AdminButton>
           {campaignStatus === 'draft' && (
             <AdminButton
               onClick={startCampaign}
@@ -588,10 +698,7 @@ Het Toptiermen Team
                 <AdminButton
                   variant="secondary"
                   size="sm"
-                  onClick={() => {
-                    setSelectedStep(step);
-                    setShowEmailEditor(true);
-                  }}
+                  onClick={() => handleOpenEmailEditor(step)}
                   icon={<PencilIcon className="w-4 h-4" />}
                 >
                   Bewerken
@@ -629,6 +736,16 @@ Het Toptiermen Team
                     {step.status === 'active' ? 'Pauzeren' : 'Activeren'}
                   </AdminButton>
                 )}
+                
+                <AdminButton
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => deleteEmailStep(step.id)}
+                  icon={<TrashIcon className="w-4 h-4" />}
+                  className="text-red-400 hover:text-red-300"
+                >
+                  Verwijderen
+                </AdminButton>
               </div>
             </div>
           </AdminCard>
@@ -1006,6 +1123,30 @@ Het Toptiermen Team
           </div>
         </div>
       )}
+
+      {/* Email Builder Modal */}
+      <EmailBuilder
+        isOpen={showEmailBuilder}
+        onClose={() => {
+          setShowEmailBuilder(false);
+          setSelectedStepForEdit(null);
+        }}
+        onSave={handleSaveAdvancedEmail}
+        initialContent={selectedStepForEdit?.design}
+        emailName={selectedStepForEdit?.name || 'Nieuwe Email'}
+      />
+
+      {/* Simple Email Editor Modal */}
+      <SimpleEmailEditor
+        isOpen={showSimpleEditor}
+        onClose={() => {
+          setShowSimpleEditor(false);
+          setSelectedStepForEdit(null);
+        }}
+        onSave={handleSaveSimpleEmail}
+        initialContent={selectedStepForEdit?.content}
+        emailName={selectedStepForEdit?.name || 'Email Bewerken'}
+      />
     </div>
   );
 } 
