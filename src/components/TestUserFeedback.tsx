@@ -378,8 +378,34 @@ export default function TestUserFeedback({ isTestUser, currentPage, onNoteCreate
     setIsSubmitting(true);
 
     try {
-      const note: FeedbackNote = {
-        id: Date.now().toString(),
+      const noteData = {
+        test_user_id: '1', // This should come from user context or props
+        type: noteType,
+        page_url: currentPage,
+        element_selector: selectedElement ? getElementSelector(selectedElement) : undefined,
+        description: description.trim(),
+        priority,
+        screenshot_url: undefined // Could be added later
+      };
+
+      // Save to database
+      const response = await fetch('/api/test-notes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(noteData),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to save note');
+      }
+
+      // Add to local state
+      const newNote: FeedbackNote = {
+        id: result.note.id,
         type: noteType,
         page_url: currentPage,
         element_selector: selectedElement ? getElementSelector(selectedElement) : undefined,
@@ -391,15 +417,14 @@ export default function TestUserFeedback({ isTestUser, currentPage, onNoteCreate
         } : undefined,
         description: description.trim(),
         priority,
-        created_at: new Date().toISOString()
+        created_at: result.note.created_at
       };
 
-      // In a real app, this would be sent to the server
-      setNotes(prev => [note, ...prev]);
+      setNotes(prev => [newNote, ...prev]);
       
       // Call callback if provided
       if (onNoteCreated) {
-        onNoteCreated(note);
+        onNoteCreated(newNote);
       }
 
       toast.success('Notitie succesvol opgeslagen');
@@ -410,6 +435,7 @@ export default function TestUserFeedback({ isTestUser, currentPage, onNoteCreate
       setSelectedArea(null);
       setIsOpen(false);
     } catch (error) {
+      console.error('Error saving note:', error);
       toast.error('Fout bij opslaan van notitie');
     } finally {
       setIsSubmitting(false);

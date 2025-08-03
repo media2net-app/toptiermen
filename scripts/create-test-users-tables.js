@@ -17,7 +17,7 @@ async function createTestUsersTables() {
   try {
     // Create test_users table
     const { error: testUsersError } = await supabase.rpc('exec_sql', {
-      sql: `
+      sql_query: `
         CREATE TABLE IF NOT EXISTS test_users (
           id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
           user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -44,7 +44,7 @@ async function createTestUsersTables() {
 
     // Create test_notes table
     const { error: testNotesError } = await supabase.rpc('exec_sql', {
-      sql: `
+      sql_query: `
         CREATE TABLE IF NOT EXISTS test_notes (
           id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
           test_user_id UUID REFERENCES test_users(id) ON DELETE CASCADE,
@@ -68,7 +68,7 @@ async function createTestUsersTables() {
 
     // Create indexes
     const { error: indexesError } = await supabase.rpc('exec_sql', {
-      sql: `
+      sql_query: `
         CREATE INDEX IF NOT EXISTS idx_test_users_user_id ON test_users(user_id);
         CREATE INDEX IF NOT EXISTS idx_test_users_status ON test_users(status);
         CREATE INDEX IF NOT EXISTS idx_test_notes_test_user_id ON test_notes(test_user_id);
@@ -85,7 +85,7 @@ async function createTestUsersTables() {
 
     // Insert sample test users
     const { error: sampleDataError } = await supabase.rpc('exec_sql', {
-      sql: `
+      sql_query: `
         INSERT INTO test_users (name, email, status, assigned_modules, test_start_date, test_end_date, bugs_reported, improvements_suggested, total_notes) VALUES
         ('Jan Jansen', 'jan.jansen@test.com', 'active', ARRAY['Academy', 'Trainingscentrum', 'Social Feed'], '2024-08-22', '2024-08-29', 3, 2, 5),
         ('Piet Peters', 'piet.peters@test.com', 'active', ARRAY['Boekenkamer', 'Badges & Rangen'], '2024-08-22', '2024-08-29', 1, 4, 5),
@@ -101,7 +101,7 @@ async function createTestUsersTables() {
 
     // Insert sample test notes
     const { error: sampleNotesError } = await supabase.rpc('exec_sql', {
-      sql: `
+      sql_query: `
         INSERT INTO test_notes (test_user_id, type, page_url, element_selector, description, priority, status) 
         SELECT 
           tu.id,

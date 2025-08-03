@@ -20,6 +20,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { AdminCard, AdminButton } from '@/components/admin';
 import { toast } from 'react-hot-toast';
+import { supabase } from '@/lib/supabase';
 
 interface TestUser {
   id: string;
@@ -63,99 +64,48 @@ export default function TestGebruikers() {
   const [selectedUser, setSelectedUser] = useState<TestUser | null>(null);
   const [selectedNote, setSelectedNote] = useState<TestNote | null>(null);
 
-  // Mock data for now
+  // Fetch data from database
   useEffect(() => {
-    const mockTestUsers: TestUser[] = [
-      {
-        id: '1',
-        user_id: 'user_1',
-        name: 'Jan Jansen',
-        email: 'jan.jansen@test.com',
-        status: 'active',
-        assigned_modules: ['Academy', 'Trainingscentrum', 'Social Feed'],
-        test_start_date: '2024-08-22',
-        test_end_date: '2024-08-29',
-        bugs_reported: 3,
-        improvements_suggested: 2,
-        total_notes: 5,
-        last_activity: '2024-08-22T14:30:00Z',
-        created_at: '2024-08-20T10:00:00Z'
-      },
-      {
-        id: '2',
-        user_id: 'user_2',
-        name: 'Piet Peters',
-        email: 'piet.peters@test.com',
-        status: 'active',
-        assigned_modules: ['Boekenkamer', 'Badges & Rangen'],
-        test_start_date: '2024-08-22',
-        test_end_date: '2024-08-29',
-        bugs_reported: 1,
-        improvements_suggested: 4,
-        total_notes: 5,
-        last_activity: '2024-08-22T16:45:00Z',
-        created_at: '2024-08-20T11:00:00Z'
-      },
-      {
-        id: '3',
-        user_id: 'user_3',
-        name: 'Klaas Klaassen',
-        email: 'klaas.klaassen@test.com',
-        status: 'inactive',
-        assigned_modules: ['Voedingsplannen', 'Evenementenbeheer'],
-        test_start_date: '2024-08-22',
-        test_end_date: '2024-08-29',
-        bugs_reported: 0,
-        improvements_suggested: 0,
-        total_notes: 0,
-        last_activity: '2024-08-21T09:15:00Z',
-        created_at: '2024-08-20T12:00:00Z'
-      }
-    ];
-
-    const mockTestNotes: TestNote[] = [
-      {
-        id: '1',
-        test_user_id: '1',
-        type: 'bug',
-        page_url: '/dashboard/academy',
-        element_selector: '.lesson-card',
-        description: 'Video player laadt niet correct op mobiele apparaten',
-        priority: 'high',
-        status: 'open',
-        created_at: '2024-08-22T14:30:00Z',
-        updated_at: '2024-08-22T14:30:00Z'
-      },
-      {
-        id: '2',
-        test_user_id: '1',
-        type: 'improvement',
-        page_url: '/dashboard/trainingscentrum',
-        element_selector: '.exercise-list',
-        description: 'Filter opties zouden handig zijn voor oefeningen',
-        priority: 'medium',
-        status: 'open',
-        created_at: '2024-08-22T15:20:00Z',
-        updated_at: '2024-08-22T15:20:00Z'
-      },
-      {
-        id: '3',
-        test_user_id: '2',
-        type: 'bug',
-        page_url: '/dashboard/boekenkamer',
-        element_selector: '.book-card',
-        description: 'Boek covers worden niet geladen',
-        priority: 'critical',
-        status: 'in_progress',
-        created_at: '2024-08-22T16:45:00Z',
-        updated_at: '2024-08-22T16:45:00Z'
-      }
-    ];
-
-    setTestUsers(mockTestUsers);
-    setTestNotes(mockTestNotes);
-    setLoading(false);
+    fetchTestData();
   }, []);
+
+  const fetchTestData = async () => {
+    setLoading(true);
+    try {
+      // Fetch test users
+      const { data: users, error: usersError } = await supabase
+        .from('test_users')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (usersError) {
+        console.error('Error fetching test users:', usersError);
+        setError('Fout bij ophalen van test gebruikers');
+        return;
+      }
+
+      // Fetch test notes
+      const { data: notes, error: notesError } = await supabase
+        .from('test_notes')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (notesError) {
+        console.error('Error fetching test notes:', notesError);
+        setError('Fout bij ophalen van test notities');
+        return;
+      }
+
+      setTestUsers(users || []);
+      setTestNotes(notes || []);
+      setError(null);
+    } catch (error) {
+      console.error('Unexpected error:', error);
+      setError('Onverwachte fout opgetreden');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredUsers = testUsers.filter(user => {
     const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -164,23 +114,12 @@ export default function TestGebruikers() {
     return matchesSearch && matchesStatus;
   });
 
-  const stats = {
-    totalUsers: testUsers.length,
-    activeUsers: testUsers.filter(u => u.status === 'active').length,
-    inactiveUsers: testUsers.filter(u => u.status === 'inactive').length,
-    completedUsers: testUsers.filter(u => u.status === 'completed').length,
-    totalBugs: testNotes.filter(n => n.type === 'bug').length,
-    totalImprovements: testNotes.filter(n => n.type === 'improvement').length,
-    openIssues: testNotes.filter(n => n.status === 'open').length,
-    criticalIssues: testNotes.filter(n => n.priority === 'critical').length
-  };
-
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'text-green-400';
-      case 'inactive': return 'text-yellow-400';
-      case 'completed': return 'text-blue-400';
-      default: return 'text-gray-400';
+      case 'active': return 'bg-green-500 text-white';
+      case 'inactive': return 'bg-yellow-500 text-white';
+      case 'completed': return 'bg-blue-500 text-white';
+      default: return 'bg-gray-500 text-white';
     }
   };
 
@@ -195,11 +134,11 @@ export default function TestGebruikers() {
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'critical': return 'text-red-400';
-      case 'high': return 'text-orange-400';
-      case 'medium': return 'text-yellow-400';
-      case 'low': return 'text-green-400';
-      default: return 'text-gray-400';
+      case 'critical': return 'bg-red-500 text-white';
+      case 'high': return 'bg-orange-500 text-white';
+      case 'medium': return 'bg-yellow-500 text-white';
+      case 'low': return 'bg-green-500 text-white';
+      default: return 'bg-gray-500 text-white';
     }
   };
 
@@ -222,164 +161,270 @@ export default function TestGebruikers() {
     setShowNoteModal(true);
   };
 
-  const handleStatusChange = (userId: string, newStatus: 'active' | 'inactive' | 'completed') => {
-    setTestUsers(prev => prev.map(user => 
-      user.id === userId ? { ...user, status: newStatus } : user
-    ));
-    toast.success(`Status van ${testUsers.find(u => u.id === userId)?.name} gewijzigd naar ${getStatusText(newStatus)}`);
+  const handleStatusChange = async (userId: string, newStatus: 'active' | 'inactive' | 'completed') => {
+    try {
+      const { error } = await supabase
+        .from('test_users')
+        .update({ status: newStatus })
+        .eq('id', userId);
+
+      if (error) {
+        toast.error('Fout bij bijwerken van status');
+        return;
+      }
+
+      setTestUsers(prev => prev.map(user => 
+        user.id === userId ? { ...user, status: newStatus } : user
+      ));
+      toast.success('Status succesvol bijgewerkt');
+    } catch (error) {
+      toast.error('Fout bij bijwerken van status');
+    }
   };
 
-  return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-[#8BAE5A]">Test Gebruikers</h1>
-          <p className="text-[#B6C948] mt-2">
-            Beheer test gebruikers voor platform testing vanaf 22 Augustus 2024
-          </p>
+  const handleDeleteUser = async (userId: string) => {
+    if (!confirm('Weet je zeker dat je deze test gebruiker wilt verwijderen?')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('test_users')
+        .delete()
+        .eq('id', userId);
+
+      if (error) {
+        toast.error('Fout bij verwijderen van test gebruiker');
+        return;
+      }
+
+      setTestUsers(prev => prev.filter(user => user.id !== userId));
+      toast.success('Test gebruiker succesvol verwijderd');
+    } catch (error) {
+      toast.error('Fout bij verwijderen van test gebruiker');
+    }
+  };
+
+  const handleNoteStatusChange = async (noteId: string, newStatus: 'open' | 'in_progress' | 'resolved' | 'closed') => {
+    try {
+      const { error } = await supabase
+        .from('test_notes')
+        .update({ status: newStatus })
+        .eq('id', noteId);
+
+      if (error) {
+        toast.error('Fout bij bijwerken van notitie status');
+        return;
+      }
+
+      setTestNotes(prev => prev.map(note => 
+        note.id === noteId ? { ...note, status: newStatus } : note
+      ));
+      toast.success('Notitie status succesvol bijgewerkt');
+    } catch (error) {
+      toast.error('Fout bij bijwerken van notitie status');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
+          <p className="text-[#B6C948]">Laden van test gebruikers...</p>
         </div>
-        <div className="flex items-center gap-4">
-          <AdminButton 
-            variant="primary" 
-            icon={<PlusIcon className="w-5 h-5" />}
-            onClick={handleAddTestUser}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <ExclamationTriangleIcon className="w-12 h-12 text-red-400 mx-auto mb-4" />
+          <p className="text-red-400 mb-4">{error}</p>
+          <AdminButton onClick={fetchTestData} icon={<ArrowPathIcon className="w-4 h-4" />}>
+            Opnieuw Proberen
+          </AdminButton>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Test Gebruikers</h1>
+          <p className="text-[#B6C948]">Beheer test gebruikers en hun feedback</p>
+        </div>
+        
+        <div className="flex gap-3">
+          <AdminButton
+            onClick={fetchTestData}
+            icon={<ArrowPathIcon className="w-4 h-4" />}
+            variant="secondary"
           >
-            Nieuwe Test Gebruiker
+            Vernieuwen
+          </AdminButton>
+          
+          <AdminButton
+            onClick={handleAddTestUser}
+            icon={<PlusIcon className="w-4 h-4" />}
+            variant="primary"
+          >
+            Test Gebruiker Toevoegen
           </AdminButton>
         </div>
       </div>
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <AdminCard title="Totaal Test Gebruikers" icon={<UserIcon className="w-6 h-6" />}>
-          <div className="text-2xl font-bold text-[#8BAE5A]">{stats.totalUsers}</div>
-          <div className="text-sm text-gray-400">Geregistreerd voor testing</div>
+      {/* Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <AdminCard>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-[#B6C948]">Totaal Test Gebruikers</p>
+              <p className="text-2xl font-bold text-white">{testUsers.length}</p>
+            </div>
+            <UserIcon className="w-8 h-8 text-[#8BAE5A]" />
+          </div>
         </AdminCard>
-        <AdminCard title="Actieve Testers" icon={<CheckCircleIcon className="w-6 h-6" />}>
-          <div className="text-2xl font-bold text-green-400">{stats.activeUsers}</div>
-          <div className="text-sm text-gray-400">Momenteel actief</div>
+        
+        <AdminCard>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-[#B6C948]">Actieve Testers</p>
+              <p className="text-2xl font-bold text-white">
+                {testUsers.filter(u => u.status === 'active').length}
+              </p>
+            </div>
+            <CheckCircleIcon className="w-8 h-8 text-[#8BAE5A]" />
+          </div>
         </AdminCard>
-        <AdminCard title="Bugs Gerapporteerd" icon={<BugAntIcon className="w-6 h-6" />}>
-          <div className="text-2xl font-bold text-red-400">{stats.totalBugs}</div>
-          <div className="text-sm text-gray-400">{stats.criticalIssues} kritiek</div>
+        
+        <AdminCard>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-[#B6C948]">Totaal Notities</p>
+              <p className="text-2xl font-bold text-white">{testNotes.length}</p>
+            </div>
+            <DocumentTextIcon className="w-8 h-8 text-[#8BAE5A]" />
+          </div>
         </AdminCard>
-        <AdminCard title="Verbeteringen" icon={<DocumentTextIcon className="w-6 h-6" />}>
-          <div className="text-2xl font-bold text-blue-400">{stats.totalImprovements}</div>
-          <div className="text-sm text-gray-400">Suggesties ontvangen</div>
+        
+        <AdminCard>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-[#B6C948]">Open Issues</p>
+              <p className="text-2xl font-bold text-white">
+                {testNotes.filter(n => n.status === 'open').length}
+              </p>
+            </div>
+            <BugAntIcon className="w-8 h-8 text-[#8BAE5A]" />
+          </div>
         </AdminCard>
       </div>
 
       {/* Filters */}
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1">
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Zoek test gebruikers..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-[#232D1A] border border-[#3A4D23] rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-          />
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex-1">
+          <div className="relative">
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Zoek op naam of email..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white placeholder-gray-400 focus:border-[#8BAE5A] focus:outline-none"
+            />
+          </div>
         </div>
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value as any)}
-          className="px-4 py-2 bg-[#232D1A] border border-[#3A4D23] rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-        >
-          <option value="all">Alle statussen</option>
-          <option value="active">Actief</option>
-          <option value="inactive">Inactief</option>
-          <option value="completed">Voltooid</option>
-        </select>
-        <AdminButton 
-          variant="secondary" 
-          icon={<ArrowPathIcon className="w-4 h-4" />}
-          onClick={() => {
-            setSearchTerm('');
-            setStatusFilter('all');
-          }}
-        >
-          Reset
-        </AdminButton>
+        
+        <div className="flex gap-2">
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as any)}
+            className="px-4 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
+          >
+            <option value="all">Alle Statussen</option>
+            <option value="active">Actief</option>
+            <option value="inactive">Inactief</option>
+            <option value="completed">Voltooid</option>
+          </select>
+        </div>
       </div>
 
-      {/* Test Users Table */}
-      <AdminCard title="Test Gebruikers Overzicht" icon={<UserIcon className="w-6 h-6" />}>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-[#3A4D23]">
-                <th className="text-left py-3 px-4 text-[#8BAE5A] font-semibold">Naam</th>
-                <th className="text-left py-3 px-4 text-[#8BAE5A] font-semibold">Email</th>
-                <th className="text-left py-3 px-4 text-[#8BAE5A] font-semibold">Status</th>
-                <th className="text-left py-3 px-4 text-[#8BAE5A] font-semibold">Modules</th>
-                <th className="text-left py-3 px-4 text-[#8BAE5A] font-semibold">Bugs</th>
-                <th className="text-left py-3 px-4 text-[#8BAE5A] font-semibold">Verbeteringen</th>
-                <th className="text-left py-3 px-4 text-[#8BAE5A] font-semibold">Laatste Activiteit</th>
-                <th className="text-left py-3 px-4 text-[#8BAE5A] font-semibold">Acties</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredUsers.map((user) => (
-                <tr key={user.id} className="border-b border-[#3A4D23]/50 hover:bg-[#232D1A]/50">
-                  <td className="py-3 px-4">
-                    <div className="font-medium text-white">{user.name}</div>
-                  </td>
-                  <td className="py-3 px-4 text-gray-300">{user.email}</td>
-                  <td className="py-3 px-4">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(user.status)}`}>
-                      {getStatusText(user.status)}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="flex flex-wrap gap-1">
-                      {user.assigned_modules.slice(0, 2).map((module, index) => (
-                        <span key={index} className="px-2 py-1 bg-[#3A4D23] text-[#8BAE5A] text-xs rounded">
-                          {module}
-                        </span>
-                      ))}
-                      {user.assigned_modules.length > 2 && (
-                        <span className="px-2 py-1 bg-[#3A4D23] text-[#8BAE5A] text-xs rounded">
-                          +{user.assigned_modules.length - 2}
-                        </span>
-                      )}
+      {/* Test Users List */}
+      <AdminCard title="Test Gebruikers" icon={<UserIcon className="w-6 h-6" />}>
+        <div className="space-y-4">
+          {filteredUsers.length === 0 ? (
+            <div className="text-center py-8 text-gray-400">
+              <UserIcon className="w-12 h-12 mx-auto mb-4 opacity-50" />
+              <p>Geen test gebruikers gevonden</p>
+            </div>
+          ) : (
+            filteredUsers.map((user) => (
+              <div key={user.id} className="flex items-center justify-between p-4 bg-[#232D1A] rounded-lg border border-[#3A4D23]">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-[#8BAE5A] rounded-full flex items-center justify-center text-black font-bold">
+                    {user.name.charAt(0)}
+                  </div>
+                  
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-1">
+                      <h3 className="font-semibold text-white">{user.name}</h3>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(user.status)}`}>
+                        {getStatusText(user.status)}
+                      </span>
                     </div>
-                  </td>
-                  <td className="py-3 px-4">
-                    <span className="text-red-400 font-medium">{user.bugs_reported}</span>
-                  </td>
-                  <td className="py-3 px-4">
-                    <span className="text-blue-400 font-medium">{user.improvements_suggested}</span>
-                  </td>
-                  <td className="py-3 px-4 text-gray-300 text-sm">
-                    {new Date(user.last_activity).toLocaleDateString('nl-NL')}
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="flex items-center gap-2">
-                      <AdminButton
-                        variant="secondary"
-                        size="sm"
-                        icon={<EyeIcon className="w-4 h-4" />}
-                        onClick={() => handleViewNotes(user)}
-                      >
-                        Notities
-                      </AdminButton>
-                      <select
-                        value={user.status}
-                        onChange={(e) => handleStatusChange(user.id, e.target.value as any)}
-                        className="px-2 py-1 bg-[#232D1A] border border-[#3A4D23] rounded text-xs text-white focus:outline-none"
-                      >
-                        <option value="active">Actief</option>
-                        <option value="inactive">Inactief</option>
-                        <option value="completed">Voltooid</option>
-                      </select>
+                    
+                    <div className="text-sm text-[#B6C948] mb-2">
+                      {user.email}
                     </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    
+                    <div className="flex items-center gap-4 text-xs text-gray-400">
+                      <span>Modules: {user.assigned_modules.join(', ')}</span>
+                      <span>Bugs: {user.bugs_reported}</span>
+                      <span>Verbeteringen: {user.improvements_suggested}</span>
+                      <span>Notities: {user.total_notes}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <AdminButton
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => handleViewNotes(user)}
+                    icon={<EyeIcon className="w-4 h-4" />}
+                  >
+                    Notities
+                  </AdminButton>
+                  
+                  <select
+                    value={user.status}
+                    onChange={(e) => handleStatusChange(user.id, e.target.value as any)}
+                    className="px-2 py-1 bg-[#181F17] border border-[#3A4D23] rounded text-white text-xs focus:border-[#8BAE5A] focus:outline-none"
+                  >
+                    <option value="active">Actief</option>
+                    <option value="inactive">Inactief</option>
+                    <option value="completed">Voltooid</option>
+                  </select>
+                  
+                  <AdminButton
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => handleDeleteUser(user.id)}
+                    icon={<TrashIcon className="w-4 h-4" />}
+                    className="text-red-400 hover:text-red-300"
+                  >
+                    Verwijderen
+                  </AdminButton>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </AdminCard>
 
@@ -405,6 +450,16 @@ export default function TestGebruikers() {
                 <span className={`px-2 py-1 rounded text-xs font-medium ${getPriorityColor(note.priority)}`}>
                   {getPriorityText(note.priority)}
                 </span>
+                <select
+                  value={note.status}
+                  onChange={(e) => handleNoteStatusChange(note.id, e.target.value as any)}
+                  className="px-2 py-1 bg-[#181F17] border border-[#3A4D23] rounded text-white text-xs focus:border-[#8BAE5A] focus:outline-none"
+                >
+                  <option value="open">Open</option>
+                  <option value="in_progress">In Progress</option>
+                  <option value="resolved">Resolved</option>
+                  <option value="closed">Closed</option>
+                </select>
                 <span className="text-gray-400 text-sm">
                   {new Date(note.created_at).toLocaleDateString('nl-NL')}
                 </span>
