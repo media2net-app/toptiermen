@@ -26,6 +26,13 @@ interface EmailConfig {
   apiKey: string;
   fromEmail: string;
   fromName: string;
+  smtp: {
+    host: string;
+    port: number;
+    secure: boolean;
+    username: string;
+    password: string;
+  };
 }
 
 interface PlatformConfig {
@@ -56,7 +63,14 @@ export default function AdminSettings() {
     provider: 'resend',
     apiKey: '',
     fromEmail: '',
-    fromName: ''
+    fromName: '',
+    smtp: {
+      host: '',
+      port: 587,
+      secure: false,
+      username: '',
+      password: ''
+    }
   });
 
   // Platform Configuration
@@ -87,7 +101,14 @@ export default function AdminSettings() {
         provider: 'resend',
         apiKey: process.env.RESEND_API_KEY || '',
         fromEmail: 'noreply@toptiermen.com',
-        fromName: 'Top Tier Men'
+        fromName: 'Top Tier Men',
+        smtp: {
+          host: process.env.SMTP_HOST || '',
+          port: parseInt(process.env.SMTP_PORT || '587'),
+          secure: process.env.SMTP_SECURE === 'true',
+          username: process.env.SMTP_USERNAME || '',
+          password: process.env.SMTP_PASSWORD || ''
+        }
       });
 
       setPlatformConfig({
@@ -193,6 +214,33 @@ export default function AdminSettings() {
       }
     } catch (error) {
       setMessage({ type: 'error', text: 'Fout bij het testen van Google Analytics configuratie' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const testSMTPConnection = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/admin/test-smtp-connection', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          smtp: emailConfig.smtp,
+          fromEmail: emailConfig.fromEmail,
+          fromName: emailConfig.fromName
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        setMessage({ type: 'success', text: 'SMTP verbinding succesvol! Test e-mail verzonden.' });
+      } else {
+        setMessage({ type: 'error', text: data.message || 'SMTP verbinding mislukt' });
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Fout bij het testen van SMTP verbinding' });
     } finally {
       setIsLoading(false);
     }
@@ -437,6 +485,130 @@ export default function AdminSettings() {
                   className="w-full px-4 py-2 bg-[#B6C948] text-[#181F17] font-semibold rounded-lg hover:bg-[#8BAE5A] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? 'Opslaan...' : 'Email Configuratie Opslaan'}
+                </button>
+              </div>
+            </div>
+
+            {/* SMTP Configuration Section */}
+            <div className="mt-8 pt-6 border-t border-[#3A4D23]">
+              <h3 className="text-lg font-semibold text-[#B6C948] mb-4 flex items-center gap-2">
+                <EnvelopeIcon className="w-5 h-5" />
+                SMTP Configuratie
+              </h3>
+              <p className="text-[#8BAE5A] text-sm mb-4">
+                Configureer SMTP-instellingen voor directe e-mailverzending vanaf het platform.
+              </p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-[#B6C948] font-medium mb-2">
+                      SMTP Host
+                    </label>
+                    <input
+                      type="text"
+                      value={emailConfig.smtp.host}
+                      onChange={(e) => setEmailConfig(prev => ({ 
+                        ...prev, 
+                        smtp: { ...prev.smtp, host: e.target.value }
+                      }))}
+                      className="w-full p-3 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white focus:border-[#B6C948] focus:outline-none"
+                      placeholder="smtp.gmail.com"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[#B6C948] font-medium mb-2">
+                      SMTP Port
+                    </label>
+                    <input
+                      type="number"
+                      value={emailConfig.smtp.port}
+                      onChange={(e) => setEmailConfig(prev => ({ 
+                        ...prev, 
+                        smtp: { ...prev.smtp, port: parseInt(e.target.value) }
+                      }))}
+                      className="w-full p-3 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white focus:border-[#B6C948] focus:outline-none"
+                      placeholder="587"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[#B6C948] font-medium mb-2">
+                      SMTP Gebruikersnaam
+                    </label>
+                    <input
+                      type="text"
+                      value={emailConfig.smtp.username}
+                      onChange={(e) => setEmailConfig(prev => ({ 
+                        ...prev, 
+                        smtp: { ...prev.smtp, username: e.target.value }
+                      }))}
+                      className="w-full p-3 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white focus:border-[#B6C948] focus:outline-none"
+                      placeholder="your-email@gmail.com"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-[#B6C948] font-medium mb-2">
+                      SMTP Wachtwoord
+                    </label>
+                    <input
+                      type="password"
+                      value={emailConfig.smtp.password}
+                      onChange={(e) => setEmailConfig(prev => ({ 
+                        ...prev, 
+                        smtp: { ...prev.smtp, password: e.target.value }
+                      }))}
+                      className="w-full p-3 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white focus:border-[#B6C948] focus:outline-none"
+                      placeholder="App wachtwoord of SMTP wachtwoord"
+                    />
+                  </div>
+
+                  <div className="bg-[#232D1A] p-4 rounded-lg border border-[#3A4D23]">
+                    <label className="flex items-center gap-2 text-[#8BAE5A]">
+                      <input
+                        type="checkbox"
+                        checked={emailConfig.smtp.secure}
+                        onChange={(e) => setEmailConfig(prev => ({ 
+                          ...prev, 
+                          smtp: { ...prev.smtp, secure: e.target.checked }
+                        }))}
+                        className="accent-[#B6C948]"
+                      />
+                      Gebruik SSL/TLS (voor poort 465)
+                    </label>
+                  </div>
+
+                  <div className="bg-[#232D1A] p-4 rounded-lg border border-[#3A4D23]">
+                    <h4 className="text-[#B6C948] font-semibold mb-2">Populaire SMTP Providers</h4>
+                    <div className="space-y-2 text-sm text-[#8BAE5A]">
+                      <div><strong>Gmail:</strong> smtp.gmail.com:587 (SSL: false)</div>
+                      <div><strong>Outlook:</strong> smtp-mail.outlook.com:587 (SSL: false)</div>
+                      <div><strong>Yahoo:</strong> smtp.mail.yahoo.com:587 (SSL: false)</div>
+                      <div><strong>ProtonMail:</strong> 127.0.0.1:1025 (voor development)</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 space-y-2">
+                <button
+                  onClick={testSMTPConnection}
+                  disabled={isLoading || !emailConfig.smtp.host || !emailConfig.smtp.username || !emailConfig.smtp.password}
+                  className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Test SMTP Verbinding
+                </button>
+                
+                <button
+                  onClick={saveEmailConfig}
+                  disabled={isLoading}
+                  className="w-full px-4 py-2 bg-[#B6C948] text-[#181F17] font-semibold rounded-lg hover:bg-[#8BAE5A] disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isLoading ? 'Opslaan...' : 'SMTP Configuratie Opslaan'}
                 </button>
               </div>
             </div>

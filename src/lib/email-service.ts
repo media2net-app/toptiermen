@@ -1,326 +1,238 @@
-import { supabaseAdmin } from './supabase-admin';
+import nodemailer from 'nodemailer';
+import { createClient } from '@supabase/supabase-js';
 
-interface EmailTemplate {
-  subject: string;
-  html: string;
-  text: string;
+// Initialize Supabase client
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+interface SMTPConfig {
+  host: string;
+  port: number;
+  secure: boolean;
+  username: string;
+  password: string;
 }
 
-interface EmailData {
+interface EmailConfig {
+  senderName: string;
+  senderEmail: string;
+  smtp: SMTPConfig;
+  templates: {
+    welcome: { subject: string; content: string };
+    passwordReset: { subject: string; content: string };
+    weeklyReminder: { subject: string; content: string };
+  };
+}
+
+interface EmailOptions {
   to: string;
-  template: string;
-  variables: Record<string, string>;
+  subject: string;
+  html: string;
+  text?: string;
 }
 
 class EmailService {
-  private apiKey: string;
-  private fromEmail: string;
-  private fromName: string;
+  private transporter: nodemailer.Transporter | null = null;
+  private config: EmailConfig | null = null;
 
-  constructor() {
-    this.apiKey = process.env.RESEND_API_KEY || '';
-    this.fromEmail = process.env.FROM_EMAIL || 'noreply@toptiermen.com';
-    this.fromName = process.env.FROM_NAME || 'Top Tier Men';
+  async initialize() {
+    try {
+      // Fetch email configuration from platform settings
+      const { data, error } = await supabase
+        .from('platform_settings')
+        .select('setting_value')
+        .eq('setting_key', 'email')
+        .single();
+
+      if (error || !data) {
+        throw new Error('Email configuration not found');
+      }
+
+      this.config = data.setting_value as EmailConfig;
+
+      // Create transporter if SMTP is configured
+      if (this.config.smtp.host && this.config.smtp.username && this.config.smtp.password) {
+        this.transporter = nodemailer.createTransporter({
+          host: this.config.smtp.host,
+          port: this.config.smtp.port,
+          secure: this.config.smtp.secure,
+          auth: {
+            user: this.config.smtp.username,
+            pass: this.config.smtp.password,
+          },
+        });
+
+        // Verify connection
+        await this.transporter.verify();
+        console.log('✅ SMTP connection verified');
+      } else {
+        console.warn('⚠️ SMTP not configured, emails will not be sent');
+      }
+    } catch (error) {
+      console.error('❌ Error initializing email service:', error);
+      throw error;
+    }
   }
 
-  private async getEmailTemplate(templateName: string): Promise<EmailTemplate> {
-    const templates: Record<string, EmailTemplate> = {
-      welcome: {
-        subject: 'Welkom bij Top Tier Men - Je reis naar excellentie begint nu!',
-        html: `
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Welkom bij Top Tier Men</title>
-            <style>
-              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-              .header { background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-              .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
-              .button { display: inline-block; background: #8BAE5A; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
-              .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
-            </style>
-          </head>
-          <body>
-            <div class="container">
-              <div class="header">
-                <h1>🎉 Welkom bij Top Tier Men!</h1>
-                <p>Je reis naar excellentie begint nu</p>
-              </div>
-              <div class="content">
-                <h2>Hallo {{name}},</h2>
-                <p>Welkom bij Top Tier Men! We zijn verheugd je te verwelkomen in onze community van mannen die streven naar excellentie.</p>
-                
-                <p>Je account is succesvol aangemaakt en je kunt nu beginnen met je reis naar persoonlijke groei. Hier is wat je kunt verwachten:</p>
-                
-                <ul>
-                  <li>🎯 <strong>Persoonlijke doelen</strong> - Stel je hoofddoel in en werk er naartoe</li>
-                  <li>🔥 <strong>Dagelijkse missies</strong> - Krijg dagelijkse uitdagingen om te groeien</li>
-                  <li>💪 <strong>Trainingsschema's</strong> - Kies uit verschillende workout programma's</li>
-                  <li>🥗 <strong>Voedingsplannen</strong> - Optimaliseer je voeding voor prestaties</li>
-                  <li>💬 <strong>Community</strong> - Connect met gelijkgestemde mannen</li>
-                </ul>
-                
-                <div style="text-align: center;">
-                  <a href="{{dashboardUrl}}" class="button">Ga naar je Dashboard</a>
-                </div>
-                
-                <p>Als je vragen hebt of hulp nodig hebt, aarzel niet om contact met ons op te nemen.</p>
-                
-                <p>Met vriendelijke groet,<br>
-                <strong>Het Top Tier Men Team</strong></p>
-              </div>
-              <div class="footer">
-                <p>© 2025 Top Tier Men. Alle rechten voorbehouden.</p>
-                <p>Je ontvangt deze email omdat je je hebt geregistreerd bij Top Tier Men.</p>
-              </div>
-            </div>
-          </body>
-          </html>
-        `,
-        text: `
-          Welkom bij Top Tier Men!
-          
-          Hallo {{name}},
-          
-          Welkom bij Top Tier Men! We zijn verheugd je te verwelkomen in onze community van mannen die streven naar excellentie.
-          
-          Je account is succesvol aangemaakt en je kunt nu beginnen met je reis naar persoonlijke groei.
-          
-          Ga naar je dashboard: {{dashboardUrl}}
-          
-          Met vriendelijke groet,
-          Het Top Tier Men Team
-        `
-      },
-      onboarding_reminder: {
-        subject: 'Voltooi je onboarding - Top Tier Men',
-        html: `
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Onboarding Reminder</title>
-            <style>
-              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-              .header { background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-              .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
-              .button { display: inline-block; background: #FFD700; color: #333; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: bold; }
-              .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
-            </style>
-          </head>
-          <body>
-            <div class="container">
-              <div class="header">
-                <h1>🚀 Klaar om te beginnen?</h1>
-                <p>Voltooi je onboarding en start je reis</p>
-              </div>
-              <div class="content">
-                <h2>Hallo {{name}},</h2>
-                <p>We hebben gemerkt dat je nog niet alle stappen van je onboarding hebt voltooid. Om het meeste uit Top Tier Men te halen, raden we je aan om je onboarding af te maken.</p>
-                
-                <p><strong>Wat je nog moet doen:</strong></p>
-                <ul>
-                  <li>🎯 Je hoofddoel instellen</li>
-                  <li>🔥 Je eerste missies selecteren</li>
-                  <li>💪 Een trainingsschema kiezen</li>
-                  <li>🥗 Een voedingsplan selecteren</li>
-                  <li>💬 Je voorstellen aan de community</li>
-                </ul>
-                
-                <div style="text-align: center;">
-                  <a href="{{onboardingUrl}}" class="button">Voltooi Onboarding</a>
-                </div>
-                
-                <p>Het duurt slechts 5 minuten en zorgt ervoor dat je direct kunt beginnen met groeien!</p>
-                
-                <p>Met vriendelijke groet,<br>
-                <strong>Het Top Tier Men Team</strong></p>
-              </div>
-              <div class="footer">
-                <p>© 2025 Top Tier Men. Alle rechten voorbehouden.</p>
-              </div>
-            </div>
-          </body>
-          </html>
-        `,
-        text: `
-          Klaar om te beginnen?
-          
-          Hallo {{name}},
-          
-          We hebben gemerkt dat je nog niet alle stappen van je onboarding hebt voltooid. Om het meeste uit Top Tier Men te halen, raden we je aan om je onboarding af te maken.
-          
-          Voltooi je onboarding: {{onboardingUrl}}
-          
-          Met vriendelijke groet,
-          Het Top Tier Men Team
-        `
-      },
-      email_verification: {
-        subject: 'Verificeer je email - Top Tier Men',
-        html: `
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Email Verificatie</title>
-            <style>
-              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-              .header { background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-              .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
-              .button { display: inline-block; background: #4CAF50; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
-              .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
-            </style>
-          </head>
-          <body>
-            <div class="container">
-              <div class="header">
-                <h1>✅ Verificeer je Email</h1>
-                <p>Bevestig je account om te beginnen</p>
-              </div>
-              <div class="content">
-                <h2>Hallo {{name}},</h2>
-                <p>Bedankt voor je registratie bij Top Tier Men! Om je account te activeren, moet je je email adres verifiëren.</p>
-                
-                <div style="text-align: center;">
-                  <a href="{{verificationUrl}}" class="button">Verificeer Email</a>
-                </div>
-                
-                <p>Of kopieer en plak deze link in je browser:</p>
-                <p style="word-break: break-all; background: #f0f0f0; padding: 10px; border-radius: 5px; font-size: 12px;">{{verificationUrl}}</p>
-                
-                <p>Deze link is 24 uur geldig. Als je geen account hebt aangemaakt bij Top Tier Men, kun je deze email negeren.</p>
-                
-                <p>Met vriendelijke groet,<br>
-                <strong>Het Top Tier Men Team</strong></p>
-              </div>
-              <div class="footer">
-                <p>© 2025 Top Tier Men. Alle rechten voorbehouden.</p>
-              </div>
-            </div>
-          </body>
-          </html>
-        `,
-        text: `
-          Verificeer je Email
-          
-          Hallo {{name}},
-          
-          Bedankt voor je registratie bij Top Tier Men! Om je account te activeren, moet je je email adres verifiëren.
-          
-          Verificeer je email: {{verificationUrl}}
-          
-          Met vriendelijke groet,
-          Het Top Tier Men Team
-        `
-      }
+  async sendEmail(options: EmailOptions) {
+    if (!this.transporter || !this.config) {
+      throw new Error('Email service not initialized or SMTP not configured');
+    }
+
+    const mailOptions = {
+      from: `"${this.config.senderName}" <${this.config.senderEmail}>`,
+      to: options.to,
+      subject: options.subject,
+      html: options.html,
+      text: options.text,
     };
 
-    return templates[templateName] || templates.welcome;
-  }
-
-  private replaceVariables(template: string, variables: Record<string, string>): string {
-    let result = template;
-    Object.entries(variables).forEach(([key, value]) => {
-      result = result.replace(new RegExp(`{{${key}}}`, 'g'), value);
-    });
-    return result;
-  }
-
-  async sendEmail(emailData: EmailData): Promise<boolean> {
     try {
-      const template = await this.getEmailTemplate(emailData.template);
-      
-      const html = this.replaceVariables(template.html, emailData.variables);
-      const text = this.replaceVariables(template.text, emailData.variables);
-      const subject = this.replaceVariables(template.subject, emailData.variables);
-
-      // Use Resend API
-      const response = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: `${this.fromName} <${this.fromEmail}>`,
-          to: [emailData.to],
-          subject: subject,
-          html: html,
-          text: text,
-        }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        console.error('Email sending failed:', error);
-        return false;
-      }
-
-      // Log email to database
-      await this.logEmail(emailData.to, emailData.template, subject);
-      
-      return true;
+      const result = await this.transporter.sendMail(mailOptions);
+      console.log('✅ Email sent successfully:', result.messageId);
+      return result;
     } catch (error) {
-      console.error('Error sending email:', error);
-      return false;
+      console.error('❌ Error sending email:', error);
+      throw error;
     }
   }
 
-  private async logEmail(to: string, template: string, subject: string): Promise<void> {
-    try {
-      await supabaseAdmin
-        .from('email_logs')
-        .insert({
-          to_email: to,
-          template_name: template,
-          subject: subject,
-          sent_at: new Date().toISOString(),
-        });
-    } catch (error) {
-      console.error('Error logging email:', error);
+  async sendWelcomeEmail(to: string, userName: string) {
+    if (!this.config) {
+      throw new Error('Email configuration not found');
     }
-  }
 
-  async sendWelcomeEmail(email: string, name: string): Promise<boolean> {
+    const template = this.config.templates.welcome;
+    const html = template.content
+      .replace(/\[Naam\]/g, userName)
+      .replace(/\n/g, '<br>');
+
     return this.sendEmail({
-      to: email,
-      template: 'welcome',
-      variables: {
-        name: name,
-        dashboardUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard`,
-      },
+      to,
+      subject: template.subject,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background-color: #B6C948; padding: 20px; text-align: center;">
+            <h1 style="color: #181F17; margin: 0;">Top Tier Men</h1>
+          </div>
+          <div style="padding: 20px;">
+            ${html}
+            <div style="margin-top: 30px; text-align: center;">
+              <a href="${process.env.NEXT_PUBLIC_SITE_URL}/login" 
+                 style="background-color: #B6C948; color: #181F17; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                Inloggen
+              </a>
+            </div>
+          </div>
+          <div style="background-color: #f5f5f5; padding: 15px; text-align: center; color: #666;">
+            <p>© 2024 Top Tier Men. Alle rechten voorbehouden.</p>
+          </div>
+        </div>
+      `
     });
   }
 
-  async sendOnboardingReminder(email: string, name: string): Promise<boolean> {
+  async sendPasswordResetEmail(to: string, userName: string, resetLink: string) {
+    if (!this.config) {
+      throw new Error('Email configuration not found');
+    }
+
+    const template = this.config.templates.passwordReset;
+    const html = template.content
+      .replace(/\[Naam\]/g, userName)
+      .replace(/\[RESET_LINK\]/g, resetLink)
+      .replace(/\n/g, '<br>');
+
     return this.sendEmail({
-      to: email,
-      template: 'onboarding_reminder',
-      variables: {
-        name: name,
-        onboardingUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard/onboarding`,
-      },
+      to,
+      subject: template.subject,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background-color: #B6C948; padding: 20px; text-align: center;">
+            <h1 style="color: #181F17; margin: 0;">Top Tier Men</h1>
+          </div>
+          <div style="padding: 20px;">
+            ${html}
+            <div style="margin-top: 30px; text-align: center;">
+              <a href="${resetLink}" 
+                 style="background-color: #B6C948; color: #181F17; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                Wachtwoord Resetten
+              </a>
+            </div>
+            <p style="color: #666; font-size: 12px; margin-top: 20px;">
+              Als je geen wachtwoord reset hebt aangevraagd, kun je deze e-mail negeren.
+            </p>
+          </div>
+          <div style="background-color: #f5f5f5; padding: 15px; text-align: center; color: #666;">
+            <p>© 2024 Top Tier Men. Alle rechten voorbehouden.</p>
+          </div>
+        </div>
+      `
     });
   }
 
-  async sendEmailVerification(email: string, name: string, verificationUrl: string): Promise<boolean> {
+  async sendWeeklyReminderEmail(to: string, userName: string) {
+    if (!this.config) {
+      throw new Error('Email configuration not found');
+    }
+
+    const template = this.config.templates.weeklyReminder;
+    const html = template.content
+      .replace(/\[Naam\]/g, userName)
+      .replace(/\n/g, '<br>');
+
     return this.sendEmail({
-      to: email,
-      template: 'email_verification',
-      variables: {
-        name: name,
-        verificationUrl: verificationUrl,
-      },
+      to,
+      subject: template.subject,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background-color: #B6C948; padding: 20px; text-align: center;">
+            <h1 style="color: #181F17; margin: 0;">Top Tier Men</h1>
+          </div>
+          <div style="padding: 20px;">
+            ${html}
+            <div style="margin-top: 30px; text-align: center;">
+              <a href="${process.env.NEXT_PUBLIC_SITE_URL}/dashboard" 
+                 style="background-color: #B6C948; color: #181F17; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                Ga naar Dashboard
+              </a>
+            </div>
+          </div>
+          <div style="background-color: #f5f5f5; padding: 15px; text-align: center; color: #666;">
+            <p>© 2024 Top Tier Men. Alle rechten voorbehouden.</p>
+          </div>
+        </div>
+      `
     });
+  }
+
+  async sendCustomEmail(to: string, subject: string, content: string) {
+    return this.sendEmail({
+      to,
+      subject,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background-color: #B6C948; padding: 20px; text-align: center;">
+            <h1 style="color: #181F17; margin: 0;">Top Tier Men</h1>
+          </div>
+          <div style="padding: 20px;">
+            ${content}
+          </div>
+          <div style="background-color: #f5f5f5; padding: 15px; text-align: center; color: #666;">
+            <p>© 2024 Top Tier Men. Alle rechten voorbehouden.</p>
+          </div>
+        </div>
+      `
+    });
+  }
+
+  isConfigured(): boolean {
+    return this.transporter !== null && this.config !== null;
   }
 }
 
-export const emailService = new EmailService(); 
+// Create singleton instance
+const emailService = new EmailService();
+
+export default emailService; 
