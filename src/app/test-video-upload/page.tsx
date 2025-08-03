@@ -1,64 +1,99 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { toast, Toaster } from 'react-hot-toast';
+import { createClient } from '@supabase/supabase-js';
 
 // Import VideoUpload component
 import VideoUpload from '@/components/VideoUpload';
 
+// Create Supabase client for storage
+const getSupabaseClient = () => {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
+  
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error('❌ Supabase environment variables not configured');
+    return null;
+  }
+  
+  return createClient(supabaseUrl, supabaseAnonKey);
+};
+
 export default function TestVideoUpload() {
   const [uploadedVideoUrl, setUploadedVideoUrl] = useState<string | null>(null);
   const [debugInfo, setDebugInfo] = useState<any>({});
-  const [blobFiles, setBlobFiles] = useState<any[]>([]);
+  const [supabaseFiles, setSupabaseFiles] = useState<any[]>([]);
   const [loadingFiles, setLoadingFiles] = useState(false);
 
   useEffect(() => {
-    // Debug environment variables via API
+    // Debug environment variables
     const fetchDebugInfo = async () => {
       try {
-        const response = await fetch('/api/blob-config');
-        const data = await response.json();
+        const supabase = getSupabaseClient();
+        if (!supabase) {
+          setDebugInfo({
+            hasSupabaseUrl: !!(process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL),
+            hasSupabaseKey: !!(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY),
+            supabaseUrl: (process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL) ? 'Configured' : 'Missing',
+            supabaseKeyStart: (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY) ? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' : 'Missing',
+            isConfigured: false
+          });
+          return;
+        }
+
+        // Test connection by trying to list buckets
+        const { data: buckets, error } = await supabase.storage.listBuckets();
         
         setDebugInfo({
-          hasProcess: typeof process !== 'undefined',
-          hasEnv: typeof process !== 'undefined' && !!process.env,
-          hasBlobToken: data.hasToken,
-          blobTokenLength: data.tokenLength,
-          blobTokenStart: data.tokenLength > 0 ? 'vercel_blob...' : 'N/A',
-          isConfigured: data.isConfigured,
-          storeName: data.storeName
+          hasSupabaseUrl: !!(process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL),
+          hasSupabaseKey: !!(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY),
+          supabaseUrl: (process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL) ? 'Configured' : 'Missing',
+          supabaseKeyStart: (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY) ? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' : 'Missing',
+          isConfigured: !error,
+          buckets: buckets?.map(b => b.name) || [],
+          error: error?.message
         });
       } catch (error) {
         console.error('Failed to fetch debug info:', error);
         setDebugInfo({
-          hasProcess: typeof process !== 'undefined',
-          hasEnv: typeof process !== 'undefined' && !!process.env,
-          hasBlobToken: false,
-          blobTokenLength: 0,
-          blobTokenStart: 'N/A',
+          hasSupabaseUrl: !!(process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL),
+          hasSupabaseKey: !!(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY),
+          supabaseUrl: (process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL) ? 'Configured' : 'Missing',
+          supabaseKeyStart: (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY) ? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' : 'Missing',
           isConfigured: false,
-          storeName: 'Unknown'
+          error: 'Connection failed'
         });
       }
     };
 
     fetchDebugInfo();
-    fetchBlobFiles();
+    fetchSupabaseFiles();
   }, []);
 
-  const fetchBlobFiles = async () => {
+  const fetchSupabaseFiles = async () => {
     setLoadingFiles(true);
     try {
-      const response = await fetch('/api/blob-files');
-      const data = await response.json();
+      const supabase = getSupabaseClient();
+      if (!supabase) {
+        console.error('Supabase client not available');
+        return;
+      }
+
+      const { data: files, error } = await supabase.storage
+        .from('workout-videos')
+        .list('exercises', {
+          limit: 100,
+          offset: 0
+        });
       
-      if (data.success) {
-        setBlobFiles(data.files);
-        console.log('📂 Blob files loaded:', data.files);
+      if (error) {
+        console.error('Failed to fetch Supabase files:', error);
       } else {
-        console.error('Failed to fetch blob files:', data.error);
+        setSupabaseFiles(files || []);
+        console.log('📂 Supabase files loaded:', files);
       }
     } catch (error) {
-      console.error('Failed to fetch blob files:', error);
+      console.error('Failed to fetch Supabase files:', error);
     } finally {
       setLoadingFiles(false);
     }
@@ -75,20 +110,24 @@ export default function TestVideoUpload() {
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-[#8BAE5A] mb-2">Video Upload Test</h1>
-          <p className="text-[#B6C948]">Test de video upload functionaliteit met Vercel Blob</p>
+          <p className="text-[#B6C948]">Test de video upload functionaliteit met Supabase Storage</p>
         </div>
 
         {/* Debug Information */}
         <div className="mb-6 bg-[#232D1A] border border-[#3A4D23] rounded-xl p-6">
           <h2 className="text-xl font-semibold text-[#8BAE5A] mb-4">Debug Informatie</h2>
           <div className="space-y-2 text-[#B6C948] text-sm">
-            <div>Has Process: {debugInfo.hasProcess ? '✅' : '❌'}</div>
-            <div>Has Env: {debugInfo.hasEnv ? '✅' : '❌'}</div>
-            <div>Has Blob Token: {debugInfo.hasBlobToken ? '✅' : '❌'}</div>
-            <div>Token Length: {debugInfo.blobTokenLength}</div>
-            <div>Token Start: {debugInfo.blobTokenStart}</div>
+            <div>Has Supabase URL: {debugInfo.hasSupabaseUrl ? '✅' : '❌'}</div>
+            <div>Has Supabase Key: {debugInfo.hasSupabaseKey ? '✅' : '❌'}</div>
+            <div>Supabase URL: {debugInfo.supabaseUrl}</div>
+            <div>Supabase Key Start: {debugInfo.supabaseKeyStart}</div>
             <div>Is Configured: {debugInfo.isConfigured ? '✅' : '❌'}</div>
-            <div>Store Name: {debugInfo.storeName}</div>
+            {debugInfo.buckets && (
+              <div>Available Buckets: {debugInfo.buckets.join(', ')}</div>
+            )}
+            {debugInfo.error && (
+              <div className="text-red-400">Error: {debugInfo.error}</div>
+            )}
           </div>
         </div>
 
@@ -128,11 +167,15 @@ export default function TestVideoUpload() {
           <div className="space-y-3 text-[#B6C948]">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-[#8BAE5A] rounded-full"></div>
-              <span>Vercel Blob Store: {debugInfo.storeName || 'toptiermen-final-blob'}</span>
+              <span>Supabase Storage: workout-videos bucket (exercises folder)</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-[#8BAE5A] rounded-full"></div>
-              <span>BLOB_READ_WRITE_TOKEN: Geconfigureerd</span>
+              <span>NEXT_PUBLIC_SUPABASE_URL: Geconfigureerd</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-[#8BAE5A] rounded-full"></div>
+              <span>NEXT_PUBLIC_SUPABASE_ANON_KEY: Geconfigureerd</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-[#8BAE5A] rounded-full"></div>
@@ -149,12 +192,12 @@ export default function TestVideoUpload() {
           </div>
         </div>
 
-        {/* Blob Directory View */}
+        {/* Supabase Storage Directory View */}
         <div className="mt-6 bg-[#232D1A] border border-[#3A4D23] rounded-xl p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-[#8BAE5A]">Blob Directory View</h2>
+            <h2 className="text-xl font-semibold text-[#8BAE5A]">Supabase Storage Directory View</h2>
             <button 
-              onClick={fetchBlobFiles}
+              onClick={fetchSupabaseFiles}
               disabled={loadingFiles}
               className="px-4 py-2 bg-[#8BAE5A] text-[#0A0F0A] rounded-lg hover:bg-[#B6C948] transition-colors disabled:opacity-50"
             >
@@ -167,40 +210,47 @@ export default function TestVideoUpload() {
               <div className="w-6 h-6 border-2 border-[#3A4D23] border-t-[#8BAE5A] rounded-full animate-spin"></div>
               <span className="ml-3 text-[#B6C948]">Bestanden laden...</span>
             </div>
-          ) : blobFiles.length === 0 ? (
+          ) : supabaseFiles.length === 0 ? (
             <div className="text-center py-8 text-[#B6C948]">
-              <p>Geen bestanden gevonden in de blob store</p>
+              <p>Geen bestanden gevonden in Supabase Storage</p>
               <p className="text-sm mt-2">Upload een video om te beginnen</p>
             </div>
           ) : (
             <div className="space-y-3">
               <div className="text-sm text-[#B6C948] mb-3">
-                Totaal: {blobFiles.length} bestand(en)
+                Totaal: {supabaseFiles.length} bestand(en)
               </div>
-              {blobFiles.map((file, index) => (
-                <div key={index} className="bg-[#181F17] border border-[#3A4D23] rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <h3 className="text-[#8BAE5A] font-semibold">{file.pathname}</h3>
-                      <div className="text-sm text-[#B6C948] mt-1 space-y-1">
-                        <div>Grootte: {(file.size / 1024 / 1024).toFixed(2)} MB</div>
-                        <div>Type: {file.contentType}</div>
-                        <div>Geüpload: {new Date(file.uploadedAt).toLocaleString('nl-NL')}</div>
+              {supabaseFiles.map((file, index) => {
+                const supabase = getSupabaseClient();
+                const publicUrl = supabase?.storage
+                  .from('workout-videos')
+                  .getPublicUrl(`exercises/${file.name}`).data.publicUrl;
+                
+                return (
+                  <div key={index} className="bg-[#181F17] border border-[#3A4D23] rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <h3 className="text-[#8BAE5A] font-semibold">{file.name}</h3>
+                        <div className="text-sm text-[#B6C948] mt-1 space-y-1">
+                          <div>Grootte: {(file.metadata?.size / 1024 / 1024).toFixed(2)} MB</div>
+                          <div>Type: {file.metadata?.mimetype}</div>
+                          <div>Geüpload: {new Date(file.updated_at).toLocaleString('nl-NL')}</div>
+                        </div>
+                      </div>
+                      <div className="ml-4">
+                        <a 
+                          href={publicUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="px-3 py-1 bg-[#3A4D23] text-[#8BAE5A] rounded hover:bg-[#8BAE5A] hover:text-[#0A0F0A] transition-colors text-sm"
+                        >
+                          Bekijk
+                        </a>
                       </div>
                     </div>
-                    <div className="ml-4">
-                      <a 
-                        href={file.url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="px-3 py-1 bg-[#3A4D23] text-[#8BAE5A] rounded hover:bg-[#8BAE5A] hover:text-[#0A0F0A] transition-colors text-sm"
-                      >
-                        Bekijk
-                      </a>
-                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
