@@ -10,7 +10,6 @@ import {
   HeartIcon, 
   StarIcon,
   XMarkIcon,
-  PlusIcon,
   FireIcon,
   BoltIcon,
   LeafIcon,
@@ -281,10 +280,6 @@ export default function ReceptenBibliotheekPage() {
       console.error('Error deleting recipe:', error);
       toast.error('Fout bij verwijderen van recept');
     }
-  };
-
-  const isRecipeSaved = (recipeId: number) => {
-    return savedRecipes.some(saved => saved.name === recipeId.toString() || saved.name.includes(recipeId.toString()));
   };
 
   return (
