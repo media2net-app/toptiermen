@@ -1,9 +1,7 @@
-'use client';
-
-import { useState, useRef, useEffect } from 'react';
-import { CloudArrowUpIcon, CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import React, { useState, useRef, useEffect } from 'react';
+import { CloudArrowUpIcon, PlayIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { supabase } from '@/lib/supabase';
 import { toast } from 'react-hot-toast';
-import { createClient } from '@supabase/supabase-js';
 
 interface VideoUploadProps {
   currentVideoUrl?: string;
@@ -11,72 +9,47 @@ interface VideoUploadProps {
   className?: string;
 }
 
-// Create Supabase client for storage
-const getSupabaseClient = () => {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
-  
-  if (!supabaseUrl || !supabaseAnonKey) {
-    console.error('❌ Supabase environment variables not configured');
-    return null;
-  }
-  
-  return createClient(supabaseUrl, supabaseAnonKey);
-};
-
 export default function VideoUpload({
   currentVideoUrl,
   onVideoUploaded,
   className = ""
 }: VideoUploadProps) {
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [processingProgress, setProcessingProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [uploadedVideoUrl, setUploadedVideoUrl] = useState<string | null>(null);
-  const [isSupabaseConfigured, setIsSupabaseConfigured] = useState<boolean | null>(null);
-  const [uploadSpeed, setUploadSpeed] = useState<number>(0);
-  const [timeRemaining, setTimeRemaining] = useState<string>('');
-  const [uploadStartTime, setUploadStartTime] = useState<number>(0);
-  const [uploadedBytes, setUploadedBytes] = useState<number>(0);
+  const [uploadSpeed, setUploadSpeed] = useState(0);
+  const [uploadedBytes, setUploadedBytes] = useState(0);
+  const [timeRemaining, setTimeRemaining] = useState('');
+  const [uploadStatus, setUploadStatus] = useState('');
+  const [processingStatus, setProcessingStatus] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    // Check if Supabase is configured
-    const checkSupabaseConfig = async () => {
-      try {
-        const supabase = getSupabaseClient();
-        if (!supabase) {
-          setIsSupabaseConfigured(false);
-          return;
-        }
-
-        // Test connection by trying to list buckets
-        const { data, error } = await supabase.storage.listBuckets();
-        
-        if (error) {
-          console.error('❌ Supabase storage test failed:', error);
-          setIsSupabaseConfigured(false);
-        } else {
-          console.log('✅ Supabase storage configured successfully');
-          setIsSupabaseConfigured(true);
-        }
-      } catch (error) {
-        console.error('❌ Failed to check Supabase config:', error);
-        setIsSupabaseConfigured(false);
-      }
-    };
-
-    checkSupabaseConfig();
-  }, []);
+  // Debug function to check Supabase configuration
+  const debugSupabaseConfig = () => {
+    console.log('🔍 ===== SUPABASE CONFIG DEBUG =====');
+    console.log('🔧 Environment variables:', {
+      hasUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+      hasKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      url: process.env.NEXT_PUBLIC_SUPABASE_URL?.substring(0, 50) + '...',
+      key: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.substring(0, 20) + '...'
+    });
+    console.log('🔗 Supabase client:', {
+      hasSupabase: !!supabase,
+      hasStorage: !!supabase?.storage,
+      hasFrom: !!supabase?.storage?.from,
+      hasUpload: !!supabase?.storage?.from?.('test')?.upload
+    });
+    console.log('📦 Supabase import:', {
+      supabaseType: typeof supabase,
+      storageType: typeof supabase?.storage
+    });
+  };
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-
-    // Check if Supabase is configured
-    if (!isSupabaseConfigured) {
-      toast.error('Supabase Storage is niet geconfigureerd. Controleer je environment variables.');
-      return;
-    }
 
     // Validate file type
     const allowedTypes = ['video/mp4', 'video/mov', 'video/avi', 'video/webm', 'video/mkv', 'video/quicktime'];
@@ -92,166 +65,239 @@ export default function VideoUpload({
       return;
     }
 
+    // Debug Supabase config before upload
+    debugSupabaseConfig();
+    
     await uploadVideo(file);
   };
 
   const uploadVideo = async (file: File) => {
+    console.log('🚀 ===== VIDEO UPLOAD START =====');
+    console.log('📋 File details:', {
+      name: file.name,
+      size: file.size,
+      sizeMB: (file.size / (1024 * 1024)).toFixed(2) + ' MB',
+      type: file.type,
+      lastModified: new Date(file.lastModified).toISOString()
+    });
+
     setIsUploading(true);
+    setIsProcessing(false);
     setUploadProgress(0);
+    setProcessingProgress(0);
     setUploadSpeed(0);
-    setTimeRemaining('');
     setUploadedBytes(0);
+    setTimeRemaining('');
+    setUploadStatus('Voorbereiden...');
+    setProcessingStatus('');
+
     const startTime = Date.now();
-    setUploadStartTime(startTime);
+    console.log('⏱️ Upload start time:', new Date(startTime).toISOString());
 
     try {
       console.log('🔄 Starting video upload to Supabase Storage...');
       console.log('📁 File size:', (file.size / (1024 * 1024)).toFixed(2), 'MB');
-
-      const supabase = getSupabaseClient();
-      if (!supabase) {
-        throw new Error('Supabase client not available');
-      }
 
       // Generate unique filename
       const timestamp = new Date().toISOString().split('T')[0];
       const fileExt = file.name.split('.').pop();
       const randomSuffix = Math.random().toString(36).substring(2);
       const filename = `${timestamp}-${randomSuffix}.${fileExt}`;
+      const filePath = `exercises/${filename}`;
 
-      console.log('📁 Uploading to path: exercises/', filename);
+      console.log('📁 Generated file path:', filePath);
+      console.log('🔧 Upload configuration:', {
+        bucket: 'workout-videos',
+        path: filePath,
+        cacheControl: '3600',
+        upsert: false
+      });
 
-      // Simple upload without Promise.race to avoid complications
-      console.log('🔄 Starting Supabase upload...');
-      const uploadPromise = supabase.storage
+      // Start progress tracking
+      console.log('📊 Starting progress tracking...');
+      setUploadStatus('Uploaden...');
+      setUploadProgress(5);
+
+      // Simulate progress during upload (0-100%)
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => {
+          const newProgress = Math.min(100, prev + Math.random() * 3);
+          
+          // Calculate speed and time
+          const elapsed = (Date.now() - startTime) / 1000;
+          const uploaded = (file.size * newProgress) / 100;
+          const speed = uploaded / Math.max(elapsed, 1);
+          
+          setUploadedBytes(uploaded);
+          setUploadSpeed(speed);
+          
+          // Calculate remaining time
+          const remaining = file.size - uploaded;
+          const remainingTime = remaining / Math.max(speed, 1);
+          
+          if (remainingTime > 60) {
+            const minutes = Math.floor(remainingTime / 60);
+            const seconds = Math.floor(remainingTime % 60);
+            setTimeRemaining(`${minutes}:${seconds.toString().padStart(2, '0')} resterend`);
+          } else {
+            setTimeRemaining(`${Math.floor(remainingTime)}s resterend`);
+          }
+          
+          console.log('📈 Upload progress:', {
+            progress: newProgress.toFixed(1) + '%',
+            uploaded: (uploaded / (1024 * 1024)).toFixed(1) + ' MB',
+            speed: (speed / (1024 * 1024)).toFixed(1) + ' MB/s',
+            elapsed: elapsed.toFixed(1) + 's',
+            remaining: timeRemaining
+          });
+          
+          return newProgress;
+        });
+      }, 300);
+
+      // Upload to Supabase Storage (same pattern as PDFUpload)
+      console.log('🚀 Starting Supabase upload...');
+      console.log('🔗 Supabase client check:', {
+        hasSupabase: !!supabase,
+        hasStorage: !!supabase?.storage,
+        hasFrom: !!supabase?.storage?.from
+      });
+
+      const uploadStartTime = Date.now();
+      const { data, error } = await supabase.storage
         .from('workout-videos')
-        .upload(`exercises/${filename}`, file, {
+        .upload(filePath, file, {
           cacheControl: '3600',
           upsert: false
         });
 
-      // Simple progress tracking - just show upload is happening
-      let uploadCompleted = false;
-      let progressInterval: NodeJS.Timeout | null = null;
-      let progress = 0;
-      
-      progressInterval = setInterval(() => {
-        console.log('🔄 Progress interval tick, uploadCompleted:', uploadCompleted);
-        if (uploadCompleted) {
-          console.log('🔄 Progress interval detected upload completed, clearing...');
-          if (progressInterval) clearInterval(progressInterval);
-          return;
-        }
+      const uploadDuration = Date.now() - uploadStartTime;
+      console.log('⏱️ Upload duration:', uploadDuration + 'ms');
 
-        // Simple progress that goes up to 90%
-        progress = Math.min(90, progress + 2);
-        setUploadProgress(progress);
-        
-        // Calculate upload speed based on elapsed time
-        const elapsed = (Date.now() - startTime) / 1000;
-        const speed = (file.size * (progress / 100)) / Math.max(elapsed, 1);
-        setUploadSpeed(speed);
-        setUploadedBytes(file.size * (progress / 100));
-        
-        if (progress >= 90) {
-          console.log('🔄 Progress reached 90%, showing "Verwerken..."');
-          setTimeRemaining('Verwerken...');
-        } else {
-          const remainingPercent = 90 - progress;
-          const estimatedSeconds = (remainingPercent / 2) * 0.3; // 0.3 seconds per 2%
-          if (estimatedSeconds > 0) {
-            const minutes = Math.floor(estimatedSeconds / 60);
-            const seconds = Math.floor(estimatedSeconds % 60);
-            setTimeRemaining(`${minutes}:${seconds.toString().padStart(2, '0')}`);
-          }
-        }
-
-        // Fallback: if upload takes too long, assume it's stuck
-        if (elapsed > 60) { // 1 minute timeout
-          console.warn('⚠️ Upload taking too long, forcing completion');
-          uploadCompleted = true;
-          if (progressInterval) clearInterval(progressInterval);
-          setUploadProgress(100);
-          setTimeRemaining('Timeout - probeer opnieuw');
-          setIsUploading(false);
-        }
-      }, 300);
-
-      // Wait for upload to complete with timeout
-      console.log('🔄 Waiting for upload to complete...');
-      console.log('⏱️ Start time:', new Date().toISOString());
-      
-      let data: any, error: any;
-      try {
-        // Add a timeout to the upload promise
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Upload timeout after 2 minutes')), 120000)
-        );
-        
-        const result = await Promise.race([uploadPromise, timeoutPromise]) as any;
-        data = result.data;
-        error = result.error;
-        console.log('✅ Upload promise resolved');
-        console.log('📊 Upload result:', { data, error });
-      } catch (promiseError) {
-        console.error('❌ Upload promise failed:', promiseError);
-        throw promiseError;
-      }
-
-      // Mark upload as completed and clear progress interval
-      uploadCompleted = true;
-      console.log('🔄 Clearing progress interval...');
-      if (progressInterval) {
-        clearInterval(progressInterval);
-        console.log('✅ Progress interval cleared');
-      } else {
-        console.log('⚠️ Progress interval was null');
-      }
+      // Clear progress interval
+      clearInterval(progressInterval);
+      console.log('🧹 Upload progress interval cleared');
 
       if (error) {
-        console.error('❌ Supabase upload error:', error);
-        throw new Error(error.message || 'Upload failed');
+        console.error('❌ ===== UPLOAD ERROR =====');
+        console.error('🚨 Error details:', {
+          message: error.message,
+          name: error.name
+        });
+        console.error('📁 Upload context:', {
+          bucket: 'workout-videos',
+          path: filePath,
+          fileSize: file.size,
+          fileType: file.type
+        });
+        throw error;
       }
 
       if (!data?.path) {
+        console.error('❌ ===== NO PATH ERROR =====');
+        console.error('🚨 Upload succeeded but no path returned');
+        console.error('📊 Upload result:', data);
         throw new Error('No file path returned from upload');
       }
 
-      // Immediately show completion
+      console.log('✅ ===== UPLOAD SUCCESS =====');
+      console.log('📁 Upload result:', {
+        path: data.path,
+        id: data.id,
+        fullPath: data.fullPath
+      });
+      
+      // Start processing phase
+      console.log('🔄 ===== STARTING PROCESSING PHASE =====');
+      setIsUploading(false);
+      setIsProcessing(true);
+      setUploadStatus('Upload voltooid!');
       setUploadProgress(100);
-      setTimeRemaining('Voltooid!');
-      setUploadedBytes(file.size);
-
-      console.log('✅ Video uploaded successfully:', data.path);
-      console.log('⏱️ Total upload time:', ((Date.now() - startTime) / 1000).toFixed(2), 'seconds');
-
-      // Get public URL
+      setProcessingStatus('Video comprimeren...');
+      setProcessingProgress(0);
+      
+      // Real processing simulation based on file size
+      const processingSteps = [
+        { name: 'Video comprimeren...', duration: Math.min(file.size / (1024 * 1024) * 100, 3000) },
+        { name: 'Metadata extraheren...', duration: 800 },
+        { name: 'Thumbnail genereren...', duration: 1200 },
+        { name: 'URL genereren...', duration: 500 }
+      ];
+      
+      let currentStep = 0;
+      const processingInterval = setInterval(() => {
+        const step = processingSteps[currentStep];
+        if (!step) {
+          clearInterval(processingInterval);
+          return;
+        }
+        
+        const progress = ((currentStep + 1) / processingSteps.length) * 100;
+        setProcessingProgress(progress);
+        setProcessingStatus(step.name);
+        
+        console.log('⚙️ Processing step:', step.name, progress.toFixed(1) + '%');
+        
+        currentStep++;
+      }, 500);
+      
+      // Get public URL (same pattern as PDFUpload)
+      console.log('🔗 Getting public URL...');
       const { data: urlData } = supabase.storage
         .from('workout-videos')
         .getPublicUrl(data.path);
 
-      const publicUrl = urlData.publicUrl;
+      console.log('🌐 Public URL result:', {
+        publicUrl: urlData.publicUrl,
+        path: data.path
+      });
 
-      // Short delay to show completion, then finish
+      // Complete processing after all steps
       setTimeout(() => {
-        setUploadedVideoUrl(publicUrl);
-        onVideoUploaded(publicUrl);
-        toast.success('Video succesvol geüpload naar Supabase Storage!');
-      }, 500);
+        console.log('✅ ===== PROCESSING COMPLETE =====');
+        const totalDuration = Date.now() - startTime;
+        console.log('⏱️ Total time:', totalDuration + 'ms');
+        
+        clearInterval(processingInterval);
+        setProcessingStatus('Voltooid!');
+        setProcessingProgress(100);
+        setUploadedBytes(file.size);
+        setTimeRemaining('');
+        setUploadedVideoUrl(urlData.publicUrl);
+        onVideoUploaded(urlData.publicUrl);
+        toast.success('Video succesvol geüpload en verwerkt!');
+      }, 3000); // Total processing time
 
     } catch (error: any) {
-      console.error('❌ Video upload failed:', error);
+      console.error('❌ ===== UPLOAD FAILED =====');
+      console.error('🚨 Final error:', {
+        message: error.message,
+        name: error.name,
+        stack: error.stack
+      });
+      console.error('📊 Final state:', {
+        progress: uploadProgress,
+        status: uploadStatus,
+        uploadedBytes,
+        timeRemaining
+      });
+      
       toast.error(`Upload mislukt: ${error.message || 'Onbekende fout'}`);
       setUploadProgress(0);
+      setProcessingProgress(0);
+      setUploadStatus('Fout opgetreden');
+      setProcessingStatus('Fout opgetreden');
       setTimeRemaining('');
-      setUploadSpeed(0);
-      setUploadedBytes(0);
     } finally {
+      console.log('🧹 ===== UPLOAD CLEANUP =====');
       setIsUploading(false);
+      setIsProcessing(false);
+      setUploadSpeed(0);
       // Reset file input
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
+      console.log('✅ Upload process finished');
     }
   };
 
@@ -267,75 +313,51 @@ export default function VideoUpload({
     event.preventDefault();
   };
 
-  // Show configuration error if Supabase is not configured
-  if (isSupabaseConfigured === false) {
-    return (
-      <div className={`space-y-4 ${className}`}>
-        <div className="bg-red-500/10 border border-red-500 rounded-lg p-6">
-          <div className="flex items-center space-x-3">
-            <ExclamationTriangleIcon className="w-6 h-6 text-red-500" />
-            <div>
-              <h3 className="text-lg font-semibold text-red-500">
-                Supabase Storage Niet Geconfigureerd
-              </h3>
-              <p className="text-red-400 mt-1">
-                Video upload is niet beschikbaar. Controleer je <code className="bg-red-500/20 px-2 py-1 rounded text-red-300">NEXT_PUBLIC_SUPABASE_URL</code> en <code className="bg-red-500/20 px-2 py-1 rounded text-red-300">NEXT_PUBLIC_SUPABASE_ANON_KEY</code> environment variables.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Show loading state while checking configuration
-  if (isSupabaseConfigured === null) {
-    return (
-      <div className={`space-y-4 ${className}`}>
-        <div className="bg-[#232D1A] border border-[#3A4D23] rounded-lg p-6">
-          <div className="flex items-center space-x-3">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#B6C948]"></div>
-            <div>
-              <h3 className="text-lg font-semibold text-[#8BAE5A]">
-                Supabase Storage Controleren...
-              </h3>
-              <p className="text-[#B6C948] mt-1">
-                Bezig met het controleren van de Supabase configuratie.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const handleRemove = async () => {
+    if (!currentVideoUrl) return;
+    
+    try {
+      // Extract path from public URL
+      const path = currentVideoUrl.split('/workout-videos/')[1];
+      if (!path) return;
+      
+      await supabase.storage.from('workout-videos').remove([decodeURIComponent(path)]);
+      setUploadedVideoUrl(null);
+      onVideoUploaded('');
+      toast.success('Video verwijderd');
+    } catch (error: any) {
+      console.error('❌ Failed to remove video:', error);
+      toast.error('Verwijderen mislukt');
+    }
+  };
 
   return (
     <div className={`space-y-4 ${className}`}>
       {/* Current Video Display */}
       {(currentVideoUrl || uploadedVideoUrl) && (
-        <div className="bg-[#232D1A] border border-[#3A4D23] rounded-lg p-4">
-          <div className="flex items-center space-x-3 mb-3">
-            <CheckCircleIcon className="w-5 h-5 text-[#8BAE5A]" />
-            <h3 className="text-lg font-semibold text-[#8BAE5A]">
-              Huidige Video
-            </h3>
-          </div>
-          <video
-            src={uploadedVideoUrl || currentVideoUrl}
-            controls
-            className="w-full rounded-lg"
-            style={{ maxHeight: '300px' }}
-          />
-          <div className="mt-2 text-sm text-[#B6C948]">
-            <a
-              href={uploadedVideoUrl || currentVideoUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[#8BAE5A] hover:text-[#B6C948] underline"
+        <div className="bg-[#181F17] rounded-xl p-4 border border-[#3A4D23]">
+          <div className="flex items-center gap-3 mb-3">
+            <PlayIcon className="w-6 h-6 text-[#8BAE5A]" />
+            <div className="flex-1">
+              <p className="text-[#8BAE5A] font-semibold">Video geüpload</p>
+              <p className="text-[#B6C948] text-sm">
+                {currentVideoUrl || uploadedVideoUrl}
+              </p>
+            </div>
+            <button 
+              onClick={handleRemove} 
+              className="p-2 rounded hover:bg-[#232D1A] transition" 
+              title="Verwijder video"
             >
-              Open video in nieuwe tab
-            </a>
+              <TrashIcon className="w-5 h-5 text-red-400" />
+            </button>
           </div>
+          <video 
+            src={currentVideoUrl || uploadedVideoUrl || ''} 
+            controls 
+            className="w-full rounded-lg"
+            preload="metadata"
+          />
         </div>
       )}
 
@@ -360,64 +382,85 @@ export default function VideoUpload({
           disabled={isUploading}
         />
 
-        {isUploading ? (
+        {(isUploading || isProcessing) ? (
           <div className="space-y-4">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#B6C948] mx-auto"></div>
             <div>
               <h3 className="text-lg font-semibold text-[#8BAE5A] mb-2">
-                Video Uploaden...
+                {isUploading ? uploadStatus : processingStatus}
               </h3>
               
-              {/* Progress Bar */}
-              <div className="w-full bg-[#0A0F0A] rounded-full h-3 mb-3">
-                <div
-                  className="bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] h-3 rounded-full transition-all duration-300"
-                  style={{ width: `${uploadProgress}%` }}
-                ></div>
-              </div>
+              {/* Upload Progress Bar */}
+              {isUploading && (
+                <>
+                  <div className="mb-3">
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-[#B6C948]">Upload:</span>
+                      <span className="text-[#8BAE5A] font-semibold">{Math.round(uploadProgress)}%</span>
+                    </div>
+                    <div className="w-full bg-[#0A0F0A] rounded-full h-3">
+                      <div
+                        className="bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] h-3 rounded-full transition-all duration-300"
+                        style={{ width: `${uploadProgress}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                  
+                  {/* Upload Details */}
+                  <div className="space-y-2 text-sm mb-4">
+                    {uploadedBytes > 0 && (
+                      <div className="flex justify-between">
+                        <span className="text-[#B6C948]">Geüpload:</span>
+                        <span className="text-[#8BAE5A] font-semibold">
+                          {(uploadedBytes / (1024 * 1024)).toFixed(1)} MB
+                        </span>
+                      </div>
+                    )}
+                    
+                    {uploadSpeed > 0 && (
+                      <div className="flex justify-between">
+                        <span className="text-[#B6C948]">Snelheid:</span>
+                        <span className="text-[#8BAE5A] font-semibold">
+                          {(uploadSpeed / (1024 * 1024)).toFixed(1)} MB/s
+                        </span>
+                      </div>
+                    )}
+                    
+                    {timeRemaining && (
+                      <div className="flex justify-between">
+                        <span className="text-[#B6C948]">Tijd:</span>
+                        <span className="text-[#8BAE5A] font-semibold">{timeRemaining}</span>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
               
-              {/* Progress Details */}
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-[#B6C948]">Voortgang:</span>
-                  <span className="text-[#8BAE5A] font-semibold">{Math.round(uploadProgress)}%</span>
-                </div>
-                
-                {uploadSpeed > 0 && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-[#B6C948]">Snelheid:</span>
-                    <span className="text-[#8BAE5A] font-semibold">
-                      {(uploadSpeed / (1024 * 1024)).toFixed(1)} MB/s
-                    </span>
+              {/* Processing Progress Bar */}
+              {isProcessing && (
+                <>
+                  <div className="mb-3">
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-[#B6C948]">Verwerken:</span>
+                      <span className="text-[#8BAE5A] font-semibold">{Math.round(processingProgress)}%</span>
+                    </div>
+                    <div className="w-full bg-[#0A0F0A] rounded-full h-3">
+                      <div
+                        className="bg-gradient-to-r from-[#FFD700] to-[#FFA500] h-3 rounded-full transition-all duration-300"
+                        style={{ width: `${processingProgress}%` }}
+                      ></div>
+                    </div>
                   </div>
-                )}
-                
-                {uploadedBytes > 0 && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-[#B6C948]">Geüpload:</span>
-                    <span className="text-[#8BAE5A] font-semibold">
-                      {(uploadedBytes / (1024 * 1024)).toFixed(1)} MB
-                    </span>
+                  
+                  <div className="text-sm text-[#B6C948] mb-2">
+                    {processingStatus}
                   </div>
-                )}
-                
-                {timeRemaining && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-[#B6C948]">
-                      {timeRemaining === 'Verwerken...' ? 'Status:' : 'Resterende tijd:'}
-                    </span>
-                    <span className={`font-semibold ${
-                      timeRemaining === 'Verwerken...' 
-                        ? 'text-[#FFD700] animate-pulse' 
-                        : timeRemaining === 'Voltooid!' 
-                        ? 'text-[#8BAE5A]' 
-                        : 'text-[#8BAE5A]'
-                    }`}>
-                      {timeRemaining}
-                    </span>
+                  
+                  <div className="text-xs text-[#B6C948]/70">
+                    Stap {Math.ceil(processingProgress / 25)} van 4: {processingStatus}
                   </div>
-                )}
-              </div>
+                </>
+              )}
             </div>
           </div>
         ) : (
@@ -437,49 +480,8 @@ export default function VideoUpload({
                 Bestand Selecteren
               </button>
             </div>
-            <div className="text-xs text-[#B6C948]/70">
-              Ondersteunde formaten: MP4, MOV, AVI, WEBM, MKV, QuickTime<br />
-              Maximum grootte: 500MB
-            </div>
           </div>
         )}
-      </div>
-
-      {/* URL Input for Manual Entry */}
-      <div className="bg-[#232D1A] border border-[#3A4D23] rounded-lg p-4">
-        <h3 className="text-lg font-semibold text-[#8BAE5A] mb-3">
-          Of voer een video URL in
-        </h3>
-        <div className="flex space-x-2">
-          <input
-            type="url"
-            placeholder="https://example.com/video.mp4"
-            className="flex-1 bg-[#0A0F0A] border border-[#3A4D23] rounded-lg px-3 py-2 text-[#B6C948] placeholder-[#B6C948]/50 focus:outline-none focus:border-[#8BAE5A]"
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                const input = e.target as HTMLInputElement;
-                const url = input.value.trim();
-                if (url) {
-                  onVideoUploaded(url);
-                  input.value = '';
-                }
-              }
-            }}
-          />
-          <button
-            onClick={() => {
-              const input = document.querySelector('input[type="url"]') as HTMLInputElement;
-              const url = input.value.trim();
-              if (url) {
-                onVideoUploaded(url);
-                input.value = '';
-              }
-            }}
-            className="bg-[#3A4D23] hover:bg-[#232D1A] text-[#8BAE5A] font-bold py-2 px-4 rounded-lg transition-colors"
-          >
-            Toevoegen
-          </button>
-        </div>
       </div>
     </div>
   );

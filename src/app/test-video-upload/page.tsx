@@ -1,23 +1,10 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { toast, Toaster } from 'react-hot-toast';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 
 // Import VideoUpload component
 import VideoUpload from '@/components/VideoUpload';
-
-// Create Supabase client for storage
-const getSupabaseClient = () => {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
-  
-  if (!supabaseUrl || !supabaseAnonKey) {
-    console.error('❌ Supabase environment variables not configured');
-    return null;
-  }
-  
-  return createClient(supabaseUrl, supabaseAnonKey);
-};
 
 export default function TestVideoUpload() {
   const [uploadedVideoUrl, setUploadedVideoUrl] = useState<string | null>(null);
@@ -29,37 +16,57 @@ export default function TestVideoUpload() {
     // Debug environment variables
     const fetchDebugInfo = async () => {
       try {
-        const supabase = getSupabaseClient();
+        console.log('🔍 Checking Supabase configuration...');
+        
+        // Check if supabase client is available
         if (!supabase) {
+          console.error('❌ Supabase client not available');
           setDebugInfo({
-            hasSupabaseUrl: !!(process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL),
-            hasSupabaseKey: !!(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY),
-            supabaseUrl: (process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL) ? 'Configured' : 'Missing',
-            supabaseKeyStart: (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY) ? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' : 'Missing',
-            isConfigured: false
+            hasSupabaseUrl: false,
+            hasSupabaseKey: false,
+            supabaseUrl: 'Client not available',
+            supabaseKeyStart: 'Client not available',
+            isConfigured: false,
+            error: 'Supabase client not initialized'
           });
           return;
         }
 
+        console.log('✅ Supabase client available, testing connection...');
+
         // Test connection by trying to list buckets
         const { data: buckets, error } = await supabase.storage.listBuckets();
         
-        setDebugInfo({
-          hasSupabaseUrl: !!(process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL),
-          hasSupabaseKey: !!(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY),
-          supabaseUrl: (process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL) ? 'Configured' : 'Missing',
-          supabaseKeyStart: (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY) ? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' : 'Missing',
-          isConfigured: !error,
-          buckets: buckets?.map(b => b.name) || [],
-          error: error?.message
-        });
+        if (error) {
+          console.error('❌ Supabase connection failed:', error);
+          setDebugInfo({
+            hasSupabaseUrl: true, // Client exists, so URL is configured
+            hasSupabaseKey: true, // Client exists, so key is configured
+            supabaseUrl: 'Configured (client loaded)',
+            supabaseKeyStart: 'Configured (client loaded)',
+            isConfigured: false,
+            buckets: [],
+            error: error.message
+          });
+        } else {
+          console.log('✅ Supabase connection successful');
+          setDebugInfo({
+            hasSupabaseUrl: true,
+            hasSupabaseKey: true,
+            supabaseUrl: 'Configured (client loaded)',
+            supabaseKeyStart: 'Configured (client loaded)',
+            isConfigured: true,
+            buckets: buckets?.map(b => b.name) || [],
+            error: null
+          });
+        }
       } catch (error) {
-        console.error('Failed to fetch debug info:', error);
+        console.error('❌ Failed to fetch debug info:', error);
         setDebugInfo({
-          hasSupabaseUrl: !!(process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL),
-          hasSupabaseKey: !!(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY),
-          supabaseUrl: (process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL) ? 'Configured' : 'Missing',
-          supabaseKeyStart: (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY) ? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' : 'Missing',
+          hasSupabaseUrl: true, // Client exists, so URL is configured
+          hasSupabaseKey: true, // Client exists, so key is configured
+          supabaseUrl: 'Configured (client loaded)',
+          supabaseKeyStart: 'Configured (client loaded)',
           isConfigured: false,
           error: 'Connection failed'
         });
@@ -73,7 +80,6 @@ export default function TestVideoUpload() {
   const fetchSupabaseFiles = async () => {
     setLoadingFiles(true);
     try {
-      const supabase = getSupabaseClient();
       if (!supabase) {
         console.error('Supabase client not available');
         return;
@@ -100,9 +106,19 @@ export default function TestVideoUpload() {
   };
 
   const handleVideoUploaded = (url: string) => {
+    console.log('🎯 ===== VIDEO UPLOADED CALLBACK =====');
+    console.log('📱 Received URL:', url);
+    console.log('📱 Previous uploadedVideoUrl:', uploadedVideoUrl);
+    
     setUploadedVideoUrl(url);
     toast.success('Video succesvol geüpload!');
-    console.log('Video URL:', url);
+    console.log('✅ State updated with new URL');
+    
+    // Refresh the file list after upload
+    setTimeout(() => {
+      console.log('🔄 Refreshing file list...');
+      fetchSupabaseFiles();
+    }, 1000);
   };
 
   return (
@@ -221,7 +237,6 @@ export default function TestVideoUpload() {
                 Totaal: {supabaseFiles.length} bestand(en)
               </div>
               {supabaseFiles.map((file, index) => {
-                const supabase = getSupabaseClient();
                 const publicUrl = supabase?.storage
                   .from('workout-videos')
                   .getPublicUrl(`exercises/${file.name}`).data.publicUrl;
