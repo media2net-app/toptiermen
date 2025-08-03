@@ -1,5 +1,5 @@
 'use client';
-import ClientLayout from '@/components/ClientLayout';
+import ClientLayout from '@/app/components/ClientLayout';
 import { useState, useEffect } from 'react';
 import { PlusIcon, TrophyIcon, FireIcon, UserGroupIcon, CheckCircleIcon, StarIcon, BookOpenIcon, HeartIcon, CurrencyDollarIcon, BoltIcon, ShieldCheckIcon } from '@heroicons/react/24/solid';
 import { toast } from 'react-hot-toast';
