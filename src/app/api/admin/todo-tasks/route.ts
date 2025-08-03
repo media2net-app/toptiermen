@@ -289,21 +289,21 @@ function getHardcodedTasks() {
     },
     {
       id: "gggggggg-gggg-gggg-gggg-gggggggggggg",
-      title: "Product Pagina Ontwikkeling",
-      description: "Comprehensive product pagina met features, pricing, testimonials en call-to-action. SEO geoptimaliseerd, responsive design en conversion tracking. A/B testing setup voor verschillende versies.",
+      title: "Product Pagina & Checkout Systeem",
+      description: "Volledige product pagina met Stripe checkout integratie. Product catalogus, winkelwagen functionaliteit, betalingsverwerking en order management. Responsive design en user experience optimalisatie.",
       category: "frontend",
       priority: "high",
       estimated_hours: 12,
-      actual_hours: 12,
-      status: "completed",
+      actual_hours: 0,
+      status: "pending",
       assigned_to: "Chiel",
-      due_date: "2025-08-05",
-      start_date: "2025-07-30",
-      completion_date: "2025-08-01",
+      due_date: "2025-08-15",
+      start_date: "2025-08-06",
+      completion_date: null,
       dependencies: [],
-      tags: ["product-page", "seo", "conversion", "a-b-testing", "responsive", "analytics"],
-      progress_percentage: 100,
-      created_at: "2025-07-28T00:00:00Z"
+      tags: ["product", "stripe", "checkout", "ecommerce", "frontend"],
+      progress_percentage: 0,
+      created_at: "2025-07-31T00:00:00Z"
     },
     {
       id: "hhhhhhhh-hhhh-hhhh-hhhh-hhhhhhhhhhhh",
@@ -847,6 +847,24 @@ function getHardcodedTasks() {
       tags: ["badges", "ranks", "design", "gamification"],
       progress_percentage: 100,
       created_at: "2025-07-31T00:00:00Z"
+    },
+    {
+      id: "platform-optimization-2025",
+      title: "Platform Optimalisatie & Verbeteringen",
+      description: "Kritieke platform verbeteringen: Performance optimalisatie (bundle size, loading speed), security hardening (authentication, authorization), mobile responsiveness, accessibility (WCAG), error handling, caching strategieën, SEO optimalisatie, en code kwaliteit verbeteringen. Focus op user experience en platform stabiliteit.",
+      category: "fullstack",
+      priority: "critical",
+      estimated_hours: 24,
+      actual_hours: 0,
+      status: "pending",
+      assigned_to: "Chiel",
+      due_date: "2025-08-20",
+      start_date: "2025-08-06",
+      completion_date: null,
+      dependencies: [],
+      tags: ["performance", "security", "mobile", "accessibility", "optimization", "ux", "seo", "caching"],
+      progress_percentage: 0,
+      created_at: "2025-08-03T12:35:00Z"
     }
   ];
 } 

@@ -33,6 +33,19 @@ export async function GET(request: NextRequest) {
         progress_percentage: 0,
         tags: ["monetization", "affiliate", "product-page", "trial", "marketing"]
       },
+      // NEW MILESTONE FOR PLATFORM OPTIMIZATION
+      {
+        id: "platform-optimization-milestone-2025",
+        title: "Platform Optimalisatie & Stabiliteit",
+        description: "Kritieke platform optimalisaties: Performance verbeteringen, security hardening, mobile responsiveness, accessibility compliance, error handling, caching, SEO optimalisatie en code kwaliteit. Focus op user experience en platform stabiliteit voor schaalbaarheid.",
+        target_date: "2025-08-20",
+        status: "planned",
+        priority: "critical",
+        total_tasks: 8,
+        completed_tasks: 0,
+        progress_percentage: 0,
+        tags: ["performance", "security", "mobile", "accessibility", "optimization", "stability", "ux", "seo"]
+      },
       {
         id: "11111111-1111-1111-1111-111111111113",
         title: "Frontend Database Integratie",
