@@ -43,6 +43,7 @@ interface WeekPlanViewProps {
   onRemoveSnack: (mealId: string) => void;
   onStartPlan: () => void;
   onNewPlan: () => void;
+  onOpenRecipeLibrary: (mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack') => void;
 }
 
 const getDayName = (day: string): string => {
@@ -68,7 +69,8 @@ export default function WeekPlanView({
   onAddSnack,
   onRemoveSnack,
   onStartPlan,
-  onNewPlan
+  onNewPlan,
+  onOpenRecipeLibrary
 }: WeekPlanViewProps) {
   const currentDayPlan = weekPlan[selectedDay];
 
@@ -191,6 +193,12 @@ export default function WeekPlanView({
                     className="text-[#8BAE5A] hover:text-[#7A9D4B] text-sm font-medium"
                   >
                     Wijzig maaltijd
+                  </button>
+                  <button
+                    onClick={() => onOpenRecipeLibrary(meal.type)}
+                    className="text-[#FFD700] hover:text-[#FFA500] text-sm font-medium"
+                  >
+                    + Recept toevoegen
                   </button>
                   {meal.type === 'snack' && (
                     <button

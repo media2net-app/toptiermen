@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'react-hot-toast';
 import { 
   CalculatorIcon, 
   HeartIcon, 
@@ -15,6 +16,7 @@ import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { supabase } from "@/lib/supabase";
 import MealEditModal from './MealEditModal';
 import WeekPlanView from './WeekPlanView';
+import RecipeLibrary from '@/components/RecipeLibrary';
 
 interface UserData {
   age: number;
@@ -123,6 +125,8 @@ export default function VoedingsplannenPage() {
   const [showPlanBanner, setShowPlanBanner] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingMeal, setEditingMeal] = useState<Meal | null>(null);
+  const [isRecipeLibraryOpen, setIsRecipeLibraryOpen] = useState(false);
+  const [selectedMealType, setSelectedMealType] = useState<'breakfast' | 'lunch' | 'dinner' | 'snack'>('lunch');
 
   useEffect(() => {
     const fetchUserNutritionData = async () => {
@@ -1063,6 +1067,64 @@ export default function VoedingsplannenPage() {
     setCurrentStep(1);
   };
 
+  const handleOpenRecipeLibrary = (mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack') => {
+    setSelectedMealType(mealType);
+    setIsRecipeLibraryOpen(true);
+  };
+
+  const handleSelectRecipe = (recipe: any) => {
+    // Convert Spoonacular recipe to our Meal format
+    const nutritionInfo = recipe.nutrition?.nutrients || [];
+    const calories = nutritionInfo.find((n: any) => n.name === 'Calories')?.amount || recipe.calories || 0;
+    const protein = nutritionInfo.find((n: any) => n.name === 'Protein')?.amount || recipe.protein || 0;
+    const fat = nutritionInfo.find((n: any) => n.name === 'Fat')?.amount || recipe.fat || 0;
+    const carbs = nutritionInfo.find((n: any) => n.name === 'Carbohydrates')?.amount || recipe.carbs || 0;
+
+    // Convert ingredients to our format
+    const ingredients = recipe.extendedIngredients?.map((ing: any) => ({
+      name: ing.name,
+      amount: ing.amount,
+      unit: ing.unit
+    })) || [];
+
+    const newMeal: Meal = {
+      id: `spoonacular-${recipe.id}`,
+      name: recipe.title,
+      image: recipe.image,
+      ingredients: ingredients,
+      calories: Math.round(calories),
+      protein: Math.round(protein),
+      carbs: Math.round(carbs),
+      fat: Math.round(fat),
+      time: selectedMealType === 'breakfast' ? '08:00' : selectedMealType === 'lunch' ? '12:00' : selectedMealType === 'dinner' ? '18:00' : '15:00',
+      type: selectedMealType as 'breakfast' | 'lunch' | 'dinner' | 'snack'
+    };
+
+    // Add to current day's plan if we have a selected day
+    if (weekPlan && selectedDay) {
+      const updatedWeekPlan = { ...weekPlan };
+      if (!updatedWeekPlan[selectedDay]) {
+        updatedWeekPlan[selectedDay] = { meals: [] };
+      }
+      
+      // Add the new meal
+      updatedWeekPlan[selectedDay].meals.push(newMeal);
+      
+      // Redistribute calories if we have nutrition goals
+      if (nutritionGoals) {
+        updatedWeekPlan[selectedDay].meals = redistributeCalories(
+          updatedWeekPlan[selectedDay].meals,
+          nutritionGoals
+        );
+      }
+      
+      setWeekPlan(updatedWeekPlan);
+      toast.success(`${recipe.title} toegevoegd aan je plan!`);
+    } else {
+      toast.error('Selecteer eerst een dag om het recept toe te voegen');
+    }
+  };
+
   // Calculate accurate macros based on ingredients
   const calculateMacrosFromIngredients = (ingredients: { name: string; amount: number; unit: string }[]) => {
     let totalCalories = 0;
@@ -1388,6 +1450,7 @@ export default function VoedingsplannenPage() {
               onRemoveSnack={handleRemoveSnack}
               onStartPlan={handleStartPlan}
               onNewPlan={handleNewPlan}
+              onOpenRecipeLibrary={handleOpenRecipeLibrary}
             />
           )}
         </AnimatePresence>
@@ -1398,6 +1461,15 @@ export default function VoedingsplannenPage() {
           onClose={() => setIsEditModalOpen(false)}
           meal={editingMeal}
           onSave={handleSaveMeal}
+          nutritionGoals={nutritionGoals}
+        />
+
+        {/* Recipe Library Modal */}
+        <RecipeLibrary
+          isOpen={isRecipeLibraryOpen}
+          onClose={() => setIsRecipeLibraryOpen(false)}
+          onSelectRecipe={handleSelectRecipe}
+          mealType={selectedMealType}
           nutritionGoals={nutritionGoals}
         />
       </div>
