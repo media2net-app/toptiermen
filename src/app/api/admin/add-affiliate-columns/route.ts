@@ -33,7 +33,7 @@ export async function POST() {
     ];
 
     let addedColumns = 0;
-    let errors = [];
+    let errors: string[] = [];
 
     for (const column of columnsToAdd) {
       try {
