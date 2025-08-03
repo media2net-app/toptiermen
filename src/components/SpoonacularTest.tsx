@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
-import { XMarkIcon, ClockIcon, UsersIcon, HeartIcon, ThumbUpIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, ClockIcon, UsersIcon, HeartIcon, StarIcon } from '@heroicons/react/24/outline';
 
 interface Recipe {
   id: number;
@@ -329,7 +329,7 @@ export default function SpoonacularTest() {
                       {recipe.healthScore}/100
                     </span>
                     <span className="flex items-center gap-1">
-                      <ThumbUpIcon className="w-4 h-4" />
+                      <StarIcon className="w-4 h-4" />
                       {recipe.aggregateLikes}
                     </span>
                   </div>
@@ -483,7 +483,7 @@ export default function SpoonacularTest() {
                       {recipe.healthScore}/100
                     </span>
                     <span className="flex items-center gap-1">
-                      <ThumbUpIcon className="w-4 h-4" />
+                      <StarIcon className="w-4 h-4" />
                       {recipe.aggregateLikes}
                     </span>
                   </div>
