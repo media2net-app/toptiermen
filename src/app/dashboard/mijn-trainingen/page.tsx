@@ -1,10 +1,10 @@
 'use client';
-import ClientLayout from '../../components/ClientLayout';
+import ClientLayout from '@/components/ClientLayout';
 import { useState, useEffect } from 'react';
 import { LockClosedIcon, PlayIcon, CalendarIcon, ChartBarIcon, ArrowRightIcon, CheckIcon } from '@heroicons/react/24/solid';
-import { toast } from 'react-toastify';
+import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
-import { useSupabaseAuth } from '../../../contexts/SupabaseAuthContext';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import PreWorkoutModal from '../trainingscentrum/PreWorkoutModal';
 
 interface TrainingSchema {

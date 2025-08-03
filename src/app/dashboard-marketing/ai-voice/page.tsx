@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { MicrophoneIcon, SpeakerWaveIcon, StopIcon, PlayIcon, PauseIcon } from '@heroicons/react/24/outline';
-import { toast } from 'react-toastify';
+import { toast } from 'react-hot-toast';
 
 interface VoiceMessage {
   id: string;

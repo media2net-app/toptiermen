@@ -40,7 +40,7 @@ const navigation = [
   { name: 'Audience', href: '/dashboard-marketing/audience', icon: UserGroupIcon },
   { name: 'Budget', href: '/dashboard-marketing/budget', icon: CurrencyDollarIcon },
   { name: 'Target', href: '/dashboard-marketing/target', icon: FlagIcon },
-  { name: 'Video Ideeën', href: '/dashboard-marketing/video-ideeen', icon: VideoCameraIcon, badge: 'IBIZA' },
+  { name: 'Video Ideeën', href: '/video-ideen-malaga', icon: VideoCameraIcon, badge: 'MALAGA' },
   { name: 'Offerte', href: '/offerte', icon: DocumentTextIcon },
   { name: 'Rapporten', href: '/dashboard-marketing/rapporten', icon: EyeIcon },
   { name: 'Concurentie', href: '/dashboard-marketing/concurentie', icon: BuildingStorefrontIcon },

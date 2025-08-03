@@ -24,8 +24,8 @@ import {
   AcademicCapIcon as AcademicCapIconSolid,
   ArrowPathIcon
 } from '@heroicons/react/24/outline';
-import { useSupabaseAuth } from '../../contexts/SupabaseAuthContext';
-import { AdminCard, AdminStatsCard, AdminButton } from '../../components/admin';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { AdminCard, AdminStatsCard, AdminButton } from '@/components/admin';
 
 interface DashboardStats {
   // Community Health

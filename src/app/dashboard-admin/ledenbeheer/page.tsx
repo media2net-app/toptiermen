@@ -25,7 +25,7 @@ import {
   InformationCircleIcon,
   ArrowPathIcon
 } from '@heroicons/react/24/outline';
-import { toast } from 'react-toastify';
+import { toast } from 'react-hot-toast';
 import { useDebug } from '@/contexts/DebugContext';
 import { AdminCard, AdminStatsCard, AdminTable, AdminButton } from '@/components/admin';
 import { supabase } from '@/lib/supabase';
@@ -530,22 +530,22 @@ export default function Ledenbeheer() {
   };
 
   // Prepare table data for AdminTable
-  const tableData = currentMembers.map(member => ({
-    Lid: member.full_name || 'Onbekend',
-    Email: member.email || 'Geen e-mail',
-    Rang: member.rank || 'Rookie',
-    Status: getStatusText(member.status),
-    Punten: member.points || 0,
-    Missies: member.missions_completed || 0,
-    'Lid sinds': new Date(member.created_at).toLocaleDateString('nl-NL'),
-    'Laatste activiteit': member.last_login ? new Date(member.last_login).toLocaleDateString('nl-NL') : 'Niet beschikbaar'
-  }));
+  const tableData = currentMembers.map(member => [
+    member.full_name || 'Onbekend',
+    member.email || 'Geen e-mail',
+    member.rank || 'Rookie',
+    getStatusText(member.status),
+    member.points || 0,
+    member.missions_completed || 0,
+    new Date(member.created_at).toLocaleDateString('nl-NL'),
+    member.last_login ? new Date(member.last_login).toLocaleDateString('nl-NL') : 'Niet beschikbaar'
+  ]);
 
   const tableHeaders = ['Lid', 'Email', 'Rang', 'Status', 'Punten', 'Missies', 'Lid sinds', 'Laatste activiteit'];
 
   const renderActions = (item: any) => {
-    // Find member by email instead of name, since name can change
-    const member = currentMembers.find(m => m.email === item.Email);
+    // Find member by email (item[1] is the email)
+    const member = currentMembers.find(m => m.email === item[1]);
     if (!member) return null;
 
     return (

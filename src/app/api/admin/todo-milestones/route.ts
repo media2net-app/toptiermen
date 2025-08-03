@@ -133,7 +133,7 @@ export async function GET(request: NextRequest) {
         id: "99999999-9999-9999-9999-999999999990",
         title: "Platform Launch - September 2025",
         description: "Finale testing, optimalisatie en platform launch",
-        target_date: "2025-09-01",
+        target_date: "2025-09-10",
         status: "in_progress",
         priority: "critical",
         total_tasks: 1,

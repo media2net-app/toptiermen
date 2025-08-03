@@ -13,7 +13,7 @@ import {
   HeartIcon,
   CalculatorIcon
 } from '@heroicons/react/24/outline';
-import { toast } from 'react-toastify';
+import { toast } from 'react-hot-toast';
 import PageLayout from '@/components/PageLayout';
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { useOnboarding } from "@/contexts/OnboardingContext";

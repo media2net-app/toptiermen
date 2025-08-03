@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useFinance } from '../FinanceContext';
-import { toast } from 'react-toastify';
+import { toast } from 'react-hot-toast';
 
 // Mockdata van vorige maand
 const defaultAssets = [

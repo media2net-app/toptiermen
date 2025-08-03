@@ -1,7 +1,6 @@
 import './globals.css';
 import { Inter, Figtree } from 'next/font/google';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { Toaster } from 'react-hot-toast';
 import Providers from './components/Providers';
 import GoogleAnalytics from './components/GoogleAnalytics';
 
@@ -41,21 +40,15 @@ export default function RootLayout({
         <Providers>
           {children}
         </Providers>
-        <ToastContainer
+        <Toaster
           position="bottom-right"
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="dark"
-          toastStyle={{
-            backgroundColor: '#232D1A',
-            color: '#8BAE5A',
-            border: '1px solid #3A4D23',
+          toastOptions={{
+            duration: 3000,
+            style: {
+              backgroundColor: '#232D1A',
+              color: '#8BAE5A',
+              border: '1px solid #3A4D23',
+            },
           }}
         />
       </body>

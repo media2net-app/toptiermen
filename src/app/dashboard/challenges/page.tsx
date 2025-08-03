@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
-import { toast } from 'react-toastify';
-import ClientLayout from '../../components/ClientLayout';
+import { toast } from 'react-hot-toast';
+import ClientLayout from '@/components/ClientLayout';
 
 interface Challenge {
   id: string;

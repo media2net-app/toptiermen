@@ -3,8 +3,7 @@ import { useEffect, useState } from 'react';
 import ClientLayout from '../components/ClientLayout';
 import { CheckCircleIcon, TrophyIcon, FireIcon, UserGroupIcon, CalendarDaysIcon, ArrowTrendingUpIcon, DocumentCheckIcon, PlusIcon, BookOpenIcon } from '@heroicons/react/24/solid';
 import { BeakerIcon as DumbbellIcon, LightBulbIcon as BrainIcon } from '@heroicons/react/24/solid';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 
 import OnboardingWidget from '../components/OnboardingWidget';

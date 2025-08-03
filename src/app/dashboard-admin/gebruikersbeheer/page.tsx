@@ -13,7 +13,7 @@ import {
   TrophyIcon,
   ClockIcon
 } from '@heroicons/react/24/outline';
-import { useSupabaseAuth } from '../../../contexts/SupabaseAuthContext';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { AdminCard, AdminStatsCard, AdminTable, AdminButton } from '../../../components/admin';
 
 interface User {

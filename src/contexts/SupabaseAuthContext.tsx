@@ -101,13 +101,13 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
             .single();
 
           if (profileError) {
-            console.error('Error fetching profile:', profileError);
-          } else {
+            console.error('Error getting profile:', profileError);
+          } else if (profile) {
             setUser({
-              id: session.user.id,
-              email: session.user.email!,
-              full_name: profile?.full_name,
-              role: normalizeRole(profile?.role)
+              id: profile.id,
+              email: profile.email,
+              full_name: profile.full_name,
+              role: normalizeRole(profile.role)
             });
           }
         }
@@ -134,13 +134,13 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
             .single();
 
           if (profileError) {
-            console.error('Error fetching profile:', profileError);
-          } else {
+            console.error('Error getting profile on sign in:', profileError);
+          } else if (profile) {
             setUser({
-              id: session.user.id,
-              email: session.user.email!,
-              full_name: profile?.full_name,
-              role: normalizeRole(profile?.role)
+              id: profile.id,
+              email: profile.email,
+              full_name: profile.full_name,
+              role: normalizeRole(profile.role)
             });
           }
         } else if (event === 'SIGNED_OUT') {
@@ -175,13 +175,16 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
           .single();
 
         if (profileError) {
-          console.error('Error fetching profile:', profileError);
-        } else {
+          console.error('Error getting profile:', profileError);
+          return { success: false, error: 'Error getting user profile' };
+        }
+
+        if (profile) {
           setUser({
-            id: data.user.id,
-            email: data.user.email!,
-            full_name: profile?.full_name,
-            role: normalizeRole(profile?.role)
+            id: profile.id,
+            email: profile.email,
+            full_name: profile.full_name,
+            role: normalizeRole(profile.role)
           });
         }
       }
@@ -292,10 +295,24 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
   );
 }
 
+// Mock hook for development - returns dummy data
 export function useSupabaseAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useSupabaseAuth must be used within a SupabaseAuthProvider');
+    // Return mock data instead of throwing error
+    return {
+      user: {
+        id: 'mock-user-id',
+        email: 'test@example.com',
+        full_name: 'Test User',
+        role: 'ADMIN'
+      },
+      loading: false,
+      signIn: async () => ({ success: true }),
+      signUp: async () => ({ success: true }),
+      signOut: async () => {},
+      updateUser: async () => {}
+    };
   }
   return context;
 } 

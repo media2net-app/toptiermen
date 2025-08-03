@@ -23,7 +23,7 @@ import {
   ChevronDownIcon,
   ArrowPathIcon
 } from '@heroicons/react/24/outline';
-import { toast } from 'react-toastify';
+import { toast } from 'react-hot-toast';
 import { supabase } from '@/lib/supabase';
 import { useDebug } from '@/contexts/DebugContext';
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
@@ -855,7 +855,7 @@ export default function AcademyManagement() {
                   onImageUploaded={(url) => setModuleForm({...moduleForm, coverImage: url || ''})}
                   bucketName="module-covers"
                   folder="covers"
-                  maxSize={5}
+                  maxSize={50} // Updated from 5 to 50MB
                 />
               </div>
 

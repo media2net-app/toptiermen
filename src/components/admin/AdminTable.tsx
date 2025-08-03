@@ -61,6 +61,12 @@ export default function AdminTable({
           </thead>
           <tbody className="divide-y divide-[#3A4D23]">
             {data.map((item, rowIndex) => {
+              // Ensure item is an array
+              if (!Array.isArray(item)) {
+                console.warn('AdminTable: item is not an array:', item);
+                return null;
+              }
+
               // Check if this is a completed task by looking at the status column (index 3)
               const isCompleted = item[3] && item[3].props && item[3].props.children && 
                 item[3].props.children[1] && item[3].props.children[1].props && 

@@ -268,7 +268,7 @@ export default function PreLaunchPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Pre-launch Campagne</h1>
-          <p className="text-gray-400 mt-1">Email verzameling voor 1 september launch</p>
+          <p className="text-gray-400 mt-1">Email verzameling voor 10 september launch</p>
         </div>
         <div className="flex items-center gap-4">
           <div className="bg-red-500/20 border border-red-500/30 rounded-lg px-4 py-2">
@@ -291,7 +291,7 @@ export default function PreLaunchPage() {
       <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-xl p-6 border border-white/20">
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold text-white mb-2">🚀 Launch Countdown</h2>
-          <p className="text-gray-300">1 september 2025 - We gaan live!</p>
+          <p className="text-gray-300">10 september 2025 - We gaan live!</p>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -350,7 +350,7 @@ export default function PreLaunchPage() {
             </div>
             <div className="flex items-center gap-2">
               <CheckCircleIcon className="w-5 h-5 text-green-400" />
-              <span className="text-gray-300 text-sm">Geldig tot 1 september</span>
+              <span className="text-gray-300 text-sm">Geldig tot 10 september</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircleIcon className="w-5 h-5 text-green-400" />

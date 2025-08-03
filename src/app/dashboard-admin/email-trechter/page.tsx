@@ -17,7 +17,7 @@ import {
   DocumentTextIcon,
   CalendarIcon
 } from '@heroicons/react/24/outline';
-import { toast } from 'react-toastify';
+import { toast } from 'react-hot-toast';
 import { AdminCard, AdminStatsCard, AdminButton } from '@/components/admin';
 
 interface EmailStep {
@@ -54,22 +54,38 @@ export default function EmailTrechter() {
 
 Welkom bij Toptiermen! 🚀
 
-We zijn verheugd dat je interesse hebt getoond in onze exclusieve community van top performers. Je hebt de eerste stap gezet naar een leven van buitengewone prestaties en persoonlijke groei.
+We zijn verheugd dat je interesse hebt getoond in onze exclusieve broederschap van top performers. Je hebt de eerste stap gezet naar een leven van buitengewone prestaties en persoonlijke transformatie.
 
 **Wat maakt Toptiermen uniek?**
 
-🏆 **Persoonlijke Mastery**: Ontwikkel jezelf tot de beste versie van jezelf
-🤝 **Elite Community**: Word onderdeel van een selecte groep gelijkgestemden
+🏆 **De Broederschap**: Word onderdeel van een exclusieve community van gelijkgestemden die elkaar naar succes duwen
+🎯 **Wekelijkse Video Calls**: Elke week evalueren we samen je voortgang met alle broeders
+💪 **Persoonlijke Transformatie**: Ontwikkel jezelf tot een echte Top Tier Man
 📈 **Bewezen Methoden**: Strategieën die al honderden mensen naar succes hebben geleid
-🎯 **Resultaatgericht**: Meetbare verbeteringen in alle levensgebieden
-⚡ **24/7 Support**: Altijd toegang tot coaching en motivatie
+⚡ **24/7 Brotherhood Support**: Altijd toegang tot je broeders en coaches
 
-**Wat je kunt verwachten:**
-• Persoonlijke begeleiding van ervaren coaches
-• Een community die je motiveert en ondersteunt
-• Bewezen strategieën voor succes in werk, gezondheid en relaties
-• Directe toegang tot alle premium features
-• Exclusieve workshops en masterclasses
+**Wat je de komende 6 maanden kunt verwachten:**
+
+**Maand 1-2: Foundation**
+• Toegang tot alle academy modules en training content
+• Persoonlijke voedingsplannen en trainingsschema's
+• Introductie in de broederschap community
+• Eerste wekelijkse video call met alle broeders
+
+**Maand 3-4: Growth**
+• Diepgaande coaching sessies
+• Community challenges en accountability
+• Wekelijkse evaluaties en voortgang tracking
+• Netwerken met gelijkgestemden
+
+**Maand 5-6: Mastery**
+• Advanced strategieën en technieken
+• Leadership development binnen de broederschap
+• Voorbereiding op je Top Tier Man titel
+• Levensveranderende resultaten
+
+**De echte waarde:**
+Dit is niet alleen content consumeren - dit is een complete levensstijl transformatie. Je wordt onderdeel van een broederschap die elkaar naar succes duwt, wekelijks samen evalueert, en uiteindelijk de prestigieuze titel "Top Tier Man" behaalt.
 
 **Interesse niveau: {{interestLevel}}**
 
@@ -95,46 +111,66 @@ Het Toptiermen Team
       subject: '💎 Ontdek hoe Toptiermen jouw leven kan veranderen',
       content: `Beste {{name}},
 
-Hopelijk heb je onze eerste email kunnen lezen. Vandaag willen we je meer vertellen over de concrete voordelen van Toptiermen.
+Hopelijk heb je onze eerste email kunnen lezen. Vandaag delen we wat het betekent om een echte Top Tier Man te worden en hoe de broederschap je leven gaat veranderen.
 
-**Wat maakt ons uniek:**
+**Het Toptiermen verschil - De echte waarde:**
 
-🎯 **Persoonlijke coaching van ervaren professionals**
-Onze coaches hebben honderden mensen geholpen hun doelen te bereiken. Ze begrijpen de uitdagingen die je tegenkomt en weten hoe je ze kunt overwinnen.
+🔥 **1. De Broederschap**
+Dit is geen gewone community - dit is een broederschap van gelijkgestemden die elkaar naar succes duwen. Elke week evalueren we samen je voortgang in video calls met alle broeders.
 
-🏆 **Een community van gelijkgestemden**
-Je wordt onderdeel van een selecte groep mannen die net als jij streven naar excellentie. Deze community motiveert, inspireert en ondersteunt je op je reis.
+💪 **2. Persoonlijke Transformatie**
+Je wordt niet alleen beter, je wordt een Top Tier Man. Dit is een complete identiteit transformatie die je leven fundamenteel verandert.
 
-📊 **Bewezen resultaten**
-Onze methoden zijn getest en bewezen effectief. Gemiddeld zien onze leden binnen 3 maanden:
-• 40% meer energie en focus
-• 60% betere prestaties op werk
-• 80% verbetering in relaties
-• 100% meer zelfvertrouwen
+🎯 **3. Accountability & Support**
+De broederschap houdt je accountable. Als je achterblijft, zijn er broeders die je weer op het juiste pad krijgen. Als je excellenteert, wordt je gevierd.
 
-⚡ **24/7 toegang tot support**
-Je staat er niet alleen voor. Ons team is altijd beschikbaar om je vragen te beantwoorden en je te motiveren.
+🤝 **4. Netwerk van Winners**
+Je netwerk wordt je nettowaarde. De broeders in Toptiermen zijn allemaal mensen die net als jij naar het volgende niveau willen.
 
-**Wat je krijgt:**
+📊 **5. Meetbare Resultaten**
+Elke week tracken we je voortgang. Niet alleen in fitness, maar in alle levensgebieden: carrière, relaties, mindset, en persoonlijke groei.
 
-✅ **Persoonlijk actieplan** - Op maat gemaakt voor jouw doelen
-✅ **Dagelijkse coaching** - Motivatie en begeleiding wanneer je het nodig hebt
-✅ **Exclusieve workshops** - Maandelijkse live sessies met experts
-✅ **Community toegang** - Connect met gelijkgestemden
-✅ **Premium content** - Toegang tot alle trainingsmateriaal
-✅ **Resultaat tracking** - Meet je voortgang en vier je successen
+**Wat onze broeders zeggen:**
+*"De wekelijkse video calls met alle broeders hebben mijn leven veranderd. Ik voel me eindelijk begrepen en gesteund."* - Mark, CEO
+*"Dit is geen gewone community - dit is een broederschap die elkaar naar succes duwt. De accountability is goud waard."* - Thomas, Entrepreneur
+*"De titel Top Tier Man behalen was het moment dat ik besefte dat ik echt veranderd was. Mijn leven is fundamenteel anders."* - Alex, Business Owner
+
+**Wat je de komende 6 maanden kunt verwachten:**
+
+**Maand 1-2: Foundation**
+• Toegang tot alle academy modules en training content
+• Persoonlijke voedingsplannen en trainingsschema's
+• Introductie in de broederschap community
+• Eerste wekelijkse video call met alle broeders
+
+**Maand 3-4: Growth**
+• Diepgaande coaching sessies
+• Community challenges en accountability
+• Wekelijkse evaluaties en voortgang tracking
+• Netwerken met gelijkgestemden
+
+**Maand 5-6: Mastery**
+• Advanced strategieën en technieken
+• Leadership development binnen de broederschap
+• Voorbereiding op je Top Tier Man titel
+• Levensveranderende resultaten
 
 **Interesse niveau: {{interestLevel}}**
 
-Gezien je interesse niveau ({{interestLevel}}), denken we dat je perfect past in onze community.
+Als {{interestLevel}} lid krijg je toegang tot:
+• Exclusieve masterclasses
+• Persoonlijke coaching sessies
+• Premium broederschap features
+• Vroegtijdige toegang tot nieuwe content
+• Prioriteit bij wekelijkse video calls
 
-Binnenkort ontvang je meer informatie over hoe je kunt beginnen.
+Binnenkort ontvang je je persoonlijke inschrijflink voor de lancering op 10 september.
 
 Met vriendelijke groet,
 Het Toptiermen Team
 
 ---
-*"De beste investering die je kunt doen, is in jezelf."*`,
+*"Alleen ga je sneller, samen kom je verder. In de broederschap kom je het verst."*`,
       delayDays: 3,
       status: 'active',
       sentCount: 0,
@@ -145,45 +181,70 @@ Het Toptiermen Team
       id: '3',
       stepNumber: 3,
       name: 'Call-to-Action',
-      subject: '⏰ Beperkte tijd: Schrijf je nu in voor 1 september',
+              subject: '⏰ Beperkte tijd: Schrijf je nu in voor 10 september',
       content: `Beste {{name}},
 
-Dit is je laatste kans om je aan te melden voor Toptiermen!
+**⏰ WAARSCHUWING: Dit is je laatste kans om een Top Tier Man te worden!**
 
-**Waarom nu actie ondernemen?**
+De lancering van Toptiermen op 10 september nadert snel, en we hebben nog slechts **24 uur** om je inschrijving te verwerken.
 
-🚨 **Beperkte beschikbaarheid**: We accepteren slechts 50 nieuwe leden per maand
-💰 **Speciale aanbieding**: 50% korting op je eerste maand (alleen geldig tot 1 september)
-🎯 **Directe start**: Begin vandaag nog met je persoonlijke groei
-🏆 **Exclusieve toegang**: Word onderdeel van onze elite community
+**Waarom een 6-maand of 12-maand commitment?**
 
-**Wat je mist als je niet nu actie onderneemt:**
+🎯 **De echte transformatie duurt tijd**
+Een Top Tier Man word je niet in een maand. Het duurt 6 maanden om je identiteit fundamenteel te veranderen. De broederschap en wekelijkse video calls zorgen ervoor dat je consistent blijft groeien.
 
-❌ Toegang tot persoonlijke coaching
-❌ Deelname aan exclusieve workshops
-❌ Community van gelijkgestemden
-❌ Bewezen strategieën voor succes
-❌ 24/7 support en motivatie
+🤝 **De broederschap heeft tijd nodig**
+Echte connecties en accountability bouw je op over tijd. Na 6 maanden ken je alle broeders, vertrouw je elkaar, en duwen jullie elkaar naar het volgende niveau.
 
-**Wat je krijgt als je nu besluit:**
+📈 **Meetbare resultaten in alle levensgebieden**
+• Maand 1-2: Foundation en introductie in de broederschap
+• Maand 3-4: Growth en diepgaande coaching
+• Maand 5-6: Mastery en voorbereiding op je Top Tier Man titel
 
-✅ **Directe toegang** tot alle premium features
-✅ **Persoonlijk actieplan** binnen 24 uur
-✅ **Eerste coaching sessie** binnen 48 uur
-✅ **Community toegang** direct na aanmelding
-✅ **50% korting** op je eerste maand
+**Waarom NU actie ondernemen?**
+
+🚨 **Beperkte beschikbaarheid**: Slechts 50 plekken beschikbaar
+💰 **Early Bird voordelen**: 50% korting op 6-maand of 12-maand lidmaatschap
+🎁 **Exclusieve bonussen**: 
+   - Persoonlijke coaching sessie (waarde €500)
+   - Premium broederschap toegang
+   - Exclusieve masterclass toegang
+   - 30-dagen geld-terug garantie
+   - Wekelijkse video calls met alle broeders
+
+⚡ **Directe toegang**: Start direct met alle features
+🎯 **Persoonlijke aandacht**: Garantie van 1-op-1 begeleiding
 
 **Interesse niveau: {{interestLevel}}**
 
-Gezien je interesse niveau ({{interestLevel}}), weten we dat je serieus bent over persoonlijke groei. Laat deze kans niet voorbij gaan!
+Als {{interestLevel}} lid krijg je:
+• Prioriteit bij inschrijving
+• Extra coaching sessies
+• Vroegtijdige toegang tot nieuwe features
+• Directe toegang tot de broederschap
 
-**Klik hier om je nu aan te melden:**
-[INSCHRIJVEN VOOR TOPTIERMEN]
+**🎯 ACTIE NU:**
+
+[INSCHRIJF HIER VOOR 10 SEPTEMBER - 6 MAAND OF 12 MAAND]
+
+**Wat gebeurt er als je wacht?**
+• Je mist de early bird korting
+• Je komt op de wachtlijst
+• Je betaalt de volledige prijs
+• Je mist exclusieve bonussen
+• Je mist de eerste wekelijkse video calls
+
+**De echte waarde van een 6-maand commitment:**
+Dit is niet alleen content consumeren - dit is een complete levensstijl transformatie. Je wordt onderdeel van een broederschap die elkaar naar succes duwt, wekelijks samen evalueert, en uiteindelijk de prestigieuze titel "Top Tier Man" behaalt.
+
+**Deze kans komt niet meer terug.**
+
+Maak vandaag nog de beslissing die je leven kan veranderen. Word onderdeel van de broederschap die je naar succes duwt.
 
 **Of bel ons direct:**
 📞 +31 6 12345678
 
-**Deadline: 1 september 2025**
+        **Deadline: 10 september 2025**
 
 Na deze datum sluiten we de inschrijvingen voor de komende maand.
 

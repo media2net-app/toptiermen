@@ -3,7 +3,7 @@ import ClientLayout from '@/app/components/ClientLayout';
 import { useState, useEffect, useRef } from 'react';
 import { CameraIcon, TrashIcon, PlusIcon, UserGroupIcon, TrophyIcon, FireIcon, BookOpenIcon, ArrowDownTrayIcon, ShieldCheckIcon, BellIcon, PencilIcon, CheckIcon, XMarkIcon, ExclamationTriangleIcon } from '@heroicons/react/24/solid';
 import CropModal from '../../../components/CropModal';
-import { toast } from 'react-toastify';
+import { toast } from 'react-hot-toast';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { supabase } from '@/lib/supabase';
 import { convertHeicToJpeg, isHeicFile } from '@/lib/heic-converter';

@@ -1,5 +1,5 @@
 "use client";
-import ClientLayout from '../../components/ClientLayout';
+import ClientLayout from '@/components/ClientLayout';
 import PageLayout from '../../../components/PageLayout';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';

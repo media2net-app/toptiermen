@@ -16,7 +16,7 @@ export default function BlobImageUpload({
   currentImageUrl,
   onImageUploaded,
   folder = 'images',
-  maxSize = 5,
+  maxSize = 50, // Updated from 5 to 50MB
   className = ''
 }: BlobImageUploadProps) {
   const [uploading, setUploading] = useState(false);

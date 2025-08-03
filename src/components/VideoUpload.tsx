@@ -1,8 +1,8 @@
-"use client";
-import { useState, useRef } from 'react';
-import { CloudArrowUpIcon, XMarkIcon, PlayIcon, ExclamationTriangleIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
-import { toast } from 'react-toastify';
-import { supabase } from '@/lib/supabase';
+'use client';
+
+import { useState, useRef, useEffect } from 'react';
+import { CloudArrowUpIcon, CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { toast } from 'react-hot-toast';
 
 interface VideoUploadProps {
   currentVideoUrl?: string;
@@ -15,15 +15,40 @@ export default function VideoUpload({
   onVideoUploaded,
   className = ""
 }: VideoUploadProps) {
-  
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadedVideoUrl, setUploadedVideoUrl] = useState<string | null>(null);
+  const [isBlobConfigured, setIsBlobConfigured] = useState<boolean | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    // Check if Vercel Blob is configured via API
+    const checkBlobConfig = async () => {
+      try {
+        const response = await fetch('/api/blob-config');
+        const data = await response.json();
+        
+        console.log('🔍 Blob config check via API:', data);
+        
+        setIsBlobConfigured(data.isConfigured);
+      } catch (error) {
+        console.error('❌ Failed to check blob config:', error);
+        setIsBlobConfigured(false);
+      }
+    };
+
+    checkBlobConfig();
+  }, []);
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+
+    // Check if Blob is configured
+    if (!isBlobConfigured) {
+      toast.error('Vercel Blob is niet geconfigureerd. Voeg BLOB_READ_WRITE_TOKEN toe aan je environment variables.');
+      return;
+    }
 
     // Validate file type
     const allowedTypes = ['video/mp4', 'video/mov', 'video/avi', 'video/webm', 'video/mkv', 'video/quicktime'];
@@ -46,52 +71,69 @@ export default function VideoUpload({
     setIsUploading(true);
     setUploadProgress(0);
 
-    // Simulate progress for better UX
-    const progressInterval = setInterval(() => {
-      setUploadProgress(prev => {
-        if (prev >= 90) return prev;
-        return prev + Math.random() * 10;
-      });
-    }, 200);
-
     try {
-      // Generate unique filename
-      const timestamp = Date.now();
-      const fileExtension = file.name.split('.').pop();
-      const fileName = `video_${timestamp}.${fileExtension}`;
-      const filePath = `exercises/${fileName}`;
+      console.log('🔄 Starting video upload...');
 
-      // Upload to Supabase Storage
-      const { data, error } = await supabase.storage
-        .from('workout-videos')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false
+      // Start with 10% progress immediately
+      setUploadProgress(10);
+
+      // Simulate progress for better UX
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => {
+          if (prev >= 85) return prev; // Stop at 85% until upload completes
+          return prev + Math.random() * 3;
         });
+      }, 150);
 
-      if (error) {
-        console.error('Upload error:', error);
-        throw new Error(error.message);
+      // Create FormData for file upload
+      const formData = new FormData();
+      formData.append('file', file);
+
+      // Upload using our server-side API with timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 360000); // 6 minutes timeout
+
+      const response = await fetch('/api/upload-video', {
+        method: 'POST',
+        body: formData,
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      // Clear progress interval
+      clearInterval(progressInterval);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Upload failed');
       }
 
-      // Get public URL
-      const { data: urlData } = supabase.storage
-        .from('workout-videos')
-        .getPublicUrl(filePath);
+      const data = await response.json();
 
-      const videoUrl = urlData.publicUrl;
-      setUploadedVideoUrl(videoUrl);
-      onVideoUploaded(videoUrl);
-
-      toast.success('Video succesvol geüpload!');
+      // Set to 100% when upload completes
       setUploadProgress(100);
 
+      console.log('✅ Video uploaded successfully:', data.url);
+
+      // Small delay to show 100% completion
+      setTimeout(() => {
+        setUploadedVideoUrl(data.url);
+        onVideoUploaded(data.url);
+        toast.success('Video succesvol geüpload!');
+      }, 500);
+
     } catch (error: any) {
-      console.error('Video upload failed:', error);
-      toast.error(`Upload mislukt: ${error.message}`);
+      console.error('❌ Video upload failed:', error);
+      
+      if (error.name === 'AbortError') {
+        toast.error('Upload geannuleerd: Timeout na 6 minuten');
+      } else {
+        toast.error(`Upload mislukt: ${error.message || 'Onbekende fout'}`);
+      }
+      
       setUploadProgress(0);
     } finally {
-      clearInterval(progressInterval);
       setIsUploading(false);
       // Reset file input
       if (fileInputRef.current) {
@@ -111,6 +153,48 @@ export default function VideoUpload({
   const handleDragOver = (event: React.DragEvent) => {
     event.preventDefault();
   };
+
+  // Show configuration error if Blob is not configured
+  if (isBlobConfigured === false) {
+    return (
+      <div className={`space-y-4 ${className}`}>
+        <div className="bg-red-500/10 border border-red-500 rounded-lg p-6">
+          <div className="flex items-center space-x-3">
+            <ExclamationTriangleIcon className="w-6 h-6 text-red-500" />
+            <div>
+              <h3 className="text-lg font-semibold text-red-500">
+                Vercel Blob Niet Geconfigureerd
+              </h3>
+              <p className="text-red-400 mt-1">
+                Video upload is niet beschikbaar. Voeg de <code className="bg-red-500/20 px-2 py-1 rounded text-red-300">BLOB_READ_WRITE_TOKEN</code> toe aan je environment variables.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading state while checking configuration
+  if (isBlobConfigured === null) {
+    return (
+      <div className={`space-y-4 ${className}`}>
+        <div className="bg-[#232D1A] border border-[#3A4D23] rounded-lg p-6">
+          <div className="flex items-center space-x-3">
+            <div className="w-6 h-6 border-2 border-[#3A4D23] border-t-[#8BAE5A] rounded-full animate-spin"></div>
+            <div>
+              <h3 className="text-lg font-semibold text-[#8BAE5A]">
+                Video Upload Configuratie Controleren...
+              </h3>
+              <p className="text-[#B6C948] mt-1">
+                Bezig met het controleren van Vercel Blob configuratie.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`space-y-4 ${className}`} onClick={(e) => e.stopPropagation()}>
@@ -132,7 +216,7 @@ export default function VideoUpload({
                   style={{ width: `${uploadProgress}%` }}
                 ></div>
               </div>
-              <p className="text-[#B6C948] text-sm">{uploadProgress}% voltooid</p>
+              <p className="text-[#B6C948] text-sm">{uploadProgress.toFixed(2)}% voltooid</p>
             </div>
           </div>
         ) : uploadedVideoUrl ? (
@@ -155,6 +239,9 @@ export default function VideoUpload({
                 </p>
                 <p className="text-[#B6C948] text-xs">
                   📏 Maximum grootte: 500MB
+                </p>
+                <p className="text-[#B6C948] text-xs">
+                  ⚡ Vercel Blob - Snelle upload met CDN
                 </p>
               </div>
             </div>
@@ -180,22 +267,28 @@ export default function VideoUpload({
           type="url"
           placeholder="https://www.youtube.com/watch?v=..."
           defaultValue={currentVideoUrl || ''}
-          onChange={(e) => onVideoUploaded(e.target.value)}
+          onChange={(e) => {
+            if (e.target.value.trim()) {
+              onVideoUploaded(e.target.value);
+            }
+          }}
           className="w-full px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
         />
       </div>
 
-      {/* Uploaded Video Preview */}
-      {uploadedVideoUrl && (
-        <div className="bg-[#232D1A] p-4 rounded-lg border border-[#3A4D23]">
-          <h4 className="text-[#8BAE5A] font-semibold mb-2">Geüploade Video:</h4>
-          <video 
-            controls 
-            className="w-full rounded-lg"
+      {/* Uploaded Video Preview - Only show if we have a URL and it's not empty */}
+      {uploadedVideoUrl && uploadedVideoUrl.trim() && (
+        <div className="space-y-2">
+          <h4 className="text-[#8BAE5A] font-semibold">Geüploade Video:</h4>
+          <video
             src={uploadedVideoUrl}
-          >
-            Je browser ondersteunt geen video afspelen.
-          </video>
+            controls
+            className="w-full rounded-lg"
+            style={{ maxHeight: '300px' }}
+          />
+          <p className="text-[#B6C948] text-xs break-all">
+            URL: {uploadedVideoUrl}
+          </p>
         </div>
       )}
     </div>

@@ -62,7 +62,7 @@ export default function PlanningStatusModal({ isOpen, onClose }: PlanningStatusM
         
         // Calculate planning status
         const now = new Date();
-        const deadline = new Date('2025-09-01');
+        const deadline = new Date('2025-09-10');
         const daysUntilDeadline = Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
         
         const completedTasks = stats.completed_tasks;
@@ -141,7 +141,7 @@ export default function PlanningStatusModal({ isOpen, onClose }: PlanningStatusM
             {getStatusIcon()}
             <div>
               <h2 className="text-2xl font-bold text-white">Planning Status</h2>
-              <p className="text-gray-400">Perfect platform ontwikkeling tot 1 September 2025</p>
+              <p className="text-gray-400">Perfect platform ontwikkeling tot 10 September 2025</p>
             </div>
           </div>
           <button
@@ -229,7 +229,7 @@ export default function PlanningStatusModal({ isOpen, onClose }: PlanningStatusM
                 <div>
                   <p className="text-gray-400">Projected voltooiing:</p>
                   <p className={`font-semibold ${
-                    new Date(status.projectedCompletionDate) > new Date('2025-09-01') 
+                    new Date(status.projectedCompletionDate) > new Date('2025-09-10') 
                       ? 'text-red-400' : 'text-green-400'
                   }`}>
                     {new Date(status.projectedCompletionDate).toLocaleDateString('nl-NL')}
@@ -246,7 +246,7 @@ export default function PlanningStatusModal({ isOpen, onClose }: PlanningStatusM
                   <span className="text-red-300 font-semibold">Kritieke Taken</span>
                 </div>
                 <p className="text-red-200 text-sm">
-                  Er zijn nog {status.criticalTasksRemaining} kritieke taken open die voor 1 September afgerond moeten zijn.
+                  Er zijn nog {status.criticalTasksRemaining} kritieke taken open die voor 10 September afgerond moeten zijn.
                 </p>
               </div>
             )}

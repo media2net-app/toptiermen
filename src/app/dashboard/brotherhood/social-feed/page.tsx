@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { supabase } from '@/lib/supabase';
-import { toast } from 'react-toastify';
+import { toast } from 'react-hot-toast';
 import { 
   PhotoIcon, 
   MapPinIcon, 

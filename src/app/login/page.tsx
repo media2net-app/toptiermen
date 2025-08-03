@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { LockClosedIcon, EnvelopeIcon } from "@heroicons/react/24/solid";
-import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
+import { useSupabaseAuth } from "../../contexts/SupabaseAuthContext";
 
 export default function Login() {
   const [mounted, setMounted] = useState(false);

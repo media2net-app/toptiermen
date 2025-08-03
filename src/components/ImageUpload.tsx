@@ -19,7 +19,7 @@ export default function ImageUpload({
   onImageUploaded,
   bucketName = 'module-covers',
   folder = 'covers',
-  maxSize = 5,
+  maxSize = 50, // Updated from 5 to 50MB
   className = ''
 }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);

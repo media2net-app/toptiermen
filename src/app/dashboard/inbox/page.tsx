@@ -1,5 +1,5 @@
 'use client';
-import ClientLayout from '../../components/ClientLayout';
+import ClientLayout from '@/components/ClientLayout';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';

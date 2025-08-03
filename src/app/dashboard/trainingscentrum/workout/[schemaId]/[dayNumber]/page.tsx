@@ -15,7 +15,7 @@ import {
 } from '@heroicons/react/24/outline';
 import ClientLayout from '../../../../../components/ClientLayout';
 import { useSupabaseAuth } from '../../../../../../contexts/SupabaseAuthContext';
-import { toast } from 'react-toastify';
+import { toast } from 'react-hot-toast';
 
 interface Exercise {
   id: string;

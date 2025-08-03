@@ -21,7 +21,7 @@ import {
   ShieldCheckIcon,
   TrophyIcon
 } from '@heroicons/react/24/outline';
-import { toast } from 'react-toastify';
+import { toast } from 'react-hot-toast';
 import { AdminCard, AdminStatsCard, AdminTable, AdminButton } from '@/components/admin';
 import { supabase } from '@/lib/supabase';
 
@@ -70,6 +70,65 @@ export default function AffiliateBeheer() {
     affiliate_code: ''
   });
   const [saving, setSaving] = useState(false);
+  const [isLive, setIsLive] = useState(false);
+
+  // Check if affiliate system is live
+  useEffect(() => {
+    checkAffiliateSystemStatus();
+  }, []);
+
+  const checkAffiliateSystemStatus = async () => {
+    try {
+      // Check if affiliates table exists and has data
+      const { data: affiliatesData, error: affiliatesError } = await supabase
+        .from('affiliates')
+        .select('id')
+        .limit(1);
+
+      if (!affiliatesError && affiliatesData) {
+        setIsLive(true);
+        console.log('✅ Affiliate system is LIVE - using dedicated tables');
+      } else {
+        setIsLive(false);
+        console.log('⚠️ Affiliate system using profiles table fallback');
+      }
+    } catch (error) {
+      console.error('Error checking affiliate system status:', error);
+      setIsLive(false);
+    }
+  };
+
+  const initializeAffiliateTables = async () => {
+    try {
+      console.log('🚀 Initializing affiliate database system...');
+      
+      const response = await fetch('/api/admin/setup-affiliate-database', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        console.log('✅ Affiliate database system initialized successfully');
+        toast.success('Affiliate database systeem succesvol geïnitialiseerd!');
+        setIsLive(true);
+        fetchAffiliateData();
+        return true;
+      } else {
+        console.error('Error initializing affiliate database:', result.error);
+        toast.error(`Fout bij het initialiseren: ${result.error}`);
+        return false;
+      }
+
+    } catch (error) {
+      console.error('Error initializing affiliate database:', error);
+      toast.error('Fout bij het initialiseren van affiliate database');
+      return false;
+    }
+  };
 
   // Fetch real affiliate data from database
   useEffect(() => {
@@ -80,6 +139,119 @@ export default function AffiliateBeheer() {
     setLoading(true);
     try {
       console.log('🔄 Fetching affiliate data from database...');
+
+      // Try to setup database first if not already done
+      if (!isLive) {
+        console.log('🔄 Checking affiliate database...');
+        const setupResponse = await fetch('/api/admin/setup-affiliate-database', {
+          method: 'POST'
+        });
+        
+        if (setupResponse.ok) {
+          const result = await setupResponse.json();
+          if (result.success) {
+            console.log('✅ Affiliate database setup completed');
+            setIsLive(true);
+          } else {
+            console.log('⚠️ Database setup failed:', result.error);
+            toast.error('Database setup failed. Please run the SQL script manually.');
+          }
+        } else {
+          console.log('⚠️ Database setup failed, using profiles fallback');
+        }
+      }
+
+      // Fetch from dedicated affiliate tables using the dashboard view
+      const { data: affiliatesData, error: affiliatesError } = await supabase
+        .from('affiliate_dashboard')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (!affiliatesError && affiliatesData) {
+        console.log('✅ Using dedicated affiliate tables');
+        setIsLive(true);
+        
+        const formattedAffiliates: Affiliate[] = affiliatesData.map((affiliate: any) => ({
+          id: affiliate.id,
+          user_id: affiliate.user_id,
+          user_name: affiliate.user_name || 'Onbekend',
+          user_email: affiliate.user_email || 'Geen e-mail',
+          affiliate_code: affiliate.affiliate_code,
+          total_referrals: affiliate.total_referrals || 0,
+          active_referrals: affiliate.active_referrals || 0,
+          total_earned: affiliate.total_earned || 0,
+          monthly_earnings: affiliate.monthly_earnings || 0,
+          status: affiliate.status || 'active',
+          created_at: affiliate.created_at,
+          last_referral: affiliate.last_referral_date
+        }));
+
+        setAffiliates(formattedAffiliates);
+
+        // Fetch referrals for this affiliate
+        const { data: referralsData, error: referralsError } = await supabase
+          .from('affiliate_referrals')
+          .select(`
+            *,
+            affiliates!inner(
+              id,
+              affiliate_code,
+              user_id,
+              profiles!inner(
+                full_name,
+                email
+              )
+            ),
+            referred_user:profiles!affiliate_referrals_referred_user_id_fkey(
+              full_name,
+              email
+            )
+          `)
+          .order('referral_date', { ascending: false });
+
+        if (!referralsError && referralsData) {
+          const formattedReferrals: Referral[] = referralsData.map((referral: any) => ({
+            id: referral.id,
+            affiliate_id: referral.affiliate_id,
+            affiliate_name: referral.affiliates.profiles.full_name,
+            affiliate_email: referral.affiliates.profiles.email,
+            affiliate_code: referral.affiliates.affiliate_code,
+            referred_user_id: referral.referred_user_id,
+            referred_user_name: referral.referred_user.full_name,
+            referred_user_email: referral.referred_user.email,
+            status: referral.status,
+            commission_earned: referral.commission_earned,
+            monthly_commission: referral.monthly_commission,
+            referral_date: referral.referral_date,
+            activation_date: referral.activation_date,
+            last_payment: referral.last_payment_date,
+            notes: referral.notes,
+            created_at: referral.created_at
+          }));
+          setReferrals(formattedReferrals);
+        }
+
+        return;
+      }
+
+      // Fallback to profiles table if no dedicated tables
+      console.log('⚠️ No dedicated affiliate tables found, using profiles fallback');
+      setIsLive(false);
+      await fetchAffiliateDataFromProfiles();
+
+    } catch (error) {
+      console.error('Error fetching affiliate data:', error);
+      toast.error('Failed to load affiliate data');
+      // Fallback to profiles table
+      await fetchAffiliateDataFromProfiles();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchAffiliateDataFromProfiles = async () => {
+    try {
+      console.log('🔄 Fetching affiliate data from profiles table...');
 
       // Fetch profiles with affiliate data
       const { data: profiles, error: profilesError } = await supabase
@@ -150,13 +322,11 @@ export default function AffiliateBeheer() {
 
       setAffiliates(realAffiliates);
       setReferrals(realReferrals);
-      console.log('✅ Affiliate data loaded:', realAffiliates.length, 'affiliates,', realReferrals.length, 'referrals');
+      console.log('✅ Profile-based affiliate data loaded:', realAffiliates.length, 'affiliates,', realReferrals.length, 'referrals');
 
     } catch (error) {
-      console.error('Error fetching affiliate data:', error);
+      console.error('Error fetching profile affiliate data:', error);
       toast.error('Fout bij het laden van affiliate data');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -209,15 +379,33 @@ export default function AffiliateBeheer() {
         return;
       }
 
-      // Update affiliate in database
-      const { error: updateError } = await supabase
-        .from('profiles')
+      // Update affiliate in database - try affiliates table first, fallback to profiles
+      let updateError = null;
+      
+      // Try to update in affiliates table
+      const { error: affiliatesUpdateError } = await supabase
+        .from('affiliates')
         .update({
           affiliate_code: editFormData.affiliate_code.toUpperCase(),
-          affiliate_status: editFormData.status,
+          status: editFormData.status,
           updated_at: new Date().toISOString()
         })
-        .eq('id', selectedAffiliate.user_id);
+        .eq('user_id', selectedAffiliate.user_id);
+
+      if (affiliatesUpdateError) {
+        console.log('⚠️ Affiliates table update failed, trying profiles table...');
+        // Fallback to profiles table
+        const { error: profilesUpdateError } = await supabase
+          .from('profiles')
+          .update({
+            affiliate_code: editFormData.affiliate_code.toUpperCase(),
+            affiliate_status: editFormData.status,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', selectedAffiliate.user_id);
+        
+        updateError = profilesUpdateError;
+      }
 
       if (updateError) {
         console.error('Error updating affiliate in database:', updateError);
@@ -299,8 +487,22 @@ export default function AffiliateBeheer() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-[#8BAE5A]">Affiliate Beheer</h1>
-          <p className="text-[#B6C948] mt-2">Beheer affiliate programma en commissies</p>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold text-[#8BAE5A]">Affiliate Beheer</h1>
+            <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+              isLive 
+                ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
+                : 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+            }`}>
+              {isLive ? 'LIVE' : 'DUMMY'}
+            </span>
+          </div>
+          <p className="text-[#B6C948] mt-2">
+            {isLive 
+              ? 'Beheer affiliate programma met volledige database integratie' 
+              : 'Beheer affiliate programma (profiles table fallback)'
+            }
+          </p>
         </div>
         <div className="flex items-center gap-4">
           <span className="text-[#8BAE5A] font-semibold">
@@ -312,11 +514,47 @@ export default function AffiliateBeheer() {
           <AdminButton 
             variant="secondary" 
             icon={<ArrowPathIcon className="w-5 h-5" />}
-            onClick={() => window.location.reload()}
+            onClick={() => {
+              fetchAffiliateData();
+              checkAffiliateSystemStatus();
+            }}
             loading={loading}
           >
             Verversen
           </AdminButton>
+          {!isLive && (
+            <AdminButton 
+              variant="secondary" 
+              icon={<TrophyIcon className="w-5 h-5" />}
+              onClick={initializeAffiliateTables}
+            >
+              Initialiseer Database
+            </AdminButton>
+          )}
+          {isLive && (
+            <AdminButton 
+              variant="secondary" 
+              icon={<PlusIcon className="w-5 h-5" />}
+              onClick={async () => {
+                try {
+                  const response = await fetch('/api/admin/create-sample-affiliates', {
+                    method: 'POST'
+                  });
+                  if (response.ok) {
+                    const result = await response.json();
+                    toast.success(`Sample data gemaakt: ${result.data.affiliates} affiliates, ${result.data.referrals} referrals`);
+                    fetchAffiliateData();
+                  } else {
+                    toast.error('Fout bij maken van sample data');
+                  }
+                } catch (error) {
+                  toast.error('Fout bij maken van sample data');
+                }
+              }}
+            >
+              Sample Data
+            </AdminButton>
+          )}
           <AdminButton 
             variant="primary" 
             icon={<UserPlusIcon className="w-5 h-5" />}
@@ -398,8 +636,8 @@ export default function AffiliateBeheer() {
       <AdminCard title="Affiliates Overzicht" icon={<UserGroupIcon className="w-6 h-6" />}>
         <AdminTable
           headers={['Affiliate', 'Affiliate Code', 'Referrals', 'Verdiensten', 'Status']}
-          data={filteredAffiliates.map(affiliate => ({
-            affiliate: (
+          data={filteredAffiliates.map(affiliate => [
+            (
               <div className="flex items-center">
                 <div className="w-10 h-10 bg-[#8BAE5A] rounded-full flex items-center justify-center mr-3">
                   <span className="text-white font-semibold">
@@ -412,32 +650,32 @@ export default function AffiliateBeheer() {
                 </div>
               </div>
             ),
-            affiliate_code: (
+            (
               <span className="text-sm text-white font-mono">{affiliate.affiliate_code}</span>
             ),
-            referrals: (
+            (
               <div>
                 <div className="text-sm text-white">{affiliate.total_referrals}</div>
                 <div className="text-xs text-[#8BAE5A]">{affiliate.active_referrals} actief</div>
               </div>
             ),
-            verdiensten: (
+            (
               <div>
                 <div className="text-sm font-medium text-white">€{affiliate.total_earned}</div>
                 <div className="text-xs text-[#8BAE5A]">€{affiliate.monthly_earnings}/maand</div>
               </div>
             ),
-            status: (
+            (
               <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(affiliate.status)}`}>
                 {getStatusText(affiliate.status)}
               </span>
             )
-          }))}
+          ])}
           actions={(item) => (
             <div className="flex space-x-2">
               <button
                 onClick={() => {
-                  const affiliate = filteredAffiliates.find(a => a.user_name === item.affiliate.props.children[1].props.children[0].props.children);
+                  const affiliate = filteredAffiliates.find(a => a.user_name === item[0].props.children[1].props.children[0].props.children);
                   if (affiliate) {
                     handleEditAffiliate(affiliate);
                   }
@@ -449,7 +687,7 @@ export default function AffiliateBeheer() {
               </button>
               <button
                 onClick={() => {
-                  const affiliate = filteredAffiliates.find(a => a.user_name === item.affiliate.props.children[1].props.children[0].props.children);
+                  const affiliate = filteredAffiliates.find(a => a.user_name === item[0].props.children[1].props.children[0].props.children);
                   if (affiliate) {
                     setSelectedAffiliate(affiliate);
                     setShowDeleteModal(true);

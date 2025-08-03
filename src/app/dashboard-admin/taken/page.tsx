@@ -21,7 +21,7 @@ import {
   PauseIcon,
   PlayIcon
 } from '@heroicons/react/24/outline';
-import { toast } from 'react-toastify';
+import { toast } from 'react-hot-toast';
 import { useDebug } from '@/contexts/DebugContext';
 import { AdminCard, AdminStatsCard, AdminTable, AdminButton } from '@/components/admin';
 
