@@ -9,7 +9,8 @@ import {
   StarIcon,
   ShoppingCartIcon,
   ArrowRightIcon,
-  CheckIcon
+  CheckIcon,
+  BookmarkIcon
 } from '@heroicons/react/24/outline';
 import PageLayout from '@/components/PageLayout';
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
@@ -1207,6 +1208,18 @@ export default function VoedingsplannenPage() {
       title="Top Tier Voedingsplan Generator"
       subtitle="Creëer jouw persoonlijke voedingsplan op maat"
     >
+      {/* Quick Actions */}
+      <div className="max-w-4xl mx-auto mb-6">
+        <div className="flex gap-4 justify-center">
+          <a
+            href="/dashboard/voedingsplannen/recepten-bibliotheek"
+            className="px-6 py-3 bg-[#8BAE5A] hover:bg-[#B6C948] text-[#0A0F0A] rounded-lg font-medium transition-colors flex items-center gap-2"
+          >
+            <BookmarkIcon className="w-5 h-5" />
+            Recepten Bibliotheek
+          </a>
+        </div>
+      </div>
       <div className="max-w-4xl mx-auto">
         {!isGenerating && selectedNutritionPlan && showPlanBanner && (
           <div className="max-w-4xl mx-auto mt-8 mb-8">
@@ -1216,6 +1229,15 @@ export default function VoedingsplannenPage() {
                 <div className="text-xl font-bold text-white mb-1">
                   {dietTypes.find(d => d.id === selectedNutritionPlan)?.name || selectedNutritionPlan}
                 </div>
+              </div>
+              <div className="flex gap-3">
+                <a
+                  href="/dashboard/voedingsplannen/recepten-bibliotheek"
+                  className="px-4 py-2 bg-[#8BAE5A] hover:bg-[#B6C948] text-[#0A0F0A] rounded-lg font-medium transition-colors flex items-center gap-2"
+                >
+                  <BookmarkIcon className="w-4 h-4" />
+                  Recepten Bibliotheek
+                </a>
                 <div className="text-gray-400 text-sm mb-1">
                   {dietTypes.find(d => d.id === selectedNutritionPlan)?.subtitle}
                 </div>
