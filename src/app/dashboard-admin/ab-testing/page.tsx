@@ -113,7 +113,7 @@ export default function ABTestingPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0A0F0A] p-6">
+      <div className="min-h-screen bg-[#0A0F0A] p-4 sm:p-6">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-center h-64">
             <div className="w-8 h-8 border-2 border-[#8BAE5A] border-t-transparent rounded-full animate-spin"></div>
@@ -124,23 +124,23 @@ export default function ABTestingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0F0A] p-6">
+    <div className="min-h-screen bg-[#0A0F0A] p-4 sm:p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">A/B Testing Dashboard</h1>
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">A/B Testing Dashboard</h1>
           <p className="text-[#8BAE5A]">Track en analyseer A/B test resultaten</p>
         </div>
 
         {/* Filters */}
         <AdminCard title="Filters" icon={<FunnelIcon className="w-6 h-6" />}>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">Pagina</label>
               <select
                 value={selectedPage}
                 onChange={(e) => setSelectedPage(e.target.value)}
-                className="w-full px-4 py-2 rounded-lg bg-[#181F17] text-white border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                className="w-full px-3 sm:px-4 py-2 rounded-lg bg-[#181F17] text-white border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] text-sm"
               >
                 <option value="product">Product Pagina</option>
                 <option value="landing">Landing Page</option>
@@ -153,7 +153,7 @@ export default function ABTestingPage() {
               <select
                 value={selectedEvent}
                 onChange={(e) => setSelectedEvent(e.target.value)}
-                className="w-full px-4 py-2 rounded-lg bg-[#181F17] text-white border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                className="w-full px-3 sm:px-4 py-2 rounded-lg bg-[#181F17] text-white border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] text-sm"
               >
                 <option value="all">Alle Events</option>
                 <option value="cta_click">CTA Clicks</option>
@@ -167,7 +167,7 @@ export default function ABTestingPage() {
               <select
                 value={days}
                 onChange={(e) => setDays(e.target.value)}
-                className="w-full px-4 py-2 rounded-lg bg-[#181F17] text-white border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                className="w-full px-3 sm:px-4 py-2 rounded-lg bg-[#181F17] text-white border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] text-sm"
               >
                 <option value="1">Laatste 24 uur</option>
                 <option value="7">Laatste 7 dagen</option>
@@ -190,7 +190,7 @@ export default function ABTestingPage() {
 
         {/* Stats Cards */}
         {analytics && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
             <AdminStatsCard
               title="Totaal Events"
               value={analytics.variants.reduce((sum, v) => sum + v.totalEvents, 0)}
@@ -220,30 +220,30 @@ export default function ABTestingPage() {
 
         {/* Variant Comparison */}
         {analytics && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mb-6 sm:mb-8">
             {/* Variant A */}
             <AdminCard title="Variant A" icon={<EyeIcon className="w-6 h-6" />}>
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-300">Totaal Events:</span>
+                  <span className="text-gray-300 text-sm">Totaal Events:</span>
                   <span className="text-white font-semibold">
                     {analytics.variants.find(v => v.variant === 'A')?.totalEvents || 0}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-300">Unieke Gebruikers:</span>
+                  <span className="text-gray-300 text-sm">Unieke Gebruikers:</span>
                   <span className="text-white font-semibold">
                     {analytics.variants.find(v => v.variant === 'A')?.uniqueUsers || 0}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-300">CTA Conversion Rate:</span>
+                  <span className="text-gray-300 text-sm">CTA Conversion Rate:</span>
                   <span className="text-[#8BAE5A] font-semibold">
                     {getConversionRate('A', 'cta_click')}%
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-300">Feature Click Rate:</span>
+                  <span className="text-gray-300 text-sm">Feature Click Rate:</span>
                   <span className="text-[#8BAE5A] font-semibold">
                     {getConversionRate('A', 'feature_click')}%
                   </span>
@@ -253,27 +253,27 @@ export default function ABTestingPage() {
 
             {/* Variant B */}
             <AdminCard title="Variant B" icon={<CursorArrowRaysIcon className="w-6 h-6" />}>
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-300">Totaal Events:</span>
+                  <span className="text-gray-300 text-sm">Totaal Events:</span>
                   <span className="text-white font-semibold">
                     {analytics.variants.find(v => v.variant === 'B')?.totalEvents || 0}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-300">Unieke Gebruikers:</span>
+                  <span className="text-gray-300 text-sm">Unieke Gebruikers:</span>
                   <span className="text-white font-semibold">
                     {analytics.variants.find(v => v.variant === 'B')?.uniqueUsers || 0}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-300">CTA Conversion Rate:</span>
+                  <span className="text-gray-300 text-sm">CTA Conversion Rate:</span>
                   <span className="text-[#8BAE5A] font-semibold">
                     {getConversionRate('B', 'cta_click')}%
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-300">Feature Click Rate:</span>
+                  <span className="text-gray-300 text-sm">Feature Click Rate:</span>
                   <span className="text-[#8BAE5A] font-semibold">
                     {getConversionRate('B', 'feature_click')}%
                   </span>
@@ -286,16 +286,16 @@ export default function ABTestingPage() {
         {/* Statistical Significance */}
         {analytics && (
           <AdminCard title="Statistische Significatie" icon={<ArrowTrendingUpIcon className="w-6 h-6" />}>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center p-4 bg-[#181F17] rounded-lg">
-                <span className="text-gray-300">CTA Clicks:</span>
-                <span className="text-white font-semibold">
+            <div className="space-y-3 sm:space-y-4">
+              <div className="flex justify-between items-center p-3 sm:p-4 bg-[#181F17] rounded-lg">
+                <span className="text-gray-300 text-sm">CTA Clicks:</span>
+                <span className="text-white font-semibold text-sm">
                   {getStatisticalSignificance('A', 'B', 'cta_click')}
                 </span>
               </div>
-              <div className="flex justify-between items-center p-4 bg-[#181F17] rounded-lg">
-                <span className="text-gray-300">Feature Clicks:</span>
-                <span className="text-white font-semibold">
+              <div className="flex justify-between items-center p-3 sm:p-4 bg-[#181F17] rounded-lg">
+                <span className="text-gray-300 text-sm">Feature Clicks:</span>
+                <span className="text-white font-semibold text-sm">
                   {getStatisticalSignificance('A', 'B', 'feature_click')}
                 </span>
               </div>
@@ -308,17 +308,17 @@ export default function ABTestingPage() {
           <AdminCard title="Event Breakdown" icon={<ChartBarIcon className="w-6 h-6" />}>
             <div className="space-y-4">
               {analytics.events.map((event) => (
-                <div key={event.event} className="border border-[#3A4D23] rounded-lg p-4">
-                  <h3 className="text-lg font-semibold text-white mb-3 capitalize">
+                <div key={event.event} className="border border-[#3A4D23] rounded-lg p-3 sm:p-4">
+                  <h3 className="text-base sm:text-lg font-semibold text-white mb-3 capitalize">
                     {event.event.replace('_', ' ')}
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     {event.variants.map((variant) => (
                       <div key={variant.variant} className="flex justify-between items-center">
-                        <span className="text-gray-300">Variant {variant.variant}:</span>
+                        <span className="text-gray-300 text-sm">Variant {variant.variant}:</span>
                         <div className="text-right">
-                          <div className="text-white font-semibold">{variant.count}</div>
-                          <div className="text-[#8BAE5A] text-sm">{variant.percentage}%</div>
+                          <div className="text-white font-semibold text-sm">{variant.count}</div>
+                          <div className="text-[#8BAE5A] text-xs sm:text-sm">{variant.percentage}%</div>
                         </div>
                       </div>
                     ))}
@@ -332,7 +332,7 @@ export default function ABTestingPage() {
         {/* No Data Message */}
         {(!analytics || analytics.variants.length === 0) && (
           <AdminCard title="Geen Data" icon={<ChartBarIcon className="w-6 h-6" />}>
-            <div className="text-center py-8">
+            <div className="text-center py-6 sm:py-8">
               <p className="text-gray-400 mb-4">Nog geen A/B test data beschikbaar</p>
               <p className="text-gray-500 text-sm">
                 Start A/B tests op de product pagina om data te verzamelen

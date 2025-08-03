@@ -52,6 +52,95 @@ body {
   }
 }
 
+/* Hide scrollbar utilities for mobile */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none;  /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar { 
+  display: none;  /* Safari and Chrome */
+}
+
+/* Swipe indicator styles */
+.swipe-container {
+  position: relative;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.swipe-container::-webkit-scrollbar {
+  display: none;
+}
+
+.swipe-indicator {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  background: rgba(139, 174, 90, 0.2);
+  border: 2px solid rgba(139, 174, 90, 0.6);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.swipe-indicator.left {
+  left: 8px;
+}
+
+.swipe-indicator.right {
+  right: 8px;
+}
+
+.swipe-indicator svg {
+  width: 12px;
+  height: 12px;
+  color: #8BAE5A;
+}
+
+.swipe-indicator.hidden {
+  opacity: 0;
+}
+
+/* Swipe hint animation */
+@keyframes swipe-hint {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(8px); }
+}
+
+.swipe-hint {
+  animation: swipe-hint 2s ease-in-out infinite;
+}
+
+/* Gradient fade indicators */
+.swipe-fade-left {
+  background: linear-gradient(to right, rgba(24, 31, 23, 0.8) 0%, transparent 100%);
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 20px;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.swipe-fade-right {
+  background: linear-gradient(to left, rgba(24, 31, 23, 0.8) 0%, transparent 100%);
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 20px;
+  pointer-events: none;
+  z-index: 5;
+}
+
 .custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: #8BAE5A #181F17;

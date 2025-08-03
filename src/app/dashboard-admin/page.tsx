@@ -26,6 +26,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { AdminCard, AdminStatsCard, AdminButton } from '@/components/admin';
+import { SwipeIndicator } from '@/components/ui';
 
 interface DashboardStats {
   // Community Health
@@ -172,12 +173,12 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold text-[#8BAE5A]">Admin Panel</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#8BAE5A]">Admin Panel</h1>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse shadow-lg shadow-green-400/50"></div>
               <span className="text-green-400 text-sm font-medium">Live</span>
@@ -196,12 +197,12 @@ export default function AdminDashboard() {
             </p>
           )}
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           {activeTab !== 'realtime' && (
             <select 
               value={selectedPeriod} 
               onChange={(e) => setSelectedPeriod(e.target.value as '7d' | '30d' | '90d')}
-              className="px-4 py-2 rounded-xl bg-[#232D1A] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+              className="px-3 sm:px-4 py-2 rounded-xl bg-[#232D1A] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] text-sm"
             >
               <option value="7d">Laatste 7 dagen</option>
               <option value="30d">Laatste 30 dagen</option>
@@ -220,82 +221,84 @@ export default function AdminDashboard() {
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex space-x-1 bg-[#181F17] rounded-lg p-1 overflow-x-auto">
-        <button
-          onClick={() => setActiveTab('overview')}
-          className={`flex-shrink-0 py-3 px-4 rounded-md font-medium transition-colors ${
-            activeTab === 'overview'
-              ? 'bg-[#8BAE5A] text-black'
-              : 'text-white/60 hover:text-white'
-          }`}
-        >
-          Community Health
-        </button>
-        <button
-          onClick={() => setActiveTab('content')}
-          className={`flex-shrink-0 py-3 px-4 rounded-md font-medium transition-colors ${
-            activeTab === 'content'
-              ? 'bg-[#8BAE5A] text-black'
-              : 'text-white/60 hover:text-white'
-          }`}
-        >
-          Content Performance
-        </button>
-        <button
-          onClick={() => setActiveTab('actions')}
-          className={`flex-shrink-0 py-3 px-4 rounded-md font-medium transition-colors ${
-            activeTab === 'actions'
-              ? 'bg-[#8BAE5A] text-black'
-              : 'text-white/60 hover:text-white'
-          }`}
-        >
-          Actiegerichte Inzichten
-        </button>
-        <button
-          onClick={() => setActiveTab('financial')}
-          className={`flex-shrink-0 py-3 px-4 rounded-md font-medium transition-colors ${
-            activeTab === 'financial'
-              ? 'bg-[#8BAE5A] text-black'
-              : 'text-white/60 hover:text-white'
-          }`}
-        >
-          Financiële Metrics
-        </button>
-        <button
-          onClick={() => setActiveTab('users')}
-          className={`flex-shrink-0 py-3 px-4 rounded-md font-medium transition-colors ${
-            activeTab === 'users'
-              ? 'bg-[#8BAE5A] text-black'
-              : 'text-white/60 hover:text-white'
-          }`}
-        >
-          Gebruikers Segmentatie
-        </button>
-        <button
-          onClick={() => setActiveTab('realtime')}
-          className={`flex-shrink-0 py-3 px-4 rounded-md font-medium transition-colors ${
-            activeTab === 'realtime'
-              ? 'bg-[#8BAE5A] text-black'
-              : 'text-white/60 hover:text-white'
-          }`}
-        >
-          Real-time Activiteit
-        </button>
-        <button
-          onClick={() => setActiveTab('technical')}
-          className={`flex-shrink-0 py-3 px-4 rounded-md font-medium transition-colors ${
-            activeTab === 'technical'
-              ? 'bg-[#8BAE5A] text-black'
-              : 'text-white/60 hover:text-white'
-          }`}
-        >
-          Technische Performance
-        </button>
-      </div>
+      <SwipeIndicator className="bg-[#181F17] rounded-lg p-1" showFadeIndicators={false}>
+        <div className="flex space-x-1">
+          <button
+            onClick={() => setActiveTab('overview')}
+            className={`flex-shrink-0 py-2 sm:py-3 px-3 sm:px-4 rounded-md font-medium transition-colors text-sm whitespace-nowrap ${
+              activeTab === 'overview'
+                ? 'bg-[#8BAE5A] text-black'
+                : 'text-white/60 hover:text-white'
+            }`}
+          >
+            Community Health
+          </button>
+          <button
+            onClick={() => setActiveTab('content')}
+            className={`flex-shrink-0 py-2 sm:py-3 px-3 sm:px-4 rounded-md font-medium transition-colors text-sm whitespace-nowrap ${
+              activeTab === 'content'
+                ? 'bg-[#8BAE5A] text-black'
+                : 'text-white/60 hover:text-white'
+            }`}
+          >
+            Content Performance
+          </button>
+          <button
+            onClick={() => setActiveTab('actions')}
+            className={`flex-shrink-0 py-2 sm:py-3 px-3 sm:px-4 rounded-md font-medium transition-colors text-sm whitespace-nowrap ${
+              activeTab === 'actions'
+                ? 'bg-[#8BAE5A] text-black'
+                : 'text-white/60 hover:text-white'
+            }`}
+          >
+            Actiegerichte Inzichten
+          </button>
+          <button
+            onClick={() => setActiveTab('financial')}
+            className={`flex-shrink-0 py-2 sm:py-3 px-3 sm:px-4 rounded-md font-medium transition-colors text-sm whitespace-nowrap ${
+              activeTab === 'financial'
+                ? 'bg-[#8BAE5A] text-black'
+                : 'text-white/60 hover:text-white'
+            }`}
+          >
+            Financiële Metrics
+          </button>
+          <button
+            onClick={() => setActiveTab('users')}
+            className={`flex-shrink-0 py-2 sm:py-3 px-3 sm:px-4 rounded-md font-medium transition-colors text-sm whitespace-nowrap ${
+              activeTab === 'users'
+                ? 'bg-[#8BAE5A] text-black'
+                : 'text-white/60 hover:text-white'
+            }`}
+          >
+            Gebruikers Segmentatie
+          </button>
+          <button
+            onClick={() => setActiveTab('realtime')}
+            className={`flex-shrink-0 py-2 sm:py-3 px-3 sm:px-4 rounded-md font-medium transition-colors text-sm whitespace-nowrap ${
+              activeTab === 'realtime'
+                ? 'bg-[#8BAE5A] text-black'
+                : 'text-white/60 hover:text-white'
+            }`}
+          >
+            Real-time Activiteit
+          </button>
+          <button
+            onClick={() => setActiveTab('technical')}
+            className={`flex-shrink-0 py-2 sm:py-3 px-3 sm:px-4 rounded-md font-medium transition-colors text-sm whitespace-nowrap ${
+              activeTab === 'technical'
+                ? 'bg-[#8BAE5A] text-black'
+                : 'text-white/60 hover:text-white'
+            }`}
+          >
+            Technische Performance
+          </button>
+        </div>
+      </SwipeIndicator>
 
       {/* Error state */}
       {error && (
-        <div className="bg-red-900/20 border border-red-500/50 rounded-xl p-6">
+        <div className="bg-red-900/20 border border-red-500/50 rounded-xl p-4 sm:p-6">
           <div className="flex items-center gap-3 mb-4">
             <ExclamationTriangleIcon className="w-6 h-6 text-red-400" />
             <h3 className="text-red-400 font-semibold">Fout bij laden van gegevens</h3>
@@ -327,7 +330,7 @@ export default function AdminDashboard() {
                   </div>
                 ) : (
                   <>
-                    <div className="text-4xl font-bold text-[#8BAE5A] mb-2">
+                    <div className="text-3xl sm:text-4xl font-bold text-[#8BAE5A] mb-2">
                       {dashboardStats?.communityHealthScore || 0}/100
                     </div>
                     <div className="text-sm text-[#B6C948]">Gezondheidsscore</div>
@@ -352,7 +355,7 @@ export default function AdminDashboard() {
             icon={<UserGroupIcon className="w-6 h-6" />}
             gradient
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {loading && !dataLoaded ? (
                 // Skeleton loading voor ledenstatistieken
                 <>
@@ -469,7 +472,7 @@ export default function AdminDashboard() {
             ) : (
               <>
                 {/* Academy Performance */}
-                <div className="bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]">
+                <div className="bg-[#181F17] rounded-xl p-4 sm:p-6 border border-[#3A4D23]">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="p-2 rounded-lg bg-[#8BAE5A]/20">
                       <AcademicCapIcon className="w-6 h-6 text-[#8BAE5A]" />
@@ -493,7 +496,7 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Training Performance */}
-                <div className="bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]">
+                <div className="bg-[#181F17] rounded-xl p-4 sm:p-6 border border-[#3A4D23]">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="p-2 rounded-lg bg-[#f0a14f]/20">
                       <FireIcon className="w-6 h-6 text-[#f0a14f]" />
@@ -517,7 +520,7 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Forum Performance */}
-                <div className="bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]">
+                <div className="bg-[#181F17] rounded-xl p-4 sm:p-6 border border-[#3A4D23]">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="p-2 rounded-lg bg-[#FFD700]/20">
                       <ChatBubbleLeftRightIcon className="w-6 h-6 text-[#FFD700]" />
@@ -562,7 +565,7 @@ export default function AdminDashboard() {
             ) : (
               <>
                 {/* User Engagement Insights */}
-                <div className="bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]">
+                <div className="bg-[#181F17] rounded-xl p-4 sm:p-6 border border-[#3A4D23]">
                   <h3 className="text-lg font-semibold text-white mb-4">Gebruikers Engagement</h3>
                   <div className="space-y-3">
                     <div className="flex justify-between">
@@ -585,7 +588,7 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Action Items */}
-                <div className="bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]">
+                <div className="bg-[#181F17] rounded-xl p-4 sm:p-6 border border-[#3A4D23]">
                   <h3 className="text-lg font-semibold text-white mb-4">Aanbevolen Acties</h3>
                   <div className="space-y-3">
                     {(dashboardStats?.onboardingRate || 0) < 50 && (
@@ -633,17 +636,17 @@ export default function AdminDashboard() {
           <div className="text-center py-8">
             <div className="text-2xl font-bold text-[#8BAE5A] mb-4">Financiële Metrics</div>
             <p className="text-[#B6C948] mb-6">Maandelijkse terugkerende inkomsten en andere financiële indicatoren</p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-2xl mx-auto">
-              <div className="bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]">
-                <div className="text-3xl font-bold text-[#8BAE5A] mb-2">€0</div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-2xl mx-auto">
+              <div className="bg-[#181F17] rounded-xl p-4 sm:p-6 border border-[#3A4D23]">
+                <div className="text-2xl sm:text-3xl font-bold text-[#8BAE5A] mb-2">€0</div>
                 <div className="text-gray-400 text-sm">MRR</div>
               </div>
-              <div className="bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]">
-                <div className="text-3xl font-bold text-[#f0a14f] mb-2">€0</div>
+              <div className="bg-[#181F17] rounded-xl p-4 sm:p-6 border border-[#3A4D23]">
+                <div className="text-2xl sm:text-3xl font-bold text-[#f0a14f] mb-2">€0</div>
                 <div className="text-gray-400 text-sm">LTV</div>
               </div>
-              <div className="bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]">
-                <div className="text-3xl font-bold text-[#FFD700] mb-2">0%</div>
+              <div className="bg-[#181F17] rounded-xl p-4 sm:p-6 border border-[#3A4D23]">
+                <div className="text-2xl sm:text-3xl font-bold text-[#FFD700] mb-2">0%</div>
                 <div className="text-gray-400 text-sm">Churn Rate</div>
               </div>
             </div>
@@ -663,7 +666,7 @@ export default function AdminDashboard() {
           icon={<UsersIcon className="w-6 h-6" />}
           gradient
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {loading && !dataLoaded ? (
               // Skeleton loading voor users
               <>
@@ -710,7 +713,7 @@ export default function AdminDashboard() {
               </>
             ) : (
               <>
-                <div className="bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]">
+                <div className="bg-[#181F17] rounded-xl p-4 sm:p-6 border border-[#3A4D23]">
                   <h3 className="text-lg font-semibold text-white mb-4">Gebruikers Distributie</h3>
                   <div className="space-y-3">
                     <div className="flex justify-between">
@@ -727,7 +730,7 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                 </div>
-                <div className="bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]">
+                <div className="bg-[#181F17] rounded-xl p-4 sm:p-6 border border-[#3A4D23]">
                   <h3 className="text-lg font-semibold text-white mb-4">Engagement Metrics</h3>
                   <div className="space-y-3">
                     <div className="flex justify-between">
@@ -757,7 +760,7 @@ export default function AdminDashboard() {
           icon={<ClockIcon className="w-6 h-6" />}
           gradient
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {loading && !dataLoaded ? (
               // Skeleton loading voor realtime
               <>
@@ -795,7 +798,7 @@ export default function AdminDashboard() {
               </>
             )}
           </div>
-          <div className="mt-6 bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]">
+          <div className="mt-6 bg-[#181F17] rounded-xl p-4 sm:p-6 border border-[#3A4D23]">
             <h3 className="text-lg font-semibold text-white mb-4">Platform Activiteit</h3>
             <div className="text-center py-8">
               <div className="text-2xl font-bold text-[#8BAE5A] mb-2">Real-time Dashboard</div>
@@ -817,7 +820,7 @@ export default function AdminDashboard() {
           icon={<WrenchScrewdriverIcon className="w-6 h-6" />}
           gradient
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {loading && !dataLoaded ? (
               // Skeleton loading voor technical
               <>
@@ -855,7 +858,7 @@ export default function AdminDashboard() {
               </>
             )}
           </div>
-          <div className="mt-6 bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]">
+          <div className="mt-6 bg-[#181F17] rounded-xl p-4 sm:p-6 border border-[#3A4D23]">
             <h3 className="text-lg font-semibold text-white mb-4">Performance Metrics</h3>
             <div className="text-center py-8">
               <div className="text-2xl font-bold text-[#8BAE5A] mb-2">Technische Performance</div>

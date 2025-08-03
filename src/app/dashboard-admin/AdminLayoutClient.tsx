@@ -33,6 +33,7 @@ import {
   EyeIcon,
   UserIcon
 } from '@heroicons/react/24/outline';
+import { SwipeIndicator } from '@/components/ui';
 
 // Type definitions for menu items
 interface MenuItem {
@@ -292,13 +293,13 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
               </div>
             )}
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             <span className="hidden sm:inline text-[#8BAE5A] text-sm">
               {user?.email || 'Admin'}
             </span>
             
             {/* Cache Management - Only for Admin */}
-            <div className="flex items-center gap-2">
+            <div className="hidden sm:flex items-center gap-2">
               <span className="text-[#B6C948] text-xs font-medium">Cache:</span>
               <button
                 onClick={() => {
@@ -327,14 +328,14 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
             {/* Planning Status Button */}
             <button
               onClick={() => setShowPlanningModal(true)}
-              className="px-3 py-1 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A] focus:outline-none focus:ring-1 focus:ring-[#8BAE5A] text-xs transition-colors"
+              className="hidden sm:block px-3 py-1 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A] focus:outline-none focus:ring-1 focus:ring-[#8BAE5A] text-xs transition-colors"
               title="Toon planning status"
             >
               📊 Status
             </button>
             
             {/* Debug Toggle */}
-            <div className="flex items-center gap-2">
+            <div className="hidden sm:flex items-center gap-2">
               <BugAntIcon className="w-4 h-4 text-[#B6C948]" />
               <select
                 value={showDebug ? 'true' : 'false'}
@@ -347,14 +348,14 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
             </div>
             <Link 
               href="/dashboard" 
-              className="px-4 py-2 rounded-xl bg-[#8BAE5A] text-[#181F17] text-sm font-semibold border border-[#8BAE5A] hover:bg-[#A6C97B] transition"
+              className="hidden sm:block px-4 py-2 rounded-xl bg-[#8BAE5A] text-[#181F17] text-sm font-semibold border border-[#8BAE5A] hover:bg-[#A6C97B] transition"
             >
               Ga naar Platform
             </Link>
             {/* Marketing button - visible for all admins */}
             <Link 
               href="/dashboard-marketing" 
-              className="px-4 py-2 rounded-xl bg-[#1E40AF] text-white text-sm font-semibold border border-[#1E40AF] hover:bg-[#1D4ED8] transition flex items-center gap-2"
+              className="hidden sm:flex px-4 py-2 rounded-xl bg-[#1E40AF] text-white text-sm font-semibold border border-[#1E40AF] hover:bg-[#1D4ED8] transition items-center gap-2"
             >
               <MegaphoneIcon className="w-4 h-4" />
               Marketing
@@ -362,12 +363,76 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
             <button
               onClick={handleLogout}
               disabled={isLoggingOut}
-              className="px-4 py-2 rounded-xl bg-[#181F17] text-[#8BAE5A] text-sm font-semibold border border-[#3A4D23] hover:bg-[#232D1A] transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 sm:px-4 py-2 rounded-xl bg-[#181F17] text-[#8BAE5A] text-sm font-semibold border border-[#3A4D23] hover:bg-[#232D1A] transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoggingOut ? 'Uitloggen...' : 'Uitloggen'}
             </button>
           </div>
         </div>
+      </div>
+
+      {/* Mobile Subheader for overflow buttons */}
+      <div className="lg:hidden bg-[#1A2318] border-b border-[#3A4D23] px-4 py-3">
+        <SwipeIndicator className="flex items-center justify-between gap-2" showFadeIndicators={false}>
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="text-[#8BAE5A] text-sm truncate">
+              {user?.email || 'Admin'}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {/* Cache Management for mobile */}
+            <button
+              onClick={() => {
+                localStorage.clear();
+                sessionStorage.clear();
+                alert('App cache opgeruimd!');
+              }}
+              className="px-2 py-1 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A] focus:outline-none focus:ring-1 focus:ring-[#8BAE5A] text-xs transition-colors"
+              title="Ruim app cache op"
+            >
+              🧹
+            </button>
+            <button
+              onClick={() => {
+                if (confirm('Weet je zeker dat je ALLE cache wilt opruimen? Dit zal de pagina herladen.')) {
+                  window.location.reload();
+                }
+              }}
+              className="px-2 py-1 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A] focus:outline-none focus:ring-1 focus:ring-[#8BAE5A] text-xs transition-colors"
+            >
+              🔄
+            </button>
+            {/* Planning Status Button */}
+            <button
+              onClick={() => setShowPlanningModal(true)}
+              className="px-2 py-1 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A] focus:outline-none focus:ring-1 focus:ring-[#8BAE5A] text-xs transition-colors"
+              title="Toon planning status"
+            >
+              📊
+            </button>
+            {/* Debug Toggle */}
+            <select
+              value={showDebug ? 'true' : 'false'}
+              onChange={(e) => setShowDebug(e.target.value === 'true')}
+              className="px-2 py-1 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-1 focus:ring-[#8BAE5A] text-xs"
+            >
+              <option value="false">Debug OFF</option>
+              <option value="true">Debug ON</option>
+            </select>
+            <Link 
+              href="/dashboard" 
+              className="px-3 py-1 rounded-lg bg-[#8BAE5A] text-[#181F17] text-xs font-semibold border border-[#8BAE5A] hover:bg-[#A6C97B] transition"
+            >
+              Platform
+            </Link>
+            <Link 
+              href="/dashboard-marketing" 
+              className="px-3 py-1 rounded-lg bg-[#1E40AF] text-white text-xs font-semibold border border-[#1E40AF] hover:bg-[#1D4ED8] transition"
+            >
+              Marketing
+            </Link>
+          </div>
+        </SwipeIndicator>
       </div>
 
       <div className="flex">
@@ -393,7 +458,7 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-6 md:p-12 overflow-x-auto bg-[#181F17]">
+        <main className="flex-1 p-4 sm:p-6 md:p-12 overflow-x-auto bg-[#181F17]">
           {children}
         </main>
       </div>

@@ -541,40 +541,43 @@ export default function Ledenbeheer() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-[#8BAE5A]">Ledenbeheer</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#8BAE5A]">Ledenbeheer</h1>
           <p className="text-[#B6C948] mt-2">Beheer alle leden van het Top Tier Men platform</p>
         </div>
-        <div className="flex items-center gap-4">
-          <span className="text-[#8BAE5A] font-semibold">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+          <span className="text-[#8BAE5A] font-semibold text-sm sm:text-base">
             {filteredMembers.length} van {allMembers.length} leden
           </span>
           {loadingMembers && (
             <span className="text-[#B6C948] text-sm">Laden...</span>
           )}
-          <AdminButton 
-            variant="secondary" 
-            icon={<ArrowPathIcon className="w-5 h-5" />}
-            onClick={fetchMembers}
-            loading={loadingMembers}
-          >
-            Verversen
-          </AdminButton>
-          <AdminButton 
-            variant="primary" 
-            icon={<UserPlusIcon className="w-5 h-5" />}
-            onClick={() => setShowAddUserModal(true)}
-          >
-            Nieuwe Gebruiker Toevoegen
-          </AdminButton>
+          <div className="flex gap-2 sm:gap-4">
+            <AdminButton 
+              variant="secondary" 
+              icon={<ArrowPathIcon className="w-4 h-5 sm:w-5 sm:h-5" />}
+              onClick={fetchMembers}
+              loading={loadingMembers}
+            >
+              Verversen
+            </AdminButton>
+            <AdminButton 
+              variant="primary" 
+              icon={<UserPlusIcon className="w-4 h-5 sm:w-5 sm:h-5" />}
+              onClick={() => setShowAddUserModal(true)}
+            >
+              <span className="hidden sm:inline">Nieuwe Gebruiker Toevoegen</span>
+              <span className="sm:hidden">Toevoegen</span>
+            </AdminButton>
+          </div>
         </div>
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <AdminStatsCard
           title="Totaal aantal leden"
           value={totalMembers}

@@ -187,20 +187,21 @@ export default function Gebruikersbeheer() {
   );
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-[#8BAE5A]">Gebruikersbeheer</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#8BAE5A]">Gebruikersbeheer</h1>
           <p className="text-[#B6C948] mt-2">Beheer alle leden van het Top Tier Men platform</p>
         </div>
-        <AdminButton variant="primary" icon={<UserGroupIcon className="w-5 h-5" />}>
-          Nieuwe Gebruiker Toevoegen
+        <AdminButton variant="primary" icon={<UserGroupIcon className="w-4 h-5 sm:w-5 sm:h-5" />}>
+          <span className="hidden sm:inline">Nieuwe Gebruiker Toevoegen</span>
+          <span className="sm:hidden">Toevoegen</span>
         </AdminButton>
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <AdminStatsCard
           title="Totaal aantal gebruikers"
           value={totalUsers}
@@ -235,16 +236,16 @@ export default function Gebruikersbeheer() {
 
       {/* Filters & Search */}
       <AdminCard title="Filters & Zoeken" icon={<FunnelIcon className="w-6 h-6" />}>
-        <div className="flex flex-wrap gap-4">
-          <div className="flex-1 min-w-[300px]">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1">
             <div className="relative">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-5 sm:w-5 sm:h-5 text-gray-400" />
               <input
                 type="text"
                 placeholder="Zoek op gebruikersnaam, e-mail, naam..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] focus:border-transparent"
+                className="w-full pl-9 sm:pl-10 pr-4 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] focus:border-transparent text-sm"
               />
             </div>
           </div>

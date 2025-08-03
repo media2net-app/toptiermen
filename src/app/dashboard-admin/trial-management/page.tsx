@@ -137,7 +137,7 @@ export default function TrialManagementPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0A0F0A] p-6">
+      <div className="min-h-screen bg-[#0A0F0A] p-4 sm:p-6">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-center h-64">
             <div className="w-8 h-8 border-2 border-[#8BAE5A] border-t-transparent rounded-full animate-spin"></div>
@@ -148,17 +148,17 @@ export default function TrialManagementPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0F0A] p-6">
+    <div className="min-h-screen bg-[#0A0F0A] p-4 sm:p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Trial Management</h1>
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Trial Management</h1>
           <p className="text-[#8BAE5A]">Beheer en analyseer 7-dagen trial gebruikers</p>
         </div>
 
         {/* Stats Cards */}
         {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
             <AdminStatsCard
               title="Totaal Trial Gebruikers"
               value={stats.totalTrialUsers}
@@ -188,13 +188,13 @@ export default function TrialManagementPage() {
 
         {/* Filters */}
         <AdminCard title="Filters" icon={<EyeIcon className="w-6 h-6" />}>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">Status Filter</label>
               <select
                 value={selectedFilter}
                 onChange={(e) => setSelectedFilter(e.target.value)}
-                className="w-full px-4 py-2 rounded-lg bg-[#181F17] text-white border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                className="w-full px-3 sm:px-4 py-2 rounded-lg bg-[#181F17] text-white border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] text-sm"
               >
                 <option value="all">Alle Gebruikers</option>
                 <option value="active">Actieve Trials</option>
@@ -210,7 +210,7 @@ export default function TrialManagementPage() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Naam of email..."
-                className="w-full px-4 py-2 rounded-lg bg-[#181F17] text-white border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] placeholder-gray-400"
+                className="w-full px-3 sm:px-4 py-2 rounded-lg bg-[#181F17] text-white border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] placeholder-gray-400 text-sm"
               />
             </div>
             
@@ -232,53 +232,53 @@ export default function TrialManagementPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-[#3A4D23]">
-                  <th className="text-left py-3 px-4 text-gray-300">Gebruiker</th>
-                  <th className="text-left py-3 px-4 text-gray-300">Status</th>
-                  <th className="text-left py-3 px-4 text-gray-300">Dagen Over</th>
-                  <th className="text-left py-3 px-4 text-gray-300">Features</th>
-                  <th className="text-left py-3 px-4 text-gray-300">Prompts</th>
-                  <th className="text-left py-3 px-4 text-gray-300">Acties</th>
+                  <th className="text-left py-3 px-2 sm:px-4 text-gray-300 text-xs sm:text-sm">Gebruiker</th>
+                  <th className="text-left py-3 px-2 sm:px-4 text-gray-300 text-xs sm:text-sm">Status</th>
+                  <th className="text-left py-3 px-2 sm:px-4 text-gray-300 text-xs sm:text-sm">Dagen Over</th>
+                  <th className="text-left py-3 px-2 sm:px-4 text-gray-300 text-xs sm:text-sm">Features</th>
+                  <th className="text-left py-3 px-2 sm:px-4 text-gray-300 text-xs sm:text-sm">Prompts</th>
+                  <th className="text-left py-3 px-2 sm:px-4 text-gray-300 text-xs sm:text-sm">Acties</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredUsers.map((user) => (
                   <tr key={user.user_id} className="border-b border-[#3A4D23] hover:bg-[#181F17]">
-                    <td className="py-3 px-4">
+                    <td className="py-3 px-2 sm:px-4">
                       <div>
-                        <div className="text-white font-semibold">{user.full_name || 'Onbekend'}</div>
-                        <div className="text-gray-400 text-sm">{user.email}</div>
+                        <div className="text-white font-semibold text-sm">{user.full_name || 'Onbekend'}</div>
+                        <div className="text-gray-400 text-xs sm:text-sm truncate max-w-[150px] sm:max-w-none">{user.email}</div>
                       </div>
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="py-3 px-2 sm:px-4">
                       <div className="flex items-center gap-2">
                         <div className={`w-2 h-2 rounded-full ${
                           user.is_in_trial ? 'bg-green-500' : 
                           user.subscription_tier !== 'trial' ? 'bg-blue-500' : 'bg-red-500'
                         }`}></div>
-                        <span className="text-white">
+                        <span className="text-white text-xs sm:text-sm">
                           {user.is_in_trial ? 'Actief' : 
                            user.subscription_tier !== 'trial' ? 'Geconverteerd' : 'Verlopen'}
                         </span>
                       </div>
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="py-3 px-2 sm:px-4">
                       <div className="flex items-center gap-2">
                         <ClockIcon className="w-4 h-4 text-gray-400" />
-                        <span className={`font-semibold ${
+                        <span className={`font-semibold text-xs sm:text-sm ${
                           user.days_remaining <= 2 ? 'text-orange-400' : 'text-white'
                         }`}>
                           {user.days_remaining} dagen
                         </span>
                       </div>
                     </td>
-                    <td className="py-3 px-4">
-                      <div className="text-white">{user.features_accessed}</div>
+                    <td className="py-3 px-2 sm:px-4">
+                      <div className="text-white text-xs sm:text-sm">{user.features_accessed}</div>
                     </td>
-                    <td className="py-3 px-4">
-                      <div className="text-white">{user.upgrade_prompts_received}</div>
+                    <td className="py-3 px-2 sm:px-4">
+                      <div className="text-white text-xs sm:text-sm">{user.upgrade_prompts_received}</div>
                     </td>
-                    <td className="py-3 px-4">
-                      <div className="flex gap-2">
+                    <td className="py-3 px-2 sm:px-4">
+                      <div className="flex flex-col sm:flex-row gap-2">
                         {user.is_in_trial && (
                           <>
                             <AdminButton
@@ -306,7 +306,7 @@ export default function TrialManagementPage() {
           </div>
           
           {filteredUsers.length === 0 && (
-            <div className="text-center py-8">
+            <div className="text-center py-6 sm:py-8">
               <p className="text-gray-400">Geen trial gebruikers gevonden</p>
             </div>
           )}
@@ -314,37 +314,37 @@ export default function TrialManagementPage() {
 
         {/* Conversion Analytics */}
         {stats && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mt-6 sm:mt-8">
             <AdminCard title="Conversie Analytics" icon={<ChartBarIcon className="w-6 h-6" />}>
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-300">Totaal conversies:</span>
-                  <span className="text-white font-semibold">{stats.convertedTrials}</span>
+                  <span className="text-gray-300 text-sm">Totaal conversies:</span>
+                  <span className="text-white font-semibold text-sm">{stats.convertedTrials}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-300">Conversie rate:</span>
-                  <span className="text-[#8BAE5A] font-semibold">{stats.conversionRate.toFixed(1)}%</span>
+                  <span className="text-gray-300 text-sm">Conversie rate:</span>
+                  <span className="text-[#8BAE5A] font-semibold text-sm">{stats.conversionRate.toFixed(1)}%</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-300">Gemiddelde trial duur:</span>
-                  <span className="text-white font-semibold">{stats.averageTrialDuration.toFixed(1)} dagen</span>
+                  <span className="text-gray-300 text-sm">Gemiddelde trial duur:</span>
+                  <span className="text-white font-semibold text-sm">{stats.averageTrialDuration.toFixed(1)} dagen</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-300">Totaal conversie waarde:</span>
-                  <span className="text-[#8BAE5A] font-semibold">€{stats.totalConversionValue}</span>
+                  <span className="text-gray-300 text-sm">Totaal conversie waarde:</span>
+                  <span className="text-[#8BAE5A] font-semibold text-sm">€{stats.totalConversionValue}</span>
                 </div>
               </div>
             </AdminCard>
 
             <AdminCard title="Upgrade Prompts" icon={<ArrowUpIcon className="w-6 h-6" />}>
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-300">Totaal prompts verzonden:</span>
-                  <span className="text-white font-semibold">{stats.totalUpgradePrompts}</span>
+                  <span className="text-gray-300 text-sm">Totaal prompts verzonden:</span>
+                  <span className="text-white font-semibold text-sm">{stats.totalUpgradePrompts}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-300">Gemiddeld per gebruiker:</span>
-                  <span className="text-white font-semibold">
+                  <span className="text-gray-300 text-sm">Gemiddeld per gebruiker:</span>
+                  <span className="text-white font-semibold text-sm">
                     {(stats.totalUpgradePrompts / Math.max(stats.totalTrialUsers, 1)).toFixed(1)}
                   </span>
                 </div>

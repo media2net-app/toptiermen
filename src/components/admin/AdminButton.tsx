@@ -33,9 +33,9 @@ export default function AdminButton({
   };
 
   const sizeClasses = {
-    sm: "px-3 py-2 text-sm h-9 min-w-[80px]",
-    md: "px-4 py-2.5 text-sm h-10 min-w-[100px]",
-    lg: "px-6 py-3 text-base h-12 min-w-[120px]"
+    sm: "px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm h-8 sm:h-9 min-w-[70px] sm:min-w-[80px]",
+    md: "px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm h-9 sm:h-10 min-w-[90px] sm:min-w-[100px]",
+    lg: "px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base h-10 sm:h-12 min-w-[100px] sm:min-w-[120px]"
   };
 
   return (

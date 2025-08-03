@@ -20,7 +20,7 @@ export default function AdminTable({
   if (loading) {
     return (
       <div className={`bg-[#232D1A] border border-[#3A4D23] rounded-xl overflow-hidden ${className}`}>
-        <div className="p-8 text-center">
+        <div className="p-6 sm:p-8 text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
           <p className="text-[#8BAE5A]">Laden...</p>
         </div>
@@ -31,7 +31,7 @@ export default function AdminTable({
   if (data.length === 0) {
     return (
       <div className={`bg-[#232D1A] border border-[#3A4D23] rounded-xl overflow-hidden ${className}`}>
-        <div className="p-8 text-center">
+        <div className="p-6 sm:p-8 text-center">
           <p className="text-gray-400">{emptyMessage}</p>
         </div>
       </div>
@@ -47,13 +47,13 @@ export default function AdminTable({
               {headers.map((header, index) => (
                 <th 
                   key={index}
-                  className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider"
+                  className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider"
                 >
                   {header}
                 </th>
               ))}
               {actions && (
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Acties
                 </th>
               )}
@@ -79,7 +79,7 @@ export default function AdminTable({
                     : 'pending-task-row hover:bg-[#232D1A]'
                 }`}>
                   {item.map((value: any, colIndex: number) => (
-                    <td key={colIndex} className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                    <td key={colIndex} className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-300">
                       {typeof value === 'boolean' ? (
                         <span className={`inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full ${
                           value 
@@ -94,7 +94,7 @@ export default function AdminTable({
                     </td>
                   ))}
                   {actions && (
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-300">
                       {actions(item)}
                     </td>
                   )}

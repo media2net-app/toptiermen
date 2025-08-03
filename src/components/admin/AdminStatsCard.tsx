@@ -31,7 +31,7 @@ export default function AdminStatsCard({
 
   if (loading) {
     return (
-      <div className={`bg-gradient-to-br ${colorClasses[color]} border rounded-xl p-6 ${className}`}>
+      <div className={`bg-gradient-to-br ${colorClasses[color]} border rounded-xl p-4 sm:p-6 ${className}`}>
         <div className="flex items-center justify-between">
           <div className="flex-1">
             <div className="animate-pulse bg-[#3A4D23] h-4 rounded mb-2"></div>
@@ -44,28 +44,28 @@ export default function AdminStatsCard({
   }
 
   return (
-    <div className={`bg-gradient-to-br ${colorClasses[color]} border rounded-xl p-6 ${className}`}>
+    <div className={`bg-gradient-to-br ${colorClasses[color]} border rounded-xl p-4 sm:p-6 ${className}`}>
       <div className="flex items-center justify-between">
-        <div>
-          <p className={`text-sm ${color === 'green' ? 'text-[#8BAE5A]' : color === 'orange' ? 'text-[#f0a14f]' : ''}`}>
+        <div className="flex-1 min-w-0">
+          <p className={`text-xs sm:text-sm ${color === 'green' ? 'text-[#8BAE5A]' : color === 'orange' ? 'text-[#f0a14f]' : ''} truncate`}>
             {title}
           </p>
-          <p className={`text-2xl font-bold ${color === 'green' ? 'text-[#8BAE5A]' : color === 'orange' ? 'text-[#f0a14f]' : ''}`}>
+          <p className={`text-xl sm:text-2xl font-bold ${color === 'green' ? 'text-[#8BAE5A]' : color === 'orange' ? 'text-[#f0a14f]' : ''}`}>
             {value}
           </p>
           {subtitle && (
-            <p className="text-gray-400 text-sm mt-1">{subtitle}</p>
+            <p className="text-gray-400 text-xs sm:text-sm mt-1 truncate">{subtitle}</p>
           )}
           {trend !== undefined && (
             <div className="flex items-center gap-1 mt-2">
               <span className={`text-xs font-semibold ${trend >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                 {trend >= 0 ? '+' : ''}{trend}%
               </span>
-              <span className="text-gray-400 text-xs">vs vorige periode</span>
+              <span className="text-gray-400 text-xs hidden sm:inline">vs vorige periode</span>
             </div>
           )}
         </div>
-        <div className={`${color === 'green' ? 'text-[#8BAE5A]' : color === 'orange' ? 'text-[#f0a14f]' : ''}`}>
+        <div className={`${color === 'green' ? 'text-[#8BAE5A]' : color === 'orange' ? 'text-[#f0a14f]' : ''} flex-shrink-0 ml-3`}>
           {icon}
         </div>
       </div>
