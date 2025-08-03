@@ -295,24 +295,11 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
   );
 }
 
-// Mock hook for development - returns dummy data
+// Hook to use Supabase auth context
 export function useSupabaseAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    // Return mock data instead of throwing error
-    return {
-      user: {
-        id: 'mock-user-id',
-        email: 'test@example.com',
-        full_name: 'Test User',
-        role: 'ADMIN'
-      },
-      loading: false,
-      signIn: async () => ({ success: true }),
-      signUp: async () => ({ success: true }),
-      signOut: async () => {},
-      updateUser: async () => {}
-    };
+    throw new Error('useSupabaseAuth must be used within a SupabaseAuthProvider');
   }
   return context;
 } 
