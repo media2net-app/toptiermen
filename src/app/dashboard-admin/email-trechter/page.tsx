@@ -21,7 +21,7 @@ import {
   WrenchScrewdriverIcon
 } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
-import { AdminCard, AdminStatsCard, AdminButton, AdminTable, EmailBuilder, SimpleEmailEditor } from '@/components/admin';
+import { AdminCard, AdminStatsCard, AdminButton, AdminTable, EmailBuilder, SimpleEmailEditor, UnifiedEmailBuilder } from '@/components/admin';
 
 interface EmailStep {
   id: string;
@@ -281,8 +281,9 @@ Het Toptiermen Team
   
   const [showEmailBuilder, setShowEmailBuilder] = useState(false);
   const [showSimpleEditor, setShowSimpleEditor] = useState(false);
+  const [showUnifiedBuilder, setShowUnifiedBuilder] = useState(false);
   const [selectedStepForEdit, setSelectedStepForEdit] = useState<EmailStep | null>(null);
-  const [editorMode, setEditorMode] = useState<'simple' | 'advanced'>('simple');
+  const [editorMode, setEditorMode] = useState<'simple' | 'unified' | 'advanced'>('unified');
 
   // Fetch campaign data
   useEffect(() => {
@@ -463,12 +464,14 @@ Het Toptiermen Team
     }
   };
 
-  const handleOpenEmailEditor = (step?: EmailStep, mode: 'simple' | 'advanced' = 'simple') => {
+  const handleOpenEmailEditor = (step?: EmailStep, mode: 'simple' | 'unified' | 'advanced' = 'unified') => {
     setSelectedStepForEdit(step || null);
     setEditorMode(mode);
     
     if (mode === 'simple') {
       setShowSimpleEditor(true);
+    } else if (mode === 'unified') {
+      setShowUnifiedBuilder(true);
     } else {
       setShowEmailBuilder(true);
     }
@@ -534,6 +537,38 @@ Het Toptiermen Team
       toast.success('Nieuwe email succesvol aangemaakt!');
     }
     setShowEmailBuilder(false);
+    setSelectedStepForEdit(null);
+  };
+
+  const handleSaveUnifiedEmail = (html: string, design: any) => {
+    if (selectedStepForEdit) {
+      // Update existing step
+      const updatedSteps = emailSteps.map(step => 
+        step.id === selectedStepForEdit.id 
+          ? { ...step, content: html, design: JSON.stringify(design) }
+          : step
+      );
+      setEmailSteps(updatedSteps);
+      toast.success('Email succesvol bijgewerkt!');
+    } else {
+      // Create new step
+      const newStep: EmailStep = {
+        id: Date.now().toString(),
+        stepNumber: emailSteps.length + 1,
+        name: 'Nieuwe Email',
+        subject: 'Nieuw onderwerp',
+        content: html,
+        design: JSON.stringify(design),
+        delayDays: 0,
+        status: 'draft',
+        sentCount: 0,
+        openRate: 0,
+        clickRate: 0
+      };
+      setEmailSteps([...emailSteps, newStep]);
+      toast.success('Nieuwe email succesvol aangemaakt!');
+    }
+    setShowUnifiedBuilder(false);
     setSelectedStepForEdit(null);
   };
 
@@ -1123,6 +1158,18 @@ Het Toptiermen Team
           </div>
         </div>
       )}
+
+      {/* Unified Email Builder Modal */}
+      <UnifiedEmailBuilder
+        isOpen={showUnifiedBuilder}
+        onClose={() => {
+          setShowUnifiedBuilder(false);
+          setSelectedStepForEdit(null);
+        }}
+        onSave={handleSaveUnifiedEmail}
+        initialContent={selectedStepForEdit?.design}
+        emailName={selectedStepForEdit?.name || 'Nieuwe Email'}
+      />
 
       {/* Email Builder Modal */}
       <EmailBuilder
