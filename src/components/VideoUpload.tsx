@@ -78,10 +78,18 @@ export default function VideoUpload({
   const startProcessingSteps = (urlData: any, file: File, startTime: number) => {
     console.log('🔄 Starting processing steps...');
     
+    // Set processing state
+    setIsUploading(false);
+    setIsProcessing(true);
+    setUploadStatus('Upload voltooid!');
+    setUploadProgress(100);
+    setProcessingStatus('Video verwerken...');
+    setProcessingProgress(0);
+    
     // Fast processing simulation - only 800ms total
     const processingSteps = [
-      { name: 'Video verwerken...', progress: 50 },
-      { name: 'URL genereren...', progress: 75 },
+      { name: 'Video verwerken...', progress: 33 },
+      { name: 'URL genereren...', progress: 66 },
       { name: 'Voltooid!', progress: 100 }
     ];
     
@@ -204,17 +212,10 @@ export default function VideoUpload({
             remaining: timeRemaining
           });
           
-          // Switch to processing phase when upload reaches 100%
+          // When upload reaches 100%, just stop the progress interval
+          // The actual processing will start after the upload completes
           if (newProgress >= 100) {
-            console.log('🔄 Upload complete, switching to processing phase...');
-            setUploadStatus('Upload voltooid!');
-            setUploadProgress(100);
-            setIsUploading(false);
-            setIsProcessing(true);
-            setProcessingStatus('Video verwerken...');
-            setProcessingProgress(25);
-            
-            // Clear the upload progress interval since we're now in processing
+            console.log('🔄 Upload progress complete, stopping interval...');
             clearInterval(progressInterval);
           }
           
