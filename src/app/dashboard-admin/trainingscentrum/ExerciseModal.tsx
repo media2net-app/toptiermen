@@ -106,6 +106,12 @@ export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: Exe
     toast.error(`Video upload mislukt: ${error}`);
   };
 
+  const handleVideoRemoved = () => {
+    console.log('🗑️ Video removed in exercise modal');
+    setFormData(prev => ({ ...prev, video_url: '' }));
+    toast.success('Video verwijderd uit oefening');
+  };
+
   const addSecondaryMuscle = () => {
     if (newSecondaryMuscle.trim() && !formData.secondary_muscles.includes(newSecondaryMuscle.trim())) {
       setFormData({
@@ -278,6 +284,7 @@ export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: Exe
               onVideoUploaded={handleVideoUploaded}
               onVideoUploadStart={handleVideoUploadStart}
               onVideoUploadError={handleVideoUploadError}
+              onVideoRemoved={handleVideoRemoved}
             />
           </div>
 

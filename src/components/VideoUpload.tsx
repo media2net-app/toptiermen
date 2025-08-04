@@ -8,6 +8,7 @@ interface VideoUploadProps {
   onVideoUploaded: (url: string) => void;
   onVideoUploadStart?: () => void;
   onVideoUploadError?: (error: string) => void;
+  onVideoRemoved?: () => void;
   className?: string;
 }
 
@@ -16,6 +17,7 @@ export default function VideoUpload({
   onVideoUploaded,
   onVideoUploadStart,
   onVideoUploadError,
+  onVideoRemoved,
   className = ""
 }: VideoUploadProps) {
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -394,6 +396,11 @@ export default function VideoUpload({
       // Update local state
       setUploadedVideoUrl(null);
       onVideoUploaded('');
+      
+      // Call remove callback to update parent component
+      if (onVideoRemoved) {
+        onVideoRemoved();
+      }
       
       toast.success('Video succesvol verwijderd');
       console.log('✅ Video removal complete');
