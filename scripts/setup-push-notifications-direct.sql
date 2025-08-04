@@ -27,7 +27,7 @@ DROP POLICY IF EXISTS "Service role can manage all push subscriptions" ON push_s
 CREATE POLICY "Users can manage their own push subscriptions" ON push_subscriptions
   FOR ALL USING (auth.uid() = user_id);
 
--- Create policy to allow service role to manage all subscriptions (for sending notifications)
+-- Create policy to allow service role to manage all push subscriptions (for sending notifications)
 CREATE POLICY "Service role can manage all push subscriptions" ON push_subscriptions
   FOR ALL USING (auth.role() = 'service_role');
 
@@ -49,20 +49,37 @@ CREATE TRIGGER update_push_subscriptions_updated_at
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
--- Test insert to verify everything works
-INSERT INTO push_subscriptions (user_id, endpoint, p256dh_key, auth_key)
-VALUES (
-  '00000000-0000-0000-0000-000000000000',
-  'https://test.endpoint.com',
-  'test-p256dh-key',
-  'test-auth-key'
-) ON CONFLICT (user_id) DO NOTHING;
+-- Get a valid user ID from the profiles table for testing
+DO $$
+DECLARE
+    test_user_id UUID;
+BEGIN
+    -- Try to get a user ID from profiles table
+    SELECT id INTO test_user_id FROM profiles LIMIT 1;
+    
+    -- If no user found in profiles, try auth.users
+    IF test_user_id IS NULL THEN
+        SELECT id INTO test_user_id FROM auth.users LIMIT 1;
+    END IF;
+    
+    -- If we found a valid user, insert test data
+    IF test_user_id IS NOT NULL THEN
+        INSERT INTO push_subscriptions (user_id, endpoint, p256dh_key, auth_key)
+        VALUES (
+            test_user_id,
+            'https://test.endpoint.com',
+            'test-p256dh-key',
+            'test-auth-key'
+        ) ON CONFLICT (user_id) DO NOTHING;
+        
+        RAISE NOTICE 'Test data inserted with user_id: %', test_user_id;
+    ELSE
+        RAISE NOTICE 'No valid user found for testing. Table created successfully.';
+    END IF;
+END $$;
 
--- Verify the insert worked
-SELECT * FROM push_subscriptions WHERE user_id = '00000000-0000-0000-0000-000000000000';
-
--- Clean up test data
-DELETE FROM push_subscriptions WHERE user_id = '00000000-0000-0000-0000-000000000000';
+-- Show all push subscriptions (if any)
+SELECT * FROM push_subscriptions;
 
 -- Show final table structure
 SELECT 
@@ -72,4 +89,11 @@ SELECT
   column_default
 FROM information_schema.columns 
 WHERE table_name = 'push_subscriptions' 
-ORDER BY ordinal_position; 
+ORDER BY ordinal_position;
+
+-- Show available users for reference
+SELECT 'Available users in profiles:' as info;
+SELECT id, email, full_name FROM profiles LIMIT 5;
+
+SELECT 'Available users in auth.users:' as info;
+SELECT id, email FROM auth.users LIMIT 5; 
