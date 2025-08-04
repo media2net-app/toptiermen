@@ -116,11 +116,26 @@ export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: Exe
     });
   };
 
-  if (!isOpen) return null;
+  if (!isOpen) {
+    console.log('🚫 ExerciseModal: Modal is closed');
+    return null;
+  }
+
+  console.log('✅ ExerciseModal: Modal is open, exercise:', exercise);
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-[#232D1A] rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-[#3A4D23]">
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      onClick={(e) => {
+        if (e.target === e.currentTarget && !isUploading) {
+          onClose();
+        }
+      }}
+    >
+      <div 
+        className="bg-[#232D1A] rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-[#3A4D23]"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold text-[#8BAE5A]">
             {exercise ? 'Bewerk Oefening' : 'Nieuwe Oefening'}

@@ -903,9 +903,13 @@ export default function TrainingscentrumBeheer() {
                     </div>
                     <div className="flex items-center gap-2">
                       <button 
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          console.log('🔧 Edit button clicked for exercise:', exercise);
                           setEditingExercise(exercise);
                           setShowEditModal(true);
+                          console.log('✅ Edit modal should be open now');
                         }}
                         className="p-2 rounded-xl hover:bg-[#181F17] transition-colors duration-200"
                       >
@@ -1263,6 +1267,7 @@ export default function TrainingscentrumBeheer() {
       <ExerciseModal
         isOpen={showNewExerciseModal || showEditModal}
         onClose={() => {
+          console.log('🔒 ExerciseModal onClose called');
           setShowNewExerciseModal(false);
           setShowEditModal(false);
           setEditingExercise(null);

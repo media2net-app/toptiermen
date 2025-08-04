@@ -418,6 +418,7 @@ export default function VideoUpload({
         `}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
+        onClick={(e) => e.stopPropagation()}
       >
         <input
           ref={fileInputRef}
@@ -426,6 +427,7 @@ export default function VideoUpload({
           onChange={handleFileSelect}
           className="hidden"
           disabled={isUploading}
+          onClick={(e) => e.stopPropagation()}
         />
 
         {(isUploading || isProcessing) ? (
@@ -520,7 +522,12 @@ export default function VideoUpload({
                 Sleep een video bestand hierheen of klik om te selecteren
               </p>
               <button
-                onClick={() => fileInputRef.current?.click()}
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  fileInputRef.current?.click();
+                }}
                 className="bg-[#8BAE5A] hover:bg-[#B6C948] text-[#0A0F0A] font-bold py-2 px-6 rounded-lg transition-colors"
               >
                 Bestand Selecteren
