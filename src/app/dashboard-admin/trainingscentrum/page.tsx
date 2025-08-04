@@ -355,12 +355,18 @@ export default function TrainingscentrumBeheer() {
       
       console.log('🧹 Cleaned data for update:', cleanedData);
       
+      // Test the update step by step
+      console.log('🔍 Step 1: Attempting database update...');
       const { data, error } = await supabase
         .from('exercises')
         .update(cleanedData)
         .eq('id', id)
         .select()
         .single();
+      
+      console.log('🔍 Step 2: Database response received');
+      console.log('📊 Response data:', data);
+      console.log('📊 Response error:', error);
       
       if (error) {
         console.error('❌ Error updating exercise:', error);
@@ -374,23 +380,40 @@ export default function TrainingscentrumBeheer() {
         return; // Don't close modal on error
       } else {
         console.log('✅ Exercise updated successfully:', data);
-        console.log('🔄 Updating local state...');
+        console.log('🔄 Step 3: Updating local state...');
         
         setExercises(prevExercises => {
-          const updatedExercises = prevExercises.map(ex => ex.id === id ? data : ex);
-          console.log('📋 Updated exercises state:', updatedExercises.length, 'exercises');
+          console.log('📋 Previous exercises count:', prevExercises.length);
+          const updatedExercises = prevExercises.map(ex => {
+            if (ex.id === id) {
+              console.log('🔄 Replacing exercise:', ex.name, 'with:', data.name);
+              return data;
+            }
+            return ex;
+          });
+          console.log('📋 Updated exercises count:', updatedExercises.length);
           return updatedExercises;
         });
         
-        console.log('🔒 Closing modal...');
+        console.log('🔒 Step 4: Closing modal...');
         setShowEditModal(false);
+        setShowNewExerciseModal(false); // Also reset new exercise modal
         setEditingExercise(null);
+        
+        // Force a small delay to ensure state updates
+        setTimeout(() => {
+          console.log('🔒 Step 5: Modal states after delay:');
+          console.log('   - showEditModal should be false');
+          console.log('   - showNewExerciseModal should be false');
+          console.log('   - editingExercise should be null');
+        }, 100);
         
         console.log('✅ Update complete!');
         toast.success('Oefening succesvol bijgewerkt');
       }
     } catch (err) {
       console.error('❌ Exception updating exercise:', err);
+      console.error('❌ Exception stack:', err instanceof Error ? err.stack : 'No stack');
       toast.error(`Fout bij het bijwerken van oefening: ${err instanceof Error ? err.message : 'Onbekende fout'}`);
       // Don't close modal on exception
     }
@@ -1294,9 +1317,11 @@ export default function TrainingscentrumBeheer() {
         isOpen={showNewExerciseModal || showEditModal}
         onClose={() => {
           console.log('🔒 ExerciseModal onClose called');
+          console.log('🔒 Resetting modal states...');
           setShowNewExerciseModal(false);
           setShowEditModal(false);
           setEditingExercise(null);
+          console.log('🔒 Modal states reset complete');
         }}
         onSave={(exerciseData) => {
           if (editingExercise) {
