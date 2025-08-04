@@ -130,7 +130,6 @@ export async function PUT(request: NextRequest) {
       data: data || { url: '/dashboard' },
       requireInteraction: false,
       silent: false,
-      vibrate: [200, 100, 200],
       actions: [
         {
           action: 'open',

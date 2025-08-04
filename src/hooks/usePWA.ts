@@ -218,7 +218,6 @@ export const usePWA = () => {
         tag: 'test-notification',
         requireInteraction: false,
         silent: false,
-        vibrate: [200, 100, 200],
         actions: [
           {
             action: 'open',
@@ -226,7 +225,7 @@ export const usePWA = () => {
             icon: '/logo.svg'
           }
         ]
-      });
+      } as any);
     } catch (error) {
       console.error('❌ Test notification failed:', error);
     }
