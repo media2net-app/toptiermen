@@ -62,18 +62,25 @@ export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: Exe
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('🚀 ===== EXERCISE MODAL SUBMIT =====');
+    console.log('📋 Form data:', formData);
+    console.log('📋 Is uploading:', isUploading);
+    
     if (!formData.name || !formData.primary_muscle || !formData.equipment || !formData.instructions) {
+      console.log('❌ Validation failed - missing required fields');
       toast.error('Vul alle verplichte velden in');
       return;
     }
 
     // Prevent submission if upload is in progress
     if (isUploading) {
+      console.log('❌ Upload in progress - preventing submission');
       toast.error('Wacht tot de video upload is voltooid');
       return;
     }
 
-    console.log('💾 Saving exercise data:', formData);
+    console.log('✅ Validation passed - calling onSave');
+    console.log('💾 Final exercise data to save:', formData);
     onSave(formData);
   };
 

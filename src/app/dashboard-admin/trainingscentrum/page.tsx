@@ -340,7 +340,10 @@ export default function TrainingscentrumBeheer() {
 
   const handleUpdateExercise = async (id: number, exerciseData: any) => {
     try {
-      console.log('Updating exercise:', id, exerciseData);
+      console.log('🔄 ===== UPDATING EXERCISE =====');
+      console.log('📋 Exercise ID:', id);
+      console.log('📋 Exercise Data:', exerciseData);
+      console.log('📋 Current exercises state:', exercises.length, 'exercises');
       
       const { data, error } = await supabase
         .from('exercises')
@@ -350,8 +353,8 @@ export default function TrainingscentrumBeheer() {
         .single();
       
       if (error) {
-        console.error('Error updating exercise:', error);
-        console.error('Error details:', {
+        console.error('❌ Error updating exercise:', error);
+        console.error('❌ Error details:', {
           message: error.message,
           details: error.details,
           hint: error.hint,
@@ -359,13 +362,24 @@ export default function TrainingscentrumBeheer() {
         });
         toast.error(`Fout bij het bijwerken van oefening: ${error.message}`);
       } else {
-        setExercises(exercises.map(ex => ex.id === id ? data : ex));
+        console.log('✅ Exercise updated successfully:', data);
+        console.log('🔄 Updating local state...');
+        
+        setExercises(prevExercises => {
+          const updatedExercises = prevExercises.map(ex => ex.id === id ? data : ex);
+          console.log('📋 Updated exercises state:', updatedExercises.length, 'exercises');
+          return updatedExercises;
+        });
+        
+        console.log('🔒 Closing modal...');
         setShowEditModal(false);
         setEditingExercise(null);
+        
+        console.log('✅ Update complete!');
         toast.success('Oefening succesvol bijgewerkt');
       }
     } catch (err) {
-      console.error('Exception updating exercise:', err);
+      console.error('❌ Exception updating exercise:', err);
       toast.error(`Fout bij het bijwerken van oefening: ${err instanceof Error ? err.message : 'Onbekende fout'}`);
     }
   };
