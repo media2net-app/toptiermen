@@ -75,6 +75,50 @@ export default function VideoUpload({
     await uploadVideo(file);
   };
 
+  const startProcessingSteps = (urlData: any, file: File, startTime: number) => {
+    console.log('🔄 Starting processing steps...');
+    
+    // Fast processing simulation - only 800ms total
+    const processingSteps = [
+      { name: 'Video verwerken...', progress: 50 },
+      { name: 'URL genereren...', progress: 75 },
+      { name: 'Voltooid!', progress: 100 }
+    ];
+    
+    let currentStep = 0;
+    const processingInterval = setInterval(() => {
+      const step = processingSteps[currentStep];
+      if (!step) {
+        clearInterval(processingInterval);
+        console.log('🔄 Processing steps complete, clearing interval');
+        return;
+      }
+      
+      setProcessingProgress(step.progress);
+      setProcessingStatus(step.name);
+      
+      console.log('⚙️ Processing step:', step.name, step.progress + '%');
+      
+      currentStep++;
+    }, 200); // Much faster interval
+    
+    // Complete processing quickly
+    setTimeout(() => {
+      console.log('✅ ===== PROCESSING COMPLETE =====');
+      const totalDuration = Date.now() - startTime;
+      console.log('⏱️ Total time:', totalDuration + 'ms');
+      
+      clearInterval(processingInterval);
+      setProcessingStatus('Voltooid!');
+      setProcessingProgress(100);
+      setUploadedBytes(file.size);
+      setTimeRemaining('');
+      setUploadedVideoUrl(urlData.publicUrl);
+      onVideoUploaded(urlData.publicUrl);
+      toast.success('Video succesvol geüpload!');
+    }, 800); // Much faster total processing time
+  };
+
   const uploadVideo = async (file: File) => {
     console.log('🚀 ===== VIDEO UPLOAD START =====');
     console.log('📋 File details:', {
@@ -246,20 +290,6 @@ export default function VideoUpload({
         fullPath: data.fullPath
       });
       
-      // Start processing phase - Much faster now!
-      console.log('🔄 ===== STARTING PROCESSING PHASE =====');
-      // Only set processing state if not already in processing phase
-      if (!isProcessing) {
-        setIsUploading(false);
-        setIsProcessing(true);
-        setUploadStatus('Upload voltooid!');
-        setUploadProgress(100);
-        setProcessingStatus('Video verwerken...');
-        setProcessingProgress(25);
-      } else {
-        console.log('🔄 Already in processing phase, continuing...');
-      }
-      
       // Get public URL immediately
       console.log('🔗 Getting public URL...');
       const { data: urlData } = supabase.storage
@@ -271,45 +301,8 @@ export default function VideoUpload({
         path: data.path
       });
 
-      // Fast processing simulation - only 800ms total
-      const processingSteps = [
-        { name: 'Video verwerken...', progress: 50 },
-        { name: 'URL genereren...', progress: 75 },
-        { name: 'Voltooid!', progress: 100 }
-      ];
-      
-      let currentStep = 0;
-      const processingInterval = setInterval(() => {
-        const step = processingSteps[currentStep];
-        if (!step) {
-          clearInterval(processingInterval);
-          console.log('🔄 Processing steps complete, clearing interval');
-          return;
-        }
-        
-        setProcessingProgress(step.progress);
-        setProcessingStatus(step.name);
-        
-        console.log('⚙️ Processing step:', step.name, step.progress + '%');
-        
-        currentStep++;
-      }, 200); // Much faster interval
-      
-      // Complete processing quickly
-      setTimeout(() => {
-        console.log('✅ ===== PROCESSING COMPLETE =====');
-        const totalDuration = Date.now() - startTime;
-        console.log('⏱️ Total time:', totalDuration + 'ms');
-        
-        clearInterval(processingInterval);
-        setProcessingStatus('Voltooid!');
-        setProcessingProgress(100);
-        setUploadedBytes(file.size);
-        setTimeRemaining('');
-        setUploadedVideoUrl(urlData.publicUrl);
-        onVideoUploaded(urlData.publicUrl);
-        toast.success('Video succesvol geüpload!');
-      }, 800); // Much faster total processing time
+      // Start processing steps with the correct parameters
+      startProcessingSteps(urlData, file, startTime);
 
     } catch (error: any) {
       console.error('❌ ===== UPLOAD FAILED =====');
