@@ -206,8 +206,8 @@ export default function EmailBuilder({
     }
   };
 
-  const editorConfig = {
-    displayMode: 'email',
+  const editorConfig: any = {
+    displayMode: 'email' as const,
     features: {
       preview: true,
       imageEditor: true,
