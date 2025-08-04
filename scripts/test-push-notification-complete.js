@@ -13,12 +13,19 @@ if (!supabaseUrl || !supabaseServiceKey) {
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-// Configure web-push with VAPID keys
-webpush.setVapidDetails(
-  'mailto:info@toptiermen.com',
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
-  process.env.VAPID_PRIVATE_KEY
-);
+// Configure web-push with VAPID keys only if they exist
+const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
+
+if (vapidPublicKey && vapidPrivateKey) {
+  webpush.setVapidDetails(
+    'mailto:info@toptiermen.com',
+    vapidPublicKey,
+    vapidPrivateKey
+  );
+} else {
+  console.log('⚠️  VAPID keys not configured - push notifications will not work');
+}
 
 async function testCompletePushNotification() {
   console.log('🚀 Testing Complete Push Notification Flow...\n');

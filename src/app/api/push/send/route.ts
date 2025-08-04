@@ -7,15 +7,28 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// Configure web-push with VAPID keys
-webpush.setVapidDetails(
-  'mailto:info@toptiermen.com',
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
-);
+// Configure web-push with VAPID keys only if they exist
+const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
+
+if (vapidPublicKey && vapidPrivateKey) {
+  webpush.setVapidDetails(
+    'mailto:info@toptiermen.com',
+    vapidPublicKey,
+    vapidPrivateKey
+  );
+}
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if VAPID keys are configured
+    if (!vapidPublicKey || !vapidPrivateKey) {
+      return NextResponse.json(
+        { error: 'Push notifications not configured - VAPID keys missing' },
+        { status: 503 }
+      );
+    }
+
     const { userId, title, body, icon, badge, data, tag } = await request.json();
 
     if (!userId || !title || !body) {
@@ -97,6 +110,14 @@ export async function POST(request: NextRequest) {
 // Send notification to multiple users
 export async function PUT(request: NextRequest) {
   try {
+    // Check if VAPID keys are configured
+    if (!vapidPublicKey || !vapidPrivateKey) {
+      return NextResponse.json(
+        { error: 'Push notifications not configured - VAPID keys missing' },
+        { status: 503 }
+      );
+    }
+
     const { userIds, title, body, icon, badge, data, tag } = await request.json();
 
     if (!userIds || !Array.isArray(userIds) || !title || !body) {
