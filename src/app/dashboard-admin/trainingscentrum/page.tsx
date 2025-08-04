@@ -345,9 +345,19 @@ export default function TrainingscentrumBeheer() {
       console.log('📋 Exercise Data:', exerciseData);
       console.log('📋 Current exercises state:', exercises.length, 'exercises');
       
+      // Clean up the data to match database expectations
+      const cleanedData = {
+        ...exerciseData,
+        video_url: exerciseData.video_url || null,
+        worksheet_url: exerciseData.worksheet_url || null,
+        secondary_muscles: Array.isArray(exerciseData.secondary_muscles) ? exerciseData.secondary_muscles : []
+      };
+      
+      console.log('🧹 Cleaned data for update:', cleanedData);
+      
       const { data, error } = await supabase
         .from('exercises')
-        .update(exerciseData)
+        .update(cleanedData)
         .eq('id', id)
         .select()
         .single();
@@ -361,6 +371,7 @@ export default function TrainingscentrumBeheer() {
           code: error.code
         });
         toast.error(`Fout bij het bijwerken van oefening: ${error.message}`);
+        return; // Don't close modal on error
       } else {
         console.log('✅ Exercise updated successfully:', data);
         console.log('🔄 Updating local state...');
@@ -381,6 +392,7 @@ export default function TrainingscentrumBeheer() {
     } catch (err) {
       console.error('❌ Exception updating exercise:', err);
       toast.error(`Fout bij het bijwerken van oefening: ${err instanceof Error ? err.message : 'Onbekende fout'}`);
+      // Don't close modal on exception
     }
   };
 
