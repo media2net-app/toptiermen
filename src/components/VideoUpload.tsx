@@ -365,10 +365,14 @@ export default function VideoUpload({
   };
 
   const handleRemove = async () => {
-    if (!currentVideoUrl) return;
+    if (!currentVideoUrl) {
+      console.log('❌ No video URL to remove');
+      return;
+    }
     
     try {
-      console.log('🗑️ Removing video:', currentVideoUrl);
+      console.log('🗑️ Starting video removal process...');
+      console.log('📹 Video URL:', currentVideoUrl);
       
       // Extract path from public URL
       const path = currentVideoUrl.split('/workout-videos/')[1];
@@ -378,35 +382,46 @@ export default function VideoUpload({
         return;
       }
       
-      console.log('📁 Removing file from storage:', path);
+      console.log('📁 Extracted path:', path);
+      console.log('📁 Decoded path:', decodeURIComponent(path));
       
       // Remove from storage
+      console.log('🗑️ Removing from Supabase storage...');
       const { error: storageError } = await supabase.storage
         .from('workout-videos')
         .remove([decodeURIComponent(path)]);
       
       if (storageError) {
         console.error('❌ Storage removal failed:', storageError);
-        toast.error('Verwijderen uit storage mislukt');
+        toast.error('Verwijderen uit storage mislukt: ' + storageError.message);
         return;
       }
       
       console.log('✅ Video removed from storage successfully');
       
       // Update local state
+      console.log('🔄 Updating local state...');
       setUploadedVideoUrl(null);
       onVideoUploaded('');
       
       // Call remove callback to update parent component
       if (onVideoRemoved) {
+        console.log('📞 Calling onVideoRemoved callback...');
         onVideoRemoved();
+      } else {
+        console.log('⚠️ No onVideoRemoved callback provided');
       }
       
       toast.success('Video succesvol verwijderd');
-      console.log('✅ Video removal complete');
+      console.log('✅ Video removal process complete');
       
     } catch (error: any) {
       console.error('❌ Failed to remove video:', error);
+      console.error('❌ Error details:', {
+        message: error.message,
+        name: error.name,
+        stack: error.stack
+      });
       toast.error('Verwijderen mislukt: ' + error.message);
     }
   };
@@ -415,7 +430,10 @@ export default function VideoUpload({
     <div className={`space-y-4 ${className}`}>
       {/* Current Video Display */}
       {(currentVideoUrl || uploadedVideoUrl) && (
-        <div className="bg-[#181F17] rounded-xl p-4 border border-[#3A4D23]">
+        <div 
+          className="bg-[#181F17] rounded-xl p-4 border border-[#3A4D23]"
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className="flex items-center gap-3 mb-3">
             <PlayIcon className="w-6 h-6 text-[#8BAE5A]" />
             <div className="flex-1">
@@ -425,7 +443,11 @@ export default function VideoUpload({
               </p>
             </div>
             <button 
-              onClick={handleRemove} 
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleRemove();
+              }}
               className="p-2 rounded hover:bg-[#232D1A] transition" 
               title="Verwijder video"
             >
