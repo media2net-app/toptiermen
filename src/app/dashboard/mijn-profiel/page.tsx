@@ -89,6 +89,12 @@ export default function MijnProfiel() {
   const [newAffiliateCode, setNewAffiliateCode] = useState('');
   const [savingAffiliateCode, setSavingAffiliateCode] = useState(false);
   
+  // Push notification states
+  const [pushSubscription, setPushSubscription] = useState<any>(null);
+  const [pushPermission, setPushPermission] = useState<NotificationPermission>('default');
+  const [isSubscribing, setIsSubscribing] = useState(false);
+  const [isUnsubscribing, setIsUnsubscribing] = useState(false);
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch user profile
@@ -109,7 +115,8 @@ export default function MijnProfiel() {
       await Promise.all([
         fetchUserProfile(),
         fetchBadgesAndRanks(),
-        fetchAffiliateData()
+        fetchAffiliateData(),
+        fetchPushSubscription()
       ]);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -244,6 +251,148 @@ export default function MijnProfiel() {
       setNewAffiliateCode(affiliateCode);
     } catch (error) {
       console.error('Error fetching affiliate data:', error);
+    }
+  };
+
+  const fetchPushSubscription = async () => {
+    if (!user) return;
+
+    try {
+      // Check if service worker and push manager are supported
+      if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+        console.log('Push notifications not supported');
+        return;
+      }
+
+      // Check current permission
+      const permission = await Notification.requestPermission();
+      setPushPermission(permission);
+
+      if (permission !== 'granted') {
+        console.log('Push notification permission not granted');
+        return;
+      }
+
+      // Get existing subscription from database
+      const { data: subscription, error } = await supabase
+        .from('push_subscriptions')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!error && subscription) {
+        setPushSubscription(subscription);
+      }
+    } catch (error) {
+      console.error('Error fetching push subscription:', error);
+    }
+  };
+
+  const subscribeToPushNotifications = async () => {
+    if (!user) return;
+
+    try {
+      setIsSubscribing(true);
+
+      // Check if service worker and push manager are supported
+      if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+        toast.error('Push notificaties worden niet ondersteund door je browser');
+        return;
+      }
+
+      // Request permission
+      const permission = await Notification.requestPermission();
+      setPushPermission(permission);
+
+      if (permission !== 'granted') {
+        toast.error('Toestemming voor push notificaties is vereist');
+        return;
+      }
+
+      // Register service worker
+      const registration = await navigator.serviceWorker.register('/sw.js');
+      await navigator.serviceWorker.ready;
+
+      // Subscribe to push notifications
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+      });
+
+      // Save subscription to database
+      const { error } = await supabase
+        .from('push_subscriptions')
+        .upsert({
+          user_id: user.id,
+          endpoint: subscription.endpoint,
+          p256dh_key: btoa(String.fromCharCode.apply(null, 
+            new Uint8Array(subscription.getKey('p256dh')!)
+          )),
+          auth_key: btoa(String.fromCharCode.apply(null, 
+            new Uint8Array(subscription.getKey('auth')!)
+          ))
+        }, { onConflict: 'user_id' });
+
+      if (error) {
+        console.error('Error saving subscription:', error);
+        toast.error('Fout bij het opslaan van push notificatie instellingen');
+        return;
+      }
+
+      setPushSubscription({
+        user_id: user.id,
+        endpoint: subscription.endpoint,
+        p256dh_key: btoa(String.fromCharCode.apply(null, 
+          new Uint8Array(subscription.getKey('p256dh')!)
+        )),
+        auth_key: btoa(String.fromCharCode.apply(null, 
+          new Uint8Array(subscription.getKey('auth')!)
+        ))
+      });
+
+      toast.success('Push notificaties succesvol geactiveerd!');
+    } catch (error) {
+      console.error('Error subscribing to push notifications:', error);
+      toast.error('Fout bij het activeren van push notificaties');
+    } finally {
+      setIsSubscribing(false);
+    }
+  };
+
+  const unsubscribeFromPushNotifications = async () => {
+    if (!user || !pushSubscription) return;
+
+    try {
+      setIsUnsubscribing(true);
+
+      // Unsubscribe from push manager
+      const registration = await navigator.serviceWorker.getRegistration();
+      if (registration) {
+        const subscription = await registration.pushManager.getSubscription();
+        if (subscription) {
+          await subscription.unsubscribe();
+        }
+      }
+
+      // Remove from database
+      const { error } = await supabase
+        .from('push_subscriptions')
+        .delete()
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Error removing subscription:', error);
+        toast.error('Fout bij het deactiveren van push notificaties');
+        return;
+      }
+
+      setPushSubscription(null);
+      toast.success('Push notificaties succesvol gedeactiveerd!');
+    } catch (error) {
+      console.error('Error unsubscribing from push notifications:', error);
+      toast.error('Fout bij het deactiveren van push notificaties');
+    } finally {
+      setIsUnsubscribing(false);
     }
   };
 
@@ -1049,6 +1198,122 @@ export default function MijnProfiel() {
                   />
                   <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#8BAE5A]"></div>
                 </label>
+              </div>
+              
+              {/* Push Notifications Section */}
+              <div className="bg-[#181F17] rounded-lg p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <BellIcon className="w-6 h-6 text-[#8BAE5A]" />
+                  <h3 className="text-lg font-semibold text-white">Push Notificaties</h3>
+                </div>
+                
+                <div className="space-y-4">
+                  {/* Current Status */}
+                  <div className="flex items-center justify-between p-4 bg-[#232D1A] rounded-lg">
+                    <div>
+                      <h4 className="font-semibold text-white">Status</h4>
+                      <p className="text-[#8BAE5A] text-sm">
+                        {pushSubscription ? 'Actief' : pushPermission === 'denied' ? 'Geweigerd' : 'Niet geactiveerd'}
+                      </p>
+                    </div>
+                    <div className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                      pushSubscription 
+                        ? 'bg-green-500/20 text-green-400' 
+                        : pushPermission === 'denied' 
+                        ? 'bg-red-500/20 text-red-400'
+                        : 'bg-yellow-500/20 text-yellow-400'
+                    }`}>
+                      {pushSubscription ? 'Actief' : pushPermission === 'denied' ? 'Geweigerd' : 'Inactief'}
+                    </div>
+                  </div>
+
+                  {/* Browser Support */}
+                  {!('serviceWorker' in navigator) || !('PushManager' in window) ? (
+                    <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <ExclamationTriangleIcon className="w-5 h-5 text-red-400" />
+                        <h4 className="font-semibold text-red-400">Niet Ondersteund</h4>
+                      </div>
+                      <p className="text-[#8BAE5A] text-sm">
+                        Je browser ondersteunt geen push notificaties. Probeer een moderne browser zoals Chrome, Firefox of Safari.
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Permission Status */}
+                      {pushPermission === 'denied' && (
+                        <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+                          <div className="flex items-center gap-2 mb-2">
+                            <ExclamationTriangleIcon className="w-5 h-5 text-red-400" />
+                            <h4 className="font-semibold text-red-400">Toestemming Geweigerd</h4>
+                          </div>
+                          <p className="text-[#8BAE5A] text-sm mb-3">
+                            Je hebt push notificaties geweigerd. Ga naar je browser instellingen om dit te wijzigen.
+                          </p>
+                          <button
+                            onClick={() => window.open('chrome://settings/content/notifications', '_blank')}
+                            className="text-[#8BAE5A] text-sm underline hover:text-[#FFD700] transition-colors"
+                          >
+                            Browser instellingen openen
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Action Buttons */}
+                      <div className="flex gap-3">
+                        {!pushSubscription ? (
+                          <button
+                            onClick={subscribeToPushNotifications}
+                            disabled={isSubscribing || pushPermission === 'denied'}
+                            className="flex-1 px-4 py-3 bg-[#8BAE5A] text-white rounded-lg font-semibold hover:bg-[#9BBE6A] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                          >
+                            {isSubscribing ? (
+                              <>
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                Activeren...
+                              </>
+                            ) : (
+                              <>
+                                <BellIcon className="w-4 h-4" />
+                                Push Notificaties Activeren
+                              </>
+                            )}
+                          </button>
+                        ) : (
+                          <button
+                            onClick={unsubscribeFromPushNotifications}
+                            disabled={isUnsubscribing}
+                            className="flex-1 px-4 py-3 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                          >
+                            {isUnsubscribing ? (
+                              <>
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                Deactiveren...
+                              </>
+                            ) : (
+                              <>
+                                <XMarkIcon className="w-4 h-4" />
+                                Push Notificaties Deactiveren
+                              </>
+                            )}
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Info */}
+                      <div className="p-4 bg-[#232D1A] rounded-lg">
+                        <h4 className="font-semibold text-white mb-2">Wat ontvang je?</h4>
+                        <ul className="text-[#8BAE5A] text-sm space-y-1">
+                          <li>• Nieuwe missies en uitdagingen</li>
+                          <li>• Belangrijke aankondigingen</li>
+                          <li>• Herinneringen voor je doelen</li>
+                          <li>• Nieuwe content en trainingen</li>
+                          <li>• Brotherhood updates en events</li>
+                        </ul>
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           </div>
