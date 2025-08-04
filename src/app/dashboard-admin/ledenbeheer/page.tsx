@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { 
   MagnifyingGlassIcon, 
   FunnelIcon, 
@@ -32,12 +32,28 @@ import { supabase } from '@/lib/supabase';
 
 const ranks = ['Rookie', 'Warrior', 'Elite', 'Legend'];
 const statuses = ['active', 'inactive', 'suspended'];
+const userTypes = ['Gebruiker', 'Admin', 'Test'];
+
+// Helper function to determine user type (moved outside component to prevent re-renders)
+const getUserType = (user: any) => {
+  // Check if user is admin
+  if (user.role === 'admin' || user.is_admin === true) {
+    return { type: 'Admin', color: 'text-red-400', icon: '👑' };
+  }
+  // Check if user is test user
+  if (user.email?.includes('test') || user.full_name?.toLowerCase().includes('test')) {
+    return { type: 'Test', color: 'text-yellow-400', icon: '🧪' };
+  }
+  // Default to regular user
+  return { type: 'Gebruiker', color: 'text-green-400', icon: '👤' };
+};
 
 
 export default function Ledenbeheer() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRank, setSelectedRank] = useState('Alle Rangen');
   const [selectedStatus, setSelectedStatus] = useState('Alle Statussen');
+  const [selectedUserType, setSelectedUserType] = useState('Alle Types');
   const [selectedMember, setSelectedMember] = useState<number | string | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingMember, setEditingMember] = useState<any>(null);
@@ -166,13 +182,17 @@ export default function Ledenbeheer() {
     fetchMembers();
   }, []);
 
-  const filteredMembers = allMembers.filter(member => {
-    const matchesSearch = (member.full_name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-                         (member.email?.toLowerCase() || '').includes(searchTerm.toLowerCase());
-    const matchesRank = selectedRank === 'Alle Rangen' || member.rank === selectedRank;
-    const matchesStatus = selectedStatus === 'Alle Statussen' || member.status === selectedStatus;
-    return matchesSearch && matchesRank && matchesStatus;
-  });
+  const filteredMembers = useMemo(() => {
+    return allMembers.filter(member => {
+      const matchesSearch = (member.full_name?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+                           (member.email?.toLowerCase() || '').includes(searchTerm.toLowerCase());
+      const matchesRank = selectedRank === 'Alle Rangen' || member.rank === selectedRank;
+      const matchesStatus = selectedStatus === 'Alle Statussen' || member.status === selectedStatus;
+      const userType = getUserType(member);
+      const matchesUserType = selectedUserType === 'Alle Types' || userType.type === selectedUserType;
+      return matchesSearch && matchesRank && matchesStatus && matchesUserType;
+    });
+  }, [allMembers, searchTerm, selectedRank, selectedStatus, selectedUserType]);
 
   // Calculate statistics
   const totalMembers = allMembers.length;
@@ -194,7 +214,7 @@ export default function Ledenbeheer() {
   // Reset to first page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, selectedRank, selectedStatus]);
+  }, [searchTerm, selectedRank, selectedStatus, selectedUserType]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -227,6 +247,8 @@ export default function Ledenbeheer() {
       default: return 'text-[#B6C948]';
     }
   };
+
+
 
   const handleEditMember = (member: any) => {
     setEditingMember(member);
@@ -474,18 +496,24 @@ export default function Ledenbeheer() {
   };
 
   // Prepare table data for AdminTable
-  const tableData = currentMembers.map(member => [
-    member.full_name || 'Onbekend',
-    member.email || 'Geen e-mail',
-    member.rank || 'Rookie',
-    getStatusText(member.status),
-    member.points || 0,
-    member.missions_completed || 0,
-    new Date(member.created_at).toLocaleDateString('nl-NL'),
-    member.last_login ? new Date(member.last_login).toLocaleDateString('nl-NL') : 'Niet beschikbaar'
-  ]);
+  const tableData = useMemo(() => {
+    return currentMembers.map(member => {
+      const userType = getUserType(member);
+      return [
+        member.full_name || 'Onbekend',
+        member.email || 'Geen e-mail',
+        `${userType.icon} ${userType.type}`,
+        member.rank || 'Rookie',
+        getStatusText(member.status),
+        member.points || 0,
+        member.missions_completed || 0,
+        new Date(member.created_at).toLocaleDateString('nl-NL'),
+        member.last_login ? new Date(member.last_login).toLocaleDateString('nl-NL') : 'Niet beschikbaar'
+      ];
+    });
+  }, [currentMembers]);
 
-  const tableHeaders = ['Lid', 'Email', 'Rang', 'Status', 'Punten', 'Missies', 'Lid sinds', 'Laatste activiteit'];
+  const tableHeaders = ['Lid', 'Email', 'Type', 'Rang', 'Status', 'Punten', 'Missies', 'Lid sinds', 'Laatste activiteit'];
 
   const renderActions = (item: any) => {
     // Find member by email (item[1] is the email)
@@ -612,7 +640,7 @@ export default function Ledenbeheer() {
 
       {/* Search and Filters */}
       <AdminCard title="Filters & Zoeken" icon={<FunnelIcon className="w-6 h-6" />}>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           {/* Search */}
           <div className="relative">
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -651,6 +679,20 @@ export default function Ledenbeheer() {
                 <option key={status} value={status}>
                   {status === 'Alle Statussen' ? 'Alle Statussen' : getStatusText(status)}
                 </option>
+              ))}
+            </select>
+          </div>
+
+          {/* User Type Filter */}
+          <div className="relative">
+            <FunnelIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <select
+              value={selectedUserType}
+              onChange={(e) => setSelectedUserType(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#181F17] text-white border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] appearance-none"
+            >
+              {['Alle Types', ...userTypes].map(type => (
+                <option key={type} value={type}>{type}</option>
               ))}
             </select>
           </div>

@@ -4,6 +4,7 @@ import { PlusIcon, PencilIcon, TrashIcon, ArrowDownTrayIcon, ArrowUpTrayIcon, Tr
 import { AdminCard, AdminStatsCard, AdminButton } from '../../../components/admin';
 import BadgeModal from './components/BadgeModal';
 import RankModal from './components/RankModal';
+import BadgeUnlockModal from '../../../components/BadgeUnlockModal';
 
 // Icon mapping function
 const getIconDisplay = (iconName: string): string => {
@@ -81,6 +82,7 @@ export default function AdminBadgesRangenPage() {
   const [ranks, setRanks] = useState<Rank[]>([]);
   const [isBadgeModalOpen, setIsBadgeModalOpen] = useState(false);
   const [isRankModalOpen, setIsRankModalOpen] = useState(false);
+  const [isBadgeUnlockModalOpen, setIsBadgeUnlockModalOpen] = useState(false);
   const [editingBadge, setEditingBadge] = useState<Badge | null>(null);
   const [editingRank, setEditingRank] = useState<Rank | null>(null);
   const [badgeStats, setBadgeStats] = useState<BadgeStats | null>(null);
@@ -621,6 +623,13 @@ export default function AdminBadgesRangenPage() {
                 >
                   Nieuwe Badge Ontwerpen
                 </AdminButton>
+                <AdminButton
+                  onClick={() => setIsBadgeUnlockModalOpen(true)}
+                  variant="secondary"
+                  className="bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] text-black font-semibold hover:from-[#7A9D4A] hover:to-[#A5B847]"
+                >
+                  🎖️ Test Badge Unlock
+                </AdminButton>
               </div>
             </div>
 
@@ -923,6 +932,18 @@ export default function AdminBadgesRangenPage() {
           setRanks={setRanks}
         />
       )}
+
+      {/* Badge Unlock Modal */}
+      <BadgeUnlockModal
+        isOpen={isBadgeUnlockModalOpen}
+        onClose={() => setIsBadgeUnlockModalOpen(false)}
+        badge={{
+          name: "No Excuses",
+          image: "/badge-no-excuses.png",
+          description: "Je hebt 10 dagen achter elkaar geen excuus gebruikt! Consistentie is de sleutel tot succes."
+        }}
+        hasUnlockedBadge={false}
+      />
     </div>
   );
 }

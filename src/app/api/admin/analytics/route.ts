@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     // Calculate real analytics
     const totalUsers = users?.length || 0;
     const completedOnboarding = onboardingData?.filter(o => o.onboarding_completed).length || 0;
-    const onboardingCompletionRate = totalUsers > 0 ? Math.round((completedOnboarding / totalUsers) * 100) : 0;
+    const onboardingCompletionRate = totalUsers > 0 ? Number(((completedOnboarding / totalUsers) * 100).toFixed(1)) : 0;
     
     const activeUsers = profiles?.filter(p => p.last_login && new Date(p.last_login) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length || 0;
     const totalMissions = missions?.length || 0;

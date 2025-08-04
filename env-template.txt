@@ -1,9 +1,15 @@
 # Supabase Configuration
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url_here
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_here
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key_here
 
-# Database Access (voor AI Assistant)
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
+# VAPID Keys for Push Notifications
+NEXT_PUBLIC_VAPID_PUBLIC_KEY=your_vapid_public_key_here
+VAPID_PRIVATE_KEY=your_vapid_private_key_here
+
+# Other Configuration
+NEXTAUTH_SECRET=your_nextauth_secret_here
+NEXTAUTH_URL=http://localhost:3000
 
 # Stripe Configuration
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_publishable_key_here

@@ -11,8 +11,7 @@ import {
   XMarkIcon,
   PlusIcon,
   FireIcon,
-  BoltIcon,
-  LeafIcon
+  BoltIcon
 } from '@heroicons/react/24/outline';
 
 interface Recipe {
@@ -292,7 +291,7 @@ export default function RecipeLibrary({
                 : 'bg-[#232D1A] text-[#B6C948] hover:bg-[#2A3620]'
             }`}
           >
-            <LeafIcon className="w-4 h-4" />
+            <FireIcon className="w-4 h-4" />
             Koolhydraatarm
           </button>
           <button
@@ -304,7 +303,7 @@ export default function RecipeLibrary({
             }`}
           >
             <BoltIcon className="w-4 h-4" />
-            Snel (< 30 min)
+            Snel (&lt; 30 min)
           </button>
           <button
             onClick={() => getFilteredRecipes('healthy')}

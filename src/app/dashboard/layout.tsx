@@ -11,6 +11,7 @@ import DebugPanel from '@/components/DebugPanel';
 import ForcedOnboardingModal from '@/components/ForcedOnboardingModal';
 import TestUserFeedback from '@/components/TestUserFeedback';
 import { useTestUser } from '@/hooks/useTestUser';
+import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 
 import Image from 'next/image';
 // import MobileNav from '../components/MobileNav';
@@ -495,6 +496,9 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
           // In a real app, this would send the note to the server
         }}
       />
+
+      {/* PWA Install Prompt */}
+      <PWAInstallPrompt />
     </div>
   );
 }

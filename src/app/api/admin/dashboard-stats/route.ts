@@ -271,7 +271,7 @@ async function fetchRealDashboardStats(period: string) {
     }
 
     // Calculate community health score based on real metrics
-    const onboardingRate = totalUsers ? ((completedOnboarding || 0) / totalUsers) * 100 : 0;
+    const onboardingRate = totalUsers ? Number(((completedOnboarding || 0) / totalUsers) * 100) : 0;
     const activityRate = totalUsers ? ((activeUsers || 0) / totalUsers) * 100 : 0;
     const engagementRate = totalUsers && recentPosts ? Math.min((recentPosts / totalUsers) * 10, 100) : 0;
     
@@ -585,7 +585,7 @@ async function fetchRealDashboardStats(period: string) {
       totalUsers: totalUsers || 0,
       activeUsers: activeUsers || 0,
       completedOnboarding: completedOnboarding || 0,
-      onboardingRate: onboardingRate || 0,
+      onboardingRate: Number((onboardingRate || 0).toFixed(1)),
 
       // Leden Statistics - Based on real user data
       activeMembersThisMonth: activeUsers || 0,

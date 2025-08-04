@@ -19,6 +19,23 @@ const figtree = Figtree({
 export const metadata = {
   title: 'Top Tier Men',
   description: 'Become the best version of yourself',
+  manifest: '/manifest.json',
+  themeColor: '#8BAE5A',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Top Tier Men',
+  },
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+  },
+  icons: {
+    icon: '/logo.svg',
+    apple: '/logo.svg',
+  },
 };
 
 export const viewport = {
