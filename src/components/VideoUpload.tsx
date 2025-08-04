@@ -124,6 +124,12 @@ export default function VideoUpload({
       setUploadedVideoUrl(urlData.publicUrl);
       onVideoUploaded(urlData.publicUrl);
       toast.success('Video succesvol geüpload!');
+      
+      // Final cleanup after processing is complete
+      setTimeout(() => {
+        setIsProcessing(false);
+        console.log('🧹 Processing cleanup complete');
+      }, 1000); // Keep processing state visible for 1 second after completion
     }, 800); // Much faster total processing time
   };
 
@@ -333,8 +339,8 @@ export default function VideoUpload({
       setTimeRemaining('');
     } finally {
       console.log('🧹 ===== UPLOAD CLEANUP =====');
+      // Only reset upload state, don't reset processing state
       setIsUploading(false);
-      setIsProcessing(false);
       setUploadSpeed(0);
       // Reset file input
       if (fileInputRef.current) {
