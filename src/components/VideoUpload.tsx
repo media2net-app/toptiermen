@@ -169,6 +169,9 @@ export default function VideoUpload({
             setIsProcessing(true);
             setProcessingStatus('Video verwerken...');
             setProcessingProgress(25);
+            
+            // Clear the upload progress interval since we're now in processing
+            clearInterval(progressInterval);
           }
           
           return newProgress;
@@ -253,6 +256,8 @@ export default function VideoUpload({
         setUploadProgress(100);
         setProcessingStatus('Video verwerken...');
         setProcessingProgress(25);
+      } else {
+        console.log('🔄 Already in processing phase, continuing...');
       }
       
       // Get public URL immediately
@@ -278,6 +283,7 @@ export default function VideoUpload({
         const step = processingSteps[currentStep];
         if (!step) {
           clearInterval(processingInterval);
+          console.log('🔄 Processing steps complete, clearing interval');
           return;
         }
         
