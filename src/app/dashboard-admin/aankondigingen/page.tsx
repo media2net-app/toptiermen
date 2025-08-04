@@ -16,7 +16,8 @@ import {
   MegaphoneIcon,
   CalendarDaysIcon,
   CursorArrowRaysIcon,
-  ArrowPathIcon
+  ArrowPathIcon,
+  BellIcon
 } from '@heroicons/react/24/outline';
 import AdminCard from '@/components/admin/AdminCard';
 import AdminStatsCard from '@/components/admin/AdminStatsCard';
@@ -92,6 +93,8 @@ export default function AnnouncementsManagement() {
     publishAt: '',
     expiresAt: ''
   });
+
+  const [isSendingTest, setIsSendingTest] = useState(false);
 
   // Fetch announcements data
   const fetchAnnouncementsData = async () => {
@@ -368,6 +371,55 @@ export default function AnnouncementsManagement() {
     setActiveTab('active');
   };
 
+  const handleTestNotification = async () => {
+    try {
+      setIsSendingTest(true);
+      
+      // Get all push subscriptions first
+      const subscriptionsResponse = await fetch('/api/admin/push-subscriptions');
+      const subscriptionsData = await subscriptionsResponse.json();
+      
+      if (!subscriptionsData.subscriptions || subscriptionsData.subscriptions.length === 0) {
+        alert('❌ Geen push abonnementen gevonden! Gebruikers moeten eerst push notificaties activeren.');
+        return;
+      }
+
+      // Send test notification to all subscriptions
+      const testNotification = {
+        userIds: subscriptionsData.subscriptions.map((sub: any) => sub.user_id),
+        title: "🧪 Test Push Notificatie",
+        body: "Dit is een test notificatie vanuit het admin dashboard!",
+        icon: "/logo.svg",
+        badge: "/badge-no-excuses.png",
+        data: { 
+          url: "/dashboard",
+          timestamp: new Date().toISOString()
+        }
+      };
+
+      const response = await fetch('/api/push/send', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(testNotification)
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        alert(`✅ Test notificatie succesvol verzonden naar ${subscriptionsData.subscriptions.length} abonnement(en)!`);
+      } else {
+        alert(`❌ Fout bij verzenden: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Error sending test notification:', error);
+      alert('❌ Fout bij verzenden van test notificatie');
+    } finally {
+      setIsSendingTest(false);
+    }
+  };
+
   const filteredAnnouncements = announcements.filter(a =>
     a.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     a.content.toLowerCase().includes(searchTerm.toLowerCase())
@@ -407,10 +459,16 @@ export default function AnnouncementsManagement() {
           <h1 className="text-3xl font-bold text-[#8BAE5A]">Aankondigingen Beheer</h1>
           <p className="text-[#B6C948] mt-2">Beheer platform-brede aankondigingen en communiceer direct met alle gebruikers.</p>
         </div>
-        <AdminButton onClick={handleCreateNew} variant="primary">
-          <PlusIcon className="w-5 h-5 mr-2" />
-          Nieuwe Aankondiging
-        </AdminButton>
+        <div className="flex gap-3">
+          <AdminButton onClick={handleTestNotification} variant="secondary" disabled={isSendingTest}>
+            <BellIcon className="w-5 h-5 mr-2" />
+            {isSendingTest ? 'Verzenden...' : '🧪 Test Notificatie'}
+          </AdminButton>
+          <AdminButton onClick={handleCreateNew} variant="primary">
+            <PlusIcon className="w-5 h-5 mr-2" />
+            Nieuwe Aankondiging
+          </AdminButton>
+        </div>
       </div>
 
       {/* Summary Stats */}

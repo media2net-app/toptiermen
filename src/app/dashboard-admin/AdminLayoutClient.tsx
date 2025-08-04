@@ -31,7 +31,8 @@ import {
   RocketLaunchIcon,
   EnvelopeIcon,
   EyeIcon,
-  UserIcon
+  UserIcon,
+  BellIcon
 } from '@heroicons/react/24/outline';
 import { SwipeIndicator } from '@/components/ui';
 
@@ -129,7 +130,8 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
       type: 'section',
       items: [
         { label: 'Instellingen', icon: Cog6ToothIcon, href: '/dashboard-admin/instellingen' },
-        { label: 'Aankondigingen', icon: MegaphoneIcon, href: '/dashboard-admin/aankondigingen' }
+        { label: 'Aankondigingen', icon: MegaphoneIcon, href: '/dashboard-admin/aankondigingen' },
+        { label: 'Push Notificatie Tests', icon: BellIcon, href: '/dashboard-admin/push-test' }
       ]
     },
   ];
