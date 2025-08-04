@@ -232,41 +232,16 @@ export default function VideoUpload({
         fullPath: data.fullPath
       });
       
-      // Start processing phase
+      // Start processing phase - Much faster now!
       console.log('🔄 ===== STARTING PROCESSING PHASE =====');
       setIsUploading(false);
       setIsProcessing(true);
       setUploadStatus('Upload voltooid!');
       setUploadProgress(100);
-      setProcessingStatus('Video comprimeren...');
-      setProcessingProgress(0);
+      setProcessingStatus('Video verwerken...');
+      setProcessingProgress(25);
       
-      // Real processing simulation based on file size
-      const processingSteps = [
-        { name: 'Video comprimeren...', duration: Math.min(file.size / (1024 * 1024) * 100, 3000) },
-        { name: 'Metadata extraheren...', duration: 800 },
-        { name: 'Thumbnail genereren...', duration: 1200 },
-        { name: 'URL genereren...', duration: 500 }
-      ];
-      
-      let currentStep = 0;
-      const processingInterval = setInterval(() => {
-        const step = processingSteps[currentStep];
-        if (!step) {
-          clearInterval(processingInterval);
-          return;
-        }
-        
-        const progress = ((currentStep + 1) / processingSteps.length) * 100;
-        setProcessingProgress(progress);
-        setProcessingStatus(step.name);
-        
-        console.log('⚙️ Processing step:', step.name, progress.toFixed(1) + '%');
-        
-        currentStep++;
-      }, 500);
-      
-      // Get public URL (same pattern as PDFUpload)
+      // Get public URL immediately
       console.log('🔗 Getting public URL...');
       const { data: urlData } = supabase.storage
         .from('workout-videos')
@@ -277,7 +252,30 @@ export default function VideoUpload({
         path: data.path
       });
 
-      // Complete processing after all steps
+      // Fast processing simulation - only 800ms total
+      const processingSteps = [
+        { name: 'Video verwerken...', progress: 50 },
+        { name: 'URL genereren...', progress: 75 },
+        { name: 'Voltooid!', progress: 100 }
+      ];
+      
+      let currentStep = 0;
+      const processingInterval = setInterval(() => {
+        const step = processingSteps[currentStep];
+        if (!step) {
+          clearInterval(processingInterval);
+          return;
+        }
+        
+        setProcessingProgress(step.progress);
+        setProcessingStatus(step.name);
+        
+        console.log('⚙️ Processing step:', step.name, step.progress + '%');
+        
+        currentStep++;
+      }, 200); // Much faster interval
+      
+      // Complete processing quickly
       setTimeout(() => {
         console.log('✅ ===== PROCESSING COMPLETE =====');
         const totalDuration = Date.now() - startTime;
@@ -290,8 +288,8 @@ export default function VideoUpload({
         setTimeRemaining('');
         setUploadedVideoUrl(urlData.publicUrl);
         onVideoUploaded(urlData.publicUrl);
-        toast.success('Video succesvol geüpload en verwerkt!');
-      }, 3000); // Total processing time
+        toast.success('Video succesvol geüpload!');
+      }, 800); // Much faster total processing time
 
     } catch (error: any) {
       console.error('❌ ===== UPLOAD FAILED =====');
