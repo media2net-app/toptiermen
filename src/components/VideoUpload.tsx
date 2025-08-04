@@ -160,6 +160,17 @@ export default function VideoUpload({
             remaining: timeRemaining
           });
           
+          // Switch to processing phase when upload reaches 100%
+          if (newProgress >= 100) {
+            console.log('🔄 Upload complete, switching to processing phase...');
+            setUploadStatus('Upload voltooid!');
+            setUploadProgress(100);
+            setIsUploading(false);
+            setIsProcessing(true);
+            setProcessingStatus('Video verwerken...');
+            setProcessingProgress(25);
+          }
+          
           return newProgress;
         });
       }, 300);
@@ -234,12 +245,15 @@ export default function VideoUpload({
       
       // Start processing phase - Much faster now!
       console.log('🔄 ===== STARTING PROCESSING PHASE =====');
-      setIsUploading(false);
-      setIsProcessing(true);
-      setUploadStatus('Upload voltooid!');
-      setUploadProgress(100);
-      setProcessingStatus('Video verwerken...');
-      setProcessingProgress(25);
+      // Only set processing state if not already in processing phase
+      if (!isProcessing) {
+        setIsUploading(false);
+        setIsProcessing(true);
+        setUploadStatus('Upload voltooid!');
+        setUploadProgress(100);
+        setProcessingStatus('Video verwerken...');
+        setProcessingProgress(25);
+      }
       
       // Get public URL immediately
       console.log('🔗 Getting public URL...');
