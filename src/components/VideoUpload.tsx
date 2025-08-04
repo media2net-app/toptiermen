@@ -360,17 +360,41 @@ export default function VideoUpload({
     if (!currentVideoUrl) return;
     
     try {
+      console.log('🗑️ Removing video:', currentVideoUrl);
+      
       // Extract path from public URL
       const path = currentVideoUrl.split('/workout-videos/')[1];
-      if (!path) return;
+      if (!path) {
+        console.error('❌ Could not extract path from URL:', currentVideoUrl);
+        toast.error('Ongeldige video URL');
+        return;
+      }
       
-      await supabase.storage.from('workout-videos').remove([decodeURIComponent(path)]);
+      console.log('📁 Removing file from storage:', path);
+      
+      // Remove from storage
+      const { error: storageError } = await supabase.storage
+        .from('workout-videos')
+        .remove([decodeURIComponent(path)]);
+      
+      if (storageError) {
+        console.error('❌ Storage removal failed:', storageError);
+        toast.error('Verwijderen uit storage mislukt');
+        return;
+      }
+      
+      console.log('✅ Video removed from storage successfully');
+      
+      // Update local state
       setUploadedVideoUrl(null);
       onVideoUploaded('');
-      toast.success('Video verwijderd');
+      
+      toast.success('Video succesvol verwijderd');
+      console.log('✅ Video removal complete');
+      
     } catch (error: any) {
       console.error('❌ Failed to remove video:', error);
-      toast.error('Verwijderen mislukt');
+      toast.error('Verwijderen mislukt: ' + error.message);
     }
   };
 
