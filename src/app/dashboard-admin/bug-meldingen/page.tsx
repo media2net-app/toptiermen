@@ -44,6 +44,8 @@ export default function BugMeldingen() {
   const [selectedReport, setSelectedReport] = useState<BugReport | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
 
+  console.log('🔍 BugMeldingen component rendering');
+
   // Fetch data from database and localStorage
   useEffect(() => {
     console.log('🔍 Bug meldingen component mounted');
@@ -169,6 +171,7 @@ export default function BugMeldingen() {
   });
 
   if (loading) {
+    console.log('🔍 Showing loading state');
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
@@ -180,6 +183,7 @@ export default function BugMeldingen() {
   }
 
   if (error) {
+    console.log('🔍 Showing error state:', error);
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
@@ -193,6 +197,7 @@ export default function BugMeldingen() {
     );
   }
 
+  console.log('🔍 Rendering main component');
   return (
     <div className="space-y-6">
       {/* Header */}
