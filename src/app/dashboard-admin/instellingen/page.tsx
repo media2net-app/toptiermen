@@ -11,8 +11,10 @@ import {
   EyeIcon,
   EyeSlashIcon,
   CheckCircleIcon,
-  ExclamationTriangleIcon
+  ExclamationTriangleIcon,
+  ChartBarIcon
 } from '@heroicons/react/24/outline';
+import CDNPerformanceTest from '@/components/admin/CDNPerformanceTest';
 
 interface StripeConfig {
   publishableKey: string;
@@ -676,6 +678,9 @@ export default function AdminSettings() {
               <GlobeAltIcon className="w-6 h-6 text-[#B6C948]" />
               Platform Instellingen
             </h2>
+            
+            {/* CDN Performance Test */}
+            <CDNPerformanceTest className="mb-6" />
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">

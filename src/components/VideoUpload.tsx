@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { CloudArrowUpIcon, PlayIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'react-hot-toast';
+import { getCDNVideoUrl, preloadVideo } from '@/lib/cdn-config';
 
 interface VideoUploadProps {
   currentVideoUrl?: string;
@@ -86,37 +87,15 @@ export default function VideoUpload({
     setProcessingStatus('Video verwerken...');
     setProcessingProgress(0);
     
-    // Fast processing simulation - only 800ms total
-    const processingSteps = [
-      { name: 'Video verwerken...', progress: 33 },
-      { name: 'URL genereren...', progress: 66 },
-      { name: 'Voltooid!', progress: 100 }
-    ];
+    // Immediate processing - no artificial delays
+    console.log('⚡ Starting immediate processing...');
     
-    let currentStep = 0;
-    const processingInterval = setInterval(() => {
-      const step = processingSteps[currentStep];
-      if (!step) {
-        clearInterval(processingInterval);
-        console.log('🔄 Processing steps complete, clearing interval');
-        return;
-      }
-      
-      setProcessingProgress(step.progress);
-      setProcessingStatus(step.name);
-      
-      console.log('⚙️ Processing step:', step.name, step.progress + '%');
-      
-      currentStep++;
-    }, 200); // Much faster interval
-    
-    // Complete processing quickly
+    // Complete processing immediately
     setTimeout(() => {
       console.log('✅ ===== PROCESSING COMPLETE =====');
       const totalDuration = Date.now() - startTime;
       console.log('⏱️ Total time:', totalDuration + 'ms');
       
-      clearInterval(processingInterval);
       setProcessingStatus('Voltooid!');
       setProcessingProgress(100);
       setUploadedBytes(file.size);
@@ -124,7 +103,10 @@ export default function VideoUpload({
       setUploadedVideoUrl(urlData.publicUrl);
       onVideoUploaded(urlData.publicUrl);
       toast.success('Video succesvol geüpload!');
-    }, 800); // Much faster total processing time
+      
+      // Complete processing
+      setIsProcessing(false);
+    }, 100); // Only 100ms for immediate completion
   };
 
   const uploadVideo = async (file: File) => {
@@ -179,49 +161,40 @@ export default function VideoUpload({
       setUploadStatus('Uploaden...');
       setUploadProgress(5);
 
-      // Simulate progress during upload (0-100%)
+      // Real upload progress tracking
       const progressInterval = setInterval(() => {
-        setUploadProgress(prev => {
-          const newProgress = Math.min(100, prev + Math.random() * 3);
-          
-          // Calculate speed and time
-          const elapsed = (Date.now() - startTime) / 1000;
-          const uploaded = (file.size * newProgress) / 100;
-          const speed = uploaded / Math.max(elapsed, 1);
-          
-          setUploadedBytes(uploaded);
-          setUploadSpeed(speed);
-          
-          // Calculate remaining time
-          const remaining = file.size - uploaded;
-          const remainingTime = remaining / Math.max(speed, 1);
-          
-          if (remainingTime > 60) {
-            const minutes = Math.floor(remainingTime / 60);
-            const seconds = Math.floor(remainingTime % 60);
-            setTimeRemaining(`${minutes}:${seconds.toString().padStart(2, '0')} resterend`);
-          } else {
-            setTimeRemaining(`${Math.floor(remainingTime)}s resterend`);
-          }
-          
-          console.log('📈 Upload progress:', {
-            progress: newProgress.toFixed(1) + '%',
-            uploaded: (uploaded / (1024 * 1024)).toFixed(1) + ' MB',
-            speed: (speed / (1024 * 1024)).toFixed(1) + ' MB/s',
-            elapsed: elapsed.toFixed(1) + 's',
-            remaining: timeRemaining
-          });
-          
-          // When upload reaches 100%, just stop the progress interval
-          // The actual processing will start after the upload completes
-          if (newProgress >= 100) {
-            console.log('🔄 Upload progress complete, stopping interval...');
-            clearInterval(progressInterval);
-          }
-          
-          return newProgress;
+        const elapsed = (Date.now() - startTime) / 1000;
+        
+        // Estimate progress based on time elapsed and file size
+        // Assume average upload speed of 5MB/s for estimation
+        const estimatedSpeed = 5 * 1024 * 1024; // 5MB/s
+        const estimatedUploaded = Math.min(file.size, estimatedSpeed * elapsed);
+        const estimatedProgress = Math.min(95, (estimatedUploaded / file.size) * 100);
+        
+        setUploadProgress(estimatedProgress);
+        setUploadedBytes(estimatedUploaded);
+        setUploadSpeed(estimatedSpeed);
+        
+        // Calculate remaining time
+        const remaining = file.size - estimatedUploaded;
+        const remainingTime = remaining / Math.max(estimatedSpeed, 1);
+        
+        if (remainingTime > 60) {
+          const minutes = Math.floor(remainingTime / 60);
+          const seconds = Math.floor(remainingTime % 60);
+          setTimeRemaining(`${minutes}:${seconds.toString().padStart(2, '0')} resterend`);
+        } else {
+          setTimeRemaining(`${Math.floor(remainingTime)}s resterend`);
+        }
+        
+        console.log('📈 Upload progress:', {
+          progress: estimatedProgress.toFixed(1) + '%',
+          uploaded: (estimatedUploaded / (1024 * 1024)).toFixed(1) + ' MB',
+          speed: (estimatedSpeed / (1024 * 1024)).toFixed(1) + ' MB/s',
+          elapsed: elapsed.toFixed(1) + 's',
+          remaining: timeRemaining
         });
-      }, 300);
+      }, 500); // Update every 500ms instead of 300ms
 
       // Upload to Supabase Storage (same pattern as PDFUpload)
       console.log('🚀 Starting Supabase upload...');
@@ -239,7 +212,8 @@ export default function VideoUpload({
         .from('workout-videos')
         .upload(filePath, file, {
           cacheControl: '3600',
-          upsert: false
+          upsert: false,
+          contentType: file.type // Explicitly set content type for better performance
         });
 
       const uploadDuration = Date.now() - uploadStartTime;
@@ -304,6 +278,9 @@ export default function VideoUpload({
 
       // Start processing steps with the correct parameters
       startProcessingSteps(urlData, file, startTime);
+      
+      // Preload video for better performance
+      preloadVideo(urlData.publicUrl);
 
     } catch (error: any) {
       console.error('❌ ===== UPLOAD FAILED =====');
@@ -420,7 +397,7 @@ export default function VideoUpload({
             </button>
           </div>
           <video 
-            src={currentVideoUrl || uploadedVideoUrl || ''} 
+            src={getCDNVideoUrl(currentVideoUrl || uploadedVideoUrl || '')} 
             controls 
             className="w-full rounded-lg"
             preload="metadata"

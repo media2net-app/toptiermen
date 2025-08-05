@@ -446,6 +446,182 @@ export default function CallOverview() {
       notes: "⚠️ KRITIEK: Bucket was per ongeluk geleegd tijdens S3 → Vercel Blob → Supabase migratie. Technische upload functionaliteit is klaar!"
     },
     {
+      title: "Video Upload bij Workout - Examen Onderdeel Academy",
+      description: "Video upload functionaliteit toevoegen aan workout sessies als examen onderdeel",
+      priority: "high",
+      deadline: "20 augustus",
+      status: "not-started",
+      assignee: "Development",
+      tasks: [
+        "Video upload component integreren in workout sessies",
+        "Examen validatie voor video uploads",
+        "Progress tracking voor video uploads",
+        "Feedback systeem voor geüploade video's",
+        "Academy integratie voor video beoordeling"
+      ],
+      notes: "Nieuwe feature: Video upload als onderdeel van workout sessies voor academy examens"
+    },
+    {
+      title: "Tekst Samenvattend van Video - AI Implementatie",
+      description: "Automatische tekst generatie van video content voor samenvattingen",
+      priority: "medium",
+      deadline: "25 augustus",
+      status: "not-started",
+      assignee: "Development",
+      tasks: [
+        "AI video transcriptie implementeren",
+        "Automatische samenvatting generatie",
+        "Key points extractie uit video's",
+        "Database opslag voor video metadata",
+        "UI voor video samenvattingen"
+      ],
+      notes: "AI-powered feature voor automatische video samenvattingen"
+    },
+    {
+      title: "Automatisch Uitloggen Uitzetten",
+      description: "Automatische logout functionaliteit uitschakelen voor betere user experience",
+      priority: "high",
+      deadline: "10 augustus",
+      status: "not-started",
+      assignee: "Development",
+      tasks: [
+        "Session timeout configuratie aanpassen",
+        "Auto-refresh token implementatie",
+        "Remember me functionaliteit",
+        "Session persistence verbeteren",
+        "User preference voor session lengte"
+      ],
+      notes: "Verbeter user experience door automatische uitlog te voorkomen"
+    },
+    {
+      title: "Niveau Weg bij Trainingsschema",
+      description: "Niveau/difficulty indicator verwijderen uit trainingsschema interface",
+      priority: "low",
+      deadline: "15 augustus",
+      status: "not-started",
+      assignee: "Development",
+      tasks: [
+        "Difficulty field verwijderen uit schema builder",
+        "UI aanpassingen voor schema weergave",
+        "Database schema updates indien nodig",
+        "Admin interface aanpassingen",
+        "Testing van gewijzigde functionaliteit"
+      ],
+      notes: "UI cleanup: niveau indicator weghalen uit trainingsschema's"
+    },
+    {
+      title: "Volgorde Aanpassen - Voedingsplannen",
+      description: "Volgorde van voedingsplannen en maaltijden aanpassen voor betere UX",
+      priority: "medium",
+      deadline: "20 augustus",
+      status: "not-started",
+      assignee: "Development",
+      tasks: [
+        "Meal order management systeem",
+        "Drag & drop functionaliteit voor maaltijden",
+        "Order persistence in database",
+        "UI verbeteringen voor volgorde aanpassing",
+        "Mobile responsive drag & drop"
+      ],
+      notes: "Verbeter gebruikerservaring door volgorde aanpassing mogelijkheden"
+    },
+    {
+      title: "Max 6 Maaltijden - Voedingsplannen Limiet",
+      description: "Maximum van 6 maaltijden per dag implementeren in voedingsplannen",
+      priority: "medium",
+      deadline: "18 augustus",
+      status: "not-started",
+      assignee: "Development",
+      tasks: [
+        "Maaltijd limiet validatie toevoegen",
+        "UI feedback voor maximum bereikt",
+        "Database constraints voor maaltijd limiet",
+        "Error handling voor te veel maaltijden",
+        "User guidance voor optimale maaltijd verdeling"
+      ],
+      notes: "Implementeer limiet van 6 maaltijden per dag voor optimale voedingsplanning"
+    },
+    {
+      title: "Ontbijt Snack - Voedingsplannen Toevoegen",
+      description: "Ontbijt snack optie toevoegen aan voedingsplannen systeem",
+      priority: "low",
+      deadline: "22 augustus",
+      status: "not-started",
+      assignee: "Development",
+      tasks: [
+        "Ontbijt snack meal type toevoegen",
+        "UI aanpassingen voor ontbijt snack",
+        "Database schema updates",
+        "Recipe library uitbreiding",
+        "Nutritional guidance voor ontbijt snacks"
+      ],
+      notes: "Nieuwe maaltijdtype: ontbijt snack voor flexibele voedingsplanning"
+    },
+    {
+      title: "Fotos in Algemene Database - Image Storage",
+      description: "Foto's verplaatsen naar algemene database storage voor betere organisatie",
+      priority: "medium",
+      deadline: "25 augustus",
+      status: "not-started",
+      assignee: "Development",
+      tasks: [
+        "Algemene image storage bucket setup",
+        "Image upload component migratie",
+        "Database schema voor image metadata",
+        "Image management interface",
+        "Legacy image migratie script"
+      ],
+      notes: "Centraliseer image storage in algemene database voor betere organisatie"
+    },
+    {
+      title: "Voedingswaarden Nalopen - Macros Kloppen Niet",
+      description: "Voedingswaarden en macro's controleren en corrigeren per gerecht",
+      priority: "high",
+      deadline: "30 augustus",
+      status: "completed",
+      assignee: "Content/Development",
+      tasks: [
+        "Database audit van voedingswaarden",
+        "Macro berekeningen controleren",
+        "Recipe data validatie",
+        "Nutritional database updates",
+        "User feedback systeem voor incorrecte data"
+      ],
+      notes: "✅ AFGEROND: Alle voedingswaarden zijn gecorrigeerd en accurate macro berekeningen geïmplementeerd"
+    },
+    {
+      title: "Meetpunt Test - Voedingsplanning Validatie",
+      description: "Test implementatie voor meetpunten en progressie tracking",
+      priority: "medium",
+      deadline: "28 augustus",
+      status: "not-started",
+      assignee: "Development",
+      tasks: [
+        "Meetpunt tracking systeem",
+        "Progressie visualisatie",
+        "Data export functionaliteit",
+        "Goal setting interface",
+        "Progressie rapporten"
+      ],
+      notes: "Implementeer meetpunt systeem voor voedingsplanning progressie"
+    },
+    {
+      title: "Aanbevolen Supplementen - Visolie Omega 3",
+      description: "Supplement aanbevelingen toevoegen aan voedingsplannen",
+      priority: "low",
+      deadline: "5 september",
+      status: "not-started",
+      assignee: "Content/Development",
+      tasks: [
+        "Supplement database opzetten",
+        "Visolie Omega 3 aanbevelingen",
+        "Elektrolyten supplementen",
+        "Personalized supplement advies",
+        "Supplement integratie in voedingsplannen"
+      ],
+      notes: "Nieuwe feature: supplement aanbevelingen (visolie, elektrolyten)"
+    },
+    {
       title: "Content & Copywriting",
       description: "Alle teksten en content finaliseren voor lancering",
       priority: "critical",

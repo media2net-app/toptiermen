@@ -91,47 +91,33 @@ export default function AcademyVideoUpload({
     setProcessingStatus('Academy video verwerken...');
     setProcessingProgress(0);
     
-    // Fast processing simulation - only 800ms total
-    const processingSteps = [
-      { name: 'Academy video verwerken...', progress: 33 },
-      { name: 'URL genereren...', progress: 66 },
-      { name: 'Voltooid!', progress: 100 }
-    ];
+    // Immediate processing - no artificial delays
+    console.log('⚡ Starting immediate academy video processing...');
     
-    let currentStep = 0;
-    const processingInterval = setInterval(() => {
-      const step = processingSteps[currentStep];
-      if (!step) {
-        clearInterval(processingInterval);
-        
-        // Processing complete
-        setIsProcessing(false);
-        setProcessingProgress(100);
-        setProcessingStatus('Academy video gereed!');
-        
-        // Set the uploaded video URL
-        const videoUrl = urlData.publicUrl;
-        setUploadedVideoUrl(videoUrl);
-        
-        // Call the callback
-        onVideoUploaded(videoUrl);
-        
-        const totalDuration = Date.now() - startTime;
-        console.log('✅ ===== ACADEMY VIDEO UPLOAD COMPLETE =====');
-        console.log('📊 Final stats:', {
-          totalDuration: totalDuration + 'ms',
-          fileSize: (file.size / (1024 * 1024)).toFixed(2) + ' MB',
-          videoUrl: videoUrl
-        });
-        
-        toast.success('Academy video succesvol geüpload!');
-        return;
-      }
+    // Complete processing immediately
+    setTimeout(() => {
+      // Processing complete
+      setIsProcessing(false);
+      setProcessingProgress(100);
+      setProcessingStatus('Academy video gereed!');
       
-      setProcessingStatus(step.name);
-      setProcessingProgress(step.progress);
-      currentStep++;
-    }, 267); // 800ms total / 3 steps = ~267ms per step
+      // Set the uploaded video URL
+      const videoUrl = urlData.publicUrl;
+      setUploadedVideoUrl(videoUrl);
+      
+      // Call the callback
+      onVideoUploaded(videoUrl);
+      
+      const totalDuration = Date.now() - startTime;
+      console.log('✅ ===== ACADEMY VIDEO UPLOAD COMPLETE =====');
+      console.log('📊 Final stats:', {
+        totalDuration: totalDuration + 'ms',
+        fileSize: (file.size / (1024 * 1024)).toFixed(2) + ' MB',
+        videoUrl: videoUrl
+      });
+      
+      toast.success('Academy video succesvol geüpload!');
+    }, 100); // Only 100ms for immediate completion
   };
 
   const uploadVideo = async (file: File) => {
@@ -256,7 +242,8 @@ export default function AcademyVideoUpload({
         .from('academy-videos')
         .upload(filePath, file, {
           cacheControl: '3600',
-          upsert: false
+          upsert: false,
+          contentType: file.type // Explicitly set content type for better performance
         });
 
       const uploadDuration = Date.now() - uploadStartTime;

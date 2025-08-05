@@ -1,0 +1,55 @@
+{
+  "headers": [
+    {
+      "source": "/storage/v1/object/public/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "CDN-Cache-Control",
+          "value": "public, max-age=86400"
+        },
+        {
+          "key": "Accept-Encoding",
+          "value": "gzip, deflate, br"
+        }
+      ]
+    },
+    {
+      "source": "/(.*\\.(mp4|mov|avi|webm|mkv))",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, s-maxage=86400"
+        },
+        {
+          "key": "Content-Type",
+          "value": "video/mp4"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/cdn/videos/(.*)",
+      "destination": "https://wkjvstuttbeyqzyjayxj.supabase.co/storage/v1/object/public/workout-videos/$1"
+    },
+    {
+      "source": "/cdn/academy/(.*)",
+      "destination": "https://wkjvstuttbeyqzyjayxj.supabase.co/storage/v1/object/public/academy-videos/$1"
+    }
+  ],
+  "functions": {
+    "src/app/api/**/*.ts": {
+      "maxDuration": 30
+    }
+  },
+  "regions": ["iad1"],
+  "build": {
+    "env": {
+      "NEXT_PUBLIC_CDN_ENABLED": "true"
+    }
+  }
+} 
