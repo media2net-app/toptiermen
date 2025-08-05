@@ -49,15 +49,7 @@ export default function BugMeldingen() {
   // Fetch data from database and localStorage
   useEffect(() => {
     console.log('🔍 Bug meldingen component mounted');
-    
-    // Simple test - set empty data immediately
-    setTimeout(() => {
-      console.log('🔍 Setting empty data for testing');
-      setBugReports([]);
-      setLoading(false);
-    }, 1000);
-    
-    // fetchBugReports();
+    fetchBugReports();
   }, []);
 
   const fetchBugReports = async () => {
