@@ -61,6 +61,15 @@ export default function TestUserFeedback({ isTestUser, currentPage, onNoteCreate
     }
   }, [user?.id, isTestUser]);
 
+  // Cleanup function to remove any leftover screenshot elements when component unmounts
+  useEffect(() => {
+    return () => {
+      if (isScreenshotMode) {
+        stopScreenshotMode();
+      }
+    };
+  }, [isScreenshotMode]);
+
   const fetchNotes = async () => {
     try {
       // Try to fetch from database first
@@ -87,6 +96,33 @@ export default function TestUserFeedback({ isTestUser, currentPage, onNoteCreate
 
   // Only show for test users
   if (!isTestUser) return null;
+
+  // Cleanup any leftover screenshot elements on component mount
+  useEffect(() => {
+    const cleanupScreenshotElements = () => {
+      const allElements = document.querySelectorAll('div');
+      allElements.forEach(element => {
+        const style = element.style;
+        if (style.position === 'fixed' && 
+            (element.textContent === 'Sleep om een gebied te selecteren' || 
+             element.textContent === 'Druk ESC om te annuleren')) {
+          console.log('🧹 Cleaning up leftover screenshot element:', element.textContent);
+          element.remove();
+        }
+      });
+    };
+
+    // Cleanup on mount
+    cleanupScreenshotElements();
+
+    // Also cleanup when window gains focus (in case user navigated away and back)
+    const handleFocus = () => {
+      cleanupScreenshotElements();
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, []);
 
   const startScreenshotMode = () => {
     console.log('🎯 Starting macOS-style screenshot mode...');
@@ -284,11 +320,27 @@ export default function TestUserFeedback({ isTestUser, currentPage, onNoteCreate
       selectionBoxRef.current = null;
     }
     
-    // Remove instructions and escape hint
-    const instructions = document.querySelector('.screenshot-overlay + div');
-    const escapeHint = document.querySelector('.screenshot-overlay + div + div');
-    if (instructions) instructions.remove();
-    if (escapeHint) escapeHint.remove();
+    // Remove all screenshot-related elements
+    const allElements = document.querySelectorAll('div');
+    allElements.forEach(element => {
+      const style = element.style;
+      if (style.position === 'fixed' && 
+          (element.textContent === 'Sleep om een gebied te selecteren' || 
+           element.textContent === 'Druk ESC om te annuleren')) {
+        console.log('🧹 Removing screenshot element:', element.textContent);
+        element.remove();
+      }
+    });
+    
+    // Also remove any elements with specific styles that match our screenshot elements
+    const screenshotElements = document.querySelectorAll('div[style*="position: fixed"][style*="z-index: 10000"]');
+    screenshotElements.forEach(element => {
+      if (element.textContent === 'Sleep om een gebied te selecteren' || 
+          element.textContent === 'Druk ESC om te annuleren') {
+        console.log('🧹 Removing screenshot element by style:', element.textContent);
+        element.remove();
+      }
+    });
     
     // Reset state
     isSelectingRef.current = false;
