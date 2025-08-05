@@ -46,20 +46,25 @@ export default function BugMeldingen() {
 
   // Fetch data from database and localStorage
   useEffect(() => {
+    console.log('🔍 Bug meldingen component mounted');
     fetchBugReports();
   }, []);
 
   const fetchBugReports = async () => {
+    console.log('🔍 Starting fetchBugReports');
     setLoading(true);
     try {
       const reports: BugReport[] = [];
 
       // Try to fetch from database
       try {
+        console.log('🔍 Fetching from database...');
         const { data: dbReports, error: dbError } = await supabase
           .from('test_notes')
           .select('*')
           .order('created_at', { ascending: false });
+
+        console.log('🔍 Database response:', { dbReports, dbError });
 
         if (!dbError && dbReports) {
           reports.push(...dbReports.map(report => ({ ...report, source: 'database' as const })));
@@ -71,6 +76,7 @@ export default function BugMeldingen() {
       // Get from localStorage (client-side only)
       if (typeof window !== 'undefined') {
         try {
+          console.log('🔍 Fetching from localStorage...');
           const localReports = JSON.parse(localStorage.getItem('test_notes') || '[]');
           reports.push(...localReports.map((report: any) => ({ ...report, source: 'localStorage' as const })));
         } catch (error) {
@@ -81,6 +87,7 @@ export default function BugMeldingen() {
       // Sort by created_at
       reports.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
+      console.log('🔍 Final reports:', reports);
       setBugReports(reports);
       setError(null);
     } catch (error) {
