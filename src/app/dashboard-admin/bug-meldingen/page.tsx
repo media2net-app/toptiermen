@@ -49,12 +49,27 @@ export default function BugMeldingen() {
   // Fetch data from database and localStorage
   useEffect(() => {
     console.log('🔍 Bug meldingen component mounted');
-    fetchBugReports();
+    
+    // Simple test - set empty data immediately
+    setTimeout(() => {
+      console.log('🔍 Setting empty data for testing');
+      setBugReports([]);
+      setLoading(false);
+    }, 1000);
+    
+    // fetchBugReports();
   }, []);
 
   const fetchBugReports = async () => {
     console.log('🔍 Starting fetchBugReports');
     setLoading(true);
+    
+    // Force loading to false after 5 seconds as fallback
+    const timeoutId = setTimeout(() => {
+      console.log('🔍 Timeout fallback - setting loading to false');
+      setLoading(false);
+    }, 5000);
+
     try {
       const reports: BugReport[] = [];
 
@@ -96,6 +111,8 @@ export default function BugMeldingen() {
       console.error('Error fetching bug reports:', error);
       setError('Fout bij ophalen van bug meldingen');
     } finally {
+      clearTimeout(timeoutId);
+      console.log('🔍 Setting loading to false');
       setLoading(false);
     }
   };
