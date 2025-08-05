@@ -15,6 +15,7 @@ import {
   ChartBarIcon
 } from '@heroicons/react/24/outline';
 import CDNPerformanceTest from '@/components/admin/CDNPerformanceTest';
+import VideoUploadLogs from '@/components/admin/VideoUploadLogs';
 
 interface StripeConfig {
   publishableKey: string;
@@ -681,6 +682,9 @@ export default function AdminSettings() {
             
             {/* CDN Performance Test */}
             <CDNPerformanceTest className="mb-6" />
+            
+            {/* Video Upload Performance Logs */}
+            <VideoUploadLogs />
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">

@@ -2,6 +2,12 @@ import React, { useState, useRef, useEffect } from 'react';
 import { CloudArrowUpIcon, PlayIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'react-hot-toast';
+import { 
+  startVideoUploadLog, 
+  logVideoUploadStep, 
+  completeVideoUploadStep, 
+  completeVideoUpload 
+} from '@/lib/video-upload-logger';
 // import { getCDNVideoUrl, preloadVideo } from '@/lib/cdn-config';
 
 interface VideoUploadProps {
@@ -77,6 +83,7 @@ export default function VideoUpload({
   };
 
   const startProcessingSteps = (urlData: any, file: File, startTime: number) => {
+    logVideoUploadStep('Video Processing');
     console.log('🔄 Starting processing steps...');
     
     // Set processing state
@@ -106,10 +113,23 @@ export default function VideoUpload({
       
       // Complete processing
       setIsProcessing(false);
+      
+      // Complete the processing step and entire upload
+      completeVideoUploadStep('Video Processing', {
+        processingDuration: 100,
+        totalDuration,
+        videoUrl: urlData.publicUrl
+      });
+      
+      // Complete the entire upload session
+      completeVideoUpload(true);
     }, 100); // Only 100ms for immediate completion
   };
 
   const uploadVideo = async (file: File) => {
+    // Start detailed logging
+    const logId = startVideoUploadLog(file);
+    
     console.log('🚀 ===== VIDEO UPLOAD START =====');
     console.log('📋 File details:', {
       name: file.name,
@@ -138,6 +158,8 @@ export default function VideoUpload({
     console.log('⏱️ Upload start time:', new Date(startTime).toISOString());
 
     try {
+      logVideoUploadStep('File Validation and Preparation');
+      
       console.log('🔄 Starting video upload to Supabase Storage...');
       console.log('📁 File size:', (file.size / (1024 * 1024)).toFixed(2), 'MB');
 
@@ -156,10 +178,19 @@ export default function VideoUpload({
         upsert: false
       });
 
+      completeVideoUploadStep('File Validation and Preparation', {
+        filePath,
+        filename,
+        bucket: 'workout-videos'
+      });
+
       // Start progress tracking
+      logVideoUploadStep('Progress Tracking Setup');
       console.log('📊 Starting progress tracking...');
       setUploadStatus('Uploaden...');
       setUploadProgress(5);
+
+      completeVideoUploadStep('Progress Tracking Setup');
 
       // Real upload progress tracking
       const progressInterval = setInterval(() => {
@@ -196,7 +227,8 @@ export default function VideoUpload({
         });
       }, 500); // Update every 500ms instead of 300ms
 
-      // Upload to Supabase Storage (same pattern as PDFUpload)
+      // Upload to Supabase Storage
+      logVideoUploadStep('Supabase Upload');
       console.log('🚀 Starting Supabase upload...');
       console.log('🔗 Supabase client check:', {
         hasSupabase: !!supabase,
@@ -218,6 +250,13 @@ export default function VideoUpload({
 
       const uploadDuration = Date.now() - uploadStartTime;
       console.log('⏱️ Upload duration:', uploadDuration + 'ms');
+
+      completeVideoUploadStep('Supabase Upload', {
+        uploadDuration,
+        filePath,
+        fileSize: file.size,
+        uploadSpeed: (file.size / uploadDuration) * 1000 // bytes per second
+      });
 
       // Clear progress interval
       clearInterval(progressInterval);
@@ -266,12 +305,18 @@ export default function VideoUpload({
       });
       
       // Get public URL immediately
+      logVideoUploadStep('Public URL Generation');
       console.log('🔗 Getting public URL...');
       const { data: urlData } = supabase.storage
         .from('workout-videos')
         .getPublicUrl(data.path);
 
       console.log('🌐 Public URL result:', {
+        publicUrl: urlData.publicUrl,
+        path: data.path
+      });
+
+      completeVideoUploadStep('Public URL Generation', {
         publicUrl: urlData.publicUrl,
         path: data.path
       });
@@ -295,6 +340,9 @@ export default function VideoUpload({
         uploadedBytes,
         timeRemaining
       });
+      
+      // Complete upload with error
+      completeVideoUpload(false, error.message || 'Onbekende fout');
       
       // Call error callback if provided
       if (onVideoUploadError) {
