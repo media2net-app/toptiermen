@@ -858,15 +858,15 @@ export default function CallOverview() {
       {/* Navigation */}
       <div className="bg-[#181F17] border-b border-[#3A4D23]">
         <div className="max-w-7xl mx-auto px-6">
-          <nav className="flex space-x-8 overflow-x-auto">
+          <nav className="flex space-x-8 overflow-x-auto scrollbar-thin scrollbar-thumb-[#8BAE5A] scrollbar-track-[#232D1A] pb-2">
             {sections.map((section) => (
               <button
                 key={section.id}
                 onClick={() => setActiveSection(section.id)}
-                className={`py-4 px-2 border-b-2 font-medium text-sm whitespace-nowrap ${
+                className={`py-4 px-2 border-b-2 font-medium text-sm whitespace-nowrap transition-all duration-200 ${
                   activeSection === section.id
                     ? 'border-[#8BAE5A] text-[#8BAE5A]'
-                    : 'border-transparent text-gray-400 hover:text-gray-300'
+                    : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-600'
                 }`}
               >
                 {section.name}
@@ -933,21 +933,16 @@ export default function CallOverview() {
                     <span className="text-xl mr-2">🔥</span>
                     Critical ({todoItems.filter(item => item.priority === 'critical' && item.status !== 'completed').length} taken)
                   </h4>
-                  <div className="space-y-2">
-                    {todoItems.filter(item => item.priority === 'critical' && item.status !== 'completed').slice(0, 3).map((item, index) => (
-                      <div key={index} className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <span className="text-red-400">⚠️</span>
-                          <span className="text-white text-sm">{item.title}</span>
+                  <div className="space-y-2 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-red-500 scrollbar-track-red-900/20">
+                    {todoItems.filter(item => item.priority === 'critical' && item.status !== 'completed').map((item, index) => (
+                      <div key={index} className="flex items-center justify-between p-2 rounded hover:bg-red-900/10 transition-colors">
+                        <div className="flex items-center space-x-3 flex-1 min-w-0">
+                          <span className="text-red-400 flex-shrink-0">⚠️</span>
+                          <span className="text-white text-sm truncate">{item.title}</span>
                         </div>
-                        <span className="text-red-300 text-xs">{item.deadline}</span>
+                        <span className="text-red-300 text-xs flex-shrink-0 ml-2">{item.deadline}</span>
                       </div>
                     ))}
-                    {todoItems.filter(item => item.priority === 'critical' && item.status !== 'completed').length > 3 && (
-                      <div className="text-red-300 text-xs mt-2">
-                        +{todoItems.filter(item => item.priority === 'critical' && item.status !== 'completed').length - 3} meer critical taken
-                      </div>
-                    )}
                   </div>
                 </div>
 
@@ -957,21 +952,16 @@ export default function CallOverview() {
                     <span className="text-xl mr-2">⚡</span>
                     High Priority ({todoItems.filter(item => item.priority === 'high' && item.status !== 'completed').length} taken)
                   </h4>
-                  <div className="space-y-2">
-                    {todoItems.filter(item => item.priority === 'high' && item.status !== 'completed').slice(0, 3).map((item, index) => (
-                      <div key={index} className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <span className="text-orange-400">📝</span>
-                          <span className="text-white text-sm">{item.title}</span>
+                  <div className="space-y-2 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-orange-500 scrollbar-track-orange-900/20">
+                    {todoItems.filter(item => item.priority === 'high' && item.status !== 'completed').map((item, index) => (
+                      <div key={index} className="flex items-center justify-between p-2 rounded hover:bg-orange-900/10 transition-colors">
+                        <div className="flex items-center space-x-3 flex-1 min-w-0">
+                          <span className="text-orange-400 flex-shrink-0">📝</span>
+                          <span className="text-white text-sm truncate">{item.title}</span>
                         </div>
-                        <span className="text-orange-300 text-xs">{item.deadline}</span>
+                        <span className="text-orange-300 text-xs flex-shrink-0 ml-2">{item.deadline}</span>
                       </div>
                     ))}
-                    {todoItems.filter(item => item.priority === 'high' && item.status !== 'completed').length > 3 && (
-                      <div className="text-orange-300 text-xs mt-2">
-                        +{todoItems.filter(item => item.priority === 'high' && item.status !== 'completed').length - 3} meer high priority taken
-                      </div>
-                    )}
                   </div>
                 </div>
 
