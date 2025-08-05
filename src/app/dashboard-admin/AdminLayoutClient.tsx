@@ -35,6 +35,7 @@ import {
   BellIcon
 } from '@heroicons/react/24/outline';
 import { SwipeIndicator } from '@/components/ui';
+import SessionMonitor from '@/components/SessionMonitor';
 
 // Type definitions for menu items
 interface MenuItem {
@@ -199,23 +200,53 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
 export default function AdminLayoutClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, loading, logoutAndRedirect } = useSupabaseAuth();
+  const { user, loading, logoutAndRedirect, refreshSession } = useSupabaseAuth();
   const isAuthenticated = !!user;
   const { showDebug, setShowDebug } = useDebug();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [showPlanningModal, setShowPlanningModal] = useState(false);
+  const [authCheckAttempts, setAuthCheckAttempts] = useState(0);
+  const [isSessionRefreshing, setIsSessionRefreshing] = useState(false);
 
-  // Check authentication
+  // Check authentication with retry logic
   useEffect(() => {
-    if (!loading && !isAuthenticated) {
+    if (!loading && !isAuthenticated && authCheckAttempts < 3) {
+      console.log(`Auth check attempt ${authCheckAttempts + 1}/3`);
+      setAuthCheckAttempts(prev => prev + 1);
+      
+      // Try to refresh session before redirecting
+      const attemptSessionRefresh = async () => {
+        setIsSessionRefreshing(true);
+        try {
+          const refreshed = await refreshSession();
+          if (!refreshed) {
+            // Only redirect if session refresh fails
+            setTimeout(() => {
+              router.push('/login');
+            }, 1000);
+          }
+        } catch (error) {
+          console.error('Session refresh failed:', error);
+          setTimeout(() => {
+            router.push('/login');
+          }, 1000);
+        } finally {
+          setIsSessionRefreshing(false);
+        }
+      };
+
+      attemptSessionRefresh();
+    } else if (!loading && !isAuthenticated && authCheckAttempts >= 3) {
+      // After 3 failed attempts, redirect to login
       router.push('/login');
     }
-  }, [loading, isAuthenticated, router]);
+  }, [loading, isAuthenticated, router, authCheckAttempts, refreshSession]);
 
-  // Check admin role
+  // Check admin role with better error handling
   useEffect(() => {
-            if (!loading && user && user.role?.toLowerCase() !== 'admin') {
+    if (!loading && user && user.role?.toLowerCase() !== 'admin') {
+      console.log('User is not admin, redirecting to dashboard');
       router.push('/dashboard');
     }
   }, [loading, user, router]);
@@ -250,15 +281,19 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
     }
   };
 
-  // Show loading state
-  if (loading) {
+  // Show loading state with better feedback
+  if (loading || isSessionRefreshing) {
     return (
       <div className="min-h-screen bg-[#181F17] flex items-center justify-center" suppressHydrationWarning>
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
-          <div className="text-[#8BAE5A] text-xl">Admin Dashboard laden...</div>
+          <div className="text-[#8BAE5A] text-xl">
+            {isSessionRefreshing ? 'Sessie vernieuwen...' : 'Admin Dashboard laden...'}
+          </div>
           <div className="mt-4">
-            <p className="text-[#B6C948] text-sm">Beheerpaneel wordt geladen</p>
+            <p className="text-[#B6C948] text-sm">
+              {isSessionRefreshing ? 'Bezig met sessie vernieuwen' : 'Beheerpaneel wordt geladen'}
+            </p>
             <button
               onClick={() => window.location.reload()}
               className="mt-2 text-[#8BAE5A] hover:text-[#B6C948] underline text-sm"
@@ -273,7 +308,22 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
 
   // Show unauthorized message if not authenticated or not admin
   if (!isAuthenticated || (user && user.role?.toLowerCase() !== 'admin')) {
-    return null; // Will redirect to appropriate page
+    return (
+      <div className="min-h-screen bg-[#181F17] flex items-center justify-center" suppressHydrationWarning>
+        <div className="text-center">
+          <div className="text-[#8BAE5A] text-xl mb-4">Toegang geweigerd</div>
+          <div className="text-[#B6C948] text-sm mb-4">
+            {!isAuthenticated ? 'Je bent niet ingelogd' : 'Je hebt geen admin rechten'}
+          </div>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#A6C97B] transition"
+          >
+            Opnieuw proberen
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -305,20 +355,46 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
             <div className="hidden sm:flex items-center gap-2">
               <span className="text-[#B6C948] text-xs font-medium">Cache:</span>
               <button
-                onClick={() => {
-                  localStorage.clear();
-                  sessionStorage.clear();
-                  alert('App cache opgeruimd!');
+                onClick={async () => {
+                  try {
+                    // Preserve auth session before clearing cache
+                    const authKey = 'toptiermen-auth';
+                    const authData = localStorage.getItem(authKey);
+                    
+                    // Clear cache but preserve auth
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    
+                    // Restore auth session
+                    if (authData) {
+                      localStorage.setItem(authKey, authData);
+                    }
+                    
+                    // Refresh session to ensure it's still valid
+                    await refreshSession();
+                    
+                    alert('App cache opgeruimd! Sessie behouden.');
+                  } catch (error) {
+                    console.error('Error clearing cache:', error);
+                    alert('Fout bij opruimen cache. Probeer opnieuw.');
+                  }
                 }}
                 className="px-2 py-1 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A] focus:outline-none focus:ring-1 focus:ring-[#8BAE5A] text-xs transition-colors"
-                title="Ruim app cache op"
+                title="Ruim app cache op (behoud sessie)"
               >
                 🧹 App
               </button>
               <button
-                onClick={() => {
+                onClick={async () => {
                   if (confirm('Weet je zeker dat je ALLE cache wilt opruimen? Dit zal de pagina herladen.')) {
-                    window.location.reload();
+                    try {
+                      // Attempt to refresh session before reload
+                      await refreshSession();
+                      window.location.reload();
+                    } catch (error) {
+                      console.error('Error before reload:', error);
+                      window.location.reload();
+                    }
                   }
                 }}
                 className="px-2 py-1 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A] focus:outline-none focus:ring-1 focus:ring-[#8BAE5A] text-xs transition-colors"
@@ -349,6 +425,32 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
                 <option value="true">Debug ON</option>
               </select>
             </div>
+            
+            {/* Session Recovery Button */}
+            <button
+              onClick={async () => {
+                try {
+                  setIsSessionRefreshing(true);
+                  const refreshed = await refreshSession();
+                  if (refreshed) {
+                    alert('Sessie succesvol vernieuwd!');
+                  } else {
+                    alert('Sessie vernieuwen mislukt. Probeer opnieuw in te loggen.');
+                  }
+                } catch (error) {
+                  console.error('Session recovery failed:', error);
+                  alert('Fout bij sessie herstel. Probeer opnieuw in te loggen.');
+                } finally {
+                  setIsSessionRefreshing(false);
+                }
+              }}
+              disabled={isSessionRefreshing}
+              className="hidden sm:block px-3 py-1 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A] focus:outline-none focus:ring-1 focus:ring-[#8BAE5A] text-xs transition-colors disabled:opacity-50"
+              title="Herstel sessie"
+            >
+              {isSessionRefreshing ? '🔄' : '🔧'}
+            </button>
+            
             <Link 
               href="/dashboard" 
               className="hidden sm:block px-4 py-2 rounded-xl bg-[#8BAE5A] text-[#181F17] text-sm font-semibold border border-[#8BAE5A] hover:bg-[#A6C97B] transition"
@@ -385,20 +487,46 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
           <div className="flex items-center gap-2 flex-shrink-0">
             {/* Cache Management for mobile */}
             <button
-              onClick={() => {
-                localStorage.clear();
-                sessionStorage.clear();
-                alert('App cache opgeruimd!');
+              onClick={async () => {
+                try {
+                  // Preserve auth session before clearing cache
+                  const authKey = 'toptiermen-auth';
+                  const authData = localStorage.getItem(authKey);
+                  
+                  // Clear cache but preserve auth
+                  localStorage.clear();
+                  sessionStorage.clear();
+                  
+                  // Restore auth session
+                  if (authData) {
+                    localStorage.setItem(authKey, authData);
+                  }
+                  
+                  // Refresh session to ensure it's still valid
+                  await refreshSession();
+                  
+                  alert('App cache opgeruimd! Sessie behouden.');
+                } catch (error) {
+                  console.error('Error clearing cache:', error);
+                  alert('Fout bij opruimen cache. Probeer opnieuw.');
+                }
               }}
               className="px-2 py-1 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A] focus:outline-none focus:ring-1 focus:ring-[#8BAE5A] text-xs transition-colors"
-              title="Ruim app cache op"
+              title="Ruim app cache op (behoud sessie)"
             >
               🧹
             </button>
             <button
-              onClick={() => {
+              onClick={async () => {
                 if (confirm('Weet je zeker dat je ALLE cache wilt opruimen? Dit zal de pagina herladen.')) {
-                  window.location.reload();
+                  try {
+                    // Attempt to refresh session before reload
+                    await refreshSession();
+                    window.location.reload();
+                  } catch (error) {
+                    console.error('Error before reload:', error);
+                    window.location.reload();
+                  }
                 }
               }}
               className="px-2 py-1 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A] focus:outline-none focus:ring-1 focus:ring-[#8BAE5A] text-xs transition-colors"
@@ -422,6 +550,31 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
               <option value="false">Debug OFF</option>
               <option value="true">Debug ON</option>
             </select>
+            
+            {/* Session Recovery Button for mobile */}
+            <button
+              onClick={async () => {
+                try {
+                  setIsSessionRefreshing(true);
+                  const refreshed = await refreshSession();
+                  if (refreshed) {
+                    alert('Sessie succesvol vernieuwd!');
+                  } else {
+                    alert('Sessie vernieuwen mislukt. Probeer opnieuw in te loggen.');
+                  }
+                } catch (error) {
+                  console.error('Session recovery failed:', error);
+                  alert('Fout bij sessie herstel. Probeer opnieuw in te loggen.');
+                } finally {
+                  setIsSessionRefreshing(false);
+                }
+              }}
+              disabled={isSessionRefreshing}
+              className="px-2 py-1 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A] focus:outline-none focus:ring-1 focus:ring-[#8BAE5A] text-xs transition-colors disabled:opacity-50"
+              title="Herstel sessie"
+            >
+              {isSessionRefreshing ? '🔄' : '🔧'}
+            </button>
             <Link 
               href="/dashboard" 
               className="px-3 py-1 rounded-lg bg-[#8BAE5A] text-[#181F17] text-xs font-semibold border border-[#8BAE5A] hover:bg-[#A6C97B] transition"
@@ -471,6 +624,9 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
         isOpen={showPlanningModal} 
         onClose={() => setShowPlanningModal(false)} 
       />
+      
+      {/* Session Monitor for Admin */}
+      <SessionMonitor isAdmin={true} />
     </div>
   );
 } 

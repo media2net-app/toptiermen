@@ -33,20 +33,38 @@ const getSupabaseClient = () => {
       storage: {
         getItem: (key: string) => {
           if (typeof window !== 'undefined') {
-            return localStorage.getItem(key);
+            try {
+              return localStorage.getItem(key);
+            } catch (error) {
+              console.error('Error reading from localStorage:', error);
+              return null;
+            }
           }
           return null;
         },
         setItem: (key: string, value: string) => {
           if (typeof window !== 'undefined') {
-            localStorage.setItem(key, value);
+            try {
+              localStorage.setItem(key, value);
+            } catch (error) {
+              console.error('Error writing to localStorage:', error);
+            }
           }
         },
         removeItem: (key: string) => {
           if (typeof window !== 'undefined') {
-            localStorage.removeItem(key);
+            try {
+              localStorage.removeItem(key);
+            } catch (error) {
+              console.error('Error removing from localStorage:', error);
+            }
           }
         }
+      }
+    },
+    global: {
+      headers: {
+        'X-Client-Info': 'toptiermen-admin'
       }
     }
   });
@@ -59,6 +77,10 @@ const normalizeRole = (role?: string) => {
   if (!role) return 'USER';
   return role.toUpperCase();
 };
+
+// Session management utilities
+const SESSION_CHECK_INTERVAL = 5 * 60 * 1000; // 5 minutes
+const SESSION_WARNING_TIME = 10 * 60 * 1000; // 10 minutes before expiry
 
 // Types
 interface User {
@@ -76,6 +98,7 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   logoutAndRedirect: (redirectUrl?: string) => Promise<void>;
   updateUser: (updates: Partial<User>) => Promise<void>;
+  refreshSession: () => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -83,7 +106,61 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [sessionCheckInterval, setSessionCheckInterval] = useState<NodeJS.Timeout | null>(null);
   const router = useRouter();
+
+  // Function to refresh session
+  const refreshSession = async (): Promise<boolean> => {
+    try {
+      const { data, error } = await supabase.auth.refreshSession();
+      if (error) {
+        console.error('Session refresh error:', error);
+        return false;
+      }
+      if (data.session) {
+        console.log('Session refreshed successfully');
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Session refresh failed:', error);
+      return false;
+    }
+  };
+
+  // Function to check and maintain session
+  const checkSessionHealth = async () => {
+    try {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        console.error('Session check error:', error);
+        return;
+      }
+
+      if (!session) {
+        console.log('No active session found');
+        return;
+      }
+
+      // Check if session is about to expire
+      const expiresAt = session.expires_at;
+      if (expiresAt) {
+        const now = Math.floor(Date.now() / 1000);
+        const timeUntilExpiry = expiresAt - now;
+        
+        if (timeUntilExpiry < SESSION_WARNING_TIME && timeUntilExpiry > 0) {
+          console.log('Session expiring soon, attempting refresh...');
+          const refreshed = await refreshSession();
+          if (!refreshed) {
+            console.warn('Failed to refresh session, user may need to re-authenticate');
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Session health check failed:', error);
+    }
+  };
 
   useEffect(() => {
     // Get initial session
@@ -121,6 +198,10 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
 
     getInitialSession();
 
+    // Set up session health check interval
+    const interval = setInterval(checkSessionHealth, SESSION_CHECK_INTERVAL);
+    setSessionCheckInterval(interval);
+
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
@@ -146,13 +227,20 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
           }
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
+        } else if (event === 'TOKEN_REFRESHED') {
+          console.log('Token refreshed successfully');
         }
         
         setLoading(false);
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      if (sessionCheckInterval) {
+        clearInterval(sessionCheckInterval);
+      }
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
@@ -314,6 +402,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     signOut,
     logoutAndRedirect,
     updateUser,
+    refreshSession,
   };
 
   return (
