@@ -5,7 +5,13 @@ export async function POST(request: NextRequest) {
   try {
     console.log('🔧 Starting comprehensive database fixes...');
 
-    const fixes = [];
+    const fixes: Array<{
+      status: string;
+      table?: string;
+      operation?: string;
+      error?: string;
+      data?: any;
+    }> = [];
 
     // 1. Fix test_notes table
     console.log('📝 Creating test_notes table...');
