@@ -56,11 +56,11 @@ export default function BugMeldingen() {
     console.log('🔍 Starting fetchBugReports');
     setLoading(true);
     
-    // Force loading to false after 5 seconds as fallback
+    // Force loading to false after 3 seconds as fallback
     const timeoutId = setTimeout(() => {
       console.log('🔍 Timeout fallback - setting loading to false');
       setLoading(false);
-    }, 5000);
+    }, 3000);
 
     try {
       const reports: BugReport[] = [];
