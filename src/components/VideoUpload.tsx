@@ -8,7 +8,7 @@ import {
   completeVideoUploadStep, 
   completeVideoUpload 
 } from '@/lib/video-upload-logger';
-// import { getCDNVideoUrl, preloadVideo } from '@/lib/cdn-config';
+import { getCDNVideoUrl, preloadVideo } from '@/lib/cdn-config';
 
 interface VideoUploadProps {
   currentVideoUrl?: string;
@@ -339,21 +339,26 @@ export default function VideoUpload({
         .from('workout-videos')
         .getPublicUrl(data.path);
 
+      // Apply CDN transformation to the public URL
+      const cdnUrl = getCDNVideoUrl(urlData.publicUrl);
+      
       console.log('🌐 Public URL result:', {
         publicUrl: urlData.publicUrl,
+        cdnUrl: cdnUrl,
         path: data.path
       });
 
       completeVideoUploadStep('Public URL Generation', {
         publicUrl: urlData.publicUrl,
+        cdnUrl: cdnUrl,
         path: data.path
       });
 
-      // Start processing steps with the correct parameters
-      startProcessingSteps(urlData, file, startTime);
+      // Start processing steps with the CDN URL
+      startProcessingSteps({ ...urlData, publicUrl: cdnUrl }, file, startTime);
       
       // Preload video for better performance
-      // preloadVideo(urlData.publicUrl);
+      preloadVideo(cdnUrl);
 
     } catch (error: any) {
       console.error('❌ ===== UPLOAD FAILED =====');

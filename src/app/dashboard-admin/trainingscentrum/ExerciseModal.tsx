@@ -91,6 +91,8 @@ export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: Exe
     }
     
     onSave(formData);
+    // Close modal after save
+    onClose();
   };
 
   const handleVideoUploaded = (url: string) => {
@@ -111,6 +113,8 @@ export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: Exe
       setTimeout(() => {
         onSave(formData);
         setIsAutoSaving(false);
+        // Close modal after successful save
+        onClose();
       }, 500); // Small delay to ensure state is updated
     } else {
       toast.success('Video geüpload! Vul de rest van de velden in en klik op Opslaan.');

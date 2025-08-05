@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { 
   PlusIcon, 
   PencilIcon, 
@@ -31,6 +31,7 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import AdminCard from '@/components/admin/AdminCard';
 import AdminStatsCard from '@/components/admin/AdminStatsCard';
 import AdminButton from '@/components/admin/AdminButton';
+import { getCDNVideoUrl } from '@/lib/cdn-config';
 
 // Mock data - in real app this would come from API
 const mockSchemas = [
@@ -265,14 +266,7 @@ export default function TrainingscentrumBeheer() {
     return () => setMounted(false);
   }, []);
 
-  useEffect(() => {
-    if (mounted) {
-      fetchExercises();
-      fetchSchemas();
-    }
-  }, [mounted]);
-
-  const fetchExercises = async () => {
+  const fetchExercises = useCallback(async () => {
     setLoadingExercises(true);
     setErrorExercises(null);
     try {
@@ -292,9 +286,9 @@ export default function TrainingscentrumBeheer() {
     } finally {
       setLoadingExercises(false);
     }
-  };
+  }, []);
 
-  const fetchSchemas = async () => {
+  const fetchSchemas = useCallback(async () => {
     setLoadingSchemas(true);
     setErrorSchemas(null);
     try {
@@ -314,7 +308,15 @@ export default function TrainingscentrumBeheer() {
     } finally {
       setLoadingSchemas(false);
     }
-  };
+  }, []);
+
+  // Load data when component mounts
+  useEffect(() => {
+    if (mounted) {
+      fetchExercises();
+      fetchSchemas();
+    }
+  }, [mounted, fetchExercises, fetchSchemas]);
 
   const handleAddExercise = async (exerciseData: any) => {
     try {
@@ -884,7 +886,7 @@ export default function TrainingscentrumBeheer() {
                         <div className="relative w-full h-full bg-gradient-to-br from-[#232D1A] to-[#181F17] flex items-center justify-center cursor-pointer">
                           {/* Video Thumbnail (if available) */}
                           <video
-                            src={exercise.video_url}
+                            src={getCDNVideoUrl(exercise.video_url)}
                             className="absolute inset-0 w-full h-full object-cover opacity-30"
                             preload="metadata"
                             muted
