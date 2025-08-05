@@ -484,14 +484,14 @@ export default function CallOverview() {
       tasks: [
         "Video upload component integreren in workout sessies",
         "Examen validatie voor video uploads",
-        "Progress tracking voor video uploads",
+        "Voortgang tracking voor video uploads",
         "Feedback systeem voor geüploade video's",
         "Academy integratie voor video beoordeling"
       ],
       notes: "Nieuwe feature: Video upload als onderdeel van workout sessies voor academy examens"
     },
     {
-      title: "Tekst Samenvattend van Video - AI Implementatie",
+      title: "Tekst Samenvatting van Video - AI Implementatie",
       description: "Automatische tekst generatie van video content voor samenvattingen",
       priority: "medium",
       deadline: "25 augustus",
@@ -500,7 +500,7 @@ export default function CallOverview() {
       tasks: [
         "AI video transcriptie implementeren",
         "Automatische samenvatting generatie",
-        "Key points extractie uit video's",
+        "Belangrijke punten extractie uit video's",
         "Database opslag voor video metadata",
         "UI voor video samenvattingen"
       ],
@@ -528,33 +528,33 @@ export default function CallOverview() {
     },
     {
       title: "Niveau Weg bij Trainingsschema",
-      description: "Niveau/difficulty indicator verwijderen uit trainingsschema interface",
+      description: "Niveau/moeilijkheidsgraad indicator verwijderen uit trainingsschema interface",
       priority: "low",
       deadline: "15 augustus",
       status: "not-started",
       assignee: "Development",
       tasks: [
-        "Difficulty field verwijderen uit schema builder",
+        "Moeilijkheidsgraad veld verwijderen uit schema builder",
         "UI aanpassingen voor schema weergave",
         "Database schema updates indien nodig",
         "Admin interface aanpassingen",
-        "Testing van gewijzigde functionaliteit"
+        "Testen van gewijzigde functionaliteit"
       ],
       notes: "UI cleanup: niveau indicator weghalen uit trainingsschema's"
     },
     {
       title: "Volgorde Aanpassen - Voedingsplannen",
-      description: "Volgorde van voedingsplannen en maaltijden aanpassen voor betere UX",
+      description: "Volgorde van voedingsplannen en maaltijden aanpassen voor betere gebruikerservaring",
       priority: "medium",
       deadline: "20 augustus",
       status: "not-started",
       assignee: "Development",
       tasks: [
-        "Meal order management systeem",
-        "Drag & drop functionaliteit voor maaltijden",
-        "Order persistence in database",
+        "Maaltijd volgorde beheer systeem",
+        "Slepen en neerzetten functionaliteit voor maaltijden",
+        "Volgorde opslaan in database",
         "UI verbeteringen voor volgorde aanpassing",
-        "Mobile responsive drag & drop"
+        "Mobiele responsive slepen en neerzetten"
       ],
       notes: "Verbeter gebruikerservaring door volgorde aanpassing mogelijkheden"
     },
@@ -568,9 +568,9 @@ export default function CallOverview() {
       tasks: [
         "Maaltijd limiet validatie toevoegen",
         "UI feedback voor maximum bereikt",
-        "Database constraints voor maaltijd limiet",
-        "Error handling voor te veel maaltijden",
-        "User guidance voor optimale maaltijd verdeling"
+        "Database beperkingen voor maaltijd limiet",
+        "Foutafhandeling voor te veel maaltijden",
+        "Gebruikersbegeleiding voor optimale maaltijd verdeling"
       ],
       notes: "Implementeer limiet van 6 maaltijden per dag voor optimale voedingsplanning"
     },
@@ -582,29 +582,29 @@ export default function CallOverview() {
       status: "not-started",
       assignee: "Development",
       tasks: [
-        "Ontbijt snack meal type toevoegen",
+        "Ontbijt snack maaltijdtype toevoegen",
         "UI aanpassingen voor ontbijt snack",
         "Database schema updates",
-        "Recipe library uitbreiding",
-        "Nutritional guidance voor ontbijt snacks"
+        "Recepten bibliotheek uitbreiding",
+        "Voedingskundige begeleiding voor ontbijt snacks"
       ],
       notes: "Nieuwe maaltijdtype: ontbijt snack voor flexibele voedingsplanning"
     },
     {
-      title: "Fotos in Algemene Database - Image Storage",
-      description: "Foto's verplaatsen naar algemene database storage voor betere organisatie",
+      title: "Foto's in Algemene Database - Afbeelding Opslag",
+      description: "Foto's verplaatsen naar algemene database opslag voor betere organisatie",
       priority: "medium",
       deadline: "25 augustus",
       status: "not-started",
       assignee: "Development",
       tasks: [
-        "Algemene image storage bucket setup",
-        "Image upload component migratie",
-        "Database schema voor image metadata",
-        "Image management interface",
-        "Legacy image migratie script"
+        "Algemene afbeelding opslag bucket setup",
+        "Afbeelding upload component migratie",
+        "Database schema voor afbeelding metadata",
+        "Afbeelding beheer interface",
+        "Oude afbeelding migratie script"
       ],
-      notes: "Centraliseer image storage in algemene database voor betere organisatie"
+      notes: "Centraliseer afbeelding opslag in algemene database voor betere organisatie"
     },
     {
       title: "Voedingswaarden Nalopen - Macros Kloppen Niet",
@@ -624,19 +624,19 @@ export default function CallOverview() {
     },
     {
       title: "Meetpunt Test - Voedingsplanning Validatie",
-      description: "Test implementatie voor meetpunten en progressie tracking",
+      description: "Test implementatie voor meetpunten en voortgang tracking",
       priority: "medium",
       deadline: "28 augustus",
       status: "not-started",
       assignee: "Development",
       tasks: [
         "Meetpunt tracking systeem",
-        "Progressie visualisatie",
+        "Voortgang visualisatie",
         "Data export functionaliteit",
-        "Goal setting interface",
-        "Progressie rapporten"
+        "Doel instelling interface",
+        "Voortgang rapporten"
       ],
-      notes: "Implementeer meetpunt systeem voor voedingsplanning progressie"
+      notes: "Implementeer meetpunt systeem voor voedingsplanning voortgang"
     },
     {
       title: "Aanbevolen Supplementen - Visolie Omega 3",
@@ -649,37 +649,37 @@ export default function CallOverview() {
         "Supplement database opzetten",
         "Visolie Omega 3 aanbevelingen",
         "Elektrolyten supplementen",
-        "Personalized supplement advies",
+        "Persoonlijk supplement advies",
         "Supplement integratie in voedingsplannen"
       ],
       notes: "Nieuwe feature: supplement aanbevelingen (visolie, elektrolyten)"
     },
     {
-      title: "Content & Copywriting",
+      title: "Content & Tekstschrijven",
       description: "Alle teksten en content finaliseren voor lancering",
       priority: "critical",
       deadline: "15 augustus",
       status: "in-progress",
       tasks: [
-        "Homepage copy finaliseren",
+        "Homepage tekst finaliseren",
         "Product pagina's content",
-        "Email templates voor pre-launch",
+        "Email sjablonen voor pre-launch",
         "FAQ sectie toevoegen",
-        "Privacy policy en terms of service"
+        "Privacy policy en voorwaarden"
       ]
     },
     {
-      title: "Payment Integration",
-      description: "Stripe payment systeem volledig implementeren",
+      title: "Betaling Integratie",
+      description: "Stripe betalingssysteem volledig implementeren",
       priority: "critical",
       deadline: "20 augustus",
       status: "in-progress",
       tasks: [
         "Stripe checkout flow testen",
-        "Subscription management",
-        "Payment webhooks implementeren",
-        "Invoice generatie",
-        "Refund handling"
+        "Abonnement beheer",
+        "Betaling webhooks implementeren",
+        "Factuur generatie",
+        "Terugbetaling afhandeling"
       ]
     },
     {
@@ -690,29 +690,29 @@ export default function CallOverview() {
       status: "not-started",
       tasks: [
         "Mailchimp/ConvertKit integratie",
-        "Pre-launch email sequence",
-        "Welcome email flow",
-        "Onboarding email series",
-        "Newsletter template"
+        "Pre-launch email reeks",
+        "Welkom email flow",
+        "Onboarding email reeks",
+        "Nieuwsbrief sjabloon"
       ]
     },
     {
       title: "Analytics & Tracking",
-      description: "Google Analytics en conversion tracking implementeren",
+      description: "Google Analytics en conversie tracking implementeren",
       priority: "high",
       deadline: "28 augustus",
       status: "not-started",
       tasks: [
         "Google Analytics 4 setup",
-        "Conversion tracking",
-        "Funnel analytics",
+        "Conversie tracking",
+        "Trechter analytics",
         "A/B testing framework",
         "Heatmap tracking (Hotjar)"
       ]
     },
     {
-      title: "SEO Optimization",
-      description: "Search Engine Optimization voor betere vindbaarheid",
+      title: "SEO Optimalisatie",
+      description: "Zoekmachine optimalisatie voor betere vindbaarheid",
       priority: "medium",
       deadline: "30 augustus",
       status: "not-started",
@@ -720,62 +720,62 @@ export default function CallOverview() {
         "Meta tags optimaliseren",
         "Sitemap genereren",
         "Schema markup toevoegen",
-        "Page speed optimaliseren",
-        "Mobile responsiveness testen"
+        "Pagina snelheid optimaliseren",
+        "Mobiele responsiviteit testen"
       ]
     },
     {
-      title: "Security Audit",
-      description: "Volledige security audit en penetration testing",
+      title: "Beveiligings Audit",
+      description: "Volledige beveiligings audit en penetratie testen",
       priority: "critical",
       deadline: "1 september",
       status: "not-started",
       tasks: [
-        "Vulnerability scanning",
-        "Penetration testing",
-        "Data encryption review",
-        "API security audit",
+        "Kwetsbaarheid scanning",
+        "Penetratie testen",
+        "Data encryptie review",
+        "API beveiligings audit",
         "SSL certificaten controleren"
       ]
     },
     {
-      title: "Performance Optimization",
-      description: "Website performance optimaliseren voor snelle laadtijden",
+      title: "Prestatie Optimalisatie",
+      description: "Website prestaties optimaliseren voor snelle laadtijden",
       priority: "high",
       deadline: "3 september",
       status: "not-started",
       tasks: [
-        "Image optimization",
-        "Code splitting",
+        "Afbeelding optimalisatie",
+        "Code opsplitsing",
         "Caching implementeren",
         "CDN setup",
         "Database query optimalisatie"
       ]
     },
     {
-      title: "Final Testing",
-      description: "Uitgebreide testing van alle functionaliteiten",
+      title: "Finale Testen",
+      description: "Uitgebreide testen van alle functionaliteiten",
       priority: "critical",
       deadline: "5 september",
       status: "not-started",
       tasks: [
-        "End-to-end testing",
-        "Cross-browser testing",
-        "Mobile testing",
-        "Payment flow testing",
-        "Email delivery testing"
+        "End-to-end testen",
+        "Cross-browser testen",
+        "Mobiele testen",
+        "Betaling flow testen",
+        "Email aflevering testen"
       ]
     },
     {
-      title: "Launch Preparation",
+      title: "Lancering Voorbereiding",
       description: "Finale voorbereidingen voor de lancering",
       priority: "critical",
       deadline: "8 september",
       status: "not-started",
       tasks: [
         "Pre-launch email versturen",
-        "Social media posts voorbereiden",
-        "Press release opstellen",
+        "Social media berichten voorbereiden",
+        "Persbericht opstellen",
         "Support team briefing",
         "Monitoring tools activeren"
       ]
@@ -787,9 +787,9 @@ export default function CallOverview() {
       deadline: "10 september",
       status: "not-started",
       tasks: [
-        "Error monitoring setup",
-        "Performance monitoring",
-        "User feedback systeem",
+        "Fout monitoring setup",
+        "Prestatie monitoring",
+        "Gebruikers feedback systeem",
         "Support ticket systeem",
         "Backup procedures"
       ]
@@ -1177,28 +1177,28 @@ export default function CallOverview() {
               <h3 className="text-lg font-semibold text-[#8BAE5A] mb-4">🎯 Prioriteiten Overzicht</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4">
-                  <h4 className="font-semibold text-red-400 mb-2">🔥 Critical (5)</h4>
+                  <h4 className="font-semibold text-red-400 mb-2">🔥 Kritiek (5)</h4>
                   <ul className="text-sm text-gray-300 space-y-1">
                     <li>• Academy Video Content Upload - URGENT</li>
-                    <li>• Content & Copywriting</li>
-                    <li>• Payment Integration</li>
-                    <li>• Security Audit</li>
-                    <li>• Final Testing</li>
+                    <li>• Content & Tekstschrijven</li>
+                    <li>• Betaling Integratie</li>
+                    <li>• Beveiligings Audit</li>
+                    <li>• Finale Testen</li>
                   </ul>
                 </div>
                 <div className="bg-orange-900/20 border border-orange-500/30 rounded-lg p-4">
-                  <h4 className="font-semibold text-orange-400 mb-2">⚡ High (4)</h4>
+                  <h4 className="font-semibold text-orange-400 mb-2">⚡ Hoog (4)</h4>
                   <ul className="text-sm text-gray-300 space-y-1">
                     <li>• Email Marketing Setup</li>
                     <li>• Analytics & Tracking</li>
-                    <li>• Performance Optimization</li>
+                    <li>• Prestatie Optimalisatie</li>
                     <li>• Post-Launch Monitoring</li>
                   </ul>
                 </div>
                 <div className="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-4">
                   <h4 className="font-semibold text-yellow-400 mb-2">📝 Medium (1)</h4>
                   <ul className="text-sm text-gray-300 space-y-1">
-                    <li>• SEO Optimization</li>
+                    <li>• SEO Optimalisatie</li>
                   </ul>
                 </div>
               </div>
