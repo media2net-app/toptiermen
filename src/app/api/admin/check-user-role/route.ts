@@ -53,11 +53,11 @@ export async function POST(request: NextRequest) {
       user: data
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Check user role error:', error);
     return NextResponse.json({
       success: false,
-      error: 'Internal server error'
+      error: error?.message || 'Internal server error'
     }, { status: 500 });
   }
 } 
