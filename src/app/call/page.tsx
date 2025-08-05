@@ -26,7 +26,7 @@ export default function CallOverview() {
     totalAdminTools: 5,
     totalSecurityUpdates: 4,
     totalTestUsers: 4,
-    completedTasks: 4
+    completedTasks: 3
   };
 
   const features = [
@@ -442,22 +442,6 @@ export default function CallOverview() {
   ];
 
   const todoItems = [
-    {
-      title: "Academy Video Upload Systeem - TECHNISCH",
-      description: "Technische implementatie van academy video upload systeem met gescheiden bucket",
-      priority: "critical",
-      deadline: "5 augustus",
-      status: "completed",
-      assignee: "Development",
-      tasks: [
-        "AcademyVideoUpload component geïmplementeerd",
-        "academy-videos bucket geconfigureerd",
-        "Storage policies ingesteld",
-        "Folder structuur georganiseerd",
-        "UI integratie in admin dashboard"
-      ],
-      notes: "✅ AFGEROND: Academy video upload systeem volledig operationeel"
-    },
     {
       title: "Academy Video Content - Rick's Taak",
       description: "Rick moet alle academy video content opnieuw uploaden (bucket was per ongeluk geleegd)",
@@ -1177,13 +1161,12 @@ export default function CallOverview() {
               <h3 className="text-lg font-semibold text-[#8BAE5A] mb-4">🎯 Prioriteiten Overzicht</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4">
-                  <h4 className="font-semibold text-red-400 mb-2">🔥 Kritiek (5)</h4>
+                  <h4 className="font-semibold text-red-400 mb-2">🔥 Kritiek (4)</h4>
                   <ul className="text-sm text-gray-300 space-y-1">
                     <li>• Academy Video Content Upload - URGENT</li>
                     <li>• Content & Tekstschrijven</li>
                     <li>• Betaling Integratie</li>
                     <li>• Beveiligings Audit</li>
-                    <li>• Finale Testen</li>
                   </ul>
                 </div>
                 <div className="bg-orange-900/20 border border-orange-500/30 rounded-lg p-4">
