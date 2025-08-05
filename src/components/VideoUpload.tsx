@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { CloudArrowUpIcon, PlayIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'react-hot-toast';
-import { getCDNVideoUrl, preloadVideo } from '@/lib/cdn-config';
+// import { getCDNVideoUrl, preloadVideo } from '@/lib/cdn-config';
 
 interface VideoUploadProps {
   currentVideoUrl?: string;
@@ -280,7 +280,7 @@ export default function VideoUpload({
       startProcessingSteps(urlData, file, startTime);
       
       // Preload video for better performance
-      preloadVideo(urlData.publicUrl);
+      // preloadVideo(urlData.publicUrl);
 
     } catch (error: any) {
       console.error('❌ ===== UPLOAD FAILED =====');
@@ -397,7 +397,7 @@ export default function VideoUpload({
             </button>
           </div>
           <video 
-            src={getCDNVideoUrl(currentVideoUrl || uploadedVideoUrl || '')} 
+            src={currentVideoUrl || uploadedVideoUrl || ''} 
             controls 
             className="w-full rounded-lg"
             preload="metadata"
