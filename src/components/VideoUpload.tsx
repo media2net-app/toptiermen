@@ -211,15 +211,14 @@ export default function VideoUpload({
 
       completeVideoUploadStep('Progress Tracking Setup');
 
-      // Real upload progress tracking
+      // Fast progress tracking - update every 2 seconds for better performance
       const progressInterval = setInterval(() => {
         const elapsed = (Date.now() - startTime) / 1000;
         
-        // Estimate progress based on time elapsed and file size
-        // Assume average upload speed of 5MB/s for estimation
-        const estimatedSpeed = 5 * 1024 * 1024; // 5MB/s
+        // More realistic upload speed estimation (2-3 MB/s)
+        const estimatedSpeed = 2.5 * 1024 * 1024; // 2.5MB/s
         const estimatedUploaded = Math.min(file.size, estimatedSpeed * elapsed);
-        const estimatedProgress = Math.min(90, (estimatedUploaded / file.size) * 100); // Max 90% during upload
+        const estimatedProgress = Math.min(85, (estimatedUploaded / file.size) * 100);
         
         setUploadProgress(estimatedProgress);
         setUploadedBytes(estimatedUploaded);
@@ -245,27 +244,22 @@ export default function VideoUpload({
           uploaded: (estimatedUploaded / (1024 * 1024)).toFixed(1),
           progress: estimatedProgress.toFixed(1)
         });
-      }, 500);
+      }, 2000); // Update every 2 seconds instead of 500ms
 
-      // Upload to Supabase Storage
+      // Fast upload to Supabase Storage
       logVideoUploadStep('Supabase Upload');
-      console.log('🚀 Starting Supabase upload...');
-      console.log('🔗 Supabase client check:', {
-        hasSupabase: !!supabase,
-        hasStorage: !!supabase?.storage,
-        hasFrom: !!supabase?.storage?.from
-      });
-
-      // Skip bucket check - try direct upload instead
-      console.log('🚀 Attempting direct upload to workout-videos bucket...');
-
+      console.log('🚀 Starting fast Supabase upload...');
+      
       const uploadStartTime = Date.now();
+      
+      // Direct upload with optimized settings for speed
       const { data, error } = await supabase.storage
         .from('workout-videos')
         .upload(filePath, file, {
           cacheControl: '3600',
           upsert: false,
-          contentType: file.type // Explicitly set content type for better performance
+          contentType: file.type,
+          duplex: 'half' // Optimize for upload speed
         });
 
       const uploadDuration = Date.now() - uploadStartTime;
