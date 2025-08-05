@@ -34,6 +34,7 @@ export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: Exe
 
   const [newSecondaryMuscle, setNewSecondaryMuscle] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const [isAutoSaving, setIsAutoSaving] = useState(false);
 
   useEffect(() => {
     if (exercise) {
@@ -81,6 +82,14 @@ export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: Exe
 
     console.log('✅ Validation passed - calling onSave');
     console.log('💾 Final exercise data to save:', formData);
+    
+    // Show saving feedback
+    if (exercise) {
+      toast.success('Oefening wordt opgeslagen...');
+    } else {
+      toast.success('Nieuwe oefening wordt toegevoegd...');
+    }
+    
     onSave(formData);
   };
 
@@ -93,6 +102,19 @@ export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: Exe
     setIsUploading(false);
     toast.success('Video succesvol geüpload!');
     console.log('✅ Exercise modal state updated with new video URL');
+    
+    // Auto-save when video is uploaded (if form is valid)
+    if (formData.name && formData.primary_muscle && formData.equipment && formData.instructions) {
+      console.log('🚀 Auto-saving exercise after video upload...');
+      setIsAutoSaving(true);
+      toast.success('Video geüpload! Oefening wordt automatisch opgeslagen...');
+      setTimeout(() => {
+        onSave(formData);
+        setIsAutoSaving(false);
+      }, 500); // Small delay to ensure state is updated
+    } else {
+      toast.success('Video geüpload! Vul de rest van de velden in en klik op Opslaan.');
+    }
   };
 
   const handleVideoUploadStart = () => {
@@ -149,6 +171,11 @@ export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: Exe
             {isUploading && (
               <span className="ml-2 text-sm text-[#B6C948]">
                 (Video uploaden...)
+              </span>
+            )}
+            {isAutoSaving && (
+              <span className="ml-2 text-sm text-[#B6C948]">
+                (Auto-opslaan...)
               </span>
             )}
           </h2>
@@ -312,25 +339,25 @@ export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: Exe
             <button
               type="button"
               onClick={onClose}
-              disabled={isUploading}
+              disabled={isUploading || isAutoSaving}
               className={`flex-1 px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
-                isUploading
+                isUploading || isAutoSaving
                   ? 'bg-[#3A4D23] text-[#8BAE5A] opacity-50 cursor-not-allowed'
                   : 'bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A]'
               }`}
             >
-              {isUploading ? 'Wachten...' : 'Annuleren'}
+              {isUploading ? 'Wachten...' : isAutoSaving ? 'Wachten...' : 'Annuleren'}
             </button>
             <button
               type="submit"
-              disabled={isUploading}
+              disabled={isUploading || isAutoSaving}
               className={`flex-1 px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
-                isUploading
+                isUploading || isAutoSaving
                   ? 'bg-[#3A4D23] text-[#8BAE5A] opacity-50 cursor-not-allowed'
                   : 'bg-[#8BAE5A] text-[#181F17] hover:bg-[#B6C948]'
               }`}
             >
-              {isUploading ? 'Uploaden...' : (exercise ? 'Bijwerken' : 'Toevoegen')}
+              {isUploading ? 'Uploaden...' : isAutoSaving ? 'Auto-opslaan...' : (exercise ? 'Opslaan' : 'Toevoegen')}
             </button>
           </div>
         </form>

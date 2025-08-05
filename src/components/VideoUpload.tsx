@@ -35,6 +35,8 @@ export default function VideoUpload({
   const [timeRemaining, setTimeRemaining] = useState('');
   const [uploadStatus, setUploadStatus] = useState('');
   const [processingStatus, setProcessingStatus] = useState('');
+  const [performanceData, setPerformanceData] = useState<any>(null);
+  const [currentStep, setCurrentStep] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Debug function to check Supabase configuration
@@ -94,6 +96,13 @@ export default function VideoUpload({
     setProcessingStatus('Video verwerken...');
     setProcessingProgress(0);
     
+    // Update performance data for processing
+    setPerformanceData(prev => ({
+      ...prev,
+      currentStep: 'Video verwerken...',
+      processingStart: Date.now()
+    }));
+    
     // Immediate processing - no artificial delays
     console.log('⚡ Starting immediate processing...');
     
@@ -101,6 +110,7 @@ export default function VideoUpload({
     setTimeout(() => {
       console.log('✅ ===== PROCESSING COMPLETE =====');
       const totalDuration = Date.now() - startTime;
+      const processingDuration = 100;
       console.log('⏱️ Total time:', totalDuration + 'ms');
       
       setProcessingStatus('Voltooid!');
@@ -111,12 +121,21 @@ export default function VideoUpload({
       onVideoUploaded(urlData.publicUrl);
       toast.success('Video succesvol geüpload!');
       
+      // Update final performance data
+      setPerformanceData(prev => ({
+        ...prev,
+        currentStep: 'Voltooid!',
+        totalDuration: totalDuration.toFixed(0),
+        processingDuration: processingDuration.toFixed(0),
+        videoUrl: urlData.publicUrl
+      }));
+      
       // Complete processing
       setIsProcessing(false);
       
       // Complete the processing step and entire upload
       completeVideoUploadStep('Video Processing', {
-        processingDuration: 100,
+        processingDuration,
         totalDuration,
         videoUrl: urlData.publicUrl
       });
@@ -200,7 +219,7 @@ export default function VideoUpload({
         // Assume average upload speed of 5MB/s for estimation
         const estimatedSpeed = 5 * 1024 * 1024; // 5MB/s
         const estimatedUploaded = Math.min(file.size, estimatedSpeed * elapsed);
-        const estimatedProgress = Math.min(95, (estimatedUploaded / file.size) * 100);
+        const estimatedProgress = Math.min(90, (estimatedUploaded / file.size) * 100); // Max 90% during upload
         
         setUploadProgress(estimatedProgress);
         setUploadedBytes(estimatedUploaded);
@@ -218,14 +237,15 @@ export default function VideoUpload({
           setTimeRemaining(`${Math.floor(remainingTime)}s resterend`);
         }
         
-        console.log('📈 Upload progress:', {
-          progress: estimatedProgress.toFixed(1) + '%',
-          uploaded: (estimatedUploaded / (1024 * 1024)).toFixed(1) + ' MB',
-          speed: (estimatedSpeed / (1024 * 1024)).toFixed(1) + ' MB/s',
-          elapsed: elapsed.toFixed(1) + 's',
-          remaining: timeRemaining
+        // Update performance data for UI
+        setPerformanceData({
+          currentStep: 'Uploaden naar Supabase...',
+          elapsed: elapsed.toFixed(1),
+          speed: (estimatedSpeed / (1024 * 1024)).toFixed(1),
+          uploaded: (estimatedUploaded / (1024 * 1024)).toFixed(1),
+          progress: estimatedProgress.toFixed(1)
         });
-      }, 500); // Update every 500ms instead of 300ms
+      }, 500);
 
       // Upload to Supabase Storage
       logVideoUploadStep('Supabase Upload');
@@ -251,6 +271,22 @@ export default function VideoUpload({
       const uploadDuration = Date.now() - uploadStartTime;
       console.log('⏱️ Upload duration:', uploadDuration + 'ms');
 
+      // Clear progress interval and set upload to 100%
+      clearInterval(progressInterval);
+      setUploadProgress(100);
+      setUploadedBytes(file.size);
+      setUploadSpeed((file.size / uploadDuration) * 1000);
+      setTimeRemaining('Upload voltooid!');
+      
+      // Update performance data
+      setPerformanceData({
+        currentStep: 'Upload voltooid!',
+        elapsed: (uploadDuration / 1000).toFixed(1),
+        speed: ((file.size / uploadDuration) * 1000 / (1024 * 1024)).toFixed(1),
+        uploaded: (file.size / (1024 * 1024)).toFixed(1),
+        progress: '100.0'
+      });
+
       completeVideoUploadStep('Supabase Upload', {
         uploadDuration,
         filePath,
@@ -258,8 +294,6 @@ export default function VideoUpload({
         uploadSpeed: (file.size / uploadDuration) * 1000 // bytes per second
       });
 
-      // Clear progress interval
-      clearInterval(progressInterval);
       console.log('🧹 Upload progress interval cleared');
 
       if (error) {
@@ -526,6 +560,33 @@ export default function VideoUpload({
                         <span className="text-[#8BAE5A] font-semibold">{timeRemaining}</span>
                       </div>
                     )}
+
+                    {/* Performance Data */}
+                    {performanceData && (
+                      <>
+                        <div className="border-t border-[#3A4D23] pt-2 mt-2">
+                          <div className="text-xs text-[#B6C948]/70 mb-1">Performance Data:</div>
+                          <div className="space-y-1 text-xs">
+                            <div className="flex justify-between">
+                              <span className="text-[#B6C948]">Huidige stap:</span>
+                              <span className="text-[#8BAE5A]">{performanceData.currentStep}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-[#B6C948]">Verstreken tijd:</span>
+                              <span className="text-[#8BAE5A]">{performanceData.elapsed}s</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-[#B6C948]">Upload snelheid:</span>
+                              <span className="text-[#8BAE5A]">{performanceData.speed} MB/s</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-[#B6C948]">Geüpload:</span>
+                              <span className="text-[#8BAE5A]">{performanceData.uploaded} MB</span>
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </>
               )}
@@ -553,6 +614,31 @@ export default function VideoUpload({
                   <div className="text-xs text-[#B6C948]/70">
                     Stap {Math.ceil(processingProgress / 25)} van 4: {processingStatus}
                   </div>
+
+                  {/* Processing Performance Data */}
+                  {performanceData && (
+                    <div className="border-t border-[#3A4D23] pt-2 mt-2">
+                      <div className="text-xs text-[#B6C948]/70 mb-1">Processing Data:</div>
+                      <div className="space-y-1 text-xs">
+                        <div className="flex justify-between">
+                          <span className="text-[#B6C948]">Huidige stap:</span>
+                          <span className="text-[#8BAE5A]">{performanceData.currentStep}</span>
+                        </div>
+                        {performanceData.totalDuration && (
+                          <div className="flex justify-between">
+                            <span className="text-[#B6C948]">Totale tijd:</span>
+                            <span className="text-[#8BAE5A]">{performanceData.totalDuration}ms</span>
+                          </div>
+                        )}
+                        {performanceData.processingDuration && (
+                          <div className="flex justify-between">
+                            <span className="text-[#B6C948]">Processing tijd:</span>
+                            <span className="text-[#8BAE5A]">{performanceData.processingDuration}ms</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </>
               )}
             </div>
