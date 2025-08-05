@@ -14,7 +14,7 @@
         {
           "key": "Accept-Encoding",
           "value": "gzip, deflate, br"
-                }
+        }
       ]
     }
   ],
@@ -33,10 +33,5 @@
       "maxDuration": 30
     }
   },
-  "regions": ["iad1"],
-  "build": {
-    "env": {
-      "NEXT_PUBLIC_CDN_ENABLED": "true"
-    }
-  }
+  "regions": ["iad1"]
 } 
