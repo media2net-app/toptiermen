@@ -722,10 +722,10 @@ export default function CallOverview() {
                 <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4">
                   <h4 className="font-semibold text-red-400 mb-3 flex items-center">
                     <span className="text-xl mr-2">🔥</span>
-                    Critical (5 taken)
+                    Critical ({todoItems.filter(item => item.priority === 'critical' && item.status !== 'completed').length} taken)
                   </h4>
                   <div className="space-y-2">
-                    {todoItems.filter(item => item.priority === 'critical').slice(0, 3).map((item, index) => (
+                    {todoItems.filter(item => item.priority === 'critical' && item.status !== 'completed').slice(0, 3).map((item, index) => (
                       <div key={index} className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
                           <span className="text-red-400">⚠️</span>
@@ -734,9 +734,9 @@ export default function CallOverview() {
                         <span className="text-red-300 text-xs">{item.deadline}</span>
                       </div>
                     ))}
-                    {todoItems.filter(item => item.priority === 'critical').length > 3 && (
+                    {todoItems.filter(item => item.priority === 'critical' && item.status !== 'completed').length > 3 && (
                       <div className="text-red-300 text-xs mt-2">
-                        +{todoItems.filter(item => item.priority === 'critical').length - 3} meer critical taken
+                        +{todoItems.filter(item => item.priority === 'critical' && item.status !== 'completed').length - 3} meer critical taken
                       </div>
                     )}
                   </div>
@@ -746,10 +746,10 @@ export default function CallOverview() {
                 <div className="bg-orange-900/20 border border-orange-500/30 rounded-lg p-4">
                   <h4 className="font-semibold text-orange-400 mb-3 flex items-center">
                     <span className="text-xl mr-2">⚡</span>
-                    High Priority (4 taken)
+                    High Priority ({todoItems.filter(item => item.priority === 'high' && item.status !== 'completed').length} taken)
                   </h4>
                   <div className="space-y-2">
-                    {todoItems.filter(item => item.priority === 'high').slice(0, 3).map((item, index) => (
+                    {todoItems.filter(item => item.priority === 'high' && item.status !== 'completed').slice(0, 3).map((item, index) => (
                       <div key={index} className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
                           <span className="text-orange-400">📝</span>
@@ -758,9 +758,9 @@ export default function CallOverview() {
                         <span className="text-orange-300 text-xs">{item.deadline}</span>
                       </div>
                     ))}
-                    {todoItems.filter(item => item.priority === 'high').length > 3 && (
+                    {todoItems.filter(item => item.priority === 'high' && item.status !== 'completed').length > 3 && (
                       <div className="text-orange-300 text-xs mt-2">
-                        +{todoItems.filter(item => item.priority === 'high').length - 3} meer high priority taken
+                        +{todoItems.filter(item => item.priority === 'high' && item.status !== 'completed').length - 3} meer high priority taken
                       </div>
                     )}
                   </div>
