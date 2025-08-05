@@ -430,20 +430,20 @@ export default function CallOverview() {
       notes: "✅ AFGEROND: Academy video upload systeem volledig operationeel"
     },
     {
-      title: "Academy Video Content Upload - URGENT",
-      description: "Alle academy video's opnieuw uploaden na bucket migratie (bucket per ongeluk geleegd)",
+      title: "Academy Video Content - Rick's Taak",
+      description: "Rick moet alle academy video content opnieuw uploaden (bucket was per ongeluk geleegd)",
       priority: "critical",
       deadline: "15 augustus",
       status: "not-started",
       assignee: "Rick",
       tasks: [
         "Backup van originele video bestanden maken",
-        "Video's uploaden naar Supabase bucket",
+        "Video's uploaden naar academy-videos bucket",
         "Metadata en beschrijvingen toevoegen",
         "Video kwaliteit controleren",
         "Links in academy sectie updaten"
       ],
-      notes: "⚠️ KRITIEK: Bucket was per ongeluk geleegd tijdens S3 → Vercel Blob → Supabase migratie"
+      notes: "⚠️ KRITIEK: Bucket was per ongeluk geleegd tijdens S3 → Vercel Blob → Supabase migratie. Technische upload functionaliteit is klaar!"
     },
     {
       title: "Content & Copywriting",
@@ -778,6 +778,10 @@ export default function CallOverview() {
                       <span className="text-white text-sm">Academy video upload systeem - TECHNISCH AFGEROND</span>
                     </div>
                     <div className="flex items-center space-x-2">
+                      <span className="text-orange-500">👤</span>
+                      <span className="text-white text-sm">Rick: Academy video content opnieuw uploaden</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
                       <span className="text-yellow-500">🔧</span>
                       <span className="text-white text-sm">Database tabel test_notes - WIP (meerdere API routes geïmplementeerd)</span>
                     </div>
@@ -813,6 +817,10 @@ export default function CallOverview() {
                   <div className="flex items-center space-x-3">
                     <span className="text-green-500">✅</span>
                     <span className="text-white">Database constraint issues opgelost</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <span className="text-orange-500">👤</span>
+                    <span className="text-white">Rick: Academy video content opnieuw uploaden (bucket was geleegd)</span>
                   </div>
                 </div>
                 <div className="space-y-3">
