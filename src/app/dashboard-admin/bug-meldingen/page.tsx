@@ -15,7 +15,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { AdminCard, AdminButton } from '@/components/admin';
 import { toast } from 'react-hot-toast';
-import { supabaseAdmin } from '@/lib/supabase-admin';
+import { supabase } from '@/lib/supabase';
 
 interface BugReport {
   id: string;
@@ -56,7 +56,7 @@ export default function BugMeldingen() {
 
       // Try to fetch from database
       try {
-        const { data: dbReports, error: dbError } = await supabaseAdmin
+        const { data: dbReports, error: dbError } = await supabase
           .from('test_notes')
           .select('*')
           .order('created_at', { ascending: false });
@@ -94,7 +94,7 @@ export default function BugMeldingen() {
   const handleStatusChange = async (reportId: string, newStatus: 'open' | 'in_progress' | 'resolved' | 'closed') => {
     try {
       // Try to update in database first
-      const { error: dbError } = await supabaseAdmin
+      const { error: dbError } = await supabase
         .from('test_notes')
         .update({ status: newStatus, updated_at: new Date().toISOString() })
         .eq('id', reportId);
