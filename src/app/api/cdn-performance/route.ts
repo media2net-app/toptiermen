@@ -52,7 +52,7 @@ export async function GET(request: Request) {
 }
 
 function getPerformanceRecommendations(performance: any) {
-  const recommendations = [];
+  const recommendations: string[] = [];
 
   if (performance.responseTime > 1000) {
     recommendations.push('Consider using a CDN closer to your users');
