@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
       console.error('❌ Error checking user role:', error);
       return NextResponse.json({
         success: false,
-        error: error.message
+        error: (error as any)?.message || 'Database error'
       }, { status: 400 });
     }
 
