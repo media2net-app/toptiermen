@@ -8,7 +8,6 @@ interface VideoUploadProps {
   onVideoUploaded: (url: string) => void;
   onVideoUploadStart?: () => void;
   onVideoUploadError?: (error: string) => void;
-  onVideoRemoved?: () => void;
   className?: string;
 }
 
@@ -17,7 +16,6 @@ export default function VideoUpload({
   onVideoUploaded,
   onVideoUploadStart,
   onVideoUploadError,
-  onVideoRemoved,
   className = ""
 }: VideoUploadProps) {
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -126,12 +124,6 @@ export default function VideoUpload({
       setUploadedVideoUrl(urlData.publicUrl);
       onVideoUploaded(urlData.publicUrl);
       toast.success('Video succesvol geüpload!');
-      
-      // Final cleanup after processing is complete
-      setTimeout(() => {
-        setIsProcessing(false);
-        console.log('🧹 Processing cleanup complete');
-      }, 1000); // Keep processing state visible for 1 second after completion
     }, 800); // Much faster total processing time
   };
 
@@ -341,8 +333,8 @@ export default function VideoUpload({
       setTimeRemaining('');
     } finally {
       console.log('🧹 ===== UPLOAD CLEANUP =====');
-      // Only reset upload state, don't reset processing state
       setIsUploading(false);
+      setIsProcessing(false);
       setUploadSpeed(0);
       // Reset file input
       if (fileInputRef.current) {
@@ -365,14 +357,10 @@ export default function VideoUpload({
   };
 
   const handleRemove = async () => {
-    if (!currentVideoUrl) {
-      console.log('❌ No video URL to remove');
-      return;
-    }
+    if (!currentVideoUrl) return;
     
     try {
-      console.log('🗑️ Starting video removal process...');
-      console.log('📹 Video URL:', currentVideoUrl);
+      console.log('🗑️ Removing video:', currentVideoUrl);
       
       // Extract path from public URL
       const path = currentVideoUrl.split('/workout-videos/')[1];
@@ -382,46 +370,30 @@ export default function VideoUpload({
         return;
       }
       
-      console.log('📁 Extracted path:', path);
-      console.log('📁 Decoded path:', decodeURIComponent(path));
+      console.log('📁 Removing file from storage:', path);
       
       // Remove from storage
-      console.log('🗑️ Removing from Supabase storage...');
       const { error: storageError } = await supabase.storage
         .from('workout-videos')
         .remove([decodeURIComponent(path)]);
       
       if (storageError) {
         console.error('❌ Storage removal failed:', storageError);
-        toast.error('Verwijderen uit storage mislukt: ' + storageError.message);
+        toast.error('Verwijderen uit storage mislukt');
         return;
       }
       
       console.log('✅ Video removed from storage successfully');
       
       // Update local state
-      console.log('🔄 Updating local state...');
       setUploadedVideoUrl(null);
       onVideoUploaded('');
       
-      // Call remove callback to update parent component
-      if (onVideoRemoved) {
-        console.log('📞 Calling onVideoRemoved callback...');
-        onVideoRemoved();
-      } else {
-        console.log('⚠️ No onVideoRemoved callback provided');
-      }
-      
       toast.success('Video succesvol verwijderd');
-      console.log('✅ Video removal process complete');
+      console.log('✅ Video removal complete');
       
     } catch (error: any) {
       console.error('❌ Failed to remove video:', error);
-      console.error('❌ Error details:', {
-        message: error.message,
-        name: error.name,
-        stack: error.stack
-      });
       toast.error('Verwijderen mislukt: ' + error.message);
     }
   };
@@ -430,10 +402,7 @@ export default function VideoUpload({
     <div className={`space-y-4 ${className}`}>
       {/* Current Video Display */}
       {(currentVideoUrl || uploadedVideoUrl) && (
-        <div 
-          className="bg-[#181F17] rounded-xl p-4 border border-[#3A4D23]"
-          onClick={(e) => e.stopPropagation()}
-        >
+        <div className="bg-[#181F17] rounded-xl p-4 border border-[#3A4D23]">
           <div className="flex items-center gap-3 mb-3">
             <PlayIcon className="w-6 h-6 text-[#8BAE5A]" />
             <div className="flex-1">
@@ -443,11 +412,7 @@ export default function VideoUpload({
               </p>
             </div>
             <button 
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                handleRemove();
-              }}
+              onClick={handleRemove} 
               className="p-2 rounded hover:bg-[#232D1A] transition" 
               title="Verwijder video"
             >

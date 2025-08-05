@@ -330,11 +330,14 @@ export default function TrainingscentrumBeheer() {
       } else {
         setExercises([...exercises, data]);
         setShowNewExerciseModal(false);
+        setShowEditModal(false); // Ensure edit modal is also closed
+        setEditingExercise(null); // Clear any editing exercise
         toast.success('Oefening succesvol toegevoegd');
       }
     } catch (err) {
       console.error('Exception adding exercise:', err);
       toast.error('Fout bij het toevoegen van oefening');
+      // Don't close modal on exception - let user try again
     }
   };
 
@@ -400,14 +403,6 @@ export default function TrainingscentrumBeheer() {
         setShowNewExerciseModal(false); // Also reset new exercise modal
         setEditingExercise(null);
         
-        // Force a small delay to ensure state updates
-        setTimeout(() => {
-          console.log('🔒 Step 5: Modal states after delay:');
-          console.log('   - showEditModal should be false');
-          console.log('   - showNewExerciseModal should be false');
-          console.log('   - editingExercise should be null');
-        }, 100);
-        
         console.log('✅ Update complete!');
         toast.success('Oefening succesvol bijgewerkt');
       }
@@ -415,7 +410,7 @@ export default function TrainingscentrumBeheer() {
       console.error('❌ Exception updating exercise:', err);
       console.error('❌ Exception stack:', err instanceof Error ? err.stack : 'No stack');
       toast.error(`Fout bij het bijwerken van oefening: ${err instanceof Error ? err.message : 'Onbekende fout'}`);
-      // Don't close modal on exception
+      // Don't close modal on exception - let user try again
     }
   };
 
@@ -832,7 +827,11 @@ export default function TrainingscentrumBeheer() {
                 {filterMuscle !== 'Alle Spiergroepen' && ` (spiergroep: ${filterMuscle})`}
               </div>
               <button
-                onClick={() => setShowNewExerciseModal(true)}
+                onClick={() => {
+                  setShowNewExerciseModal(true);
+                  setShowEditModal(false); // Ensure edit modal is closed
+                  setEditingExercise(null); // Clear any editing exercise
+                }}
                 className="px-6 py-3 rounded-xl bg-[#8BAE5A] text-[#181F17] font-semibold hover:bg-[#B6C948] transition-all duration-200 flex items-center gap-2"
               >
                 <PlusIcon className="w-5 h-5" />
@@ -958,6 +957,7 @@ export default function TrainingscentrumBeheer() {
                           console.log('🔧 Edit button clicked for exercise:', exercise);
                           setEditingExercise(exercise);
                           setShowEditModal(true);
+                          setShowNewExerciseModal(false); // Ensure new exercise modal is closed
                           console.log('✅ Edit modal should be open now');
                         }}
                         className="p-2 rounded-xl hover:bg-[#181F17] transition-colors duration-200"

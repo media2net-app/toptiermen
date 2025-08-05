@@ -3,7 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase-admin';
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('📝 Test notes API called');
+    console.log('📝 Simple test notes API called');
     const body = await request.json();
     console.log('📝 Request body:', body);
     
@@ -17,22 +17,19 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // Try to create table if it doesn't exist using direct Supabase operations
+    // Try to create table if it doesn't exist
     console.log('🔧 Ensuring test_notes table exists...');
     
     try {
-      // First, try to insert a test record to see if table exists
-      const { error: testError } = await supabaseAdmin
+      // Try to select from table to see if it exists
+      const { error: selectError } = await supabaseAdmin
         .from('test_notes')
-        .insert({
-          test_user_id: 'table-test',
-          type: 'bug',
-          page_url: '/test',
-          description: 'Table test',
-          priority: 'low'
-        });
+        .select('id')
+        .limit(1);
 
-      if (testError && testError.message.includes('relation "public.test_notes" does not exist')) {
+      console.log('📊 Select test result:', { selectError });
+
+      if (selectError) {
         console.log('🔧 Table does not exist, creating it...');
         
         // Create table using direct SQL
@@ -61,18 +58,9 @@ export async function POST(request: NextRequest) {
         }
 
         console.log('✅ Table created successfully');
-      } else if (testError) {
-        console.error('❌ Unexpected error testing table:', testError);
-        throw new Error(`Table test failed: ${testError.message}`);
       } else {
         console.log('✅ Table exists and is working');
       }
-
-      // Clean up test record if it was created
-      await supabaseAdmin
-        .from('test_notes')
-        .delete()
-        .eq('test_user_id', 'table-test');
 
     } catch (tableError) {
       console.error('❌ Table creation/verification failed:', tableError);
@@ -149,7 +137,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('📝 Test notes GET API called');
+    console.log('📝 Simple test notes GET API called');
     const { searchParams } = new URL(request.url);
     const test_user_id = searchParams.get('test_user_id');
     const status = searchParams.get('status');
@@ -161,13 +149,15 @@ export async function GET(request: NextRequest) {
     console.log('🔧 Ensuring test_notes table exists...');
     
     try {
-      // Test if table exists by trying to select from it
-      const { error: testError } = await supabaseAdmin
+      // Try to select from table to see if it exists
+      const { error: selectError } = await supabaseAdmin
         .from('test_notes')
         .select('id')
         .limit(1);
 
-      if (testError && testError.message.includes('relation "public.test_notes" does not exist')) {
+      console.log('📊 Select test result:', { selectError });
+
+      if (selectError) {
         console.log('🔧 Table does not exist, creating it...');
         
         // Create table using direct SQL
@@ -196,9 +186,6 @@ export async function GET(request: NextRequest) {
         }
 
         console.log('✅ Table created successfully');
-      } else if (testError) {
-        console.error('❌ Unexpected error testing table:', testError);
-        throw new Error(`Table test failed: ${testError.message}`);
       } else {
         console.log('✅ Table exists and is working');
       }

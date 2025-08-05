@@ -29,6 +29,7 @@ import { useDebug } from '@/contexts/DebugContext';
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import dynamic from 'next/dynamic';
 import VideoUpload from '@/components/VideoUpload';
+import AcademyVideoUpload from '@/components/AcademyVideoUpload';
 import PDFUpload from '@/components/PDFUpload';
 import ImageUpload from '@/components/ImageUpload';
 import AdminCard from '@/components/admin/AdminCard';
@@ -983,10 +984,12 @@ export default function AcademyManagement() {
               {/* Video URL - Only show for video type */}
               {lessonForm.type === 'video' && (
                 <div>
-                  <label className="block text-[#8BAE5A] font-semibold mb-2">Video</label>
-                  <VideoUpload
+                  <label className="block text-[#8BAE5A] font-semibold mb-2">Academy Video</label>
+                  <AcademyVideoUpload
                     currentVideoUrl={lessonForm.videoUrl}
                     onVideoUploaded={(url) => setLessonForm({...lessonForm, videoUrl: url})}
+                    moduleId={selectedModule?.toString()}
+                    lessonId={editingLesson?.toString()}
                   />
                 </div>
               )}

@@ -8,9 +8,12 @@ import {
   DocumentTextIcon,
   CameraIcon,
   CheckIcon,
-  ExclamationTriangleIcon
+  ExclamationTriangleIcon,
+  CursorArrowRaysIcon,
+  Square3Stack3DIcon
 } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
 interface TestUserFeedbackProps {
   isTestUser: boolean;
@@ -32,9 +35,9 @@ interface FeedbackNote {
 }
 
 export default function TestUserFeedback({ isTestUser, currentPage, onNoteCreated, userRole }: TestUserFeedbackProps) {
+  const { user } = useSupabaseAuth();
   const [isOpen, setIsOpen] = useState(false);
-  const [isHighlighting, setIsHighlighting] = useState(false);
-  const [isAreaSelecting, setIsAreaSelecting] = useState(false);
+  const [isScreenshotMode, setIsScreenshotMode] = useState(false);
   const [selectedElement, setSelectedElement] = useState<HTMLElement | null>(null);
   const [selectedArea, setSelectedArea] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
   const [noteType, setNoteType] = useState<'bug' | 'improvement' | 'general'>('bug');
@@ -43,329 +46,258 @@ export default function TestUserFeedback({ isTestUser, currentPage, onNoteCreate
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notes, setNotes] = useState<FeedbackNote[]>([]);
   const [showNotes, setShowNotes] = useState(false);
-  const [selectionMode, setSelectionMode] = useState<'element' | 'area'>('element');
 
-  const overlayRef = useRef<HTMLDivElement>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const selectionRef = useRef<HTMLDivElement | null>(null);
+  // Screenshot mode refs
+  const overlayRef = useRef<HTMLDivElement | null>(null);
+  const selectionBoxRef = useRef<HTMLDivElement | null>(null);
+  const isSelectingRef = useRef(false);
   const startPosRef = useRef<{ x: number; y: number } | null>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
-  // Update event listeners when selection mode changes
+  // Fetch existing notes when component mounts
   useEffect(() => {
-    if (isHighlighting) {
-      setupEventListeners(selectionMode);
+    if (user?.id && isTestUser) {
+      fetchNotes();
     }
-  }, [selectionMode, isHighlighting]);
+  }, [user?.id, isTestUser]);
+
+  const fetchNotes = async () => {
+    try {
+      // Try to fetch from database first
+      const response = await fetch(`/api/test-notes-working?test_user_id=${user?.id}`);
+      const result = await response.json();
+      
+      if (result.success && result.notes) {
+        setNotes(result.notes);
+        return;
+      }
+    } catch (error) {
+      console.warn('Database fetch failed, falling back to localStorage:', error);
+    }
+
+    // Fallback to localStorage
+    try {
+      const localNotes = JSON.parse(localStorage.getItem('test_notes') || '[]');
+      setNotes(localNotes);
+    } catch (error) {
+      console.error('Error loading notes from localStorage:', error);
+      setNotes([]);
+    }
+  };
 
   // Only show for test users
   if (!isTestUser) return null;
 
-  const startHighlighting = () => {
-    setIsHighlighting(true);
+  const startScreenshotMode = () => {
+    console.log('🎯 Starting macOS-style screenshot mode...');
+    setIsScreenshotMode(true);
     setIsOpen(false);
     
-    // Add highlighting styles
-    const style = document.createElement('style');
-    style.id = 'test-user-highlighting';
-    style.textContent = `
-      .test-user-highlight {
-        outline: 3px solid #ef4444 !important;
-        outline-offset: 2px !important;
-        background-color: rgba(239, 68, 68, 0.1) !important;
-        cursor: crosshair !important;
-        position: relative !important;
-        z-index: 9999 !important;
-      }
-      .test-user-highlight:hover {
-        outline-color: #dc2626 !important;
-        background-color: rgba(239, 68, 68, 0.2) !important;
-      }
-      .test-user-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: rgba(0, 0, 0, 0.3);
-        z-index: 9998;
-        cursor: crosshair;
-      }
-      .test-user-area-selection {
-        position: fixed;
-        border: 2px dashed #3b82f6;
-        background-color: rgba(59, 130, 246, 0.1);
-        z-index: 10000;
-        pointer-events: none;
-      }
-      .test-user-selection-handle {
-        position: absolute;
-        width: 8px;
-        height: 8px;
-        background-color: #3b82f6;
-        border: 1px solid white;
-        border-radius: 50%;
-        cursor: move;
-        pointer-events: all;
-      }
-      .test-user-selection-handle.top-left { top: -4px; left: -4px; cursor: nw-resize; }
-      .test-user-selection-handle.top-right { top: -4px; right: -4px; cursor: ne-resize; }
-      .test-user-selection-handle.bottom-left { bottom: -4px; left: -4px; cursor: sw-resize; }
-      .test-user-selection-handle.bottom-right { bottom: -4px; right: -4px; cursor: se-resize; }
-    `;
-    document.head.appendChild(style);
-
-    // Add overlay
+    // Create overlay
     const overlay = document.createElement('div');
-    overlay.className = 'test-user-overlay';
-    overlay.onclick = stopHighlighting;
-    document.body.appendChild(overlay);
-
-    // Add mode selection UI
-    const modeSelector = document.createElement('div');
-    modeSelector.id = 'test-user-mode-selector';
-    modeSelector.style.cssText = `
+    overlay.className = 'screenshot-overlay';
+    overlay.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.3);
+      z-index: 9999;
+      cursor: crosshair;
+      user-select: none;
+      pointer-events: auto;
+    `;
+    
+    // Create instructions
+    const instructions = document.createElement('div');
+    instructions.style.cssText = `
       position: fixed;
       top: 20px;
       left: 50%;
       transform: translateX(-50%);
-      background: #181F17;
-      border: 2px solid #3A4D23;
-      border-radius: 12px;
-      padding: 12px;
-      z-index: 10001;
-      display: flex;
-      gap: 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    `;
-    
-    const updateButtonStyles = () => {
-      elementBtn.style.background = selectionMode === 'element' ? '#8BAE5A' : '#232D1A';
-      elementBtn.style.color = selectionMode === 'element' ? 'black' : '#8BAE5A';
-      areaBtn.style.background = selectionMode === 'area' ? '#8BAE5A' : '#232D1A';
-      areaBtn.style.color = selectionMode === 'area' ? 'black' : '#8BAE5A';
-    };
-    
-    const elementBtn = document.createElement('button');
-    elementBtn.textContent = 'Element Selecteren';
-    elementBtn.style.cssText = `
-      padding: 8px 16px;
-      background: ${selectionMode === 'element' ? '#8BAE5A' : '#232D1A'};
-      color: ${selectionMode === 'element' ? 'black' : '#8BAE5A'};
-      border: 1px solid #3A4D23;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
-    `;
-    elementBtn.onclick = () => {
-      setSelectionMode('element');
-      setSelectedArea(null);
-      setSelectedElement(null);
-      updateButtonStyles();
-      setupEventListeners('element');
-    };
-    
-    const areaBtn = document.createElement('button');
-    areaBtn.textContent = 'Gebied Selecteren';
-    areaBtn.style.cssText = `
-      padding: 8px 16px;
-      background: ${selectionMode === 'area' ? '#8BAE5A' : '#232D1A'};
-      color: ${selectionMode === 'area' ? 'black' : '#8BAE5A'};
-      border: 1px solid #3A4D23;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
-    `;
-    areaBtn.onclick = () => {
-      setSelectionMode('area');
-      setSelectedArea(null);
-      setSelectedElement(null);
-      updateButtonStyles();
-      setupEventListeners('area');
-    };
-    
-    const confirmBtn = document.createElement('button');
-    confirmBtn.textContent = 'Bevestigen';
-    confirmBtn.style.cssText = `
-      padding: 8px 16px;
-      background: #3b82f6;
+      background: rgba(0, 0, 0, 0.8);
       color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
       font-size: 14px;
-      font-weight: 500;
+      z-index: 10000;
+      pointer-events: none;
     `;
-    confirmBtn.onclick = () => {
-      if (selectedElement || selectedArea) {
-        stopHighlighting();
+    instructions.textContent = 'Sleep om een gebied te selecteren';
+    
+    // Create escape hint
+    const escapeHint = document.createElement('div');
+    escapeHint.style.cssText = `
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 12px;
+      z-index: 10000;
+      pointer-events: none;
+    `;
+    escapeHint.textContent = 'Druk ESC om te annuleren';
+    
+    document.body.appendChild(overlay);
+    document.body.appendChild(instructions);
+    document.body.appendChild(escapeHint);
+    
+    overlayRef.current = overlay;
+    
+    // Add event listeners
+    const handleMouseDown = (e: MouseEvent) => {
+      console.log('🎯 Mouse down:', e.clientX, e.clientY);
+      e.preventDefault();
+      e.stopPropagation();
+      
+      isSelectingRef.current = true;
+      startPosRef.current = { x: e.clientX, y: e.clientY };
+      
+      // Create selection box
+      const selectionBox = document.createElement('div');
+      selectionBox.className = 'screenshot-selection-box';
+      selectionBox.style.cssText = `
+        position: fixed;
+        left: ${e.clientX}px;
+        top: ${e.clientY}px;
+        width: 1px;
+        height: 1px;
+        border: 2px solid #007AFF;
+        background: rgba(0, 122, 255, 0.1);
+        z-index: 10000;
+        pointer-events: none;
+        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.5);
+        border-radius: 2px;
+      `;
+      
+      document.body.appendChild(selectionBox);
+      selectionBoxRef.current = selectionBox;
+      
+      console.log('✅ Selection box created');
+    };
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isSelectingRef.current || !startPosRef.current || !selectionBoxRef.current) return;
+      
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const currentPos = { x: e.clientX, y: e.clientY };
+      const startPos = startPosRef.current;
+      
+      const minX = Math.min(startPos.x, currentPos.x);
+      const minY = Math.min(startPos.y, currentPos.y);
+      const maxX = Math.max(startPos.x, currentPos.x);
+      const maxY = Math.max(startPos.y, currentPos.y);
+      
+      const width = maxX - minX;
+      const height = maxY - minY;
+      
+      selectionBoxRef.current.style.left = `${minX}px`;
+      selectionBoxRef.current.style.top = `${minY}px`;
+      selectionBoxRef.current.style.width = `${width}px`;
+      selectionBoxRef.current.style.height = `${height}px`;
+      
+      console.log('📐 Selection box updated:', { width, height });
+    };
+    
+    const handleMouseUp = (e: MouseEvent) => {
+      console.log('🎯 Mouse up:', e.clientX, e.clientY);
+      if (!isSelectingRef.current || !startPosRef.current) return;
+      
+      e.preventDefault();
+      e.stopPropagation();
+      
+      isSelectingRef.current = false;
+      
+      const currentPos = { x: e.clientX, y: e.clientY };
+      const startPos = startPosRef.current;
+      
+      const minX = Math.min(startPos.x, currentPos.x);
+      const minY = Math.min(startPos.y, currentPos.y);
+      const maxX = Math.max(startPos.x, currentPos.x);
+      const maxY = Math.max(startPos.y, currentPos.y);
+      
+      const width = maxX - minX;
+      const height = maxY - minY;
+      
+      console.log('📐 Final selection:', { width, height });
+      
+      // Only accept selection if it's large enough
+      if (width > 20 && height > 20) {
+        setSelectedArea({ x: minX, y: minY, width, height });
+        console.log('✅ Valid selection made, opening form');
+        stopScreenshotMode();
         setIsOpen(true);
       } else {
-        // Show error message if nothing is selected
-        alert('Selecteer eerst een element of gebied');
+        console.log('❌ Selection too small, removing');
+        if (selectionBoxRef.current) {
+          selectionBoxRef.current.remove();
+          selectionBoxRef.current = null;
+        }
+      }
+      
+      startPosRef.current = null;
+    };
+    
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        console.log('🚪 ESC pressed, canceling screenshot mode');
+        stopScreenshotMode();
       }
     };
     
-    const cancelBtn = document.createElement('button');
-    cancelBtn.textContent = 'Annuleren';
-    cancelBtn.style.cssText = `
-      padding: 8px 16px;
-      background: #6b7280;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
-    `;
-    cancelBtn.onclick = stopHighlighting;
+    // Add event listeners
+    overlay.addEventListener('mousedown', handleMouseDown);
+    overlay.addEventListener('mousemove', handleMouseMove);
+    overlay.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener('keydown', handleKeyDown);
     
-    modeSelector.appendChild(elementBtn);
-    modeSelector.appendChild(areaBtn);
-    modeSelector.appendChild(confirmBtn);
-    modeSelector.appendChild(cancelBtn);
-    document.body.appendChild(modeSelector);
-
-    // Setup initial event listeners
-    setupEventListeners(selectionMode);
+    // Store cleanup function
+    overlay.dataset.cleanup = 'true';
+    overlay.dataset.mouseDown = handleMouseDown.toString();
+    overlay.dataset.mouseMove = handleMouseMove.toString();
+    overlay.dataset.mouseUp = handleMouseUp.toString();
+    overlay.dataset.keyDown = handleKeyDown.toString();
   };
 
-  const setupEventListeners = (mode: 'element' | 'area') => {
-    // Remove all existing event listeners first
-    document.removeEventListener('mouseover', handleMouseOver);
-    document.removeEventListener('click', handleElementClick, true);
-    document.removeEventListener('mousedown', handleAreaSelectionStart);
-    document.removeEventListener('mousemove', handleAreaSelectionMove);
-    document.removeEventListener('mouseup', handleAreaSelectionEnd);
-
-    // Clean up any existing area selection
-    const existingSelection = document.querySelector('.test-user-area-selection');
-    if (existingSelection) {
-      existingSelection.remove();
-    }
-
-    // Add event listeners based on mode
-    if (mode === 'element') {
-      document.addEventListener('mouseover', handleMouseOver);
-      document.addEventListener('click', handleElementClick, true);
-    } else {
-      document.addEventListener('mousedown', handleAreaSelectionStart);
-      document.addEventListener('mousemove', handleAreaSelectionMove);
-      document.addEventListener('mouseup', handleAreaSelectionEnd);
-    }
-  };
-
-  const handleMouseOver = (e: MouseEvent) => {
-    if (!isHighlighting) return;
+  const stopScreenshotMode = () => {
+    console.log('🛑 Stopping screenshot mode...');
+    setIsScreenshotMode(false);
     
-    const target = e.target as HTMLElement;
-    if (target === overlayRef.current || target === buttonRef.current) return;
-
-    // Remove previous highlights
-    document.querySelectorAll('.test-user-highlight').forEach(el => {
-      el.classList.remove('test-user-highlight');
-    });
-
-    // Add highlight to current element
-    target.classList.add('test-user-highlight');
-  };
-
-  const handleElementClick = (e: MouseEvent) => {
-    if (!isHighlighting) return;
-    
-    e.preventDefault();
-    e.stopPropagation();
-
-    const target = e.target as HTMLElement;
-    if (target === overlayRef.current || target === buttonRef.current) return;
-
-    setSelectedElement(target);
-    stopHighlighting();
-    setIsOpen(true);
-  };
-
-  const handleAreaSelectionStart = (e: MouseEvent) => {
-    if (!isHighlighting) return;
-    if (selectionMode !== 'area') return;
-
-    setIsAreaSelecting(true);
-    startPosRef.current = { x: e.clientX, y: e.clientY };
-    const selectionDiv = document.createElement('div');
-    selectionDiv.className = 'test-user-area-selection';
-    document.body.appendChild(selectionDiv);
-    selectionRef.current = selectionDiv;
-  };
-
-  const handleAreaSelectionMove = (e: MouseEvent) => {
-    if (!isHighlighting || !isAreaSelecting || !startPosRef.current) return;
-    if (selectionMode !== 'area') return;
-
-    const currentPos = { x: e.clientX, y: e.clientY };
-    const start = startPosRef.current;
-
-    const minX = Math.min(start.x, currentPos.x);
-    const minY = Math.min(start.y, currentPos.y);
-    const maxX = Math.max(start.x, currentPos.x);
-    const maxY = Math.max(start.y, currentPos.y);
-
-    selectionRef.current!.style.left = `${minX}px`;
-    selectionRef.current!.style.top = `${minY}px`;
-    selectionRef.current!.style.width = `${maxX - minX}px`;
-    selectionRef.current!.style.height = `${maxY - minY}px`;
-
-    // Update selected area state
-    setSelectedArea({ x: minX, y: minY, width: maxX - minX, height: maxY - minY });
-  };
-
-  const handleAreaSelectionEnd = () => {
-    if (!isHighlighting || !isAreaSelecting) return;
-    if (selectionMode !== 'area') return;
-
-    setIsAreaSelecting(false);
-    
-    // Keep the selection visible but stop the selection process
-    if (selectionRef.current) {
-      selectionRef.current.style.pointerEvents = 'none';
-    }
-    
-    // Don't stop highlighting here, let user confirm with the confirm button
-  };
-
-  const stopHighlighting = () => {
-    setIsHighlighting(false);
-    
-    // Remove highlighting styles
-    const style = document.getElementById('test-user-highlighting');
-    if (style) style.remove();
-
     // Remove overlay
-    const overlay = document.querySelector('.test-user-overlay');
-    if (overlay) overlay.remove();
-
-    // Remove highlights
-    document.querySelectorAll('.test-user-highlight').forEach(el => {
-      el.classList.remove('test-user-highlight');
-    });
-
-    // Remove event listeners
-    document.removeEventListener('mouseover', handleMouseOver);
-    document.removeEventListener('click', handleElementClick, true);
-    document.removeEventListener('mousedown', handleAreaSelectionStart);
-    document.removeEventListener('mousemove', handleAreaSelectionMove);
-    document.removeEventListener('mouseup', handleAreaSelectionEnd);
-
-    // Remove mode selector
-    const modeSelector = document.getElementById('test-user-mode-selector');
-    if (modeSelector) modeSelector.remove();
+    if (overlayRef.current) {
+      overlayRef.current.remove();
+      overlayRef.current = null;
+    }
+    
+    // Remove selection box
+    if (selectionBoxRef.current) {
+      selectionBoxRef.current.remove();
+      selectionBoxRef.current = null;
+    }
+    
+    // Remove instructions and escape hint
+    const instructions = document.querySelector('.screenshot-overlay + div');
+    const escapeHint = document.querySelector('.screenshot-overlay + div + div');
+    if (instructions) instructions.remove();
+    if (escapeHint) escapeHint.remove();
+    
+    // Reset state
+    isSelectingRef.current = false;
+    startPosRef.current = null;
   };
 
   const getElementSelector = (element: HTMLElement): string => {
     if (element.id) return `#${element.id}`;
-    if (element.className) {
-      const classes = element.className.split(' ').filter(c => c).join('.');
-      return `.${classes}`;
-    }
+    if (element.className) return `.${element.className.split(' ').join('.')}`;
     return element.tagName.toLowerCase();
   };
 
@@ -379,63 +311,101 @@ export default function TestUserFeedback({ isTestUser, currentPage, onNoteCreate
 
     try {
       const noteData = {
-        test_user_id: '1', // This should come from user context or props
+        test_user_id: user?.id || 'unknown',
         type: noteType,
         page_url: currentPage,
         element_selector: selectedElement ? getElementSelector(selectedElement) : undefined,
+        area_selection: selectedArea,
         description: description.trim(),
         priority,
-        screenshot_url: undefined // Could be added later
+        screenshot_url: undefined // TODO: Implement actual screenshot capture
       };
 
-      // Save to database
-      const response = await fetch('/api/test-notes', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(noteData),
-      });
+      console.log('📝 Submitting note:', noteData);
 
-      const result = await response.json();
+      // Try to save to database first
+      try {
+        const response = await fetch('/api/test-notes-working', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(noteData),
+        });
 
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to save note');
+        const result = await response.json();
+
+        if (response.ok) {
+          // Successfully saved to database
+          const newNote: FeedbackNote = {
+            id: result.note.id,
+            type: noteType,
+            page_url: currentPage,
+            element_selector: selectedElement ? getElementSelector(selectedElement) : undefined,
+            area_selection: selectedArea ? {
+              x: selectedArea.x,
+              y: selectedArea.y,
+              width: selectedArea.width,
+              height: selectedArea.height
+            } : undefined,
+            description: description.trim(),
+            priority,
+            created_at: result.note.created_at
+          };
+
+          setNotes(prev => [newNote, ...prev]);
+          
+          // Call callback if provided
+          if (onNoteCreated) {
+            onNoteCreated(newNote);
+          }
+
+          toast.success('Notitie succesvol opgeslagen in database');
+        } else {
+          throw new Error(result.error || 'Failed to save note');
+        }
+      } catch (error) {
+        console.warn('Database save failed, falling back to localStorage:', error);
+        
+        // Fallback to localStorage
+        const localNote: FeedbackNote = {
+          id: `local-${Date.now()}`,
+          type: noteType,
+          page_url: currentPage,
+          element_selector: selectedElement ? getElementSelector(selectedElement) : undefined,
+          area_selection: selectedArea ? {
+            x: selectedArea.x,
+            y: selectedArea.y,
+            width: selectedArea.width,
+            height: selectedArea.height
+          } : undefined,
+          description: description.trim(),
+          priority,
+          created_at: new Date().toISOString()
+        };
+
+        const existingNotes = JSON.parse(localStorage.getItem('test_notes') || '[]');
+        const updatedNotes = [localNote, ...existingNotes];
+        localStorage.setItem('test_notes', JSON.stringify(updatedNotes));
+        
+        setNotes(prev => [localNote, ...prev]);
+        
+        if (onNoteCreated) {
+          onNoteCreated(localNote);
+        }
+
+        console.log('Test note created:', localNote);
+        toast.success('Notitie opgeslagen in lokale opslag');
       }
 
-      // Add to local state
-      const newNote: FeedbackNote = {
-        id: result.note.id,
-        type: noteType,
-        page_url: currentPage,
-        element_selector: selectedElement ? getElementSelector(selectedElement) : undefined,
-        area_selection: selectedArea ? {
-          x: selectedArea.x,
-          y: selectedArea.y,
-          width: selectedArea.width,
-          height: selectedArea.height
-        } : undefined,
-        description: description.trim(),
-        priority,
-        created_at: result.note.created_at
-      };
-
-      setNotes(prev => [newNote, ...prev]);
-      
-      // Call callback if provided
-      if (onNoteCreated) {
-        onNoteCreated(newNote);
-      }
-
-      toast.success('Notitie succesvol opgeslagen');
-      
       // Reset form
       setDescription('');
       setSelectedElement(null);
       setSelectedArea(null);
       setIsOpen(false);
+
     } catch (error) {
-      console.error('Error saving note:', error);
+      console.error('Error submitting note:', error);
       toast.error('Fout bij opslaan van notitie');
     } finally {
       setIsSubmitting(false);
@@ -451,225 +421,193 @@ export default function TestUserFeedback({ isTestUser, currentPage, onNoteCreate
 
   return (
     <>
-      {/* Floating Action Button */}
-      <div className="fixed right-6 top-1/2 transform -translate-y-1/2 z-50 flex flex-col gap-3">
-        <button
-          ref={buttonRef}
-          onClick={() => setIsOpen(true)}
-          className="bg-red-500 hover:bg-red-600 text-white p-3 rounded-full shadow-lg transition-all duration-200 group"
-          title={`Bug/Verbetering melden${userRole === 'admin' ? ' (Admin Mode)' : ''}`}
-        >
-          <BugAntIcon className="w-6 h-6" />
-          {userRole === 'admin' && (
-            <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full flex items-center justify-center">
-              <span className="text-xs font-bold text-black">A</span>
-            </div>
-          )}
-        </button>
-        
-        <button
-          onClick={startHighlighting}
-          className="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-full shadow-lg transition-all duration-200 group"
-          title={`Element markeren${userRole === 'admin' ? ' (Admin Mode)' : ''}`}
-        >
-          <DocumentTextIcon className="w-6 h-6" />
-          {userRole === 'admin' && (
-            <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full flex items-center justify-center">
-              <span className="text-xs font-bold text-black">A</span>
-            </div>
-          )}
-        </button>
-
-        <button
-          onClick={() => setShowNotes(!showNotes)}
-          className="bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-full shadow-lg transition-all duration-200 group"
-          title={`Mijn notities${userRole === 'admin' ? ' (Admin Mode)' : ''}`}
-        >
-          <span className="text-sm font-bold">{notes.length}</span>
-          {userRole === 'admin' && (
-            <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full flex items-center justify-center">
-              <span className="text-xs font-bold text-black">A</span>
-            </div>
-          )}
-        </button>
-      </div>
+      {/* Screenshot Button */}
+      <button
+        ref={buttonRef}
+        onClick={startScreenshotMode}
+        disabled={isScreenshotMode}
+        className="fixed right-4 bottom-20 z-50 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        title="Screenshot maken (macOS-style)"
+      >
+        <CameraIcon className="w-6 h-6" />
+      </button>
 
       {/* Feedback Modal */}
       {isOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[10000] p-4">
-          <div className="bg-[#181F17] border border-[#3A4D23] rounded-2xl p-6 w-full max-w-2xl">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-[#8BAE5A]">
-                {noteType === 'bug' ? '🐛 Bug Melden' : noteType === 'improvement' ? '💡 Verbetering Voorstellen' : '📝 Notitie'}
-                {userRole === 'admin' && <span className="text-yellow-400 text-lg ml-2">(Admin Mode)</span>}
-              </h2>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#181F17] border border-[#3A4D23] rounded-xl p-6 w-full max-w-md">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-[#8BAE5A]">Test Gebruiker Feedback</h3>
               <button
                 onClick={handleCancel}
-                className="text-gray-400 hover:text-white transition-colors"
+                className="text-gray-400 hover:text-white"
               >
-                <XMarkIcon className="w-6 h-6" />
+                <XMarkIcon className="w-5 h-5" />
               </button>
             </div>
 
-            {selectedElement && (
-              <div className="mb-4 p-3 bg-[#232D1A] rounded-lg border border-[#3A4D23]">
-                <div className="flex items-center gap-2 text-[#8BAE5A] text-sm">
-                  <CheckIcon className="w-4 h-4" />
-                  Element geselecteerd: {selectedElement.tagName.toLowerCase()}
-                  {selectedElement.className && ` (${selectedElement.className.split(' ')[0]})`}
-                </div>
+            {/* Type Selection */}
+            <div className="mb-4">
+              <label className="block text-[#8BAE5A] font-semibold mb-2">Type</label>
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  onClick={() => setNoteType('bug')}
+                  className={`p-2 rounded-lg text-sm font-medium transition-colors ${
+                    noteType === 'bug'
+                      ? 'bg-red-600 text-white'
+                      : 'bg-[#232D1A] text-gray-300 hover:bg-[#3A4D23]'
+                  }`}
+                >
+                  <BugAntIcon className="w-4 h-4 inline mr-1" />
+                  Bug
+                </button>
+                <button
+                  onClick={() => setNoteType('improvement')}
+                  className={`p-2 rounded-lg text-sm font-medium transition-colors ${
+                    noteType === 'improvement'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-[#232D1A] text-gray-300 hover:bg-[#3A4D23]'
+                  }`}
+                >
+                  <LightBulbIcon className="w-4 h-4 inline mr-1" />
+                  Verbetering
+                </button>
+                <button
+                  onClick={() => setNoteType('general')}
+                  className={`p-2 rounded-lg text-sm font-medium transition-colors ${
+                    noteType === 'general'
+                      ? 'bg-gray-600 text-white'
+                      : 'bg-[#232D1A] text-gray-300 hover:bg-[#3A4D23]'
+                  }`}
+                >
+                  <DocumentTextIcon className="w-4 h-4 inline mr-1" />
+                  Algemeen
+                </button>
               </div>
-            )}
+            </div>
 
+            {/* Selected Area Info */}
             {selectedArea && (
-              <div className="mb-4 p-3 bg-[#232D1A] rounded-lg border border-[#3A4D23]">
-                <div className="flex items-center gap-2 text-[#8BAE5A] text-sm">
-                  <CheckIcon className="w-4 h-4" />
-                  Gebied geselecteerd: {selectedArea.width}px × {selectedArea.height}px
-                  <span className="text-gray-400">(Positie: {selectedArea.x}, {selectedArea.y})</span>
+              <div className="mb-4 p-3 bg-[#232D1A] rounded-lg">
+                <div className="flex items-center space-x-2 mb-2">
+                  <Square3Stack3DIcon className="w-4 h-4 text-[#8BAE5A]" />
+                  <span className="text-[#8BAE5A] font-medium">Geselecteerd Gebied</span>
+                </div>
+                <div className="text-sm text-gray-300">
+                  Positie: ({selectedArea.x}, {selectedArea.y})<br />
+                  Grootte: {selectedArea.width} × {selectedArea.height} pixels
                 </div>
               </div>
             )}
 
-            <div className="space-y-4">
-              {/* Note Type Selection */}
-              <div>
-                <label className="block text-[#8BAE5A] font-medium mb-2">Type</label>
-                <div className="flex gap-2">
-                  {[
-                    { value: 'bug', label: '🐛 Bug', icon: BugAntIcon },
-                    { value: 'improvement', label: '💡 Verbetering', icon: LightBulbIcon },
-                    { value: 'general', label: '📝 Algemeen', icon: DocumentTextIcon }
-                  ].map((type) => (
-                    <button
-                      key={type.value}
-                      onClick={() => setNoteType(type.value as any)}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
-                        noteType === type.value
-                          ? 'bg-[#8BAE5A] text-black border-[#8BAE5A]'
-                          : 'bg-[#232D1A] text-white border-[#3A4D23] hover:border-[#8BAE5A]'
-                      }`}
-                    >
-                      <type.icon className="w-4 h-4" />
-                      {type.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
+            {/* Description */}
+            <div className="mb-4">
+              <label className="block text-[#8BAE5A] font-semibold mb-2">Beschrijving</label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Beschrijf het probleem of de verbetering..."
+                className="w-full px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] placeholder-[#B6C948] resize-none"
+                rows={4}
+                required
+              />
+            </div>
 
-              {/* Priority Selection */}
-              <div>
-                <label className="block text-[#8BAE5A] font-medium mb-2">Prioriteit</label>
-                <select
-                  value={priority}
-                  onChange={(e) => setPriority(e.target.value as any)}
-                  className="w-full px-4 py-2 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                >
-                  <option value="low">Laag</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">Hoog</option>
-                  <option value="critical">Kritiek</option>
-                </select>
-              </div>
+            {/* Priority */}
+            <div className="mb-6">
+              <label className="block text-[#8BAE5A] font-semibold mb-2">Prioriteit</label>
+              <select
+                value={priority}
+                onChange={(e) => setPriority(e.target.value as any)}
+                className="w-full px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+              >
+                <option value="low">Laag</option>
+                <option value="medium">Medium</option>
+                <option value="high">Hoog</option>
+                <option value="critical">Kritiek</option>
+              </select>
+            </div>
 
-              {/* Description */}
-              <div>
-                <label className="block text-[#8BAE5A] font-medium mb-2">Beschrijving</label>
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Beschrijf de bug, verbetering of notitie..."
-                  rows={4}
-                  className="w-full px-4 py-2 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] resize-none"
-                />
-              </div>
-
-              {/* Actions */}
-              <div className="flex items-center justify-end gap-3 pt-4">
-                <button
-                  onClick={handleCancel}
-                  className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
-                >
-                  Annuleren
-                </button>
-                <button
-                  onClick={handleSubmit}
-                  disabled={isSubmitting || !description.trim()}
-                  className="px-6 py-2 bg-[#8BAE5A] text-black font-medium rounded-lg hover:bg-[#B6C948] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isSubmitting ? 'Opslaan...' : 'Opslaan'}
-                </button>
-              </div>
+            {/* Action Buttons */}
+            <div className="flex items-center gap-4">
+              <button
+                onClick={handleCancel}
+                className="flex-1 px-4 py-3 rounded-xl bg-[#232D1A] text-gray-300 hover:bg-[#3A4D23] transition-colors"
+              >
+                Annuleren
+              </button>
+              <button
+                onClick={handleSubmit}
+                disabled={isSubmitting || !description.trim()}
+                className="flex-1 px-4 py-3 rounded-xl bg-[#8BAE5A] text-white hover:bg-[#B6C948] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              >
+                {isSubmitting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                    Opslaan...
+                  </>
+                ) : (
+                  <>
+                    <CheckIcon className="w-4 h-4 mr-2" />
+                    Opslaan
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Notes Overview */}
-      {showNotes && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[10000] p-4">
-          <div className="bg-[#181F17] border border-[#3A4D23] rounded-2xl p-6 w-full max-w-4xl max-h-[80vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-[#8BAE5A]">
-                Mijn Test Notities
-                {userRole === 'admin' && <span className="text-yellow-400 text-lg ml-2">(Admin Mode)</span>}
-              </h2>
-              <button
-                onClick={() => setShowNotes(false)}
-                className="text-gray-400 hover:text-white transition-colors"
-              >
-                <XMarkIcon className="w-6 h-6" />
-              </button>
-            </div>
+      {/* Notes List Button */}
+      <button
+        onClick={() => setShowNotes(!showNotes)}
+        className="fixed right-4 bottom-32 z-50 bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-full shadow-lg transition-colors"
+        title="Bekijk notities"
+      >
+        <DocumentTextIcon className="w-6 h-6" />
+      </button>
 
-            {notes.length === 0 ? (
-              <div className="text-center py-8 text-gray-400">
-                <DocumentTextIcon className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>Nog geen notities gemaakt</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {notes.map((note) => (
-                  <div key={note.id} className="p-4 bg-[#232D1A] rounded-lg border border-[#3A4D23]">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${
-                          note.type === 'bug' ? 'bg-red-500/20 text-red-400' :
-                          note.type === 'improvement' ? 'bg-blue-500/20 text-blue-400' :
-                          'bg-gray-500/20 text-gray-400'
-                        }`}>
-                          {note.type === 'bug' ? '🐛 Bug' : note.type === 'improvement' ? '💡 Verbetering' : '📝 Algemeen'}
-                        </span>
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${
-                          note.priority === 'critical' ? 'bg-red-500/20 text-red-400' :
-                          note.priority === 'high' ? 'bg-orange-500/20 text-orange-400' :
-                          note.priority === 'medium' ? 'bg-yellow-500/20 text-yellow-400' :
-                          'bg-green-500/20 text-green-400'
-                        }`}>
-                          {note.priority === 'critical' ? 'Kritiek' :
-                           note.priority === 'high' ? 'Hoog' :
-                           note.priority === 'medium' ? 'Medium' : 'Laag'}
-                        </span>
-                      </div>
-                      <span className="text-gray-400 text-sm">
-                        {new Date(note.created_at).toLocaleDateString('nl-NL')}
-                      </span>
-                    </div>
-                    <p className="text-white mb-2">{note.description}</p>
-                    <div className="text-sm text-gray-400">
-                      <span>Pagina: {note.page_url}</span>
-                      {note.element_selector && (
-                        <span className="ml-4">Element: {note.element_selector}</span>
-                      )}
-                      {note.area_selection && (
-                        <span className="ml-4">Gebied: {note.area_selection.width}px × {note.area_selection.height}px</span>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+      {/* Notes List */}
+      {showNotes && (
+        <div className="fixed right-4 bottom-40 z-50 bg-[#181F17] border border-[#3A4D23] rounded-xl p-4 w-80 max-h-96 overflow-y-auto">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-[#8BAE5A]">Notities ({notes.length})</h3>
+            <button
+              onClick={() => setShowNotes(false)}
+              className="text-gray-400 hover:text-white"
+            >
+              <XMarkIcon className="w-5 h-5" />
+            </button>
           </div>
+          
+          {notes.length === 0 ? (
+            <p className="text-gray-400 text-center py-4">Geen notities</p>
+          ) : (
+            <div className="space-y-3">
+              {notes.map((note) => (
+                <div key={note.id} className="p-3 bg-[#232D1A] rounded-lg">
+                  <div className="flex items-center space-x-2 mb-2">
+                    {note.type === 'bug' && <BugAntIcon className="w-4 h-4 text-red-400" />}
+                    {note.type === 'improvement' && <LightBulbIcon className="w-4 h-4 text-blue-400" />}
+                    {note.type === 'general' && <DocumentTextIcon className="w-4 h-4 text-gray-400" />}
+                    <span className="text-sm font-medium text-white">{note.type}</span>
+                    <span className={`px-2 py-1 rounded-full text-xs ${
+                      note.priority === 'critical' ? 'bg-red-600 text-white' :
+                      note.priority === 'high' ? 'bg-orange-600 text-white' :
+                      note.priority === 'medium' ? 'bg-yellow-600 text-white' :
+                      'bg-green-600 text-white'
+                    }`}>
+                      {note.priority}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-300 mb-2">{note.description}</p>
+                  <div className="text-xs text-gray-500">
+                    {new Date(note.created_at).toLocaleString()}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </>

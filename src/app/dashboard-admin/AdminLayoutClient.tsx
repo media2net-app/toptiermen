@@ -88,6 +88,7 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
       items: [
         { label: 'Ledenbeheer', icon: UserGroupIcon, href: '/dashboard-admin/ledenbeheer' },
         { label: 'Test gebruikers', icon: UserIcon, href: '/dashboard-admin/test-gebruikers' },
+        { label: 'Bug Meldingen', icon: BugAntIcon, href: '/dashboard-admin/bug-meldingen', badge: 'NEW' },
         { label: 'Affiliate Beheer', icon: FireIcon, href: '/dashboard-admin/affiliate-beheer' },
         { 
           label: 'Onboarding Overzicht', 

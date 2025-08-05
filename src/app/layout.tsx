@@ -20,17 +20,10 @@ export const metadata = {
   title: 'Top Tier Men',
   description: 'Become the best version of yourself',
   manifest: '/manifest.json',
-  themeColor: '#8BAE5A',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
     title: 'Top Tier Men',
-  },
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
   },
   icons: {
     icon: '/logo.svg',
@@ -40,7 +33,10 @@ export const metadata = {
 
 export const viewport = {
   width: 'device-width',
-  initialScale: 1.0,
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: '#8BAE5A',
 };
 
 export default function RootLayout({

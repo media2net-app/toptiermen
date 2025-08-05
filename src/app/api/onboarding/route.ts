@@ -27,16 +27,69 @@ export async function GET(request: Request) {
     // Initialize Supabase client
     const supabase = getSupabaseClient();
 
-    const { data, error } = await supabase
+    // First, get all records for this user
+    const { data: allRecords, error: fetchError } = await supabase
       .from('onboarding_status')
       .select('*')
-      .eq('user_id', userId)
-      .single();
+      .eq('user_id', userId);
 
-    if (error) {
-      console.log('❌ Error fetching onboarding status:', error.message);
+    if (fetchError) {
+      console.log('❌ Error fetching onboarding status:', fetchError.message);
       return NextResponse.json({ error: 'Failed to fetch onboarding status' }, { status: 500 });
     }
+
+    // If multiple records exist, keep only the most recent one
+    let data;
+    if (allRecords && allRecords.length > 1) {
+      console.log(`⚠️ Found ${allRecords.length} onboarding records for user ${userId}, keeping most recent`);
+      
+      // Sort by created_at descending and keep the first (most recent)
+      const sortedRecords = allRecords.sort((a, b) => 
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      
+      data = sortedRecords[0];
+      
+      // Delete the older records
+      const deleteIds = sortedRecords.slice(1).map(record => record.id);
+      for (const id of deleteIds) {
+        await supabase
+          .from('onboarding_status')
+          .delete()
+          .eq('id', id);
+      }
+      
+      console.log(`✅ Kept record ${data.id}, deleted ${deleteIds.length} duplicates`);
+    } else if (allRecords && allRecords.length === 1) {
+      data = allRecords[0];
+    } else {
+      // No records found, create one
+      console.log(`📝 No onboarding record found for user ${userId}, creating one`);
+      const { data: newRecord, error: createError } = await supabase
+        .from('onboarding_status')
+        .insert({
+          user_id: userId,
+          welcome_video_watched: false,
+          step_1_completed: false,
+          step_2_completed: false,
+          step_3_completed: false,
+          step_4_completed: false,
+          step_5_completed: false,
+          onboarding_completed: false,
+          current_step: 1
+        })
+        .select()
+        .single();
+      
+      if (createError) {
+        console.log('❌ Error creating onboarding record:', createError.message);
+        return NextResponse.json({ error: 'Failed to create onboarding record' }, { status: 500 });
+      }
+      
+      data = newRecord;
+    }
+
+
 
     console.log('✅ Onboarding status fetched:', {
       user_id: data.user_id,
@@ -173,11 +226,14 @@ export async function POST(request: Request) {
       }
       
       // Check if all steps are completed
-      const { data: currentStatus } = await supabase
+      const { data: currentStatusRecords } = await supabase
         .from('onboarding_status')
         .select('*')
-        .eq('user_id', userId)
-        .single();
+        .eq('user_id', userId);
+
+      const currentStatus = currentStatusRecords && currentStatusRecords.length > 0 
+        ? currentStatusRecords[0] 
+        : null;
 
       if (currentStatus) {
         const allStepsCompleted = 
@@ -201,17 +257,48 @@ export async function POST(request: Request) {
       updateData.current_step = 6;
     }
 
-    const { data, error } = await supabase
+    // Get the current record to update
+    const { data: currentRecords } = await supabase
       .from('onboarding_status')
-      .update(updateData)
-      .eq('user_id', userId)
-      .select()
-      .single();
+      .select('*')
+      .eq('user_id', userId);
 
-    if (error) {
-      console.log('❌ Error updating onboarding status:', error.message);
-      return NextResponse.json({ error: 'Failed to update onboarding status' }, { status: 500 });
+    let data;
+    if (currentRecords && currentRecords.length > 0) {
+      // Update the first (most recent) record
+      const { data: updatedRecord, error } = await supabase
+        .from('onboarding_status')
+        .update(updateData)
+        .eq('id', currentRecords[0].id)
+        .select()
+        .single();
+
+      if (error) {
+        console.log('❌ Error updating onboarding status:', error.message);
+        return NextResponse.json({ error: 'Failed to update onboarding status' }, { status: 500 });
+      }
+
+      data = updatedRecord;
+    } else {
+      // Create new record if none exists
+      const { data: newRecord, error } = await supabase
+        .from('onboarding_status')
+        .insert({
+          user_id: userId,
+          ...updateData
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.log('❌ Error creating onboarding status:', error.message);
+        return NextResponse.json({ error: 'Failed to create onboarding status' }, { status: 500 });
+      }
+
+      data = newRecord;
     }
+
+
 
     console.log('✅ Onboarding status updated:', {
       user_id: data.user_id,

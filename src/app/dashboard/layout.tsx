@@ -181,7 +181,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { user, loading, logoutAndRedirect } = useSupabaseAuth();
   const isAuthenticated = !!user;
-  const { showDebug } = useDebug();
+  const { showDebug, toggleDebug } = useDebug();
   const { isOnboarding, currentStep, isTransitioning } = useOnboarding();
   const isTestUser = useTestUser();
   
@@ -353,11 +353,30 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
                     {user.email}
                   </p>
                   <p className="text-[#8BAE5A] text-xs">
-                    {user.role?.toLowerCase() === 'admin' ? 'Admin' : 'Lid'}
+                    {user.role?.toLowerCase() === 'admin' ? 'Admin' : 
+                     user.role?.toLowerCase() === 'test' ? 'Test' :
+                     user.email?.toLowerCase().includes('test') ? 'Test' : 'Lid'}
                   </p>
                 </div>
               )}
             </div>
+            
+            {/* Debug Toggle for Test Users */}
+            {(isTestUser || user?.role?.toLowerCase() === 'admin' || user?.email?.toLowerCase().includes('test')) && (
+              <div className="mt-3 pt-3 border-t border-[#3A4D23]">
+                <button
+                  onClick={toggleDebug}
+                  className={`w-full px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
+                    showDebug 
+                      ? 'bg-[#8BAE5A] text-black' 
+                      : 'bg-[#3A4D23] text-[#8BAE5A] hover:bg-[#4A5D33]'
+                  }`}
+                >
+                  {!sidebarCollapsed ? 'Debug Mode' : 'D'}
+                  {showDebug && !sidebarCollapsed && ' ✓'}
+                </button>
+              </div>
+            )}
           </div>
         </div>
 

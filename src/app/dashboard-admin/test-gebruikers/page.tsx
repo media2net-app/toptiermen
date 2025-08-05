@@ -16,7 +16,8 @@ import {
   ClockIcon,
   CalendarIcon,
   DocumentTextIcon,
-  BugAntIcon
+  BugAntIcon,
+  WrenchScrewdriverIcon
 } from '@heroicons/react/24/outline';
 import { AdminCard, AdminButton } from '@/components/admin';
 import { toast } from 'react-hot-toast';
@@ -44,6 +45,7 @@ interface TestNote {
   type: 'bug' | 'improvement' | 'general';
   page_url: string;
   element_selector: string;
+  area_selection?: { x: number; y: number; width: number; height: number } | null;
   description: string;
   priority: 'low' | 'medium' | 'high' | 'critical';
   status: 'open' | 'in_progress' | 'resolved' | 'closed';
@@ -63,14 +65,45 @@ export default function TestGebruikers() {
   const [showNoteModal, setShowNoteModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<TestUser | null>(null);
   const [selectedNote, setSelectedNote] = useState<TestNote | null>(null);
+  const [newUserData, setNewUserData] = useState({
+    name: '',
+    email: '',
+    status: 'active' as const,
+    assigned_modules: [] as string[],
+    test_start_date: '',
+    test_end_date: ''
+  });
 
   // Fetch data from database
   useEffect(() => {
-    fetchTestData();
+    initializeTestTables();
   }, []);
 
-  const fetchTestData = async () => {
+  const initializeTestTables = async () => {
     setLoading(true);
+    try {
+      // First, try to create tables if they don't exist
+      const createResponse = await fetch('/api/admin/create-test-tables', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!createResponse.ok) {
+        console.warn('Could not create test tables, continuing with existing data');
+      }
+
+      await fetchTestData();
+    } catch (error) {
+      console.error('Error initializing test tables:', error);
+      await fetchTestData();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchTestData = async () => {
     try {
       // Fetch test users
       const { data: users, error: usersError } = await supabase
@@ -102,58 +135,54 @@ export default function TestGebruikers() {
     } catch (error) {
       console.error('Unexpected error:', error);
       setError('Onverwachte fout opgetreden');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const filteredUsers = testUsers.filter(user => {
-    const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || user.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active': return 'bg-green-500 text-white';
-      case 'inactive': return 'bg-yellow-500 text-white';
-      case 'completed': return 'bg-blue-500 text-white';
-      default: return 'bg-gray-500 text-white';
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'active': return 'Actief';
-      case 'inactive': return 'Inactief';
-      case 'completed': return 'Voltooid';
-      default: return 'Onbekend';
-    }
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'critical': return 'bg-red-500 text-white';
-      case 'high': return 'bg-orange-500 text-white';
-      case 'medium': return 'bg-yellow-500 text-white';
-      case 'low': return 'bg-green-500 text-white';
-      default: return 'bg-gray-500 text-white';
-    }
-  };
-
-  const getPriorityText = (priority: string) => {
-    switch (priority) {
-      case 'critical': return 'Kritiek';
-      case 'high': return 'Hoog';
-      case 'medium': return 'Medium';
-      case 'low': return 'Laag';
-      default: return 'Onbekend';
     }
   };
 
   const handleAddTestUser = () => {
     setShowAddModal(true);
+  };
+
+  const handleSaveTestUser = async () => {
+    if (!newUserData.name || !newUserData.email || !newUserData.test_start_date || !newUserData.test_end_date) {
+      toast.error('Vul alle verplichte velden in');
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('test_users')
+        .insert([{
+          name: newUserData.name,
+          email: newUserData.email,
+          status: newUserData.status,
+          assigned_modules: newUserData.assigned_modules,
+          test_start_date: newUserData.test_start_date,
+          test_end_date: newUserData.test_end_date
+        }])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating test user:', error);
+        toast.error('Fout bij aanmaken van test gebruiker');
+        return;
+      }
+
+      setTestUsers(prev => [data, ...prev]);
+      setShowAddModal(false);
+      setNewUserData({
+        name: '',
+        email: '',
+        status: 'active',
+        assigned_modules: [],
+        test_start_date: '',
+        test_end_date: ''
+      });
+      toast.success('Test gebruiker succesvol aangemaakt');
+    } catch (error) {
+      console.error('Error creating test user:', error);
+      toast.error('Fout bij aanmaken van test gebruiker');
+    }
   };
 
   const handleViewNotes = (user: TestUser) => {
@@ -223,6 +252,51 @@ export default function TestGebruikers() {
       toast.success('Notitie status succesvol bijgewerkt');
     } catch (error) {
       toast.error('Fout bij bijwerken van notitie status');
+    }
+  };
+
+  const filteredUsers = testUsers.filter(user => {
+    const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         user.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || user.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'active': return 'bg-green-500 text-white';
+      case 'inactive': return 'bg-yellow-500 text-white';
+      case 'completed': return 'bg-blue-500 text-white';
+      default: return 'bg-gray-500 text-white';
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'active': return 'Actief';
+      case 'inactive': return 'Inactief';
+      case 'completed': return 'Voltooid';
+      default: return 'Onbekend';
+    }
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'critical': return 'bg-red-500 text-white';
+      case 'high': return 'bg-orange-500 text-white';
+      case 'medium': return 'bg-yellow-500 text-white';
+      case 'low': return 'bg-green-500 text-white';
+      default: return 'bg-gray-500 text-white';
+    }
+  };
+
+  const getPriorityText = (priority: string) => {
+    switch (priority) {
+      case 'critical': return 'Kritiek';
+      case 'high': return 'Hoog';
+      case 'medium': return 'Medium';
+      case 'low': return 'Laag';
+      default: return 'Onbekend';
     }
   };
 
@@ -468,6 +542,155 @@ export default function TestGebruikers() {
           ))}
         </div>
       </AdminCard>
+
+      {/* Add Test User Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#181F17] border border-[#3A4D23] rounded-2xl p-6 w-full max-w-md">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-[#8BAE5A]">Test Gebruiker Toevoegen</h2>
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <XCircleIcon className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-[#8BAE5A] font-medium mb-2">Naam</label>
+                <input
+                  type="text"
+                  value={newUserData.name}
+                  onChange={(e) => setNewUserData(prev => ({ ...prev, name: e.target.value }))}
+                  className="w-full px-4 py-2 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
+                  placeholder="Volledige naam"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[#8BAE5A] font-medium mb-2">Email</label>
+                <input
+                  type="email"
+                  value={newUserData.email}
+                  onChange={(e) => setNewUserData(prev => ({ ...prev, email: e.target.value }))}
+                  className="w-full px-4 py-2 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
+                  placeholder="email@example.com"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[#8BAE5A] font-medium mb-2">Status</label>
+                <select
+                  value={newUserData.status}
+                  onChange={(e) => setNewUserData(prev => ({ ...prev, status: e.target.value as any }))}
+                  className="w-full px-4 py-2 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
+                >
+                  <option value="active">Actief</option>
+                  <option value="inactive">Inactief</option>
+                  <option value="completed">Voltooid</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[#8BAE5A] font-medium mb-2">Test Start Datum</label>
+                <input
+                  type="date"
+                  value={newUserData.test_start_date}
+                  onChange={(e) => setNewUserData(prev => ({ ...prev, test_start_date: e.target.value }))}
+                  className="w-full px-4 py-2 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[#8BAE5A] font-medium mb-2">Test Eind Datum</label>
+                <input
+                  type="date"
+                  value={newUserData.test_end_date}
+                  onChange={(e) => setNewUserData(prev => ({ ...prev, test_end_date: e.target.value }))}
+                  className="w-full px-4 py-2 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-4">
+                <button
+                  onClick={() => setShowAddModal(false)}
+                  className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
+                >
+                  Annuleren
+                </button>
+                <button
+                  onClick={handleSaveTestUser}
+                  className="px-6 py-2 bg-[#8BAE5A] text-black font-medium rounded-lg hover:bg-[#B6C948] transition-colors"
+                >
+                  Toevoegen
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View Notes Modal */}
+      {showNoteModal && selectedUser && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#181F17] border border-[#3A4D23] rounded-2xl p-6 w-full max-w-4xl max-h-[80vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-[#8BAE5A]">Notities van {selectedUser.name}</h2>
+              <button
+                onClick={() => setShowNoteModal(false)}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <XCircleIcon className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {testNotes.filter(note => note.test_user_id === selectedUser.id).length === 0 ? (
+                <div className="text-center py-8 text-gray-400">
+                  <DocumentTextIcon className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>Geen notities gevonden voor deze gebruiker</p>
+                </div>
+              ) : (
+                testNotes
+                  .filter(note => note.test_user_id === selectedUser.id)
+                  .map((note) => (
+                    <div key={note.id} className="p-4 bg-[#232D1A] rounded-lg border border-[#3A4D23]">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <span className={`px-2 py-1 rounded text-xs font-medium ${
+                            note.type === 'bug' ? 'bg-red-500/20 text-red-400' :
+                            note.type === 'improvement' ? 'bg-blue-500/20 text-blue-400' :
+                            'bg-gray-500/20 text-gray-400'
+                          }`}>
+                            {note.type === 'bug' ? '🐛 Bug' : note.type === 'improvement' ? '💡 Verbetering' : '📝 Algemeen'}
+                          </span>
+                          <span className={`px-2 py-1 rounded text-xs font-medium ${getPriorityColor(note.priority)}`}>
+                            {getPriorityText(note.priority)}
+                          </span>
+                        </div>
+                        <span className="text-gray-400 text-sm">
+                          {new Date(note.created_at).toLocaleDateString('nl-NL')}
+                        </span>
+                      </div>
+                      <p className="text-white mb-2">{note.description}</p>
+                      <div className="text-sm text-gray-400">
+                        <span>Pagina: {note.page_url}</span>
+                        {note.element_selector && (
+                          <span className="ml-4">Element: {note.element_selector}</span>
+                        )}
+                        {note.area_selection && (
+                          <span className="ml-4">Gebied: {note.area_selection.width}px × {note.area_selection.height}px</span>
+                        )}
+                      </div>
+                    </div>
+                  ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 

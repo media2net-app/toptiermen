@@ -7,10 +7,11 @@ export function useTestUser() {
 
   useEffect(() => {
     if (user) {
-      // Check if user has test role or is admin
+      // Check if user has test role, is admin, or has specific test email
       const isTest = user.role?.toLowerCase() === 'test';
       const isAdmin = user.role?.toLowerCase() === 'admin';
-      setIsTestUser(isTest || isAdmin);
+      const isTestEmail = user.email?.toLowerCase().includes('test');
+      setIsTestUser(isTest || isAdmin || isTestEmail);
     } else {
       setIsTestUser(false);
     }
