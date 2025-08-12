@@ -437,7 +437,7 @@ export default function TestUserFeedback({ isTestUser, currentPage, onNoteCreate
 
     try {
       // Capture screenshot if area or element is selected
-      let screenshotUrl: string | undefined = undefined;
+      let screenshotUrl: string | null = null;
       
       if (selectedArea || selectedElement) {
         toast.loading('Screenshot maken...');
