@@ -613,7 +613,8 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
         {isMobileMenuOpen && (
           <div className="lg:hidden fixed inset-0 z-40 flex">
              <div className="fixed inset-0 bg-black/60" onClick={() => setIsMobileMenuOpen(false)}></div>
-             <div className="relative flex-1 flex flex-col max-w-sm w-full bg-[#232D1A] border-r border-[#3A4D23] p-6">
+             <div className="relative flex-1 flex flex-col max-w-sm w-full bg-[#232D1A] border-r border-[#3A4D23] p-6 h-full overflow-y-auto"
+                  style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}>
                 <button
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="absolute top-5 right-5 p-2 text-[#8BAE5A]"
