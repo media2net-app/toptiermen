@@ -91,7 +91,12 @@ export default function TakenPage() {
       
       if (data.success) {
         setAllTasks(data.tasks);
-        console.log('✅ Tasks loaded:', data.tasks.length);
+        console.log(`✅ Tasks loaded: ${data.tasks.length} (Source: ${data.source})`);
+        
+        // Show debug info if using hardcoded data
+        if (data.source === 'hardcoded') {
+          console.warn('⚠️ Using hardcoded data - database table may not exist');
+        }
       } else {
         console.error('Error fetching tasks:', data.error);
         toast.error('Fout bij het laden van taken', {
@@ -252,7 +257,7 @@ export default function TakenPage() {
   };
 
   const handleAddNewTask = async () => {
-    if (!formData.title || !formData.description || !formData.assigned_to || !formData.due_date) {
+    if (!formData.title || !formData.description || !formData.assigned_to || !formData.due_date || formData.estimated_hours === undefined) {
       toast.error('Vul alle verplichte velden in', {
         position: "top-right",
         duration: 3000,
@@ -262,13 +267,32 @@ export default function TakenPage() {
 
     setAddingTask(true);
     try {
+      console.log('🔄 Creating task:', formData);
+      
       const response = await fetch('/api/admin/todo-tasks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, created_at: new Date().toISOString() })
+        body: JSON.stringify({ 
+          ...formData, 
+          created_at: new Date().toISOString(),
+          start_date: formData.due_date // Use due_date as start_date if not provided
+        })
       });
 
-      if (response.ok) {
+      console.log('📡 Response status:', response.status);
+      console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()));
+
+      if (!response.ok) {
+        console.error('❌ HTTP Error:', response.status, response.statusText);
+        const errorText = await response.text();
+        console.error('❌ Error response body:', errorText);
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log('📝 Task creation response:', result);
+
+      if (response.ok && result.success) {
         toast.success('Taak succesvol toegevoegd', {
           position: "top-right",
           duration: 3000,
@@ -286,13 +310,33 @@ export default function TakenPage() {
         });
         fetchTasks();
       } else {
-        throw new Error('Failed to add task');
+        // Check for specific database table error
+        if (result.error && typeof result.error === 'string' && result.error.includes('does not exist')) {
+          throw new Error('Database tabel ontbreekt. Neem contact op met de beheerder.');
+        }
+        throw new Error(result.error || 'Failed to add task');
       }
     } catch (error) {
-      console.error('Error adding task:', error);
-      toast.error('Fout bij het toevoegen van taak', {
+      console.error('❌ Error adding task:', error);
+      
+      // Handle different types of errors
+      let errorMessage = 'Onbekende fout opgetreden';
+      
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        errorMessage = 'Netwerk fout - Controleer je internetverbinding';
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
+      console.error('❌ Detailed error info:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
+      
+      toast.error(`Fout bij het toevoegen van taak: ${errorMessage}`, {
         position: "top-right",
-        duration: 3000,
+        duration: 5000,
       });
     } finally {
       setAddingTask(false);
@@ -539,8 +583,8 @@ export default function TakenPage() {
 
       {/* Edit Task Modal */}
       {showEditModal && editingTask && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-[#232D1A] rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-[#3A4D23]">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#232D1A] rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-[#3A4D23]">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-bold text-[#8BAE5A]">Taak Bewerken</h2>
               <button
@@ -548,58 +592,55 @@ export default function TakenPage() {
                   setShowEditModal(false);
                   setEditingTask(null);
                 }}
-                className="text-[#B6C948] hover:text-[#8BAE5A]"
+                className="p-2 rounded-xl transition-colors duration-200 hover:bg-[#181F17]"
               >
-                <XMarkIcon className="w-6 h-6" />
+                <XMarkIcon className="w-6 h-6 text-[#B6C948]" />
               </button>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Titel *</label>
+                <label className="block text-[#8BAE5A] font-semibold mb-2">Titel *</label>
                 <input
                   type="text"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] placeholder-[#B6C948]"
+                  placeholder="Taak titel"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Beschrijving *</label>
+                <label className="block text-[#8BAE5A] font-semibold mb-2">Beschrijving *</label>
                 <textarea
                   rows={3}
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] placeholder-[#B6C948] resize-none"
+                  placeholder="Taak beschrijving"
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Toegewezen aan *</label>
+                  <label className="block text-[#8BAE5A] font-semibold mb-2">Toegewezen aan *</label>
                   <select
                     value={formData.assigned_to}
                     onChange={(e) => setFormData({ ...formData, assigned_to: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
                   >
                     <option value="">Selecteer persoon</option>
-                    <option value="Rick">Rick (Content & Video's)</option>
-                    <option value="Chiel">Chiel (Design & Development)</option>
-                    <option value="Development Team">Development Team</option>
-                    <option value="Frontend Team">Frontend Team</option>
-                    <option value="Backend Team">Backend Team</option>
-                    <option value="QA Team">QA Team</option>
-                    <option value="Content Team">Content Team</option>
+                    <option value="Rick">Rick</option>
+                    <option value="Chiel">Chiel</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Categorie *</label>
+                  <label className="block text-[#8BAE5A] font-semibold mb-2">Categorie *</label>
                   <select
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
                   >
                     <option value="development">Development</option>
                     <option value="content">Content</option>
@@ -612,11 +653,11 @@ export default function TakenPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Prioriteit *</label>
+                  <label className="block text-[#8BAE5A] font-semibold mb-2">Prioriteit *</label>
                   <select
                     value={formData.priority}
                     onChange={(e) => setFormData({ ...formData, priority: e.target.value as any })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
                   >
                     <option value="low">Laag</option>
                     <option value="medium">Medium</option>
@@ -626,11 +667,11 @@ export default function TakenPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Status *</label>
+                  <label className="block text-[#8BAE5A] font-semibold mb-2">Status *</label>
                   <select
                     value={formData.status}
                     onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
                   >
                     <option value="pending">Open</option>
                     <option value="in_progress">Bezig</option>
@@ -640,30 +681,34 @@ export default function TakenPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Deadline *</label>
+                  <label className="block text-[#8BAE5A] font-semibold mb-2">Deadline *</label>
                   <input
                     type="date"
                     value={formData.due_date}
                     onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
                   />
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 pt-4">
+              <div className="flex gap-4 pt-4">
                 <button
                   onClick={() => {
                     setShowEditModal(false);
                     setEditingTask(null);
                   }}
-                  className="px-4 py-2 text-[#B6C948] border border-[#3A4D23] rounded-lg hover:bg-[#181F17]"
+                  className="flex-1 px-6 py-3 rounded-xl font-semibold transition-all duration-200 bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A]"
                 >
                   Annuleren
                 </button>
                 <button
                   onClick={handleSave}
                   disabled={isLoading}
-                  className="px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] disabled:opacity-50 font-semibold"
+                  className={`flex-1 px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
+                    isLoading
+                      ? 'bg-[#3A4D23] text-[#8BAE5A] opacity-50 cursor-not-allowed'
+                      : 'bg-[#8BAE5A] text-[#181F17] hover:bg-[#B6C948]'
+                  }`}
                 >
                   {isLoading ? 'Opslaan...' : 'Opslaan'}
                 </button>
@@ -675,64 +720,61 @@ export default function TakenPage() {
 
       {/* Add Task Modal */}
       {showAddTaskModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-[#232D1A] rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-[#3A4D23]">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#232D1A] rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-[#3A4D23]">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-bold text-[#8BAE5A]">Nieuwe Taak Toevoegen</h2>
               <button
                 onClick={() => setShowAddTaskModal(false)}
-                className="text-[#B6C948] hover:text-[#8BAE5A]"
+                className="p-2 rounded-xl transition-colors duration-200 hover:bg-[#181F17]"
               >
-                <XMarkIcon className="w-6 h-6" />
+                <XMarkIcon className="w-6 h-6 text-[#B6C948]" />
               </button>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Titel *</label>
+                <label className="block text-[#8BAE5A] font-semibold mb-2">Titel *</label>
                 <input
                   type="text"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] placeholder-[#B6C948]"
+                  placeholder="Taak titel"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Beschrijving *</label>
+                <label className="block text-[#8BAE5A] font-semibold mb-2">Beschrijving *</label>
                 <textarea
                   rows={3}
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] placeholder-[#B6C948] resize-none"
+                  placeholder="Taak beschrijving"
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Toegewezen aan *</label>
+                  <label className="block text-[#8BAE5A] font-semibold mb-2">Toegewezen aan *</label>
                   <select
                     value={formData.assigned_to}
                     onChange={(e) => setFormData({ ...formData, assigned_to: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
                   >
                     <option value="">Selecteer persoon</option>
-                    <option value="Rick">Rick (Content & Video's)</option>
-                    <option value="Chiel">Chiel (Design & Development)</option>
-                    <option value="Development Team">Development Team</option>
-                    <option value="Frontend Team">Frontend Team</option>
-                    <option value="Backend Team">Backend Team</option>
-                    <option value="QA Team">QA Team</option>
-                    <option value="Content Team">Content Team</option>
+                    <option value="Rick">Rick</option>
+                    <option value="Chiel">Chiel</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Categorie *</label>
+                  <label className="block text-[#8BAE5A] font-semibold mb-2">Categorie *</label>
                   <select
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
                   >
                     <option value="development">Development</option>
                     <option value="content">Content</option>
@@ -745,11 +787,11 @@ export default function TakenPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Prioriteit *</label>
+                  <label className="block text-[#8BAE5A] font-semibold mb-2">Prioriteit *</label>
                   <select
                     value={formData.priority}
                     onChange={(e) => setFormData({ ...formData, priority: e.target.value as any })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
                   >
                     <option value="low">Laag</option>
                     <option value="medium">Medium</option>
@@ -759,11 +801,11 @@ export default function TakenPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Status *</label>
+                  <label className="block text-[#8BAE5A] font-semibold mb-2">Status *</label>
                   <select
                     value={formData.status}
                     onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
                   >
                     <option value="pending">Open</option>
                     <option value="in_progress">Bezig</option>
@@ -773,27 +815,44 @@ export default function TakenPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-[#B6C948] mb-1">Deadline *</label>
+                  <label className="block text-[#8BAE5A] font-semibold mb-2">Deadline *</label>
                   <input
                     type="date"
                     value={formData.due_date}
                     onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
-                    className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-[#8BAE5A] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                    className="w-full px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[#8BAE5A] font-semibold mb-2">Geschatte Uren *</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.5"
+                    value={formData.estimated_hours}
+                    onChange={(e) => setFormData({ ...formData, estimated_hours: parseFloat(e.target.value) || 0 })}
+                    className="w-full px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                    placeholder="0"
                   />
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 pt-4">
+              <div className="flex gap-4 pt-4">
                 <button
                   onClick={() => setShowAddTaskModal(false)}
-                  className="px-4 py-2 text-[#B6C948] border border-[#3A4D23] rounded-lg hover:bg-[#181F17]"
+                  className="flex-1 px-6 py-3 rounded-xl font-semibold transition-all duration-200 bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A]"
                 >
                   Annuleren
                 </button>
                 <button
                   onClick={handleAddNewTask}
                   disabled={addingTask}
-                  className="px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] disabled:opacity-50 font-semibold"
+                  className={`flex-1 px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
+                    addingTask
+                      ? 'bg-[#3A4D23] text-[#8BAE5A] opacity-50 cursor-not-allowed'
+                      : 'bg-[#8BAE5A] text-[#181F17] hover:bg-[#B6C948]'
+                  }`}
                 >
                   {addingTask ? 'Toevoegen...' : 'Toevoegen'}
                 </button>

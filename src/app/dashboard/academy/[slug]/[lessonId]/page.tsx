@@ -8,6 +8,7 @@ import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import PageLayout from '@/components/PageLayout';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import Breadcrumb, { createBreadcrumbs } from '@/components/Breadcrumb';
 
 interface Module {
   id: string;
@@ -269,29 +270,35 @@ export default function LessonDetailPage() {
             </div>
           </div>
 
-          {/* Video content - Temporarily disabled */}
+          {/* Video content */}
           {lesson.video_url && (
             <div className="mb-6">
-              <div className="aspect-video bg-[#232D1A] rounded-lg overflow-hidden relative border border-[#3A4D23] flex items-center justify-center">
-                <div className="text-center p-8">
-                  <div className="w-16 h-16 bg-[#8BAE5A]/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-8 h-8 text-[#8BAE5A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                    </svg>
-                  </div>
-                  <h3 className="text-lg font-semibold text-[#8BAE5A] mb-2">
-                    Video functionaliteit tijdelijk niet beschikbaar
-                  </h3>
-                  <p className="text-[#B6C948] text-sm mb-3">
-                    Op dit moment is video afspelen niet mogelijk gezien we het systeem aan het updaten zijn
-                  </p>
-                  <p className="text-[#8BAE5A] text-xs">
-                    🚧 Video functionaliteit wordt momenteel geüpdatet voor betere prestaties en stabiliteit
-                  </p>
-                </div>
+              <div className="aspect-video bg-[#232D1A] rounded-lg overflow-hidden relative border border-[#3A4D23]">
+                <video
+                  src={lesson.video_url}
+                  controls
+                  className="w-full h-full rounded-lg bg-black"
+                  preload="auto"
+                  autoPlay
+                  muted
+                  onError={(e) => {
+                    console.error('❌ Video error:', e);
+                    console.log('🎥 Video URL:', lesson.video_url);
+                  }}
+                  onLoadStart={() => {
+                    console.log('🎥 Loading video:', lesson.video_url);
+                  }}
+                  onCanPlay={() => {
+                    console.log('🎥 Video can start playing');
+                  }}
+                >
+                  Je browser ondersteunt deze video niet.
+                </video>
               </div>
             </div>
           )}
+          
+
 
           {/* Text content */}
           {lesson.content && (

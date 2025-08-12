@@ -46,6 +46,7 @@ export default function TestUserFeedback({ isTestUser, currentPage, onNoteCreate
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notes, setNotes] = useState<FeedbackNote[]>([]);
   const [showNotes, setShowNotes] = useState(false);
+  const [screenshotData, setScreenshotData] = useState<string | null>(null);
 
   // Screenshot mode refs
   const overlayRef = useRef<HTMLDivElement | null>(null);
@@ -353,6 +354,79 @@ export default function TestUserFeedback({ isTestUser, currentPage, onNoteCreate
     return element.tagName.toLowerCase();
   };
 
+  const captureScreenshot = async (): Promise<string | null> => {
+    try {
+      // Use html2canvas to capture the selected area or full page
+      const html2canvas = (await import('html2canvas')).default;
+      
+      let targetElement: HTMLElement;
+      
+      if (selectedArea) {
+        // Capture selected area
+        const canvas = await html2canvas(document.body, {
+          x: selectedArea.x,
+          y: selectedArea.y,
+          width: selectedArea.width,
+          height: selectedArea.height,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: null
+        });
+        return canvas.toDataURL('image/png');
+      } else if (selectedElement) {
+        // Capture selected element
+        const canvas = await html2canvas(selectedElement, {
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: null
+        });
+        return canvas.toDataURL('image/png');
+      } else {
+        // Capture full page
+        const canvas = await html2canvas(document.body, {
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: null
+        });
+        return canvas.toDataURL('image/png');
+      }
+    } catch (error) {
+      console.error('Error capturing screenshot:', error);
+      toast.error('Fout bij maken van screenshot');
+      return null;
+    }
+  };
+
+  const uploadScreenshot = async (screenshotData: string): Promise<string | null> => {
+    try {
+      // Convert base64 to blob
+      const base64Data = screenshotData.split(',')[1];
+      const blob = await fetch(`data:image/png;base64,${base64Data}`).then(res => res.blob());
+      
+      // Create FormData
+      const formData = new FormData();
+      formData.append('screenshot', blob, 'screenshot.png');
+      
+      // Upload to API
+      const response = await fetch('/api/upload-screenshot', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      const result = await response.json();
+      
+      if (response.ok && result.url) {
+        return result.url;
+      } else {
+        throw new Error(result.error || 'Upload failed');
+      }
+    } catch (error) {
+      console.error('Error uploading screenshot:', error);
+      toast.error('Fout bij uploaden van screenshot');
+      return null;
+    }
+  };
+
   const handleSubmit = async () => {
     if (!description.trim()) {
       toast.error('Beschrijving is verplicht');
@@ -362,6 +436,21 @@ export default function TestUserFeedback({ isTestUser, currentPage, onNoteCreate
     setIsSubmitting(true);
 
     try {
+      // Capture screenshot if area or element is selected
+      let screenshotUrl: string | undefined = undefined;
+      
+      if (selectedArea || selectedElement) {
+        toast.loading('Screenshot maken...');
+        const screenshotData = await captureScreenshot();
+        
+        if (screenshotData) {
+          toast.loading('Screenshot uploaden...');
+          screenshotUrl = await uploadScreenshot(screenshotData);
+        }
+        
+        toast.dismiss();
+      }
+
       const noteData = {
         test_user_id: user?.id || 'unknown',
         type: noteType,
@@ -370,7 +459,7 @@ export default function TestUserFeedback({ isTestUser, currentPage, onNoteCreate
         area_selection: selectedArea,
         description: description.trim(),
         priority,
-        screenshot_url: undefined // TODO: Implement actual screenshot capture
+        screenshot_url: screenshotUrl
       };
 
       console.log('📝 Submitting note:', noteData);

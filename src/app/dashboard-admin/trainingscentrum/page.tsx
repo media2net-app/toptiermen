@@ -715,12 +715,12 @@ export default function TrainingscentrumBeheer() {
                 <table className="w-full">
                   <thead className="bg-[#181F17]">
                     <tr>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-[#8BAE5A]">Schema</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-[#8BAE5A]">Categorie</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-[#8BAE5A]">Dagen</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-[#8BAE5A]">Status</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-[#8BAE5A]">Gebruikers</th>
-                      <th className="px-6 py-4 text-center text-sm font-medium text-[#8BAE5A]">Acties</th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-[#8BAE5A] w-1/3">Schema</th>
+                      <th className="px-6 py-4 text-left text-sm font-medium text-[#8BAE5A] w-1/12">Categorie</th>
+                      <th className="px-6 py-4 text-center text-sm font-medium text-[#8BAE5A] w-1/12">Dagen</th>
+                      <th className="px-6 py-4 text-center text-sm font-medium text-[#8BAE5A] w-1/12">Status</th>
+                      <th className="px-6 py-4 text-center text-sm font-medium text-[#8BAE5A] w-1/12">Gebruikers</th>
+                      <th className="px-6 py-4 text-center text-sm font-medium text-[#8BAE5A] w-1/3">Acties</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#3A4D23]">
@@ -737,26 +737,34 @@ export default function TrainingscentrumBeheer() {
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-6 py-4 text-center">
                           <span className="px-3 py-1 rounded-full text-xs font-semibold text-[#8BAE5A] bg-[#181F17]">
                             {schema.category}
                           </span>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-6 py-4 text-center">
                           <span className="text-[#8BAE5A] font-semibold">{schema.training_schema_days?.length || 0}</span>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-6 py-4 text-center">
                           <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(schema.status)} bg-[#181F17]`}>
                             {getStatusText(schema.status)}
                           </span>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-6 py-4 text-center">
                           <span className="text-[#8BAE5A] font-semibold">0</span>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="flex items-center justify-center gap-2">
-                            <AdminButton variant="secondary" size="sm">
-                              <EyeIcon className="w-4 h-4 mr-2" />
+                          <div className="flex items-center justify-center gap-1 flex-wrap">
+                            <AdminButton 
+                              onClick={() => {
+                                // Navigate to schema view page in same tab
+                                window.location.href = `/dashboard/trainingscentrum/schema/${schema.id}`;
+                              }}
+                              variant="secondary" 
+                              size="sm"
+                              className="min-w-[70px] text-xs"
+                            >
+                              <EyeIcon className="w-3 h-3 mr-1" />
                               Bekijk
                             </AdminButton>
                             <AdminButton 
@@ -766,20 +774,37 @@ export default function TrainingscentrumBeheer() {
                               }}
                               variant="secondary"
                               size="sm"
+                              className="min-w-[70px] text-xs"
                             >
-                              <PencilIcon className="w-4 h-4 mr-2" />
+                              <PencilIcon className="w-3 h-3 mr-1" />
                               Bewerk
                             </AdminButton>
-                            <AdminButton variant="secondary" size="sm">
-                              <DocumentDuplicateIcon className="w-4 h-4 mr-2" />
+                            <AdminButton 
+                              onClick={() => {
+                                // Duplicate schema functionality
+                                const duplicatedSchema = {
+                                  ...mapDbSchemaToForm(schema),
+                                  id: undefined,
+                                  name: `${schema.name} (Kopie)`,
+                                  status: 'draft'
+                                };
+                                setEditingSchema(duplicatedSchema);
+                                setShowNewSchemaModal(true);
+                              }}
+                              variant="secondary" 
+                              size="sm"
+                              className="min-w-[70px] text-xs"
+                            >
+                              <DocumentDuplicateIcon className="w-3 h-3 mr-1" />
                               Dupliceer
                             </AdminButton>
                             <AdminButton 
                               onClick={() => handleDeleteSchema(schema.id)}
                               variant="danger"
                               size="sm"
+                              className="min-w-[70px] text-xs"
                             >
-                              <TrashIcon className="w-4 h-4 mr-2" />
+                              <TrashIcon className="w-3 h-3 mr-1" />
                               Verwijder
                             </AdminButton>
                           </div>

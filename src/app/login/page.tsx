@@ -26,7 +26,26 @@ export default function Login() {
     if (user) {
       console.log('User already authenticated:', user.role);
       setRedirecting(true);
-      const targetPath = user.role?.toLowerCase() === 'admin' ? '/dashboard-admin' : '/dashboard';
+      
+      // Check for redirect parameter first
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirectPath = urlParams.get('redirect');
+      
+      let targetPath: string;
+      if (redirectPath && redirectPath.startsWith('/dashboard-admin')) {
+        // If redirecting to admin page, verify user is admin
+        if (user.role?.toLowerCase() === 'admin') {
+          targetPath = redirectPath;
+        } else {
+          targetPath = '/dashboard';
+        }
+      } else if (redirectPath && redirectPath.startsWith('/dashboard')) {
+        // If redirecting to regular dashboard
+        targetPath = redirectPath;
+      } else {
+        // Default redirect based on user role
+        targetPath = user.role?.toLowerCase() === 'admin' ? '/dashboard-admin' : '/dashboard';
+      }
       
       // Try router.replace first, fallback to window.location
       try {

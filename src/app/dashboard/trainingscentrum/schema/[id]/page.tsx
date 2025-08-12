@@ -32,7 +32,6 @@ interface TrainingDay {
   day_number: number;
   name: string;
   description: string;
-  focus_area: string;
   order_index: number;
 }
 
@@ -103,8 +102,10 @@ export default function TrainingSchemaViewPage() {
             .eq('schema_day_id', day.id)
             .order('order_index');
 
-          if (!exercisesError && dayExercises) {
-            exercisesData[day.id] = dayExercises;
+          if (exercisesError) {
+            console.error(`Error fetching exercises for day ${day.day_number}:`, exercisesError);
+          } else {
+            exercisesData[day.id] = dayExercises || [];
           }
         }
         setExercises(exercisesData);
@@ -336,7 +337,7 @@ export default function TrainingSchemaViewPage() {
                     )}
                   </div>
                   <h4 className="text-[#8BAE5A] font-medium mb-1">{day.name}</h4>
-                  <p className="text-sm text-gray-400">{day.focus_area}</p>
+                  <p className="text-sm text-gray-400">{day.description}</p>
                 </motion.div>
               );
             })}
@@ -352,7 +353,7 @@ export default function TrainingSchemaViewPage() {
                   {currentDay.name}
                 </h2>
                 <p className="text-gray-300">{currentDay.description}</p>
-                <p className="text-[#8BAE5A] font-medium mt-2">{currentDay.focus_area}</p>
+                <p className="text-[#8BAE5A] font-medium mt-2">{currentDay.description}</p>
               </div>
               
               <div className="flex gap-3">
@@ -378,36 +379,47 @@ export default function TrainingSchemaViewPage() {
 
             {/* Exercises */}
             <div className="space-y-4">
-              <h3 className="text-xl font-bold text-white mb-4">Oefeningen</h3>
+              <h3 className="text-xl font-bold text-white mb-4">
+                Oefeningen ({currentDayExercises.length})
+              </h3>
               {currentDayExercises.length > 0 ? (
                 currentDayExercises.map((exercise, index) => (
-                  <div key={exercise.id} className="bg-[#232D1A] rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-2">
+                  <div key={exercise.id} className="bg-[#232D1A] rounded-lg p-4 border border-[#3A4D23]">
+                    <div className="flex items-center justify-between mb-3">
                       <h4 className="text-lg font-semibold text-white">
                         {index + 1}. {exercise.exercise_name}
                       </h4>
+                      <span className="text-xs bg-[#8BAE5A] text-[#232D1A] px-2 py-1 rounded-full">
+                        Oefening {index + 1}
+                      </span>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                      <div className="text-gray-300">
-                        <span className="font-medium">Sets:</span> {exercise.sets}
+                      <div className="text-gray-300 bg-[#1A1A1A] p-2 rounded">
+                        <span className="font-medium text-[#8BAE5A]">Sets:</span> {exercise.sets}
                       </div>
-                      <div className="text-gray-300">
-                        <span className="font-medium">Reps:</span> {exercise.reps}
+                      <div className="text-gray-300 bg-[#1A1A1A] p-2 rounded">
+                        <span className="font-medium text-[#8BAE5A]">Reps:</span> {exercise.reps}
                       </div>
-                      <div className="text-gray-300">
-                        <span className="font-medium">Rust:</span> {exercise.rest_time}
+                      <div className="text-gray-300 bg-[#1A1A1A] p-2 rounded">
+                        <span className="font-medium text-[#8BAE5A]">Rust:</span> {exercise.rest_time}s
                       </div>
                     </div>
                     {exercise.notes && (
-                      <div className="mt-3 p-3 bg-[#1A1A1A] rounded-lg">
+                      <div className="mt-3 p-3 bg-[#1A1A1A] rounded-lg border border-[#3A4D23]">
                         <p className="text-sm text-gray-400">{exercise.notes}</p>
                       </div>
                     )}
                   </div>
                 ))
               ) : (
-                <div className="text-center py-8">
-                  <p className="text-gray-400">Geen oefeningen gevonden voor deze dag.</p>
+                <div className="text-center py-8 bg-[#232D1A] rounded-lg border border-[#3A4D23]">
+                  <div className="w-16 h-16 bg-[#3A4D23] rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-[#8BAE5A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <p className="text-gray-400 mb-2">Geen oefeningen gevonden voor deze dag.</p>
+                  <p className="text-sm text-gray-500">Controleer of er oefeningen zijn toegevoegd aan dit schema.</p>
                 </div>
               )}
             </div>

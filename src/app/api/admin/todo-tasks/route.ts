@@ -54,6 +54,14 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     console.log('📝 Creating new task:', body);
 
+    // Validate required fields
+    if (!body.title || !body.description || !body.assigned_to || !body.due_date) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Missing required fields: title, description, assigned_to, due_date' 
+      });
+    }
+
     // Try to insert into database first
     const { data: newTask, error: dbError } = await supabaseAdmin
       .from('todo_tasks')
@@ -67,9 +75,20 @@ export async function POST(request: NextRequest) {
 
     if (dbError) {
       console.error('❌ Database insert failed:', dbError);
+      
+      // Check if it's a table not found error
+      if (dbError.message && typeof dbError.message === 'string' && dbError.message.includes('relation "todo_tasks" does not exist')) {
+        return NextResponse.json({ 
+          success: false, 
+          error: 'Database table "todo_tasks" does not exist. Please create it first using the SQL script.',
+          details: 'Run the SQL from scripts/create-todo-table-manual.sql in your Supabase SQL Editor'
+        });
+      }
+      
       return NextResponse.json({ 
         success: false, 
-        error: `Failed to insert new task: ${dbError.message}` 
+        error: `Failed to insert new task: ${dbError.message || 'Unknown database error'}`,
+        details: dbError
       });
     }
 
@@ -82,9 +101,10 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('❌ Error creating task:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     return NextResponse.json({ 
       success: false, 
-      error: `Failed to create task: ${error}` 
+      error: `Failed to create task: ${errorMessage}` 
     });
   }
 }

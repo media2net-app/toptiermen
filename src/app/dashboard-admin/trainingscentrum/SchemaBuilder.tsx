@@ -63,6 +63,8 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedMuscle, setSelectedMuscle] = useState<string>('');
+  const [showDaySelector, setShowDaySelector] = useState(false);
+  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
   const [formData, setFormData] = useState<TrainingSchema>({
     name: '',
     description: '',
@@ -177,6 +179,20 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
           : day
       )
     }));
+  };
+
+  const showDaySelectorForExercise = (exercise: Exercise) => {
+    setSelectedExercise(exercise);
+    setShowDaySelector(true);
+  };
+
+  const handleDaySelection = (dayIndex: number) => {
+    if (selectedExercise) {
+      addExerciseToDay(dayIndex, selectedExercise);
+      toast.success(`${selectedExercise.name} toegevoegd aan Dag ${dayIndex + 1}`);
+    }
+    setShowDaySelector(false);
+    setSelectedExercise(null);
   };
 
   const removeExerciseFromDay = (dayIndex: number, exerciseIndex: number) => {
@@ -667,7 +683,7 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
                             } ${formData.days.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
                             onClick={() => {
                               if (formData.days.length > 0) {
-                                addExerciseToDay(formData.days.length - 1, exercise);
+                                showDaySelectorForExercise(exercise);
                               }
                             }}
                           >
@@ -703,6 +719,59 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
           </button>
         </div>
       </div>
+
+      {/* Day Selector Modal */}
+      {showDaySelector && selectedExercise && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          onClick={() => {
+            setShowDaySelector(false);
+            setSelectedExercise(null);
+          }}
+        >
+          <div 
+            className="bg-gray-900 rounded-lg p-6 max-w-md w-full mx-4 border border-gray-700"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-center mb-6">
+              <h3 className="text-lg font-semibold text-white mb-2">
+                Kies een dag voor {selectedExercise.name}
+              </h3>
+              <p className="text-gray-400 text-sm">
+                Selecteer naar welke dag je deze oefening wilt toevoegen
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-3 mb-6">
+              {formData.days.map((day, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleDaySelection(index)}
+                  className="p-4 bg-gray-800 hover:bg-gray-700 border border-gray-600 hover:border-[#8BAE5A] rounded-lg transition-colors text-left"
+                >
+                  <div className="font-medium text-white">Dag {index + 1}</div>
+                  <div className="text-sm text-gray-400">{day.name}</div>
+                  <div className="text-xs text-gray-500">
+                    {day.exercises.length} oefening{day.exercises.length !== 1 ? 'en' : ''}
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => {
+                  setShowDaySelector(false);
+                  setSelectedExercise(null);
+                }}
+                className="px-4 py-2 text-gray-300 hover:text-white"
+              >
+                Annuleren
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 

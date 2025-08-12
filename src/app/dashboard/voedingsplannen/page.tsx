@@ -18,6 +18,7 @@ import { supabase } from "@/lib/supabase";
 import MealEditModal from './MealEditModal';
 import WeekPlanView from './WeekPlanView';
 import RecipeLibrary from '@/components/RecipeLibrary';
+import { calculateMacrosFromIngredients } from '@/lib/nutrition-utils';
 
 interface UserData {
   age: number;
@@ -1141,126 +1142,8 @@ export default function VoedingsplannenPage() {
     }
   };
 
-  // Calculate accurate macros based on ingredients
-  const calculateMacrosFromIngredients = (ingredients: { name: string; amount: number; unit: string }[]) => {
-    let totalCalories = 0;
-    let totalProtein = 0;
-    let totalCarbs = 0;
-    let totalFat = 0;
 
-    // Verbeterde conversie functie
-    const convertToGrams = (amount: number, unit: string, ingredientName: string): number => {
-      const name = ingredientName.toLowerCase();
-      
-      switch (unit) {
-        case 'stuks':
-          if (name.includes('eieren')) return amount * 50; // 1 ei = 50g
-          if (name.includes('wrap')) return amount * 60; // 1 wrap = 60g
-          return amount * 100; // Default: 1 stuk = 100g
-          
-        case 'blik':
-          if (name.includes('tonijn')) return amount * 142; // 1 blik = 142g
-          return amount * 100; // Default
-          
-        case 'ml':
-          if (name.includes('olijfolie')) return amount * 0.92; // 1ml = 0.92g
-          if (name.includes('melk')) return amount * 1.03; // 1ml = 1.03g
-          return amount; // Default: 1ml = 1g
-          
-        case 'gram':
-        case 'g':
-          return amount;
-          
-        default:
-          return amount;
-      }
-    };
-
-    // Uitgebreide en accurate voedingswaarden database
-    const NUTRITION_DATABASE: { [key: string]: { calories: number; protein: number; carbs: number; fat: number } } = {
-      // Vlees & Vis
-      'Rundvlees (biefstuk)': { calories: 290, protein: 26, carbs: 0, fat: 20 },
-      'Rundvlees (gehakt)': { calories: 242, protein: 23, carbs: 0, fat: 15 },
-      'Lamsvlees (lende)': { calories: 294, protein: 25, carbs: 0, fat: 21 },
-      'Lamsvlees (schouder)': { calories: 282, protein: 25, carbs: 0, fat: 20 },
-      'Varkensvlees (varkenshaas)': { calories: 143, protein: 21, carbs: 0, fat: 6 },
-      'Kipfilet': { calories: 165, protein: 23, carbs: 0, fat: 3.6 },
-      'Kalkoenfilet': { calories: 157, protein: 30, carbs: 0, fat: 3.6 },
-      'Zalm': { calories: 208, protein: 25, carbs: 0, fat: 12 },
-      'Tonijn': { calories: 144, protein: 30, carbs: 0, fat: 1 },
-      'Eend': { calories: 337, protein: 19, carbs: 0, fat: 28 },
-      'Eieren': { calories: 155, protein: 12.5, carbs: 1.1, fat: 11 },
-      'Spek': { calories: 417, protein: 37, carbs: 0, fat: 28 },
-      'Runderlever': { calories: 135, protein: 20, carbs: 3.9, fat: 3.6 },
-      'Kippenlever': { calories: 167, protein: 26, carbs: 0.7, fat: 6.5 },
-      'Varkenslever': { calories: 134, protein: 21, carbs: 2.5, fat: 3.7 },
-      'Rundernieren': { calories: 99, protein: 17, carbs: 0.3, fat: 3.1 },
-      'Lamsnieren': { calories: 97, protein: 16, carbs: 0.8, fat: 3.2 },
-      
-      // Eieren & Zuivel
-      'Griekse yoghurt': { calories: 59, protein: 10, carbs: 3.6, fat: 0.4 },
-      'Magere kwark': { calories: 98, protein: 11, carbs: 3.4, fat: 0.3 },
-      
-      // Granen & Brood
-      'Havermout': { calories: 389, protein: 16.9, carbs: 66.3, fat: 6.9 },
-      'Volkoren wrap': { calories: 265, protein: 8.5, carbs: 49, fat: 3.2 },
-      
-      // Groenten & Fruit
-      'Broccoli': { calories: 34, protein: 2.8, carbs: 7, fat: 0.4 },
-      'Spinazie': { calories: 23, protein: 2.9, carbs: 3.6, fat: 0.4 },
-      'Paprika': { calories: 31, protein: 1, carbs: 7, fat: 0.3 },
-      'Komkommer': { calories: 16, protein: 0.7, carbs: 3.6, fat: 0.1 },
-      'Tomaat': { calories: 18, protein: 0.9, carbs: 3.9, fat: 0.2 },
-      'Courgette': { calories: 17, protein: 1.2, carbs: 3.1, fat: 0.3 },
-      'Zoete aardappel': { calories: 86, protein: 1.6, carbs: 20, fat: 0.1 },
-      'Blauwe bessen': { calories: 57, protein: 0.7, carbs: 14.5, fat: 0.3 },
-      'Sperziebonen': { calories: 31, protein: 1.8, carbs: 7, fat: 0.2 },
-      
-      // Noten & Zaden
-      'Walnoten': { calories: 654, protein: 15.2, carbs: 13.7, fat: 65.2 },
-      'Gemengde noten': { calories: 607, protein: 20, carbs: 19, fat: 54 },
-      'Lijnzaad': { calories: 534, protein: 18.3, carbs: 28.9, fat: 42.2 },
-      
-      // Vetten & Oliën
-      'Boter': { calories: 717, protein: 0.9, carbs: 0.1, fat: 81 },
-      'Olijfolie': { calories: 884, protein: 0, carbs: 0, fat: 100 },
-      
-      // Overige
-      'Hummus': { calories: 166, protein: 7.9, carbs: 14.3, fat: 9.6 },
-      'Feta': { calories: 264, protein: 14.2, carbs: 4.1, fat: 21.3 },
-      'Avocado': { calories: 160, protein: 2, carbs: 8.5, fat: 14.7 },
-      'Kidneybonen': { calories: 127, protein: 8.7, carbs: 23, fat: 0.5 },
-      'Proteïne poeder': { calories: 375, protein: 75, carbs: 12.5, fat: 2.5 },
-      'Melk': { calories: 42, protein: 3.4, carbs: 5, fat: 1 },
-      
-      // Kruiden & Specerijen
-      'Zout': { calories: 0, protein: 0, carbs: 0, fat: 0 },
-      'Peper': { calories: 0, protein: 0, carbs: 0, fat: 0 }
-    };
-
-    ingredients.forEach(ingredient => {
-      const { name, amount, unit } = ingredient;
-      
-      // Convert to grams using improved conversion function
-      const grams = convertToGrams(amount, unit, name);
-      
-      // Get macro values from accurate database
-      const macro = NUTRITION_DATABASE[name] || { calories: 0, protein: 0, carbs: 0, fat: 0 };
-      const multiplier = grams / 100;
-
-      totalCalories += macro.calories * multiplier;
-      totalProtein += macro.protein * multiplier;
-      totalCarbs += macro.carbs * multiplier;
-      totalFat += macro.fat * multiplier;
-    });
-
-    return {
-      calories: Math.round(totalCalories),
-      protein: Math.round(totalProtein * 10) / 10, // 1 decimal voor precisie
-      carbs: Math.round(totalCarbs * 10) / 10,
-      fat: Math.round(totalFat * 10) / 10
-    };
-  };
+  // Helper function to create meals with accurate macros
 
   // Helper function to create meals with accurate macros
   const createMealWithMacros = (

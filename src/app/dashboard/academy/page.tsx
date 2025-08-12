@@ -15,6 +15,7 @@ import {
 import PageLayout from '@/components/PageLayout';
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { supabase } from "@/lib/supabase";
+import Breadcrumb, { createBreadcrumbs } from '@/components/Breadcrumb';
 
 interface Module {
   id: string;
@@ -370,6 +371,10 @@ export default function AcademyPage() {
       title="Academy"
       subtitle="Overzicht van alle modules en jouw voortgang"
     >
+      {/* Breadcrumb */}
+      <div className="mb-6">
+        <Breadcrumb items={createBreadcrumbs('Academy')} />
+      </div>
       {/* Overall Progress Section */}
       <div className="mb-8 p-6 bg-[#181F17]/90 rounded-xl border border-[#3A4D23]">
         <div className="flex items-center justify-between mb-4">

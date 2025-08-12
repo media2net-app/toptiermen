@@ -11,10 +11,13 @@ import {
   ArrowLeftIcon,
   ClockIcon,
   FireIcon,
-  TrophyIcon
+  TrophyIcon,
+  VideoCameraIcon
 } from '@heroicons/react/24/outline';
 import ClientLayout from '../../../../../components/ClientLayout';
+import WorkoutVideoModal from '@/components/WorkoutVideoModal';
 import { useSupabaseAuth } from '../../../../../../contexts/SupabaseAuthContext';
+import { supabase } from '@/lib/supabase';
 import { toast } from 'react-hot-toast';
 
 interface Exercise {
@@ -26,6 +29,7 @@ interface Exercise {
   completed: boolean;
   currentSet: number;
   notes?: string;
+  videoUrl?: string;
 }
 
 interface WorkoutSession {
@@ -53,6 +57,7 @@ export default function WorkoutPage() {
   const [restTimer, setRestTimer] = useState(0);
   const [isRestTimerRunning, setIsRestTimerRunning] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showVideoModal, setShowVideoModal] = useState(false);
 
   // Sample exercises - in real app, fetch from API
   const sampleExercises: Exercise[] = [
@@ -63,7 +68,8 @@ export default function WorkoutPage() {
       reps: '8-10',
       rest: '2 min',
       completed: false,
-      currentSet: 0
+      currentSet: 0,
+      videoUrl: 'workout-videos/exercises/bench-press-tutorial.mp4'
     },
     {
       id: '2',
@@ -72,35 +78,129 @@ export default function WorkoutPage() {
       reps: '10-12',
       rest: '90 sec',
       completed: false,
-      currentSet: 0
+      currentSet: 0,
+      videoUrl: 'workout-videos/exercises/incline-dumbbell-press-tutorial.mp4'
     },
     {
       id: '3',
-      name: 'Dips',
+      name: 'Tricep Dips',
       sets: 3,
       reps: '8-12',
       rest: '90 sec',
       completed: false,
-      currentSet: 0
+      currentSet: 0,
+      videoUrl: 'workout-videos/exercises/tricep-dips-tutorial.mp4'
     },
     {
       id: '4',
-      name: 'Tricep Extensions',
+      name: 'Tricep Pushdowns',
       sets: 3,
       reps: '12-15',
       rest: '60 sec',
       completed: false,
-      currentSet: 0
+      currentSet: 0,
+      videoUrl: '/videos/tricep-extensions-tutorial.mp4'
     }
   ];
 
   useEffect(() => {
     if (sessionId) {
       loadSession();
+    } else {
+      // Load exercises from database for the current schema and day
+      loadExercisesFromDatabase();
     }
-    setExercises(sampleExercises);
-    setLoading(false);
-  }, [sessionId]);
+  }, [sessionId, schemaId, dayNumber]);
+
+  const getVideoUrlForExercise = (exerciseName: string): string | undefined => {
+    const videoUrls: { [key: string]: string } = {
+      'Bench Press': 'workout-videos/exercises/bench-press-tutorial.mp4',
+      'Incline Dumbbell Press': 'workout-videos/exercises/incline-dumbbell-press-tutorial.mp4',
+      'Overhead Press': 'workout-videos/exercises/overhead-press-tutorial.mp4',
+      'Lateral Raises': 'workout-videos/exercises/lateral-raises-tutorial.mp4',
+      'Tricep Dips': 'workout-videos/exercises/tricep-dips-tutorial.mp4',
+      'Tricep Pushdowns': 'workout-videos/exercises/tricep-pushdowns-tutorial.mp4',
+      'Squat': 'workout-videos/exercises/squat-tutorial.mp4',
+      'Leg Press': 'workout-videos/exercises/leg-press-tutorial.mp4',
+      'Romanian Deadlift': 'workout-videos/exercises/romanian-deadlift-tutorial.mp4',
+      'Leg Extensions': 'workout-videos/exercises/leg-extensions-tutorial.mp4',
+      'Leg Curls': 'workout-videos/exercises/leg-curls-tutorial.mp4',
+      'Standing Calf Raises': 'workout-videos/exercises/standing-calf-raises-tutorial.mp4',
+      'Deadlift': 'workout-videos/exercises/deadlift-tutorial.mp4',
+      'Pull-ups': 'workout-videos/exercises/pull-ups-tutorial.mp4',
+      'Barbell Row': 'workout-videos/exercises/barbell-row-tutorial.mp4',
+      'Lat Pulldown': 'workout-videos/exercises/lat-pulldown-tutorial.mp4',
+      'Bicep Curls': 'workout-videos/exercises/bicep-curls-tutorial.mp4',
+      'Hammer Curls': 'workout-videos/exercises/hammer-curls-tutorial.mp4',
+      'Front Squat': 'workout-videos/exercises/front-squat-tutorial.mp4',
+      'Walking Lunges': 'workout-videos/exercises/walking-lunges-tutorial.mp4',
+      'Hip Thrusts': 'workout-videos/exercises/hip-thrusts-tutorial.mp4',
+      'Good Mornings': 'workout-videos/exercises/good-mornings-tutorial.mp4',
+      'Seated Calf Raises': 'workout-videos/exercises/seated-calf-raises-tutorial.mp4',
+      'Planks': 'workout-videos/exercises/planks-tutorial.mp4'
+    };
+    
+    return videoUrls[exerciseName];
+  };
+
+  const loadExercisesFromDatabase = async () => {
+    if (!user || !schemaId || !dayNumber) return;
+
+    setLoading(true);
+    try {
+      // Get the day for this schema and day number
+      const { data: dayData, error: dayError } = await supabase
+        .from('training_schema_days')
+        .select('*')
+        .eq('schema_id', schemaId)
+        .eq('day_number', dayNumber)
+        .single();
+
+      if (dayError) {
+        console.error('Error loading day:', dayError);
+        // Fallback to sample data
+        setExercises(sampleExercises);
+        setLoading(false);
+        return;
+      }
+
+      // Get exercises for this day
+      const { data: exercisesData, error: exercisesError } = await supabase
+        .from('training_schema_exercises')
+        .select('*')
+        .eq('schema_day_id', dayData.id)
+        .order('order_index');
+
+      if (exercisesError) {
+        console.error('Error loading exercises:', exercisesError);
+        // Fallback to sample data
+        setExercises(sampleExercises);
+        setLoading(false);
+        return;
+      }
+
+      // Transform database exercises to our format
+      const transformedExercises: Exercise[] = exercisesData.map((ex, index) => ({
+        id: ex.id,
+        name: ex.exercise_name,
+        sets: ex.sets,
+        reps: ex.reps.toString(),
+        rest: `${ex.rest_time}s`,
+        completed: false,
+        currentSet: 0,
+        notes: ex.notes || undefined,
+        videoUrl: getVideoUrlForExercise(ex.exercise_name) || undefined
+      }));
+
+      setExercises(transformedExercises);
+    } catch (error) {
+      console.error('Error loading exercises:', error);
+      // Fallback to sample data
+      setExercises(sampleExercises);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -246,12 +346,26 @@ export default function WorkoutPage() {
       <ClientLayout>
         <div className="min-h-screen bg-gradient-to-br from-[#0F1419] to-[#1A1F2E] p-6">
           <div className="flex items-center justify-center min-h-[60vh]">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A]"></div>
-          </div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A]">          </div>
         </div>
-      </ClientLayout>
-    );
-  }
+      </div>
+
+      {/* Workout Video Modal */}
+      <WorkoutVideoModal
+        isOpen={showVideoModal}
+        onClose={() => setShowVideoModal(false)}
+        exerciseName={currentExercise?.name || 'Oefening'}
+        videoUrl={currentExercise?.videoUrl}
+        exerciseDetails={currentExercise ? {
+          sets: currentExercise.sets,
+          reps: currentExercise.reps,
+          rest: currentExercise.rest,
+          notes: currentExercise.notes
+        } : undefined}
+      />
+    </ClientLayout>
+  );
+}
 
   return (
     <ClientLayout>
@@ -282,7 +396,7 @@ export default function WorkoutPage() {
 
           {/* Workout Controls */}
           {!isWorkoutActive ? (
-            <div className="text-center mb-8">
+            <div className="text-center mb-8 space-y-4">
               <button
                 onClick={startWorkout}
                 className="px-8 py-4 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold text-lg rounded-xl hover:from-[#7A9D4A] hover:to-[#e0903f] transition-all duration-200"
@@ -290,6 +404,21 @@ export default function WorkoutPage() {
                 <PlayIcon className="w-6 h-6 inline mr-2" />
                 Start Workout
               </button>
+              
+              <div className="flex justify-center">
+                <button
+                  onClick={() => {
+                    console.log('🎥 Video modal button clicked!');
+                    console.log('Current exercise:', currentExercise);
+                    console.log('Video URL:', currentExercise?.videoUrl);
+                    setShowVideoModal(true);
+                  }}
+                  className="px-6 py-3 bg-[#232D1A] text-[#8BAE5A] font-semibold rounded-lg hover:bg-[#3A4D23] transition-all duration-200 border border-[#3A4D23] hover:border-[#8BAE5A]"
+                >
+                  <VideoCameraIcon className="w-5 h-5 inline mr-2" />
+                  Bekijk Workout Video
+                </button>
+              </div>
             </div>
           ) : (
             <div className="flex justify-center gap-4 mb-8">
@@ -356,10 +485,19 @@ export default function WorkoutPage() {
                 <h2 className="text-2xl font-bold text-white">
                   {currentExercise.name}
                 </h2>
-                <div className="text-right">
-                  <div className="text-sm text-gray-400">Oefening {currentExerciseIndex + 1}/{totalExercises}</div>
-                  <div className="text-lg font-semibold text-[#8BAE5A]">
-                    Set {currentExercise.currentSet + 1}/{currentExercise.sets}
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={() => setShowVideoModal(true)}
+                    className="p-2 bg-[#3A4D23] text-[#8BAE5A] rounded-lg hover:bg-[#4A5D33] transition-colors"
+                    title="Bekijk oefening video"
+                  >
+                    <VideoCameraIcon className="w-5 h-5" />
+                  </button>
+                  <div className="text-right">
+                    <div className="text-sm text-gray-400">Oefening {currentExerciseIndex + 1}/{totalExercises}</div>
+                    <div className="text-lg font-semibold text-[#8BAE5A]">
+                      Set {currentExercise.currentSet + 1}/{currentExercise.sets}
+                    </div>
                   </div>
                 </div>
               </div>

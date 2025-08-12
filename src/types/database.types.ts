@@ -397,6 +397,266 @@ export interface Database {
           proof?: Json | null
         }
       }
+      training_schemas: {
+        Row: {
+          id: string
+          name: string
+          description: string | null
+          category: string
+          difficulty: string
+          status: string
+          cover_image: string | null
+          estimated_duration: string | null
+          target_audience: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          description?: string | null
+          category?: string
+          difficulty?: string
+          status?: string
+          cover_image?: string | null
+          estimated_duration?: string | null
+          target_audience?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          description?: string | null
+          category?: string
+          difficulty?: string
+          status?: string
+          cover_image?: string | null
+          estimated_duration?: string | null
+          target_audience?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      training_schema_days: {
+        Row: {
+          id: string
+          schema_id: string
+          day_number: number
+          name: string
+          description: string | null
+          order_index: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          schema_id: string
+          day_number: number
+          name: string
+          description?: string | null
+          order_index?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          schema_id?: string
+          day_number?: number
+          name?: string
+          description?: string | null
+          order_index?: number
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      training_schema_exercises: {
+        Row: {
+          id: string
+          schema_day_id: string
+          exercise_id: string | null
+          exercise_name: string
+          sets: number
+          reps: number
+          rest_time: number
+          order_index: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          schema_day_id: string
+          exercise_id?: string | null
+          exercise_name: string
+          sets?: number
+          reps?: number
+          rest_time?: number
+          order_index?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          schema_day_id?: string
+          exercise_id?: string | null
+          exercise_name?: string
+          sets?: number
+          reps?: number
+          rest_time?: number
+          order_index?: number
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      exercises: {
+        Row: {
+          id: string
+          name: string
+          muscle_group: string | null
+          equipment: string | null
+          difficulty: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          muscle_group?: string | null
+          equipment?: string | null
+          difficulty?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          muscle_group?: string | null
+          equipment?: string | null
+          difficulty?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      user_training_schema_progress: {
+        Row: {
+          id: string
+          user_id: string
+          schema_id: string
+          current_day: number
+          total_days_completed: number
+          total_workouts_completed: number
+          last_workout_date: string | null
+          started_at: string
+          completed_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          schema_id: string
+          current_day?: number
+          total_days_completed?: number
+          total_workouts_completed?: number
+          last_workout_date?: string | null
+          started_at?: string
+          completed_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          schema_id?: string
+          current_day?: number
+          total_days_completed?: number
+          total_workouts_completed?: number
+          last_workout_date?: string | null
+          started_at?: string
+          completed_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      workout_sessions: {
+        Row: {
+          id: string
+          user_id: string
+          schema_id: string
+          day_number: number
+          started_at: string
+          completed_at: string | null
+          duration_minutes: number | null
+          mode: string
+          notes: string | null
+          rating: number | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          schema_id: string
+          day_number: number
+          started_at?: string
+          completed_at?: string | null
+          duration_minutes?: number | null
+          mode?: string
+          notes?: string | null
+          rating?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          schema_id?: string
+          day_number?: number
+          started_at?: string
+          completed_at?: string | null
+          duration_minutes?: number | null
+          mode?: string
+          notes?: string | null
+          rating?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      workout_exercises: {
+        Row: {
+          id: string
+          session_id: string
+          exercise_name: string
+          sets_completed: number
+          reps_completed: number
+          weight_kg: number | null
+          rest_time_seconds: number
+          notes: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          session_id: string
+          exercise_name: string
+          sets_completed?: number
+          reps_completed?: number
+          weight_kg?: number | null
+          rest_time_seconds?: number
+          notes?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          session_id?: string
+          exercise_name?: string
+          sets_completed?: number
+          reps_completed?: number
+          weight_kg?: number | null
+          rest_time_seconds?: number
+          notes?: string | null
+          created_at?: string
+        }
+      }
     }
   }
 } 

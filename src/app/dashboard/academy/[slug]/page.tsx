@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { supabase } from '@/lib/supabase';
 import Link from "next/link";
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import Breadcrumb, { createBreadcrumbs } from '@/components/Breadcrumb';
 
 interface Module {
   id: string;
@@ -228,6 +229,17 @@ export default function ModuleDetailPage() {
 
   return (
     <div className="p-6 md:p-12">
+      {/* Breadcrumb */}
+      <div className="mb-6">
+        <Breadcrumb 
+          items={createBreadcrumbs(
+            module.title,
+            'Academy',
+            '/dashboard/academy'
+          )} 
+        />
+      </div>
+
       {/* Progress bar */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-2">

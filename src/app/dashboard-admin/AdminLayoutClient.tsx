@@ -223,13 +223,25 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
           if (!refreshed) {
             // Only redirect if session refresh fails
             setTimeout(() => {
-              router.push('/login');
+              // Preserve current URL for redirect back after login
+              const currentPath = window.location.pathname;
+              if (currentPath !== '/login') {
+                router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
+              } else {
+                router.push('/login');
+              }
             }, 1000);
           }
         } catch (error) {
           console.error('Session refresh failed:', error);
           setTimeout(() => {
-            router.push('/login');
+            // Preserve current URL for redirect back after login
+            const currentPath = window.location.pathname;
+            if (currentPath !== '/login') {
+              router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
+            } else {
+              router.push('/login');
+            }
           }, 1000);
         } finally {
           setIsSessionRefreshing(false);
@@ -238,8 +250,13 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
 
       attemptSessionRefresh();
     } else if (!loading && !isAuthenticated && authCheckAttempts >= 3) {
-      // After 3 failed attempts, redirect to login
-      router.push('/login');
+      // After 3 failed attempts, redirect to login with current path preserved
+      const currentPath = window.location.pathname;
+      if (currentPath !== '/login') {
+        router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
+      } else {
+        router.push('/login');
+      }
     }
   }, [loading, isAuthenticated, router, authCheckAttempts, refreshSession]);
 

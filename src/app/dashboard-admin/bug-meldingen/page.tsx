@@ -11,7 +11,8 @@ import {
   ArrowPathIcon,
   EyeIcon,
   DocumentTextIcon,
-  ComputerDesktopIcon
+  ComputerDesktopIcon,
+  CameraIcon
 } from '@heroicons/react/24/outline';
 import { AdminCard, AdminButton } from '@/components/admin';
 import { toast } from 'react-hot-toast';
@@ -43,6 +44,7 @@ export default function BugMeldingen() {
   const [typeFilter, setTypeFilter] = useState<'all' | 'bug' | 'improvement' | 'general'>('all');
   const [selectedReport, setSelectedReport] = useState<BugReport | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showScreenshot, setShowScreenshot] = useState(false);
 
   console.log('🔍 BugMeldingen component rendering');
 
@@ -55,31 +57,87 @@ export default function BugMeldingen() {
   const fetchBugReports = async () => {
     console.log('🔍 Starting fetchBugReports');
     setLoading(true);
+    setError(null);
     
-    // Force loading to false after 3 seconds as fallback
+    // Force loading to false after 10 seconds as fallback
     const timeoutId = setTimeout(() => {
       console.log('🔍 Timeout fallback - setting loading to false');
       setLoading(false);
-    }, 3000);
+      if (bugReports.length === 0) {
+        setError('Timeout bij ophalen van data. Probeer de pagina te verversen.');
+      }
+    }, 10000);
 
     try {
       const reports: BugReport[] = [];
 
-      // Try to fetch from database
+      // Try API route first (faster and more reliable)
       try {
-        console.log('🔍 Fetching from database...');
-        const { data: dbReports, error: dbError } = await supabase
-          .from('test_notes')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        console.log('🔍 Database response:', { dbReports, dbError });
-
-        if (!dbError && dbReports) {
-          reports.push(...dbReports.map(report => ({ ...report, source: 'database' as const })));
+        console.log('🔍 Fetching from API...');
+        const response = await fetch('/api/test-notes-simple', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
-      } catch (error) {
-        console.warn('Database fetch failed:', error);
+        
+        const result = await response.json();
+        
+        console.log('🔍 API response:', result);
+        
+        if (result.success && result.notes) {
+          reports.push(...result.notes.map((report: any) => ({ ...report, source: 'database' as const })));
+          console.log('🔍 Added API reports:', result.notes.length);
+        }
+      } catch (apiError) {
+        console.error('API fetch failed:', apiError);
+        
+        // Fallback: try direct database
+        try {
+          console.log('🔍 Trying direct database...');
+          const { data: dbReports, error: dbError } = await supabase
+            .from('test_notes')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+          console.log('🔍 Database response:', { dbReports, dbError });
+
+          if (dbError) {
+            console.error('Database error:', dbError);
+            throw new Error(`Database error: ${dbError.message}`);
+          }
+
+          if (dbReports) {
+            reports.push(...dbReports.map(report => ({ ...report, source: 'database' as const })));
+            console.log('🔍 Added database reports:', dbReports.length);
+          }
+        } catch (dbError) {
+          console.error('Direct database fetch also failed:', dbError);
+        }
+      }
+
+      // If no reports found, add a test report for debugging
+      if (reports.length === 0) {
+        console.log('🔍 No reports found, adding test report');
+        reports.push({
+          id: 'test-123',
+          test_user_id: 'test-user',
+          type: 'bug',
+          page_url: '/dashboard',
+          element_selector: undefined,
+          area_selection: { x: 100, y: 100, width: 200, height: 150 },
+          description: 'Test bug melding - database connectie werkt niet',
+          priority: 'medium',
+          status: 'open',
+          screenshot_url: undefined,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          source: 'database'
+        });
       }
 
       // Get from localStorage (client-side only)
@@ -87,7 +145,10 @@ export default function BugMeldingen() {
         try {
           console.log('🔍 Fetching from localStorage...');
           const localReports = JSON.parse(localStorage.getItem('test_notes') || '[]');
-          reports.push(...localReports.map((report: any) => ({ ...report, source: 'localStorage' as const })));
+          if (localReports.length > 0) {
+            reports.push(...localReports.map((report: any) => ({ ...report, source: 'localStorage' as const })));
+            console.log('🔍 Added localStorage reports:', localReports.length);
+          }
         } catch (error) {
           console.warn('localStorage fetch failed:', error);
         }
@@ -98,10 +159,14 @@ export default function BugMeldingen() {
 
       console.log('🔍 Final reports:', reports);
       setBugReports(reports);
-      setError(null);
+      
+      if (reports.length === 0) {
+        console.log('🔍 No reports found');
+      }
+      
     } catch (error) {
       console.error('Error fetching bug reports:', error);
-      setError('Fout bij ophalen van bug meldingen');
+      setError(`Fout bij ophalen van bug meldingen: ${error.message}`);
     } finally {
       clearTimeout(timeoutId);
       console.log('🔍 Setting loading to false');
@@ -138,6 +203,7 @@ export default function BugMeldingen() {
   const handleViewDetails = (report: BugReport) => {
     setSelectedReport(report);
     setShowDetailModal(true);
+    setShowScreenshot(false);
   };
 
   const getStatusColor = (status: string) => {
@@ -170,8 +236,8 @@ export default function BugMeldingen() {
   };
 
   const filteredReports = bugReports.filter(report => {
-    const matchesSearch = report.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         report.page_url.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = (report.description || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (report.page_url || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || report.status === statusFilter;
     const matchesPriority = priorityFilter === 'all' || report.priority === priorityFilter;
     const matchesType = typeFilter === 'all' || report.type === typeFilter;
@@ -194,14 +260,109 @@ export default function BugMeldingen() {
   if (error) {
     console.log('🔍 Showing error state:', error);
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <ExclamationTriangleIcon className="w-12 h-12 text-red-400 mx-auto mb-4" />
-          <p className="text-red-400 mb-4">{error}</p>
-          <AdminButton onClick={fetchBugReports} icon={<ArrowPathIcon className="w-4 h-4" />}>
-            Opnieuw Proberen
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold text-white">Bug Meldingen</h1>
+            <p className="text-[#B6C948]">Overzicht van alle bug meldingen van test gebruikers</p>
+          </div>
+          
+          <AdminButton
+            onClick={fetchBugReports}
+            icon={<ArrowPathIcon className="w-4 h-4" />}
+            variant="secondary"
+          >
+            Vernieuwen
           </AdminButton>
         </div>
+
+        {/* Error Message */}
+        <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-6">
+          <div className="flex items-center space-x-3 mb-4">
+            <ExclamationTriangleIcon className="w-8 h-8 text-red-400" />
+            <h3 className="text-lg font-semibold text-red-400">Fout bij laden</h3>
+          </div>
+          <p className="text-red-300 mb-4">{error}</p>
+          <div className="flex space-x-3">
+            <AdminButton onClick={fetchBugReports} icon={<ArrowPathIcon className="w-4 h-4" />}>
+              Opnieuw Proberen
+            </AdminButton>
+            <AdminButton 
+              onClick={() => window.location.reload()} 
+              icon={<ArrowPathIcon className="w-4 h-4" />}
+              variant="secondary"
+            >
+              Pagina Verversen
+            </AdminButton>
+          </div>
+        </div>
+
+        {/* Show any existing reports even if there was an error */}
+        {bugReports.length > 0 && (
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-white">Beschikbare meldingen ({bugReports.length})</h3>
+            {bugReports.map((report) => (
+              <div key={report.id} className="bg-[#181F17] border border-[#3A4D23] rounded-lg p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-3 mb-2">
+                      <h3 className="text-lg font-semibold text-[#8BAE5A]">
+                        {report.type === 'bug' ? '🐛' : report.type === 'improvement' ? '💡' : '📝'} {(report.description || 'Geen beschrijving').substring(0, 60)}...
+                      </h3>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(report.status)}`}>
+                        {report.status.replace('_', ' ')}
+                      </span>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(report.priority)}`}>
+                        {report.priority}
+                      </span>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(report.type)}`}>
+                        {report.type}
+                      </span>
+                      {report.source && (
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          report.source === 'database' ? 'text-green-600 bg-green-100' : 'text-orange-600 bg-orange-100'
+                        }`}>
+                          {report.source}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-gray-300 mb-2">{report.description}</p>
+                    <div className="flex items-center space-x-4 text-sm">
+                      <span className="text-[#B6C948]">📄 {report.page_url}</span>
+                      <span className="text-[#B6C948]">📅 {new Date(report.created_at).toLocaleDateString()}</span>
+                      {report.area_selection && (
+                        <span className="text-[#B6C948]">📍 Area: {report.area_selection.width}x{report.area_selection.height}</span>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <AdminButton
+                      onClick={() => handleViewDetails(report)}
+                      icon={<EyeIcon className="w-4 h-4" />}
+                      variant="secondary"
+                      size="sm"
+                    >
+                      Details
+                    </AdminButton>
+                    
+                    <select
+                      value={report.status}
+                      onChange={(e) => handleStatusChange(report.id, e.target.value as any)}
+                      className="px-3 py-1 bg-[#232D1A] border border-[#3A4D23] rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+                    >
+                      <option value="open">Open</option>
+                      <option value="in_progress">In Progress</option>
+                      <option value="resolved">Resolved</option>
+                      <option value="closed">Closed</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     );
   }
@@ -351,16 +512,16 @@ export default function BugMeldingen() {
                 <div className="flex-1">
                   <div className="flex items-center space-x-3 mb-2">
                     <h3 className="text-lg font-semibold text-[#8BAE5A]">
-                      {report.type === 'bug' ? '🐛' : report.type === 'improvement' ? '💡' : '📝'} {report.description.substring(0, 60)}...
+                      {report.type === 'bug' ? '🐛' : report.type === 'improvement' ? '💡' : '📝'} {(report.description || 'Geen beschrijving').substring(0, 60)}...
                     </h3>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(report.status)}`}>
-                      {report.status.replace('_', ' ')}
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(report.status || 'open')}`}>
+                      {(report.status || 'open').replace('_', ' ')}
                     </span>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(report.priority)}`}>
-                      {report.priority}
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(report.priority || 'medium')}`}>
+                      {report.priority || 'medium'}
                     </span>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(report.type)}`}>
-                      {report.type}
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(report.type || 'bug')}`}>
+                      {report.type || 'bug'}
                     </span>
                     {report.source && (
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -370,12 +531,16 @@ export default function BugMeldingen() {
                       </span>
                     )}
                   </div>
-                  <p className="text-gray-300 mb-2">{report.description}</p>
+                  <p className="text-gray-300 mb-2">{report.description || 'Geen beschrijving'}</p>
+                  
                   <div className="flex items-center space-x-4 text-sm">
                     <span className="text-[#B6C948]">📄 {report.page_url}</span>
                     <span className="text-[#B6C948]">📅 {new Date(report.created_at).toLocaleDateString()}</span>
                     {report.area_selection && (
                       <span className="text-[#B6C948]">📍 Area: {report.area_selection.width}x{report.area_selection.height}</span>
+                    )}
+                    {report.screenshot_url && (
+                      <span className="text-[#B6C948]">📸 Screenshot beschikbaar</span>
                     )}
                   </div>
                 </div>
@@ -390,8 +555,22 @@ export default function BugMeldingen() {
                     Details
                   </AdminButton>
                   
+                  {report.screenshot_url && (
+                    <AdminButton
+                      onClick={() => {
+                        setSelectedReport(report);
+                        setShowScreenshot(true);
+                      }}
+                      icon={<CameraIcon className="w-4 h-4" />}
+                      variant="secondary"
+                      size="sm"
+                    >
+                      Bekijk Screenshot
+                    </AdminButton>
+                  )}
+                  
                   <select
-                    value={report.status}
+                    value={report.status || 'open'}
                     onChange={(e) => handleStatusChange(report.id, e.target.value as any)}
                     className="px-3 py-1 bg-[#232D1A] border border-[#3A4D23] rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
                   >
@@ -406,6 +585,69 @@ export default function BugMeldingen() {
           ))
         )}
       </div>
+
+      {/* Screenshot Modal */}
+      {showScreenshot && selectedReport && selectedReport.screenshot_url && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-[#181F17] border border-[#3A4D23] rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-start mb-4">
+              <h2 className="text-xl font-bold text-[#8BAE5A]">Screenshot - {selectedReport.description}</h2>
+              <button
+                onClick={() => setShowScreenshot(false)}
+                className="text-gray-400 hover:text-white text-2xl"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="text-center">
+                <img 
+                  src={selectedReport.screenshot_url} 
+                  alt="Bug screenshot"
+                  className="max-w-full h-auto rounded-lg border border-[#3A4D23]"
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-[#B6C948] font-semibold">Pagina:</span>
+                  <p className="text-gray-300">{selectedReport.page_url}</p>
+                </div>
+                <div>
+                  <span className="text-[#B6C948] font-semibold">Datum:</span>
+                  <p className="text-gray-300">{new Date(selectedReport.created_at).toLocaleString()}</p>
+                </div>
+                {selectedReport.area_selection && (
+                  <div className="col-span-2">
+                    <span className="text-[#B6C948] font-semibold">Geselecteerd gebied:</span>
+                    <p className="text-gray-300">
+                      X: {selectedReport.area_selection.x}, Y: {selectedReport.area_selection.y}, 
+                      Breedte: {selectedReport.area_selection.width}, Hoogte: {selectedReport.area_selection.height}
+                    </p>
+                  </div>
+                )}
+              </div>
+              
+              <div className="flex justify-center space-x-3 pt-4">
+                <AdminButton
+                  onClick={() => window.open(selectedReport.screenshot_url, '_blank')}
+                  icon={<EyeIcon className="w-4 h-4" />}
+                  variant="secondary"
+                >
+                  Open in Nieuw Tabblad
+                </AdminButton>
+                <AdminButton
+                  onClick={() => setShowScreenshot(false)}
+                  variant="secondary"
+                >
+                  Sluiten
+                </AdminButton>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Detail Modal */}
       {showDetailModal && selectedReport && (
@@ -424,28 +666,28 @@ export default function BugMeldingen() {
             <div className="space-y-4">
               <div>
                 <h3 className="font-semibold text-white mb-2">Beschrijving</h3>
-                <p className="text-gray-300">{selectedReport.description}</p>
+                <p className="text-gray-300">{selectedReport.description || 'Geen beschrijving'}</p>
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <h3 className="font-semibold text-white mb-2">Type</h3>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(selectedReport.type)}`}>
-                    {selectedReport.type}
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(selectedReport.type || 'bug')}`}>
+                    {selectedReport.type || 'bug'}
                   </span>
                 </div>
                 
                 <div>
                   <h3 className="font-semibold text-white mb-2">Prioriteit</h3>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(selectedReport.priority)}`}>
-                    {selectedReport.priority}
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(selectedReport.priority || 'medium')}`}>
+                    {selectedReport.priority || 'medium'}
                   </span>
                 </div>
                 
                 <div>
                   <h3 className="font-semibold text-white mb-2">Status</h3>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(selectedReport.status)}`}>
-                    {selectedReport.status.replace('_', ' ')}
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(selectedReport.status || 'open')}`}>
+                    {(selectedReport.status || 'open').replace('_', ' ')}
                   </span>
                 </div>
                 
@@ -463,6 +705,26 @@ export default function BugMeldingen() {
                 <h3 className="font-semibold text-white mb-2">Pagina</h3>
                 <p className="text-gray-300">{selectedReport.page_url}</p>
               </div>
+              
+              {selectedReport.screenshot_url && (
+                <div>
+                  <h3 className="font-semibold text-white mb-2">Screenshot</h3>
+                  <div className="flex items-center space-x-3">
+                    <span className="text-gray-300">Screenshot beschikbaar</span>
+                    <AdminButton
+                      onClick={() => {
+                        setShowDetailModal(false);
+                        setShowScreenshot(true);
+                      }}
+                      icon={<CameraIcon className="w-4 h-4" />}
+                      variant="secondary"
+                      size="sm"
+                    >
+                      Bekijk Screenshot
+                    </AdminButton>
+                  </div>
+                </div>
+              )}
               
               {selectedReport.element_selector && (
                 <div>

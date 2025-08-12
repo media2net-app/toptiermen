@@ -1,28 +1,115 @@
 import React from "react";
 import { useCalorieMacro } from "./CalorieMacroCalculator";
+import { calculateMacrosFromIngredients } from "@/lib/nutrition-utils";
 
 interface PlanDetailProps {
   slug: string;
   onBack: () => void;
 }
 
-const planData: Record<string, { title: string; meals: { time: string; name: string; main: string; options: string[] }[] }> = {
+const planData: Record<string, { title: string; meals: { time: string; name: string; main: string; options: string[]; ingredients: { name: string; amount: number; unit: string }[] }[] }> = {
   balanced: {
     title: "Gebalanceerd Dieet",
     meals: [
-      { time: "08:00", name: "Ontbijt", main: "Havermout met fruit en noten", options: ["Griekse yoghurt met muesli", "Volkoren boterham met pindakaas"] },
-      { time: "12:30", name: "Lunch", main: "Kipfilet met rijst en broccoli", options: ["Kabeljauw met aardappel en sperziebonen", "Tofu met quinoa en groenten"] },
-      { time: "15:30", name: "Snack", main: "Griekse yoghurt met honing", options: ["Handje noten", "Banaan"] },
-      { time: "18:30", name: "Diner", main: "Zalm met zoete aardappel en spinazie", options: ["Rundergehakt met volkoren pasta en tomatensaus", "Vegetarische curry met kikkererwten"] },
+      { 
+        time: "08:00", 
+        name: "Ontbijt", 
+        main: "Havermout met fruit en noten", 
+        options: ["Griekse yoghurt met muesli", "Volkoren boterham met pindakaas"],
+        ingredients: [
+          { name: "Havermout", amount: 60, unit: "g" },
+          { name: "Melk (halfvolle)", amount: 250, unit: "ml" },
+          { name: "Blauwe bessen", amount: 50, unit: "g" },
+          { name: "Walnoten", amount: 15, unit: "g" },
+          { name: "Honing", amount: 10, unit: "g" }
+        ]
+      },
+      { 
+        time: "12:30", 
+        name: "Lunch", 
+        main: "Kipfilet met rijst en broccoli", 
+        options: ["Kabeljauw met aardappel en sperziebonen", "Tofu met quinoa en groenten"],
+        ingredients: [
+          { name: "Kipfilet", amount: 150, unit: "g" },
+          { name: "Bruine rijst", amount: 100, unit: "g" },
+          { name: "Broccoli", amount: 100, unit: "g" },
+          { name: "Olijfolie", amount: 10, unit: "ml" }
+        ]
+      },
+      { 
+        time: "15:30", 
+        name: "Snack", 
+        main: "Griekse yoghurt met honing", 
+        options: ["Handje noten", "Banaan"],
+        ingredients: [
+          { name: "Griekse yoghurt", amount: 150, unit: "g" },
+          { name: "Honing", amount: 15, unit: "g" }
+        ]
+      },
+      { 
+        time: "18:30", 
+        name: "Diner", 
+        main: "Zalm met zoete aardappel en spinazie", 
+        options: ["Rundergehakt met volkoren pasta en tomatensaus", "Vegetarische curry met kikkererwten"],
+        ingredients: [
+          { name: "Zalm", amount: 150, unit: "g" },
+          { name: "Zoete aardappel", amount: 200, unit: "g" },
+          { name: "Spinazie", amount: 100, unit: "g" },
+          { name: "Olijfolie", amount: 15, unit: "ml" }
+        ]
+      },
     ],
   },
   lowcarb: {
     title: "Koolhydraatarm",
     meals: [
-      { time: "08:00", name: "Ontbijt", main: "Omelet met spinazie en kaas", options: ["Griekse yoghurt met noten", "Kokoskwark met chiazaad"] },
-      { time: "12:30", name: "Lunch", main: "Kipsalade met avocado", options: ["Tonijnsalade", "Geitenkaas met walnoten"] },
-      { time: "15:30", name: "Snack", main: "Komkommer met hummus", options: ["Handje amandelen", "Olijven"] },
-      { time: "18:30", name: "Diner", main: "Zalm met courgette en pesto", options: ["Biefstuk met bloemkoolpuree", "Kipfilet met broccoli"] },
+      { 
+        time: "08:00", 
+        name: "Ontbijt", 
+        main: "Omelet met spinazie en kaas", 
+        options: ["Griekse yoghurt met noten", "Kokoskwark met chiazaad"],
+        ingredients: [
+          { name: "Eieren", amount: 3, unit: "stuks" },
+          { name: "Spinazie", amount: 50, unit: "g" },
+          { name: "Feta", amount: 30, unit: "g" },
+          { name: "Olijfolie", amount: 10, unit: "ml" }
+        ]
+      },
+      { 
+        time: "12:30", 
+        name: "Lunch", 
+        main: "Kipsalade met avocado", 
+        options: ["Tonijnsalade", "Geitenkaas met walnoten"],
+        ingredients: [
+          { name: "Kipfilet", amount: 150, unit: "g" },
+          { name: "Avocado", amount: 1, unit: "stuks" },
+          { name: "Tomaat", amount: 1, unit: "stuks" },
+          { name: "Komkommer", amount: 50, unit: "g" },
+          { name: "Olijfolie", amount: 15, unit: "ml" }
+        ]
+      },
+      { 
+        time: "15:30", 
+        name: "Snack", 
+        main: "Komkommer met hummus", 
+        options: ["Handje amandelen", "Olijven"],
+        ingredients: [
+          { name: "Komkommer", amount: 100, unit: "g" },
+          { name: "Hummus", amount: 30, unit: "g" }
+        ]
+      },
+      { 
+        time: "18:30", 
+        name: "Diner", 
+        main: "Zalm met courgette en pesto", 
+        options: ["Biefstuk met bloemkoolpuree", "Kipfilet met broccoli"],
+        ingredients: [
+          { name: "Zalm", amount: 150, unit: "g" },
+          { name: "Courgette", amount: 200, unit: "g" },
+          { name: "Pesto", amount: 20, unit: "g" },
+          { name: "Olijfolie", amount: 10, unit: "ml" }
+        ]
+      },
     ],
   },
   vegetarian: {
@@ -66,9 +153,15 @@ export default function PlanDetail({ slug, onBack }: PlanDetailProps) {
       <h3 className="text-xl font-bold text-[#FFD700] mb-4">Voorbeeld Dagindeling</h3>
       <div className="flex flex-col gap-6">
         {plan.meals.map((meal, idx) => {
-          // Simpele portieberekening: hoofdmaaltijd = 1/4, snack = 1/8 van dagtotaal
+          // Bereken werkelijke macro's op basis van ingrediënten
+          let actualMacros: any = null;
+          if (meal.ingredients) {
+            actualMacros = calculateMacrosFromIngredients(meal.ingredients);
+          }
+          
+          // Fallback naar percentage berekening als geen ingrediënten beschikbaar
           let portion: any = null;
-          if (macro) {
+          if (macro && !actualMacros) {
             const divider = meal.name === "Snack" ? 8 : 4;
             portion = {
               protein: Math.round(macro.protein / divider),
@@ -84,12 +177,29 @@ export default function PlanDetail({ slug, onBack }: PlanDetailProps) {
               </div>
               <div className="text-[#8BAE5A] mb-1">{meal.main}</div>
               <div className="text-[#A3AED6] text-sm mb-1">Variatie: {meal.options.join(", ")}</div>
-              <div className="text-xs text-[#FFD700]">Portiegids:
-                {portion ? (
-                  <div className="flex gap-4 mt-1">
-                    <span className="text-white">Eiwit: <b>{portion.protein}g</b></span>
-                    <span className="text-white">Koolhydraten: <b>{portion.carbs}g</b></span>
-                    <span className="text-white">Vetten: <b>{portion.fat}g</b></span>
+              <div className="text-xs text-[#FFD700]">
+                {actualMacros ? (
+                  <div>
+                    <div className="text-[#8BAE5A] font-semibold mb-1">Werkelijke Macro's:</div>
+                    <div className="flex gap-4 mt-1">
+                      <span className="text-white">Eiwit: <b>{actualMacros.protein}g</b></span>
+                      <span className="text-white">Koolhydraten: <b>{actualMacros.carbs}g</b></span>
+                      <span className="text-white">Vetten: <b>{actualMacros.fat}g</b></span>
+                    </div>
+                    <div className="text-gray-400 text-xs mt-1">
+                      {actualMacros.calories} kcal | {actualMacros.missingIngredients?.length > 0 && 
+                        <span className="text-orange-400">⚠️ {actualMacros.missingIngredients.length} ingrediënt(en) ontbreken</span>
+                      }
+                    </div>
+                  </div>
+                ) : portion ? (
+                  <div>
+                    <div className="text-gray-400 font-semibold mb-1">Geschatte Macro's (percentage):</div>
+                    <div className="flex gap-4 mt-1">
+                      <span className="text-white">Eiwit: <b>{portion.protein}g</b></span>
+                      <span className="text-white">Koolhydraten: <b>{portion.carbs}g</b></span>
+                      <span className="text-white">Vetten: <b>{portion.fat}g</b></span>
+                    </div>
                   </div>
                 ) : (
                   <span className="text-white">(Vul eerst de calculator in)</span>

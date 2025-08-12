@@ -61,7 +61,7 @@ const menu = [
     isSub: true
   },
   { label: 'Mijn Trainingen', icon: AcademicCapIcon, parent: 'Dashboard', href: '/dashboard/mijn-trainingen', isSub: true },
-  { label: 'Finance & Business', icon: CurrencyDollarIcon, parent: 'Dashboard', href: '/dashboard/finance-en-business', isSub: true },
+  { label: 'Finance & Business', icon: CurrencyDollarIcon, href: '/dashboard/finance-en-business' },
   { label: 'Academy', icon: FireIcon, href: '/dashboard/academy' },
   { label: 'Trainingscentrum', icon: AcademicCapIcon, href: '/dashboard/trainingscentrum' },
   { label: 'Mind & Focus', icon: ChartBarIcon, href: '/dashboard/mind-en-focus' },
@@ -296,7 +296,13 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
   // Redirect to login if no user
   if (!user) {
-    router.push('/login');
+    // Preserve current URL for redirect back after login
+    const currentPath = window.location.pathname;
+    if (currentPath !== '/login') {
+      router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
+    } else {
+      router.push('/login');
+    }
     return null;
   }
 
