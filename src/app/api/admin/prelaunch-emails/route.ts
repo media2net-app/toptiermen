@@ -57,7 +57,7 @@ async function handleCRUDWithAdminClient(method: string, request: NextRequest, s
     const body = await request.json();
     
     if (method === 'POST') {
-      const { email, name, source, status, package: packageType, notes } = body;
+      const { email, name, source, status, notes } = body;
 
       if (!email) {
         return NextResponse.json({ error: 'Email is required' }, { status: 400 });
@@ -70,7 +70,6 @@ async function handleCRUDWithAdminClient(method: string, request: NextRequest, s
           name,
           source: source || 'Manual',
           status: status || 'active',
-          package: packageType || 'BASIC', // Keep as 'package' in DB for compatibility
           notes
         })
         .select()

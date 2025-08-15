@@ -20,7 +20,6 @@ interface PreLaunchEmail {
   source: string;
   subscribedAt: Date;
   status: string;
-  interestLevel: string;
   notes?: string;
 }
 
@@ -29,7 +28,6 @@ interface NewLeadForm {
   name: string;
   source: string;
   status: string;
-  package: string;
   notes: string;
 }
 
@@ -38,14 +36,16 @@ export default function PreLaunchEmails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedEmail, setSelectedEmail] = useState<PreLaunchEmail | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   
   const [newLead, setNewLead] = useState<NewLeadForm>({
     email: '',
     name: '',
     source: '',
     status: 'active',
-    package: 'Basic',
     notes: ''
   });
 
@@ -65,7 +65,6 @@ export default function PreLaunchEmails() {
           source: email.source,
           subscribedAt: new Date(email.subscribed_at || email.subscribedAt),
           status: email.status?.toLowerCase() || 'active',
-          interestLevel: email.package?.toUpperCase() || 'BASIC',
           notes: email.notes
         }));
         setEmails(formattedEmails);
@@ -107,7 +106,6 @@ export default function PreLaunchEmails() {
           name: '',
           source: '',
           status: 'active',
-          package: 'Basic',
           notes: ''
         });
         fetchEmails(); // Refresh the list
@@ -119,6 +117,45 @@ export default function PreLaunchEmails() {
       toast.error('Fout bij toevoegen van lead');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleEmailClick = (email: PreLaunchEmail) => {
+    setSelectedEmail(email);
+    setShowDetailModal(true);
+  };
+
+  const handleDeleteEmail = async (emailId: string) => {
+    if (!confirm('Weet je zeker dat je deze lead wilt verwijderen?')) {
+      return;
+    }
+
+    try {
+      setDeleting(true);
+      
+      const response = await fetch('/api/admin/prelaunch-emails', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id: emailId }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success('Lead succesvol verwijderd!');
+        setShowDetailModal(false);
+        setSelectedEmail(null);
+        fetchEmails(); // Refresh the list
+      } else {
+        toast.error(data.error || 'Fout bij verwijderen van lead');
+      }
+    } catch (err) {
+      console.error('Error deleting lead:', err);
+      toast.error('Fout bij verwijderen van lead');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -239,25 +276,61 @@ export default function PreLaunchEmails() {
                 <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   DATUM
                 </th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  ACTIES
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#3A4D23]">
               {emails.map((email) => (
-                <tr key={email.id} className="hover:bg-[#232D1A]">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                <tr key={email.id} className="hover:bg-[#232D1A] cursor-pointer">
+                  <td 
+                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-300"
+                    onClick={() => handleEmailClick(email)}
+                  >
                     {email.email}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                  <td 
+                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-300"
+                    onClick={() => handleEmailClick(email)}
+                  >
                     {email.name}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                  <td 
+                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-300"
+                    onClick={() => handleEmailClick(email)}
+                  >
                     {email.source}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                    {email.status}
+                  <td 
+                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-300"
+                    onClick={() => handleEmailClick(email)}
+                  >
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      email.status === 'active' ? 'bg-green-500/20 text-green-400' :
+                      email.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
+                      'bg-red-500/20 text-red-400'
+                    }`}>
+                      {email.status}
+                    </span>
+                  </td>
+                  <td 
+                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-300"
+                    onClick={() => handleEmailClick(email)}
+                  >
+                    {email.subscribedAt.toLocaleDateString('nl-NL')}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                    {email.subscribedAt.toLocaleDateString('nl-NL')}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteEmail(email.id);
+                      }}
+                      className="text-red-400 hover:text-red-300 transition-colors"
+                      title="Verwijder lead"
+                    >
+                      <TrashIcon className="w-4 h-4" />
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -343,20 +416,7 @@ export default function PreLaunchEmails() {
                 </select>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-[#B6C948] mb-2">
-                  Package
-                </label>
-                <select
-                  value={newLead.package}
-                  onChange={(e) => setNewLead({...newLead, package: e.target.value})}
-                  className="w-full p-3 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
-                >
-                  <option value="Basic">Basic</option>
-                  <option value="Premium">Premium</option>
-                  <option value="Ultimate">Ultimate</option>
-                </select>
-              </div>
+
 
               <div>
                 <label className="block text-sm font-medium text-[#B6C948] mb-2">
@@ -385,6 +445,97 @@ export default function PreLaunchEmails() {
                 className="flex-1 px-4 py-2 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#0A0F0A] rounded-lg font-semibold hover:from-[#B6C948] hover:to-[#FFD700] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {submitting ? 'Toevoegen...' : 'Toevoegen'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Detail Modal */}
+      {showDetailModal && selectedEmail && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-6 w-full max-w-md mx-4">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-[#8BAE5A]">Lead Details</h2>
+              <button
+                onClick={() => {
+                  setShowDetailModal(false);
+                  setSelectedEmail(null);
+                }}
+                className="text-gray-400 hover:text-white"
+              >
+                <XMarkIcon className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-[#B6C948] mb-2">
+                  Email
+                </label>
+                <p className="text-white">{selectedEmail.email}</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#B6C948] mb-2">
+                  Naam
+                </label>
+                <p className="text-white">{selectedEmail.name}</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#B6C948] mb-2">
+                  Bron
+                </label>
+                <p className="text-white">{selectedEmail.source || 'Niet opgegeven'}</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#B6C948] mb-2">
+                  Status
+                </label>
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                  selectedEmail.status === 'active' ? 'bg-green-500/20 text-green-400' :
+                  selectedEmail.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
+                  'bg-red-500/20 text-red-400'
+                }`}>
+                  {selectedEmail.status}
+                </span>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#B6C948] mb-2">
+                  Aangemeld op
+                </label>
+                <p className="text-white">{selectedEmail.subscribedAt.toLocaleDateString('nl-NL')} om {selectedEmail.subscribedAt.toLocaleTimeString('nl-NL')}</p>
+              </div>
+
+              {selectedEmail.notes && (
+                <div>
+                  <label className="block text-sm font-medium text-[#B6C948] mb-2">
+                    Notities
+                  </label>
+                  <p className="text-white">{selectedEmail.notes}</p>
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => {
+                  setShowDetailModal(false);
+                  setSelectedEmail(null);
+                }}
+                className="flex-1 px-4 py-2 border border-[#3A4D23] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors"
+              >
+                Sluiten
+              </button>
+              <button
+                onClick={() => handleDeleteEmail(selectedEmail.id)}
+                disabled={deleting}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {deleting ? 'Verwijderen...' : 'Verwijderen'}
               </button>
             </div>
           </div>
