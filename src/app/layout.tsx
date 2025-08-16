@@ -1,14 +1,8 @@
 import './globals.css';
-import { Inter, Figtree } from 'next/font/google';
+import { Figtree } from 'next/font/google';
 import { Toaster } from 'react-hot-toast';
 import Providers from './components/Providers';
 import GoogleAnalytics from './components/GoogleAnalytics';
-
-const inter = Inter({
-  subsets: ['latin'],
-  display: 'swap',
-  fallback: ['system-ui', 'Arial', 'sans-serif'],
-});
 
 const figtree = Figtree({
   subsets: ['latin'],
@@ -45,7 +39,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.className} ${figtree.className}`}>
+    <html lang="en" className={figtree.className}>
       <head>
         <GoogleAnalytics />
       </head>

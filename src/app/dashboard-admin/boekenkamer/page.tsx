@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { PlusIcon, PencilIcon, TrashIcon, EyeIcon, EyeSlashIcon, BookOpenIcon, StarIcon, UserGroupIcon, ChatBubbleLeftRightIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
-import { AdminCard, AdminStatsCard, AdminButton } from '../../../components/admin';
+import { AdminCard, AdminStatsCard, AdminButton, AdminActionButton } from '../../../components/admin';
 import BookModal from './components/BookModal';
 import CategoryModal from './components/CategoryModal';
 
@@ -623,18 +623,16 @@ export default function AdminBoekenkamerPage() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex gap-2">
-                          <button
+                          <AdminActionButton
+                            variant="edit"
                             onClick={() => handleEditBook(book)}
-                            className="p-1 text-[#8BAE5A] hover:text-white hover:bg-[#3A4D23] rounded"
-                          >
-                            <PencilIcon className="w-4 h-4" />
-                          </button>
-                          <button
+                            title="Bewerk boek"
+                          />
+                          <AdminActionButton
+                            variant="delete"
                             onClick={() => handleDeleteBook(book.id)}
-                            className="p-1 text-red-400 hover:text-red-300 hover:bg-[#3A4D23] rounded"
-                          >
-                            <TrashIcon className="w-4 h-4" />
-                          </button>
+                            title="Verwijder boek"
+                          />
                         </div>
                       </td>
                     </tr>
@@ -682,18 +680,16 @@ export default function AdminBoekenkamerPage() {
                       <td className="px-6 py-4 text-sm text-gray-300">{category.bookCount}</td>
                       <td className="px-6 py-4">
                         <div className="flex gap-2">
-                          <button
+                          <AdminActionButton
+                            variant="edit"
                             onClick={() => handleEditCategory(category)}
-                            className="p-1 text-[#8BAE5A] hover:text-white hover:bg-[#3A4D23] rounded"
-                          >
-                            <PencilIcon className="w-4 h-4" />
-                          </button>
-                          <button
+                            title="Bewerk categorie"
+                          />
+                          <AdminActionButton
+                            variant="delete"
                             onClick={() => handleDeleteCategory(category.id)}
-                            className="p-1 text-red-400 hover:text-red-300 hover:bg-[#3A4D23] rounded"
-                          >
-                            <TrashIcon className="w-4 h-4" />
-                          </button>
+                            title="Verwijder categorie"
+                          />
                         </div>
                       </td>
                     </tr>

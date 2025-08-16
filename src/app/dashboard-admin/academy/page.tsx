@@ -32,9 +32,7 @@ import VideoUpload from '@/components/VideoUpload';
 import AcademyVideoUpload from '@/components/AcademyVideoUpload';
 import PDFUpload from '@/components/PDFUpload';
 import ImageUpload from '@/components/ImageUpload';
-import AdminCard from '@/components/admin/AdminCard';
-import AdminStatsCard from '@/components/admin/AdminStatsCard';
-import AdminButton from '@/components/admin/AdminButton';
+import { AdminCard, AdminStatsCard, AdminButton, AdminActionButton } from '@/components/admin';
 import 'react-quill/dist/quill.snow.css';
 
 const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
@@ -626,23 +624,28 @@ export default function AcademyManagement() {
                 <div className="p-3 rounded-xl bg-[#8BAE5A]/20">
                   <AcademicCapIcon className="w-6 h-6 text-[#8BAE5A]" />
                 </div>
-                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(module.status)} bg-[#181F17]`}>
-                  {getStatusText(module.status)}
-                </span>
-                <AdminButton
-                  onClick={() => { handleModuleDelete(module.id); }}
-                  variant="danger"
-                  size="sm"
-                >
-                  <TrashIcon className="w-4 h-4 mr-2" />
-                  Verwijder
-                </AdminButton>
+                <div className="flex items-center gap-2">
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(module.status)} bg-[#181F17]`}>
+                    {getStatusText(module.status)}
+                  </span>
+                  <AdminButton
+                    onClick={(e: React.MouseEvent) => { 
+                      e.stopPropagation();
+                      handleModuleDelete(module.id); 
+                    }}
+                    variant="danger"
+                    size="sm"
+                  >
+                    <TrashIcon className="w-4 h-4" />
+                    Verwijder
+                  </AdminButton>
+                </div>
               </div>
               
               <h3 className="text-xl font-bold text-[#8BAE5A] mb-2">{module.title}</h3>
-              <p className="text-[#B6C948] text-sm mb-4">{module.shortDescription}</p>
+              <p className="text-[#B6C948] text-sm mb-4 line-clamp-2">{module.shortDescription}</p>
               
-              <div className="space-y-3">
+              <div className="space-y-3 mb-4">
                 <div className="flex items-center justify-between">
                   <span className="text-[#B6C948] text-sm">Lessen</span>
                   <span className="text-[#8BAE5A] font-semibold">{(lessons.filter(l => l.module_id === module.id).length) || 0}</span>
@@ -661,25 +664,27 @@ export default function AcademyManagement() {
                 </div>
               </div>
 
-              <div className="mt-4 flex items-center gap-2">
+              <div className="admin-card-actions">
                 <AdminButton 
-                  onClick={() => {
+                  onClick={(e: React.MouseEvent) => {
+                    e.stopPropagation();
                     openModuleModal(module);
                   }}
                   variant="secondary"
                   size="sm"
                 >
-                  <PencilIcon className="w-4 h-4 mr-2" />
+                  <PencilIcon className="w-4 h-4" />
                   Bewerk
                 </AdminButton>
                 <AdminButton 
-                  onClick={() => {
+                  onClick={(e: React.MouseEvent) => {
+                    e.stopPropagation();
                     setSelectedModule(module.id);
                   }}
                   variant="secondary"
                   size="sm"
                 >
-                  <EyeIcon className="w-4 h-4 mr-2" />
+                  <EyeIcon className="w-4 h-4" />
                   Bekijk Lessen
                 </AdminButton>
               </div>
@@ -740,52 +745,48 @@ export default function AcademyManagement() {
                 >
                   <div className="flex items-center gap-4">
                     {/* Drag Handle */}
-                    <div className="cursor-move p-2 text-[#B6C948] hover:text-[#8BAE5A] transition">
+                    <div className="cursor-move p-2 text-[#B6C948] hover:text-[#8BAE5A] transition flex-shrink-0">
                       <Bars3Icon className="w-5 h-5" />
                     </div>
                     
                     {/* Lesson Info */}
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 rounded-xl bg-[#8BAE5A]/20">
+                        <div className="p-2 rounded-xl bg-[#8BAE5A]/20 flex-shrink-0">
                           <TypeIcon className="w-4 h-4 text-[#8BAE5A]" />
                         </div>
-                        <div>
-                          <span className="text-[#8BAE5A] font-semibold text-sm">Les {lesson.order_index}</span>
-                          <h3 className="text-[#8BAE5A] font-medium">{lesson.title}</h3>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[#8BAE5A] font-semibold text-sm">Les {lesson.order_index}</span>
+                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(lesson.status)} bg-[#232D1A]`}>
+                              {getStatusText(lesson.status)}
+                            </span>
+                          </div>
+                          <h3 className="text-[#8BAE5A] font-medium truncate">{lesson.title}</h3>
                         </div>
                       </div>
                       
-                      <div className="flex items-center gap-6 text-sm">
+                      <div className="flex items-center gap-4 text-sm">
                         <span className="text-[#B6C948] capitalize">{getTypeText(lesson.type)}</span>
                         <div className="flex items-center gap-1">
                           <ClockIcon className="w-4 h-4 text-[#B6C948]" />
                           <span className="text-[#B6C948]">{lesson.duration}</span>
                         </div>
-                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(lesson.status)} bg-[#232D1A]`}>
-                          {getStatusText(lesson.status)}
-                        </span>
                       </div>
                     </div>
                     
                     {/* Actions */}
-                    <div className="flex items-center gap-2">
-                      <AdminButton 
+                    <div className="admin-action-buttons">
+                      <AdminActionButton 
+                        variant="edit"
                         onClick={() => openLessonModal(lesson)}
-                        variant="secondary"
-                        size="sm"
-                      >
-                        <PencilIcon className="w-4 h-4 mr-2" />
-                        Bewerk
-                      </AdminButton>
-                      <AdminButton 
+                        title="Bewerk les"
+                      />
+                      <AdminActionButton 
+                        variant="delete"
                         onClick={() => handleLessonDelete(lesson.id)}
-                        variant="danger"
-                        size="sm"
-                      >
-                        <TrashIcon className="w-4 h-4 mr-2" />
-                        Verwijder
-                      </AdminButton>
+                        title="Verwijder les"
+                      />
                     </div>
                   </div>
                 </div>

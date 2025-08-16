@@ -37,8 +37,12 @@ export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: Exe
   const [isAutoSaving, setIsAutoSaving] = useState(false);
 
   useEffect(() => {
+    console.log('🔄 ExerciseModal useEffect triggered');
+    console.log('📋 Exercise prop:', exercise);
+    console.log('📋 IsOpen prop:', isOpen);
+    
     if (exercise) {
-      setFormData({
+      const newFormData = {
         name: exercise.name || '',
         primary_muscle: exercise.primary_muscle || '',
         secondary_muscles: exercise.secondary_muscles || [],
@@ -46,9 +50,12 @@ export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: Exe
         video_url: exercise.video_url || '',
         instructions: exercise.instructions || '',
         worksheet_url: exercise.worksheet_url || null
-      });
+      };
+      
+      console.log('📋 Setting form data for editing:', newFormData);
+      setFormData(newFormData);
     } else {
-      setFormData({
+      const emptyFormData = {
         name: '',
         primary_muscle: '',
         secondary_muscles: [],
@@ -56,7 +63,10 @@ export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: Exe
         video_url: '',
         instructions: '',
         worksheet_url: null
-      });
+      };
+      
+      console.log('📋 Setting empty form data for new exercise');
+      setFormData(emptyFormData);
     }
   }, [exercise, isOpen]);
 

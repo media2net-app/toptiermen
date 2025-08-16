@@ -31,7 +31,7 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import AdminCard from '@/components/admin/AdminCard';
 import AdminStatsCard from '@/components/admin/AdminStatsCard';
 import AdminButton from '@/components/admin/AdminButton';
-import { getCDNVideoUrl } from '@/lib/cdn-config';
+import { getCDNVideoUrl, getOptimizedVideoUrl } from '@/lib/cdn-config';
 
 // Mock data - in real app this would come from API
 const mockSchemas = [
@@ -260,6 +260,12 @@ export default function TrainingscentrumBeheer() {
   const [loadingSchemas, setLoadingSchemas] = useState(true);
   const [errorExercises, setErrorExercises] = useState<string | null>(null);
   const [errorSchemas, setErrorSchemas] = useState<string | null>(null);
+  
+  // Lazy loading state
+  const [visibleExercises, setVisibleExercises] = useState<Set<number>>(new Set());
+  const [loadedThumbnails, setLoadedThumbnails] = useState<Set<number>>(new Set());
+  const [videoErrors, setVideoErrors] = useState<Set<number>>(new Set());
+  const [thumbnailLoadingStarted, setThumbnailLoadingStarted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -318,6 +324,36 @@ export default function TrainingscentrumBeheer() {
     }
   }, [mounted, fetchExercises, fetchSchemas]);
 
+  // Lazy load thumbnails one by one
+  useEffect(() => {
+    if (!mounted || exercises.length === 0) return;
+
+    let isCancelled = false;
+    const loadThumbnailsSequentially = async () => {
+      console.log('🎬 Starting sequential thumbnail loading...');
+      setThumbnailLoadingStarted(true);
+      
+      for (let i = 0; i < exercises.length; i++) {
+        if (isCancelled) break;
+        
+        const exercise = exercises[i];
+        console.log(`📹 Loading thumbnail ${i + 1}/${exercises.length}: ${exercise.name}`);
+        
+        // Add exercise to visible set to trigger thumbnail loading
+        setVisibleExercises(prev => new Set([...prev, exercise.id]));
+        
+        // Small delay between each thumbnail to prevent overwhelming
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+    };
+
+    loadThumbnailsSequentially();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [mounted, exercises]);
+
   const handleAddExercise = async (exerciseData: any) => {
     try {
       const { data, error } = await supabase
@@ -355,7 +391,8 @@ export default function TrainingscentrumBeheer() {
         ...exerciseData,
         video_url: exerciseData.video_url || null,
         worksheet_url: exerciseData.worksheet_url || null,
-        secondary_muscles: Array.isArray(exerciseData.secondary_muscles) ? exerciseData.secondary_muscles : []
+        secondary_muscles: Array.isArray(exerciseData.secondary_muscles) ? exerciseData.secondary_muscles : [],
+        updated_at: new Date().toISOString() // Force update timestamp
       };
       
       console.log('🧹 Cleaned data for update:', cleanedData);
@@ -387,18 +424,9 @@ export default function TrainingscentrumBeheer() {
         console.log('✅ Exercise updated successfully:', data);
         console.log('🔄 Step 3: Updating local state...');
         
-        setExercises(prevExercises => {
-          console.log('📋 Previous exercises count:', prevExercises.length);
-          const updatedExercises = prevExercises.map(ex => {
-            if (ex.id === id) {
-              console.log('🔄 Replacing exercise:', ex.name, 'with:', data.name);
-              return data;
-            }
-            return ex;
-          });
-          console.log('📋 Updated exercises count:', updatedExercises.length);
-          return updatedExercises;
-        });
+        // Force a complete refresh of the exercises list
+        console.log('🔄 Refreshing exercises list from database...');
+        await fetchExercises();
         
         console.log('🔒 Step 4: Closing modal...');
         setShowEditModal(false);
@@ -671,8 +699,8 @@ export default function TrainingscentrumBeheer() {
                 setShowNewSchemaModal(true);
               }}
               variant="primary"
+              icon={<PlusIcon className="w-5 h-5" />}
             >
-              <PlusIcon className="w-5 h-5 mr-2" />
               Nieuw Trainingsschema
             </AdminButton>
           </div>
@@ -754,7 +782,7 @@ export default function TrainingscentrumBeheer() {
                           <span className="text-[#8BAE5A] font-semibold">0</span>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="flex items-center justify-center gap-1 flex-wrap">
+                          <div className="flex items-center justify-center gap-2 flex-wrap">
                             <AdminButton 
                               onClick={() => {
                                 // Navigate to schema view page in same tab
@@ -762,9 +790,9 @@ export default function TrainingscentrumBeheer() {
                               }}
                               variant="secondary" 
                               size="sm"
-                              className="min-w-[70px] text-xs"
+                              className="min-w-[80px] text-xs"
                             >
-                              <EyeIcon className="w-3 h-3 mr-1" />
+                              <EyeIcon className="w-3 h-3" />
                               Bekijk
                             </AdminButton>
                             <AdminButton 
@@ -774,9 +802,9 @@ export default function TrainingscentrumBeheer() {
                               }}
                               variant="secondary"
                               size="sm"
-                              className="min-w-[70px] text-xs"
+                              className="min-w-[80px] text-xs"
                             >
-                              <PencilIcon className="w-3 h-3 mr-1" />
+                              <PencilIcon className="w-3 h-3" />
                               Bewerk
                             </AdminButton>
                             <AdminButton 
@@ -793,18 +821,18 @@ export default function TrainingscentrumBeheer() {
                               }}
                               variant="secondary" 
                               size="sm"
-                              className="min-w-[70px] text-xs"
+                              className="min-w-[80px] text-xs"
                             >
-                              <DocumentDuplicateIcon className="w-3 h-3 mr-1" />
+                              <DocumentDuplicateIcon className="w-3 h-3" />
                               Dupliceer
                             </AdminButton>
                             <AdminButton 
                               onClick={() => handleDeleteSchema(schema.id)}
                               variant="danger"
                               size="sm"
-                              className="min-w-[70px] text-xs"
+                              className="min-w-[80px] text-xs"
                             >
-                              <TrashIcon className="w-3 h-3 mr-1" />
+                              <TrashIcon className="w-3 h-3" />
                               Verwijder
                             </AdminButton>
                           </div>
@@ -902,57 +930,76 @@ export default function TrainingscentrumBeheer() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredExercises.map((exercise) => (
-                <div key={exercise.id} className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23] hover:border-[#8BAE5A] transition-all duration-300">
+                <div
+                  key={exercise.id}
+                  data-exercise-id={exercise.id}
+                  className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23] hover:border-[#8BAE5A] transition-all duration-300 hover:shadow-lg hover:shadow-[#8BAE5A]/10"
+                >
                   {/* Video Preview - Only show if there's a real video */}
                   {exercise.video_url && exercise.video_url !== '/video-placeholder.jpg' && exercise.video_url !== 'video-placeholder.jpg' && (
-                    <div className="mb-4 relative group">
-                      <div className="aspect-video bg-[#181F17] rounded-xl border border-[#3A4D23] overflow-hidden">
-                        {/* Video Thumbnail with Play Button */}
-                        <div className="relative w-full h-full bg-gradient-to-br from-[#232D1A] to-[#181F17] flex items-center justify-center cursor-pointer">
-                          {/* Video Thumbnail (if available) */}
-                          <video
-                            src={getCDNVideoUrl(exercise.video_url)}
-                            className="absolute inset-0 w-full h-full object-cover opacity-30"
-                            preload="metadata"
-                            muted
-                            onLoadedMetadata={(e) => {
-                              const video = e.target as HTMLVideoElement;
-                              video.currentTime = 1; // Seek to 1 second for thumbnail
-                            }}
-                          />
-                          
-                          <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors" />
-                          <div className="relative z-10 text-center">
-                            <div className="w-16 h-16 bg-[#8BAE5A]/90 rounded-full flex items-center justify-center mx-auto mb-2 group-hover:bg-[#8BAE5A] transition-colors shadow-lg">
-                              <PlayIcon className="w-8 h-8 text-[#181F17]" />
-                            </div>
-                            <p className="text-[#8BAE5A] text-sm font-medium">Video beschikbaar</p>
-                            <p className="text-[#B6C948] text-xs">Hover om te bekijken</p>
-                          </div>
-                        </div>
+                    <div className="mb-4 relative">
+                      <div 
+                        className="aspect-video bg-[#181F17] rounded-xl border border-[#3A4D23] overflow-hidden cursor-pointer hover:border-[#8BAE5A] transition-colors"
+                        onClick={() => {
+                          // Open video in full screen or modal
+                          window.open(exercise.video_url, '_blank');
+                        }}
+                      >
+                        {/* Thumbnail Video - Always load for immediate preview */}
+                        <video
+                          src={getOptimizedVideoUrl(exercise.video_url, 'medium')}
+                          className="w-full h-full object-cover rounded-xl"
+                          preload="metadata"
+                          muted
+                          onLoadStart={() => {
+                            console.log('🎬 Thumbnail loading started:', exercise.name);
+                          }}
+                          onLoadedMetadata={(e) => {
+                            const video = e.target as HTMLVideoElement;
+                            // Seek to 1 second for a good thumbnail
+                            video.currentTime = 1;
+                            setLoadedThumbnails(prev => new Set([...prev, exercise.id]));
+                            console.log('✅ Thumbnail loaded:', exercise.name);
+                          }}
+                          onSeeked={(e) => {
+                            const video = e.target as HTMLVideoElement;
+                            // Show the thumbnail frame
+                            video.style.opacity = '1';
+                          }}
+                          onError={(e) => {
+                            console.error('❌ Thumbnail error:', exercise.name, e);
+                            setVideoErrors(prev => new Set([...prev, exercise.id]));
+                          }}
+                          style={{ opacity: 0 }}
+                        />
                         
-                        {/* Video Player (click to play) */}
-                        <div className="absolute inset-0 bg-black rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none group-hover:pointer-events-auto">
-                          <video
-                            src={exercise.video_url}
-                            className="w-full h-full object-cover rounded-xl"
-                            controls
-                            preload="none"
-                            muted
-                            onLoadStart={() => console.log('🎬 Video loading started:', exercise.name)}
-                            onCanPlay={() => console.log('✅ Video can play:', exercise.name)}
-                            onError={(e) => console.error('❌ Video error:', exercise.name, e)}
-                            onPlay={() => console.log('▶️ Video started playing:', exercise.name)}
-                            onPause={() => console.log('⏸️ Video paused:', exercise.name)}
-                            onEnded={() => console.log('🏁 Video ended:', exercise.name)}
-                          />
-                        </div>
-                      </div>
-                      
-                      {/* Video Info */}
-                      <div className="mt-2 text-center">
-                        <p className="text-[#8BAE5A] text-xs font-medium">{exercise.name} - Video</p>
-                        <p className="text-[#B6C948] text-xs">Hover om video te bekijken</p>
+
+                        
+                        {/* Loading Placeholder - Show when no thumbnails are loaded yet */}
+                        {!loadedThumbnails.has(exercise.id) && !videoErrors.has(exercise.id) && (
+                          <div className="absolute inset-0 bg-gradient-to-br from-[#232D1A] to-[#181F17] flex items-center justify-center">
+                            <div className="text-center">
+                              <div className="animate-spin w-8 h-8 border-2 border-[#8BAE5A] border-t-transparent rounded-full mx-auto mb-2"></div>
+                              <p className="text-[#8BAE5A] text-sm">
+                                {thumbnailLoadingStarted ? 'Bezig met laden...' : 'Video laden...'}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Error State - Show when video fails to load */}
+                        {videoErrors.has(exercise.id) && (
+                          <div className="absolute inset-0 bg-gradient-to-br from-red-900/20 to-red-800/20 flex items-center justify-center">
+                            <div className="text-center">
+                              <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-2">
+                                <svg className="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                </svg>
+                              </div>
+                              <p className="text-red-400 text-sm">Video niet beschikbaar</p>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
@@ -1350,11 +1397,14 @@ export default function TrainingscentrumBeheer() {
           setEditingExercise(null);
           console.log('🔒 Modal states reset complete');
         }}
-        onSave={(exerciseData) => {
+        onSave={async (exerciseData) => {
+          console.log('💾 ExerciseModal onSave called with data:', exerciseData);
           if (editingExercise) {
-            handleUpdateExercise(editingExercise.id, exerciseData);
+            console.log('🔄 Updating existing exercise:', editingExercise.id);
+            await handleUpdateExercise(editingExercise.id, exerciseData);
           } else {
-            handleAddExercise(exerciseData);
+            console.log('➕ Adding new exercise');
+            await handleAddExercise(exerciseData);
           }
         }}
         exercise={editingExercise}
