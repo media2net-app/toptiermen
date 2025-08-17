@@ -141,21 +141,94 @@ body {
   z-index: 5;
 }
 
+/* Modern Green Scrollbar - Global */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #8BAE5A #181F17;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+  background: #181F17;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #8BAE5A 0%, #B6C948 100%);
+  border-radius: 10px;
+  border: 2px solid #181F17;
+  transition: all 0.3s ease;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #B6C948 0%, #8BAE5A 100%);
+  box-shadow: 0 0 8px rgba(139, 174, 90, 0.4);
+}
+
+*::-webkit-scrollbar-track {
+  background: #181F17;
+  border-radius: 10px;
+}
+
+*::-webkit-scrollbar-corner {
+  background: #181F17;
+}
+
+/* Custom scrollbar for specific elements */
 .custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: #8BAE5A #181F17;
 }
+
 .custom-scrollbar::-webkit-scrollbar {
   width: 8px;
   background: #181F17;
 }
+
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #8BAE5A;
+  background: linear-gradient(180deg, #8BAE5A 0%, #B6C948 100%);
   border-radius: 8px;
   border: 2px solid #181F17;
+  transition: all 0.3s ease;
 }
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #B6C948 0%, #8BAE5A 100%);
+  box-shadow: 0 0 6px rgba(139, 174, 90, 0.4);
+}
+
 .custom-scrollbar::-webkit-scrollbar-track {
   background: #181F17;
+  border-radius: 8px;
+}
+
+/* Thin scrollbar for tables and lists */
+.thin-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #8BAE5A #181F17;
+}
+
+.thin-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+  background: #181F17;
+}
+
+.thin-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #8BAE5A 0%, #B6C948 100%);
+  border-radius: 6px;
+  border: 1px solid #181F17;
+  transition: all 0.3s ease;
+}
+
+.thin-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #B6C948 0%, #8BAE5A 100%);
+  box-shadow: 0 0 4px rgba(139, 174, 90, 0.4);
+}
+
+.thin-scrollbar::-webkit-scrollbar-track {
+  background: #181F17;
+  border-radius: 6px;
 }
 
 @keyframes fade-in-up {

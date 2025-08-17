@@ -137,14 +137,14 @@ export default function WorkoutVideoModal({
                 <>
                   <video
                     ref={videoRef}
-                    src={getCDNVideoUrl(videoUrl)}
+                    src={videoUrl.startsWith('/video-oefeningen/') ? videoUrl : getCDNVideoUrl(videoUrl)}
                     className="w-full h-full object-cover"
                     preload="auto"
                     onTimeUpdate={handleTimeUpdate}
                     onLoadedMetadata={handleLoadedMetadata}
                     onEnded={handleVideoEnd}
                     onCanPlay={() => {
-                      console.log('🎥 Workout video can start playing');
+                      console.log('🎥 Workout video can start playing:', videoUrl);
                     }}
                     muted={isMuted}
                   />

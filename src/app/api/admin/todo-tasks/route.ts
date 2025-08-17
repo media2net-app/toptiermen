@@ -116,13 +116,26 @@ export async function PATCH(request: NextRequest) {
     
     console.log('📝 Updating task:', id);
 
+    // Prepare update data
+    const updatePayload = {
+      ...updateData,
+      updated_at: new Date().toISOString()
+    };
+
+    // If status is being set to completed and completion_date is not provided, set it
+    if (updateData.status === 'completed' && !updateData.completion_date) {
+      updatePayload.completion_date = new Date().toISOString();
+    }
+
+    // If status is being changed from completed to something else, clear completion_date
+    if (updateData.status !== 'completed' && updateData.status !== undefined) {
+      updatePayload.completion_date = null;
+    }
+
     // Try to update in database first
     const { data: updatedTask, error: dbError } = await supabaseAdmin
       .from('todo_tasks')
-      .update({
-        ...updateData,
-        updated_at: new Date().toISOString()
-      })
+      .update(updatePayload)
       .eq('id', id)
       .select()
       .single();
@@ -209,7 +222,8 @@ function getHardcodedTasks() {
       estimated_hours: 4,
       actual_hours: 4,
       category: "development",
-      created_at: "2024-08-20T10:00:00Z"
+      created_at: "2024-08-20T10:00:00Z",
+      completion_date: "2024-08-20T16:00:00Z"
     },
     {
       id: "test-users-002",
@@ -222,7 +236,8 @@ function getHardcodedTasks() {
       estimated_hours: 6,
       actual_hours: 6,
       category: "development",
-      created_at: "2024-08-20T11:00:00Z"
+      created_at: "2024-08-20T11:00:00Z",
+      completion_date: "2024-08-20T17:00:00Z"
     },
     {
       id: "test-users-003",

@@ -140,11 +140,11 @@ export async function getCDNPerformance(url: string): Promise<{
   responseTime: number;
   cacheHit: boolean;
 }> {
-  const startTime = performance.now();
+  const startTime = Date.now();
   
   try {
     const response = await fetch(url, { method: 'HEAD' });
-    const responseTime = performance.now() - startTime;
+    const responseTime = Date.now() - startTime;
     
     return {
       provider: activeCDN.provider,

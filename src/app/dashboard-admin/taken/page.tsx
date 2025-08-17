@@ -37,6 +37,7 @@ interface Task {
   actual_hours?: number;
   category: string;
   created_at: string;
+  completion_date?: string;
 }
 
 const priorities = ['Alle Prioriteiten', 'critical', 'high', 'medium', 'low'];
@@ -343,8 +344,51 @@ export default function TakenPage() {
     }
   };
 
+  const handleToggleCompletion = async (task: Task) => {
+    const newStatus = task.status === 'completed' ? 'pending' : 'completed';
+    
+    try {
+      const response = await fetch('/api/admin/todo-tasks', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          id: task.id, 
+          status: newStatus,
+          completion_date: newStatus === 'completed' ? new Date().toISOString() : null
+        })
+      });
+
+      if (response.ok) {
+        toast.success(`Taak ${newStatus === 'completed' ? 'voltooid' : 'heropend'}`, {
+          position: "top-right",
+          duration: 3000,
+        });
+        fetchTasks();
+      } else {
+        throw new Error('Failed to update task status');
+      }
+    } catch (error) {
+      console.error('Error updating task status:', error);
+      toast.error('Fout bij het bijwerken van taak status', {
+        position: "top-right",
+        duration: 3000,
+      });
+    }
+  };
+
   const renderActions = (task: Task) => (
     <div className="flex items-center gap-2">
+      <button
+        onClick={() => handleToggleCompletion(task)}
+        className={`p-1 transition-colors ${
+          task.status === 'completed' 
+            ? 'text-green-500 hover:text-green-400' 
+            : 'text-gray-400 hover:text-green-600'
+        }`}
+        title={task.status === 'completed' ? 'Markeren als niet voltooid' : 'Markeren als voltooid'}
+      >
+        <CheckCircleIcon className="w-4 h-4" />
+      </button>
       <button
         onClick={() => handleEditTask(task)}
         className="p-1 text-gray-400 hover:text-blue-600 transition-colors"

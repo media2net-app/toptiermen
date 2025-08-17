@@ -777,6 +777,46 @@ export default function CallOverview() {
         "Support ticket systeem",
         "Backup procedures"
       ]
+    },
+    {
+      title: "Campagnes lanceren TMT prelaunch",
+      description: "Lancering van alle marketing campagnes voor TMT prelaunch periode",
+      priority: "critical",
+      deadline: "19 augustus",
+      status: "not-started",
+      assignee: "Marketing",
+      tasks: [
+        "Facebook advertentie campagnes activeren",
+        "Instagram marketing campagnes lanceren",
+        "LinkedIn targeting campagnes starten",
+        "Google Ads campagnes activeren",
+        "Email marketing campagnes lanceren",
+        "Social media content planning finaliseren",
+        "Campagne tracking en analytics setup",
+        "Budget allocatie en monitoring"
+      ],
+      notes: "🚀 KRITIEK: Alle marketing campagnes moeten gelanceerd worden voor maximale prelaunch exposure"
+    },
+    {
+      title: "Landingspagina klaar voor pre-launch",
+      description: "Finaliseren van de landingspagina voor pre-launch campagne",
+      priority: "critical",
+      deadline: "18 augustus",
+      status: "not-started",
+      assignee: "Development/Design",
+      tasks: [
+        "Landingspagina design finaliseren",
+        "Pre-launch formulier implementeren",
+        "Email capture systeem testen",
+        "A/B testing setup voor conversie optimalisatie",
+        "Mobile responsive design controleren",
+        "Loading speed optimaliseren",
+        "SEO meta tags toevoegen",
+        "Analytics tracking implementeren",
+        "Social proof elementen toevoegen",
+        "Call-to-action buttons optimaliseren"
+      ],
+      notes: "🎯 KRITIEK: Landingspagina moet 100% klaar zijn voor pre-launch campagnes die op 19 augustus starten"
     }
   ];
 

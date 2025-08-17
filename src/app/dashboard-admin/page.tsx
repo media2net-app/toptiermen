@@ -98,8 +98,8 @@ export default function AdminDashboard() {
   const [dataLoaded, setDataLoaded] = useState(false); // Track of data is geladen
 
   // Read tab from URL parameter and set initial active tab
-  const tabFromUrl = searchParams?.get('tab') as 'overview' | 'content' | 'actions' | 'financial' | 'users' | 'realtime' | 'technical';
-  const [activeTab, setActiveTab] = useState<'overview' | 'content' | 'actions' | 'financial' | 'users' | 'realtime' | 'technical'>(
+  const tabFromUrl = searchParams?.get('tab') as 'overview' | 'content' | 'actions' | 'financial' | 'users' | 'realtime' | 'technical' | 'timeline';
+  const [activeTab, setActiveTab] = useState<'overview' | 'content' | 'actions' | 'financial' | 'users' | 'realtime' | 'technical' | 'timeline'>(
     tabFromUrl || 'overview'
   );
 
@@ -292,6 +292,16 @@ export default function AdminDashboard() {
             }`}
           >
             Technische Performance
+          </button>
+          <button
+            onClick={() => setActiveTab('timeline')}
+            className={`flex-shrink-0 py-2 sm:py-3 px-3 sm:px-4 rounded-md font-medium transition-colors text-sm whitespace-nowrap ${
+              activeTab === 'timeline'
+                ? 'bg-[#8BAE5A] text-black'
+                : 'text-white/60 hover:text-white'
+            }`}
+          >
+            🚀 Launch Timeline
           </button>
         </div>
       </SwipeIndicator>
@@ -867,6 +877,243 @@ export default function AdminDashboard() {
                 <AdminButton variant="primary" size="lg">
                   Bekijk Technische Rapportage
                 </AdminButton>
+              </div>
+            </div>
+          </div>
+        </AdminCard>
+      )}
+
+      {activeTab === 'timeline' && (
+        <AdminCard
+          title="🚀 Launch Timeline"
+          subtitle="Planning van 16 augustus t/m 10 september - Platform lancering"
+          icon={<ClockIcon className="w-6 h-6" />}
+          gradient
+        >
+          <div className="space-y-8">
+            {/* Timeline Overview */}
+            <div className="bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold text-[#8BAE5A]">Timeline Overzicht</h3>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                  <span className="text-green-400 text-sm font-medium">Actief</span>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div className="text-center p-4 bg-[#232D1A] rounded-xl border border-[#3A4D23]">
+                  <div className="text-2xl font-bold text-[#8BAE5A]">16</div>
+                  <div className="text-[#B6C948] text-sm">Augustus</div>
+                  <div className="text-[#8BAE5A] font-semibold mt-2">Start Planning</div>
+                </div>
+                <div className="text-center p-4 bg-[#232D1A] rounded-xl border border-[#3A4D23]">
+                  <div className="text-2xl font-bold text-[#8BAE5A]">23</div>
+                  <div className="text-[#B6C948] text-sm">Augustus</div>
+                  <div className="text-[#8BAE5A] font-semibold mt-2">Test Groep Live</div>
+                </div>
+                <div className="text-center p-4 bg-[#232D1A] rounded-xl border border-[#3A4D23]">
+                  <div className="text-2xl font-bold text-[#8BAE5A]">10</div>
+                  <div className="text-[#B6C948] text-sm">September</div>
+                  <div className="text-[#8BAE5A] font-semibold mt-2">Officiële Lancering</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Detailed Timeline */}
+            <div className="bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]">
+              <h3 className="text-xl font-bold text-[#8BAE5A] mb-6">Gedetailleerde Planning</h3>
+              
+              <div className="space-y-6">
+                {/* Week 1: 16-22 Augustus */}
+                <div className="border-l-4 border-[#8BAE5A] pl-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-8 h-8 bg-[#8BAE5A] rounded-full flex items-center justify-center">
+                      <span className="text-[#181F17] font-bold text-sm">1</span>
+                    </div>
+                    <h4 className="text-lg font-semibold text-[#8BAE5A]">Week 1: 16-22 Augustus</h4>
+                    <span className="px-3 py-1 bg-yellow-500/20 text-yellow-400 rounded-full text-sm font-medium">In Progress</span>
+                  </div>
+                  <div className="ml-11 space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 bg-[#8BAE5A] rounded-full"></div>
+                      <span className="text-[#B6C948]">Finaliseren alle video content voor oefeningen</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 bg-[#8BAE5A] rounded-full"></div>
+                      <span className="text-[#B6C948]">Testen van workout video functionaliteit</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 bg-[#8BAE5A] rounded-full"></div>
+                      <span className="text-[#B6C948]">Bug fixes en performance optimalisatie</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 bg-[#8BAE5A] rounded-full"></div>
+                      <span className="text-[#B6C948]">Voorbereiden test groep onboarding</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Week 2: 23-29 Augustus */}
+                <div className="border-l-4 border-[#B6C948] pl-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-8 h-8 bg-[#B6C948] rounded-full flex items-center justify-center">
+                      <span className="text-[#181F17] font-bold text-sm">2</span>
+                    </div>
+                    <h4 className="text-lg font-semibold text-[#B6C948]">Week 2: 23-29 Augustus</h4>
+                    <span className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-sm font-medium">Critical</span>
+                  </div>
+                  <div className="ml-11 space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 bg-[#B6C948] rounded-full"></div>
+                      <span className="text-[#B6C948] font-semibold">🎯 VRIJDAG 23 AUGUSTUS: Platform live voor test groep</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 bg-[#B6C948] rounded-full"></div>
+                      <span className="text-[#B6C948]">Uitnodigen test gebruikers (20-30 personen)</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 bg-[#B6C948] rounded-full"></div>
+                      <span className="text-[#B6C948]">Monitoring van gebruikersfeedback en bugs</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 bg-[#B6C948] rounded-full"></div>
+                      <span className="text-[#B6C948]">Implementeren van feedback en fixes</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Week 3: 30 Augustus - 5 September */}
+                <div className="border-l-4 border-[#3A4D23] pl-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-8 h-8 bg-[#3A4D23] rounded-full flex items-center justify-center">
+                      <span className="text-[#8BAE5A] font-bold text-sm">3</span>
+                    </div>
+                    <h4 className="text-lg font-semibold text-[#8BAE5A]">Week 3: 30 Augustus - 5 September</h4>
+                    <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-sm font-medium">Planning</span>
+                  </div>
+                  <div className="ml-11 space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 bg-[#3A4D23] rounded-full"></div>
+                      <span className="text-[#B6C948]">Uitbreiden test groep (50-100 personen)</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 bg-[#3A4D23] rounded-full"></div>
+                      <span className="text-[#B6C948]">Content optimalisatie gebaseerd op feedback</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 bg-[#3A4D23] rounded-full"></div>
+                      <span className="text-[#B6C948]">Voorbereiden marketing campagne</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 bg-[#3A4D23] rounded-full"></div>
+                      <span className="text-[#B6C948]">Finaliseren onboarding flow</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Week 4: 6-10 September */}
+                <div className="border-l-4 border-[#8BAE5A] pl-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-8 h-8 bg-[#8BAE5A] rounded-full flex items-center justify-center">
+                      <span className="text-[#181F17] font-bold text-sm">4</span>
+                    </div>
+                    <h4 className="text-lg font-semibold text-[#8BAE5A]">Week 4: 6-10 September</h4>
+                    <span className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm font-medium">Launch</span>
+                  </div>
+                  <div className="ml-11 space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 bg-[#8BAE5A] rounded-full"></div>
+                      <span className="text-[#B6C948] font-semibold">🎯 DINSDAG 10 SEPTEMBER: Officiële lancering</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 bg-[#8BAE5A] rounded-full"></div>
+                      <span className="text-[#B6C948]">Marketing campagne activeren</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 bg-[#8BAE5A] rounded-full"></div>
+                      <span className="text-[#B6C948]">Social media push</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 bg-[#8BAE5A] rounded-full"></div>
+                      <span className="text-[#B6C948]">Monitoring en support</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Critical Milestones */}
+            <div className="bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]">
+              <h3 className="text-xl font-bold text-[#8BAE5A] mb-6">🎯 Kritieke Milestones</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="p-4 bg-[#232D1A] rounded-xl border border-[#3A4D23]">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
+                      <span className="text-white font-bold text-sm">!</span>
+                    </div>
+                    <h4 className="text-lg font-semibold text-[#8BAE5A]">Vrijdag 23 Augustus</h4>
+                  </div>
+                  <p className="text-[#B6C948] mb-3">Platform moet live zijn voor test groep</p>
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-1 bg-red-500/20 text-red-400 rounded text-xs">Critical</span>
+                    <span className="text-[#B6C948] text-sm">Geen uitstel mogelijk</span>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-[#232D1A] rounded-xl border border-[#3A4D23]">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                      <span className="text-white font-bold text-sm">✓</span>
+                    </div>
+                    <h4 className="text-lg font-semibold text-[#8BAE5A]">Dinsdag 10 September</h4>
+                  </div>
+                  <p className="text-[#B6C948] mb-3">Officiële lancering voor publiek</p>
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs">Launch</span>
+                    <span className="text-[#B6C948] text-sm">Marketing campagne start</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Items */}
+            <div className="bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]">
+              <h3 className="text-xl font-bold text-[#8BAE5A] mb-6">📋 Actie Punten</h3>
+              
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 bg-[#232D1A] rounded-xl border border-[#3A4D23]">
+                  <div className="flex items-center gap-3">
+                    <input type="checkbox" className="w-5 h-5 text-[#8BAE5A] bg-[#181F17] border-[#3A4D23] rounded focus:ring-[#8BAE5A]" />
+                    <span className="text-[#B6C948]">Workout video functionaliteit testen</span>
+                  </div>
+                  <span className="px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded text-xs">Vandaag</span>
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-[#232D1A] rounded-xl border border-[#3A4D23]">
+                  <div className="flex items-center gap-3">
+                    <input type="checkbox" className="w-5 h-5 text-[#8BAE5A] bg-[#181F17] border-[#3A4D23] rounded focus:ring-[#8BAE5A]" />
+                    <span className="text-[#B6C948]">Test groep uitnodigingen voorbereiden</span>
+                  </div>
+                  <span className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs">Woensdag</span>
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-[#232D1A] rounded-xl border border-[#3A4D23]">
+                  <div className="flex items-center gap-3">
+                    <input type="checkbox" className="w-5 h-5 text-[#8BAE5A] bg-[#181F17] border-[#3A4D23] rounded focus:ring-[#8BAE5A]" />
+                    <span className="text-[#B6C948]">Marketing content voorbereiden</span>
+                  </div>
+                  <span className="px-2 py-1 bg-purple-500/20 text-purple-400 rounded text-xs">Volgende week</span>
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-[#232D1A] rounded-xl border border-[#3A4D23]">
+                  <div className="flex items-center gap-3">
+                    <input type="checkbox" className="w-5 h-5 text-[#8BAE5A] bg-[#181F17] border-[#3A4D23] rounded focus:ring-[#8BAE5A]" />
+                    <span className="text-[#B6C948]">Support team voorbereiden</span>
+                  </div>
+                  <span className="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs">Week 3</span>
+                </div>
               </div>
             </div>
           </div>

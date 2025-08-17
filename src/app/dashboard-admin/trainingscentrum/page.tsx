@@ -939,38 +939,27 @@ export default function TrainingscentrumBeheer() {
                   {exercise.video_url && exercise.video_url !== '/video-placeholder.jpg' && exercise.video_url !== 'video-placeholder.jpg' && (
                     <div className="mb-4 relative">
                       <div 
-                        className="aspect-video bg-[#181F17] rounded-xl border border-[#3A4D23] overflow-hidden cursor-pointer hover:border-[#8BAE5A] transition-colors"
-                        onClick={() => {
-                          // Open video in full screen or modal
-                          window.open(exercise.video_url, '_blank');
-                        }}
+                        className="aspect-video bg-[#181F17] rounded-xl border border-[#3A4D23] overflow-hidden cursor-pointer hover:border-[#8BAE5A] transition-colors relative group"
                       >
-                        {/* Thumbnail Video - Always load for immediate preview */}
+                        {/* Video Player with Controls */}
                         <video
                           src={getOptimizedVideoUrl(exercise.video_url, 'medium')}
                           className="w-full h-full object-cover rounded-xl"
                           preload="metadata"
-                          muted
+                          controls
+                          controlsList="nodownload"
                           onLoadStart={() => {
-                            console.log('🎬 Thumbnail loading started:', exercise.name);
+                            console.log('🎬 Video loading started:', exercise.name);
                           }}
                           onLoadedMetadata={(e) => {
                             const video = e.target as HTMLVideoElement;
-                            // Seek to 1 second for a good thumbnail
-                            video.currentTime = 1;
                             setLoadedThumbnails(prev => new Set([...prev, exercise.id]));
-                            console.log('✅ Thumbnail loaded:', exercise.name);
-                          }}
-                          onSeeked={(e) => {
-                            const video = e.target as HTMLVideoElement;
-                            // Show the thumbnail frame
-                            video.style.opacity = '1';
+                            console.log('✅ Video loaded:', exercise.name);
                           }}
                           onError={(e) => {
-                            console.error('❌ Thumbnail error:', exercise.name, e);
+                            console.error('❌ Video error:', exercise.name, e);
                             setVideoErrors(prev => new Set([...prev, exercise.id]));
                           }}
-                          style={{ opacity: 0 }}
                         />
                         
 

@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getCDNPerformance } from '@/lib/cdn-config';
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
+    const { searchParams } = request.nextUrl;
     const videoUrl = searchParams.get('url');
 
     if (!videoUrl) {
@@ -22,7 +22,7 @@ export async function GET(request: Request) {
     const metrics = {
       ...performance,
       timestamp: new Date().toISOString(),
-      userAgent: request.headers.get('user-agent'),
+      userAgent: request.headers.get('user-agent') || 'unknown',
       region: request.headers.get('x-vercel-ip-country') || 'unknown',
       isVercel: request.headers.get('x-vercel-deployment-url') ? true : false
     };

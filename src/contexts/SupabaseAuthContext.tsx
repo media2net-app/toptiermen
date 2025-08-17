@@ -166,6 +166,12 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     // Get initial session
     const getInitialSession = async () => {
       try {
+        // Add timeout to prevent infinite loading
+        const timeoutId = setTimeout(() => {
+          console.warn('Auth initialization timeout, forcing loading to false');
+          setLoading(false);
+        }, 15000); // 15 second timeout
+
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
@@ -189,6 +195,8 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
             });
           }
         }
+        
+        clearTimeout(timeoutId);
       } catch (error) {
         console.error('Error in getInitialSession:', error);
       } finally {

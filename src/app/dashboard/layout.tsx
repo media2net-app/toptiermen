@@ -12,6 +12,7 @@ import ForcedOnboardingModal from '@/components/ForcedOnboardingModal';
 import TestUserFeedback from '@/components/TestUserFeedback';
 import { useTestUser } from '@/hooks/useTestUser';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 import Image from 'next/image';
 // import MobileNav from '../components/MobileNav';
@@ -197,7 +198,15 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
     if (!user) return;
 
     try {
-      const response = await fetch(`/api/onboarding?userId=${user.id}`);
+      // Add timeout to the fetch request
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
+      const response = await fetch(`/api/onboarding?userId=${user.id}`, {
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
       const data = await response.json();
 
       if (response.ok) {
@@ -219,14 +228,25 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
       }
     } catch (error) {
       console.error('Error checking onboarding status:', error);
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.warn('Onboarding check timed out, continuing without onboarding data');
+      }
     }
   }, [user?.id, router]);
 
   // Check onboarding status on mount and when user changes
   useEffect(() => {
     if (user && !loading) {
-      checkOnboardingStatus();
-      setIsLoading(false);
+      // Add timeout to prevent infinite loading
+      const timeoutId = setTimeout(() => {
+        console.warn('Onboarding check timeout, forcing loading to false');
+        setIsLoading(false);
+      }, 10000); // 10 second timeout
+
+      checkOnboardingStatus().finally(() => {
+        clearTimeout(timeoutId);
+        setIsLoading(false);
+      });
     } else if (!user && !loading) {
       setIsLoading(false);
     }
@@ -282,12 +302,23 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
           {/* Add timeout indicator */}
           <div className="mt-4">
             <p className="text-[#B6C948] text-sm">Dashboard wordt geladen</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="mt-2 text-[#8BAE5A] hover:text-[#B6C948] underline text-sm"
-            >
-              Pagina herladen als het te lang duurt
-            </button>
+            <div className="flex flex-col gap-2 mt-4">
+              <button
+                onClick={() => window.location.reload()}
+                className="text-[#8BAE5A] hover:text-[#B6C948] underline text-sm"
+              >
+                Pagina herladen als het te lang duurt
+              </button>
+              <button
+                onClick={() => {
+                  console.warn('Force loading state to false');
+                  setIsLoading(false);
+                }}
+                className="text-[#B6C948] hover:text-[#8BAE5A] underline text-sm"
+              >
+                Forceer doorladen (als er problemen zijn)
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -530,8 +561,10 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
-    <OnboardingProvider>
-      <DashboardContent>{children}</DashboardContent>
-    </OnboardingProvider>
+    <ErrorBoundary>
+      <OnboardingProvider>
+        <DashboardContent>{children}</DashboardContent>
+      </OnboardingProvider>
+    </ErrorBoundary>
   );
 } 

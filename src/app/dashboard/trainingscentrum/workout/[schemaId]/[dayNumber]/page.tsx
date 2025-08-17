@@ -69,7 +69,7 @@ export default function WorkoutPage() {
       rest: '2 min',
       completed: false,
       currentSet: 0,
-      videoUrl: 'workout-videos/exercises/bench-press-tutorial.mp4'
+      videoUrl: '/video-oefeningen/bankdrukken.mp4'
     },
     {
       id: '2',
@@ -79,7 +79,7 @@ export default function WorkoutPage() {
       rest: '90 sec',
       completed: false,
       currentSet: 0,
-      videoUrl: 'workout-videos/exercises/incline-dumbbell-press-tutorial.mp4'
+      videoUrl: '/video-oefeningen/Incline Chest press.mp4'
     },
     {
       id: '3',
@@ -89,7 +89,7 @@ export default function WorkoutPage() {
       rest: '90 sec',
       completed: false,
       currentSet: 0,
-      videoUrl: 'workout-videos/exercises/tricep-dips-tutorial.mp4'
+      videoUrl: '/video-oefeningen/tricpes dips_.mp4'
     },
     {
       id: '4',
@@ -99,7 +99,7 @@ export default function WorkoutPage() {
       rest: '60 sec',
       completed: false,
       currentSet: 0,
-      videoUrl: '/videos/tricep-extensions-tutorial.mp4'
+      videoUrl: '/video-oefeningen/triceps rope cabel.mp4'
     }
   ];
 
@@ -114,30 +114,30 @@ export default function WorkoutPage() {
 
   const getVideoUrlForExercise = (exerciseName: string): string | undefined => {
     const videoUrls: { [key: string]: string } = {
-      'Bench Press': 'workout-videos/exercises/bench-press-tutorial.mp4',
-      'Incline Dumbbell Press': 'workout-videos/exercises/incline-dumbbell-press-tutorial.mp4',
-      'Overhead Press': 'workout-videos/exercises/overhead-press-tutorial.mp4',
-      'Lateral Raises': 'workout-videos/exercises/lateral-raises-tutorial.mp4',
-      'Tricep Dips': 'workout-videos/exercises/tricep-dips-tutorial.mp4',
-      'Tricep Pushdowns': 'workout-videos/exercises/tricep-pushdowns-tutorial.mp4',
-      'Squat': 'workout-videos/exercises/squat-tutorial.mp4',
-      'Leg Press': 'workout-videos/exercises/leg-press-tutorial.mp4',
-      'Romanian Deadlift': 'workout-videos/exercises/romanian-deadlift-tutorial.mp4',
-      'Leg Extensions': 'workout-videos/exercises/leg-extensions-tutorial.mp4',
-      'Leg Curls': 'workout-videos/exercises/leg-curls-tutorial.mp4',
-      'Standing Calf Raises': 'workout-videos/exercises/standing-calf-raises-tutorial.mp4',
-      'Deadlift': 'workout-videos/exercises/deadlift-tutorial.mp4',
-      'Pull-ups': 'workout-videos/exercises/pull-ups-tutorial.mp4',
-      'Barbell Row': 'workout-videos/exercises/barbell-row-tutorial.mp4',
-      'Lat Pulldown': 'workout-videos/exercises/lat-pulldown-tutorial.mp4',
-      'Bicep Curls': 'workout-videos/exercises/bicep-curls-tutorial.mp4',
-      'Hammer Curls': 'workout-videos/exercises/hammer-curls-tutorial.mp4',
-      'Front Squat': 'workout-videos/exercises/front-squat-tutorial.mp4',
-      'Walking Lunges': 'workout-videos/exercises/walking-lunges-tutorial.mp4',
-      'Hip Thrusts': 'workout-videos/exercises/hip-thrusts-tutorial.mp4',
-      'Good Mornings': 'workout-videos/exercises/good-mornings-tutorial.mp4',
-      'Seated Calf Raises': 'workout-videos/exercises/seated-calf-raises-tutorial.mp4',
-      'Planks': 'workout-videos/exercises/planks-tutorial.mp4'
+      'Bench Press': '/video-oefeningen/bankdrukken.mp4',
+      'Incline Dumbbell Press': '/video-oefeningen/Incline Chest press.mp4',
+      'Overhead Press': '/video-oefeningen/militairy press.mp4',
+      'Lateral Raises': '/video-oefeningen/Lateral Raise.mp4',
+      'Tricep Dips': '/video-oefeningen/tricpes dips_.mp4',
+      'Tricep Pushdowns': '/video-oefeningen/triceps rope cabel.mp4',
+      'Squat': '/video-oefeningen/Squatten.mp4',
+      'Leg Press': '/video-oefeningen/legg press.mp4',
+      'Romanian Deadlift': '/video-oefeningen/Stiff Deadlift.mp4',
+      'Leg Extensions': '/video-oefeningen/leg extensie.mp4',
+      'Leg Curls': '/video-oefeningen/Leg Curl.mp4',
+      'Standing Calf Raises': '/video-oefeningen/Calf Raises.mp4',
+      'Deadlift': '/video-oefeningen/Deadlift.mp4',
+      'Pull-ups': '/video-oefeningen/Machine Pull Up.mp4',
+      'Barbell Row': '/video-oefeningen/Barbel Row Rug.mp4',
+      'Lat Pulldown': '/video-oefeningen/Lat Pull Down.mp4',
+      'Bicep Curls': '/video-oefeningen/Biceps Curl Barbell.mp4',
+      'Hammer Curls': '/video-oefeningen/Biceps Curl Dumbells.mp4',
+      'Front Squat': '/video-oefeningen/Hack Squat.mp4',
+      'Walking Lunges': '/video-oefeningen/Walking Lunges.mp4',
+      'Hip Thrusts': '/video-oefeningen/Booty Builder.mp4',
+      'Good Mornings': '/video-oefeningen/Lower Back Extensie.mp4',
+      'Seated Calf Raises': '/video-oefeningen/Calf Press.mp4',
+      'Planks': '/video-oefeningen/Abdominal Crunch.mp4'
     };
     
     return videoUrls[exerciseName];
