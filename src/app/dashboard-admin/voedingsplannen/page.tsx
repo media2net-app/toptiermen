@@ -921,7 +921,7 @@ const getImageFromLocalStorage = (imageId: string): string | null => {
 };
 
 export default function AdminVoedingsplannenPage() {
-  const [activeTab, setActiveTab] = useState<'dutch-recipes' | 'plans' | 'ingredients' | 'intelligent-builder' | 'meal-planner' | 'analytics' | 'educational-hubs'>('dutch-recipes');
+  const [activeTab, setActiveTab] = useState<'dutch-recipes' | 'recipes' | 'plans' | 'ingredients' | 'intelligent-builder' | 'meal-planner' | 'analytics' | 'educational-hubs'>('dutch-recipes');
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [nutritionPlans, setNutritionPlans] = useState<NutritionPlan[]>([]);
@@ -1215,6 +1215,7 @@ export default function AdminVoedingsplannenPage() {
 
   const tabs = [
     { id: 'dutch-recipes', label: 'Nederlandse Recepten', count: dutchRecipesData.length, icon: '🇳🇱' },
+    { id: 'recipes', label: 'Recepten', count: recipes.length, icon: '🍳' },
     { id: 'plans', label: 'Voedingsplan Templates', count: nutritionPlans.length, icon: '📋' },
     { id: 'ingredients', label: 'Ingrediënten Database', count: ingredients.length, icon: '🥕' },
     { id: 'intelligent-builder', label: 'Intelligente Recept Bouwer', count: 0, icon: '🧠' },
