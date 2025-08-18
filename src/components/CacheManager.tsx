@@ -30,15 +30,15 @@ export function CacheManager() {
   const detectCacheIssues = useCallback(() => {
     const now = Date.now();
     
-    // Check for stale cache indicators
+    // Check for stale cache indicators (less sensitive)
     const staleCacheIndicators = [
-      // Check if page loads are unusually fast (cached)
-      performance.timing.loadEventEnd - performance.timing.navigationStart < 100,
-      // Check if resources are served from cache
-      performance.getEntriesByType('resource').some(entry => (entry as any).transferSize === 0),
-      // Check for old timestamps in localStorage/sessionStorage
+      // Check if page loads are unusually fast (cached) - increased threshold
+      performance.timing.loadEventEnd - performance.timing.navigationStart < 50,
+      // Check if resources are served from cache - more specific check
+      performance.getEntriesByType('resource').filter(entry => (entry as any).transferSize === 0).length > 10,
+      // Check for old timestamps in localStorage/sessionStorage - increased threshold
       localStorage.getItem('lastCacheCheck') && 
-      (now - parseInt(localStorage.getItem('lastCacheCheck') || '0')) > 300000, // 5 minutes
+      (now - parseInt(localStorage.getItem('lastCacheCheck') || '0')) > 600000, // 10 minutes
       // Check for browser cache headers
       document.querySelector('meta[http-equiv="Cache-Control"]')?.getAttribute('content')?.includes('no-cache')
     ];
@@ -160,8 +160,8 @@ export function CacheManager() {
       const checkAndFixCache = () => {
         detectCacheIssues();
         
-        // If multiple cache issues detected, auto-refresh
-        if (cacheIssueCount.current >= 3) {
+        // Only auto-refresh if there are significant cache issues (increased threshold)
+        if (cacheIssueCount.current >= 5) {
           logCacheIssue({
             error_message: `Auto-refreshing cache due to multiple issues (${isPWA ? 'PWA' : isEdge ? 'Edge' : 'Chrome'})`,
             details: {
@@ -181,13 +181,16 @@ export function CacheManager() {
         }
       };
 
-      // Check cache every 30 seconds for Rick (Chrome + PWA + Edge)
-      const cacheCheckInterval = setInterval(checkAndFixCache, 30000);
+      // Check cache every 60 seconds for Rick (increased interval to reduce loops)
+      const cacheCheckInterval = setInterval(checkAndFixCache, 60000);
       
-      // Initial check
-      checkAndFixCache();
+      // Initial check after 10 seconds (delayed to avoid immediate loops)
+      const initialCheck = setTimeout(checkAndFixCache, 10000);
       
-      return () => clearInterval(cacheCheckInterval);
+      return () => {
+        clearInterval(cacheCheckInterval);
+        clearTimeout(initialCheck);
+      };
     }
   }, [getUserType, detectCacheIssues, forceCacheRefresh, logCacheIssue]);
 
@@ -236,8 +239,8 @@ export function CacheManager() {
         }
       };
 
-      // Monitor cache every 15 seconds
-      const cacheInterval = setInterval(monitorCache, 15000);
+      // Monitor cache every 30 seconds (increased to reduce loops)
+      const cacheInterval = setInterval(monitorCache, 30000);
       
       return () => clearInterval(cacheInterval);
     }
