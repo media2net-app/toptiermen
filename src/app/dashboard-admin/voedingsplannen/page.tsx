@@ -962,7 +962,7 @@ const getImageFromLocalStorage = (imageId: string): string | null => {
 };
 
 export default function AdminVoedingsplannenPage() {
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('voeding');
   const [showIngredientModal, setShowIngredientModal] = useState(false);
   const [showRecipeBuilder, setShowRecipeBuilder] = useState(false);
   const [showPlanBuilder, setShowPlanBuilder] = useState(false);
@@ -1290,8 +1290,8 @@ export default function AdminVoedingsplannenPage() {
   );
 
   const tabs = [
-    { id: 'migrated-plans', label: 'Frontend Plannen', count: migratedPlans.length, icon: '🔄' },
     { id: 'voeding', label: 'Voeding', count: voedingItems.length, icon: '🥗' },
+    { id: 'migrated-plans', label: 'Voedingsplannen', count: migratedPlans.length, icon: '📋' },
   ];
 
   return (
@@ -1747,9 +1747,9 @@ export default function AdminVoedingsplannenPage() {
             <div className="bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]/40">
               <div className="flex justify-between items-center mb-4">
                 <div>
-                  <h3 className="text-white font-semibold text-lg">Frontend Plannen Migratie</h3>
+                  <h3 className="text-white font-semibold text-lg">Voedingsplannen</h3>
                   <p className="text-[#8BAE5A] text-sm">
-                    De hardcoded voedingsplannen uit de frontend zijn gemigreerd naar de database voor beheer.
+                    Beheer voedingsplannen en templates voor gebruikers.
                   </p>
                 </div>
                 <AdminButton
