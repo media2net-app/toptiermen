@@ -1,5 +1,4 @@
 import { useEffect, useRef, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
 interface SessionLogData {
@@ -15,7 +14,6 @@ interface SessionLogData {
 
 export function useSessionLogging() {
   const { user } = useSupabaseAuth();
-  const router = useRouter();
   const pageLoadCount = useRef(0);
   const lastPage = useRef<string>('');
   const loopDetectionCount = useRef(0);
@@ -107,27 +105,25 @@ export function useSessionLogging() {
 
   }, [user, logSession, detectLoops]);
 
-  // Log navigation events
+  // Log navigation events using pathname changes
   useEffect(() => {
     if (!user) return;
 
-    const handleRouteChange = (url: string) => {
+    const currentPage = window.location.pathname;
+    const previousPage = lastPage.current;
+    
+    if (previousPage && previousPage !== currentPage) {
       logSession({
         user_id: user.id,
         user_email: user.email || '',
-        current_page: url,
+        current_page: currentPage,
         user_agent: navigator.userAgent,
         action_type: 'navigation',
       });
-    };
-
-    // Listen for route changes
-    router.events?.on('routeChangeComplete', handleRouteChange);
-
-    return () => {
-      router.events?.off('routeChangeComplete', handleRouteChange);
-    };
-  }, [user, router, logSession]);
+    }
+    
+    lastPage.current = currentPage;
+  }, [user, logSession]);
 
   // Log errors
   useEffect(() => {
