@@ -7,7 +7,12 @@ export function PerformanceTestPanel() {
   const { user } = useSupabaseAuth();
   const [performanceInfo, setPerformanceInfo] = useState<any>({});
   const [isVisible, setIsVisible] = useState(false);
-  const [testResults, setTestResults] = useState<any[]>([]);
+  const [testResults, setTestResults] = useState<Array<{
+    name: string;
+    status: string;
+    value: string;
+    threshold: string;
+  }>>([]);
 
   // Enhanced user detection
   const getUserType = () => {
@@ -119,7 +124,12 @@ export function PerformanceTestPanel() {
 
   // Run performance tests
   const runPerformanceTests = async () => {
-    const tests = [];
+    const tests: Array<{
+      name: string;
+      status: string;
+      value: string;
+      threshold: string;
+    }> = [];
     
     // Test 1: Memory usage
     if ('memory' in performance) {
