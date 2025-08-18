@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/SupabaseAuthContext';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
 interface SessionLogData {
   user_id: string;
@@ -14,7 +14,7 @@ interface SessionLogData {
 }
 
 export function useSessionLogging() {
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   const router = useRouter();
   const pageLoadCount = useRef(0);
   const lastPage = useRef<string>('');
