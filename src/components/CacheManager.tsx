@@ -424,63 +424,92 @@ export function CacheManager() {
           }
         }
         
-        // Smart cache clearing for Rick in Chrome (optimized for performance)
+        // AGGRESSIVE smart cache clearing for Rick in Chrome
         const smartClearCache = () => {
-          console.log('🔄 Rick: Smart-clearing Chrome cache');
+          console.log('🔄 Rick: AGGRESSIVE smart-clearing Chrome cache');
           
-          // Only clear essential items, not everything
           try {
-            // Clear localStorage but keep essential items
-            const essentialKeys = ['user-email', 'chrome_cache_version'];
-            const keysToRemove = Object.keys(localStorage).filter(key => !essentialKeys.includes(key));
-            keysToRemove.forEach(key => localStorage.removeItem(key));
+            // Clear ALL localStorage (no exceptions for Rick)
+            localStorage.clear();
+            console.log('🗑️ Cleared all localStorage');
             
-            // Clear sessionStorage
+            // Clear ALL sessionStorage
             sessionStorage.clear();
+            console.log('🗑️ Cleared all sessionStorage');
             
-            // Only clear problematic cookies, not all
-            const problematicCookies = ['cache', 'session', 'temp', 'tmp'];
-            document.cookie.split(";").forEach(cookie => {
+            // Clear ALL cookies (including user-email to force fresh login)
+            const allCookies = document.cookie.split(";");
+            console.log('🗑️ Clearing all cookies in smart clear:', allCookies.length);
+            allCookies.forEach(cookie => {
               const eqPos = cookie.indexOf("=");
               const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
-              if (name && !name.includes('user-email') && problematicCookies.some(problematic => name.toLowerCase().includes(problematic))) {
+              if (name) {
+                // Clear with multiple paths
                 document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+                document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/dashboard`;
+                document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/login`;
               }
             });
+            
+            // Clear any session-related data that might have been recreated
+            const sessionKeys = Object.keys(localStorage).filter(key => 
+              key.toLowerCase().includes('session') || 
+              key.toLowerCase().includes('auth') || 
+              key.toLowerCase().includes('user') ||
+              key.toLowerCase().includes('login') ||
+              key.toLowerCase().includes('token')
+            );
+            sessionKeys.forEach(key => localStorage.removeItem(key));
+            console.log('🗑️ Cleared session-related items:', sessionKeys);
+            
           } catch (error) {
-            console.log('⚠️ Rick: Error during smart cache clear:', error);
+            console.log('⚠️ Rick: Error during aggressive smart cache clear:', error);
           }
         };
         
-        // Full cache clear only on page load
+        // AGGRESSIVE cache clear for Rick in Chrome (like incognito mode)
         const fullClearCache = () => {
-          console.log('🔄 Rick: Full-clearing Chrome cache on page load');
+          console.log('🔄 Rick: AGGRESSIVE Chrome cache clear (like incognito)');
           
-          // Clear all storage
-          localStorage.clear();
-          sessionStorage.clear();
+          // Clear ALL storage (no exceptions)
+          try {
+            localStorage.clear();
+            sessionStorage.clear();
+            console.log('🗑️ Cleared localStorage and sessionStorage');
+          } catch (e) {
+            console.log('⚠️ Error clearing storage:', e);
+          }
           
-          // Clear all cookies except user-email
-          document.cookie.split(";").forEach(cookie => {
+          // Clear ALL cookies (including user-email to force fresh login)
+          const allCookies = document.cookie.split(";");
+          console.log('🗑️ Clearing all cookies:', allCookies.length);
+          allCookies.forEach(cookie => {
             const eqPos = cookie.indexOf("=");
             const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
-            if (name && !name.includes('user-email')) {
+            if (name) {
+              // Clear with multiple paths and domains
               document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+              document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/dashboard`;
+              document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/login`;
+              document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;domain=${window.location.hostname}`;
+              document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;domain=.${window.location.hostname}`;
             }
           });
           
-          // Clear caches
+          // Clear ALL caches aggressively
           if ('caches' in window) {
             caches.keys().then(cacheNames => {
+              console.log('🗑️ Clearing caches:', cacheNames);
               cacheNames.forEach(cacheName => {
                 caches.delete(cacheName);
               });
             });
           }
           
-          // Clear IndexedDB
+          // Clear ALL IndexedDB databases
           if ('indexedDB' in window) {
             indexedDB.databases().then(databases => {
+              console.log('🗑️ Clearing IndexedDB databases:', databases.map(db => db.name));
               databases.forEach(db => {
                 if (db.name) {
                   indexedDB.deleteDatabase(db.name);
@@ -489,13 +518,67 @@ export function CacheManager() {
             });
           }
           
-          // Unregister service workers
+          // Unregister ALL service workers
           if ('serviceWorker' in navigator) {
             navigator.serviceWorker.getRegistrations().then(registrations => {
+              console.log('🗑️ Unregistering service workers:', registrations.length);
               registrations.forEach(registration => {
                 registration.unregister();
               });
             });
+          }
+          
+          // Clear Chrome's application cache
+          if ('applicationCache' in window) {
+            try {
+              (window as any).applicationCache.clear();
+              console.log('🗑️ Cleared application cache');
+            } catch (e) {
+              console.log('⚠️ Could not clear application cache:', e);
+            }
+          }
+          
+          // Clear Chrome's file system cache
+          if ('webkitRequestFileSystem' in window) {
+            try {
+              (window as any).webkitRequestFileSystem((window as any).TEMPORARY, 0, (fs: any) => {
+                fs.root.createReader().readEntries((entries: any[]) => {
+                  entries.forEach(entry => {
+                    if (entry.isFile) {
+                      entry.remove();
+                    }
+                  });
+                });
+              });
+              console.log('🗑️ Cleared temporary file system');
+            } catch (e) {
+              console.log('⚠️ Could not clear temporary file system:', e);
+            }
+          }
+          
+          // Force garbage collection if available
+          if ('gc' in window) {
+            try {
+              (window as any).gc();
+              console.log('🗑️ Forced garbage collection');
+            } catch (e) {
+              console.log('⚠️ Could not force garbage collection:', e);
+            }
+          }
+          
+          // Clear any remaining session data
+          try {
+            // Clear any session-related data
+            const sessionKeys = Object.keys(localStorage).filter(key => 
+              key.toLowerCase().includes('session') || 
+              key.toLowerCase().includes('auth') || 
+              key.toLowerCase().includes('user') ||
+              key.toLowerCase().includes('login')
+            );
+            sessionKeys.forEach(key => localStorage.removeItem(key));
+            console.log('🗑️ Cleared session-related localStorage items:', sessionKeys);
+          } catch (e) {
+            console.log('⚠️ Error clearing session data:', e);
           }
         };
         
