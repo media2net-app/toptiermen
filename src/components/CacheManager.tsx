@@ -57,7 +57,7 @@ export function CacheManager() {
       // Check if page loads are unusually fast (cached)
       performance.timing.loadEventEnd - performance.timing.navigationStart < 100,
       // Check if resources are served from cache
-      performance.getEntriesByType('resource').some(entry => entry.transferSize === 0),
+      performance.getEntriesByType('resource').some(entry => (entry as any).transferSize === 0),
       // Check for old timestamps in localStorage/sessionStorage
       localStorage.getItem('lastCacheCheck') && 
       (now - parseInt(localStorage.getItem('lastCacheCheck') || '0')) > 300000, // 5 minutes
@@ -168,7 +168,7 @@ export function CacheManager() {
           // Check if page loads instantly (Chrome cache)
           performance.timing.loadEventEnd - performance.timing.navigationStart < 50,
           // Check for cached resources
-          performance.getEntriesByType('resource').filter(entry => entry.transferSize === 0).length > 5,
+          performance.getEntriesByType('resource').filter(entry => (entry as any).transferSize === 0).length > 5,
           // Check for old service worker cache
           'serviceWorker' in navigator && navigator.serviceWorker.controller
         ];
