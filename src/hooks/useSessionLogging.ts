@@ -71,6 +71,18 @@ export function useSessionLogging() {
     lastLogTime.current = now;
   }, [logSession, user]);
 
+  // Enhanced user detection for special monitoring
+  const getUserType = useCallback(() => {
+    if (!user?.email) return 'unknown';
+    
+    const email = user.email.toLowerCase();
+    if (email.includes('rick') || email.includes('cuijpers')) return 'rick';
+    if (email.includes('chiel')) return 'chiel';
+    if (email.includes('test') || email.includes('demo')) return 'test';
+    if (email.includes('admin')) return 'admin';
+    return 'user';
+  }, [user]);
+
   // Log page loads
   useEffect(() => {
     if (!user) return;
@@ -81,7 +93,8 @@ export function useSessionLogging() {
     // Detect potential loops
     detectLoops(currentPage);
 
-    // Log the page load
+    // Log the page load with enhanced user type detection
+    const userType = getUserType();
     logSession({
       user_id: user.id,
       user_email: user.email || '',
@@ -89,6 +102,7 @@ export function useSessionLogging() {
       user_agent: navigator.userAgent,
       action_type: 'page_load',
       cache_hit: false, // We'll implement cache detection later
+      user_type: userType, // Add user type for filtering
     });
 
   }, [user, logSession, detectLoops]);

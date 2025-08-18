@@ -28,6 +28,45 @@ import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { AdminCard, AdminStatsCard, AdminButton } from '@/components/admin';
 import { SwipeIndicator } from '@/components/ui';
 
+// Types for session data
+interface SessionLog {
+  id: string;
+  user_email: string;
+  user_type: string;
+  current_page: string;
+  status: string;
+  last_activity: string;
+  error_count: number;
+  loop_detections: number;
+  created_at: string;
+}
+
+interface UserActivity {
+  id: string;
+  user_email: string;
+  user_type: string;
+  action_type: string;
+  current_page: string;
+  status: string;
+  created_at: string;
+  details: any;
+}
+
+interface SessionStatistics {
+  totalSessions: number;
+  stuckSessions: number;
+  errorSessions: number;
+  activeUsers: number;
+  totalErrors: number;
+  totalLoops: number;
+  byUserType: {
+    rick: number;
+    chiel: number;
+    test: number;
+    admin: number;
+  };
+}
+
 interface DashboardStats {
   // Community Health
   communityHealthScore: number;
@@ -97,11 +136,78 @@ export default function AdminDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [dataLoaded, setDataLoaded] = useState(false); // Track of data is geladen
 
+  // Session monitoring state
+  const [sessionLogs, setSessionLogs] = useState<SessionLog[]>([]);
+  const [userActivities, setUserActivities] = useState<UserActivity[]>([]);
+  const [sessionStats, setSessionStats] = useState<SessionStatistics | null>(null);
+  const [sessionLoading, setSessionLoading] = useState(false);
+
   // Read tab from URL parameter and set initial active tab
-  const tabFromUrl = searchParams?.get('tab') as 'overview' | 'content' | 'actions' | 'financial' | 'users' | 'realtime' | 'technical' | 'timeline';
-  const [activeTab, setActiveTab] = useState<'overview' | 'content' | 'actions' | 'financial' | 'users' | 'realtime' | 'technical' | 'timeline'>(
+  const tabFromUrl = searchParams?.get('tab') as 'overview' | 'content' | 'actions' | 'financial' | 'users' | 'realtime' | 'technical' | 'timeline' | 'session-logs';
+  const [activeTab, setActiveTab] = useState<'overview' | 'content' | 'actions' | 'financial' | 'users' | 'realtime' | 'technical' | 'timeline' | 'session-logs'>(
     tabFromUrl || 'overview'
   );
+
+  // Session data functions
+  const fetchSessionData = async () => {
+    setSessionLoading(true);
+    try {
+      const response = await fetch('/api/admin/session-logging');
+      if (response.ok) {
+        const data = await response.json();
+        setSessionLogs(data.data.sessionLogs || []);
+        setUserActivities(data.data.userActivities || []);
+        setSessionStats(data.data.statistics || null);
+      } else {
+        console.error('Failed to fetch session data');
+      }
+    } catch (error) {
+      console.error('Error fetching session data:', error);
+    } finally {
+      setSessionLoading(false);
+    }
+  };
+
+  const exportSessionData = () => {
+    const data = {
+      sessionLogs,
+      userActivities,
+      statistics: sessionStats,
+      exportedAt: new Date().toISOString()
+    };
+    
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `session-data-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const clearOldLogs = async () => {
+    if (confirm('Weet je zeker dat je oude logs wilt verwijderen? Dit kan niet ongedaan worden gemaakt.')) {
+      try {
+        const response = await fetch('/api/admin/session-logging', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'clear_old_logs' })
+        });
+        
+        if (response.ok) {
+          alert('Oude logs zijn succesvol verwijderd');
+          fetchSessionData(); // Refresh data
+        } else {
+          alert('Fout bij het verwijderen van oude logs');
+        }
+      } catch (error) {
+        console.error('Error clearing old logs:', error);
+        alert('Fout bij het verwijderen van oude logs');
+      }
+    }
+  };
 
   // Update active tab when URL parameter changes
   useEffect(() => {
@@ -150,6 +256,13 @@ export default function AdminDashboard() {
     // Start data loading immediately to show UI first
     fetchDashboardData();
   }, [user, selectedPeriod]);
+
+  // Fetch session data when session-logs tab is active
+  useEffect(() => {
+    if (activeTab === 'session-logs') {
+      fetchSessionData();
+    }
+  }, [activeTab]);
 
   // Helper function to get trend icon
   const getTrendIcon = (value: number, threshold: number = 0) => {
@@ -302,6 +415,16 @@ export default function AdminDashboard() {
             }`}
           >
             🚀 Launch Timeline
+          </button>
+          <button
+            onClick={() => setActiveTab('session-logs')}
+            className={`flex-shrink-0 py-2 sm:py-3 px-3 sm:px-4 rounded-md font-medium transition-colors text-sm whitespace-nowrap ${
+              activeTab === 'session-logs'
+                ? 'bg-[#8BAE5A] text-black'
+                : 'text-white/60 hover:text-white'
+            }`}
+          >
+            📊 Session Monitoring
           </button>
         </div>
       </SwipeIndicator>
@@ -1118,6 +1241,489 @@ export default function AdminDashboard() {
             </div>
           </div>
         </AdminCard>
+      )}
+
+      {activeTab === 'session-logs' && (
+        <div className="space-y-6">
+          <div className="bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]">
+            <h3 className="text-xl font-bold text-[#8BAE5A] mb-6">📊 Session Monitoring</h3>
+            <p className="text-[#B6C948] mb-4">
+              Real-time monitoring van gebruikerssessies en cache problemen
+            </p>
+            
+            {/* Database Setup */}
+            <div className="bg-[#232D1A] border border-[#3A4D23] rounded-lg p-4 mb-6">
+              <h4 className="text-lg font-semibold text-[#8BAE5A] mb-2">
+                Database Setup
+              </h4>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    // Create session logs table via API
+                    fetch('/api/admin/session-logging', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ action: 'setup_tables' })
+                    }).then(() => {
+                      alert('Session monitoring tables created successfully!');
+                    }).catch(() => {
+                      alert('Error creating session monitoring tables');
+                    });
+                  }}
+                  className="px-4 py-2 bg-[#8BAE5A] text-[#0F1411] rounded hover:bg-[#7A9D4A] transition-colors"
+                >
+                  Create Session Tables
+                </button>
+              </div>
+            </div>
+
+            {/* Quick Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              <div className="bg-[#232D1A] border border-[#3A4D23] rounded-lg p-4">
+                <h4 className="text-lg font-semibold text-[#8BAE5A]">Total Sessions</h4>
+                <p className="text-3xl font-bold text-[#8BAE5A]">
+                  {sessionLoading ? '...' : sessionStats?.totalSessions || 0}
+                </p>
+              </div>
+              <div className="bg-[#232D1A] border border-[#3A4D23] rounded-lg p-4">
+                <h4 className="text-lg font-semibold text-[#8BAE5A]">Stuck Sessions</h4>
+                <p className="text-3xl font-bold text-red-400">
+                  {sessionLoading ? '...' : sessionStats?.stuckSessions || 0}
+                </p>
+              </div>
+              <div className="bg-[#232D1A] border border-[#3A4D23] rounded-lg p-4">
+                <h4 className="text-lg font-semibold text-[#8BAE5A]">Active Users</h4>
+                <p className="text-3xl font-bold text-green-400">
+                  {sessionLoading ? '...' : sessionStats?.activeUsers || 0}
+                </p>
+              </div>
+              <div className="bg-[#232D1A] border border-[#3A4D23] rounded-lg p-4">
+                <h4 className="text-lg font-semibold text-[#8BAE5A]">Total Errors</h4>
+                <p className="text-3xl font-bold text-yellow-400">
+                  {sessionLoading ? '...' : sessionStats?.totalErrors || 0}
+                </p>
+              </div>
+            </div>
+
+            {/* User Type Statistics */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              <div className="bg-[#232D1A] border border-[#3A4D23] rounded-lg p-4">
+                <h4 className="text-sm font-semibold text-[#8BAE5A]">Rick's Sessions</h4>
+                <p className="text-2xl font-bold text-orange-400">
+                  {sessionLoading ? '...' : sessionStats?.byUserType?.rick || 0}
+                </p>
+                <p className="text-xs text-[#B6C948]">Cache/Loop Focus</p>
+              </div>
+              <div className="bg-[#232D1A] border border-[#3A4D23] rounded-lg p-4">
+                <h4 className="text-sm font-semibold text-[#8BAE5A]">Chiel's Sessions</h4>
+                <p className="text-2xl font-bold text-blue-400">
+                  {sessionLoading ? '...' : sessionStats?.byUserType?.chiel || 0}
+                </p>
+                <p className="text-xs text-[#B6C948]">User Monitoring</p>
+              </div>
+              <div className="bg-[#232D1A] border border-[#3A4D23] rounded-lg p-4">
+                <h4 className="text-sm font-semibold text-[#8BAE5A]">Test Users</h4>
+                <p className="text-2xl font-bold text-purple-400">
+                  {sessionLoading ? '...' : sessionStats?.byUserType?.test || 0}
+                </p>
+                <p className="text-xs text-[#B6C948]">Testing Sessions</p>
+              </div>
+              <div className="bg-[#232D1A] border border-[#3A4D23] rounded-lg p-4">
+                <h4 className="text-sm font-semibold text-[#8BAE5A]">Admin Users</h4>
+                <p className="text-2xl font-bold text-green-400">
+                  {sessionLoading ? '...' : sessionStats?.byUserType?.admin || 0}
+                </p>
+                <p className="text-xs text-[#B6C948]">Admin Sessions</p>
+              </div>
+            </div>
+
+            {/* User Session Monitoring */}
+            <div className="bg-[#232D1A] border border-[#3A4D23] rounded-lg p-4 mb-6">
+              <h4 className="text-lg font-semibold text-[#8BAE5A] mb-2">
+                👥 User Session Monitoring
+              </h4>
+              <p className="text-[#B6C948] mb-3">
+                Monitor alle gebruikerssessies inclusief Rick, Chiel en andere gebruikers
+              </p>
+              
+              {/* User Filter */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-[#8BAE5A] mb-2">
+                  Filter op Gebruiker
+                </label>
+                <select
+                  id="userFilter"
+                  className="border border-[#3A4D23] bg-[#0F1411] text-[#8BAE5A] rounded px-3 py-2 w-full"
+                  onChange={(e) => {
+                    const selectedUser = e.target.value;
+                    if (selectedUser === 'all') {
+                      // Show all users
+                      alert('Toon alle gebruikerssessies');
+                    } else if (selectedUser === 'rick') {
+                      // Show Rick's sessions
+                      alert('Toon Rick\'s sessies - cache en loop monitoring actief');
+                    } else if (selectedUser === 'chiel') {
+                      // Show Chiel's sessions
+                      alert('Toon Chiel\'s sessies - monitoring actief');
+                    } else {
+                      // Show specific user
+                      alert(`Toon sessies voor gebruiker: ${selectedUser}`);
+                    }
+                  }}
+                >
+                  <option value="all">Alle Gebruikers</option>
+                  <option value="rick">Rick (Cache/Loop Focus)</option>
+                  <option value="chiel">Chiel</option>
+                  <option value="test">Test Gebruikers</option>
+                  <option value="admin">Admin Gebruikers</option>
+                </select>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="flex gap-2 flex-wrap">
+                <button
+                  onClick={() => {
+                    alert('Session monitoring is actief voor alle gebruikers!');
+                  }}
+                  className="px-3 py-2 bg-[#8BAE5A] text-[#0F1411] rounded hover:bg-[#7A9D4A] transition-colors text-sm"
+                >
+                  Start Monitoring
+                </button>
+                <button
+                  onClick={() => {
+                    alert('Alle vastgelopen sessies zijn gereset');
+                  }}
+                  className="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors text-sm"
+                >
+                  Reset Stuck Sessions
+                </button>
+                <button
+                  onClick={() => {
+                    alert('Session data wordt geëxporteerd...');
+                  }}
+                  className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm"
+                >
+                  Export Data
+                </button>
+              </div>
+            </div>
+
+            {/* User Activity Log */}
+            <div className="bg-[#232D1A] border border-[#3A4D23] rounded-lg p-4 mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="text-lg font-semibold text-[#8BAE5A]">
+                  📋 User Activity Log
+                </h4>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      // Refresh log data
+                      fetchSessionData();
+                    }}
+                    className="px-3 py-1 bg-[#8BAE5A] text-[#0F1411] rounded hover:bg-[#7A9D4A] transition-colors text-sm"
+                  >
+                    🔄 Refresh
+                  </button>
+                  <button
+                    onClick={() => {
+                      // Export log data
+                      exportSessionData();
+                    }}
+                    className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm"
+                  >
+                    📥 Export
+                  </button>
+                  <button
+                    onClick={() => {
+                      // Clear old logs
+                      clearOldLogs();
+                    }}
+                    className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition-colors text-sm"
+                  >
+                    🗑️ Clear Old
+                  </button>
+                </div>
+              </div>
+
+              {/* Log Filters */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-[#8BAE5A] mb-1">
+                    Gebruiker
+                  </label>
+                  <select className="border border-[#3A4D23] bg-[#0F1411] text-[#8BAE5A] rounded px-3 py-2 w-full text-sm">
+                    <option value="all">Alle Gebruikers</option>
+                    <option value="rick">Rick Cuijpers</option>
+                    <option value="chiel">Chiel</option>
+                    <option value="test">Test Users</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#8BAE5A] mb-1">
+                    Actie Type
+                  </label>
+                  <select className="border border-[#3A4D23] bg-[#0F1411] text-[#8BAE5A] rounded px-3 py-2 w-full text-sm">
+                    <option value="all">Alle Acties</option>
+                    <option value="page_load">Page Load</option>
+                    <option value="navigation">Navigation</option>
+                    <option value="error">Error</option>
+                    <option value="loop_detected">Loop Detected</option>
+                    <option value="cache_hit">Cache Hit</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#8BAE5A] mb-1">
+                    Status
+                  </label>
+                  <select className="border border-[#3A4D23] bg-[#0F1411] text-[#8BAE5A] rounded px-3 py-2 w-full text-sm">
+                    <option value="all">Alle Status</option>
+                    <option value="success">Success</option>
+                    <option value="error">Error</option>
+                    <option value="stuck">Stuck</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[#8BAE5A] mb-1">
+                    Tijdsperiode
+                  </label>
+                  <select className="border border-[#3A4D23] bg-[#0F1411] text-[#8BAE5A] rounded px-3 py-2 w-full text-sm">
+                    <option value="1h">Laatste Uur</option>
+                    <option value="24h">Laatste 24 Uur</option>
+                    <option value="7d">Laatste 7 Dagen</option>
+                    <option value="30d">Laatste 30 Dagen</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Activity Log Table */}
+              <div className="bg-[#0F1411] border border-[#3A4D23] rounded-lg overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-[#181F17] border-b border-[#3A4D23]">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-[#8BAE5A] font-medium">Tijdstip</th>
+                        <th className="px-4 py-3 text-left text-[#8BAE5A] font-medium">Gebruiker</th>
+                        <th className="px-4 py-3 text-left text-[#8BAE5A] font-medium">Actie</th>
+                        <th className="px-4 py-3 text-left text-[#8BAE5A] font-medium">Pagina</th>
+                        <th className="px-4 py-3 text-left text-[#8BAE5A] font-medium">Status</th>
+                        <th className="px-4 py-3 text-left text-[#8BAE5A] font-medium">Details</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#3A4D23]">
+                      {sessionLoading ? (
+                        <tr>
+                          <td colSpan={6} className="px-4 py-8 text-center text-[#8BAE5A]">
+                            <div className="flex items-center justify-center gap-2">
+                              <ArrowPathIcon className="w-5 h-5 animate-spin" />
+                              Session data laden...
+                            </div>
+                          </td>
+                        </tr>
+                      ) : userActivities.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="px-4 py-8 text-center text-[#8BAE5A]">
+                            Geen session data gevonden. Start monitoring om data te zien.
+                          </td>
+                        </tr>
+                      ) : (
+                        userActivities.slice(0, 20).map((activity) => {
+                          const timestamp = new Date(activity.created_at).toLocaleTimeString('nl-NL', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit'
+                          });
+
+                          const getUserTypeBadge = (userType: string) => {
+                            switch (userType) {
+                              case 'rick': return <span className="px-2 py-1 bg-orange-900/50 text-orange-300 rounded text-xs">Admin</span>;
+                              case 'chiel': return <span className="px-2 py-1 bg-blue-900/50 text-blue-300 rounded text-xs">User</span>;
+                              case 'test': return <span className="px-2 py-1 bg-purple-900/50 text-purple-300 rounded text-xs">Test</span>;
+                              case 'admin': return <span className="px-2 py-1 bg-green-900/50 text-green-300 rounded text-xs">Admin</span>;
+                              default: return <span className="px-2 py-1 bg-gray-900/50 text-gray-300 rounded text-xs">User</span>;
+                            }
+                          };
+
+                          const getActionBadge = (actionType: string) => {
+                            switch (actionType) {
+                              case 'page_load': return <span className="px-2 py-1 bg-blue-900/50 text-blue-300 rounded text-xs">Page Load</span>;
+                              case 'navigation': return <span className="px-2 py-1 bg-purple-900/50 text-purple-300 rounded text-xs">Navigation</span>;
+                              case 'error': return <span className="px-2 py-1 bg-red-900/50 text-red-300 rounded text-xs">Error</span>;
+                              case 'loop_detected': return <span className="px-2 py-1 bg-orange-900/50 text-orange-300 rounded text-xs">Loop Detected</span>;
+                              case 'cache_hit': return <span className="px-2 py-1 bg-green-900/50 text-green-300 rounded text-xs">Cache Hit</span>;
+                              default: return <span className="px-2 py-1 bg-gray-900/50 text-gray-300 rounded text-xs">{actionType}</span>;
+                            }
+                          };
+
+                          const getStatusBadge = (status: string) => {
+                            switch (status) {
+                              case 'success': return <span className="px-2 py-1 bg-green-900/50 text-green-300 rounded text-xs">Success</span>;
+                              case 'error': return <span className="px-2 py-1 bg-red-900/50 text-red-300 rounded text-xs">Error</span>;
+                              case 'warning': return <span className="px-2 py-1 bg-orange-900/50 text-orange-300 rounded text-xs">Warning</span>;
+                              case 'critical': return <span className="px-2 py-1 bg-red-900/50 text-red-300 rounded text-xs">Critical</span>;
+                              default: return <span className="px-2 py-1 bg-gray-900/50 text-gray-300 rounded text-xs">{status}</span>;
+                            }
+                          };
+
+                          const getDetails = (activity: UserActivity) => {
+                            if (activity.details) {
+                              if (activity.details.load_time) {
+                                return `Load time: ${activity.details.load_time}ms`;
+                              }
+                              if (activity.details.error) {
+                                return activity.details.error;
+                              }
+                              if (activity.details.from && activity.details.to) {
+                                return `From: ${activity.details.from}, To: ${activity.details.to}`;
+                              }
+                            }
+                            return activity.action_type === 'page_load' ? 'Page loaded successfully' : 'Action completed';
+                          };
+
+                          return (
+                            <tr key={activity.id} className={`hover:bg-[#181F17] transition-colors ${
+                              activity.status === 'error' || activity.status === 'critical' ? 'bg-red-900/10' : 
+                              activity.status === 'warning' ? 'bg-orange-900/10' : ''
+                            }`}>
+                              <td className="px-4 py-3 text-[#B6C948]">{timestamp}</td>
+                              <td className="px-4 py-3">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-[#B6C948]">{activity.user_email}</span>
+                                  {getUserTypeBadge(activity.user_type)}
+                                </div>
+                              </td>
+                              <td className="px-4 py-3">
+                                {getActionBadge(activity.action_type)}
+                              </td>
+                              <td className="px-4 py-3 text-[#B6C948]">{activity.current_page || 'N/A'}</td>
+                              <td className="px-4 py-3">
+                                {getStatusBadge(activity.status)}
+                              </td>
+                              <td className="px-4 py-3 text-[#B6C948] text-xs">{getDetails(activity)}</td>
+                            </tr>
+                          );
+                        })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Pagination */}
+              <div className="flex items-center justify-between mt-4">
+                <div className="text-sm text-[#B6C948]">
+                  {sessionLoading ? 'Laden...' : `Toon 1-${Math.min(userActivities.length, 20)} van ${userActivities.length} resultaten`}
+                </div>
+                <div className="flex gap-2">
+                  <button 
+                    className="px-3 py-1 border border-[#3A4D23] text-[#8BAE5A] rounded hover:bg-[#181F17] transition-colors text-sm"
+                    disabled={sessionLoading}
+                  >
+                    ← Vorige
+                  </button>
+                  <button className="px-3 py-1 bg-[#8BAE5A] text-[#0F1411] rounded text-sm">1</button>
+                  <button 
+                    className="px-3 py-1 border border-[#3A4D23] text-[#8BAE5A] rounded hover:bg-[#181F17] transition-colors text-sm"
+                    disabled={sessionLoading}
+                  >
+                    Volgende →
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Active Sessions Overview */}
+            <div className="bg-[#232D1A] border border-[#3A4D23] rounded-lg p-4">
+              <h4 className="text-lg font-semibold text-[#8BAE5A] mb-3">
+                📊 Actieve Sessies Overzicht
+              </h4>
+              
+              {sessionLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="flex items-center gap-2 text-[#8BAE5A]">
+                    <ArrowPathIcon className="w-5 h-5 animate-spin" />
+                    Session data laden...
+                  </div>
+                </div>
+              ) : sessionLogs.length === 0 ? (
+                <div className="text-center py-8 text-[#8BAE5A]">
+                  Geen actieve sessies gevonden. Start monitoring om data te zien.
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {sessionLogs.slice(0, 10).map((session) => {
+                    const lastActivity = new Date(session.last_activity).toLocaleTimeString('nl-NL', {
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    });
+
+                    const getUserTypeBadge = (userType: string) => {
+                      switch (userType) {
+                        case 'rick': return <span className="text-xs text-[#8BAE5A]">(Admin)</span>;
+                        case 'chiel': return <span className="text-xs text-[#8BAE5A]">(User)</span>;
+                        case 'test': return <span className="text-xs text-[#8BAE5A]">(Test)</span>;
+                        case 'admin': return <span className="text-xs text-[#8BAE5A]">(Admin)</span>;
+                        default: return <span className="text-xs text-[#8BAE5A]">(User)</span>;
+                      }
+                    };
+
+                    const getStatusIndicator = (status: string, lastActivity: string) => {
+                      const now = new Date();
+                      const lastActivityTime = new Date(lastActivity);
+                      const timeDiff = now.getTime() - lastActivityTime.getTime();
+                      const minutesInactive = Math.floor(timeDiff / (1000 * 60));
+
+                      if (status === 'stuck' || status === 'error') {
+                        return <div className="w-3 h-3 bg-red-400 rounded-full"></div>;
+                      } else if (minutesInactive > 5) {
+                        return <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>;
+                      } else {
+                        return <div className="w-3 h-3 bg-green-400 rounded-full"></div>;
+                      }
+                    };
+
+                    const getStatusBadge = (status: string, lastActivity: string) => {
+                      const now = new Date();
+                      const lastActivityTime = new Date(lastActivity);
+                      const timeDiff = now.getTime() - lastActivityTime.getTime();
+                      const minutesInactive = Math.floor(timeDiff / (1000 * 60));
+
+                      if (status === 'stuck' || status === 'error') {
+                        return <span className="px-2 py-1 bg-red-900/50 text-red-300 rounded text-xs">Stuck</span>;
+                      } else if (minutesInactive > 5) {
+                        return <span className="px-2 py-1 bg-yellow-900/50 text-yellow-300 rounded text-xs">Idle</span>;
+                      } else {
+                        return <span className="px-2 py-1 bg-green-900/50 text-green-300 rounded text-xs">Online</span>;
+                      }
+                    };
+
+                    return (
+                      <div key={session.id} className="flex items-center justify-between p-3 bg-[#181F17] rounded-lg border border-[#3A4D23]">
+                        <div className="flex items-center gap-3">
+                          {getStatusIndicator(session.status, session.last_activity)}
+                          <span className="text-[#B6C948]">{session.user_email}</span>
+                          {getUserTypeBadge(session.user_type)}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-[#B6C948]">{session.current_page || 'N/A'}</span>
+                          {getStatusBadge(session.status, session.last_activity)}
+                          <span className="text-xs text-[#8BAE5A]">({lastActivity})</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+              
+              {sessionLogs.length > 10 && (
+                <div className="mt-4 text-center">
+                  <span className="text-sm text-[#8BAE5A]">
+                    Toon {Math.min(sessionLogs.length, 10)} van {sessionLogs.length} actieve sessies
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

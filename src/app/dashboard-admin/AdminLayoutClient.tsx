@@ -79,6 +79,7 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
         { label: 'Gebruikers Segmentatie', icon: UsersIcon, href: '/dashboard-admin?tab=users' },
         { label: 'Real-time Activiteit', icon: ClockIcon, href: '/dashboard-admin?tab=realtime' },
         { label: 'Technische Performance', icon: WrenchScrewdriverIcon, href: '/dashboard-admin?tab=technical' },
+        { label: 'Session Monitoring', icon: ClockIcon, href: '/dashboard-admin?tab=session-logs', badge: 'NEW' },
         { label: 'A/B Testing', icon: EyeIcon, href: '/dashboard-admin/ab-testing' },
         { label: 'Trial Management', icon: ClockIcon, href: '/dashboard-admin/trial-management' }
       ]
@@ -133,8 +134,7 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
       items: [
         { label: 'Instellingen', icon: Cog6ToothIcon, href: '/dashboard-admin/instellingen' },
         { label: 'Aankondigingen', icon: MegaphoneIcon, href: '/dashboard-admin/aankondigingen' },
-        { label: 'Push Notificatie Tests', icon: BellIcon, href: '/dashboard-admin/push-test' },
-        { label: 'Session Logs', icon: ClockIcon, href: '/dashboard-admin/user-session-logs', badge: 'NEW' }
+        { label: 'Push Notificatie Tests', icon: BellIcon, href: '/dashboard-admin/push-test' }
       ]
     },
   ];

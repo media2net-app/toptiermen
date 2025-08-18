@@ -4,6 +4,79 @@ import { supabase } from '@/lib/supabase';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    
+    // Handle setup tables action
+    if (body.action === 'setup_tables') {
+      try {
+        // Create session logs table with enhanced structure
+        const { error: sessionError } = await supabase.rpc('exec_sql', {
+          sql_query: `
+            CREATE TABLE IF NOT EXISTS user_session_logs (
+              id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+              user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+              user_email TEXT NOT NULL,
+              user_type TEXT DEFAULT 'user' CHECK (user_type IN ('rick', 'chiel', 'test', 'admin', 'user')),
+              session_start TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+              last_activity TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+              page_visits INTEGER DEFAULT 0,
+              cache_hits INTEGER DEFAULT 0,
+              cache_misses INTEGER DEFAULT 0,
+              loop_detections INTEGER DEFAULT 0,
+              error_count INTEGER DEFAULT 0,
+              status TEXT DEFAULT 'active' CHECK (status IN ('active', 'idle', 'stuck', 'error', 'completed')),
+              current_page TEXT,
+              user_agent TEXT,
+              ip_address TEXT,
+              created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+              updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+            );
+          `
+        });
+
+        // Create user activities table with enhanced structure
+        const { error: activityError } = await supabase.rpc('exec_sql', {
+          sql_query: `
+            CREATE TABLE IF NOT EXISTS user_activities (
+              id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+              user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+              user_email TEXT NOT NULL,
+              user_type TEXT DEFAULT 'user' CHECK (user_type IN ('rick', 'chiel', 'test', 'admin', 'user')),
+              action_type TEXT NOT NULL CHECK (action_type IN ('page_load', 'navigation', 'error', 'loop_detected', 'cache_hit', 'cache_miss', 'login', 'logout', 'api_call', 'performance_issue', 'session_timeout', 'rick_issue', 'rick_critical')),
+              current_page TEXT,
+              previous_page TEXT,
+              error_message TEXT,
+              error_stack TEXT,
+              load_time_ms INTEGER,
+              cache_hit BOOLEAN DEFAULT FALSE,
+              loop_detected BOOLEAN DEFAULT FALSE,
+              user_agent TEXT,
+              ip_address TEXT,
+              status TEXT DEFAULT 'success' CHECK (status IN ('success', 'error', 'warning', 'critical')),
+              details JSONB,
+              created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+            );
+          `
+        });
+
+        if (sessionError || activityError) {
+          return NextResponse.json(
+            { error: 'Failed to create tables' },
+            { status: 500 }
+          );
+        }
+
+        return NextResponse.json({
+          success: true,
+          message: 'Session monitoring tables created successfully'
+        });
+      } catch (error) {
+        return NextResponse.json(
+          { error: 'Failed to setup tables' },
+          { status: 500 }
+        );
+      }
+    }
+
     const {
       user_id,
       user_email,
@@ -13,7 +86,8 @@ export async function POST(request: NextRequest) {
       action_type,
       error_message,
       cache_hit,
-      loop_detected
+      loop_detected,
+      user_type
     } = body;
 
     // Get user's IP address if not provided
@@ -93,6 +167,7 @@ export async function POST(request: NextRequest) {
           current_page,
           user_agent,
           ip_address: clientIP,
+          user_type: user_type || 'user',
           created_at: now,
           updated_at: now
         });
@@ -102,51 +177,37 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Update user activities table
-    const { data: existingActivity } = await supabase
+    // Insert activity record for this specific action
+    const { error: insertActivityError } = await supabase
       .from('user_activities')
-      .select('*')
-      .eq('user_id', user_id)
-      .single();
+      .insert({
+        user_id,
+        user_email,
+        user_type: user_type || 'user',
+        action_type: action_type || 'page_load',
+        current_page,
+        previous_page: existingLog?.current_page,
+        error_message,
+        error_stack: error_message ? new Error().stack : null,
+        load_time_ms: null, // Will be calculated if needed
+        cache_hit: cache_hit || false,
+        loop_detected: loop_detected || false,
+        user_agent,
+        ip_address: clientIP,
+        status: status === 'stuck' ? 'critical' : status === 'error' ? 'error' : 'success',
+        details: {
+          page_visits,
+          cache_hits,
+          cache_misses,
+          loop_detections,
+          error_count,
+          session_duration: existingLog ? Math.floor((new Date().getTime() - new Date(existingLog.created_at).getTime()) / 1000) : 0
+        },
+        created_at: now
+      });
 
-    if (existingActivity) {
-      // Update existing activity
-      const sessionDuration = Math.floor((new Date().getTime() - new Date(existingActivity.created_at).getTime()) / 1000);
-      
-      const { error: updateActivityError } = await supabase
-        .from('user_activities')
-        .update({
-          last_seen: now,
-          session_duration: sessionDuration,
-          page_count: existingActivity.page_count + 1,
-          status: loop_detections > 5 ? 'stuck' : 'online',
-          current_location: current_page,
-          updated_at: now
-        })
-        .eq('id', existingActivity.id);
-
-      if (updateActivityError) {
-        console.error('Error updating user activity:', updateActivityError);
-      }
-    } else {
-      // Create new activity record
-      const { error: insertActivityError } = await supabase
-        .from('user_activities')
-        .insert({
-          user_id,
-          email: user_email,
-          last_seen: now,
-          session_duration: 0,
-          page_count: 1,
-          status: 'online',
-          current_location: current_page,
-          created_at: now,
-          updated_at: now
-        });
-
-      if (insertActivityError) {
-        console.error('Error creating user activity:', insertActivityError);
-      }
+    if (insertActivityError) {
+      console.error('Error creating user activity:', insertActivityError);
     }
 
     return NextResponse.json({
@@ -166,24 +227,45 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    // Get recent session logs
-    const { data: sessionLogs, error: sessionError } = await supabase
+    const { searchParams } = new URL(request.url);
+    const userType = searchParams.get('user_type');
+    const userId = searchParams.get('user_id');
+
+    let query = supabase
       .from('user_session_logs')
       .select('*')
-      .order('created_at', { ascending: false })
-      .limit(50);
+      .order('created_at', { ascending: false });
+
+    // Apply filters
+    if (userType && userType !== 'all') {
+      query = query.eq('user_type', userType);
+    }
+    if (userId) {
+      query = query.eq('user_id', userId);
+    }
+
+    const { data: sessionLogs, error: sessionError } = await query.limit(100);
 
     if (sessionError) {
       throw sessionError;
     }
 
-    // Get user activities
-    const { data: userActivities, error: activityError } = await supabase
+    // Get user activities with same filters
+    let activityQuery = supabase
       .from('user_activities')
       .select('*')
-      .order('last_seen', { ascending: false });
+      .order('created_at', { ascending: false });
+
+    if (userType && userType !== 'all') {
+      activityQuery = activityQuery.eq('user_type', userType);
+    }
+    if (userId) {
+      activityQuery = activityQuery.eq('user_id', userId);
+    }
+
+    const { data: userActivities, error: activityError } = await activityQuery;
 
     if (activityError) {
       throw activityError;
@@ -192,7 +274,12 @@ export async function GET() {
     // Calculate statistics
     const stuckSessions = sessionLogs?.filter(log => log.status === 'stuck') || [];
     const errorSessions = sessionLogs?.filter(log => log.status === 'error') || [];
-    const activeUsers = userActivities?.filter(activity => activity.status === 'online') || [];
+    const activeUsers = userActivities?.filter(activity => activity.status === 'success') || [];
+    
+    // User type specific statistics
+    const rickSessions = sessionLogs?.filter(log => log.user_type === 'rick') || [];
+    const chielSessions = sessionLogs?.filter(log => log.user_type === 'chiel') || [];
+    const testSessions = sessionLogs?.filter(log => log.user_type === 'test') || [];
 
     return NextResponse.json({
       success: true,
@@ -205,7 +292,13 @@ export async function GET() {
           errorSessions: errorSessions.length,
           activeUsers: activeUsers.length,
           totalErrors: sessionLogs?.reduce((sum, log) => sum + log.error_count, 0) || 0,
-          totalLoops: sessionLogs?.reduce((sum, log) => sum + log.loop_detections, 0) || 0
+          totalLoops: sessionLogs?.reduce((sum, log) => sum + log.loop_detections, 0) || 0,
+          byUserType: {
+            rick: rickSessions.length,
+            chiel: chielSessions.length,
+            test: testSessions.length,
+            admin: sessionLogs?.filter(log => log.user_type === 'admin').length || 0
+          }
         }
       }
     });
