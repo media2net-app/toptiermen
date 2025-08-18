@@ -47,6 +47,13 @@ export default function Login() {
         targetPath = user.role?.toLowerCase() === 'admin' ? '/dashboard-admin' : '/dashboard';
       }
       
+      // Update debug info for redirect
+      setDebugInfo(prev => ({
+        ...prev,
+        redirectAttempts: prev.redirectAttempts + 1,
+        timestamp: new Date().toISOString()
+      }));
+
       // Try router.replace first, fallback to window.location
       try {
         router.replace(targetPath);
@@ -54,11 +61,13 @@ export default function Login() {
         setTimeout(() => {
           if (window.location.pathname === '/login') {
             console.log('🔍 Router redirect failed, using window.location fallback');
+            setDebugInfo(prev => ({ ...prev, lastError: 'Router redirect failed, using fallback' }));
             window.location.href = targetPath;
           }
         }, 2000);
       } catch (redirectError) {
         console.error('🔍 Router redirect error:', redirectError);
+        setDebugInfo(prev => ({ ...prev, lastError: `Redirect error: ${redirectError}` }));
         // Fallback to window.location
         window.location.href = targetPath;
       }
@@ -71,6 +80,7 @@ export default function Login() {
       const timeout = setTimeout(() => {
         if (window.location.pathname === '/login') {
           console.log('🔍 Redirect timeout, forcing reload');
+          setDebugInfo(prev => ({ ...prev, lastError: 'Redirect timeout - forcing reload' }));
           window.location.reload();
         }
       }, 10000); // 10 second timeout
@@ -79,12 +89,73 @@ export default function Login() {
     }
   }, [redirecting]);
 
+  // Debug state
+  const [debugInfo, setDebugInfo] = useState({
+    browser: '',
+    userAgent: '',
+    isChrome: false,
+    isEdge: false,
+    isFirefox: false,
+    isIncognito: false,
+    localStorage: false,
+    sessionStorage: false,
+    cookies: '',
+    cacheStatus: '',
+    loginAttempts: 0,
+    redirectAttempts: 0,
+    lastError: '',
+    timestamp: new Date().toISOString()
+  });
+
+  // Update debug info
+  useEffect(() => {
+    const userAgent = navigator.userAgent;
+    const isChrome = /Chrome/.test(userAgent) && !/Edge/.test(userAgent);
+    const isEdge = /Edge/.test(userAgent);
+    const isFirefox = /Firefox/.test(userAgent);
+    
+    // Check if incognito/private mode
+    let isIncognito = false;
+    try {
+      localStorage.setItem('test', 'test');
+      localStorage.removeItem('test');
+      isIncognito = false;
+    } catch (e) {
+      isIncognito = true;
+    }
+
+    setDebugInfo({
+      browser: isChrome ? 'Chrome' : isEdge ? 'Edge' : isFirefox ? 'Firefox' : 'Unknown',
+      userAgent: userAgent,
+      isChrome,
+      isEdge,
+      isFirefox,
+      isIncognito,
+      localStorage: !isIncognito,
+      sessionStorage: !isIncognito,
+      cookies: document.cookie || 'No cookies',
+      cacheStatus: 'Checking...',
+      loginAttempts: 0,
+      redirectAttempts: 0,
+      lastError: '',
+      timestamp: new Date().toISOString()
+    });
+  }, []);
+
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     console.log('🔍 Login attempt started');
     
+    // Update debug info
+    setDebugInfo(prev => ({
+      ...prev,
+      loginAttempts: prev.loginAttempts + 1,
+      timestamp: new Date().toISOString()
+    }));
+    
     if (!email || !password) {
       setError("Vul alle velden in");
+      setDebugInfo(prev => ({ ...prev, lastError: "Empty fields" }));
       return;
     }
     
@@ -98,6 +169,7 @@ export default function Login() {
       if (!result.success) {
         console.error('Sign in error:', result.error);
         setError(result.error || "Ongeldige inloggegevens");
+        setDebugInfo(prev => ({ ...prev, lastError: result.error || "Sign in failed" }));
         setIsLoading(false);
         return;
       }
@@ -160,6 +232,50 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center relative px-4 py-6" style={{ backgroundColor: '#181F17' }}>
       <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
+      
+      {/* Debug Panel */}
+      <div className="fixed top-4 left-4 right-4 z-50 bg-black/90 text-white p-4 rounded-lg border border-red-500 max-h-96 overflow-y-auto">
+        <h3 className="text-red-400 font-bold mb-2">🔍 DEBUG PANEL - Login Page</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+          <div><strong>Browser:</strong> {debugInfo.browser}</div>
+          <div><strong>Incognito:</strong> {debugInfo.isIncognito ? 'Yes' : 'No'}</div>
+          <div><strong>Chrome:</strong> {debugInfo.isChrome ? 'Yes' : 'No'}</div>
+          <div><strong>Edge:</strong> {debugInfo.isEdge ? 'Yes' : 'No'}</div>
+          <div><strong>Firefox:</strong> {debugInfo.isFirefox ? 'Yes' : 'No'}</div>
+          <div><strong>localStorage:</strong> {debugInfo.localStorage ? 'Available' : 'Blocked'}</div>
+          <div><strong>sessionStorage:</strong> {debugInfo.sessionStorage ? 'Available' : 'Blocked'}</div>
+          <div><strong>Login Attempts:</strong> {debugInfo.loginAttempts}</div>
+          <div><strong>Redirect Attempts:</strong> {debugInfo.redirectAttempts}</div>
+          <div><strong>Loading:</strong> {loading ? 'Yes' : 'No'}</div>
+          <div><strong>User:</strong> {user ? `${user.email} (${user.role})` : 'None'}</div>
+          <div><strong>Mounted:</strong> {mounted ? 'Yes' : 'No'}</div>
+          <div><strong>Redirecting:</strong> {redirecting ? 'Yes' : 'No'}</div>
+          <div><strong>Last Error:</strong> {debugInfo.lastError || 'None'}</div>
+          <div><strong>Timestamp:</strong> {debugInfo.timestamp}</div>
+        </div>
+        <div className="mt-2">
+          <strong>User Agent:</strong> <span className="text-xs break-all">{debugInfo.userAgent}</span>
+        </div>
+        <div className="mt-2">
+          <strong>Cookies:</strong> <span className="text-xs break-all">{debugInfo.cookies}</span>
+        </div>
+        <button 
+          onClick={() => window.location.reload()} 
+          className="mt-2 bg-red-600 text-white px-3 py-1 rounded text-xs"
+        >
+          🔄 Reload Page
+        </button>
+        <button 
+          onClick={() => {
+            localStorage.clear();
+            sessionStorage.clear();
+            console.log('Cache cleared manually');
+          }} 
+          className="mt-2 ml-2 bg-blue-600 text-white px-3 py-1 rounded text-xs"
+        >
+          🗑️ Clear Cache
+        </button>
+      </div>
       
       <div className="w-full max-w-md p-6 sm:p-8 rounded-3xl shadow-2xl bg-[#232D1A]/95 border border-[#3A4D23] backdrop-blur-lg relative z-10">
         <h1 className="text-4xl sm:text-5xl md:text-7xl font-black uppercase tracking-tight mb-2 text-center">
