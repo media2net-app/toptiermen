@@ -27,6 +27,8 @@ export function GlobalSessionMonitor() {
   // Log session data to database
   const logSession = useCallback(async (data: any) => {
     try {
+      console.log('🔍 GlobalSessionMonitor: Logging session data:', data);
+      
       const response = await fetch('/api/admin/session-logging', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -45,10 +47,14 @@ export function GlobalSessionMonitor() {
       });
 
       if (!response.ok) {
-        console.error('Failed to log session:', response.statusText);
+        console.error('❌ GlobalSessionMonitor: Failed to log session:', response.statusText);
+        const errorText = await response.text();
+        console.error('❌ GlobalSessionMonitor: Error response:', errorText);
+      } else {
+        console.log('✅ GlobalSessionMonitor: Session logged successfully');
       }
     } catch (error) {
-      console.error('Error logging session:', error);
+      console.error('❌ GlobalSessionMonitor: Error logging session:', error);
     }
   }, [user, getUserType]);
 
@@ -61,14 +67,20 @@ export function GlobalSessionMonitor() {
       loopDetectionCount.current++;
       
       if (loopDetectionCount.current > 3) {
+        console.log('🔄 GlobalSessionMonitor: Loop detected!', {
+          page: currentPage,
+          count: loopDetectionCount.current,
+          timeSinceLastLog
+        });
+        
         logSession({
           action_type: 'loop_detected',
+          error_message: `Loop detected: ${loopDetectionCount.current} times on ${currentPage}`,
           loop_detected: true,
-          error_message: `Page reloaded ${loopDetectionCount.current} times in ${Math.round(timeSinceLastLog / 1000)} seconds`,
           details: {
-            reload_count: loopDetectionCount.current,
-            time_span: timeSinceLastLog,
-            page: currentPage
+            loop_count: loopDetectionCount.current,
+            page: currentPage,
+            time_since_last: timeSinceLastLog
           }
         });
       }
@@ -80,25 +92,29 @@ export function GlobalSessionMonitor() {
     lastLogTime.current = now;
   }, [logSession]);
 
-  // Monitor page loads and navigation
+  // Monitor page loads
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      console.log('🔍 GlobalSessionMonitor: No user, skipping session logging');
+      return;
+    }
 
-    const currentPage = window.location.pathname;
+    console.log('🚀 GlobalSessionMonitor: Starting session monitoring for user:', user.email);
     pageLoadCount.current++;
-    
-    // Log page load
+
+    // Log initial page load
     logSession({
       action_type: 'page_load',
-      cache_hit: false, // We'll implement cache detection later
       details: {
         page_load_count: pageLoadCount.current,
         session_duration: Date.now() - sessionStartTime.current,
-        referrer: document.referrer
+        user_type: getUserType()
       }
     });
 
-    detectLoops(currentPage);
+    // Detect loops
+    detectLoops(window.location.pathname);
+
   }, [user, logSession, detectLoops]);
 
   // Monitor navigation changes using pathname changes
@@ -109,6 +125,8 @@ export function GlobalSessionMonitor() {
     const previousPage = lastPage.current;
     
     if (previousPage && previousPage !== currentPage) {
+      console.log('🔄 GlobalSessionMonitor: Navigation detected:', { from: previousPage, to: currentPage });
+      
       logSession({
         action_type: 'navigation',
         current_page: currentPage,
@@ -130,40 +148,38 @@ export function GlobalSessionMonitor() {
 
     const handleError = (event: ErrorEvent) => {
       errorCount.current++;
+      console.log('❌ GlobalSessionMonitor: Error detected:', event.message);
       
       logSession({
         action_type: 'error',
         error_message: event.message,
-        error_stack: event.error?.stack,
         details: {
           error_count: errorCount.current,
-          error_type: event.type,
-          filename: event.filename,
-          lineno: event.lineno,
-          colno: event.colno
+          error_type: 'javascript_error',
+          error_stack: event.error?.stack,
+          page: window.location.pathname
         }
       });
     };
 
     const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
       errorCount.current++;
+      console.log('❌ GlobalSessionMonitor: Unhandled rejection detected:', event.reason);
       
       logSession({
         action_type: 'error',
-        error_message: event.reason?.message || 'Unhandled Promise Rejection',
-        error_stack: event.reason?.stack,
+        error_message: event.reason?.toString() || 'Unhandled promise rejection',
         details: {
           error_count: errorCount.current,
-          error_type: 'unhandledrejection',
-          reason: event.reason
+          error_type: 'unhandled_rejection',
+          page: window.location.pathname
         }
       });
     };
 
-    // Global error listeners
     window.addEventListener('error', handleError);
     window.addEventListener('unhandledrejection', handleUnhandledRejection);
-    
+
     return () => {
       window.removeEventListener('error', handleError);
       window.removeEventListener('unhandledrejection', handleUnhandledRejection);
@@ -174,146 +190,141 @@ export function GlobalSessionMonitor() {
   useEffect(() => {
     if (!user) return;
 
-    const monitorPerformance = () => {
-      // Check for slow page loads
-      const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
+    const checkPerformance = () => {
+      const now = Date.now();
+      const loadTime = now - sessionStartTime.current;
       
-      if (loadTime > 5000) { // 5 seconds threshold
+      if (loadTime > 10000) { // 10 seconds
+        console.log('🐌 GlobalSessionMonitor: Slow page load detected:', loadTime + 'ms');
+        
         logSession({
           action_type: 'performance_issue',
           error_message: `Slow page load: ${loadTime}ms`,
           details: {
             load_time: loadTime,
-            threshold: 5000,
-            performance_metrics: {
-              domContentLoaded: performance.timing.domContentLoadedEventEnd - performance.timing.navigationStart,
-              firstPaint: performance.getEntriesByType('paint')[0]?.startTime,
-              firstContentfulPaint: performance.getEntriesByType('paint')[1]?.startTime
-            }
-          }
-        });
-      }
-
-      // Check for memory issues
-      if ('memory' in performance) {
-        const memory = (performance as any).memory;
-        const memoryUsage = (memory.usedJSHeapSize / memory.totalJSHeapSize) * 100;
-        
-        if (memoryUsage > 80) { // 80% memory usage threshold
-          logSession({
-            action_type: 'performance_issue',
-            error_message: `High memory usage: ${memoryUsage.toFixed(1)}%`,
-            details: {
-              memory_usage: memoryUsage,
-              used_heap: memory.usedJSHeapSize,
-              total_heap: memory.totalJSHeapSize,
-              threshold: 80
-            }
-          });
-        }
-      }
-    };
-
-    // Monitor performance after page load
-    if (document.readyState === 'complete') {
-      monitorPerformance();
-    } else {
-      window.addEventListener('load', monitorPerformance);
-      return () => window.removeEventListener('load', monitorPerformance);
-    }
-  }, [user, logSession]);
-
-  // Monitor for stuck sessions (no activity for extended period)
-  useEffect(() => {
-    if (!user) return;
-
-    let inactivityTimer: NodeJS.Timeout;
-    
-    const resetInactivityTimer = () => {
-      clearTimeout(inactivityTimer);
-      inactivityTimer = setTimeout(() => {
-        logSession({
-          action_type: 'session_timeout',
-          error_message: 'User inactive for extended period',
-          details: {
-            inactivity_duration: 300000, // 5 minutes
-            last_activity: new Date().toISOString()
-          }
-        });
-      }, 300000); // 5 minutes
-    };
-
-    // Reset timer on user activity
-    const handleUserActivity = () => {
-      resetInactivityTimer();
-    };
-
-    // Listen for user activity
-    ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'].forEach(event => {
-      document.addEventListener(event, handleUserActivity, true);
-    });
-
-    resetInactivityTimer();
-
-    return () => {
-      clearTimeout(inactivityTimer);
-      ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'].forEach(event => {
-        document.removeEventListener(event, handleUserActivity, true);
-      });
-    };
-  }, [user, logSession]);
-
-  // Monitor for specific Rick-related issues
-  useEffect(() => {
-    if (!user || getUserType() !== 'rick') return;
-
-    // Special monitoring for Rick's sessions
-    const monitorRickIssues = () => {
-      // Check for excessive DOM elements (potential memory leak)
-      const domElementCount = document.querySelectorAll('*').length;
-      if (domElementCount > 10000) {
-        logSession({
-          action_type: 'rick_issue',
-          error_message: `Excessive DOM elements: ${domElementCount}`,
-          details: {
-            dom_element_count: domElementCount,
             threshold: 10000,
             page: window.location.pathname
           }
         });
       }
+    };
 
-      // Event listener monitoring removed for build compatibility
+    // Check performance after 5 seconds
+    const performanceTimer = setTimeout(checkPerformance, 5000);
 
-      // Check for infinite loops in console
-      const originalConsoleError = console.error;
-      console.error = (...args) => {
-        const message = args.join(' ');
-        if (message.includes('Maximum call stack size exceeded') || 
-            message.includes('infinite loop') ||
-            message.includes('too much recursion')) {
+    return () => clearTimeout(performanceTimer);
+  }, [user, logSession]);
+
+  // Monitor for stuck sessions (inactivity)
+  useEffect(() => {
+    if (!user) return;
+
+    const checkInactivity = () => {
+      const now = Date.now();
+      const timeSinceLastActivity = now - lastLogTime.current;
+      
+      if (timeSinceLastActivity > 300000) { // 5 minutes
+        console.log('⏰ GlobalSessionMonitor: Inactivity detected:', timeSinceLastActivity + 'ms');
+        
+        logSession({
+          action_type: 'session_timeout',
+          error_message: `Session timeout: ${timeSinceLastActivity}ms of inactivity`,
+          details: {
+            inactivity_duration: timeSinceLastActivity,
+            threshold: 300000,
+            page: window.location.pathname
+          }
+        });
+      }
+    };
+
+    // Check every minute
+    const inactivityTimer = setInterval(checkInactivity, 60000);
+
+    return () => clearInterval(inactivityTimer);
+  }, [user, logSession]);
+
+  // Rick-specific monitoring
+  useEffect(() => {
+    if (!user || getUserType() !== 'rick') return;
+
+    console.log('🔍 GlobalSessionMonitor: Rick-specific monitoring enabled');
+
+    // Monitor for excessive DOM elements
+    const checkDOMSize = () => {
+      const elementCount = document.querySelectorAll('*').length;
+      
+      if (elementCount > 1000) {
+        console.log('🏗️ GlobalSessionMonitor: Large DOM detected:', elementCount + ' elements');
+        
+        logSession({
+          action_type: 'rick_issue',
+          error_message: `Large DOM: ${elementCount} elements`,
+          details: {
+            dom_element_count: elementCount,
+            threshold: 1000,
+            page: window.location.pathname
+          }
+        });
+      }
+    };
+
+    // Monitor for memory issues
+    const checkMemory = () => {
+      if ('memory' in performance) {
+        const memory = (performance as any).memory;
+        const usedMB = memory.usedJSHeapSize / 1024 / 1024;
+        
+        if (usedMB > 100) { // 100MB
+          console.log('💾 GlobalSessionMonitor: High memory usage detected:', usedMB.toFixed(2) + 'MB');
+          
           logSession({
-            action_type: 'rick_critical',
-            error_message: `Infinite loop detected: ${message}`,
+            action_type: 'rick_issue',
+            error_message: `High memory usage: ${usedMB.toFixed(2)}MB`,
             details: {
-              console_error: message,
-              stack_trace: new Error().stack,
+              memory_usage_mb: usedMB,
+              threshold: 100,
               page: window.location.pathname
             }
           });
         }
-        originalConsoleError.apply(console, args);
-      };
+      }
     };
 
-    monitorRickIssues();
+    // Event listener monitoring removed for build compatibility
+
+    // Check for infinite loops in console
+    const originalConsoleError = console.error;
+    let errorCount = 0;
     
-    // Monitor every 30 seconds for Rick
-    const rickMonitorInterval = setInterval(monitorRickIssues, 30000);
-    
+    console.error = function(...args) {
+      errorCount++;
+      originalConsoleError.apply(console, args);
+      
+      if (errorCount > 10) {
+        console.log('🔄 GlobalSessionMonitor: Excessive console errors detected:', errorCount);
+        
+        logSession({
+          action_type: 'rick_critical',
+          error_message: `Excessive console errors: ${errorCount}`,
+          details: {
+            console_error_count: errorCount,
+            threshold: 10,
+            page: window.location.pathname
+          }
+        });
+      }
+    };
+
+    // Run checks every 30 seconds
+    const rickTimer = setInterval(() => {
+      checkDOMSize();
+      checkMemory();
+    }, 30000);
+
     return () => {
-      clearInterval(rickMonitorInterval);
-      console.error = console.error; // Restore original
+      clearInterval(rickTimer);
+      console.error = originalConsoleError;
     };
   }, [user, getUserType, logSession]);
 
