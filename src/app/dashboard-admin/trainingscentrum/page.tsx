@@ -356,25 +356,56 @@ export default function TrainingscentrumBeheer() {
 
   const handleAddExercise = async (exerciseData: any) => {
     try {
+      console.log('➕ ===== ADDING NEW EXERCISE =====');
+      console.log('📋 Exercise Data:', exerciseData);
+      
+      // Clean up the data to match database expectations
+      const cleanedData = {
+        name: exerciseData.name,
+        muscle_group: exerciseData.primary_muscle, // Map primary_muscle to muscle_group
+        equipment: exerciseData.equipment,
+        difficulty: 'Intermediate', // Default difficulty
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      
+      console.log('🧹 Cleaned data for insert:', cleanedData);
+      
       const { data, error } = await supabase
         .from('exercises')
-        .insert([exerciseData])
+        .insert([cleanedData])
         .select()
         .single();
       
       if (error) {
-        console.error('Error adding exercise:', error);
-        toast.error('Fout bij het toevoegen van oefening');
+        console.error('❌ Error adding exercise:', error);
+        console.error('❌ Error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        toast.error(`Fout bij het toevoegen van oefening: ${error.message}`);
+        return; // Don't close modal on error
       } else {
-        setExercises([...exercises, data]);
+        console.log('✅ Exercise added successfully:', data);
+        
+        // Force a complete refresh of the exercises list
+        console.log('🔄 Refreshing exercises list from database...');
+        await fetchExercises();
+        
+        console.log('🔒 Closing modal...');
         setShowNewExerciseModal(false);
         setShowEditModal(false); // Ensure edit modal is also closed
         setEditingExercise(null); // Clear any editing exercise
+        
+        console.log('✅ Add complete!');
         toast.success('Oefening succesvol toegevoegd');
       }
     } catch (err) {
-      console.error('Exception adding exercise:', err);
-      toast.error('Fout bij het toevoegen van oefening');
+      console.error('❌ Exception adding exercise:', err);
+      console.error('❌ Exception stack:', err instanceof Error ? err.stack : 'No stack');
+      toast.error(`Fout bij het toevoegen van oefening: ${err instanceof Error ? err.message : 'Onbekende fout'}`);
       // Don't close modal on exception - let user try again
     }
   };
@@ -388,10 +419,10 @@ export default function TrainingscentrumBeheer() {
       
       // Clean up the data to match database expectations
       const cleanedData = {
-        ...exerciseData,
-        video_url: exerciseData.video_url || null,
-        worksheet_url: exerciseData.worksheet_url || null,
-        secondary_muscles: Array.isArray(exerciseData.secondary_muscles) ? exerciseData.secondary_muscles : [],
+        name: exerciseData.name,
+        muscle_group: exerciseData.primary_muscle, // Map primary_muscle to muscle_group
+        equipment: exerciseData.equipment,
+        difficulty: exerciseData.difficulty || 'Intermediate',
         updated_at: new Date().toISOString() // Force update timestamp
       };
       
