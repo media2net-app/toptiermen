@@ -102,7 +102,7 @@ export function useSessionLogging() {
       user_agent: navigator.userAgent,
       action_type: 'page_load',
       cache_hit: false, // We'll implement cache detection later
-      user_type: userType, // Add user type for filtering
+      // user_type: userType, // Add user type for filtering - removed for build compatibility
     });
 
   }, [user, logSession, detectLoops]);
