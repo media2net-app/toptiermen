@@ -424,19 +424,47 @@ export function CacheManager() {
           }
         }
         
-        // Auto-clear cache on page load for Rick in Chrome
-        const autoClearCache = () => {
-          console.log('🔄 Rick: Auto-clearing Chrome cache on page load');
+        // Smart cache clearing for Rick in Chrome (optimized for performance)
+        const smartClearCache = () => {
+          console.log('🔄 Rick: Smart-clearing Chrome cache');
           
-          // Clear all storage immediately
+          // Only clear essential items, not everything
+          try {
+            // Clear localStorage but keep essential items
+            const essentialKeys = ['user-email', 'chrome_cache_version'];
+            const keysToRemove = Object.keys(localStorage).filter(key => !essentialKeys.includes(key));
+            keysToRemove.forEach(key => localStorage.removeItem(key));
+            
+            // Clear sessionStorage
+            sessionStorage.clear();
+            
+            // Only clear problematic cookies, not all
+            const problematicCookies = ['cache', 'session', 'temp', 'tmp'];
+            document.cookie.split(";").forEach(cookie => {
+              const eqPos = cookie.indexOf("=");
+              const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+              if (name && !name.includes('user-email') && problematicCookies.some(problematic => name.toLowerCase().includes(problematic))) {
+                document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+              }
+            });
+          } catch (error) {
+            console.log('⚠️ Rick: Error during smart cache clear:', error);
+          }
+        };
+        
+        // Full cache clear only on page load
+        const fullClearCache = () => {
+          console.log('🔄 Rick: Full-clearing Chrome cache on page load');
+          
+          // Clear all storage
           localStorage.clear();
           sessionStorage.clear();
           
-          // Clear cookies
+          // Clear all cookies except user-email
           document.cookie.split(";").forEach(cookie => {
             const eqPos = cookie.indexOf("=");
             const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
-            if (name && !name.includes('user-email')) { // Keep user email cookie
+            if (name && !name.includes('user-email')) {
               document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
             }
           });
@@ -471,14 +499,31 @@ export function CacheManager() {
           }
         };
         
-        // Run auto-clear on page load
-        autoClearCache();
+        // Run full clear on page load
+        const startTime = performance.now();
+        fullClearCache();
+        const endTime = performance.now();
+        console.log(`🔄 Rick: Full cache clear took ${(endTime - startTime).toFixed(2)}ms`);
         
-        // Also clear cache every 5 seconds for Rick in Chrome
-        const autoClearInterval = setInterval(autoClearCache, 5000);
+        // Smart clear only when needed (not on a fixed interval)
+        let lastClearTime = Date.now();
+        const checkAndClearIfNeeded = () => {
+          const now = Date.now();
+          const timeSinceLastClear = now - lastClearTime;
+          
+          // Only clear if it's been more than 2 minutes since last clear
+          if (timeSinceLastClear > 120000) { // 2 minutes
+            console.log('🔄 Rick: Periodic smart cache clear (2+ minutes)');
+            smartClearCache();
+            lastClearTime = now;
+          }
+        };
+        
+        // Check every 60 seconds if we need to clear
+        const checkInterval = setInterval(checkAndClearIfNeeded, 60000);
         
         // Cleanup interval on component unmount
-        return () => clearInterval(autoClearInterval);
+        return () => clearInterval(checkInterval);
       }
       
       // Set user email in cookie for middleware identification
