@@ -13,12 +13,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SupabaseAuthProvider>
       <DebugProvider>
-        {/* <SessionLogger /> */}
-        {/* <GlobalSessionMonitor /> */}
-        {/* <CacheManager /> */}
-        {/* <CacheTestPanel /> */}
-        {/* <PerformanceMonitor /> */}
-        {/* <PerformanceTestPanel /> */}
+        {/* All monitoring components disabled to prevent infinite loops */}
         {children}
       </DebugProvider>
     </SupabaseAuthProvider>

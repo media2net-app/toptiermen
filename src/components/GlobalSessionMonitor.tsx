@@ -24,38 +24,10 @@ export function GlobalSessionMonitor() {
     return 'user';
   }, [user]);
 
-  // Log session data to database
+  // Log session data to database - DISABLED
   const logSession = useCallback(async (data: any) => {
-    try {
-      console.log('🔍 GlobalSessionMonitor: Logging session data:', data);
-      
-      const response = await fetch('/api/admin/session-logging', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_id: user?.id || '',
-          user_email: user?.email || '',
-          current_page: window.location.pathname,
-          user_agent: navigator.userAgent,
-          action_type: data.action_type || 'page_load',
-          error_message: data.error_message || null,
-          cache_hit: data.cache_hit || false,
-          loop_detected: data.loop_detected || false,
-          user_type: getUserType(),
-          ...data
-        })
-      });
-
-      if (!response.ok) {
-        console.error('❌ GlobalSessionMonitor: Failed to log session:', response.statusText);
-        const errorText = await response.text();
-        console.error('❌ GlobalSessionMonitor: Error response:', errorText);
-      } else {
-        console.log('✅ GlobalSessionMonitor: Session logged successfully');
-      }
-    } catch (error) {
-      console.error('❌ GlobalSessionMonitor: Error logging session:', error);
-    }
+    // Session logging disabled to prevent infinite loops
+    return;
   }, [user, getUserType]);
 
   // Detect loops (same page loaded multiple times quickly)

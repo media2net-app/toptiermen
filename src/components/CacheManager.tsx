@@ -20,32 +20,10 @@ export function CacheManager() {
     return 'user';
   }, [user]);
 
-  // Log cache issues to database
+  // Log cache issues to database - DISABLED
   const logCacheIssue = useCallback(async (data: any) => {
-    try {
-      const response = await fetch('/api/admin/session-logging', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_id: user?.id || '',
-          user_email: user?.email || '',
-          current_page: window.location.pathname,
-          user_agent: navigator.userAgent,
-          action_type: 'cache_issue',
-          error_message: data.error_message || null,
-          cache_hit: false,
-          loop_detected: false,
-          user_type: getUserType(),
-          details: data.details || {}
-        })
-      });
-
-      if (!response.ok) {
-        console.error('Failed to log cache issue:', response.statusText);
-      }
-    } catch (error) {
-      console.error('Error logging cache issue:', error);
-    }
+    // Session logging disabled to prevent infinite loops
+    return;
   }, [user, getUserType]);
 
   // Detect cache issues

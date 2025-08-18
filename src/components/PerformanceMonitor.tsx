@@ -32,33 +32,10 @@ export function PerformanceMonitor() {
     return 'user';
   }, [user]);
 
-  // Log performance issues
+  // Log performance issues - DISABLED
   const logPerformanceIssue = useCallback(async (data: any) => {
-    try {
-      const response = await fetch('/api/admin/session-logging', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_id: user?.id || '',
-          user_email: user?.email || '',
-          current_page: window.location.pathname,
-          user_agent: navigator.userAgent,
-          action_type: 'performance_issue',
-          error_message: data.error_message || null,
-          details: {
-            ...data.details,
-            user_type: getUserType(),
-            timestamp: new Date().toISOString()
-          }
-        })
-      });
-
-      if (!response.ok) {
-        console.error('Failed to log performance issue:', response.statusText);
-      }
-    } catch (error) {
-      console.error('Error logging performance issue:', error);
-    }
+    // Session logging disabled to prevent infinite loops
+    return;
   }, [user, getUserType]);
 
   // Monitor render performance (simplified)

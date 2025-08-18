@@ -148,24 +148,13 @@ export default function AdminDashboard() {
     tabFromUrl || 'overview'
   );
 
-  // Session data functions
+  // Session data functions - DISABLED
   const fetchSessionData = async () => {
-    setSessionLoading(true);
-    try {
-      const response = await fetch('/api/admin/session-logging');
-      if (response.ok) {
-        const data = await response.json();
-        setSessionLogs(data.data.sessionLogs || []);
-        setUserActivities(data.data.userActivities || []);
-        setSessionStats(data.data.statistics || null);
-      } else {
-        console.error('Failed to fetch session data');
-      }
-    } catch (error) {
-      console.error('Error fetching session data:', error);
-    } finally {
-      setSessionLoading(false);
-    }
+    // Session logging disabled to prevent infinite loops
+    setSessionLogs([]);
+    setUserActivities([]);
+    setSessionStats(null);
+    setSessionLoading(false);
   };
 
   const exportSessionData = () => {
@@ -188,25 +177,8 @@ export default function AdminDashboard() {
   };
 
   const clearOldLogs = async () => {
-    if (confirm('Weet je zeker dat je oude logs wilt verwijderen? Dit kan niet ongedaan worden gemaakt.')) {
-      try {
-        const response = await fetch('/api/admin/session-logging', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'clear_old_logs' })
-        });
-        
-        if (response.ok) {
-          alert('Oude logs zijn succesvol verwijderd');
-          fetchSessionData(); // Refresh data
-        } else {
-          alert('Fout bij het verwijderen van oude logs');
-        }
-      } catch (error) {
-        console.error('Error clearing old logs:', error);
-        alert('Fout bij het verwijderen van oude logs');
-      }
-    }
+    // Session logging disabled to prevent infinite loops
+    alert('Session logging is uitgeschakeld');
   };
 
   // Update active tab when URL parameter changes
@@ -221,27 +193,8 @@ export default function AdminDashboard() {
     if (activeTab === 'session-logs') {
       console.log('🚀 Auto-starting session monitoring...');
       
-      // First try to create tables if they don't exist
-      const setupTables = async () => {
-        try {
-          console.log('🔧 Attempting to create session tables...');
-          const response = await fetch('/api/admin/session-logging', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'setup_tables' })
-          });
-          
-          if (response.ok) {
-            console.log('✅ Session tables created successfully');
-          } else {
-            console.log('⚠️ Tables may already exist or creation failed');
-          }
-        } catch (error) {
-          console.log('⚠️ Error setting up tables:', error);
-        }
-      };
-      
-      setupTables();
+      // Session logging disabled
+      console.log('Session logging is uitgeschakeld');
       fetchSessionData();
       
       // Set up auto-refresh every 30 seconds
