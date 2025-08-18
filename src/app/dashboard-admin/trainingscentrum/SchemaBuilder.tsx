@@ -119,15 +119,23 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
 
   const fetchExercises = async () => {
     try {
+      console.log('🔍 SchemaBuilder: Fetching exercises from database...');
       const { data, error } = await supabase
         .from('exercises')
         .select('*')
         .order('name');
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ SchemaBuilder: Error fetching exercises:', error);
+        toast.error('Fout bij het ophalen van oefeningen');
+        return;
+      }
+      
+      console.log('✅ SchemaBuilder: Successfully fetched', data?.length || 0, 'exercises');
+      console.log('📋 SchemaBuilder: First few exercises:', data?.slice(0, 3));
       setExercises(data || []);
     } catch (error) {
-      console.error('Error fetching exercises:', error);
+      console.error('❌ SchemaBuilder: Exception fetching exercises:', error);
       toast.error('Fout bij het ophalen van oefeningen');
     }
   };
@@ -136,6 +144,14 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
     const matchesSearch = exercise.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesMuscle = !selectedMuscle || exercise.primary_muscle === selectedMuscle;
     return matchesSearch && matchesMuscle;
+  });
+
+  console.log('🔍 SchemaBuilder: Filtered exercises:', {
+    totalExercises: exercises.length,
+    searchTerm,
+    selectedMuscle,
+    filteredCount: filteredExercises.length,
+    firstFewFiltered: filteredExercises.slice(0, 3)
   });
 
   const muscleGroups = Array.from(new Set(exercises.map(e => e.primary_muscle))).sort();
