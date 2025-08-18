@@ -592,10 +592,20 @@ export default function TrainingscentrumBeheer() {
     (filterCategory === 'Alle Categorieën' || schema.category === filterCategory)
   );
 
-  const filteredExercises = exercises.filter(exercise => 
-    exercise.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-    (filterMuscle === 'Alle Spiergroepen' || exercise.primary_muscle === filterMuscle)
-  );
+  const filteredExercises = exercises.filter(exercise => {
+    const matchesSearch = exercise.name.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    if (filterMuscle === 'Alle Spiergroepen') {
+      return matchesSearch;
+    }
+    
+    // Special handling for "Armen" to include Biceps and Triceps
+    if (filterMuscle === 'Armen') {
+      return matchesSearch && (exercise.primary_muscle === 'Biceps' || exercise.primary_muscle === 'Triceps');
+    }
+    
+    return matchesSearch && exercise.primary_muscle === filterMuscle;
+  });
 
   // Show loading state if component is not mounted yet
   if (!mounted) {
@@ -916,7 +926,7 @@ export default function TrainingscentrumBeheer() {
             <div className="flex items-center gap-4">
               {/* Debug info */}
               <div className="text-[#B6C948] text-sm">
-                {filteredExercises.length} van {mockExercises.length} oefeningen
+                {filteredExercises.length} van {exercises.length} oefeningen
                 {searchTerm && ` (gefilterd op: "${searchTerm}")`}
                 {filterMuscle !== 'Alle Spiergroepen' && ` (spiergroep: ${filterMuscle})`}
               </div>
