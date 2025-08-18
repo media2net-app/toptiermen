@@ -186,6 +186,13 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
 
           if (profileError) {
             console.error('Error getting profile:', profileError);
+            // Fallback: set minimal user info from auth session
+            setUser({
+              id: session.user.id,
+              email: session.user.email || '',
+              full_name: (session.user.user_metadata as any)?.full_name,
+              role: 'USER'
+            });
           } else if (profile) {
             setUser({
               id: profile.id,
@@ -225,6 +232,13 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
 
           if (profileError) {
             console.error('Error getting profile on sign in:', profileError);
+            // Fallback to auth session user if profile cannot be fetched
+            setUser({
+              id: session.user.id,
+              email: session.user.email || '',
+              full_name: (session.user.user_metadata as any)?.full_name,
+              role: 'USER'
+            });
           } else if (profile) {
             setUser({
               id: profile.id,
@@ -273,7 +287,14 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
 
         if (profileError) {
           console.error('Error getting profile:', profileError);
-          return { success: false, error: 'Error getting user profile' };
+          // Fallback to auth user if profile not readable (e.g., RLS)
+          setUser({
+            id: data.user.id,
+            email: data.user.email!,
+            full_name: (data.user.user_metadata as any)?.full_name,
+            role: 'USER'
+          });
+          return { success: true };
         }
 
         if (profile) {
@@ -325,7 +346,14 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
 
         if (profileError) {
           console.error('Error creating profile:', profileError);
-          return { success: false, error: 'Error creating user profile' };
+          // Fallback: still consider sign-up successful with auth user only
+          setUser({
+            id: data.user.id,
+            email: data.user.email!,
+            full_name: fullName,
+            role: 'USER'
+          });
+          return { success: true };
         }
 
         setUser({
