@@ -44,7 +44,7 @@ export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: Exe
     if (exercise) {
       const newFormData = {
         name: exercise.name || '',
-        primary_muscle: exercise.primary_muscle || exercise.muscle_group || '',
+        primary_muscle: exercise.primary_muscle || '',
         secondary_muscles: exercise.secondary_muscles || [],
         equipment: exercise.equipment || '',
         video_url: exercise.video_url || '',

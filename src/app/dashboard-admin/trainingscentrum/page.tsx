@@ -363,7 +363,6 @@ export default function TrainingscentrumBeheer() {
       const cleanedData = {
         name: exerciseData.name,
         primary_muscle: exerciseData.primary_muscle,
-        muscle_group: exerciseData.primary_muscle, // Keep both for compatibility
         equipment: exerciseData.equipment,
         difficulty: exerciseData.difficulty || 'Intermediate',
         video_url: exerciseData.video_url || null,
@@ -426,7 +425,6 @@ export default function TrainingscentrumBeheer() {
       const cleanedData = {
         name: exerciseData.name,
         primary_muscle: exerciseData.primary_muscle,
-        muscle_group: exerciseData.primary_muscle, // Keep both for compatibility
         equipment: exerciseData.equipment,
         difficulty: exerciseData.difficulty || 'Intermediate',
         video_url: exerciseData.video_url || null,
