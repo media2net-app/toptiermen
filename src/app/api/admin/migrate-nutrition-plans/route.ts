@@ -6,10 +6,16 @@ const hardcodedPlans = [
   {
     id: 'balanced',
     name: 'Gebalanceerd',
-    subtitle: 'Voor duurzame energie en algehele gezondheid',
-    description: 'Een mix van alle macronutriënten',
-    icon: '🥗',
-    color: 'from-green-500 to-emerald-600',
+    description: 'Een mix van alle macronutriënten voor duurzame energie en algehele gezondheid',
+    target_calories: 2000,
+    target_protein: 150,
+    target_carbs: 200,
+    target_fat: 70,
+    duration_weeks: 4,
+    difficulty: 'beginner',
+    goal: 'maintenance',
+    is_featured: true,
+    is_public: true,
     meals: [
       {
         id: 'breakfast-1',
@@ -55,10 +61,16 @@ const hardcodedPlans = [
   {
     id: 'low_carb',
     name: 'Koolhydraatarm / Keto',
-    subtitle: 'Focus op vetverbranding en een stabiele bloedsuikerspiegel',
-    description: 'Minimale koolhydraten, hoog in gezonde vetten',
-    icon: '🥑',
-    color: 'from-purple-500 to-indigo-600',
+    description: 'Minimale koolhydraten, hoog in gezonde vetten. Focus op vetverbranding en een stabiele bloedsuikerspiegel',
+    target_calories: 1800,
+    target_protein: 120,
+    target_carbs: 50,
+    target_fat: 140,
+    duration_weeks: 4,
+    difficulty: 'intermediate',
+    goal: 'weight_loss',
+    is_featured: true,
+    is_public: true,
     meals: [
       {
         id: 'breakfast-1',
@@ -102,10 +114,16 @@ const hardcodedPlans = [
   {
     id: 'carnivore',
     name: 'Carnivoor (Rick\'s Aanpak)',
-    subtitle: 'Voor maximale eenvoud en het elimineren van potentiële triggers',
-    description: 'Eet zoals de oprichter',
-    icon: '🥩',
-    color: 'from-red-500 to-orange-600',
+    description: 'Eet zoals de oprichter. Voor maximale eenvoud en het elimineren van potentiële triggers',
+    target_calories: 2200,
+    target_protein: 200,
+    target_carbs: 20,
+    target_fat: 150,
+    duration_weeks: 4,
+    difficulty: 'advanced',
+    goal: 'muscle_gain',
+    is_featured: true,
+    is_public: true,
     meals: [
       {
         id: 'breakfast-1',
@@ -148,10 +166,16 @@ const hardcodedPlans = [
   {
     id: 'high_protein',
     name: 'High Protein',
-    subtitle: 'Geoptimaliseerd voor maximale spieropbouw en herstel',
-    description: 'Maximale eiwitinname voor spiergroei',
-    icon: '💪',
-    color: 'from-blue-500 to-cyan-600',
+    description: 'Maximale eiwitinname voor spiergroei. Geoptimaliseerd voor maximale spieropbouw en herstel',
+    target_calories: 2500,
+    target_protein: 220,
+    target_carbs: 180,
+    target_fat: 80,
+    duration_weeks: 4,
+    difficulty: 'intermediate',
+    goal: 'muscle_gain',
+    is_featured: true,
+    is_public: true,
     meals: [
       {
         id: 'breakfast-1',
@@ -205,14 +229,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Migreer elk plan naar de database
-    const migratedPlans = [];
+    const migratedPlans: any[] = [];
 
     for (const plan of hardcodedPlans) {
       // Controleer of plan al bestaat
       const { data: existingPlan } = await supabase
         .from('nutrition_plans')
         .select('id')
-        .eq('plan_id', plan.id)
+        .eq('name', plan.name)
         .single();
 
       if (existingPlan) {
@@ -221,14 +245,19 @@ export async function POST(request: NextRequest) {
           .from('nutrition_plans')
           .update({
             name: plan.name,
-            subtitle: plan.subtitle,
             description: plan.description,
-            icon: plan.icon,
-            color: plan.color,
-            meals: plan.meals,
+            target_calories: plan.target_calories || 2000,
+            target_protein: plan.target_protein || 150,
+            target_carbs: plan.target_carbs || 200,
+            target_fat: plan.target_fat || 70,
+            duration_weeks: plan.duration_weeks || 4,
+            difficulty: plan.difficulty || 'beginner',
+            goal: plan.goal || 'maintenance',
+            is_featured: plan.is_featured || false,
+            is_public: plan.is_public || true,
             updated_at: new Date().toISOString()
           })
-          .eq('plan_id', plan.id)
+          .eq('name', plan.name)
           .select()
           .single();
 
@@ -243,14 +272,17 @@ export async function POST(request: NextRequest) {
         const { data: newPlan, error: insertError } = await supabase
           .from('nutrition_plans')
           .insert({
-            plan_id: plan.id,
             name: plan.name,
-            subtitle: plan.subtitle,
             description: plan.description,
-            icon: plan.icon,
-            color: plan.color,
-            meals: plan.meals,
-            is_active: true,
+            target_calories: plan.target_calories || 2000,
+            target_protein: plan.target_protein || 150,
+            target_carbs: plan.target_carbs || 200,
+            target_fat: plan.target_fat || 70,
+            duration_weeks: plan.duration_weeks || 4,
+            difficulty: plan.difficulty || 'beginner',
+            goal: plan.goal || 'maintenance',
+            is_featured: plan.is_featured || false,
+            is_public: plan.is_public || true,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           })
