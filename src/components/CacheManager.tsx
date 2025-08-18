@@ -64,12 +64,18 @@ export function CacheManager() {
     lastCacheCheck.current = now;
   }, [logCacheIssue]);
 
-  // Force cache refresh for Rick (all browsers)
+  // Force cache refresh for Rick (all browsers) - AGGRESSIVE
   const forceCacheRefresh = useCallback(() => {
     if (getUserType() === 'rick') {
+      const userAgent = navigator.userAgent;
+      const isChrome = /Chrome/.test(userAgent) && !/Edge/.test(userAgent);
+      
+      console.log('🔄 Rick: Starting aggressive cache clearing for', isChrome ? 'Chrome' : 'browser');
+
       // Clear browser cache for current domain (all browsers)
       if ('caches' in window) {
         caches.keys().then(cacheNames => {
+          console.log('🗑️ Clearing caches:', cacheNames);
           cacheNames.forEach(cacheName => {
             caches.delete(cacheName);
           });
@@ -79,6 +85,7 @@ export function CacheManager() {
       // Clear IndexedDB for Edge/Chrome
       if ('indexedDB' in window) {
         indexedDB.databases().then(databases => {
+          console.log('🗑️ Clearing IndexedDB databases:', databases.map(db => db.name));
           databases.forEach(db => {
             if (db.name) {
               indexedDB.deleteDatabase(db.name);
@@ -89,34 +96,105 @@ export function CacheManager() {
         });
       }
 
+      // Chrome-specific aggressive clearing
+      if (isChrome) {
+        // Clear Chrome's V8 cache
+        if ('gc' in window) {
+          try {
+            (window as any).gc();
+            console.log('🗑️ Chrome: Forced garbage collection');
+          } catch (e) {
+            console.log('⚠️ Chrome: Could not force garbage collection');
+          }
+        }
+
+        // Clear Chrome's memory cache
+        if ('memory' in performance) {
+          console.log('🗑️ Chrome: Memory usage before clear:', (performance as any).memory.usedJSHeapSize / 1024 / 1024, 'MB');
+        }
+
+        // Clear Chrome's service worker cache more aggressively
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(registrations => {
+            console.log('🗑️ Chrome: Clearing service workers:', registrations.length);
+            registrations.forEach(registration => {
+              registration.unregister();
+            });
+          });
+        }
+
+        // Clear Chrome's application cache
+        if ('applicationCache' in window) {
+          try {
+            (window as any).applicationCache.clear();
+            console.log('🗑️ Chrome: Cleared application cache');
+          } catch (e) {
+            console.log('⚠️ Chrome: Could not clear application cache');
+          }
+        }
+      }
+
       // Clear localStorage and sessionStorage
+      console.log('🗑️ Clearing localStorage and sessionStorage');
       localStorage.clear();
       sessionStorage.clear();
 
-      // Clear cookies for current domain
-      document.cookie.split(";").forEach(cookie => {
+      // Clear cookies for current domain (more aggressive)
+      const cookies = document.cookie.split(";");
+      console.log('🗑️ Clearing cookies:', cookies.length);
+      cookies.forEach(cookie => {
         const eqPos = cookie.indexOf("=");
-        const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+        const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+        if (name) {
+          // Clear with multiple paths and domains
+          document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+          document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/dashboard`;
+          document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/login`;
+          document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;domain=${window.location.hostname}`;
+        }
       });
+
+      // Clear Chrome's disk cache (if possible)
+      if (isChrome && 'webkitRequestFileSystem' in window) {
+        try {
+          (window as any).webkitRequestFileSystem((window as any).TEMPORARY, 0, (fs: any) => {
+            fs.root.createReader().readEntries((entries: any[]) => {
+              entries.forEach(entry => {
+                if (entry.isFile) {
+                  entry.remove();
+                }
+              });
+            });
+          });
+          console.log('🗑️ Chrome: Cleared temporary file system');
+        } catch (e) {
+          console.log('⚠️ Chrome: Could not clear temporary file system');
+        }
+      }
 
       // Force reload with cache busting
       const timestamp = Date.now();
       const currentUrl = new URL(window.location.href);
       currentUrl.searchParams.set('_cb', timestamp.toString());
+      currentUrl.searchParams.set('_nocache', '1');
+      currentUrl.searchParams.set('_t', timestamp.toString());
       
       logCacheIssue({
-        error_message: 'Forced cache refresh for Rick (all browsers)',
+        error_message: `Aggressive cache refresh for Rick (${isChrome ? 'Chrome' : 'browser'})`,
         details: {
-          action: 'force_cache_refresh',
-          browser: navigator.userAgent,
+          action: 'aggressive_cache_refresh',
+          browser: userAgent,
+          is_chrome: isChrome,
           timestamp: new Date().toISOString(),
           new_url: currentUrl.toString()
         }
       });
 
-      // Reload page with cache busting
-      window.location.href = currentUrl.toString();
+      // Wait a bit then reload page with cache busting
+      setTimeout(() => {
+        console.log('🔄 Rick: Reloading page with cache busting');
+        window.location.href = currentUrl.toString();
+      }, 100);
     }
   }, [getUserType, logCacheIssue]);
 
@@ -127,8 +205,12 @@ export function CacheManager() {
     const checkAndFixCache = () => {
       detectCacheIssues();
       
-      // If multiple cache issues detected, auto-refresh
-      if (cacheIssueCount.current >= 3) {
+      // If multiple cache issues detected, auto-refresh (lower threshold for Chrome)
+      const userAgent = navigator.userAgent;
+      const isChrome = /Chrome/.test(userAgent) && !/Edge/.test(userAgent);
+      const threshold = isChrome ? 2 : 3; // Lower threshold for Chrome
+      
+      if (cacheIssueCount.current >= threshold) {
         logCacheIssue({
           error_message: 'Auto-refreshing cache due to multiple issues',
           details: {
@@ -175,8 +257,10 @@ export function CacheManager() {
           'serviceWorker' in navigator && navigator.serviceWorker.controller,
           // Edge-specific: check for aggressive memory caching
           isEdge && 'memory' in performance && (performance as any).memory.usedJSHeapSize > 50 * 1024 * 1024, // 50MB
-          // Chrome-specific: check for V8 cache
-          isChrome && localStorage.getItem('chrome_cache_version') !== 'v2',
+          // Chrome-specific: check for V8 cache and memory issues
+          isChrome && localStorage.getItem('chrome_cache_version') !== 'v3',
+          isChrome && 'memory' in performance && (performance as any).memory.usedJSHeapSize > 30 * 1024 * 1024, // 30MB for Chrome
+          isChrome && performance.getEntriesByType('resource').filter(entry => (entry as any).transferSize === 0).length > 3,
           // Firefox-specific: check for aggressive disk cache
           isFirefox && sessionStorage.getItem('firefox_cache_check') !== 'cleared'
         ];
@@ -297,6 +381,31 @@ export function CacheManager() {
       };
 
       addNoCacheMeta();
+      
+      // Chrome-specific cache prevention
+      const userAgent = navigator.userAgent;
+      const isChrome = /Chrome/.test(userAgent) && !/Edge/.test(userAgent);
+      
+      if (isChrome) {
+        // Set Chrome-specific cache version
+        localStorage.setItem('chrome_cache_version', 'v3');
+        
+        // Add Chrome-specific meta tags
+        const chromeMeta = document.createElement('meta');
+        chromeMeta.setAttribute('name', 'chrome-cache-control');
+        chromeMeta.setAttribute('content', 'no-cache, no-store, must-revalidate, max-age=0');
+        document.head.appendChild(chromeMeta);
+        
+        // Disable Chrome's back-forward cache
+        if ('performance' in window && 'navigation' in performance) {
+          const nav = (performance as any).navigation;
+          if (nav.type === 1) { // NavigationType.RELOAD
+            console.log('🔄 Chrome: Page reload detected, clearing cache');
+            localStorage.clear();
+            sessionStorage.clear();
+          }
+        }
+      }
       
       // Set user email in cookie for middleware identification
       document.cookie = `user-email=${user?.email || ''}; path=/; max-age=3600`;
