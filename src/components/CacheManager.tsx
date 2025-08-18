@@ -251,7 +251,7 @@ export function CacheManager() {
     };
   }, [getUserType, cacheIssueCount.current, forceCacheRefresh]);
 
-  // Add cache prevention headers
+  // Add cache prevention headers and user identification
   useEffect(() => {
     if (getUserType() === 'rick') {
       // Add meta tags to prevent caching
@@ -282,8 +282,24 @@ export function CacheManager() {
       };
 
       addNoCacheMeta();
+      
+      // Set user email in cookie for middleware identification
+      document.cookie = `user-email=${user?.email || ''}; path=/; max-age=3600`;
+      
+      // Add user email to all fetch requests
+      const originalFetch = window.fetch;
+      window.fetch = function(input, init) {
+        const newInit = {
+          ...init,
+          headers: {
+            ...init?.headers,
+            'x-user-email': user?.email || ''
+          }
+        };
+        return originalFetch(input, newInit);
+      };
     }
-  }, [getUserType]);
+  }, [getUserType, user]);
 
   // This component doesn't render anything visible
   return null;

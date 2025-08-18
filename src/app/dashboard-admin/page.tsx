@@ -216,6 +216,44 @@ export default function AdminDashboard() {
     }
   }, [tabFromUrl]);
 
+  // Automatically start session monitoring when session-logs tab is active
+  useEffect(() => {
+    if (activeTab === 'session-logs') {
+      console.log('🚀 Auto-starting session monitoring...');
+      
+      // First try to create tables if they don't exist
+      const setupTables = async () => {
+        try {
+          console.log('🔧 Attempting to create session tables...');
+          const response = await fetch('/api/admin/session-logging', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'setup_tables' })
+          });
+          
+          if (response.ok) {
+            console.log('✅ Session tables created successfully');
+          } else {
+            console.log('⚠️ Tables may already exist or creation failed');
+          }
+        } catch (error) {
+          console.log('⚠️ Error setting up tables:', error);
+        }
+      };
+      
+      setupTables();
+      fetchSessionData();
+      
+      // Set up auto-refresh every 30 seconds
+      const interval = setInterval(() => {
+        console.log('🔄 Auto-refreshing session data...');
+        fetchSessionData();
+      }, 30000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [activeTab]);
+
   // Fetch real dashboard data - geoptimaliseerd voor performance
   const fetchDashboardData = async () => {
     if (!user) return;
@@ -1251,30 +1289,18 @@ export default function AdminDashboard() {
               Real-time monitoring van gebruikerssessies en cache problemen
             </p>
             
-            {/* Database Setup */}
+            {/* Session Monitoring Status */}
             <div className="bg-[#232D1A] border border-[#3A4D23] rounded-lg p-4 mb-6">
               <h4 className="text-lg font-semibold text-[#8BAE5A] mb-2">
-                Database Setup
+                Session Monitoring Status
               </h4>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => {
-                    // Create session logs table via API
-                    fetch('/api/admin/session-logging', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ action: 'setup_tables' })
-                    }).then(() => {
-                      alert('Session monitoring tables created successfully!');
-                    }).catch(() => {
-                      alert('Error creating session monitoring tables');
-                    });
-                  }}
-                  className="px-4 py-2 bg-[#8BAE5A] text-[#0F1411] rounded hover:bg-[#7A9D4A] transition-colors"
-                >
-                  Create Session Tables
-                </button>
+              <div className="flex items-center gap-3">
+                <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                <span className="text-[#B6C948]">Automatisch actief - Data wordt elke 30 seconden ververst</span>
               </div>
+              <p className="text-sm text-[#8BAE5A] mt-2">
+                Database tabellen worden automatisch aangemaakt indien nodig
+              </p>
             </div>
 
             {/* Quick Stats */}

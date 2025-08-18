@@ -5,9 +5,13 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     
+    console.log('🔍 Session logging API called with:', body);
+    
     // Handle setup tables action
     if (body.action === 'setup_tables') {
       try {
+        console.log('🔧 Setting up session monitoring tables...');
+        
         // Create session logs table with enhanced structure
         const { error: sessionError } = await supabase.rpc('exec_sql', {
           sql_query: `
@@ -32,6 +36,12 @@ export async function POST(request: NextRequest) {
             );
           `
         });
+
+        if (sessionError) {
+          console.error('❌ Error creating session logs table:', sessionError);
+        } else {
+          console.log('✅ Session logs table created successfully');
+        }
 
         // Create user activities table with enhanced structure
         const { error: activityError } = await supabase.rpc('exec_sql', {
@@ -58,9 +68,19 @@ export async function POST(request: NextRequest) {
           `
         });
 
+        if (activityError) {
+          console.error('❌ Error creating user activities table:', activityError);
+        } else {
+          console.log('✅ User activities table created successfully');
+        }
+
         if (sessionError || activityError) {
           return NextResponse.json(
-            { error: 'Failed to create tables' },
+            { 
+              error: 'Failed to create tables',
+              sessionError: sessionError?.message,
+              activityError: activityError?.message
+            },
             { status: 500 }
           );
         }
@@ -70,8 +90,9 @@ export async function POST(request: NextRequest) {
           message: 'Session monitoring tables created successfully'
         });
       } catch (error) {
+        console.error('❌ Error in setup_tables:', error);
         return NextResponse.json(
-          { error: 'Failed to setup tables' },
+          { error: 'Failed to setup tables', details: error instanceof Error ? error.message : 'Unknown error' },
           { status: 500 }
         );
       }
@@ -93,6 +114,9 @@ export async function POST(request: NextRequest) {
     // Get user's IP address if not provided
     const clientIP = ip_address || request.headers.get('x-forwarded-for') || 
                     request.headers.get('x-real-ip') || 'unknown';
+
+    // Try to insert data directly - if tables don't exist, it will fail gracefully
+    console.log('📋 Attempting to log session data...');
 
     // Check if user has an existing session log
     const { data: existingLog } = await supabase
@@ -148,6 +172,10 @@ export async function POST(request: NextRequest) {
 
       if (updateError) {
         console.error('Error updating session log:', updateError);
+        // If table doesn't exist, don't fail completely
+        if (updateError.message.includes('relation') && updateError.message.includes('does not exist')) {
+          console.log('⚠️ Session logs table does not exist, skipping update');
+        }
       }
     } else {
       // Create new session log
@@ -174,6 +202,10 @@ export async function POST(request: NextRequest) {
 
       if (insertError) {
         console.error('Error creating session log:', insertError);
+        // If table doesn't exist, don't fail completely
+        if (insertError.message.includes('relation') && insertError.message.includes('does not exist')) {
+          console.log('⚠️ Session logs table does not exist, skipping insert');
+        }
       }
     }
 
@@ -208,6 +240,10 @@ export async function POST(request: NextRequest) {
 
     if (insertActivityError) {
       console.error('Error creating user activity:', insertActivityError);
+      // If table doesn't exist, don't fail completely
+      if (insertActivityError.message.includes('relation') && insertActivityError.message.includes('does not exist')) {
+        console.log('⚠️ User activities table does not exist, skipping insert');
+      }
     }
 
     return NextResponse.json({
@@ -229,9 +265,14 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
+    console.log('🔍 Session logging GET request');
+    
     const { searchParams } = new URL(request.url);
     const userType = searchParams.get('user_type');
     const userId = searchParams.get('user_id');
+
+    // Try to fetch data directly - if tables don't exist, return empty data
+    console.log('📋 Attempting to fetch session data...');
 
     let query = supabase
       .from('user_session_logs')
@@ -249,6 +290,32 @@ export async function GET(request: NextRequest) {
     const { data: sessionLogs, error: sessionError } = await query.limit(100);
 
     if (sessionError) {
+      console.error('❌ Error fetching session logs:', sessionError);
+      // If table doesn't exist, return empty data instead of throwing error
+      if (sessionError.message.includes('relation') && sessionError.message.includes('does not exist')) {
+        return NextResponse.json({
+          success: true,
+          data: {
+            sessionLogs: [],
+            userActivities: [],
+            statistics: {
+              totalSessions: 0,
+              stuckSessions: 0,
+              errorSessions: 0,
+              activeUsers: 0,
+              totalErrors: 0,
+              totalLoops: 0,
+              byUserType: {
+                rick: 0,
+                chiel: 0,
+                test: 0,
+                admin: 0
+              }
+            }
+          },
+          message: 'Tables do not exist yet. Please create them first.'
+        });
+      }
       throw sessionError;
     }
 
@@ -268,6 +335,32 @@ export async function GET(request: NextRequest) {
     const { data: userActivities, error: activityError } = await activityQuery;
 
     if (activityError) {
+      console.error('❌ Error fetching user activities:', activityError);
+      // If table doesn't exist, return empty data instead of throwing error
+      if (activityError.message.includes('relation') && activityError.message.includes('does not exist')) {
+        return NextResponse.json({
+          success: true,
+          data: {
+            sessionLogs: sessionLogs || [],
+            userActivities: [],
+            statistics: {
+              totalSessions: sessionLogs?.length || 0,
+              stuckSessions: 0,
+              errorSessions: 0,
+              activeUsers: 0,
+              totalErrors: 0,
+              totalLoops: 0,
+              byUserType: {
+                rick: 0,
+                chiel: 0,
+                test: 0,
+                admin: 0
+              }
+            }
+          },
+          message: 'User activities table does not exist yet.'
+        });
+      }
       throw activityError;
     }
 
