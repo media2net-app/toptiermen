@@ -1859,7 +1859,7 @@ export default function AdminVoedingsplannenPage() {
         onClose={() => setHubModalOpen(false)}
         onSave={handleSaveHub}
         hub={editingHub}
-        nutritionPlans={nutritionPlans}
+        nutritionPlans={mockNutritionPlans}
       />
     </div>
   );
