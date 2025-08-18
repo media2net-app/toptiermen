@@ -70,42 +70,7 @@ const activityLevels = [
   { value: 'very_active', label: 'Zeer actief', description: 'Dagelijks intensief sporten' }
 ];
 
-const dietTypes = [
-  {
-    id: 'balanced',
-    name: 'Gebalanceerd',
-    subtitle: 'Voor duurzame energie en algehele gezondheid',
-    description: 'Een mix van alle macronutriënten',
-    icon: '🥗',
-    color: 'from-green-500 to-emerald-600'
-  },
-  {
-    id: 'low_carb',
-    name: 'Koolhydraatarm / Keto',
-    subtitle: 'Focus op vetverbranding en een stabiele bloedsuikerspiegel',
-    description: 'Minimale koolhydraten, hoog in gezonde vetten',
-    icon: '🥑',
-    color: 'from-purple-500 to-indigo-600'
-  },
-  {
-    id: 'carnivore',
-    name: 'Carnivoor (Rick\'s Aanpak)',
-    subtitle: 'Voor maximale eenvoud en het elimineren van potentiële triggers',
-    description: 'Eet zoals de oprichter',
-    icon: '🥩',
-    color: 'from-red-500 to-orange-600'
-  },
-  {
-    id: 'high_protein',
-    name: 'High Protein',
-    subtitle: 'Geoptimaliseerd voor maximale spieropbouw en herstel',
-    description: 'Maximale eiwitinname voor spiergroei',
-    icon: '💪',
-    color: 'from-blue-500 to-cyan-600'
-  }
-];
-
-
+// Diet types will be fetched from database
 
 export default function VoedingsplannenPage() {
   const { user } = useSupabaseAuth();
@@ -129,6 +94,28 @@ export default function VoedingsplannenPage() {
   const [editingMeal, setEditingMeal] = useState<Meal | null>(null);
   const [isRecipeLibraryOpen, setIsRecipeLibraryOpen] = useState(false);
   const [selectedMealType, setSelectedMealType] = useState<'breakfast' | 'lunch' | 'dinner' | 'snack'>('lunch');
+  const [databasePlans, setDatabasePlans] = useState<any[]>([]);
+  const [isLoadingPlans, setIsLoadingPlans] = useState(true);
+
+  // Laad voedingsplannen uit database
+  useEffect(() => {
+    const fetchDatabasePlans = async () => {
+      try {
+        const response = await fetch('/api/admin/migrate-nutrition-plans');
+        const data = await response.json();
+        
+        if (data.success && data.plans) {
+          setDatabasePlans(data.plans);
+        }
+      } catch (error) {
+        console.error('Fout bij laden voedingsplannen uit database:', error);
+      } finally {
+        setIsLoadingPlans(false);
+      }
+    };
+
+    fetchDatabasePlans();
+  }, []);
 
   useEffect(() => {
     const fetchUserNutritionData = async () => {
@@ -252,7 +239,20 @@ export default function VoedingsplannenPage() {
   };
 
   const generateMealPlan = (goals: NutritionGoals, dietType: string): MealPlan => {
-    // Realistische dagmenu's per dieettype met accurate macro berekeningen
+    // Zoek het plan in de database
+    const databasePlan = databasePlans.find(plan => plan.id === dietType);
+    
+    if (databasePlan && databasePlan.meals) {
+      // Gebruik de maaltijden uit de database
+      return {
+        meals: databasePlan.meals.map((meal: any) => ({
+          ...meal,
+          ...calculateMacrosFromIngredients(meal.ingredients)
+        }))
+      };
+    }
+    
+    // Fallback naar hardcoded plannen als database plan niet gevonden
     if (dietType === 'balanced') {
       return {
         meals: [
@@ -1189,7 +1189,7 @@ export default function VoedingsplannenPage() {
               <div className="flex-1 text-center md:text-left">
                 <div className="text-sm text-[#8BAE5A] font-semibold mb-1">Je huidige voedingsplan</div>
                 <div className="text-xl font-bold text-white mb-1">
-                  {dietTypes.find(d => d.id === selectedNutritionPlan)?.name || selectedNutritionPlan}
+                  {databasePlans.find(d => d.id === selectedNutritionPlan)?.name || selectedNutritionPlan}
                 </div>
               </div>
               <div className="flex gap-3">
@@ -1201,10 +1201,10 @@ export default function VoedingsplannenPage() {
                   Recepten Bibliotheek
                 </a>
                 <div className="text-gray-400 text-sm mb-1">
-                  {dietTypes.find(d => d.id === selectedNutritionPlan)?.subtitle}
+                  {databasePlans.find(d => d.id === selectedNutritionPlan)?.subtitle}
                 </div>
                 <div className="text-gray-300 text-sm">
-                  {dietTypes.find(d => d.id === selectedNutritionPlan)?.description}
+                  {databasePlans.find(d => d.id === selectedNutritionPlan)?.description}
                 </div>
               </div>
               <button
@@ -1376,7 +1376,7 @@ export default function VoedingsplannenPage() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {dietTypes.map(diet => (
+                {databasePlans.map(diet => (
                   <button
                     key={diet.id}
                     onClick={() => handleDietSelection(diet.id)}

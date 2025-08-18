@@ -638,7 +638,7 @@ export default function AdminBadgesRangenPage() {
                 <table className="w-full">
                   <thead className="bg-[#232D1A] border-b border-[#3A4D23]">
                     <tr>
-                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Icoon</th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Badge</th>
                       <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Naam Badge</th>
                       <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Omschrijving</th>
                       <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Trigger</th>
@@ -650,7 +650,13 @@ export default function AdminBadgesRangenPage() {
                     {badges.map((badge) => (
                       <tr key={badge.id} className="hover:bg-[#232D1A]/50 transition-colors">
                         <td className="px-6 py-4">
-                          <span className="text-2xl">{getIconDisplay(badge.icon)}</span>
+                          <div className="flex items-center">
+                            <img 
+                              src="/badge-no-excuses.png" 
+                              alt={`${badge.name} badge`}
+                              className="w-12 h-12 rounded-lg object-cover border-2 border-[#3A4D23]"
+                            />
+                          </div>
                         </td>
                         <td className="px-6 py-4">
                           <div>

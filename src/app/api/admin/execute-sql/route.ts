@@ -27,16 +27,29 @@ export async function POST(request: NextRequest) {
     // Security: Allow specific safe operations for Week 1 content creation
     const sqlLower = sql.toLowerCase().trim();
     
-    // Block dangerous operations
+    // Block dangerous operations (but allow nutrition_plans setup)
     const dangerousKeywords = [
-      'drop', 'truncate', 'alter', 'create', 'grant', 'revoke', 'backup', 'restore'
+      'truncate', 'grant', 'revoke', 'backup', 'restore'
     ];
+
+    // Allow specific DDL operations for nutrition_plans setup
+    const allowedDDLOperations = [
+      'alter table nutrition_plans',
+      'create index idx_nutrition_plans',
+      'drop policy if exists',
+      'create policy',
+      'update nutrition_plans'
+    ];
+
+    const isAllowedDDL = allowedDDLOperations.some(operation => 
+      sqlLower.includes(operation)
+    );
 
     const isDangerous = dangerousKeywords.some(keyword => 
       sqlLower.includes(keyword)
     );
 
-    if (isDangerous) {
+    if (isDangerous && !isAllowedDDL) {
       return NextResponse.json({ 
         success: false, 
         error: 'This operation is not allowed for security reasons.' 
@@ -72,7 +85,8 @@ export async function POST(request: NextRequest) {
       sqlLower.startsWith(operation)
     );
 
-    if (!isAllowed) {
+    // Allow DDL operations for nutrition_plans setup
+    if (!isAllowed && !isAllowedDDL) {
       return NextResponse.json({ 
         success: false, 
         error: 'This operation is not allowed. Only specific content management operations are permitted.' 
@@ -87,7 +101,7 @@ export async function POST(request: NextRequest) {
     if (sqlLower.startsWith('select')) {
       // For SELECT queries, execute directly
       try {
-        const { data, error } = await supabase.rpc('exec_sql', { query: sql });
+        const { data, error } = await supabase.rpc('exec_sql', { sql_query: sql });
         
         if (error) {
           console.error('❌ SQL execution error:', error);
@@ -145,6 +159,32 @@ export async function POST(request: NextRequest) {
             query: sql 
           };
         }
+      }
+    } else if (isAllowedDDL) {
+      // For allowed DDL operations, execute directly
+      try {
+        const { data, error } = await supabase.rpc('exec_sql', { sql_query: sql });
+        
+        if (error) {
+          console.error('❌ DDL execution error:', error);
+          return NextResponse.json({ 
+            success: false, 
+            error: error.message 
+          }, { status: 500 });
+        }
+        
+        result = { 
+          success: true, 
+          data: data,
+          message: 'DDL operation executed successfully',
+          query: sql
+        };
+      } catch (rpcError) {
+        console.error('❌ DDL RPC error:', rpcError);
+        return NextResponse.json({ 
+          success: false, 
+          error: 'Failed to execute DDL operation' 
+        }, { status: 500 });
       }
     } else {
       // For UPDATE/INSERT queries, return success but note that manual execution is needed

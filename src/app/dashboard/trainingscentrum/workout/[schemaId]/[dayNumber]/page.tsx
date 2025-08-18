@@ -66,40 +66,40 @@ export default function WorkoutPage() {
       name: 'Bench Press',
       sets: 4,
       reps: '8-10',
-      rest: '2 min',
+      rest: '120s',
       completed: false,
       currentSet: 0,
-      videoUrl: '/video-oefeningen/bankdrukken.mp4'
+      videoUrl: undefined // Will be fetched from exercises table
     },
     {
       id: '2',
       name: 'Incline Dumbbell Press',
       sets: 3,
       reps: '10-12',
-      rest: '90 sec',
+      rest: '90s',
       completed: false,
       currentSet: 0,
-      videoUrl: '/video-oefeningen/Incline Chest press.mp4'
+      videoUrl: undefined // Will be fetched from exercises table
     },
     {
       id: '3',
       name: 'Tricep Dips',
       sets: 3,
       reps: '8-12',
-      rest: '90 sec',
+      rest: '90s',
       completed: false,
       currentSet: 0,
-      videoUrl: '/video-oefeningen/tricpes dips_.mp4'
+      videoUrl: undefined // Will be fetched from exercises table
     },
     {
       id: '4',
       name: 'Tricep Pushdowns',
       sets: 3,
       reps: '12-15',
-      rest: '60 sec',
+      rest: '60s',
       completed: false,
       currentSet: 0,
-      videoUrl: '/video-oefeningen/triceps rope cabel.mp4'
+      videoUrl: undefined // Will be fetched from exercises table
     }
   ];
 
@@ -112,35 +112,25 @@ export default function WorkoutPage() {
     }
   }, [sessionId, schemaId, dayNumber]);
 
-  const getVideoUrlForExercise = (exerciseName: string): string | undefined => {
-    const videoUrls: { [key: string]: string } = {
-      'Bench Press': '/video-oefeningen/bankdrukken.mp4',
-      'Incline Dumbbell Press': '/video-oefeningen/Incline Chest press.mp4',
-      'Overhead Press': '/video-oefeningen/militairy press.mp4',
-      'Lateral Raises': '/video-oefeningen/Lateral Raise.mp4',
-      'Tricep Dips': '/video-oefeningen/tricpes dips_.mp4',
-      'Tricep Pushdowns': '/video-oefeningen/triceps rope cabel.mp4',
-      'Squat': '/video-oefeningen/Squatten.mp4',
-      'Leg Press': '/video-oefeningen/legg press.mp4',
-      'Romanian Deadlift': '/video-oefeningen/Stiff Deadlift.mp4',
-      'Leg Extensions': '/video-oefeningen/leg extensie.mp4',
-      'Leg Curls': '/video-oefeningen/Leg Curl.mp4',
-      'Standing Calf Raises': '/video-oefeningen/Calf Raises.mp4',
-      'Deadlift': '/video-oefeningen/Deadlift.mp4',
-      'Pull-ups': '/video-oefeningen/Machine Pull Up.mp4',
-      'Barbell Row': '/video-oefeningen/Barbel Row Rug.mp4',
-      'Lat Pulldown': '/video-oefeningen/Lat Pull Down.mp4',
-      'Bicep Curls': '/video-oefeningen/Biceps Curl Barbell.mp4',
-      'Hammer Curls': '/video-oefeningen/Biceps Curl Dumbells.mp4',
-      'Front Squat': '/video-oefeningen/Hack Squat.mp4',
-      'Walking Lunges': '/video-oefeningen/Walking Lunges.mp4',
-      'Hip Thrusts': '/video-oefeningen/Booty Builder.mp4',
-      'Good Mornings': '/video-oefeningen/Lower Back Extensie.mp4',
-      'Seated Calf Raises': '/video-oefeningen/Calf Press.mp4',
-      'Planks': '/video-oefeningen/Abdominal Crunch.mp4'
-    };
-    
-    return videoUrls[exerciseName];
+  const getVideoUrlForExercise = async (exerciseName: string): Promise<string | undefined> => {
+    try {
+      // Zoek de oefening in de exercises tabel om de video URL op te halen
+      const { data: exercise, error } = await supabase
+        .from('exercises')
+        .select('video_url')
+        .eq('name', exerciseName)
+        .single();
+
+      if (error) {
+        console.log(`Geen video gevonden voor ${exerciseName}:`, error.message);
+        return undefined;
+      }
+
+      return exercise?.video_url || undefined;
+    } catch (error) {
+      console.error(`Fout bij ophalen video voor ${exerciseName}:`, error);
+      return undefined;
+    }
   };
 
   const loadExercisesFromDatabase = async () => {
@@ -158,8 +148,14 @@ export default function WorkoutPage() {
 
       if (dayError) {
         console.error('Error loading day:', dayError);
-        // Fallback to sample data
-        setExercises(sampleExercises);
+        // Fallback to sample data with video URLs
+        const sampleExercisesWithVideos = await Promise.all(
+          sampleExercises.map(async (exercise) => {
+            const videoUrl = await getVideoUrlForExercise(exercise.name);
+            return { ...exercise, videoUrl };
+          })
+        );
+        setExercises(sampleExercisesWithVideos);
         setLoading(false);
         return;
       }
@@ -173,30 +169,53 @@ export default function WorkoutPage() {
 
       if (exercisesError) {
         console.error('Error loading exercises:', exercisesError);
-        // Fallback to sample data
-        setExercises(sampleExercises);
+        // Fallback to sample data with video URLs
+        const sampleExercisesWithVideos = await Promise.all(
+          sampleExercises.map(async (exercise) => {
+            const videoUrl = await getVideoUrlForExercise(exercise.name);
+            return { ...exercise, videoUrl };
+          })
+        );
+        setExercises(sampleExercisesWithVideos);
         setLoading(false);
         return;
       }
 
-      // Transform database exercises to our format
-      const transformedExercises: Exercise[] = exercisesData.map((ex, index) => ({
-        id: ex.id,
-        name: ex.exercise_name,
-        sets: ex.sets,
-        reps: ex.reps.toString(),
-        rest: `${ex.rest_time}s`,
-        completed: false,
-        currentSet: 0,
-        notes: ex.notes || undefined,
-        videoUrl: getVideoUrlForExercise(ex.exercise_name) || undefined
-      }));
+      // Transform database exercises to our format and fetch video URLs
+      const transformedExercises: Exercise[] = [];
+      
+      for (const ex of exercisesData) {
+        const videoUrl = await getVideoUrlForExercise(ex.exercise_name);
+        
+        transformedExercises.push({
+          id: ex.id,
+          name: ex.exercise_name,
+          sets: ex.sets,
+          reps: ex.reps.toString(),
+          rest: `${ex.rest_time}s`,
+          completed: false,
+          currentSet: 0,
+          notes: ex.notes || undefined,
+          videoUrl: videoUrl || undefined
+        });
+      }
 
       setExercises(transformedExercises);
     } catch (error) {
       console.error('Error loading exercises:', error);
-      // Fallback to sample data
-      setExercises(sampleExercises);
+      // Fallback to sample data with video URLs
+      try {
+        const sampleExercisesWithVideos = await Promise.all(
+          sampleExercises.map(async (exercise) => {
+            const videoUrl = await getVideoUrlForExercise(exercise.name);
+            return { ...exercise, videoUrl };
+          })
+        );
+        setExercises(sampleExercisesWithVideos);
+      } catch (fallbackError) {
+        console.error('Error loading sample exercises with videos:', fallbackError);
+        setExercises(sampleExercises);
+      }
     } finally {
       setLoading(false);
     }
@@ -274,7 +293,15 @@ export default function WorkoutPage() {
             // Start rest timer for next exercise
             if (currentExerciseIndex < exercises.length - 1) {
               const nextExercise = exercises[currentExerciseIndex + 1];
-              const restTime = parseInt(nextExercise.rest.split(' ')[0]) * 60; // Convert to seconds
+              // Parse rest time correctly - handle both "2 min" and "120s" formats
+              let restTime: number;
+              if (nextExercise.rest.includes('min')) {
+                restTime = parseInt(nextExercise.rest.split(' ')[0]) * 60; // Convert minutes to seconds
+              } else if (nextExercise.rest.includes('s')) {
+                restTime = parseInt(nextExercise.rest.replace('s', '')); // Already in seconds
+              } else {
+                restTime = parseInt(nextExercise.rest) || 120; // Default to 2 minutes
+              }
               setRestTimer(restTime);
               setIsRestTimerRunning(true);
             }
@@ -299,6 +326,12 @@ export default function WorkoutPage() {
       setIsRestTimerRunning(false);
       setRestTimer(0);
     }
+  };
+
+  const skipRest = () => {
+    setIsRestTimerRunning(false);
+    setRestTimer(0);
+    toast.success('Rust overgeslagen! 💪');
   };
 
   const completeWorkout = async () => {
@@ -474,7 +507,13 @@ export default function WorkoutPage() {
               <div className="text-2xl font-bold text-[#f0a14f] mb-2">
                 {formatTime(restTimer)}
               </div>
-              <p className="text-[#f0a14f]">Rust voor volgende oefening</p>
+              <p className="text-[#f0a14f] mb-4">Rust voor volgende oefening</p>
+              <button
+                onClick={skipRest}
+                className="px-4 py-2 bg-[#f0a14f] text-white font-semibold rounded-lg hover:bg-[#e0903f] transition-colors"
+              >
+                Rust Overslaan
+              </button>
             </motion.div>
           )}
 
@@ -585,6 +624,20 @@ export default function WorkoutPage() {
           </div>
         </div>
       </div>
+
+      {/* Workout Video Modal */}
+      <WorkoutVideoModal
+        isOpen={showVideoModal}
+        onClose={() => setShowVideoModal(false)}
+        exerciseName={currentExercise?.name || ''}
+        videoUrl={currentExercise?.videoUrl}
+        exerciseDetails={currentExercise ? {
+          sets: currentExercise.sets,
+          reps: currentExercise.reps,
+          rest: currentExercise.rest,
+          notes: currentExercise.notes
+        } : undefined}
+      />
     </ClientLayout>
   );
 } 

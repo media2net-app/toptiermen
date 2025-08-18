@@ -1,93 +1,96 @@
 const { createClient } = require('@supabase/supabase-js');
+
+// Load environment variables
 require('dotenv').config({ path: '.env.local' });
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!supabaseUrl || !supabaseServiceKey) {
+  console.error('❌ Supabase URL of Service Role Key niet gevonden in .env.local');
+  process.exit(1);
+}
+
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 async function addMissingColumns() {
-  console.log('🔧 Adding Missing Columns to user_missions...\n');
-
   try {
-    // Add frequency_type column
-    console.log('📝 Adding frequency_type column...');
-    const { error: freqError } = await supabase
-      .rpc('exec_sql', {
-        sql_query: `
-          ALTER TABLE user_missions 
-          ADD COLUMN IF NOT EXISTS frequency_type VARCHAR(20) DEFAULT 'daily';
-        `
-      });
-
-    if (freqError) {
-      console.error('❌ Error adding frequency_type:', freqError);
-    } else {
-      console.log('✅ frequency_type column added');
-    }
-
-    // Add xp_reward column
-    console.log('📝 Adding xp_reward column...');
-    const { error: xpError } = await supabase
-      .rpc('exec_sql', {
-        sql_query: `
-          ALTER TABLE user_missions 
-          ADD COLUMN IF NOT EXISTS xp_reward INTEGER DEFAULT 15;
-        `
-      });
-
-    if (xpError) {
-      console.error('❌ Error adding xp_reward:', xpError);
-    } else {
-      console.log('✅ xp_reward column added');
-    }
-
-    // Update existing missions with default values
-    console.log('📝 Updating existing missions with default values...');
-    const { error: updateError } = await supabase
-      .rpc('exec_sql', {
-        sql_query: `
-          UPDATE user_missions 
-          SET 
-            frequency_type = 'daily',
-            xp_reward = 15
-          WHERE frequency_type IS NULL OR xp_reward IS NULL;
-        `
-      });
-
-    if (updateError) {
-      console.error('❌ Error updating missions:', updateError);
-    } else {
-      console.log('✅ Existing missions updated with default values');
-    }
-
-    console.log('\n🎉 Missing columns added successfully!');
-
-    // Verify the changes
-    console.log('\n📋 Verifying changes...');
-    const { data: userMissions, error: missionsError } = await supabase
-      .from('user_missions')
-      .select('*')
-      .limit(3);
-
-    if (missionsError) {
-      console.error('❌ Error getting missions:', missionsError);
+    console.log('🚀 Toevoegen van ontbrekende kolommen aan nutrition_plans tabel...');
+    
+    // Check if table exists
+    console.log('🔍 Controleren van tabel...');
+    
+    const { data: testData, error: testError } = await supabase
+      .from('nutrition_plans')
+      .select('id')
+      .limit(1);
+    
+    if (testError) {
+      console.error('❌ Tabel nutrition_plans bestaat niet:', testError);
       return;
     }
-
-    console.log(`📊 Sample missions:\n`);
     
-    userMissions.forEach((mission, index) => {
-      console.log(`${index + 1}. "${mission.title}"`);
-      console.log(`   Type: ${mission.frequency_type}`);
-      console.log(`   XP Reward: ${mission.xp_reward}`);
-      console.log(`   Status: ${mission.status}`);
-      console.log(`   Last Completion: ${mission.last_completion_date}`);
-      console.log('');
-    });
-
+    console.log('✅ Tabel bestaat! Nu kolommen toevoegen...');
+    
+    // Try to add missing columns one by one
+    const missingColumns = [
+      { name: 'color', type: 'VARCHAR(100)' },
+      { name: 'is_active', type: 'BOOLEAN DEFAULT true' },
+      { name: 'subtitle', type: 'TEXT' },
+      { name: 'description', type: 'TEXT' },
+      { name: 'icon', type: 'VARCHAR(10)' },
+      { name: 'meals', type: 'JSONB' },
+      { name: 'created_at', type: 'TIMESTAMP WITH TIME ZONE DEFAULT NOW()' },
+      { name: 'updated_at', type: 'TIMESTAMP WITH TIME ZONE DEFAULT NOW()' }
+    ];
+    
+    for (const column of missingColumns) {
+      console.log(`📝 Toevoegen kolom: ${column.name}`);
+      
+      try {
+        // Try to insert a test record with the new column to see if it exists
+        const testRecord = {
+          plan_id: `test-${column.name}`,
+          name: `Test ${column.name}`,
+          [column.name]: column.name === 'is_active' ? true : 
+                        column.name === 'meals' ? [] : 
+                        column.name === 'created_at' || column.name === 'updated_at' ? new Date().toISOString() :
+                        'test'
+        };
+        
+        const { data: insertData, error: insertError } = await supabase
+          .from('nutrition_plans')
+          .insert(testRecord)
+          .select();
+        
+        if (insertError) {
+          if (insertError.message.includes(`Could not find the '${column.name}' column`)) {
+            console.log(`⚠️  Kolom ${column.name} bestaat nog niet. Handmatige toevoeging vereist.`);
+            console.log(`📋 Voer dit uit in Supabase SQL Editor:`);
+            console.log(`ALTER TABLE nutrition_plans ADD COLUMN IF NOT EXISTS ${column.name} ${column.type};`);
+          } else {
+            console.error(`❌ Fout bij testen kolom ${column.name}:`, insertError);
+          }
+        } else {
+          console.log(`✅ Kolom ${column.name} bestaat al`);
+          
+          // Clean up test record
+          await supabase
+            .from('nutrition_plans')
+            .delete()
+            .eq('plan_id', `test-${column.name}`);
+        }
+      } catch (error) {
+        console.error(`❌ Fout bij testen kolom ${column.name}:`, error);
+      }
+    }
+    
+    console.log('🎉 Kolom check voltooid!');
+    console.log('📋 Als er kolommen ontbreken, voer de ALTER TABLE statements handmatig uit in Supabase SQL Editor.');
+    console.log('📋 Daarna kun je de plannen invoegen met: node scripts/simple-insert.js');
+    
   } catch (error) {
-    console.error('❌ Error:', error.message);
+    console.error('❌ Fout tijdens kolom check:', error);
   }
 }
 
