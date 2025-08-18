@@ -64,13 +64,16 @@ export function CacheManager() {
     lastCacheCheck.current = now;
   }, [logCacheIssue]);
 
-  // Force cache refresh for Rick (Chrome only)
+  // Force cache refresh for Rick (Chrome + PWA)
   const forceCacheRefresh = useCallback(() => {
     if (getUserType() === 'rick') {
       const isChrome = /Chrome/.test(navigator.userAgent) && !/Edge/.test(navigator.userAgent);
+      const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
+                   (window.navigator as any).standalone === true ||
+                   document.referrer.includes('android-app://');
       
-      if (isChrome) {
-        // Clear browser cache for current domain (Chrome only)
+      if (isChrome || isPWA) {
+        // Clear browser cache for current domain (Chrome + PWA)
         if ('caches' in window) {
           caches.keys().then(cacheNames => {
             cacheNames.forEach(cacheName => {
@@ -83,16 +86,27 @@ export function CacheManager() {
         localStorage.clear();
         sessionStorage.clear();
 
+        // Clear service worker cache for PWA
+        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+          navigator.serviceWorker.getRegistrations().then(registrations => {
+            registrations.forEach(registration => {
+              registration.unregister();
+            });
+          });
+        }
+
         // Force reload with cache busting
         const timestamp = Date.now();
         const currentUrl = new URL(window.location.href);
         currentUrl.searchParams.set('_cb', timestamp.toString());
         
         logCacheIssue({
-          error_message: 'Forced cache refresh for Rick (Chrome only)',
+          error_message: `Forced cache refresh for Rick (${isPWA ? 'PWA' : 'Chrome'})`,
           details: {
             action: 'force_cache_refresh',
             browser: navigator.userAgent,
+            is_pwa: isPWA,
+            display_mode: window.matchMedia('(display-mode: standalone)').matches ? 'standalone' : 'browser',
             timestamp: new Date().toISOString(),
             new_url: currentUrl.toString()
           }
@@ -101,12 +115,14 @@ export function CacheManager() {
         // Reload page with cache busting
         window.location.href = currentUrl.toString();
       } else {
-        // For non-Chrome browsers, just log the issue but don't force refresh
+        // For non-Chrome/non-PWA browsers, just log the issue but don't force refresh
         logCacheIssue({
-          error_message: 'Cache refresh skipped for non-Chrome browser',
+          error_message: 'Cache refresh skipped for non-Chrome/non-PWA browser',
           details: {
             action: 'cache_refresh_skipped',
             browser: navigator.userAgent,
+            is_pwa: isPWA,
+            display_mode: window.matchMedia('(display-mode: standalone)').matches ? 'standalone' : 'browser',
             timestamp: new Date().toISOString()
           }
         });
@@ -114,23 +130,28 @@ export function CacheManager() {
     }
   }, [getUserType, logCacheIssue]);
 
-  // Auto-cache refresh for Rick when issues are detected (Chrome only)
+  // Auto-cache refresh for Rick when issues are detected (Chrome + PWA)
   useEffect(() => {
     if (getUserType() !== 'rick') return;
 
     const isChrome = /Chrome/.test(navigator.userAgent) && !/Edge/.test(navigator.userAgent);
+    const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
+                 (window.navigator as any).standalone === true ||
+                 document.referrer.includes('android-app://');
     
-    if (isChrome) {
+    if (isChrome || isPWA) {
       const checkAndFixCache = () => {
         detectCacheIssues();
         
         // If multiple cache issues detected, auto-refresh
         if (cacheIssueCount.current >= 3) {
           logCacheIssue({
-            error_message: 'Auto-refreshing cache due to multiple issues (Chrome only)',
+            error_message: `Auto-refreshing cache due to multiple issues (${isPWA ? 'PWA' : 'Chrome'})`,
             details: {
               cache_issue_count: cacheIssueCount.current,
               browser: navigator.userAgent,
+              is_pwa: isPWA,
+              display_mode: window.matchMedia('(display-mode: standalone)').matches ? 'standalone' : 'browser',
               action: 'auto_cache_refresh',
               timestamp: new Date().toISOString()
             }
@@ -142,7 +163,7 @@ export function CacheManager() {
         }
       };
 
-      // Check cache every 30 seconds for Rick (Chrome only)
+      // Check cache every 30 seconds for Rick (Chrome + PWA)
       const cacheCheckInterval = setInterval(checkAndFixCache, 30000);
       
       // Initial check
@@ -152,33 +173,40 @@ export function CacheManager() {
     }
   }, [getUserType, detectCacheIssues, forceCacheRefresh, logCacheIssue]);
 
-    // Monitor for Chrome-specific cache issues only
+    // Monitor for Chrome/PWA-specific cache issues
   useEffect(() => {
     if (getUserType() !== 'rick') return;
 
     const isChrome = /Chrome/.test(navigator.userAgent) && !/Edge/.test(navigator.userAgent);
+    const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
+                 (window.navigator as any).standalone === true ||
+                 document.referrer.includes('android-app://');
     
-    if (isChrome) {
-      // Chrome-specific cache monitoring
-      const monitorChromeCache = () => {
-        // Check for Chrome's aggressive caching
-        const chromeCacheIndicators = [
-          // Check if page loads instantly (Chrome cache)
+    if (isChrome || isPWA) {
+      // Chrome/PWA-specific cache monitoring
+      const monitorChromePWACache = () => {
+        // Check for Chrome's/PWA's aggressive caching
+        const cacheIndicators = [
+          // Check if page loads instantly (cache)
           performance.timing.loadEventEnd - performance.timing.navigationStart < 50,
           // Check for cached resources
           performance.getEntriesByType('resource').filter(entry => (entry as any).transferSize === 0).length > 5,
           // Check for old service worker cache
-          'serviceWorker' in navigator && navigator.serviceWorker.controller
+          'serviceWorker' in navigator && navigator.serviceWorker.controller,
+          // PWA-specific: Check for standalone mode
+          isPWA && window.matchMedia('(display-mode: standalone)').matches
         ];
 
-        const hasChromeCacheIssues = chromeCacheIndicators.some(indicator => indicator);
+        const hasCacheIssues = cacheIndicators.some(indicator => indicator);
         
-        if (hasChromeCacheIssues) {
+        if (hasCacheIssues) {
           logCacheIssue({
-            error_message: 'Chrome cache issue detected',
+            error_message: `${isPWA ? 'PWA' : 'Chrome'} cache issue detected`,
             details: {
-              chrome_cache_indicators: chromeCacheIndicators,
-              browser_type: 'Chrome',
+              cache_indicators: cacheIndicators,
+              browser_type: isPWA ? 'PWA' : 'Chrome',
+              is_pwa: isPWA,
+              display_mode: window.matchMedia('(display-mode: standalone)').matches ? 'standalone' : 'browser',
               user_agent: navigator.userAgent,
               timestamp: new Date().toISOString()
             }
@@ -186,10 +214,10 @@ export function CacheManager() {
         }
       };
 
-      // Monitor Chrome cache every 15 seconds
-      const chromeCacheInterval = setInterval(monitorChromeCache, 15000);
+      // Monitor cache every 15 seconds
+      const cacheInterval = setInterval(monitorChromePWACache, 15000);
       
-      return () => clearInterval(chromeCacheInterval);
+      return () => clearInterval(cacheInterval);
     }
   }, [getUserType, logCacheIssue]);
 
