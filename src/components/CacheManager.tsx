@@ -64,136 +64,22 @@ export function CacheManager() {
     lastCacheCheck.current = now;
   }, [logCacheIssue]);
 
-  // Force cache refresh for Rick (Chrome only)
+  // Force cache refresh for Rick - DISABLED
   const forceCacheRefresh = useCallback(() => {
-    if (getUserType() === 'rick') {
-      const isChrome = /Chrome/.test(navigator.userAgent) && !/Edge/.test(navigator.userAgent);
-      
-      if (isChrome) {
-        // Clear browser cache for current domain (Chrome only)
-        if ('caches' in window) {
-          caches.keys().then(cacheNames => {
-            cacheNames.forEach(cacheName => {
-              caches.delete(cacheName);
-            });
-          });
-        }
-
-        // Clear localStorage and sessionStorage
-        localStorage.clear();
-        sessionStorage.clear();
-
-        // Force reload with cache busting
-        const timestamp = Date.now();
-        const currentUrl = new URL(window.location.href);
-        currentUrl.searchParams.set('_cb', timestamp.toString());
-        
-        logCacheIssue({
-          error_message: 'Forced cache refresh for Rick (Chrome only)',
-          details: {
-            action: 'force_cache_refresh',
-            browser: navigator.userAgent,
-            timestamp: new Date().toISOString(),
-            new_url: currentUrl.toString()
-          }
-        });
-
-        // Reload page with cache busting
-        window.location.href = currentUrl.toString();
-      } else {
-        // For non-Chrome browsers, just log the issue but don't force refresh
-        logCacheIssue({
-          error_message: 'Cache refresh skipped for non-Chrome browser',
-          details: {
-            action: 'cache_refresh_skipped',
-            browser: navigator.userAgent,
-            timestamp: new Date().toISOString()
-          }
-        });
-      }
-    }
+    // Cache clearing disabled to prevent authentication delays
+    console.log('🔍 Cache clearing disabled for all browsers');
   }, [getUserType, logCacheIssue]);
 
-  // Auto-cache refresh for Rick when issues are detected (Chrome only)
+  // Auto-cache refresh for Rick - DISABLED
   useEffect(() => {
-    if (getUserType() !== 'rick') return;
-
-    const isChrome = /Chrome/.test(navigator.userAgent) && !/Edge/.test(navigator.userAgent);
-    
-    if (isChrome) {
-      const checkAndFixCache = () => {
-        detectCacheIssues();
-        
-        // Only auto-refresh if there are significant cache issues (increased threshold)
-        if (cacheIssueCount.current >= 5) {
-          logCacheIssue({
-            error_message: 'Auto-refreshing cache due to multiple issues (Chrome only)',
-            details: {
-              cache_issue_count: cacheIssueCount.current,
-              browser: navigator.userAgent,
-              action: 'auto_cache_refresh',
-              timestamp: new Date().toISOString()
-            }
-          });
-          
-          // Reset counter and force refresh
-          cacheIssueCount.current = 0;
-          forceCacheRefresh();
-        }
-      };
-
-      // Check cache every 60 seconds for Rick (increased interval to reduce loops)
-      const cacheCheckInterval = setInterval(checkAndFixCache, 60000);
-      
-      // Initial check after 10 seconds (delayed to avoid immediate loops)
-      const initialCheck = setTimeout(checkAndFixCache, 10000);
-      
-      return () => {
-        clearInterval(cacheCheckInterval);
-        clearTimeout(initialCheck);
-      };
-    }
+    // Auto cache refresh disabled to prevent authentication delays
+    console.log('🔍 Auto cache refresh disabled for all browsers');
   }, [getUserType, detectCacheIssues, forceCacheRefresh, logCacheIssue]);
 
-    // Monitor for Chrome-specific cache issues only
+    // Monitor for cache issues - DISABLED
   useEffect(() => {
-    if (getUserType() !== 'rick') return;
-
-    const isChrome = /Chrome/.test(navigator.userAgent) && !/Edge/.test(navigator.userAgent);
-    
-    if (isChrome) {
-      // Chrome-specific cache monitoring
-      const monitorChromeCache = () => {
-        // Check for Chrome's aggressive caching
-        const chromeCacheIndicators = [
-          // Check if page loads instantly (Chrome cache)
-          performance.timing.loadEventEnd - performance.timing.navigationStart < 50,
-          // Check for cached resources
-          performance.getEntriesByType('resource').filter(entry => (entry as any).transferSize === 0).length > 5,
-          // Check for old service worker cache
-          'serviceWorker' in navigator && navigator.serviceWorker.controller
-        ];
-
-        const hasChromeCacheIssues = chromeCacheIndicators.some(indicator => indicator);
-        
-        if (hasChromeCacheIssues) {
-          logCacheIssue({
-            error_message: 'Chrome cache issue detected',
-            details: {
-              chrome_cache_indicators: chromeCacheIndicators,
-              browser_type: 'Chrome',
-              user_agent: navigator.userAgent,
-              timestamp: new Date().toISOString()
-            }
-          });
-        }
-      };
-
-      // Monitor Chrome cache every 30 seconds (increased to reduce loops)
-      const chromeCacheInterval = setInterval(monitorChromeCache, 30000);
-      
-      return () => clearInterval(chromeCacheInterval);
-    }
+    // Cache monitoring disabled to prevent authentication delays
+    console.log('🔍 Cache monitoring disabled for all browsers');
   }, [getUserType, logCacheIssue]);
 
   // Add cache management UI for Rick
