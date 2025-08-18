@@ -283,22 +283,26 @@ export function GlobalSessionMonitor() {
         });
       }
 
-      // Check for excessive event listeners
+      // Check for excessive event listeners (simplified)
       const eventListeners = (window as any).getEventListeners;
       if (eventListeners) {
-        const listeners = eventListeners(document);
-        const totalListeners = Object.values(listeners).reduce((acc: number, curr: any) => acc + curr.length, 0);
-        
-        if (totalListeners > 100) {
-          logSession({
-            action_type: 'rick_issue',
-            error_message: `Excessive event listeners: ${totalListeners}`,
-            details: {
-              event_listener_count: totalListeners,
-              threshold: 100,
-              page: window.location.pathname
-            }
-          });
+        try {
+          const listeners = eventListeners(document);
+          const totalListeners = Object.values(listeners as any).reduce((acc: number, curr: any) => acc + (curr?.length || 0), 0);
+          
+          if (totalListeners > 100) {
+            logSession({
+              action_type: 'rick_issue',
+              error_message: `Excessive event listeners: ${totalListeners}`,
+              details: {
+                event_listener_count: totalListeners,
+                threshold: 100,
+                page: window.location.pathname
+              }
+            });
+          }
+        } catch (error) {
+          // Ignore event listener errors
         }
       }
 
