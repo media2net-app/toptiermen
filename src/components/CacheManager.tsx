@@ -198,17 +198,24 @@ export function CacheManager() {
     }
   }, [getUserType, logCacheIssue]);
 
-  // Auto-cache refresh for Rick when issues are detected
+  // Auto-cache refresh for Rick when issues are detected (disabled for Chrome)
   useEffect(() => {
     if (getUserType() !== 'rick') return;
+
+    const userAgent = navigator.userAgent;
+    const isChrome = /Chrome/.test(userAgent) && !/Edge/.test(userAgent);
+    
+    // Skip cache monitoring for Rick in Chrome (we auto-clear everything)
+    if (isChrome) {
+      console.log('🔄 Rick: Skipping cache monitoring in Chrome (auto-clear enabled)');
+      return;
+    }
 
     const checkAndFixCache = () => {
       detectCacheIssues();
       
-      // If multiple cache issues detected, auto-refresh (lower threshold for Chrome)
-      const userAgent = navigator.userAgent;
-      const isChrome = /Chrome/.test(userAgent) && !/Edge/.test(userAgent);
-      const threshold = isChrome ? 2 : 3; // Lower threshold for Chrome
+      // If multiple cache issues detected, auto-refresh
+      const threshold = 3;
       
       if (cacheIssueCount.current >= threshold) {
         logCacheIssue({
@@ -226,7 +233,7 @@ export function CacheManager() {
       }
     };
 
-    // Check cache every 30 seconds for Rick
+    // Check cache every 30 seconds for Rick (non-Chrome browsers)
     const cacheCheckInterval = setInterval(checkAndFixCache, 30000);
     
     // Initial check
@@ -235,7 +242,7 @@ export function CacheManager() {
     return () => clearInterval(cacheCheckInterval);
   }, [getUserType, detectCacheIssues, forceCacheRefresh, logCacheIssue]);
 
-  // Monitor for browser-specific cache issues (Chrome, Edge, Firefox)
+  // Monitor for browser-specific cache issues (Edge, Firefox - Chrome disabled)
   useEffect(() => {
     if (getUserType() !== 'rick') return;
 
@@ -244,7 +251,13 @@ export function CacheManager() {
     const isEdge = /Edge/.test(userAgent);
     const isFirefox = /Firefox/.test(userAgent);
     
-    if (isChrome || isEdge || isFirefox) {
+    // Skip Chrome monitoring (we auto-clear everything)
+    if (isChrome) {
+      console.log('🔄 Rick: Skipping Chrome cache monitoring (auto-clear enabled)');
+      return;
+    }
+    
+    if (isEdge || isFirefox) {
       // Browser-specific cache monitoring
       const monitorBrowserCache = () => {
         // Check for browser-specific aggressive caching
@@ -257,10 +270,7 @@ export function CacheManager() {
           'serviceWorker' in navigator && navigator.serviceWorker.controller,
           // Edge-specific: check for aggressive memory caching
           isEdge && 'memory' in performance && (performance as any).memory.usedJSHeapSize > 50 * 1024 * 1024, // 50MB
-          // Chrome-specific: check for V8 cache and memory issues
-          isChrome && localStorage.getItem('chrome_cache_version') !== 'v3',
-          isChrome && 'memory' in performance && (performance as any).memory.usedJSHeapSize > 30 * 1024 * 1024, // 30MB for Chrome
-          isChrome && performance.getEntriesByType('resource').filter(entry => (entry as any).transferSize === 0).length > 3,
+          // Chrome monitoring disabled (auto-clear enabled)
           // Firefox-specific: check for aggressive disk cache
           isFirefox && sessionStorage.getItem('firefox_cache_check') !== 'cleared'
         ];
@@ -387,14 +397,22 @@ export function CacheManager() {
       const isChrome = /Chrome/.test(userAgent) && !/Edge/.test(userAgent);
       
       if (isChrome) {
-        // Set Chrome-specific cache version
-        localStorage.setItem('chrome_cache_version', 'v3');
+        console.log('🔄 Rick: Chrome detected, implementing aggressive cache prevention');
         
-        // Add Chrome-specific meta tags
+        // Set Chrome-specific cache version
+        localStorage.setItem('chrome_cache_version', 'v4');
+        
+        // Add Chrome-specific meta tags (more aggressive)
         const chromeMeta = document.createElement('meta');
         chromeMeta.setAttribute('name', 'chrome-cache-control');
-        chromeMeta.setAttribute('content', 'no-cache, no-store, must-revalidate, max-age=0');
+        chromeMeta.setAttribute('content', 'no-cache, no-store, must-revalidate, max-age=0, private');
         document.head.appendChild(chromeMeta);
+        
+        // Add additional Chrome cache prevention
+        const additionalMeta = document.createElement('meta');
+        additionalMeta.setAttribute('name', 'chrome-cache-busting');
+        additionalMeta.setAttribute('content', `timestamp-${Date.now()}`);
+        document.head.appendChild(additionalMeta);
         
         // Disable Chrome's back-forward cache
         if ('performance' in window && 'navigation' in performance) {
@@ -405,6 +423,62 @@ export function CacheManager() {
             sessionStorage.clear();
           }
         }
+        
+        // Auto-clear cache on page load for Rick in Chrome
+        const autoClearCache = () => {
+          console.log('🔄 Rick: Auto-clearing Chrome cache on page load');
+          
+          // Clear all storage immediately
+          localStorage.clear();
+          sessionStorage.clear();
+          
+          // Clear cookies
+          document.cookie.split(";").forEach(cookie => {
+            const eqPos = cookie.indexOf("=");
+            const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+            if (name && !name.includes('user-email')) { // Keep user email cookie
+              document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+            }
+          });
+          
+          // Clear caches
+          if ('caches' in window) {
+            caches.keys().then(cacheNames => {
+              cacheNames.forEach(cacheName => {
+                caches.delete(cacheName);
+              });
+            });
+          }
+          
+          // Clear IndexedDB
+          if ('indexedDB' in window) {
+            indexedDB.databases().then(databases => {
+              databases.forEach(db => {
+                if (db.name) {
+                  indexedDB.deleteDatabase(db.name);
+                }
+              });
+            });
+          }
+          
+          // Unregister service workers
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(registrations => {
+              registrations.forEach(registration => {
+                registration.unregister();
+              });
+            });
+          }
+        };
+        
+        // Run auto-clear on page load
+        autoClearCache();
+        
+        // Also clear cache every 5 seconds for Rick in Chrome
+        const autoClearInterval = setInterval(autoClearCache, 5000);
+        
+        // Cleanup interval on component unmount
+        return () => clearInterval(autoClearInterval);
       }
       
       // Set user email in cookie for middleware identification
