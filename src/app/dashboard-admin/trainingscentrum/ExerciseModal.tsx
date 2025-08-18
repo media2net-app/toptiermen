@@ -48,7 +48,7 @@ export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: Exe
         secondary_muscles: exercise.secondary_muscles || [],
         equipment: exercise.equipment || '',
         video_url: exercise.video_url || '',
-        instructions: exercise.instructions || '',
+        instructions: exercise.instructions || 'Geen instructies beschikbaar',
         worksheet_url: exercise.worksheet_url || null
       };
       
@@ -61,7 +61,7 @@ export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: Exe
         secondary_muscles: [],
         equipment: '',
         video_url: '',
-        instructions: '',
+        instructions: 'Geen instructies beschikbaar',
         worksheet_url: null
       };
       
@@ -77,9 +77,9 @@ export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: Exe
     console.log('📋 Form data:', formData);
     console.log('📋 Is uploading:', isUploading);
     
-    if (!formData.name || !formData.primary_muscle || !formData.equipment) {
+    if (!formData.name || !formData.primary_muscle || !formData.equipment || !formData.instructions) {
       console.log('❌ Validation failed - missing required fields');
-      toast.error('Vul alle verplichte velden in (naam, primaire spiergroep, materiaal)');
+      toast.error('Vul alle verplichte velden in (naam, primaire spiergroep, materiaal, instructies)');
       return;
     }
 
@@ -116,7 +116,7 @@ export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: Exe
     console.log('✅ Exercise modal state updated with new video URL');
     
     // Auto-save when video is uploaded (if form is valid)
-    if (formData.name && formData.primary_muscle && formData.equipment) {
+    if (formData.name && formData.primary_muscle && formData.equipment && formData.instructions) {
       console.log('🚀 Auto-saving exercise after video upload...');
       setIsAutoSaving(true);
       toast.success('Video geüpload! Oefening wordt automatisch opgeslagen...');
@@ -340,7 +340,7 @@ export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: Exe
           {/* Instructies */}
           <div>
             <label className="block text-[#8BAE5A] font-semibold mb-2">
-              Instructies
+              Instructies *
             </label>
             <textarea
               value={formData.instructions}

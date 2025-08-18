@@ -517,7 +517,7 @@ export interface Database {
           equipment: string | null
           difficulty: string | null
           video_url: string | null
-          instructions: string | null
+          instructions: string
           worksheet_url: string | null
           secondary_muscles: string[] | null
           created_at: string
@@ -531,7 +531,7 @@ export interface Database {
           equipment?: string | null
           difficulty?: string | null
           video_url?: string | null
-          instructions?: string | null
+          instructions: string
           worksheet_url?: string | null
           secondary_muscles?: string[] | null
           created_at?: string
@@ -545,7 +545,7 @@ export interface Database {
           equipment?: string | null
           difficulty?: string | null
           video_url?: string | null
-          instructions?: string | null
+          instructions?: string
           worksheet_url?: string | null
           secondary_muscles?: string[] | null
           created_at?: string

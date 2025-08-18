@@ -367,7 +367,7 @@ export default function TrainingscentrumBeheer() {
         equipment: exerciseData.equipment,
         difficulty: exerciseData.difficulty || 'Intermediate',
         video_url: exerciseData.video_url || null,
-        instructions: exerciseData.instructions || null,
+        instructions: exerciseData.instructions || 'Geen instructies beschikbaar',
         worksheet_url: exerciseData.worksheet_url || null,
         secondary_muscles: Array.isArray(exerciseData.secondary_muscles) ? exerciseData.secondary_muscles : [],
         created_at: new Date().toISOString(),
@@ -430,7 +430,7 @@ export default function TrainingscentrumBeheer() {
         equipment: exerciseData.equipment,
         difficulty: exerciseData.difficulty || 'Intermediate',
         video_url: exerciseData.video_url || null,
-        instructions: exerciseData.instructions || null,
+        instructions: exerciseData.instructions || 'Geen instructies beschikbaar',
         worksheet_url: exerciseData.worksheet_url || null,
         secondary_muscles: Array.isArray(exerciseData.secondary_muscles) ? exerciseData.secondary_muscles : [],
         updated_at: new Date().toISOString() // Force update timestamp
