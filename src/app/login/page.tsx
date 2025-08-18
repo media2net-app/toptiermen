@@ -21,47 +21,68 @@ export default function Login() {
 
   // Check if user is already authenticated
   useEffect(() => {
-    if (!mounted || loading) return;
+    console.log('🔍 Login useEffect triggered:', { mounted, loading, user: user?.email, role: user?.role });
+    
+    if (!mounted) {
+      console.log('🔍 Component not mounted yet, skipping');
+      return;
+    }
+    
+    if (loading) {
+      console.log('🔍 Still loading auth state, skipping');
+      return;
+    }
     
     if (user) {
-      console.log('User already authenticated:', user.role);
+      console.log('🔍 User already authenticated:', { email: user.email, role: user.role, id: user.id });
       setRedirecting(true);
       
       // Check for redirect parameter first
       const urlParams = new URLSearchParams(window.location.search);
       const redirectPath = urlParams.get('redirect');
+      console.log('🔍 Redirect path from URL:', redirectPath);
       
       let targetPath: string;
       if (redirectPath && redirectPath.startsWith('/dashboard-admin')) {
         // If redirecting to admin page, verify user is admin
         if (user.role?.toLowerCase() === 'admin') {
           targetPath = redirectPath;
+          console.log('🔍 Admin user, redirecting to admin path:', targetPath);
         } else {
           targetPath = '/dashboard';
+          console.log('🔍 Non-admin user, redirecting to dashboard instead of admin path');
         }
       } else if (redirectPath && redirectPath.startsWith('/dashboard')) {
         // If redirecting to regular dashboard
         targetPath = redirectPath;
+        console.log('🔍 Redirecting to dashboard path:', targetPath);
       } else {
         // Default redirect based on user role
         targetPath = user.role?.toLowerCase() === 'admin' ? '/dashboard-admin' : '/dashboard';
+        console.log('🔍 Default redirect based on role:', targetPath);
       }
       
       // Try router.replace first, fallback to window.location
       try {
+        console.log('🔍 Attempting router.replace to:', targetPath);
         router.replace(targetPath);
         // Add a fallback redirect in case router.replace doesn't work
         setTimeout(() => {
           if (window.location.pathname === '/login') {
-            console.log('🔍 Router redirect failed, using window.location fallback');
+            console.log('🔍 Router redirect failed after 2s, using window.location fallback');
             window.location.href = targetPath;
+          } else {
+            console.log('🔍 Router redirect successful, current path:', window.location.pathname);
           }
         }, 2000);
       } catch (redirectError) {
         console.error('🔍 Router redirect error:', redirectError);
         // Fallback to window.location
+        console.log('🔍 Using window.location fallback due to router error');
         window.location.href = targetPath;
       }
+    } else {
+      console.log('🔍 No user authenticated, staying on login page');
     }
   }, [mounted, loading, user, router]);
 
@@ -81,34 +102,38 @@ export default function Login() {
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    console.log('🔍 Login attempt started');
+    console.log('🔍 Login attempt started for email:', email);
     
     if (!email || !password) {
+      console.log('🔍 Missing email or password');
       setError("Vul alle velden in");
       return;
     }
     
+    console.log('🔍 Setting loading state and clearing errors');
     setIsLoading(true);
     setError("");
     
     try {
-      console.log('🔍 Calling signIn...');
+      console.log('🔍 Calling signIn with email:', email);
       const result = await signIn(email, password);
+      console.log('🔍 SignIn result:', result);
 
       if (!result.success) {
-        console.error('Sign in error:', result.error);
+        console.error('🔍 Sign in failed:', result.error);
         setError(result.error || "Ongeldige inloggegevens");
         setIsLoading(false);
         return;
       }
 
-      console.log('🔍 Login successful, redirecting...');
+      console.log('🔍 Login successful, setting redirecting state');
       setRedirecting(true);
       
       // The redirect will be handled by the useEffect above when user state updates
+      console.log('🔍 Waiting for user state to update for redirect...');
       
     } catch (error: any) {
-      console.error('🔍 Login error:', error);
+      console.error('🔍 Login error caught:', error);
       setError(error.message || "Er is een fout opgetreden bij het inloggen");
       setIsLoading(false);
     }

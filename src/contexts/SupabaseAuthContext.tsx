@@ -165,19 +165,23 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
   useEffect(() => {
     // Get initial session
     const getInitialSession = async () => {
+      console.log('🔍 Auth: getInitialSession started');
       try {
         // Add timeout to prevent infinite loading
         const timeoutId = setTimeout(() => {
-          console.warn('Auth initialization timeout, forcing loading to false');
+          console.warn('🔍 Auth: Initialization timeout, forcing loading to false');
           setLoading(false);
         }, 15000); // 15 second timeout
 
+        console.log('🔍 Auth: Getting session from Supabase...');
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
-          console.error('Error getting session:', error);
+          console.error('🔍 Auth: Error getting session:', error);
         } else if (session?.user) {
+          console.log('🔍 Auth: Session found, user:', { id: session.user.id, email: session.user.email });
           // Get user profile from profiles table
+          console.log('🔍 Auth: Fetching user profile...');
           const { data: profile, error: profileError } = await supabase
             .from('users')
             .select('*')
@@ -185,8 +189,9 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
             .single();
 
           if (profileError) {
-            console.error('Error getting profile:', profileError);
+            console.error('🔍 Auth: Error getting profile:', profileError);
             // Fallback: set minimal user info from auth session
+            console.log('🔍 Auth: Using fallback user data from session');
             setUser({
               id: session.user.id,
               email: session.user.email || '',
@@ -194,19 +199,31 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
               role: 'USER'
             });
           } else if (profile) {
+            console.log('🔍 Auth: Profile fetched successfully:', { id: profile.id, email: profile.email, role: profile.role });
             setUser({
               id: profile.id,
               email: profile.email,
               full_name: profile.full_name,
               role: normalizeRole(profile.role)
             });
+          } else {
+            console.log('🔍 Auth: No profile found, using fallback');
+            setUser({
+              id: session.user.id,
+              email: session.user.email || '',
+              full_name: (session.user.user_metadata as any)?.full_name,
+              role: 'USER'
+            });
           }
+        } else {
+          console.log('🔍 Auth: No session found');
         }
         
         clearTimeout(timeoutId);
       } catch (error) {
-        console.error('Error in getInitialSession:', error);
+        console.error('🔍 Auth: Error in getInitialSession:', error);
       } finally {
+        console.log('🔍 Auth: Setting loading to false');
         setLoading(false);
       }
     };
@@ -266,19 +283,24 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
   }, []);
 
   const signIn = async (email: string, password: string) => {
+    console.log('🔍 Auth: signIn called with email:', email);
     try {
+      console.log('🔍 Auth: Calling supabase.auth.signInWithPassword...');
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
-        console.error('Sign in error:', error);
+        console.error('🔍 Auth: Sign in error:', error);
         return { success: false, error: error.message };
       }
 
+      console.log('🔍 Auth: Sign in successful, user data:', { id: data.user?.id, email: data.user?.email });
+
       if (data.user) {
         // Get user profile
+        console.log('🔍 Auth: Fetching user profile from database...');
         const { data: profile, error: profileError } = await supabase
           .from('users')
           .select('*')
@@ -286,8 +308,9 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
           .single();
 
         if (profileError) {
-          console.error('Error getting profile:', profileError);
+          console.error('🔍 Auth: Error getting profile:', profileError);
           // Fallback to auth user if profile not readable (e.g., RLS)
+          console.log('🔍 Auth: Using fallback user data from auth session');
           setUser({
             id: data.user.id,
             email: data.user.email!,
@@ -298,18 +321,28 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         }
 
         if (profile) {
+          console.log('🔍 Auth: Profile fetched successfully:', { id: profile.id, email: profile.email, role: profile.role });
           setUser({
             id: profile.id,
             email: profile.email,
             full_name: profile.full_name,
             role: normalizeRole(profile.role)
           });
+        } else {
+          console.log('🔍 Auth: No profile found, using fallback');
+          setUser({
+            id: data.user.id,
+            email: data.user.email!,
+            full_name: (data.user.user_metadata as any)?.full_name,
+            role: 'USER'
+          });
         }
       }
 
+      console.log('🔍 Auth: signIn completed successfully');
       return { success: true };
     } catch (error) {
-      console.error('Sign in error:', error);
+      console.error('🔍 Auth: Sign in error caught:', error);
       return { success: false, error: 'An unexpected error occurred' };
     }
   };
