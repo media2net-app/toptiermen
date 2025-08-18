@@ -162,11 +162,11 @@ export async function POST(request: NextRequest) {
 
     if (existingLog) {
       // Update existing session
-      loop_detections = existingLog.loop_detections + (loop_detected ? 1 : 0);
-      error_count = existingLog.error_count + (error_message ? 1 : 0);
-      page_visits = existingLog.page_visits + 1;
-      cache_hits = existingLog.cache_hits + (cache_hit ? 1 : 0);
-      cache_misses = existingLog.cache_misses + (!cache_hit ? 1 : 0);
+      loop_detections = (existingLog as any).loop_detections + (loop_detected ? 1 : 0);
+      error_count = (existingLog as any).error_count + (error_message ? 1 : 0);
+      page_visits = (existingLog as any).page_visits + 1;
+      cache_hits = (existingLog as any).cache_hits + (cache_hit ? 1 : 0);
+      cache_misses = (existingLog as any).cache_misses + (!cache_hit ? 1 : 0);
 
       // Determine status based on activity
       if (loop_detections > 5) {
@@ -194,7 +194,7 @@ export async function POST(request: NextRequest) {
             ip_address: clientIP,
             updated_at: now
           })
-          .eq('id', existingLog.id);
+          .eq('id', (existingLog as any).id);
 
         if (updateError) {
           console.log('⚠️ Error updating session log:', updateError.message);
@@ -252,7 +252,7 @@ export async function POST(request: NextRequest) {
           user_type: user_type || 'user',
           action_type: action_type || 'page_load',
           current_page,
-          previous_page: existingLog?.current_page,
+          previous_page: (existingLog as any)?.current_page,
           error_message,
           error_stack: error_message ? new Error().stack : null,
           load_time_ms: null, // Will be calculated if needed
@@ -267,7 +267,7 @@ export async function POST(request: NextRequest) {
             cache_misses,
             loop_detections,
             error_count,
-            session_duration: existingLog ? Math.floor((new Date().getTime() - new Date(existingLog.created_at).getTime()) / 1000) : 0
+            session_duration: existingLog ? Math.floor((new Date().getTime() - new Date((existingLog as any).created_at).getTime()) / 1000) : 0
           },
           created_at: now
         });
