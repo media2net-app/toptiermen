@@ -397,189 +397,89 @@ export function CacheManager() {
       const isChrome = /Chrome/.test(userAgent) && !/Edge/.test(userAgent);
       
       if (isChrome) {
-        console.log('🔄 Rick: Chrome detected, implementing aggressive cache prevention');
+        console.log('🔄 Rick: Chrome detected, implementing INCOGNITO MODE simulation');
         
-        // Set Chrome-specific cache version
-        localStorage.setItem('chrome_cache_version', 'v4');
+        // Simulate Incognito mode by preventing any storage access
+        const originalLocalStorage = window.localStorage;
+        const originalSessionStorage = window.sessionStorage;
         
-        // Add Chrome-specific meta tags (more aggressive)
-        const chromeMeta = document.createElement('meta');
-        chromeMeta.setAttribute('name', 'chrome-cache-control');
-        chromeMeta.setAttribute('content', 'no-cache, no-store, must-revalidate, max-age=0, private');
-        document.head.appendChild(chromeMeta);
-        
-        // Add additional Chrome cache prevention
-        const additionalMeta = document.createElement('meta');
-        additionalMeta.setAttribute('name', 'chrome-cache-busting');
-        additionalMeta.setAttribute('content', `timestamp-${Date.now()}`);
-        document.head.appendChild(additionalMeta);
-        
-        // Disable Chrome's back-forward cache
-        if ('performance' in window && 'navigation' in performance) {
-          const nav = (performance as any).navigation;
-          if (nav.type === 1) { // NavigationType.RELOAD
-            console.log('🔄 Chrome: Page reload detected, clearing cache');
-            localStorage.clear();
-            sessionStorage.clear();
+        // Override localStorage to prevent any writes
+        Object.defineProperty(window, 'localStorage', {
+          get: function() {
+            return {
+              getItem: () => null,
+              setItem: () => {},
+              removeItem: () => {},
+              clear: () => {},
+              key: () => null,
+              length: 0
+            };
           }
-        }
+        });
         
-        // AGGRESSIVE smart cache clearing for Rick in Chrome
+        // Override sessionStorage to prevent any writes
+        Object.defineProperty(window, 'sessionStorage', {
+          get: function() {
+            return {
+              getItem: () => null,
+              setItem: () => {},
+              removeItem: () => {},
+              clear: () => {},
+              key: () => null,
+              length: 0
+            };
+          }
+        });
+        
+        // Override document.cookie to prevent any writes
+        const originalCookieDescriptor = Object.getOwnPropertyDescriptor(Document.prototype, 'cookie');
+        Object.defineProperty(document, 'cookie', {
+          get: function() {
+            return '';
+          },
+          set: function(value) {
+            // Only allow setting cookies that expire immediately
+            if (value.includes('expires=Thu, 01 Jan 1970')) {
+              // Allow deletion cookies
+              return;
+            }
+            // Block all other cookie writes
+            console.log('🚫 Rick: Blocked cookie write:', value);
+          }
+        });
+        
+        // Add Incognito-style meta tags
+        const incognitoMeta = document.createElement('meta');
+        incognitoMeta.setAttribute('name', 'incognito-mode');
+        incognitoMeta.setAttribute('content', 'enabled');
+        document.head.appendChild(incognitoMeta);
+        
+        // Add cache prevention headers
+        const cacheMeta = document.createElement('meta');
+        cacheMeta.setAttribute('http-equiv', 'Cache-Control');
+        cacheMeta.setAttribute('content', 'no-cache, no-store, must-revalidate, max-age=0');
+        document.head.appendChild(cacheMeta);
+        
+        const pragmaMeta = document.createElement('meta');
+        pragmaMeta.setAttribute('http-equiv', 'Pragma');
+        pragmaMeta.setAttribute('content', 'no-cache');
+        document.head.appendChild(pragmaMeta);
+        
+        const expiresMeta = document.createElement('meta');
+        expiresMeta.setAttribute('http-equiv', 'Expires');
+        expiresMeta.setAttribute('content', '0');
+        document.head.appendChild(expiresMeta);
+        
+        // INCOGNITO MODE - No cache clearing needed since storage is blocked
         const smartClearCache = () => {
-          console.log('🔄 Rick: AGGRESSIVE smart-clearing Chrome cache');
-          
-          try {
-            // Clear ALL localStorage (no exceptions for Rick)
-            localStorage.clear();
-            console.log('🗑️ Cleared all localStorage');
-            
-            // Clear ALL sessionStorage
-            sessionStorage.clear();
-            console.log('🗑️ Cleared all sessionStorage');
-            
-            // Clear ALL cookies (including user-email to force fresh login)
-            const allCookies = document.cookie.split(";");
-            console.log('🗑️ Clearing all cookies in smart clear:', allCookies.length);
-            allCookies.forEach(cookie => {
-              const eqPos = cookie.indexOf("=");
-              const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
-              if (name) {
-                // Clear with multiple paths
-                document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
-                document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/dashboard`;
-                document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/login`;
-              }
-            });
-            
-            // Clear any session-related data that might have been recreated
-            const sessionKeys = Object.keys(localStorage).filter(key => 
-              key.toLowerCase().includes('session') || 
-              key.toLowerCase().includes('auth') || 
-              key.toLowerCase().includes('user') ||
-              key.toLowerCase().includes('login') ||
-              key.toLowerCase().includes('token')
-            );
-            sessionKeys.forEach(key => localStorage.removeItem(key));
-            console.log('🗑️ Cleared session-related items:', sessionKeys);
-            
-          } catch (error) {
-            console.log('⚠️ Rick: Error during aggressive smart cache clear:', error);
-          }
+          console.log('🔄 Rick: INCOGNITO MODE - No cache to clear (storage blocked)');
+          // No need to clear anything since storage is completely blocked
         };
         
-        // AGGRESSIVE cache clear for Rick in Chrome (like incognito mode)
+        // INCOGNITO MODE - No cache clearing needed since storage is blocked
         const fullClearCache = () => {
-          console.log('🔄 Rick: AGGRESSIVE Chrome cache clear (like incognito)');
-          
-          // Clear ALL storage (no exceptions)
-          try {
-            localStorage.clear();
-            sessionStorage.clear();
-            console.log('🗑️ Cleared localStorage and sessionStorage');
-          } catch (e) {
-            console.log('⚠️ Error clearing storage:', e);
-          }
-          
-          // Clear ALL cookies (including user-email to force fresh login)
-          const allCookies = document.cookie.split(";");
-          console.log('🗑️ Clearing all cookies:', allCookies.length);
-          allCookies.forEach(cookie => {
-            const eqPos = cookie.indexOf("=");
-            const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
-            if (name) {
-              // Clear with multiple paths and domains
-              document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
-              document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/dashboard`;
-              document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/login`;
-              document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;domain=${window.location.hostname}`;
-              document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;domain=.${window.location.hostname}`;
-            }
-          });
-          
-          // Clear ALL caches aggressively
-          if ('caches' in window) {
-            caches.keys().then(cacheNames => {
-              console.log('🗑️ Clearing caches:', cacheNames);
-              cacheNames.forEach(cacheName => {
-                caches.delete(cacheName);
-              });
-            });
-          }
-          
-          // Clear ALL IndexedDB databases
-          if ('indexedDB' in window) {
-            indexedDB.databases().then(databases => {
-              console.log('🗑️ Clearing IndexedDB databases:', databases.map(db => db.name));
-              databases.forEach(db => {
-                if (db.name) {
-                  indexedDB.deleteDatabase(db.name);
-                }
-              });
-            });
-          }
-          
-          // Unregister ALL service workers
-          if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.getRegistrations().then(registrations => {
-              console.log('🗑️ Unregistering service workers:', registrations.length);
-              registrations.forEach(registration => {
-                registration.unregister();
-              });
-            });
-          }
-          
-          // Clear Chrome's application cache
-          if ('applicationCache' in window) {
-            try {
-              (window as any).applicationCache.clear();
-              console.log('🗑️ Cleared application cache');
-            } catch (e) {
-              console.log('⚠️ Could not clear application cache:', e);
-            }
-          }
-          
-          // Clear Chrome's file system cache
-          if ('webkitRequestFileSystem' in window) {
-            try {
-              (window as any).webkitRequestFileSystem((window as any).TEMPORARY, 0, (fs: any) => {
-                fs.root.createReader().readEntries((entries: any[]) => {
-                  entries.forEach(entry => {
-                    if (entry.isFile) {
-                      entry.remove();
-                    }
-                  });
-                });
-              });
-              console.log('🗑️ Cleared temporary file system');
-            } catch (e) {
-              console.log('⚠️ Could not clear temporary file system:', e);
-            }
-          }
-          
-          // Force garbage collection if available
-          if ('gc' in window) {
-            try {
-              (window as any).gc();
-              console.log('🗑️ Forced garbage collection');
-            } catch (e) {
-              console.log('⚠️ Could not force garbage collection:', e);
-            }
-          }
-          
-          // Clear any remaining session data
-          try {
-            // Clear any session-related data
-            const sessionKeys = Object.keys(localStorage).filter(key => 
-              key.toLowerCase().includes('session') || 
-              key.toLowerCase().includes('auth') || 
-              key.toLowerCase().includes('user') ||
-              key.toLowerCase().includes('login')
-            );
-            sessionKeys.forEach(key => localStorage.removeItem(key));
-            console.log('🗑️ Cleared session-related localStorage items:', sessionKeys);
-          } catch (e) {
-            console.log('⚠️ Error clearing session data:', e);
-          }
+          console.log('🔄 Rick: INCOGNITO MODE - No cache to clear (storage blocked)');
+          // No need to clear anything since storage is completely blocked
         };
         
         // Run full clear on page load
@@ -588,68 +488,11 @@ export function CacheManager() {
         const endTime = performance.now();
         console.log(`🔄 Rick: Full cache clear took ${(endTime - startTime).toFixed(2)}ms`);
         
-        // Check if Rick has any existing session data and force reset
-        const checkForExistingSession = () => {
-          const hasSessionData = 
-            document.cookie.includes('sb-') || 
-            localStorage.getItem('supabase.auth.token') ||
-            sessionStorage.getItem('supabase.auth.token') ||
-            Object.keys(localStorage).some(key => key.includes('supabase') || key.includes('auth'));
-          
-          if (hasSessionData) {
-            console.log('🔄 Rick: Existing session detected, forcing reset');
-            (window as any).rickResetSession();
-          }
-        };
+        // INCOGNITO MODE - No session detection needed since storage is blocked
+        console.log('🔄 Rick: INCOGNITO MODE - No session detection needed (storage blocked)');
         
-        // Check for existing session after a short delay
-        setTimeout(checkForExistingSession, 1000);
-        
-        // ULTRA AGGRESSIVE cache clearing for Rick (every 5 seconds)
-        const ultraClearInterval = setInterval(() => {
-          console.log('🔄 Rick: ULTRA AGGRESSIVE cache clearing (every 5 seconds)');
-          
-          // Clear everything immediately
-          try {
-            // Clear all storage
-            localStorage.clear();
-            sessionStorage.clear();
-            
-            // Clear all cookies with multiple methods
-            const allCookies = document.cookie.split(";");
-            allCookies.forEach(cookie => {
-              const eqPos = cookie.indexOf("=");
-              const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
-              if (name) {
-                // Clear with all possible paths and domains
-                document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
-                document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/dashboard`;
-                document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/login`;
-                document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/admin`;
-                document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;domain=${window.location.hostname}`;
-                document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;domain=.${window.location.hostname}`;
-                document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;secure`;
-                document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;httponly`;
-              }
-            });
-            
-            // Clear any remaining session data
-            const sessionKeys = Object.keys(localStorage).filter(key => 
-              key.toLowerCase().includes('session') || 
-              key.toLowerCase().includes('auth') || 
-              key.toLowerCase().includes('user') ||
-              key.toLowerCase().includes('login') ||
-              key.toLowerCase().includes('token') ||
-              key.toLowerCase().includes('supabase') ||
-              key.toLowerCase().includes('sb-')
-            );
-            sessionKeys.forEach(key => localStorage.removeItem(key));
-            
-            console.log('🗑️ Ultra aggressive cache clear completed');
-          } catch (error) {
-            console.log('⚠️ Rick: Error during ultra aggressive cache clear:', error);
-          }
-        }, 5000); // Every 5 seconds
+        // INCOGNITO MODE - No intervals needed since storage is blocked
+        console.log('🔄 Rick: INCOGNITO MODE - No cache clearing intervals needed (storage blocked)');
         
         // Add manual cache clear function to window for debugging
         (window as any).rickClearAllCache = () => {
@@ -679,8 +522,8 @@ export function CacheManager() {
           }, 500);
         };
         
-        // Cleanup interval on component unmount
-        return () => clearInterval(ultraClearInterval);
+        // No cleanup needed for Incognito mode
+        return () => {};
       }
       
       // Set user email in cookie for middleware identification
