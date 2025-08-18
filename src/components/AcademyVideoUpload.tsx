@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useRef, useEffect } from 'react';
 import { CloudArrowUpIcon, PlayIcon, TrashIcon, AcademicCapIcon } from '@heroicons/react/24/outline';
 import { supabase } from '@/lib/supabase';

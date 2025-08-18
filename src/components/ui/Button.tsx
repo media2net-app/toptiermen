@@ -1,3 +1,5 @@
+"use client";
+
 import { ReactNode, ButtonHTMLAttributes } from 'react';
 import { clsx } from 'clsx';
 

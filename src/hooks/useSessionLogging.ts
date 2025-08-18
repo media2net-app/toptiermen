@@ -21,26 +21,8 @@ export function useSessionLogging() {
   const lastLogTime = useRef<number>(0);
 
   const logSession = useCallback(async (data: SessionLogData) => {
-    if (!user) return;
-
-    try {
-      const response = await fetch('/api/admin/session-logging', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...data,
-          ip_address: undefined, // Will be detected by server
-        }),
-      });
-
-      if (!response.ok) {
-        console.error('Failed to log session:', response.statusText);
-      }
-    } catch (error) {
-      console.error('Error logging session:', error);
-    }
+    // Session logging disabled to prevent infinite loops
+    return;
   }, [user]);
 
   // Detect loops (same page loaded multiple times quickly)

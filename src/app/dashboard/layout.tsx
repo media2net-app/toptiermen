@@ -47,6 +47,7 @@ const menu = [
   { label: 'Dashboard', icon: HomeIcon, href: '/dashboard' },
   { label: 'Onboarding', icon: CheckCircleIcon, href: '/dashboard/onboarding' },
   { label: 'Mijn Profiel', icon: UserCircleIcon, parent: 'Dashboard', href: '/dashboard/mijn-profiel', isSub: true },
+  { label: 'Inbox', icon: EnvelopeIcon, parent: 'Dashboard', href: '/dashboard/inbox', isSub: true },
   {
     label: 'Mijn Missies',
     icon: FireIcon,
@@ -62,6 +63,7 @@ const menu = [
     isSub: true
   },
   { label: 'Mijn Trainingen', icon: AcademicCapIcon, parent: 'Dashboard', href: '/dashboard/mijn-trainingen', isSub: true },
+  { label: 'Voedingsplannen', icon: BookOpenIcon, href: '/dashboard/voedingsplannen' },
   { label: 'Finance & Business', icon: CurrencyDollarIcon, href: '/dashboard/finance-en-business' },
   { label: 'Academy', icon: FireIcon, href: '/dashboard/academy' },
   { label: 'Trainingscentrum', icon: AcademicCapIcon, href: '/dashboard/trainingscentrum' },
@@ -540,7 +542,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
       />
 
       {/* Debug Panel */}
-      {showDebug && <DebugPanel />}
+              {/* {showDebug && <DebugPanel />} */}
 
       {/* Test User Feedback */}
       <TestUserFeedback 

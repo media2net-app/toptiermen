@@ -14,6 +14,7 @@ import {
   ExclamationTriangleIcon,
   ChartBarIcon
 } from '@heroicons/react/24/outline';
+import { supabase } from '@/lib/supabase';
 import CDNPerformanceTest from '@/components/admin/CDNPerformanceTest';
 import VideoUploadLogs from '@/components/admin/VideoUploadLogs';
 
@@ -114,13 +115,43 @@ export default function AdminSettings() {
         useManualSmtp: false
       });
 
-      setPlatformConfig({
-        siteName: 'Top Tier Men',
-        siteUrl: process.env.NEXT_PUBLIC_SITE_URL || '',
-        maintenanceMode: false,
-        analyticsEnabled: false,
-        googleAnalyticsId: process.env.NEXT_PUBLIC_GA_ID || ''
-      });
+      // Try to load platform settings from database
+      try {
+        const { data: platformSettings, error: platformError } = await supabase
+          .from('platform_settings')
+          .select('*')
+          .eq('id', 1)
+          .single();
+
+        if (platformSettings && !platformError) {
+          setPlatformConfig({
+            siteName: platformSettings.site_name || 'Top Tier Men',
+            siteUrl: platformSettings.site_url || process.env.NEXT_PUBLIC_SITE_URL || '',
+            maintenanceMode: platformSettings.maintenance_mode || false,
+            analyticsEnabled: platformSettings.analytics_enabled || true,
+            googleAnalyticsId: platformSettings.google_analytics_id || 'G-YT2NR1LKHX'
+          });
+        } else {
+          // Fallback to default values
+          setPlatformConfig({
+            siteName: 'Top Tier Men',
+            siteUrl: process.env.NEXT_PUBLIC_SITE_URL || '',
+            maintenanceMode: false,
+            analyticsEnabled: true, // Automatically enable since we have GA implemented
+            googleAnalyticsId: 'G-YT2NR1LKHX' // Use the ID we just implemented
+          });
+        }
+      } catch (error) {
+        console.log('⚠️ Error loading platform settings from database, using defaults:', error);
+        // Fallback to default values
+        setPlatformConfig({
+          siteName: 'Top Tier Men',
+          siteUrl: process.env.NEXT_PUBLIC_SITE_URL || '',
+          maintenanceMode: false,
+          analyticsEnabled: true, // Automatically enable since we have GA implemented
+          googleAnalyticsId: 'G-YT2NR1LKHX' // Use the ID we just implemented
+        });
+      }
     } catch (error) {
       console.error('Error loading settings:', error);
       setMessage({ type: 'error', text: 'Fout bij het laden van instellingen' });
@@ -193,8 +224,18 @@ export default function AdminSettings() {
   const savePlatformConfig = async () => {
     setIsLoading(true);
     try {
-      // Save platform configuration
-      setMessage({ type: 'success', text: 'Platform configuratie opgeslagen!' });
+      // Save platform configuration to database or environment
+      const response = await fetch('/api/admin/save-platform-config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(platformConfig)
+      });
+      
+      if (response.ok) {
+        setMessage({ type: 'success', text: 'Platform configuratie opgeslagen! Google Analytics ID: ' + platformConfig.googleAnalyticsId });
+      } else {
+        setMessage({ type: 'error', text: 'Fout bij het opslaan van platform configuratie' });
+      }
     } catch (error) {
       setMessage({ type: 'error', text: 'Fout bij het opslaan van platform configuratie' });
     } finally {

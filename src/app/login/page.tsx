@@ -130,6 +130,11 @@ export default function Login() {
     );
   }
 
+  // Handle manual reload
+  const handleManualReload = () => {
+    window.location.reload();
+  };
+
   // Show redirecting state
   if (redirecting) {
     return (
@@ -141,7 +146,7 @@ export default function Login() {
             <p className="text-[#B6C948] text-lg">Doorsturen naar dashboard...</p>
             <p className="text-[#8BAE5A] text-sm mt-2">Je wordt automatisch doorgestuurd</p>
             <button
-              onClick={() => window.location.reload()}
+              onClick={handleManualReload}
               className="mt-4 text-[#8BAE5A] hover:text-[#B6C948] underline text-sm"
             >
               Handmatig herladen als het te lang duurt

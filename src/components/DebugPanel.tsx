@@ -212,13 +212,13 @@ export default function DebugPanel() {
           <h3 className="text-sm font-semibold text-green-400 mb-2">Quick Actions</h3>
           <div className="flex flex-wrap gap-2">
             <button
-              onClick={() => window.location.reload()}
+              onClick={handleForceReload}
               className="px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700"
             >
               Clear App Cache
             </button>
             <button
-              onClick={() => window.location.reload()}
+              onClick={handleForceReload}
               className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700"
             >
               Force Reload & Clear All
