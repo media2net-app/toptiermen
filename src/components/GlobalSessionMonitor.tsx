@@ -2,11 +2,9 @@
 
 import { useEffect, useRef, useCallback } from 'react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
-import { useRouter } from 'next/navigation';
 
 export function GlobalSessionMonitor() {
   const { user } = useSupabaseAuth();
-  const router = useRouter();
   const lastLogTime = useRef<number>(0);
   const lastPage = useRef<string>('');
   const loopDetectionCount = useRef<number>(0);
@@ -103,35 +101,28 @@ export function GlobalSessionMonitor() {
     detectLoops(currentPage);
   }, [user, logSession, detectLoops]);
 
-  // Monitor navigation changes
+  // Monitor navigation changes using pathname changes
   useEffect(() => {
     if (!user) return;
 
-    const handleRouteChange = (url: string) => {
-      const previousPage = lastPage.current;
-      const currentPage = url;
-      
-      if (previousPage && previousPage !== currentPage) {
-        logSession({
-          action_type: 'navigation',
-          current_page: currentPage,
-          previous_page: previousPage,
-          details: {
-            from: previousPage,
-            to: currentPage,
-            navigation_time: Date.now() - lastLogTime.current
-          }
-        });
-      }
-    };
-
-    // Listen for route changes
-    router.events?.on('routeChangeComplete', handleRouteChange);
+    const currentPage = window.location.pathname;
+    const previousPage = lastPage.current;
     
-    return () => {
-      router.events?.off('routeChangeComplete', handleRouteChange);
-    };
-  }, [user, router, logSession]);
+    if (previousPage && previousPage !== currentPage) {
+      logSession({
+        action_type: 'navigation',
+        current_page: currentPage,
+        previous_page: previousPage,
+        details: {
+          from: previousPage,
+          to: currentPage,
+          navigation_time: Date.now() - lastLogTime.current
+        }
+      });
+    }
+    
+    lastPage.current = currentPage;
+  }, [user, logSession]);
 
   // Monitor errors globally
   useEffect(() => {
