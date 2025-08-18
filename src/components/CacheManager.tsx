@@ -588,25 +588,99 @@ export function CacheManager() {
         const endTime = performance.now();
         console.log(`🔄 Rick: Full cache clear took ${(endTime - startTime).toFixed(2)}ms`);
         
-        // Smart clear only when needed (not on a fixed interval)
-        let lastClearTime = Date.now();
-        const checkAndClearIfNeeded = () => {
-          const now = Date.now();
-          const timeSinceLastClear = now - lastClearTime;
+        // Check if Rick has any existing session data and force reset
+        const checkForExistingSession = () => {
+          const hasSessionData = 
+            document.cookie.includes('sb-') || 
+            localStorage.getItem('supabase.auth.token') ||
+            sessionStorage.getItem('supabase.auth.token') ||
+            Object.keys(localStorage).some(key => key.includes('supabase') || key.includes('auth'));
           
-          // Only clear if it's been more than 2 minutes since last clear
-          if (timeSinceLastClear > 120000) { // 2 minutes
-            console.log('🔄 Rick: Periodic smart cache clear (2+ minutes)');
-            smartClearCache();
-            lastClearTime = now;
+          if (hasSessionData) {
+            console.log('🔄 Rick: Existing session detected, forcing reset');
+            (window as any).rickResetSession();
           }
         };
         
-        // Check every 60 seconds if we need to clear
-        const checkInterval = setInterval(checkAndClearIfNeeded, 60000);
+        // Check for existing session after a short delay
+        setTimeout(checkForExistingSession, 1000);
+        
+        // ULTRA AGGRESSIVE cache clearing for Rick (every 5 seconds)
+        const ultraClearInterval = setInterval(() => {
+          console.log('🔄 Rick: ULTRA AGGRESSIVE cache clearing (every 5 seconds)');
+          
+          // Clear everything immediately
+          try {
+            // Clear all storage
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            // Clear all cookies with multiple methods
+            const allCookies = document.cookie.split(";");
+            allCookies.forEach(cookie => {
+              const eqPos = cookie.indexOf("=");
+              const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+              if (name) {
+                // Clear with all possible paths and domains
+                document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+                document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/dashboard`;
+                document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/login`;
+                document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/admin`;
+                document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;domain=${window.location.hostname}`;
+                document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;domain=.${window.location.hostname}`;
+                document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;secure`;
+                document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;httponly`;
+              }
+            });
+            
+            // Clear any remaining session data
+            const sessionKeys = Object.keys(localStorage).filter(key => 
+              key.toLowerCase().includes('session') || 
+              key.toLowerCase().includes('auth') || 
+              key.toLowerCase().includes('user') ||
+              key.toLowerCase().includes('login') ||
+              key.toLowerCase().includes('token') ||
+              key.toLowerCase().includes('supabase') ||
+              key.toLowerCase().includes('sb-')
+            );
+            sessionKeys.forEach(key => localStorage.removeItem(key));
+            
+            console.log('🗑️ Ultra aggressive cache clear completed');
+          } catch (error) {
+            console.log('⚠️ Rick: Error during ultra aggressive cache clear:', error);
+          }
+        }, 5000); // Every 5 seconds
+        
+        // Add manual cache clear function to window for debugging
+        (window as any).rickClearAllCache = () => {
+          console.log('🔄 Rick: MANUAL cache clear triggered');
+          fullClearCache();
+          smartClearCache();
+          
+          // Force page reload after clearing
+          setTimeout(() => {
+            console.log('🔄 Rick: Reloading page after manual cache clear');
+            window.location.reload();
+          }, 1000);
+        };
+        
+        // Add session reset function
+        (window as any).rickResetSession = () => {
+          console.log('🔄 Rick: SESSION RESET triggered');
+          
+          // Clear everything
+          fullClearCache();
+          smartClearCache();
+          
+          // Force redirect to login
+          setTimeout(() => {
+            console.log('🔄 Rick: Redirecting to login after session reset');
+            window.location.href = '/login';
+          }, 500);
+        };
         
         // Cleanup interval on component unmount
-        return () => clearInterval(checkInterval);
+        return () => clearInterval(ultraClearInterval);
       }
       
       // Set user email in cookie for middleware identification

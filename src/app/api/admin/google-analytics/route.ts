@@ -2,62 +2,33 @@ import { NextRequest, NextResponse } from 'next/server';
 
 // Mock data for demonstration - in production this would fetch from Google Analytics API
 const mockAnalyticsData = {
-  realtime: {
-    activeUsers: 12,
-    pageViews: 45,
-    topPages: [
-      { page: '/dashboard', views: 15 },
-      { page: '/trainingscentrum', views: 12 },
-      { page: '/voedingsplannen', views: 8 },
-      { page: '/brotherhood', views: 6 },
-      { page: '/academy', views: 4 }
-    ]
-  },
-  overview: {
-    totalUsers: 1247,
-    totalSessions: 2156,
-    totalPageViews: 8923,
-    avgSessionDuration: 245, // seconds
-    bounceRate: 34.2
-  },
-  demographics: {
-    countries: [
-      { country: 'Nederland', users: 8, coordinates: [52.3676, 4.9041] },
-      { country: 'België', users: 3, coordinates: [50.8503, 4.3517] },
-      { country: 'Duitsland', users: 1, coordinates: [51.1657, 10.4515] },
-      { country: 'Verenigde Staten', users: 2, coordinates: [37.0902, -95.7129] },
-      { country: 'Verenigd Koninkrijk', users: 1, coordinates: [55.3781, -3.4360] }
-    ],
-    devices: [
-      { device: 'Desktop', users: 8 },
-      { device: 'Mobile', users: 6 },
-      { device: 'Tablet', users: 2 }
-    ],
-    browsers: [
-      { browser: 'Chrome', users: 10 },
-      { browser: 'Safari', users: 4 },
-      { browser: 'Firefox', users: 2 }
-    ]
-  },
+  activeUsers: 12,
+  totalUsers: 1247,
+  pageViews: 8923,
+  bounceRate: 34.2,
+  sessionDuration: 245, // seconds
+  newUsers: 892,
+  returningUsers: 355,
   topPages: [
-    { page: '/dashboard', views: 1247, uniqueViews: 892 },
-    { page: '/trainingscentrum', views: 1156, uniqueViews: 756 },
-    { page: '/voedingsplannen', views: 892, uniqueViews: 634 },
-    { page: '/brotherhood', views: 678, uniqueViews: 445 },
-    { page: '/academy', views: 445, uniqueViews: 334 },
-    { page: '/badges-rangen', views: 334, uniqueViews: 223 },
-    { page: '/profiel', views: 223, uniqueViews: 178 },
-    { page: '/instellingen', views: 178, uniqueViews: 145 },
-    { page: '/notificaties', views: 145, uniqueViews: 112 },
-    { page: '/help', views: 112, uniqueViews: 89 }
+    { page: '/dashboard', views: 1247 },
+    { page: '/trainingscentrum', views: 1156 },
+    { page: '/voedingsplannen', views: 892 },
+    { page: '/brotherhood', views: 678 },
+    { page: '/academy', views: 445 }
   ],
-  userFlow: [
-    { step: 'Homepage', users: 100, dropoff: 0 },
-    { step: 'Dashboard', users: 85, dropoff: 15 },
-    { step: 'Trainingscentrum', users: 67, dropoff: 18 },
-    { step: 'Workout Start', users: 45, dropoff: 22 },
-    { step: 'Workout Complete', users: 34, dropoff: 11 }
-  ]
+  topSources: [
+    { source: 'Direct', sessions: 567 },
+    { source: 'Google', sessions: 445 },
+    { source: 'Social Media', sessions: 234 },
+    { source: 'Email', sessions: 123 },
+    { source: 'Referral', sessions: 89 }
+  ],
+  deviceBreakdown: [
+    { device: 'Desktop', percentage: 65.2 },
+    { device: 'Mobile', percentage: 28.7 },
+    { device: 'Tablet', percentage: 6.1 }
+  ],
+  lastUpdated: new Date().toISOString()
 };
 
 export async function GET(request: NextRequest) {
@@ -76,17 +47,10 @@ export async function GET(request: NextRequest) {
     // For now, we'll return mock data with some randomization to simulate real data
     const randomizedData = {
       ...mockAnalyticsData,
-      realtime: {
-        ...mockAnalyticsData.realtime,
-        activeUsers: Math.floor(Math.random() * 20) + 5, // Random between 5-25
-        pageViews: Math.floor(Math.random() * 50) + 20, // Random between 20-70
-      },
-      overview: {
-        ...mockAnalyticsData.overview,
-        totalUsers: mockAnalyticsData.overview.totalUsers + Math.floor(Math.random() * 100),
-        totalSessions: mockAnalyticsData.overview.totalSessions + Math.floor(Math.random() * 200),
-        totalPageViews: mockAnalyticsData.overview.totalPageViews + Math.floor(Math.random() * 500),
-      }
+      activeUsers: Math.floor(Math.random() * 20) + 5, // Random between 5-25
+      totalUsers: mockAnalyticsData.totalUsers + Math.floor(Math.random() * 100),
+      pageViews: mockAnalyticsData.pageViews + Math.floor(Math.random() * 500),
+      lastUpdated: new Date().toISOString()
     };
 
     // Simulate API delay
