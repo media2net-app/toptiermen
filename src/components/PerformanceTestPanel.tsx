@@ -205,12 +205,8 @@ export function PerformanceTestPanel() {
 
   // Clear all intervals and timeouts
   const clearAllTimers = () => {
-    // This is a hack to clear intervals - not recommended for production
-    const highestId = setTimeout(() => {}, 0) as number;
-    for (let i = 0; i < highestId; i++) {
-      clearTimeout(i);
-      clearInterval(i);
-    }
+    // Simplified approach - just show a message
+    alert('Timer clearing functionality is disabled for production safety');
     collectPerformanceInfo();
   };
 
