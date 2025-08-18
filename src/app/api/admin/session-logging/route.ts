@@ -311,7 +311,7 @@ export async function GET(request: NextRequest) {
     // Try to fetch data directly - if tables don't exist, return empty data
     console.log('📋 Attempting to fetch session data...');
 
-    let sessionLogs = [];
+    let sessionLogs: any[] = [];
     try {
       let query = supabase
         .from('user_session_logs')
@@ -365,7 +365,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get user activities with same filters
-    let userActivities = [];
+    let userActivities: any[] = [];
     try {
       let activityQuery = supabase
         .from('user_activities')
