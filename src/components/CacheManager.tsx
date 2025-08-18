@@ -30,15 +30,15 @@ export function CacheManager() {
   const detectCacheIssues = useCallback(() => {
     const now = Date.now();
     
-    // Check for stale cache indicators (less sensitive)
+    // Check for stale cache indicators
     const staleCacheIndicators = [
-      // Check if page loads are unusually fast (cached) - increased threshold
-      performance.timing.loadEventEnd - performance.timing.navigationStart < 50,
-      // Check if resources are served from cache - more specific check
-      performance.getEntriesByType('resource').filter(entry => (entry as any).transferSize === 0).length > 10,
-      // Check for old timestamps in localStorage/sessionStorage - increased threshold
+      // Check if page loads are unusually fast (cached)
+      performance.timing.loadEventEnd - performance.timing.navigationStart < 100,
+      // Check if resources are served from cache
+      performance.getEntriesByType('resource').some(entry => (entry as any).transferSize === 0),
+      // Check for old timestamps in localStorage/sessionStorage
       localStorage.getItem('lastCacheCheck') && 
-      (now - parseInt(localStorage.getItem('lastCacheCheck') || '0')) > 600000, // 10 minutes
+      (now - parseInt(localStorage.getItem('lastCacheCheck') || '0')) > 300000, // 5 minutes
       // Check for browser cache headers
       document.querySelector('meta[http-equiv="Cache-Control"]')?.getAttribute('content')?.includes('no-cache')
     ];
@@ -64,22 +64,143 @@ export function CacheManager() {
     lastCacheCheck.current = now;
   }, [logCacheIssue]);
 
-  // Force cache refresh for Rick - DISABLED
+  // Force cache refresh for Rick (all browsers)
   const forceCacheRefresh = useCallback(() => {
-    // Cache clearing disabled to prevent authentication delays
-    console.log('🔍 Cache clearing disabled for all browsers');
+    if (getUserType() === 'rick') {
+      // Clear browser cache for current domain (all browsers)
+      if ('caches' in window) {
+        caches.keys().then(cacheNames => {
+          cacheNames.forEach(cacheName => {
+            caches.delete(cacheName);
+          });
+        });
+      }
+
+      // Clear IndexedDB for Edge/Chrome
+      if ('indexedDB' in window) {
+        indexedDB.databases().then(databases => {
+          databases.forEach(db => {
+            if (db.name) {
+              indexedDB.deleteDatabase(db.name);
+            }
+          });
+        }).catch(() => {
+          // IndexedDB not supported or error
+        });
+      }
+
+      // Clear localStorage and sessionStorage
+      localStorage.clear();
+      sessionStorage.clear();
+
+      // Clear cookies for current domain
+      document.cookie.split(";").forEach(cookie => {
+        const eqPos = cookie.indexOf("=");
+        const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+      });
+
+      // Force reload with cache busting
+      const timestamp = Date.now();
+      const currentUrl = new URL(window.location.href);
+      currentUrl.searchParams.set('_cb', timestamp.toString());
+      
+      logCacheIssue({
+        error_message: 'Forced cache refresh for Rick (all browsers)',
+        details: {
+          action: 'force_cache_refresh',
+          browser: navigator.userAgent,
+          timestamp: new Date().toISOString(),
+          new_url: currentUrl.toString()
+        }
+      });
+
+      // Reload page with cache busting
+      window.location.href = currentUrl.toString();
+    }
   }, [getUserType, logCacheIssue]);
 
-  // Auto-cache refresh for Rick - DISABLED
+  // Auto-cache refresh for Rick when issues are detected
   useEffect(() => {
-    // Auto cache refresh disabled to prevent authentication delays
-    console.log('🔍 Auto cache refresh disabled for all browsers');
+    if (getUserType() !== 'rick') return;
+
+    const checkAndFixCache = () => {
+      detectCacheIssues();
+      
+      // If multiple cache issues detected, auto-refresh
+      if (cacheIssueCount.current >= 3) {
+        logCacheIssue({
+          error_message: 'Auto-refreshing cache due to multiple issues',
+          details: {
+            cache_issue_count: cacheIssueCount.current,
+            action: 'auto_cache_refresh',
+            timestamp: new Date().toISOString()
+          }
+        });
+        
+        // Reset counter and force refresh
+        cacheIssueCount.current = 0;
+        forceCacheRefresh();
+      }
+    };
+
+    // Check cache every 30 seconds for Rick
+    const cacheCheckInterval = setInterval(checkAndFixCache, 30000);
+    
+    // Initial check
+    checkAndFixCache();
+    
+    return () => clearInterval(cacheCheckInterval);
   }, [getUserType, detectCacheIssues, forceCacheRefresh, logCacheIssue]);
 
-    // Monitor for cache issues - DISABLED
+  // Monitor for browser-specific cache issues (Chrome, Edge, Firefox)
   useEffect(() => {
-    // Cache monitoring disabled to prevent authentication delays
-    console.log('🔍 Cache monitoring disabled for all browsers');
+    if (getUserType() !== 'rick') return;
+
+    const userAgent = navigator.userAgent;
+    const isChrome = /Chrome/.test(userAgent) && !/Edge/.test(userAgent);
+    const isEdge = /Edge/.test(userAgent);
+    const isFirefox = /Firefox/.test(userAgent);
+    
+    if (isChrome || isEdge || isFirefox) {
+      // Browser-specific cache monitoring
+      const monitorBrowserCache = () => {
+        // Check for browser-specific aggressive caching
+        const browserCacheIndicators = [
+          // Check if page loads instantly (browser cache)
+          performance.timing.loadEventEnd - performance.timing.navigationStart < 50,
+          // Check for cached resources
+          performance.getEntriesByType('resource').filter(entry => (entry as any).transferSize === 0).length > 5,
+          // Check for old service worker cache
+          'serviceWorker' in navigator && navigator.serviceWorker.controller,
+          // Edge-specific: check for aggressive memory caching
+          isEdge && 'memory' in performance && (performance as any).memory.usedJSHeapSize > 50 * 1024 * 1024, // 50MB
+          // Chrome-specific: check for V8 cache
+          isChrome && localStorage.getItem('chrome_cache_version') !== 'v2',
+          // Firefox-specific: check for aggressive disk cache
+          isFirefox && sessionStorage.getItem('firefox_cache_check') !== 'cleared'
+        ];
+
+        const hasBrowserCacheIssues = browserCacheIndicators.some(indicator => indicator);
+        
+        if (hasBrowserCacheIssues) {
+          logCacheIssue({
+            error_message: `${isEdge ? 'Edge' : isChrome ? 'Chrome' : 'Firefox'} cache issue detected`,
+            details: {
+              browser_cache_indicators: browserCacheIndicators,
+              browser_type: isEdge ? 'Edge' : isChrome ? 'Chrome' : 'Firefox',
+              user_agent: userAgent,
+              timestamp: new Date().toISOString()
+            }
+          });
+        }
+      };
+
+      // Monitor browser cache every 15 seconds
+      const browserCacheInterval = setInterval(monitorBrowserCache, 15000);
+      
+      return () => clearInterval(browserCacheInterval);
+    }
   }, [getUserType, logCacheIssue]);
 
   // Add cache management UI for Rick
@@ -93,6 +214,12 @@ export function CacheManager() {
       if (existingButton) {
         existingButton.remove();
       }
+
+      const userAgent = navigator.userAgent;
+      const isEdge = /Edge/.test(userAgent);
+      const isChrome = /Chrome/.test(userAgent) && !/Edge/.test(userAgent);
+      const isFirefox = /Firefox/.test(userAgent);
+      const browserType = isEdge ? 'Edge' : isChrome ? 'Chrome' : isFirefox ? 'Firefox' : 'Unknown';
 
       const button = document.createElement('div');
       button.id = 'rick-cache-manager';
@@ -112,9 +239,9 @@ export function CacheManager() {
           box-shadow: 0 4px 12px rgba(0,0,0,0.3);
           border: 2px solid #ef4444;
         ">
-          🔄 Cache Issue Detected (${cacheIssueCount.current})
+          🔄 ${browserType} Cache Issue (${cacheIssueCount.current})
           <br>
-          <small>Click to fix</small>
+          <small>Click to fix all browsers</small>
         </div>
       `;
 
