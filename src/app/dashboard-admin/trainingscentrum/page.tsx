@@ -362,9 +362,14 @@ export default function TrainingscentrumBeheer() {
       // Clean up the data to match database expectations
       const cleanedData = {
         name: exerciseData.name,
-        muscle_group: exerciseData.primary_muscle, // Map primary_muscle to muscle_group
+        primary_muscle: exerciseData.primary_muscle,
+        muscle_group: exerciseData.primary_muscle, // Keep both for compatibility
         equipment: exerciseData.equipment,
-        difficulty: 'Intermediate', // Default difficulty
+        difficulty: exerciseData.difficulty || 'Intermediate',
+        video_url: exerciseData.video_url || null,
+        instructions: exerciseData.instructions || null,
+        worksheet_url: exerciseData.worksheet_url || null,
+        secondary_muscles: Array.isArray(exerciseData.secondary_muscles) ? exerciseData.secondary_muscles : [],
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
@@ -420,9 +425,14 @@ export default function TrainingscentrumBeheer() {
       // Clean up the data to match database expectations
       const cleanedData = {
         name: exerciseData.name,
-        muscle_group: exerciseData.primary_muscle, // Map primary_muscle to muscle_group
+        primary_muscle: exerciseData.primary_muscle,
+        muscle_group: exerciseData.primary_muscle, // Keep both for compatibility
         equipment: exerciseData.equipment,
         difficulty: exerciseData.difficulty || 'Intermediate',
+        video_url: exerciseData.video_url || null,
+        instructions: exerciseData.instructions || null,
+        worksheet_url: exerciseData.worksheet_url || null,
+        secondary_muscles: Array.isArray(exerciseData.secondary_muscles) ? exerciseData.secondary_muscles : [],
         updated_at: new Date().toISOString() // Force update timestamp
       };
       

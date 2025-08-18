@@ -513,8 +513,13 @@ export interface Database {
           id: string
           name: string
           muscle_group: string | null
+          primary_muscle: string | null
           equipment: string | null
           difficulty: string | null
+          video_url: string | null
+          instructions: string | null
+          worksheet_url: string | null
+          secondary_muscles: string[] | null
           created_at: string
           updated_at: string
         }
@@ -522,8 +527,13 @@ export interface Database {
           id?: string
           name: string
           muscle_group?: string | null
+          primary_muscle?: string | null
           equipment?: string | null
           difficulty?: string | null
+          video_url?: string | null
+          instructions?: string | null
+          worksheet_url?: string | null
+          secondary_muscles?: string[] | null
           created_at?: string
           updated_at?: string
         }
@@ -531,8 +541,13 @@ export interface Database {
           id?: string
           name?: string
           muscle_group?: string | null
+          primary_muscle?: string | null
           equipment?: string | null
           difficulty?: string | null
+          video_url?: string | null
+          instructions?: string | null
+          worksheet_url?: string | null
+          secondary_muscles?: string[] | null
           created_at?: string
           updated_at?: string
         }
