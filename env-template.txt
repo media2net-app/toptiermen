@@ -11,10 +11,14 @@ VAPID_PRIVATE_KEY=your_vapid_private_key_here
 NEXTAUTH_SECRET=your_nextauth_secret_here
 NEXTAUTH_URL=http://localhost:3000
 
-# Stripe Configuration
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_publishable_key_here
-STRIPE_SECRET_KEY=sk_test_your_secret_key_here
-STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret_here
+# Payment Configuration (Mollie)
+MOLLIE_LIVE_KEY=live_your_mollie_live_key_here
+MOLLIE_TEST_KEY=test_your_mollie_test_key_here
+
+# Stripe Configuration (Optional - replaced by Mollie)
+# NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_publishable_key_here
+# STRIPE_SECRET_KEY=sk_test_your_secret_key_here
+# STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret_here
 
 # Google Analytics Configuration
 NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
@@ -52,8 +56,9 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 # Voeg hier je service role key toe die je ophaalt uit:
 # Supabase Dashboard → Settings → API → service_role key 
 
-# Stripe Keys haal je op uit:
-# Stripe Dashboard → Developers → API Keys
+# Mollie Keys haal je op uit:
+# Mollie Dashboard → Website Profiles → API Keys
+# Live key voor productie, test key voor ontwikkeling
 
 # Google Analytics ID haal je op uit:
 # Google Analytics → Admin → Data Streams → Web Stream → Measurement ID
