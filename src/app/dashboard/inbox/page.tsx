@@ -1,23 +1,36 @@
 'use client';
 import ClientLayout from '@/app/components/ClientLayout';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
 interface ChatMessage {
+  id: string;
+  content: string;
+  messageType: string;
+  isRead: boolean;
+  readAt: string | null;
+  createdAt: string;
   fromMe: boolean;
-  text: string;
-  time: string;
 }
 
-interface Message {
-  id: number;
-  name: string;
-  avatar: string;
-  lastMessage: string;
-  time: string;
-  unread: number;
+interface Conversation {
+  id: string;
+  participant: {
+    id: string;
+    name: string;
+    avatar: string;
+    rank: string;
+  };
+  lastMessage: {
+    content: string;
+    time: string;
+    fromMe: boolean;
+  } | null;
+  unreadCount: number;
   online: boolean;
+  lastSeen: string | null;
+  updatedAt: string;
 }
 
 interface Profile {
@@ -26,104 +39,181 @@ interface Profile {
   full_name: string;
   avatar_url: string;
   rank: string;
-  last_seen: string;
 }
 
 export default function Inbox() {
   const { user } = useSupabaseAuth();
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [selected, setSelected] = useState<number | null>(null);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [showChat, setShowChat] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [availableUsers, setAvailableUsers] = useState<Profile[]>([]);
+  const [showNewChat, setShowNewChat] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<string | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (user) {
-      fetchMessages();
+      fetchConversations();
+      fetchAvailableUsers();
+      updateOnlineStatus(true);
     }
+
+    // Update online status when component unmounts
+    return () => {
+      if (user) {
+        updateOnlineStatus(false);
+      }
+    };
   }, [user]);
 
-  const fetchMessages = async () => {
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatMessages]);
+
+  const updateOnlineStatus = async (isOnline: boolean) => {
+    if (!user) return;
+    
+    try {
+      await fetch('/api/chat/online-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, isOnline })
+      });
+    } catch (error) {
+      console.error('Error updating online status:', error);
+    }
+  };
+
+  const fetchConversations = async () => {
     try {
       setLoading(true);
-
-      // Fetch recent profiles as potential chat contacts
-      const { data: profiles, error } = await supabase
-        .from('profiles')
-        .select('id, display_name, full_name, avatar_url, rank, updated_at')
-        .neq('id', user?.id)
-        .order('updated_at', { ascending: false })
-        .limit(10);
-
-      if (error) {
-        console.error('Error fetching profiles:', error);
-        return;
-      }
-
-      // Convert profiles to messages format
-      const formattedMessages: Message[] = profiles?.map((profile, index) => ({
-        id: index + 1,
-        name: profile.display_name || profile.full_name || 'Onbekende gebruiker',
-        avatar: profile.avatar_url || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
-        lastMessage: getRandomLastMessage(profile.rank || 'Member'),
-        time: formatTimeAgo(profile.updated_at),
-        unread: Math.floor(Math.random() * 3), // Random unread count
-        online: Math.random() > 0.7 // 30% chance of being online
-      })) || [];
-
-      setMessages(formattedMessages);
       
-      // Set first message as selected by default
-      if (formattedMessages.length > 0) {
-        setSelected(formattedMessages[0].id);
-        setShowChat(true);
+      const response = await fetch(`/api/chat/conversations?userId=${user?.id}`);
+      const data = await response.json();
+      
+      if (response.ok) {
+        setConversations(data.conversations);
+        
+        // Set first conversation as selected by default
+        if (data.conversations.length > 0 && !selectedConversation) {
+          setSelectedConversation(data.conversations[0]);
+          fetchMessages(data.conversations[0].id);
+        }
+      } else {
+        console.error('Error fetching conversations:', data.error);
       }
-
     } catch (error) {
-      console.error('Error fetching messages:', error);
+      console.error('Error fetching conversations:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const getRandomLastMessage = (rank: string): string => {
-    const messages = {
-      'Founder': [
-        'Welkom bij de Brotherhood!',
-        'Hoe gaat het met je voortgang?',
-        'Heb je de nieuwe module al bekeken?'
-      ],
-      'Alpha': [
-        'Goed bezig met je missies deze week!',
-        'Klaar voor de volgende challenge?',
-        'Je voortgang ziet er sterk uit!'
-      ],
-      'Elite': [
-        'Nieuwe challenge: 30 dagen discipline',
-        'Vergeet je check-in niet vanavond!',
-        'Plan een 1-op-1 call in voor extra support'
-      ],
-      'Veteran': [
-        'Hoe gaat het met je doelen?',
-        'Klaar voor de groepstraining?',
-        'Je abonnement is verlengd'
-      ],
-      'Warrior': [
-        'Welkom bij de community!',
-        'Hoe voel je je na je eerste week?',
-        'Heb je vragen over de app?'
-      ],
-      'Member': [
-        'Welkom bij Top Tier Men!',
-        'Hoe gaat het met je reis?',
-        'Heb je al je eerste missie voltooid?'
-      ]
-    };
+  const fetchAvailableUsers = async () => {
+    try {
+      const { data: profiles, error } = await supabase
+        .from('profiles')
+        .select('id, display_name, full_name, avatar_url, rank')
+        .neq('id', user?.id)
+        .order('display_name', { ascending: true });
 
-    const rankMessages = messages[rank as keyof typeof messages] || messages['Member'];
-    return rankMessages[Math.floor(Math.random() * rankMessages.length)];
+      if (error) {
+        console.error('Error fetching available users:', error);
+        return;
+      }
+
+      setAvailableUsers(profiles || []);
+    } catch (error) {
+      console.error('Error fetching available users:', error);
+    }
+  };
+
+  const fetchMessages = async (conversationId: string) => {
+    try {
+      const response = await fetch(`/api/chat/messages?conversationId=${conversationId}&userId=${user?.id}`);
+      const data = await response.json();
+      
+      if (response.ok) {
+        setChatMessages(data.messages);
+      } else {
+        console.error('Error fetching messages:', data.error);
+      }
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+    }
+  };
+
+  const handleSend = async () => {
+    if (input.trim() === '' || !selectedConversation || !user) return;
+    
+    const messageContent = input.trim();
+    setInput('');
+
+    try {
+      const response = await fetch('/api/chat/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          conversationId: selectedConversation.id,
+          senderId: user.id,
+          content: messageContent
+        })
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        // Add new message to chat
+        setChatMessages(prev => [...prev, data.message]);
+        
+        // Update conversation list
+        fetchConversations();
+      } else {
+        console.error('Error sending message:', data.error);
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  const startNewConversation = async (userId: string) => {
+    if (!user) return;
+
+    try {
+      const response = await fetch('/api/chat/conversations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          participant1Id: user.id,
+          participant2Id: userId
+        })
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        // Refresh conversations and select the new one
+        await fetchConversations();
+        setShowNewChat(false);
+        setSelectedUser(null);
+      } else {
+        console.error('Error creating conversation:', data.error);
+      }
+    } catch (error) {
+      console.error('Error creating conversation:', error);
+    }
   };
 
   const formatTimeAgo = (dateString: string) => {
@@ -136,54 +226,6 @@ export default function Inbox() {
     if (diffInHours < 48) return 'Gisteren';
     return `${Math.floor(diffInHours / 24)} dagen geleden`;
   };
-
-  const getRandomResponse = (selectedId: number) => {
-    const responses = [
-      'Goed bezig! Blijf consistent.',
-      'Dat klinkt als een geweldige voortgang!',
-      'Houd vol, je bent op de goede weg.',
-      'Consistentie is de sleutel tot succes.',
-      'Ik ben trots op je vooruitgang!',
-      'Blijf gefocust op je doelen.',
-      'Elke dag is een nieuwe kans om te groeien.',
-      'Je mindset is aan het veranderen, dat zie ik!',
-      'Geweldig werk! Blijf de druk opvoeren.',
-      'Succes is geen toeval, het is keuze na keuze.'
-    ];
-    return responses[Math.floor(Math.random() * responses.length)];
-  };
-
-  const handleSend = () => {
-    if (input.trim() === '' || !selected) return;
-    
-    // Add user message
-    setChatMessages(prev => [
-      ...prev,
-      { fromMe: true, text: input, time: 'nu' },
-    ]);
-    setInput('');
-
-    // Show typing indicator
-    setIsTyping(true);
-
-    // Simulate response after delay
-    setTimeout(() => {
-      setIsTyping(false);
-      setChatMessages(prev => [
-        ...prev,
-        { fromMe: false, text: getRandomResponse(selected), time: 'nu' },
-      ]);
-    }, 1500 + Math.random() * 1000);
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
-
-  const selectedMsg = messages.find(m => m.id === selected);
 
   if (loading) {
     return (
@@ -202,74 +244,131 @@ export default function Inbox() {
 
       <div className="bg-[#232D1A]/80 rounded-2xl shadow-xl border border-[#3A4D23]/40 overflow-hidden">
         <div className="flex h-[600px]">
-          {/* Message List */}
+          {/* Conversations List */}
           <div className="w-full md:w-1/3 border-r border-[#3A4D23]/40">
-            <div className="p-4 border-b border-[#3A4D23]/40">
-              <h2 className="text-xl font-bold text-white">Berichten</h2>
+            <div className="p-4 border-b border-[#3A4D23]/40 flex justify-between items-center">
+              <h2 className="text-xl font-bold text-white">Gesprekken</h2>
+              <button
+                onClick={() => setShowNewChat(true)}
+                className="px-3 py-1 bg-[#8BAE5A] text-[#181F17] rounded-lg text-sm font-semibold hover:bg-[#A6C97B] transition-colors"
+              >
+                + Nieuw
+              </button>
             </div>
-            <div className="overflow-y-auto h-full">
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  onClick={() => {
-                    setSelected(message.id);
-                    setShowChat(true);
-                    setChatMessages([]); // Reset chat for new conversation
-                  }}
-                  className={`p-4 border-b border-[#3A4D23]/40 cursor-pointer transition-colors ${
-                    selected === message.id ? 'bg-[#3A4D23]/40' : 'hover:bg-[#2A341F]'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="relative">
+            
+            {/* New Chat Modal */}
+            {showNewChat && (
+              <div className="absolute top-0 left-0 w-full h-full bg-[#232D1A]/95 z-10 flex flex-col">
+                <div className="p-4 border-b border-[#3A4D23]/40 flex justify-between items-center">
+                  <h3 className="text-lg font-bold text-white">Nieuw gesprek</h3>
+                  <button
+                    onClick={() => {
+                      setShowNewChat(false);
+                      setSelectedUser(null);
+                    }}
+                    className="text-[#8BAE5A] hover:text-white"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <div className="flex-1 overflow-y-auto p-4">
+                  {availableUsers.map((user) => (
+                    <div
+                      key={user.id}
+                      onClick={() => startNewConversation(user.id)}
+                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-[#3A4D23]/40 cursor-pointer transition-colors"
+                    >
                       <img
-                        src={message.avatar}
-                        alt={message.name}
-                        className="w-12 h-12 rounded-full"
+                        src={user.avatar_url || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'}
+                        alt={user.display_name || user.full_name}
+                        className="w-10 h-10 rounded-full"
                       />
-                      {message.online && (
-                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-[#232D1A]"></div>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-semibold text-white truncate">{message.name}</h3>
-                        <span className="text-[#8BAE5A] text-xs">{message.time}</span>
+                      <div>
+                        <h4 className="font-semibold text-white">
+                          {user.display_name || user.full_name || 'Onbekende gebruiker'}
+                        </h4>
+                        <p className="text-[#8BAE5A] text-sm">{user.rank || 'Member'}</p>
                       </div>
-                      <p className="text-[#8BAE5A] text-sm truncate">{message.lastMessage}</p>
-                      {message.unread > 0 && (
-                        <div className="flex items-center justify-between mt-1">
-                          <span className="text-[#8BAE5A] text-xs">{message.unread} ongelezen</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="overflow-y-auto h-full">
+              {conversations.length === 0 ? (
+                <div className="p-8 text-center">
+                  <p className="text-[#8BAE5A] text-lg">Nog geen gesprekken</p>
+                  <p className="text-[#8BAE5A] text-sm mt-2">Start een nieuw gesprek om te beginnen</p>
+                </div>
+              ) : (
+                conversations.map((conversation) => (
+                  <div
+                    key={conversation.id}
+                    onClick={() => {
+                      setSelectedConversation(conversation);
+                      fetchMessages(conversation.id);
+                      setShowChat(true);
+                    }}
+                    className={`p-4 border-b border-[#3A4D23]/40 cursor-pointer transition-colors ${
+                      selectedConversation?.id === conversation.id ? 'bg-[#3A4D23]/40' : 'hover:bg-[#2A341F]'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        <img
+                          src={conversation.participant.avatar}
+                          alt={conversation.participant.name}
+                          className="w-12 h-12 rounded-full"
+                        />
+                        {conversation.online && (
+                          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-[#232D1A]"></div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <h3 className="font-semibold text-white truncate">{conversation.participant.name}</h3>
+                          <span className="text-[#8BAE5A] text-xs">
+                            {conversation.lastMessage ? formatTimeAgo(conversation.lastMessage.time) : 'Nieuw'}
+                          </span>
                         </div>
-                      )}
+                        <p className="text-[#8BAE5A] text-sm truncate">
+                          {conversation.lastMessage ? conversation.lastMessage.content : 'Start een gesprek...'}
+                        </p>
+                        {conversation.unreadCount > 0 && (
+                          <div className="flex items-center justify-between mt-1">
+                            <span className="text-[#8BAE5A] text-xs">{conversation.unreadCount} ongelezen</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
 
           {/* Chat Area */}
           <div className="hidden md:flex flex-col flex-1">
-            {selectedMsg ? (
+            {selectedConversation ? (
               <>
                 {/* Chat Header */}
                 <div className="p-4 border-b border-[#3A4D23]/40 bg-[#181F17]">
                   <div className="flex items-center gap-3">
                     <div className="relative">
                       <img
-                        src={selectedMsg.avatar}
-                        alt={selectedMsg.name}
+                        src={selectedConversation.participant.avatar}
+                        alt={selectedConversation.participant.name}
                         className="w-10 h-10 rounded-full"
                       />
-                      {selectedMsg.online && (
+                      {selectedConversation.online && (
                         <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-[#181F17]"></div>
                       )}
                     </div>
                     <div>
-                      <h3 className="font-semibold text-white">{selectedMsg.name}</h3>
+                      <h3 className="font-semibold text-white">{selectedConversation.participant.name}</h3>
                       <p className="text-[#8BAE5A] text-sm">
-                        {selectedMsg.online ? 'Online' : 'Offline'}
+                        {selectedConversation.online ? 'Online' : 'Offline'}
                       </p>
                     </div>
                   </div>
@@ -277,9 +376,9 @@ export default function Inbox() {
 
                 {/* Chat Messages */}
                 <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                  {chatMessages.map((msg, index) => (
+                  {chatMessages.map((msg) => (
                     <div
-                      key={index}
+                      key={msg.id}
                       className={`flex ${msg.fromMe ? 'justify-end' : 'justify-start'}`}
                     >
                       <div
@@ -289,22 +388,14 @@ export default function Inbox() {
                             : 'bg-[#3A4D23] text-white'
                         }`}
                       >
-                        <p className="text-sm">{msg.text}</p>
-                        <p className="text-xs opacity-70 mt-1">{msg.time}</p>
+                        <p className="text-sm">{msg.content}</p>
+                        <p className="text-xs opacity-70 mt-1">
+                          {formatTimeAgo(msg.createdAt)}
+                        </p>
                       </div>
                     </div>
                   ))}
-                  {isTyping && (
-                    <div className="flex justify-start">
-                      <div className="bg-[#3A4D23] text-white px-4 py-2 rounded-lg">
-                        <div className="flex space-x-1">
-                          <div className="w-2 h-2 bg-[#8BAE5A] rounded-full animate-bounce"></div>
-                          <div className="w-2 h-2 bg-[#8BAE5A] rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                          <div className="w-2 h-2 bg-[#8BAE5A] rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                  <div ref={messagesEndRef} />
                 </div>
 
                 {/* Chat Input */}
@@ -331,7 +422,7 @@ export default function Inbox() {
             ) : (
               <div className="flex-1 flex items-center justify-center">
                 <div className="text-center">
-                  <p className="text-[#8BAE5A] text-lg">Selecteer een bericht om te beginnen</p>
+                  <p className="text-[#8BAE5A] text-lg">Selecteer een gesprek om te beginnen</p>
                 </div>
               </div>
             )}
@@ -339,7 +430,7 @@ export default function Inbox() {
         </div>
 
         {/* Mobile Chat Overlay */}
-        {showChat && selectedMsg && (
+        {showChat && selectedConversation && (
           <div className="md:hidden fixed inset-0 bg-[#232D1A] z-50">
             <div className="flex flex-col h-full">
               {/* Mobile Chat Header */}
@@ -352,14 +443,14 @@ export default function Inbox() {
                 </button>
                 <div className="flex items-center gap-3 flex-1">
                   <img
-                    src={selectedMsg.avatar}
-                    alt={selectedMsg.name}
+                    src={selectedConversation.participant.avatar}
+                    alt={selectedConversation.participant.name}
                     className="w-10 h-10 rounded-full"
                   />
                   <div>
-                    <h3 className="font-semibold text-white">{selectedMsg.name}</h3>
+                    <h3 className="font-semibold text-white">{selectedConversation.participant.name}</h3>
                     <p className="text-[#8BAE5A] text-sm">
-                      {selectedMsg.online ? 'Online' : 'Offline'}
+                      {selectedConversation.online ? 'Online' : 'Offline'}
                     </p>
                   </div>
                 </div>
@@ -367,9 +458,9 @@ export default function Inbox() {
 
               {/* Mobile Chat Messages */}
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {chatMessages.map((msg, index) => (
+                {chatMessages.map((msg) => (
                   <div
-                    key={index}
+                    key={msg.id}
                     className={`flex ${msg.fromMe ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
@@ -379,22 +470,14 @@ export default function Inbox() {
                           : 'bg-[#3A4D23] text-white'
                       }`}
                     >
-                      <p className="text-sm">{msg.text}</p>
-                      <p className="text-xs opacity-70 mt-1">{msg.time}</p>
+                      <p className="text-sm">{msg.content}</p>
+                      <p className="text-xs opacity-70 mt-1">
+                        {formatTimeAgo(msg.createdAt)}
+                      </p>
                     </div>
                   </div>
                 ))}
-                {isTyping && (
-                  <div className="flex justify-start">
-                    <div className="bg-[#3A4D23] text-white px-4 py-2 rounded-lg">
-                      <div className="flex space-x-1">
-                        <div className="w-2 h-2 bg-[#8BAE5A] rounded-full animate-bounce"></div>
-                        <div className="w-2 h-2 bg-[#8BAE5A] rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                        <div className="w-2 h-2 bg-[#8BAE5A] rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                <div ref={messagesEndRef} />
               </div>
 
               {/* Mobile Chat Input */}
