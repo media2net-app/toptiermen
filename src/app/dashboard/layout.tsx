@@ -45,33 +45,47 @@ function getOnboardingTargetPath(currentStep: number): string {
 }
 
 const menu = [
-  { label: 'Dashboard', href: '/dashboard' },
-  { label: 'Mijn Missies', href: '/dashboard/mijn-missies' },
-  { label: 'Mijn Challenges', href: '/dashboard/mijn-challenges' },
-  { label: 'Trainingscentrum', href: '/dashboard/trainingscentrum' },
-  { label: 'Mind & Focus', href: '/dashboard/mind-en-focus' },
-  { label: 'Finance & Business', href: '/dashboard/finance-en-business' },
+  { label: 'Dashboard', icon: HomeIcon, href: '/dashboard' },
+  { label: 'Onboarding', icon: CheckCircleIcon, href: '/dashboard/onboarding' },
+  { label: 'Mijn Profiel', icon: UserCircleIcon, parent: 'Dashboard', href: '/dashboard/mijn-profiel', isSub: true },
+  { label: 'Inbox', icon: EnvelopeIcon, parent: 'Dashboard', href: '/dashboard/inbox', isSub: true },
   {
-    label: 'Brotherhood',
-    href: '/dashboard/brotherhood',
-    subItems: [
-      { label: 'Dashboard', href: '/dashboard/brotherhood' },
-      { label: 'Social Feed', href: '/dashboard/brotherhood/social-feed' },
-      { label: 'Forum', href: '/dashboard/brotherhood/forum' },
-      { label: 'Leden', href: '/dashboard/brotherhood/leden' },
-      { label: 'Mijn Groepen & Evenementen', href: '/dashboard/brotherhood/mijn-groepen' },
-    ],
+    label: 'Mijn Missies',
+    icon: FireIcon,
+    parent: 'Dashboard',
+    href: '/dashboard/mijn-missies',
+    isSub: true
   },
-  { label: 'Boekenkamer', href: '/dashboard/boekenkamer' },
-  { label: 'Badges & Rangen', href: '/dashboard/badges-en-rangen' },
-  { label: 'Mijn Profiel', href: '/dashboard/mijn-profiel' },
-  { label: 'Mentorship & Coaching', href: '/dashboard/mentorship-en-coaching' },
+  {
+    label: 'Challenges',
+    icon: TrophyIcon,
+    parent: 'Dashboard',
+    href: '/dashboard/challenges',
+    isSub: true
+  },
+  { label: 'Mijn Trainingen', icon: AcademicCapIcon, parent: 'Dashboard', href: '/dashboard/mijn-trainingen', isSub: true },
+  { label: 'Voedingsplannen', icon: BookOpenIcon, href: '/dashboard/voedingsplannen' },
+  { label: 'Finance & Business', icon: CurrencyDollarIcon, href: '/dashboard/finance-en-business' },
+  { label: 'Academy', icon: FireIcon, href: '/dashboard/academy' },
+  { label: 'Trainingscentrum', icon: AcademicCapIcon, href: '/dashboard/trainingscentrum' },
+  { label: 'Mind & Focus', icon: ChartBarIcon, href: '/dashboard/mind-en-focus' },
+  { label: 'Brotherhood', icon: UsersIcon, href: '/dashboard/brotherhood' },
+  { label: 'Social Feed', icon: ChatBubbleLeftRightIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/social-feed', isSub: true },
+  { label: 'Forum', icon: FireIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/forum', isSub: true },
+  { label: 'Leden', icon: UsersIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/leden', isSub: true },
+  { label: 'Mijn Groepen & Evenementen', icon: StarIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/mijn-groepen', isSub: true },
+  { label: 'Boekenkamer', icon: BookOpenIcon, href: '/dashboard/boekenkamer' },
+  { label: 'Badges & Rangen', icon: StarIcon, href: '/dashboard/badges-en-rangen' },
+  { label: 'Producten', icon: ShoppingBagIcon, href: '/dashboard/producten' },
+  { label: 'Mentorship & Coaching', icon: ChatBubbleLeftRightIcon, href: '/dashboard/mentorship-en-coaching' },
 ];
 
 const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: { collapsed: boolean, onLinkClick?: () => void, onboardingStatus?: any }) => {
   const pathname = usePathname();
   const [openBrotherhood, setOpenBrotherhood] = useState(false);
+  const [openDashboard, setOpenDashboard] = useState(false);
   const safePathname = pathname || '';
+  const { isOnboarding, highlightedMenu, isTransitioning } = useOnboarding();
 
   const handleLinkClick = () => {
     if(onLinkClick) {
@@ -81,93 +95,121 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: { collapse
 
   // Auto-open submenu if current page is a submenu item
   useEffect(() => {
-    const currentItem = menu.find(item => item.subItems?.some(sub => sub.href === safePathname));
-    if (currentItem) {
+    const currentItem = menu.find(item => item.href === safePathname);
+    if (currentItem?.parent === 'Dashboard') {
+      setOpenDashboard(true);
+    } else if (currentItem?.parent === 'Brotherhood') {
       setOpenBrotherhood(true);
     }
   }, [safePathname]);
 
-  // Get current item for highlighting
-  const getCurrentItem = () => {
-    return menu.find(item => item.href === safePathname) || 
-           menu.find(item => item.subItems?.some(sub => sub.href === safePathname));
-  };
-
-  const currentItem = getCurrentItem();
-
   return (
-    <nav className="flex flex-col gap-1">
+    <nav className="flex flex-col gap-2">
       {menu.map((item) => {
-        const isActive = currentItem?.href === item.href || 
-                        (currentItem?.subItems && item.subItems?.some(sub => sub.href === safePathname));
-        const isParentActive = item.subItems?.some(sub => sub.href === safePathname);
+        // Skip onboarding menu item if onboarding is completed
+        if (item.label === 'Onboarding' && onboardingStatus?.onboarding_completed) {
+          return null;
+        }
         
-        if (item.subItems) {
-          return (
-            <div key={item.label} className="mb-1">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation(); // Stop event bubbling
-                  if (!collapsed) {
-                    setOpenBrotherhood(v => !v);
-                  }
-                }}
-                className={`flex items-center justify-between w-full text-[#8BAE5A] hover:text-white active:bg-[#3A4D23]/20 text-lg font-medium py-3 px-4 rounded-xl transition-all touch-manipulation ${
-                  isParentActive ? 'bg-[#3A4D23]/20 text-white' : ''
-                }`}
-                aria-expanded={openBrotherhood}
-              >
-                <span>{item.label}</span>
-                {!collapsed && (
-                  openBrotherhood ? 
-                    <ChevronUpIcon className="w-5 h-5 transition-transform duration-200" /> : 
-                    <ChevronDownIcon className="w-5 h-5 transition-transform duration-200" />
-                )}
-              </button>
-              <div
-                className={`pl-4 flex flex-col gap-1 overflow-hidden transition-all duration-300 ${
-                  openBrotherhood && !collapsed ? 'max-h-[400px] opacity-100 mt-1' : 'max-h-0 opacity-0'
-                }`}
-              >
-                {item.subItems.map((sub) => (
-                  <Link
-                    key={sub.href}
-                    href={sub.href}
-                    className={`text-[#8BAE5A] hover:text-white active:bg-[#3A4D23]/20 text-base font-normal py-3 px-4 rounded-xl transition-all touch-manipulation ${
-                      sub.href === safePathname ? 'bg-[#3A4D23]/20 text-white' : ''
-                    }`}
-                    onClick={(e) => {
-                      e.stopPropagation(); // Stop event bubbling
-                      if (handleLinkClick) { // Null check
-                        handleLinkClick();
-                      }
-                    }}
+        if (!item.parent) {
+          const isActive = safePathname === item.href;
+          const hasSubmenu = menu.some(sub => sub.parent === item.label);
+
+          if (hasSubmenu) {
+            const isOpen = item.label === 'Dashboard' ? openDashboard : openBrotherhood;
+            const setIsOpen = item.label === 'Dashboard' ? setOpenDashboard : setOpenBrotherhood;
+            const subItems = menu.filter(sub => sub.parent === item.label);
+            const hasActiveSubItem = subItems.some(sub => sub.href === safePathname);
+            
+            return (
+              <div key={item.label} className="group">
+                <button
+                  className={`grid grid-cols-[auto_1fr_auto] items-center gap-4 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide transition-all duration-150 font-figtree w-full text-left ${
+                    isActive || hasActiveSubItem 
+                      ? 'bg-[#8BAE5A] text-black shadow-lg' 
+                      : 'text-white hover:text-[#8BAE5A] hover:bg-[#3A4D23]/50'
+                  } ${collapsed ? 'justify-center px-2' : ''}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (!collapsed) {
+                      setIsOpen(v => !v);
+                    }
+                  }}
+                >
+                  <item.icon className={`w-6 h-6 ${isActive || hasActiveSubItem ? 'text-white' : 'text-[#8BAE5A]'}`} />
+                  {!collapsed && (
+                    <span className="truncate col-start-2">{item.label}</span>
+                  )}
+                  {!collapsed && (
+                    <ChevronDownIcon 
+                      className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} 
+                    />
+                  )}
+                </button>
+                {isOpen && !collapsed && (
+                  <motion.div 
+                    className="ml-4 mt-2 space-y-1"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2 }}
                   >
-                    {sub.label}
-                  </Link>
-                ))}
+                    {subItems.map(sub => {
+                      const isSubActive = safePathname === sub.href;
+                      const isHighlighted = isOnboarding && highlightedMenu === sub.label;
+                      return (
+                        <Link
+                          key={sub.label}
+                          href={sub.href}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (handleLinkClick) {
+                              handleLinkClick();
+                            }
+                          }}
+                          className={`block px-4 py-2 rounded-lg text-sm transition-all duration-150 ${
+                            isSubActive 
+                              ? 'bg-[#8BAE5A] text-black font-semibold' 
+                              : isHighlighted
+                              ? 'bg-[#FFD700]/20 text-[#FFD700] border border-[#FFD700]/30'
+                              : 'text-gray-300 hover:text-[#8BAE5A] hover:bg-[#8BAE5A]/10'
+                          }`}
+                        >
+                          {sub.label}
+                        </Link>
+                      );
+                    })}
+                  </motion.div>
+                )}
               </div>
-            </div>
+            );
+          }
+
+          const isHighlighted = isOnboarding && highlightedMenu === item.label;
+          return (
+            <Link
+              key={item.label}
+              href={item.href}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (handleLinkClick) {
+                  handleLinkClick();
+                }
+              }}
+              className={`grid grid-cols-[auto_1fr] items-center gap-4 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide transition-all duration-150 font-figtree ${
+                isActive 
+                  ? 'bg-[#8BAE5A] text-black shadow-lg' 
+                  : isHighlighted 
+                    ? 'bg-[#FFD700]/20 text-[#FFD700] border border-[#FFD700]/30' 
+                    : 'text-white hover:text-[#8BAE5A] hover:bg-[#3A4D23]/50'
+              } ${collapsed ? 'justify-center px-2' : ''}`}
+            >
+              <item.icon className={`w-6 h-6 ${isActive ? 'text-white' : isHighlighted ? 'text-[#FFD700]' : 'text-[#8BAE5A]'}`} />
+              {!collapsed && <span className="truncate">{item.label}</span>}
+            </Link>
           );
         }
-
-        return (
-          <Link
-            key={item.label}
-            href={item.href}
-            className={`text-[#8BAE5A] hover:text-white active:bg-[#3A4D23]/20 text-lg font-medium py-3 px-4 rounded-xl transition-all touch-manipulation ${
-              isActive ? 'bg-[#3A4D23]/20 text-white' : ''
-            }`}
-            onClick={(e) => {
-              e.stopPropagation(); // Stop event bubbling
-              if (handleLinkClick) { // Null check
-                handleLinkClick();
-              }
-            }}
-          >
-            {item.label}
-          </Link>
-        );
+        return null;
       })}
     </nav>
   );
