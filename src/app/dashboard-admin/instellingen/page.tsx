@@ -18,10 +18,9 @@ import { supabase } from '@/lib/supabase';
 import CDNPerformanceTest from '@/components/admin/CDNPerformanceTest';
 import VideoUploadLogs from '@/components/admin/VideoUploadLogs';
 
-interface StripeConfig {
-  publishableKey: string;
-  secretKey: string;
-  webhookSecret: string;
+interface MollieConfig {
+  liveKey: string;
+  testKey: string;
   isTestMode: boolean;
 }
 
@@ -52,15 +51,14 @@ export default function AdminSettings() {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   
-  // Stripe Configuration
-  const [stripeConfig, setStripeConfig] = useState<StripeConfig>({
-    publishableKey: '',
-    secretKey: '',
-    webhookSecret: '',
+  // Mollie Configuration
+  const [mollieConfig, setMollieConfig] = useState<MollieConfig>({
+    liveKey: '',
+    testKey: '',
     isTestMode: true
   });
-  const [showStripeSecret, setShowStripeSecret] = useState(false);
-  const [showWebhookSecret, setShowWebhookSecret] = useState(false);
+  const [showLiveKey, setShowLiveKey] = useState(false);
+  const [showTestKey, setShowTestKey] = useState(false);
 
   // Email Configuration
   const [emailConfig, setEmailConfig] = useState<EmailConfig>({
@@ -94,10 +92,9 @@ export default function AdminSettings() {
     setIsLoading(true);
     try {
       // Load from environment variables or database
-      setStripeConfig({
-        publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '',
-        secretKey: process.env.STRIPE_SECRET_KEY || '',
-        webhookSecret: process.env.STRIPE_WEBHOOK_SECRET || '',
+      setMollieConfig({
+        liveKey: process.env.MOLLIE_LIVE_KEY || '',
+        testKey: process.env.MOLLIE_TEST_KEY || '',
         isTestMode: true
       });
 
@@ -160,27 +157,25 @@ export default function AdminSettings() {
     }
   };
 
-  const saveStripeConfig = async () => {
+  const saveMollieConfig = async () => {
     setIsLoading(true);
     try {
       // In a real app, you'd save this to the database
       // For now, we'll just show a success message
-      setMessage({ type: 'success', text: 'Stripe configuratie opgeslagen!' });
+      setMessage({ type: 'success', text: 'Mollie configuratie opgeslagen!' });
       
-      // Test Stripe connection
-      const response = await fetch('/api/admin/test-stripe-connection', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ secretKey: stripeConfig.secretKey })
+      // Test Mollie connection
+      const response = await fetch('/api/test-mollie', {
+        method: 'GET'
       });
       
       if (response.ok) {
-        setMessage({ type: 'success', text: 'Stripe verbinding succesvol getest!' });
+        setMessage({ type: 'success', text: 'Mollie verbinding succesvol getest!' });
       } else {
-        setMessage({ type: 'error', text: 'Stripe verbinding test mislukt' });
+        setMessage({ type: 'error', text: 'Mollie verbinding test mislukt' });
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'Fout bij het opslaan van Stripe configuratie' });
+      setMessage({ type: 'error', text: 'Fout bij het opslaan van Mollie configuratie' });
     } finally {
       setIsLoading(false);
     }
@@ -243,22 +238,20 @@ export default function AdminSettings() {
     }
   };
 
-  const testStripeConnection = async () => {
+  const testMollieConnection = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/admin/test-stripe-connection', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ secretKey: stripeConfig.secretKey })
+      const response = await fetch('/api/test-mollie', {
+        method: 'GET'
       });
       
       if (response.ok) {
-        setMessage({ type: 'success', text: 'Stripe verbinding succesvol!' });
+        setMessage({ type: 'success', text: 'Mollie verbinding succesvol!' });
       } else {
-        setMessage({ type: 'error', text: 'Stripe verbinding mislukt' });
+        setMessage({ type: 'error', text: 'Mollie verbinding mislukt' });
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'Fout bij het testen van Stripe verbinding' });
+      setMessage({ type: 'error', text: 'Fout bij het testen van Mollie verbinding' });
     } finally {
       setIsLoading(false);
     }
@@ -287,7 +280,7 @@ export default function AdminSettings() {
   };
 
   const tabs = [
-    { id: 'stripe', name: 'Stripe Configuratie', icon: CreditCardIcon },
+    { id: 'mollie', name: 'Mollie Configuratie', icon: CreditCardIcon },
     { id: 'email', name: 'Email Instellingen', icon: EnvelopeIcon },
     { id: 'platform', name: 'Platform Instellingen', icon: GlobeAltIcon }
   ];
@@ -336,70 +329,57 @@ export default function AdminSettings() {
         </nav>
       </div>
 
-      {/* Stripe Configuration Tab */}
-      {activeTab === 'stripe' && (
+      {/* Mollie Configuration Tab */}
+      {activeTab === 'mollie' && (
         <div className="space-y-6">
           <div className="bg-[#181F17] p-6 rounded-lg border border-[#3A4D23]">
             <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
               <CreditCardIcon className="w-6 h-6 text-[#B6C948]" />
-              Stripe Payment Configuratie
+              Mollie Payment Configuratie
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div>
                   <label className="block text-[#B6C948] font-medium mb-2">
-                    Publishable Key
-                  </label>
-                  <input
-                    type="text"
-                    value={stripeConfig.publishableKey}
-                    onChange={(e) => setStripeConfig(prev => ({ ...prev, publishableKey: e.target.value }))}
-                    className="w-full p-3 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white focus:border-[#B6C948] focus:outline-none"
-                    placeholder="pk_test_..."
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[#B6C948] font-medium mb-2">
-                    Secret Key
+                    Live Key
                   </label>
                   <div className="relative">
                     <input
-                      type={showStripeSecret ? 'text' : 'password'}
-                      value={stripeConfig.secretKey}
-                      onChange={(e) => setStripeConfig(prev => ({ ...prev, secretKey: e.target.value }))}
+                      type={showLiveKey ? 'text' : 'password'}
+                      value={mollieConfig.liveKey}
+                      onChange={(e) => setMollieConfig(prev => ({ ...prev, liveKey: e.target.value }))}
                       className="w-full p-3 pr-12 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white focus:border-[#B6C948] focus:outline-none"
-                      placeholder="sk_test_..."
+                      placeholder="live_..."
                     />
                     <button
                       type="button"
-                      onClick={() => setShowStripeSecret(!showStripeSecret)}
+                      onClick={() => setShowLiveKey(!showLiveKey)}
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#8BAE5A] hover:text-[#B6C948]"
                     >
-                      {showStripeSecret ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
+                      {showLiveKey ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
                     </button>
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-[#B6C948] font-medium mb-2">
-                    Webhook Secret
+                    Test Key
                   </label>
                   <div className="relative">
                     <input
-                      type={showWebhookSecret ? 'text' : 'password'}
-                      value={stripeConfig.webhookSecret}
-                      onChange={(e) => setStripeConfig(prev => ({ ...prev, webhookSecret: e.target.value }))}
+                      type={showTestKey ? 'text' : 'password'}
+                      value={mollieConfig.testKey}
+                      onChange={(e) => setMollieConfig(prev => ({ ...prev, testKey: e.target.value }))}
                       className="w-full p-3 pr-12 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white focus:border-[#B6C948] focus:outline-none"
-                      placeholder="whsec_..."
+                      placeholder="test_..."
                     />
                     <button
                       type="button"
-                      onClick={() => setShowWebhookSecret(!showWebhookSecret)}
+                      onClick={() => setShowTestKey(!showTestKey)}
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#8BAE5A] hover:text-[#B6C948]"
                     >
-                      {showWebhookSecret ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
+                      {showTestKey ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
                     </button>
                   </div>
                 </div>
@@ -411,8 +391,8 @@ export default function AdminSettings() {
                   <label className="flex items-center gap-2 text-[#8BAE5A]">
                     <input
                       type="checkbox"
-                      checked={stripeConfig.isTestMode}
-                      onChange={(e) => setStripeConfig(prev => ({ ...prev, isTestMode: e.target.checked }))}
+                      checked={mollieConfig.isTestMode}
+                      onChange={(e) => setMollieConfig(prev => ({ ...prev, isTestMode: e.target.checked }))}
                       className="accent-[#B6C948]"
                     />
                     Gebruik test modus (aanbevolen voor ontwikkeling)
@@ -422,28 +402,28 @@ export default function AdminSettings() {
                 <div className="bg-[#232D1A] p-4 rounded-lg border border-[#3A4D23]">
                   <h3 className="text-[#B6C948] font-semibold mb-2">Webhook URL</h3>
                   <p className="text-[#8BAE5A] text-sm mb-2">
-                    Configureer deze URL in je Stripe dashboard:
+                    Configureer deze URL in je Mollie dashboard:
                   </p>
                   <code className="block p-2 bg-[#181F17] text-[#B6C948] text-xs rounded border border-[#3A4D23]">
-                    {typeof window !== 'undefined' ? `${window.location.origin}/api/webhooks/stripe` : 'Loading...'}
+                    {typeof window !== 'undefined' ? `${window.location.origin}/api/payments/mollie/webhook` : 'Loading...'}
                   </code>
                 </div>
 
                 <div className="space-y-2">
                   <button
-                    onClick={testStripeConnection}
-                    disabled={isLoading || !stripeConfig.secretKey}
+                    onClick={testMollieConnection}
+                    disabled={isLoading || (!mollieConfig.liveKey && !mollieConfig.testKey)}
                     className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Test Stripe Verbinding
+                    Test Mollie Verbinding
                   </button>
                   
                   <button
-                    onClick={saveStripeConfig}
+                    onClick={saveMollieConfig}
                     disabled={isLoading}
                     className="w-full px-4 py-2 bg-[#B6C948] text-[#181F17] font-semibold rounded-lg hover:bg-[#8BAE5A] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isLoading ? 'Opslaan...' : 'Stripe Configuratie Opslaan'}
+                    {isLoading ? 'Opslaan...' : 'Mollie Configuratie Opslaan'}
                   </button>
                 </div>
               </div>
