@@ -50,7 +50,7 @@ export const SUBSCRIPTION_PLANS = {
   }
 };
 
-// Payment methods
+// Payment methods (for reference - Mollie shows all available methods automatically)
 export const PAYMENT_METHODS = [
   'ideal',
   'creditcard',
@@ -79,8 +79,7 @@ export const createPayment = async (data: {
     description: data.description,
     redirectUrl: data.redirectUrl,
     webhookUrl: data.webhookUrl,
-    metadata: data.metadata,
-    methods: PAYMENT_METHODS
+    metadata: data.metadata
   });
   
   return payment;
