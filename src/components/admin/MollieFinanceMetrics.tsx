@@ -1,6 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { 
+  CurrencyEuroIcon,
+  ArrowTrendingUpIcon,
+  CheckCircleIcon,
+  ChartBarIcon,
+  CreditCardIcon,
+  ClockIcon,
+  XCircleIcon,
+  ArrowPathIcon,
+  ExclamationTriangleIcon
+} from '@heroicons/react/24/outline';
 
 interface FinanceMetrics {
   period: string;
@@ -120,7 +131,7 @@ export default function MollieFinanceMetrics({ period }: MollieFinanceMetricsPro
     return (
       <div className="bg-[#181F17] p-6 rounded-lg border border-[#3A4D23]">
         <div className="flex items-center justify-center py-8">
-          <div className="w-8 h-8 border-2 border-[#8BAE5A] border-t-transparent rounded-full animate-spin"></div>
+          <ArrowPathIcon className="w-8 h-8 text-[#8BAE5A] animate-spin" />
           <span className="ml-2 text-[#8BAE5A]">Finance metrics laden...</span>
         </div>
       </div>
@@ -131,9 +142,7 @@ export default function MollieFinanceMetrics({ period }: MollieFinanceMetricsPro
     return (
       <div className="bg-[#181F17] p-6 rounded-lg border border-[#3A4D23]">
         <div className="text-center py-8">
-          <div className="w-12 h-12 bg-red-500/20 border border-red-500/50 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-red-400 text-2xl">⚠️</span>
-          </div>
+          <ExclamationTriangleIcon className="w-12 h-12 text-red-400 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-white mb-2">Finance Metrics Error</h3>
           <p className="text-gray-400 mb-4">{error}</p>
           <button
@@ -163,7 +172,7 @@ export default function MollieFinanceMetrics({ period }: MollieFinanceMetricsPro
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-gradient-to-r from-[#8BAE5A] to-[#3A4D23] rounded-lg flex items-center justify-center">
-            <span className="text-white text-xl">€</span>
+            <CurrencyEuroIcon className="w-6 h-6 text-white" />
           </div>
           <div>
             <h2 className="text-xl font-bold text-white">Mollie Finance Metrics</h2>
@@ -176,7 +185,7 @@ export default function MollieFinanceMetrics({ period }: MollieFinanceMetricsPro
           onClick={fetchMetrics}
           className="p-2 text-[#8BAE5A] hover:text-[#B6C948] transition-colors"
         >
-          <span className="text-xl">🔄</span>
+          <ArrowPathIcon className="w-5 h-5" />
         </button>
       </div>
 
@@ -188,7 +197,7 @@ export default function MollieFinanceMetrics({ period }: MollieFinanceMetricsPro
               <p className="text-sm text-gray-400">Totale Omzet</p>
               <p className="text-2xl font-bold text-[#8BAE5A]">{formatCurrency(metrics.totalRevenue)}</p>
             </div>
-            <span className="text-[#8BAE5A] text-2xl">📈</span>
+            <ArrowTrendingUpIcon className="w-8 h-8 text-[#8BAE5A]" />
           </div>
         </div>
 
@@ -198,7 +207,7 @@ export default function MollieFinanceMetrics({ period }: MollieFinanceMetricsPro
               <p className="text-sm text-gray-400">Succesvolle Transacties</p>
               <p className="text-2xl font-bold text-green-400">{metrics.successfulTransactions}</p>
             </div>
-            <span className="text-green-400 text-2xl">✅</span>
+            <CheckCircleIcon className="w-8 h-8 text-green-400" />
           </div>
         </div>
 
@@ -208,7 +217,7 @@ export default function MollieFinanceMetrics({ period }: MollieFinanceMetricsPro
               <p className="text-sm text-gray-400">Conversie Rate</p>
               <p className="text-2xl font-bold text-[#B6C948]">{metrics.conversionRate}%</p>
             </div>
-            <span className="text-[#B6C948] text-2xl">📊</span>
+            <ChartBarIcon className="w-8 h-8 text-[#B6C948]" />
           </div>
         </div>
 
@@ -218,7 +227,7 @@ export default function MollieFinanceMetrics({ period }: MollieFinanceMetricsPro
               <p className="text-sm text-gray-400">Gem. Transactie</p>
               <p className="text-2xl font-bold text-[#8BAE5A]">{formatCurrency(metrics.averageTransactionValue)}</p>
             </div>
-            <span className="text-[#8BAE5A] text-2xl">💳</span>
+            <CreditCardIcon className="w-8 h-8 text-[#8BAE5A]" />
           </div>
         </div>
       </div>
@@ -227,7 +236,7 @@ export default function MollieFinanceMetrics({ period }: MollieFinanceMetricsPro
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-[#232D1A] p-4 rounded-lg border border-[#3A4D23]">
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-yellow-400 text-xl">⏰</span>
+            <ClockIcon className="w-5 h-5 text-yellow-400" />
             <span className="text-sm text-gray-400">In behandeling</span>
           </div>
           <p className="text-xl font-bold text-yellow-400">{metrics.pendingTransactions}</p>
@@ -235,7 +244,7 @@ export default function MollieFinanceMetrics({ period }: MollieFinanceMetricsPro
 
         <div className="bg-[#232D1A] p-4 rounded-lg border border-[#3A4D23]">
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-red-400 text-xl">❌</span>
+            <XCircleIcon className="w-5 h-5 text-red-400" />
             <span className="text-sm text-gray-400">Mislukt</span>
           </div>
           <p className="text-xl font-bold text-red-400">{metrics.failedTransactions}</p>
@@ -243,7 +252,7 @@ export default function MollieFinanceMetrics({ period }: MollieFinanceMetricsPro
 
         <div className="bg-[#232D1A] p-4 rounded-lg border border-[#3A4D23]">
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-blue-400 text-xl">💳</span>
+            <CreditCardIcon className="w-5 h-5 text-blue-400" />
             <span className="text-sm text-gray-400">Totaal</span>
           </div>
           <p className="text-xl font-bold text-blue-400">{metrics.totalTransactions}</p>
