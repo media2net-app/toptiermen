@@ -79,19 +79,19 @@ export default function PreLaunchPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-[#232D1A] to-gray-900">
       {/* Header */}
       <header className="relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-to-r from-[#8BAE5A] to-[#3A4D23] rounded-lg flex items-center justify-center">
                 <TrophyIcon className="w-6 h-6 text-white" />
               </div>
               <span className="text-2xl font-bold text-white">Top Tier Men</span>
             </div>
             <div className="flex items-center space-x-4">
-              <span className="text-yellow-400 text-sm font-medium">🚀 Pre-Launch</span>
+              <span className="text-[#8BAE5A] text-sm font-medium">🚀 Pre-Launch</span>
             </div>
           </div>
         </div>
@@ -105,14 +105,14 @@ export default function PreLaunchPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <div className="inline-flex items-center px-4 py-2 bg-yellow-500/10 border border-yellow-500/30 rounded-full text-yellow-400 text-sm font-medium mb-8">
+            <div className="inline-flex items-center px-4 py-2 bg-[#8BAE5A]/10 border border-[#8BAE5A]/30 rounded-full text-[#8BAE5A] text-sm font-medium mb-8">
               <ClockIcon className="w-4 h-4 mr-2" />
               Launch: 22 Augustus 2024
             </div>
             
             <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
               Word de Beste Versie van
-              <span className="block bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+              <span className="block bg-gradient-to-r from-[#8BAE5A] to-[#3A4D23] bg-clip-text text-transparent">
                 Jezelf
               </span>
             </h1>
@@ -127,7 +127,7 @@ export default function PreLaunchPage() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
+                className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-[#8BAE5A] to-[#3A4D23] text-white text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
                 onClick={() => document.getElementById('signup')?.scrollIntoView({ behavior: 'smooth' })}
               >
                 <StarIcon className="w-6 h-6 mr-2" />
@@ -140,7 +140,7 @@ export default function PreLaunchPage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-black/20">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#232D1A]/20">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -168,7 +168,7 @@ export default function PreLaunchPage() {
                 viewport={{ once: true }}
                 className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 hover:bg-white/10 transition-all duration-300"
               >
-                <feature.icon className="w-12 h-12 text-blue-400 mb-4" />
+                <feature.icon className="w-12 h-12 text-[#8BAE5A] mb-4" />
                 <h3 className="text-xl font-semibold text-white mb-3">{feature.title}</h3>
                 <p className="text-gray-300">{feature.description}</p>
               </motion.div>
@@ -212,7 +212,7 @@ export default function PreLaunchPage() {
                     viewport={{ once: true }}
                     className="flex items-center space-x-4"
                   >
-                    <CheckCircleIcon className="w-6 h-6 text-green-400 flex-shrink-0" />
+                    <CheckCircleIcon className="w-6 h-6 text-[#8BAE5A] flex-shrink-0" />
                     <span className="text-lg text-white">{benefit}</span>
                   </motion.div>
                 ))}
@@ -226,9 +226,9 @@ export default function PreLaunchPage() {
               viewport={{ once: true }}
               className="relative"
             >
-              <div className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-2xl p-8 border border-white/10">
+              <div className="bg-gradient-to-br from-[#8BAE5A]/20 to-[#3A4D23]/20 rounded-2xl p-8 border border-white/10">
                 <div className="text-center">
-                  <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <div className="w-20 h-20 bg-gradient-to-r from-[#8BAE5A] to-[#3A4D23] rounded-full flex items-center justify-center mx-auto mb-6">
                     <PlayIcon className="w-10 h-10 text-white" />
                   </div>
                   <h3 className="text-2xl font-bold text-white mb-4">Platform Preview</h3>
@@ -247,7 +247,7 @@ export default function PreLaunchPage() {
       </section>
 
       {/* Early Bird Section */}
-      <section id="signup" className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-blue-600/20 to-purple-600/20">
+      <section id="signup" className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-[#8BAE5A]/20 to-[#3A4D23]/20">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -255,7 +255,7 @@ export default function PreLaunchPage() {
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <div className="inline-flex items-center px-4 py-2 bg-yellow-500/20 border border-yellow-500/30 rounded-full text-yellow-400 text-sm font-medium mb-8">
+            <div className="inline-flex items-center px-4 py-2 bg-[#8BAE5A]/20 border border-[#8BAE5A]/30 rounded-full text-[#8BAE5A] text-sm font-medium mb-8">
               <FireIcon className="w-4 h-4 mr-2" />
               Limited Time Offer
             </div>
@@ -284,7 +284,7 @@ export default function PreLaunchPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Vul je email adres in"
-                    className="w-full px-6 py-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-6 py-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] focus:border-transparent"
                     required
                   />
                   {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
@@ -295,7 +295,7 @@ export default function PreLaunchPage() {
                   disabled={isSubmitting}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="w-full px-8 py-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-8 py-4 bg-gradient-to-r from-[#8BAE5A] to-[#3A4D23] text-white text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? (
                     <div className="flex items-center justify-center">
@@ -314,9 +314,9 @@ export default function PreLaunchPage() {
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="bg-green-500/20 border border-green-500/30 rounded-xl p-8"
+                className="bg-[#8BAE5A]/20 border border-[#8BAE5A]/30 rounded-xl p-8"
               >
-                <CheckCircleIcon className="w-16 h-16 text-green-400 mx-auto mb-4" />
+                <CheckCircleIcon className="w-16 h-16 text-[#8BAE5A] mx-auto mb-4" />
                 <h3 className="text-2xl font-bold text-white mb-2">Je bent ingeschreven!</h3>
                 <p className="text-gray-300">
                   Bedankt voor je interesse! Je ontvangt binnenkort meer informatie over de launch 
@@ -347,7 +347,7 @@ export default function PreLaunchPage() {
       <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-white/10">
         <div className="max-w-7xl mx-auto text-center">
           <div className="flex items-center justify-center space-x-3 mb-4">
-            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-to-r from-[#8BAE5A] to-[#3A4D23] rounded-lg flex items-center justify-center">
               <TrophyIcon className="w-5 h-5 text-white" />
             </div>
             <span className="text-xl font-bold text-white">Top Tier Men</span>
