@@ -134,10 +134,7 @@ export async function GET(request: NextRequest) {
       case 'dashboard':
       default:
         const dashboardData = await facebookAdManager.getDashboardData(dateRangeObj);
-        return NextResponse.json({
-          success: true,
-          ...dashboardData
-        });
+        return NextResponse.json(dashboardData);
     }
 
   } catch (error) {
