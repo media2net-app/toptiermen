@@ -126,41 +126,41 @@ export const getPaymentMethods = async () => {
 
 // Check if payment is paid
 export const isPaymentPaid = (payment: Payment) => {
-  return payment.isPaid();
+  return payment.status === 'paid';
 };
 
 // Check if payment is pending
 export const isPaymentPending = (payment: Payment) => {
-  return payment.isPending();
+  return payment.status === 'pending';
 };
 
 // Check if payment is failed
 export const isPaymentFailed = (payment: Payment) => {
-  return payment.isFailed();
+  return payment.status === 'failed';
 };
 
 // Check if payment is expired
 export const isPaymentExpired = (payment: Payment) => {
-  return payment.isExpired();
+  return payment.status === 'expired';
 };
 
 // Get payment status text
 export const getPaymentStatusText = (payment: Payment) => {
-  if (payment.isPaid()) return 'Betaald';
-  if (payment.isPending()) return 'In behandeling';
-  if (payment.isFailed()) return 'Mislukt';
-  if (payment.isExpired()) return 'Verlopen';
-  if (payment.isCanceled()) return 'Geannuleerd';
+  if (payment.status === 'paid') return 'Betaald';
+  if (payment.status === 'pending') return 'In behandeling';
+  if (payment.status === 'failed') return 'Mislukt';
+  if (payment.status === 'expired') return 'Verlopen';
+  if (payment.status === 'canceled') return 'Geannuleerd';
   return 'Onbekend';
 };
 
 // Get payment status color
 export const getPaymentStatusColor = (payment: Payment) => {
-  if (payment.isPaid()) return 'green';
-  if (payment.isPending()) return 'yellow';
-  if (payment.isFailed()) return 'red';
-  if (payment.isExpired()) return 'gray';
-  if (payment.isCanceled()) return 'gray';
+  if (payment.status === 'paid') return 'green';
+  if (payment.status === 'pending') return 'yellow';
+  if (payment.status === 'failed') return 'red';
+  if (payment.status === 'expired') return 'gray';
+  if (payment.status === 'canceled') return 'gray';
   return 'gray';
 };
 
