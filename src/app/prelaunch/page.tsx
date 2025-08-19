@@ -83,15 +83,13 @@ export default function PreLaunchPage() {
       {/* Header */}
       <header className="relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-center">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-[#8BAE5A] to-[#3A4D23] rounded-lg flex items-center justify-center">
-                <TrophyIcon className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-2xl font-bold text-white">Top Tier Men</span>
-            </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-[#8BAE5A] text-sm font-medium">🚀 Pre-Launch</span>
+              <img 
+                src="/logo_white-full.svg" 
+                alt="Top Tier Men Logo" 
+                className="h-12 sm:h-16 w-auto"
+              />
             </div>
           </div>
         </div>
@@ -107,7 +105,7 @@ export default function PreLaunchPage() {
           >
             <div className="inline-flex items-center px-4 py-2 bg-[#8BAE5A]/10 border border-[#8BAE5A]/30 rounded-full text-[#8BAE5A] text-sm font-medium mb-8">
               <ClockIcon className="w-4 h-4 mr-2" />
-              Launch: 22 Augustus 2024
+              Lancering: 10 September 2024
             </div>
             
             <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
@@ -131,7 +129,7 @@ export default function PreLaunchPage() {
                 onClick={() => document.getElementById('signup')?.scrollIntoView({ behavior: 'smooth' })}
               >
                 <StarIcon className="w-6 h-6 mr-2" />
-                Schrijf je in voor 50% Early Bird Korting
+                Schrijf je in voor de Wachtlijst
                 <ArrowRightIcon className="w-5 h-5 ml-2" />
               </motion.button>
             </div>
@@ -246,7 +244,7 @@ export default function PreLaunchPage() {
         </div>
       </section>
 
-      {/* Early Bird Section */}
+      {/* Waitlist Section */}
       <section id="signup" className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-[#8BAE5A]/20 to-[#3A4D23]/20">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
@@ -257,16 +255,16 @@ export default function PreLaunchPage() {
           >
             <div className="inline-flex items-center px-4 py-2 bg-[#8BAE5A]/20 border border-[#8BAE5A]/30 rounded-full text-[#8BAE5A] text-sm font-medium mb-8">
               <FireIcon className="w-4 h-4 mr-2" />
-              Limited Time Offer
+              Exclusieve Wachtlijst
             </div>
 
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              Early Bird Korting: 50% OFF
+              Wees er Bij vanaf Dag 1
             </h2>
             
             <p className="text-xl text-gray-300 mb-8">
-              Schrijf je in voor de pre-launch lijst en krijg exclusieve toegang tot 50% korting 
-              wanneer het platform live gaat op 22 Augustus 2024.
+              Door je te registreren kom je op de wachtlijst te staan voor de lancering op 10 September 2024. 
+              Je behoort dan tot de groep eerste gebruikers van het platform.
             </p>
 
             {!isSubmitted ? (
@@ -305,7 +303,7 @@ export default function PreLaunchPage() {
                   ) : (
                     <div className="flex items-center justify-center">
                       <ShieldCheckIcon className="w-5 h-5 mr-2" />
-                      Schrijf je in voor Early Bird Korting
+                      Schrijf je in voor de Wachtlijst
                     </div>
                   )}
                 </motion.button>
@@ -319,8 +317,8 @@ export default function PreLaunchPage() {
                 <CheckCircleIcon className="w-16 h-16 text-[#8BAE5A] mx-auto mb-4" />
                 <h3 className="text-2xl font-bold text-white mb-2">Je bent ingeschreven!</h3>
                 <p className="text-gray-300">
-                  Bedankt voor je interesse! Je ontvangt binnenkort meer informatie over de launch 
-                  en je exclusieve 50% korting.
+                  Bedankt voor je interesse! Je staat nu op de wachtlijst en behoort tot de groep eerste gebruikers. 
+                  Je ontvangt binnenkort meer informatie over de lancering op 10 September 2024.
                 </p>
               </motion.div>
             )}
@@ -336,7 +334,7 @@ export default function PreLaunchPage() {
               </div>
               <div className="flex items-center">
                 <StarIcon className="w-4 h-4 mr-2" />
-                Exclusieve Korting
+                Eerste Gebruikers
               </div>
             </div>
           </motion.div>
@@ -347,10 +345,11 @@ export default function PreLaunchPage() {
       <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-white/10">
         <div className="max-w-7xl mx-auto text-center">
           <div className="flex items-center justify-center space-x-3 mb-4">
-            <div className="w-8 h-8 bg-gradient-to-r from-[#8BAE5A] to-[#3A4D23] rounded-lg flex items-center justify-center">
-              <TrophyIcon className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-xl font-bold text-white">Top Tier Men</span>
+            <img 
+              src="/logo_white-full.svg" 
+              alt="Top Tier Men Logo" 
+              className="h-8 sm:h-10 w-auto"
+            />
           </div>
           <p className="text-gray-400">
             © 2024 Top Tier Men. Alle rechten voorbehouden.
