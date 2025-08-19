@@ -504,21 +504,28 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
         {/* Mobile/Tablet Menu */}
         {isMobileMenuOpen && (
           <div className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-50">
-            <div className="bg-[#232D1A] w-[85%] max-w-[400px] h-full p-3 sm:p-4 mobile-menu">
-              <div className="flex items-center justify-between mb-4 sm:mb-6">
-                <h2 className="text-[#8BAE5A] font-bold text-base sm:text-lg">Menu</h2>
-                <button
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="p-2 bg-[#181F17] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors"
-                >
-                  <XMarkIcon className="w-5 h-5 sm:w-6 sm:h-6" />
-                </button>
+            <div className="bg-[#232D1A] w-[85%] max-w-[400px] h-full flex flex-col">
+              {/* Header */}
+              <div className="p-3 sm:p-4 border-b border-[#3A4D23] flex-shrink-0">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-[#8BAE5A] font-bold text-base sm:text-lg">Menu</h2>
+                  <button
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="p-2 bg-[#181F17] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors"
+                  >
+                    <XMarkIcon className="w-5 h-5 sm:w-6 sm:h-6" />
+                  </button>
+                </div>
               </div>
-              <SidebarContent 
-                collapsed={false} 
-                onLinkClick={() => setIsMobileMenuOpen(false)}
-                onboardingStatus={onboardingStatus}
-              />
+              
+              {/* Scrollable Content */}
+              <div className="flex-1 overflow-y-auto p-3 sm:p-4">
+                <SidebarContent 
+                  collapsed={false} 
+                  onLinkClick={() => setIsMobileMenuOpen(false)}
+                  onboardingStatus={onboardingStatus}
+                />
+              </div>
             </div>
           </div>
         )}

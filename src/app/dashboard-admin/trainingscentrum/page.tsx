@@ -266,6 +266,7 @@ export default function TrainingscentrumBeheer() {
   const [loadedThumbnails, setLoadedThumbnails] = useState<Set<number>>(new Set());
   const [videoErrors, setVideoErrors] = useState<Set<number>>(new Set());
   const [thumbnailLoadingStarted, setThumbnailLoadingStarted] = useState(false);
+  const [showVideoLoadingOverlay, setShowVideoLoadingOverlay] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -332,6 +333,7 @@ export default function TrainingscentrumBeheer() {
     const loadThumbnailsSequentially = async () => {
       console.log('🎬 Starting sequential thumbnail loading...');
       setThumbnailLoadingStarted(true);
+      setShowVideoLoadingOverlay(true); // Show overlay when starting to load videos
       
       for (let i = 0; i < exercises.length; i++) {
         if (isCancelled) break;
@@ -345,6 +347,13 @@ export default function TrainingscentrumBeheer() {
         // Small delay between each thumbnail to prevent overwhelming
         await new Promise(resolve => setTimeout(resolve, 100));
       }
+      
+      // Hide overlay after all videos are loaded (with a small delay to ensure smooth transition)
+      setTimeout(() => {
+        if (!isCancelled) {
+          setShowVideoLoadingOverlay(false);
+        }
+      }, 500);
     };
 
     loadThumbnailsSequentially();
@@ -898,7 +907,17 @@ export default function TrainingscentrumBeheer() {
 
       {/* Oefeningen Bibliotheek */}
       {activeTab === 'exercises' && (
-        <div className="space-y-6">
+        <div className="space-y-6 relative">
+          {/* Video Loading Overlay */}
+          {showVideoLoadingOverlay && (
+            <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+              <div className="bg-[#232D1A] rounded-2xl p-8 border border-[#3A4D23] text-center">
+                <div className="animate-spin w-12 h-12 border-4 border-[#8BAE5A] border-t-transparent rounded-full mx-auto mb-4"></div>
+                <h3 className="text-[#8BAE5A] text-xl font-semibold mb-2">Videos worden geladen...</h3>
+                <p className="text-[#B6C948] text-sm">Even geduld, alle video's worden voorbereid</p>
+              </div>
+            </div>
+          )}
           {/* Header Actions */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
