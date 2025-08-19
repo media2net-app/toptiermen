@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useDebug } from '@/contexts/DebugContext';
 import { OnboardingProvider, useOnboarding } from '@/contexts/OnboardingContext';
@@ -15,7 +16,7 @@ import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
 import Image from 'next/image';
-// import MobileNav from '../components/MobileNav';
+import MobileNav from '../components/MobileNav';
 
 function slugify(str: string) {
   return str
@@ -92,8 +93,18 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: { collapse
     }
   }
 
+  // Auto-open submenu if current page is a submenu item
+  useEffect(() => {
+    const currentItem = menu.find(item => item.href === safePathname);
+    if (currentItem?.parent === 'Dashboard') {
+      setOpenDashboard(true);
+    } else if (currentItem?.parent === 'Brotherhood') {
+      setOpenBrotherhood(true);
+    }
+  }, [safePathname]);
+
   return (
-    <nav className="flex-1 flex flex-col gap-2 mt-4">
+    <nav className="flex flex-col gap-2">
       {menu.map((item) => {
         // Skip onboarding menu item if onboarding is completed
         if (item.label === 'Onboarding' && onboardingStatus?.onboarding_completed) {
@@ -107,54 +118,66 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: { collapse
           if (hasSubmenu) {
             const isOpen = item.label === 'Dashboard' ? openDashboard : openBrotherhood;
             const setIsOpen = item.label === 'Dashboard' ? setOpenDashboard : setOpenBrotherhood;
+            const subItems = menu.filter(sub => sub.parent === item.label);
+            const hasActiveSubItem = subItems.some(sub => sub.href === safePathname);
+            
             return (
               <div key={item.label} className="group">
-                <div
-                  className={`grid grid-cols-[auto_1fr_auto] items-center gap-4 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide transition-all duration-150 font-figtree w-full text-left ${isActive && !isOpen ? 'bg-[#8BAE5A] text-black shadow-lg' : 'text-white hover:text-[#8BAE5A]'} ${collapsed ? 'justify-center px-2' : ''}`}
-                  onClick={collapsed ? () => {} : () => setIsOpen(v => !v)}
+                <button
+                  className={`grid grid-cols-[auto_1fr_auto] items-center gap-4 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide transition-all duration-150 font-figtree w-full text-left ${
+                    isActive || hasActiveSubItem 
+                      ? 'bg-[#8BAE5A] text-black shadow-lg' 
+                      : 'text-white hover:text-[#8BAE5A] hover:bg-[#3A4D23]/50'
+                  } ${collapsed ? 'justify-center px-2' : ''}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (!collapsed) {
+                      setIsOpen(v => !v);
+                    }
+                  }}
                 >
-                  <item.icon className={`w-6 h-6 ${isActive && !isOpen ? 'text-white' : 'text-[#8BAE5A]'}`} />
+                  <item.icon className={`w-6 h-6 ${isActive || hasActiveSubItem ? 'text-white' : 'text-[#8BAE5A]'}`} />
                   {!collapsed && (
                     <span className="truncate col-start-2">{item.label}</span>
                   )}
                   {!collapsed && (
-                    <button
-                      className="col-start-3 ml-2 p-1 bg-transparent border-none"
-                      aria-label={`${isOpen ? 'submenu inklappen' : 'submenu uitklappen'}`}
-                    >
-                      {isOpen ? (
-                        <ChevronUpIcon className="w-4 h-4" />
-                      ) : (
-                        <ChevronDownIcon className="w-4 h-4" />
-                      )}
-                    </button>
+                    <ChevronDownIcon 
+                      className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} 
+                    />
                   )}
-                </div>
+                </button>
                 {isOpen && !collapsed && (
-                  <div className="ml-4 mt-2 space-y-1">
-                    {menu
-                      .filter(sub => sub.parent === item.label)
-                      .map(sub => {
-                        const isSubActive = safePathname === sub.href;
-                        const isHighlighted = isOnboarding && highlightedMenu === sub.label;
-                        return (
-                          <Link
-                            key={sub.label}
-                            href={sub.href}
-                            onClick={handleLinkClick}
-                            className={`block px-4 py-2 rounded-lg text-sm transition-all duration-150 ${
-                              isSubActive 
-                                ? 'bg-[#8BAE5A] text-black font-semibold' 
-                                : isHighlighted
-                                ? 'bg-[#FFD700]/20 text-[#FFD700] border border-[#FFD700]/30'
-                                : 'text-gray-300 hover:text-[#8BAE5A] hover:bg-[#8BAE5A]/10'
-                            }`}
-                          >
-                            {sub.label}
-                          </Link>
-                        );
-                      })}
-                  </div>
+                  <motion.div 
+                    className="ml-4 mt-2 space-y-1"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {subItems.map(sub => {
+                      const isSubActive = safePathname === sub.href;
+                      const isHighlighted = isOnboarding && highlightedMenu === sub.label;
+                      return (
+                        <Link
+                          key={sub.label}
+                          href={sub.href}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleLinkClick();
+                          }}
+                          className={`block px-4 py-2 rounded-lg text-sm transition-all duration-150 ${
+                            isSubActive 
+                              ? 'bg-[#8BAE5A] text-black font-semibold' 
+                              : isHighlighted
+                              ? 'bg-[#FFD700]/20 text-[#FFD700] border border-[#FFD700]/30'
+                              : 'text-gray-300 hover:text-[#8BAE5A] hover:bg-[#8BAE5A]/10'
+                          }`}
+                        >
+                          {sub.label}
+                        </Link>
+                      );
+                    })}
+                  </motion.div>
                 )}
               </div>
             );
@@ -165,8 +188,17 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: { collapse
             <Link
               key={item.label}
               href={item.href}
-              onClick={handleLinkClick}
-              className={`grid grid-cols-[auto_1fr] items-center gap-4 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide transition-all duration-150 font-figtree ${isActive ? 'bg-[#8BAE5A] text-black shadow-lg' : isHighlighted ? 'bg-[#FFD700]/20 text-[#FFD700] border border-[#FFD700]/30' : 'text-white hover:text-[#8BAE5A]'} ${collapsed ? 'justify-center px-2' : ''}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleLinkClick();
+              }}
+              className={`grid grid-cols-[auto_1fr] items-center gap-4 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide transition-all duration-150 font-figtree ${
+                isActive 
+                  ? 'bg-[#8BAE5A] text-black shadow-lg' 
+                  : isHighlighted 
+                    ? 'bg-[#FFD700]/20 text-[#FFD700] border border-[#FFD700]/30' 
+                    : 'text-white hover:text-[#8BAE5A] hover:bg-[#3A4D23]/50'
+              } ${collapsed ? 'justify-center px-2' : ''}`}
             >
               <item.icon className={`w-6 h-6 ${isActive ? 'text-white' : isHighlighted ? 'text-[#FFD700]' : 'text-[#8BAE5A]'}`} />
               {!collapsed && <span className="truncate">{item.label}</span>}
@@ -353,74 +385,96 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
 
   return (
-    <div className="min-h-screen bg-[#0A0F0A] flex" suppressHydrationWarning>
+    <>
+      <style jsx>{`
+        .sidebar-scrollbar::-webkit-scrollbar {
+          width: 6px;
+        }
+        .sidebar-scrollbar::-webkit-scrollbar-track {
+          background: #181F17;
+        }
+        .sidebar-scrollbar::-webkit-scrollbar-thumb {
+          background: #3A4D23;
+          border-radius: 3px;
+        }
+        .sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #4A5D33;
+        }
+        .sidebar-scrollbar {
+          scrollbar-width: thin;
+          scrollbar-color: #3A4D23 #181F17;
+        }
+      `}</style>
+      <div className="min-h-screen bg-[#0A0F0A] flex" suppressHydrationWarning>
       {/* Sidebar */}
       <div className={`bg-[#232D1A] border-r border-[#3A4D23] transition-all duration-300 ease-in-out ${
         sidebarCollapsed ? 'w-16' : 'w-64 lg:w-72'
       } hidden lg:flex flex-col fixed h-full z-40`}>
-        <div className="flex-1 flex flex-col">
-          {/* Logo */}
-          <div className="p-4 border-b border-[#3A4D23]">
-            <Link href="/dashboard" className="flex items-center justify-center">
-              <Image
-                src="/logo.svg"
-                alt="Top Tier Men Logo"
-                width={sidebarCollapsed ? 32 : 200}
-                height={32}
-                className={`${sidebarCollapsed ? 'w-8 h-8' : 'w-full h-8'} object-contain hover:opacity-80 transition-opacity`}
-              />
-            </Link>
-          </div>
+        {/* Logo - Fixed at top */}
+        <div className="p-4 border-b border-[#3A4D23] flex-shrink-0">
+          <Link href="/dashboard" className="flex items-center justify-center">
+            <Image
+              src="/logo.svg"
+              alt="Top Tier Men Logo"
+              width={sidebarCollapsed ? 32 : 200}
+              height={32}
+              className={`${sidebarCollapsed ? 'w-8 h-8' : 'w-full h-8'} object-contain hover:opacity-80 transition-opacity`}
+            />
+          </Link>
+        </div>
 
-          {/* Navigation */}
-          <SidebarContent 
-            collapsed={sidebarCollapsed} 
-            onboardingStatus={onboardingStatus}
-          />
-
-          {/* User Profile */}
-          <div className="p-4 border-t border-[#3A4D23]">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-[#8BAE5A] rounded-full flex items-center justify-center">
-                <span className="text-[#0A0F0A] font-bold text-sm">
-                  {user.email?.charAt(0).toUpperCase()}
-                </span>
-              </div>
-              {!sidebarCollapsed && (
-                <div className="flex-1 min-w-0">
-                  <p className="text-white text-sm font-medium truncate">
-                    {user.email}
-                  </p>
-                  <p className="text-[#8BAE5A] text-xs">
-                    {user.role?.toLowerCase() === 'admin' ? 'Admin' : 
-                     user.role?.toLowerCase() === 'test' ? 'Test' :
-                     user.email?.toLowerCase().includes('test') ? 'Test' : 'Lid'}
-                  </p>
-                </div>
-              )}
-            </div>
-            
-            {/* Debug Toggle for Test Users */}
-            {(isTestUser || user?.role?.toLowerCase() === 'admin' || user?.email?.toLowerCase().includes('test')) && (
-              <div className="mt-3 pt-3 border-t border-[#3A4D23]">
-                <button
-                  onClick={toggleDebug}
-                  className={`w-full px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
-                    showDebug 
-                      ? 'bg-[#8BAE5A] text-black' 
-                      : 'bg-[#3A4D23] text-[#8BAE5A] hover:bg-[#4A5D33]'
-                  }`}
-                >
-                  {!sidebarCollapsed ? 'Debug Mode' : 'D'}
-                  {showDebug && !sidebarCollapsed && ' ✓'}
-                </button>
-              </div>
-            )}
+        {/* Scrollable Navigation Area */}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden sidebar-scrollbar">
+          <div className="p-4">
+            <SidebarContent 
+              collapsed={sidebarCollapsed} 
+              onboardingStatus={onboardingStatus}
+            />
           </div>
         </div>
 
-        {/* Collapse Button */}
-        <div className="p-4 border-t border-[#3A4D23]">
+        {/* User Profile - Fixed at bottom */}
+        <div className="p-4 border-t border-[#3A4D23] flex-shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-[#8BAE5A] rounded-full flex items-center justify-center">
+              <span className="text-[#0A0F0A] font-bold text-sm">
+                {user.email?.charAt(0).toUpperCase()}
+              </span>
+            </div>
+            {!sidebarCollapsed && (
+              <div className="flex-1 min-w-0">
+                <p className="text-white text-sm font-medium truncate">
+                  {user.email}
+                </p>
+                <p className="text-[#8BAE5A] text-xs">
+                  {user.role?.toLowerCase() === 'admin' ? 'Admin' : 
+                   user.role?.toLowerCase() === 'test' ? 'Test' :
+                   user.email?.toLowerCase().includes('test') ? 'Test' : 'Lid'}
+                </p>
+              </div>
+            )}
+          </div>
+          
+          {/* Debug Toggle for Test Users */}
+          {(isTestUser || user?.role?.toLowerCase() === 'admin' || user?.email?.toLowerCase().includes('test')) && (
+            <div className="mt-3 pt-3 border-t border-[#3A4D23]">
+              <button
+                onClick={toggleDebug}
+                className={`w-full px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
+                  showDebug 
+                    ? 'bg-[#8BAE5A] text-black' 
+                    : 'bg-[#3A4D23] text-[#8BAE5A] hover:bg-[#4A5D33]'
+                }`}
+              >
+                {!sidebarCollapsed ? 'Debug Mode' : 'D'}
+                {showDebug && !sidebarCollapsed && ' ✓'}
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Collapse Button - Fixed at bottom */}
+        <div className="p-4 border-t border-[#3A4D23] flex-shrink-0">
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
             className="w-full p-2 bg-[#181F17] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors flex items-center justify-center"
@@ -502,36 +556,68 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Mobile/Tablet Menu */}
-        {isMobileMenuOpen && (
-          <div className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-50">
-            <div className="bg-[#232D1A] w-[85%] max-w-[400px] h-full flex flex-col">
-              {/* Header */}
-              <div className="p-3 sm:p-4 border-b border-[#3A4D23] flex-shrink-0">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-[#8BAE5A] font-bold text-base sm:text-lg">Menu</h2>
-                  <button
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="p-2 bg-[#181F17] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors"
-                  >
-                    <XMarkIcon className="w-5 h-5 sm:w-6 sm:h-6" />
-                  </button>
-                </div>
-              </div>
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div 
+              className="lg:hidden fixed inset-0 z-50"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              {/* Backdrop */}
+              <motion.div 
+                className="absolute inset-0 bg-black bg-opacity-50"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                onClick={() => setIsMobileMenuOpen(false)}
+              />
               
-              {/* Scrollable Content */}
-              <div className="flex-1 overflow-y-auto p-3 sm:p-4">
-                <SidebarContent 
-                  collapsed={false} 
-                  onLinkClick={() => setIsMobileMenuOpen(false)}
-                  onboardingStatus={onboardingStatus}
-                />
-              </div>
-            </div>
-          </div>
-        )}
+              {/* Sidebar */}
+              <motion.div 
+                className="absolute left-0 top-0 h-full w-[85%] max-w-[400px] bg-[#232D1A] flex flex-col shadow-2xl"
+                initial={{ x: '-100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '-100%' }}
+                transition={{ 
+                  type: "spring", 
+                  damping: 25, 
+                  stiffness: 200,
+                  duration: 0.3
+                }}
+              >
+                {/* Header */}
+                <div className="p-3 sm:p-4 border-b border-[#3A4D23] flex-shrink-0">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-[#8BAE5A] font-bold text-base sm:text-lg">Menu</h2>
+                    <motion.button
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="p-2 bg-[#181F17] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <XMarkIcon className="w-5 h-5 sm:w-6 sm:h-6" />
+                    </motion.button>
+                  </div>
+                </div>
+                
+                {/* Scrollable Content */}
+                <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-4 sidebar-scrollbar">
+                  <SidebarContent 
+                    collapsed={false} 
+                    onLinkClick={() => setIsMobileMenuOpen(false)}
+                    onboardingStatus={onboardingStatus}
+                  />
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Page Content */}
-        <div className="p-3 sm:p-4 md:p-6 lg:p-8">
+        <div className="p-3 sm:p-4 md:p-6 lg:p-8 pb-20 lg:pb-8">
           {/* Main Content */}
           <div className={`transition-all duration-300 ${isTransitioning ? 'opacity-50 scale-95' : 'opacity-100 scale-100'}`}>
             {children}
@@ -564,7 +650,11 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
       {/* PWA Install Prompt */}
       <PWAInstallPrompt />
+      
+      {/* Mobile Navigation */}
+      <MobileNav />
     </div>
+    </>
   );
 }
 

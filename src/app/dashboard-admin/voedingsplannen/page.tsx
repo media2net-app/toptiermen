@@ -11,8 +11,6 @@ import {
   UserGroupIcon
 } from '@heroicons/react/24/outline';
 import { createClient } from '@supabase/supabase-js';
-import IngredientModal from './components/IngredientModal';
-import RecipeBuilder from './components/RecipeBuilder';
 import PlanBuilder from './components/PlanBuilder';
 import FoodItemModal from './components/FoodItemModal';
 import AdminCard from '@/components/admin/AdminCard';
@@ -21,67 +19,25 @@ import AdminButton from '@/components/admin/AdminButton';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
 // Types
 interface FoodItem {
-  id: number;
+  id: string;
   name: string;
   category: string;
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-  fiber: number;
-  sugar: number;
-  sodium: number;
+  calories_per_100g: number;
+  protein_per_100g: number;
+  carbs_per_100g: number;
+  fat_per_100g: number;
   description: string;
-  serving_size: string;
-  allergens: string[];
-  diet_tags: string[];
+  is_active: boolean;
   created_at: string;
   updated_at: string;
 }
 
-interface Ingredient {
-  id: string;
-  name: string;
-  category: string;
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-  allergens?: string[];
-  dietTags?: string[];
-  alternatives?: string[];
-}
 
-interface RecipeIngredient {
-  ingredientId: string;
-  ingredientName: string;
-  amount: number;
-  unit: string;
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-}
-
-interface Recipe {
-  id: string;
-  name: string;
-  description: string;
-  mealType: string;
-  image: string;
-  ingredients: RecipeIngredient[];
-  totalCalories: number;
-  totalProtein: number;
-  totalCarbs: number;
-  totalFat: number;
-  prepTime: number;
-  servings: number;
-}
 
 interface MealStructure {
   mealType: string;
@@ -97,74 +53,74 @@ interface NutritionPlan {
 
 export default function AdminVoedingsplannenPage() {
   const [activeTab, setActiveTab] = useState('voeding');
-  const [showIngredientModal, setShowIngredientModal] = useState(false);
-  const [showRecipeBuilder, setShowRecipeBuilder] = useState(false);
   const [showPlanBuilder, setShowPlanBuilder] = useState(false);
   const [showFoodItemModal, setShowFoodItemModal] = useState(false);
-  const [selectedIngredient, setSelectedIngredient] = useState<Ingredient | null>(null);
-  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<NutritionPlan | null>(null);
   const [selectedFoodItem, setSelectedFoodItem] = useState<FoodItem | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterCategory, setFilterCategory] = useState('all');
-  const [ingredients, setIngredients] = useState<Ingredient[]>([]);
-  const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [plans, setPlans] = useState<NutritionPlan[]>([]);
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingFoodItems, setIsLoadingFoodItems] = useState(true);
 
-  // Fetch food items from database
-  const fetchFoodItems = async () => {
+  // Fetch all data on component mount
+  const fetchAllData = async () => {
     try {
+      setIsLoading(true);
       setIsLoadingFoodItems(true);
-      console.log('🥗 Fetching food items from database...');
       
-      const { data, error } = await supabase
-        .from('food_items')
-        .select('*')
-        .order('name');
+      console.log('🥗 Fetching nutrition ingredients from database...');
       
-      if (error) {
-        console.error('❌ Error fetching food items:', error);
+      const response = await fetch('/api/admin/nutrition-ingredients');
+      const result = await response.json();
+      
+      if (!response.ok) {
+        console.error('❌ Error fetching nutrition ingredients:', result.error);
         return;
       }
       
-      setFoodItems(data || []);
-      console.log('✅ Food items loaded:', data?.length || 0);
-    } catch (err) {
-      console.error('❌ Exception fetching food items:', err);
+      setFoodItems(result.ingredients || []);
+      console.log('✅ Nutrition ingredients loaded:', result.ingredients?.length || 0);
+      
+      // Fetch plans from your data source
+      // This is a placeholder - replace with actual data fetching
+      setPlans([]);
+      
+    } catch (error) {
+      console.error('Error fetching data:', error);
     } finally {
+      setIsLoading(false);
       setIsLoadingFoodItems(false);
     }
   };
 
-  // Load food items on component mount
+  // Load all data on component mount
   useEffect(() => {
-    fetchFoodItems();
+    fetchAllData();
   }, []);
 
-  // Fetch nutrition data
-  const fetchNutritionData = async () => {
+  // Fetch food items from database (for refresh)
+  const fetchFoodItems = async () => {
     try {
-      setIsLoading(true);
+      setIsLoadingFoodItems(true);
+      console.log('🥗 Fetching nutrition ingredients from database...');
       
-      // Fetch ingredients, recipes, and plans from your data source
-      // This is a placeholder - replace with actual data fetching
-      setIngredients([]);
-      setRecipes([]);
-      setPlans([]);
+      const response = await fetch('/api/admin/nutrition-ingredients');
+      const result = await response.json();
       
-    } catch (error) {
-      console.error('Error fetching nutrition data:', error);
+      if (!response.ok) {
+        console.error('❌ Error fetching nutrition ingredients:', result.error);
+        return;
+      }
+      
+      setFoodItems(result.ingredients || []);
+      console.log('✅ Nutrition ingredients loaded:', result.ingredients?.length || 0);
+    } catch (err) {
+      console.error('❌ Exception fetching nutrition ingredients:', err);
     } finally {
-      setIsLoading(false);
+      setIsLoadingFoodItems(false);
     }
   };
-
-  useEffect(() => {
-    fetchNutritionData();
-  }, []);
 
   // Handlers
   const handleAddFoodItem = () => {
@@ -183,37 +139,7 @@ export default function AdminVoedingsplannenPage() {
     setShowFoodItemModal(false);
   };
 
-  const handleAddIngredient = () => {
-    setSelectedIngredient(null);
-    setShowIngredientModal(true);
-  };
 
-  const handleEditIngredient = (ingredient: Ingredient) => {
-    setSelectedIngredient(ingredient);
-    setShowIngredientModal(true);
-  };
-
-  const handleSaveIngredient = async (ingredient: Ingredient) => {
-    // Implement save logic
-    await fetchNutritionData();
-    setShowIngredientModal(false);
-  };
-
-  const handleAddRecipe = () => {
-    setSelectedRecipe(null);
-    setShowRecipeBuilder(true);
-  };
-
-  const handleEditRecipe = (recipe: Recipe) => {
-    setSelectedRecipe(recipe);
-    setShowRecipeBuilder(true);
-  };
-
-  const handleSaveRecipe = async (recipe: Recipe) => {
-    // Implement save logic
-    await fetchNutritionData();
-    setShowRecipeBuilder(false);
-  };
 
   const handleAddPlan = () => {
     setSelectedPlan(null);
@@ -227,7 +153,7 @@ export default function AdminVoedingsplannenPage() {
 
   const handleSavePlan = async (plan: NutritionPlan) => {
     // Implement save logic
-    await fetchNutritionData();
+    await fetchAllData();
     setShowPlanBuilder(false);
   };
 
@@ -236,25 +162,12 @@ export default function AdminVoedingsplannenPage() {
     item.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const filteredIngredients = ingredients.filter(ingredient => 
-    ingredient.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-    (filterCategory === 'all' || ingredient.category === filterCategory)
-  );
-
-  const filteredRecipes = recipes.filter(recipe => 
-    recipe.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   const filteredPlans = plans.filter(plan => 
     plan.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const categories = Array.from(new Set(ingredients.map(i => i.category)));
-
   const tabs = [
     { id: 'voeding', label: 'Voeding', count: foodItems.length, icon: '🥗' },
-    { id: 'ingredients', label: 'Ingrediënten', count: ingredients.length, icon: '🥕' },
-    { id: 'recipes', label: 'Recepten', count: recipes.length, icon: '🍳' },
     { id: 'plans', label: 'Plannen', count: plans.length, icon: '📋' },
   ];
 
@@ -272,35 +185,23 @@ export default function AdminVoedingsplannenPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-[#8BAE5A]">Voedingsplannen Beheer</h1>
-          <p className="text-[#B6C948] mt-2">Beheer ingrediënten, recepten en voedingsplan templates</p>
+          <p className="text-[#B6C948] mt-2">Beheer voedingsitems en voedingsplan templates</p>
         </div>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <AdminStatsCard
-          icon={<ChartBarIcon className="w-6 h-6" />}
-          value={recipes.length}
-          title="Recepten"
-          color="blue"
+          icon={<UserGroupIcon className="w-6 h-6" />}
+          value={foodItems.length}
+          title="Voedingsitems"
+          color="purple"
         />
         <AdminStatsCard
           icon={<BoltIcon className="w-6 h-6" />}
           value={plans.length}
           title="Voedingsplannen"
           color="green"
-        />
-        <AdminStatsCard
-          icon={<LightBulbIcon className="w-6 h-6" />}
-          value={ingredients.length}
-          title="Ingrediënten"
-          color="orange"
-        />
-        <AdminStatsCard
-          icon={<UserGroupIcon className="w-6 h-6" />}
-          value={foodItems.length}
-          title="Voedingsitems"
-          color="purple"
         />
       </div>
 
@@ -340,26 +241,9 @@ export default function AdminVoedingsplannenPage() {
           />
         </div>
 
-        {activeTab === 'ingredients' && (
-          <div className="flex gap-2">
-            <select
-              value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value)}
-              className="px-4 py-3 rounded-xl bg-[#232D1A] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-            >
-              <option value="all">Alle categorieën</option>
-              {categories.map(category => (
-                <option key={category} value={category}>{category}</option>
-              ))}
-            </select>
-          </div>
-        )}
-
         <AdminButton
           onClick={
             activeTab === 'voeding' ? handleAddFoodItem :
-            activeTab === 'ingredients' ? handleAddIngredient : 
-            activeTab === 'recipes' ? handleAddRecipe : 
             activeTab === 'plans' ? handleAddPlan : 
             handleAddFoodItem
           }
@@ -367,8 +251,6 @@ export default function AdminVoedingsplannenPage() {
         >
           <PlusIcon className="w-4 h-4 mr-2" />
           {activeTab === 'voeding' && 'Nieuw Voedingsitem'}
-          {activeTab === 'ingredients' && 'Nieuw Ingrediënt'}
-          {activeTab === 'recipes' && 'Nieuw Recept'}
           {activeTab === 'plans' && 'Nieuw Plan'}
         </AdminButton>
       </div>
@@ -376,8 +258,24 @@ export default function AdminVoedingsplannenPage() {
       {/* Content */}
       <AdminCard>
         {activeTab === 'voeding' && (
-          <div className="overflow-x-auto">
-            <table className="w-full">
+          <>
+            {/* Nutrition Info Header */}
+            <div className="mb-6 p-4 bg-[#181F17] rounded-xl border border-[#3A4D23]">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-[#8BAE5A] rounded-full flex items-center justify-center">
+                  <span className="text-[#181F17] text-sm font-bold">ℹ️</span>
+                </div>
+                <div>
+                  <h3 className="text-[#8BAE5A] font-semibold text-lg">Voedingswaarden Informatie</h3>
+                  <p className="text-[#B6C948] text-sm mt-1">
+                    Alle voedingswaarden zijn gebaseerd op <strong>per 100 gram</strong> van het voedingsitem.
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="overflow-x-auto">
+              <table className="w-full">
               <thead>
                 <tr className="border-b border-[#3A4D23]">
                   <th className="text-left py-3 px-4 text-[#8BAE5A] font-semibold">Naam</th>
@@ -394,10 +292,10 @@ export default function AdminVoedingsplannenPage() {
                   <tr key={item.id} className="border-b border-[#3A4D23]/20 hover:bg-[#181F17]/40">
                     <td className="py-3 px-4 text-white">{item.name}</td>
                     <td className="py-3 px-4 text-[#8BAE5A]">{item.category}</td>
-                    <td className="py-3 px-4 text-white">{item.calories}</td>
-                    <td className="py-3 px-4 text-white">{item.protein}</td>
-                    <td className="py-3 px-4 text-white">{item.carbs}</td>
-                    <td className="py-3 px-4 text-white">{item.fat}</td>
+                    <td className="py-3 px-4 text-white">{item.calories_per_100g}</td>
+                    <td className="py-3 px-4 text-white">{item.protein_per_100g}</td>
+                    <td className="py-3 px-4 text-white">{item.carbs_per_100g}</td>
+                    <td className="py-3 px-4 text-white">{item.fat_per_100g}</td>
                     <td className="py-3 px-4">
                       <div className="flex gap-2">
                         <AdminButton
@@ -422,90 +320,7 @@ export default function AdminVoedingsplannenPage() {
               </tbody>
             </table>
           </div>
-        )}
-
-        {activeTab === 'ingredients' && (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-[#3A4D23]">
-                  <th className="text-left py-3 px-4 text-[#8BAE5A] font-semibold">Naam Ingrediënt</th>
-                  <th className="text-left py-3 px-4 text-[#8BAE5A] font-semibold">Categorie</th>
-                  <th className="text-left py-3 px-4 text-[#8BAE5A] font-semibold">Calorieën (per 100g)</th>
-                  <th className="text-left py-3 px-4 text-[#8BAE5A] font-semibold">Eiwitten (g)</th>
-                  <th className="text-left py-3 px-4 text-[#8BAE5A] font-semibold">Koolhydraten (g)</th>
-                  <th className="text-left py-3 px-4 text-[#8BAE5A] font-semibold">Vetten (g)</th>
-                  <th className="text-left py-3 px-4 text-[#8BAE5A] font-semibold">Acties</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredIngredients.map((ingredient) => (
-                  <tr key={ingredient.id} className="border-b border-[#3A4D23]/20 hover:bg-[#181F17]/40">
-                    <td className="py-3 px-4 text-white">{ingredient.name}</td>
-                    <td className="py-3 px-4 text-[#8BAE5A]">{ingredient.category}</td>
-                    <td className="py-3 px-4 text-white">{ingredient.calories}</td>
-                    <td className="py-3 px-4 text-white">{ingredient.protein}</td>
-                    <td className="py-3 px-4 text-white">{ingredient.carbs}</td>
-                    <td className="py-3 px-4 text-white">{ingredient.fat}</td>
-                    <td className="py-3 px-4">
-                      <div className="flex gap-2">
-                        <AdminButton
-                          onClick={() => handleEditIngredient(ingredient)}
-                          variant="secondary"
-                          size="sm"
-                        >
-                          <PencilIcon className="w-4 h-4 mr-2" />
-                          Bewerk
-                        </AdminButton>
-                        <AdminButton
-                          variant="danger"
-                          size="sm"
-                        >
-                          <TrashIcon className="w-4 h-4 mr-2" />
-                          Verwijder
-                        </AdminButton>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {activeTab === 'recipes' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredRecipes.map((recipe) => (
-              <div key={recipe.id} className="bg-[#181F17] rounded-xl p-4 border border-[#3A4D23]/40 hover:border-[#8BAE5A]/40 transition-colors">
-                <div className="aspect-video bg-[#3A4D23]/40 rounded-xl mb-4 flex items-center justify-center">
-                  <span className="text-[#8BAE5A]/60">📷 Foto</span>
-                </div>
-                <h3 className="text-white font-semibold mb-2">{recipe.name}</h3>
-                <p className="text-[#8BAE5A] text-sm mb-3">{recipe.mealType}</p>
-                <div className="flex justify-between text-xs text-white/80 mb-4">
-                  <span>🕒 {recipe.prepTime} min</span>
-                  <span>👥 {recipe.servings} portie(s)</span>
-                </div>
-                <div className="flex gap-2">
-                  <AdminButton
-                    onClick={() => handleEditRecipe(recipe)}
-                    variant="secondary"
-                    size="sm"
-                  >
-                    <PencilIcon className="w-4 h-4 mr-2" />
-                    Bewerk
-                  </AdminButton>
-                  <AdminButton
-                    variant="danger"
-                    size="sm"
-                  >
-                    <TrashIcon className="w-4 h-4 mr-2" />
-                    Verwijder
-                  </AdminButton>
-                </div>
-              </div>
-            ))}
-          </div>
+          </>
         )}
 
         {activeTab === 'plans' && (
@@ -549,28 +364,12 @@ export default function AdminVoedingsplannenPage() {
       </AdminCard>
 
       {/* Modals */}
-      <IngredientModal
-        isOpen={showIngredientModal}
-        onClose={() => setShowIngredientModal(false)}
-        ingredient={selectedIngredient}
-        onSave={handleSaveIngredient}
-        categories={categories}
-      />
-
-      <RecipeBuilder
-        isOpen={showRecipeBuilder}
-        onClose={() => setShowRecipeBuilder(false)}
-        recipe={selectedRecipe}
-        onSave={handleSaveRecipe}
-        ingredients={ingredients}
-      />
-
       <PlanBuilder
         isOpen={showPlanBuilder}
         onClose={() => setShowPlanBuilder(false)}
         plan={selectedPlan}
         onSave={(plan) => handleSavePlan(plan)}
-        recipes={recipes}
+        recipes={[]}
       />
 
       <FoodItemModal

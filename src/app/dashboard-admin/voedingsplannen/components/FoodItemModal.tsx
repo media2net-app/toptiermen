@@ -9,20 +9,17 @@ const supabase = createClient(
 );
 
 interface FoodItem {
-  id: number;
+  id: string;
   name: string;
   category: string;
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-  fiber: number;
-  sugar: number;
-  sodium: number;
+  calories_per_100g: number;
+  protein_per_100g: number;
+  carbs_per_100g: number;
+  fat_per_100g: number;
   description: string;
-  serving_size: string;
-  allergens: string[];
-  diet_tags: string[];
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 interface FoodItemModalProps {
@@ -36,17 +33,12 @@ export default function FoodItemModal({ isOpen, onClose, foodItem, onSave }: Foo
   const [formData, setFormData] = useState<Partial<FoodItem>>({
     name: '',
     category: '',
-    calories: 0,
-    protein: 0,
-    carbs: 0,
-    fat: 0,
-    fiber: 0,
-    sugar: 0,
-    sodium: 0,
+    calories_per_100g: 0,
+    protein_per_100g: 0,
+    carbs_per_100g: 0,
+    fat_per_100g: 0,
     description: '',
-    serving_size: '100g',
-    allergens: [],
-    diet_tags: []
+    is_active: true
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -60,33 +52,23 @@ export default function FoodItemModal({ isOpen, onClose, foodItem, onSave }: Foo
       setFormData({
         name: foodItem.name,
         category: foodItem.category,
-        calories: foodItem.calories,
-        protein: foodItem.protein,
-        carbs: foodItem.carbs,
-        fat: foodItem.fat,
-        fiber: foodItem.fiber,
-        sugar: foodItem.sugar,
-        sodium: foodItem.sodium,
+        calories_per_100g: foodItem.calories_per_100g,
+        protein_per_100g: foodItem.protein_per_100g,
+        carbs_per_100g: foodItem.carbs_per_100g,
+        fat_per_100g: foodItem.fat_per_100g,
         description: foodItem.description,
-        serving_size: foodItem.serving_size,
-        allergens: foodItem.allergens || [],
-        diet_tags: foodItem.diet_tags || []
+        is_active: foodItem.is_active
       });
     } else {
       setFormData({
         name: '',
         category: '',
-        calories: 0,
-        protein: 0,
-        carbs: 0,
-        fat: 0,
-        fiber: 0,
-        sugar: 0,
-        sodium: 0,
+        calories_per_100g: 0,
+        protein_per_100g: 0,
+        carbs_per_100g: 0,
+        fat_per_100g: 0,
         description: '',
-        serving_size: '100g',
-        allergens: [],
-        diet_tags: []
+        is_active: true
       });
     }
     setError('');
@@ -112,7 +94,7 @@ export default function FoodItemModal({ isOpen, onClose, foodItem, onSave }: Foo
       if (foodItem) {
         // Update existing item
         const { error: updateError } = await supabase
-          .from('food_items')
+          .from('nutrition_ingredients')
           .update({
             ...formData,
             updated_at: new Date().toISOString()
@@ -123,7 +105,7 @@ export default function FoodItemModal({ isOpen, onClose, foodItem, onSave }: Foo
       } else {
         // Create new item
         const { error: insertError } = await supabase
-          .from('food_items')
+          .from('nutrition_ingredients')
           .insert([{
             ...formData,
             created_at: new Date().toISOString(),
@@ -210,18 +192,7 @@ export default function FoodItemModal({ isOpen, onClose, foodItem, onSave }: Foo
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Portiegrootte
-              </label>
-              <input
-                type="text"
-                value={formData.serving_size || ''}
-                onChange={(e) => handleInputChange('serving_size', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="bijv. 100g, 1 stuk"
-              />
-            </div>
+
           </div>
 
           {/* Nutritional Values */}
@@ -232,8 +203,8 @@ export default function FoodItemModal({ isOpen, onClose, foodItem, onSave }: Foo
               </label>
               <input
                 type="number"
-                value={formData.calories || ''}
-                onChange={(e) => handleInputChange('calories', parseFloat(e.target.value) || 0)}
+                value={formData.calories_per_100g || ''}
+                onChange={(e) => handleInputChange('calories_per_100g', parseFloat(e.target.value) || 0)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="0"
               />
@@ -247,8 +218,8 @@ export default function FoodItemModal({ isOpen, onClose, foodItem, onSave }: Foo
                 <input
                   type="number"
                   step="0.1"
-                  value={formData.protein || ''}
-                  onChange={(e) => handleInputChange('protein', parseFloat(e.target.value) || 0)}
+                  value={formData.protein_per_100g || ''}
+                  onChange={(e) => handleInputChange('protein_per_100g', parseFloat(e.target.value) || 0)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="0"
                 />
@@ -260,8 +231,8 @@ export default function FoodItemModal({ isOpen, onClose, foodItem, onSave }: Foo
                 <input
                   type="number"
                   step="0.1"
-                  value={formData.carbs || ''}
-                  onChange={(e) => handleInputChange('carbs', parseFloat(e.target.value) || 0)}
+                  value={formData.carbs_per_100g || ''}
+                  onChange={(e) => handleInputChange('carbs_per_100g', parseFloat(e.target.value) || 0)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="0"
                 />
@@ -273,55 +244,15 @@ export default function FoodItemModal({ isOpen, onClose, foodItem, onSave }: Foo
                 <input
                   type="number"
                   step="0.1"
-                  value={formData.fat || ''}
-                  onChange={(e) => handleInputChange('fat', parseFloat(e.target.value) || 0)}
+                  value={formData.fat_per_100g || ''}
+                  onChange={(e) => handleInputChange('fat_per_100g', parseFloat(e.target.value) || 0)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="0"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-2">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Vezels (g)
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  value={formData.fiber || ''}
-                  onChange={(e) => handleInputChange('fiber', parseFloat(e.target.value) || 0)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="0"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Suiker (g)
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  value={formData.sugar || ''}
-                  onChange={(e) => handleInputChange('sugar', parseFloat(e.target.value) || 0)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="0"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Natrium (mg)
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  value={formData.sodium || ''}
-                  onChange={(e) => handleInputChange('sodium', parseFloat(e.target.value) || 0)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="0"
-                />
-              </div>
-            </div>
+
           </div>
         </div>
 
