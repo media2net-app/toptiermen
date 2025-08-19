@@ -33,6 +33,19 @@ BLOB_READ_WRITE_TOKEN=your_vercel_blob_token_here
 # Free tier: 150 requests per dag
 NEXT_PUBLIC_SPOONACULAR_API_KEY=your_spoonacular_api_key_here
 
+# Facebook Ad Manager API Configuration (OAuth Login)
+# Haal je Facebook App ID op uit: https://developers.facebook.com/
+# Ga naar: Facebook Developers → Your App → Settings → Basic
+NEXT_PUBLIC_FACEBOOK_APP_ID=your_facebook_app_id_here
+
+# Facebook Marketing API Permissions (automatisch via OAuth):
+# - ads_management
+# - ads_read
+# - business_management
+# - read_insights
+# - pages_read_engagement
+# - pages_show_list
+
 # Site Configuration
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
@@ -56,3 +69,11 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 # Spoonacular API Key haal je op uit:
 # https://spoonacular.com/food-api → Get API Key → Free Plan
 # Free tier: 150 requests per dag, perfect voor ontwikkeling en kleine projecten 
+
+# Facebook Ad Manager Setup (OAuth Login):
+# 1. Ga naar https://developers.facebook.com/
+# 2. Maak een nieuwe app aan (Business type)
+# 3. Voeg Facebook Login toe (Web platform)
+# 4. Ga naar App Settings → Basic voor App ID
+# 5. Voeg App ID toe aan environment variables
+# 6. Gebruik Facebook Login knop in de app 
