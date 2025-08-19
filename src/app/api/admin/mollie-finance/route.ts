@@ -34,16 +34,20 @@ export async function GET(request: NextRequest) {
 
     // Get all payments for the period
     const payments = await mollieClient.payments.list({
-      limit: 250, // Get maximum payments
-      from: startDate.toISOString().split('T')[0],
-      to: now.toISOString().split('T')[0]
+      limit: 250 // Get maximum payments
+    });
+
+    // Filter payments by date range
+    const filteredPayments = payments.filter(payment => {
+      const paymentDate = new Date(payment.createdAt);
+      return paymentDate >= startDate && paymentDate <= now;
     });
 
     // Calculate metrics
-    const totalPayments = payments.length;
-    const paidPayments = payments.filter(payment => payment.status === 'paid');
-    const failedPayments = payments.filter(payment => payment.status === 'failed');
-    const pendingPayments = payments.filter(payment => payment.status === 'pending');
+    const totalPayments = filteredPayments.length;
+    const paidPayments = filteredPayments.filter(payment => payment.status === 'paid');
+    const failedPayments = filteredPayments.filter(payment => payment.status === 'failed');
+    const pendingPayments = filteredPayments.filter(payment => payment.status === 'pending');
 
     // Calculate revenue
     const totalRevenue = paidPayments.reduce((sum, payment) => {
