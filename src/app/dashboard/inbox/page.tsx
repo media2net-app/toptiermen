@@ -116,6 +116,7 @@ export default function Inbox() {
 
   const fetchAvailableUsers = async () => {
     try {
+      console.log('Fetching available users...');
       const { data: profiles, error } = await supabase
         .from('profiles')
         .select('id, display_name, full_name, avatar_url, rank')
@@ -127,6 +128,7 @@ export default function Inbox() {
         return;
       }
 
+      console.log('Available users loaded:', profiles?.length || 0, 'users');
       setAvailableUsers(profiles || []);
     } catch (error) {
       console.error('Error fetching available users:', error);
@@ -191,6 +193,8 @@ export default function Inbox() {
   const startNewConversation = async (userId: string) => {
     if (!user) return;
 
+    console.log('Starting new conversation with user:', userId);
+    
     try {
       const response = await fetch('/api/chat/conversations', {
         method: 'POST',
@@ -204,6 +208,7 @@ export default function Inbox() {
       const data = await response.json();
       
       if (response.ok) {
+        console.log('Conversation created successfully:', data);
         // Refresh conversations and select the new one
         await fetchConversations();
         setShowNewChat(false);
@@ -258,39 +263,47 @@ export default function Inbox() {
             
             {/* New Chat Modal */}
             {showNewChat && (
-              <div className="absolute top-0 left-0 w-full h-full bg-[#232D1A]/95 z-10 flex flex-col">
-                <div className="p-4 border-b border-[#3A4D23]/40 flex justify-between items-center">
-                  <h3 className="text-lg font-bold text-white">Nieuw gesprek</h3>
-                  <button
-                    onClick={() => {
-                      setShowNewChat(false);
-                      setSelectedUser(null);
-                    }}
-                    className="text-[#8BAE5A] hover:text-white"
-                  >
-                    ✕
-                  </button>
-                </div>
-                <div className="flex-1 overflow-y-auto p-4">
-                  {availableUsers.map((user) => (
-                    <div
-                      key={user.id}
-                      onClick={() => startNewConversation(user.id)}
-                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-[#3A4D23]/40 cursor-pointer transition-colors"
+              <div className="fixed inset-0 bg-[#232D1A]/95 z-50 flex items-center justify-center">
+                <div className="bg-[#232D1A] rounded-2xl border border-[#3A4D23] w-full max-w-md mx-4 max-h-[80vh] flex flex-col">
+                  <div className="p-4 border-b border-[#3A4D23]/40 flex justify-between items-center">
+                    <h3 className="text-lg font-bold text-white">Nieuw gesprek</h3>
+                    <button
+                      onClick={() => {
+                        setShowNewChat(false);
+                        setSelectedUser(null);
+                      }}
+                      className="text-[#8BAE5A] hover:text-white text-xl"
                     >
-                      <img
-                        src={user.avatar_url || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'}
-                        alt={user.display_name || user.full_name}
-                        className="w-10 h-10 rounded-full"
-                      />
-                      <div>
-                        <h4 className="font-semibold text-white">
-                          {user.display_name || user.full_name || 'Onbekende gebruiker'}
-                        </h4>
-                        <p className="text-[#8BAE5A] text-sm">{user.rank || 'Member'}</p>
+                      ✕
+                    </button>
+                  </div>
+                  <div className="flex-1 overflow-y-auto p-4 max-h-96">
+                    {availableUsers.length === 0 ? (
+                      <div className="text-center py-8">
+                        <p className="text-[#8BAE5A] text-lg">Geen gebruikers beschikbaar</p>
                       </div>
-                    </div>
-                  ))}
+                    ) : (
+                      availableUsers.map((user) => (
+                        <div
+                          key={user.id}
+                          onClick={() => startNewConversation(user.id)}
+                          className="flex items-center gap-3 p-3 rounded-lg hover:bg-[#3A4D23]/40 cursor-pointer transition-colors"
+                        >
+                          <img
+                            src={user.avatar_url || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'}
+                            alt={user.display_name || user.full_name}
+                            className="w-10 h-10 rounded-full"
+                          />
+                          <div>
+                            <h4 className="font-semibold text-white">
+                              {user.display_name || user.full_name || 'Onbekende gebruiker'}
+                            </h4>
+                            <p className="text-[#8BAE5A] text-sm">{user.rank || 'Member'}</p>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
                 </div>
               </div>
             )}
