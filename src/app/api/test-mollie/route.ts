@@ -34,13 +34,12 @@ export async function POST(request: NextRequest) {
     const { testPayment } = body;
 
     if (testPayment) {
-      // Create a test payment
+      // Create a test payment (no webhook for local testing)
       const payment = await createPayment({
         amount: 10.00,
         currency: 'EUR',
         description: 'Test Payment - Top Tier Men',
         redirectUrl: 'http://localhost:3000/test-payment-success',
-        webhookUrl: 'http://localhost:3000/api/payments/mollie/webhook',
         metadata: {
           test: true,
           userId: 'test-user-123',
