@@ -27,6 +27,7 @@ import {
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { AdminCard, AdminStatsCard, AdminButton } from '@/components/admin';
 import { SwipeIndicator } from '@/components/ui';
+import MollieFinanceMetrics from '@/components/admin/MollieFinanceMetrics';
 
 // Types for session data
 interface SessionLog {
@@ -751,36 +752,48 @@ export default function AdminDashboard() {
       )}
 
       {activeTab === 'financial' && (
-        <AdminCard
-          title="Financiële Metrics"
-          subtitle="MRR, LTV en andere financiële KPI's"
-          icon={<ChartBarIcon className="w-6 h-6" />}
-          gradient
-        >
-          <div className="text-center py-8">
-            <div className="text-2xl font-bold text-[#8BAE5A] mb-4">Financiële Metrics</div>
-            <p className="text-[#B6C948] mb-6">Maandelijkse terugkerende inkomsten en andere financiële indicatoren</p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-2xl mx-auto">
-              <div className="bg-[#181F17] rounded-xl p-4 sm:p-6 border border-[#3A4D23]">
-                <div className="text-2xl sm:text-3xl font-bold text-[#8BAE5A] mb-2">€0</div>
-                <div className="text-gray-400 text-sm">MRR</div>
-              </div>
-              <div className="bg-[#181F17] rounded-xl p-4 sm:p-6 border border-[#3A4D23]">
-                <div className="text-2xl sm:text-3xl font-bold text-[#f0a14f] mb-2">€0</div>
-                <div className="text-gray-400 text-sm">LTV</div>
-              </div>
-              <div className="bg-[#181F17] rounded-xl p-4 sm:p-6 border border-[#3A4D23]">
-                <div className="text-2xl sm:text-3xl font-bold text-[#FFD700] mb-2">0%</div>
-                <div className="text-gray-400 text-sm">Churn Rate</div>
-              </div>
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-white">Financiële Metrics</h1>
+              <p className="text-gray-400">Mollie betalingsdata en inkomsten analyse</p>
             </div>
-            <div className="mt-6">
-              <AdminButton variant="primary" size="lg">
-                Bekijk Financiële Rapportage
-              </AdminButton>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setSelectedPeriod('7d')}
+                className={`px-3 py-1 rounded text-sm ${
+                  selectedPeriod === '7d'
+                    ? 'bg-[#8BAE5A] text-white'
+                    : 'bg-[#232D1A] text-[#8BAE5A] hover:bg-[#3A4D23]'
+                }`}
+              >
+                7 dagen
+              </button>
+              <button
+                onClick={() => setSelectedPeriod('30d')}
+                className={`px-3 py-1 rounded text-sm ${
+                  selectedPeriod === '30d'
+                    ? 'bg-[#8BAE5A] text-white'
+                    : 'bg-[#232D1A] text-[#8BAE5A] hover:bg-[#3A4D23]'
+                }`}
+              >
+                30 dagen
+              </button>
+              <button
+                onClick={() => setSelectedPeriod('90d')}
+                className={`px-3 py-1 rounded text-sm ${
+                  selectedPeriod === '90d'
+                    ? 'bg-[#8BAE5A] text-white'
+                    : 'bg-[#232D1A] text-[#8BAE5A] hover:bg-[#3A4D23]'
+                }`}
+              >
+                90 dagen
+              </button>
             </div>
           </div>
-        </AdminCard>
+          
+          <MollieFinanceMetrics period={selectedPeriod} />
+        </div>
       )}
 
       {activeTab === 'users' && (
