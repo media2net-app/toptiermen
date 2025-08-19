@@ -22,7 +22,7 @@ const urlsToCache = [
   '/dashboard/onboarding',
   '/dashboard/onboarding-completion',
   '/globals.css',
-  '/logo.svg',
+  '/logo_white-full.svg',
   '/badge1.png',
   '/badge2.png',
   '/badge3.png',
@@ -90,7 +90,7 @@ self.addEventListener('push', (event) => {
   let notificationData = {
     title: 'Top Tier Men',
     body: 'Je hebt een nieuwe update!',
-    icon: '/logo.svg',
+    icon: '/logo_white-full.svg',
     badge: '/badge1.png',
     tag: 'ttm-notification',
     data: {

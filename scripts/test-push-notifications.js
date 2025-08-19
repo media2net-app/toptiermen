@@ -50,7 +50,7 @@ async function testPushNotifications() {
       userId: 'test-user-id',
       title: '🧪 Test Notificatie',
       body: 'Dit is een test push notificatie van Top Tier Men!',
-      icon: '/logo.svg',
+      icon: '/logo_white-full.svg',
       badge: '/badge1.png',
       data: { url: '/dashboard' },
       tag: 'test-notification'

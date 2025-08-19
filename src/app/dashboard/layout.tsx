@@ -16,7 +16,7 @@ import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
 import Image from 'next/image';
-import MobileNav from '../components/MobileNav';
+
 
 function slugify(str: string) {
   return str
@@ -163,7 +163,9 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: { collapse
                           href={sub.href}
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleLinkClick();
+                            if (handleLinkClick) {
+                              handleLinkClick();
+                            }
                           }}
                           className={`block px-4 py-2 rounded-lg text-sm transition-all duration-150 ${
                             isSubActive 
@@ -190,7 +192,9 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: { collapse
               href={item.href}
               onClick={(e) => {
                 e.stopPropagation();
-                handleLinkClick();
+                if (handleLinkClick) {
+                  handleLinkClick();
+                }
               }}
               className={`grid grid-cols-[auto_1fr] items-center gap-4 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide transition-all duration-150 font-figtree ${
                 isActive 
@@ -388,14 +392,15 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
     <>
       <style jsx>{`
         .sidebar-scrollbar::-webkit-scrollbar {
-          width: 6px;
+          width: 8px;
         }
         .sidebar-scrollbar::-webkit-scrollbar-track {
           background: #181F17;
+          border-radius: 4px;
         }
         .sidebar-scrollbar::-webkit-scrollbar-thumb {
           background: #3A4D23;
-          border-radius: 3px;
+          border-radius: 4px;
         }
         .sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
           background: #4A5D33;
@@ -403,6 +408,19 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
         .sidebar-scrollbar {
           scrollbar-width: thin;
           scrollbar-color: #3A4D23 #181F17;
+        }
+        
+        /* Mobile specific scrollbar */
+        @media (max-width: 1024px) {
+          .sidebar-scrollbar::-webkit-scrollbar {
+            width: 6px;
+          }
+          .sidebar-scrollbar::-webkit-scrollbar-thumb {
+            background: #8BAE5A;
+          }
+          .sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #B6C948;
+          }
         }
       `}</style>
       <div className="min-h-screen bg-[#0A0F0A] flex" suppressHydrationWarning>
@@ -414,11 +432,11 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
         <div className="p-4 border-b border-[#3A4D23] flex-shrink-0">
           <Link href="/dashboard" className="flex items-center justify-center">
             <Image
-              src="/logo.svg"
+              src="/logo_white-full.svg"
               alt="Top Tier Men Logo"
-              width={sidebarCollapsed ? 32 : 200}
-              height={32}
-              className={`${sidebarCollapsed ? 'w-8 h-8' : 'w-full h-8'} object-contain hover:opacity-80 transition-opacity`}
+              width={sidebarCollapsed ? 40 : 240}
+              height={40}
+              className={`${sidebarCollapsed ? 'w-10 h-10' : 'w-full h-10'} object-contain hover:opacity-80 transition-opacity`}
             />
           </Link>
         </div>
@@ -493,7 +511,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
         sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64 lg:ml-72'
       }`}>
         {/* Top Bar */}
-        <div className="bg-[#232D1A] border-b border-[#3A4D23] p-3 sm:p-4 flex items-center justify-between">
+        <div className="bg-[#232D1A] border-b border-[#3A4D23] p-4 flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-4">
             {/* Mobile/Tablet Menu Button */}
             <button
@@ -589,9 +607,17 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
                 }}
               >
                 {/* Header */}
-                <div className="p-3 sm:p-4 border-b border-[#3A4D23] flex-shrink-0">
+                <div className="p-4 border-b border-[#3A4D23] flex-shrink-0 bg-[#232D1A] z-10">
                   <div className="flex items-center justify-between">
-                    <h2 className="text-[#8BAE5A] font-bold text-base sm:text-lg">Menu</h2>
+                    <div className="flex items-center gap-3">
+                      <Image
+                        src="/logo_white-full.svg"
+                        alt="Top Tier Men Logo"
+                        width={120}
+                        height={30}
+                        className="h-8 w-auto object-contain"
+                      />
+                    </div>
                     <motion.button
                       onClick={() => setIsMobileMenuOpen(false)}
                       className="p-2 bg-[#181F17] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors"
@@ -604,12 +630,14 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
                 </div>
                 
                 {/* Scrollable Content */}
-                <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-4 sidebar-scrollbar">
-                  <SidebarContent 
-                    collapsed={false} 
-                    onLinkClick={() => setIsMobileMenuOpen(false)}
-                    onboardingStatus={onboardingStatus}
-                  />
+                <div className="flex-1 overflow-y-auto overflow-x-hidden sidebar-scrollbar" style={{ height: 'calc(100vh - 80px)', maxHeight: 'calc(100vh - 80px)' }}>
+                  <div className="p-4 pb-8">
+                    <SidebarContent 
+                      collapsed={false} 
+                      onLinkClick={() => setIsMobileMenuOpen(false)}
+                      onboardingStatus={onboardingStatus}
+                    />
+                  </div>
                 </div>
               </motion.div>
             </motion.div>
@@ -617,7 +645,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
         </AnimatePresence>
 
         {/* Page Content */}
-        <div className="p-3 sm:p-4 md:p-6 lg:p-8 pb-20 lg:pb-8">
+        <div className="p-3 sm:p-4 md:p-6 lg:p-8">
           {/* Main Content */}
           <div className={`transition-all duration-300 ${isTransitioning ? 'opacity-50 scale-95' : 'opacity-100 scale-100'}`}>
             {children}
@@ -651,8 +679,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
       {/* PWA Install Prompt */}
       <PWAInstallPrompt />
       
-      {/* Mobile Navigation */}
-      <MobileNav />
+      
     </div>
     </>
   );

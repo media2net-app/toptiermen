@@ -41,7 +41,7 @@ export default function PushTestPage() {
   const [testConfig, setTestConfig] = useState({
     title: '🧪 Test Notificatie',
     body: 'Dit is een test notificatie vanuit het admin dashboard!',
-    icon: '/logo.svg',
+    icon: '/logo_white-full.svg',
     badge: '/badge-no-excuses.png',
     url: '/dashboard'
   });
@@ -52,7 +52,7 @@ export default function PushTestPage() {
       name: 'Welkom Notificatie',
       title: '🎉 Welkom bij Top Tier Men!',
       body: 'Je push notificaties werken perfect!',
-      icon: '/logo.svg',
+      icon: '/logo_white-full.svg',
       badge: '/badge-no-excuses.png'
     },
     {
@@ -68,7 +68,7 @@ export default function PushTestPage() {
       name: 'Herinnering',
       title: '⏰ Tijd voor je Workout!',
       body: 'Vergeet niet om vandaag te trainen!',
-      icon: '/logo.svg',
+      icon: '/logo_white-full.svg',
       badge: '/badge1.png'
     },
     {
@@ -76,7 +76,7 @@ export default function PushTestPage() {
       name: 'Brotherhood Update',
       title: '🤝 Nieuwe Brotherhood Activiteit',
       body: 'Er is een nieuwe activiteit gepland!',
-      icon: '/logo.svg',
+      icon: '/logo_white-full.svg',
       badge: '/badge2.png'
     },
     {
@@ -389,7 +389,7 @@ export default function PushTestPage() {
                     onClick={() => sendTestNotification({
                       title: '🧪 Individuele Test',
                       body: `Test notificatie voor gebruiker ${subscription.user_id}`,
-                      icon: '/logo.svg',
+                      icon: '/logo_white-full.svg',
                       badge: '/badge-no-excuses.png'
                     })}
                     variant="secondary"

@@ -170,10 +170,13 @@ export default function Login() {
 
       
       <div className="w-full max-w-md p-6 sm:p-8 rounded-3xl shadow-2xl bg-[#232D1A]/95 border border-[#3A4D23] backdrop-blur-lg relative z-10">
-        <h1 className="text-4xl sm:text-5xl md:text-7xl font-black uppercase tracking-tight mb-2 text-center">
-          <span className="text-white">TOP TIER </span>
-          <span className="text-[#8BAE5A]">MEN</span>
-        </h1>
+        <div className="flex justify-center mb-4">
+          <img 
+            src="/logo_white-full.svg" 
+            alt="Top Tier Men Logo" 
+            className="h-16 sm:h-20 md:h-24 w-auto"
+          />
+        </div>
         <p className="text-[#B6C948] text-center mb-6 sm:mb-8 text-base sm:text-lg font-figtree">Log in op je dashboard</p>
         <form onSubmit={handleLogin} className="flex flex-col gap-6">
           <div className="relative">

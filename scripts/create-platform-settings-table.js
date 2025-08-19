@@ -41,7 +41,7 @@ async function createPlatformSettingsTable() {
     const { error: insertError } = await supabase.rpc('exec_sql', {
       sql_query: `
         INSERT INTO platform_settings (setting_key, setting_value, setting_type, description, is_public) VALUES
-        ('general', '{"platformName": "Top Tier Men", "logoUrl": "/logo.svg", "maintenanceMode": false}', 'general', 'General platform settings', true),
+        ('general', '{"platformName": "Top Tier Men", "logoUrl": "/logo_white-full.svg", "maintenanceMode": false}', 'general', 'General platform settings', true),
         ('gamification', '{"xpSystemEnabled": true, "xpDailyMission": 10, "xpAcademyLesson": 25, "xpForumPost": 5, "xpReceivedBoks": 1, "streakBonusDays": 7, "streakBonusXp": 100}', 'gamification', 'Gamification and XP system settings', true),
         ('community', '{"manualApprovalRequired": false, "wordFilter": "spam,scam,verkoop,reclame", "forumRules": "Welkom bij de Top Tier Men Brotherhood!\\n\\nOnze kernwaarden:\\n- Respect voor elkaar\\n- Constructieve feedback\\n- Geen spam of reclame\\n- Blijf on-topic\\n- Help elkaar groeien\\n\\nOvertredingen leiden tot waarschuwingen of uitsluiting."}', 'community', 'Community and moderation settings', true),
         ('email', '{"senderName": "Rick Cuijpers", "senderEmail": "rick@toptiermen.app", "templates": {"welcome": {"subject": "Welkom bij Top Tier Men", "content": "Beste [Naam],\\n\\nWelkom bij Top Tier Men!"}, "passwordReset": {"subject": "Wachtwoord reset", "content": "Beste [Naam],\\n\\nJe hebt een wachtwoord reset aangevraagd."}, "weeklyReminder": {"subject": "Wekelijkse update", "content": "Beste [Naam],\\n\\nHier is je wekelijkse update."}}}', 'email', 'Email settings and templates', false),

@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
     const payload = {
       title: title || 'Top Tier Men',
       body: body,
-      icon: icon || '/logo.svg',
+      icon: icon || '/logo_white-full.svg',
       badge: badge || '/badge1.png',
       tag: tag || 'ttm-notification',
       data: data || { url: '/dashboard' },
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
         {
           action: 'open',
           title: 'Openen',
-          icon: '/logo.svg'
+          icon: '/logo_white-full.svg'
         },
         {
           action: 'dismiss',
@@ -145,7 +145,7 @@ export async function PUT(request: NextRequest) {
     const payload = {
       title: title || 'Top Tier Men',
       body: body,
-      icon: icon || '/logo.svg',
+      icon: icon || '/logo_white-full.svg',
       badge: badge || '/badge1.png',
       tag: tag || 'ttm-notification',
       data: data || { url: '/dashboard' },
@@ -155,7 +155,7 @@ export async function PUT(request: NextRequest) {
         {
           action: 'open',
           title: 'Openen',
-          icon: '/logo.svg'
+          icon: '/logo_white-full.svg'
         },
         {
           action: 'dismiss',

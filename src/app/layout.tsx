@@ -20,8 +20,8 @@ export const metadata = {
     title: 'Top Tier Men',
   },
   icons: {
-    icon: '/logo.svg',
-    apple: '/logo.svg',
+            icon: '/logo_white-full.svg',
+        apple: '/logo_white-full.svg',
   },
 };
 

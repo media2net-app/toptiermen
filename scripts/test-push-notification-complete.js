@@ -78,7 +78,7 @@ async function testCompletePushNotification() {
       userId: testUser.id,
       title: "🎉 Test Push Notificatie!",
       body: "Dit is een test push notificatie van Top Tier Men!",
-      icon: "/logo.svg",
+              icon: "/logo_white-full.svg",
       badge: "/badge-no-excuses.png",
       data: { 
         url: "/dashboard",
@@ -119,7 +119,7 @@ async function testCompletePushNotification() {
         const payload = {
           title: "🎉 Direct Test!",
           body: "Direct web-push test",
-          icon: "/logo.svg",
+          icon: "/logo_white-full.svg",
           data: { url: "/dashboard" }
         };
 

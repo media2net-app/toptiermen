@@ -41,7 +41,7 @@ async function sendTestNotification() {
         userId: subscription.user_id,
         title: "🎉 Welkom bij Top Tier Men!",
         body: "Je push notificaties werken perfect!",
-        icon: "/logo.svg",
+        icon: "/logo_white-full.svg",
         badge: "/badge-no-excuses.png",
         data: { 
           url: "/dashboard",

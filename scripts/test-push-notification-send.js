@@ -43,7 +43,7 @@ async function testPushNotification() {
       userId: testUser.id,
       title: "🎉 Test Push Notificatie!",
       body: "Dit is een test push notificatie van Top Tier Men!",
-      icon: "/logo.svg",
+      icon: "/logo_white-full.svg",
       badge: "/badge-no-excuses.png",
       data: { 
         url: "/dashboard",

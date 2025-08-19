@@ -389,7 +389,7 @@ export default function AnnouncementsManagement() {
         userIds: subscriptionsData.subscriptions.map((sub: any) => sub.user_id),
         title: "🧪 Test Push Notificatie",
         body: "Dit is een test notificatie vanuit het admin dashboard!",
-        icon: "/logo.svg",
+        icon: "/logo_white-full.svg",
         badge: "/badge-no-excuses.png",
         data: { 
           url: "/dashboard",

@@ -213,7 +213,7 @@ export const usePWA = () => {
     try {
       await registration.showNotification('Top Tier Men', {
         body: 'Dit is een test notificatie! 🏆',
-        icon: '/logo.svg',
+        icon: '/logo_white-full.svg',
         badge: '/badge1.png',
         tag: 'test-notification',
         requireInteraction: false,
@@ -222,7 +222,7 @@ export const usePWA = () => {
           {
             action: 'open',
             title: 'Openen',
-            icon: '/logo.svg'
+            icon: '/logo_white-full.svg'
           }
         ]
       } as any);
