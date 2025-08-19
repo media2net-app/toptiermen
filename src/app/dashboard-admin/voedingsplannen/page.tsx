@@ -2542,4 +2542,4 @@ function EducationalHubModal({ isOpen, onClose, onSave, hub, nutritionPlans }: E
       />
     </div>
   );
-} 
+}
