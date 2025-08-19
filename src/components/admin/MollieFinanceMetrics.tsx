@@ -46,6 +46,68 @@ interface MollieFinanceMetricsProps {
   period: '7d' | '30d' | '90d';
 }
 
+// Payment method SVG icons
+const PaymentMethodIcons = {
+  ideal: () => (
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="32" height="32" rx="4" fill="#0066CC"/>
+      <path d="M8 12h16v8H8z" fill="white"/>
+      <path d="M10 14h12v4H10z" fill="#0066CC"/>
+      <text x="16" y="17" textAnchor="middle" fill="white" fontSize="8" fontWeight="bold">iDEAL</text>
+    </svg>
+  ),
+  creditcard: () => (
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="32" height="32" rx="4" fill="#1a1a1a"/>
+      <rect x="4" y="8" width="24" height="16" rx="2" fill="#333"/>
+      <rect x="6" y="12" width="20" height="8" rx="1" fill="#666"/>
+      <circle cx="8" cy="16" r="1" fill="#999"/>
+      <circle cx="11" cy="16" r="1" fill="#999"/>
+      <circle cx="14" cy="16" r="1" fill="#999"/>
+    </svg>
+  ),
+  paypal: () => (
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="32" height="32" rx="4" fill="#003087"/>
+      <path d="M8 12h16v8H8z" fill="white"/>
+      <path d="M10 14h12v4H10z" fill="#003087"/>
+      <text x="16" y="17" textAnchor="middle" fill="white" fontSize="6" fontWeight="bold">PayPal</text>
+    </svg>
+  ),
+  sofort: () => (
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="32" height="32" rx="4" fill="#FF6600"/>
+      <path d="M8 12h16v8H8z" fill="white"/>
+      <path d="M10 14h12v4H10z" fill="#FF6600"/>
+      <text x="16" y="17" textAnchor="middle" fill="white" fontSize="6" fontWeight="bold">SOFORT</text>
+    </svg>
+  ),
+  bancontact: () => (
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="32" height="32" rx="4" fill="#FF6600"/>
+      <path d="M8 12h16v8H8z" fill="white"/>
+      <path d="M10 14h12v4H10z" fill="#FF6600"/>
+      <text x="16" y="17" textAnchor="middle" fill="white" fontSize="5" fontWeight="bold">Bancontact</text>
+    </svg>
+  ),
+  banktransfer: () => (
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="32" height="32" rx="4" fill="#2E7D32"/>
+      <path d="M8 12h16v8H8z" fill="white"/>
+      <path d="M10 14h12v4H10z" fill="#2E7D32"/>
+      <text x="16" y="17" textAnchor="middle" fill="white" fontSize="5" fontWeight="bold">Bank</text>
+    </svg>
+  ),
+  default: () => (
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="32" height="32" rx="4" fill="#666"/>
+      <path d="M8 12h16v8H8z" fill="white"/>
+      <path d="M10 14h12v4H10z" fill="#666"/>
+      <text x="16" y="17" textAnchor="middle" fill="white" fontSize="6" fontWeight="bold">$$$</text>
+    </svg>
+  )
+};
+
 export default function MollieFinanceMetrics({ period }: MollieFinanceMetricsProps) {
   const [metrics, setMetrics] = useState<FinanceMetrics | null>(null);
   const [loading, setLoading] = useState(true);
@@ -90,22 +152,8 @@ export default function MollieFinanceMetrics({ period }: MollieFinanceMetricsPro
   };
 
   const getPaymentMethodIcon = (method: string) => {
-    switch (method) {
-      case 'ideal':
-        return '🏦';
-      case 'creditcard':
-        return '💳';
-      case 'paypal':
-        return '📱';
-      case 'sofort':
-        return '🇩🇪';
-      case 'bancontact':
-        return '🇧🇪';
-      case 'banktransfer':
-        return '🏛️';
-      default:
-        return '💰';
-    }
+    const IconComponent = PaymentMethodIcons[method as keyof typeof PaymentMethodIcons] || PaymentMethodIcons.default;
+    return <IconComponent />;
   };
 
   const getPaymentMethodName = (method: string) => {
@@ -265,7 +313,9 @@ export default function MollieFinanceMetrics({ period }: MollieFinanceMetricsPro
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {Object.entries(metrics.paymentMethods).map(([method, count]) => (
             <div key={method} className="text-center">
-              <div className="text-2xl mb-2">{getPaymentMethodIcon(method)}</div>
+              <div className="flex justify-center mb-2">
+                {getPaymentMethodIcon(method)}
+              </div>
               <p className="text-sm text-gray-400">{getPaymentMethodName(method)}</p>
               <p className="text-lg font-bold text-[#8BAE5A]">{count}</p>
             </div>
@@ -280,7 +330,9 @@ export default function MollieFinanceMetrics({ period }: MollieFinanceMetricsPro
           {metrics.recentTransactions.map((transaction) => (
             <div key={transaction.id} className="flex items-center justify-between p-3 bg-[#181F17] rounded-lg">
               <div className="flex items-center gap-3">
-                <div className="text-xl">{getPaymentMethodIcon(transaction.method)}</div>
+                <div className="flex justify-center">
+                  {getPaymentMethodIcon(transaction.method)}
+                </div>
                 <div>
                   <p className="text-white font-medium">{transaction.description}</p>
                   <p className="text-sm text-gray-400">
