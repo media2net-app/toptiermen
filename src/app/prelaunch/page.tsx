@@ -12,7 +12,8 @@ import {
   ArrowRightIcon,
   PlayIcon,
   ShieldCheckIcon,
-  ClockIcon
+  ClockIcon,
+  ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
 
 export default function PreLaunchPage() {
@@ -20,6 +21,7 @@ export default function PreLaunchPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState('');
+  const [alreadyExists, setAlreadyExists] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,15 +32,27 @@ export default function PreLaunchPage() {
 
     setIsSubmitting(true);
     setError('');
+    setAlreadyExists(false);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Here you would normally send to your API
-      console.log('Email submitted:', email);
-      
-      setIsSubmitted(true);
+      const response = await fetch('/api/prelaunch-signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setIsSubmitted(true);
+      } else if (result.alreadyExists) {
+        setAlreadyExists(true);
+        setError(result.message);
+      } else {
+        setError(result.error || 'Er is iets misgegaan. Probeer het opnieuw.');
+      }
     } catch (error) {
       setError('Er is iets misgegaan. Probeer het opnieuw.');
     } finally {
@@ -105,7 +119,7 @@ export default function PreLaunchPage() {
           >
             <div className="inline-flex items-center px-4 py-2 bg-[#8BAE5A]/10 border border-[#8BAE5A]/30 rounded-full text-[#8BAE5A] text-sm font-medium mb-8">
               <ClockIcon className="w-4 h-4 mr-2" />
-              Lancering: 10 September 2024
+              Lancering: 10 September 2025
             </div>
             
             <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
@@ -263,7 +277,7 @@ export default function PreLaunchPage() {
             </h2>
             
             <p className="text-xl text-gray-300 mb-8">
-              Door je te registreren kom je op de wachtlijst te staan voor de lancering op 10 September 2024. 
+              Door je te registreren kom je op de wachtlijst te staan voor de lancering op 10 September 2025. 
               Je behoort dan tot de groep eerste gebruikers van het platform.
             </p>
 
@@ -285,7 +299,20 @@ export default function PreLaunchPage() {
                     className="w-full px-6 py-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] focus:border-transparent"
                     required
                   />
-                  {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
+                  {error && (
+                    <div className={`mt-2 p-3 rounded-lg flex items-center space-x-2 ${
+                      alreadyExists 
+                        ? 'bg-yellow-500/20 border border-yellow-500/50 text-yellow-400' 
+                        : 'bg-red-500/20 border border-red-500/50 text-red-400'
+                    }`}>
+                      {alreadyExists ? (
+                        <ExclamationTriangleIcon className="w-4 h-4 flex-shrink-0" />
+                      ) : (
+                        <ExclamationTriangleIcon className="w-4 h-4 flex-shrink-0" />
+                      )}
+                      <span className="text-sm">{error}</span>
+                    </div>
+                  )}
                 </div>
                 
                 <motion.button
@@ -318,7 +345,7 @@ export default function PreLaunchPage() {
                 <h3 className="text-2xl font-bold text-white mb-2">Je bent ingeschreven!</h3>
                 <p className="text-gray-300">
                   Bedankt voor je interesse! Je staat nu op de wachtlijst en behoort tot de groep eerste gebruikers. 
-                  Je ontvangt binnenkort meer informatie over de lancering op 10 September 2024.
+                  Je ontvangt binnenkort meer informatie over de lancering op 10 September 2025.
                 </p>
               </motion.div>
             )}
