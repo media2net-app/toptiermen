@@ -71,16 +71,22 @@ export const createPayment = async (data: {
 }) => {
   const mollieClient = getMollieServer();
   
-  const payment = await mollieClient.payments.create({
+  const paymentData: any = {
     amount: {
       currency: data.currency,
       value: data.amount.toFixed(2)
     },
     description: data.description,
     redirectUrl: data.redirectUrl,
-    webhookUrl: data.webhookUrl,
     metadata: data.metadata
-  });
+  };
+
+  // Only add webhook URL in production
+  if (process.env.NODE_ENV === 'production' && data.webhookUrl) {
+    paymentData.webhookUrl = data.webhookUrl;
+  }
+
+  const payment = await mollieClient.payments.create(paymentData);
   
   return payment;
 };
