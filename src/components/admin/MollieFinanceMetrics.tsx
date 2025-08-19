@@ -7,7 +7,6 @@ import {
   CurrencyEuroIcon,
   ChartBarIcon,
   TrendingUpIcon,
-  TrendingDownIcon,
   ClockIcon,
   CheckCircleIcon,
   XCircleIcon,
