@@ -31,11 +31,13 @@ import { VideosService, VideoFile } from '@/lib/videos-service';
 
 export default function AdvertentieMateriaalPage() {
   const [videos, setVideos] = useState<VideoFile[]>([]);
+  const [campaigns, setCampaigns] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedVideo, setSelectedVideo] = useState<VideoFile | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showCampaignSetup, setShowCampaignSetup] = useState(false);
   const [campaignVideo, setCampaignVideo] = useState<VideoFile | null>(null);
+  const [showCampaignsList, setShowCampaignsList] = useState(false);
   const [editingVideo, setEditingVideo] = useState<VideoFile | null>(null);
   const [editingName, setEditingName] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -64,6 +66,11 @@ export default function AdvertentieMateriaalPage() {
     return null;
   };
 
+  // Get campaigns for a specific video
+  const getCampaignsForVideo = (videoId: string) => {
+    return campaigns.filter(campaign => campaign.video_id === videoId);
+  };
+
   // Helper function to determine target audience based on video name
   const getTargetAudienceFromName = (videoName: string): string => {
     const name = videoName.toLowerCase();
@@ -78,6 +85,23 @@ export default function AdvertentieMateriaalPage() {
       return 'Mannen 25-45, fitness, lifestyle, Nederland';
     } else {
       return 'Algemene doelgroep, fitness, Nederland';
+    }
+  };
+
+  // Fetch campaigns from database
+  const fetchCampaigns = async () => {
+    try {
+      const response = await fetch('/api/campaigns');
+      const result = await response.json();
+      
+      if (result.success) {
+        console.log('✅ Fetched campaigns:', result.campaigns.length);
+        setCampaigns(result.campaigns);
+      } else {
+        console.error('❌ Error fetching campaigns:', result.error);
+      }
+    } catch (err) {
+      console.error('❌ Error fetching campaigns:', err);
     }
   };
 
@@ -100,9 +124,10 @@ export default function AdvertentieMateriaalPage() {
     }
   };
 
-  // Load videos on component mount
+  // Load videos and campaigns on component mount
   useEffect(() => {
     fetchVideos();
+    fetchCampaigns();
   }, []);
 
   // Filter videos based on search and status
@@ -201,6 +226,17 @@ export default function AdvertentieMateriaalPage() {
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-white">Advertentie Materiaal</h1>
           <p className="text-gray-400 mt-1 text-sm sm:text-base">Beheer je video advertenties</p>
+        </div>
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => setShowCampaignsList(true)}
+            className="flex items-center space-x-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+          >
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+            <span>Alle Campagnes</span>
+          </button>
         </div>
       </div>
 
@@ -480,8 +516,28 @@ export default function AdvertentieMateriaalPage() {
                 </button>
               </div>
 
-              {/* Campaign Setup Button */}
-              <div className="mt-2 sm:mt-3">
+              {/* Campaign Buttons */}
+              <div className="mt-2 sm:mt-3 space-y-2">
+                {/* Existing Campaigns */}
+                {getCampaignsForVideo(video.id).length > 0 && (
+                  <div className="bg-blue-900 bg-opacity-50 p-2 rounded-lg">
+                    <div className="text-xs text-blue-200 mb-1">
+                      📊 {getCampaignsForVideo(video.id).length} campagne{getCampaignsForVideo(video.id).length > 1 ? 's' : ''}
+                    </div>
+                    {getCampaignsForVideo(video.id).slice(0, 2).map((campaign: any) => (
+                      <div key={campaign.id} className="text-xs text-gray-300 mb-1">
+                        • {campaign.name} - €{campaign.budget_amount} {campaign.budget_type === 'DAILY' ? '/dag' : 'totaal'}
+                      </div>
+                    ))}
+                    {getCampaignsForVideo(video.id).length > 2 && (
+                      <div className="text-xs text-gray-400">
+                        +{getCampaignsForVideo(video.id).length - 2} meer...
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {/* Setup New Campaign */}
                 <button
                   onClick={() => {
                     setCampaignVideo(video);
@@ -584,13 +640,114 @@ export default function AdvertentieMateriaalPage() {
             setShowCampaignSetup(false);
             setCampaignVideo(null);
           }}
-          onSave={(campaign) => {
+          onSave={(campaign: any) => {
             console.log('🎯 Campaign saved:', campaign);
-            alert(`Campagne "${campaign.name}" succesvol opgezet!\n\nBudget: €${campaign.budget.amount} ${campaign.budget.type === 'DAILY' ? 'per dag' : 'totaal'}\nTargeting: ${campaign.targeting.ageMin}-${campaign.targeting.ageMax} jaar, ${campaign.targeting.gender}\nLocaties: ${campaign.targeting.locations.join(', ')}`);
+            alert(`Campagne "${campaign.name}" succesvol opgezet!\n\nBudget: €${campaign.budget_amount} ${campaign.budget_type === 'DAILY' ? 'per dag' : 'totaal'}\nTargeting: ${campaign.targeting?.ageMin}-${campaign.targeting?.ageMax} jaar, ${campaign.targeting?.gender}\nLocaties: ${campaign.targeting?.locations?.join(', ')}`);
             setShowCampaignSetup(false);
             setCampaignVideo(null);
+            // Refresh campaigns list
+            fetchCampaigns();
           }}
         />
+      )}
+
+      {/* Campaigns List Modal */}
+      {showCampaignsList && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-gray-900 rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-white">Alle Campagnes</h2>
+              <button
+                onClick={() => setShowCampaignsList(false)}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            {campaigns.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4">📊</div>
+                <h3 className="text-lg font-medium text-gray-400 mb-2">Nog geen campagnes</h3>
+                <p className="text-gray-500">Maak je eerste campagne aan om te beginnen.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {campaigns.map((campaign: any) => (
+                  <div key={campaign.id} className="bg-gray-800 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-lg font-medium text-white">{campaign.name}</h3>
+                      <div className="flex items-center space-x-2">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          campaign.status === 'ACTIVE' ? 'bg-green-600 text-white' :
+                          campaign.status === 'PAUSED' ? 'bg-yellow-600 text-white' :
+                          'bg-gray-600 text-white'
+                        }`}>
+                          {campaign.status}
+                        </span>
+                        <button
+                          onClick={async () => {
+                            if (confirm('Weet je zeker dat je deze campagne wilt verwijderen?')) {
+                              try {
+                                const response = await fetch(`/api/campaigns?id=${campaign.id}`, {
+                                  method: 'DELETE'
+                                });
+                                const result = await response.json();
+                                if (result.success) {
+                                  fetchCampaigns();
+                                } else {
+                                  alert('Fout bij verwijderen: ' + result.error);
+                                }
+                              } catch (error) {
+                                console.error('Error deleting campaign:', error);
+                                alert('Fout bij verwijderen van campagne');
+                              }
+                            }
+                          }}
+                          className="text-red-400 hover:text-red-300 transition-colors"
+                          title="Verwijder campagne"
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                      <div>
+                        <span className="text-gray-400">Video:</span>
+                        <div className="text-white">{campaign.video_name}</div>
+                      </div>
+                      <div>
+                        <span className="text-gray-400">Budget:</span>
+                        <div className="text-white">€{campaign.budget_amount} {campaign.budget_type === 'DAILY' ? 'per dag' : 'totaal'}</div>
+                      </div>
+                      <div>
+                        <span className="text-gray-400">Doelstelling:</span>
+                        <div className="text-white">{campaign.objective}</div>
+                      </div>
+                    </div>
+                    
+                    {campaign.targeting && (
+                      <div className="mt-3 text-sm">
+                        <span className="text-gray-400">Targeting:</span>
+                        <div className="text-white">
+                          {campaign.targeting.ageMin}-{campaign.targeting.ageMax} jaar, {campaign.targeting.gender}
+                          {campaign.targeting.locations && campaign.targeting.locations.length > 0 && (
+                            <span>, {campaign.targeting.locations.join(', ')}</span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="mt-3 text-xs text-gray-500">
+                      Aangemaakt: {new Date(campaign.created_at).toLocaleDateString('nl-NL')}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       )}
     </div>
   );

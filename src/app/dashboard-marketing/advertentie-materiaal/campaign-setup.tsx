@@ -51,7 +51,7 @@ export default function CampaignSetup({ selectedVideo, onClose, onSave }: Campai
     videoName: selectedVideo?.name || '',
     objective: 'CONSIDERATION',
     budget: {
-      amount: 50,
+      amount: 5,
       currency: 'EUR',
       type: 'DAILY'
     },
@@ -86,9 +86,33 @@ export default function CampaignSetup({ selectedVideo, onClose, onSave }: Campai
 
   const [step, setStep] = useState(1);
 
-  const handleSave = () => {
-    onSave(campaign);
-    onClose();
+  const handleSave = async () => {
+    try {
+      console.log('🎯 Saving campaign to database:', campaign);
+      
+      const response = await fetch('/api/campaigns', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(campaign),
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        console.error('Failed to save campaign:', result.error);
+        alert(`Fout bij opslaan: ${result.error}`);
+        return;
+      }
+
+      console.log('✅ Campaign saved successfully:', result.campaign);
+      onSave(result.campaign);
+      onClose();
+    } catch (error) {
+      console.error('Error saving campaign:', error);
+      alert('Er is een fout opgetreden bij het opslaan van de campagne');
+    }
   };
 
   if (!selectedVideo) return null;
