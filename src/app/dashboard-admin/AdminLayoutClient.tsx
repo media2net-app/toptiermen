@@ -47,7 +47,7 @@ interface MenuItem {
   items?: MenuItem[];
 }
 
-const SidebarContent = ({ pathname, isLoading = false }: { pathname: string; isLoading?: boolean }) => {
+const SidebarContent = ({ pathname }: { pathname: string }) => {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['Dashboard', 'ANALYTICS', 'LEDEN', 'CONTENT', 'COMMUNITY', 'PRE LAUNCH', 'PLATFORM']));
 
   const toggleSection = (sectionLabel: string) => {
@@ -199,7 +199,7 @@ const SidebarContent = ({ pathname, isLoading = false }: { pathname: string; isL
   )
 };
 
-export default function AdminLayoutClient({ children, isLoading = false }: { children: React.ReactNode; isLoading?: boolean }) {
+export default function AdminLayoutClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, loading, logoutAndRedirect, refreshSession } = useSupabaseAuth();
@@ -594,30 +594,14 @@ export default function AdminLayoutClient({ children, isLoading = false }: { chi
                 >
                     <XMarkIcon className="w-6 h-6" />
                 </button>
-                <SidebarContent pathname={pathname ?? ''} isLoading={isLoading} />
-                {isLoading && (
-                  <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10">
-                    <div className="text-center">
-                      <div className="w-8 h-8 border-2 border-[#B6C948] border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-                      <p className="text-[#B6C948] text-sm">Laden...</p>
-                    </div>
-                  </div>
-                )}
+                <SidebarContent pathname={pathname ?? ''} />
              </div>
           </div>
         )}
         
         {/* Desktop Sidebar */}
-        <aside className="hidden lg:block w-72 bg-[#232D1A] border-r border-[#3A4D23] min-h-screen p-6 relative">
-          <SidebarContent pathname={pathname ?? ''} isLoading={isLoading} />
-          {isLoading && (
-            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10">
-              <div className="text-center">
-                <div className="w-8 h-8 border-2 border-[#B6C948] border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-                <p className="text-[#B6C948] text-sm">Laden...</p>
-              </div>
-            </div>
-          )}
+        <aside className="hidden lg:block w-72 bg-[#232D1A] border-r border-[#3A4D23] min-h-screen p-6">
+          <SidebarContent pathname={pathname ?? ''} />
         </aside>
 
         {/* Main Content */}
