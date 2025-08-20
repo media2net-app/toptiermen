@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   CheckCircleIcon,
@@ -16,12 +16,51 @@ import {
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
 
+// Facebook SDK TypeScript declarations
+declare global {
+  interface Window {
+    FB: any;
+    fbAsyncInit: () => void;
+  }
+}
+
 export default function PreLaunchPage() {
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState('');
   const [alreadyExists, setAlreadyExists] = useState(false);
+
+  // Initialize Facebook SDK
+  useEffect(() => {
+    // Load Facebook SDK
+    const loadFacebookSDK = () => {
+      if (window.FB) return; // Already loaded
+      
+      window.fbAsyncInit = function() {
+        window.FB.init({
+          appId: '1063013326038261',
+          cookie: true,
+          xfbml: true,
+          version: 'v18.0'
+        });
+        
+        window.FB.AppEvents.logPageView();
+      };
+
+      (function(d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) return;
+        js = d.createElement(s); js.id = id;
+        js.src = "https://connect.facebook.net/en_US/sdk.js";
+        if (fjs.parentNode) {
+          fjs.parentNode.insertBefore(js, fjs);
+        }
+      }(document, 'script', 'facebook-jssdk'));
+    };
+
+    loadFacebookSDK();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
