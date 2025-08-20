@@ -145,10 +145,16 @@ export default function AdvertentieMateriaalPage() {
 
       // Try direct access to advertenties bucket
       console.log('🧪 Testing direct access to advertenties bucket...');
+      let directData = null;
+      let directError = null;
+      
       try {
-        const { data: directData, error: directError } = await supabase.storage
+        const result = await supabase.storage
           .from('advertenties')
           .list('', { limit: 10 });
+        
+        directData = result.data;
+        directError = result.error;
         
         if (directError) {
           console.error('❌ Direct access to advertenties bucket failed:', directError);
@@ -162,18 +168,32 @@ export default function AdvertentieMateriaalPage() {
         console.error('❌ Exception during direct access:', directErr);
       }
 
-      // Now try to list files
-      const { data, error } = await supabase.storage
-        .from(bucketName)
-        .list('', {
-          limit: 100,
-          offset: 0,
-          sortBy: { column: 'created_at', order: 'desc' }
-        });
+      // Use the data from direct access if available, otherwise try normal listing
+      let data = directData;
+      let error = directError;
+      
+      if (!data && !error) {
+        console.log('🔄 Trying normal bucket listing as fallback...');
+        const result = await supabase.storage
+          .from(bucketName)
+          .list('', {
+            limit: 100,
+            offset: 0,
+            sortBy: { column: 'created_at', order: 'desc' }
+          });
+        
+        data = result.data;
+        error = result.error;
+      }
 
-      console.log('🔍 Bucket public status:', advertentiesBucket.public);
-      console.log('🔍 Bucket file size limit:', advertentiesBucket.file_size_limit);
-      console.log('🔍 Bucket allowed MIME types:', advertentiesBucket.allowed_mime_types);
+      // Only try to access bucket properties if the bucket object exists
+      if (advertentiesBucket) {
+        console.log('🔍 Bucket public status:', advertentiesBucket.public);
+        console.log('🔍 Bucket file size limit:', advertentiesBucket.file_size_limit);
+        console.log('🔍 Bucket allowed MIME types:', advertentiesBucket.allowed_mime_types);
+      } else {
+        console.log('⚠️ No bucket object available, skipping bucket property checks');
+      }
 
       if (error) {
         console.error('❌ Error fetching videos:', error);
