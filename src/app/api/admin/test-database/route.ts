@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
       tableExists: false,
       canSelect: false,
       canInsert: false,
-      errors: []
+      errors: [] as string[]
     };
 
     // Test 1: Basic connection
