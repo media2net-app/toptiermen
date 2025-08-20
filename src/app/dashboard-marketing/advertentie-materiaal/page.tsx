@@ -105,19 +105,62 @@ export default function AdvertentieMateriaalPage() {
 
       console.log('📁 Available buckets:', buckets?.map(b => b.id) || []);
       
+      // Test with a known working bucket first
+      console.log('🧪 Testing with workout-videos bucket first...');
+      const workoutBucket = buckets?.find(bucket => bucket.id === 'workout-videos');
+      if (workoutBucket) {
+        console.log('✅ Workout-videos bucket found:', workoutBucket);
+        
+        // Test listing files from workout-videos bucket
+        const { data: workoutData, error: workoutError } = await supabase.storage
+          .from('workout-videos')
+          .list('', { limit: 5 });
+        
+        if (workoutError) {
+          console.error('❌ Error listing workout-videos:', workoutError);
+        } else {
+          console.log('✅ Workout-videos bucket accessible, files found:', workoutData?.length || 0);
+        }
+      } else {
+        console.error('❌ Workout-videos bucket not found either');
+      }
+
       // Find the correct bucket name
-      const correctBucketName = findAdvertentiesBucket(buckets || []);
+      let correctBucketName = findAdvertentiesBucket(buckets || []);
+      
+      // If advertenties bucket not found, try to use it anyway (might be a permissions issue)
       if (!correctBucketName) {
-        console.error('❌ Advertenties bucket not found');
-        console.error('❌ Available bucket IDs:', buckets?.map(b => b.id) || []);
-        setError('Advertenties bucket bestaat niet. Neem contact op met de beheerder.');
-        return;
+        console.warn('⚠️ Advertenties bucket not found in bucket list, but trying direct access...');
+        correctBucketName = 'advertenties'; // Try the default name
       }
       
       setBucketName(correctBucketName);
       const advertentiesBucket = buckets?.find(bucket => bucket.id === correctBucketName);
 
-      console.log('✅ Advertenties bucket found:', advertentiesBucket);
+      if (advertentiesBucket) {
+        console.log('✅ Advertenties bucket found in list:', advertentiesBucket);
+      } else {
+        console.log('⚠️ Advertenties bucket not in list, but trying direct access with name:', correctBucketName);
+      }
+
+      // Try direct access to advertenties bucket
+      console.log('🧪 Testing direct access to advertenties bucket...');
+      try {
+        const { data: directData, error: directError } = await supabase.storage
+          .from('advertenties')
+          .list('', { limit: 10 });
+        
+        if (directError) {
+          console.error('❌ Direct access to advertenties bucket failed:', directError);
+        } else {
+          console.log('✅ Direct access to advertenties bucket successful, files found:', directData?.length || 0);
+          if (directData && directData.length > 0) {
+            console.log('📁 Files in advertenties bucket:', directData.map(f => f.name));
+          }
+        }
+      } catch (directErr) {
+        console.error('❌ Exception during direct access:', directErr);
+      }
 
       // Now try to list files
       const { data, error } = await supabase.storage
