@@ -285,8 +285,8 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
     }
   };
 
-  // Show loading state with better feedback
-  if (loading || isSessionRefreshing) {
+  // Show loading state with better feedback - only for initial auth loading
+  if (loading && !user) {
     return (
       <div className="min-h-screen bg-[#181F17] flex items-center justify-center" suppressHydrationWarning>
         <div className="text-center">
@@ -343,7 +343,7 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
               <Bars3Icon className="w-6 h-6" />
             </button>
             <h1 className="text-xl md:text-2xl font-bold text-[#8BAE5A]">Admin Panel</h1>
-            {loading && (
+            {loading && !user && (
               <div className="flex items-center gap-2 text-[#8BAE5A] text-sm">
                 <div className="animate-spin rounded-full h-3 w-3 border-b border-[#8BAE5A]"></div>
                 Gegevens laden...
