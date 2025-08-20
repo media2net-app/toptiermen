@@ -7,7 +7,7 @@ import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 
 import OnboardingWidget from '../components/OnboardingWidget';
-import IntroductionTaskWidget from '../components/IntroductionTaskWidget';
+import IntroductionTaskWidget from '@/components/IntroductionTaskWidget';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
 interface DashboardStats {
