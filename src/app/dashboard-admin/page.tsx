@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, usePathname } from 'next/navigation';
 import { 
   UserGroupIcon, 
   ChartBarIcon, 
@@ -129,6 +129,7 @@ interface DashboardStats {
 
 export default function AdminDashboard() {
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const [selectedPeriod, setSelectedPeriod] = useState<'7d' | '30d' | '90d'>('7d');
   const { user } = useSupabaseAuth();
   
@@ -281,7 +282,7 @@ export default function AdminDashboard() {
   return (
     <>
       <LoadingModal 
-        isOpen={loading && !dataLoaded} 
+        isOpen={loading && !dataLoaded && pathname === '/dashboard-admin'} 
         message="Admin dashboard statistieken worden geladen..."
       />
       
