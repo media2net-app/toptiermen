@@ -46,6 +46,17 @@ export default function MarketingDashboard() {
   useEffect(() => {
     console.log('🔍 Marketing Dashboard useEffect triggered:', { loading, user: user?.email, isAuthenticated: !!user });
     
+    // Check if Supabase is properly configured
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    
+    if (!supabaseUrl || !supabaseKey || supabaseUrl === 'https://placeholder.supabase.co' || supabaseKey === 'placeholder-key') {
+      console.error('❌ Supabase environment variables not configured');
+      setError('Supabase configuratie ontbreekt. Neem contact op met de beheerder.');
+      setIsLoading(false);
+      return;
+    }
+    
     // Only run once when auth context is loaded and user is available
     if (loading) {
       console.log('🔍 Waiting for auth context to load...');
