@@ -493,10 +493,10 @@ export default function AdvertentieMateriaalPage() {
         return '';
       }
       
-      // Apply CDN optimization
-      const cdnUrl = getCDNVideoUrl(data.publicUrl);
-      console.log('✅ Got CDN URL:', cdnUrl);
-      return cdnUrl;
+      console.log('✅ Got Supabase URL:', data.publicUrl);
+      
+      // For now, use direct Supabase URL to avoid CDN issues
+      return data.publicUrl;
       
     } catch (error) {
       console.error('❌ Error getting video URL:', error);
@@ -786,7 +786,16 @@ export default function AdvertentieMateriaalPage() {
                 {/* Actions */}
                 <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-700">
                   <button
-                    onClick={() => window.open(getVideoUrl(video.name), '_blank')}
+                    onClick={() => {
+                      const videoUrl = getVideoUrl(video.name);
+                      if (videoUrl) {
+                        console.log('🔗 Opening video URL:', videoUrl);
+                        window.open(videoUrl, '_blank');
+                      } else {
+                        console.error('❌ No video URL available for:', video.name);
+                        setError(`Video URL niet beschikbaar voor: ${video.name}`);
+                      }
+                    }}
                     className="flex items-center space-x-1 text-blue-400 hover:text-blue-300 transition-colors"
                     title="Bekijk video"
                   >
@@ -796,10 +805,17 @@ export default function AdvertentieMateriaalPage() {
 
                   <button
                     onClick={() => {
-                      const link = document.createElement('a');
-                      link.href = getVideoUrl(video.name);
-                      link.download = video.name;
-                      link.click();
+                      const videoUrl = getVideoUrl(video.name);
+                      if (videoUrl) {
+                        console.log('⬇️ Downloading video:', videoUrl);
+                        const link = document.createElement('a');
+                        link.href = videoUrl;
+                        link.download = video.name;
+                        link.click();
+                      } else {
+                        console.error('❌ No video URL available for download:', video.name);
+                        setError(`Video URL niet beschikbaar voor download: ${video.name}`);
+                      }
                     }}
                     className="flex items-center space-x-1 text-green-400 hover:text-green-300 transition-colors"
                     title="Download video"
@@ -887,7 +903,16 @@ export default function AdvertentieMateriaalPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <button
-                    onClick={() => window.open(getVideoUrl(selectedVideo.name), '_blank')}
+                    onClick={() => {
+                      const videoUrl = getVideoUrl(selectedVideo.name);
+                      if (videoUrl) {
+                        console.log('🔗 Opening modal video URL:', videoUrl);
+                        window.open(videoUrl, '_blank');
+                      } else {
+                        console.error('❌ No video URL available for modal:', selectedVideo.name);
+                        setError(`Video URL niet beschikbaar voor: ${selectedVideo.name}`);
+                      }
+                    }}
                     className="flex items-center space-x-2 text-blue-400 hover:text-blue-300 transition-colors"
                     title="Open in nieuw tabblad"
                   >
