@@ -63,41 +63,54 @@ export default function AdvertentieMateriaalPage() {
   // Check database status
   const checkDatabaseStatus = async () => {
     try {
-      const response = await fetch('/api/admin/check-videos-table');
-      const result = await response.json();
+      // First run a simple test
+      const testResponse = await fetch('/api/admin/test-database');
+      const testResult = await testResponse.json();
       
-      if (!result.success) {
-        console.error('❌ Database check failed:', result);
-        
-        // If table doesn't exist, try to set it up
-        if (result.needsSetup) {
-          console.log('🔧 Attempting to set up videos table...');
-          try {
-            const setupResponse = await fetch('/api/admin/setup-videos-table', {
-              method: 'POST'
-            });
-            const setupResult = await setupResponse.json();
-            
-            if (setupResult.success) {
-              console.log('✅ Videos table setup successful');
-              return true;
-            } else {
-              console.error('❌ Videos table setup failed:', setupResult);
-              setError(`Database setup mislukt: ${setupResult.error}. Voer handmatig de SQL uit in Supabase.`);
-              return false;
-            }
-          } catch (setupErr) {
-            console.error('❌ Error during setup:', setupErr);
-            setError('Database setup mislukt. Voer handmatig de SQL uit in Supabase Dashboard.');
+      if (!testResult.success) {
+        console.error('❌ Database test failed:', testResult);
+        setError('Database test mislukt. Controleer de verbinding.');
+        return false;
+      }
+
+      const { testResults } = testResult;
+      console.log('🧪 Database test results:', testResults);
+
+      if (!testResults.connection) {
+        setError('Kan geen verbinding maken met de database. Controleer de instellingen.');
+        return false;
+      }
+
+      if (!testResults.tableExists) {
+        console.log('🔧 Table does not exist, attempting setup...');
+        try {
+          const setupResponse = await fetch('/api/admin/setup-videos-table', {
+            method: 'POST'
+          });
+          const setupResult = await setupResponse.json();
+          
+          if (setupResult.success) {
+            console.log('✅ Videos table setup successful');
+            return true;
+          } else {
+            console.error('❌ Videos table setup failed:', setupResult);
+            setError(`Database setup mislukt: ${setupResult.error}. Voer handmatig de SQL uit in Supabase.`);
             return false;
           }
-        } else {
-          setError(`Database probleem: ${result.error}. Neem contact op met de beheerder.`);
+        } catch (setupErr) {
+          console.error('❌ Error during setup:', setupErr);
+          setError('Database setup mislukt. Voer handmatig de SQL uit in Supabase Dashboard.');
           return false;
         }
       }
-      
-      console.log('✅ Database status:', result);
+
+      if (!testResults.canInsert) {
+        console.warn('⚠️ Cannot insert into videos table:', testResults.errors);
+        setError('Kan geen video\'s uploaden. Controleer de database rechten.');
+        return false;
+      }
+
+      console.log('✅ Database status OK');
       return true;
     } catch (err) {
       console.error('❌ Error checking database:', err);
