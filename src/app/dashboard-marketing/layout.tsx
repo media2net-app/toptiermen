@@ -31,6 +31,14 @@ import {
 } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 
+// Facebook SDK TypeScript declarations
+declare global {
+  interface Window {
+    FB: any;
+    fbAsyncInit: () => void;
+  }
+}
+
 const navigation = [
   { name: 'Overzicht', href: '/dashboard-marketing', icon: ChartBarIcon },
   { name: 'Advertenties', href: '/dashboard-marketing/advertenties', icon: MegaphoneIcon },
@@ -69,7 +77,38 @@ export default function MarketingLayout({
   const router = useRouter();
 
   // Check if user is admin (all admins have access to marketing dashboard)
-      const isMarketingUser = user?.role?.toLowerCase() === 'admin';
+  const isMarketingUser = user?.role?.toLowerCase() === 'admin';
+
+  // Initialize Facebook SDK
+  useEffect(() => {
+    // Load Facebook SDK
+    const loadFacebookSDK = () => {
+      if (window.FB) return; // Already loaded
+      
+      window.fbAsyncInit = function() {
+        window.FB.init({
+          appId: '1063013326038261',
+          cookie: true,
+          xfbml: true,
+          version: 'v18.0'
+        });
+        
+        window.FB.AppEvents.logPageView();
+      };
+
+      (function(d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) return;
+        js = d.createElement(s); js.id = id;
+        js.src = "https://connect.facebook.net/en_US/sdk.js";
+        if (fjs.parentNode) {
+          fjs.parentNode.insertBefore(js, fjs);
+        }
+      }(document, 'script', 'facebook-jssdk'));
+    };
+
+    loadFacebookSDK();
+  }, []);
 
   useEffect(() => {
     if (!loading && !isMarketingUser) {
