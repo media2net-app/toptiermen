@@ -76,8 +76,8 @@ export default function MarketingLayout({
   const { user, loading } = useSupabaseAuth();
   const router = useRouter();
 
-  // Check if user is authenticated (all authenticated users have access to marketing dashboard)
-  const isMarketingUser = !!user;
+  // Temporarily disable authentication check for testing
+  // const isMarketingUser = !!user;
 
   // Initialize Facebook SDK
   useEffect(() => {
@@ -164,39 +164,40 @@ export default function MarketingLayout({
     loadFacebookSDK();
   }, []);
 
-  useEffect(() => {
-    if (!loading && !isMarketingUser) {
-      router.push('/login?redirect=/dashboard-marketing');
-    }
-  }, [loading, isMarketingUser, router]);
+  // Temporarily disable authentication redirect
+  // useEffect(() => {
+  //   if (!loading && !isMarketingUser) {
+  //     router.push('/login?redirect=/dashboard-marketing');
+  //   }
+  // }, [loading, isMarketingUser, router]);
 
-  // Show loading while checking auth
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#0F1419] flex items-center justify-center">
-        <div className="text-white">Loading...</div>
-      </div>
-    );
-  }
+  // Show loading while checking auth (temporarily disabled)
+  // if (loading) {
+  //   return (
+  //     <div className="min-h-screen bg-[#0F1419] flex items-center justify-center">
+  //       <div className="text-white">Loading...</div>
+  //     </div>
+  //   );
+  // }
 
-  // Show access denied if not authenticated
-  if (!isMarketingUser) {
-    return (
-      <div className="min-h-screen bg-[#0F1419] flex items-center justify-center">
-        <div className="text-center">
-          <ExclamationTriangleIcon className="w-16 h-16 text-red-400 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-white mb-2">Toegang Geweigerd</h1>
-          <p className="text-gray-400 mb-4">Je moet ingelogd zijn om toegang te krijgen tot het Marketing Panel.</p>
-          <Link 
-            href="/login?redirect=/dashboard-marketing"
-            className="bg-[#1E40AF] hover:bg-[#1D4ED8] text-white px-4 py-2 rounded-lg transition-colors"
-          >
-            Inloggen
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  // Show access denied if not authenticated (temporarily disabled)
+  // if (!isMarketingUser) {
+  //   return (
+  //     <div className="min-h-screen bg-[#0F1419] flex items-center justify-center">
+  //       <div className="text-center">
+  //         <ExclamationTriangleIcon className="w-16 h-16 text-red-400 mx-auto mb-4" />
+  //         <h1 className="text-2xl font-bold text-white mb-2">Toegang Geweigerd</h1>
+  //         <p className="text-gray-400 mb-4">Je moet ingelogd zijn om toegang te krijgen tot het Marketing Panel.</p>
+  //         <Link 
+  //           href="/login?redirect=/dashboard-marketing"
+  //           className="bg-[#1E40AF] hover:bg-[#1D4ED8] text-white px-4 py-2 rounded-lg transition-colors"
+  //         >
+  //           Inloggen
+  //         </Link>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="min-h-screen bg-[#0F1419]">
