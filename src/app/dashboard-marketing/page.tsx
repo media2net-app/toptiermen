@@ -1,14 +1,41 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ExclamationTriangleIcon, CogIcon } from '@heroicons/react/24/outline';
+import { 
+  ExclamationTriangleIcon, 
+  CogIcon, 
+  CheckCircleIcon,
+  InformationCircleIcon,
+  UserIcon,
+  BuildingOfficeIcon,
+  ChartBarIcon,
+  CurrencyEuroIcon
+} from '@heroicons/react/24/outline';
 import FacebookConnectionModal from '@/components/marketing/FacebookConnectionModal';
+
+interface FacebookUserInfo {
+  id: string;
+  name: string;
+  email: string;
+}
+
+interface FacebookAdAccount {
+  id: string;
+  name: string;
+  account_status: number;
+  currency: string;
+  timezone_name: string;
+}
 
 export default function MarketingDashboard() {
   const [isFacebookConnected, setIsFacebookConnected] = useState(false);
   const [showFacebookModal, setShowFacebookModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userInfo, setUserInfo] = useState<FacebookUserInfo | null>(null);
+  const [adAccountInfo, setAdAccountInfo] = useState<FacebookAdAccount | null>(null);
+  const [campaignsCount, setCampaignsCount] = useState<number>(0);
+  const [totalSpend, setTotalSpend] = useState<number>(0);
 
   // Check Facebook connection on component mount
   useEffect(() => {
@@ -47,6 +74,19 @@ export default function MarketingDashboard() {
             if (adAccountId) {
               console.log('🔍 Facebook connected with ad account:', adAccountId);
               setIsFacebookConnected(true);
+              
+              // Get user info
+              window.FB.api('/me', { fields: 'id,name,email' }, (userResponse: any) => {
+                if (userResponse && !userResponse.error) {
+                  setUserInfo(userResponse);
+                }
+              });
+
+              // Get ad account info
+              fetchAdAccountInfo(adAccountId);
+              
+              // Get campaigns data
+              fetchCampaignsData(adAccountId);
             } else {
               console.log('🔍 Facebook connected but no ad account found');
               setShowFacebookModal(true);
@@ -67,10 +107,50 @@ export default function MarketingDashboard() {
     checkFacebookConnection();
   }, []);
 
+  const fetchAdAccountInfo = async (adAccountId: string) => {
+    try {
+      const accessToken = localStorage.getItem('facebook_access_token');
+      if (!accessToken) return;
+
+      const response = await fetch(`/api/marketing/facebook-ad-manager?action=account&accessToken=${accessToken}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        setAdAccountInfo(data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching ad account info:', error);
+    }
+  };
+
+  const fetchCampaignsData = async (adAccountId: string) => {
+    try {
+      const accessToken = localStorage.getItem('facebook_access_token');
+      if (!accessToken) return;
+
+      const response = await fetch(`/api/marketing/facebook-ad-manager?action=campaigns&accessToken=${accessToken}&dateRange=30d`);
+      const data = await response.json();
+      
+      if (data.success) {
+        setCampaignsCount(data.data.length);
+        
+        // Calculate total spend
+        const total = data.data.reduce((sum: number, campaign: any) => {
+          return sum + (campaign.insights?.spend || 0);
+        }, 0);
+        setTotalSpend(total);
+      }
+    } catch (error) {
+      console.error('Error fetching campaigns data:', error);
+    }
+  };
+
   const handleFacebookConnectionSuccess = () => {
     console.log('🔍 Facebook connection success');
     setIsFacebookConnected(true);
     setShowFacebookModal(false);
+    // Reload the page to fetch fresh data
+    window.location.reload();
   };
 
   const handleOpenFacebookModal = () => {
@@ -147,18 +227,117 @@ export default function MarketingDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0F1419] flex items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-2xl font-bold text-white mb-2">Marketing Dashboard</h1>
-        <p className="text-gray-400 mb-6">
-          Facebook is verbonden! Het dashboard is klaar voor gebruik.
-        </p>
-        <button
-          onClick={handleOpenFacebookModal}
-          className="bg-[#3B82F6] hover:bg-[#2563EB] text-white px-6 py-3 rounded-lg transition-colors"
-        >
-          Facebook Instellingen
-        </button>
+    <div className="min-h-screen bg-[#0F1419] p-6">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-white mb-2">Marketing Dashboard</h1>
+          <div className="flex items-center space-x-2 text-green-400">
+            <CheckCircleIcon className="w-5 h-5" />
+            <span>Facebook is verbonden!</span>
+          </div>
+        </div>
+
+        {/* Connection Details */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {/* User Info */}
+          <div className="bg-[#1E293B] rounded-lg p-6 border border-[#334155]">
+            <div className="flex items-center space-x-3 mb-4">
+              <UserIcon className="w-6 h-6 text-blue-400" />
+              <h3 className="text-lg font-semibold text-white">Gebruiker</h3>
+            </div>
+            {userInfo && (
+              <div className="space-y-2">
+                <p className="text-gray-300 text-sm">Naam: <span className="text-white">{userInfo.name}</span></p>
+                <p className="text-gray-300 text-sm">Email: <span className="text-white">{userInfo.email}</span></p>
+                <p className="text-gray-300 text-sm">ID: <span className="text-white font-mono text-xs">{userInfo.id}</span></p>
+              </div>
+            )}
+          </div>
+
+          {/* Ad Account Info */}
+          <div className="bg-[#1E293B] rounded-lg p-6 border border-[#334155]">
+            <div className="flex items-center space-x-3 mb-4">
+              <BuildingOfficeIcon className="w-6 h-6 text-purple-400" />
+              <h3 className="text-lg font-semibold text-white">Ad Account</h3>
+            </div>
+            {adAccountInfo && (
+              <div className="space-y-2">
+                <p className="text-gray-300 text-sm">Naam: <span className="text-white">{adAccountInfo.name}</span></p>
+                <p className="text-gray-300 text-sm">Status: <span className="text-green-400">Actief</span></p>
+                <p className="text-gray-300 text-sm">Valuta: <span className="text-white">{adAccountInfo.currency}</span></p>
+                <p className="text-gray-300 text-sm">ID: <span className="text-white font-mono text-xs">{adAccountInfo.id}</span></p>
+              </div>
+            )}
+          </div>
+
+          {/* Campaigns */}
+          <div className="bg-[#1E293B] rounded-lg p-6 border border-[#334155]">
+            <div className="flex items-center space-x-3 mb-4">
+              <ChartBarIcon className="w-6 h-6 text-green-400" />
+              <h3 className="text-lg font-semibold text-white">Campagnes</h3>
+            </div>
+            <div className="space-y-2">
+              <p className="text-gray-300 text-sm">Aantal: <span className="text-white text-xl font-bold">{campaignsCount}</span></p>
+              <p className="text-gray-300 text-sm">Periode: <span className="text-white">30 dagen</span></p>
+            </div>
+          </div>
+
+          {/* Total Spend */}
+          <div className="bg-[#1E293B] rounded-lg p-6 border border-[#334155]">
+            <div className="flex items-center space-x-3 mb-4">
+              <CurrencyEuroIcon className="w-6 h-6 text-yellow-400" />
+              <h3 className="text-lg font-semibold text-white">Totaal Uitgegeven</h3>
+            </div>
+            <div className="space-y-2">
+              <p className="text-gray-300 text-sm">Bedrag: <span className="text-white text-xl font-bold">€{totalSpend.toFixed(2)}</span></p>
+              <p className="text-gray-300 text-sm">Periode: <span className="text-white">30 dagen</span></p>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="bg-[#1E293B] rounded-lg p-6 border border-[#334155] mb-8">
+          <h3 className="text-lg font-semibold text-white mb-4">Snelle Acties</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <button
+              onClick={handleOpenFacebookModal}
+              className="bg-[#3B82F6] hover:bg-[#2563EB] text-white px-4 py-3 rounded-lg transition-colors flex items-center space-x-2"
+            >
+              <InformationCircleIcon className="w-5 h-5" />
+              <span>Facebook Instellingen</span>
+            </button>
+            
+            <button
+              onClick={() => window.open('/test-facebook-marketing', '_blank')}
+              className="bg-[#10B981] hover:bg-[#059669] text-white px-4 py-3 rounded-lg transition-colors flex items-center space-x-2"
+            >
+              <ChartBarIcon className="w-5 h-5" />
+              <span>Test Marketing API</span>
+            </button>
+            
+            <button
+              onClick={() => window.open('/dashboard-marketing/facebook-setup', '_blank')}
+              className="bg-[#8B5CF6] hover:bg-[#7C3AED] text-white px-4 py-3 rounded-lg transition-colors flex items-center space-x-2"
+            >
+              <CogIcon className="w-5 h-5" />
+              <span>Facebook Setup</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Connection Status */}
+        <div className="bg-green-900/20 border border-green-500/50 rounded-lg p-6">
+          <div className="flex items-center space-x-3">
+            <CheckCircleIcon className="w-6 h-6 text-green-400" />
+            <div>
+              <h3 className="text-green-400 font-semibold">Facebook Verbinding Status</h3>
+              <p className="text-green-300 text-sm">
+                Alle Facebook Marketing API permissions zijn actief en het dashboard is klaar voor gebruik.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
       
       <FacebookConnectionModal
