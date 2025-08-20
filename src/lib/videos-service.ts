@@ -43,18 +43,31 @@ export interface UpdateVideoData {
 export class VideosService {
   // Fetch all videos
   static async getVideos(): Promise<VideoFile[]> {
-    const { data, error } = await supabase
-      .from('videos')
-      .select('*')
-      .eq('is_deleted', false)
-      .order('created_at', { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from('videos')
+        .select('*')
+        .eq('is_deleted', false)
+        .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('Error fetching videos:', error);
-      throw error;
+      if (error) {
+        console.error('Error fetching videos:', error);
+        
+        // If table doesn't exist, return empty array instead of throwing
+        if (error.code === '42P01' || error.message.includes('does not exist')) {
+          console.log('📋 Videos table does not exist, returning empty array');
+          return [];
+        }
+        
+        throw error;
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Error in getVideos:', error);
+      // Return empty array on any error to prevent app crash
+      return [];
     }
-
-    return data || [];
   }
 
   // Fetch video by ID
@@ -76,15 +89,50 @@ export class VideosService {
 
   // Create new video
   static async createVideo(videoData: CreateVideoData): Promise<VideoFile> {
+    try {
+      const { data, error } = await supabase
+        .from('videos')
+        .insert([videoData])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating video:', error);
+        
+        // Handle 409 conflict (duplicate entry)
+        if (error.code === '23505' || error.message.includes('duplicate')) {
+          console.log('🔄 Duplicate video detected, trying to get existing video...');
+          
+          // Try to get the existing video
+          const existingVideo = await this.getVideoByOriginalName(videoData.original_name);
+          if (existingVideo) {
+            console.log('✅ Found existing video:', existingVideo.id);
+            return existingVideo;
+          }
+        }
+        
+        throw error;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error in createVideo:', error);
+      throw error;
+    }
+  }
+
+  // Get video by original name
+  static async getVideoByOriginalName(originalName: string): Promise<VideoFile | null> {
     const { data, error } = await supabase
       .from('videos')
-      .insert([videoData])
-      .select()
+      .select('*')
+      .eq('original_name', originalName)
+      .eq('is_deleted', false)
       .single();
 
     if (error) {
-      console.error('Error creating video:', error);
-      throw error;
+      console.error('Error fetching video by original name:', error);
+      return null;
     }
 
     return data;
