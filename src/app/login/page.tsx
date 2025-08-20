@@ -14,9 +14,28 @@ export default function Login() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
+  const [debugInfo, setDebugInfo] = useState("");
 
   useEffect(() => { 
     setMounted(true); 
+    
+    // Debug: Check environment variables
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    
+    setDebugInfo(`
+      Supabase URL: ${supabaseUrl ? 'Configured' : 'NOT CONFIGURED'}
+      Supabase Key: ${supabaseKey ? 'Configured' : 'NOT CONFIGURED'}
+      Environment: ${process.env.NODE_ENV}
+      URL: ${window.location.href}
+    `);
+    
+    console.log('🔍 Debug Info:', {
+      supabaseUrl: supabaseUrl ? 'Configured' : 'NOT CONFIGURED',
+      supabaseKey: supabaseKey ? 'Configured' : 'NOT CONFIGURED',
+      environment: process.env.NODE_ENV,
+      url: window.location.href
+    });
   }, []);
 
   // Check if user is already authenticated
@@ -48,6 +67,7 @@ export default function Login() {
       }
       
 
+      console.log('🔍 Redirecting to:', targetPath);
 
       // Try router.replace first, fallback to window.location
       try {
@@ -100,6 +120,8 @@ export default function Login() {
     try {
       console.log('🔍 Calling signIn...');
       const result = await signIn(email, password);
+
+      console.log('🔍 SignIn result:', result);
 
       if (!result.success) {
         console.error('Sign in error:', result.error);
@@ -178,6 +200,14 @@ export default function Login() {
           />
         </div>
         <p className="text-[#B6C948] text-center mb-6 sm:mb-8 text-base sm:text-lg font-figtree">Log in op je dashboard</p>
+        
+        {/* Debug Info */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="mb-4 p-3 bg-[#181F17] rounded-lg border border-[#B6C948]">
+            <p className="text-[#B6C948] text-xs font-mono whitespace-pre-wrap">{debugInfo}</p>
+          </div>
+        )}
+        
         <form onSubmit={handleLogin} className="flex flex-col gap-6">
           <div className="relative">
             <EnvelopeIcon className="w-5 h-5 text-[#B6C948] absolute left-3 top-1/2 -translate-y-1/2" />
