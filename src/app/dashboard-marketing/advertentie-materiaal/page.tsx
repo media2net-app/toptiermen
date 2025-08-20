@@ -176,7 +176,7 @@ export default function AdvertentieMateriaalPage() {
 
             // Try to get real file data for existing files
             console.log('🔍 Attempting to get real file data for existing videos...');
-            const realFileData = [];
+            const realFileData: any[] = [];
             
             for (const fileName of existingFiles) {
               try {
