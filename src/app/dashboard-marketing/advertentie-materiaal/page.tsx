@@ -308,12 +308,32 @@ export default function AdvertentieMateriaalPage() {
       }
 
       if (data) {
-        // Filter for video files
-        const videoFiles = data.filter(file => {
-          const isVideo = file.metadata?.mimetype?.startsWith('video/') || 
-                         file.name?.toLowerCase().match(/\.(mp4|avi|mov|wmv|flv|webm|mkv)$/);
-          return isVideo;
-        });
+        // Filter for video files and transform to VideoFile format
+        const videoFiles: VideoFile[] = data
+          .filter(file => {
+            const isVideo = file.metadata?.mimetype?.startsWith('video/') || 
+                           file.name?.toLowerCase().match(/\.(mp4|avi|mov|wmv|flv|webm|mkv)$/);
+            return isVideo;
+          })
+          .map(file => ({
+            id: file.id,
+            name: file.name,
+            size: file.metadata?.size || 0,
+            created_at: file.created_at,
+            updated_at: file.updated_at,
+            last_accessed_at: file.last_accessed_at,
+            metadata: {
+              eTag: file.metadata?.eTag || '',
+              size: file.metadata?.size || 0,
+              mimetype: file.metadata?.mimetype || 'video/mp4',
+              cacheControl: file.metadata?.cacheControl || '3600',
+              lastModified: file.metadata?.lastModified || new Date().toISOString(),
+              contentLength: file.metadata?.contentLength || 0,
+              httpStatusCode: file.metadata?.httpStatusCode || 200
+            },
+            bucket_id: file.bucket_id,
+            owner: file.owner
+          }));
 
         console.log('📹 Found video files:', videoFiles.length);
         setVideos(videoFiles);
