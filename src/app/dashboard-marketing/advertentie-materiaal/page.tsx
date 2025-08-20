@@ -40,6 +40,29 @@ export default function AdvertentieMateriaalPage() {
   const [editingName, setEditingName] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
+  const [videoThumbnails, setVideoThumbnails] = useState<{[key: string]: string}>({});
+
+  // Helper function to generate video thumbnail
+  const generateVideoThumbnail = (videoElement: HTMLVideoElement, videoId: string) => {
+    try {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (ctx && videoElement.videoWidth > 0 && videoElement.videoHeight > 0) {
+        canvas.width = videoElement.videoWidth;
+        canvas.height = videoElement.videoHeight;
+        ctx.drawImage(videoElement, 0, 0);
+        const thumbnailUrl = canvas.toDataURL('image/jpeg', 0.8);
+        setVideoThumbnails(prev => ({
+          ...prev,
+          [videoId]: thumbnailUrl
+        }));
+        return thumbnailUrl;
+      }
+    } catch (error) {
+      console.log('Could not generate thumbnail for video:', videoId);
+    }
+    return null;
+  };
 
   // Helper function to determine target audience based on video name
   const getTargetAudienceFromName = (videoName: string): string => {
@@ -229,6 +252,58 @@ export default function AdvertentieMateriaalPage() {
           >
             {/* Video Preview */}
             <div className="relative bg-gray-900" style={{ aspectRatio: '9/16' }}>
+              {/* Thumbnail Preview (shown when video is not playing) */}
+              {videoThumbnails[video.id] && (
+                <div 
+                  className="absolute inset-0 z-10 cursor-pointer"
+                  data-thumbnail-id={video.id}
+                  onClick={() => {
+                    const videoElement = document.querySelector(`[data-video-id="${video.id}"]`) as HTMLVideoElement;
+                    if (videoElement) {
+                      videoElement.play();
+                    }
+                  }}
+                >
+                  <img 
+                    src={videoThumbnails[video.id]} 
+                    alt={`Preview van ${video.name}`}
+                    className="w-full h-full object-contain"
+                  />
+                  {/* Play Button Overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
+                    <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-full p-3 hover:bg-opacity-30 transition-all duration-200">
+                      <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z"/>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* Fallback Preview (when no thumbnail is available) */}
+              {!videoThumbnails[video.id] && (
+                <div 
+                  className="absolute inset-0 z-10 cursor-pointer flex items-center justify-center bg-gray-800"
+                  data-thumbnail-id={video.id}
+                  onClick={() => {
+                    const videoElement = document.querySelector(`[data-video-id="${video.id}"]`) as HTMLVideoElement;
+                    if (videoElement) {
+                      videoElement.play();
+                    }
+                  }}
+                >
+                  <div className="text-center">
+                    <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-full p-4 mx-auto mb-3 w-16 h-16 flex items-center justify-center">
+                      <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z"/>
+                      </svg>
+                    </div>
+                    <p className="text-white text-sm font-medium">Klik om video te bekijken</p>
+                    <p className="text-gray-400 text-xs mt-1">{video.name}</p>
+                  </div>
+                </div>
+              )}
+              
               <video
                 data-video-id={video.id}
                 src={video.public_url || ''}
@@ -236,14 +311,39 @@ export default function AdvertentieMateriaalPage() {
                 preload="metadata"
                 controls
                 crossOrigin="anonymous"
+                playsInline
+                muted
                 onLoadedMetadata={(e) => {
                   console.log('🎬 Video metadata loaded:', video.name);
+                  // Generate thumbnail for mobile preview
+                  const videoElement = e.target as HTMLVideoElement;
+                  if (!videoThumbnails[video.id]) {
+                    // Seek to 0.1 seconds to get a good frame
+                    videoElement.currentTime = 0.1;
+                    videoElement.addEventListener('seeked', () => {
+                      generateVideoThumbnail(videoElement, video.id);
+                    }, { once: true });
+                  }
                 }}
                 onLoadStart={() => {
                   console.log('🔄 Video loading started:', video.name);
                 }}
                 onCanPlay={() => {
                   console.log('✅ Video can play:', video.name);
+                }}
+                onPlay={() => {
+                  // Hide thumbnail when video starts playing
+                  const thumbnailElement = document.querySelector(`[data-thumbnail-id="${video.id}"]`);
+                  if (thumbnailElement) {
+                    (thumbnailElement as HTMLElement).style.display = 'none';
+                  }
+                }}
+                onPause={() => {
+                  // Show thumbnail when video is paused
+                  const thumbnailElement = document.querySelector(`[data-thumbnail-id="${video.id}"]`);
+                  if (thumbnailElement) {
+                    (thumbnailElement as HTMLElement).style.display = 'block';
+                  }
                 }}
                 onError={(e) => {
                   console.error('❌ Video error:', video.name, e);
