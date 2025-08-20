@@ -130,12 +130,7 @@ export default function AdvertentieVideoUpload({
       debugSupabaseConfig();
 
       // Start upload logging
-      const uploadId = await startVideoUploadLog({
-        fileName: file.name,
-        fileSize: file.size,
-        fileType: file.type,
-        bucket: 'advertenties'
-      });
+      const uploadId = await startVideoUploadLog(file);
 
       console.log('🚀 Starting advertentie video upload:', {
         fileName: file.name,
@@ -150,7 +145,7 @@ export default function AdvertentieVideoUpload({
       const uniqueFileName = `advertenties/${timestamp}-${file.name}`;
 
       setCurrentStep('Uploaden naar Supabase Storage...');
-      await logVideoUploadStep(uploadId, 'upload_start', 'Starting upload to advertenties bucket');
+      await logVideoUploadStep('upload_start', 'Starting upload to advertenties bucket');
 
       // Upload to Supabase Storage
       const { data: uploadData, error: uploadError } = await supabase.storage
@@ -162,12 +157,12 @@ export default function AdvertentieVideoUpload({
 
       if (uploadError) {
         console.error('❌ Upload error:', uploadError);
-        await logVideoUploadStep(uploadId, 'upload_error', uploadError.message);
+        await logVideoUploadStep('upload_error', uploadError.message);
         throw new Error(`Upload mislukt: ${uploadError.message}`);
       }
 
       console.log('✅ Upload successful:', uploadData);
-      await logVideoUploadStep(uploadId, 'upload_success', 'File uploaded successfully');
+      await logVideoUploadStep('upload_success', 'File uploaded successfully');
 
       // Get public URL
       const { data: urlData } = supabase.storage
@@ -183,15 +178,15 @@ export default function AdvertentieVideoUpload({
 
       // Preload video for better performance
       setCurrentStep('Video voorbereiden...');
-      await logVideoUploadStep(uploadId, 'preload_start', 'Preloading video for performance');
+      await logVideoUploadStep('preload_start', 'Preloading video for performance');
       
-      try {
-        await preloadVideo(publicUrl);
-        await logVideoUploadStep(uploadId, 'preload_success', 'Video preloaded successfully');
-      } catch (preloadError) {
-        console.warn('⚠️ Preload failed:', preloadError);
-        await logVideoUploadStep(uploadId, 'preload_warning', 'Video preload failed but upload successful');
-      }
+              try {
+          await preloadVideo(publicUrl);
+          await logVideoUploadStep('preload_success', 'Video preloaded successfully');
+        } catch (preloadError) {
+          console.warn('⚠️ Preload failed:', preloadError);
+          await logVideoUploadStep('preload_warning', 'Video preload failed but upload successful');
+        }
 
       // Performance data
       const performance = {
@@ -202,7 +197,7 @@ export default function AdvertentieVideoUpload({
       };
 
       setPerformanceData(performance);
-      await completeVideoUpload(uploadId, 'success', publicUrl, performance);
+      await completeVideoUpload(true);
 
       console.log('🎉 Advertentie video upload completed successfully!');
       toast.success('Advertentie video succesvol geüpload!');
