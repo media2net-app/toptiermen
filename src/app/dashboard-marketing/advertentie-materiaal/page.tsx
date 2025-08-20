@@ -50,6 +50,29 @@ export default function AdvertentieMateriaalPage() {
   const [selectedVideo, setSelectedVideo] = useState<VideoFile | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [bucketName, setBucketName] = useState<string>('advertenties');
+
+  // Function to find the correct bucket name
+  const findAdvertentiesBucket = (buckets: any[]) => {
+    const possibleNames = ['advertenties', 'Advertenties', 'ADVERTENTIES', 'advertentie', 'Advertentie'];
+    
+    for (const name of possibleNames) {
+      const bucket = buckets.find(b => b.id === name);
+      if (bucket) {
+        console.log(`✅ Found bucket with name: "${name}"`);
+        return name;
+      }
+    }
+    
+    // Case-insensitive search
+    const bucket = buckets.find(b => b.id.toLowerCase() === 'advertenties');
+    if (bucket) {
+      console.log(`✅ Found bucket with case-insensitive match: "${bucket.id}"`);
+      return bucket.id;
+    }
+    
+    return null;
+  };
 
   // Fetch videos from the bucket
   const fetchVideos = async () => {
@@ -73,18 +96,23 @@ export default function AdvertentieMateriaalPage() {
 
       console.log('📁 Available buckets:', buckets?.map(b => b.id) || []);
       
-      const advertentiesBucket = buckets?.find(bucket => bucket.id === 'advertenties');
-      if (!advertentiesBucket) {
+      // Find the correct bucket name
+      const correctBucketName = findAdvertentiesBucket(buckets || []);
+      if (!correctBucketName) {
         console.error('❌ Advertenties bucket not found');
+        console.error('❌ Available bucket IDs:', buckets?.map(b => b.id) || []);
         setError('Advertenties bucket bestaat niet. Neem contact op met de beheerder.');
         return;
       }
+      
+      setBucketName(correctBucketName);
+      const advertentiesBucket = buckets?.find(bucket => bucket.id === correctBucketName);
 
       console.log('✅ Advertenties bucket found:', advertentiesBucket);
 
       // Now try to list files
       const { data, error } = await supabase.storage
-        .from('advertenties')
+        .from(bucketName)
         .list('', {
           limit: 100,
           offset: 0,
@@ -150,7 +178,7 @@ export default function AdvertentieMateriaalPage() {
       const fileName = `${Date.now()}_${file.name}`;
       
       const { data, error } = await supabase.storage
-        .from('advertenties')
+        .from(bucketName)
         .upload(fileName, file, {
           cacheControl: '3600',
           upsert: false
@@ -183,7 +211,7 @@ export default function AdvertentieMateriaalPage() {
   // Get video URL
   const getVideoUrl = (fileName: string) => {
     const { data } = supabase.storage
-      .from('advertenties')
+      .from(bucketName)
       .getPublicUrl(fileName);
     return data.publicUrl;
   };
@@ -191,7 +219,7 @@ export default function AdvertentieMateriaalPage() {
   // Get signed URL for private access (fallback)
   const getSignedUrl = async (fileName: string) => {
     const { data, error } = await supabase.storage
-      .from('advertenties')
+      .from(bucketName)
       .createSignedUrl(fileName, 3600); // 1 hour expiry
     
     if (error) {
@@ -208,7 +236,7 @@ export default function AdvertentieMateriaalPage() {
 
     try {
       const { error } = await supabase.storage
-        .from('advertenties')
+        .from(bucketName)
         .remove([fileName]);
 
       if (error) {
@@ -365,6 +393,7 @@ export default function AdvertentieMateriaalPage() {
             <div>User ID: {user?.id || 'N/A'}</div>
             <div>Loading: {loading ? 'Ja' : 'Nee'}</div>
             <div>Videos gevonden: {videos.length}</div>
+            <div>Bucket naam: {bucketName}</div>
             <div>Supabase URL: {supabaseUrl ? 'Geconfigureerd' : 'Ontbreekt'}</div>
             <div>Supabase Key: {supabaseAnonKey ? 'Geconfigureerd' : 'Ontbreekt'}</div>
           </div>
