@@ -44,101 +44,113 @@ export default function MarketingDashboard() {
 
   // Check authentication and Facebook connection on component mount
   useEffect(() => {
-    const checkAuthenticationAndFacebook = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
+    console.log('🔍 Marketing Dashboard useEffect triggered:', { loading, user: user?.email, isAuthenticated: !!user });
+    
+    // Only run once when auth context is loaded and user is available
+    if (loading) {
+      console.log('🔍 Waiting for auth context to load...');
+      return;
+    }
 
-        // Wait for auth context to load
-        if (loading) {
-          console.log('🔍 Waiting for auth context to load...');
-          return;
+    if (!user) {
+      console.log('🔍 No user found, redirecting to login');
+      // Add a small delay to prevent immediate redirect
+      setTimeout(() => {
+        router.push('/login?redirect=/dashboard-marketing');
+      }, 100);
+      return;
+    }
+
+    console.log('🔍 User authenticated:', user.email);
+    
+    // Start Facebook check only after user is confirmed
+    checkFacebookConnection();
+  }, [loading, user, router]);
+
+  // Separate function for Facebook connection check
+  const checkFacebookConnection = async () => {
+    // Prevent multiple calls
+    if (isLoading) {
+      console.log('🔍 Facebook check already in progress, skipping...');
+      return;
+    }
+    
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      // Wait for Facebook SDK to load with timeout
+      let sdkLoaded = false;
+      const maxWaitTime = 5000; // 5 seconds
+      const startTime = Date.now();
+
+      while (!sdkLoaded && (Date.now() - startTime) < maxWaitTime) {
+        if (typeof window !== 'undefined' && window.FB) {
+          sdkLoaded = true;
+          console.log('🔍 Facebook SDK loaded after', Date.now() - startTime, 'ms');
+        } else {
+          await new Promise(resolve => setTimeout(resolve, 100));
         }
+      }
 
-        // Check if user is authenticated
-        if (!user) {
-          console.log('🔍 No user found, redirecting to login');
-          router.push('/login?redirect=/dashboard-marketing');
-          return;
-        }
+      if (!sdkLoaded) {
+        console.log('🔍 Facebook SDK not loaded within timeout, showing modal');
+        setShowFacebookModal(true);
+        setIsLoading(false);
+        return;
+      }
 
-        console.log('🔍 User authenticated:', user.email);
-
-        // Wait for Facebook SDK to load with timeout
-        let sdkLoaded = false;
-        const maxWaitTime = 5000; // 5 seconds
-        const startTime = Date.now();
-
-        while (!sdkLoaded && (Date.now() - startTime) < maxWaitTime) {
-          if (typeof window !== 'undefined' && window.FB) {
-            sdkLoaded = true;
-            console.log('🔍 Facebook SDK loaded after', Date.now() - startTime, 'ms');
-          } else {
-            await new Promise(resolve => setTimeout(resolve, 100));
-          }
-        }
-
-        if (!sdkLoaded) {
-          console.log('🔍 Facebook SDK not loaded within timeout, showing modal');
-          setShowFacebookModal(true);
-          setIsLoading(false);
-          return;
-        }
-
-        // Check Facebook login status
-        window.FB.getLoginStatus((response: any) => {
-          console.log('🔍 Facebook login status:', response);
+      // Check Facebook login status
+      window.FB.getLoginStatus((response: any) => {
+        console.log('🔍 Facebook login status:', response);
+        
+        if (response.status === 'connected') {
+          // Store Facebook login status persistently
+          localStorage.setItem('facebook_login_status', 'connected');
+          localStorage.setItem('facebook_access_token', response.authResponse.accessToken);
+          localStorage.setItem('facebook_user_id', response.authResponse.userID);
           
-          if (response.status === 'connected') {
-            // Store Facebook login status persistently
-            localStorage.setItem('facebook_login_status', 'connected');
-            localStorage.setItem('facebook_access_token', response.authResponse.accessToken);
-            localStorage.setItem('facebook_user_id', response.authResponse.userID);
+          const adAccountId = localStorage.getItem('facebook_ad_account_id');
+          if (adAccountId) {
+            console.log('🔍 Facebook connected with ad account:', adAccountId);
+            setIsFacebookConnected(true);
             
-            const adAccountId = localStorage.getItem('facebook_ad_account_id');
-            if (adAccountId) {
-              console.log('🔍 Facebook connected with ad account:', adAccountId);
-              setIsFacebookConnected(true);
-              
-              // Get user info
-              window.FB.api('/me', { fields: 'id,name,email' }, (userResponse: any) => {
-                if (userResponse && !userResponse.error) {
-                  setUserInfo(userResponse);
-                  // Store user info persistently
-                  localStorage.setItem('facebook_user_info', JSON.stringify(userResponse));
-                }
-              });
+            // Get user info
+            window.FB.api('/me', { fields: 'id,name,email' }, (userResponse: any) => {
+              if (userResponse && !userResponse.error) {
+                setUserInfo(userResponse);
+                // Store user info persistently
+                localStorage.setItem('facebook_user_info', JSON.stringify(userResponse));
+              }
+            });
 
-              // Get ad account info
-              fetchAdAccountInfo(adAccountId);
-              
-              // Get campaigns data
-              fetchCampaignsData(adAccountId);
-            } else {
-              console.log('🔍 Facebook connected but no ad account found');
-              setShowFacebookModal(true);
-            }
+            // Get ad account info
+            fetchAdAccountInfo(adAccountId);
+            
+            // Get campaigns data
+            fetchCampaignsData(adAccountId);
           } else {
-            console.log('🔍 Facebook not connected, showing modal');
-            // Clear any stale Facebook data
-            localStorage.removeItem('facebook_login_status');
-            localStorage.removeItem('facebook_access_token');
-            localStorage.removeItem('facebook_user_id');
-            localStorage.removeItem('facebook_user_info');
+            console.log('🔍 Facebook connected but no ad account found');
             setShowFacebookModal(true);
           }
-          setIsLoading(false);
-        });
-
-      } catch (error) {
-        console.error('🔍 Error checking authentication and Facebook connection:', error);
-        setError('Er is een fout opgetreden bij het controleren van de verbinding');
+        } else {
+          console.log('🔍 Facebook not connected, showing modal');
+          // Clear any stale Facebook data
+          localStorage.removeItem('facebook_login_status');
+          localStorage.removeItem('facebook_access_token');
+          localStorage.removeItem('facebook_user_id');
+          localStorage.removeItem('facebook_user_info');
+          setShowFacebookModal(true);
+        }
         setIsLoading(false);
-      }
-    };
+      });
 
-    checkAuthenticationAndFacebook();
-  }, [user, loading, router]);
+    } catch (error) {
+      console.error('🔍 Error checking Facebook connection:', error);
+      setError('Er is een fout opgetreden bij het controleren van de Facebook verbinding');
+      setIsLoading(false);
+    }
+  };
 
   const fetchAdAccountInfo = async (adAccountId: string) => {
     try {
@@ -194,8 +206,8 @@ export default function MarketingDashboard() {
     setShowFacebookModal(true);
   };
 
-  // Show loading state
-  if (loading || isLoading) {
+  // Show loading state for Facebook check
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-[#0F1419] flex items-center justify-center">
         <div className="text-center">
@@ -204,9 +216,64 @@ export default function MarketingDashboard() {
           </div>
           <h1 className="text-2xl font-bold text-white mb-2">Marketing Dashboard Laden...</h1>
           <p className="text-gray-400 mb-6 max-w-md">
-            {loading ? 'Authenticatie wordt gecontroleerd...' : 'Facebook verbinding wordt gecontroleerd'}
+            Facebook verbinding wordt gecontroleerd...
           </p>
+          <div className="text-xs text-gray-500 mt-4">
+            Debug: user={user?.email || 'null'}, isLoading={isLoading.toString()}
+          </div>
         </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[#0F1419] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-red-500/20 border border-red-500/50 rounded-full flex items-center justify-center mx-auto mb-4">
+            <ExclamationTriangleIcon className="w-8 h-8 text-red-400" />
+          </div>
+          <h1 className="text-2xl font-bold text-white mb-2">Fout Opgetreden</h1>
+          <p className="text-gray-400 mb-6 max-w-md">
+            {error}
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-[#3B82F6] hover:bg-[#2563EB] text-white px-6 py-3 rounded-lg transition-colors"
+          >
+            Pagina Herladen
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Show Facebook connection modal if not connected
+  if (!isFacebookConnected) {
+    return (
+      <div className="min-h-screen bg-[#0F1419] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-red-500/20 border border-red-500/50 rounded-full flex items-center justify-center mx-auto mb-4">
+            <ExclamationTriangleIcon className="w-8 h-8 text-red-400" />
+          </div>
+          <h1 className="text-2xl font-bold text-white mb-2">Facebook Connectie Vereist</h1>
+          <p className="text-gray-400 mb-6 max-w-md">
+            Je moet eerst verbinden met Facebook om het marketing dashboard te kunnen gebruiken.
+          </p>
+          <button
+            onClick={handleOpenFacebookModal}
+            className="bg-[#3B82F6] hover:bg-[#2563EB] text-white px-6 py-3 rounded-lg transition-colors"
+          >
+            Facebook Verbinden
+          </button>
+        </div>
+        
+        <FacebookConnectionModal
+          isOpen={showFacebookModal}
+          onClose={() => setShowFacebookModal(false)}
+          onConnectionSuccess={handleFacebookConnectionSuccess}
+        />
       </div>
     );
   }
