@@ -60,6 +60,52 @@ export default function AdvertentieMateriaalPage() {
     }
   };
 
+  // Check database status
+  const checkDatabaseStatus = async () => {
+    try {
+      const response = await fetch('/api/admin/check-videos-table');
+      const result = await response.json();
+      
+      if (!result.success) {
+        console.error('❌ Database check failed:', result);
+        
+        // If table doesn't exist, try to set it up
+        if (result.needsSetup) {
+          console.log('🔧 Attempting to set up videos table...');
+          try {
+            const setupResponse = await fetch('/api/admin/setup-videos-table', {
+              method: 'POST'
+            });
+            const setupResult = await setupResponse.json();
+            
+            if (setupResult.success) {
+              console.log('✅ Videos table setup successful');
+              return true;
+            } else {
+              console.error('❌ Videos table setup failed:', setupResult);
+              setError(`Database setup mislukt: ${setupResult.error}. Voer handmatig de SQL uit in Supabase.`);
+              return false;
+            }
+          } catch (setupErr) {
+            console.error('❌ Error during setup:', setupErr);
+            setError('Database setup mislukt. Voer handmatig de SQL uit in Supabase Dashboard.');
+            return false;
+          }
+        } else {
+          setError(`Database probleem: ${result.error}. Neem contact op met de beheerder.`);
+          return false;
+        }
+      }
+      
+      console.log('✅ Database status:', result);
+      return true;
+    } catch (err) {
+      console.error('❌ Error checking database:', err);
+      setError('Kan geen verbinding maken met de database');
+      return false;
+    }
+  };
+
   // Fetch videos from database
   const fetchVideos = async () => {
     console.log('🔍 Fetching videos from database...');
@@ -67,6 +113,13 @@ export default function AdvertentieMateriaalPage() {
     setError(null);
 
     try {
+      // First check if database is accessible
+      const dbOk = await checkDatabaseStatus();
+      if (!dbOk) {
+        setLoading(false);
+        return;
+      }
+
       const videosData = await VideosService.getVideos();
       console.log('✅ Fetched videos:', videosData.length);
       
@@ -92,7 +145,7 @@ export default function AdvertentieMateriaalPage() {
       setVideos(updatedVideos);
     } catch (err) {
       console.error('❌ Error fetching videos:', err);
-      setError('Fout bij het ophalen van video\'s');
+      setError('Fout bij het ophalen van video\'s. Probeer de pagina te verversen.');
     } finally {
       setLoading(false);
     }
@@ -217,9 +270,17 @@ export default function AdvertentieMateriaalPage() {
     setEditingName('');
   };
 
-  // Get video URL
+  // Get video URL with fallback
   const getVideoUrl = (video: VideoFile): string => {
-    return VideosService.getVideoUrl(video);
+    try {
+      const url = VideosService.getVideoUrl(video);
+      console.log(`🎬 Video URL for ${video.name}:`, url);
+      return url;
+    } catch (error) {
+      console.error(`❌ Error getting video URL for ${video.name}:`, error);
+      // Fallback to a placeholder or error video
+      return '/videos/advertenties/placeholder.mp4';
+    }
   };
 
   if (loading) {
@@ -315,8 +376,9 @@ export default function AdvertentieMateriaalPage() {
                 data-video-id={video.id}
                 src={getVideoUrl(video)}
                 className="w-full h-full object-cover"
-                preload="auto"
+                preload="metadata"
                 controls
+                crossOrigin="anonymous"
                 onLoadedMetadata={(e) => {
                   console.log('🎬 Video metadata loaded:', video.name);
                 }}
@@ -328,6 +390,20 @@ export default function AdvertentieMateriaalPage() {
                 }}
                 onError={(e) => {
                   console.error('❌ Video error:', video.name, e);
+                  // Show error message in video container
+                  const videoElement = e.target as HTMLVideoElement;
+                  const container = videoElement.parentElement;
+                  if (container) {
+                    container.innerHTML = `
+                      <div class="flex items-center justify-center h-full text-red-400 text-sm">
+                        <div class="text-center">
+                          <div class="mb-2">⚠️</div>
+                          <div>Video niet beschikbaar</div>
+                          <div class="text-xs text-gray-500 mt-1">${video.name}</div>
+                        </div>
+                      </div>
+                    `;
+                  }
                 }}
               />
             </div>
