@@ -14,8 +14,8 @@ export async function GET(request: NextRequest) {
       tableExists: false,
       tableStructure: null,
       sampleData: null,
-      errors: [],
-      recommendations: []
+      errors: [] as string[],
+      recommendations: [] as string[]
     };
 
     // 1. Check if table exists
