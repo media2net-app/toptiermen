@@ -287,6 +287,78 @@ export default function AdvertentieMateriaalPage() {
     }
   };
 
+  // Test bucket access and upload functionality
+  const testBucketAccess = async () => {
+    console.log('🧪 Testing bucket access and functionality...');
+    
+    // Test 1: Check if bucket exists
+    console.log('🔍 Step 1: Checking if advertenties bucket exists...');
+    const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
+    
+    if (bucketsError) {
+      console.error('❌ Error listing buckets:', bucketsError);
+      return;
+    }
+    
+    console.log('📦 Available buckets:', buckets?.map(b => b.id) || []);
+    const advertentiesBucket = buckets?.find(b => b.id === 'advertenties');
+    console.log('🎯 Advertenties bucket found:', !!advertentiesBucket);
+    
+    // Test 2: Try to list files in bucket
+    console.log('🔍 Step 2: Listing files in advertenties bucket...');
+    const { data: files, error: filesError } = await supabase.storage
+      .from('advertenties')
+      .list('', { limit: 100 });
+    
+    if (filesError) {
+      console.error('❌ Error listing files:', filesError);
+      return;
+    }
+    
+    console.log('📁 Files in advertenties bucket:', files?.map(f => f.name) || []);
+    console.log('📊 Total files found:', files?.length || 0);
+    
+    // Test 3: Try to upload a test file
+    console.log('🔍 Step 3: Testing upload functionality...');
+    try {
+      const testContent = 'This is a test file for bucket access verification';
+      const testBlob = new Blob([testContent], { type: 'text/plain' });
+      const testFileName = `test-access-${Date.now()}.txt`;
+      
+      console.log('📤 Attempting test upload...');
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('advertenties')
+        .upload(testFileName, testBlob, {
+          cacheControl: '3600',
+          upsert: false
+        });
+      
+      if (uploadError) {
+        console.error('❌ Test upload failed:', uploadError);
+        setError(`Upload test failed: ${uploadError.message}`);
+      } else {
+        console.log('✅ Test upload successful:', uploadData);
+        
+        // Clean up test file
+        console.log('🧹 Cleaning up test file...');
+        const { error: deleteError } = await supabase.storage
+          .from('advertenties')
+          .remove([testFileName]);
+        
+        if (deleteError) {
+          console.log('⚠️ Could not clean up test file:', deleteError.message);
+        } else {
+          console.log('✅ Test file cleaned up successfully');
+        }
+        
+        console.log('🎉 Bucket access test completed successfully!');
+      }
+    } catch (error) {
+      console.error('❌ Test upload error:', error);
+      setError(`Test upload error: ${error}`);
+    }
+  };
+
   // Test video URL functionality
   const testVideoUrls = async () => {
     console.log('🧪 Testing video URLs...');
@@ -568,8 +640,9 @@ export default function AdvertentieMateriaalPage() {
   useEffect(() => {
     if (user && !authLoading) {
       fetchVideos();
-      // Test video URLs after fetching videos
+      // Test bucket access and video URLs after fetching videos
       setTimeout(() => {
+        testBucketAccess();
         testVideoUrls();
       }, 2000);
     }
@@ -688,6 +761,25 @@ export default function AdvertentieMateriaalPage() {
           <div className="w-16 h-16 text-gray-600 mx-auto mb-4">📹</div>
           <h3 className="text-lg font-medium text-white mb-2">Geen video's gevonden</h3>
           <p className="text-gray-400 mb-4">Upload je eerste video om te beginnen</p>
+          
+          {/* Debug buttons */}
+          <div className="flex justify-center gap-4 mt-6">
+            <button
+              onClick={testBucketAccess}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Test Bucket Access
+            </button>
+            <button
+              onClick={() => {
+                console.log('🔄 Refreshing videos...');
+                fetchVideos();
+              }}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            >
+              Refresh Videos
+            </button>
+          </div>
         </div>
       )}
 
