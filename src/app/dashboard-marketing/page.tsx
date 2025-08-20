@@ -42,9 +42,10 @@ export default function MarketingDashboard() {
   const [campaignsCount, setCampaignsCount] = useState<number>(0);
   const [totalSpend, setTotalSpend] = useState<number>(0);
 
+  // Temporarily disable authentication check for testing
   // Check authentication and Facebook connection on component mount
   useEffect(() => {
-    console.log('🔍 Marketing Dashboard useEffect triggered:', { 
+    console.log('🔍 Marketing Dashboard useEffect triggered (no auth check):', { 
       loading, 
       user: user?.email, 
       isAuthenticated: !!user,
@@ -68,25 +69,25 @@ export default function MarketingDashboard() {
       setIsLoading(false);
       return;
     }
-    
-    // Only run once when auth context is loaded and user is available
-    if (loading) {
-      console.log('🔍 Waiting for auth context to load...');
-      return;
-    }
 
-    if (!user) {
-      console.log('🔍 No user found, checking if this is a temporary state...');
+    // Temporarily skip authentication check
+    // if (loading) {
+    //   console.log('🔍 Waiting for auth context to load...');
+    //   return;
+    // }
+
+    // if (!user) {
+    //   console.log('🔍 No user found, checking if this is a temporary state...');
       
-      // Add a longer delay to prevent immediate redirect and allow auth to stabilize
-      setTimeout(() => {
-        console.log('🔍 Re-checking user after delay');
-        // The user state will be checked by the useEffect dependency array
-      }, 2000); // 2 second delay
-      return;
-    }
+    //   // Add a longer delay to prevent immediate redirect and allow auth to stabilize
+    //   setTimeout(() => {
+    //     console.log('🔍 Re-checking user after delay');
+    //     // The user state will be checked by the useEffect dependency array
+    //   }, 2000); // 2 second delay
+    //   return;
+    // }
 
-    console.log('🔍 User authenticated:', user.email);
+    console.log('🔍 Starting Facebook connection check (no auth required)...');
     
     // Set Facebook as connected immediately and load cards
     console.log('🔍 Setting Facebook as connected and loading cards...');
@@ -95,7 +96,7 @@ export default function MarketingDashboard() {
     
     // Start Facebook check in background
     checkFacebookConnection();
-  }, [loading, user, router]);
+  }, []); // Removed loading, user, router dependencies
 
   // Separate function for Facebook connection check (runs in background)
   const checkFacebookConnection = async () => {
@@ -402,24 +403,26 @@ export default function MarketingDashboard() {
           </div>
           
           {/* User Info and Logout */}
-          {user && (
-            <div className="bg-[#1E293B] rounded-lg p-4 border border-[#334155] min-w-[250px]">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center space-x-2">
-                  <UserIcon className="w-5 h-5 text-blue-400" />
-                  <span className="text-white font-medium">Ingelogd als</span>
-                </div>
+          <div className="bg-[#1E293B] rounded-lg p-4 border border-[#334155] min-w-[250px]">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center space-x-2">
+                <UserIcon className="w-5 h-5 text-blue-400" />
+                <span className="text-white font-medium">Test Mode</span>
+              </div>
+              {user && (
                 <button
                   onClick={signOut}
                   className="text-red-400 hover:text-red-300 text-sm underline"
                 >
                   Uitloggen
                 </button>
-              </div>
-              <p className="text-gray-300 text-sm">{user.email}</p>
-              <p className="text-gray-400 text-xs">Gebruiker ID: {user.id}</p>
+              )}
             </div>
-          )}
+            <p className="text-gray-300 text-sm">{user ? user.email : 'Geen authenticatie vereist'}</p>
+            <p className="text-gray-400 text-xs">
+              {user ? `Gebruiker ID: ${user.id}` : 'Facebook integratie test'}
+            </p>
+          </div>
         </div>
 
         {/* Connection Details */}
