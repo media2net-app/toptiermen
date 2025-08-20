@@ -76,11 +76,16 @@ export default function MarketingDashboard() {
     }
 
     if (!user) {
-      console.log('🔍 No user found, redirecting to login');
-      // Add a small delay to prevent immediate redirect
+      console.log('🔍 No user found, checking if this is a temporary state...');
+      
+      // Add a longer delay to prevent immediate redirect and allow auth to stabilize
       setTimeout(() => {
-        router.push('/login?redirect=/dashboard-marketing');
-      }, 100);
+        console.log('🔍 Re-checking user after delay:', { user: user?.email || 'null', loading });
+        if (!user && !loading) {
+          console.log('🔍 Still no user, redirecting to login');
+          router.push('/login?redirect=/dashboard-marketing');
+        }
+      }, 2000); // 2 second delay
       return;
     }
 
