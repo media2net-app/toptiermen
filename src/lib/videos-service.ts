@@ -128,14 +128,9 @@ export class VideosService {
   static async getVideoById(id: string): Promise<VideoFile | null> {
     try {
       // Get public URL for the specific file
-      const { data: urlData, error } = supabase.storage
+      const { data: urlData } = supabase.storage
         .from('advertenties')
         .getPublicUrl(id);
-
-      if (error) {
-        console.error('❌ Error getting video URL:', error);
-        return null;
-      }
 
       // Get file metadata
       const { data: files, error: listError } = await supabase.storage
@@ -256,14 +251,9 @@ export class VideosService {
   // Get video URL
   static async getVideoUrl(filePath: string): Promise<string | null> {
     try {
-      const { data, error } = supabase.storage
+      const { data } = supabase.storage
         .from('advertenties')
         .getPublicUrl(filePath);
-
-      if (error) {
-        console.error('❌ Error getting video URL:', error);
-        return null;
-      }
 
       return data.publicUrl;
 

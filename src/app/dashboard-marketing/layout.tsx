@@ -204,14 +204,14 @@ export default function MarketingLayout({
   return (
     <div className="min-h-screen bg-[#0F1419]">
       {/* Top Navigation Bar */}
-      <div className="bg-black border-b border-gray-800 px-4 sm:px-6 py-4">
+      <div className="bg-black border-b border-gray-800 px-4 sm:px-6 py-3 sm:py-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4 flex-1">
+          <div className="flex items-center gap-3 sm:gap-4 flex-1">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 text-white"
+              className="lg:hidden p-2 text-white hover:bg-gray-800 rounded-lg transition-colors"
             >
-              <Bars3Icon className="w-6 h-6" />
+              <Bars3Icon className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
             <div className="flex items-center">
               <Image
@@ -219,17 +219,17 @@ export default function MarketingLayout({
                 alt="Media2Net Logo"
                 width={500}
                 height={40}
-                className="min-w-[500px] h-10"
+                className="w-32 sm:w-40 md:w-48 lg:min-w-[500px] h-6 sm:h-8 lg:h-10"
               />
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             <span className="hidden sm:inline text-white text-sm">
               {user?.email || 'Marketing'}
             </span>
             <Link 
               href="/dashboard" 
-              className="px-4 py-2 rounded-xl bg-[#3B82F6] text-white text-sm font-semibold border border-[#3B82F6] hover:bg-[#2563EB] transition"
+              className="px-3 sm:px-4 py-2 rounded-xl bg-[#3B82F6] text-white text-xs sm:text-sm font-semibold border border-[#3B82F6] hover:bg-[#2563EB] transition whitespace-nowrap"
             >
               Terug naar Dashboard
             </Link>
@@ -240,25 +240,27 @@ export default function MarketingLayout({
       <div className="flex">
         {/* Mobile/Tablet Menu Overlay */}
         {sidebarOpen && (
-          <div className="lg:hidden fixed inset-0 z-40 flex">
+          <div className="lg:hidden fixed inset-0 z-50 flex">
             <div className="fixed inset-0 bg-black/60" onClick={() => setSidebarOpen(false)}></div>
-            <div className="relative flex-1 flex flex-col max-w-sm w-full bg-black border-r border-gray-800 p-6">
-              <button
-                onClick={() => setSidebarOpen(false)}
-                className="absolute top-5 right-5 p-2 text-[#60A5FA]"
-              >
-                <XMarkIcon className="w-6 h-6" />
-              </button>
-              <div className="flex-1">
-                <h2 className="text-lg font-semibold text-white mb-6">Marketing Menu</h2>
-                <nav className="space-y-2">
+            <div className="relative flex-1 flex flex-col max-w-xs sm:max-w-sm w-full bg-black border-r border-gray-800">
+              <div className="flex items-center justify-between p-4 border-b border-gray-800">
+                <h2 className="text-lg font-semibold text-white">Marketing Menu</h2>
+                <button
+                  onClick={() => setSidebarOpen(false)}
+                  className="p-2 text-[#60A5FA] hover:bg-gray-800 rounded-lg transition-colors"
+                >
+                  <XMarkIcon className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4">
+                <nav className="space-y-1">
                   {navigation.map((item) => {
                     const isActive = pathname === item.href;
                     return (
                       <Link
                         key={item.name}
                         href={item.href}
-                        className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        className={`flex items-center justify-between px-3 py-3 rounded-lg text-sm font-medium transition-colors ${
                           isActive
                             ? 'bg-[#3B82F6] text-white border border-[#3B82F6]'
                             : 'text-gray-300 hover:bg-gray-800 hover:text-white'
@@ -267,10 +269,10 @@ export default function MarketingLayout({
                       >
                         <div className="flex items-center space-x-3">
                           <item.icon className="w-5 h-5" />
-                          <span>{item.name}</span>
+                          <span className="truncate">{item.name}</span>
                         </div>
                         {item.badge && (
-                          <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold">
+                          <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold flex-shrink-0">
                             {item.badge}
                           </span>
                         )}
@@ -280,16 +282,16 @@ export default function MarketingLayout({
                 </nav>
                 
                 {/* Ontwikkeling Menu */}
-                <div className="mt-8 pt-6 border-t border-gray-700">
+                <div className="mt-6 pt-6 border-t border-gray-700">
                   <h2 className="text-lg font-semibold text-white mb-4">Ontwikkeling</h2>
-                  <nav className="space-y-2">
+                  <nav className="space-y-1">
                     {developmentNavigation.map((item) => {
                       const isActive = pathname === item.href;
                       return (
                         <Link
                           key={item.name}
                           href={item.href}
-                          className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          className={`flex items-center space-x-3 px-3 py-3 rounded-lg text-sm font-medium transition-colors ${
                             isActive
                               ? 'bg-[#3B82F6] text-white border border-[#3B82F6]'
                               : 'text-gray-300 hover:bg-gray-800 hover:text-white'
@@ -297,7 +299,7 @@ export default function MarketingLayout({
                           onClick={() => setSidebarOpen(false)}
                         >
                           <item.icon className="w-5 h-5" />
-                          <span>{item.name}</span>
+                          <span className="truncate">{item.name}</span>
                         </Link>
                       );
                     })}
@@ -309,17 +311,17 @@ export default function MarketingLayout({
         )}
         
         {/* Desktop Sidebar */}
-        <aside className="hidden lg:block w-72 bg-black border-r border-gray-800 min-h-screen p-6">
-          <div className="flex flex-col h-full">
+        <aside className="hidden lg:block w-72 bg-black border-r border-gray-800 min-h-screen">
+          <div className="flex flex-col h-full p-6">
             <h2 className="text-lg font-semibold text-white mb-6">Marketing Menu</h2>
-            <nav className="space-y-2">
+            <nav className="space-y-1 flex-1">
               {navigation.map((item) => {
                 const isActive = pathname === item.href;
                 return (
                   <Link
                     key={item.name}
                     href={item.href}
-                    className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    className={`flex items-center justify-between px-3 py-3 rounded-lg text-sm font-medium transition-colors ${
                       isActive
                         ? 'bg-[#3B82F6] text-white border border-[#3B82F6]'
                         : 'text-gray-300 hover:bg-gray-800 hover:text-white'
@@ -327,10 +329,10 @@ export default function MarketingLayout({
                   >
                     <div className="flex items-center space-x-3">
                       <item.icon className="w-5 h-5" />
-                      <span>{item.name}</span>
+                      <span className="truncate">{item.name}</span>
                     </div>
                     {item.badge && (
-                      <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold">
+                      <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold flex-shrink-0">
                         {item.badge}
                       </span>
                     )}
@@ -340,23 +342,23 @@ export default function MarketingLayout({
             </nav>
             
             {/* Ontwikkeling Menu */}
-            <div className="mt-8 pt-6 border-t border-gray-700">
+            <div className="mt-6 pt-6 border-t border-gray-700">
               <h2 className="text-lg font-semibold text-white mb-4">Ontwikkeling</h2>
-              <nav className="space-y-2">
+              <nav className="space-y-1">
                 {developmentNavigation.map((item) => {
                   const isActive = pathname === item.href;
                   return (
                     <Link
                       key={item.name}
                       href={item.href}
-                      className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      className={`flex items-center space-x-3 px-3 py-3 rounded-lg text-sm font-medium transition-colors ${
                         isActive
                           ? 'bg-[#3B82F6] text-white border border-[#3B82F6]'
                           : 'text-gray-300 hover:bg-gray-800 hover:text-white'
                       }`}
                     >
                       <item.icon className="w-5 h-5" />
-                      <span>{item.name}</span>
+                      <span className="truncate">{item.name}</span>
                     </Link>
                   );
                 })}
@@ -364,10 +366,10 @@ export default function MarketingLayout({
             </div>
             
             {/* Footer */}
-            <div className="mt-auto pt-6 border-t border-gray-700">
+            <div className="mt-6 pt-6 border-t border-gray-700">
               <Link
                 href="/dashboard"
-                className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+                className="flex items-center space-x-3 px-3 py-3 rounded-lg text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
               >
                 <ArrowLeftOnRectangleIcon className="w-5 h-5" />
                 <span>Terug naar Dashboard</span>
@@ -377,7 +379,7 @@ export default function MarketingLayout({
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-4 md:p-6 lg:p-12 overflow-x-auto bg-[#0F1419]">
+        <main className="flex-1 p-3 sm:p-4 md:p-6 lg:p-8 xl:p-12 overflow-x-auto bg-[#0F1419]">
           <CampaignsProvider>
             {children}
           </CampaignsProvider>

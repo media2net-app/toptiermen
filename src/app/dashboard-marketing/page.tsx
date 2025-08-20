@@ -390,35 +390,35 @@ export default function MarketingDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0F1419] p-6">
+    <div className="min-h-screen bg-[#0F1419] p-3 sm:p-4 md:p-6">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-8 flex justify-between items-start">
+        <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Marketing Dashboard</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Marketing Dashboard</h1>
             <div className="flex items-center space-x-2 text-green-400">
-              <CheckCircleIcon className="w-5 h-5" />
-              <span>Facebook is verbonden!</span>
+              <CheckCircleIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="text-sm sm:text-base">Facebook is verbonden!</span>
             </div>
           </div>
           
           {/* User Info and Logout */}
-          <div className="bg-[#1E293B] rounded-lg p-4 border border-[#334155] min-w-[250px]">
+          <div className="bg-[#1E293B] rounded-lg p-3 sm:p-4 border border-[#334155] w-full sm:min-w-[250px] sm:w-auto">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center space-x-2">
-                <UserIcon className="w-5 h-5 text-blue-400" />
-                <span className="text-white font-medium">Test Mode</span>
+                <UserIcon className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
+                <span className="text-white font-medium text-sm sm:text-base">Test Mode</span>
               </div>
               {user && (
                 <button
                   onClick={signOut}
-                  className="text-red-400 hover:text-red-300 text-sm underline"
+                  className="text-red-400 hover:text-red-300 text-xs sm:text-sm underline"
                 >
                   Uitloggen
                 </button>
               )}
             </div>
-            <p className="text-gray-300 text-sm">{user ? user.email : 'Geen authenticatie vereist'}</p>
+            <p className="text-gray-300 text-xs sm:text-sm">{user ? user.email : 'Geen authenticatie vereist'}</p>
             <p className="text-gray-400 text-xs">
               {user ? `Gebruiker ID: ${user.id}` : 'Facebook integratie test'}
             </p>
@@ -426,117 +426,117 @@ export default function MarketingDashboard() {
         </div>
 
         {/* Connection Details */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
           {/* User Info */}
-          <div className="bg-[#1E293B] rounded-lg p-6 border border-[#334155]">
-            <div className="flex items-center space-x-3 mb-4">
-              <UserIcon className="w-6 h-6 text-blue-400" />
-              <h3 className="text-lg font-semibold text-white">Gebruiker</h3>
+          <div className="bg-[#1E293B] rounded-lg p-4 sm:p-6 border border-[#334155]">
+            <div className="flex items-center space-x-3 mb-3 sm:mb-4">
+              <UserIcon className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" />
+              <h3 className="text-base sm:text-lg font-semibold text-white">Gebruiker</h3>
             </div>
             {userInfo ? (
               <div className="space-y-2">
-                <p className="text-gray-300 text-sm">Naam: <span className="text-white">{userInfo.name}</span></p>
-                <p className="text-gray-300 text-sm">Email: <span className="text-white">{userInfo.email}</span></p>
-                <p className="text-gray-300 text-sm">ID: <span className="text-white font-mono text-xs">{userInfo.id}</span></p>
+                <p className="text-gray-300 text-xs sm:text-sm">Naam: <span className="text-white">{userInfo.name}</span></p>
+                <p className="text-gray-300 text-xs sm:text-sm">Email: <span className="text-white">{userInfo.email}</span></p>
+                <p className="text-gray-300 text-xs sm:text-sm">ID: <span className="text-white font-mono text-xs">{userInfo.id}</span></p>
               </div>
             ) : (
               <div className="space-y-2">
-                <p className="text-gray-400 text-sm">Data laden...</p>
-                <p className="text-gray-300 text-sm">Email: <span className="text-white">{user?.email}</span></p>
+                <p className="text-gray-400 text-xs sm:text-sm">Data laden...</p>
+                <p className="text-gray-300 text-xs sm:text-sm">Email: <span className="text-white">{user?.email}</span></p>
               </div>
             )}
           </div>
 
           {/* Ad Account Info */}
-          <div className="bg-[#1E293B] rounded-lg p-6 border border-[#334155]">
-            <div className="flex items-center space-x-3 mb-4">
-              <BuildingOfficeIcon className="w-6 h-6 text-purple-400" />
-              <h3 className="text-lg font-semibold text-white">Ad Account</h3>
+          <div className="bg-[#1E293B] rounded-lg p-4 sm:p-6 border border-[#334155]">
+            <div className="flex items-center space-x-3 mb-3 sm:mb-4">
+              <BuildingOfficeIcon className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400" />
+              <h3 className="text-base sm:text-lg font-semibold text-white">Ad Account</h3>
             </div>
             {adAccountInfo ? (
               <div className="space-y-2">
-                <p className="text-gray-300 text-sm">Naam: <span className="text-white">{adAccountInfo.name}</span></p>
-                <p className="text-gray-300 text-sm">Status: <span className="text-green-400">Actief</span></p>
-                <p className="text-gray-300 text-sm">Valuta: <span className="text-white">{adAccountInfo.currency}</span></p>
-                <p className="text-gray-300 text-sm">ID: <span className="text-white font-mono text-xs">{adAccountInfo.id}</span></p>
+                <p className="text-gray-300 text-xs sm:text-sm">Naam: <span className="text-white">{adAccountInfo.name}</span></p>
+                <p className="text-gray-300 text-xs sm:text-sm">Status: <span className="text-green-400">Actief</span></p>
+                <p className="text-gray-300 text-xs sm:text-sm">Valuta: <span className="text-white">{adAccountInfo.currency}</span></p>
+                <p className="text-gray-300 text-xs sm:text-sm">ID: <span className="text-white font-mono text-xs">{adAccountInfo.id}</span></p>
               </div>
             ) : (
               <div className="space-y-2">
-                <p className="text-gray-400 text-sm">Data laden...</p>
+                <p className="text-gray-400 text-xs sm:text-sm">Data laden...</p>
               </div>
             )}
           </div>
 
           {/* Campaigns */}
-          <div className="bg-[#1E293B] rounded-lg p-6 border border-[#334155]">
-            <div className="flex items-center space-x-3 mb-4">
-              <ChartBarIcon className="w-6 h-6 text-green-400" />
-              <h3 className="text-lg font-semibold text-white">Campagnes</h3>
+          <div className="bg-[#1E293B] rounded-lg p-4 sm:p-6 border border-[#334155]">
+            <div className="flex items-center space-x-3 mb-3 sm:mb-4">
+              <ChartBarIcon className="w-5 h-5 sm:w-6 sm:h-6 text-green-400" />
+              <h3 className="text-base sm:text-lg font-semibold text-white">Campagnes</h3>
             </div>
             <div className="space-y-2">
-              <p className="text-gray-300 text-sm">Aantal: <span className="text-white text-xl font-bold">{campaignsCount > 0 ? campaignsCount : 'Data laden...'}</span></p>
-              <p className="text-gray-300 text-sm">Periode: <span className="text-white">30 dagen</span></p>
+              <p className="text-gray-300 text-xs sm:text-sm">Aantal: <span className="text-white text-lg sm:text-xl font-bold">{campaignsCount > 0 ? campaignsCount : 'Data laden...'}</span></p>
+              <p className="text-gray-300 text-xs sm:text-sm">Periode: <span className="text-white">30 dagen</span></p>
             </div>
           </div>
 
           {/* Total Spend */}
-          <div className="bg-[#1E293B] rounded-lg p-6 border border-[#334155]">
-            <div className="flex items-center space-x-3 mb-4">
-              <CurrencyEuroIcon className="w-6 h-6 text-yellow-400" />
-              <h3 className="text-lg font-semibold text-white">Totaal Uitgegeven</h3>
+          <div className="bg-[#1E293B] rounded-lg p-4 sm:p-6 border border-[#334155]">
+            <div className="flex items-center space-x-3 mb-3 sm:mb-4">
+              <CurrencyEuroIcon className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400" />
+              <h3 className="text-base sm:text-lg font-semibold text-white">Totaal Uitgegeven</h3>
             </div>
             <div className="space-y-2">
-              <p className="text-gray-300 text-sm">Bedrag: <span className="text-white text-xl font-bold">{totalSpend > 0 ? `€${totalSpend.toFixed(2)}` : 'Data laden...'}</span></p>
-              <p className="text-gray-300 text-sm">Periode: <span className="text-white">30 dagen</span></p>
+              <p className="text-gray-300 text-xs sm:text-sm">Bedrag: <span className="text-white text-lg sm:text-xl font-bold">{totalSpend > 0 ? `€${totalSpend.toFixed(2)}` : 'Data laden...'}</span></p>
+              <p className="text-gray-300 text-xs sm:text-sm">Periode: <span className="text-white">30 dagen</span></p>
             </div>
           </div>
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-[#1E293B] rounded-lg p-6 border border-[#334155] mb-8">
-          <h3 className="text-lg font-semibold text-white mb-4">Snelle Acties</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-[#1E293B] rounded-lg p-4 sm:p-6 border border-[#334155] mb-6 sm:mb-8">
+          <h3 className="text-base sm:text-lg font-semibold text-white mb-4">Snelle Acties</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <button
               onClick={handleOpenFacebookModal}
-              className="bg-[#3B82F6] hover:bg-[#2563EB] text-white px-4 py-3 rounded-lg transition-colors flex items-center space-x-2"
+              className="bg-[#3B82F6] hover:bg-[#2563EB] text-white px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition-colors flex items-center space-x-2 text-sm"
             >
-              <InformationCircleIcon className="w-5 h-5" />
-              <span>Facebook Instellingen</span>
+              <InformationCircleIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="truncate">Facebook Instellingen</span>
             </button>
             
             <button
               onClick={() => window.open('/test-facebook-marketing', '_blank')}
-              className="bg-[#10B981] hover:bg-[#059669] text-white px-4 py-3 rounded-lg transition-colors flex items-center space-x-2"
+              className="bg-[#10B981] hover:bg-[#059669] text-white px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition-colors flex items-center space-x-2 text-sm"
             >
-              <ChartBarIcon className="w-5 h-5" />
-              <span>Test Marketing API</span>
+              <ChartBarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="truncate">Test Marketing API</span>
             </button>
             
             <button
               onClick={() => window.open('/dashboard-marketing/facebook-setup', '_blank')}
-              className="bg-[#8B5CF6] hover:bg-[#7C3AED] text-white px-4 py-3 rounded-lg transition-colors flex items-center space-x-2"
+              className="bg-[#8B5CF6] hover:bg-[#7C3AED] text-white px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition-colors flex items-center space-x-2 text-sm"
             >
-              <CogIcon className="w-5 h-5" />
-              <span>Facebook Setup</span>
+              <CogIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="truncate">Facebook Setup</span>
             </button>
 
             <button
               onClick={testConfiguration}
-              className="bg-[#F59E0B] hover:bg-[#D97706] text-white px-4 py-3 rounded-lg transition-colors flex items-center space-x-2"
+              className="bg-[#F59E0B] hover:bg-[#D97706] text-white px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition-colors flex items-center space-x-2 text-sm"
             >
-              <CogIcon className="w-5 h-5" />
-              <span>Test Configuratie</span>
+              <CogIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="truncate">Test Configuratie</span>
             </button>
           </div>
         </div>
 
         {/* Connection Status */}
-        <div className="bg-green-900/20 border border-green-500/50 rounded-lg p-6">
+        <div className="bg-green-900/20 border border-green-500/50 rounded-lg p-4 sm:p-6">
           <div className="flex items-center space-x-3">
-            <CheckCircleIcon className="w-6 h-6 text-green-400" />
+            <CheckCircleIcon className="w-5 h-5 sm:w-6 sm:h-6 text-green-400 flex-shrink-0" />
             <div>
-              <h3 className="text-green-400 font-semibold">Facebook Verbinding Status</h3>
-              <p className="text-green-300 text-sm">
+              <h3 className="text-green-400 font-semibold text-sm sm:text-base">Facebook Verbinding Status</h3>
+              <p className="text-green-300 text-xs sm:text-sm">
                 Alle Facebook Marketing API permissions zijn actief en het dashboard is klaar voor gebruik.
               </p>
             </div>
