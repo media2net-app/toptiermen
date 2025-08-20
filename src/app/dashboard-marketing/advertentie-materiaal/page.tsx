@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 import { 
   VideoCameraIcon,
   PlayIcon,
@@ -16,11 +16,6 @@ import {
   CheckCircleIcon,
   ClockIcon
 } from '@heroicons/react/24/outline';
-
-// Initialize Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 interface VideoFile {
   id: string;
@@ -81,8 +76,22 @@ export default function AdvertentieMateriaalPage() {
       setError(null);
 
       console.log('🔍 Fetching videos for user:', user?.email);
-      console.log('🔍 Supabase URL:', supabaseUrl);
-      console.log('🔍 Supabase Key (first 20 chars):', supabaseAnonKey.substring(0, 20) + '...');
+      console.log('🔍 Using shared Supabase client from lib/supabase');
+      
+      // Test Supabase client
+      if (!supabase) {
+        console.error('❌ Supabase client is not available');
+        setError('Supabase client is niet beschikbaar');
+        return;
+      }
+      
+      if (!supabase.storage) {
+        console.error('❌ Supabase storage is not available');
+        setError('Supabase storage is niet beschikbaar');
+        return;
+      }
+      
+      console.log('✅ Supabase client and storage are available');
 
       // First, let's check if the bucket exists
       console.log('🔍 Checking if advertenties bucket exists...');
@@ -394,8 +403,8 @@ export default function AdvertentieMateriaalPage() {
             <div>Loading: {loading ? 'Ja' : 'Nee'}</div>
             <div>Videos gevonden: {videos.length}</div>
             <div>Bucket naam: {bucketName}</div>
-            <div>Supabase URL: {supabaseUrl ? 'Geconfigureerd' : 'Ontbreekt'}</div>
-            <div>Supabase Key: {supabaseAnonKey ? 'Geconfigureerd' : 'Ontbreekt'}</div>
+            <div>Supabase Client: {supabase ? 'Geladen' : 'Ontbreekt'}</div>
+            <div>Storage API: {supabase?.storage ? 'Beschikbaar' : 'Ontbreekt'}</div>
           </div>
         </div>
       )}
