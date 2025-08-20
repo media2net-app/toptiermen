@@ -18,7 +18,7 @@ export const vercelCDN: CDNConfig = {
   transformUrl: (url: string) => {
     // Vercel automatically serves Supabase files through their edge network
     // Add optimization parameters for better performance
-    if (url.includes('workout-videos')) {
+    if (url.includes('workout-videos') || url.includes('advertenties')) {
       const separator = url.includes('?') ? '&' : '?';
       return `${url}${separator}optimize=medium&format=auto`;
     }

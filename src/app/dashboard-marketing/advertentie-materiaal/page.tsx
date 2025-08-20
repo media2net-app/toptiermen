@@ -495,11 +495,34 @@ export default function AdvertentieMateriaalPage() {
       
       console.log('✅ Got Supabase URL:', data.publicUrl);
       
-      // For now, use direct Supabase URL to avoid CDN issues
-      return data.publicUrl;
+      // Apply CDN optimization for better performance
+      const cdnUrl = getCDNVideoUrl(data.publicUrl);
+      console.log('✅ Got CDN URL:', cdnUrl);
+      return cdnUrl;
       
     } catch (error) {
       console.error('❌ Error getting video URL:', error);
+      return '';
+    }
+  };
+
+  // Get video thumbnail URL for preview
+  const getVideoThumbnailUrl = (fileName: string) => {
+    try {
+      const { data } = supabase.storage
+        .from('advertenties')
+        .getPublicUrl(fileName);
+      
+      if (!data?.publicUrl) {
+        return '';
+      }
+      
+      // Add thumbnail parameters for faster loading
+      const separator = data.publicUrl.includes('?') ? '&' : '?';
+      return `${data.publicUrl}${separator}thumb=1&width=400&height=500&quality=80`;
+      
+    } catch (error) {
+      console.error('❌ Error getting thumbnail URL:', error);
       return '';
     }
   };
@@ -695,6 +718,7 @@ export default function AdvertentieMateriaalPage() {
                   <video
                     className="w-full h-full object-cover rounded-t-lg"
                     src={getVideoUrl(video.name)}
+                    poster={getVideoThumbnailUrl(video.name)}
                     preload="metadata"
                     muted
                     playsInline
