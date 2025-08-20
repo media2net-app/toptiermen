@@ -1,7 +1,7 @@
 require('dotenv').config({ path: '.env.local' });
 
 const facebookAppId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID;
-const accessToken = 'EAAPexHzdG7YBPLbclyRpgNovSwB84K9fxhw7c7VnxEj5AEYr4ySi7p0z517LuqozTYFOTCjpZB08S2VRIXzwB7NPcL506BVIPzIDqOytXw0VUJIIMvZBqfc01ATi6PvEyIW16ps9nRbX09yCdRW16p4zvHi5xLBbTM30dGASZBrBqF6ObxL0yVZCkgoxqZAySOukZD';
+const accessToken = 'EAAPexHzdG7YBPClZAArLJk5y6DxX8Kf0XUzYWQtS622FYOHVODKE5gWhhAjFYZBJPZAFiEXFM4r0heQdZBs691WrUCurjHr7uYqFFH83E7HVa5rHwycWZBrHcEnUzv5GxagADWAclxEZAEOtZApGY9tjMLy59UgQoeOgI3eHd9ZAzLlX70XZBeHgcsUhXgSEHoRY5wnAZD';
 
 async function testFacebookToken() {
   console.log('🔍 Testing Facebook Marketing API with Access Token...\n');
