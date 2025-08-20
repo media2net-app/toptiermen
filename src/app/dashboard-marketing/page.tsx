@@ -12,6 +12,7 @@ import {
   CurrencyEuroIcon
 } from '@heroicons/react/24/outline';
 import FacebookConnectionModal from '@/components/marketing/FacebookConnectionModal';
+import { createClient } from '@supabase/supabase-js';
 
 interface FacebookUserInfo {
   id: string;
@@ -36,13 +37,47 @@ export default function MarketingDashboard() {
   const [adAccountInfo, setAdAccountInfo] = useState<FacebookAdAccount | null>(null);
   const [campaignsCount, setCampaignsCount] = useState<number>(0);
   const [totalSpend, setTotalSpend] = useState<number>(0);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authUser, setAuthUser] = useState<any>(null);
 
-  // Check Facebook connection on component mount
+  // Check authentication and Facebook connection on component mount
   useEffect(() => {
-    const checkFacebookConnection = async () => {
+    const checkAuthenticationAndFacebook = async () => {
       try {
         setIsLoading(true);
         setError(null);
+
+        // Initialize Supabase client
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+        
+        if (!supabaseUrl || !supabaseKey) {
+          setError('Supabase configuratie ontbreekt');
+          setIsLoading(false);
+          return;
+        }
+
+        const supabase = createClient(supabaseUrl, supabaseKey);
+
+        // Check if user is authenticated
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error('Session error:', sessionError);
+          setError('Authenticatie fout');
+          setIsLoading(false);
+          return;
+        }
+
+        if (!session) {
+          console.log('🔍 No session found, redirecting to login');
+          window.location.href = '/login';
+          return;
+        }
+
+        console.log('🔍 User authenticated:', session.user.email);
+        setIsAuthenticated(true);
+        setAuthUser(session.user);
 
         // Wait for Facebook SDK to load with timeout
         let sdkLoaded = false;
@@ -65,11 +100,16 @@ export default function MarketingDashboard() {
           return;
         }
 
-        // Check login status
+        // Check Facebook login status
         window.FB.getLoginStatus((response: any) => {
           console.log('🔍 Facebook login status:', response);
           
           if (response.status === 'connected') {
+            // Store Facebook login status persistently
+            localStorage.setItem('facebook_login_status', 'connected');
+            localStorage.setItem('facebook_access_token', response.authResponse.accessToken);
+            localStorage.setItem('facebook_user_id', response.authResponse.userID);
+            
             const adAccountId = localStorage.getItem('facebook_ad_account_id');
             if (adAccountId) {
               console.log('🔍 Facebook connected with ad account:', adAccountId);
@@ -79,6 +119,8 @@ export default function MarketingDashboard() {
               window.FB.api('/me', { fields: 'id,name,email' }, (userResponse: any) => {
                 if (userResponse && !userResponse.error) {
                   setUserInfo(userResponse);
+                  // Store user info persistently
+                  localStorage.setItem('facebook_user_info', JSON.stringify(userResponse));
                 }
               });
 
@@ -93,18 +135,24 @@ export default function MarketingDashboard() {
             }
           } else {
             console.log('🔍 Facebook not connected, showing modal');
+            // Clear any stale Facebook data
+            localStorage.removeItem('facebook_login_status');
+            localStorage.removeItem('facebook_access_token');
+            localStorage.removeItem('facebook_user_id');
+            localStorage.removeItem('facebook_user_info');
             setShowFacebookModal(true);
           }
           setIsLoading(false);
         });
+
       } catch (error) {
-        console.error('🔍 Error checking Facebook connection:', error);
-        setError('Er is een fout opgetreden bij het controleren van de Facebook verbinding');
+        console.error('🔍 Error checking authentication and Facebook connection:', error);
+        setError('Er is een fout opgetreden bij het controleren van de verbinding');
         setIsLoading(false);
       }
     };
 
-    checkFacebookConnection();
+    checkAuthenticationAndFacebook();
   }, []);
 
   const fetchAdAccountInfo = async (adAccountId: string) => {
@@ -149,6 +197,10 @@ export default function MarketingDashboard() {
     console.log('🔍 Facebook connection success');
     setIsFacebookConnected(true);
     setShowFacebookModal(false);
+    
+    // Store connection status
+    localStorage.setItem('facebook_login_status', 'connected');
+    
     // Reload the page to fetch fresh data
     window.location.reload();
   };
@@ -167,7 +219,7 @@ export default function MarketingDashboard() {
           </div>
           <h1 className="text-2xl font-bold text-white mb-2">Marketing Dashboard Laden...</h1>
           <p className="text-gray-400 mb-6 max-w-md">
-            Facebook verbinding wordt gecontroleerd
+            Authenticatie en Facebook verbinding worden gecontroleerd
           </p>
         </div>
       </div>
@@ -230,12 +282,41 @@ export default function MarketingDashboard() {
     <div className="min-h-screen bg-[#0F1419] p-6">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Marketing Dashboard</h1>
-          <div className="flex items-center space-x-2 text-green-400">
-            <CheckCircleIcon className="w-5 h-5" />
-            <span>Facebook is verbonden!</span>
+        <div className="mb-8 flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold text-white mb-2">Marketing Dashboard</h1>
+            <div className="flex items-center space-x-2 text-green-400">
+              <CheckCircleIcon className="w-5 h-5" />
+              <span>Facebook is verbonden!</span>
+            </div>
           </div>
+          
+          {/* User Info and Logout */}
+          {authUser && (
+            <div className="bg-[#1E293B] rounded-lg p-4 border border-[#334155] min-w-[250px]">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center space-x-2">
+                  <UserIcon className="w-5 h-5 text-blue-400" />
+                  <span className="text-white font-medium">Ingelogd als</span>
+                </div>
+                <button
+                  onClick={async () => {
+                    const supabase = createClient(
+                      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+                      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+                    );
+                    await supabase.auth.signOut();
+                    window.location.href = '/login';
+                  }}
+                  className="text-red-400 hover:text-red-300 text-sm underline"
+                >
+                  Uitloggen
+                </button>
+              </div>
+              <p className="text-gray-300 text-sm">{authUser.email}</p>
+              <p className="text-gray-400 text-xs">Gebruiker ID: {authUser.id}</p>
+            </div>
+          )}
         </div>
 
         {/* Connection Details */}
