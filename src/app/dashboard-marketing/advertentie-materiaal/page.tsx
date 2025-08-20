@@ -462,8 +462,17 @@ export default function AdvertentieMateriaalPage() {
     // For existing videos, try to get a signed URL first
     if (fileName.includes('TTM_') || fileName.includes('Prelaunch')) {
       console.log('🔗 Getting signed URL for existing video:', fileName);
-      // Return a placeholder URL for now - in production this would be a signed URL
-      return `https://placeholder-video-url.com/${fileName}`;
+      // Try to get a real signed URL from Supabase
+      try {
+        const { data } = supabase.storage
+          .from('advertenties')
+          .getPublicUrl(fileName);
+        return data.publicUrl;
+      } catch (error) {
+        console.error('Error getting public URL:', error);
+        // Fallback to placeholder
+        return `https://placeholder-video-url.com/${fileName}`;
+      }
     }
     
     const { data } = supabase.storage
@@ -664,11 +673,52 @@ export default function AdvertentieMateriaalPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {videos.map((video) => (
             <div key={video.id} className="bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
-              {/* Video Thumbnail */}
-              <div className="relative aspect-video bg-gray-900 flex items-center justify-center cursor-pointer" onClick={() => setSelectedVideo(video)}>
-                <div className="w-12 h-12 text-white opacity-80">▶️</div>
-                <div className="absolute top-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
-                  {video.metadata?.mimetype || 'video/mp4'}
+              {/* Video Player - Vertical for Social Media */}
+              <div className="relative bg-gray-900 cursor-pointer group" onClick={() => setSelectedVideo(video)}>
+                {/* Vertical aspect ratio for social media videos (9:16) */}
+                <div className="aspect-[9/16] relative">
+                  <video
+                    className="w-full h-full object-cover rounded-t-lg"
+                    src={getVideoUrl(video.name)}
+                    preload="metadata"
+                    muted
+                    onLoadedMetadata={(e) => {
+                      // Video loaded successfully
+                    }}
+                    onError={(e) => {
+                      console.error('Video load error:', e);
+                      // Show fallback content
+                      const videoElement = e.target as HTMLVideoElement;
+                      const parent = videoElement.parentElement;
+                      if (parent) {
+                        parent.innerHTML = `
+                          <div class="w-full h-full flex items-center justify-center bg-gray-800 rounded-t-lg">
+                            <div class="text-center">
+                              <div class="w-12 h-12 text-gray-400 mb-2">📹</div>
+                              <p class="text-gray-400 text-sm">Video niet beschikbaar</p>
+                            </div>
+                          </div>
+                        `;
+                      }
+                    }}
+                  />
+                  
+                  {/* Play overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 group-hover:bg-opacity-20 transition-all duration-200">
+                    <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center backdrop-blur-sm group-hover:bg-opacity-30 transition-all duration-200">
+                      <div className="w-8 h-8 text-white">▶️</div>
+                    </div>
+                  </div>
+                  
+                  {/* Video type badge */}
+                  <div className="absolute top-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">
+                    {video.metadata?.mimetype || 'video/mp4'}
+                  </div>
+                  
+                  {/* Duration badge (if available) */}
+                  <div className="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">
+                    Social Media
+                  </div>
                 </div>
               </div>
 
@@ -733,27 +783,85 @@ export default function AdvertentieMateriaalPage() {
         </div>
       )}
 
-      {/* Video Player Modal */}
+      {/* Video Player Modal - Optimized for Vertical Videos */}
       {selectedVideo && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
-            <div className="p-4 border-b border-gray-700 flex items-center justify-between">
-              <h3 className="text-white font-semibold">{selectedVideo.name}</h3>
+        <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 rounded-xl max-w-2xl w-full max-h-[95vh] overflow-hidden shadow-2xl">
+            {/* Header */}
+            <div className="p-4 border-b border-gray-700 flex items-center justify-between bg-gray-900">
+              <div className="flex-1">
+                <h3 className="text-white font-semibold truncate">{selectedVideo.name}</h3>
+                <p className="text-gray-400 text-sm">
+                  {formatFileSize(selectedVideo.metadata?.size || 0)} • {formatDate(selectedVideo.created_at)}
+                </p>
+              </div>
               <button
                 onClick={() => setSelectedVideo(null)}
-                className="text-gray-400 hover:text-white"
+                className="ml-4 p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
               >
                 <span className="sr-only">Sluiten</span>
-                ×
+                <div className="w-6 h-6 text-xl">×</div>
               </button>
             </div>
-            <div className="p-4">
-              <video
-                className="w-full h-auto max-h-[70vh]"
-                src={getVideoUrl(selectedVideo.name)}
-                controls
-                autoPlay
-              />
+            
+            {/* Video Player */}
+            <div className="p-4 bg-black">
+              <div className="flex justify-center">
+                <div className="max-w-sm w-full">
+                  {/* Vertical video container */}
+                  <div className="aspect-[9/16] relative bg-black rounded-lg overflow-hidden">
+                    <video
+                      className="w-full h-full object-contain"
+                      src={getVideoUrl(selectedVideo.name)}
+                      controls
+                      autoPlay
+                      playsInline
+                      onError={(e) => {
+                        console.error('Video playback error:', e);
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Footer with actions */}
+            <div className="p-4 border-t border-gray-700 bg-gray-900">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <button
+                    onClick={() => window.open(getVideoUrl(selectedVideo.name), '_blank')}
+                    className="flex items-center space-x-2 text-blue-400 hover:text-blue-300 transition-colors"
+                    title="Open in nieuw tabblad"
+                  >
+                    <div className="w-4 h-4">👁️</div>
+                    <span className="text-sm">Open</span>
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      const link = document.createElement('a');
+                      link.href = getVideoUrl(selectedVideo.name);
+                      link.download = selectedVideo.name;
+                      link.click();
+                    }}
+                    className="flex items-center space-x-2 text-green-400 hover:text-green-300 transition-colors"
+                    title="Download video"
+                  >
+                    <div className="w-4 h-4">⬇️</div>
+                    <span className="text-sm">Download</span>
+                  </button>
+                </div>
+                
+                <button
+                  onClick={() => deleteVideo(selectedVideo.name)}
+                  className="flex items-center space-x-2 text-red-400 hover:text-red-300 transition-colors"
+                  title="Verwijder video"
+                >
+                  <div className="w-4 h-4">🗑️</div>
+                  <span className="text-sm">Verwijder</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
