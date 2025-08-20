@@ -79,17 +79,9 @@ export async function POST(request: NextRequest) {
     console.log('🔍 Getting public URL for:', fileName);
 
     // Get public URL for specific file
-    const { data: urlData, error } = supabase.storage
+    const { data: urlData } = supabase.storage
       .from('advertenties')
       .getPublicUrl(fileName);
-
-    if (error) {
-      console.error('❌ Error getting public URL:', error);
-      return NextResponse.json(
-        { error: 'Failed to get public URL', details: error.message },
-        { status: 500 }
-      );
-    }
 
     return NextResponse.json({
       success: true,
