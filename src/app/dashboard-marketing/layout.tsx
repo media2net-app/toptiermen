@@ -94,6 +94,9 @@ export default function MarketingLayout({
         });
         
         window.FB.AppEvents.logPageView();
+        
+        // Check login status after SDK is loaded
+        checkFacebookLoginStatus();
       };
 
       (function(d, s, id) {
@@ -105,6 +108,57 @@ export default function MarketingLayout({
           fjs.parentNode.insertBefore(js, fjs);
         }
       }(document, 'script', 'facebook-jssdk'));
+    };
+
+    // Check Facebook login status
+    const checkFacebookLoginStatus = () => {
+      if (!window.FB) return;
+      
+      window.FB.getLoginStatus(function(response) {
+        console.log('Facebook login status:', response);
+        
+        if (response.status === 'connected') {
+          // User is logged into Facebook and has authorized the app
+          console.log('User is connected to Facebook');
+          console.log('Access Token:', response.authResponse.accessToken);
+          console.log('User ID:', response.authResponse.userID);
+          
+          // Store the access token and user ID
+          localStorage.setItem('facebook_access_token', response.authResponse.accessToken);
+          localStorage.setItem('facebook_user_id', response.authResponse.userID);
+          localStorage.setItem('facebook_login_status', 'connected');
+          
+          // You can now make API calls to Facebook
+          // For example, get user's ad accounts
+          getFacebookAdAccounts(response.authResponse.accessToken);
+          
+        } else if (response.status === 'not_authorized') {
+          // User is logged into Facebook but hasn't authorized the app
+          console.log('User is logged into Facebook but not authorized');
+          localStorage.setItem('facebook_login_status', 'not_authorized');
+          
+        } else {
+          // User is not logged into Facebook
+          console.log('User is not logged into Facebook');
+          localStorage.setItem('facebook_login_status', 'unknown');
+        }
+      });
+    };
+
+    // Get user's Facebook ad accounts
+    const getFacebookAdAccounts = (accessToken: string) => {
+      if (!window.FB) return;
+      
+      window.FB.api('/me/adaccounts', function(response) {
+        console.log('Ad accounts response:', response);
+        
+        if (response && response.data && response.data.length > 0) {
+          // Store the first ad account ID (you might want to let user choose)
+          const adAccountId = response.data[0].id;
+          localStorage.setItem('facebook_ad_account_id', adAccountId);
+          console.log('Stored ad account ID:', adAccountId);
+        }
+      });
     };
 
     loadFacebookSDK();

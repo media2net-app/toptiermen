@@ -13,6 +13,14 @@ import {
   CheckCircleIcon
 } from '@heroicons/react/24/outline';
 
+// Facebook SDK TypeScript declarations
+declare global {
+  interface Window {
+    FB: any;
+    fbAsyncInit: () => void;
+  }
+}
+
 interface FacebookConnectionModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -26,6 +34,7 @@ export default function FacebookConnectionModal({
 }: FacebookConnectionModalProps) {
   const [activeTab, setActiveTab] = useState('login');
   const [isConnected, setIsConnected] = useState(false);
+  const [loginStatus, setLoginStatus] = useState<string>('unknown');
 
   const tabs = [
     { id: 'login', name: 'Facebook Login', icon: CogIcon },
@@ -33,13 +42,35 @@ export default function FacebookConnectionModal({
     { id: 'permissions', name: 'Permissions', icon: BuildingOfficeIcon }
   ];
 
+  // Check Facebook login status
+  const checkFacebookLoginStatus = () => {
+    if (!window.FB) return;
+    
+    window.FB.getLoginStatus(function(response) {
+      console.log('Modal Facebook login status:', response);
+      setLoginStatus(response.status);
+      
+      if (response.status === 'connected') {
+        setIsConnected(true);
+        onConnectionSuccess();
+      }
+    });
+  };
+
   // Check if Facebook is connected
   useEffect(() => {
     const checkConnection = () => {
       const adAccountId = localStorage.getItem('facebook_ad_account_id');
-      if (adAccountId) {
+      const loginStatus = localStorage.getItem('facebook_login_status');
+      
+      if (adAccountId && loginStatus === 'connected') {
         setIsConnected(true);
         onConnectionSuccess();
+      } else {
+        // Check Facebook login status if SDK is available
+        if (window.FB) {
+          checkFacebookLoginStatus();
+        }
       }
     };
 
@@ -49,6 +80,13 @@ export default function FacebookConnectionModal({
     window.addEventListener('storage', checkConnection);
     return () => window.removeEventListener('storage', checkConnection);
   }, [onConnectionSuccess]);
+
+  // Check login status when modal opens
+  useEffect(() => {
+    if (isOpen && window.FB) {
+      checkFacebookLoginStatus();
+    }
+  }, [isOpen]);
 
   const handleLoginSuccess = (accessToken: string, userID: string) => {
     console.log('Facebook login successful:', { accessToken, userID });
