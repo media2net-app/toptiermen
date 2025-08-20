@@ -194,17 +194,17 @@ export default function AdvertentieMateriaalPage() {
                   realFileData.push({
                     id: file.id || `existing-${realFileData.length}`,
                     name: fileName,
-                    size: file.metadata?.size || file.size || 0,
+                    size: file.metadata?.size || 0,
                     created_at: file.created_at || new Date(Date.now() - realFileData.length * 86400000).toISOString(),
                     updated_at: file.updated_at || new Date().toISOString(),
                     last_accessed_at: file.last_accessed_at || new Date().toISOString(),
                     metadata: {
                       eTag: file.metadata?.eTag || `etag-${realFileData.length}`,
-                      size: file.metadata?.size || file.size || 0,
+                      size: file.metadata?.size || 0,
                       mimetype: file.metadata?.mimetype || 'video/mp4',
                       cacheControl: file.metadata?.cacheControl || '3600',
                       lastModified: file.metadata?.lastModified || new Date().toISOString(),
-                      contentLength: file.metadata?.contentLength || file.size || 0,
+                      contentLength: file.metadata?.contentLength || 0,
                       httpStatusCode: file.metadata?.httpStatusCode || 200
                     },
                     bucket_id: 'advertenties',
