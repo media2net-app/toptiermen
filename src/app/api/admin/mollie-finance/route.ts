@@ -79,7 +79,12 @@ export async function GET(request: NextRequest) {
       }));
 
     // Calculate daily revenue for the last 7 days
-    const dailyRevenue = [];
+    const dailyRevenue: Array<{
+      date: string;
+      revenue: number;
+      transactions: number;
+    }> = [];
+    
     for (let i = 6; i >= 0; i--) {
       const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
       const dateStr = date.toISOString().split('T')[0];
