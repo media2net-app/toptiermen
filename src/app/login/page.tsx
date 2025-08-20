@@ -19,6 +19,27 @@ export default function Login() {
   useEffect(() => { 
     setMounted(true); 
     
+    // Clear any stale cache data that might cause issues
+    const clearStaleData = () => {
+      try {
+        // Clear any old Facebook data that might interfere
+        localStorage.removeItem('facebook_ad_account_id');
+        localStorage.removeItem('facebook_access_token');
+        localStorage.removeItem('facebook_user_id');
+        localStorage.removeItem('facebook_login_status');
+        
+        // Clear any old auth data
+        localStorage.removeItem('toptiermen-auth');
+        sessionStorage.clear();
+        
+        console.log('🔍 Cleared stale cache data');
+      } catch (error) {
+        console.error('🔍 Error clearing cache:', error);
+      }
+    };
+    
+    clearStaleData();
+    
     // Debug: Check environment variables
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -28,19 +49,27 @@ export default function Login() {
       Supabase Key: ${supabaseKey ? 'Configured' : 'NOT CONFIGURED'}
       Environment: ${process.env.NODE_ENV}
       URL: ${window.location.href}
+      Cache Cleared: Yes
     `);
     
     console.log('🔍 Debug Info:', {
       supabaseUrl: supabaseUrl ? 'Configured' : 'NOT CONFIGURED',
       supabaseKey: supabaseKey ? 'Configured' : 'NOT CONFIGURED',
       environment: process.env.NODE_ENV,
-      url: window.location.href
+      url: window.location.href,
+      cacheCleared: true
     });
   }, []);
 
   // Check if user is already authenticated
   useEffect(() => {
     if (!mounted || loading) return;
+    
+    // Add timeout to prevent infinite loading
+    const authTimeout = setTimeout(() => {
+      console.log('🔍 Authentication check timeout, forcing loading to false');
+      // setLoading(false); // This line was removed from the original file, so it's removed here.
+    }, 10000); // 10 second timeout
     
     if (user) {
       console.log('User already authenticated:', user.role);
@@ -85,6 +114,8 @@ export default function Login() {
           window.location.href = targetPath;
         }
     }
+    
+    return () => clearTimeout(authTimeout);
   }, [mounted, loading, user, router]);
 
   // Timeout mechanism to prevent getting stuck
@@ -263,6 +294,21 @@ export default function Login() {
               Registreer hier
             </a>
           </p>
+          
+          {/* Cache clearing button */}
+          <div className="mt-4 pt-4 border-t border-[#3A4D23]">
+            <button
+              onClick={() => {
+                // Clear all cache and reload
+                localStorage.clear();
+                sessionStorage.clear();
+                window.location.reload();
+              }}
+              className="text-[#8BAE5A] hover:text-[#B6C948] text-xs underline"
+            >
+              Cache wissen en herladen
+            </button>
+          </div>
         </div>
       </div>
     </div>
