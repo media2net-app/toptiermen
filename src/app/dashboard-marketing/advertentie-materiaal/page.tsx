@@ -43,6 +43,23 @@ export default function AdvertentieMateriaalPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
 
+  // Helper function to determine target audience based on video name
+  const getTargetAudienceFromName = (videoName: string): string => {
+    const name = videoName.toLowerCase();
+    
+    if (name.includes('zakelijk')) {
+      return 'Ondernemers 30-50, zakelijk, Nederland, LinkedIn';
+    } else if (name.includes('jeugd')) {
+      return 'Jongeren 18-25, fitness, social media, Nederland';
+    } else if (name.includes('vader')) {
+      return 'Vaders 30-45, gezin, fitness, Nederland';
+    } else if (name.includes('het_merk') || name.includes('hetmerk')) {
+      return 'Mannen 25-45, fitness, lifestyle, Nederland';
+    } else {
+      return 'Algemene doelgroep, fitness, Nederland';
+    }
+  };
+
   // Fetch videos from database
   const fetchVideos = async () => {
     console.log('🔍 Fetching videos from database...');
@@ -52,7 +69,27 @@ export default function AdvertentieMateriaalPage() {
     try {
       const videosData = await VideosService.getVideos();
       console.log('✅ Fetched videos:', videosData.length);
-      setVideos(videosData);
+      
+      // Auto-fill target audience for videos that don't have one
+      const updatedVideos = await Promise.all(
+        videosData.map(async (video) => {
+          if (!video.target_audience || video.target_audience.trim() === '') {
+            const targetAudience = getTargetAudienceFromName(video.name);
+            console.log(`🎯 Auto-filling target audience for ${video.name}: ${targetAudience}`);
+            
+            try {
+              await VideosService.updateTargetAudience(video.id, targetAudience);
+              return { ...video, target_audience: targetAudience };
+            } catch (err) {
+              console.error(`❌ Error auto-filling target audience for ${video.name}:`, err);
+              return video;
+            }
+          }
+          return video;
+        })
+      );
+      
+      setVideos(updatedVideos);
     } catch (err) {
       console.error('❌ Error fetching videos:', err);
       setError('Fout bij het ophalen van video\'s');
@@ -83,19 +120,23 @@ export default function AdvertentieMateriaalPage() {
     setUploadProgress(0);
 
     try {
+      const videoName = file.name.replace(/\.[^/.]+$/, ''); // Remove extension
+      const targetAudience = getTargetAudienceFromName(videoName);
+      
       // Create video data
       const videoData = {
-        name: file.name.replace(/\.[^/.]+$/, ''), // Remove extension
+        name: videoName,
         original_name: file.name,
         file_path: `/videos/advertenties/${file.name}`,
         file_size: file.size,
         mime_type: file.type || 'video/mp4',
-        campaign_status: 'inactive' as const
+        campaign_status: 'inactive' as const,
+        target_audience: targetAudience
       };
 
       // Add to database
       const newVideo = await VideosService.createVideo(videoData);
-      console.log('✅ Video uploaded:', newVideo);
+      console.log('✅ Video uploaded with target audience:', newVideo);
 
       // Refresh videos list
       await fetchVideos();
