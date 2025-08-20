@@ -166,24 +166,29 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     // Get initial session
     const getInitialSession = async () => {
       try {
+        console.log('🔍 Starting auth initialization...');
+        
         // Add timeout to prevent infinite loading
         const timeoutId = setTimeout(() => {
           console.warn('Auth initialization timeout, forcing loading to false');
           setLoading(false);
-          // Clear any stale session data that might be causing issues
-          try {
-            localStorage.removeItem('toptiermen-auth');
-            sessionStorage.clear();
-          } catch (error) {
-            console.error('Error clearing stale session data:', error);
-          }
-        }, 8000); // Reduced to 8 seconds for faster recovery
+          // Don't clear session data on timeout - let it persist
+        }, 15000); // Extended to 15 seconds for better reliability
 
         const { data: { session }, error } = await supabase.auth.getSession();
+        
+        console.log('🔍 Session check result:', { 
+          hasSession: !!session, 
+          hasUser: !!session?.user, 
+          userEmail: session?.user?.email,
+          error: error?.message 
+        });
         
         if (error) {
           console.error('Error getting session:', error);
         } else if (session?.user) {
+          console.log('🔍 User session found, getting profile...');
+          
           // Get user profile from profiles table
           const { data: profile, error: profileError } = await supabase
             .from('users')
@@ -193,7 +198,15 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
 
           if (profileError) {
             console.error('Error getting profile:', profileError);
+            // Still set user even if profile fetch fails
+            setUser({
+              id: session.user.id,
+              email: session.user.email!,
+              full_name: session.user.user_metadata?.full_name,
+              role: 'USER'
+            });
           } else if (profile) {
+            console.log('🔍 Profile loaded successfully:', profile.email);
             setUser({
               id: profile.id,
               email: profile.email,
@@ -201,6 +214,8 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
               role: normalizeRole(profile.role)
             });
           }
+        } else {
+          console.log('🔍 No active session found');
         }
         
         clearTimeout(timeoutId);
@@ -220,9 +235,11 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.email);
+        console.log('🔍 Auth state changed:', event, session?.user?.email);
         
         if (event === 'SIGNED_IN' && session?.user) {
+          console.log('🔍 User signed in, getting profile...');
+          
           // Get user profile
           const { data: profile, error: profileError } = await supabase
             .from('users')
@@ -232,7 +249,15 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
 
           if (profileError) {
             console.error('Error getting profile on sign in:', profileError);
+            // Still set user even if profile fetch fails
+            setUser({
+              id: session.user.id,
+              email: session.user.email!,
+              full_name: session.user.user_metadata?.full_name,
+              role: 'USER'
+            });
           } else if (profile) {
+            console.log('🔍 Profile loaded on sign in:', profile.email);
             setUser({
               id: profile.id,
               email: profile.email,
@@ -241,9 +266,12 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
             });
           }
         } else if (event === 'SIGNED_OUT') {
+          console.log('🔍 User signed out');
           setUser(null);
         } else if (event === 'TOKEN_REFRESHED') {
-          console.log('Token refreshed successfully');
+          console.log('🔍 Token refreshed successfully');
+        } else if (event === 'USER_UPDATED') {
+          console.log('🔍 User updated');
         }
         
         setLoading(false);
