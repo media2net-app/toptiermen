@@ -162,16 +162,8 @@ export default function AdvertentieMateriaalPage() {
   };
 
   // Get video URL with fallback
-  const getVideoUrl = async (video: VideoFile): Promise<string> => {
-    try {
-      const url = await VideosService.getVideoUrl(video.file_path);
-      console.log(`🎬 Video URL for ${video.name}:`, url);
-      return url || video.public_url || '/videos/advertenties/placeholder.mp4';
-    } catch (error) {
-      console.error(`❌ Error getting video URL for ${video.name}:`, error);
-      // Fallback to public_url or placeholder
-      return video.public_url || '/videos/advertenties/placeholder.mp4';
-    }
+  const getVideoUrl = (video: VideoFile): string => {
+    return video.public_url || '/videos/advertenties/placeholder.mp4';
   };
 
   if (loading) {
@@ -260,7 +252,7 @@ export default function AdvertentieMateriaalPage() {
             <div className="relative aspect-video bg-gray-900">
               <video
                 data-video-id={video.id}
-                src={getVideoUrl(video)}
+                src={video.public_url || ''}
                 className="w-full h-full object-cover"
                 preload="metadata"
                 controls
@@ -276,6 +268,7 @@ export default function AdvertentieMateriaalPage() {
                 }}
                 onError={(e) => {
                   console.error('❌ Video error:', video.name, e);
+                  console.log('🔗 Video URL:', video.public_url);
                   // Show error message in video container
                   const videoElement = e.target as HTMLVideoElement;
                   const container = videoElement.parentElement;
@@ -286,6 +279,7 @@ export default function AdvertentieMateriaalPage() {
                           <div class="mb-2">⚠️</div>
                           <div>Video niet beschikbaar</div>
                           <div class="text-xs text-gray-500 mt-1">${video.name}</div>
+                          <div class="text-xs text-gray-600 mt-1">URL: ${video.public_url}</div>
                         </div>
                       </div>
                     `;
