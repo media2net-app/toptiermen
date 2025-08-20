@@ -44,11 +44,23 @@ export default function MarketingDashboard() {
 
   // Check authentication and Facebook connection on component mount
   useEffect(() => {
-    console.log('🔍 Marketing Dashboard useEffect triggered:', { loading, user: user?.email, isAuthenticated: !!user });
+    console.log('🔍 Marketing Dashboard useEffect triggered:', { 
+      loading, 
+      user: user?.email, 
+      isAuthenticated: !!user,
+      timestamp: new Date().toISOString()
+    });
     
     // Check if Supabase is properly configured
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    
+    console.log('🔍 Environment variables check:', {
+      supabaseUrl: supabaseUrl ? 'Present' : 'Missing',
+      supabaseKey: supabaseKey ? 'Present' : 'Missing',
+      supabaseUrlValue: supabaseUrl || 'null',
+      supabaseKeyValue: supabaseKey ? `${supabaseKey.substring(0, 10)}...` : 'null'
+    });
     
     if (!supabaseUrl || !supabaseKey || supabaseUrl === 'https://placeholder.supabase.co' || supabaseKey === 'placeholder-key') {
       console.error('❌ Supabase environment variables not configured');
@@ -80,6 +92,8 @@ export default function MarketingDashboard() {
 
   // Separate function for Facebook connection check
   const checkFacebookConnection = async () => {
+    console.log('🔍 Starting Facebook connection check...');
+    
     // Prevent multiple calls
     if (isLoading) {
       console.log('🔍 Facebook check already in progress, skipping...');
@@ -89,17 +103,21 @@ export default function MarketingDashboard() {
     try {
       setIsLoading(true);
       setError(null);
+      console.log('🔍 Set loading to true, starting Facebook SDK check...');
 
       // Wait for Facebook SDK to load with timeout
       let sdkLoaded = false;
       const maxWaitTime = 5000; // 5 seconds
       const startTime = Date.now();
+      
+      console.log('🔍 Waiting for Facebook SDK to load...');
 
       while (!sdkLoaded && (Date.now() - startTime) < maxWaitTime) {
         if (typeof window !== 'undefined' && window.FB) {
           sdkLoaded = true;
           console.log('🔍 Facebook SDK loaded after', Date.now() - startTime, 'ms');
         } else {
+          console.log('🔍 Facebook SDK not ready yet, waiting...');
           await new Promise(resolve => setTimeout(resolve, 100));
         }
       }
@@ -111,50 +129,59 @@ export default function MarketingDashboard() {
         return;
       }
 
-      // Check Facebook login status
-      window.FB.getLoginStatus((response: any) => {
-        console.log('🔍 Facebook login status:', response);
-        
-        if (response.status === 'connected') {
-          // Store Facebook login status persistently
-          localStorage.setItem('facebook_login_status', 'connected');
-          localStorage.setItem('facebook_access_token', response.authResponse.accessToken);
-          localStorage.setItem('facebook_user_id', response.authResponse.userID);
-          
-          const adAccountId = localStorage.getItem('facebook_ad_account_id');
-          if (adAccountId) {
-            console.log('🔍 Facebook connected with ad account:', adAccountId);
-            setIsFacebookConnected(true);
-            
-            // Get user info
-            window.FB.api('/me', { fields: 'id,name,email' }, (userResponse: any) => {
-              if (userResponse && !userResponse.error) {
-                setUserInfo(userResponse);
-                // Store user info persistently
-                localStorage.setItem('facebook_user_info', JSON.stringify(userResponse));
-              }
-            });
+      console.log('🔍 Facebook SDK loaded, checking login status...');
 
-            // Get ad account info
-            fetchAdAccountInfo(adAccountId);
+              // Check Facebook login status with timeout
+        const loginStatusTimeout = setTimeout(() => {
+          console.log('🔍 Facebook login status check timeout, forcing loading to false');
+          setIsLoading(false);
+          setShowFacebookModal(true);
+        }, 10000); // 10 second timeout
+
+        window.FB.getLoginStatus((response: any) => {
+          clearTimeout(loginStatusTimeout);
+          console.log('🔍 Facebook login status:', response);
+          
+          if (response.status === 'connected') {
+            // Store Facebook login status persistently
+            localStorage.setItem('facebook_login_status', 'connected');
+            localStorage.setItem('facebook_access_token', response.authResponse.accessToken);
+            localStorage.setItem('facebook_user_id', response.authResponse.userID);
             
-            // Get campaigns data
-            fetchCampaignsData(adAccountId);
+            const adAccountId = localStorage.getItem('facebook_ad_account_id');
+            if (adAccountId) {
+              console.log('🔍 Facebook connected with ad account:', adAccountId);
+              setIsFacebookConnected(true);
+              
+              // Get user info
+              window.FB.api('/me', { fields: 'id,name,email' }, (userResponse: any) => {
+                if (userResponse && !userResponse.error) {
+                  setUserInfo(userResponse);
+                  // Store user info persistently
+                  localStorage.setItem('facebook_user_info', JSON.stringify(userResponse));
+                }
+              });
+
+              // Get ad account info
+              fetchAdAccountInfo(adAccountId);
+              
+              // Get campaigns data
+              fetchCampaignsData(adAccountId);
+            } else {
+              console.log('🔍 Facebook connected but no ad account found');
+              setShowFacebookModal(true);
+            }
           } else {
-            console.log('🔍 Facebook connected but no ad account found');
+            console.log('🔍 Facebook not connected, showing modal');
+            // Clear any stale Facebook data
+            localStorage.removeItem('facebook_login_status');
+            localStorage.removeItem('facebook_access_token');
+            localStorage.removeItem('facebook_user_id');
+            localStorage.removeItem('facebook_user_info');
             setShowFacebookModal(true);
           }
-        } else {
-          console.log('🔍 Facebook not connected, showing modal');
-          // Clear any stale Facebook data
-          localStorage.removeItem('facebook_login_status');
-          localStorage.removeItem('facebook_access_token');
-          localStorage.removeItem('facebook_user_id');
-          localStorage.removeItem('facebook_user_info');
-          setShowFacebookModal(true);
-        }
-        setIsLoading(false);
-      });
+          setIsLoading(false);
+        });
 
     } catch (error) {
       console.error('🔍 Error checking Facebook connection:', error);
@@ -234,6 +261,13 @@ export default function MarketingDashboard() {
     }
   };
 
+  const resetLoadingState = () => {
+    console.log('🔍 Manually resetting loading state...');
+    setIsLoading(false);
+    setError(null);
+    setShowFacebookModal(true);
+  };
+
   // Show loading state for Facebook check
   if (isLoading) {
     return (
@@ -246,9 +280,15 @@ export default function MarketingDashboard() {
           <p className="text-gray-400 mb-6 max-w-md">
             Facebook verbinding wordt gecontroleerd...
           </p>
-          <div className="text-xs text-gray-500 mt-4">
+          <div className="text-xs text-gray-500 mt-4 mb-4">
             Debug: user={user?.email || 'null'}, isLoading={isLoading.toString()}
           </div>
+          <button
+            onClick={resetLoadingState}
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm"
+          >
+            Forceer Facebook Modal
+          </button>
         </div>
       </div>
     );
