@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
         const { data, error } = await supabase
           .from('videos')
           .select('original_name, count')
-          .not('is_deleted', true);
+          .neq('is_deleted', true);
 
         if (!error && data) {
           const duplicates = data.filter((item: any) => item.count > 1);
