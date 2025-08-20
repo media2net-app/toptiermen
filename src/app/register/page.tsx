@@ -54,10 +54,12 @@ export default function Register() {
     {
       id: 'monthly',
       name: 'Maandelijks',
-      description: 'Flexibel, opzegbaar per maand',
+      description: 'Minimaal 6 maanden vereist voor Top Tier Men groei',
       price: '47',
       priceLabel: 'per maand',
-      features: ['Toegang tot alle content', 'Live sessies', 'Community']
+      features: ['Toegang tot alle content', 'Live sessies', 'Community', 'Minimaal 6 maanden commitment'],
+      minMonths: 6,
+      totalPrice: '282'
     },
     {
       id: 'yearly',
@@ -65,7 +67,9 @@ export default function Register() {
       description: '10% korting t.o.v. maandelijks',
       price: '508',
       priceLabel: 'per jaar',
-      features: ['Toegang tot alle content', 'Live sessies', 'Community', '10% korting (€42 per maand)']
+      features: ['Toegang tot alle content', 'Live sessies', 'Community', '10% korting (€42 per maand)'],
+      minMonths: 12,
+      totalPrice: '508'
     },
     {
       id: 'lifetime',
@@ -73,7 +77,9 @@ export default function Register() {
       description: 'Eénmalige betaling, levenslang toegang',
       price: '1997',
       priceLabel: 'eenmalig',
-      features: ['Toegang tot alle content', 'Live sessies', 'Community', 'Levenslang toegang']
+      features: ['Toegang tot alle content', 'Live sessies', 'Community', 'Levenslang toegang'],
+      minMonths: null,
+      totalPrice: '1997'
     }
   ];
 
@@ -356,6 +362,15 @@ export default function Register() {
                   }`}
                   onClick={() => setSelectedPackage(pkg.id)}
                 >
+                  <div className="absolute top-2 right-2">
+                    <a 
+                      href={`/pakketten/${pkg.id === 'monthly' ? 'maandelijks' : pkg.id === 'yearly' ? 'jaarlijks' : 'lifetime'}`}
+                      className="text-[#B6C948] text-xs hover:underline"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      Meer info →
+                    </a>
+                  </div>
                   {pkg.id === 'yearly' && (
                     <span className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#B6C948] text-[#181F17] text-xs font-bold px-3 py-1 rounded shadow-lg border border-[#8BAE5A]">Meest gekozen</span>
                   )}
@@ -366,6 +381,9 @@ export default function Register() {
                   <div className="mb-4">
                     <span className="text-3xl font-bold text-white">€{pkg.price}</span>
                     <span className="text-[#B6C948] ml-1">{pkg.priceLabel}</span>
+                    {pkg.id === 'monthly' && (
+                      <span className="block text-xs text-[#8BAE5A] mt-1">Minimaal 6 maanden<br/>(€282 totaal)</span>
+                    )}
                     {pkg.id === 'yearly' && (
                       <span className="block text-xs text-[#8BAE5A] mt-1">10% korting t.o.v. maandelijks<br/>(€42 per maand)</span>
                     )}
