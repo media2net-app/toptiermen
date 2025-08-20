@@ -86,24 +86,21 @@ export default function MarketingDashboard() {
 
     console.log('🔍 User authenticated:', user.email);
     
-    // Start Facebook check only after user is confirmed
+    // Set Facebook as connected immediately and load cards
+    console.log('🔍 Setting Facebook as connected and loading cards...');
+    setIsFacebookConnected(true);
+    setIsLoading(false);
+    
+    // Start Facebook check in background
     checkFacebookConnection();
   }, [loading, user, router]);
 
-  // Separate function for Facebook connection check
+  // Separate function for Facebook connection check (runs in background)
   const checkFacebookConnection = async () => {
-    console.log('🔍 Starting Facebook connection check...');
-    
-    // Prevent multiple calls
-    if (isLoading) {
-      console.log('🔍 Facebook check already in progress, skipping...');
-      return;
-    }
+    console.log('🔍 Starting Facebook connection check in background...');
     
     try {
-      setIsLoading(true);
-      setError(null);
-      console.log('🔍 Set loading to true, starting Facebook SDK check...');
+      console.log('🔍 Starting Facebook SDK check...');
 
       // Wait for Facebook SDK to load with timeout
       let sdkLoaded = false;
@@ -122,21 +119,17 @@ export default function MarketingDashboard() {
         }
       }
 
-      if (!sdkLoaded) {
-        console.log('🔍 Facebook SDK not loaded within timeout, showing modal');
-        setShowFacebookModal(true);
-        setIsLoading(false);
+            if (!sdkLoaded) {
+        console.log('🔍 Facebook SDK not loaded within timeout');
         return;
       }
 
       console.log('🔍 Facebook SDK loaded, checking login status...');
 
-              // Check Facebook login status with timeout
-        const loginStatusTimeout = setTimeout(() => {
-          console.log('🔍 Facebook login status check timeout, forcing loading to false');
-          setIsLoading(false);
-          setShowFacebookModal(true);
-        }, 10000); // 10 second timeout
+      // Check Facebook login status with timeout
+      const loginStatusTimeout = setTimeout(() => {
+        console.log('🔍 Facebook login status check timeout');
+      }, 10000); // 10 second timeout
 
         window.FB.getLoginStatus((response: any) => {
           clearTimeout(loginStatusTimeout);
@@ -169,24 +162,19 @@ export default function MarketingDashboard() {
               fetchCampaignsData(adAccountId);
             } else {
               console.log('🔍 Facebook connected but no ad account found');
-              setShowFacebookModal(true);
             }
           } else {
-            console.log('🔍 Facebook not connected, showing modal');
+            console.log('🔍 Facebook not connected');
             // Clear any stale Facebook data
             localStorage.removeItem('facebook_login_status');
             localStorage.removeItem('facebook_access_token');
             localStorage.removeItem('facebook_user_id');
             localStorage.removeItem('facebook_user_info');
-            setShowFacebookModal(true);
           }
-          setIsLoading(false);
         });
 
     } catch (error) {
       console.error('🔍 Error checking Facebook connection:', error);
-      setError('Er is een fout opgetreden bij het controleren van de Facebook verbinding');
-      setIsLoading(false);
     }
   };
 
@@ -440,11 +428,16 @@ export default function MarketingDashboard() {
               <UserIcon className="w-6 h-6 text-blue-400" />
               <h3 className="text-lg font-semibold text-white">Gebruiker</h3>
             </div>
-            {userInfo && (
+            {userInfo ? (
               <div className="space-y-2">
                 <p className="text-gray-300 text-sm">Naam: <span className="text-white">{userInfo.name}</span></p>
                 <p className="text-gray-300 text-sm">Email: <span className="text-white">{userInfo.email}</span></p>
                 <p className="text-gray-300 text-sm">ID: <span className="text-white font-mono text-xs">{userInfo.id}</span></p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-gray-400 text-sm">Data laden...</p>
+                <p className="text-gray-300 text-sm">Email: <span className="text-white">{user?.email}</span></p>
               </div>
             )}
           </div>
@@ -455,12 +448,16 @@ export default function MarketingDashboard() {
               <BuildingOfficeIcon className="w-6 h-6 text-purple-400" />
               <h3 className="text-lg font-semibold text-white">Ad Account</h3>
             </div>
-            {adAccountInfo && (
+            {adAccountInfo ? (
               <div className="space-y-2">
                 <p className="text-gray-300 text-sm">Naam: <span className="text-white">{adAccountInfo.name}</span></p>
                 <p className="text-gray-300 text-sm">Status: <span className="text-green-400">Actief</span></p>
                 <p className="text-gray-300 text-sm">Valuta: <span className="text-white">{adAccountInfo.currency}</span></p>
                 <p className="text-gray-300 text-sm">ID: <span className="text-white font-mono text-xs">{adAccountInfo.id}</span></p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-gray-400 text-sm">Data laden...</p>
               </div>
             )}
           </div>
@@ -472,7 +469,7 @@ export default function MarketingDashboard() {
               <h3 className="text-lg font-semibold text-white">Campagnes</h3>
             </div>
             <div className="space-y-2">
-              <p className="text-gray-300 text-sm">Aantal: <span className="text-white text-xl font-bold">{campaignsCount}</span></p>
+              <p className="text-gray-300 text-sm">Aantal: <span className="text-white text-xl font-bold">{campaignsCount > 0 ? campaignsCount : 'Data laden...'}</span></p>
               <p className="text-gray-300 text-sm">Periode: <span className="text-white">30 dagen</span></p>
             </div>
           </div>
@@ -484,7 +481,7 @@ export default function MarketingDashboard() {
               <h3 className="text-lg font-semibold text-white">Totaal Uitgegeven</h3>
             </div>
             <div className="space-y-2">
-              <p className="text-gray-300 text-sm">Bedrag: <span className="text-white text-xl font-bold">€{totalSpend.toFixed(2)}</span></p>
+              <p className="text-gray-300 text-sm">Bedrag: <span className="text-white text-xl font-bold">{totalSpend > 0 ? `€${totalSpend.toFixed(2)}` : 'Data laden...'}</span></p>
               <p className="text-gray-300 text-sm">Periode: <span className="text-white">30 dagen</span></p>
             </div>
           </div>
