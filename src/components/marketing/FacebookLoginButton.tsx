@@ -27,7 +27,6 @@ export default function FacebookLoginButton({ onLoginSuccess, onLoginError }: Fa
   const [isConnected, setIsConnected] = useState(false);
   const [userInfo, setUserInfo] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
-  const buttonContainerRef = useRef<HTMLDivElement>(null);
 
   // Facebook App ID from environment
   const FB_APP_ID = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || '1063013326038261';
@@ -133,6 +132,57 @@ export default function FacebookLoginButton({ onLoginSuccess, onLoginError }: Fa
     });
   };
 
+  const handleFacebookLogin = () => {
+    if (!window.FB) {
+      setError('Facebook SDK niet geladen');
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    // Request permissions for marketing API
+    window.FB.login((response: any) => {
+      setIsLoading(false);
+
+      if (response.status === 'connected') {
+        setIsConnected(true);
+        setUserInfo(response.authResponse);
+        
+        // Get user info
+        window.FB.api('/me', { fields: 'id,name,email' }, (userResponse: any) => {
+          if (userResponse && !userResponse.error) {
+            setUserInfo({
+              ...response.authResponse,
+              user: userResponse
+            });
+          }
+        });
+
+        // Get user's ad accounts
+        getAdAccounts(response.authResponse.accessToken);
+        
+        onLoginSuccess?.(response.authResponse.accessToken, response.authResponse.userID);
+      } else {
+        setIsConnected(false);
+        const errorMsg = response.error_reason || 'Facebook login mislukt';
+        setError(errorMsg);
+        onLoginError?.(errorMsg);
+      }
+    }, {
+      scope: [
+        'email',
+        'public_profile',
+        'ads_management',
+        'ads_read',
+        'business_management',
+        'read_insights',
+        'pages_read_engagement',
+        'pages_show_list'
+      ].join(',')
+    });
+  };
+
   const getAdAccounts = async (accessToken: string) => {
     try {
       const response = await fetch(`/api/marketing/facebook-ad-manager?action=get-ad-accounts&accessToken=${accessToken}`);
@@ -160,14 +210,6 @@ export default function FacebookLoginButton({ onLoginSuccess, onLoginError }: Fa
       localStorage.removeItem('facebook_login_status');
     });
   };
-
-  // Render the Facebook Login Button
-  useEffect(() => {
-    if (window.FB && buttonContainerRef.current) {
-      // Parse XFBML elements
-      window.FB.XFBML.parse(buttonContainerRef.current);
-    }
-  }, [isConnected]);
 
   if (!FB_APP_ID) {
     return (
@@ -242,21 +284,25 @@ export default function FacebookLoginButton({ onLoginSuccess, onLoginError }: Fa
         </div>
       )}
 
-      {/* Official Facebook Login Button */}
+      {/* Facebook Login Button */}
       <div className="flex justify-center">
         {!isConnected ? (
-          <div ref={buttonContainerRef}>
-            <fb:login-button 
-              scope="email,public_profile,ads_management,ads_read,business_management,read_insights,pages_read_engagement,pages_show_list"
-              onlogin="checkLoginState();"
-              data-width=""
-              data-size="large"
-              data-button-type="login_with"
-              data-layout="rounded"
-              data-auto-logout-link="false"
-              data-use-continue-as="false">
-            </fb:login-button>
-          </div>
+          <button
+            onClick={handleFacebookLogin}
+            disabled={isLoading}
+            className="bg-[#1877F2] hover:bg-[#166FE5] disabled:bg-gray-600 text-white px-8 py-4 rounded-lg flex items-center space-x-3 transition-colors font-medium text-lg shadow-lg"
+          >
+            {isLoading ? (
+              <CogIcon className="w-6 h-6 animate-spin" />
+            ) : (
+              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+              </svg>
+            )}
+            <span>
+              {isLoading ? 'Verbinden...' : 'Verbinden met Facebook'}
+            </span>
+          </button>
         ) : (
           <button
             onClick={handleLogout}
