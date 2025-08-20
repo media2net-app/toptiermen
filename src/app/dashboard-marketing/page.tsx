@@ -12,7 +12,8 @@ import {
   CurrencyEuroIcon
 } from '@heroicons/react/24/outline';
 import FacebookConnectionModal from '@/components/marketing/FacebookConnectionModal';
-import { createClient } from '@supabase/supabase-js';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useRouter } from 'next/navigation';
 
 interface FacebookUserInfo {
   id: string;
@@ -29,6 +30,9 @@ interface FacebookAdAccount {
 }
 
 export default function MarketingDashboard() {
+  const { user, loading, signOut } = useSupabaseAuth();
+  const router = useRouter();
+  
   const [isFacebookConnected, setIsFacebookConnected] = useState(false);
   const [showFacebookModal, setShowFacebookModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -37,8 +41,6 @@ export default function MarketingDashboard() {
   const [adAccountInfo, setAdAccountInfo] = useState<FacebookAdAccount | null>(null);
   const [campaignsCount, setCampaignsCount] = useState<number>(0);
   const [totalSpend, setTotalSpend] = useState<number>(0);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [authUser, setAuthUser] = useState<any>(null);
 
   // Check authentication and Facebook connection on component mount
   useEffect(() => {
@@ -47,37 +49,20 @@ export default function MarketingDashboard() {
         setIsLoading(true);
         setError(null);
 
-        // Initialize Supabase client
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-        const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-        
-        if (!supabaseUrl || !supabaseKey) {
-          setError('Supabase configuratie ontbreekt');
-          setIsLoading(false);
+        // Wait for auth context to load
+        if (loading) {
+          console.log('🔍 Waiting for auth context to load...');
           return;
         }
-
-        const supabase = createClient(supabaseUrl, supabaseKey);
 
         // Check if user is authenticated
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        
-        if (sessionError) {
-          console.error('Session error:', sessionError);
-          setError('Authenticatie fout');
-          setIsLoading(false);
+        if (!user) {
+          console.log('🔍 No user found, redirecting to login');
+          router.push('/login?redirect=/dashboard-marketing');
           return;
         }
 
-        if (!session) {
-          console.log('🔍 No session found, redirecting to login');
-          window.location.href = '/login';
-          return;
-        }
-
-        console.log('🔍 User authenticated:', session.user.email);
-        setIsAuthenticated(true);
-        setAuthUser(session.user);
+        console.log('🔍 User authenticated:', user.email);
 
         // Wait for Facebook SDK to load with timeout
         let sdkLoaded = false;
@@ -153,7 +138,7 @@ export default function MarketingDashboard() {
     };
 
     checkAuthenticationAndFacebook();
-  }, []);
+  }, [user, loading, router]);
 
   const fetchAdAccountInfo = async (adAccountId: string) => {
     try {
@@ -210,7 +195,7 @@ export default function MarketingDashboard() {
   };
 
   // Show loading state
-  if (isLoading) {
+  if (loading || isLoading) {
     return (
       <div className="min-h-screen bg-[#0F1419] flex items-center justify-center">
         <div className="text-center">
@@ -219,7 +204,7 @@ export default function MarketingDashboard() {
           </div>
           <h1 className="text-2xl font-bold text-white mb-2">Marketing Dashboard Laden...</h1>
           <p className="text-gray-400 mb-6 max-w-md">
-            Authenticatie en Facebook verbinding worden gecontroleerd
+            {loading ? 'Authenticatie wordt gecontroleerd...' : 'Facebook verbinding wordt gecontroleerd'}
           </p>
         </div>
       </div>
@@ -292,7 +277,7 @@ export default function MarketingDashboard() {
           </div>
           
           {/* User Info and Logout */}
-          {authUser && (
+          {user && (
             <div className="bg-[#1E293B] rounded-lg p-4 border border-[#334155] min-w-[250px]">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center space-x-2">
@@ -300,21 +285,14 @@ export default function MarketingDashboard() {
                   <span className="text-white font-medium">Ingelogd als</span>
                 </div>
                 <button
-                  onClick={async () => {
-                    const supabase = createClient(
-                      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-                      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-                    );
-                    await supabase.auth.signOut();
-                    window.location.href = '/login';
-                  }}
+                  onClick={signOut}
                   className="text-red-400 hover:text-red-300 text-sm underline"
                 >
                   Uitloggen
                 </button>
               </div>
-              <p className="text-gray-300 text-sm">{authUser.email}</p>
-              <p className="text-gray-400 text-xs">Gebruiker ID: {authUser.id}</p>
+              <p className="text-gray-300 text-sm">{user.email}</p>
+              <p className="text-gray-400 text-xs">Gebruiker ID: {user.id}</p>
             </div>
           )}
         </div>
