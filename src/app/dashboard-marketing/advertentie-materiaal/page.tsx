@@ -28,14 +28,13 @@ import {
 } from '@heroicons/react/24/outline';
 import CampaignSetup from './campaign-setup';
 import { VideosService, VideoFile } from '@/lib/videos-service';
+import AdvertentieVideoUpload from '@/components/AdvertentieVideoUpload';
 
 export default function AdvertentieMateriaalPage() {
   const [videos, setVideos] = useState<VideoFile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<VideoFile | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [uploadProgress, setUploadProgress] = useState(0);
   const [showCampaignSetup, setShowCampaignSetup] = useState(false);
   const [campaignVideo, setCampaignVideo] = useState<VideoFile | null>(null);
   const [editingVideo, setEditingVideo] = useState<VideoFile | null>(null);
@@ -177,47 +176,7 @@ export default function AdvertentieMateriaalPage() {
     return matchesSearch && matchesStatus;
   });
 
-  // Handle file upload
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
 
-    setUploading(true);
-    setUploadProgress(0);
-
-    try {
-      const videoName = file.name.replace(/\.[^/.]+$/, ''); // Remove extension
-      const targetAudience = getTargetAudienceFromName(videoName);
-      
-      // Create video data
-      const videoData = {
-        name: videoName,
-        original_name: file.name,
-        file_path: `/videos/advertenties/${file.name}`,
-        file_size: file.size,
-        mime_type: file.type || 'video/mp4',
-        campaign_status: 'inactive' as const,
-        target_audience: targetAudience
-      };
-
-      // Add to database
-      const newVideo = await VideosService.createVideo(videoData);
-      console.log('✅ Video uploaded with target audience:', newVideo);
-
-      // Refresh videos list
-      await fetchVideos();
-
-      // Reset form
-      event.target.value = '';
-      setUploadProgress(100);
-    } catch (err) {
-      console.error('❌ Error uploading video:', err);
-      setError('Fout bij het uploaden van video');
-    } finally {
-      setUploading(false);
-      setUploadProgress(0);
-    }
-  };
 
   // Handle video deletion
   const handleDeleteVideo = async (videoId: string) => {
@@ -313,17 +272,20 @@ export default function AdvertentieMateriaalPage() {
           <p className="text-gray-400 mt-1">Beheer je video advertenties</p>
         </div>
         <div className="flex items-center space-x-4">
-          <label className="bg-[#3A4D23] hover:bg-[#4A5D33] text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors cursor-pointer">
-            <PlusIcon className="w-5 h-5" />
-            <span>Video Uploaden</span>
-            <input
-              type="file"
-              accept="video/*"
-              onChange={handleFileUpload}
-              className="hidden"
-              disabled={uploading}
-            />
-          </label>
+          <AdvertentieVideoUpload
+            onVideoUploaded={async (url) => {
+              console.log('🎬 Advertentie video uploaded:', url);
+              // Refresh videos list after upload
+              await fetchVideos();
+            }}
+            onVideoUploadStart={() => {
+              console.log('🚀 Advertentie video upload started');
+            }}
+            onVideoUploadError={(error) => {
+              console.error('❌ Advertentie video upload error:', error);
+              setError(`Video upload mislukt: ${error}`);
+            }}
+          />
         </div>
       </div>
 
@@ -334,15 +296,7 @@ export default function AdvertentieMateriaalPage() {
         </div>
       )}
 
-      {/* Upload Progress */}
-      {uploading && (
-        <div className="bg-blue-900/20 border border-blue-500 text-blue-400 px-4 py-3 rounded-lg">
-          <div className="flex items-center space-x-2">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-400"></div>
-            <span>Video uploaden... {uploadProgress}%</span>
-          </div>
-        </div>
-      )}
+
 
       {/* Filters */}
       <div className="bg-[#1A1F2E] border border-[#2D3748] rounded-lg p-4">
