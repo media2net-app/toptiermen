@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     const diagnosis = {
       tableExists: false,
       tableStructure: null,
-      sampleData: null,
+      sampleData: null as any[] | null,
       errors: [] as string[],
       recommendations: [] as string[]
     };
