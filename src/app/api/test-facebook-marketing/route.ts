@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
     const adAccountsData = await adAccountsResponse.json();
 
     // Test 3: Get campaigns (if ad accounts exist)
-    let campaignsData = null;
+    let campaignsData: any = null;
     if (adAccountsData.data && adAccountsData.data.length > 0) {
       const firstAdAccount = adAccountsData.data[0];
       const campaignsResponse = await fetch(`https://graph.facebook.com/v18.0/${firstAdAccount.id}/campaigns?access_token=${accessToken}&fields=id,name,status,objective,created_time,start_time,stop_time,spend_cap,spend_cap_type`);
@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Test 4: Get insights (if campaigns exist)
-    let insightsData = null;
+    let insightsData: any = null;
     if (campaignsData && campaignsData.data && campaignsData.data.length > 0) {
       const firstCampaign = campaignsData.data[0];
       const insightsResponse = await fetch(`https://graph.facebook.com/v18.0/${firstCampaign.id}/insights?access_token=${accessToken}&fields=impressions,clicks,spend,reach,frequency,cpm,cpc,ctr&date_preset=last_30d`);
