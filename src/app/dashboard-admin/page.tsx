@@ -282,7 +282,7 @@ export default function AdminDashboard() {
   return (
     <>
       <LoadingModal 
-        isOpen={loading && !dataLoaded && pathname === '/dashboard-admin'} 
+        isOpen={loading && !dataLoaded && pathname === '/dashboard-admin' && !dashboardStats} 
         message="Admin dashboard statistieken worden geladen..."
       />
       
