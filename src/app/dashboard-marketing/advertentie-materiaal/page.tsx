@@ -59,105 +59,20 @@ export default function AdvertentieMateriaalPage() {
     }
   };
 
-  // Check database status
-  const checkDatabaseStatus = async () => {
-    try {
-      // First run a simple test
-      const testResponse = await fetch('/api/admin/test-database');
-      const testResult = await testResponse.json();
-      
-      if (!testResult.success) {
-        console.error('❌ Database test failed:', testResult);
-        setError('Database test mislukt. Controleer de verbinding.');
-        return false;
-      }
-
-      const { testResults } = testResult;
-      console.log('🧪 Database test results:', testResults);
-
-      if (!testResults.connection) {
-        setError('Kan geen verbinding maken met de database. Controleer de instellingen.');
-        return false;
-      }
-
-      if (!testResults.tableExists) {
-        console.log('🔧 Table does not exist, attempting setup...');
-        try {
-          const setupResponse = await fetch('/api/admin/setup-videos-table', {
-            method: 'POST'
-          });
-          const setupResult = await setupResponse.json();
-          
-          if (setupResult.success) {
-            console.log('✅ Videos table setup successful');
-            return true;
-          } else {
-            console.error('❌ Videos table setup failed:', setupResult);
-            setError(`Database setup mislukt: ${setupResult.error}. Voer handmatig de SQL uit in Supabase.`);
-            return false;
-          }
-        } catch (setupErr) {
-          console.error('❌ Error during setup:', setupErr);
-          setError('Database setup mislukt. Voer handmatig de SQL uit in Supabase Dashboard.');
-          return false;
-        }
-      }
-
-      if (!testResults.canInsert) {
-        console.warn('⚠️ Cannot insert into videos table:', testResults.errors);
-        setError('Kan geen video\'s uploaden. Controleer de database rechten.');
-        return false;
-      }
-
-      console.log('✅ Database status OK');
-      return true;
-    } catch (err) {
-      console.error('❌ Error checking database:', err);
-      setError('Kan geen verbinding maken met de database');
-      return false;
-    }
-  };
-
-  // Fetch videos from database
+  // Fetch videos from storage bucket
   const fetchVideos = async () => {
-    console.log('🔍 Fetching videos from database...');
+    console.log('🔍 Fetching videos from storage bucket...');
     setLoading(true);
     setError(null);
 
     try {
-      // First check if database is accessible
-      const dbOk = await checkDatabaseStatus();
-      if (!dbOk) {
-        setLoading(false);
-        return;
-      }
-
       const videosData = await VideosService.getVideos();
       console.log('✅ Fetched videos:', videosData.length);
       
-      // Auto-fill target audience for videos that don't have one
-      const updatedVideos = await Promise.all(
-        videosData.map(async (video) => {
-          if (!video.target_audience || video.target_audience.trim() === '') {
-            const targetAudience = getTargetAudienceFromName(video.name);
-            console.log(`🎯 Auto-filling target audience for ${video.name}: ${targetAudience}`);
-            
-            try {
-              await VideosService.updateTargetAudience(video.id, targetAudience);
-              return { ...video, target_audience: targetAudience };
-            } catch (err) {
-              console.error(`❌ Error auto-filling target audience for ${video.name}:`, err);
-              return video;
-            }
-          }
-          return video;
-        })
-      );
-      
-      setVideos(updatedVideos);
+      setVideos(videosData);
     } catch (err) {
       console.error('❌ Error fetching videos:', err);
-      setError('Fout bij het ophalen van video\'s. Probeer de pagina te verversen.');
+      setError('Kan geen video\'s ophalen uit de storage bucket');
     } finally {
       setLoading(false);
     }
@@ -195,7 +110,7 @@ export default function AdvertentieMateriaalPage() {
   // Handle target audience update
   const saveTargetAudience = async (videoId: string, targetAudience: string) => {
     try {
-      await VideosService.updateTargetAudience(videoId, targetAudience);
+      await VideosService.updateVideo(videoId, { target_audience: targetAudience });
       console.log('✅ Target audience saved for video:', videoId, targetAudience);
       await fetchVideos(); // Refresh to get updated data
     } catch (err) {
@@ -207,7 +122,11 @@ export default function AdvertentieMateriaalPage() {
   // Handle campaign status toggle
   const toggleCampaignStatus = async (videoId: string) => {
     try {
-      await VideosService.toggleCampaignStatus(videoId);
+      const video = videos.find(v => v.id === videoId);
+      if (!video) return;
+      
+      const newStatus = video.campaign_status === 'active' ? 'inactive' : 'active';
+      await VideosService.updateVideo(videoId, { campaign_status: newStatus });
       console.log('✅ Campaign status toggled for video:', videoId);
       await fetchVideos(); // Refresh to get updated data
     } catch (err) {
@@ -226,7 +145,7 @@ export default function AdvertentieMateriaalPage() {
     if (!editingVideo || !editingName.trim()) return;
 
     try {
-      await VideosService.updateVideoName(editingVideo.id, editingName.trim());
+      await VideosService.updateVideo(editingVideo.id, { name: editingName.trim() });
       console.log('✅ Video name updated:', editingVideo.id, editingName);
       await fetchVideos(); // Refresh to get updated data
       setEditingVideo(null);
@@ -243,15 +162,15 @@ export default function AdvertentieMateriaalPage() {
   };
 
   // Get video URL with fallback
-  const getVideoUrl = (video: VideoFile): string => {
+  const getVideoUrl = async (video: VideoFile): Promise<string> => {
     try {
-      const url = VideosService.getVideoUrl(video);
+      const url = await VideosService.getVideoUrl(video.file_path);
       console.log(`🎬 Video URL for ${video.name}:`, url);
-      return url;
+      return url || video.public_url || '/videos/advertenties/placeholder.mp4';
     } catch (error) {
       console.error(`❌ Error getting video URL for ${video.name}:`, error);
-      // Fallback to a placeholder or error video
-      return '/videos/advertenties/placeholder.mp4';
+      // Fallback to public_url or placeholder
+      return video.public_url || '/videos/advertenties/placeholder.mp4';
     }
   };
 
