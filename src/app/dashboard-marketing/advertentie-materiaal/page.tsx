@@ -28,7 +28,6 @@ import {
 } from '@heroicons/react/24/outline';
 import CampaignSetup from './campaign-setup';
 import { VideosService, VideoFile } from '@/lib/videos-service';
-import AdvertentieVideoUpload from '@/components/AdvertentieVideoUpload';
 
 export default function AdvertentieMateriaalPage() {
   const [videos, setVideos] = useState<VideoFile[]>([]);
@@ -181,22 +180,6 @@ export default function AdvertentieMateriaalPage() {
         <div>
           <h1 className="text-2xl font-bold text-white">Advertentie Materiaal</h1>
           <p className="text-gray-400 mt-1">Beheer je video advertenties</p>
-        </div>
-        <div className="flex items-center space-x-4">
-          <AdvertentieVideoUpload
-            onVideoUploaded={async (url) => {
-              console.log('🎬 Advertentie video uploaded:', url);
-              // Refresh videos list after upload
-              await fetchVideos();
-            }}
-            onVideoUploadStart={() => {
-              console.log('🚀 Advertentie video upload started');
-            }}
-            onVideoUploadError={(error) => {
-              console.error('❌ Advertentie video upload error:', error);
-              setError(`Video upload mislukt: ${error}`);
-            }}
-          />
         </div>
       </div>
 
