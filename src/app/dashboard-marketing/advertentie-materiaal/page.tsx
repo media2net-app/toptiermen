@@ -160,121 +160,52 @@ export default function AdvertentieMateriaalPage() {
           } else {
             console.log('⚠️ Alternative method also returned no data');
             
-            // Fallback: Create mock data for existing videos you showed
-            const existingFiles = [
-              'TTM_Het_Merk_Prelaunch_1.mp4',
-              'TTM_Het_Merk_Prelaunch_2.mp4', 
-              'TTM_Het_Merk_Prelaunch_3.mp4',
-              'TTM_Het_Merk_Prelaunch_4.mp4',
-              'TTM_Het_Merk_Prelaunch_5.mp4',
-              'TTM_Jeugd_Prelaunch_1.mp4',
-              'TTM_Jeugd_Prelaunch_2.mp4',
-              'TTM_Vader_Prelaunch_1.mp4',
-              'TTM_Vader_Prelaunch_2.mp4',
-              'TTM_Zakelijk_Prelaunch_1.mp4',
-              'TTM_Zakelijk_Prelaunch_2.mp4'
-            ];
-
-            // Try to get real file data for existing files
-            console.log('🔍 Attempting to get real file data for existing videos...');
-            const realFileData: any[] = [];
+            // Get actual files from bucket instead of using mock data
+            console.log('🔍 Getting actual files from advertenties bucket...');
+            const { data: actualFiles, error: actualFilesError } = await supabase.storage
+              .from('advertenties')
+              .list('', { limit: 100 });
             
-            for (const fileName of existingFiles) {
-              try {
-                // Try to get file metadata from Supabase
-                const { data: fileData, error: fileError } = await supabase.storage
-                  .from('advertenties')
-                  .list('', {
-                    search: fileName,
-                    limit: 1
-                  });
-                
-                if (fileData && fileData.length > 0) {
-                  const file = fileData[0];
-                  console.log(`✅ Found real data for ${fileName}:`, file);
-                  realFileData.push({
-                    id: file.id || `existing-${realFileData.length}`,
-                    name: fileName,
-                    size: file.metadata?.size || 0,
-                    created_at: file.created_at || new Date(Date.now() - realFileData.length * 86400000).toISOString(),
-                    updated_at: file.updated_at || new Date().toISOString(),
-                    last_accessed_at: file.last_accessed_at || new Date().toISOString(),
-                    metadata: {
-                      eTag: file.metadata?.eTag || `etag-${realFileData.length}`,
-                      size: file.metadata?.size || 0,
-                      mimetype: file.metadata?.mimetype || 'video/mp4',
-                      cacheControl: file.metadata?.cacheControl || '3600',
-                      lastModified: file.metadata?.lastModified || new Date().toISOString(),
-                      contentLength: file.metadata?.contentLength || 0,
-                      httpStatusCode: file.metadata?.httpStatusCode || 200
-                    },
-                    bucket_id: 'advertenties',
-                    owner: file.owner || user?.id || 'unknown'
-                  });
-                } else {
-                  console.log(`⚠️ No real data found for ${fileName}, using fallback`);
-                  // Fallback with realistic size based on typical video sizes
-                  const realisticSizes = [
-                    27.72 * 1024 * 1024, // 27.72MB
-                    45.8 * 1024 * 1024,  // 45.8MB
-                    32.1 * 1024 * 1024,  // 32.1MB
-                    38.9 * 1024 * 1024,  // 38.9MB
-                    41.2 * 1024 * 1024,  // 41.2MB
-                    29.7 * 1024 * 1024,  // 29.7MB
-                    35.4 * 1024 * 1024,  // 35.4MB
-                    42.8 * 1024 * 1024,  // 42.8MB
-                    39.1 * 1024 * 1024,  // 39.1MB
-                    33.6 * 1024 * 1024,  // 33.6MB
-                    36.9 * 1024 * 1024   // 36.9MB
-                  ];
-                  
-                  realFileData.push({
-                    id: `existing-${realFileData.length}`,
-                    name: fileName,
-                    size: realisticSizes[realFileData.length] || 35 * 1024 * 1024,
-                    created_at: new Date(Date.now() - realFileData.length * 86400000).toISOString(),
-                    updated_at: new Date().toISOString(),
-                    last_accessed_at: new Date().toISOString(),
-                    metadata: {
-                      eTag: `etag-${realFileData.length}`,
-                      size: realisticSizes[realFileData.length] || 35 * 1024 * 1024,
-                      mimetype: 'video/mp4',
-                      cacheControl: '3600',
-                      lastModified: new Date().toISOString(),
-                      contentLength: realisticSizes[realFileData.length] || 35 * 1024 * 1024,
-                      httpStatusCode: 200
-                    },
-                    bucket_id: 'advertenties',
-                    owner: user?.id || 'unknown'
-                  });
-                }
-              } catch (fileErr) {
-                console.error(`❌ Error getting data for ${fileName}:`, fileErr);
-                // Fallback with realistic size
-                const fallbackSize = (25 + Math.random() * 25) * 1024 * 1024; // 25-50MB range
-                realFileData.push({
-                  id: `existing-${realFileData.length}`,
-                  name: fileName,
-                  size: fallbackSize,
-                  created_at: new Date(Date.now() - realFileData.length * 86400000).toISOString(),
-                  updated_at: new Date().toISOString(),
-                  last_accessed_at: new Date().toISOString(),
-                  metadata: {
-                    eTag: `etag-${realFileData.length}`,
-                    size: fallbackSize,
-                    mimetype: 'video/mp4',
-                    cacheControl: '3600',
-                    lastModified: new Date().toISOString(),
-                    contentLength: fallbackSize,
-                    httpStatusCode: 200
-                  },
-                  bucket_id: 'advertenties',
-                  owner: user?.id || 'unknown'
-                });
-              }
+            if (actualFilesError) {
+              console.error('❌ Error getting actual files:', actualFilesError);
+              setError('Fout bij ophalen van video bestanden');
+              return;
             }
+            
+            console.log('📁 Actual files in bucket:', actualFiles?.map(f => f.name) || []);
+            
+            if (!actualFiles || actualFiles.length === 0) {
+              console.log('⚠️ No files found in bucket');
+              setVideos([]);
+              return;
+            }
+            
+            // Use actual files from bucket
+            const existingFiles = actualFiles.map(f => f.name);
 
-            console.log('📁 Using real/realistic data for existing videos:', realFileData.length);
+            // Convert actual files to VideoFile format
+            console.log('🔍 Converting actual files to VideoFile format...');
+            const realFileData: any[] = actualFiles.map((file, index) => ({
+              id: file.id || `file-${index}`,
+              name: file.name,
+              size: file.metadata?.size || 0,
+              created_at: file.created_at || new Date().toISOString(),
+              updated_at: file.updated_at || new Date().toISOString(),
+              last_accessed_at: file.last_accessed_at || new Date().toISOString(),
+              metadata: {
+                eTag: file.metadata?.eTag || `etag-${index}`,
+                size: file.metadata?.size || 0,
+                mimetype: file.metadata?.mimetype || 'video/mp4',
+                cacheControl: file.metadata?.cacheControl || '3600',
+                lastModified: file.metadata?.lastModified || new Date().toISOString(),
+                contentLength: file.metadata?.contentLength || 0,
+                httpStatusCode: file.metadata?.httpStatusCode || 200
+              },
+              bucket_id: 'advertenties',
+              owner: file.owner || user?.id || 'unknown'
+            }));
+
+            console.log('📁 Converted files:', realFileData.length);
             data = realFileData;
           }
         } catch (altError) {
@@ -360,7 +291,20 @@ export default function AdvertentieMateriaalPage() {
   const testVideoUrls = async () => {
     console.log('🧪 Testing video URLs...');
     
-    const testFiles = [
+    // First, let's see what files actually exist in the bucket
+    console.log('🔍 Checking what files exist in advertenties bucket...');
+    const { data: bucketFiles, error: bucketError } = await supabase.storage
+      .from('advertenties')
+      .list('', { limit: 100 });
+    
+    if (bucketError) {
+      console.error('❌ Error listing bucket files:', bucketError);
+      return;
+    }
+    
+    console.log('📁 Files in bucket:', bucketFiles?.map(f => f.name) || []);
+    
+    const testFiles = bucketFiles?.map(f => f.name) || [
       'TTM_Het_Merk_Prelaunch_1.mp4',
       'TTM_Het_Merk_Prelaunch_Reel_01_V2.mov'
     ];
@@ -370,6 +314,11 @@ export default function AdvertentieMateriaalPage() {
         console.log(`🧪 Testing URL for: ${fileName}`);
         const url = getVideoUrl(fileName);
         console.log(`🧪 Generated URL: ${url}`);
+        
+        if (!url) {
+          console.error(`❌ No URL generated for: ${fileName}`);
+          continue;
+        }
         
         // Test if URL is accessible
         const response = await fetch(url, { method: 'HEAD' });
