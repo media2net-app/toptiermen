@@ -69,6 +69,49 @@ export default function AdvertentieMateriaalPage() {
     return null;
   };
 
+  // Test upload functionality
+  const testUploadFunctionality = async () => {
+    try {
+      console.log('🧪 Creating test file for upload test...');
+      
+      // Create a small test file
+      const testContent = 'This is a test file for upload functionality';
+      const testBlob = new Blob([testContent], { type: 'text/plain' });
+      const testFileName = `test-upload-${Date.now()}.txt`;
+      
+      console.log('🧪 Attempting test upload...');
+      const { data, error } = await supabase.storage
+        .from('advertenties')
+        .upload(testFileName, testBlob, {
+          cacheControl: '3600',
+          upsert: false
+        });
+      
+      if (error) {
+        console.error('❌ Test upload failed:', error);
+        console.log('⚠️ Upload functionality may not work');
+      } else {
+        console.log('✅ Test upload successful:', data);
+        
+        // Clean up test file
+        console.log('🧹 Cleaning up test file...');
+        const { error: deleteError } = await supabase.storage
+          .from('advertenties')
+          .remove([testFileName]);
+        
+        if (deleteError) {
+          console.log('⚠️ Could not clean up test file:', deleteError.message);
+        } else {
+          console.log('✅ Test file cleaned up successfully');
+        }
+        
+        console.log('🎉 Upload functionality is working!');
+      }
+    } catch (err) {
+      console.error('❌ Test upload error:', err);
+    }
+  };
+
   // Fetch videos from the bucket
   const fetchVideos = async () => {
     try {
@@ -131,6 +174,7 @@ export default function AdvertentieMateriaalPage() {
       // If advertenties bucket not found, try to use it anyway (might be a permissions issue)
       if (!correctBucketName) {
         console.warn('⚠️ Advertenties bucket not found in bucket list, but trying direct access...');
+        console.log('ℹ️ This is normal - listBuckets() may not show all buckets due to permissions');
         correctBucketName = 'advertenties'; // Try the default name
       }
       
@@ -212,11 +256,21 @@ export default function AdvertentieMateriaalPage() {
         
         console.log('🎬 Filtered video files:', videoFiles);
         setVideos(videoFiles);
-        console.log('✅ Videos loaded:', videoFiles.length, 'files');
-      } else {
-        console.log('📁 No data returned from bucket');
-        setVideos([]);
+              console.log('✅ Videos loaded:', videoFiles.length, 'files');
+      
+      // If no videos found, show a helpful message
+      if (videoFiles.length === 0) {
+        console.log('📝 No videos found in bucket - bucket is accessible but empty');
+        setError(null); // Clear any previous errors since bucket access works
+        
+        // Test upload functionality with a small test file
+        console.log('🧪 Testing upload functionality...');
+        await testUploadFunctionality();
       }
+    } else {
+      console.log('📁 No data returned from bucket');
+      setVideos([]);
+    }
     } catch (err) {
       console.error('❌ Error in fetchVideos:', err);
       setError(`Onverwachte fout bij het ophalen van video bestanden: ${err}`);
