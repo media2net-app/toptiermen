@@ -80,11 +80,8 @@ export default function MarketingDashboard() {
       
       // Add a longer delay to prevent immediate redirect and allow auth to stabilize
       setTimeout(() => {
-        console.log('🔍 Re-checking user after delay:', { user: user?.email || 'null', loading });
-        if (!user && !loading) {
-          console.log('🔍 Still no user, redirecting to login');
-          router.push('/login?redirect=/dashboard-marketing');
-        }
+        console.log('🔍 Re-checking user after delay');
+        // The user state will be checked by the useEffect dependency array
       }, 2000); // 2 second delay
       return;
     }
