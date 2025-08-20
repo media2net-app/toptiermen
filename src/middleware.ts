@@ -3,53 +3,37 @@ import { NextRequest, NextResponse } from 'next/server';
 export function middleware(request: NextRequest) {
   const response = NextResponse.next();
   
-  // Get user email from headers or cookies to identify Rick
+  // Get user email from headers or cookies
   const userEmail = request.headers.get('x-user-email') || 
                    request.cookies.get('user-email')?.value || '';
   
   const isRick = userEmail.toLowerCase().includes('rick') || 
                  userEmail.toLowerCase().includes('cuijpers');
   
-  const isChrome = request.headers.get('user-agent')?.includes('Chrome') || false;
+  // Unified cache strategy for all users
+  const path = request.nextUrl.pathname;
   
-  // Different cache strategies based on user and browser
-  if (isRick && isChrome) {
-    // Rick + Chrome: Aggressive no-cache strategy
-    response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
-    response.headers.set('Pragma', 'no-cache');
-    response.headers.set('Expires', '0');
-    response.headers.set('Surrogate-Control', 'no-store');
-    
-    // Add cache busting headers
-    response.headers.set('X-Cache-Strategy', 'rick-chrome-no-cache');
-    response.headers.set('X-Cache-Bust', Date.now().toString());
-    
-  } else if (isRick) {
-    // Rick + other browsers: Moderate no-cache strategy
-    response.headers.set('Cache-Control', 'no-cache, must-revalidate, max-age=0');
-    response.headers.set('Pragma', 'no-cache');
-    response.headers.set('Expires', '0');
-    response.headers.set('X-Cache-Strategy', 'rick-other-no-cache');
-    
+  if (path.startsWith('/api/')) {
+    // API routes: Short cache with version-based invalidation
+    response.headers.set('Cache-Control', 'public, max-age=60, s-maxage=300');
+    response.headers.set('X-Cache-Strategy', 'api-short-cache');
+    response.headers.set('X-Cache-Version', '1.2.0');
+  } else if (path.startsWith('/dashboard')) {
+    // Dashboard pages: Medium cache with user-specific invalidation
+    response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=600');
+    response.headers.set('X-Cache-Strategy', 'dashboard-medium-cache');
+    response.headers.set('X-Cache-Version', '1.2.0');
+    response.headers.set('X-User-ID', userEmail);
+  } else if (path.includes('.js') || path.includes('.css')) {
+    // Static assets: Long cache with version-based invalidation
+    response.headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+    response.headers.set('X-Cache-Strategy', 'static-long-cache');
+    response.headers.set('X-Cache-Version', '1.2.0');
   } else {
-    // Other users: Normal caching strategy
-    const path = request.nextUrl.pathname;
-    
-    if (path.startsWith('/api/')) {
-      // API routes: Short cache
-      response.headers.set('Cache-Control', 'public, max-age=60, s-maxage=300');
-    } else if (path.startsWith('/dashboard')) {
-      // Dashboard pages: Medium cache
-      response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=600');
-    } else if (path.includes('.js') || path.includes('.css')) {
-      // Static assets: Long cache
-      response.headers.set('Cache-Control', 'public, max-age=31536000, immutable');
-    } else {
-      // Default: Short cache
-      response.headers.set('Cache-Control', 'public, max-age=60, s-maxage=300');
-    }
-    
-    response.headers.set('X-Cache-Strategy', 'normal-caching');
+    // Default: Short cache
+    response.headers.set('Cache-Control', 'public, max-age=60, s-maxage=300');
+    response.headers.set('X-Cache-Strategy', 'default-short-cache');
+    response.headers.set('X-Cache-Version', '1.2.0');
   }
   
   // Add security headers
@@ -59,6 +43,10 @@ export function middleware(request: NextRequest) {
   
   // Add performance headers
   response.headers.set('X-DNS-Prefetch-Control', 'on');
+  
+  // Add unified cache headers
+  response.headers.set('X-Unified-Cache', 'enabled');
+  response.headers.set('X-Cache-Invalidation', 'version-based');
   
   return response;
 }
