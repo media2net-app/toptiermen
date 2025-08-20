@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { supabase } from '@/lib/supabase';
+import { getCDNVideoUrl } from '@/lib/cdn-config';
 
 interface VideoFile {
   id: string;
@@ -477,32 +478,30 @@ export default function AdvertentieMateriaalPage() {
     }
   };
 
-  // Get video URL
+  // Get video URL with CDN optimization
   const getVideoUrl = (fileName: string) => {
     console.log('🔗 Getting video URL for:', fileName);
     
-    // For existing videos, try to get a signed URL first
-    if (fileName.includes('TTM_') || fileName.includes('Prelaunch')) {
-      console.log('🔗 Getting signed URL for existing video:', fileName);
-      // Try to get a real signed URL from Supabase
-      try {
-        const { data } = supabase.storage
-          .from('advertenties')
-          .getPublicUrl(fileName);
-        console.log('✅ Got public URL:', data.publicUrl);
-        return data.publicUrl;
-      } catch (error) {
-        console.error('❌ Error getting public URL:', error);
-        // Fallback to placeholder
-        return `https://placeholder-video-url.com/${fileName}`;
+    try {
+      // Get public URL from Supabase
+      const { data } = supabase.storage
+        .from('advertenties')
+        .getPublicUrl(fileName);
+      
+      if (!data?.publicUrl) {
+        console.error('❌ No public URL returned for:', fileName);
+        return '';
       }
+      
+      // Apply CDN optimization
+      const cdnUrl = getCDNVideoUrl(data.publicUrl);
+      console.log('✅ Got CDN URL:', cdnUrl);
+      return cdnUrl;
+      
+    } catch (error) {
+      console.error('❌ Error getting video URL:', error);
+      return '';
     }
-    
-    const { data } = supabase.storage
-      .from(bucketName)
-      .getPublicUrl(fileName);
-    console.log('✅ Got bucket URL:', data.publicUrl);
-    return data.publicUrl;
   };
 
   // Get signed URL for private access (fallback)
@@ -698,11 +697,24 @@ export default function AdvertentieMateriaalPage() {
                     src={getVideoUrl(video.name)}
                     preload="metadata"
                     muted
+                    playsInline
                     onLoadedMetadata={(e) => {
                       console.log('✅ Video loaded successfully:', video.name);
+                      // Video is ready to play
+                      const videoElement = e.target as HTMLVideoElement;
+                      videoElement.style.display = 'block';
                     }}
                     onLoadStart={(e) => {
                       console.log('🔄 Video loading started:', video.name);
+                      // Show loading state
+                      const videoElement = e.target as HTMLVideoElement;
+                      videoElement.style.display = 'none';
+                    }}
+                    onCanPlay={(e) => {
+                      console.log('🎬 Video can play:', video.name);
+                      // Video is ready to play
+                      const videoElement = e.target as HTMLVideoElement;
+                      videoElement.style.display = 'block';
                     }}
                     onError={(e) => {
                       console.error('❌ Video load error for:', video.name, e);
@@ -722,6 +734,14 @@ export default function AdvertentieMateriaalPage() {
                       }
                     }}
                   />
+                  
+                  {/* Loading overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-t-lg" id={`loading-${video.id}`}>
+                    <div className="text-center">
+                      <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                      <p className="text-white text-xs">Laden...</p>
+                    </div>
+                  </div>
                   
                   {/* Play overlay */}
                   <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 group-hover:bg-opacity-20 transition-all duration-200">
@@ -836,8 +856,25 @@ export default function AdvertentieMateriaalPage() {
                       controls
                       autoPlay
                       playsInline
+                      onLoadedMetadata={(e) => {
+                        console.log('✅ Modal video loaded:', selectedVideo.name);
+                      }}
                       onError={(e) => {
-                        console.error('Video playback error:', e);
+                        console.error('❌ Modal video playback error:', e);
+                        // Show error message in modal
+                        const videoElement = e.target as HTMLVideoElement;
+                        const parent = videoElement.parentElement;
+                        if (parent) {
+                          parent.innerHTML = `
+                            <div class="w-full h-full flex items-center justify-center bg-gray-800 rounded-lg">
+                              <div class="text-center">
+                                <div class="w-16 h-16 text-gray-400 mb-4">📹</div>
+                                <p class="text-gray-400 text-lg mb-2">Video niet beschikbaar</p>
+                                <p class="text-gray-500 text-sm">${selectedVideo.name}</p>
+                              </div>
+                            </div>
+                          `;
+                        }
                       }}
                     />
                   </div>
