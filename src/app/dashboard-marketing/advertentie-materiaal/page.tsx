@@ -356,6 +356,36 @@ export default function AdvertentieMateriaalPage() {
     }
   };
 
+  // Test video URL functionality
+  const testVideoUrls = async () => {
+    console.log('🧪 Testing video URLs...');
+    
+    const testFiles = [
+      'TTM_Het_Merk_Prelaunch_1.mp4',
+      'TTM_Het_Merk_Prelaunch_Reel_01_V2.mov'
+    ];
+    
+    for (const fileName of testFiles) {
+      try {
+        console.log(`🧪 Testing URL for: ${fileName}`);
+        const url = getVideoUrl(fileName);
+        console.log(`🧪 Generated URL: ${url}`);
+        
+        // Test if URL is accessible
+        const response = await fetch(url, { method: 'HEAD' });
+        console.log(`🧪 URL test result: ${response.status} ${response.statusText}`);
+        
+        if (response.ok) {
+          console.log(`✅ URL works for: ${fileName}`);
+        } else {
+          console.error(`❌ URL failed for: ${fileName} - ${response.status}`);
+        }
+      } catch (error) {
+        console.error(`❌ Error testing URL for ${fileName}:`, error);
+      }
+    }
+  };
+
   // Test upload functionality
   const testUploadFunctionality = async () => {
     try {
@@ -495,10 +525,12 @@ export default function AdvertentieMateriaalPage() {
       
       console.log('✅ Got Supabase URL:', data.publicUrl);
       
-      // Apply CDN optimization for better performance
-      const cdnUrl = getCDNVideoUrl(data.publicUrl);
-      console.log('✅ Got CDN URL:', cdnUrl);
-      return cdnUrl;
+      // Test direct URL first, then CDN
+      const directUrl = data.publicUrl;
+      console.log('🎬 Using direct URL for testing:', directUrl);
+      
+      // For now, use direct URL to ensure it works
+      return directUrl;
       
     } catch (error) {
       console.error('❌ Error getting video URL:', error);
@@ -587,6 +619,10 @@ export default function AdvertentieMateriaalPage() {
   useEffect(() => {
     if (user && !authLoading) {
       fetchVideos();
+      // Test video URLs after fetching videos
+      setTimeout(() => {
+        testVideoUrls();
+      }, 2000);
     }
   }, [user, authLoading]);
 
@@ -727,21 +763,41 @@ export default function AdvertentieMateriaalPage() {
                       // Video is ready to play
                       const videoElement = e.target as HTMLVideoElement;
                       videoElement.style.display = 'block';
+                      // Hide loading overlay
+                      const loadingOverlay = document.getElementById(`loading-${video.id}`);
+                      if (loadingOverlay) {
+                        loadingOverlay.style.display = 'none';
+                      }
                     }}
                     onLoadStart={(e) => {
                       console.log('🔄 Video loading started:', video.name);
                       // Show loading state
                       const videoElement = e.target as HTMLVideoElement;
                       videoElement.style.display = 'none';
+                      // Show loading overlay
+                      const loadingOverlay = document.getElementById(`loading-${video.id}`);
+                      if (loadingOverlay) {
+                        loadingOverlay.style.display = 'flex';
+                      }
                     }}
                     onCanPlay={(e) => {
                       console.log('🎬 Video can play:', video.name);
                       // Video is ready to play
                       const videoElement = e.target as HTMLVideoElement;
                       videoElement.style.display = 'block';
+                      // Hide loading overlay
+                      const loadingOverlay = document.getElementById(`loading-${video.id}`);
+                      if (loadingOverlay) {
+                        loadingOverlay.style.display = 'none';
+                      }
                     }}
                     onError={(e) => {
                       console.error('❌ Video load error for:', video.name, e);
+                      console.error('❌ Error details:', {
+                        error: e,
+                        videoElement: e.target,
+                        src: (e.target as HTMLVideoElement).src
+                      });
                       // Show fallback content
                       const videoElement = e.target as HTMLVideoElement;
                       const parent = videoElement.parentElement;
@@ -752,6 +808,7 @@ export default function AdvertentieMateriaalPage() {
                               <div class="w-12 h-12 text-gray-400 mb-2">📹</div>
                               <p class="text-gray-400 text-sm">Video niet beschikbaar</p>
                               <p class="text-gray-500 text-xs mt-1">${video.name}</p>
+                              <p class="text-gray-600 text-xs mt-1">URL: ${videoElement.src}</p>
                             </div>
                           </div>
                         `;
