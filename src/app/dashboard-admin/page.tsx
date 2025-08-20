@@ -28,6 +28,7 @@ import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { AdminCard, AdminStatsCard, AdminButton } from '@/components/admin';
 import { SwipeIndicator } from '@/components/ui';
 import MollieFinanceMetrics from '@/components/admin/MollieFinanceMetrics';
+import LoadingModal from '@/components/admin/LoadingModal';
 
 // Types for session data
 interface SessionLog {
@@ -278,7 +279,13 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="space-y-6 sm:space-y-8">
+    <>
+      <LoadingModal 
+        isOpen={loading && !dataLoaded} 
+        message="Admin dashboard statistieken worden geladen..."
+      />
+      
+      <div className="space-y-6 sm:space-y-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -1717,6 +1724,7 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 } 
