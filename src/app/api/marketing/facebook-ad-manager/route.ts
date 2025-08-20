@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { facebookAdManager } from '@/lib/facebook-ad-manager';
+import { facebookAdManager, createFacebookAdManager } from '@/lib/facebook-ad-manager';
 
 export async function GET(request: NextRequest) {
   try {
@@ -51,8 +51,9 @@ export async function GET(request: NextRequest) {
         }
         
         try {
+          // Use server-side token exchange for better security
           const response = await fetch(
-            `https://graph.facebook.com/v18.0/me/adaccounts?access_token=${accessToken}&fields=id,name,account_status,currency`
+            `https://graph.facebook.com/v18.0/me/adaccounts?access_token=${accessToken}&fields=id,name,account_status,currency,timezone_name`
           );
           
           if (!response.ok) {
@@ -133,8 +134,53 @@ export async function GET(request: NextRequest) {
 
       case 'dashboard':
       default:
-        const dashboardData = await facebookAdManager.getDashboardData(dateRangeObj);
-        return NextResponse.json(dashboardData);
+        // Check if we have user credentials
+        if (accessToken) {
+          try {
+            // Get ad accounts first to get the ad account ID
+            const adAccountsResponse = await fetch(
+              `https://graph.facebook.com/v18.0/me/adaccounts?access_token=${accessToken}&fields=id,name,account_status,currency,timezone_name`
+            );
+            
+            if (!adAccountsResponse.ok) {
+              throw new Error(`Facebook API error: ${adAccountsResponse.status} ${adAccountsResponse.statusText}`);
+            }
+            
+            const adAccountsData = await adAccountsResponse.json();
+            const adAccounts = adAccountsData.data || [];
+            
+            if (adAccounts.length === 0) {
+              return NextResponse.json({
+                success: false,
+                error: 'No ad accounts found for this user'
+              }, { status: 404 });
+            }
+            
+            // Use the first ad account
+            const adAccountId = adAccounts[0].id;
+            const userFacebookManager = createFacebookAdManager(accessToken, adAccountId);
+            const dashboardData = await userFacebookManager.getDashboardData(dateRangeObj);
+            return NextResponse.json(dashboardData);
+          } catch (error) {
+            console.error('Error using user credentials:', error);
+            // Fallback to singleton instance
+            if (facebookAdManager) {
+              const dashboardData = await facebookAdManager.getDashboardData(dateRangeObj);
+              return NextResponse.json(dashboardData);
+            }
+            throw error;
+          }
+        } else {
+          // Use singleton instance
+          if (!facebookAdManager) {
+            return NextResponse.json({
+              success: false,
+              error: 'No Facebook credentials available'
+            }, { status: 500 });
+          }
+          const dashboardData = await facebookAdManager.getDashboardData(dateRangeObj);
+          return NextResponse.json(dashboardData);
+        }
     }
 
   } catch (error) {
