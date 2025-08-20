@@ -232,11 +232,11 @@ export default function AdvertentieMateriaalPage() {
             className="bg-[#1A1F2E] border border-[#2D3748] rounded-lg overflow-hidden"
           >
             {/* Video Preview */}
-            <div className="relative aspect-video bg-gray-900">
+            <div className="relative bg-gray-900" style={{ aspectRatio: '9/16' }}>
               <video
                 data-video-id={video.id}
                 src={video.public_url || ''}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
                 preload="metadata"
                 controls
                 crossOrigin="anonymous"
