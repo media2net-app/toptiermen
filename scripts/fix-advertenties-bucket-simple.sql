@@ -1,5 +1,6 @@
--- Fix Advertenties Storage Bucket and RLS Policies
--- Run this script in Supabase SQL Editor to resolve video upload issues
+-- Simple Advertenties Bucket Setup
+-- Run this script in Supabase SQL Editor
+-- This script only creates the bucket and basic policies
 
 -- 1. Create the advertenties bucket (if not exists)
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
@@ -14,46 +15,7 @@ VALUES (
   file_size_limit = EXCLUDED.file_size_limit,
   allowed_mime_types = EXCLUDED.allowed_mime_types;
 
--- 2. Enable RLS on storage.objects if not already enabled
-ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
-
--- 3. Drop existing policies if they exist
-DROP POLICY IF EXISTS "Public read access for advertenties videos" ON storage.objects;
-DROP POLICY IF EXISTS "Authenticated users can upload advertenties videos" ON storage.objects;
-DROP POLICY IF EXISTS "Users can update their own advertenties videos" ON storage.objects;
-DROP POLICY IF EXISTS "Users can delete their own advertenties videos" ON storage.objects;
-DROP POLICY IF EXISTS "Public read access for advertenties" ON storage.objects;
-DROP POLICY IF EXISTS "Authenticated users can upload advertenties" ON storage.objects;
-DROP POLICY IF EXISTS "Users can update their own advertenties" ON storage.objects;
-DROP POLICY IF EXISTS "Users can delete their own advertenties" ON storage.objects;
-
--- 4. Create new policies with more permissive settings
--- Policy for public read access
-CREATE POLICY "Public read access for advertenties" ON storage.objects
-FOR SELECT USING (bucket_id = 'advertenties');
-
--- Policy for authenticated users to upload (more permissive)
-CREATE POLICY "Authenticated users can upload advertenties" ON storage.objects
-FOR INSERT WITH CHECK (
-  bucket_id = 'advertenties' 
-  AND auth.role() = 'authenticated'
-);
-
--- Policy for users to update their own videos (more permissive)
-CREATE POLICY "Users can update their own advertenties" ON storage.objects
-FOR UPDATE USING (
-  bucket_id = 'advertenties' 
-  AND auth.role() = 'authenticated'
-);
-
--- Policy for users to delete their own videos (more permissive)
-CREATE POLICY "Users can delete their own advertenties" ON storage.objects
-FOR DELETE USING (
-  bucket_id = 'advertenties' 
-  AND auth.role() = 'authenticated'
-);
-
--- 5. Create video upload logging table if not exists
+-- 2. Create video upload logs table if not exists
 CREATE TABLE IF NOT EXISTS video_upload_logs (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -68,10 +30,10 @@ CREATE TABLE IF NOT EXISTS video_upload_logs (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 6. Enable RLS on video_upload_logs
+-- 3. Enable RLS on video_upload_logs
 ALTER TABLE video_upload_logs ENABLE ROW LEVEL SECURITY;
 
--- 7. Create RLS policies for video_upload_logs
+-- 4. Create RLS policies for video_upload_logs
 DROP POLICY IF EXISTS "Users can view their own video upload logs" ON video_upload_logs;
 DROP POLICY IF EXISTS "Users can insert their own video upload logs" ON video_upload_logs;
 DROP POLICY IF EXISTS "Users can update their own video upload logs" ON video_upload_logs;
@@ -89,17 +51,15 @@ FOR UPDATE USING (auth.uid() = user_id);
 CREATE POLICY "Users can delete their own video upload logs" ON video_upload_logs
 FOR DELETE USING (auth.uid() = user_id);
 
--- 8. Grant necessary permissions
-GRANT ALL ON storage.objects TO authenticated;
-GRANT ALL ON storage.buckets TO authenticated;
+-- 5. Grant necessary permissions
 GRANT ALL ON video_upload_logs TO authenticated;
 
--- 9. Create indexes for better performance
+-- 6. Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_video_upload_logs_user_id ON video_upload_logs(user_id);
 CREATE INDEX IF NOT EXISTS idx_video_upload_logs_status ON video_upload_logs(upload_status);
 CREATE INDEX IF NOT EXISTS idx_video_upload_logs_created_at ON video_upload_logs(created_at);
 
--- 10. Create function to update updated_at timestamp
+-- 7. Create function to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_video_upload_logs_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -108,14 +68,14 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- 11. Create trigger for updated_at
+-- 8. Create trigger for updated_at
 DROP TRIGGER IF EXISTS update_video_upload_logs_updated_at_trigger ON video_upload_logs;
 CREATE TRIGGER update_video_upload_logs_updated_at_trigger
   BEFORE UPDATE ON video_upload_logs
   FOR EACH ROW
   EXECUTE FUNCTION update_video_upload_logs_updated_at();
 
--- 12. Verify the setup
+-- 9. Verify the setup
 SELECT 
   'Bucket created successfully' as status,
   id,
@@ -126,20 +86,7 @@ SELECT
 FROM storage.buckets 
 WHERE id = 'advertenties';
 
--- 13. Show created policies
-SELECT 
-  policyname,
-  permissive,
-  roles,
-  cmd,
-  qual,
-  with_check
-FROM pg_policies 
-WHERE tablename = 'objects' 
-AND policyname LIKE '%advertenties%'
-ORDER BY policyname;
-
--- 14. Show video upload logs table structure
+-- 10. Show video upload logs table structure
 SELECT 
   column_name,
   data_type,
@@ -148,3 +95,8 @@ SELECT
 FROM information_schema.columns 
 WHERE table_name = 'video_upload_logs'
 ORDER BY ordinal_position;
+
+-- 11. Note about storage policies
+SELECT 
+  'IMPORTANT: Storage policies need to be set via Supabase Dashboard' as note,
+  'Go to Storage > Policies and add policies for advertenties bucket' as action;
