@@ -7,6 +7,7 @@ import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 
 import OnboardingWidget from '../components/OnboardingWidget';
+import IntroductionTaskWidget from '../components/IntroductionTaskWidget';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
 interface DashboardStats {
@@ -67,6 +68,7 @@ export default function Dashboard() {
   const [hasDismissedDaily, setHasDismissedDaily] = useState(false);
   const [hasDismissedAlmost, setHasDismissedAlmost] = useState(false);
   const [preferencesLoaded, setPreferencesLoaded] = useState(false);
+  const [showIntroductionTask, setShowIntroductionTask] = useState(false);
 
   const { user } = useSupabaseAuth();
 
@@ -111,6 +113,27 @@ export default function Dashboard() {
     setOnboardingCompleted(true);
     setShowOnboarding(false);
   }, []);
+
+  // Check if introduction task should be shown
+  useEffect(() => {
+    const checkIntroductionTask = async () => {
+      if (!user?.id || !onboardingCompleted) return;
+
+      try {
+        const response = await fetch(`/api/user-introduction-task?userId=${user.id}`);
+        const data = await response.json();
+
+        if (response.ok && data.task) {
+          // Show task if it's pending
+          setShowIntroductionTask(data.task.status === 'pending');
+        }
+      } catch (error) {
+        console.error('Error checking introduction task:', error);
+      }
+    };
+
+    checkIntroductionTask();
+  }, [user?.id, onboardingCompleted]);
 
   // Check if all daily missions are completed
   useEffect(() => {
@@ -260,6 +283,15 @@ export default function Dashboard() {
             setOnboardingCompleted(true);
             setShowOnboarding(false);
             toast.success('Gefeliciteerd! Je hebt je fundament gelegd! 🎉');
+          }}
+        />
+
+        {/* Introduction Task Widget */}
+        <IntroductionTaskWidget
+          isVisible={showIntroductionTask && onboardingCompleted}
+          onComplete={() => {
+            setShowIntroductionTask(false);
+            toast.success('Welkom in de community! 🎉');
           }}
         />
 
