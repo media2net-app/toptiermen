@@ -479,6 +479,8 @@ export default function AdvertentieMateriaalPage() {
 
   // Get video URL
   const getVideoUrl = (fileName: string) => {
+    console.log('🔗 Getting video URL for:', fileName);
+    
     // For existing videos, try to get a signed URL first
     if (fileName.includes('TTM_') || fileName.includes('Prelaunch')) {
       console.log('🔗 Getting signed URL for existing video:', fileName);
@@ -487,9 +489,10 @@ export default function AdvertentieMateriaalPage() {
         const { data } = supabase.storage
           .from('advertenties')
           .getPublicUrl(fileName);
+        console.log('✅ Got public URL:', data.publicUrl);
         return data.publicUrl;
       } catch (error) {
-        console.error('Error getting public URL:', error);
+        console.error('❌ Error getting public URL:', error);
         // Fallback to placeholder
         return `https://placeholder-video-url.com/${fileName}`;
       }
@@ -498,6 +501,7 @@ export default function AdvertentieMateriaalPage() {
     const { data } = supabase.storage
       .from(bucketName)
       .getPublicUrl(fileName);
+    console.log('✅ Got bucket URL:', data.publicUrl);
     return data.publicUrl;
   };
 
@@ -659,15 +663,7 @@ export default function AdvertentieMateriaalPage() {
         </div>
       )}
 
-      {/* Success Message */}
-      {!error && !loading && videos.length > 0 && (
-        <div className="bg-green-900/20 border border-green-500/50 rounded-lg p-4">
-          <div className="flex items-center space-x-3">
-            <div className="w-5 h-5 text-green-400">✅</div>
-            <span className="text-green-300">{videos.length} video's gevonden</span>
-          </div>
-        </div>
-      )}
+
 
       {/* Loading State */}
       {loading && (
@@ -690,23 +686,26 @@ export default function AdvertentieMateriaalPage() {
 
       {/* Videos Grid */}
       {!loading && videos.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
           {videos.map((video) => (
             <div key={video.id} className="bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
               {/* Video Player - Vertical for Social Media */}
               <div className="relative bg-gray-900 cursor-pointer group" onClick={() => setSelectedVideo(video)}>
-                {/* Vertical aspect ratio for social media videos (9:16) */}
-                <div className="aspect-[9/16] relative">
+                {/* Vertical aspect ratio for social media videos (4:5) - less tall */}
+                <div className="aspect-[4/5] relative">
                   <video
                     className="w-full h-full object-cover rounded-t-lg"
                     src={getVideoUrl(video.name)}
                     preload="metadata"
                     muted
                     onLoadedMetadata={(e) => {
-                      // Video loaded successfully
+                      console.log('✅ Video loaded successfully:', video.name);
+                    }}
+                    onLoadStart={(e) => {
+                      console.log('🔄 Video loading started:', video.name);
                     }}
                     onError={(e) => {
-                      console.error('Video load error:', e);
+                      console.error('❌ Video load error for:', video.name, e);
                       // Show fallback content
                       const videoElement = e.target as HTMLVideoElement;
                       const parent = videoElement.parentElement;
@@ -716,6 +715,7 @@ export default function AdvertentieMateriaalPage() {
                             <div class="text-center">
                               <div class="w-12 h-12 text-gray-400 mb-2">📹</div>
                               <p class="text-gray-400 text-sm">Video niet beschikbaar</p>
+                              <p class="text-gray-500 text-xs mt-1">${video.name}</p>
                             </div>
                           </div>
                         `;
@@ -829,7 +829,7 @@ export default function AdvertentieMateriaalPage() {
               <div className="flex justify-center">
                 <div className="max-w-sm w-full">
                   {/* Vertical video container */}
-                  <div className="aspect-[9/16] relative bg-black rounded-lg overflow-hidden">
+                  <div className="aspect-[4/5] relative bg-black rounded-lg overflow-hidden">
                     <video
                       className="w-full h-full object-contain"
                       src={getVideoUrl(selectedVideo.name)}
