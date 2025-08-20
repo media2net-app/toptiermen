@@ -138,14 +138,16 @@ export default function FacebookLoginButton({ onLoginSuccess, onLoginError }: Fa
       return;
     }
 
-    setIsLoading(true);
-    setError(null);
+    // Check if already connected first
+    if (isConnected) {
+      setError('Je bent al verbonden met Facebook. Probeer eerst de verbinding te verbreken als je opnieuw wilt verbinden.');
+      return;
+    }
 
-    // Request permissions for marketing API
-    window.FB.login((response: any) => {
-      setIsLoading(false);
-
+    // Check current Facebook login status before attempting login
+    window.FB.getLoginStatus((response: any) => {
       if (response.status === 'connected') {
+        // Already connected, just update the state
         setIsConnected(true);
         setUserInfo(response.authResponse);
         
@@ -163,23 +165,53 @@ export default function FacebookLoginButton({ onLoginSuccess, onLoginError }: Fa
         getAdAccounts(response.authResponse.accessToken);
         
         onLoginSuccess?.(response.authResponse.accessToken, response.authResponse.userID);
-      } else {
-        setIsConnected(false);
-        const errorMsg = response.error_reason || 'Facebook login mislukt';
-        setError(errorMsg);
-        onLoginError?.(errorMsg);
+        return;
       }
-    }, {
-      scope: [
-        'email',
-        'public_profile',
-        'ads_management',
-        'ads_read',
-        'business_management',
-        'read_insights',
-        'pages_read_engagement',
-        'pages_show_list'
-      ].join(',')
+
+      // Not connected, proceed with login
+      setIsLoading(true);
+      setError(null);
+
+      // Request permissions for marketing API
+      window.FB.login((loginResponse: any) => {
+        setIsLoading(false);
+
+        if (loginResponse.status === 'connected') {
+          setIsConnected(true);
+          setUserInfo(loginResponse.authResponse);
+          
+          // Get user info
+          window.FB.api('/me', { fields: 'id,name,email' }, (userResponse: any) => {
+            if (userResponse && !userResponse.error) {
+              setUserInfo({
+                ...loginResponse.authResponse,
+                user: userResponse
+              });
+            }
+          });
+
+          // Get user's ad accounts
+          getAdAccounts(loginResponse.authResponse.accessToken);
+          
+          onLoginSuccess?.(loginResponse.authResponse.accessToken, loginResponse.authResponse.userID);
+        } else {
+          setIsConnected(false);
+          const errorMsg = loginResponse.error_reason || 'Facebook login mislukt';
+          setError(errorMsg);
+          onLoginError?.(errorMsg);
+        }
+      }, {
+        scope: [
+          'email',
+          'public_profile',
+          'ads_management',
+          'ads_read',
+          'business_management',
+          'read_insights',
+          'pages_read_engagement',
+          'pages_show_list'
+        ].join(',')
+      });
     });
   };
 
