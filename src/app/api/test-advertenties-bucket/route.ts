@@ -26,22 +26,18 @@ export async function GET(request: NextRequest) {
       
       // Test 2: Try to get a specific file URL
       console.log('🔗 Testing public URL generation...');
-      const { data: urlData, error: urlError } = supabase.storage
+      const { data: urlData } = supabase.storage
         .from('advertenties')
         .getPublicUrl('test-file.txt');
 
-      if (urlError) {
-        console.error('❌ URL error:', urlError);
-      } else {
-        console.log('✅ URL generation works:', urlData.publicUrl);
-      }
+      console.log('✅ URL generation works:', urlData.publicUrl);
 
       return NextResponse.json({
         success: false,
         error: 'Bucket access failed',
         details: listError.message,
         bucketExists: false,
-        canGenerateUrls: !urlError,
+        canGenerateUrls: true,
         testUrl: urlData?.publicUrl || null
       });
     }

@@ -90,8 +90,6 @@ export default function AdvertentieMateriaalPage() {
     return matchesSearch && matchesStatus;
   });
 
-
-
   // Handle video deletion
   const handleDeleteVideo = async (videoId: string) => {
     if (!confirm('Weet je zeker dat je deze video wilt verwijderen?')) return;
@@ -174,27 +172,25 @@ export default function AdvertentieMateriaalPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">Advertentie Materiaal</h1>
-          <p className="text-gray-400 mt-1">Beheer je video advertenties</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-white">Advertentie Materiaal</h1>
+          <p className="text-gray-400 mt-1 text-sm sm:text-base">Beheer je video advertenties</p>
         </div>
       </div>
 
       {/* Error Display */}
       {error && (
-        <div className="bg-red-900/20 border border-red-500 text-red-400 px-4 py-3 rounded-lg">
+        <div className="bg-red-900/20 border border-red-500 text-red-400 px-4 py-3 rounded-lg text-sm">
           {error}
         </div>
       )}
 
-
-
       {/* Filters */}
       <div className="bg-[#1A1F2E] border border-[#2D3748] rounded-lg p-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <div className="relative">
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
@@ -202,28 +198,28 @@ export default function AdvertentieMateriaalPage() {
               placeholder="Zoek video's..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-[#2D3748] border border-[#4A5568] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#8BAE5A]"
+              className="w-full pl-10 pr-4 py-3 bg-[#2D3748] border border-[#4A5568] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#8BAE5A] text-sm"
             />
           </div>
           
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value as 'all' | 'active' | 'inactive')}
-            className="px-4 py-2 bg-[#2D3748] border border-[#4A5568] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A]"
+            className="px-4 py-3 bg-[#2D3748] border border-[#4A5568] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A] text-sm"
           >
             <option value="all">Alle Statussen</option>
             <option value="active">Actief</option>
             <option value="inactive">Inactief</option>
           </select>
 
-          <div className="text-sm text-gray-400 flex items-center">
+          <div className="text-sm text-gray-400 flex items-center justify-center sm:justify-start">
             {filteredVideos.length} van {videos.length} video's
           </div>
         </div>
       </div>
 
       {/* Videos Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-6">
         {filteredVideos.map((video) => (
           <motion.div
             key={video.id}
@@ -257,12 +253,11 @@ export default function AdvertentieMateriaalPage() {
                   const container = videoElement.parentElement;
                   if (container) {
                     container.innerHTML = `
-                      <div class="flex items-center justify-center h-full text-red-400 text-sm">
+                      <div class="flex items-center justify-center h-full text-red-400 text-sm p-4">
                         <div class="text-center">
                           <div class="mb-2">⚠️</div>
                           <div>Video niet beschikbaar</div>
                           <div class="text-xs text-gray-500 mt-1">${video.name}</div>
-                          <div class="text-xs text-gray-600 mt-1">URL: ${video.public_url}</div>
                         </div>
                       </div>
                     `;
@@ -272,7 +267,7 @@ export default function AdvertentieMateriaalPage() {
             </div>
 
             {/* Video Info */}
-            <div className="p-4 space-y-3">
+            <div className="p-3 sm:p-4 space-y-3">
               {/* Video Name */}
               <div className="flex items-center justify-between">
                 {editingVideo?.id === video.id ? (
@@ -308,7 +303,7 @@ export default function AdvertentieMateriaalPage() {
                     </h3>
                     <button
                       onClick={() => startEditingName(video)}
-                      className="text-gray-400 hover:text-white transition-colors"
+                      className="text-gray-400 hover:text-white transition-colors flex-shrink-0"
                       title="Bewerk naam"
                     >
                       <PencilIcon className="w-3 h-3" />
@@ -322,7 +317,7 @@ export default function AdvertentieMateriaalPage() {
                 <span className="text-xs text-gray-400">Campagne Status:</span>
                 <button
                   onClick={() => toggleCampaignStatus(video.id)}
-                  className={`px-2 py-1 rounded-full text-xs font-medium backdrop-blur-sm cursor-pointer hover:scale-105 transition-all duration-200 ${
+                  className={`px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm cursor-pointer hover:scale-105 transition-all duration-200 ${
                     video.campaign_status === 'active' 
                       ? 'bg-green-600 bg-opacity-90 text-white hover:bg-green-500' 
                       : 'bg-gray-600 bg-opacity-90 text-gray-200 hover:bg-gray-500'
@@ -333,8 +328,8 @@ export default function AdvertentieMateriaalPage() {
                 </button>
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex space-x-2">
+              {/* Action Buttons - Mobile Optimized */}
+              <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={() => {
                     console.log('🔗 Playing video in thumbnail:', video.name);
@@ -343,45 +338,45 @@ export default function AdvertentieMateriaalPage() {
                       videoElement.play();
                     }
                   }}
-                  className="flex-1 flex items-center justify-center space-x-1 px-2 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-200 hover:scale-105 text-xs"
+                  className="flex items-center justify-center space-x-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-200 hover:scale-105 text-xs font-medium"
                   title="Afspelen"
                 >
                   <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z"/>
                   </svg>
-                  <span className="font-medium">Afspelen</span>
+                  <span className="hidden sm:inline">Afspelen</span>
                 </button>
                 
                 <button
                   onClick={() => window.open(getVideoUrl(video), '_blank')}
-                  className="flex-1 flex items-center justify-center space-x-1 px-2 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all duration-200 hover:scale-105 text-xs"
+                  className="flex items-center justify-center space-x-1 px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all duration-200 hover:scale-105 text-xs font-medium"
                   title="Bekijk"
                 >
                   <EyeIcon className="w-3 h-3" />
-                  <span className="font-medium">Bekijk</span>
+                  <span className="hidden sm:inline">Bekijk</span>
                 </button>
                 
-                                 <button
-                   onClick={() => {
-                     const link = document.createElement('a');
-                     link.href = getVideoUrl(video);
-                     link.download = video.original_name;
-                     link.click();
-                   }}
-                   className="flex-1 flex items-center justify-center space-x-1 px-2 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-all duration-200 hover:scale-105 text-xs"
-                   title="Download"
-                 >
-                   <ArrowDownTrayIcon className="w-3 h-3" />
-                   <span className="font-medium">Download</span>
-                 </button>
+                <button
+                  onClick={() => {
+                    const link = document.createElement('a');
+                    link.href = getVideoUrl(video);
+                    link.download = video.original_name;
+                    link.click();
+                  }}
+                  className="flex items-center justify-center space-x-1 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-all duration-200 hover:scale-105 text-xs font-medium"
+                  title="Download"
+                >
+                  <ArrowDownTrayIcon className="w-3 h-3" />
+                  <span className="hidden sm:inline">Download</span>
+                </button>
                 
                 <button
                   onClick={() => handleDeleteVideo(video.id)}
-                  className="flex-1 flex items-center justify-center space-x-1 px-2 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all duration-200 hover:scale-105 text-xs"
+                  className="flex items-center justify-center space-x-1 px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all duration-200 hover:scale-105 text-xs font-medium"
                   title="Verwijder"
                 >
                   <TrashIcon className="w-3 h-3" />
-                  <span className="font-medium">Verwijder</span>
+                  <span className="hidden sm:inline">Verwijder</span>
                 </button>
               </div>
 
@@ -392,13 +387,14 @@ export default function AdvertentieMateriaalPage() {
                     setCampaignVideo(video);
                     setShowCampaignSetup(true);
                   }}
-                  className="w-full flex items-center justify-center space-x-2 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-all duration-200 hover:scale-105 text-sm font-medium"
+                  className="w-full flex items-center justify-center space-x-2 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-all duration-200 hover:scale-105 text-xs sm:text-sm font-medium"
                   title="Campagne opzetten voor deze video"
                 >
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                   </svg>
-                  <span>Campagne Opzetten</span>
+                  <span className="hidden sm:inline">Campagne Opzetten</span>
+                  <span className="sm:hidden">Campagne</span>
                 </button>
               </div>
 
@@ -438,7 +434,7 @@ export default function AdvertentieMateriaalPage() {
                         input.blur();
                       }
                     }}
-                    className="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-medium transition-colors"
+                    className="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-medium transition-colors flex-shrink-0"
                     title="Doelgroep opslaan"
                   >
                     💾
@@ -453,7 +449,7 @@ export default function AdvertentieMateriaalPage() {
 
               {/* Video Details */}
               <div className="text-xs text-gray-400 space-y-1">
-                <div>Bestand: {video.original_name}</div>
+                <div className="truncate">Bestand: {video.original_name}</div>
                 <div>Grootte: {(video.file_size / 1024 / 1024).toFixed(1)} MB</div>
                 <div>Toegevoegd: {new Date(video.created_at).toLocaleDateString('nl-NL')}</div>
               </div>
@@ -467,7 +463,7 @@ export default function AdvertentieMateriaalPage() {
         <div className="text-center py-12">
           <VideoCameraIcon className="w-16 h-16 text-gray-600 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-400 mb-2">Geen video's gevonden</h3>
-          <p className="text-gray-500">
+          <p className="text-gray-500 text-sm sm:text-base">
             {searchTerm || filterStatus !== 'all' 
               ? 'Probeer je zoekopdracht of filters aan te passen.'
               : 'Upload je eerste video om te beginnen.'
