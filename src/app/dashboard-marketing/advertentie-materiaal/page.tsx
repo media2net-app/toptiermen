@@ -242,7 +242,7 @@ export default function AdvertentieMateriaalPage() {
       </div>
 
       {/* Videos Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-6">
         {filteredVideos.map((video) => (
           <motion.div
             key={video.id}
@@ -367,7 +367,7 @@ export default function AdvertentieMateriaalPage() {
             </div>
 
             {/* Video Info */}
-            <div className="p-3 sm:p-4 space-y-3">
+            <div className="p-2 sm:p-3 lg:p-4 space-y-2 sm:space-y-3">
               {/* Video Name */}
               <div className="flex items-center justify-between">
                 {editingVideo?.id === video.id ? (
@@ -398,7 +398,7 @@ export default function AdvertentieMateriaalPage() {
                   </div>
                 ) : (
                   <div className="flex items-center space-x-2 flex-1">
-                    <h3 className="text-sm font-medium text-white truncate">
+                    <h3 className="text-xs sm:text-sm font-medium text-white truncate">
                       {video.name}
                     </h3>
                     <button
@@ -414,10 +414,10 @@ export default function AdvertentieMateriaalPage() {
 
               {/* Campaign Status */}
               <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-400">Campagne Status:</span>
+                <span className="text-xs text-gray-400">Status:</span>
                 <button
                   onClick={() => toggleCampaignStatus(video.id)}
-                  className={`px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm cursor-pointer hover:scale-105 transition-all duration-200 ${
+                  className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm cursor-pointer hover:scale-105 transition-all duration-200 ${
                     video.campaign_status === 'active' 
                       ? 'bg-green-600 bg-opacity-90 text-white hover:bg-green-500' 
                       : 'bg-gray-600 bg-opacity-90 text-gray-200 hover:bg-gray-500'
@@ -429,7 +429,7 @@ export default function AdvertentieMateriaalPage() {
               </div>
 
               {/* Action Buttons - Mobile Optimized */}
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-1 sm:gap-2">
                 <button
                   onClick={() => {
                     console.log('🔗 Playing video in thumbnail:', video.name);
@@ -438,7 +438,7 @@ export default function AdvertentieMateriaalPage() {
                       videoElement.play();
                     }
                   }}
-                  className="flex items-center justify-center space-x-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-200 hover:scale-105 text-xs font-medium"
+                  className="flex items-center justify-center space-x-1 px-2 sm:px-3 py-1 sm:py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-200 hover:scale-105 text-xs font-medium"
                   title="Afspelen"
                 >
                   <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
@@ -449,7 +449,7 @@ export default function AdvertentieMateriaalPage() {
                 
                 <button
                   onClick={() => window.open(getVideoUrl(video), '_blank')}
-                  className="flex items-center justify-center space-x-1 px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all duration-200 hover:scale-105 text-xs font-medium"
+                  className="flex items-center justify-center space-x-1 px-2 sm:px-3 py-1 sm:py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all duration-200 hover:scale-105 text-xs font-medium"
                   title="Bekijk"
                 >
                   <EyeIcon className="w-3 h-3" />
@@ -463,7 +463,7 @@ export default function AdvertentieMateriaalPage() {
                     link.download = video.original_name;
                     link.click();
                   }}
-                  className="flex items-center justify-center space-x-1 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-all duration-200 hover:scale-105 text-xs font-medium"
+                  className="flex items-center justify-center space-x-1 px-2 sm:px-3 py-1 sm:py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-all duration-200 hover:scale-105 text-xs font-medium"
                   title="Download"
                 >
                   <ArrowDownTrayIcon className="w-3 h-3" />
@@ -472,7 +472,7 @@ export default function AdvertentieMateriaalPage() {
                 
                 <button
                   onClick={() => handleDeleteVideo(video.id)}
-                  className="flex items-center justify-center space-x-1 px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all duration-200 hover:scale-105 text-xs font-medium"
+                  className="flex items-center justify-center space-x-1 px-2 sm:px-3 py-1 sm:py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all duration-200 hover:scale-105 text-xs font-medium"
                   title="Verwijder"
                 >
                   <TrashIcon className="w-3 h-3" />
@@ -481,16 +481,16 @@ export default function AdvertentieMateriaalPage() {
               </div>
 
               {/* Campaign Setup Button */}
-              <div className="mt-3">
+              <div className="mt-2 sm:mt-3">
                 <button
                   onClick={() => {
                     setCampaignVideo(video);
                     setShowCampaignSetup(true);
                   }}
-                  className="w-full flex items-center justify-center space-x-2 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-all duration-200 hover:scale-105 text-xs sm:text-sm font-medium"
+                  className="w-full flex items-center justify-center space-x-1 sm:space-x-2 px-2 sm:px-3 py-1 sm:py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-all duration-200 hover:scale-105 text-xs font-medium"
                   title="Campagne opzetten voor deze video"
                 >
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                   </svg>
                   <span className="hidden sm:inline">Campagne Opzetten</span>
@@ -499,11 +499,11 @@ export default function AdvertentieMateriaalPage() {
               </div>
 
               {/* Target Audience Input */}
-              <div className="mt-3 space-y-2">
+              <div className="mt-2 sm:mt-3 space-y-1 sm:space-y-2">
                 <label className="block text-xs font-medium text-gray-300">
                   🎯 Doelgroep
                 </label>
-                <div className="flex space-x-2">
+                <div className="flex space-x-1 sm:space-x-2">
                   <input
                     type="text"
                     placeholder="Bijv: Mannen 25-45, fitness, Nederland"
