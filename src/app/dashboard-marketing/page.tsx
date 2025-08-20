@@ -217,6 +217,23 @@ export default function MarketingDashboard() {
     setShowFacebookModal(true);
   };
 
+  const testConfiguration = async () => {
+    try {
+      const response = await fetch('/api/test-config');
+      const data = await response.json();
+      console.log('🔍 Configuration test result:', data);
+      
+      if (data.success) {
+        alert('✅ Alle environment variables zijn correct geconfigureerd!');
+      } else {
+        alert(`❌ Configuratie probleem: ${data.error}\n\nDetails: ${JSON.stringify(data.config, null, 2)}`);
+      }
+    } catch (error) {
+      console.error('🔍 Configuration test failed:', error);
+      alert('❌ Kon configuratie niet testen');
+    }
+  };
+
   // Show loading state for Facebook check
   if (isLoading) {
     return (
@@ -436,7 +453,7 @@ export default function MarketingDashboard() {
         {/* Quick Actions */}
         <div className="bg-[#1E293B] rounded-lg p-6 border border-[#334155] mb-8">
           <h3 className="text-lg font-semibold text-white mb-4">Snelle Acties</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <button
               onClick={handleOpenFacebookModal}
               className="bg-[#3B82F6] hover:bg-[#2563EB] text-white px-4 py-3 rounded-lg transition-colors flex items-center space-x-2"
@@ -459,6 +476,14 @@ export default function MarketingDashboard() {
             >
               <CogIcon className="w-5 h-5" />
               <span>Facebook Setup</span>
+            </button>
+
+            <button
+              onClick={testConfiguration}
+              className="bg-[#F59E0B] hover:bg-[#D97706] text-white px-4 py-3 rounded-lg transition-colors flex items-center space-x-2"
+            >
+              <CogIcon className="w-5 h-5" />
+              <span>Test Configuratie</span>
             </button>
           </div>
         </div>
