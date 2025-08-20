@@ -354,20 +354,64 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
     }
   };
 
-  const handleSave = async () => {
-    if (!formData.name.trim()) {
-      toast.error('Vul een naam in voor het schema');
-      return;
+  const validateSchema = (schema: TrainingSchema): string | null => {
+    if (!schema.name.trim()) {
+      return 'Vul een naam in voor het schema';
     }
 
-    if (formData.days.length === 0) {
-      toast.error('Voeg minimaal één dag toe aan het schema');
+    if (schema.days.length === 0) {
+      return 'Voeg minimaal één dag toe aan het schema';
+    }
+
+    for (let i = 0; i < schema.days.length; i++) {
+      const day = schema.days[i];
+      if (!day.name.trim()) {
+        return `Dag ${i + 1} heeft geen naam`;
+      }
+
+      if (day.exercises.length === 0) {
+        return `Dag ${i + 1} heeft geen oefeningen`;
+      }
+
+      for (let j = 0; j < day.exercises.length; j++) {
+        const exercise = day.exercises[j];
+        if (!exercise.exercise_name.trim()) {
+          return `Oefening ${j + 1} in dag ${i + 1} heeft geen naam`;
+        }
+        if (exercise.sets <= 0) {
+          return `Oefening ${j + 1} in dag ${i + 1} heeft ongeldig aantal sets`;
+        }
+        if (!exercise.reps.trim()) {
+          return `Oefening ${j + 1} in dag ${i + 1} heeft geen reps`;
+        }
+        if (exercise.rest_time < 0) {
+          return `Oefening ${j + 1} in dag ${i + 1} heeft ongeldige rusttijd`;
+        }
+      }
+    }
+
+    return null;
+  };
+
+  const handleSave = async () => {
+    const validationError = validateSchema(formData);
+    if (validationError) {
+      toast.error(validationError);
       return;
     }
 
     setLoading(true);
     try {
       // Save schema
+      console.log('Saving schema with data:', {
+        id: formData.id,
+        name: formData.name,
+        description: formData.description,
+        category: formData.category,
+        difficulty: formData.difficulty,
+        status: formData.status
+      });
+
       const { data: schemaData, error: schemaError } = await supabase
         .from('training_schemas')
         .upsert({
@@ -381,13 +425,22 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
         .select()
         .single();
 
-      if (schemaError) throw schemaError;
+      if (schemaError) {
+        console.error('Schema save error:', schemaError);
+        throw new Error(`Schema save failed: ${schemaError.message}`);
+      }
+
+      if (!schemaData) {
+        throw new Error('No schema data returned after save');
+      }
 
       const schemaId = schemaData.id;
 
       // Save days
       for (let i = 0; i < formData.days.length; i++) {
         const day = formData.days[i];
+        console.log(`Saving day ${i + 1}:`, day);
+
         const { data: dayData, error: dayError } = await supabase
           .from('training_schema_days')
           .upsert({
@@ -400,14 +453,23 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
           .select()
           .single();
 
-        if (dayError) throw dayError;
+        if (dayError) {
+          console.error(`Day ${i + 1} save error:`, dayError);
+          throw new Error(`Day save failed: ${dayError.message}`);
+        }
+
+        if (!dayData) {
+          throw new Error(`No day data returned for day ${i + 1}`);
+        }
 
         const dayId = dayData.id;
 
         // Save exercises for this day
         for (let j = 0; j < day.exercises.length; j++) {
           const exercise = day.exercises[j];
-          await supabase
+          console.log(`Saving exercise ${j + 1} for day ${i + 1}:`, exercise);
+
+          const { error: exerciseError } = await supabase
             .from('training_schema_exercises')
             .upsert({
               id: exercise.id,
@@ -419,6 +481,11 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
               rest_time: exercise.rest_time,
               order_index: exercise.order_index
             });
+
+          if (exerciseError) {
+            console.error(`Exercise ${j + 1} save error:`, exerciseError);
+            throw new Error(`Exercise save failed: ${exerciseError.message}`);
+          }
         }
       }
 
@@ -427,7 +494,26 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
       onClose();
     } catch (error) {
       console.error('Error saving schema:', error);
-      toast.error('Fout bij het opslaan van het schema');
+      console.error('Error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        formData: formData
+      });
+      
+      // More specific error messages
+      if (error instanceof Error) {
+        if (error.message.includes('duplicate key')) {
+          toast.error('Schema naam bestaat al. Kies een andere naam.');
+        } else if (error.message.includes('foreign key')) {
+          toast.error('Ongeldige oefening geselecteerd. Controleer je schema.');
+        } else if (error.message.includes('not null')) {
+          toast.error('Vul alle verplichte velden in.');
+        } else {
+          toast.error(`Fout bij het opslaan van het schema: ${error.message}`);
+        }
+      } else {
+        toast.error('Fout bij het opslaan van het schema');
+      }
     } finally {
       setLoading(false);
     }
