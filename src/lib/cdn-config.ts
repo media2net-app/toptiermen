@@ -51,8 +51,8 @@ export const supabaseCDN: CDNConfig = {
   transformUrl: (url: string) => url
 };
 
-// Active CDN configuration
-export const activeCDN: CDNConfig = vercelCDN;
+// Active CDN configuration - Use Supabase CDN for now (no transformation needed)
+export const activeCDN: CDNConfig = supabaseCDN;
 
 /**
  * Get optimized video URL with CDN
