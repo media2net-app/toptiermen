@@ -170,7 +170,14 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         const timeoutId = setTimeout(() => {
           console.warn('Auth initialization timeout, forcing loading to false');
           setLoading(false);
-        }, 15000); // 15 second timeout
+          // Clear any stale session data that might be causing issues
+          try {
+            localStorage.removeItem('toptiermen-auth');
+            sessionStorage.clear();
+          } catch (error) {
+            console.error('Error clearing stale session data:', error);
+          }
+        }, 8000); // Reduced to 8 seconds for faster recovery
 
         const { data: { session }, error } = await supabase.auth.getSession();
         
