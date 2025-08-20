@@ -166,29 +166,17 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     // Get initial session
     const getInitialSession = async () => {
       try {
-        console.log('🔍 Starting auth initialization...');
-        
         // Add timeout to prevent infinite loading
         const timeoutId = setTimeout(() => {
           console.warn('Auth initialization timeout, forcing loading to false');
           setLoading(false);
-          // Don't clear session data on timeout - let it persist
-        }, 15000); // Extended to 15 seconds for better reliability
+        }, 15000); // 15 second timeout
 
         const { data: { session }, error } = await supabase.auth.getSession();
-        
-        console.log('🔍 Session check result:', { 
-          hasSession: !!session, 
-          hasUser: !!session?.user, 
-          userEmail: session?.user?.email,
-          error: error?.message 
-        });
         
         if (error) {
           console.error('Error getting session:', error);
         } else if (session?.user) {
-          console.log('🔍 User session found, getting profile...');
-          
           // Get user profile from profiles table
           const { data: profile, error: profileError } = await supabase
             .from('users')
@@ -198,15 +186,14 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
 
           if (profileError) {
             console.error('Error getting profile:', profileError);
-            // Still set user even if profile fetch fails
+            // Fallback: set minimal user info from auth session
             setUser({
               id: session.user.id,
-              email: session.user.email!,
-              full_name: session.user.user_metadata?.full_name,
+              email: session.user.email || '',
+              full_name: (session.user.user_metadata as any)?.full_name,
               role: 'USER'
             });
           } else if (profile) {
-            console.log('🔍 Profile loaded successfully:', profile.email);
             setUser({
               id: profile.id,
               email: profile.email,
@@ -214,8 +201,6 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
               role: normalizeRole(profile.role)
             });
           }
-        } else {
-          console.log('🔍 No active session found');
         }
         
         clearTimeout(timeoutId);
@@ -235,11 +220,9 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('🔍 Auth state changed:', event, session?.user?.email);
+        console.log('Auth state changed:', event, session?.user?.email);
         
         if (event === 'SIGNED_IN' && session?.user) {
-          console.log('🔍 User signed in, getting profile...');
-          
           // Get user profile
           const { data: profile, error: profileError } = await supabase
             .from('users')
@@ -249,15 +232,14 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
 
           if (profileError) {
             console.error('Error getting profile on sign in:', profileError);
-            // Still set user even if profile fetch fails
+            // Fallback to auth session user if profile cannot be fetched
             setUser({
               id: session.user.id,
-              email: session.user.email!,
-              full_name: session.user.user_metadata?.full_name,
+              email: session.user.email || '',
+              full_name: (session.user.user_metadata as any)?.full_name,
               role: 'USER'
             });
           } else if (profile) {
-            console.log('🔍 Profile loaded on sign in:', profile.email);
             setUser({
               id: profile.id,
               email: profile.email,
@@ -266,12 +248,9 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
             });
           }
         } else if (event === 'SIGNED_OUT') {
-          console.log('🔍 User signed out');
           setUser(null);
         } else if (event === 'TOKEN_REFRESHED') {
-          console.log('🔍 Token refreshed successfully');
-        } else if (event === 'USER_UPDATED') {
-          console.log('🔍 User updated');
+          console.log('Token refreshed successfully');
         }
         
         setLoading(false);
@@ -308,7 +287,14 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
 
         if (profileError) {
           console.error('Error getting profile:', profileError);
-          return { success: false, error: 'Error getting user profile' };
+          // Fallback to auth user if profile not readable (e.g., RLS)
+          setUser({
+            id: data.user.id,
+            email: data.user.email!,
+            full_name: (data.user.user_metadata as any)?.full_name,
+            role: 'USER'
+          });
+          return { success: true };
         }
 
         if (profile) {
@@ -360,7 +346,14 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
 
         if (profileError) {
           console.error('Error creating profile:', profileError);
-          return { success: false, error: 'Error creating user profile' };
+          // Fallback: still consider sign-up successful with auth user only
+          setUser({
+            id: data.user.id,
+            email: data.user.email!,
+            full_name: fullName,
+            role: 'USER'
+          });
+          return { success: true };
         }
 
         setUser({

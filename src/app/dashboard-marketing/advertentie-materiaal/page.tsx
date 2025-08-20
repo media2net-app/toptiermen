@@ -1,682 +1,190 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
-import { supabase } from '@/lib/supabase';
-import { getCDNVideoUrl } from '@/lib/cdn-config';
-
-interface VideoFile {
-  id: string;
-  name: string;
-  size: number;
-  created_at: string;
-  updated_at: string;
-  last_accessed_at: string;
-  metadata: {
-    eTag: string;
-    size: number;
-    mimetype: string;
-    cacheControl: string;
-    lastModified: string;
-    contentLength: number;
-    httpStatusCode: number;
-  };
-  bucket_id: string;
-  owner: string;
-}
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  PlusIcon,
+  MagnifyingGlassIcon,
+  FunnelIcon,
+  EyeIcon,
+  ArrowDownTrayIcon,
+  TrashIcon,
+  PlayIcon,
+  PauseIcon,
+  ExclamationTriangleIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+  ClockIcon,
+  ChartBarIcon,
+  CurrencyDollarIcon,
+  UserGroupIcon,
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon,
+  StarIcon,
+  FireIcon,
+  CalendarIcon,
+  PencilIcon,
+  VideoCameraIcon
+} from '@heroicons/react/24/outline';
+import CampaignSetup from './campaign-setup';
+import { VideosService, VideoFile } from '@/lib/videos-service';
 
 export default function AdvertentieMateriaalPage() {
-  const { user, loading: authLoading } = useSupabaseAuth();
   const [videos, setVideos] = useState<VideoFile[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<VideoFile | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [bucketName, setBucketName] = useState<string>('advertenties');
+  const [showCampaignSetup, setShowCampaignSetup] = useState(false);
+  const [campaignVideo, setCampaignVideo] = useState<VideoFile | null>(null);
+  const [editingVideo, setEditingVideo] = useState<VideoFile | null>(null);
+  const [editingName, setEditingName] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
 
-  // Function to find the correct bucket name
-  const findAdvertentiesBucket = (buckets: any[]) => {
-    const possibleNames = ['advertenties', 'Advertenties', 'ADVERTENTIES', 'advertentie', 'Advertentie'];
-    
-    for (const name of possibleNames) {
-      const bucket = buckets.find(b => b.id === name);
-      if (bucket) {
-        console.log(`✅ Found bucket with name: "${name}"`);
-        return name;
-      }
-    }
-    
-    // Case-insensitive search
-    const bucket = buckets.find(b => b.id.toLowerCase() === 'advertenties');
-    if (bucket) {
-      console.log(`✅ Found bucket with case-insensitive match: "${bucket.id}"`);
-      return bucket.id;
-    }
-    
-    return null;
-  };
-
-  // Fetch videos from bucket
+  // Fetch videos from database
   const fetchVideos = async () => {
-    if (!user || authLoading) {
-      console.log('⏳ Waiting for user authentication...');
-      return;
-    }
-
-    console.log('🔍 Fetching videos...');
+    console.log('🔍 Fetching videos from database...');
     setLoading(true);
     setError(null);
 
     try {
-      // Test supabase client
-      console.log('🔧 Testing Supabase client...');
-      if (!supabase) {
-        console.error('❌ Supabase client is not available');
-        setError('Supabase client niet beschikbaar');
-        return;
-      }
-
-      if (!supabase.storage) {
-        console.error('❌ Supabase storage is not available');
-        setError('Supabase storage niet beschikbaar');
-        return;
-      }
-
-      // Get available buckets
-      console.log('📦 Getting available buckets...');
-      const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
-      
-      if (bucketsError) {
-        console.error('❌ Error getting buckets:', bucketsError);
-      } else {
-        console.log('📦 Available buckets:', buckets?.map(b => b.id) || 'None');
-      }
-
-      // Find the advertenties bucket
-      const advertentiesBucket = buckets ? findAdvertentiesBucket(buckets) : null;
-      
-      if (advertentiesBucket) {
-        setBucketName(advertentiesBucket);
-        console.log(`✅ Using bucket: ${advertentiesBucket}`);
-      } else {
-        console.log('⚠️ Advertenties bucket not found in buckets list, trying direct access...');
-      }
-
-      // Try direct access to advertenties bucket
-      console.log('🔍 Trying direct access to advertenties bucket...');
-      const { data: directData, error: directError } = await supabase.storage
-        .from('advertenties')
-        .list('', {
-          limit: 100,
-          offset: 0,
-          sortBy: { column: 'created_at', order: 'desc' }
-        });
-
-      if (directError) {
-        console.error('❌ Direct access error:', directError);
-      } else {
-        console.log('✅ Direct access successful, files found:', directData?.length || 0);
-      }
-
-      // Use the data from direct access if available, otherwise try normal listing
-      let data = directData;
-      let error = directError;
-      
-      if (!data && !error) {
-        console.log('🔄 Trying normal bucket listing as fallback...');
-        const result = await supabase.storage
-          .from(bucketName)
-          .list('', {
-            limit: 100,
-            offset: 0,
-            sortBy: { column: 'created_at', order: 'desc' }
-          });
-        
-        data = result.data;
-        error = result.error;
-      }
-
-      // If still no data, try to load existing videos from the bucket you showed earlier
-      if (!data || data.length === 0) {
-        console.log('🔍 Trying to load existing videos from bucket...');
-        
-        // Try to access the bucket with different methods
-        try {
-          // Method 1: Try with service role key (if available)
-          console.log('🔧 Trying alternative bucket access method...');
-          
-          // Method 2: Try to list with different parameters
-          const altResult = await supabase.storage
-            .from('advertenties')
-            .list('', { 
-              limit: 50,
-              offset: 0
-            });
-          
-          if (altResult.data && altResult.data.length > 0) {
-            console.log('✅ Alternative method found videos:', altResult.data.length);
-            data = altResult.data;
-          } else {
-            console.log('⚠️ Alternative method also returned no data');
-            
-            // Get actual files from bucket instead of using mock data
-            console.log('🔍 Getting actual files from advertenties bucket...');
-            const { data: actualFiles, error: actualFilesError } = await supabase.storage
-              .from('advertenties')
-              .list('', { limit: 100 });
-            
-            if (actualFilesError) {
-              console.error('❌ Error getting actual files:', actualFilesError);
-              setError('Fout bij ophalen van video bestanden');
-              return;
-            }
-            
-            console.log('📁 Actual files in bucket:', actualFiles?.map(f => f.name) || []);
-            
-            if (!actualFiles || actualFiles.length === 0) {
-              console.log('⚠️ No files found in bucket');
-              setVideos([]);
-              return;
-            }
-            
-            // Use actual files from bucket
-            const existingFiles = actualFiles.map(f => f.name);
-
-            // Convert actual files to VideoFile format
-            console.log('🔍 Converting actual files to VideoFile format...');
-            const realFileData: any[] = actualFiles.map((file, index) => ({
-              id: file.id || `file-${index}`,
-              name: file.name,
-              size: file.metadata?.size || 0,
-              created_at: file.created_at || new Date().toISOString(),
-              updated_at: file.updated_at || new Date().toISOString(),
-              last_accessed_at: file.last_accessed_at || new Date().toISOString(),
-              metadata: {
-                eTag: file.metadata?.eTag || `etag-${index}`,
-                size: file.metadata?.size || 0,
-                mimetype: file.metadata?.mimetype || 'video/mp4',
-                cacheControl: file.metadata?.cacheControl || '3600',
-                lastModified: file.metadata?.lastModified || new Date().toISOString(),
-                contentLength: file.metadata?.contentLength || 0,
-                httpStatusCode: file.metadata?.httpStatusCode || 200
-              },
-              bucket_id: 'advertenties',
-              owner: file.owner || user?.id || 'unknown'
-            }));
-
-            console.log('📁 Converted files:', realFileData.length);
-            data = realFileData;
-          }
-        } catch (altError) {
-          console.error('❌ Alternative method failed:', altError);
-        }
-      }
-
-      // Only try to access bucket properties if the bucket object exists
-      if (advertentiesBucket) {
-        try {
-          const bucketProps = await supabase.storage.getBucket(advertentiesBucket);
-          console.log('📦 Bucket properties:', bucketProps);
-        } catch (propsError) {
-          console.log('⚠️ Could not get bucket properties:', propsError);
-        }
-      }
-
-      // Test workout-videos bucket access for comparison
-      try {
-        const workoutResult = await supabase.storage
-          .from('workout-videos')
-          .list('', { limit: 5 });
-        console.log('🏋️ Workout videos bucket test:', workoutResult.data?.length || 0, 'files');
-      } catch (workoutError) {
-        console.log('⚠️ Workout videos bucket test failed:', workoutError);
-      }
-
-      if (error) {
-        console.error('❌ Error fetching videos:', error);
-        setError(`Fout bij ophalen van video's: ${error.message}`);
-        return;
-      }
-
-      if (data) {
-        // Filter for video files and transform to VideoFile format
-        const videoFiles: VideoFile[] = data
-          .filter(file => {
-            const isVideo = file.metadata?.mimetype?.startsWith('video/') || 
-                           file.name?.toLowerCase().match(/\.(mp4|avi|mov|wmv|flv|webm|mkv)$/);
-            return isVideo;
-          })
-          .map(file => ({
-            id: file.id,
-            name: file.name,
-            size: file.metadata?.size || 0,
-            created_at: file.created_at,
-            updated_at: file.updated_at,
-            last_accessed_at: file.last_accessed_at,
-            metadata: {
-              eTag: file.metadata?.eTag || '',
-              size: file.metadata?.size || 0,
-              mimetype: file.metadata?.mimetype || 'video/mp4',
-              cacheControl: file.metadata?.cacheControl || '3600',
-              lastModified: file.metadata?.lastModified || new Date().toISOString(),
-              contentLength: file.metadata?.contentLength || 0,
-              httpStatusCode: file.metadata?.httpStatusCode || 200
-            },
-            bucket_id: file.bucket_id,
-            owner: file.owner
-          }));
-
-        console.log('📹 Found video files:', videoFiles.length);
-        setVideos(videoFiles);
-
-        // If no videos found, test upload functionality
-        if (videoFiles.length === 0) {
-          console.log('🧪 No videos found, testing upload functionality...');
-          testUploadFunctionality();
-        }
-      } else {
-        console.log('⚠️ No data returned from bucket');
-        setVideos([]);
-      }
+      const videosData = await VideosService.getVideos();
+      console.log('✅ Fetched videos:', videosData.length);
+      setVideos(videosData);
     } catch (err) {
-      console.error('❌ Unexpected error:', err);
-      setError('Onverwachte fout bij ophalen van video\'s');
+      console.error('❌ Error fetching videos:', err);
+      setError('Fout bij het ophalen van video\'s');
     } finally {
       setLoading(false);
     }
   };
 
-  // Test bucket access and upload functionality
-  const testBucketAccess = async () => {
-    console.log('🧪 Testing bucket access and functionality...');
-    
-    // Test 1: Check if bucket exists
-    console.log('🔍 Step 1: Checking if advertenties bucket exists...');
-    const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
-    
-    if (bucketsError) {
-      console.error('❌ Error listing buckets:', bucketsError);
-      return;
-    }
-    
-    console.log('📦 Available buckets:', buckets?.map(b => b.id) || []);
-    const advertentiesBucket = buckets?.find(b => b.id === 'advertenties');
-    console.log('🎯 Advertenties bucket found:', !!advertentiesBucket);
-    
-    // Test 2: Try to list files in bucket
-    console.log('🔍 Step 2: Listing files in advertenties bucket...');
-    const { data: files, error: filesError } = await supabase.storage
-      .from('advertenties')
-      .list('', { limit: 100 });
-    
-    if (filesError) {
-      console.error('❌ Error listing files:', filesError);
-      return;
-    }
-    
-    console.log('📁 Files in advertenties bucket:', files?.map(f => f.name) || []);
-    console.log('📊 Total files found:', files?.length || 0);
-    
-    // Test 3: Try to upload a test file
-    console.log('🔍 Step 3: Testing upload functionality...');
-    try {
-      const testContent = 'This is a test file for bucket access verification';
-      const testBlob = new Blob([testContent], { type: 'text/plain' });
-      const testFileName = `test-access-${Date.now()}.txt`;
-      
-      console.log('📤 Attempting test upload...');
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('advertenties')
-        .upload(testFileName, testBlob, {
-          cacheControl: '3600',
-          upsert: false
-        });
-      
-      if (uploadError) {
-        console.error('❌ Test upload failed:', uploadError);
-        setError(`Upload test failed: ${uploadError.message}`);
-      } else {
-        console.log('✅ Test upload successful:', uploadData);
-        
-        // Clean up test file
-        console.log('🧹 Cleaning up test file...');
-        const { error: deleteError } = await supabase.storage
-          .from('advertenties')
-          .remove([testFileName]);
-        
-        if (deleteError) {
-          console.log('⚠️ Could not clean up test file:', deleteError.message);
-        } else {
-          console.log('✅ Test file cleaned up successfully');
-        }
-        
-        console.log('🎉 Bucket access test completed successfully!');
-      }
-    } catch (error) {
-      console.error('❌ Test upload error:', error);
-      setError(`Test upload error: ${error}`);
-    }
-  };
+  // Load videos on component mount
+  useEffect(() => {
+    fetchVideos();
+  }, []);
 
-  // Test video URL functionality
-  const testVideoUrls = async () => {
-    console.log('🧪 Testing video URLs...');
-    
-    // First, let's see what files actually exist in the bucket
-    console.log('🔍 Checking what files exist in advertenties bucket...');
-    const { data: bucketFiles, error: bucketError } = await supabase.storage
-      .from('advertenties')
-      .list('', { limit: 100 });
-    
-    if (bucketError) {
-      console.error('❌ Error listing bucket files:', bucketError);
-      return;
-    }
-    
-    console.log('📁 Files in bucket:', bucketFiles?.map(f => f.name) || []);
-    
-    const testFiles = bucketFiles?.map(f => f.name) || [
-      'TTM_Het_Merk_Prelaunch_1.mp4',
-      'TTM_Het_Merk_Prelaunch_Reel_01_V2.mov'
-    ];
-    
-    for (const fileName of testFiles) {
-      try {
-        console.log(`🧪 Testing URL for: ${fileName}`);
-        const url = getVideoUrl(fileName);
-        console.log(`🧪 Generated URL: ${url}`);
-        
-        if (!url) {
-          console.error(`❌ No URL generated for: ${fileName}`);
-          continue;
-        }
-        
-        // Test if URL is accessible
-        const response = await fetch(url, { method: 'HEAD' });
-        console.log(`🧪 URL test result: ${response.status} ${response.statusText}`);
-        
-        if (response.ok) {
-          console.log(`✅ URL works for: ${fileName}`);
-        } else {
-          console.error(`❌ URL failed for: ${fileName} - ${response.status}`);
-        }
-      } catch (error) {
-        console.error(`❌ Error testing URL for ${fileName}:`, error);
-      }
-    }
-  };
-
-  // Test upload functionality
-  const testUploadFunctionality = async () => {
-    try {
-      console.log('🧪 Creating test file for upload test...');
-      
-      // Create a small test file
-      const testContent = 'This is a test file for upload functionality';
-      const testBlob = new Blob([testContent], { type: 'text/plain' });
-      const testFileName = `test-upload-${Date.now()}.txt`;
-      
-      console.log('🧪 Attempting test upload...');
-      
-      // Try with signed URL approach first
-      const { data, error } = await supabase.storage
-        .from('advertenties')
-        .upload(testFileName, testBlob, {
-          cacheControl: '3600',
-          upsert: false
-        });
-      
-      if (error) {
-        console.error('❌ Test upload failed:', error);
-        
-        // If RLS error, try to provide helpful guidance
-        if (error.message.includes('row-level security') || error.message.includes('violates')) {
-          console.log('🔧 RLS Policy Issue Detected!');
-          console.log('📋 Manual fix required:');
-          console.log('   1. Go to Supabase Dashboard → Storage');
-          console.log('   2. Find "advertenties" bucket');
-          console.log('   3. Click bucket settings');
-          console.log('   4. Set "Public bucket" to ON');
-          console.log('   5. Save changes');
-          console.log('   6. Refresh this page');
-          
-          setError('RLS Policy Issue: Zet de advertenties bucket op "Public" in Supabase Dashboard → Storage → advertenties → Settings → Public bucket ON');
-        } else {
-          console.log('⚠️ Upload functionality may not work');
-        }
-      } else {
-        console.log('✅ Test upload successful:', data);
-        
-        // Clean up test file
-        console.log('🧹 Cleaning up test file...');
-        const { error: deleteError } = await supabase.storage
-          .from('advertenties')
-          .remove([testFileName]);
-        
-        if (deleteError) {
-          console.log('⚠️ Could not clean up test file:', deleteError.message);
-        } else {
-          console.log('✅ Test file cleaned up successfully');
-        }
-        
-        console.log('🎉 Upload functionality is working!');
-      }
-    } catch (err) {
-      console.error('❌ Test upload error:', err);
-    }
-  };
+  // Filter videos based on search and status
+  const filteredVideos = videos.filter(video => {
+    const matchesSearch = video.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         video.original_name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = filterStatus === 'all' || video.campaign_status === filterStatus;
+    return matchesSearch && matchesStatus;
+  });
 
   // Handle file upload
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
-    if (!file.type.startsWith('video/')) {
-      setError('Alleen video bestanden zijn toegestaan');
-      return;
-    }
-
-    // Validate file size (500MB limit)
-    const maxSize = 500 * 1024 * 1024; // 500MB
-    if (file.size > maxSize) {
-      setError('Bestand is te groot. Maximum grootte is 500MB');
-      return;
-    }
-
     setUploading(true);
-    setError(null);
     setUploadProgress(0);
 
     try {
-      const fileName = `${Date.now()}-${file.name}`;
-      
-      const { data, error } = await supabase.storage
-        .from(bucketName)
-        .upload(fileName, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
+      // Create video data
+      const videoData = {
+        name: file.name.replace(/\.[^/.]+$/, ''), // Remove extension
+        original_name: file.name,
+        file_path: `/videos/advertenties/${file.name}`,
+        file_size: file.size,
+        mime_type: file.type || 'video/mp4',
+        campaign_status: 'inactive' as const
+      };
 
-      if (error) {
-        console.error('Upload error:', error);
-        
-        // Check for RLS policy error
-        if (error.message.includes('row-level security') || error.message.includes('violates')) {
-          setError('RLS Policy Issue: Zet de advertenties bucket op "Public" in Supabase Dashboard → Storage → advertenties → Settings → Public bucket ON');
-        } else {
-          setError(`Upload fout: ${error.message}`);
-        }
-        return;
-      }
+      // Add to database
+      const newVideo = await VideosService.createVideo(videoData);
+      console.log('✅ Video uploaded:', newVideo);
 
-      if (data) {
-        console.log('Upload successful:', data);
-        setUploadProgress(100);
-        
-        // Refresh the video list
-        setTimeout(() => {
-          fetchVideos();
-          setUploadProgress(0);
-        }, 1000);
-      }
+      // Refresh videos list
+      await fetchVideos();
+
+      // Reset form
+      event.target.value = '';
+      setUploadProgress(100);
     } catch (err) {
-      console.error('Upload error:', err);
-      setError('Onverwachte fout bij uploaden');
+      console.error('❌ Error uploading video:', err);
+      setError('Fout bij het uploaden van video');
     } finally {
       setUploading(false);
+      setUploadProgress(0);
     }
   };
 
-  // Get video URL with CDN optimization
-  const getVideoUrl = (fileName: string) => {
-    console.log('🔗 Getting video URL for:', fileName);
-    
-    try {
-      // Get public URL from Supabase
-      const { data } = supabase.storage
-        .from('advertenties')
-        .getPublicUrl(fileName);
-      
-      if (!data?.publicUrl) {
-        console.error('❌ No public URL returned for:', fileName);
-        return '';
-      }
-      
-      console.log('✅ Got Supabase URL:', data.publicUrl);
-      
-      // Test direct URL first, then CDN
-      const directUrl = data.publicUrl;
-      console.log('🎬 Using direct URL for testing:', directUrl);
-      
-      // For now, use direct URL to ensure it works
-      return directUrl;
-      
-    } catch (error) {
-      console.error('❌ Error getting video URL:', error);
-      return '';
-    }
-  };
-
-  // Get video thumbnail URL for preview
-  const getVideoThumbnailUrl = (fileName: string) => {
-    try {
-      const { data } = supabase.storage
-        .from('advertenties')
-        .getPublicUrl(fileName);
-      
-      if (!data?.publicUrl) {
-        return '';
-      }
-      
-      // Add thumbnail parameters for faster loading
-      const separator = data.publicUrl.includes('?') ? '&' : '?';
-      return `${data.publicUrl}${separator}thumb=1&width=400&height=500&quality=80`;
-      
-    } catch (error) {
-      console.error('❌ Error getting thumbnail URL:', error);
-      return '';
-    }
-  };
-
-  // Get signed URL for private access (fallback)
-  const getSignedUrl = async (fileName: string) => {
-    const { data, error } = await supabase.storage
-      .from(bucketName)
-      .createSignedUrl(fileName, 3600); // 1 hour expiry
-    
-    if (error) {
-      console.error('Error creating signed URL:', error);
-      return getVideoUrl(fileName); // Fallback to public URL
-    }
-    
-    return data.signedUrl;
-  };
-
-  // Delete video
-  const deleteVideo = async (fileName: string) => {
+  // Handle video deletion
+  const handleDeleteVideo = async (videoId: string) => {
     if (!confirm('Weet je zeker dat je deze video wilt verwijderen?')) return;
 
     try {
-      const { error } = await supabase.storage
-        .from(bucketName)
-        .remove([fileName]);
-
-      if (error) {
-        console.error('Delete error:', error);
-        setError('Fout bij verwijderen van video');
-        return;
-      }
-
-      // Refresh the video list
-      fetchVideos();
+      await VideosService.deleteVideo(videoId);
+      console.log('✅ Video deleted:', videoId);
+      await fetchVideos();
     } catch (err) {
-      console.error('Delete error:', err);
-      setError('Onverwachte fout bij verwijderen');
+      console.error('❌ Error deleting video:', err);
+      setError('Fout bij het verwijderen van video');
     }
   };
 
-  // Format file size
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
-
-  // Format date
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('nl-NL', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  useEffect(() => {
-    if (user && !authLoading) {
-      fetchVideos();
-      // Test bucket access and video URLs after fetching videos
-      setTimeout(() => {
-        testBucketAccess();
-        testVideoUrls();
-      }, 2000);
+  // Handle target audience update
+  const saveTargetAudience = async (videoId: string, targetAudience: string) => {
+    try {
+      await VideosService.updateTargetAudience(videoId, targetAudience);
+      console.log('✅ Target audience saved for video:', videoId, targetAudience);
+      await fetchVideos(); // Refresh to get updated data
+    } catch (err) {
+      console.error('❌ Error saving target audience:', err);
+      setError('Fout bij het opslaan van doelgroep');
     }
-  }, [user, authLoading]);
+  };
 
-  // Show loading while auth is being checked
-  if (authLoading) {
+  // Handle campaign status toggle
+  const toggleCampaignStatus = async (videoId: string) => {
+    try {
+      await VideosService.toggleCampaignStatus(videoId);
+      console.log('✅ Campaign status toggled for video:', videoId);
+      await fetchVideos(); // Refresh to get updated data
+    } catch (err) {
+      console.error('❌ Error toggling campaign status:', err);
+      setError('Fout bij het wijzigen van campagne status');
+    }
+  };
+
+  // Handle video name editing
+  const startEditingName = (video: VideoFile) => {
+    setEditingVideo(video);
+    setEditingName(video.name);
+  };
+
+  const saveVideoName = async () => {
+    if (!editingVideo || !editingName.trim()) return;
+
+    try {
+      await VideosService.updateVideoName(editingVideo.id, editingName.trim());
+      console.log('✅ Video name updated:', editingVideo.id, editingName);
+      await fetchVideos(); // Refresh to get updated data
+      setEditingVideo(null);
+      setEditingName('');
+    } catch (err) {
+      console.error('❌ Error updating video name:', err);
+      setError('Fout bij het bijwerken van video naam');
+    }
+  };
+
+  const cancelEditingName = () => {
+    setEditingVideo(null);
+    setEditingName('');
+  };
+
+  // Get video URL
+  const getVideoUrl = (video: VideoFile): string => {
+    return VideosService.getVideoUrl(video);
+  };
+
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="w-8 h-8 text-blue-500 animate-spin mx-auto mb-4">⏳</div>
-          <p className="text-gray-400">Authenticatie controleren...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Show access denied if not authenticated
-  if (!user) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="w-12 h-12 text-yellow-500 mx-auto mb-4">⚠️</div>
-          <h2 className="text-xl font-semibold text-white mb-2">Toegang vereist</h2>
-          <p className="text-gray-400">Je moet ingelogd zijn om advertentie materiaal te bekijken.</p>
-          <div className="mt-4">
-            <a 
-              href="/login" 
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
-            >
-              Inloggen
-            </a>
-          </div>
-        </div>
+        <div className="text-white">Video's laden...</div>
       </div>
     );
   }
@@ -687,12 +195,12 @@ export default function AdvertentieMateriaalPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Advertentie Materiaal</h1>
-          <p className="text-gray-400 mt-1">Beheer je video bestanden voor advertenties</p>
+          <p className="text-gray-400 mt-1">Beheer je video advertenties</p>
         </div>
-        
-        {/* Upload Button */}
         <div className="flex items-center space-x-4">
-          <label className="relative cursor-pointer">
+          <label className="bg-[#3A4D23] hover:bg-[#4A5D33] text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors cursor-pointer">
+            <PlusIcon className="w-5 h-5" />
+            <span>Video Uploaden</span>
             <input
               type="file"
               accept="video/*"
@@ -700,390 +208,313 @@ export default function AdvertentieMateriaalPage() {
               className="hidden"
               disabled={uploading}
             />
-            <div className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors font-medium">
-              {uploading ? (
-                <>
-                  <div className="w-5 h-5 animate-spin">⏳</div>
-                  <span>Uploaden...</span>
-                </>
-              ) : (
-                <>
-                  <div className="w-5 h-5">📤</div>
-                  <span>Video Uploaden</span>
-                </>
-              )}
-            </div>
           </label>
         </div>
       </div>
 
-      {/* Upload Progress */}
-      {uploading && uploadProgress > 0 && (
-        <div className="bg-gray-800 border border-gray-700 rounded-lg p-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-gray-300">Upload voortgang</span>
-            <span className="text-sm text-gray-300">{uploadProgress}%</span>
-          </div>
-          <div className="w-full bg-gray-700 rounded-full h-2">
-            <div 
-              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${uploadProgress}%` }}
-            ></div>
-          </div>
-        </div>
-      )}
-
-      {/* Error Message */}
+      {/* Error Display */}
       {error && (
-        <div className="bg-red-900/20 border border-red-500/50 rounded-lg p-4">
-          <div className="flex items-center space-x-3">
-            <div className="w-5 h-5 text-red-400">⚠️</div>
-            <span className="text-red-300">{error}</span>
+        <div className="bg-red-900/20 border border-red-500 text-red-400 px-4 py-3 rounded-lg">
+          {error}
+        </div>
+      )}
+
+      {/* Upload Progress */}
+      {uploading && (
+        <div className="bg-blue-900/20 border border-blue-500 text-blue-400 px-4 py-3 rounded-lg">
+          <div className="flex items-center space-x-2">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-400"></div>
+            <span>Video uploaden... {uploadProgress}%</span>
           </div>
         </div>
       )}
 
-
-
-      {/* Loading State */}
-      {loading && (
-        <div className="flex items-center justify-center py-12">
-          <div className="text-center">
-            <div className="w-8 h-8 text-blue-500 animate-spin mx-auto mb-4">⏳</div>
-            <p className="text-gray-400">Video's laden...</p>
+      {/* Filters */}
+      <div className="bg-[#1A1F2E] border border-[#2D3748] rounded-lg p-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="relative">
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Zoek video's..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-[#2D3748] border border-[#4A5568] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#8BAE5A]"
+            />
           </div>
-        </div>
-      )}
-
-      {/* No Videos State */}
-      {!loading && videos.length === 0 && (
-        <div className="text-center py-12">
-          <div className="w-16 h-16 text-gray-600 mx-auto mb-4">📹</div>
-          <h3 className="text-lg font-medium text-white mb-2">Geen video's gevonden</h3>
-          <p className="text-gray-400 mb-4">Upload je eerste video om te beginnen</p>
           
-          {/* Debug buttons */}
-          <div className="flex justify-center gap-4 mt-6">
-            <button
-              onClick={testBucketAccess}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Test Bucket Access
-            </button>
-            <button
-              onClick={() => {
-                console.log('🔄 Refreshing videos...');
-                fetchVideos();
-              }}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-            >
-              Refresh Videos
-            </button>
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value as 'all' | 'active' | 'inactive')}
+            className="px-4 py-2 bg-[#2D3748] border border-[#4A5568] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A]"
+          >
+            <option value="all">Alle Statussen</option>
+            <option value="active">Actief</option>
+            <option value="inactive">Inactief</option>
+          </select>
+
+          <div className="text-sm text-gray-400 flex items-center">
+            {filteredVideos.length} van {videos.length} video's
           </div>
         </div>
-      )}
+      </div>
 
       {/* Videos Grid */}
-      {!loading && videos.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
-          {videos.map((video) => (
-            <div key={video.id} className="bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
-              {/* Video Player - Vertical for Social Media */}
-              <div className="relative bg-gray-900 cursor-pointer group" onClick={() => setSelectedVideo(video)}>
-                {/* Vertical aspect ratio for social media videos (4:5) - less tall */}
-                <div className="aspect-[4/5] relative">
-                  <video
-                    className="w-full h-full object-cover rounded-t-lg"
-                    src={getVideoUrl(video.name)}
-                    poster={getVideoThumbnailUrl(video.name)}
-                    preload="metadata"
-                    muted
-                    playsInline
-                    onLoadedMetadata={(e) => {
-                      console.log('✅ Video loaded successfully:', video.name);
-                      // Video is ready to play
-                      const videoElement = e.target as HTMLVideoElement;
-                      videoElement.style.display = 'block';
-                      // Hide loading overlay
-                      const loadingOverlay = document.getElementById(`loading-${video.id}`);
-                      if (loadingOverlay) {
-                        loadingOverlay.style.display = 'none';
-                      }
-                    }}
-                    onLoadStart={(e) => {
-                      console.log('🔄 Video loading started:', video.name);
-                      // Show loading state
-                      const videoElement = e.target as HTMLVideoElement;
-                      videoElement.style.display = 'none';
-                      // Show loading overlay
-                      const loadingOverlay = document.getElementById(`loading-${video.id}`);
-                      if (loadingOverlay) {
-                        loadingOverlay.style.display = 'flex';
-                      }
-                    }}
-                    onCanPlay={(e) => {
-                      console.log('🎬 Video can play:', video.name);
-                      // Video is ready to play
-                      const videoElement = e.target as HTMLVideoElement;
-                      videoElement.style.display = 'block';
-                      // Hide loading overlay
-                      const loadingOverlay = document.getElementById(`loading-${video.id}`);
-                      if (loadingOverlay) {
-                        loadingOverlay.style.display = 'none';
-                      }
-                    }}
-                    onError={(e) => {
-                      console.error('❌ Video load error for:', video.name, e);
-                      console.error('❌ Error details:', {
-                        error: e,
-                        videoElement: e.target,
-                        src: (e.target as HTMLVideoElement).src
-                      });
-                      // Show fallback content
-                      const videoElement = e.target as HTMLVideoElement;
-                      const parent = videoElement.parentElement;
-                      if (parent) {
-                        parent.innerHTML = `
-                          <div class="w-full h-full flex items-center justify-center bg-gray-800 rounded-t-lg">
-                            <div class="text-center">
-                              <div class="w-12 h-12 text-gray-400 mb-2">📹</div>
-                              <p class="text-gray-400 text-sm">Video niet beschikbaar</p>
-                              <p class="text-gray-500 text-xs mt-1">${video.name}</p>
-                              <p class="text-gray-600 text-xs mt-1">URL: ${videoElement.src}</p>
-                            </div>
-                          </div>
-                        `;
-                      }
-                    }}
-                  />
-                  
-                  {/* Loading overlay */}
-                  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-t-lg" id={`loading-${video.id}`}>
-                    <div className="text-center">
-                      <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-                      <p className="text-white text-xs">Laden...</p>
-                    </div>
-                  </div>
-                  
-                  {/* Play overlay */}
-                  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 group-hover:bg-opacity-20 transition-all duration-200">
-                    <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center backdrop-blur-sm group-hover:bg-opacity-30 transition-all duration-200">
-                      <div className="w-8 h-8 text-white">▶️</div>
-                    </div>
-                  </div>
-                  
-                  {/* Video type badge */}
-                  <div className="absolute top-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">
-                    {video.metadata?.mimetype || 'video/mp4'}
-                  </div>
-                  
-                  {/* Duration badge (if available) */}
-                  <div className="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">
-                    Social Media
-                  </div>
-                </div>
-              </div>
-
-              {/* Video Info */}
-              <div className="p-4">
-                <h3 className="font-semibold text-white mb-2 truncate" title={video.name}>
-                  {video.name}
-                </h3>
-                
-                <div className="space-y-1 text-sm text-gray-400">
-                  <div className="flex items-center justify-between">
-                    <span>Grootte:</span>
-                    <span>{formatFileSize(video.metadata?.size || 0)}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span>Type:</span>
-                    <span>{video.metadata?.mimetype || 'video/mp4'}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span>Geüpload:</span>
-                    <span>{formatDate(video.created_at)}</span>
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-700">
-                  <button
-                    onClick={() => {
-                      const videoUrl = getVideoUrl(video.name);
-                      if (videoUrl) {
-                        console.log('🔗 Opening video URL:', videoUrl);
-                        window.open(videoUrl, '_blank');
-                      } else {
-                        console.error('❌ No video URL available for:', video.name);
-                        setError(`Video URL niet beschikbaar voor: ${video.name}`);
-                      }
-                    }}
-                    className="flex items-center space-x-1 text-blue-400 hover:text-blue-300 transition-colors"
-                    title="Bekijk video"
-                  >
-                    <div className="w-4 h-4">👁️</div>
-                    <span className="text-sm">Bekijk</span>
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      const videoUrl = getVideoUrl(video.name);
-                      if (videoUrl) {
-                        console.log('⬇️ Downloading video:', videoUrl);
-                        const link = document.createElement('a');
-                        link.href = videoUrl;
-                        link.download = video.name;
-                        link.click();
-                      } else {
-                        console.error('❌ No video URL available for download:', video.name);
-                        setError(`Video URL niet beschikbaar voor download: ${video.name}`);
-                      }
-                    }}
-                    className="flex items-center space-x-1 text-green-400 hover:text-green-300 transition-colors"
-                    title="Download video"
-                  >
-                    <div className="w-4 h-4">⬇️</div>
-                    <span className="text-sm">Download</span>
-                  </button>
-
-                  <button
-                    onClick={() => deleteVideo(video.name)}
-                    className="flex items-center space-x-1 text-red-400 hover:text-red-300 transition-colors"
-                    title="Verwijder video"
-                  >
-                    <div className="w-4 h-4">🗑️</div>
-                    <span className="text-sm">Verwijder</span>
-                  </button>
-                </div>
-              </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredVideos.map((video) => (
+          <motion.div
+            key={video.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-[#1A1F2E] border border-[#2D3748] rounded-lg overflow-hidden"
+          >
+            {/* Video Preview */}
+            <div className="relative aspect-video bg-gray-900">
+              <video
+                data-video-id={video.id}
+                src={getVideoUrl(video)}
+                className="w-full h-full object-cover"
+                preload="auto"
+                controls
+                onLoadedMetadata={(e) => {
+                  console.log('🎬 Video metadata loaded:', video.name);
+                }}
+                onLoadStart={() => {
+                  console.log('🔄 Video loading started:', video.name);
+                }}
+                onCanPlay={() => {
+                  console.log('✅ Video can play:', video.name);
+                }}
+                onError={(e) => {
+                  console.error('❌ Video error:', video.name, e);
+                }}
+              />
             </div>
-          ))}
-        </div>
-      )}
 
-      {/* Video Player Modal - Optimized for Vertical Videos */}
-      {selectedVideo && (
-        <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-xl max-w-2xl w-full max-h-[95vh] overflow-hidden shadow-2xl">
-            {/* Header */}
-            <div className="p-4 border-b border-gray-700 flex items-center justify-between bg-gray-900">
-              <div className="flex-1">
-                <h3 className="text-white font-semibold truncate">{selectedVideo.name}</h3>
-                <p className="text-gray-400 text-sm">
-                  {formatFileSize(selectedVideo.metadata?.size || 0)} • {formatDate(selectedVideo.created_at)}
-                </p>
-              </div>
-              <button
-                onClick={() => setSelectedVideo(null)}
-                className="ml-4 p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
-              >
-                <span className="sr-only">Sluiten</span>
-                <div className="w-6 h-6 text-xl">×</div>
-              </button>
-            </div>
-            
-            {/* Video Player */}
-            <div className="p-4 bg-black">
-              <div className="flex justify-center">
-                <div className="max-w-sm w-full">
-                  {/* Vertical video container */}
-                  <div className="aspect-[4/5] relative bg-black rounded-lg overflow-hidden">
-                    <video
-                      className="w-full h-full object-contain"
-                      src={getVideoUrl(selectedVideo.name)}
-                      controls
-                      autoPlay
-                      playsInline
-                      onLoadedMetadata={(e) => {
-                        console.log('✅ Modal video loaded:', selectedVideo.name);
-                      }}
-                      onError={(e) => {
-                        console.error('❌ Modal video playback error:', e);
-                        // Show error message in modal
-                        const videoElement = e.target as HTMLVideoElement;
-                        const parent = videoElement.parentElement;
-                        if (parent) {
-                          parent.innerHTML = `
-                            <div class="w-full h-full flex items-center justify-center bg-gray-800 rounded-lg">
-                              <div class="text-center">
-                                <div class="w-16 h-16 text-gray-400 mb-4">📹</div>
-                                <p class="text-gray-400 text-lg mb-2">Video niet beschikbaar</p>
-                                <p class="text-gray-500 text-sm">${selectedVideo.name}</p>
-                              </div>
-                            </div>
-                          `;
-                        }
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Footer with actions */}
-            <div className="p-4 border-t border-gray-700 bg-gray-900">
+            {/* Video Info */}
+            <div className="p-4 space-y-3">
+              {/* Video Name */}
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <button
-                    onClick={() => {
-                      const videoUrl = getVideoUrl(selectedVideo.name);
-                      if (videoUrl) {
-                        console.log('🔗 Opening modal video URL:', videoUrl);
-                        window.open(videoUrl, '_blank');
-                      } else {
-                        console.error('❌ No video URL available for modal:', selectedVideo.name);
-                        setError(`Video URL niet beschikbaar voor: ${selectedVideo.name}`);
-                      }
-                    }}
-                    className="flex items-center space-x-2 text-blue-400 hover:text-blue-300 transition-colors"
-                    title="Open in nieuw tabblad"
-                  >
-                    <div className="w-4 h-4">👁️</div>
-                    <span className="text-sm">Open</span>
-                  </button>
-                  
-                  <button
-                    onClick={() => {
-                      const link = document.createElement('a');
-                      link.href = getVideoUrl(selectedVideo.name);
-                      link.download = selectedVideo.name;
-                      link.click();
-                    }}
-                    className="flex items-center space-x-2 text-green-400 hover:text-green-300 transition-colors"
-                    title="Download video"
-                  >
-                    <div className="w-4 h-4">⬇️</div>
-                    <span className="text-sm">Download</span>
-                  </button>
-                </div>
-                
+                {editingVideo?.id === video.id ? (
+                  <div className="flex items-center space-x-2 flex-1">
+                    <input
+                      type="text"
+                      value={editingName}
+                      onChange={(e) => setEditingName(e.target.value)}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') saveVideoName();
+                        if (e.key === 'Escape') cancelEditingName();
+                      }}
+                      className="flex-1 px-2 py-1 text-sm bg-gray-800 border border-gray-700 rounded text-white focus:outline-none focus:border-blue-500"
+                      autoFocus
+                    />
+                    <button
+                      onClick={saveVideoName}
+                      className="px-2 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-xs"
+                    >
+                      ✓
+                    </button>
+                    <button
+                      onClick={cancelEditingName}
+                      className="px-2 py-1 bg-gray-600 hover:bg-gray-700 text-white rounded text-xs"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-2 flex-1">
+                    <h3 className="text-sm font-medium text-white truncate">
+                      {video.name}
+                    </h3>
+                    <button
+                      onClick={() => startEditingName(video)}
+                      className="text-gray-400 hover:text-white transition-colors"
+                      title="Bewerk naam"
+                    >
+                      <PencilIcon className="w-3 h-3" />
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Campaign Status */}
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-gray-400">Campagne Status:</span>
                 <button
-                  onClick={() => deleteVideo(selectedVideo.name)}
-                  className="flex items-center space-x-2 text-red-400 hover:text-red-300 transition-colors"
-                  title="Verwijder video"
+                  onClick={() => toggleCampaignStatus(video.id)}
+                  className={`px-2 py-1 rounded-full text-xs font-medium backdrop-blur-sm cursor-pointer hover:scale-105 transition-all duration-200 ${
+                    video.campaign_status === 'active' 
+                      ? 'bg-green-600 bg-opacity-90 text-white hover:bg-green-500' 
+                      : 'bg-gray-600 bg-opacity-90 text-gray-200 hover:bg-gray-500'
+                  }`}
+                  title={`Klik om status te wijzigen naar ${video.campaign_status === 'active' ? 'inactief' : 'actief'}`}
                 >
-                  <div className="w-4 h-4">🗑️</div>
-                  <span className="text-sm">Verwijder</span>
+                  {video.campaign_status === 'active' ? '🟢 Actief' : '⚪ Inactief'}
                 </button>
               </div>
+
+              {/* Action Buttons */}
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => {
+                    console.log('🔗 Playing video in thumbnail:', video.name);
+                    const videoElement = document.querySelector(`[data-video-id="${video.id}"]`) as HTMLVideoElement;
+                    if (videoElement) {
+                      videoElement.play();
+                    }
+                  }}
+                  className="flex-1 flex items-center justify-center space-x-1 px-2 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-200 hover:scale-105 text-xs"
+                  title="Afspelen"
+                >
+                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z"/>
+                  </svg>
+                  <span className="font-medium">Afspelen</span>
+                </button>
+                
+                <button
+                  onClick={() => window.open(getVideoUrl(video), '_blank')}
+                  className="flex-1 flex items-center justify-center space-x-1 px-2 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all duration-200 hover:scale-105 text-xs"
+                  title="Bekijk"
+                >
+                  <EyeIcon className="w-3 h-3" />
+                  <span className="font-medium">Bekijk</span>
+                </button>
+                
+                                 <button
+                   onClick={() => {
+                     const link = document.createElement('a');
+                     link.href = getVideoUrl(video);
+                     link.download = video.original_name;
+                     link.click();
+                   }}
+                   className="flex-1 flex items-center justify-center space-x-1 px-2 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-all duration-200 hover:scale-105 text-xs"
+                   title="Download"
+                 >
+                   <ArrowDownTrayIcon className="w-3 h-3" />
+                   <span className="font-medium">Download</span>
+                 </button>
+                
+                <button
+                  onClick={() => handleDeleteVideo(video.id)}
+                  className="flex-1 flex items-center justify-center space-x-1 px-2 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all duration-200 hover:scale-105 text-xs"
+                  title="Verwijder"
+                >
+                  <TrashIcon className="w-3 h-3" />
+                  <span className="font-medium">Verwijder</span>
+                </button>
+              </div>
+
+              {/* Campaign Setup Button */}
+              <div className="mt-3">
+                <button
+                  onClick={() => {
+                    setCampaignVideo(video);
+                    setShowCampaignSetup(true);
+                  }}
+                  className="w-full flex items-center justify-center space-x-2 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-all duration-200 hover:scale-105 text-sm font-medium"
+                  title="Campagne opzetten voor deze video"
+                >
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                  </svg>
+                  <span>Campagne Opzetten</span>
+                </button>
+              </div>
+
+              {/* Target Audience Input */}
+              <div className="mt-3 space-y-2">
+                <label className="block text-xs font-medium text-gray-300">
+                  🎯 Doelgroep
+                </label>
+                <div className="flex space-x-2">
+                  <input
+                    type="text"
+                    placeholder="Bijv: Mannen 25-45, fitness, Nederland"
+                    defaultValue={video.target_audience || ''}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        const target = (e.target as HTMLInputElement).value;
+                        if (target.trim()) {
+                          saveTargetAudience(video.id, target.trim());
+                          (e.target as HTMLInputElement).blur();
+                        }
+                      }
+                    }}
+                    onBlur={(e) => {
+                      const target = e.target.value;
+                      if (target.trim() && target !== video.target_audience) {
+                        saveTargetAudience(video.id, target.trim());
+                      }
+                    }}
+                    className="flex-1 px-2 py-1 text-xs bg-gray-800 border border-gray-700 rounded text-white focus:outline-none focus:border-blue-500"
+                  />
+                  <button
+                    onClick={(e) => {
+                      const input = e.currentTarget.previousElementSibling as HTMLInputElement;
+                      const target = input.value.trim();
+                      if (target) {
+                        saveTargetAudience(video.id, target);
+                        input.blur();
+                      }
+                    }}
+                    className="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-medium transition-colors"
+                    title="Doelgroep opslaan"
+                  >
+                    💾
+                  </button>
+                </div>
+                {video.target_audience && (
+                  <div className="text-xs text-gray-400 bg-gray-800 px-2 py-1 rounded">
+                    <strong>Huidige:</strong> {video.target_audience}
+                  </div>
+                )}
+              </div>
+
+              {/* Video Details */}
+              <div className="text-xs text-gray-400 space-y-1">
+                <div>Bestand: {video.original_name}</div>
+                <div>Grootte: {(video.file_size / 1024 / 1024).toFixed(1)} MB</div>
+                <div>Toegevoegd: {new Date(video.created_at).toLocaleDateString('nl-NL')}</div>
+              </div>
             </div>
-          </div>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Empty State */}
+      {filteredVideos.length === 0 && !loading && (
+        <div className="text-center py-12">
+          <VideoCameraIcon className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-400 mb-2">Geen video's gevonden</h3>
+          <p className="text-gray-500">
+            {searchTerm || filterStatus !== 'all' 
+              ? 'Probeer je zoekopdracht of filters aan te passen.'
+              : 'Upload je eerste video om te beginnen.'
+            }
+          </p>
         </div>
       )}
 
-      {/* Debug Information (Development Only) */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="mt-8 p-4 bg-gray-900 rounded-lg">
-          <h3 className="text-white font-semibold mb-2">Debug Info:</h3>
-          <div className="text-sm text-gray-400 space-y-1">
-            <div>User: {user?.email || 'Not logged in'}</div>
-            <div>Auth Loading: {authLoading ? 'Yes' : 'No'}</div>
-            <div>Videos Count: {videos.length}</div>
-            <div>Bucket Name: {bucketName}</div>
-            <div>Supabase Client: {supabase ? 'Available' : 'Not available'}</div>
-            <div>Supabase Storage: {supabase?.storage ? 'Available' : 'Not available'}</div>
-          </div>
-        </div>
+      {/* Campaign Setup Modal */}
+      {showCampaignSetup && campaignVideo && (
+        <CampaignSetup
+          selectedVideo={{
+            id: campaignVideo.id,
+            name: campaignVideo.name,
+            campaignStatus: campaignVideo.campaign_status
+          }}
+          onClose={() => {
+            setShowCampaignSetup(false);
+            setCampaignVideo(null);
+          }}
+          onSave={(campaign) => {
+            console.log('🎯 Campaign saved:', campaign);
+            alert(`Campagne "${campaign.name}" succesvol opgezet!\n\nBudget: €${campaign.budget.amount} ${campaign.budget.type === 'DAILY' ? 'per dag' : 'totaal'}\nTargeting: ${campaign.targeting.ageMin}-${campaign.targeting.ageMax} jaar, ${campaign.targeting.gender}\nLocaties: ${campaign.targeting.locations.join(', ')}`);
+            setShowCampaignSetup(false);
+            setCampaignVideo(null);
+          }}
+        />
       )}
     </div>
   );

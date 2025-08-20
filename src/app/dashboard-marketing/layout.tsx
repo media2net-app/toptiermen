@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { CampaignsProvider } from '@/contexts/CampaignsContext';
 import { 
   ChartBarIcon,
   MegaphoneIcon,
@@ -377,7 +378,9 @@ export default function MarketingLayout({
 
         {/* Main Content */}
         <main className="flex-1 p-4 md:p-6 lg:p-12 overflow-x-auto bg-[#0F1419]">
-          {children}
+          <CampaignsProvider>
+            {children}
+          </CampaignsProvider>
         </main>
       </div>
     </div>

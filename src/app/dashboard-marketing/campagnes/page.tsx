@@ -25,6 +25,7 @@ import {
   CalendarIcon
 } from '@heroicons/react/24/outline';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
+import { useCampaigns } from '@/contexts/CampaignsContext';
 
 // Types
 interface Campaign {
@@ -52,8 +53,7 @@ interface Campaign {
 }
 
 export default function CampaignsPage() {
-  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { campaigns, loading } = useCampaigns();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterPlatform, setFilterPlatform] = useState('all');
@@ -61,130 +61,6 @@ export default function CampaignsPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showCampaignModal, setShowCampaignModal] = useState(false);
   const [viewMode, setViewMode] = useState<'table' | 'cards' | 'calendar'>('table');
-
-  // Mock data
-  useEffect(() => {
-    const mockCampaigns: Campaign[] = [
-      {
-        id: "1",
-        name: "Summer Fitness Challenge",
-        platform: "Facebook",
-        status: "active",
-        objective: "conversions",
-        impressions: 250000,
-        clicks: 8500,
-        conversions: 425,
-        spent: 2800,
-        budget: 5000,
-        dailyBudget: 100,
-        ctr: 3.4,
-        cpc: 0.33,
-        conversionRate: 5.0,
-        roas: 4.8,
-        targetAudience: "Fitness enthusiasts, 25-45, interested in self-improvement",
-        startDate: "2025-07-01",
-        endDate: "2025-08-31",
-        adsCount: 3,
-        createdAt: "2025-07-01T10:00:00Z",
-        lastUpdated: "2025-07-27T10:30:00Z"
-      },
-      {
-        id: "2",
-        name: "Brotherhood Community",
-        platform: "Instagram",
-        status: "active",
-        objective: "engagement",
-        impressions: 180000,
-        clicks: 7200,
-        conversions: 360,
-        spent: 2400,
-        budget: 4000,
-        dailyBudget: 80,
-        ctr: 4.0,
-        cpc: 0.33,
-        conversionRate: 5.0,
-        roas: 4.2,
-        targetAudience: "Men, 18-35, interested in self-improvement and community",
-        startDate: "2025-07-15",
-        endDate: "2025-09-15",
-        adsCount: 2,
-        createdAt: "2025-07-15T14:00:00Z",
-        lastUpdated: "2025-07-27T09:15:00Z"
-      },
-      {
-        id: "3",
-        name: "Premium Membership",
-        platform: "Google Ads",
-        status: "active",
-        objective: "sales",
-        impressions: 320000,
-        clicks: 12800,
-        conversions: 640,
-        spent: 4200,
-        budget: 8000,
-        dailyBudget: 150,
-        ctr: 4.0,
-        cpc: 0.33,
-        conversionRate: 5.0,
-        roas: 4.1,
-        targetAudience: "Professionals, 30-50, high income, interested in premium features",
-        startDate: "2025-06-01",
-        endDate: "2025-12-31",
-        adsCount: 4,
-        createdAt: "2025-06-01T09:00:00Z",
-        lastUpdated: "2025-07-27T08:45:00Z"
-      },
-      {
-        id: "4",
-        name: "Mind & Focus",
-        platform: "Facebook",
-        status: "paused",
-        objective: "awareness",
-        impressions: 120000,
-        clicks: 3600,
-        conversions: 180,
-        spent: 1200,
-        budget: 2000,
-        dailyBudget: 40,
-        ctr: 3.0,
-        cpc: 0.33,
-        conversionRate: 5.0,
-        roas: 3.8,
-        targetAudience: "Wellness seekers, 25-40, interested in meditation and mindfulness",
-        startDate: "2025-07-10",
-        endDate: "2025-08-10",
-        adsCount: 2,
-        createdAt: "2025-07-10T11:00:00Z",
-        lastUpdated: "2025-07-25T16:20:00Z"
-      },
-      {
-        id: "5",
-        name: "Finance & Business",
-        platform: "LinkedIn",
-        status: "draft",
-        objective: "traffic",
-        impressions: 0,
-        clicks: 0,
-        conversions: 0,
-        spent: 0,
-        budget: 3000,
-        dailyBudget: 60,
-        ctr: 0,
-        cpc: 0,
-        conversionRate: 0,
-        roas: 0,
-        targetAudience: "Entrepreneurs, 30-50, interested in business tools and finance",
-        startDate: "2025-08-01",
-        endDate: "2025-09-30",
-        adsCount: 0,
-        createdAt: "2025-07-26T15:00:00Z",
-        lastUpdated: "2025-07-26T15:00:00Z"
-      }
-    ];
-
-    setCampaigns(mockCampaigns);
-    setLoading(false);
-  }, []);
 
   const handleCampaignClick = (campaign: Campaign) => {
     setSelectedCampaign(campaign);
