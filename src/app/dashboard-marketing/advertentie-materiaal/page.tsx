@@ -3,19 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { supabase } from '@/lib/supabase';
-import { 
-  VideoCameraIcon,
-  PlayIcon,
-  PauseIcon,
-  EyeIcon,
-  DownloadIcon,
-  TrashIcon,
-  PlusIcon,
-  CloudArrowUpIcon,
-  ExclamationTriangleIcon,
-  CheckCircleIcon,
-  ClockIcon
-} from '@heroicons/react/24/outline';
 
 interface VideoFile {
   id: string;
@@ -69,164 +56,66 @@ export default function AdvertentieMateriaalPage() {
     return null;
   };
 
-  // Test upload functionality
-  const testUploadFunctionality = async () => {
-    try {
-      console.log('🧪 Creating test file for upload test...');
-      
-      // Create a small test file
-      const testContent = 'This is a test file for upload functionality';
-      const testBlob = new Blob([testContent], { type: 'text/plain' });
-      const testFileName = `test-upload-${Date.now()}.txt`;
-      
-      console.log('🧪 Attempting test upload...');
-      
-      // Try with signed URL approach first
-      const { data, error } = await supabase.storage
-        .from('advertenties')
-        .upload(testFileName, testBlob, {
-          cacheControl: '3600',
-          upsert: false
-        });
-      
-      if (error) {
-        console.error('❌ Test upload failed:', error);
-        
-        // If RLS error, try to provide helpful guidance
-        if (error.message.includes('row-level security') || error.message.includes('violates')) {
-          console.log('🔧 RLS Policy Issue Detected!');
-          console.log('📋 Manual fix required:');
-          console.log('   1. Go to Supabase Dashboard → Storage');
-          console.log('   2. Find "advertenties" bucket');
-          console.log('   3. Click bucket settings');
-          console.log('   4. Set "Public bucket" to ON');
-          console.log('   5. Save changes');
-          console.log('   6. Refresh this page');
-          
-          setError('RLS Policy Issue: Zet de advertenties bucket op "Public" in Supabase Dashboard → Storage → advertenties → Settings → Public bucket ON');
-        } else {
-          console.log('⚠️ Upload functionality may not work');
-        }
-      } else {
-        console.log('✅ Test upload successful:', data);
-        
-        // Clean up test file
-        console.log('🧹 Cleaning up test file...');
-        const { error: deleteError } = await supabase.storage
-          .from('advertenties')
-          .remove([testFileName]);
-        
-        if (deleteError) {
-          console.log('⚠️ Could not clean up test file:', deleteError.message);
-        } else {
-          console.log('✅ Test file cleaned up successfully');
-        }
-        
-        console.log('🎉 Upload functionality is working!');
-      }
-    } catch (err) {
-      console.error('❌ Test upload error:', err);
-    }
-  };
-
-  // Fetch videos from the bucket
+  // Fetch videos from bucket
   const fetchVideos = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+    if (!user || authLoading) {
+      console.log('⏳ Waiting for user authentication...');
+      return;
+    }
 
-      console.log('🔍 Fetching videos for user:', user?.email);
-      console.log('🔍 Using shared Supabase client from lib/supabase');
-      
-      // Test Supabase client
+    console.log('🔍 Fetching videos...');
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Test supabase client
+      console.log('🔧 Testing Supabase client...');
       if (!supabase) {
         console.error('❌ Supabase client is not available');
-        setError('Supabase client is niet beschikbaar');
+        setError('Supabase client niet beschikbaar');
         return;
       }
-      
+
       if (!supabase.storage) {
         console.error('❌ Supabase storage is not available');
-        setError('Supabase storage is niet beschikbaar');
-        return;
-      }
-      
-      console.log('✅ Supabase client and storage are available');
-
-      // First, let's check if the bucket exists
-      console.log('🔍 Checking if advertenties bucket exists...');
-      const { data: buckets, error: bucketError } = await supabase.storage.listBuckets();
-      
-      if (bucketError) {
-        console.error('❌ Error listing buckets:', bucketError);
-        setError(`Bucket error: ${bucketError.message}`);
+        setError('Supabase storage niet beschikbaar');
         return;
       }
 
-      console.log('📁 Available buckets:', buckets?.map(b => b.id) || []);
+      // Get available buckets
+      console.log('📦 Getting available buckets...');
+      const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
       
-      // Test with a known working bucket first
-      console.log('🧪 Testing with workout-videos bucket first...');
-      const workoutBucket = buckets?.find(bucket => bucket.id === 'workout-videos');
-      if (workoutBucket) {
-        console.log('✅ Workout-videos bucket found:', workoutBucket);
-        
-        // Test listing files from workout-videos bucket
-        const { data: workoutData, error: workoutError } = await supabase.storage
-          .from('workout-videos')
-          .list('', { limit: 5 });
-        
-        if (workoutError) {
-          console.error('❌ Error listing workout-videos:', workoutError);
-        } else {
-          console.log('✅ Workout-videos bucket accessible, files found:', workoutData?.length || 0);
-        }
+      if (bucketsError) {
+        console.error('❌ Error getting buckets:', bucketsError);
       } else {
-        console.error('❌ Workout-videos bucket not found either');
+        console.log('📦 Available buckets:', buckets?.map(b => b.id) || 'None');
       }
 
-      // Find the correct bucket name
-      let correctBucketName = findAdvertentiesBucket(buckets || []);
+      // Find the advertenties bucket
+      const advertentiesBucket = buckets ? findAdvertentiesBucket(buckets) : null;
       
-      // If advertenties bucket not found, try to use it anyway (might be a permissions issue)
-      if (!correctBucketName) {
-        console.warn('⚠️ Advertenties bucket not found in bucket list, but trying direct access...');
-        console.log('ℹ️ This is normal - listBuckets() may not show all buckets due to permissions');
-        correctBucketName = 'advertenties'; // Try the default name
-      }
-      
-      setBucketName(correctBucketName);
-      const advertentiesBucket = buckets?.find(bucket => bucket.id === correctBucketName);
-
       if (advertentiesBucket) {
-        console.log('✅ Advertenties bucket found in list:', advertentiesBucket);
+        setBucketName(advertentiesBucket);
+        console.log(`✅ Using bucket: ${advertentiesBucket}`);
       } else {
-        console.log('⚠️ Advertenties bucket not in list, but trying direct access with name:', correctBucketName);
+        console.log('⚠️ Advertenties bucket not found in buckets list, trying direct access...');
       }
 
       // Try direct access to advertenties bucket
-      console.log('🧪 Testing direct access to advertenties bucket...');
-      let directData = null;
-      let directError = null;
-      
-      try {
-        const result = await supabase.storage
-          .from('advertenties')
-          .list('', { limit: 10 });
-        
-        directData = result.data;
-        directError = result.error;
-        
-        if (directError) {
-          console.error('❌ Direct access to advertenties bucket failed:', directError);
-        } else {
-          console.log('✅ Direct access to advertenties bucket successful, files found:', directData?.length || 0);
-          if (directData && directData.length > 0) {
-            console.log('📁 Files in advertenties bucket:', directData.map(f => f.name));
-          }
-        }
-      } catch (directErr) {
-        console.error('❌ Exception during direct access:', directErr);
+      console.log('🔍 Trying direct access to advertenties bucket...');
+      const { data: directData, error: directError } = await supabase.storage
+        .from('advertenties')
+        .list('', {
+          limit: 100,
+          offset: 0,
+          sortBy: { column: 'created_at', order: 'desc' }
+        });
+
+      if (directError) {
+        console.error('❌ Direct access error:', directError);
+      } else {
+        console.log('✅ Direct access successful, files found:', directData?.length || 0);
       }
 
       // Use the data from direct access if available, otherwise try normal listing
@@ -316,50 +205,115 @@ export default function AdvertentieMateriaalPage() {
 
       // Only try to access bucket properties if the bucket object exists
       if (advertentiesBucket) {
-        console.log('🔍 Bucket public status:', advertentiesBucket.public);
-        console.log('🔍 Bucket file size limit:', advertentiesBucket.file_size_limit);
-        console.log('🔍 Bucket allowed MIME types:', advertentiesBucket.allowed_mime_types);
-      } else {
-        console.log('⚠️ No bucket object available, skipping bucket property checks');
+        try {
+          const bucketProps = await supabase.storage.getBucket(advertentiesBucket);
+          console.log('📦 Bucket properties:', bucketProps);
+        } catch (propsError) {
+          console.log('⚠️ Could not get bucket properties:', propsError);
+        }
+      }
+
+      // Test workout-videos bucket access for comparison
+      try {
+        const workoutResult = await supabase.storage
+          .from('workout-videos')
+          .list('', { limit: 5 });
+        console.log('🏋️ Workout videos bucket test:', workoutResult.data?.length || 0, 'files');
+      } catch (workoutError) {
+        console.log('⚠️ Workout videos bucket test failed:', workoutError);
       }
 
       if (error) {
         console.error('❌ Error fetching videos:', error);
-        setError(`Fout bij het ophalen van video bestanden: ${error.message}`);
+        setError(`Fout bij ophalen van video's: ${error.message}`);
         return;
       }
 
-      console.log('📁 Raw data from bucket:', data);
-
       if (data) {
         // Filter for video files
-        const videoFiles = data.filter(file => 
-          file.metadata?.mimetype?.startsWith('video/') || 
-          file.name.toLowerCase().match(/\.(mp4|avi|mov|wmv|flv|webm|mkv|m4v)$/)
-        );
-        
-        console.log('🎬 Filtered video files:', videoFiles);
+        const videoFiles = data.filter(file => {
+          const isVideo = file.metadata?.mimetype?.startsWith('video/') || 
+                         file.name?.toLowerCase().match(/\.(mp4|avi|mov|wmv|flv|webm|mkv)$/);
+          return isVideo;
+        });
+
+        console.log('📹 Found video files:', videoFiles.length);
         setVideos(videoFiles);
-              console.log('✅ Videos loaded:', videoFiles.length, 'files');
-      
-      // If no videos found, show a helpful message
-      if (videoFiles.length === 0) {
-        console.log('📝 No videos found in bucket - bucket is accessible but empty');
-        setError(null); // Clear any previous errors since bucket access works
-        
-        // Test upload functionality with a small test file
-        console.log('🧪 Testing upload functionality...');
-        await testUploadFunctionality();
+
+        // If no videos found, test upload functionality
+        if (videoFiles.length === 0) {
+          console.log('🧪 No videos found, testing upload functionality...');
+          testUploadFunctionality();
+        }
+      } else {
+        console.log('⚠️ No data returned from bucket');
+        setVideos([]);
       }
-    } else {
-      console.log('📁 No data returned from bucket');
-      setVideos([]);
-    }
     } catch (err) {
-      console.error('❌ Error in fetchVideos:', err);
-      setError(`Onverwachte fout bij het ophalen van video bestanden: ${err}`);
+      console.error('❌ Unexpected error:', err);
+      setError('Onverwachte fout bij ophalen van video\'s');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Test upload functionality
+  const testUploadFunctionality = async () => {
+    try {
+      console.log('🧪 Creating test file for upload test...');
+      
+      // Create a small test file
+      const testContent = 'This is a test file for upload functionality';
+      const testBlob = new Blob([testContent], { type: 'text/plain' });
+      const testFileName = `test-upload-${Date.now()}.txt`;
+      
+      console.log('🧪 Attempting test upload...');
+      
+      // Try with signed URL approach first
+      const { data, error } = await supabase.storage
+        .from('advertenties')
+        .upload(testFileName, testBlob, {
+          cacheControl: '3600',
+          upsert: false
+        });
+      
+      if (error) {
+        console.error('❌ Test upload failed:', error);
+        
+        // If RLS error, try to provide helpful guidance
+        if (error.message.includes('row-level security') || error.message.includes('violates')) {
+          console.log('🔧 RLS Policy Issue Detected!');
+          console.log('📋 Manual fix required:');
+          console.log('   1. Go to Supabase Dashboard → Storage');
+          console.log('   2. Find "advertenties" bucket');
+          console.log('   3. Click bucket settings');
+          console.log('   4. Set "Public bucket" to ON');
+          console.log('   5. Save changes');
+          console.log('   6. Refresh this page');
+          
+          setError('RLS Policy Issue: Zet de advertenties bucket op "Public" in Supabase Dashboard → Storage → advertenties → Settings → Public bucket ON');
+        } else {
+          console.log('⚠️ Upload functionality may not work');
+        }
+      } else {
+        console.log('✅ Test upload successful:', data);
+        
+        // Clean up test file
+        console.log('🧹 Cleaning up test file...');
+        const { error: deleteError } = await supabase.storage
+          .from('advertenties')
+          .remove([testFileName]);
+        
+        if (deleteError) {
+          console.log('⚠️ Could not clean up test file:', deleteError.message);
+        } else {
+          console.log('✅ Test file cleaned up successfully');
+        }
+        
+        console.log('🎉 Upload functionality is working!');
+      }
+    } catch (err) {
+      console.error('❌ Test upload error:', err);
     }
   };
 
@@ -375,17 +329,18 @@ export default function AdvertentieMateriaalPage() {
     }
 
     // Validate file size (500MB limit)
-    if (file.size > 500 * 1024 * 1024) {
+    const maxSize = 500 * 1024 * 1024; // 500MB
+    if (file.size > maxSize) {
       setError('Bestand is te groot. Maximum grootte is 500MB');
       return;
     }
 
-    try {
-      setUploading(true);
-      setError(null);
-      setUploadProgress(0);
+    setUploading(true);
+    setError(null);
+    setUploadProgress(0);
 
-      const fileName = `${Date.now()}_${file.name}`;
+    try {
+      const fileName = `${Date.now()}-${file.name}`;
       
       const { data, error } = await supabase.storage
         .from(bucketName)
@@ -507,7 +462,7 @@ export default function AdvertentieMateriaalPage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <ClockIcon className="w-8 h-8 text-blue-500 animate-spin mx-auto mb-4" />
+          <div className="w-8 h-8 text-blue-500 animate-spin mx-auto mb-4">⏳</div>
           <p className="text-gray-400">Authenticatie controleren...</p>
         </div>
       </div>
@@ -519,7 +474,7 @@ export default function AdvertentieMateriaalPage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <ExclamationTriangleIcon className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
+          <div className="w-12 h-12 text-yellow-500 mx-auto mb-4">⚠️</div>
           <h2 className="text-xl font-semibold text-white mb-2">Toegang vereist</h2>
           <p className="text-gray-400">Je moet ingelogd zijn om advertentie materiaal te bekijken.</p>
           <div className="mt-4">
@@ -557,12 +512,12 @@ export default function AdvertentieMateriaalPage() {
             <div className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors font-medium">
               {uploading ? (
                 <>
-                  <ClockIcon className="w-5 h-5 animate-spin" />
+                  <div className="w-5 h-5 animate-spin">⏳</div>
                   <span>Uploaden...</span>
                 </>
               ) : (
                 <>
-                  <CloudArrowUpIcon className="w-5 h-5" />
+                  <div className="w-5 h-5">📤</div>
                   <span>Video Uploaden</span>
                 </>
               )}
@@ -591,72 +546,49 @@ export default function AdvertentieMateriaalPage() {
       {error && (
         <div className="bg-red-900/20 border border-red-500/50 rounded-lg p-4">
           <div className="flex items-center space-x-3">
-            <ExclamationTriangleIcon className="w-5 h-5 text-red-400" />
+            <div className="w-5 h-5 text-red-400">⚠️</div>
             <span className="text-red-300">{error}</span>
           </div>
         </div>
       )}
 
       {/* Success Message */}
-      {uploadProgress === 100 && (
+      {!error && !loading && videos.length > 0 && (
         <div className="bg-green-900/20 border border-green-500/50 rounded-lg p-4">
           <div className="flex items-center space-x-3">
-            <CheckCircleIcon className="w-5 h-5 text-green-400" />
-            <span className="text-green-300">Video succesvol geüpload!</span>
+            <div className="w-5 h-5 text-green-400">✅</div>
+            <span className="text-green-300">{videos.length} video's gevonden</span>
           </div>
         </div>
       )}
 
-      {/* Debug Information */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="bg-gray-800 border border-gray-700 rounded-lg p-4">
-          <h3 className="text-white font-semibold mb-2">Debug Informatie</h3>
-          <div className="text-sm text-gray-300 space-y-1">
-            <div>User: {user?.email || 'Niet ingelogd'}</div>
-            <div>User ID: {user?.id || 'N/A'}</div>
-            <div>Loading: {loading ? 'Ja' : 'Nee'}</div>
-            <div>Videos gevonden: {videos.length}</div>
-            <div>Bucket naam: {bucketName}</div>
-            <div>Supabase Client: {supabase ? 'Geladen' : 'Ontbreekt'}</div>
-            <div>Storage API: {supabase?.storage ? 'Beschikbaar' : 'Ontbreekt'}</div>
-          </div>
-        </div>
-      )}
-
-      {/* Video Grid */}
-      {loading ? (
+      {/* Loading State */}
+      {loading && (
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
-            <ClockIcon className="w-8 h-8 text-blue-500 animate-spin mx-auto mb-4" />
+            <div className="w-8 h-8 text-blue-500 animate-spin mx-auto mb-4">⏳</div>
             <p className="text-gray-400">Video's laden...</p>
           </div>
         </div>
-      ) : videos.length === 0 ? (
+      )}
+
+      {/* No Videos State */}
+      {!loading && videos.length === 0 && (
         <div className="text-center py-12">
-          <VideoCameraIcon className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-300 mb-2">Geen video's gevonden</h3>
-          <p className="text-gray-500">Upload je eerste video om te beginnen</p>
+          <div className="w-16 h-16 text-gray-600 mx-auto mb-4">📹</div>
+          <h3 className="text-lg font-medium text-white mb-2">Geen video's gevonden</h3>
+          <p className="text-gray-400 mb-4">Upload je eerste video om te beginnen</p>
         </div>
-      ) : (
+      )}
+
+      {/* Videos Grid */}
+      {!loading && videos.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {videos.map((video) => (
-            <div key={video.id} className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden hover:border-gray-600 transition-colors">
-              {/* Video Preview */}
-              <div className="relative aspect-video bg-gray-900">
-                <video
-                  className="w-full h-full object-cover"
-                  src={getVideoUrl(video.name)}
-                  preload="metadata"
-                  onLoadedMetadata={(e) => {
-                    // Video loaded
-                  }}
-                  onError={(e) => {
-                    console.error('Video load error:', e);
-                  }}
-                />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <PlayIcon className="w-12 h-12 text-white opacity-80" />
-                </div>
+            <div key={video.id} className="bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
+              {/* Video Thumbnail */}
+              <div className="relative aspect-video bg-gray-900 flex items-center justify-center cursor-pointer" onClick={() => setSelectedVideo(video)}>
+                <div className="w-12 h-12 text-white opacity-80">▶️</div>
                 <div className="absolute top-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
                   {video.metadata?.mimetype || 'video/mp4'}
                 </div>
@@ -690,7 +622,7 @@ export default function AdvertentieMateriaalPage() {
                     className="flex items-center space-x-1 text-blue-400 hover:text-blue-300 transition-colors"
                     title="Bekijk video"
                   >
-                    <EyeIcon className="w-4 h-4" />
+                    <div className="w-4 h-4">👁️</div>
                     <span className="text-sm">Bekijk</span>
                   </button>
 
@@ -704,7 +636,7 @@ export default function AdvertentieMateriaalPage() {
                     className="flex items-center space-x-1 text-green-400 hover:text-green-300 transition-colors"
                     title="Download video"
                   >
-                    <DownloadIcon className="w-4 h-4" />
+                    <div className="w-4 h-4">⬇️</div>
                     <span className="text-sm">Download</span>
                   </button>
 
@@ -713,7 +645,7 @@ export default function AdvertentieMateriaalPage() {
                     className="flex items-center space-x-1 text-red-400 hover:text-red-300 transition-colors"
                     title="Verwijder video"
                   >
-                    <TrashIcon className="w-4 h-4" />
+                    <div className="w-4 h-4">🗑️</div>
                     <span className="text-sm">Verwijder</span>
                   </button>
                 </div>
@@ -745,6 +677,21 @@ export default function AdvertentieMateriaalPage() {
                 autoPlay
               />
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Debug Information (Development Only) */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="mt-8 p-4 bg-gray-900 rounded-lg">
+          <h3 className="text-white font-semibold mb-2">Debug Info:</h3>
+          <div className="text-sm text-gray-400 space-y-1">
+            <div>User: {user?.email || 'Not logged in'}</div>
+            <div>Auth Loading: {authLoading ? 'Yes' : 'No'}</div>
+            <div>Videos Count: {videos.length}</div>
+            <div>Bucket Name: {bucketName}</div>
+            <div>Supabase Client: {supabase ? 'Available' : 'Not available'}</div>
+            <div>Supabase Storage: {supabase?.storage ? 'Available' : 'Not available'}</div>
           </div>
         </div>
       )}
