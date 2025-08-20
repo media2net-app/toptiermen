@@ -133,11 +133,40 @@ interface FacebookAdAccount {
 class FacebookAdManagerAPI {
   private accessToken: string;
   private adAccountId: string;
+  private appSecret?: string;
   private baseUrl = 'https://graph.facebook.com/v18.0';
 
-  constructor(accessToken: string, adAccountId: string) {
+  constructor(accessToken: string, adAccountId: string, appSecret?: string) {
     this.accessToken = accessToken;
     this.adAccountId = adAccountId;
+    this.appSecret = appSecret;
+  }
+
+  /**
+   * Genereer een server-side access token met App Secret
+   */
+  private async getServerSideToken(): Promise<string> {
+    if (!this.appSecret) {
+      return this.accessToken; // Fallback naar user access token
+    }
+
+    try {
+      // Exchange user access token voor server-side token
+      const response = await fetch(
+        `${this.baseUrl}/oauth/access_token?grant_type=fb_exchange_token&client_id=${process.env.NEXT_PUBLIC_FACEBOOK_APP_ID}&client_secret=${this.appSecret}&fb_exchange_token=${this.accessToken}`
+      );
+
+      if (!response.ok) {
+        console.warn('Failed to exchange token, using original access token');
+        return this.accessToken;
+      }
+
+      const data = await response.json();
+      return data.access_token || this.accessToken;
+    } catch (error) {
+      console.warn('Token exchange failed, using original access token:', error);
+      return this.accessToken;
+    }
   }
 
   /**
@@ -145,8 +174,9 @@ class FacebookAdManagerAPI {
    */
   async testConnection(): Promise<boolean> {
     try {
+      const serverToken = await this.getServerSideToken();
       const response = await fetch(
-        `${this.baseUrl}/${this.adAccountId}?fields=id,name,account_status&access_token=${this.accessToken}`
+        `${this.baseUrl}/${this.adAccountId}?fields=id,name,account_status&access_token=${serverToken}`
       );
       
       if (!response.ok) {
@@ -165,8 +195,9 @@ class FacebookAdManagerAPI {
    * Haal ad account informatie op
    */
   async getAdAccount(): Promise<FacebookAdAccount> {
+    const serverToken = await this.getServerSideToken();
     const response = await fetch(
-      `${this.baseUrl}/${this.adAccountId}?fields=id,name,account_status,currency,timezone_name,business{id,name}&access_token=${this.accessToken}`
+      `${this.baseUrl}/${this.adAccountId}?fields=id,name,account_status,currency,timezone_name,business{id,name}&access_token=${serverToken}`
     );
 
     if (!response.ok) {
@@ -180,8 +211,9 @@ class FacebookAdManagerAPI {
    * Haal alle campagnes op
    */
   async getCampaigns(limit: number = 100): Promise<FacebookCampaign[]> {
+    const serverToken = await this.getServerSideToken();
     const response = await fetch(
-      `${this.baseUrl}/${this.adAccountId}/campaigns?fields=id,name,status,objective,special_ad_categories,created_time,updated_time,start_time,stop_time,daily_budget,lifetime_budget,budget_remaining,spend_cap&limit=${limit}&access_token=${this.accessToken}`
+      `${this.baseUrl}/${this.adAccountId}/campaigns?fields=id,name,status,objective,special_ad_categories,created_time,updated_time,start_time,stop_time,daily_budget,lifetime_budget,budget_remaining,spend_cap&limit=${limit}&access_token=${serverToken}`
     );
 
     if (!response.ok) {
@@ -421,11 +453,19 @@ class FacebookAdManagerAPI {
 // Environment variables
 const FACEBOOK_ACCESS_TOKEN = process.env.FACEBOOK_ACCESS_TOKEN;
 const FACEBOOK_AD_ACCOUNT_ID = process.env.FACEBOOK_AD_ACCOUNT_ID;
+const FACEBOOK_APP_SECRET = process.env.FACEBOOK_APP_SECRET;
 
 // Export singleton instance
 export const facebookAdManager = FACEBOOK_ACCESS_TOKEN && FACEBOOK_AD_ACCOUNT_ID
-  ? new FacebookAdManagerAPI(FACEBOOK_ACCESS_TOKEN, FACEBOOK_AD_ACCOUNT_ID)
+  ? new FacebookAdManagerAPI(FACEBOOK_ACCESS_TOKEN, FACEBOOK_AD_ACCOUNT_ID, FACEBOOK_APP_SECRET)
   : null;
+
+/**
+ * Maak een Facebook Ad Manager instance met user credentials
+ */
+export function createFacebookAdManager(accessToken: string, adAccountId: string): FacebookAdManagerAPI {
+  return new FacebookAdManagerAPI(accessToken, adAccountId, FACEBOOK_APP_SECRET);
+}
 
 export type { 
   FacebookCampaign, 
