@@ -43,7 +43,7 @@ interface VideoFile {
 }
 
 export default function AdvertentieMateriaalPage() {
-  const { user } = useSupabaseAuth();
+  const { user, loading: authLoading } = useSupabaseAuth();
   const [videos, setVideos] = useState<VideoFile[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -57,6 +57,32 @@ export default function AdvertentieMateriaalPage() {
       setLoading(true);
       setError(null);
 
+      console.log('🔍 Fetching videos for user:', user?.email);
+      console.log('🔍 Supabase URL:', supabaseUrl);
+      console.log('🔍 Supabase Key (first 20 chars):', supabaseAnonKey.substring(0, 20) + '...');
+
+      // First, let's check if the bucket exists
+      console.log('🔍 Checking if advertenties bucket exists...');
+      const { data: buckets, error: bucketError } = await supabase.storage.listBuckets();
+      
+      if (bucketError) {
+        console.error('❌ Error listing buckets:', bucketError);
+        setError(`Bucket error: ${bucketError.message}`);
+        return;
+      }
+
+      console.log('📁 Available buckets:', buckets?.map(b => b.id) || []);
+      
+      const advertentiesBucket = buckets?.find(bucket => bucket.id === 'advertenties');
+      if (!advertentiesBucket) {
+        console.error('❌ Advertenties bucket not found');
+        setError('Advertenties bucket bestaat niet. Neem contact op met de beheerder.');
+        return;
+      }
+
+      console.log('✅ Advertenties bucket found:', advertentiesBucket);
+
+      // Now try to list files
       const { data, error } = await supabase.storage
         .from('advertenties')
         .list('', {
@@ -66,10 +92,12 @@ export default function AdvertentieMateriaalPage() {
         });
 
       if (error) {
-        console.error('Error fetching videos:', error);
-        setError('Fout bij het ophalen van video bestanden');
+        console.error('❌ Error fetching videos:', error);
+        setError(`Fout bij het ophalen van video bestanden: ${error.message}`);
         return;
       }
+
+      console.log('📁 Raw data from bucket:', data);
 
       if (data) {
         // Filter for video files
@@ -78,12 +106,16 @@ export default function AdvertentieMateriaalPage() {
           file.name.toLowerCase().match(/\.(mp4|avi|mov|wmv|flv|webm|mkv|m4v)$/)
         );
         
+        console.log('🎬 Filtered video files:', videoFiles);
         setVideos(videoFiles);
-        console.log('Videos loaded:', videoFiles);
+        console.log('✅ Videos loaded:', videoFiles.length, 'files');
+      } else {
+        console.log('📁 No data returned from bucket');
+        setVideos([]);
       }
     } catch (err) {
-      console.error('Error in fetchVideos:', err);
-      setError('Onverwachte fout bij het ophalen van video bestanden');
+      console.error('❌ Error in fetchVideos:', err);
+      setError(`Onverwachte fout bij het ophalen van video bestanden: ${err}`);
     } finally {
       setLoading(false);
     }
@@ -196,11 +228,24 @@ export default function AdvertentieMateriaalPage() {
   };
 
   useEffect(() => {
-    if (user) {
+    if (user && !authLoading) {
       fetchVideos();
     }
-  }, [user]);
+  }, [user, authLoading]);
 
+  // Show loading while auth is being checked
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <ClockIcon className="w-8 h-8 text-blue-500 animate-spin mx-auto mb-4" />
+          <p className="text-gray-400">Authenticatie controleren...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show access denied if not authenticated
   if (!user) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -208,6 +253,14 @@ export default function AdvertentieMateriaalPage() {
           <ExclamationTriangleIcon className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-white mb-2">Toegang vereist</h2>
           <p className="text-gray-400">Je moet ingelogd zijn om advertentie materiaal te bekijken.</p>
+          <div className="mt-4">
+            <a 
+              href="/login" 
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+            >
+              Inloggen
+            </a>
+          </div>
         </div>
       </div>
     );
@@ -281,6 +334,21 @@ export default function AdvertentieMateriaalPage() {
           <div className="flex items-center space-x-3">
             <CheckCircleIcon className="w-5 h-5 text-green-400" />
             <span className="text-green-300">Video succesvol geüpload!</span>
+          </div>
+        </div>
+      )}
+
+      {/* Debug Information */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="bg-gray-800 border border-gray-700 rounded-lg p-4">
+          <h3 className="text-white font-semibold mb-2">Debug Informatie</h3>
+          <div className="text-sm text-gray-300 space-y-1">
+            <div>User: {user?.email || 'Niet ingelogd'}</div>
+            <div>User ID: {user?.id || 'N/A'}</div>
+            <div>Loading: {loading ? 'Ja' : 'Nee'}</div>
+            <div>Videos gevonden: {videos.length}</div>
+            <div>Supabase URL: {supabaseUrl ? 'Geconfigureerd' : 'Ontbreekt'}</div>
+            <div>Supabase Key: {supabaseAnonKey ? 'Geconfigureerd' : 'Ontbreekt'}</div>
           </div>
         </div>
       )}
