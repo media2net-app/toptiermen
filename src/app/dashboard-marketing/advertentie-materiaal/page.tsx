@@ -91,6 +91,10 @@ export default function AdvertentieMateriaalPage() {
           sortBy: { column: 'created_at', order: 'desc' }
         });
 
+      console.log('🔍 Bucket public status:', advertentiesBucket.public);
+      console.log('🔍 Bucket file size limit:', advertentiesBucket.file_size_limit);
+      console.log('🔍 Bucket allowed MIME types:', advertentiesBucket.allowed_mime_types);
+
       if (error) {
         console.error('❌ Error fetching videos:', error);
         setError(`Fout bij het ophalen van video bestanden: ${error.message}`);
@@ -182,6 +186,20 @@ export default function AdvertentieMateriaalPage() {
       .from('advertenties')
       .getPublicUrl(fileName);
     return data.publicUrl;
+  };
+
+  // Get signed URL for private access (fallback)
+  const getSignedUrl = async (fileName: string) => {
+    const { data, error } = await supabase.storage
+      .from('advertenties')
+      .createSignedUrl(fileName, 3600); // 1 hour expiry
+    
+    if (error) {
+      console.error('Error creating signed URL:', error);
+      return getVideoUrl(fileName); // Fallback to public URL
+    }
+    
+    return data.signedUrl;
   };
 
   // Delete video
@@ -380,9 +398,15 @@ export default function AdvertentieMateriaalPage() {
                   onLoadedMetadata={(e) => {
                     // Video loaded
                   }}
+                  onError={(e) => {
+                    console.error('Video load error:', e);
+                  }}
                 />
                 <div className="absolute inset-0 flex items-center justify-center">
                   <PlayIcon className="w-12 h-12 text-white opacity-80" />
+                </div>
+                <div className="absolute top-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                  {video.metadata?.mimetype || 'video/mp4'}
                 </div>
               </div>
 
