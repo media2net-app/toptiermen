@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
         ready: systemReady,
         score: systemReady ? 100 : 0,
       },
-      changelog: currentVersion.changelog,
+      changelog: [], // V1.2: Simplified - no changelog in this version
       history: VERSION_HISTORY.map(v => ({
         version: v.version,
         name: v.name,
