@@ -149,12 +149,12 @@ export class VideosService {
       const { data: video, error } = await supabase
         .from('videos')
         .insert({
-          name: videoData.name,
+          name: videoData.original_name, // Use original filename as name
           original_name: videoData.original_name,
           file_path: videoData.file_path,
           file_size: videoData.file_size,
           mime_type: videoData.mime_type,
-          target_audience: videoData.target_audience || this.getTargetAudienceFromName(videoData.name),
+          target_audience: videoData.target_audience || 'Algemene doelgroep, fitness, Nederland',
           campaign_status: videoData.campaign_status || 'inactive',
           bucket_name: 'advertenties',
           is_deleted: false

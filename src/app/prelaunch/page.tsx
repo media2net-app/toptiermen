@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import './prelaunch.css';
 import { 
   CheckCircleIcon,
   StarIcon,
@@ -102,37 +103,99 @@ export default function PreLaunchPage() {
   const features = [
     {
       icon: UserGroupIcon,
-      title: "Brotherhood Community",
+      title: "Brotherhood community",
       description: "Sluit je aan bij een exclusieve community van mannen die streven naar excellentie in alle aspecten van het leven."
     },
     {
       icon: ChartBarIcon,
-      title: "Persoonlijke Groei",
+      title: "Persoonlijke groei",
       description: "Stap-voor-stap programma's voor fitness, mindset, business en persoonlijke ontwikkeling."
     },
     {
       icon: TrophyIcon,
-      title: "Achievement System",
+      title: "Achievement system",
       description: "Verdien badges en rangen door je doelen te behalen en jezelf te overtreffen."
     },
     {
       icon: FireIcon,
-      title: "Daily Challenges",
+      title: "Daily challenges",
       description: "Dagelijkse uitdagingen die je motiveren om consistent te blijven en je grenzen te verleggen."
     }
   ];
 
   const benefits = [
     "Exclusieve toegang tot premium content",
-    "Persoonlijke coaching en mentoring",
     "Community van gelijkgestemde mannen",
     "Stap-voor-stap actieplannen",
     "Accountability partners",
     "Lifetime toegang tot alle updates"
   ];
 
+  const platformFeatures = [
+    {
+      category: "Fitness & Training",
+      features: [
+        "Persoonlijke trainingsschema's",
+        "Video-oefeningen en tutorials",
+        "Voortgang tracking",
+        "Voedingsplannen en recepten",
+        "Workout logging"
+      ]
+    },
+    {
+      category: "Mindset & Focus",
+      features: [
+        "Meditatie en mindfulness oefeningen",
+        "Productiviteit tools",
+        "Goal setting en tracking",
+        "Habit building system",
+        "Stress management technieken"
+      ]
+    },
+    {
+      category: "Community & Networking",
+      features: [
+        "Brotherhood forum",
+        "Event organisatie",
+        "Mentorship programma",
+        "Accountability groups",
+        "Networking events"
+      ]
+    },
+    {
+      category: "Business & Finance",
+      features: [
+        "Business coaching content",
+        "Financiële planning tools",
+        "Investment strategieën",
+        "Entrepreneurship guides",
+        "Side hustle ideeën"
+      ]
+    },
+    {
+      category: "Gamification",
+      features: [
+        "Achievement badges",
+        "Level system",
+        "Daily challenges",
+        "Leaderboards",
+        "Reward system"
+      ]
+    },
+    {
+      category: "Content & Learning",
+      features: [
+        "Video academy",
+        "E-books en guides",
+        "Podcast episodes",
+        "Expert interviews",
+        "Case studies"
+      ]
+    }
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-[#232D1A] to-gray-900">
+    <div className="prelaunch-page min-h-screen">
       {/* Header */}
       <header className="relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -149,26 +212,24 @@ export default function PreLaunchPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative py-20 px-4 sm:px-6 lg:px-8">
+      <section className="prelaunch-hero relative py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <div className="inline-flex items-center px-4 py-2 bg-[#8BAE5A]/10 border border-[#8BAE5A]/30 rounded-full text-[#8BAE5A] text-sm font-medium mb-8">
+                          <div className="inline-flex items-center px-4 py-2 bg-[#8BAE5A]/10 border border-[#8BAE5A]/30 rounded-full text-[#8BAE5A] text-sm font-medium mb-8">
               <ClockIcon className="w-4 h-4 mr-2" />
-              Lancering: 10 September 2025
+              Lancering: 10 september 2025
             </div>
             
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
-              Word de Beste Versie van
-              <span className="block bg-gradient-to-r from-[#8BAE5A] to-[#3A4D23] bg-clip-text text-transparent">
-                Jezelf
-              </span>
+            <h1>
+              <span>WORD DE BESTE VERSIE VAN</span>
+              <span className="block">JEZELF</span>
             </h1>
             
-            <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-4xl mx-auto leading-relaxed">
+            <p>
               Sluit je aan bij de exclusieve <strong>Top Tier Men</strong> community. 
               Een platform waar mannen samen groeien, excelleren en hun volledige potentieel bereiken.
             </p>
@@ -178,11 +239,11 @@ export default function PreLaunchPage() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-[#8BAE5A] to-[#3A4D23] text-white text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
+                className="prelaunch-btn-primary inline-flex items-center"
                 onClick={() => document.getElementById('signup')?.scrollIntoView({ behavior: 'smooth' })}
               >
                 <StarIcon className="w-6 h-6 mr-2" />
-                Schrijf je in voor de Wachtlijst
+                Schrijf je in voor de wachtlijst
                 <ArrowRightIcon className="w-5 h-5 ml-2" />
               </motion.button>
             </div>
@@ -190,8 +251,167 @@ export default function PreLaunchPage() {
         </div>
       </section>
 
+      {/* Kracht Begint Section */}
+      <section className="prelaunch-section py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="space-y-8"
+            >
+              <div>
+                <h1>
+                  <span className="text-[#8BAE5A]">KRACHT BEGINT</span>
+                  <span className="block text-white">WAAR TWIJFELS</span>
+                  <span className="block text-white">STOPPEN</span>
+                </h1>
+                <div className="prelaunch-story-box">
+                  <p>
+                    Fysiek sterker, mentaal onbreekbaar en financieel onafhankelijk. 
+                    Met mijn mariniersdiscipline word jij een Top Tier Men.
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="relative"
+            >
+              <div className="prelaunch-story-image">
+                <div className="w-full h-96 bg-gray-800 rounded-lg shadow-lg flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-[#8BAE5A] rounded-full flex items-center justify-center mx-auto mb-4">
+                      <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <p className="text-gray-400 text-sm">Foto wordt hier geplaatst</p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Mijn Verhaal Section */}
+      <section className="prelaunch-section py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="space-y-8"
+            >
+              <div>
+                <h1>
+                  <span>MIJN</span>
+                  <span className="block">VERHAAL</span>
+                </h1>
+                <div className="prelaunch-story-box">
+                  <p>
+                    Mijn naam is Rick Cuijpers. Op mijn zeventiende werd ik marinier en op mijn achttiende werd ik uitgezonden naar Irak. 
+                    In mijn acht jaar bij het Korps Mariniers volgden meerdere missies, waaronder naar Uruzgan en andere delen van Afghanistan. 
+                    Ik doorstond zware trainingen in extreme omgevingen. Deze uitdagingen vormden mij tot de man die ik nu ben. 
+                    Gedisciplineerd, gemotiveerd en vastberadenheid. Ik ga door waar anderen stoppen.
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="relative"
+            >
+              <div className="prelaunch-story-image">
+                <img 
+                  src="/prelaunch/korps-foto.jpg" 
+                  alt="Rick Cuijpers - Korps Mariniers" 
+                  className="w-full h-auto rounded-lg shadow-lg"
+                />
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Waarom Top Tier Men Section */}
+      <section className="prelaunch-section py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        {/* Background pattern */}
+        <div className="prelaunch-pattern"></div>
+        
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+            >
+              <h2>
+                <span>WAAROM TOP TIER</span>
+                <span className="block">MEN?</span>
+              </h2>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="space-y-6"
+            >
+              <div className="prelaunch-story-box">
+                <p>
+                  Top Tier Men is ontstaan uit mijn eigen zoektocht naar echte groei in kracht, focus en financiële onafhankelijkheid. 
+                  Ik zette mijn persoonlijke ervaringen om in een gestructureerd plan met krachtige workouts, mentale routines en slimme investeringsstappen. 
+                  Zo begeleid ik jou, geworteld in bewijs, versterkt door een hechte community naar jouw Top Tier-versie.
+                </p>
+              </div>
+              
+              <div className="prelaunch-feature-block">
+                <h3>VOLLEDIGE FOCUS</h3>
+                <p>Jouw gepersonaliseerde blueprint voor body, mind en financiën. Geen ruis, geen gedoe.</p>
+              </div>
+              
+              <div className="prelaunch-feature-block">
+                <h3>MEETBARE VOORUITGANG</h3>
+                <p>Heldere doelstellingen én inzicht in elke stap. Volg je groei met concrete milestones.</p>
+              </div>
+              
+              <div className="prelaunch-feature-block">
+                <h3>COMMUNITY GELEID DOOR AMBITIE</h3>
+                <p>Mannen met dezelfde drive, die elkaar scherp houden, eerlijk feedback geven en samen successen vieren.</p>
+              </div>
+
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="prelaunch-btn-primary inline-flex items-center"
+                onClick={() => document.getElementById('signup')?.scrollIntoView({ behavior: 'smooth' })}
+              >
+                <ArrowRightIcon className="w-5 h-5 mr-2" />
+                Start jouw TopTier-reis
+              </motion.button>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
       {/* Features Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#232D1A]/20">
+      <section className="prelaunch-section py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -200,10 +420,11 @@ export default function PreLaunchPage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              Wat is Top Tier Men?
+            <h2>
+              <span>WAT IS TOP TIER</span>
+              <span className="block">MEN?</span>
             </h2>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+            <p>
               Een revolutionair platform dat mannen helpt om hun volledige potentieel te bereiken 
               door middel van community, coaching en systematische groei.
             </p>
@@ -229,7 +450,7 @@ export default function PreLaunchPage() {
       </section>
 
       {/* What to Expect Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
+      <section className="prelaunch-section py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -238,10 +459,11 @@ export default function PreLaunchPage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              Wat Kun Je Verwachten?
+            <h2>
+              <span>WAT KUN JE</span>
+              <span className="block">VERWACHTEN?</span>
             </h2>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+            <p>
               Een complete transformatie van je leven met bewezen methoden en een ondersteunende community.
             </p>
           </motion.div>
@@ -282,13 +504,13 @@ export default function PreLaunchPage() {
                   <div className="w-20 h-20 bg-gradient-to-r from-[#8BAE5A] to-[#3A4D23] rounded-full flex items-center justify-center mx-auto mb-6">
                     <PlayIcon className="w-10 h-10 text-white" />
                   </div>
-                  <h3 className="text-2xl font-bold text-white mb-4">Platform Preview</h3>
+                  <h3 className="text-2xl font-bold text-white mb-4">Platform preview</h3>
                   <p className="text-gray-300 mb-6">
                     Bekijk een sneak peek van wat je kunt verwachten in het Top Tier Men platform.
                   </p>
                   <button className="inline-flex items-center px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors">
                     <PlayIcon className="w-5 h-5 mr-2" />
-                    Bekijk Preview
+                    Bekijk preview
                   </button>
                 </div>
               </div>
@@ -297,8 +519,61 @@ export default function PreLaunchPage() {
         </div>
       </section>
 
+      {/* Platform Features Section */}
+      <section className="prelaunch-section py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2>
+              <span>ALLE PLATFORM</span>
+              <span className="block">FUNCTIES</span>
+            </h2>
+            <p>
+              Ontdek alle tools en functies die je helpen om je volledige potentieel te bereiken.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {platformFeatures.map((category, categoryIndex) => (
+              <motion.div
+                key={categoryIndex}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: categoryIndex * 0.1 }}
+                viewport={{ once: true }}
+                className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 hover:bg-white/10 transition-all duration-300"
+              >
+                <h3 className="text-xl font-semibold text-[#8BAE5A] mb-4 border-b border-[#8BAE5A]/30 pb-2">
+                  {category.category}
+                </h3>
+                <ul className="space-y-3">
+                  {category.features.map((feature, featureIndex) => (
+                    <motion.li
+                      key={featureIndex}
+                      initial={{ opacity: 0, x: -10 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.5, delay: (categoryIndex * 0.1) + (featureIndex * 0.05) }}
+                      viewport={{ once: true }}
+                      className="flex items-start space-x-3"
+                    >
+                      <div className="w-2 h-2 bg-[#8BAE5A] rounded-full mt-2 flex-shrink-0"></div>
+                      <span className="text-gray-300 text-sm">{feature}</span>
+                    </motion.li>
+                  ))}
+                </ul>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Waitlist Section */}
-      <section id="signup" className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-[#8BAE5A]/20 to-[#3A4D23]/20">
+      <section id="signup" className="prelaunch-section py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -306,17 +581,18 @@ export default function PreLaunchPage() {
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <div className="inline-flex items-center px-4 py-2 bg-[#8BAE5A]/20 border border-[#8BAE5A]/30 rounded-full text-[#8BAE5A] text-sm font-medium mb-8">
+                          <div className="inline-flex items-center px-4 py-2 bg-[#8BAE5A]/20 border border-[#8BAE5A]/30 rounded-full text-[#8BAE5A] text-sm font-medium mb-8">
               <FireIcon className="w-4 h-4 mr-2" />
-              Exclusieve Wachtlijst
+              Exclusieve wachtlijst
             </div>
 
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              Wees er Bij vanaf Dag 1
+            <h2>
+              <span>WEES ER BIJ VANAF</span>
+              <span className="block">DAG 1</span>
             </h2>
             
-            <p className="text-xl text-gray-300 mb-8">
-              Door je te registreren kom je op de wachtlijst te staan voor de lancering op 10 September 2025. 
+            <p>
+              Door je te registreren kom je op de wachtlijst te staan voor de lancering op 10 september 2025. 
               Je behoort dan tot de groep eerste gebruikers van het platform.
             </p>
 
@@ -369,7 +645,7 @@ export default function PreLaunchPage() {
                   ) : (
                     <div className="flex items-center justify-center">
                       <ShieldCheckIcon className="w-5 h-5 mr-2" />
-                      Schrijf je in voor de Wachtlijst
+                      Schrijf je in voor de wachtlijst
                     </div>
                   )}
                 </motion.button>
@@ -384,7 +660,7 @@ export default function PreLaunchPage() {
                 <h3 className="text-2xl font-bold text-white mb-2">Je bent ingeschreven!</h3>
                 <p className="text-gray-300">
                   Bedankt voor je interesse! Je staat nu op de wachtlijst en behoort tot de groep eerste gebruikers. 
-                  Je ontvangt binnenkort meer informatie over de lancering op 10 September 2025.
+                  Je ontvangt binnenkort meer informatie over de lancering op 10 september 2025.
                 </p>
               </motion.div>
             )}
