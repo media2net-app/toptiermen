@@ -309,6 +309,17 @@ export default function Login() {
               Cache wissen en herladen
             </button>
           </div>
+          
+          {/* Version badge - V1.2 */}
+          <div className="mt-4 pt-2 border-t border-[#3A4D23]/30">
+            <div className="flex items-center justify-center gap-2">
+              <span className="text-[#B6C948] text-xs">Platform</span>
+              <span className="px-2 py-1 bg-[#B6C948]/20 text-[#B6C948] text-xs font-semibold rounded-full border border-[#B6C948]/30">
+                V1.2
+              </span>
+              <span className="text-[#B6C948] text-xs">Stable</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
