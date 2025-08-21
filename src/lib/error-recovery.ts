@@ -410,10 +410,3 @@ export {
   calculateBackoffDelay,
   classifyError,
 };
-
-// Export types
-export type {
-  CircuitBreakerConfig,
-  ErrorRecoveryConfig,
-  CircuitBreakerState,
-};

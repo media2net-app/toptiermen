@@ -212,7 +212,7 @@ class AdvancedMonitoringSystem {
           this.addMetric({
             id: 'page_load_time',
             name: 'Page Load Time',
-            value: navigation.loadEventEnd - navigation.navigationStart,
+            value: navigation.loadEventEnd - navigation.fetchStart,
             unit: 'ms',
             timestamp,
             category: 'performance',
@@ -223,7 +223,7 @@ class AdvancedMonitoringSystem {
           this.addMetric({
             id: 'dom_content_loaded',
             name: 'DOM Content Loaded',
-            value: navigation.domContentLoadedEventEnd - navigation.navigationStart,
+            value: navigation.domContentLoadedEventEnd - navigation.fetchStart,
             unit: 'ms',
             timestamp,
             category: 'performance',
@@ -818,5 +818,5 @@ class AdvancedMonitoringSystem {
 // Export singleton instance
 export const monitoringSystem = new AdvancedMonitoringSystem();
 
-// Export types and class for advanced usage
-export { AdvancedMonitoringSystem, type MonitoringConfig };
+// Export class for advanced usage
+export { AdvancedMonitoringSystem };
