@@ -8,12 +8,15 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('🔍 Listing videos from advertenties bucket...');
+    const { searchParams } = new URL(request.url);
+    const submap = searchParams.get('submap') || '';
+    
+    console.log(`🔍 Listing videos from advertenties bucket${submap ? ` (submap: ${submap})` : ''}...`);
 
-    // List all files in the advertenties bucket
+    // List all files in the advertenties bucket (with optional submap)
     const { data: files, error } = await supabase.storage
       .from('advertenties')
-      .list('', {
+      .list(submap, {
         limit: 100,
         offset: 0,
         sortBy: { column: 'created_at', order: 'desc' }
@@ -32,12 +35,14 @@ export async function GET(request: NextRequest) {
     // Get public URLs for each file
     const videosWithUrls = await Promise.all(
       (files || []).map(async (file) => {
+        const filePath = submap ? `${submap}/${file.name}` : file.name;
         const { data: urlData } = supabase.storage
           .from('advertenties')
-          .getPublicUrl(file.name);
+          .getPublicUrl(filePath);
 
         return {
           name: file.name,
+          full_path: filePath,
           size: file.metadata?.size,
           type: file.metadata?.mimetype,
           created_at: file.created_at,

@@ -12,7 +12,7 @@ const figtree = Figtree({
 
 export const metadata = {
   title: 'Top Tier Men',
-  description: 'Become the best version of yourself',
+  description: 'Become the best version of yourself. Join the Top Tier Men community and transform your life with fitness, nutrition, mindset, and brotherhood.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
@@ -20,8 +20,56 @@ export const metadata = {
     title: 'Top Tier Men',
   },
   icons: {
-            icon: '/logo_white-full.svg',
-        apple: '/logo_white-full.svg',
+    icon: '/logo_white-full.svg',
+    apple: '/logo_white-full.svg',
+  },
+  // Open Graph / Facebook
+  openGraph: {
+    type: 'website',
+    locale: 'nl_NL',
+    url: 'https://platform.toptiermen.eu',
+    siteName: 'Top Tier Men',
+    title: 'Top Tier Men - Become the Best Version of Yourself',
+    description: 'Join the Top Tier Men community and transform your life with fitness, nutrition, mindset, and brotherhood.',
+    images: [
+      {
+        url: '/logo_white-full.png',
+        width: 1200,
+        height: 630,
+        alt: 'Top Tier Men - Fitness, Nutrition, Mindset & Brotherhood',
+        type: 'image/png',
+      },
+    ],
+  },
+  // Twitter
+  twitter: {
+    card: 'summary_large_image',
+    site: '@toptiermen',
+    creator: '@toptiermen',
+    title: 'Top Tier Men - Become the Best Version of Yourself',
+    description: 'Join the Top Tier Men community and transform your life with fitness, nutrition, mindset, and brotherhood.',
+    images: [
+      {
+        url: '/logo_white-full.png',
+        alt: 'Top Tier Men - Fitness, Nutrition, Mindset & Brotherhood',
+      }
+    ],
+  },
+  // Additional meta tags
+  keywords: ['fitness', 'nutrition', 'mindset', 'brotherhood', 'personal development', 'men', 'health', 'wellness'],
+  authors: [{ name: 'Top Tier Men' }],
+  creator: 'Top Tier Men',
+  publisher: 'Top Tier Men',
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
 };
 
