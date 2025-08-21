@@ -43,62 +43,43 @@ export interface UpdateVideoData {
 }
 
 export class VideosService {
-  // Fetch all videos from storage bucket
+  // Fetch all videos from database
   static async getVideos(): Promise<VideoFile[]> {
     try {
-      console.log('🔍 Fetching videos from advertenties bucket...');
+      console.log('🔍 Fetching videos from database...');
       
-      // List all files in the advertenties bucket
-      const { data: files, error } = await supabase.storage
-        .from('advertenties')
-        .list('', {
-          limit: 100,
-          offset: 0,
-          sortBy: { column: 'created_at', order: 'desc' }
-        });
+      // Get all videos from the database
+      const { data: videos, error } = await supabase
+        .from('videos')
+        .select('*')
+        .eq('bucket_name', 'advertenties')
+        .eq('is_deleted', false)
+        .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('❌ Error listing files:', error);
-        
-        // If bucket doesn't exist, return empty array
-        if (error.message.includes('does not exist') || error.message.includes('not found')) {
-          console.log('📋 Advertenties bucket does not exist, returning empty array');
-          return [];
-        }
-        
-        throw error;
+        console.error('❌ Error fetching videos from database:', error);
+        return [];
       }
 
-      console.log('✅ Found files:', files?.length || 0);
+      console.log('✅ Found videos in database:', videos?.length || 0);
 
-      // Convert storage files to VideoFile format
-      const videos: VideoFile[] = await Promise.all(
-        (files || []).map(async (file) => {
+      // Add public URLs to videos
+      const videosWithUrls: VideoFile[] = await Promise.all(
+        (videos || []).map(async (video) => {
           // Get public URL for the file
           const { data: urlData } = supabase.storage
             .from('advertenties')
-            .getPublicUrl(file.name);
+            .getPublicUrl(video.original_name);
 
           return {
-            id: file.id || file.name,
-            name: file.name,
-            original_name: file.name,
-            file_path: file.name,
-            file_size: file.metadata?.size || 0,
-            mime_type: file.metadata?.mimetype || 'video/mp4',
-            bucket_name: 'advertenties',
-            created_at: file.created_at || new Date().toISOString(),
-            updated_at: file.updated_at || new Date().toISOString(),
-            campaign_status: 'active' as const,
-            is_deleted: false,
-            public_url: urlData.publicUrl,
-            target_audience: this.getTargetAudienceFromName(file.name)
+            ...video,
+            public_url: urlData.publicUrl
           };
         })
       );
 
-      console.log('✅ Converted to videos:', videos.length);
-      return videos;
+      console.log('✅ Videos with URLs:', videosWithUrls.length);
+      return videosWithUrls;
 
     } catch (error) {
       console.error('❌ Error in getVideos:', error);
@@ -124,46 +105,35 @@ export class VideosService {
     }
   }
 
-  // Fetch video by ID (filename)
+  // Fetch video by ID from database
   static async getVideoById(id: string): Promise<VideoFile | null> {
     try {
-      // Get public URL for the specific file
+      // Get video from database
+      const { data: video, error } = await supabase
+        .from('videos')
+        .select('*')
+        .eq('id', id)
+        .eq('is_deleted', false)
+        .single();
+
+      if (error) {
+        console.error('❌ Error fetching video by ID:', error);
+        return null;
+      }
+
+      if (!video) {
+        console.error('❌ Video not found:', id);
+        return null;
+      }
+
+      // Get public URL for the file
       const { data: urlData } = supabase.storage
         .from('advertenties')
-        .getPublicUrl(id);
-
-      // Get file metadata
-      const { data: files, error: listError } = await supabase.storage
-        .from('advertenties')
-        .list('', {
-          limit: 1000
-        });
-
-      if (listError) {
-        console.error('❌ Error listing files:', listError);
-        return null;
-      }
-
-      const file = files?.find(f => f.name === id);
-      if (!file) {
-        console.error('❌ File not found:', id);
-        return null;
-      }
+        .getPublicUrl(video.original_name);
 
       return {
-        id: file.id || file.name,
-        name: file.name,
-        original_name: file.name,
-        file_path: file.name,
-        file_size: file.metadata?.size || 0,
-        mime_type: file.metadata?.mimetype || 'video/mp4',
-        bucket_name: 'advertenties',
-        created_at: file.created_at || new Date().toISOString(),
-        updated_at: file.updated_at || new Date().toISOString(),
-        campaign_status: 'active' as const,
-        is_deleted: false,
-        public_url: urlData.publicUrl,
-        target_audience: this.getTargetAudienceFromName(file.name)
+        ...video,
+        public_url: urlData.publicUrl
       };
 
     } catch (error) {
@@ -172,29 +142,39 @@ export class VideosService {
     }
   }
 
-  // Create new video (this would be called after successful upload)
+  // Create new video in database
   static async createVideo(videoData: CreateVideoData): Promise<VideoFile> {
     try {
-      // Since we're using storage, we don't need to create a database record
-      // The video is already uploaded to storage
+      // Create video record in database
+      const { data: video, error } = await supabase
+        .from('videos')
+        .insert({
+          name: videoData.name,
+          original_name: videoData.original_name,
+          file_path: videoData.file_path,
+          file_size: videoData.file_size,
+          mime_type: videoData.mime_type,
+          target_audience: videoData.target_audience || this.getTargetAudienceFromName(videoData.name),
+          campaign_status: videoData.campaign_status || 'inactive',
+          bucket_name: 'advertenties',
+          is_deleted: false
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('❌ Error creating video in database:', error);
+        throw error;
+      }
+
+      // Get public URL for the file
       const { data: urlData } = supabase.storage
         .from('advertenties')
-        .getPublicUrl(videoData.file_path);
+        .getPublicUrl(videoData.original_name);
 
       return {
-        id: videoData.file_path,
-        name: videoData.name,
-        original_name: videoData.original_name,
-        file_path: videoData.file_path,
-        file_size: videoData.file_size,
-        mime_type: videoData.mime_type,
-        bucket_name: 'advertenties',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        campaign_status: videoData.campaign_status || 'active',
-        is_deleted: false,
-        public_url: urlData.publicUrl,
-        target_audience: videoData.target_audience || this.getTargetAudienceFromName(videoData.name)
+        ...video,
+        public_url: urlData.publicUrl
       };
 
     } catch (error) {
@@ -203,22 +183,38 @@ export class VideosService {
     }
   }
 
-  // Update video (this would update metadata, not the actual file)
+  // Update video in database
   static async updateVideo(id: string, updateData: UpdateVideoData): Promise<VideoFile | null> {
     try {
-      // For storage-based videos, we can't easily update metadata
-      // So we'll just return the existing video with updated fields
-      const existingVideo = await this.getVideoById(id);
-      if (!existingVideo) {
+      // Update video in database
+      const { data: video, error } = await supabase
+        .from('videos')
+        .update({
+          ...updateData,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .eq('is_deleted', false)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('❌ Error updating video:', error);
         return null;
       }
 
+      if (!video) {
+        return null;
+      }
+
+      // Get public URL for the file
+      const { data: urlData } = supabase.storage
+        .from('advertenties')
+        .getPublicUrl(video.original_name);
+
       return {
-        ...existingVideo,
-        name: updateData.name || existingVideo.name,
-        target_audience: updateData.target_audience || existingVideo.target_audience,
-        campaign_status: updateData.campaign_status || existingVideo.campaign_status,
-        updated_at: new Date().toISOString()
+        ...video,
+        public_url: urlData.publicUrl
       };
 
     } catch (error) {
@@ -227,12 +223,16 @@ export class VideosService {
     }
   }
 
-  // Delete video (this would delete from storage)
+  // Delete video (soft delete in database)
   static async deleteVideo(id: string): Promise<boolean> {
     try {
-      const { error } = await supabase.storage
-        .from('advertenties')
-        .remove([id]);
+      const { error } = await supabase
+        .from('videos')
+        .update({ 
+          is_deleted: true,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id);
 
       if (error) {
         console.error('❌ Error deleting video:', error);
