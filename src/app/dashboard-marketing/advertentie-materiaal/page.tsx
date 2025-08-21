@@ -348,7 +348,6 @@ export default function AdvertentieMateriaalPage() {
                 controls
                 crossOrigin="anonymous"
                 playsInline
-                muted
                 onLoadedMetadata={(e) => {
                   console.log('🎬 Video metadata loaded:', video.name);
                   // Generate thumbnail for mobile preview
