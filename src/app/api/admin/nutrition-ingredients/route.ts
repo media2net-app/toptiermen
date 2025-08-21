@@ -81,4 +81,32 @@ export async function POST(request: NextRequest) {
     console.error('Error in nutrition ingredients API:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { id, ...updateData } = body;
+
+    if (!id) {
+      return NextResponse.json({ error: 'ID is required for update' }, { status: 400 });
+    }
+
+    const { data: ingredient, error } = await supabaseAdmin
+      .from('nutrition_ingredients')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating nutrition ingredient:', error);
+      return NextResponse.json({ error: 'Failed to update nutrition ingredient' }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, ingredient });
+  } catch (error) {
+    console.error('Error in nutrition ingredients API:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
 } 
