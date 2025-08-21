@@ -102,7 +102,10 @@ export default function MonitoringDashboard() {
   // Run comprehensive tests
   const runTests = async () => {
     setRunningTests(true);
-    const results = {
+    const results: {
+      timestamp: string;
+      tests: Record<string, any>;
+    } = {
       timestamp: new Date().toISOString(),
       tests: {}
     };

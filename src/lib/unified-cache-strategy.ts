@@ -414,8 +414,9 @@ class UnifiedCacheStrategy {
     
     if (!entry) {
       // Try to load from persistent storage
-      entry = await this.loadPersistent(cacheKey);
-      if (entry) {
+      const persistentEntry = await this.loadPersistent(cacheKey);
+      if (persistentEntry) {
+        entry = persistentEntry;
         this.cache.set(cacheKey, entry);
         this.stats.totalEntries++;
         this.stats.totalSize += entry.size;
@@ -542,5 +543,5 @@ class UnifiedCacheStrategy {
 // Export singleton instance
 export const unifiedCache = new UnifiedCacheStrategy();
 
-// Export types and class for advanced usage
-export { UnifiedCacheStrategy, type CacheConfig, type CacheEntry, type CacheStats };
+// Export class for advanced usage
+export { UnifiedCacheStrategy };

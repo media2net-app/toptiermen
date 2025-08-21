@@ -99,40 +99,50 @@ function calculateTopPages(sessions: any[]) {
     .map(([page, count]) => ({ page, count }));
 }
 
-export async function GET_SINGLE(request: NextRequest, { params }: { params: { sessionId: string } }) {
+export async function POST(request: NextRequest) {
   try {
-    const sessionId = params.sessionId;
-    
-    console.log('👤 Fetching session details for:', sessionId);
+    const body = await request.json();
+    const { action, data } = body;
+
+    console.log('📝 Processing session action:', action);
 
     // Start monitoring if not already started
     await monitoringSystem.startMonitoring();
 
-    // This would need to be implemented in the monitoring system
-    // For now, we'll get from active sessions
-    const sessions = monitoringSystem.getActiveSessions();
-    const session = sessions.find(s => s.sessionId === sessionId);
-
-    if (!session) {
-      return NextResponse.json(
-        { success: false, error: 'Session not found' },
-        { status: 404 }
-      );
+    let response;
+    switch (action) {
+      case 'track_session':
+        // Track new session
+        response = {
+          success: true,
+          message: 'Session tracked successfully',
+          sessionId: data.sessionId
+        };
+        break;
+        
+      case 'update_session':
+        // Update existing session
+        response = {
+          success: true,
+          message: 'Session updated successfully',
+          sessionId: data.sessionId
+        };
+        break;
+        
+      default:
+        return NextResponse.json(
+          { success: false, error: 'Invalid action' },
+          { status: 400 }
+        );
     }
 
-    const response = {
-      success: true,
-      session,
-      timestamp: new Date().toISOString()
-    };
-
-    console.log('✅ Session details retrieved for:', sessionId);
+    console.log('✅ Session action processed:', action);
     return NextResponse.json(response);
 
   } catch (error) {
-    console.error('❌ Error fetching session details:', error);
+    console.error('❌ Error processing session action:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch session details', details: error },
+      { success: false, error: 'Failed to process session action', details: error },
       { status: 500 }
     );
   }

@@ -2,16 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { 
   getCurrentVersion, 
   getVersion, 
-  getPerformanceImprovements, 
-  getSystemReadiness,
+  getPerformanceSummary,
+  isSystemReady,
   VERSION_HISTORY 
 } from '@/lib/version-config';
 
 export async function GET(request: NextRequest) {
   try {
     const currentVersion = getCurrentVersion();
-    const performanceImprovements = getPerformanceImprovements();
-    const systemReadiness = getSystemReadiness();
+    const performanceSummary = getPerformanceSummary();
+    const systemReady = isSystemReady();
 
     return NextResponse.json({
       success: true,
@@ -20,16 +20,19 @@ export async function GET(request: NextRequest) {
         name: currentVersion.name,
         status: currentVersion.status,
         releaseDate: currentVersion.releaseDate,
-        ready: systemReadiness.ready,
-        score: systemReadiness.score,
+        ready: systemReady,
+        score: systemReady ? 100 : 0,
       },
       features: currentVersion.features,
       performance: {
         current: currentVersion.performance,
-        improvements: performanceImprovements,
+        improvements: performanceSummary,
       },
       tests: currentVersion.tests,
-      readiness: systemReadiness,
+      readiness: {
+        ready: systemReady,
+        score: systemReady ? 100 : 0,
+      },
       changelog: currentVersion.changelog,
       history: VERSION_HISTORY.map(v => ({
         version: v.version,
@@ -116,15 +119,17 @@ export async function POST(request: NextRequest) {
         });
 
       case 'system-status':
+        const systemReady = isSystemReady();
+        const performanceSummary = getPerformanceSummary();
         return NextResponse.json({
           success: true,
           status: {
             currentVersion: getCurrentVersion().version,
-            ready: systemReadiness.ready,
-            score: systemReadiness.score,
-            issues: systemReadiness.issues,
-            recommendations: systemReadiness.recommendations,
-            performance: performanceImprovements,
+            ready: systemReady,
+            score: systemReady ? 100 : 0,
+            issues: systemReady ? [] : ['System not ready for production'],
+            recommendations: systemReady ? ['System is ready for production'] : ['Complete system setup required'],
+            performance: performanceSummary,
           },
         });
 

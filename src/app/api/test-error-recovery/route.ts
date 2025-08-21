@@ -284,12 +284,12 @@ export async function POST(request: NextRequest) {
             },
             {
               retry: { maxRetries: 2, baseDelay: 50 },
-              fallback: async () => ({ index: i, fallback: true, success: true }),
+              fallback: async () => ({ index: i, duration: 0, success: true }),
               context: `stress_test_${i}`,
             }
           ).then(result => {
             results.successful++;
-            if (result.fallback) {
+            if (result.duration === 0) {
               results.recovered++;
             }
             return result;

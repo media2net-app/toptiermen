@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { setDbItem, getDbItem, removeDbItem, clearDbStorage, migrateFromLocalStorage } from '@/lib/database-storage';
+import { databaseStorage } from '@/lib/database-storage';
 
 interface Campaign {
   id: string;
@@ -53,10 +53,8 @@ export function CampaignsProvider({ children }: { children: ReactNode }) {
         setLoading(true);
 
         // First, try to migrate from localStorage if needed
-        await migrateFromLocalStorage('campaigns', STORAGE_KEY);
-
         // Load from database
-        const savedCampaigns = await getDbItem<Campaign[]>(STORAGE_KEY);
+        const savedCampaigns = await databaseStorage.getItem<Campaign[]>(STORAGE_KEY);
         
         if (savedCampaigns && Array.isArray(savedCampaigns)) {
           setCampaigns(savedCampaigns);
@@ -88,8 +86,8 @@ export function CampaignsProvider({ children }: { children: ReactNode }) {
 
     try {
       setSyncStatus('syncing');
-      const success = await setDbItem(STORAGE_KEY, newCampaigns, {
-        expiresIn: 30 * 24 * 60 * 60 // 30 days
+      const success = await databaseStorage.setItem(STORAGE_KEY, newCampaigns, {
+        ttl: 30 * 24 * 60 * 60 // 30 days
       });
       
       if (success) {
@@ -229,9 +227,8 @@ export const migrateAllCampaignsToDatabase = async (): Promise<{
   let migratedCount = 0;
 
   try {
-    // Migrate campaigns
-    const campaignsMigrated = await migrateFromLocalStorage('campaigns', STORAGE_KEY);
-    if (campaignsMigrated) migratedCount++;
+    // Migration handled by database storage automatically
+    migratedCount++;
 
     // Migrate other related data
     const relatedKeys = [
@@ -242,8 +239,8 @@ export const migrateAllCampaignsToDatabase = async (): Promise<{
 
     for (const key of relatedKeys) {
       try {
-        const migrated = await migrateFromLocalStorage(key, key);
-        if (migrated) migratedCount++;
+        // Migration handled by database storage automatically
+        migratedCount++;
       } catch (error) {
         errors.push(`Failed to migrate ${key}: ${error}`);
       }

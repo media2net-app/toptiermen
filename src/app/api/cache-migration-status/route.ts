@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     const cacheInfo = unifiedCache.getInfo();
 
     // Check for old localStorage usage
-    let oldCacheData = null;
+    let oldCacheData: { key: string; value: string | null } | null = null;
     let hasOldCache = false;
     
     if (typeof window !== 'undefined') {
@@ -27,11 +27,12 @@ export async function GET(request: NextRequest) {
         ];
         
         for (const key of oldCacheKeys) {
-          if (localStorage.getItem(key)) {
+          const value = localStorage.getItem(key);
+          if (value) {
             hasOldCache = true;
             oldCacheData = {
               key,
-              value: localStorage.getItem(key)
+              value
             };
             break;
           }
