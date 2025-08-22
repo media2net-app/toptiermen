@@ -48,7 +48,16 @@ export async function POST() {
 
     let successCount = 0;
     let errorCount = 0;
-    const results = [];
+    const results: Array<{
+      adset_id: string;
+      adset_name: string;
+      status: string;
+      added_interest?: string;
+      total_interests?: number;
+      removed_interests?: any[];
+      remaining_interests?: any[];
+      error?: string;
+    }> = [];
 
     // Check and fix each ad set
     for (const adset of ttmAdSets) {

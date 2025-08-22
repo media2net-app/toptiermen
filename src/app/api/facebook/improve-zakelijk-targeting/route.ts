@@ -25,7 +25,12 @@ export async function POST() {
       { name: 'Professional development', searchTerm: 'Professional development' }
     ];
 
-    const foundInterests = [];
+    const foundInterests: Array<{
+      id: string;
+      found_name: string;
+      original_name: string;
+      audience_size?: string;
+    }> = [];
 
     // Search for each interest
     for (const interest of zakelijkInterests) {
@@ -101,7 +106,15 @@ export async function POST() {
 
     let successCount = 0;
     let errorCount = 0;
-    const results = [];
+    const results: Array<{
+      adset_id: string;
+      adset_name: string;
+      status: string;
+      added_interest?: string;
+      added_interests?: string[];
+      total_interests?: number;
+      error?: string;
+    }> = [];
 
     // Update each Zakelijk ad set
     for (const adset of zakelijkAdSets) {

@@ -26,7 +26,12 @@ export async function POST() {
       { name: 'Fitness Lifestyle', searchTerm: 'Fitness Lifestyle' }
     ];
 
-    const foundInterests = [];
+    const foundInterests: Array<{
+      id: string;
+      found_name: string;
+      original_name: string;
+      audience_size?: string;
+    }> = [];
 
     // Search for each fitness interest
     for (const interest of fitnessInterests) {
@@ -102,7 +107,16 @@ export async function POST() {
 
     let successCount = 0;
     let errorCount = 0;
-    const results = [];
+    const results: Array<{
+      adset_id: string;
+      adset_name: string;
+      status: string;
+      added_interest?: string;
+      total_interests?: number;
+      removed_interests?: any[];
+      added_interests?: any[];
+      error?: string;
+    }> = [];
 
     // Update each Algemeen ad set
     for (const adset of algemeenAdSets) {

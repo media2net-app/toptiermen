@@ -62,7 +62,16 @@ export async function POST() {
 
     let successCount = 0;
     let errorCount = 0;
-    const results = [];
+    const results: Array<{
+      adset_id?: string;
+      adset_name?: string;
+      ad_id?: string;
+      ad_name?: string;
+      status: string;
+      added_interest?: string;
+      total_interests?: number;
+      error?: string;
+    }> = [];
 
     // Update each ad's creative
     for (const ad of ttmAds) {

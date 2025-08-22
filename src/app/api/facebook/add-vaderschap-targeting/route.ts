@@ -48,7 +48,14 @@ export async function POST() {
 
     let successCount = 0;
     let errorCount = 0;
-    const results = [];
+    const results: Array<{
+      adset_id: string;
+      adset_name: string;
+      status: string;
+      added_interest?: string;
+      total_interests?: number;
+      error?: string;
+    }> = [];
 
     // Check and update each Vaders ad set
     for (const adset of vadersAdSets) {

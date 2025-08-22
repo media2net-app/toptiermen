@@ -472,16 +472,11 @@ export default function PreLaunchPage() {
               className="relative"
             >
               <div className="prelaunch-story-image">
-                <div className="w-full h-96 bg-gray-800 rounded-lg shadow-lg flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="w-16 h-16 bg-[#8BAE5A] rounded-full flex items-center justify-center mx-auto mb-4">
-                      <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                    </div>
-                    <p className="text-gray-400 text-sm">Foto wordt hier geplaatst</p>
-                  </div>
-                </div>
+                <img 
+                  src="/rick-01.jpg" 
+                  alt="Rick Cuijpers - Kracht en Discipline" 
+                  className="w-full h-auto rounded-lg shadow-lg"
+                />
               </div>
             </motion.div>
           </div>
@@ -618,54 +613,29 @@ export default function PreLaunchPage() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-            >
-              <div className="space-y-4 sm:space-y-6">
-                {benefits.map((benefit, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                    viewport={{ once: true }}
-                    className="flex items-center space-x-4"
-                  >
-                    <CheckCircleIcon className="w-6 h-6 text-[#8BAE5A] flex-shrink-0" />
-                    <span className="text-lg text-white">{benefit}</span>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-              className="relative"
-            >
-              <div className="bg-gradient-to-br from-[#8BAE5A]/20 to-[#3A4D23]/20 rounded-2xl p-8 border border-white/10">
-                <div className="text-center">
-                  <div className="w-20 h-20 bg-gradient-to-r from-[#8BAE5A] to-[#3A4D23] rounded-full flex items-center justify-center mx-auto mb-6">
-                    <PlayIcon className="w-10 h-10 text-white" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-white mb-4">Platform preview</h3>
-                  <p className="text-gray-300 mb-6">
-                    Bekijk een sneak peek van wat je kunt verwachten in het Top Tier Men platform.
-                  </p>
-                  <button className="inline-flex items-center px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors">
-                    <PlayIcon className="w-5 h-5 mr-2" />
-                    Bekijk preview
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="max-w-4xl mx-auto"
+          >
+            <div className="space-y-6 sm:space-y-8">
+              {benefits.map((benefit, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                  className="flex items-center justify-center space-x-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 hover:bg-white/10 transition-all duration-300"
+                >
+                  <CheckCircleIcon className="w-8 h-8 text-[#8BAE5A] flex-shrink-0" />
+                  <span className="text-xl text-white font-medium">{benefit}</span>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
         </div>
       </section>
 
