@@ -44,7 +44,7 @@ export default function MarketingDashboard() {
   const [campaigns, setCampaigns] = useState<any[]>([]);
   const [adSets, setAdSets] = useState<any[]>([]);
   const [ads, setAds] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<'campaigns' | 'adsets' | 'ads'>('ads');
+  const [activeTab, setActiveTab] = useState<'campaigns' | 'adsets' | 'ads'>('adsets');
 
   // Temporarily disable authentication check for testing
   // Check authentication and Facebook connection on component mount
