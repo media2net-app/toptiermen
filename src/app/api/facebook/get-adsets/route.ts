@@ -31,6 +31,9 @@ export async function GET() {
       return NextResponse.json({ success: true, data: [] });
     }
 
+    console.log(`📋 Raw ad sets from Facebook: ${data.data.length}`);
+    console.log('📋 Sample ad set names:', data.data.slice(0, 3).map((adSet: any) => adSet.name));
+
     // Filter to only show TTM ad sets
     const ttmAdSets = data.data.filter((adSet: any) => 
       adSet.name && adSet.name.includes('TTM')
