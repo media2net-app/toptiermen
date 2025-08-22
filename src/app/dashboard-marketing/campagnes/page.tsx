@@ -94,21 +94,36 @@ export default function CampaignsPage() {
   const loadFacebookData = async () => {
     setLoading(true);
     try {
-      // Load campaigns, ad sets, and ads in parallel
-      const [campaignsRes, adSetsRes, adsRes] = await Promise.all([
-        fetch('/api/facebook/get-campaigns'),
-        fetch('/api/facebook/get-adsets'),
-        fetch('/api/facebook/get-ads')
-      ]);
-
+      // Load campaigns first (this is the most important)
+      const campaignsRes = await fetch('/api/facebook/get-campaigns');
       const campaignsData = await campaignsRes.json();
-      const adSetsData = await adSetsRes.json();
-      const adsData = await adsRes.json();
 
-      if (campaignsData.success && adSetsData.success && adsData.success) {
+      if (campaignsData.success) {
         const facebookCampaigns: FacebookCampaign[] = campaignsData.data;
-        const facebookAdSets: FacebookAdSet[] = adSetsData.data;
-        const facebookAds: FacebookAd[] = adsData.data;
+        
+        // Try to load ad sets and ads, but don't fail if they don't work
+        let facebookAdSets: FacebookAdSet[] = [];
+        let facebookAds: FacebookAd[] = [];
+        
+        try {
+          const adSetsRes = await fetch('/api/facebook/get-adsets');
+          const adSetsData = await adSetsRes.json();
+          if (adSetsData.success) {
+            facebookAdSets = adSetsData.data;
+          }
+        } catch (error) {
+          console.log('Ad sets API failed, continuing with campaigns only:', error);
+        }
+        
+        try {
+          const adsRes = await fetch('/api/facebook/get-ads');
+          const adsData = await adsRes.json();
+          if (adsData.success) {
+            facebookAds = adsData.data;
+          }
+        } catch (error) {
+          console.log('Ads API failed, continuing with campaigns only:', error);
+        }
 
         // Transform Facebook data to our Campaign format
         const transformedCampaigns: Campaign[] = facebookCampaigns.map(campaign => {
@@ -149,8 +164,9 @@ export default function CampaignsPage() {
         });
 
         setCampaigns(transformedCampaigns);
+        console.log(`✅ Loaded ${transformedCampaigns.length} campaigns`);
       } else {
-        console.error('Failed to load Facebook data:', { campaignsData, adSetsData, adsData });
+        console.error('Failed to load campaigns:', campaignsData);
       }
     } catch (error) {
       console.error('Error loading Facebook data:', error);
