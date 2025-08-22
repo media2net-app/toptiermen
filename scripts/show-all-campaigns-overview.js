@@ -76,6 +76,48 @@ const CAMPAIGNS_OVERVIEW = {
         ad_title: 'Word Onderdeel van Onze Community'
       }
     ]
+  },
+  vaders: {
+    name: 'TTM - Vaders Prelaunch Campagne',
+    objective: 'TRAFFIC',
+    daily_budget: 100,
+    ad_sets: [
+      {
+        name: 'TTM - Vaders - Family & Leadership',
+        daily_budget: 60,
+        video: 'vaders_01',
+        targeting: '30-50 jaar, mannen, NL/BE',
+        ad_title: 'Voor Vaders Die Meer Willen'
+      },
+      {
+        name: 'TTM - Vaders - Role Model & Success',
+        daily_budget: 40,
+        video: 'vaders_02',
+        targeting: '35-55 jaar, mannen, NL',
+        ad_title: 'Word een Betere Rolmodel'
+      }
+    ]
+  },
+  zakelijk: {
+    name: 'TTM - Zakelijk Prelaunch Campagne',
+    objective: 'TRAFFIC',
+    daily_budget: 120,
+    ad_sets: [
+      {
+        name: 'TTM - Zakelijk - Business Professionals',
+        daily_budget: 70,
+        video: 'zakelijk_01',
+        targeting: '28-45 jaar, alle geslachten, NL/BE',
+        ad_title: 'Voor Business Professionals'
+      },
+      {
+        name: 'TTM - Zakelijk - Entrepreneurs & Leaders',
+        daily_budget: 50,
+        video: 'zakelijk_02',
+        targeting: '30-50 jaar, alle geslachten, NL',
+        ad_title: 'Voor Ondernemers en Leiders'
+      }
+    ]
   }
 };
 
@@ -156,14 +198,52 @@ async function showAllCampaignsOverview() {
       console.log(`     📝 Ad Title: ${adSet.ad_title}`);
     });
 
+    console.log('\n' + '-'.repeat(80));
+
+    // Show Vaders Campaign
+    console.log('\n🎯 VADERS CAMPAIGN:');
+    console.log(`📊 Campaign Name: ${CAMPAIGNS_OVERVIEW.vaders.name}`);
+    console.log(`🎯 Objective: ${CAMPAIGNS_OVERVIEW.vaders.objective}`);
+    console.log(`💰 Total Daily Budget: €${CAMPAIGNS_OVERVIEW.vaders.daily_budget}`);
+    console.log(`📊 Number of Ad Sets: ${CAMPAIGNS_OVERVIEW.vaders.ad_sets.length}`);
+    console.log(`🔗 Landing Page: https://platform.toptiermen.eu/prelaunch`);
+    
+    console.log('\n📊 Ad Sets:');
+    CAMPAIGNS_OVERVIEW.vaders.ad_sets.forEach((adSet, index) => {
+      console.log(`\n  ${index + 1}. ${adSet.name}`);
+      console.log(`     💰 Daily Budget: €${adSet.daily_budget}`);
+      console.log(`     📹 Video: ${adSet.video}`);
+      console.log(`     👥 Targeting: ${adSet.targeting}`);
+      console.log(`     📝 Ad Title: ${adSet.ad_title}`);
+    });
+
+    console.log('\n' + '-'.repeat(80));
+
+    // Show Zakelijk Campaign
+    console.log('\n🎯 ZAKELIJK CAMPAIGN:');
+    console.log(`📊 Campaign Name: ${CAMPAIGNS_OVERVIEW.zakelijk.name}`);
+    console.log(`🎯 Objective: ${CAMPAIGNS_OVERVIEW.zakelijk.objective}`);
+    console.log(`💰 Total Daily Budget: €${CAMPAIGNS_OVERVIEW.zakelijk.daily_budget}`);
+    console.log(`📊 Number of Ad Sets: ${CAMPAIGNS_OVERVIEW.zakelijk.ad_sets.length}`);
+    console.log(`🔗 Landing Page: https://platform.toptiermen.eu/prelaunch`);
+    
+    console.log('\n📊 Ad Sets:');
+    CAMPAIGNS_OVERVIEW.zakelijk.ad_sets.forEach((adSet, index) => {
+      console.log(`\n  ${index + 1}. ${adSet.name}`);
+      console.log(`     💰 Daily Budget: €${adSet.daily_budget}`);
+      console.log(`     📹 Video: ${adSet.video}`);
+      console.log(`     👥 Targeting: ${adSet.targeting}`);
+      console.log(`     📝 Ad Title: ${adSet.ad_title}`);
+    });
+
     console.log('\n' + '='.repeat(80));
     console.log('📊 SUMMARY');
     console.log('='.repeat(80));
     
-    const totalBudget = CAMPAIGNS_OVERVIEW.algemene.daily_budget + CAMPAIGNS_OVERVIEW.jongeren.daily_budget;
-    const totalAdSets = CAMPAIGNS_OVERVIEW.algemene.ad_sets.length + CAMPAIGNS_OVERVIEW.jongeren.ad_sets.length;
+    const totalBudget = CAMPAIGNS_OVERVIEW.algemene.daily_budget + CAMPAIGNS_OVERVIEW.jongeren.daily_budget + CAMPAIGNS_OVERVIEW.vaders.daily_budget + CAMPAIGNS_OVERVIEW.zakelijk.daily_budget;
+    const totalAdSets = CAMPAIGNS_OVERVIEW.algemene.ad_sets.length + CAMPAIGNS_OVERVIEW.jongeren.ad_sets.length + CAMPAIGNS_OVERVIEW.vaders.ad_sets.length + CAMPAIGNS_OVERVIEW.zakelijk.ad_sets.length;
     
-    console.log(`📊 Total Campaigns: 2`);
+    console.log(`📊 Total Campaigns: 4`);
     console.log(`📊 Total Ad Sets: ${totalAdSets}`);
     console.log(`📊 Total Ads: ${totalAdSets}`);
     console.log(`💰 Total Daily Budget: €${totalBudget}`);
@@ -173,6 +253,8 @@ async function showAllCampaignsOverview() {
     console.log('\n🎯 Campaign Creation Commands:');
     console.log('1. Algemene Campaign: node scripts/create-algemene-multi-adset-campaign.js');
     console.log('2. Jongeren Campaign: node scripts/create-jongeren-multi-adset-campaign.js');
+    console.log('3. Vaders Campaign: node scripts/create-vaders-multi-adset-campaign.js');
+    console.log('4. Zakelijk Campaign: node scripts/create-zakelijk-multi-adset-campaign.js');
     
     console.log('\n💡 Tips:');
     console.log('- Start alle campagnes gepauzeerd (veiligheid)');
