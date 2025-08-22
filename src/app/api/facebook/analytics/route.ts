@@ -19,22 +19,31 @@ export async function GET(request: NextRequest) {
     console.log('📊 Fetching Facebook analytics data...');
     console.log('🔧 Date range:', dateRange);
     console.log('🔧 Level:', level);
+    console.log('🔧 Ad Account ID:', FACEBOOK_AD_ACCOUNT_ID);
 
     let analyticsData: any = {};
 
     // Fetch campaigns with insights
+    console.log('📋 Fetching campaigns...');
     const campaignsResponse = await fetch(
       `https://graph.facebook.com/v19.0/${FACEBOOK_AD_ACCOUNT_ID}/campaigns?access_token=${FACEBOOK_ACCESS_TOKEN}&fields=id,name,status,objective,created_time,insights{impressions,clicks,spend,reach,frequency,ctr,cpc,cpm,actions}&limit=100&date_preset=${dateRange}`
     );
 
     if (!campaignsResponse.ok) {
-      throw new Error(`Facebook API error: ${campaignsResponse.status}`);
+      const errorText = await campaignsResponse.text();
+      console.error('❌ Facebook campaigns API error:', campaignsResponse.status, errorText);
+      throw new Error(`Facebook campaigns API error: ${campaignsResponse.status} - ${errorText}`);
     }
 
     const campaignsData = await campaignsResponse.json();
+    console.log('📋 Raw campaigns data:', campaignsData);
+    
     const ttmCampaigns = campaignsData.data?.filter((campaign: any) => 
       campaign.name && campaign.name.includes('TTM')
     ) || [];
+    
+    console.log('📋 TTM campaigns found:', ttmCampaigns.length);
+    console.log('📋 Campaign names:', ttmCampaigns.map((c: any) => c.name));
 
     analyticsData.campaigns = ttmCampaigns.map((campaign: any) => {
       const insights = campaign.insights?.data?.[0];
@@ -123,16 +132,16 @@ export async function GET(request: NextRequest) {
 
     // Calculate summary metrics
     const summary = {
-      totalImpressions: analyticsData.campaigns.reduce((sum: number, campaign: any) => sum + campaign.impressions, 0),
-      totalClicks: analyticsData.campaigns.reduce((sum: number, campaign: any) => sum + campaign.clicks, 0),
-      totalSpend: analyticsData.campaigns.reduce((sum: number, campaign: any) => sum + campaign.spend, 0),
-      totalReach: analyticsData.campaigns.reduce((sum: number, campaign: any) => sum + campaign.reach, 0),
+      totalImpressions: analyticsData.campaigns.reduce((sum: number, campaign: any) => sum + (campaign.impressions || 0), 0),
+      totalClicks: analyticsData.campaigns.reduce((sum: number, campaign: any) => sum + (campaign.clicks || 0), 0),
+      totalSpend: analyticsData.campaigns.reduce((sum: number, campaign: any) => sum + (campaign.spend || 0), 0),
+      totalReach: analyticsData.campaigns.reduce((sum: number, campaign: any) => sum + (campaign.reach || 0), 0),
       averageCTR: analyticsData.campaigns.length > 0 ? 
-        analyticsData.campaigns.reduce((sum: number, campaign: any) => sum + campaign.ctr, 0) / analyticsData.campaigns.length : 0,
+        analyticsData.campaigns.reduce((sum: number, campaign: any) => sum + (campaign.ctr || 0), 0) / analyticsData.campaigns.length : 0,
       averageCPC: analyticsData.campaigns.length > 0 ? 
-        analyticsData.campaigns.reduce((sum: number, campaign: any) => sum + campaign.cpc, 0) / analyticsData.campaigns.length : 0,
+        analyticsData.campaigns.reduce((sum: number, campaign: any) => sum + (campaign.cpc || 0), 0) / analyticsData.campaigns.length : 0,
       averageCPM: analyticsData.campaigns.length > 0 ? 
-        analyticsData.campaigns.reduce((sum: number, campaign: any) => sum + campaign.cpm, 0) / analyticsData.campaigns.length : 0,
+        analyticsData.campaigns.reduce((sum: number, campaign: any) => sum + (campaign.cpm || 0), 0) / analyticsData.campaigns.length : 0,
       activeCampaigns: analyticsData.campaigns.filter((campaign: any) => campaign.status === 'ACTIVE').length,
       totalCampaigns: analyticsData.campaigns.length
     };
@@ -143,7 +152,25 @@ export async function GET(request: NextRequest) {
       adSets: analyticsData.adSets?.length || 0,
       ads: analyticsData.ads?.length || 0,
       totalSpend: summary.totalSpend,
-      totalClicks: summary.totalClicks
+      totalClicks: summary.totalClicks,
+      totalImpressions: summary.totalImpressions,
+      totalReach: summary.totalReach,
+      averageCTR: summary.averageCTR,
+      averageCPC: summary.averageCPC,
+      activeCampaigns: summary.activeCampaigns
+    });
+    
+    // Log individual campaign data for debugging
+    analyticsData.campaigns.forEach((campaign: any, index: number) => {
+      console.log(`📋 Campaign ${index + 1}:`, {
+        name: campaign.name,
+        status: campaign.status,
+        impressions: campaign.impressions,
+        clicks: campaign.clicks,
+        spend: campaign.spend,
+        ctr: campaign.ctr,
+        cpc: campaign.cpc
+      });
     });
 
     return NextResponse.json({
