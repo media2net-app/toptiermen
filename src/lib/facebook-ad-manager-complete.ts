@@ -152,6 +152,48 @@ interface CreateCampaignData {
   page_id?: string;
 }
 
+interface CreateMultiAdSetCampaignData {
+  name: string;
+  objective: 'AWARENESS' | 'CONSIDERATION' | 'CONVERSIONS' | 'ENGAGEMENT' | 'LEADS' | 'SALES' | 'TRAFFIC';
+  status: 'ACTIVE' | 'PAUSED';
+  start_time?: string;
+  stop_time?: string;
+  campaign_daily_budget?: number;
+  lifetime_budget?: number;
+  special_ad_categories?: string[];
+  ad_sets: Array<{
+    name: string;
+    daily_budget: number;
+    targeting: {
+      age_min: number;
+      age_max: number;
+      genders: string[];
+      locations: string[];
+      interests?: string[];
+      behaviors?: string[];
+      demographics?: {
+        education_statuses?: string[];
+        relationship_statuses?: string[];
+      };
+      exclusions?: {
+        interests?: string[];
+        behaviors?: string[];
+      };
+      languages?: string[];
+      radius?: number;
+    };
+    ad_creative: {
+      title?: string;
+      body?: string;
+      link_url: string;
+      call_to_action_type?: string;
+    };
+    video_url?: string;
+    video_name?: string;
+  }>;
+  page_id?: string;
+}
+
 interface FacebookAdAccount {
   id: string;
   name: string;
@@ -527,6 +569,195 @@ class FacebookAdManagerComplete {
   }
 
   /**
+   * Maak een campagne aan met meerdere ad sets
+   */
+  async createMultiAdSetCampaign(campaignData: CreateMultiAdSetCampaignData): Promise<{
+    campaign: FacebookCampaign;
+    adSets: FacebookAdSet[];
+    ads: FacebookAd[];
+  }> {
+    const serverToken = await this.getServerSideToken();
+    
+    console.log('🚀 Creating Facebook campaign with multiple ad sets...');
+    
+    // 1. Maak de campagne aan
+    const campaignPayload = {
+      name: campaignData.name,
+      objective: campaignData.objective,
+      status: campaignData.status,
+      special_ad_categories: campaignData.special_ad_categories || [],
+      ...(campaignData.start_time && { start_time: campaignData.start_time }),
+      ...(campaignData.stop_time && { stop_time: campaignData.stop_time }),
+      ...(campaignData.campaign_daily_budget && { daily_budget: campaignData.campaign_daily_budget * 100 }),
+      ...(campaignData.lifetime_budget && { lifetime_budget: campaignData.lifetime_budget * 100 })
+    };
+
+    console.log('📋 Creating campaign with payload:', campaignPayload);
+
+    const campaignResponse = await fetch(
+      `${this.baseUrl}/${this.adAccountId}/campaigns?access_token=${serverToken}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(campaignPayload)
+      }
+    );
+
+    if (!campaignResponse.ok) {
+      const errorData = await campaignResponse.json();
+      throw new Error(`Campaign creation failed: ${JSON.stringify(errorData)}`);
+    }
+
+    const campaign = await campaignResponse.json();
+    console.log('✅ Campaign created:', campaign.id);
+
+    const adSets: FacebookAdSet[] = [];
+    const ads: FacebookAd[] = [];
+
+    // 2. Maak ad sets en ads aan voor elke ad set configuratie
+    for (let i = 0; i < campaignData.ad_sets.length; i++) {
+      const adSetConfig = campaignData.ad_sets[i];
+      
+      console.log(`🎯 Creating ad set ${i + 1}/${campaignData.ad_sets.length}: ${adSetConfig.name}`);
+
+      // Upload video als die er is
+      let videoId: string | undefined;
+      if (adSetConfig.video_url) {
+        console.log('🎥 Uploading video...');
+        videoId = await this.uploadVideo(adSetConfig.video_url, adSetConfig.video_name || 'Ad Video');
+        console.log('✅ Video uploaded:', videoId);
+      }
+
+      // Maak ad set aan
+      const adSetPayload = {
+        name: adSetConfig.name,
+        campaign_id: campaign.id,
+        daily_budget: adSetConfig.daily_budget * 100,
+        billing_event: 'IMPRESSIONS',
+        optimization_goal: this.getOptimizationGoal(campaignData.objective),
+        targeting: {
+          age_min: adSetConfig.targeting.age_min,
+          age_max: adSetConfig.targeting.age_max,
+          genders: adSetConfig.targeting.genders,
+          geo_locations: {
+            countries: adSetConfig.targeting.locations
+          },
+          ...(adSetConfig.targeting.interests && { 
+            interests: adSetConfig.targeting.interests.map(id => ({ id })) 
+          }),
+          ...(adSetConfig.targeting.behaviors && { 
+            behaviors: adSetConfig.targeting.behaviors.map(id => ({ id })) 
+          }),
+          ...(adSetConfig.targeting.demographics && {
+            demographics: adSetConfig.targeting.demographics
+          }),
+          ...(adSetConfig.targeting.exclusions && {
+            exclusions: adSetConfig.targeting.exclusions
+          }),
+          ...(adSetConfig.targeting.languages && {
+            languages: adSetConfig.targeting.languages
+          }),
+          ...(adSetConfig.targeting.radius && {
+            radius: adSetConfig.targeting.radius
+          })
+        },
+        status: 'ACTIVE'
+      };
+
+      const adSetResponse = await fetch(
+        `${this.baseUrl}/${this.adAccountId}/adsets?access_token=${serverToken}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(adSetPayload)
+        }
+      );
+
+      if (!adSetResponse.ok) {
+        const errorData = await adSetResponse.json();
+        throw new Error(`Ad Set creation failed: ${JSON.stringify(errorData)}`);
+      }
+
+      const adSet = await adSetResponse.json();
+      adSets.push(adSet);
+      console.log('✅ Ad Set created:', adSet.id);
+
+      // Maak ad creative aan
+      const creativePayload = {
+        name: `${adSetConfig.name} - Creative`,
+        object_story_spec: {
+          ...(campaignData.page_id && { page_id: campaignData.page_id }),
+          link_data: {
+            ...(videoId && { video_id: videoId }),
+            link: adSetConfig.ad_creative.link_url,
+            message: adSetConfig.ad_creative.body,
+            name: adSetConfig.ad_creative.title,
+            call_to_action: {
+              type: adSetConfig.ad_creative.call_to_action_type || 'LEARN_MORE',
+              value: {
+                link: adSetConfig.ad_creative.link_url
+              }
+            }
+          }
+        }
+      };
+
+      const creativeResponse = await fetch(
+        `${this.baseUrl}/${this.adAccountId}/adcreatives?access_token=${serverToken}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(creativePayload)
+        }
+      );
+
+      if (!creativeResponse.ok) {
+        const errorData = await creativeResponse.json();
+        throw new Error(`Ad Creative creation failed: ${JSON.stringify(errorData)}`);
+      }
+
+      const creative = await creativeResponse.json();
+      console.log('✅ Ad Creative created:', creative.id);
+
+      // Maak ad aan
+      const adPayload = {
+        name: `${adSetConfig.name} - Ad`,
+        adset_id: adSet.id,
+        creative: {
+          creative_id: creative.id
+        },
+        status: 'ACTIVE'
+      };
+
+      const adResponse = await fetch(
+        `${this.baseUrl}/${this.adAccountId}/ads?access_token=${serverToken}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(adPayload)
+        }
+      );
+
+      if (!adResponse.ok) {
+        const errorData = await adResponse.json();
+        throw new Error(`Ad creation failed: ${JSON.stringify(errorData)}`);
+      }
+
+      const ad = await adResponse.json();
+      ads.push(ad);
+      console.log('✅ Ad created:', ad.id);
+
+      // Wait a bit between ad sets to avoid rate limiting
+      if (i < campaignData.ad_sets.length - 1) {
+        console.log('⏳ Waiting 2 seconds before next ad set...');
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+    }
+
+    return { campaign, adSets, ads };
+  }
+
+  /**
    * Toggle campagne status
    */
   async toggleCampaignStatus(campaignId: string, status: 'ACTIVE' | 'PAUSED'): Promise<FacebookCampaign> {
@@ -554,6 +785,7 @@ export type {
   FacebookAd,
   FacebookAdAccount,
   CreateCampaignData,
+  CreateMultiAdSetCampaignData,
   Interest,
   Behavior,
   TargetingSpec,
