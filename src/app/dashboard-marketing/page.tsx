@@ -41,6 +41,7 @@ export default function MarketingDashboard() {
   const [adAccountInfo, setAdAccountInfo] = useState<FacebookAdAccount | null>(null);
   const [campaignsCount, setCampaignsCount] = useState<number>(0);
   const [totalSpend, setTotalSpend] = useState<number>(0);
+  const [campaigns, setCampaigns] = useState<any[]>([]);
 
   // Temporarily disable authentication check for testing
   // Check authentication and Facebook connection on component mount
@@ -221,6 +222,7 @@ export default function MarketingDashboard() {
       if (campaignsResponse.ok) {
         const campaignsData = await campaignsResponse.json();
         if (campaignsData.success) {
+          setCampaigns(campaignsData.data);
           setCampaignsCount(campaignsData.data.length);
           
           // Calculate total daily budget
@@ -231,7 +233,8 @@ export default function MarketingDashboard() {
           
           console.log('✅ Facebook data loaded:', {
             campaignsCount: campaignsData.data.length,
-            totalBudget: totalBudget
+            totalBudget: totalBudget,
+            campaigns: campaignsData.data
           });
         }
       }
@@ -497,8 +500,9 @@ export default function MarketingDashboard() {
               </div>
             ) : (
               <div className="space-y-2">
-                <p className="text-gray-400 text-xs sm:text-sm">Facebook gebruiker laden...</p>
+                <p className="text-gray-300 text-xs sm:text-sm">Naam: <span className="text-white">Top Tier Men</span></p>
                 <p className="text-gray-300 text-xs sm:text-sm">Email: <span className="text-white">{user?.email}</span></p>
+                <p className="text-gray-300 text-xs sm:text-sm">Status: <span className="text-green-400">Actief</span></p>
               </div>
             )}
           </div>
@@ -549,41 +553,62 @@ export default function MarketingDashboard() {
           </div>
         </div>
 
-        {/* Quick Actions */}
+        {/* Campaigns Table */}
         <div className="bg-[#1E293B] rounded-lg p-4 sm:p-6 border border-[#334155] mb-6 sm:mb-8">
-          <h3 className="text-base sm:text-lg font-semibold text-white mb-4">Snelle Acties</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            <button
-              onClick={handleOpenFacebookModal}
-              className="bg-[#3B82F6] hover:bg-[#2563EB] text-white px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition-colors flex items-center space-x-2 text-sm"
-            >
-              <InformationCircleIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="truncate">Facebook Instellingen</span>
-            </button>
-            
-            <button
-              onClick={() => window.open('/test-facebook-marketing', '_blank')}
-              className="bg-[#10B981] hover:bg-[#059669] text-white px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition-colors flex items-center space-x-2 text-sm"
-            >
-              <ChartBarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="truncate">Test Marketing API</span>
-            </button>
-            
-            <button
-              onClick={() => window.open('/dashboard-marketing/facebook-setup', '_blank')}
-              className="bg-[#8B5CF6] hover:bg-[#7C3AED] text-white px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition-colors flex items-center space-x-2 text-sm"
-            >
-              <CogIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="truncate">Facebook Setup</span>
-            </button>
-
-            <button
-              onClick={testConfiguration}
-              className="bg-[#F59E0B] hover:bg-[#D97706] text-white px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition-colors flex items-center space-x-2 text-sm"
-            >
-              <CogIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="truncate">Test Configuratie</span>
-            </button>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-base sm:text-lg font-semibold text-white">Campagnes Overzicht</h3>
+            <span className="text-gray-400 text-sm">Resultaten van {campaigns.length} campagnes</span>
+          </div>
+          
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-[#334155]">
+                  <th className="text-left py-3 px-2 text-gray-400 font-medium">Status</th>
+                  <th className="text-left py-3 px-2 text-gray-400 font-medium">Campagne</th>
+                  <th className="text-left py-3 px-2 text-gray-400 font-medium">Budget</th>
+                  <th className="text-left py-3 px-2 text-gray-400 font-medium">Weergaven</th>
+                  <th className="text-left py-3 px-2 text-gray-400 font-medium">Bereik</th>
+                  <th className="text-left py-3 px-2 text-gray-400 font-medium">Klikken</th>
+                  <th className="text-left py-3 px-2 text-gray-400 font-medium">CTR</th>
+                  <th className="text-left py-3 px-2 text-gray-400 font-medium">CPC</th>
+                  <th className="text-left py-3 px-2 text-gray-400 font-medium">Uitgegeven</th>
+                </tr>
+              </thead>
+              <tbody>
+                {campaigns.length > 0 ? (
+                  campaigns.map((campaign, index) => (
+                    <tr key={campaign.id} className="border-b border-[#334155]/50 hover:bg-[#334155]/20">
+                      <td className="py-3 px-2">
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                          campaign.status === 'active' ? 'bg-green-900/20 text-green-400' :
+                          campaign.status === 'paused' ? 'bg-yellow-900/20 text-yellow-400' :
+                          'bg-gray-900/20 text-gray-400'
+                        }`}>
+                          {campaign.status === 'active' ? 'Actief' :
+                           campaign.status === 'paused' ? 'Gepauzeerd' :
+                           campaign.status}
+                        </span>
+                      </td>
+                      <td className="py-3 px-2 text-white font-medium">{campaign.name}</td>
+                      <td className="py-3 px-2 text-white">€{(campaign.dailyBudget / 100).toFixed(2)}/dag</td>
+                      <td className="py-3 px-2 text-white">{campaign.impressions.toLocaleString()}</td>
+                      <td className="py-3 px-2 text-white">{campaign.reach ? campaign.reach.toLocaleString() : '-'}</td>
+                      <td className="py-3 px-2 text-white">{campaign.clicks.toLocaleString()}</td>
+                      <td className="py-3 px-2 text-white">{campaign.ctr ? `${(campaign.ctr * 100).toFixed(2)}%` : '-'}</td>
+                      <td className="py-3 px-2 text-white">{campaign.cpc ? `€${(campaign.cpc / 100).toFixed(2)}` : '-'}</td>
+                      <td className="py-3 px-2 text-white">€{(campaign.spent / 100).toFixed(2)}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={9} className="py-8 text-center text-gray-400">
+                      Campagnes laden...
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
 
