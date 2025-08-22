@@ -74,8 +74,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Task notification sent successfully',
-      notification: notification || null
+      message: 'Task notification sent successfully'
     });
 
   } catch (error) {
