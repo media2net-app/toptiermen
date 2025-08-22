@@ -47,7 +47,168 @@ interface Advertisement {
   dailyBudget: number;
   createdAt: string;
   lastUpdated: string;
+  videoName?: string;
 }
+
+// Mock ad sets data for demonstration (matching our Facebook campaigns)
+const mockAdSets = [
+  // Algemene Campagne - 5 ad sets
+  {
+    id: "adset_algemene_1",
+    name: "TTM - Algemeen - Prelaunch Awareness",
+    campaign: "TTM - Algemene Prelaunch Campagne",
+    platform: "Facebook",
+    status: "paused" as const,
+    type: "video" as const,
+    impressions: 0,
+    clicks: 0,
+    ctr: 0,
+    cpc: 0,
+    spent: 0,
+    performance: "good" as const,
+    targetAudience: "Algemeen (18-65 jaar, alle geslachten, NL/BE)",
+    startDate: "2025-01-01",
+    endDate: "2025-12-31",
+    budget: 25,
+    dailyBudget: 25,
+    createdAt: "2025-01-01T00:00:00Z",
+    lastUpdated: "2025-01-01T00:00:00Z",
+    videoName: "algemeen_01"
+  },
+  {
+    id: "adset_algemene_2",
+    name: "TTM - Algemeen - Fitness Community",
+    campaign: "TTM - Algemene Prelaunch Campagne",
+    platform: "Facebook",
+    status: "paused" as const,
+    type: "video" as const,
+    impressions: 0,
+    clicks: 0,
+    ctr: 0,
+    cpc: 0,
+    spent: 0,
+    performance: "good" as const,
+    targetAudience: "Algemeen (25-55 jaar, mannen, NL)",
+    startDate: "2025-01-01",
+    endDate: "2025-12-31",
+    budget: 30,
+    dailyBudget: 30,
+    createdAt: "2025-01-01T00:00:00Z",
+    lastUpdated: "2025-01-01T00:00:00Z",
+    videoName: "algemeen_02"
+  },
+  {
+    id: "adset_algemene_3",
+    name: "TTM - Algemeen - Lifestyle Upgrade",
+    campaign: "TTM - Algemene Prelaunch Campagne",
+    platform: "Facebook",
+    status: "paused" as const,
+    type: "video" as const,
+    impressions: 0,
+    clicks: 0,
+    ctr: 0,
+    cpc: 0,
+    spent: 0,
+    performance: "good" as const,
+    targetAudience: "Algemeen (30-50 jaar, alle geslachten, NL/BE/DE)",
+    startDate: "2025-01-01",
+    endDate: "2025-12-31",
+    budget: 35,
+    dailyBudget: 35,
+    createdAt: "2025-01-01T00:00:00Z",
+    lastUpdated: "2025-01-01T00:00:00Z",
+    videoName: "algemeen_03"
+  },
+  {
+    id: "adset_algemene_4",
+    name: "TTM - Algemeen - Business Professionals",
+    campaign: "TTM - Algemene Prelaunch Campagne",
+    platform: "Facebook",
+    status: "paused" as const,
+    type: "video" as const,
+    impressions: 0,
+    clicks: 0,
+    ctr: 0,
+    cpc: 0,
+    spent: 0,
+    performance: "good" as const,
+    targetAudience: "Algemeen (28-45 jaar, alle geslachten, NL)",
+    startDate: "2025-01-01",
+    endDate: "2025-12-31",
+    budget: 40,
+    dailyBudget: 40,
+    createdAt: "2025-01-01T00:00:00Z",
+    lastUpdated: "2025-01-01T00:00:00Z",
+    videoName: "algemeen_04"
+  },
+  {
+    id: "adset_algemene_5",
+    name: "TTM - Algemeen - Community Building",
+    campaign: "TTM - Algemene Prelaunch Campagne",
+    platform: "Facebook",
+    status: "paused" as const,
+    type: "video" as const,
+    impressions: 0,
+    clicks: 0,
+    ctr: 0,
+    cpc: 0,
+    spent: 0,
+    performance: "good" as const,
+    targetAudience: "Algemeen (22-40 jaar, alle geslachten, NL/BE)",
+    startDate: "2025-01-01",
+    endDate: "2025-12-31",
+    budget: 20,
+    dailyBudget: 20,
+    createdAt: "2025-01-01T00:00:00Z",
+    lastUpdated: "2025-01-01T00:00:00Z",
+    videoName: "algemeen_05"
+  },
+  // Jongeren Campagne - 2 ad sets
+  {
+    id: "adset_jongeren_1",
+    name: "TTM - Jongeren - Fitness & Lifestyle",
+    campaign: "TTM - Jongeren Prelaunch Campagne",
+    platform: "Facebook",
+    status: "paused" as const,
+    type: "video" as const,
+    impressions: 0,
+    clicks: 0,
+    ctr: 0,
+    cpc: 0,
+    spent: 0,
+    performance: "good" as const,
+    targetAudience: "Jongeren (18-25 jaar, alle geslachten, NL/BE)",
+    startDate: "2025-01-01",
+    endDate: "2025-12-31",
+    budget: 45,
+    dailyBudget: 45,
+    createdAt: "2025-01-01T00:00:00Z",
+    lastUpdated: "2025-01-01T00:00:00Z",
+    videoName: "jongeren_01"
+  },
+  {
+    id: "adset_jongeren_2",
+    name: "TTM - Jongeren - Social & Community",
+    campaign: "TTM - Jongeren Prelaunch Campagne",
+    platform: "Facebook",
+    status: "paused" as const,
+    type: "video" as const,
+    impressions: 0,
+    clicks: 0,
+    ctr: 0,
+    cpc: 0,
+    spent: 0,
+    performance: "good" as const,
+    targetAudience: "Jongeren (18-25 jaar, alle geslachten, NL)",
+    startDate: "2025-01-01",
+    endDate: "2025-12-31",
+    budget: 35,
+    dailyBudget: 35,
+    createdAt: "2025-01-01T00:00:00Z",
+    lastUpdated: "2025-01-01T00:00:00Z",
+    videoName: "jongeren_02"
+  }
+];
 
 export default function AdvertisementsPage() {
   const [ads, setAds] = useState<Advertisement[]>([]);
@@ -58,119 +219,11 @@ export default function AdvertisementsPage() {
   const [selectedAd, setSelectedAd] = useState<Advertisement | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showAdModal, setShowAdModal] = useState(false);
-  const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
+  const [viewMode, setViewMode] = useState<'table' | 'cards' | 'calendar'>('table');
 
-  // Mock data
+  // Load mock ad sets data
   useEffect(() => {
-    const mockAds: Advertisement[] = [
-      {
-        id: "1",
-        name: "Transform Your Life - Summer Edition",
-        campaign: "Summer Fitness Challenge",
-        platform: "Facebook",
-        status: "active",
-        type: "image",
-        impressions: 85000,
-        clicks: 2900,
-        ctr: 3.4,
-        cpc: 0.33,
-        spent: 957,
-        performance: "excellent",
-        targetAudience: "Fitness enthusiasts, 25-45",
-        startDate: "2025-07-01",
-        endDate: "2025-08-31",
-        budget: 1500,
-        dailyBudget: 25,
-        createdAt: "2025-07-01T10:00:00Z",
-        lastUpdated: "2025-07-27T10:30:00Z"
-      },
-      {
-        id: "2",
-        name: "Join the Brotherhood Community",
-        campaign: "Brotherhood Community",
-        platform: "Instagram",
-        status: "active",
-        type: "carousel",
-        impressions: 62000,
-        clicks: 2480,
-        ctr: 4.0,
-        cpc: 0.33,
-        spent: 818,
-        performance: "good",
-        targetAudience: "Men, 18-35, interested in self-improvement",
-        startDate: "2025-07-15",
-        endDate: "2025-09-15",
-        budget: 1200,
-        dailyBudget: 20,
-        createdAt: "2025-07-15T14:00:00Z",
-        lastUpdated: "2025-07-27T09:15:00Z"
-      },
-      {
-        id: "3",
-        name: "Premium Features Showcase",
-        campaign: "Premium Membership",
-        platform: "Google Ads",
-        status: "active",
-        type: "video",
-        impressions: 105000,
-        clicks: 4200,
-        ctr: 4.0,
-        cpc: 0.33,
-        spent: 1386,
-        performance: "excellent",
-        targetAudience: "Professionals, 30-50, high income",
-        startDate: "2025-06-01",
-        endDate: "2025-12-31",
-        budget: 3000,
-        dailyBudget: 50,
-        createdAt: "2025-06-01T09:00:00Z",
-        lastUpdated: "2025-07-27T08:45:00Z"
-      },
-      {
-        id: "4",
-        name: "Mind & Focus Meditation",
-        campaign: "Mind & Focus",
-        platform: "Facebook",
-        status: "paused",
-        type: "video",
-        impressions: 45000,
-        clicks: 1350,
-        ctr: 3.0,
-        cpc: 0.35,
-        spent: 472,
-        performance: "average",
-        targetAudience: "Wellness seekers, 25-40",
-        startDate: "2025-07-10",
-        endDate: "2025-08-10",
-        budget: 800,
-        dailyBudget: 15,
-        createdAt: "2025-07-10T11:00:00Z",
-        lastUpdated: "2025-07-25T16:20:00Z"
-      },
-      {
-        id: "5",
-        name: "Finance & Business Tools",
-        campaign: "Finance & Business",
-        platform: "LinkedIn",
-        status: "draft",
-        type: "image",
-        impressions: 0,
-        clicks: 0,
-        ctr: 0,
-        cpc: 0,
-        spent: 0,
-        performance: "poor",
-        targetAudience: "Entrepreneurs, 30-50",
-        startDate: "2025-08-01",
-        endDate: "2025-09-30",
-        budget: 2000,
-        dailyBudget: 30,
-        createdAt: "2025-07-26T15:00:00Z",
-        lastUpdated: "2025-07-26T15:00:00Z"
-      }
-    ];
-
-    setAds(mockAds);
+    setAds(mockAdSets);
     setLoading(false);
   }, []);
 
@@ -241,13 +294,87 @@ export default function AdvertisementsPage() {
           <h1 className="text-2xl font-bold text-white">Advertenties</h1>
           <p className="text-gray-400 mt-1">Beheer je advertenties en campagnes</p>
         </div>
-        <button 
-          onClick={() => setShowCreateModal(true)}
-          className="bg-[#3A4D23] hover:bg-[#4A5D33] text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
-        >
-          <PlusIcon className="w-5 h-5" />
-          <span>Nieuwe Advertentie</span>
-        </button>
+        <div className="flex items-center space-x-3">
+          <button 
+            onClick={async () => {
+              setLoading(true);
+              try {
+                const response = await fetch('/api/facebook/get-campaigns');
+                const result = await response.json();
+                if (result.success) {
+                  // Transform campaigns to ad sets format
+                  const adSetsFromCampaigns = result.data.flatMap(campaign => 
+                    campaign.adSets?.map(adSet => ({
+                      id: adSet.id,
+                      name: adSet.name,
+                      campaign: campaign.name,
+                      platform: 'Facebook',
+                      status: adSet.status.toLowerCase() as 'active' | 'paused' | 'rejected' | 'draft' | 'pending_review',
+                      type: 'video' as const,
+                      impressions: 0,
+                      clicks: 0,
+                      ctr: 0,
+                      cpc: 0,
+                      spent: 0,
+                      performance: 'good' as const,
+                      targetAudience: 'Facebook Targeting',
+                      startDate: campaign.startDate,
+                      endDate: campaign.endDate,
+                      budget: adSet.daily_budget || 0,
+                      dailyBudget: adSet.daily_budget || 0,
+                      createdAt: campaign.createdAt,
+                      lastUpdated: campaign.lastUpdated,
+                      videoName: adSet.video_name || ''
+                    })) || []
+                  );
+                  setAds(adSetsFromCampaigns);
+                } else {
+                  console.error('Failed to load Facebook ad sets:', result.error);
+                }
+              } catch (error) {
+                console.error('Error loading Facebook ad sets:', error);
+              } finally {
+                setLoading(false);
+              }
+            }}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+          >
+            <ChartBarIcon className="w-5 h-5" />
+            <span>Laad Facebook Ad Sets</span>
+          </button>
+          <button 
+            onClick={() => setShowCreateModal(true)}
+            className="bg-[#3A4D23] hover:bg-[#4A5D33] text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+          >
+            <PlusIcon className="w-5 h-5" />
+            <span>Nieuwe Advertentie</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Info Banner */}
+      <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mb-6">
+        <div className="flex items-start space-x-3">
+          <ExclamationTriangleIcon className="w-6 h-6 text-blue-400 mt-0.5" />
+          <div>
+            <h3 className="text-blue-400 font-semibold mb-1">Facebook Ad Sets</h3>
+            <p className="text-blue-200 text-sm mb-2">
+              Momenteel worden demo ad sets getoond. Klik op "Laad Facebook Ad Sets" om echte ad sets van Facebook op te halen, 
+              of ga naar "Advertentie Materiaal" om nieuwe campagnes aan te maken.
+            </p>
+            <div className="flex items-center space-x-4 text-xs text-blue-300">
+              <span>📊 Demo: 7 ad sets (5 Algemeen + 2 Jongeren)</span>
+              <span>💰 Budget: €230/dag totaal</span>
+              <span>🎯 Doel: TRAFFIC naar prelaunch</span>
+              <a 
+                href="/dashboard-marketing/advertentie-materiaal" 
+                className="text-blue-400 hover:text-blue-300 underline"
+              >
+                → Ga naar Advertentie Materiaal
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Filters */}
@@ -318,6 +445,16 @@ export default function AdvertisementsPage() {
             }`}
           >
             Kaarten
+          </button>
+          <button
+            onClick={() => setViewMode('calendar')}
+            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              viewMode === 'calendar'
+                ? 'bg-[#3B82F6] text-white'
+                : 'bg-[#2D3748] text-gray-400 hover:text-white'
+            }`}
+          >
+            Kalender
           </button>
         </div>
       </div>
@@ -393,190 +530,82 @@ export default function AdvertisementsPage() {
         </motion.div>
       </div>
 
-      {/* Advertisements Display */}
-      <AnimatePresence mode="wait">
-        {viewMode === 'table' ? (
-          <motion.div
-            key="table"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            className="bg-[#1A1F2E] border border-[#2D3748] rounded-lg overflow-hidden"
-          >
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-[#2D3748]">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Advertentie
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Campagne
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Platform
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Prestaties
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Impressies
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      CTR
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Uitgegeven
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Acties
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#2D3748]">
-                  {filteredAds.map((ad, index) => (
-                    <motion.tr
-                      key={ad.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      className="hover:bg-[#2D3748] transition-colors cursor-pointer"
-                      onClick={() => handleAdClick(ad)}
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div>
-                          <div className="text-sm font-medium text-white">{ad.name}</div>
-                          <div className="text-sm text-gray-400">{ad.type}</div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                        {ad.campaign}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                        {ad.platform}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center space-x-2">
-                          {getStatusIcon(ad.status)}
-                          <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(ad.status)}`}>
-                            {ad.status.replace('_', ' ')}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`text-sm font-medium ${getPerformanceColor(ad.performance)}`}>
-                          {ad.performance}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                        {ad.impressions.toLocaleString()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                        {ad.ctr}%
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                        €{ad.spent.toLocaleString()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex items-center space-x-2">
-                          <button 
-                            className="text-[#8BAE5A] hover:text-[#9BBE6A]"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleAdClick(ad);
-                            }}
-                          >
-                            <EyeIcon className="w-4 h-4" />
-                          </button>
-                          <button className="text-blue-400 hover:text-blue-300">
-                            <PencilIcon className="w-4 h-4" />
-                          </button>
-                          <button className="text-red-400 hover:text-red-300">
-                            <TrashIcon className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </motion.tr>
-                  ))}
-                </tbody>
-              </table>
+      {/* Advertisements Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {filteredAds.map((ad) => (
+          <div key={ad.id} className="bg-[#1A1F2E] border border-[#2D3748] rounded-lg p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <h3 className="text-lg font-semibold text-white mb-1">{ad.name}</h3>
+                <p className="text-gray-400 text-sm">{ad.platform}</p>
+              </div>
+              <div className="flex items-center space-x-2">
+                {getStatusIcon(ad.status)}
+                <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(ad.status)}`}>
+                  {ad.status.replace('_', ' ')}
+                </span>
+              </div>
             </div>
-          </motion.div>
-        ) : (
-          <motion.div
-            key="cards"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-          >
-            {filteredAds.map((ad, index) => (
-              <motion.div
-                key={ad.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                whileHover={{ 
-                  scale: 1.02,
-                  boxShadow: "0 10px 25px rgba(0, 0, 0, 0.3)"
-                }}
-                whileTap={{ scale: 0.98 }}
-                className="bg-[#1A1F2E] border border-[#2D3748] rounded-lg p-6 cursor-pointer transition-all duration-200 hover:border-[#3B82F6] hover:bg-gray-800/30"
-                onClick={() => handleAdClick(ad)}
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center space-x-2">
-                    {getStatusIcon(ad.status)}
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(ad.status)}`}>
-                      {ad.status.replace('_', ' ')}
-                    </span>
-                  </div>
-                  <span className={`text-sm font-medium ${getPerformanceColor(ad.performance)}`}>
-                    {ad.performance}
-                  </span>
-                </div>
-                
-                <h3 className="text-lg font-semibold text-white mb-2">{ad.name}</h3>
-                <p className="text-gray-400 text-sm mb-4">{ad.campaign} • {ad.platform}</p>
-                
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <p className="text-gray-400 text-sm">Impressies</p>
-                    <p className="text-white font-medium">{ad.impressions.toLocaleString()}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-400 text-sm">CTR</p>
-                    <p className="text-white font-medium">{ad.ctr}%</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-400 text-sm">Uitgegeven</p>
-                    <p className="text-white font-medium">€{ad.spent.toLocaleString()}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-400 text-sm">Budget</p>
-                    <p className="text-white font-medium">€{ad.budget.toLocaleString()}</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-between pt-4 border-t border-gray-700">
-                  <span className="text-xs text-gray-500">Klik voor details →</span>
-                  <div className="flex items-center space-x-2">
-                    <button className="text-blue-400 hover:text-blue-300">
-                      <PencilIcon className="w-4 h-4" />
-                    </button>
-                    <button className="text-red-400 hover:text-red-300">
-                      <TrashIcon className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
+
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <p className="text-gray-400 text-sm">Campagne</p>
+                <p className="text-white font-medium text-sm">{ad.campaign}</p>
+              </div>
+              <div>
+                <p className="text-gray-400 text-sm">Video</p>
+                <p className="text-white font-medium text-sm">{ad.videoName || 'N/A'}</p>
+              </div>
+              <div>
+                <p className="text-gray-400 text-sm">Budget</p>
+                <p className="text-white font-medium">€{ad.budget.toLocaleString()}</p>
+              </div>
+              <div>
+                <p className="text-gray-400 text-sm">Uitgegeven</p>
+                <p className="text-white font-medium">€{ad.spent.toLocaleString()}</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-4 gap-4 mb-4">
+              <div className="text-center">
+                <p className="text-gray-400 text-xs">Impressies</p>
+                <p className="text-white font-medium text-sm">{ad.impressions.toLocaleString()}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-gray-400 text-xs">Klikken</p>
+                <p className="text-white font-medium text-sm">{ad.clicks.toLocaleString()}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-gray-400 text-xs">CTR</p>
+                <p className="text-white font-medium text-sm">{ad.ctr}%</p>
+              </div>
+              <div className="text-center">
+                <p className="text-gray-400 text-xs">Prestaties</p>
+                <p className={`text-sm font-medium ${getPerformanceColor(ad.performance)}`}>
+                  {ad.performance}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-4 border-t border-[#2D3748]">
+              <div className="text-sm text-gray-400">
+                {ad.startDate} - {ad.endDate}
+              </div>
+              <div className="flex items-center space-x-2">
+                <button className="text-[#8BAE5A] hover:text-[#9BBE6A]">
+                  <EyeIcon className="w-4 h-4" />
+                </button>
+                <button className="text-blue-400 hover:text-blue-300">
+                  <PencilIcon className="w-4 h-4" />
+                </button>
+                <button className="text-red-400 hover:text-red-300">
+                  <TrashIcon className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
 
       {/* Pagination */}
       <div className="flex items-center justify-between">
