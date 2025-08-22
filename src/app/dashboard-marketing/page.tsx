@@ -454,10 +454,10 @@ export default function MarketingDashboard() {
         {/* Header */}
         <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Marketing Dashboard</h1>
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-2">Marketing Dashboard</h1>
             <div className="flex items-center space-x-2 text-green-400">
               <CheckCircleIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="text-sm sm:text-base">Facebook is verbonden!</span>
+              <span className="text-xs sm:text-sm lg:text-base">Facebook is verbonden!</span>
             </div>
           </div>
           
@@ -466,12 +466,12 @@ export default function MarketingDashboard() {
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center space-x-2">
                 <UserIcon className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
-                <span className="text-white font-medium text-sm sm:text-base">Live Mode</span>
+                <span className="text-white font-medium text-xs sm:text-sm lg:text-base">Live Mode</span>
               </div>
               {user && (
                 <button
                   onClick={signOut}
-                  className="text-red-400 hover:text-red-300 text-xs sm:text-sm underline"
+                  className="text-red-400 hover:text-red-300 text-xs underline"
                 >
                   Uitloggen
                 </button>
@@ -479,18 +479,18 @@ export default function MarketingDashboard() {
             </div>
             <p className="text-gray-300 text-xs sm:text-sm">{user ? user.email : 'Geen authenticatie vereist'}</p>
             <p className="text-gray-400 text-xs">
-              {user ? `Gebruiker ID: ${user.id}` : 'Facebook integratie live'}
+              {user ? `ID: ${user.id.substring(0, 8)}...` : 'Facebook integratie live'}
             </p>
           </div>
         </div>
 
         {/* Connection Details */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
           {/* User Info */}
-          <div className="bg-[#1E293B] rounded-lg p-4 sm:p-6 border border-[#334155]">
-            <div className="flex items-center space-x-3 mb-3 sm:mb-4">
-              <UserIcon className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" />
-              <h3 className="text-base sm:text-lg font-semibold text-white">Gebruiker</h3>
+          <div className="bg-[#1E293B] rounded-lg p-3 sm:p-4 lg:p-6 border border-[#334155]">
+            <div className="flex items-center space-x-2 sm:space-x-3 mb-2 sm:mb-3 lg:mb-4">
+              <UserIcon className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-blue-400" />
+              <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-white">Gebruiker</h3>
             </div>
             {userInfo ? (
               <div className="space-y-2">
@@ -508,10 +508,10 @@ export default function MarketingDashboard() {
           </div>
 
           {/* Ad Account Info */}
-          <div className="bg-[#1E293B] rounded-lg p-4 sm:p-6 border border-[#334155]">
-            <div className="flex items-center space-x-3 mb-3 sm:mb-4">
-              <BuildingOfficeIcon className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400" />
-              <h3 className="text-base sm:text-lg font-semibold text-white">Ad Account</h3>
+          <div className="bg-[#1E293B] rounded-lg p-3 sm:p-4 lg:p-6 border border-[#334155]">
+            <div className="flex items-center space-x-2 sm:space-x-3 mb-2 sm:mb-3 lg:mb-4">
+              <BuildingOfficeIcon className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-purple-400" />
+              <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-white">Ad Account</h3>
             </div>
             {adAccountInfo ? (
               <div className="space-y-2">
@@ -529,10 +529,10 @@ export default function MarketingDashboard() {
           </div>
 
           {/* Campaigns */}
-          <div className="bg-[#1E293B] rounded-lg p-4 sm:p-6 border border-[#334155]">
-            <div className="flex items-center space-x-3 mb-3 sm:mb-4">
-              <ChartBarIcon className="w-5 h-5 sm:w-6 sm:h-6 text-green-400" />
-              <h3 className="text-base sm:text-lg font-semibold text-white">Campagnes</h3>
+          <div className="bg-[#1E293B] rounded-lg p-3 sm:p-4 lg:p-6 border border-[#334155]">
+            <div className="flex items-center space-x-2 sm:space-x-3 mb-2 sm:mb-3 lg:mb-4">
+              <ChartBarIcon className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-green-400" />
+              <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-white">Campagnes</h3>
             </div>
             <div className="space-y-2">
               <p className="text-gray-300 text-xs sm:text-sm">Aantal: <span className="text-white text-lg sm:text-xl font-bold">{campaignsCount > 0 ? campaignsCount : '4'}</span></p>
@@ -541,10 +541,10 @@ export default function MarketingDashboard() {
           </div>
 
           {/* Total Spend */}
-          <div className="bg-[#1E293B] rounded-lg p-4 sm:p-6 border border-[#334155]">
-            <div className="flex items-center space-x-3 mb-3 sm:mb-4">
-              <CurrencyEuroIcon className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400" />
-              <h3 className="text-base sm:text-lg font-semibold text-white">Totaal Uitgegeven</h3>
+          <div className="bg-[#1E293B] rounded-lg p-3 sm:p-4 lg:p-6 border border-[#334155]">
+            <div className="flex items-center space-x-2 sm:space-x-3 mb-2 sm:mb-3 lg:mb-4">
+              <CurrencyEuroIcon className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-yellow-400" />
+              <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-white">Totaal Uitgegeven</h3>
             </div>
             <div className="space-y-2">
               <p className="text-gray-300 text-xs sm:text-sm">Dagbudget: <span className="text-white text-lg sm:text-xl font-bold">{totalSpend > 0 ? `€${totalSpend.toFixed(2)}` : '€55,00'}</span></p>
@@ -554,13 +554,14 @@ export default function MarketingDashboard() {
         </div>
 
         {/* Campaigns Table */}
-        <div className="bg-[#1E293B] rounded-lg p-4 sm:p-6 border border-[#334155] mb-6 sm:mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base sm:text-lg font-semibold text-white">Campagnes Overzicht</h3>
-            <span className="text-gray-400 text-sm">Resultaten van {campaigns.length} campagnes</span>
+        <div className="bg-[#1E293B] rounded-lg p-3 sm:p-4 lg:p-6 border border-[#334155] mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
+            <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-white">Campagnes Overzicht</h3>
+            <span className="text-gray-400 text-xs sm:text-sm">Resultaten van {campaigns.length} campagnes</span>
           </div>
           
-          <div className="overflow-x-auto">
+          {/* Desktop Table */}
+          <div className="hidden lg:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-[#334155]">
@@ -609,6 +610,67 @@ export default function MarketingDashboard() {
                 )}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile Cards */}
+          <div className="lg:hidden space-y-4">
+            {campaigns.length > 0 ? (
+              campaigns.map((campaign, index) => (
+                <div key={campaign.id} className="bg-[#334155]/20 rounded-lg p-4 border border-[#334155]/50">
+                  {/* Header */}
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="text-white font-medium text-sm truncate flex-1 mr-2">{campaign.name}</h4>
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium flex-shrink-0 ${
+                      campaign.status === 'active' ? 'bg-green-900/20 text-green-400' :
+                      campaign.status === 'paused' ? 'bg-yellow-900/20 text-yellow-400' :
+                      'bg-gray-900/20 text-gray-400'
+                    }`}>
+                      {campaign.status === 'active' ? 'Actief' :
+                       campaign.status === 'paused' ? 'Gepauzeerd' :
+                       campaign.status}
+                    </span>
+                  </div>
+                  
+                  {/* Budget */}
+                  <div className="mb-3">
+                    <p className="text-gray-400 text-xs">Budget</p>
+                    <p className="text-white font-medium">€{(campaign.dailyBudget / 100).toFixed(2)}/dag</p>
+                  </div>
+                  
+                  {/* Performance Grid */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-gray-400 text-xs">Weergaven</p>
+                      <p className="text-white font-medium">{campaign.impressions.toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-400 text-xs">Bereik</p>
+                      <p className="text-white font-medium">{campaign.reach ? campaign.reach.toLocaleString() : '-'}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-400 text-xs">Klikken</p>
+                      <p className="text-white font-medium">{campaign.clicks.toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-400 text-xs">CTR</p>
+                      <p className="text-white font-medium">{campaign.ctr ? `${(campaign.ctr * 100).toFixed(2)}%` : '-'}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-400 text-xs">CPC</p>
+                      <p className="text-white font-medium">{campaign.cpc ? `€${(campaign.cpc / 100).toFixed(2)}` : '-'}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-400 text-xs">Uitgegeven</p>
+                      <p className="text-white font-medium">€{(campaign.spent / 100).toFixed(2)}</p>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-gray-400">
+                Campagnes laden...
+              </div>
+            )}
           </div>
         </div>
 
