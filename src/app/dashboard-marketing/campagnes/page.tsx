@@ -27,6 +27,56 @@ import {
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 import { useCampaigns } from '@/contexts/CampaignsContext';
 
+// Mock campaigns data for demonstration (since we haven't created real campaigns yet)
+const mockCampaigns = [
+  {
+    id: 'campaign_algemene',
+    name: 'TTM - Algemene Prelaunch Campagne',
+    platform: 'Facebook',
+    status: 'paused' as const,
+    objective: 'traffic' as const,
+    impressions: 0,
+    clicks: 0,
+    conversions: 0,
+    spent: 0,
+    budget: 150,
+    dailyBudget: 150,
+    ctr: 0,
+    cpc: 0,
+    conversionRate: 0,
+    roas: 0,
+    targetAudience: 'Algemeen (18-65 jaar)',
+    startDate: '2025-01-01',
+    endDate: '2025-12-31',
+    adsCount: 5,
+    createdAt: '2025-01-01T00:00:00Z',
+    lastUpdated: '2025-01-01T00:00:00Z'
+  },
+  {
+    id: 'campaign_jongeren',
+    name: 'TTM - Jongeren Prelaunch Campagne',
+    platform: 'Facebook',
+    status: 'paused' as const,
+    objective: 'traffic' as const,
+    impressions: 0,
+    clicks: 0,
+    conversions: 0,
+    spent: 0,
+    budget: 80,
+    dailyBudget: 80,
+    ctr: 0,
+    cpc: 0,
+    conversionRate: 0,
+    roas: 0,
+    targetAudience: 'Jongeren (18-25 jaar)',
+    startDate: '2025-01-01',
+    endDate: '2025-12-31',
+    adsCount: 2,
+    createdAt: '2025-01-01T00:00:00Z',
+    lastUpdated: '2025-01-01T00:00:00Z'
+  }
+];
+
 // Types
 interface Campaign {
   id: string;
@@ -53,7 +103,8 @@ interface Campaign {
 }
 
 export default function CampaignsPage() {
-  const { campaigns, loading } = useCampaigns();
+  const [campaigns, setCampaigns] = useState<Campaign[]>(mockCampaigns);
+  const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterPlatform, setFilterPlatform] = useState('all');
@@ -129,13 +180,62 @@ export default function CampaignsPage() {
           <h1 className="text-2xl font-bold text-white">Campagnes</h1>
           <p className="text-gray-400 mt-1">Beheer je marketing campagnes</p>
         </div>
-        <button 
-          onClick={() => setShowCreateModal(true)}
-          className="bg-[#3A4D23] hover:bg-[#4A5D33] text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
-        >
-          <PlusIcon className="w-5 h-5" />
-          <span>Nieuwe Campagne</span>
-        </button>
+        <div className="flex items-center space-x-3">
+          <button 
+            onClick={async () => {
+              setLoading(true);
+              try {
+                const response = await fetch('/api/facebook/get-campaigns');
+                const result = await response.json();
+                if (result.success) {
+                  setCampaigns(result.data);
+                } else {
+                  console.error('Failed to load Facebook campaigns:', result.error);
+                }
+              } catch (error) {
+                console.error('Error loading Facebook campaigns:', error);
+              } finally {
+                setLoading(false);
+              }
+            }}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+          >
+            <ChartBarIcon className="w-5 h-5" />
+            <span>Laad Facebook Campagnes</span>
+          </button>
+          <button 
+            onClick={() => setShowCreateModal(true)}
+            className="bg-[#3A4D23] hover:bg-[#4A5D33] text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+          >
+            <PlusIcon className="w-5 h-5" />
+            <span>Nieuwe Campagne</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Info Banner */}
+      <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mb-6">
+        <div className="flex items-start space-x-3">
+          <ExclamationTriangleIcon className="w-6 h-6 text-blue-400 mt-0.5" />
+          <div>
+            <h3 className="text-blue-400 font-semibold mb-1">Facebook Campagnes</h3>
+            <p className="text-blue-200 text-sm mb-2">
+              Momenteel worden demo campagnes getoond. Klik op "Laad Facebook Campagnes" om echte campagnes van Facebook op te halen, 
+              of ga naar "Advertentie Materiaal" om nieuwe campagnes aan te maken.
+            </p>
+            <div className="flex items-center space-x-4 text-xs text-blue-300">
+              <span>📊 Demo: 2 campagnes (Algemeen + Jongeren)</span>
+              <span>💰 Budget: €230/dag totaal</span>
+              <span>🎯 Doel: TRAFFIC naar prelaunch</span>
+              <a 
+                href="/dashboard-marketing/advertentie-materiaal" 
+                className="text-blue-400 hover:text-blue-300 underline"
+              >
+                → Ga naar Advertentie Materiaal
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Filters */}
