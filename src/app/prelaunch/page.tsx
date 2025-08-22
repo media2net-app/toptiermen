@@ -248,13 +248,13 @@ export default function PreLaunchPage() {
     <div className="prelaunch-page min-h-screen">
       {/* Header */}
       <header className="relative z-10">
-        <div className="w-full px-20 py-6">
+        <div className="w-full px-4 sm:px-8 md:px-12 lg:px-20 py-4 sm:py-6">
           <div className="flex items-center justify-center">
             <div className="flex items-center space-x-3">
               <img 
                 src="/logo_white-full.svg" 
                 alt="Top Tier Men Logo" 
-                className="h-12 sm:h-16 w-auto"
+                className="h-8 sm:h-12 md:h-16 w-auto"
               />
             </div>
           </div>
@@ -262,9 +262,9 @@ export default function PreLaunchPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="prelaunch-hero relative py-20 px-20">
+      <section className="prelaunch-hero relative py-8 sm:py-12 md:py-16 lg:py-20 px-4 sm:px-8 md:px-12 lg:px-20">
         <div className="w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 md:gap-16 items-center">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -284,10 +284,10 @@ export default function PreLaunchPage() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
-              className="space-y-8"
+              className="space-y-4 sm:space-y-6 md:space-y-8"
             >
               <div>
-                <div className="inline-flex items-center px-4 py-2 bg-[#8BAE5A]/10 border border-[#8BAE5A]/30 rounded-full text-[#8BAE5A] text-sm font-medium mb-8">
+                <div className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 bg-[#8BAE5A]/10 border border-[#8BAE5A]/30 rounded-full text-[#8BAE5A] text-xs sm:text-sm font-medium mb-4 sm:mb-6 md:mb-8">
                   <ClockIcon className="w-4 h-4 mr-2" />
                   Lancering: 10 september 2025
                 </div>
@@ -326,9 +326,9 @@ export default function PreLaunchPage() {
       </section>
 
       {/* Mijn Verhaal Section */}
-      <section className="prelaunch-section py-20 px-20">
+      <section className="prelaunch-section py-8 sm:py-12 md:py-16 lg:py-20 px-4 sm:px-8 md:px-12 lg:px-20">
         <div className="w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 md:gap-16 items-start">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -372,7 +372,7 @@ export default function PreLaunchPage() {
       </section>
 
       {/* Word De Beste Versie Van Jezelf Section */}
-      <section className="prelaunch-section py-20 px-20">
+      <section className="prelaunch-section py-8 sm:py-12 md:py-16 lg:py-20 px-4 sm:px-8 md:px-12 lg:px-20">
         <div className="w-full text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -391,7 +391,7 @@ export default function PreLaunchPage() {
             </p>
 
             {/* CTA Button */}
-            <div className="mb-12">
+            <div className="mb-6 sm:mb-8 md:mb-12">
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -408,9 +408,9 @@ export default function PreLaunchPage() {
       </section>
 
       {/* Kracht Begint Section */}
-      <section className="prelaunch-section py-20 px-20">
+      <section className="prelaunch-section py-8 sm:py-12 md:py-16 lg:py-20 px-4 sm:px-8 md:px-12 lg:px-20">
         <div className="w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 md:gap-16 items-center">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -458,7 +458,7 @@ export default function PreLaunchPage() {
       </section>
 
       {/* Waarom Top Tier Men Section */}
-      <section className="prelaunch-section py-20 px-20 relative overflow-hidden">
+      <section className="prelaunch-section py-8 sm:py-12 md:py-16 lg:py-20 px-4 sm:px-8 md:px-12 lg:px-20 relative overflow-hidden">
         {/* Background pattern */}
         <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
         
@@ -530,7 +530,7 @@ export default function PreLaunchPage() {
       </section>
 
       {/* Features Section */}
-      <section className="prelaunch-section py-20 px-20">
+      <section className="prelaunch-section py-8 sm:py-12 md:py-16 lg:py-20 px-4 sm:px-8 md:px-12 lg:px-20">
         <div className="w-full">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -549,7 +549,7 @@ export default function PreLaunchPage() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
             {features.map((feature, index) => (
               <motion.div
                 key={index}
@@ -557,11 +557,11 @@ export default function PreLaunchPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 hover:bg-white/10 transition-all duration-300"
+                className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 sm:p-6 hover:bg-white/10 transition-all duration-300"
               >
-                <feature.icon className="w-12 h-12 text-[#8BAE5A] mb-4" />
-                <h3 className="text-xl font-semibold text-white mb-3">{feature.title}</h3>
-                <p className="text-gray-300">{feature.description}</p>
+                <feature.icon className="w-8 h-8 sm:w-12 sm:h-12 text-[#8BAE5A] mb-3 sm:mb-4" />
+                <h3 className="text-lg sm:text-xl font-semibold text-white mb-2 sm:mb-3">{feature.title}</h3>
+                <p className="text-sm sm:text-base text-gray-300">{feature.description}</p>
               </motion.div>
             ))}
           </div>
@@ -569,7 +569,7 @@ export default function PreLaunchPage() {
       </section>
 
       {/* What to Expect Section */}
-      <section className="prelaunch-section py-20 px-20">
+      <section className="prelaunch-section py-8 sm:py-12 md:py-16 lg:py-20 px-4 sm:px-8 md:px-12 lg:px-20">
         <div className="w-full">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -587,14 +587,14 @@ export default function PreLaunchPage() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-center">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
             >
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 {benefits.map((benefit, index) => (
                   <motion.div
                     key={index}
@@ -639,7 +639,7 @@ export default function PreLaunchPage() {
       </section>
 
       {/* Platform Features Section */}
-      <section className="prelaunch-section py-20 px-20">
+      <section className="prelaunch-section py-8 sm:py-12 md:py-16 lg:py-20 px-4 sm:px-8 md:px-12 lg:px-20">
         <div className="w-full">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -692,7 +692,7 @@ export default function PreLaunchPage() {
       </section>
 
       {/* Waitlist Section */}
-      <section id="signup" className="prelaunch-section py-20 px-20">
+      <section id="signup" className="prelaunch-section py-8 sm:py-12 md:py-16 lg:py-20 px-4 sm:px-8 md:px-12 lg:px-20">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
