@@ -26,7 +26,7 @@ import {
   PencilIcon,
   VideoCameraIcon
 } from '@heroicons/react/24/outline';
-import CampaignSetup from './campaign-setup';
+import CampaignSetupComplete from './campaign-setup-complete';
 import { VideosService, VideoFile } from '@/lib/videos-service';
 
 export default function AdvertentieMateriaalPage() {
@@ -723,23 +723,17 @@ export default function AdvertentieMateriaalPage() {
 
       {/* Campaign Setup Modal */}
       {showCampaignSetup && campaignVideo && (
-        <CampaignSetup
-          selectedVideo={{
-            id: campaignVideo.id,
-            name: campaignVideo.name,
-            campaignStatus: campaignVideo.campaign_status
-          }}
+        <CampaignSetupComplete
+          video={campaignVideo}
           onClose={() => {
             setShowCampaignSetup(false);
             setCampaignVideo(null);
           }}
-          onSave={(campaign: any) => {
-            console.log('🎯 Campaign saved:', campaign);
-            alert(`Campagne "${campaign.name}" succesvol opgezet!\n\nBudget: €${campaign.budget_amount} ${campaign.budget_type === 'DAILY' ? 'per dag' : 'totaal'}\nTargeting: ${campaign.targeting?.ageMin}-${campaign.targeting?.ageMax} jaar, ${campaign.targeting?.gender}\nLocaties: ${campaign.targeting?.locations?.join(', ')}`);
+          onSuccess={(campaignData) => {
+            console.log('✅ Campaign created:', campaignData);
+            alert(`Facebook campagne succesvol aangemaakt!\n\nCampagne: ${campaignData.campaign.name}\nAd Set: ${campaignData.adSet.name}\nAd: ${campaignData.ad.name}\n\nStatus: ${campaignData.campaign.status}`);
             setShowCampaignSetup(false);
             setCampaignVideo(null);
-            // Refresh campaigns list
-            fetchCampaigns();
           }}
         />
       )}
