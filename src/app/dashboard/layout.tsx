@@ -78,6 +78,11 @@ const menu = [
   { label: 'Badges & Rangen', icon: StarIcon, href: '/dashboard/badges-en-rangen' },
   { label: 'Producten', icon: ShoppingBagIcon, href: '/dashboard/producten' },
   { label: 'Mentorship & Coaching', icon: ChatBubbleLeftRightIcon, href: '/dashboard/mentorship-en-coaching' },
+  { label: 'Marketing Dashboard', icon: ChartBarIcon, href: '/dashboard-marketing', isLive: true },
+  { label: 'Overzicht', icon: HomeIcon, parent: 'Marketing Dashboard', href: '/dashboard-marketing', isSub: true, isLive: true },
+  { label: 'Advertentie Materiaal', icon: ShoppingBagIcon, parent: 'Marketing Dashboard', href: '/dashboard-marketing/advertentie-materiaal', isSub: true, isLive: true },
+  { label: 'Campagnes', icon: FireIcon, parent: 'Marketing Dashboard', href: '/dashboard-marketing/campagnes', isSub: true, isLive: true },
+  { label: 'Advertenties', icon: StarIcon, parent: 'Marketing Dashboard', href: '/dashboard-marketing/advertenties', isSub: true, isLive: true },
 ];
 
 const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: { collapsed: boolean, onLinkClick?: () => void, onboardingStatus?: any }) => {
