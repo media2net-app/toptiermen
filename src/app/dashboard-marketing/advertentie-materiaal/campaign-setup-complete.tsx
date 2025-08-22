@@ -10,7 +10,7 @@ import {
   MagnifyingGlassIcon,
   GlobeAltIcon,
   HeartIcon,
-  BrainIcon,
+  // BrainIcon, // Not available in heroicons
   EyeIcon,
   LinkIcon,
   PlayIcon,
