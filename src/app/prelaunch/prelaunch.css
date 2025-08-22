@@ -124,9 +124,9 @@
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 16px;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
 }
 
 .prelaunch-feature-block h3 {
@@ -372,7 +372,7 @@
   .prelaunch-section h1,
   .prelaunch-section h2 {
     font-size: 32px;
-    margin-bottom: 16px;
+    margin-bottom: 24px;
     text-align: center !important;
   }
   
@@ -391,7 +391,7 @@
   .prelaunch-story-box p {
     font-size: 16px;
     line-height: 1.5;
-    margin-bottom: 24px;
+    margin-bottom: 32px;
     text-align: center !important;
   }
   
@@ -427,13 +427,15 @@
   /* Button mobile optimization - CENTER BUTTONS */
   .prelaunch-btn-primary {
     font-size: 16px;
-    padding: 14px 28px;
-    width: auto !important;
-    min-width: 200px;
-    max-width: 280px;
-    margin: 0 auto !important;
-    display: inline-block !important;
+    font-weight: 600;
+    padding: 16px 32px;
+    width: 100% !important;
+    max-width: 320px;
+    margin: 24px auto 0 auto !important;
+    display: block !important;
     text-align: center !important;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(139, 174, 90, 0.3);
   }
   
   /* Form mobile optimization - CENTER FORM */
@@ -447,7 +449,7 @@
   .prelaunch-badge {
     font-size: 13px;
     padding: 8px 16px;
-    margin: 0 auto 20px auto !important;
+    margin: 0 auto 32px auto !important;
     display: inline-block !important;
   }
   
@@ -568,7 +570,7 @@
   .prelaunch-section h1,
   .prelaunch-section h2 {
     font-size: 28px;
-    margin-bottom: 12px;
+    margin-bottom: 20px;
     text-align: center !important;
   }
   
@@ -587,14 +589,14 @@
   .prelaunch-story-box p {
     font-size: 15px;
     line-height: 1.4;
-    margin-bottom: 20px;
+    margin-bottom: 28px;
     text-align: center !important;
   }
   
   .prelaunch-section p {
     font-size: 15px;
     line-height: 1.4;
-    margin-bottom: 20px;
+    margin-bottom: 28px;
     text-align: center !important;
   }
   
@@ -622,13 +624,15 @@
   /* Button small mobile optimization - CENTER BUTTONS */
   .prelaunch-btn-primary {
     font-size: 15px;
-    padding: 12px 24px;
-    width: auto !important;
-    min-width: 180px;
-    max-width: 260px;
-    margin: 0 auto !important;
-    display: inline-block !important;
+    font-weight: 600;
+    padding: 14px 28px;
+    width: 100% !important;
+    max-width: 300px;
+    margin: 20px auto 0 auto !important;
+    display: block !important;
     text-align: center !important;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(139, 174, 90, 0.3);
   }
   
   /* Form small mobile optimization - CENTER FORM */
@@ -642,7 +646,7 @@
   .prelaunch-badge {
     font-size: 12px;
     padding: 6px 12px;
-    margin: 0 auto 16px auto !important;
+    margin: 0 auto 24px auto !important;
     display: inline-block !important;
   }
   
