@@ -69,8 +69,8 @@ const mockAdSets = [
     targetAudience: "Algemeen (18-65 jaar, alle geslachten, NL/BE)",
     startDate: "2025-01-01",
     endDate: "2025-12-31",
-    budget: 25,
-    dailyBudget: 25,
+    budget: 5,
+    dailyBudget: 5,
     createdAt: "2025-01-01T00:00:00Z",
     lastUpdated: "2025-01-01T00:00:00Z",
     videoName: "algemeen_01"
@@ -91,8 +91,8 @@ const mockAdSets = [
     targetAudience: "Algemeen (25-55 jaar, mannen, NL)",
     startDate: "2025-01-01",
     endDate: "2025-12-31",
-    budget: 30,
-    dailyBudget: 30,
+    budget: 5,
+    dailyBudget: 5,
     createdAt: "2025-01-01T00:00:00Z",
     lastUpdated: "2025-01-01T00:00:00Z",
     videoName: "algemeen_02"
@@ -113,8 +113,8 @@ const mockAdSets = [
     targetAudience: "Algemeen (30-50 jaar, alle geslachten, NL/BE/DE)",
     startDate: "2025-01-01",
     endDate: "2025-12-31",
-    budget: 35,
-    dailyBudget: 35,
+    budget: 5,
+    dailyBudget: 5,
     createdAt: "2025-01-01T00:00:00Z",
     lastUpdated: "2025-01-01T00:00:00Z",
     videoName: "algemeen_03"
@@ -135,8 +135,8 @@ const mockAdSets = [
     targetAudience: "Algemeen (28-45 jaar, alle geslachten, NL)",
     startDate: "2025-01-01",
     endDate: "2025-12-31",
-    budget: 40,
-    dailyBudget: 40,
+    budget: 5,
+    dailyBudget: 5,
     createdAt: "2025-01-01T00:00:00Z",
     lastUpdated: "2025-01-01T00:00:00Z",
     videoName: "algemeen_04"
@@ -157,8 +157,8 @@ const mockAdSets = [
     targetAudience: "Algemeen (22-40 jaar, alle geslachten, NL/BE)",
     startDate: "2025-01-01",
     endDate: "2025-12-31",
-    budget: 20,
-    dailyBudget: 20,
+    budget: 5,
+    dailyBudget: 5,
     createdAt: "2025-01-01T00:00:00Z",
     lastUpdated: "2025-01-01T00:00:00Z",
     videoName: "algemeen_05"
@@ -180,8 +180,8 @@ const mockAdSets = [
     targetAudience: "Jongeren (18-25 jaar, alle geslachten, NL/BE)",
     startDate: "2025-01-01",
     endDate: "2025-12-31",
-    budget: 45,
-    dailyBudget: 45,
+    budget: 5,
+    dailyBudget: 5,
     createdAt: "2025-01-01T00:00:00Z",
     lastUpdated: "2025-01-01T00:00:00Z",
     videoName: "jongeren_01"
@@ -202,8 +202,8 @@ const mockAdSets = [
     targetAudience: "Jongeren (18-25 jaar, alle geslachten, NL)",
     startDate: "2025-01-01",
     endDate: "2025-12-31",
-    budget: 35,
-    dailyBudget: 35,
+    budget: 5,
+    dailyBudget: 5,
     createdAt: "2025-01-01T00:00:00Z",
     lastUpdated: "2025-01-01T00:00:00Z",
     videoName: "jongeren_02"
@@ -225,8 +225,8 @@ const mockAdSets = [
     targetAudience: "Vaders (30-50 jaar, mannen, NL/BE)",
     startDate: "2025-01-01",
     endDate: "2025-12-31",
-    budget: 60,
-    dailyBudget: 60,
+    budget: 5,
+    dailyBudget: 5,
     createdAt: "2025-01-01T00:00:00Z",
     lastUpdated: "2025-01-01T00:00:00Z",
     videoName: "vaders_01"
@@ -247,8 +247,8 @@ const mockAdSets = [
     targetAudience: "Vaders (35-55 jaar, mannen, NL)",
     startDate: "2025-01-01",
     endDate: "2025-12-31",
-    budget: 40,
-    dailyBudget: 40,
+    budget: 5,
+    dailyBudget: 5,
     createdAt: "2025-01-01T00:00:00Z",
     lastUpdated: "2025-01-01T00:00:00Z",
     videoName: "vaders_02"
@@ -270,8 +270,8 @@ const mockAdSets = [
     targetAudience: "Zakelijk (28-45 jaar, alle geslachten, NL/BE)",
     startDate: "2025-01-01",
     endDate: "2025-12-31",
-    budget: 70,
-    dailyBudget: 70,
+    budget: 5,
+    dailyBudget: 5,
     createdAt: "2025-01-01T00:00:00Z",
     lastUpdated: "2025-01-01T00:00:00Z",
     videoName: "zakelijk_01"
@@ -292,8 +292,8 @@ const mockAdSets = [
     targetAudience: "Zakelijk (30-50 jaar, alle geslachten, NL)",
     startDate: "2025-01-01",
     endDate: "2025-12-31",
-    budget: 50,
-    dailyBudget: 50,
+    budget: 5,
+    dailyBudget: 5,
     createdAt: "2025-01-01T00:00:00Z",
     lastUpdated: "2025-01-01T00:00:00Z",
     videoName: "zakelijk_02"
@@ -454,7 +454,7 @@ export default function AdvertisementsPage() {
             </p>
             <div className="flex items-center space-x-4 text-xs text-blue-300">
               <span>📊 Demo: 11 ad sets (5 Algemeen + 2 Jongeren + 2 Vaders + 2 Zakelijk)</span>
-              <span>💰 Budget: €450/dag totaal</span>
+              <span>💰 Budget: €55/dag totaal</span>
               <span>🎯 Doel: TRAFFIC naar prelaunch</span>
               <a 
                 href="/dashboard-marketing/advertentie-materiaal" 

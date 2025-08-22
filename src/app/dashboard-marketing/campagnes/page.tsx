@@ -39,8 +39,8 @@ const mockCampaigns = [
     clicks: 0,
     conversions: 0,
     spent: 0,
-    budget: 150,
-    dailyBudget: 150,
+    budget: 25,
+    dailyBudget: 25,
     ctr: 0,
     cpc: 0,
     conversionRate: 0,
@@ -62,8 +62,8 @@ const mockCampaigns = [
     clicks: 0,
     conversions: 0,
     spent: 0,
-    budget: 80,
-    dailyBudget: 80,
+    budget: 10,
+    dailyBudget: 10,
     ctr: 0,
     cpc: 0,
     conversionRate: 0,
@@ -85,8 +85,8 @@ const mockCampaigns = [
     clicks: 0,
     conversions: 0,
     spent: 0,
-    budget: 100,
-    dailyBudget: 100,
+    budget: 10,
+    dailyBudget: 10,
     ctr: 0,
     cpc: 0,
     conversionRate: 0,
@@ -108,8 +108,8 @@ const mockCampaigns = [
     clicks: 0,
     conversions: 0,
     spent: 0,
-    budget: 120,
-    dailyBudget: 120,
+    budget: 10,
+    dailyBudget: 10,
     ctr: 0,
     cpc: 0,
     conversionRate: 0,
@@ -271,7 +271,7 @@ export default function CampaignsPage() {
             </p>
             <div className="flex items-center space-x-4 text-xs text-blue-300">
               <span>📊 Demo: 4 campagnes (Algemeen + Jongeren + Vaders + Zakelijk)</span>
-              <span>💰 Budget: €450/dag totaal</span>
+              <span>💰 Budget: €55/dag totaal</span>
               <span>🎯 Doel: TRAFFIC naar prelaunch</span>
               <a 
                 href="/dashboard-marketing/advertentie-materiaal" 

@@ -17,11 +17,11 @@ const JONGEREN_CAMPAIGN = {
   name: 'TTM - Jongeren Prelaunch Campagne',
   objective: 'TRAFFIC',
   status: 'PAUSED',
-  campaign_daily_budget: 80, // Total budget for all ad sets
+  campaign_daily_budget: 10, // Total budget for all ad sets (2 x €5)
   ad_sets: [
     {
       name: 'TTM - Jongeren - Fitness & Lifestyle',
-      daily_budget: 45,
+      daily_budget: 5,
       targeting: {
         age_min: 18,
         age_max: 25,
@@ -39,7 +39,7 @@ const JONGEREN_CAMPAIGN = {
     },
     {
       name: 'TTM - Jongeren - Social & Community',
-      daily_budget: 35,
+      daily_budget: 5,
       targeting: {
         age_min: 18,
         age_max: 25,

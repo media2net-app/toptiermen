@@ -17,39 +17,39 @@ const CAMPAIGNS_OVERVIEW = {
   algemene: {
     name: 'TTM - Algemene Prelaunch Campagne',
     objective: 'TRAFFIC',
-    daily_budget: 150,
+    daily_budget: 25,
     ad_sets: [
       {
         name: 'TTM - Algemeen - Prelaunch Awareness',
-        daily_budget: 25,
+        daily_budget: 5,
         video: 'algemeen_01',
         targeting: '18-65 jaar, alle geslachten, NL/BE',
         ad_title: 'Word Lid van Top Tier Men'
       },
       {
         name: 'TTM - Algemeen - Fitness Community',
-        daily_budget: 30,
+        daily_budget: 5,
         video: 'algemeen_02',
         targeting: '25-55 jaar, mannen, NL',
         ad_title: 'Fitness Community voor Mannen'
       },
       {
         name: 'TTM - Algemeen - Lifestyle Upgrade',
-        daily_budget: 35,
+        daily_budget: 5,
         video: 'algemeen_03',
         targeting: '30-50 jaar, alle geslachten, NL/BE/DE',
         ad_title: 'Upgrade Je Lifestyle'
       },
       {
         name: 'TTM - Algemeen - Business Professionals',
-        daily_budget: 40,
+        daily_budget: 5,
         video: 'algemeen_04',
         targeting: '28-45 jaar, alle geslachten, NL',
         ad_title: 'Voor Business Professionals'
       },
       {
         name: 'TTM - Algemeen - Community Building',
-        daily_budget: 20,
+        daily_budget: 5,
         video: 'algemeen_05',
         targeting: '22-40 jaar, alle geslachten, NL/BE',
         ad_title: 'Word Onderdeel van Onze Community'
@@ -59,18 +59,18 @@ const CAMPAIGNS_OVERVIEW = {
   jongeren: {
     name: 'TTM - Jongeren Prelaunch Campagne',
     objective: 'TRAFFIC',
-    daily_budget: 80,
+    daily_budget: 10,
     ad_sets: [
       {
         name: 'TTM - Jongeren - Fitness & Lifestyle',
-        daily_budget: 45,
+        daily_budget: 5,
         video: 'jongeren_01',
         targeting: '18-25 jaar, alle geslachten, NL/BE',
         ad_title: 'Fitness & Lifestyle voor Jongeren'
       },
       {
         name: 'TTM - Jongeren - Social & Community',
-        daily_budget: 35,
+        daily_budget: 5,
         video: 'jongeren_02',
         targeting: '18-25 jaar, alle geslachten, NL',
         ad_title: 'Word Onderdeel van Onze Community'
@@ -80,39 +80,39 @@ const CAMPAIGNS_OVERVIEW = {
   vaders: {
     name: 'TTM - Vaders Prelaunch Campagne',
     objective: 'TRAFFIC',
-    daily_budget: 100,
+    daily_budget: 10,
     ad_sets: [
       {
         name: 'TTM - Vaders - Family & Leadership',
-        daily_budget: 60,
+        daily_budget: 5,
         video: 'vaders_01',
         targeting: '30-50 jaar, mannen, NL/BE',
         ad_title: 'Voor Vaders Die Meer Willen'
       },
-      {
-        name: 'TTM - Vaders - Role Model & Success',
-        daily_budget: 40,
-        video: 'vaders_02',
-        targeting: '35-55 jaar, mannen, NL',
-        ad_title: 'Word een Betere Rolmodel'
-      }
+              {
+          name: 'TTM - Vaders - Role Model & Success',
+          daily_budget: 5,
+          video: 'vaders_02',
+          targeting: '35-55 jaar, mannen, NL',
+          ad_title: 'Word een Betere Rolmodel'
+        }
     ]
   },
   zakelijk: {
     name: 'TTM - Zakelijk Prelaunch Campagne',
     objective: 'TRAFFIC',
-    daily_budget: 120,
+    daily_budget: 10,
     ad_sets: [
       {
         name: 'TTM - Zakelijk - Business Professionals',
-        daily_budget: 70,
+        daily_budget: 5,
         video: 'zakelijk_01',
         targeting: '28-45 jaar, alle geslachten, NL/BE',
         ad_title: 'Voor Business Professionals'
       },
       {
         name: 'TTM - Zakelijk - Entrepreneurs & Leaders',
-        daily_budget: 50,
+        daily_budget: 5,
         video: 'zakelijk_02',
         targeting: '30-50 jaar, alle geslachten, NL',
         ad_title: 'Voor Ondernemers en Leiders'

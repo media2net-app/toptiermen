@@ -17,11 +17,11 @@ const ALGEMENE_CAMPAIGN = {
   name: 'TTM - Algemene Prelaunch Campagne',
   objective: 'TRAFFIC',
   status: 'PAUSED',
-  campaign_daily_budget: 150, // Total budget for all ad sets
+  campaign_daily_budget: 25, // Total budget for all ad sets (5 x €5)
   ad_sets: [
     {
       name: 'TTM - Algemeen - Prelaunch Awareness',
-      daily_budget: 25,
+      daily_budget: 5,
       targeting: {
         age_min: 18,
         age_max: 65,
@@ -39,7 +39,7 @@ const ALGEMENE_CAMPAIGN = {
     },
     {
       name: 'TTM - Algemeen - Fitness Community',
-      daily_budget: 30,
+      daily_budget: 5,
       targeting: {
         age_min: 25,
         age_max: 55,
@@ -57,7 +57,7 @@ const ALGEMENE_CAMPAIGN = {
     },
     {
       name: 'TTM - Algemeen - Lifestyle Upgrade',
-      daily_budget: 35,
+      daily_budget: 5,
       targeting: {
         age_min: 30,
         age_max: 50,
@@ -75,7 +75,7 @@ const ALGEMENE_CAMPAIGN = {
     },
     {
       name: 'TTM - Algemeen - Business Professionals',
-      daily_budget: 40,
+      daily_budget: 5,
       targeting: {
         age_min: 28,
         age_max: 45,
@@ -93,7 +93,7 @@ const ALGEMENE_CAMPAIGN = {
     },
     {
       name: 'TTM - Algemeen - Community Building',
-      daily_budget: 20,
+      daily_budget: 5,
       targeting: {
         age_min: 22,
         age_max: 40,
