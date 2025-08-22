@@ -198,7 +198,7 @@ export default function PreLaunchPage() {
     <div className="prelaunch-page min-h-screen">
       {/* Header */}
       <header className="relative z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="w-full px-20 py-6">
           <div className="flex items-center justify-center">
             <div className="flex items-center space-x-3">
               <img 
@@ -212,18 +212,124 @@ export default function PreLaunchPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="prelaunch-hero relative py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto text-center">
+      <section className="prelaunch-hero relative py-20 px-20">
+        <div className="w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              className="relative"
+            >
+              <div className="prelaunch-story-image">
+                <img 
+                  src="/prelaunch/rick.jpg" 
+                  alt="Rick Cuijpers - Top Tier Men" 
+                  className="w-full h-auto rounded-lg shadow-lg"
+                />
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              className="space-y-8"
+            >
+              <div>
+                <div className="inline-flex items-center px-4 py-2 bg-[#8BAE5A]/10 border border-[#8BAE5A]/30 rounded-full text-[#8BAE5A] text-sm font-medium mb-8">
+                  <ClockIcon className="w-4 h-4 mr-2" />
+                  Lancering: 10 september 2025
+                </div>
+                
+                <h1>
+                  <span>MANNEN TERUG NAAR HUN</span>
+                  <span className="block text-[#8BAE5A]">ESSENTIE</span>
+                </h1>
+                
+                <div className="prelaunch-story-box">
+                  <p>
+                    In een maatschappij waar mannelijkheid vaak verkeerd wordt begrepen of zelfs onderdrukt, zie ik hoe zowel jonge als oudere mannen worstelen met hun identiteit en doel. Wat ik vooral heb gemerkt, is dat de laatste jaren de mentaliteit, vooral bij de jongere generatie, sterk verzwakt is en dat oudere mannen de weg terug naar hun essentie niet meer vinden. Doelstellingen worden niet meer behaald, passie en discipline lijken ver te zoeken.
+                  </p>
+                </div>
+
+                <div className="prelaunch-feature-block">
+                  <h3>WAT BETEKENT DIT VOOR <span className="text-[#8BAE5A]">JOU?</span></h3>
+                  <p>
+                    Het betekent dat je de regie terugpakt over je eigen kracht en focus. Door gerichte coaching en oefeningen kom je weer in contact met je authentieke zelf. Zo leg je een onbreekbare basis voor succes in werk, relaties én persoonlijke groei.
+                  </p>
+                </div>
+
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="prelaunch-btn-primary inline-flex items-center"
+                  onClick={() => document.getElementById('signup')?.scrollIntoView({ behavior: 'smooth' })}
+                >
+                  <ArrowRightIcon className="w-5 h-5 mr-2" />
+                  Breek door
+                </motion.button>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Mijn Verhaal Section */}
+      <section className="prelaunch-section py-20 px-20">
+        <div className="w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="space-y-8"
+            >
+              <div>
+                <h1>
+                  <span>MIJN</span>
+                  <span className="block">VERHAAL</span>
+                </h1>
+                <div className="prelaunch-story-box">
+                  <p>
+                    Mijn naam is Rick Cuijpers. Op mijn zeventiende werd ik marinier en op mijn achttiende werd ik uitgezonden naar Irak. 
+                    In mijn acht jaar bij het Korps Mariniers volgden meerdere missies, waaronder naar Uruzgan en andere delen van Afghanistan. 
+                    Ik doorstond zware trainingen in extreme omgevingen. Deze uitdagingen vormden mij tot de man die ik nu ben. 
+                    Gedisciplineerd, gemotiveerd en vastberadenheid. Ik ga door waar anderen stoppen.
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="relative"
+            >
+              <div className="prelaunch-story-image">
+                <img 
+                  src="/prelaunch/korps-foto.jpg" 
+                  alt="Rick Cuijpers - Korps Mariniers" 
+                  className="w-full h-auto rounded-lg shadow-lg"
+                />
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Word De Beste Versie Van Jezelf Section */}
+      <section className="prelaunch-section py-20 px-20">
+        <div className="w-full text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
           >
-                          <div className="inline-flex items-center px-4 py-2 bg-[#8BAE5A]/10 border border-[#8BAE5A]/30 rounded-full text-[#8BAE5A] text-sm font-medium mb-8">
-              <ClockIcon className="w-4 h-4 mr-2" />
-              Lancering: 10 september 2025
-            </div>
-            
             <h1>
               <span>WORD DE BESTE VERSIE VAN</span>
               <span className="block">JEZELF</span>
@@ -252,8 +358,8 @@ export default function PreLaunchPage() {
       </section>
 
       {/* Kracht Begint Section */}
-      <section className="prelaunch-section py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
+      <section className="prelaunch-section py-20 px-20">
+        <div className="w-full">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
@@ -301,9 +407,12 @@ export default function PreLaunchPage() {
         </div>
       </section>
 
-      {/* Mijn Verhaal Section */}
-      <section className="prelaunch-section py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
+      {/* Waarom Top Tier Men Section */}
+      <section className="prelaunch-section py-20 px-20 relative overflow-hidden">
+        {/* Background pattern */}
+        <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
+        
+        <div className="w-full relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
@@ -312,54 +421,14 @@ export default function PreLaunchPage() {
               viewport={{ once: true }}
               className="space-y-8"
             >
-              <div>
-                <h1>
-                  <span>MIJN</span>
-                  <span className="block">VERHAAL</span>
-                </h1>
-                <div className="prelaunch-story-box">
-                  <p>
-                    Mijn naam is Rick Cuijpers. Op mijn zeventiende werd ik marinier en op mijn achttiende werd ik uitgezonden naar Irak. 
-                    In mijn acht jaar bij het Korps Mariniers volgden meerdere missies, waaronder naar Uruzgan en andere delen van Afghanistan. 
-                    Ik doorstond zware trainingen in extreme omgevingen. Deze uitdagingen vormden mij tot de man die ik nu ben. 
-                    Gedisciplineerd, gemotiveerd en vastberadenheid. Ik ga door waar anderen stoppen.
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-              className="relative"
-            >
               <div className="prelaunch-story-image">
                 <img 
-                  src="/prelaunch/korps-foto.jpg" 
-                  alt="Rick Cuijpers - Korps Mariniers" 
+                  src="/prelaunch/waaromtoptier.jpg" 
+                  alt="Waarom Top Tier Men" 
                   className="w-full h-auto rounded-lg shadow-lg"
                 />
               </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* Waarom Top Tier Men Section */}
-      <section className="prelaunch-section py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-        {/* Background pattern */}
-        <div className="prelaunch-pattern"></div>
-        
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-            >
+              
               <h2>
                 <span>WAAROM TOP TIER</span>
                 <span className="block">MEN?</span>
@@ -411,8 +480,8 @@ export default function PreLaunchPage() {
       </section>
 
       {/* Features Section */}
-      <section className="prelaunch-section py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
+      <section className="prelaunch-section py-20 px-20">
+        <div className="w-full">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -450,8 +519,8 @@ export default function PreLaunchPage() {
       </section>
 
       {/* What to Expect Section */}
-      <section className="prelaunch-section py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
+      <section className="prelaunch-section py-20 px-20">
+        <div className="w-full">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -520,8 +589,8 @@ export default function PreLaunchPage() {
       </section>
 
       {/* Platform Features Section */}
-      <section className="prelaunch-section py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
+      <section className="prelaunch-section py-20 px-20">
+        <div className="w-full">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -573,7 +642,7 @@ export default function PreLaunchPage() {
       </section>
 
       {/* Waitlist Section */}
-      <section id="signup" className="prelaunch-section py-20 px-4 sm:px-6 lg:px-8">
+      <section id="signup" className="prelaunch-section py-20 px-20">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -684,8 +753,8 @@ export default function PreLaunchPage() {
       </section>
 
       {/* Footer */}
-      <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-white/10">
-        <div className="max-w-7xl mx-auto text-center">
+      <footer className="py-12 px-20 border-t border-white/10">
+        <div className="w-full text-center">
           <div className="flex items-center justify-center space-x-3 mb-4">
             <img 
               src="/logo_white-full.svg" 
