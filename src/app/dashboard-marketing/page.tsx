@@ -45,6 +45,7 @@ export default function MarketingDashboard() {
   const [adSets, setAdSets] = useState<any[]>([]);
   const [ads, setAds] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<'campaigns' | 'adsets' | 'ads'>('adsets');
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
 
   // Temporarily disable authentication check for testing
   // Check authentication and Facebook connection on component mount
@@ -339,6 +340,72 @@ export default function MarketingDashboard() {
     setIsLoading(false);
     setError(null);
     setShowFacebookModal(true);
+  };
+
+  const updateStatus = async (type: 'campaign' | 'adset' | 'ad', id: string, currentStatus: string) => {
+    try {
+      setUpdatingStatus(id);
+      const newStatus = currentStatus === 'active' ? 'paused' : 'active';
+      
+      let endpoint = '';
+      let payload = {};
+      
+      switch (type) {
+        case 'campaign':
+          endpoint = '/api/facebook/update-campaign-status';
+          payload = { campaignId: id, status: newStatus };
+          break;
+        case 'adset':
+          endpoint = '/api/facebook/update-adset-status';
+          payload = { adsetId: id, status: newStatus };
+          break;
+        case 'ad':
+          endpoint = '/api/facebook/update-ad-status';
+          payload = { adId: id, status: newStatus };
+          break;
+      }
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Update local state
+        switch (type) {
+          case 'campaign':
+            setCampaigns(prev => prev.map(c => 
+              c.id === id ? { ...c, status: newStatus } : c
+            ));
+            break;
+          case 'adset':
+            setAdSets(prev => prev.map(a => 
+              a.id === id ? { ...a, status: newStatus } : a
+            ));
+            break;
+          case 'ad':
+            setAds(prev => prev.map(a => 
+              a.id === id ? { ...a, status: newStatus } : a
+            ));
+            break;
+        }
+        
+        console.log(`✅ ${type} status updated successfully`);
+      } else {
+        console.error(`❌ Failed to update ${type} status:`, result.error);
+        alert(`Fout bij het updaten van ${type} status: ${result.error}`);
+      }
+    } catch (error) {
+      console.error(`❌ Error updating ${type} status:`, error);
+      alert(`Fout bij het updaten van ${type} status`);
+    } finally {
+      setUpdatingStatus(null);
+    }
   };
 
   // Show loading state for Facebook check
@@ -639,6 +706,7 @@ export default function MarketingDashboard() {
                     <th className="text-left py-3 px-2 text-gray-400 font-medium">CTR</th>
                     <th className="text-left py-3 px-2 text-gray-400 font-medium">CPC</th>
                     <th className="text-left py-3 px-2 text-gray-400 font-medium">Uitgegeven</th>
+                    <th className="text-left py-3 px-2 text-gray-400 font-medium">Acties</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -664,6 +732,23 @@ export default function MarketingDashboard() {
                         <td className="py-3 px-2 text-white">{campaign.ctr ? `${(campaign.ctr * 100).toFixed(2)}%` : '-'}</td>
                         <td className="py-3 px-2 text-white">{campaign.cpc ? `€${(campaign.cpc / 100).toFixed(2)}` : '-'}</td>
                         <td className="py-3 px-2 text-white">€{(campaign.spent / 100).toFixed(2)}</td>
+                        <td className="py-3 px-2">
+                          <button
+                            onClick={() => updateStatus('campaign', campaign.id, campaign.status)}
+                            disabled={updatingStatus === campaign.id}
+                            className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
+                              campaign.status === 'active'
+                                ? 'bg-red-600 hover:bg-red-700 text-white'
+                                : 'bg-green-600 hover:bg-green-700 text-white'
+                            } disabled:opacity-50 disabled:cursor-not-allowed`}
+                          >
+                            {updatingStatus === campaign.id ? (
+                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>
+                            ) : (
+                              campaign.status === 'active' ? 'Pauzeren' : 'Activeren'
+                            )}
+                          </button>
+                        </td>
                       </tr>
                     ))
                   ) : (
@@ -691,6 +776,7 @@ export default function MarketingDashboard() {
                     <th className="text-left py-3 px-2 text-gray-400 font-medium">CTR</th>
                     <th className="text-left py-3 px-2 text-gray-400 font-medium">CPC</th>
                     <th className="text-left py-3 px-2 text-gray-400 font-medium">Uitgegeven</th>
+                    <th className="text-left py-3 px-2 text-gray-400 font-medium">Acties</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -717,6 +803,23 @@ export default function MarketingDashboard() {
                         <td className="py-3 px-2 text-white">{adSet.ctr ? `${(adSet.ctr * 100).toFixed(2)}%` : '-'}</td>
                         <td className="py-3 px-2 text-white">{adSet.cpc ? `€${(adSet.cpc / 100).toFixed(2)}` : '-'}</td>
                         <td className="py-3 px-2 text-white">€{(adSet.spent / 100).toFixed(2) || '0.00'}</td>
+                        <td className="py-3 px-2">
+                          <button
+                            onClick={() => updateStatus('adset', adSet.id, adSet.status)}
+                            disabled={updatingStatus === adSet.id}
+                            className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
+                              adSet.status === 'active'
+                                ? 'bg-red-600 hover:bg-red-700 text-white'
+                                : 'bg-green-600 hover:bg-green-700 text-white'
+                            } disabled:opacity-50 disabled:cursor-not-allowed`}
+                          >
+                            {updatingStatus === adSet.id ? (
+                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>
+                            ) : (
+                              adSet.status === 'active' ? 'Pauzeren' : 'Activeren'
+                            )}
+                          </button>
+                        </td>
                       </tr>
                     ))
                   ) : (
@@ -744,6 +847,7 @@ export default function MarketingDashboard() {
                     <th className="text-left py-3 px-2 text-gray-400 font-medium">CTR</th>
                     <th className="text-left py-3 px-2 text-gray-400 font-medium">CPC</th>
                     <th className="text-left py-3 px-2 text-gray-400 font-medium">Uitgegeven</th>
+                    <th className="text-left py-3 px-2 text-gray-400 font-medium">Acties</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -770,6 +874,23 @@ export default function MarketingDashboard() {
                         <td className="py-3 px-2 text-white">{ad.ctr ? `${(ad.ctr * 100).toFixed(2)}%` : '-'}</td>
                         <td className="py-3 px-2 text-white">{ad.cpc ? `€${(ad.cpc / 100).toFixed(2)}` : '-'}</td>
                         <td className="py-3 px-2 text-white">€{(ad.spent / 100).toFixed(2) || '0.00'}</td>
+                        <td className="py-3 px-2">
+                          <button
+                            onClick={() => updateStatus('ad', ad.id, ad.status)}
+                            disabled={updatingStatus === ad.id}
+                            className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
+                              ad.status === 'active'
+                                ? 'bg-red-600 hover:bg-red-700 text-white'
+                                : 'bg-green-600 hover:bg-green-700 text-white'
+                            } disabled:opacity-50 disabled:cursor-not-allowed`}
+                          >
+                            {updatingStatus === ad.id ? (
+                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>
+                            ) : (
+                              ad.status === 'active' ? 'Pauzeren' : 'Activeren'
+                            )}
+                          </button>
+                        </td>
                       </tr>
                     ))
                   ) : (
@@ -837,6 +958,28 @@ export default function MarketingDashboard() {
                           <p className="text-gray-400 text-xs">Uitgegeven</p>
                           <p className="text-white font-medium">€{(campaign.spent / 100).toFixed(2)}</p>
                         </div>
+                      </div>
+                      
+                      {/* Action Button */}
+                      <div className="mt-4">
+                        <button
+                          onClick={() => updateStatus('campaign', campaign.id, campaign.status)}
+                          disabled={updatingStatus === campaign.id}
+                          className={`w-full px-4 py-2 rounded text-sm font-medium transition-colors ${
+                            campaign.status === 'active'
+                              ? 'bg-red-600 hover:bg-red-700 text-white'
+                              : 'bg-green-600 hover:bg-green-700 text-white'
+                          } disabled:opacity-50 disabled:cursor-not-allowed`}
+                        >
+                          {updatingStatus === campaign.id ? (
+                            <div className="flex items-center justify-center">
+                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                              Updaten...
+                            </div>
+                          ) : (
+                            campaign.status === 'active' ? 'Pauzeren' : 'Activeren'
+                          )}
+                        </button>
                       </div>
                     </div>
                   ))
@@ -906,6 +1049,28 @@ export default function MarketingDashboard() {
                           <p className="text-white font-medium">€{(adSet.spent / 100).toFixed(2) || '0.00'}</p>
                         </div>
                       </div>
+                      
+                      {/* Action Button */}
+                      <div className="mt-4">
+                        <button
+                          onClick={() => updateStatus('adset', adSet.id, adSet.status)}
+                          disabled={updatingStatus === adSet.id}
+                          className={`w-full px-4 py-2 rounded text-sm font-medium transition-colors ${
+                            adSet.status === 'active'
+                              ? 'bg-red-600 hover:bg-red-700 text-white'
+                              : 'bg-green-600 hover:bg-green-700 text-white'
+                          } disabled:opacity-50 disabled:cursor-not-allowed`}
+                        >
+                          {updatingStatus === adSet.id ? (
+                            <div className="flex items-center justify-center">
+                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                              Updaten...
+                            </div>
+                          ) : (
+                            adSet.status === 'active' ? 'Pauzeren' : 'Activeren'
+                          )}
+                        </button>
+                      </div>
                     </div>
                   ))
                 ) : (
@@ -973,6 +1138,28 @@ export default function MarketingDashboard() {
                           <p className="text-gray-400 text-xs">Uitgegeven</p>
                           <p className="text-white font-medium">€{(ad.spent / 100).toFixed(2) || '0.00'}</p>
                         </div>
+                      </div>
+                      
+                      {/* Action Button */}
+                      <div className="mt-4">
+                        <button
+                          onClick={() => updateStatus('ad', ad.id, ad.status)}
+                          disabled={updatingStatus === ad.id}
+                          className={`w-full px-4 py-2 rounded text-sm font-medium transition-colors ${
+                            ad.status === 'active'
+                              ? 'bg-red-600 hover:bg-red-700 text-white'
+                              : 'bg-green-600 hover:bg-green-700 text-white'
+                          } disabled:opacity-50 disabled:cursor-not-allowed`}
+                        >
+                          {updatingStatus === ad.id ? (
+                            <div className="flex items-center justify-center">
+                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                              Updaten...
+                            </div>
+                          ) : (
+                            ad.status === 'active' ? 'Pauzeren' : 'Activeren'
+                          )}
+                        </button>
                       </div>
                     </div>
                   ))

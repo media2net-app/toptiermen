@@ -32,6 +32,13 @@ export default function PreLaunchPage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState('');
   const [alreadyExists, setAlreadyExists] = useState(false);
+  const [utmData, setUtmData] = useState({
+    utm_source: '',
+    utm_medium: '',
+    utm_campaign: '',
+    utm_content: '',
+    utm_term: ''
+  });
 
   const handleEmailFocus = () => {
     // Track when user focuses on email field
@@ -43,8 +50,24 @@ export default function PreLaunchPage() {
     }
   };
 
-  // Initialize Facebook SDK
+  // Initialize Facebook SDK and get UTM parameters
   useEffect(() => {
+    // Get UTM parameters from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const utmParams = {
+      utm_source: urlParams.get('utm_source') || '',
+      utm_medium: urlParams.get('utm_medium') || '',
+      utm_campaign: urlParams.get('utm_campaign') || '',
+      utm_content: urlParams.get('utm_content') || '',
+      utm_term: urlParams.get('utm_term') || ''
+    };
+    setUtmData(utmParams);
+
+    // Log UTM data for debugging
+    if (Object.values(utmParams).some(val => val)) {
+      console.log('🎯 UTM Parameters detected:', utmParams);
+    }
+
     // Load Facebook SDK
     const loadFacebookSDK = () => {
       if (window.FB) return; // Already loaded
@@ -73,12 +96,13 @@ export default function PreLaunchPage() {
 
     loadFacebookSDK();
     
-    // Track page view for prelaunch page
+    // Track page view for prelaunch page with UTM data
     if (typeof window !== 'undefined' && window.fbq) {
       window.fbq('track', 'ViewContent', {
         content_name: 'Prelaunch Page',
         content_category: 'Landing Page',
-        content_type: 'page'
+        content_type: 'page',
+        ...utmParams
       });
     }
   }, []);
@@ -108,7 +132,14 @@ export default function PreLaunchPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ 
+          email,
+          utm_source: utmData.utm_source,
+          utm_medium: utmData.utm_medium,
+          utm_campaign: utmData.utm_campaign,
+          utm_content: utmData.utm_content,
+          utm_term: utmData.utm_term
+        }),
       });
 
       const result = await response.json();

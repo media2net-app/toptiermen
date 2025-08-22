@@ -21,10 +21,11 @@ import {
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,
   StarIcon,
-  FireIcon
+  FireIcon,
+  VideoCameraIcon
 } from '@heroicons/react/24/outline';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
-import AdModal from '@/components/marketing/AdModal';
+import AdDetailModal from '@/app/components/marketing/AdDetailModal';
 
 // Types
 interface Advertisement {
@@ -40,6 +41,7 @@ interface Advertisement {
   ctr: number;
   cpc: number;
   spent: number;
+  reach: number;
   performance: 'excellent' | 'good' | 'average' | 'poor';
   targetAudience: string;
   startDate: string;
@@ -48,7 +50,15 @@ interface Advertisement {
   dailyBudget: number;
   createdAt: string;
   lastUpdated: string;
-  videoName?: string;
+  videoName?: string | null;
+  // Facebook-specific fields for detailed modal
+  title?: string;
+  body?: string;
+  link_url?: string;
+  video_id?: string;
+  image_url?: string;
+  creative_id?: string;
+  raw_creative?: any;
 }
 
 interface FacebookCampaign {
@@ -70,8 +80,24 @@ interface FacebookAd {
   id: string;
   name: string;
   adset_id: string;
+  campaign_id?: string;
   status: string;
   created_time: string;
+  creative_type?: string;
+  impressions?: number;
+  clicks?: number;
+  ctr?: number;
+  cpc?: number;
+  spent?: number;
+  reach?: number;
+  video_name?: string;
+  title?: string;
+  body?: string;
+  link_url?: string;
+  video_id?: string;
+  image_url?: string;
+  creative_id?: string;
+  raw_creative?: any;
 }
 
 export default function AdvertisementsPage() {
@@ -82,89 +108,140 @@ export default function AdvertisementsPage() {
   const [filterPlatform, setFilterPlatform] = useState('all');
   const [selectedAd, setSelectedAd] = useState<Advertisement | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showAdModal, setShowAdModal] = useState(false);
+  const [showAdDetailModal, setShowAdDetailModal] = useState(false);
   const [viewMode, setViewMode] = useState<'table' | 'cards' | 'calendar'>('table');
+  const [updatingTitle, setUpdatingTitle] = useState<string | null>(null);
+  const [updatingAllTitles, setUpdatingAllTitles] = useState(false);
 
   // Load Facebook data on component mount
   useEffect(() => {
     loadFacebookData();
   }, []);
 
+  const updateAdTitle = async (adId: string, adName: string) => {
+    try {
+      setUpdatingTitle(adId);
+      
+      const response = await fetch('/api/facebook/update-ad-title', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ adId, adName })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        console.log(`✅ Ad title updated successfully for ${adName}`);
+        alert(`✅ Ad title bijgewerkt voor ${adName}`);
+      } else {
+        console.error(`❌ Failed to update ad title:`, result.error);
+        alert(`❌ Fout bij het updaten van ad title: ${result.error}`);
+      }
+    } catch (error) {
+      console.error(`❌ Error updating ad title:`, error);
+      alert(`❌ Fout bij het updaten van ad title`);
+    } finally {
+      setUpdatingTitle(null);
+    }
+  };
+
+  const updateAllAdTitles = async () => {
+    try {
+      setUpdatingAllTitles(true);
+      let successCount = 0;
+      let errorCount = 0;
+
+      for (const ad of ads) {
+        try {
+          const response = await fetch('/api/facebook/update-ad-title', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ adId: ad.id, adName: ad.name })
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            successCount++;
+            console.log(`✅ Ad title updated for ${ad.name}`);
+          } else {
+            errorCount++;
+            console.error(`❌ Failed to update ad title for ${ad.name}:`, result.error);
+          }
+        } catch (error) {
+          errorCount++;
+          console.error(`❌ Error updating ad title for ${ad.name}:`, error);
+        }
+      }
+
+      alert(`✅ Ad titles update voltooid!\nSuccesvol: ${successCount}\nFouten: ${errorCount}`);
+    } catch (error) {
+      console.error('❌ Error in bulk ad title update:', error);
+      alert('❌ Fout bij bulk ad title update');
+    } finally {
+      setUpdatingAllTitles(false);
+    }
+  };
+
   const loadFacebookData = async () => {
     setLoading(true);
     try {
-      // Load campaigns, ad sets, and ads in parallel
-      const [campaignsRes, adSetsRes, adsRes] = await Promise.all([
-        fetch('/api/facebook/get-campaigns'),
-        fetch('/api/facebook/get-adsets'),
-        fetch('/api/facebook/get-ads')
-      ]);
+      console.log('🚀 Starting to load Facebook data...');
+      
+      // Load ads data with cache busting
+      const response = await fetch(`/api/facebook/get-ads?_t=${Date.now()}`);
+      const data = await response.json();
+      console.log('📊 Ads API response:', data);
 
-      const campaignsData = await campaignsRes.json();
-      const adSetsData = await adSetsRes.json();
-      const adsData = await adsRes.json();
-
-      if (campaignsData.success && adSetsData.success && adsData.success) {
-        const facebookCampaigns: FacebookCampaign[] = campaignsData.data;
-        const facebookAdSets: FacebookAdSet[] = adSetsData.data;
-        const facebookAds: FacebookAd[] = adsData.data;
-
-        // Create a map for quick lookup
-        const campaignMap = new Map(facebookCampaigns.map(c => [c.id, c]));
-        const adSetMap = new Map(facebookAdSets.map(ads => [ads.id, ads]));
+      if (data.success && data.data) {
+        console.log('✅ Facebook ads loaded:', data.data.length);
 
         // Transform Facebook data to our Advertisement format
-        const transformedAds: Advertisement[] = facebookAds.map(ad => {
-          // Find campaign for this ad
-          const campaign = facebookCampaigns.find(c => c.id === ad.campaign_id) || { name: 'Unknown Campaign' };
-          
-          // Find ad set for this ad
-          const adSet = facebookAdSets.find(ads => ads.id === ad.adset_id) || { name: 'Unknown Ad Set' };
+        const transformedAds: Advertisement[] = data.data.map((ad: any) => ({
+          id: ad.id,
+          name: ad.name,
+          campaign: 'TTM Campaign',
+          adSet: ad.adset_id || 'Unknown Ad Set',
+          platform: 'Facebook',
+          status: 'active' as const,
+          type: 'video' as const,
+          impressions: ad.impressions || 0,
+          clicks: ad.clicks || 0,
+          ctr: ad.ctr || 0,
+          cpc: ad.cpc || 0,
+          spent: ad.spent || 0,
+          reach: ad.reach || 0,
+          performance: 'good' as const,
+          targetAudience: 'Facebook Targeting',
+          startDate: '2025-01-01',
+          endDate: '2025-12-31',
+          budget: 5,
+          dailyBudget: 5,
+          createdAt: new Date().toISOString(),
+          lastUpdated: new Date().toISOString(),
+          videoName: ad.video_name,
+          title: ad.title,
+          body: ad.body,
+          link_url: ad.link_url,
+          video_id: ad.video_id,
+          image_url: ad.image_url,
+          creative_id: ad.creative_id,
+          raw_creative: ad.raw_creative
+        }));
 
-          // Safe date parsing
-          let startDate = '2025-01-01'; // Default date
-          try {
-            if (ad.created_time) {
-              const date = new Date(ad.created_time);
-              if (!isNaN(date.getTime())) {
-                startDate = date.toISOString().split('T')[0];
-              }
-            }
-          } catch (error) {
-            console.warn('Invalid date for ad:', ad.name, ad.created_time);
-          }
-
-          return {
-            id: ad.id,
-            name: ad.name,
-            campaign: campaign.name,
-            adSet: adSet.name,
-            platform: 'Facebook',
-            status: ad.status.toLowerCase() as 'active' | 'paused' | 'rejected' | 'draft' | 'pending_review',
-            type: ad.creative_type || 'Video',
-            impressions: 0,
-            clicks: 0,
-            ctr: 0,
-            cpc: 0,
-            spent: 0,
-            performance: 'good' as const,
-            targetAudience: 'Facebook Targeting',
-            startDate: startDate,
-            endDate: '2025-12-31',
-            budget: 5, // Default budget
-            dailyBudget: 5,
-            createdAt: ad.created_time || new Date().toISOString(),
-            lastUpdated: ad.created_time || new Date().toISOString(),
-            videoName: ad.video_name || 'Facebook Video'
-          };
-        });
-
+        console.log('✅ Transformed ads:', transformedAds.length);
         setAds(transformedAds);
       } else {
-        console.error('Failed to load Facebook data:', { campaignsData, adSetsData, adsData });
+        console.error('Failed to load Facebook ads data:', data);
+        setAds([]);
       }
     } catch (error) {
       console.error('Error loading Facebook data:', error);
+      setAds([]);
     } finally {
       setLoading(false);
     }
@@ -172,11 +249,11 @@ export default function AdvertisementsPage() {
 
   const handleAdClick = (ad: Advertisement) => {
     setSelectedAd(ad);
-    setShowAdModal(true);
+    setShowAdDetailModal(true);
   };
 
-  const handleCloseAdModal = () => {
-    setShowAdModal(false);
+  const handleCloseAdDetailModal = () => {
+    setShowAdDetailModal(false);
     setSelectedAd(null);
   };
 
@@ -199,6 +276,28 @@ export default function AdvertisementsPage() {
       case 'poor': return 'text-red-400';
       default: return 'text-gray-400';
     }
+  };
+
+  // Function to convert title case to sentence case for Dutch
+  const formatDutchTitle = (title: string) => {
+    // Simple approach: convert to lowercase first, then capitalize specific patterns
+    let result = title.toLowerCase();
+    
+    // Capitalize first letter of sentence
+    if (result.length > 0) {
+      result = result.charAt(0).toUpperCase() + result.slice(1);
+    }
+    
+    // Capitalize words after dash
+    result = result.replace(/-([a-z])/g, (match, letter) => {
+      return '-' + letter.toUpperCase();
+    });
+    
+    // Restore specific terms that should always be capitalized
+    result = result.replace(/top tier men/gi, 'Top Tier Men');
+    result = result.replace(/ttm/gi, 'TTM');
+    
+    return result;
   };
 
   const getStatusIcon = (status: string) => {
@@ -239,6 +338,20 @@ export default function AdvertisementsPage() {
           <p className="text-gray-400 mt-1">Beheer je advertenties en campagnes</p>
         </div>
         <div className="flex items-center space-x-3">
+          <button
+            onClick={updateAllAdTitles}
+            disabled={updatingAllTitles}
+            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {updatingAllTitles ? (
+              <div className="flex items-center">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                Alle Titles Fixen...
+              </div>
+            ) : (
+              'Fix Alle Ad Titles'
+            )}
+          </button>
           <button 
             onClick={loadFacebookData}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
@@ -267,13 +380,13 @@ export default function AdvertisementsPage() {
             </p>
             <div className="flex items-center space-x-4 text-xs text-green-300">
               <span>📊 Live: {ads.length} advertenties van Facebook</span>
-              <span>🎯 Campagnes: {new Set(ads.map(ad => ad.campaign)).size} uniek</span>
-              <span>📱 Ad Sets: {new Set(ads.map(ad => ad.adSet)).size} uniek</span>
+                              <span>🎯 campagnes: {new Set(ads.map(ad => ad.campaign)).size} uniek</span>
+                              <span>📱 ad sets: {new Set(ads.map(ad => ad.adSet)).size} uniek</span>
               <a 
                 href="/dashboard-marketing/campagnes" 
                 className="text-green-400 hover:text-green-300 underline"
               >
-                → Bekijk Campagnes
+                → bekijk campagnes
               </a>
             </div>
           </div>
@@ -373,7 +486,7 @@ export default function AdvertisementsPage() {
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-400 text-sm">Totaal Advertenties</p>
+              <p className="text-gray-400 text-sm">totaal advertenties</p>
               <p className="text-2xl font-bold text-white">{ads.length}</p>
             </div>
             <ChartBarIcon className="w-8 h-8 text-[#8BAE5A]" />
@@ -389,7 +502,7 @@ export default function AdvertisementsPage() {
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-400 text-sm">Actieve Advertenties</p>
+              <p className="text-gray-400 text-sm">actieve advertenties</p>
               <p className="text-2xl font-bold text-white">{ads.filter(ad => ad.status === 'active').length}</p>
             </div>
             <CheckCircleIcon className="w-8 h-8 text-green-400" />
@@ -405,7 +518,7 @@ export default function AdvertisementsPage() {
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-400 text-sm">Unieke Campagnes</p>
+              <p className="text-gray-400 text-sm">unieke campagnes</p>
               <p className="text-2xl font-bold text-white">{new Set(ads.map(ad => ad.campaign)).size}</p>
             </div>
             <UserGroupIcon className="w-8 h-8 text-blue-400" />
@@ -421,7 +534,7 @@ export default function AdvertisementsPage() {
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-400 text-sm">Gemiddelde CTR</p>
+              <p className="text-gray-400 text-sm">gemiddelde CTR</p>
               <p className="text-2xl font-bold text-white">
                 {ads.length > 0 ? (ads.reduce((sum, ad) => sum + ad.ctr, 0) / ads.length).toFixed(1) : '0.0'}%
               </p>
@@ -435,9 +548,32 @@ export default function AdvertisementsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {filteredAds.map((ad) => (
           <div key={ad.id} className="bg-[#1A1F2E] border border-[#2D3748] rounded-lg p-6">
+            <div className="flex gap-4">
+              {/* Video Preview - 1/4 of the card */}
+              <div className="w-1/4 flex-shrink-0">
+                {ad.videoName ? (
+                  <div className="relative bg-gray-900 rounded-lg overflow-hidden" style={{ aspectRatio: '9/16', maxHeight: '200px' }}>
+                    <video
+                      className="w-full h-full object-contain"
+                      preload="metadata"
+                      muted
+                      loop
+                      playsInline
+                      src={`https://ggrvcrffzprmutrzrtxf.supabase.co/storage/v1/object/public/advertenties/${ad.videoName}`}
+                    />
+                  </div>
+                ) : (
+                  <div className="bg-gray-800 rounded-lg flex items-center justify-center" style={{ aspectRatio: '9/16', maxHeight: '200px' }}>
+                    <VideoCameraIcon className="w-8 h-8 text-gray-500" />
+                  </div>
+                )}
+              </div>
+              
+              {/* Ad Information - 3/4 of the card */}
+              <div className="flex-1">
             <div className="flex items-start justify-between mb-4">
               <div>
-                <h3 className="text-lg font-semibold text-white mb-1">{ad.name}</h3>
+                <h3 className="text-lg font-semibold text-white mb-1">{formatDutchTitle(ad.name)}</h3>
                 <p className="text-gray-400 text-sm">{ad.platform}</p>
               </div>
               <div className="flex items-center space-x-2">
@@ -450,30 +586,30 @@ export default function AdvertisementsPage() {
 
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
-                <p className="text-gray-400 text-sm">Campagne</p>
+                <p className="text-gray-400 text-sm">campagne</p>
                 <p className="text-white font-medium text-sm">{ad.campaign}</p>
               </div>
               <div>
-                <p className="text-gray-400 text-sm">Ad Set</p>
+                <p className="text-gray-400 text-sm">ad set</p>
                 <p className="text-white font-medium text-sm">{ad.adSet}</p>
               </div>
               <div>
-                <p className="text-gray-400 text-sm">Budget</p>
+                <p className="text-gray-400 text-sm">budget</p>
                 <p className="text-white font-medium">€{ad.budget.toLocaleString()}</p>
               </div>
               <div>
-                <p className="text-gray-400 text-sm">Type</p>
+                <p className="text-gray-400 text-sm">type</p>
                 <p className="text-white font-medium text-sm">{ad.type}</p>
               </div>
             </div>
 
             <div className="grid grid-cols-4 gap-4 mb-4">
               <div className="text-center">
-                <p className="text-gray-400 text-xs">Impressies</p>
+                <p className="text-gray-400 text-xs">impressies</p>
                 <p className="text-white font-medium text-sm">{ad.impressions.toLocaleString()}</p>
               </div>
               <div className="text-center">
-                <p className="text-gray-400 text-xs">Klikken</p>
+                <p className="text-gray-400 text-xs">klikken</p>
                 <p className="text-white font-medium text-sm">{ad.clicks.toLocaleString()}</p>
               </div>
               <div className="text-center">
@@ -481,7 +617,7 @@ export default function AdvertisementsPage() {
                 <p className="text-white font-medium text-sm">{ad.ctr}%</p>
               </div>
               <div className="text-center">
-                <p className="text-gray-400 text-xs">Prestaties</p>
+                <p className="text-gray-400 text-xs">prestaties</p>
                 <p className={`text-sm font-medium ${getPerformanceColor(ad.performance)}`}>
                   {ad.performance}
                 </p>
@@ -499,12 +635,22 @@ export default function AdvertisementsPage() {
                 >
                   <EyeIcon className="w-4 h-4" />
                 </button>
-                <button className="text-blue-400 hover:text-blue-300">
-                  <PencilIcon className="w-4 h-4" />
+                <button 
+                  onClick={() => updateAdTitle(ad.id, ad.name)}
+                  disabled={updatingTitle === ad.id}
+                  className="text-purple-400 hover:text-purple-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {updatingTitle === ad.id ? (
+                    <div className="w-4 h-4 border-2 border-purple-400 border-t-transparent rounded-full animate-spin"></div>
+                  ) : (
+                    <PencilIcon className="w-4 h-4" />
+                  )}
                 </button>
                 <button className="text-red-400 hover:text-red-300">
                   <TrashIcon className="w-4 h-4" />
                 </button>
+              </div>
+            </div>
               </div>
             </div>
           </div>
@@ -527,11 +673,11 @@ export default function AdvertisementsPage() {
         </div>
       </div>
 
-      {/* Ad Modal */}
-      <AdModal
+      {/* Ad Detail Modal */}
+      <AdDetailModal
         ad={selectedAd}
-        isOpen={showAdModal}
-        onClose={handleCloseAdModal}
+        isOpen={showAdDetailModal}
+        onClose={handleCloseAdDetailModal}
       />
     </div>
   );

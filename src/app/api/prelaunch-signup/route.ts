@@ -3,7 +3,14 @@ import { supabaseAdmin } from '@/lib/supabase-admin';
 
 export async function POST(request: NextRequest) {
   try {
-    const { email } = await request.json();
+    const { 
+      email, 
+      utm_source, 
+      utm_medium, 
+      utm_campaign, 
+      utm_content, 
+      utm_term 
+    } = await request.json();
 
     if (!email) {
       return NextResponse.json({ 
@@ -48,8 +55,13 @@ export async function POST(request: NextRequest) {
         source: 'Pre-launch landingspagina',
         status: 'active',
         package: 'BASIC',
-        notes: 'Signed up via pre-launch landing page',
-        subscribed_at: new Date().toISOString()
+        notes: `Signed up via pre-launch landing page${utm_campaign ? ` | Campaign: ${utm_campaign}` : ''}${utm_content ? ` | Ad Set: ${utm_content}` : ''}`,
+        subscribed_at: new Date().toISOString(),
+        utm_source: utm_source || null,
+        utm_medium: utm_medium || null,
+        utm_campaign: utm_campaign || null,
+        utm_content: utm_content || null,
+        utm_term: utm_term || null
       })
       .select()
       .single();
