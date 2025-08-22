@@ -74,6 +74,52 @@ const mockCampaigns = [
     adsCount: 2,
     createdAt: '2025-01-01T00:00:00Z',
     lastUpdated: '2025-01-01T00:00:00Z'
+  },
+  {
+    id: 'campaign_vaders',
+    name: 'TTM - Vaders Prelaunch Campagne',
+    platform: 'Facebook',
+    status: 'paused' as const,
+    objective: 'traffic' as const,
+    impressions: 0,
+    clicks: 0,
+    conversions: 0,
+    spent: 0,
+    budget: 100,
+    dailyBudget: 100,
+    ctr: 0,
+    cpc: 0,
+    conversionRate: 0,
+    roas: 0,
+    targetAudience: 'Vaders (30-55 jaar)',
+    startDate: '2025-01-01',
+    endDate: '2025-12-31',
+    adsCount: 2,
+    createdAt: '2025-01-01T00:00:00Z',
+    lastUpdated: '2025-01-01T00:00:00Z'
+  },
+  {
+    id: 'campaign_zakelijk',
+    name: 'TTM - Zakelijk Prelaunch Campagne',
+    platform: 'Facebook',
+    status: 'paused' as const,
+    objective: 'traffic' as const,
+    impressions: 0,
+    clicks: 0,
+    conversions: 0,
+    spent: 0,
+    budget: 120,
+    dailyBudget: 120,
+    ctr: 0,
+    cpc: 0,
+    conversionRate: 0,
+    roas: 0,
+    targetAudience: 'Zakelijk (28-50 jaar)',
+    startDate: '2025-01-01',
+    endDate: '2025-12-31',
+    adsCount: 2,
+    createdAt: '2025-01-01T00:00:00Z',
+    lastUpdated: '2025-01-01T00:00:00Z'
   }
 ];
 
@@ -224,8 +270,8 @@ export default function CampaignsPage() {
               of ga naar "Advertentie Materiaal" om nieuwe campagnes aan te maken.
             </p>
             <div className="flex items-center space-x-4 text-xs text-blue-300">
-              <span>📊 Demo: 2 campagnes (Algemeen + Jongeren)</span>
-              <span>💰 Budget: €230/dag totaal</span>
+              <span>📊 Demo: 4 campagnes (Algemeen + Jongeren + Vaders + Zakelijk)</span>
+              <span>💰 Budget: €450/dag totaal</span>
               <span>🎯 Doel: TRAFFIC naar prelaunch</span>
               <a 
                 href="/dashboard-marketing/advertentie-materiaal" 

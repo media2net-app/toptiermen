@@ -207,6 +207,96 @@ const mockAdSets = [
     createdAt: "2025-01-01T00:00:00Z",
     lastUpdated: "2025-01-01T00:00:00Z",
     videoName: "jongeren_02"
+  },
+  // Vaders Campagne - 2 ad sets
+  {
+    id: "adset_vaders_1",
+    name: "TTM - Vaders - Family & Leadership",
+    campaign: "TTM - Vaders Prelaunch Campagne",
+    platform: "Facebook",
+    status: "paused" as const,
+    type: "video" as const,
+    impressions: 0,
+    clicks: 0,
+    ctr: 0,
+    cpc: 0,
+    spent: 0,
+    performance: "good" as const,
+    targetAudience: "Vaders (30-50 jaar, mannen, NL/BE)",
+    startDate: "2025-01-01",
+    endDate: "2025-12-31",
+    budget: 60,
+    dailyBudget: 60,
+    createdAt: "2025-01-01T00:00:00Z",
+    lastUpdated: "2025-01-01T00:00:00Z",
+    videoName: "vaders_01"
+  },
+  {
+    id: "adset_vaders_2",
+    name: "TTM - Vaders - Role Model & Success",
+    campaign: "TTM - Vaders Prelaunch Campagne",
+    platform: "Facebook",
+    status: "paused" as const,
+    type: "video" as const,
+    impressions: 0,
+    clicks: 0,
+    ctr: 0,
+    cpc: 0,
+    spent: 0,
+    performance: "good" as const,
+    targetAudience: "Vaders (35-55 jaar, mannen, NL)",
+    startDate: "2025-01-01",
+    endDate: "2025-12-31",
+    budget: 40,
+    dailyBudget: 40,
+    createdAt: "2025-01-01T00:00:00Z",
+    lastUpdated: "2025-01-01T00:00:00Z",
+    videoName: "vaders_02"
+  },
+  // Zakelijk Campagne - 2 ad sets
+  {
+    id: "adset_zakelijk_1",
+    name: "TTM - Zakelijk - Business Professionals",
+    campaign: "TTM - Zakelijk Prelaunch Campagne",
+    platform: "Facebook",
+    status: "paused" as const,
+    type: "video" as const,
+    impressions: 0,
+    clicks: 0,
+    ctr: 0,
+    cpc: 0,
+    spent: 0,
+    performance: "good" as const,
+    targetAudience: "Zakelijk (28-45 jaar, alle geslachten, NL/BE)",
+    startDate: "2025-01-01",
+    endDate: "2025-12-31",
+    budget: 70,
+    dailyBudget: 70,
+    createdAt: "2025-01-01T00:00:00Z",
+    lastUpdated: "2025-01-01T00:00:00Z",
+    videoName: "zakelijk_01"
+  },
+  {
+    id: "adset_zakelijk_2",
+    name: "TTM - Zakelijk - Entrepreneurs & Leaders",
+    campaign: "TTM - Zakelijk Prelaunch Campagne",
+    platform: "Facebook",
+    status: "paused" as const,
+    type: "video" as const,
+    impressions: 0,
+    clicks: 0,
+    ctr: 0,
+    cpc: 0,
+    spent: 0,
+    performance: "good" as const,
+    targetAudience: "Zakelijk (30-50 jaar, alle geslachten, NL)",
+    startDate: "2025-01-01",
+    endDate: "2025-12-31",
+    budget: 50,
+    dailyBudget: 50,
+    createdAt: "2025-01-01T00:00:00Z",
+    lastUpdated: "2025-01-01T00:00:00Z",
+    videoName: "zakelijk_02"
   }
 ];
 
@@ -363,8 +453,8 @@ export default function AdvertisementsPage() {
               of ga naar "Advertentie Materiaal" om nieuwe campagnes aan te maken.
             </p>
             <div className="flex items-center space-x-4 text-xs text-blue-300">
-              <span>📊 Demo: 7 ad sets (5 Algemeen + 2 Jongeren)</span>
-              <span>💰 Budget: €230/dag totaal</span>
+              <span>📊 Demo: 11 ad sets (5 Algemeen + 2 Jongeren + 2 Vaders + 2 Zakelijk)</span>
+              <span>💰 Budget: €450/dag totaal</span>
               <span>🎯 Doel: TRAFFIC naar prelaunch</span>
               <a 
                 href="/dashboard-marketing/advertentie-materiaal" 
