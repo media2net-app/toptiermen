@@ -157,6 +157,30 @@ export default function PrivacyPolicy() {
             </ul>
           </div>
 
+          {/* Data Deletion Instructions */}
+          <div className="bg-gray-800 rounded-lg p-6 mb-8">
+            <h2 className="text-2xl font-bold text-red-400 mb-4">
+              Gegevens Verwijdering Instructies
+            </h2>
+            
+            <p className="text-gray-300 leading-relaxed mb-4">
+              Om uw gegevens volledig te verwijderen uit ons systeem:
+            </p>
+            
+            <ol className="list-decimal list-inside text-gray-300 space-y-2 mb-4">
+              <li>Log in op uw account op https://platform.toptiermen.eu</li>
+              <li>Ga naar Account Instellingen</li>
+              <li>Klik op "Account Verwijderen"</li>
+              <li>Bevestig uw keuze</li>
+              <li>Uw gegevens worden binnen 30 dagen permanent verwijderd</li>
+            </ol>
+            
+            <p className="text-gray-300 leading-relaxed">
+              U kunt ook een verzoek tot gegevensverwijdering sturen naar contact@media2net.nl. 
+              Wij zullen uw verzoek binnen 30 dagen verwerken.
+            </p>
+          </div>
+
           {/* Contact */}
           <div className="bg-gray-800 rounded-lg p-6 mb-8">
             <h2 className="text-2xl font-bold text-green-400 mb-4">
@@ -169,11 +193,29 @@ export default function PrivacyPolicy() {
             
             <div className="bg-gray-700 rounded-lg p-4">
               <p className="text-gray-300">
-                <strong>E-mail:</strong> privacy@toptiermen.com<br/>
-                <strong>Adres:</strong> [Bedrijfsadres]<br/>
-                <strong>Telefoon:</strong> [Telefoonnummer]
+                <strong>E-mail:</strong> contact@media2net.nl<br/>
+                <strong>Website:</strong> https://platform.toptiermen.eu<br/>
+                <strong>Platform:</strong> Top Tier Men
               </p>
             </div>
+          </div>
+
+          {/* Facebook App Compliance */}
+          <div className="bg-gray-800 rounded-lg p-6 mb-8">
+            <h2 className="text-2xl font-bold text-blue-400 mb-4">
+              Facebook App Compliance
+            </h2>
+            
+            <p className="text-gray-300 leading-relaxed mb-4">
+              Deze Privacy Policy voldoet aan de vereisten van Facebook App Platform en Meta's privacy richtlijnen.
+            </p>
+            
+            <ul className="list-disc list-inside text-gray-300 space-y-2 mb-4">
+              <li>Wij verzamelen alleen gegevens die nodig zijn voor het functioneren van onze app</li>
+              <li>Geen gegevens worden gedeeld met Facebook zonder uw toestemming</li>
+              <li>U heeft volledige controle over uw gegevens en kunt deze op elk moment verwijderen</li>
+              <li>Wij gebruiken Facebook's privacy tools en instellingen</li>
+            </ul>
           </div>
 
           {/* Updates */}
