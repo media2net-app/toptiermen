@@ -6,6 +6,8 @@ const FACEBOOK_AD_ACCOUNT_ID = process.env.FACEBOOK_AD_ACCOUNT_ID || 'act_146583
 export async function GET(request: NextRequest) {
   try {
     console.log('📊 Fetching Facebook ads (including drafts)...');
+    console.log('🔧 Using access token:', FACEBOOK_ACCESS_TOKEN ? 'PRESENT' : 'MISSING');
+    console.log('🔧 Using ad account ID:', FACEBOOK_AD_ACCOUNT_ID);
 
     if (!FACEBOOK_ACCESS_TOKEN) {
       return NextResponse.json({ 
@@ -16,7 +18,7 @@ export async function GET(request: NextRequest) {
 
     // Fetch ads from Facebook with all statuses including drafts
     const adsResponse = await fetch(
-      `https://graph.facebook.com/v19.0/${FACEBOOK_AD_ACCOUNT_ID}/ads?access_token=${FACEBOOK_ACCESS_TOKEN}&fields=id,name,adset_id,adset{name},status,creative{id,title,body,image_url,video_id,link_url,call_to_action_type},created_time,updated_time,insights{impressions,clicks,spend,reach,frequency,ctr,cpc,cpm}&status[]=ACTIVE&status[]=PAUSED&status[]=DRAFT&status[]=PENDING_REVIEW&status[]=DISAPPROVED&status[]=ARCHIVED&status[]=DELETED&limit=100`
+      `https://graph.facebook.com/v19.0/${FACEBOOK_AD_ACCOUNT_ID}/ads?access_token=${FACEBOOK_ACCESS_TOKEN}&fields=id,name,status,created_time&limit=100`
     );
 
     if (!adsResponse.ok) {
@@ -31,23 +33,23 @@ export async function GET(request: NextRequest) {
     const transformedAds = ads.map((ad: any) => ({
       id: ad.id,
       name: ad.name,
-      adset_id: ad.adset_id,
-      adset_name: ad.adset?.name || '',
+      adset_id: '',
+      adset_name: '',
       platform: 'Facebook',
       status: ad.status.toLowerCase() as 'active' | 'paused' | 'completed' | 'draft' | 'scheduled' | 'pending_review' | 'disapproved' | 'archived' | 'deleted',
-      creative_type: ad.creative?.video_id ? 'Video' : ad.creative?.image_url ? 'Image' : 'Link',
-      creative_id: ad.creative?.id || '',
-      title: ad.creative?.title || '',
-      body: ad.creative?.body || '',
-      link_url: ad.creative?.link_url || '',
-      impressions: ad.insights?.impressions || 0,
-      clicks: ad.insights?.clicks || 0,
-      spent: ad.insights?.spend || 0,
-      reach: ad.insights?.reach || 0,
-      ctr: ad.insights?.ctr || 0,
-      cpc: ad.insights?.cpc || 0,
+      creative_type: 'Link',
+      creative_id: '',
+      title: '',
+      body: '',
+      link_url: '',
+      impressions: 0,
+      clicks: 0,
+      spent: 0,
+      reach: 0,
+      ctr: 0,
+      cpc: 0,
       created_time: ad.created_time || new Date().toISOString(),
-      updated_time: ad.updated_time || new Date().toISOString()
+      updated_time: new Date().toISOString()
     }));
 
     console.log(`✅ Found ${transformedAds.length} Facebook ads (including drafts)`);
