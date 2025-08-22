@@ -815,7 +815,7 @@ export default function PreLaunchPage() {
             />
           </div>
           <p className="text-gray-400">
-            © 2024 Top Tier Men. Alle rechten voorbehouden.
+            © 2025 Top Tier Men. Alle rechten voorbehouden.
           </p>
         </div>
       </footer>
