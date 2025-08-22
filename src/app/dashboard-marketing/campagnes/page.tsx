@@ -30,7 +30,7 @@ import { useCampaigns } from '@/contexts/CampaignsContext';
 // Real campaigns data from Facebook API
 const realCampaigns = [
   {
-    id: '120232169752900324',
+    id: '120232170463890324',
     name: 'TTM - Algemene Prelaunch Campagne',
     platform: 'Facebook',
     status: 'paused' as const,
@@ -49,11 +49,11 @@ const realCampaigns = [
     startDate: '2025-08-22',
     endDate: '2025-12-31',
     adsCount: 0, // Will be populated from API
-    createdAt: '2025-08-22T11:58:20+0200',
-    lastUpdated: '2025-08-22T11:58:20+0200'
+    createdAt: '2025-08-22T12:30:00+0200',
+    lastUpdated: '2025-08-22T12:30:00+0200'
   },
   {
-    id: '120232169753840324',
+    id: '120232170464630324',
     name: 'TTM - Jongeren Prelaunch Campagne',
     platform: 'Facebook',
     status: 'paused' as const,
@@ -72,11 +72,11 @@ const realCampaigns = [
     startDate: '2025-08-22',
     endDate: '2025-12-31',
     adsCount: 0, // Will be populated from API
-    createdAt: '2025-08-22T11:58:23+0200',
-    lastUpdated: '2025-08-22T11:58:23+0200'
+    createdAt: '2025-08-22T12:30:00+0200',
+    lastUpdated: '2025-08-22T12:30:00+0200'
   },
   {
-    id: '120232169755100324',
+    id: '120232170465340324',
     name: 'TTM - Vaders Prelaunch Campagne',
     platform: 'Facebook',
     status: 'paused' as const,
@@ -95,11 +95,11 @@ const realCampaigns = [
     startDate: '2025-08-22',
     endDate: '2025-12-31',
     adsCount: 0, // Will be populated from API
-    createdAt: '2025-08-22T11:58:26+0200',
-    lastUpdated: '2025-08-22T11:58:26+0200'
+    createdAt: '2025-08-22T12:30:00+0200',
+    lastUpdated: '2025-08-22T12:30:00+0200'
   },
   {
-    id: '120232169757400324',
+    id: '120232170466830324',
     name: 'TTM - Zakelijk Prelaunch Campagne',
     platform: 'Facebook',
     status: 'paused' as const,
@@ -118,8 +118,8 @@ const realCampaigns = [
     startDate: '2025-08-22',
     endDate: '2025-12-31',
     adsCount: 0, // Will be populated from API
-    createdAt: '2025-08-22T11:58:28+0200',
-    lastUpdated: '2025-08-22T11:58:28+0200'
+    createdAt: '2025-08-22T12:30:00+0200',
+    lastUpdated: '2025-08-22T12:30:00+0200'
   }
 ];
 
