@@ -46,8 +46,22 @@ export async function GET() {
 
     console.log(`📋 Found ${ttmAdSets.length} TTM ad sets`);
 
-    const vkAdSets = [];
-    const nonVkAdSets = [];
+    const vkAdSets: Array<{
+      id: string;
+      name: string;
+      targeting: any;
+      interests: any[];
+      has_interests?: boolean;
+      interest_count?: number;
+    }> = [];
+    const nonVkAdSets: Array<{
+      id: string;
+      name: string;
+      targeting: any;
+      interests: any[];
+      has_interests?: boolean;
+      interest_count?: number;
+    }> = [];
 
     // Check each ad set for VK targeting
     for (const adset of ttmAdSets) {
@@ -67,6 +81,8 @@ export async function GET() {
         nonVkAdSets.push({
           id: adset.id,
           name: adset.name,
+          targeting: targeting,
+          interests: targeting && targeting.interests ? targeting.interests : [],
           has_interests: targeting && targeting.interests ? true : false,
           interest_count: targeting && targeting.interests ? targeting.interests.length : 0
         });

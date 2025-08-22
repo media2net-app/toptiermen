@@ -62,10 +62,17 @@ export async function GET() {
       
       const groupAnalysis = {
         total_ad_sets: adSets.length,
-        ad_sets: [],
-        common_interests: {},
-        missing_interests: [],
-        recommendations: []
+        ad_sets: [] as Array<{
+          id: string;
+          name: string;
+          interests: string[];
+          demographics: any;
+          geo_locations: any;
+          total_interests: number;
+        }>,
+        common_interests: {} as Record<string, number>,
+        missing_interests: [] as string[],
+        recommendations: [] as string[]
       };
 
       // Analyze each ad set in the group

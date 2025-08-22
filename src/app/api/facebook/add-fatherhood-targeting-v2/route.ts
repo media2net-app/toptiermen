@@ -115,7 +115,14 @@ export async function POST() {
 
     let successCount = 0;
     let errorCount = 0;
-    const results = [];
+    const results: Array<{
+      adset_id: string;
+      adset_name: string;
+      status: string;
+      added_interest?: string;
+      total_interests?: number;
+      error?: string;
+    }> = [];
 
     // For now, let's just return the search results to see what interests are available
     return NextResponse.json({
