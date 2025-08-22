@@ -67,7 +67,7 @@ export async function GET() {
         status: ad.effective_status ? ad.effective_status.toLowerCase() : ad.status.toLowerCase(),
         created_time: ad.created_time
       };
-    }));
+    });
 
     function getVideoForAdName(adName: string): string {
       if (adName.includes('Zakelijk')) {
