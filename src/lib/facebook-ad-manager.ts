@@ -113,7 +113,7 @@ interface FacebookAdAccount {
 }
 
 interface CreateCampaignData {
-  name: string;
+    name: string;
   objective: 'AWARENESS' | 'CONSIDERATION' | 'CONVERSIONS' | 'ENGAGEMENT' | 'LEADS' | 'SALES' | 'TRAFFIC';
   status: 'ACTIVE' | 'PAUSED';
   daily_budget?: number;
@@ -415,10 +415,10 @@ export function getFacebookAdManager(): FacebookAdManagerAPI | null {
   return facebookAdManager;
 }
 
-export type {
-  FacebookCampaign,
-  FacebookAdSet,
-  FacebookAd,
+export type { 
+  FacebookCampaign, 
+  FacebookAdSet, 
+  FacebookAd, 
   FacebookAdAccount,
   CreateCampaignData
 };

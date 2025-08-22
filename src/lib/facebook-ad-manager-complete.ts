@@ -154,13 +154,14 @@ interface CreateCampaignData {
 
 interface CreateMultiAdSetCampaignData {
   name: string;
-  objective: 'AWARENESS' | 'CONSIDERATION' | 'CONVERSIONS' | 'ENGAGEMENT' | 'LEADS' | 'SALES' | 'TRAFFIC';
+  objective: 'APP_INSTALLS' | 'BRAND_AWARENESS' | 'EVENT_RESPONSES' | 'LEAD_GENERATION' | 'LINK_CLICKS' | 'LOCAL_AWARENESS' | 'MESSAGES' | 'OFFER_CLAIMS' | 'PAGE_LIKES' | 'POST_ENGAGEMENT' | 'PRODUCT_CATALOG_SALES' | 'REACH' | 'STORE_VISITS' | 'VIDEO_VIEWS' | 'OUTCOME_AWARENESS' | 'OUTCOME_ENGAGEMENT' | 'OUTCOME_LEADS' | 'OUTCOME_SALES' | 'OUTCOME_TRAFFIC' | 'OUTCOME_APP_PROMOTION' | 'CONVERSIONS';
   status: 'ACTIVE' | 'PAUSED';
   start_time?: string;
   stop_time?: string;
   campaign_daily_budget?: number;
   lifetime_budget?: number;
   special_ad_categories?: string[];
+  ad_account_id?: string;
   ad_sets: Array<{
     name: string;
     daily_budget: number;
@@ -480,12 +481,15 @@ class FacebookAdManagerComplete {
   /**
    * Upload video naar Facebook
    */
-  private async uploadVideo(videoUrl: string, videoName: string): Promise<string> {
+  private async uploadVideo(videoUrl: string, videoName: string, adAccountId?: string): Promise<string> {
     const serverToken = await this.getServerSideToken();
+    
+    // Use provided ad account ID or fall back to default
+    const targetAdAccountId = adAccountId || this.adAccountId;
     
     // 1. Maak video container aan
     const containerResponse = await fetch(
-      `${this.baseUrl}/${this.adAccountId}/advideos?access_token=${serverToken}`,
+      `${this.baseUrl}/${targetAdAccountId}/advideos?access_token=${serverToken}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -510,20 +514,38 @@ class FacebookAdManagerComplete {
    */
   private getOptimizationGoal(objective: string): string {
     switch (objective) {
-      case 'AWARENESS':
+      case 'BRAND_AWARENESS':
         return 'REACH';
-      case 'CONSIDERATION':
+      case 'LINK_CLICKS':
         return 'LINK_CLICKS';
+      case 'OUTCOME_TRAFFIC':
+        return 'LINK_CLICKS';
+      case 'POST_ENGAGEMENT':
+        return 'POST_ENGAGEMENT';
+      case 'LEAD_GENERATION':
+        return 'LEAD_GENERATION';
       case 'CONVERSIONS':
         return 'OFFSITE_CONVERSIONS';
-      case 'ENGAGEMENT':
-        return 'POST_ENGAGEMENT';
-      case 'LEADS':
-        return 'LEAD_GENERATION';
-      case 'SALES':
+      case 'VIDEO_VIEWS':
+        return 'VIDEO_VIEWS';
+      case 'REACH':
+        return 'REACH';
+      case 'APP_INSTALLS':
+        return 'APP_INSTALLS';
+      case 'MESSAGES':
+        return 'CONVERSATIONS';
+      case 'PAGE_LIKES':
+        return 'PAGE_LIKES';
+      case 'EVENT_RESPONSES':
+        return 'EVENT_RESPONSES';
+      case 'OFFER_CLAIMS':
+        return 'OFFER_CLAIMS';
+      case 'STORE_VISITS':
+        return 'STORE_VISITS';
+      case 'PRODUCT_CATALOG_SALES':
         return 'OFFSITE_CONVERSIONS';
-      case 'TRAFFIC':
-        return 'LINK_CLICKS';
+      case 'LOCAL_AWARENESS':
+        return 'REACH';
       default:
         return 'LINK_CLICKS';
     }
@@ -580,6 +602,10 @@ class FacebookAdManagerComplete {
     
     console.log('🚀 Creating Facebook campaign with multiple ad sets...');
     
+    // Use provided ad account ID or fall back to default
+    const adAccountId = campaignData.ad_account_id || this.adAccountId;
+    console.log(`📊 Using Ad Account ID: ${adAccountId}`);
+    
     // 1. Maak de campagne aan
     const campaignPayload = {
       name: campaignData.name,
@@ -587,15 +613,14 @@ class FacebookAdManagerComplete {
       status: campaignData.status,
       special_ad_categories: campaignData.special_ad_categories || [],
       ...(campaignData.start_time && { start_time: campaignData.start_time }),
-      ...(campaignData.stop_time && { stop_time: campaignData.stop_time }),
-      ...(campaignData.campaign_daily_budget && { daily_budget: campaignData.campaign_daily_budget * 100 }),
-      ...(campaignData.lifetime_budget && { lifetime_budget: campaignData.lifetime_budget * 100 })
+      ...(campaignData.stop_time && { stop_time: campaignData.stop_time })
+      // Removed campaign daily_budget and lifetime_budget - using ad set budgets instead
     };
 
     console.log('📋 Creating campaign with payload:', campaignPayload);
 
     const campaignResponse = await fetch(
-      `${this.baseUrl}/${this.adAccountId}/campaigns?access_token=${serverToken}`,
+      `${this.baseUrl}/${adAccountId}/campaigns?access_token=${serverToken}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -624,7 +649,7 @@ class FacebookAdManagerComplete {
       let videoId: string | undefined;
       if (adSetConfig.video_url) {
         console.log('🎥 Uploading video...');
-        videoId = await this.uploadVideo(adSetConfig.video_url, adSetConfig.video_name || 'Ad Video');
+        videoId = await this.uploadVideo(adSetConfig.video_url, adSetConfig.video_name || 'Ad Video', adAccountId);
         console.log('✅ Video uploaded:', videoId);
       }
 
@@ -635,10 +660,18 @@ class FacebookAdManagerComplete {
         daily_budget: adSetConfig.daily_budget * 100,
         billing_event: 'IMPRESSIONS',
         optimization_goal: this.getOptimizationGoal(campaignData.objective),
+        bid_amount: Math.floor(adSetConfig.daily_budget * 50), // €0.50 per click (50 cents)
+        dsa_beneficiary: 'Top Tier Men', // DSA beneficiary requirement
+        dsa_payor: 'Top Tier Men', // DSA payor requirement
         targeting: {
           age_min: adSetConfig.targeting.age_min,
           age_max: adSetConfig.targeting.age_max,
-          genders: adSetConfig.targeting.genders,
+          genders: adSetConfig.targeting.genders.map(gender => {
+            if (gender === 'all') return 0;
+            if (gender === 'men') return 1;
+            if (gender === 'women') return 2;
+            return 0; // default to all
+          }),
           geo_locations: {
             countries: adSetConfig.targeting.locations
           },
@@ -659,13 +692,16 @@ class FacebookAdManagerComplete {
           }),
           ...(adSetConfig.targeting.radius && {
             radius: adSetConfig.targeting.radius
-          })
+          }),
+          targeting_automation: {
+            advantage_audience: 0 // Disable Advantage Audience
+          }
         },
         status: 'ACTIVE'
       };
 
       const adSetResponse = await fetch(
-        `${this.baseUrl}/${this.adAccountId}/adsets?access_token=${serverToken}`,
+        `${this.baseUrl}/${adAccountId}/adsets?access_token=${serverToken}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -682,11 +718,10 @@ class FacebookAdManagerComplete {
       adSets.push(adSet);
       console.log('✅ Ad Set created:', adSet.id);
 
-      // Maak ad creative aan
+      // Maak ad creative aan (text-only, zonder page_id)
       const creativePayload = {
         name: `${adSetConfig.name} - Creative`,
         object_story_spec: {
-          ...(campaignData.page_id && { page_id: campaignData.page_id }),
           link_data: {
             ...(videoId && { video_id: videoId }),
             link: adSetConfig.ad_creative.link_url,
@@ -703,7 +738,7 @@ class FacebookAdManagerComplete {
       };
 
       const creativeResponse = await fetch(
-        `${this.baseUrl}/${this.adAccountId}/adcreatives?access_token=${serverToken}`,
+        `${this.baseUrl}/${adAccountId}/adcreatives?access_token=${serverToken}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -730,7 +765,7 @@ class FacebookAdManagerComplete {
       };
 
       const adResponse = await fetch(
-        `${this.baseUrl}/${this.adAccountId}/ads?access_token=${serverToken}`,
+        `${this.baseUrl}/${adAccountId}/ads?access_token=${serverToken}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
