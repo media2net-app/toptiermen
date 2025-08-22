@@ -17,11 +17,11 @@ const VADERS_CAMPAIGN = {
   name: 'TTM - Vaders Prelaunch Campagne',
   objective: 'TRAFFIC',
   status: 'PAUSED',
-  campaign_daily_budget: 100, // Total budget for all ad sets
+  campaign_daily_budget: 10, // Total budget for all ad sets (2 x €5)
   ad_sets: [
     {
       name: 'TTM - Vaders - Family & Leadership',
-      daily_budget: 60,
+      daily_budget: 5,
       targeting: {
         age_min: 30,
         age_max: 50,
@@ -39,7 +39,7 @@ const VADERS_CAMPAIGN = {
     },
     {
       name: 'TTM - Vaders - Role Model & Success',
-      daily_budget: 40,
+      daily_budget: 5,
       targeting: {
         age_min: 35,
         age_max: 55,

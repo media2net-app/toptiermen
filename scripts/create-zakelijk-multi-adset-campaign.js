@@ -17,11 +17,11 @@ const ZAKELIJK_CAMPAIGN = {
   name: 'TTM - Zakelijk Prelaunch Campagne',
   objective: 'TRAFFIC',
   status: 'PAUSED',
-  campaign_daily_budget: 120, // Total budget for all ad sets
+  campaign_daily_budget: 10, // Total budget for all ad sets (2 x €5)
   ad_sets: [
     {
       name: 'TTM - Zakelijk - Business Professionals',
-      daily_budget: 70,
+      daily_budget: 5,
       targeting: {
         age_min: 28,
         age_max: 45,
@@ -39,7 +39,7 @@ const ZAKELIJK_CAMPAIGN = {
     },
     {
       name: 'TTM - Zakelijk - Entrepreneurs & Leaders',
-      daily_budget: 50,
+      daily_budget: 5,
       targeting: {
         age_min: 30,
         age_max: 50,
