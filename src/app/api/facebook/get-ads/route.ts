@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
 
     // Fetch ads from Facebook with all statuses including drafts
     const adsResponse = await fetch(
-      `https://graph.facebook.com/v19.0/${FACEBOOK_AD_ACCOUNT_ID}/ads?access_token=${FACEBOOK_ACCESS_TOKEN}&fields=id,name,status,created_time&limit=100`
+      `https://graph.facebook.com/v19.0/${FACEBOOK_AD_ACCOUNT_ID}/ads?access_token=${FACEBOOK_ACCESS_TOKEN}&fields=id,name,status,effective_status,created_time&limit=1000`
     );
 
     if (!adsResponse.ok) {
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
       adset_id: '',
       adset_name: '',
       platform: 'Facebook',
-      status: ad.status.toLowerCase() as 'active' | 'paused' | 'completed' | 'draft' | 'scheduled' | 'pending_review' | 'disapproved' | 'archived' | 'deleted',
+      status: (ad.effective_status || ad.status).toLowerCase() as 'active' | 'paused' | 'completed' | 'draft' | 'scheduled' | 'pending_review' | 'disapproved' | 'archived' | 'deleted',
       creative_type: 'Link',
       creative_id: '',
       title: '',
