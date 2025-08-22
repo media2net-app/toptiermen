@@ -1,46 +1,47 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { facebookAdManagerComplete } from '@/lib/facebook-ad-manager-complete';
+
+const FACEBOOK_ACCESS_TOKEN = process.env.FACEBOOK_ACCESS_TOKEN;
+const FACEBOOK_AD_ACCOUNT_ID = process.env.FACEBOOK_AD_ACCOUNT_ID || 'act_1465834431278978';
 
 export async function GET(request: NextRequest) {
   try {
     console.log('📊 Fetching Facebook campaigns...');
 
-    // Test connection first
-    const connectionTest = await facebookAdManagerComplete.testConnection();
-    if (!connectionTest.success) {
+    if (!FACEBOOK_ACCESS_TOKEN) {
       return NextResponse.json({ 
         success: false, 
-        error: 'Facebook connection failed',
-        details: connectionTest.error 
+        error: 'Facebook access token not configured'
       }, { status: 500 });
     }
 
-    // Get campaigns from Facebook
-    const campaignsResult = await facebookAdManagerComplete.getCampaigns();
-    
-    if (!campaignsResult.success) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Failed to fetch campaigns',
-        details: campaignsResult.error 
-      }, { status: 500 });
+    // Fetch campaigns from Facebook
+    const campaignsResponse = await fetch(
+      `https://graph.facebook.com/v19.0/${FACEBOOK_AD_ACCOUNT_ID}/campaigns?access_token=${FACEBOOK_ACCESS_TOKEN}&fields=id,name,status,objective,daily_budget,lifetime_budget,created_time,updated_time,start_time,stop_time,insights{impressions,clicks,spend,reach,frequency,ctr,cpc,cpm}`
+    );
+
+    if (!campaignsResponse.ok) {
+      const errorData = await campaignsResponse.json();
+      throw new Error(`Failed to fetch campaigns: ${JSON.stringify(errorData)}`);
     }
+
+    const campaignsData = await campaignsResponse.json();
+    const campaigns = campaignsData.data || [];
 
     // Transform Facebook campaigns to our format
-    const transformedCampaigns = campaignsResult.data.map(campaign => ({
+    const transformedCampaigns = campaigns.map((campaign: any) => ({
       id: campaign.id,
       name: campaign.name,
       platform: 'Facebook',
       status: campaign.status.toLowerCase() as 'active' | 'paused' | 'completed' | 'draft' | 'scheduled',
       objective: campaign.objective.toLowerCase() as 'awareness' | 'traffic' | 'conversions' | 'engagement' | 'sales',
-      impressions: 0, // Will be populated from ad insights
-      clicks: 0,
+      impressions: campaign.insights?.impressions || 0,
+      clicks: campaign.insights?.clicks || 0,
       conversions: 0,
-      spent: 0,
+      spent: campaign.insights?.spend || 0,
       budget: campaign.daily_budget || campaign.lifetime_budget || 0,
       dailyBudget: campaign.daily_budget || 0,
-      ctr: 0,
-      cpc: 0,
+      ctr: campaign.insights?.ctr || 0,
+      cpc: campaign.insights?.cpc || 0,
       conversionRate: 0,
       roas: 0,
       targetAudience: 'Facebook Targeting',
