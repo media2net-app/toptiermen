@@ -93,6 +93,33 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('✅ Task created in database:', newTask.id);
+    
+    // Send notification if task is assigned to Chiel
+    if (newTask.assigned_to === 'Chiel') {
+      try {
+        const notificationResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/admin/task-notifications`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            taskId: newTask.id,
+            taskTitle: newTask.title,
+            assignedTo: newTask.assigned_to,
+            message: `Nieuwe taak toegewezen: ${newTask.title}`
+          })
+        });
+
+        if (notificationResponse.ok) {
+          console.log('✅ Task notification sent to Chiel');
+        } else {
+          console.log('⚠️ Task notification failed');
+        }
+      } catch (notificationError) {
+        console.log('⚠️ Task notification error:', notificationError);
+      }
+    }
+    
     return NextResponse.json({
       success: true,
       task: newTask,

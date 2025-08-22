@@ -29,6 +29,7 @@ import { AdminCard, AdminStatsCard, AdminButton } from '@/components/admin';
 import { SwipeIndicator } from '@/components/ui';
 import MollieFinanceMetrics from '@/components/admin/MollieFinanceMetrics';
 import LoadingModal from '@/components/admin/LoadingModal';
+import TaskNotificationWidget from '@/components/admin/TaskNotificationWidget';
 
 // Types for session data
 interface SessionLog {
@@ -311,6 +312,9 @@ export default function AdminDashboard() {
           )}
         </div>
         <div className="flex items-center gap-2 sm:gap-4">
+          {/* Task Notification Widget for Chiel */}
+          <TaskNotificationWidget />
+          
           {activeTab !== 'realtime' && (
             <select 
               value={selectedPeriod} 
