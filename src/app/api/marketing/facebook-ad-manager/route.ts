@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { facebookAdManager, createFacebookAdManager } from '@/lib/facebook-ad-manager';
+import { getFacebookAdManager } from '@/lib/facebook-ad-manager';
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,6 +10,7 @@ export async function GET(request: NextRequest) {
     const adSetId = searchParams.get('adSetId');
     const accessToken = searchParams.get('accessToken');
 
+    const facebookAdManager = getFacebookAdManager();
     if (!facebookAdManager) {
       return NextResponse.json(
         { 
