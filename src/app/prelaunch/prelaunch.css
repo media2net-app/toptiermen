@@ -59,6 +59,22 @@
   text-align: center;
 }
 
+/* PC Centering for all sections */
+.prelaunch-section {
+  text-align: center;
+}
+
+.prelaunch-section .space-y-6 {
+  text-align: center;
+}
+
+.prelaunch-section .space-y-6 > div {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .prelaunch-section h1 span:first-child,
 .prelaunch-section h2 span:first-child {
   color: #FFFFFF;
@@ -80,7 +96,7 @@
   line-height: 1.5;
   color: #FFFFFF;
   margin-bottom: 24px;
-  text-align: left;
+  text-align: center;
 }
 
 /* Story Text Box */
@@ -127,6 +143,7 @@
   border-radius: 12px;
   padding: 24px;
   margin-bottom: 20px;
+  text-align: center;
 }
 
 .prelaunch-feature-block h3 {
@@ -144,7 +161,7 @@
   line-height: 1.5;
   color: #FFFFFF;
   margin: 0;
-  text-align: left;
+  text-align: center;
 }
 
 /* Feature Cards */
