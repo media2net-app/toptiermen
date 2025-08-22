@@ -1,58 +1,67 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 const FACEBOOK_ACCESS_TOKEN = process.env.FACEBOOK_ACCESS_TOKEN;
-const FACEBOOK_AD_ACCOUNT_ID = process.env.FACEBOOK_AD_ACCOUNT_ID || 'act_1465834431278978';
+const FACEBOOK_AD_ACCOUNT_ID = process.env.FACEBOOK_AD_ACCOUNT_ID;
 
-export async function GET(request: NextRequest) {
+export async function GET() {
+  if (!FACEBOOK_ACCESS_TOKEN || !FACEBOOK_AD_ACCOUNT_ID) {
+    return NextResponse.json(
+      { success: false, error: 'Missing Facebook credentials' },
+      { status: 500 }
+    );
+  }
+
   try {
     console.log('📊 Fetching Facebook ads (including drafts)...');
     console.log('🔧 Using access token:', FACEBOOK_ACCESS_TOKEN ? 'PRESENT' : 'MISSING');
     console.log('🔧 Using ad account ID:', FACEBOOK_AD_ACCOUNT_ID);
 
-    if (!FACEBOOK_ACCESS_TOKEN) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Facebook access token not configured'
-      }, { status: 500 });
-    }
-
-    // Fetch ads from Facebook with all statuses including drafts
-    const adsResponse = await fetch(
+    const response = await fetch(
       `https://graph.facebook.com/v19.0/${FACEBOOK_AD_ACCOUNT_ID}/ads?access_token=${FACEBOOK_ACCESS_TOKEN}&fields=id,name,status,effective_status,created_time&limit=1000`
     );
 
-    if (!adsResponse.ok) {
-      const errorData = await adsResponse.json();
-      throw new Error(`Failed to fetch ads: ${JSON.stringify(errorData)}`);
+    if (!response.ok) {
+      throw new Error(`Facebook API error: ${response.status} ${response.statusText}`);
     }
 
-    const adsData = await adsResponse.json();
-    const ads = adsData.data || [];
+    const data = await response.json();
 
-    // Transform Facebook ads to our format
-    const transformedAds = ads.map((ad: any) => ({
+    if (!data.data) {
+      console.log('✅ No ads found');
+      return NextResponse.json({ success: true, data: [] });
+    }
+
+    console.log(`📋 Raw ads from Facebook: ${data.data.length}`);
+    console.log('📋 Sample ad names:', data.data.slice(0, 3).map((ad: any) => ad.name));
+    console.log('📋 All ad names:', data.data.map((ad: any) => ad.name));
+
+    // Filter to only show TTM ads
+    const ttmAds = data.data.filter((ad: any) => 
+      ad.name && ad.name.includes('TTM')
+    );
+
+    console.log(`✅ Found ${ttmAds.length} TTM ads (filtered from ${data.data.length} total)`);
+    console.log('📋 TTM ad names:', ttmAds.map((ad: any) => ad.name));
+
+    const transformedAds = ttmAds.map((ad: any) => ({
       id: ad.id,
       name: ad.name,
       adset_id: '',
       adset_name: '',
-      platform: 'Facebook',
-      status: (ad.effective_status || ad.status).toLowerCase() as 'active' | 'paused' | 'completed' | 'draft' | 'scheduled' | 'pending_review' | 'disapproved' | 'archived' | 'deleted',
       creative_type: 'Link',
       creative_id: '',
       title: '',
       body: '',
-      link_url: '',
+      link_url: 'https://platform.toptiermen.eu/prelaunch',
       impressions: 0,
       clicks: 0,
       spent: 0,
       reach: 0,
       ctr: 0,
       cpc: 0,
-      created_time: ad.created_time || new Date().toISOString(),
-      updated_time: new Date().toISOString()
+      status: ad.effective_status ? ad.effective_status.toLowerCase() : ad.status.toLowerCase(),
+      created_time: ad.created_time
     }));
-
-    console.log(`✅ Found ${transformedAds.length} Facebook ads (including drafts)`);
 
     return NextResponse.json({
       success: true,
@@ -61,10 +70,9 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error('❌ Error fetching Facebook ads:', error);
-    return NextResponse.json({ 
-      success: false, 
-      error: 'Internal server error',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: 'Failed to fetch ads' },
+      { status: 500 }
+    );
   }
 }
