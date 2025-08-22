@@ -64,6 +64,11 @@
   text-align: center;
 }
 
+/* Launch date badge spacing */
+.inline-flex {
+  margin-bottom: 32px !important;
+}
+
 .prelaunch-section .space-y-6 {
   text-align: center;
 }
@@ -471,7 +476,7 @@
   .prelaunch-badge {
     font-size: 13px;
     padding: 10px 20px;
-    margin: 0 auto 20px auto !important;
+    margin: 0 auto 32px auto !important;
     display: inline-block !important;
   }
   
@@ -673,7 +678,7 @@
   .prelaunch-badge {
     font-size: 12px;
     padding: 8px 16px;
-    margin: 0 auto 16px auto !important;
+    margin: 0 auto 24px auto !important;
     display: inline-block !important;
   }
   
