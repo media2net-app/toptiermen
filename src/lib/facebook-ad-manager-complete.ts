@@ -718,13 +718,12 @@ class FacebookAdManagerComplete {
       adSets.push(adSet);
       console.log('✅ Ad Set created:', adSet.id);
 
-      // Maak ad creative aan met alleen Facebook pagina
+      // Maak ad creative aan met alleen Facebook pagina (zonder afbeelding)
       const creativePayload = {
         name: `${adSetConfig.name} - Creative`,
         object_story_spec: {
           page_id: '610571295471584', // Top Tier Men Facebook page
           link_data: {
-            ...(videoId && { video_id: videoId }),
             link: adSetConfig.ad_creative.link_url,
             message: adSetConfig.ad_creative.body,
             name: adSetConfig.ad_creative.title,

@@ -10,10 +10,10 @@ if (!FACEBOOK_ACCESS_TOKEN) {
 
 // Campaign IDs to delete
 const CAMPAIGN_IDS = [
-  '120232169275430324', // Algemene
-  '120232169282700324', // Jongeren
-  '120232169285260324', // Vaders
-  '120232169287000324'  // Zakelijk
+  '120232169694350324', // Algemene
+  '120232169696830324', // Jongeren
+  '120232169699340324', // Vaders
+  '120232169702740324'  // Zakelijk
 ];
 
 async function deleteAllCampaigns() {
