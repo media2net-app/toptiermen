@@ -23,6 +23,7 @@ interface GoogleAnalyticsResponse {
   timestamp: string;
   range: string;
   source: string;
+  error?: string;
 }
 
 export default function GoogleAnalyticsPage() {
