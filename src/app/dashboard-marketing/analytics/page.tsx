@@ -33,6 +33,71 @@ interface AnalyticsData {
   roas: number;
 }
 
+interface FacebookAnalyticsData {
+  summary: {
+    totalImpressions: number;
+    totalClicks: number;
+    totalSpend: number;
+    totalReach: number;
+    averageCTR: number;
+    averageCPC: number;
+    averageCPM: number;
+    activeCampaigns: number;
+    totalCampaigns: number;
+  };
+  campaigns: Array<{
+    id: string;
+    name: string;
+    status: string;
+    objective: string;
+    impressions: number;
+    clicks: number;
+    spend: number;
+    reach: number;
+    frequency: number;
+    ctr: number;
+    cpc: number;
+    cpm: number;
+    actions: Array<{ action_type: string; value: string }>;
+    created_time: string;
+  }>;
+  adSets: Array<{
+    id: string;
+    name: string;
+    campaign_id: string;
+    status: string;
+    impressions: number;
+    clicks: number;
+    spend: number;
+    reach: number;
+    frequency: number;
+    ctr: number;
+    cpc: number;
+    cpm: number;
+    actions: Array<{ action_type: string; value: string }>;
+    created_time: string;
+  }>;
+  ads: Array<{
+    id: string;
+    name: string;
+    adset_id: string;
+    campaign_id: string;
+    status: string;
+    impressions: number;
+    clicks: number;
+    spend: number;
+    reach: number;
+    frequency: number;
+    ctr: number;
+    cpc: number;
+    cpm: number;
+    actions: Array<{ action_type: string; value: string }>;
+    created_time: string;
+  }>;
+  dateRange: string;
+  lastUpdated: string;
+}
+
 interface PlatformPerformance {
   platform: string;
   impressions: number;
@@ -56,77 +121,91 @@ interface AudienceInsights {
 }
 
 export default function AnalyticsPage() {
-  const [timeRange, setTimeRange] = useState('30d');
+  const [timeRange, setTimeRange] = useState('last_30d');
   const [selectedMetric, setSelectedMetric] = useState('impressions');
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData[]>([]);
+  const [facebookAnalytics, setFacebookAnalytics] = useState<FacebookAnalyticsData | null>(null);
   const [platformPerformance, setPlatformPerformance] = useState<PlatformPerformance[]>([]);
   const [audienceInsights, setAudienceInsights] = useState<AudienceInsights[]>([]);
   const [loading, setLoading] = useState(true);
   const [showExportModal, setShowExportModal] = useState(false);
   const [showAlerts, setShowAlerts] = useState(false);
 
-  // Mock data
+  // Load Facebook analytics data
   useEffect(() => {
-    const mockAnalyticsData: AnalyticsData[] = [
-      { date: '2025-07-21', impressions: 42000, clicks: 1512, conversions: 76, spent: 499, ctr: 3.6, cpc: 0.33, conversionRate: 5.0, roas: 4.5 },
-      { date: '2025-07-22', impressions: 43500, clicks: 1566, conversions: 78, spent: 517, ctr: 3.6, cpc: 0.33, conversionRate: 5.0, roas: 4.5 },
-      { date: '2025-07-23', impressions: 44800, clicks: 1613, conversions: 81, spent: 532, ctr: 3.6, cpc: 0.33, conversionRate: 5.0, roas: 4.5 },
-      { date: '2025-07-24', impressions: 46200, clicks: 1663, conversions: 83, spent: 549, ctr: 3.6, cpc: 0.33, conversionRate: 5.0, roas: 4.5 },
-      { date: '2025-07-25', impressions: 47600, clicks: 1714, conversions: 86, spent: 565, ctr: 3.6, cpc: 0.33, conversionRate: 5.0, roas: 4.5 },
-      { date: '2025-07-26', impressions: 49000, clicks: 1764, conversions: 88, spent: 582, ctr: 3.6, cpc: 0.33, conversionRate: 5.0, roas: 4.5 },
-      { date: '2025-07-27', impressions: 50400, clicks: 1814, conversions: 91, spent: 599, ctr: 3.6, cpc: 0.33, conversionRate: 5.0, roas: 4.5 }
-    ];
-
-    const mockPlatformPerformance: PlatformPerformance[] = [
-      {
-        platform: "Facebook",
-        impressions: 450000,
-        clicks: 15300,
-        conversions: 765,
-        spent: 5049,
-        ctr: 3.4,
-        cpc: 0.33,
-        conversionRate: 5.0,
-        roas: 4.8
-      },
-      {
-        platform: "Instagram",
-        impressions: 320000,
-        clicks: 12800,
-        conversions: 640,
-        spent: 4224,
-        ctr: 4.0,
-        cpc: 0.33,
-        conversionRate: 5.0,
-        roas: 4.2
-      },
-      {
-        platform: "Google Ads",
-        impressions: 480000,
-        clicks: 16900,
-        conversions: 845,
-        spent: 5727,
-        ctr: 3.5,
-        cpc: 0.34,
-        conversionRate: 5.0,
-        roas: 4.1
+    const loadFacebookAnalytics = async () => {
+      setLoading(true);
+      try {
+        console.log('📊 Loading Facebook analytics data...');
+        
+        const response = await fetch(`/api/facebook/analytics?dateRange=${timeRange}`);
+        const data = await response.json();
+        
+        if (data.success && data.data) {
+          console.log('✅ Facebook analytics loaded:', data.data);
+          setFacebookAnalytics(data.data);
+          
+          // Create platform performance data from Facebook data
+          const facebookPlatformData: PlatformPerformance = {
+            platform: "Facebook",
+            impressions: data.data.summary.totalImpressions,
+            clicks: data.data.summary.totalClicks,
+            conversions: 0, // Facebook doesn't provide conversion data in basic insights
+            spent: data.data.summary.totalSpend,
+            ctr: data.data.summary.averageCTR,
+            cpc: data.data.summary.averageCPC,
+            conversionRate: 0,
+            roas: 0
+          };
+          
+          setPlatformPerformance([facebookPlatformData]);
+          
+          // Create mock audience insights for now
+          const mockAudienceInsights: AudienceInsights[] = [
+            { ageGroup: "25-34", gender: "Male", impressions: Math.floor(data.data.summary.totalImpressions * 0.4), clicks: Math.floor(data.data.summary.totalClicks * 0.4), conversions: 0, ctr: data.data.summary.averageCTR, conversionRate: 0 },
+            { ageGroup: "35-44", gender: "Male", impressions: Math.floor(data.data.summary.totalImpressions * 0.3), clicks: Math.floor(data.data.summary.totalClicks * 0.3), conversions: 0, ctr: data.data.summary.averageCTR, conversionRate: 0 },
+            { ageGroup: "45-54", gender: "Male", impressions: Math.floor(data.data.summary.totalImpressions * 0.2), clicks: Math.floor(data.data.summary.totalClicks * 0.2), conversions: 0, ctr: data.data.summary.averageCTR, conversionRate: 0 },
+            { ageGroup: "25-34", gender: "Female", impressions: Math.floor(data.data.summary.totalImpressions * 0.05), clicks: Math.floor(data.data.summary.totalClicks * 0.05), conversions: 0, ctr: data.data.summary.averageCTR, conversionRate: 0 },
+            { ageGroup: "35-44", gender: "Female", impressions: Math.floor(data.data.summary.totalImpressions * 0.05), clicks: Math.floor(data.data.summary.totalClicks * 0.05), conversions: 0, ctr: data.data.summary.averageCTR, conversionRate: 0 }
+          ];
+          
+          setAudienceInsights(mockAudienceInsights);
+          
+          // Create time series data from campaigns
+          const timeSeriesData: AnalyticsData[] = data.data.campaigns.map((campaign: any, index: number) => ({
+            date: new Date(campaign.created_time).toISOString().split('T')[0],
+            impressions: campaign.impressions,
+            clicks: campaign.clicks,
+            conversions: 0,
+            spent: campaign.spend,
+            ctr: campaign.ctr,
+            cpc: campaign.cpc,
+            conversionRate: 0,
+            roas: 0
+          }));
+          
+          setAnalyticsData(timeSeriesData);
+          
+        } else {
+          console.error('Failed to load Facebook analytics:', data);
+          // Fallback to mock data
+          setAnalyticsData([]);
+          setPlatformPerformance([]);
+          setAudienceInsights([]);
+        }
+      } catch (error) {
+        console.error('Error loading Facebook analytics:', error);
+        // Fallback to mock data
+        setAnalyticsData([]);
+        setPlatformPerformance([]);
+        setAudienceInsights([]);
+      } finally {
+        setLoading(false);
       }
-    ];
+    };
 
-    const mockAudienceInsights: AudienceInsights[] = [
-      { ageGroup: "18-24", gender: "Male", impressions: 180000, clicks: 6300, conversions: 315, ctr: 3.5, conversionRate: 5.0 },
-      { ageGroup: "25-34", gender: "Male", impressions: 320000, clicks: 11200, conversions: 560, ctr: 3.5, conversionRate: 5.0 },
-      { ageGroup: "35-44", gender: "Male", impressions: 280000, clicks: 9800, conversions: 490, ctr: 3.5, conversionRate: 5.0 },
-      { ageGroup: "45-54", gender: "Male", impressions: 150000, clicks: 5250, conversions: 263, ctr: 3.5, conversionRate: 5.0 },
-      { ageGroup: "18-24", gender: "Female", impressions: 120000, clicks: 4200, conversions: 210, ctr: 3.5, conversionRate: 5.0 },
-      { ageGroup: "25-34", gender: "Female", impressions: 200000, clicks: 7000, conversions: 350, ctr: 3.5, conversionRate: 5.0 }
-    ];
-
-    setAnalyticsData(mockAnalyticsData);
-    setPlatformPerformance(mockPlatformPerformance);
-    setAudienceInsights(mockAudienceInsights);
-    setLoading(false);
-  }, []);
+    loadFacebookAnalytics();
+  }, [timeRange]);
 
   const handleExport = () => {
     setShowExportModal(true);
@@ -200,10 +279,14 @@ export default function AnalyticsPage() {
             onChange={(e) => setTimeRange(e.target.value)}
             className="px-4 py-2 bg-[#2D3748] border border-[#4A5568] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A]"
           >
-            <option value="7d">Laatste 7 dagen</option>
-            <option value="30d">Laatste 30 dagen</option>
-            <option value="90d">Laatste 90 dagen</option>
-            <option value="1y">Laatste jaar</option>
+            <option value="last_7d">Laatste 7 dagen</option>
+            <option value="last_30d">Laatste 30 dagen</option>
+            <option value="last_90d">Laatste 90 dagen</option>
+            <option value="last_1y">Laatste jaar</option>
+            <option value="today">Vandaag</option>
+            <option value="yesterday">Gisteren</option>
+            <option value="this_month">Deze maand</option>
+            <option value="last_month">Vorige maand</option>
           </select>
           <motion.button
             whileHover={{ scale: 1.05 }}
@@ -461,6 +544,85 @@ export default function AnalyticsPage() {
           </div>
         </motion.div>
       </div>
+
+      {/* Facebook Analytics Data */}
+      {facebookAnalytics && (
+        <div className="space-y-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
+            className="bg-[#1A1F2E] border border-[#2D3748] rounded-lg p-6"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-semibold text-white">Facebook Analytics Overzicht</h2>
+              <div className="flex items-center space-x-2 text-sm text-gray-400">
+                <ClockIcon className="w-4 h-4" />
+                <span>Laatste update: {new Date(facebookAnalytics.lastUpdated).toLocaleString('nl-NL')}</span>
+              </div>
+            </div>
+            
+            {/* Summary Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              <div className="bg-[#2D3748] rounded-lg p-4">
+                <p className="text-gray-400 text-sm">Totaal Impressies</p>
+                <p className="text-xl font-bold text-white">{facebookAnalytics.summary.totalImpressions.toLocaleString()}</p>
+              </div>
+              <div className="bg-[#2D3748] rounded-lg p-4">
+                <p className="text-gray-400 text-sm">Totaal Klikken</p>
+                <p className="text-xl font-bold text-white">{facebookAnalytics.summary.totalClicks.toLocaleString()}</p>
+              </div>
+              <div className="bg-[#2D3748] rounded-lg p-4">
+                <p className="text-gray-400 text-sm">Totaal Uitgegeven</p>
+                <p className="text-xl font-bold text-white">€{facebookAnalytics.summary.totalSpend.toFixed(2)}</p>
+              </div>
+              <div className="bg-[#2D3748] rounded-lg p-4">
+                <p className="text-gray-400 text-sm">Gemiddelde CTR</p>
+                <p className="text-xl font-bold text-white">{facebookAnalytics.summary.averageCTR.toFixed(2)}%</p>
+              </div>
+            </div>
+
+            {/* Campaigns Table */}
+            <div className="space-y-4">
+              <h3 className="text-md font-semibold text-white">Campagnes ({facebookAnalytics.campaigns.length})</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-[#2D3748]">
+                    <tr>
+                      <th className="text-left p-3 text-gray-300">Campagne</th>
+                      <th className="text-left p-3 text-gray-300">Status</th>
+                      <th className="text-right p-3 text-gray-300">Impressies</th>
+                      <th className="text-right p-3 text-gray-300">Klikken</th>
+                      <th className="text-right p-3 text-gray-300">CTR</th>
+                      <th className="text-right p-3 text-gray-300">CPC</th>
+                      <th className="text-right p-3 text-gray-300">Uitgegeven</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {facebookAnalytics.campaigns.map((campaign, index) => (
+                      <tr key={campaign.id} className="border-b border-[#2D3748] hover:bg-[#2D3748]/30">
+                        <td className="p-3 text-white">{campaign.name}</td>
+                        <td className="p-3">
+                          <span className={`px-2 py-1 rounded-full text-xs ${
+                            campaign.status === 'ACTIVE' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
+                          }`}>
+                            {campaign.status}
+                          </span>
+                        </td>
+                        <td className="p-3 text-right text-white">{campaign.impressions.toLocaleString()}</td>
+                        <td className="p-3 text-right text-white">{campaign.clicks.toLocaleString()}</td>
+                        <td className="p-3 text-right text-white">{campaign.ctr.toFixed(2)}%</td>
+                        <td className="p-3 text-right text-white">€{campaign.cpc.toFixed(2)}</td>
+                        <td className="p-3 text-right text-white">€{campaign.spend.toFixed(2)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
 
       {/* Performance Metrics Table */}
       <div className="bg-[#1A1F2E] border border-[#2D3748] rounded-lg p-6">
