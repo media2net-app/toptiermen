@@ -155,7 +155,7 @@ export default function AdvertisementsPage() {
             dailyBudget: 5,
             createdAt: ad.created_time || new Date().toISOString(),
             lastUpdated: ad.created_time || new Date().toISOString(),
-            videoName: 'Facebook Video'
+            videoName: ad.video_name || 'Facebook Video'
           };
         });
 
