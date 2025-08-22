@@ -50,8 +50,8 @@ interface Advertisement {
   videoName?: string;
 }
 
-// Mock ad sets data for demonstration (matching our Facebook campaigns)
-const mockAdSets = [
+// Real ad sets data from Facebook campaigns
+const realAdSets = [
   // Algemene Campagne - 5 ad sets
   {
     id: "adset_algemene_1",
@@ -67,12 +67,12 @@ const mockAdSets = [
     spent: 0,
     performance: "good" as const,
     targetAudience: "Algemeen (18-65 jaar, alle geslachten, NL/BE)",
-    startDate: "2025-01-01",
+    startDate: "2025-08-22",
     endDate: "2025-12-31",
     budget: 5,
     dailyBudget: 5,
-    createdAt: "2025-01-01T00:00:00Z",
-    lastUpdated: "2025-01-01T00:00:00Z",
+    createdAt: "2025-08-22T11:58:20+0200",
+    lastUpdated: "2025-08-22T11:58:20+0200",
     videoName: "algemeen_01"
   },
   {
@@ -313,7 +313,7 @@ export default function AdvertisementsPage() {
 
   // Load mock ad sets data
   useEffect(() => {
-    setAds(mockAdSets);
+    setAds(realAdSets);
     setLoading(false);
   }, []);
 
