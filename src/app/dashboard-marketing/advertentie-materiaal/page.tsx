@@ -142,6 +142,25 @@ export default function AdvertentieMateriaalPage() {
     return matchesSearch && matchesStatus;
   });
 
+  // Helper function to identify duplicate videos
+  const getDuplicateVideos = (): VideoFile[] => {
+    const duplicates: VideoFile[] = [];
+    const seen = new Set<string>();
+    
+    videos.forEach(video => {
+      const baseName = video.original_name.replace(/\.mov$/, '').replace(/\.mp4$/, '');
+      if (seen.has(baseName)) {
+        duplicates.push(video);
+      } else {
+        seen.add(baseName);
+      }
+    });
+    
+    return duplicates;
+  };
+
+  const duplicateVideos = getDuplicateVideos();
+
   // Handle video deletion
   const handleDeleteVideo = async (videoId: string) => {
     if (!confirm('Weet je zeker dat je deze video wilt verwijderen?')) return;
@@ -280,6 +299,45 @@ export default function AdvertentieMateriaalPage() {
           </div>
         </div>
       </div>
+
+      {/* Duplicate Videos Warning */}
+      {duplicateVideos.length > 0 && (
+        <div className="bg-yellow-900/20 border border-yellow-500 text-yellow-400 px-4 py-3 rounded-lg">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <ExclamationTriangleIcon className="w-5 h-5" />
+              <span className="font-medium">Dubbele Video's Gevonden</span>
+            </div>
+            <span className="text-sm">{duplicateVideos.length} dubbele video's</span>
+          </div>
+          <p className="text-sm mt-2 text-yellow-300">
+            Er zijn {duplicateVideos.length} video's die mogelijk duplicaten zijn. 
+            Controleer deze video's en verwijder de oude versies handmatig.
+          </p>
+          <div className="mt-3 text-xs space-y-1">
+            {duplicateVideos.slice(0, 3).map(video => (
+              <div key={video.id} className="flex items-center justify-between">
+                <span>{video.name}</span>
+                <button
+                  onClick={() => {
+                    if (confirm(`Verwijder "${video.name}"?`)) {
+                      handleDeleteVideo(video.id);
+                    }
+                  }}
+                  className="text-red-400 hover:text-red-300 text-xs"
+                >
+                  Verwijder
+                </button>
+              </div>
+            ))}
+            {duplicateVideos.length > 3 && (
+              <div className="text-yellow-400">
+                +{duplicateVideos.length - 3} meer dubbele video's...
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Videos Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-6">
@@ -528,7 +586,11 @@ export default function AdvertentieMateriaalPage() {
                 </button>
                 
                 <button
-                  onClick={() => handleDeleteVideo(video.id)}
+                  onClick={() => {
+                    if (confirm(`Weet je zeker dat je "${video.name}" wilt verwijderen?\n\nDit kan niet ongedaan worden gemaakt.`)) {
+                      handleDeleteVideo(video.id);
+                    }
+                  }}
                   className="flex items-center justify-center space-x-1 px-2 sm:px-3 py-1 sm:py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all duration-200 hover:scale-105 text-xs font-medium"
                   title="Verwijder"
                 >
