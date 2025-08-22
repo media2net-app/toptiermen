@@ -70,16 +70,30 @@ export async function GET() {
     });
 
     function getVideoForAdName(adName: string): string {
-      if (adName.includes('Zakelijk')) {
-        return 'TTM_Zakelijk_Prelaunch_Reel_01_V2.mov';
-      } else if (adName.includes('Vaders')) {
-        return 'TTM_Vader_Prelaunch_Reel_02_V2.mov';
-      } else if (adName.includes('Jongeren')) {
-        return 'TTM_Jeugd_Prelaunch_Reel_02_V2.mov';
-      } else if (adName.includes('Algemeen')) {
-        return 'TTM_Het_Merk_Prelaunch_Reel_01_V2.mov';
+      if (adName.includes('Zakelijk - Entrepreneurs & Leaders')) {
+        return 'zakelijk_01.mp4';
+      } else if (adName.includes('Zakelijk - Business Professionals')) {
+        return 'zakelijk_02.mp4';
+      } else if (adName.includes('Vaders - Role Model & Success')) {
+        return 'vaders_01.mp4';
+      } else if (adName.includes('Vaders - Family & Leadership')) {
+        return 'vaders_02.mp4';
+      } else if (adName.includes('Jongeren - Social & Community')) {
+        return 'jongeren_01.mp4';
+      } else if (adName.includes('Jongeren - Fitness & Lifestyle')) {
+        return 'jongeren_02.mp4';
+      } else if (adName.includes('Algemeen - Custom Audience')) {
+        return 'algemeen_01.mp4';
+      } else if (adName.includes('Algemeen - Retargeting')) {
+        return 'algemeen_02.mp4';
+      } else if (adName.includes('Algemeen - Lookalike')) {
+        return 'algemeen_03.mp4';
+      } else if (adName.includes('Algemeen - Interest Based')) {
+        return 'algemeen_04.mp4';
+      } else if (adName.includes('Algemeen - Awareness')) {
+        return 'algemeen_05.mp4';
       } else {
-        return 'TTM_Het_Merk_Prelaunch_Reel_01_V2.mov'; // Default
+        return 'algemeen_01.mp4'; // Default
       }
     }
 
