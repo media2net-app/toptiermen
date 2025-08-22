@@ -25,103 +25,6 @@ import {
   CalendarIcon
 } from '@heroicons/react/24/outline';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
-import { useCampaigns } from '@/contexts/CampaignsContext';
-
-// Real campaigns data from Facebook API
-const realCampaigns = [
-  {
-    id: '120232170463890324',
-    name: 'TTM - Algemene Prelaunch Campagne',
-    platform: 'Facebook',
-    status: 'paused' as const,
-    objective: 'traffic' as const,
-    impressions: 0,
-    clicks: 0,
-    conversions: 0,
-    spent: 0,
-    budget: 25,
-    dailyBudget: 25,
-    ctr: 0,
-    cpc: 0,
-    conversionRate: 0,
-    roas: 0,
-    targetAudience: 'Algemeen (18-65 jaar)',
-    startDate: '2025-08-22',
-    endDate: '2025-12-31',
-    adsCount: 0, // Will be populated from API
-    createdAt: '2025-08-22T12:30:00+0200',
-    lastUpdated: '2025-08-22T12:30:00+0200'
-  },
-  {
-    id: '120232170464630324',
-    name: 'TTM - Jongeren Prelaunch Campagne',
-    platform: 'Facebook',
-    status: 'paused' as const,
-    objective: 'traffic' as const,
-    impressions: 0,
-    clicks: 0,
-    conversions: 0,
-    spent: 0,
-    budget: 10,
-    dailyBudget: 10,
-    ctr: 0,
-    cpc: 0,
-    conversionRate: 0,
-    roas: 0,
-    targetAudience: 'Jongeren (18-25 jaar)',
-    startDate: '2025-08-22',
-    endDate: '2025-12-31',
-    adsCount: 0, // Will be populated from API
-    createdAt: '2025-08-22T12:30:00+0200',
-    lastUpdated: '2025-08-22T12:30:00+0200'
-  },
-  {
-    id: '120232170465340324',
-    name: 'TTM - Vaders Prelaunch Campagne',
-    platform: 'Facebook',
-    status: 'paused' as const,
-    objective: 'traffic' as const,
-    impressions: 0,
-    clicks: 0,
-    conversions: 0,
-    spent: 0,
-    budget: 10,
-    dailyBudget: 10,
-    ctr: 0,
-    cpc: 0,
-    conversionRate: 0,
-    roas: 0,
-    targetAudience: 'Vaders (30-55 jaar)',
-    startDate: '2025-08-22',
-    endDate: '2025-12-31',
-    adsCount: 0, // Will be populated from API
-    createdAt: '2025-08-22T12:30:00+0200',
-    lastUpdated: '2025-08-22T12:30:00+0200'
-  },
-  {
-    id: '120232170466830324',
-    name: 'TTM - Zakelijk Prelaunch Campagne',
-    platform: 'Facebook',
-    status: 'paused' as const,
-    objective: 'traffic' as const,
-    impressions: 0,
-    clicks: 0,
-    conversions: 0,
-    spent: 0,
-    budget: 10,
-    dailyBudget: 10,
-    ctr: 0,
-    cpc: 0,
-    conversionRate: 0,
-    roas: 0,
-    targetAudience: 'Zakelijk (28-50 jaar)',
-    startDate: '2025-08-22',
-    endDate: '2025-12-31',
-    adsCount: 0, // Will be populated from API
-    createdAt: '2025-08-22T12:30:00+0200',
-    lastUpdated: '2025-08-22T12:30:00+0200'
-  }
-];
 
 // Types
 interface Campaign {
@@ -144,13 +47,37 @@ interface Campaign {
   startDate: string;
   endDate: string;
   adsCount: number;
+  adSetsCount: number;
   createdAt: string;
   lastUpdated: string;
 }
 
+interface FacebookCampaign {
+  id: string;
+  name: string;
+  status: string;
+  created_time: string;
+}
+
+interface FacebookAdSet {
+  id: string;
+  name: string;
+  campaign_id: string;
+  status: string;
+  created_time: string;
+}
+
+interface FacebookAd {
+  id: string;
+  name: string;
+  adset_id: string;
+  status: string;
+  created_time: string;
+}
+
 export default function CampaignsPage() {
-  const [campaigns, setCampaigns] = useState<Campaign[]>(realCampaigns);
-  const [loading, setLoading] = useState(false);
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterPlatform, setFilterPlatform] = useState('all');
@@ -158,6 +85,79 @@ export default function CampaignsPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showCampaignModal, setShowCampaignModal] = useState(false);
   const [viewMode, setViewMode] = useState<'table' | 'cards' | 'calendar'>('table');
+
+  // Load Facebook data on component mount
+  useEffect(() => {
+    loadFacebookData();
+  }, []);
+
+  const loadFacebookData = async () => {
+    setLoading(true);
+    try {
+      // Load campaigns, ad sets, and ads in parallel
+      const [campaignsRes, adSetsRes, adsRes] = await Promise.all([
+        fetch('/api/facebook/get-campaigns'),
+        fetch('/api/facebook/get-adsets'),
+        fetch('/api/facebook/get-ads')
+      ]);
+
+      const campaignsData = await campaignsRes.json();
+      const adSetsData = await adSetsRes.json();
+      const adsData = await adsRes.json();
+
+      if (campaignsData.success && adSetsData.success && adsData.success) {
+        const facebookCampaigns: FacebookCampaign[] = campaignsData.data;
+        const facebookAdSets: FacebookAdSet[] = adSetsData.data;
+        const facebookAds: FacebookAd[] = adsData.data;
+
+        // Transform Facebook data to our Campaign format
+        const transformedCampaigns: Campaign[] = facebookCampaigns.map(campaign => {
+          // Count ad sets for this campaign
+          const campaignAdSets = facebookAdSets.filter(adSet => adSet.campaign_id === campaign.id);
+          const adSetsCount = campaignAdSets.length;
+
+          // Count ads for this campaign (ads belong to ad sets)
+          const campaignAds = facebookAds.filter(ad => 
+            campaignAdSets.some(adSet => adSet.id === ad.adset_id)
+          );
+          const adsCount = campaignAds.length;
+
+          return {
+            id: campaign.id,
+            name: campaign.name,
+            platform: 'Facebook',
+            status: campaign.status.toLowerCase() as 'active' | 'paused' | 'completed' | 'draft' | 'scheduled',
+            objective: 'traffic' as const, // Default for now
+            impressions: 0,
+            clicks: 0,
+            conversions: 0,
+            spent: 0,
+            budget: 25, // Default budget
+            dailyBudget: 25,
+            ctr: 0,
+            cpc: 0,
+            conversionRate: 0,
+            roas: 0,
+            targetAudience: 'Facebook Targeting',
+            startDate: new Date(campaign.created_time).toISOString().split('T')[0],
+            endDate: '2025-12-31',
+            adsCount: adsCount,
+            adSetsCount: adSetsCount,
+            createdAt: campaign.created_time,
+            lastUpdated: campaign.created_time
+          };
+        });
+
+        setCampaigns(transformedCampaigns);
+      } else {
+        console.error('Failed to load Facebook data:', { campaignsData, adSetsData, adsData });
+      }
+    } catch (error) {
+      console.error('Error loading Facebook data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleCampaignClick = (campaign: Campaign) => {
     setSelectedCampaign(campaign);
@@ -228,26 +228,11 @@ export default function CampaignsPage() {
         </div>
         <div className="flex items-center space-x-3">
           <button 
-            onClick={async () => {
-              setLoading(true);
-              try {
-                const response = await fetch('/api/facebook/get-campaigns');
-                const result = await response.json();
-                if (result.success) {
-                  setCampaigns(result.data);
-                } else {
-                  console.error('Failed to load Facebook campaigns:', result.error);
-                }
-              } catch (error) {
-                console.error('Error loading Facebook campaigns:', error);
-              } finally {
-                setLoading(false);
-              }
-            }}
+            onClick={loadFacebookData}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
           >
             <ChartBarIcon className="w-5 h-5" />
-            <span>Laad Facebook Campagnes</span>
+            <span>Ververs Facebook Data</span>
           </button>
           <button 
             onClick={() => setShowCreateModal(true)}
@@ -260,24 +245,23 @@ export default function CampaignsPage() {
       </div>
 
       {/* Info Banner */}
-      <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mb-6">
+      <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-4 mb-6">
         <div className="flex items-start space-x-3">
-          <ExclamationTriangleIcon className="w-6 h-6 text-blue-400 mt-0.5" />
+          <CheckCircleIcon className="w-6 h-6 text-green-400 mt-0.5" />
           <div>
-            <h3 className="text-blue-400 font-semibold mb-1">Facebook Campagnes</h3>
-            <p className="text-blue-200 text-sm mb-2">
-              Momenteel worden demo campagnes getoond. Klik op "Laad Facebook Campagnes" om echte campagnes van Facebook op te halen, 
-              of ga naar "Advertentie Materiaal" om nieuwe campagnes aan te maken.
+            <h3 className="text-green-400 font-semibold mb-1">Live Facebook Data</h3>
+            <p className="text-green-200 text-sm mb-2">
+              De campagnes worden nu live geladen van Facebook. Elke campagne toont het aantal gekoppelde advertentie sets en advertenties.
             </p>
-            <div className="flex items-center space-x-4 text-xs text-blue-300">
-              <span>📊 Demo: 4 campagnes (Algemeen + Jongeren + Vaders + Zakelijk)</span>
-              <span>💰 Budget: €55/dag totaal</span>
-              <span>🎯 Doel: TRAFFIC naar prelaunch</span>
+            <div className="flex items-center space-x-4 text-xs text-green-300">
+              <span>📊 Live: {campaigns.length} campagnes van Facebook</span>
+              <span>🔗 Ad Sets: {campaigns.reduce((sum, c) => sum + c.adSetsCount, 0)} totaal</span>
+              <span>📱 Ads: {campaigns.reduce((sum, c) => sum + c.adsCount, 0)} totaal</span>
               <a 
-                href="/dashboard-marketing/advertentie-materiaal" 
-                className="text-blue-400 hover:text-blue-300 underline"
+                href="/dashboard-marketing/advertenties" 
+                className="text-green-400 hover:text-green-300 underline"
               >
-                → Ga naar Advertentie Materiaal
+                → Bekijk Advertenties
               </a>
             </div>
           </div>
@@ -393,10 +377,10 @@ export default function CampaignsPage() {
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-400 text-sm">Actieve Campagnes</p>
-              <p className="text-2xl font-bold text-white">{campaigns.filter(c => c.status === 'active').length}</p>
+              <p className="text-gray-400 text-sm">Ad Sets</p>
+              <p className="text-2xl font-bold text-white">{campaigns.reduce((sum, c) => sum + c.adSetsCount, 0)}</p>
             </div>
-            <PlayIcon className="w-8 h-8 text-green-400" />
+            <UserGroupIcon className="w-8 h-8 text-blue-400" />
           </div>
         </motion.div>
         
@@ -409,12 +393,10 @@ export default function CampaignsPage() {
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-400 text-sm">Totaal Uitgegeven</p>
-              <p className="text-2xl font-bold text-white">
-                €{campaigns.reduce((sum, c) => sum + c.spent, 0).toLocaleString()}
-              </p>
+              <p className="text-gray-400 text-sm">Advertenties</p>
+              <p className="text-2xl font-bold text-white">{campaigns.reduce((sum, c) => sum + c.adsCount, 0)}</p>
             </div>
-            <CurrencyDollarIcon className="w-8 h-8 text-[#8BAE5A]" />
+            <StarIcon className="w-8 h-8 text-[#8BAE5A]" />
           </div>
         </motion.div>
         
@@ -425,15 +407,13 @@ export default function CampaignsPage() {
           whileHover={{ scale: 1.02 }}
           className="bg-[#1A1F2E] border border-[#2D3748] rounded-lg p-4"
         >
-                      <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-400 text-sm">Totaal Conversies</p>
-                <p className="text-2xl font-bold text-white">
-                  {campaigns.reduce((sum, c) => sum + c.conversions, 0).toLocaleString()}
-                </p>
-              </div>
-              <UserGroupIcon className="w-8 h-8 text-[#8BAE5A]" />
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-400 text-sm">Actieve Campagnes</p>
+              <p className="text-2xl font-bold text-white">{campaigns.filter(c => c.status === 'active').length}</p>
             </div>
+            <PlayIcon className="w-8 h-8 text-green-400" />
+          </div>
         </motion.div>
       </div>
 
@@ -462,16 +442,16 @@ export default function CampaignsPage() {
                 </p>
               </div>
               <div>
+                <p className="text-gray-400 text-sm">Ad Sets</p>
+                <p className="text-white font-medium">{campaign.adSetsCount}</p>
+              </div>
+              <div>
                 <p className="text-gray-400 text-sm">Advertenties</p>
                 <p className="text-white font-medium">{campaign.adsCount}</p>
               </div>
               <div>
                 <p className="text-gray-400 text-sm">Budget</p>
                 <p className="text-white font-medium">€{campaign.budget.toLocaleString()}</p>
-              </div>
-              <div>
-                <p className="text-gray-400 text-sm">Uitgegeven</p>
-                <p className="text-white font-medium">€{campaign.spent.toLocaleString()}</p>
               </div>
             </div>
 
@@ -499,7 +479,10 @@ export default function CampaignsPage() {
                 {campaign.startDate} - {campaign.endDate}
               </div>
               <div className="flex items-center space-x-2">
-                <button className="text-[#8BAE5A] hover:text-[#9BBE6A]">
+                <button 
+                  onClick={() => handleCampaignClick(campaign)}
+                  className="text-[#8BAE5A] hover:text-[#9BBE6A]"
+                >
                   <EyeIcon className="w-4 h-4" />
                 </button>
                 <button className="text-blue-400 hover:text-blue-300">
