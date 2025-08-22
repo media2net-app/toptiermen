@@ -407,7 +407,7 @@ export default function MarketingDashboard() {
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center space-x-2">
                 <UserIcon className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
-                <span className="text-white font-medium text-sm sm:text-base">Test Mode</span>
+                <span className="text-white font-medium text-sm sm:text-base">Live Mode</span>
               </div>
               {user && (
                 <button
@@ -420,7 +420,7 @@ export default function MarketingDashboard() {
             </div>
             <p className="text-gray-300 text-xs sm:text-sm">{user ? user.email : 'Geen authenticatie vereist'}</p>
             <p className="text-gray-400 text-xs">
-              {user ? `Gebruiker ID: ${user.id}` : 'Facebook integratie test'}
+              {user ? `Gebruiker ID: ${user.id}` : 'Facebook integratie live'}
             </p>
           </div>
         </div>

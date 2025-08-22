@@ -27,10 +27,10 @@ import {
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 import { useCampaigns } from '@/contexts/CampaignsContext';
 
-// Mock campaigns data for demonstration (since we haven't created real campaigns yet)
-const mockCampaigns = [
+// Real campaigns data from Facebook API
+const realCampaigns = [
   {
-    id: 'campaign_algemene',
+    id: '120232169752900324',
     name: 'TTM - Algemene Prelaunch Campagne',
     platform: 'Facebook',
     status: 'paused' as const,
@@ -46,14 +46,14 @@ const mockCampaigns = [
     conversionRate: 0,
     roas: 0,
     targetAudience: 'Algemeen (18-65 jaar)',
-    startDate: '2025-01-01',
+    startDate: '2025-08-22',
     endDate: '2025-12-31',
-    adsCount: 5,
-    createdAt: '2025-01-01T00:00:00Z',
-    lastUpdated: '2025-01-01T00:00:00Z'
+    adsCount: 0, // Will be populated from API
+    createdAt: '2025-08-22T11:58:20+0200',
+    lastUpdated: '2025-08-22T11:58:20+0200'
   },
   {
-    id: 'campaign_jongeren',
+    id: '120232169753840324',
     name: 'TTM - Jongeren Prelaunch Campagne',
     platform: 'Facebook',
     status: 'paused' as const,
@@ -69,14 +69,14 @@ const mockCampaigns = [
     conversionRate: 0,
     roas: 0,
     targetAudience: 'Jongeren (18-25 jaar)',
-    startDate: '2025-01-01',
+    startDate: '2025-08-22',
     endDate: '2025-12-31',
-    adsCount: 2,
-    createdAt: '2025-01-01T00:00:00Z',
-    lastUpdated: '2025-01-01T00:00:00Z'
+    adsCount: 0, // Will be populated from API
+    createdAt: '2025-08-22T11:58:23+0200',
+    lastUpdated: '2025-08-22T11:58:23+0200'
   },
   {
-    id: 'campaign_vaders',
+    id: '120232169755100324',
     name: 'TTM - Vaders Prelaunch Campagne',
     platform: 'Facebook',
     status: 'paused' as const,
@@ -92,14 +92,14 @@ const mockCampaigns = [
     conversionRate: 0,
     roas: 0,
     targetAudience: 'Vaders (30-55 jaar)',
-    startDate: '2025-01-01',
+    startDate: '2025-08-22',
     endDate: '2025-12-31',
-    adsCount: 2,
-    createdAt: '2025-01-01T00:00:00Z',
-    lastUpdated: '2025-01-01T00:00:00Z'
+    adsCount: 0, // Will be populated from API
+    createdAt: '2025-08-22T11:58:26+0200',
+    lastUpdated: '2025-08-22T11:58:26+0200'
   },
   {
-    id: 'campaign_zakelijk',
+    id: '120232169757400324',
     name: 'TTM - Zakelijk Prelaunch Campagne',
     platform: 'Facebook',
     status: 'paused' as const,
@@ -115,11 +115,11 @@ const mockCampaigns = [
     conversionRate: 0,
     roas: 0,
     targetAudience: 'Zakelijk (28-50 jaar)',
-    startDate: '2025-01-01',
+    startDate: '2025-08-22',
     endDate: '2025-12-31',
-    adsCount: 2,
-    createdAt: '2025-01-01T00:00:00Z',
-    lastUpdated: '2025-01-01T00:00:00Z'
+    adsCount: 0, // Will be populated from API
+    createdAt: '2025-08-22T11:58:28+0200',
+    lastUpdated: '2025-08-22T11:58:28+0200'
   }
 ];
 
@@ -149,7 +149,7 @@ interface Campaign {
 }
 
 export default function CampaignsPage() {
-  const [campaigns, setCampaigns] = useState<Campaign[]>(mockCampaigns);
+  const [campaigns, setCampaigns] = useState<Campaign[]>(realCampaigns);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
