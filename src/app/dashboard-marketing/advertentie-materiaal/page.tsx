@@ -288,6 +288,15 @@ export default function AdvertentieMateriaalPage() {
           >
             {/* Video Preview */}
             <div className="relative bg-gray-900" style={{ aspectRatio: '9/16' }}>
+              {/* Updated Label for new videos */}
+              {video.original_name && ['lv_0_20250821161841.mp4', 'lv_0_20250821162618.mp4', 'lv_0_20250821163117.mp4'].includes(video.original_name) && (
+                <div className="absolute top-2 left-2 z-20">
+                  <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg border border-white/20 backdrop-blur-sm">
+                    🆕 UPDATED
+                  </div>
+                </div>
+              )}
+              
               {/* Thumbnail Preview (shown when video is not playing) */}
               {videoThumbnails[video.id] && (
                 <div 
@@ -328,6 +337,15 @@ export default function AdvertentieMateriaalPage() {
                     }
                   }}
                 >
+                  {/* Updated Label for new videos (fallback) */}
+                  {video.original_name && ['lv_0_20250821161841.mp4', 'lv_0_20250821162618.mp4', 'lv_0_20250821163117.mp4'].includes(video.original_name) && (
+                    <div className="absolute top-2 left-2 z-20">
+                      <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg border border-white/20 backdrop-blur-sm">
+                        🆕 UPDATED
+                      </div>
+                    </div>
+                  )}
+                  
                   <div className="text-center">
                     <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-full p-4 mx-auto mb-3 w-16 h-16 flex items-center justify-center">
                       <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
