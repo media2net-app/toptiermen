@@ -355,7 +355,7 @@
   /* Reduce padding and margins for mobile */
   .prelaunch-hero,
   .prelaunch-section {
-    padding: 40px 16px !important;
+    padding: 60px 20px !important;
   }
   
   /* Header mobile optimization */
@@ -390,15 +390,15 @@
   
   .prelaunch-story-box p {
     font-size: 16px;
-    line-height: 1.4;
-    margin-bottom: 16px;
+    line-height: 1.5;
+    margin-bottom: 24px;
     text-align: center !important;
   }
   
   .prelaunch-section p {
     font-size: 16px;
-    line-height: 1.4;
-    margin-bottom: 16px;
+    line-height: 1.5;
+    margin-bottom: 24px;
     text-align: center !important;
   }
   
@@ -427,11 +427,13 @@
   /* Button mobile optimization - CENTER BUTTONS */
   .prelaunch-btn-primary {
     font-size: 16px;
-    padding: 12px 24px;
-    width: 100%;
-    max-width: 300px;
+    padding: 14px 28px;
+    width: auto !important;
+    min-width: 200px;
+    max-width: 280px;
     margin: 0 auto !important;
-    display: block !important;
+    display: inline-block !important;
+    text-align: center !important;
   }
   
   /* Form mobile optimization - CENTER FORM */
@@ -443,10 +445,10 @@
   
   /* Badge mobile optimization - CENTER BADGES */
   .prelaunch-badge {
-    font-size: 12px;
-    padding: 6px 12px;
-    margin: 0 auto !important;
-    display: block !important;
+    font-size: 13px;
+    padding: 8px 16px;
+    margin: 0 auto 20px auto !important;
+    display: inline-block !important;
   }
   
   /* Center inline-flex elements */
@@ -554,7 +556,7 @@
   /* Further reduce spacing for small mobile */
   .prelaunch-hero,
   .prelaunch-section {
-    padding: 24px 12px !important;
+    padding: 40px 16px !important;
   }
   
   header .w-full {
@@ -583,16 +585,16 @@
   }
   
   .prelaunch-story-box p {
-    font-size: 14px;
-    line-height: 1.3;
-    margin-bottom: 12px;
+    font-size: 15px;
+    line-height: 1.4;
+    margin-bottom: 20px;
     text-align: center !important;
   }
   
   .prelaunch-section p {
-    font-size: 14px;
-    line-height: 1.3;
-    margin-bottom: 12px;
+    font-size: 15px;
+    line-height: 1.4;
+    margin-bottom: 20px;
     text-align: center !important;
   }
   
@@ -619,10 +621,14 @@
   
   /* Button small mobile optimization - CENTER BUTTONS */
   .prelaunch-btn-primary {
-    font-size: 14px;
-    padding: 10px 20px;
+    font-size: 15px;
+    padding: 12px 24px;
+    width: auto !important;
+    min-width: 180px;
+    max-width: 260px;
     margin: 0 auto !important;
-    display: block !important;
+    display: inline-block !important;
+    text-align: center !important;
   }
   
   /* Form small mobile optimization - CENTER FORM */
@@ -634,10 +640,10 @@
   
   /* Badge small mobile optimization - CENTER BADGES */
   .prelaunch-badge {
-    font-size: 11px;
-    padding: 4px 8px;
-    margin: 0 auto !important;
-    display: block !important;
+    font-size: 12px;
+    padding: 6px 12px;
+    margin: 0 auto 16px auto !important;
+    display: inline-block !important;
   }
   
   /* Center inline-flex elements */
