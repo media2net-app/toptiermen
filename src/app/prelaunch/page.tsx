@@ -16,6 +16,7 @@ import {
   ClockIcon,
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
+import { trackEmailSignup } from '@/lib/facebook-pixel';
 
 // Facebook SDK TypeScript declarations
 declare global {
@@ -87,6 +88,8 @@ export default function PreLaunchPage() {
 
       if (result.success) {
         setIsSubmitted(true);
+        // Track email signup with Facebook Pixel
+        trackEmailSignup();
       } else if (result.alreadyExists) {
         setAlreadyExists(true);
         setError(result.message);
