@@ -3,6 +3,7 @@ import { Figtree } from 'next/font/google';
 import { Toaster } from 'react-hot-toast';
 import Providers from './components/Providers';
 import GoogleAnalytics from './components/GoogleAnalytics';
+import MetaPixel from './components/MetaPixel';
 
 const figtree = Figtree({
   subsets: ['latin'],
@@ -90,6 +91,7 @@ export default function RootLayout({
     <html lang="en" className={figtree.className}>
       <head>
         <GoogleAnalytics />
+        <MetaPixel />
       </head>
       <body>
         <Providers>
