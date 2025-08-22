@@ -378,7 +378,7 @@ export default function AdvertentieMateriaalPage() {
             {/* Video Preview */}
             <div className="relative bg-gray-900" style={{ aspectRatio: '9/16' }}>
               {/* Updated Label for new videos */}
-              {video.original_name && ['lv_0_20250821161841.mp4', 'lv_0_20250821162618.mp4', 'lv_0_20250821163117.mp4'].includes(video.original_name) && (
+              {video.name && video.name.includes('(Updated)') && (
                 <div className="absolute top-2 left-2 z-20">
                   <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg border border-white/20 backdrop-blur-sm">
                     🆕 UPDATED
