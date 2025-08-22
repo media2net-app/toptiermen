@@ -113,19 +113,35 @@ export default function AdvertisementsPage() {
         const campaignMap = new Map(facebookCampaigns.map(c => [c.id, c]));
         const adSetMap = new Map(facebookAdSets.map(ads => [ads.id, ads]));
 
-        // Transform Facebook ads to our Advertisement format
+        // Transform Facebook data to our Advertisement format
         const transformedAds: Advertisement[] = facebookAds.map(ad => {
-          const adSet = adSetMap.get(ad.adset_id);
-          const campaign = adSet ? campaignMap.get(adSet.campaign_id) : null;
+          // Find campaign for this ad
+          const campaign = facebookCampaigns.find(c => c.id === ad.campaign_id) || { name: 'Unknown Campaign' };
+          
+          // Find ad set for this ad
+          const adSet = facebookAdSets.find(ads => ads.id === ad.adset_id) || { name: 'Unknown Ad Set' };
+
+          // Safe date parsing
+          let startDate = '2025-01-01'; // Default date
+          try {
+            if (ad.created_time) {
+              const date = new Date(ad.created_time);
+              if (!isNaN(date.getTime())) {
+                startDate = date.toISOString().split('T')[0];
+              }
+            }
+          } catch (error) {
+            console.warn('Invalid date for ad:', ad.name, ad.created_time);
+          }
 
           return {
             id: ad.id,
             name: ad.name,
-            campaign: campaign?.name || 'Onbekende Campagne',
-            adSet: adSet?.name || 'Onbekende Ad Set',
+            campaign: campaign.name,
+            adSet: adSet.name,
             platform: 'Facebook',
             status: ad.status.toLowerCase() as 'active' | 'paused' | 'rejected' | 'draft' | 'pending_review',
-            type: 'video' as const, // Default for now
+            type: ad.creative_type || 'Video',
             impressions: 0,
             clicks: 0,
             ctr: 0,
@@ -133,12 +149,12 @@ export default function AdvertisementsPage() {
             spent: 0,
             performance: 'good' as const,
             targetAudience: 'Facebook Targeting',
-            startDate: new Date(ad.created_time).toISOString().split('T')[0],
+            startDate: startDate,
             endDate: '2025-12-31',
             budget: 5, // Default budget
             dailyBudget: 5,
-            createdAt: ad.created_time,
-            lastUpdated: ad.created_time,
+            createdAt: ad.created_time || new Date().toISOString(),
+            lastUpdated: ad.created_time || new Date().toISOString(),
             videoName: 'Facebook Video'
           };
         });

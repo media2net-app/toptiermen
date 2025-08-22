@@ -137,6 +137,19 @@ export default function CampaignsPage() {
           );
           const adsCount = campaignAds.length;
 
+          // Safe date parsing
+          let startDate = '2025-01-01'; // Default date
+          try {
+            if (campaign.created_time) {
+              const date = new Date(campaign.created_time);
+              if (!isNaN(date.getTime())) {
+                startDate = date.toISOString().split('T')[0];
+              }
+            }
+          } catch (error) {
+            console.warn('Invalid date for campaign:', campaign.name, campaign.created_time);
+          }
+
           return {
             id: campaign.id,
             name: campaign.name,
@@ -154,12 +167,12 @@ export default function CampaignsPage() {
             conversionRate: 0,
             roas: 0,
             targetAudience: 'Facebook Targeting',
-            startDate: new Date(campaign.created_time).toISOString().split('T')[0],
+            startDate: startDate,
             endDate: '2025-12-31',
             adsCount: adsCount,
             adSetsCount: adSetsCount,
-            createdAt: campaign.created_time,
-            lastUpdated: campaign.created_time
+            createdAt: campaign.created_time || new Date().toISOString(),
+            lastUpdated: campaign.created_time || new Date().toISOString()
           };
         });
 
