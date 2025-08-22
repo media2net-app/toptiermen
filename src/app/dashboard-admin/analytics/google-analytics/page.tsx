@@ -17,9 +17,18 @@ interface GoogleAnalyticsData {
   lastUpdated: string;
 }
 
+interface GoogleAnalyticsResponse {
+  success: boolean;
+  data: GoogleAnalyticsData;
+  timestamp: string;
+  range: string;
+  source: string;
+}
+
 export default function GoogleAnalyticsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [analyticsData, setAnalyticsData] = useState<GoogleAnalyticsData | null>(null);
+  const [dataSource, setDataSource] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -34,10 +43,11 @@ export default function GoogleAnalyticsPage() {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         
-        const data = await response.json();
+        const data: GoogleAnalyticsResponse = await response.json();
         
         if (data.success) {
           setAnalyticsData(data.data);
+          setDataSource(data.source);
         } else {
           throw new Error(data.error || 'Failed to fetch Google Analytics data');
         }
@@ -106,11 +116,22 @@ export default function GoogleAnalyticsPage() {
           <ChartBarIcon className="w-8 h-8 text-[#B6C948]" />
           <h1 className="text-3xl font-bold text-white">Google Analytics</h1>
         </div>
-        {analyticsData && (
-          <div className="text-[#8BAE5A] text-sm">
-            Laatste update: {analyticsData.lastUpdated}
-          </div>
-        )}
+        <div className="flex items-center gap-4">
+          {analyticsData && (
+            <div className="text-[#8BAE5A] text-sm">
+              Laatste update: {analyticsData.lastUpdated}
+            </div>
+          )}
+          {dataSource && (
+            <div className={`text-xs px-2 py-1 rounded ${
+              dataSource.includes('API') 
+                ? 'bg-green-900 text-green-300' 
+                : 'bg-yellow-900 text-yellow-300'
+            }`}>
+              {dataSource}
+            </div>
+          )}
+        </div>
       </div>
       
       <div className="bg-[#232D1A] p-6 rounded-lg border border-[#3A4D23]">
