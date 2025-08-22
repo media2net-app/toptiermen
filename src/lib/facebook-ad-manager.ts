@@ -38,27 +38,21 @@ interface FacebookAdSet {
   status: 'ACTIVE' | 'PAUSED' | 'DELETED' | 'ARCHIVED';
   daily_budget?: number;
   lifetime_budget?: number;
-  budget_remaining?: number;
   billing_event: string;
   optimization_goal: string;
   targeting: {
-    age_min?: number;
-    age_max?: number;
-    genders?: string[];
-    geo_locations?: Array<{
-      country: string;
-      regions?: string[];
-      cities?: string[];
-    }>;
-    interests?: string[];
-    behaviors?: string[];
-    custom_audiences?: string[];
-    lookalike_audiences?: string[];
+    age_min: number;
+    age_max: number;
+    genders: string[];
+    geo_locations: {
+      countries: string[];
+      cities?: Array<{ key: string; name: string; region: string; country: string }>;
+    };
+    interests?: Array<{ id: string; name: string }>;
+    behaviors?: Array<{ id: string; name: string }>;
   };
   created_time: string;
   updated_time: string;
-  start_time: string;
-  end_time?: string;
   insights?: {
     impressions: number;
     clicks: number;
@@ -114,81 +108,59 @@ interface FacebookAdAccount {
   account_status: number;
   currency: string;
   timezone_name: string;
-  business: {
-    id: string;
-    name: string;
+  business_name?: string;
+  business_id?: string;
+}
+
+interface CreateCampaignData {
+  name: string;
+  objective: 'AWARENESS' | 'CONSIDERATION' | 'CONVERSIONS' | 'ENGAGEMENT' | 'LEADS' | 'SALES' | 'TRAFFIC';
+  status: 'ACTIVE' | 'PAUSED';
+  daily_budget?: number;
+  lifetime_budget?: number;
+  special_ad_categories?: string[];
+  targeting: {
+    age_min: number;
+    age_max: number;
+    genders: string[];
+    locations: string[];
+    interests?: string[];
+    behaviors?: string[];
   };
-  insights?: {
-    impressions: number;
-    clicks: number;
-    spend: number;
-    reach: number;
-    frequency: number;
-    ctr: number;
-    cpc: number;
-    cpm: number;
-  };
+  video_url?: string;
+  video_name?: string;
 }
 
 class FacebookAdManagerAPI {
   private accessToken: string;
   private adAccountId: string;
-  private appSecret?: string;
-  private baseUrl = 'https://graph.facebook.com/v18.0';
+  private baseUrl: string = 'https://graph.facebook.com/v18.0';
 
-  constructor(accessToken: string, adAccountId: string, appSecret?: string) {
+  constructor(accessToken: string, adAccountId: string) {
     this.accessToken = accessToken;
     this.adAccountId = adAccountId;
-    this.appSecret = appSecret;
   }
 
   /**
-   * Genereer een server-side access token met App Secret
-   */
-  private async getServerSideToken(): Promise<string> {
-    if (!this.appSecret) {
-      return this.accessToken; // Fallback naar user access token
-    }
-
-    try {
-      // Exchange user access token voor server-side token
-      const response = await fetch(
-        `${this.baseUrl}/oauth/access_token?grant_type=fb_exchange_token&client_id=${process.env.NEXT_PUBLIC_FACEBOOK_APP_ID}&client_secret=${this.appSecret}&fb_exchange_token=${this.accessToken}`
-      );
-
-      if (!response.ok) {
-        console.warn('Failed to exchange token, using original access token');
-        return this.accessToken;
-      }
-
-      const data = await response.json();
-      return data.access_token || this.accessToken;
-    } catch (error) {
-      console.warn('Token exchange failed, using original access token:', error);
-      return this.accessToken;
-    }
-  }
-
-  /**
-   * Test de API connectie
+   * Test de verbinding met Facebook API
    */
   async testConnection(): Promise<boolean> {
     try {
-      const serverToken = await this.getServerSideToken();
-      const response = await fetch(
-        `${this.baseUrl}/${this.adAccountId}?fields=id,name,account_status&access_token=${serverToken}`
-      );
-      
-      if (!response.ok) {
-        throw new Error(`Facebook API error: ${response.status} ${response.statusText}`);
-      }
-
+      const response = await fetch(`${this.baseUrl}/me?access_token=${this.accessToken}`);
       const data = await response.json();
-      return data.account_status === 1; // 1 = Active account
+      return !data.error;
     } catch (error) {
-      console.error('Facebook Ad Manager connection test failed:', error);
+      console.error('Facebook API connection test failed:', error);
       return false;
     }
+  }
+
+  /**
+   * Haal server-side token op (voor betere beveiliging)
+   */
+  private async getServerSideToken(): Promise<string> {
+    // Voor nu gebruiken we de client token, maar in productie zou je server-side token exchange doen
+    return this.accessToken;
   }
 
   /**
@@ -197,7 +169,7 @@ class FacebookAdManagerAPI {
   async getAdAccount(): Promise<FacebookAdAccount> {
     const serverToken = await this.getServerSideToken();
     const response = await fetch(
-      `${this.baseUrl}/${this.adAccountId}?fields=id,name,account_status,currency,timezone_name,business{id,name}&access_token=${serverToken}`
+      `${this.baseUrl}/${this.adAccountId}?fields=id,name,account_status,currency,timezone_name,business_name,business_id&access_token=${serverToken}`
     );
 
     if (!response.ok) {
@@ -231,50 +203,9 @@ class FacebookAdManagerAPI {
     dateRange: { start: string; end: string },
     limit: number = 100
   ): Promise<FacebookCampaign[]> {
-    const campaigns = await this.getCampaigns(limit);
-    const campaignsWithInsights: FacebookCampaign[] = [];
-
-    for (const campaign of campaigns) {
-      try {
-        const insights = await this.getCampaignInsights(campaign.id, dateRange);
-        campaignsWithInsights.push({
-          ...campaign,
-          insights
-        });
-      } catch (error) {
-        console.error(`Error fetching insights for campaign ${campaign.id}:`, error);
-        campaignsWithInsights.push(campaign);
-      }
-    }
-
-    return campaignsWithInsights;
-  }
-
-  /**
-   * Haal campaign insights op
-   */
-  async getCampaignInsights(
-    campaignId: string,
-    dateRange: { start: string; end: string }
-  ): Promise<any> {
+    const serverToken = await this.getServerSideToken();
     const response = await fetch(
-      `${this.baseUrl}/${campaignId}/insights?fields=impressions,clicks,spend,reach,frequency,ctr,cpc,cpm,actions&time_range={"since":"${dateRange.start}","until":"${dateRange.end}"}&access_token=${this.accessToken}`
-    );
-
-    if (!response.ok) {
-      throw new Error(`Facebook API error: ${response.status} ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    return data.data?.[0] || {};
-  }
-
-  /**
-   * Haal ad sets op voor een campagne
-   */
-  async getAdSets(campaignId: string, limit: number = 100): Promise<FacebookAdSet[]> {
-    const response = await fetch(
-      `${this.baseUrl}/${campaignId}/adsets?fields=id,name,status,daily_budget,lifetime_budget,budget_remaining,billing_event,optimization_goal,targeting,created_time,updated_time,start_time,end_time&limit=${limit}&access_token=${this.accessToken}`
+      `${this.baseUrl}/${this.adAccountId}/campaigns?fields=id,name,status,objective,special_ad_categories,created_time,updated_time,start_time,stop_time,daily_budget,lifetime_budget,budget_remaining,spend_cap,insights{impressions,clicks,spend,reach,frequency,ctr,cpc,cpm,actions}&limit=${limit}&access_token=${serverToken}`
     );
 
     if (!response.ok) {
@@ -283,193 +214,211 @@ class FacebookAdManagerAPI {
 
     const data = await response.json();
     return data.data || [];
-  }
-
-  /**
-   * Haal ads op voor een ad set
-   */
-  async getAds(adSetId: string, limit: number = 100): Promise<FacebookAd[]> {
-    const response = await fetch(
-      `${this.baseUrl}/${adSetId}/ads?fields=id,name,status,creative{id,title,body,image_url,video_id,link_url,call_to_action_type},created_time,updated_time&limit=${limit}&access_token=${this.accessToken}`
-    );
-
-    if (!response.ok) {
-      throw new Error(`Facebook API error: ${response.status} ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    return data.data || [];
-  }
-
-  /**
-   * Haal ad insights op
-   */
-  async getAdInsights(
-    adId: string,
-    dateRange: { start: string; end: string }
-  ): Promise<any> {
-    const response = await fetch(
-      `${this.baseUrl}/${adId}/insights?fields=impressions,clicks,spend,reach,frequency,ctr,cpc,cpm,actions&time_range={"since":"${dateRange.start}","until":"${dateRange.end}"}&access_token=${this.accessToken}`
-    );
-
-    if (!response.ok) {
-      throw new Error(`Facebook API error: ${response.status} ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    return data.data?.[0] || {};
-  }
-
-  /**
-   * Haal account insights op
-   */
-  async getAccountInsights(dateRange: { start: string; end: string }): Promise<any> {
-    const response = await fetch(
-      `${this.baseUrl}/${this.adAccountId}/insights?fields=impressions,clicks,spend,reach,frequency,ctr,cpc,cpm,actions&time_range={"since":"${dateRange.start}","until":"${dateRange.end}"}&access_token=${this.accessToken}`
-    );
-
-    if (!response.ok) {
-      throw new Error(`Facebook API error: ${response.status} ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    return data.data?.[0] || {};
   }
 
   /**
    * Maak een nieuwe campagne aan
    */
-  async createCampaign(campaignData: {
-    name: string;
-    objective: string;
-    status: string;
-    special_ad_categories?: string[];
-    daily_budget?: number;
-    lifetime_budget?: number;
-  }): Promise<FacebookCampaign> {
-    const response = await fetch(
-      `${this.baseUrl}/${this.adAccountId}/campaigns?access_token=${this.accessToken}`,
+  async createCampaign(campaignData: CreateCampaignData): Promise<FacebookCampaign> {
+    const serverToken = await this.getServerSideToken();
+    
+    // 1. Maak de campagne aan
+    const campaignPayload = {
+      name: campaignData.name,
+      objective: campaignData.objective,
+      status: campaignData.status,
+      special_ad_categories: campaignData.special_ad_categories || [],
+      ...(campaignData.daily_budget && { daily_budget: campaignData.daily_budget * 100 }), // Convert to cents
+      ...(campaignData.lifetime_budget && { lifetime_budget: campaignData.lifetime_budget * 100 })
+    };
+
+    const campaignResponse = await fetch(
+      `${this.baseUrl}/${this.adAccountId}/campaigns?access_token=${serverToken}`,
       {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(campaignData),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(campaignPayload)
       }
     );
 
-    if (!response.ok) {
-      throw new Error(`Facebook API error: ${response.status} ${response.statusText}`);
+    if (!campaignResponse.ok) {
+      const errorData = await campaignResponse.json();
+      throw new Error(`Campaign creation failed: ${JSON.stringify(errorData)}`);
     }
 
-    return response.json();
+    const campaign = await campaignResponse.json();
+
+    // 2. Upload video als die er is
+    let videoId: string | undefined;
+    if (campaignData.video_url) {
+      videoId = await this.uploadVideo(campaignData.video_url, campaignData.video_name || 'Ad Video');
+    }
+
+    // 3. Maak ad set aan
+    const adSetPayload = {
+      name: `${campaignData.name} - Ad Set`,
+      campaign_id: campaign.id,
+      daily_budget: campaignData.daily_budget ? campaignData.daily_budget * 100 : undefined,
+      billing_event: 'IMPRESSIONS',
+      optimization_goal: this.getOptimizationGoal(campaignData.objective),
+      targeting: {
+        age_min: campaignData.targeting.age_min,
+        age_max: campaignData.targeting.age_max,
+        genders: campaignData.targeting.genders,
+        geo_locations: {
+          countries: campaignData.targeting.locations
+        },
+        ...(campaignData.targeting.interests && { interests: campaignData.targeting.interests.map(id => ({ id })) }),
+        ...(campaignData.targeting.behaviors && { behaviors: campaignData.targeting.behaviors.map(id => ({ id })) })
+      },
+      status: 'ACTIVE'
+    };
+
+    const adSetResponse = await fetch(
+      `${this.baseUrl}/${this.adAccountId}/adsets?access_token=${serverToken}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(adSetPayload)
+      }
+    );
+
+    if (!adSetResponse.ok) {
+      const errorData = await adSetResponse.json();
+      throw new Error(`Ad Set creation failed: ${JSON.stringify(errorData)}`);
+    }
+
+    const adSet = await adSetResponse.json();
+
+    // 4. Maak ad aan
+    const adPayload = {
+      name: `${campaignData.name} - Ad`,
+      adset_id: adSet.id,
+      creative: {
+        ...(videoId && { video_id: videoId }),
+        link_url: 'https://platform.toptiermen.eu',
+        call_to_action_type: 'LEARN_MORE'
+      },
+      status: 'ACTIVE'
+    };
+
+    const adResponse = await fetch(
+      `${this.baseUrl}/${this.adAccountId}/ads?access_token=${serverToken}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(adPayload)
+      }
+    );
+
+    if (!adResponse.ok) {
+      const errorData = await adResponse.json();
+      throw new Error(`Ad creation failed: ${JSON.stringify(errorData)}`);
+    }
+
+    return campaign;
   }
 
   /**
-   * Update een campagne
+   * Upload video naar Facebook
    */
-  async updateCampaign(
-    campaignId: string,
-    updates: Partial<FacebookCampaign>
-  ): Promise<FacebookCampaign> {
-    const response = await fetch(
-      `${this.baseUrl}/${campaignId}?access_token=${this.accessToken}`,
+  private async uploadVideo(videoUrl: string, videoName: string): Promise<string> {
+    const serverToken = await this.getServerSideToken();
+    
+    // 1. Maak video container aan
+    const containerResponse = await fetch(
+      `${this.baseUrl}/${this.adAccountId}/advideos?access_token=${serverToken}`,
       {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updates),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: videoName,
+          file_url: videoUrl
+        })
+      }
+    );
+
+    if (!containerResponse.ok) {
+      const errorData = await containerResponse.json();
+      throw new Error(`Video upload failed: ${JSON.stringify(errorData)}`);
+    }
+
+    const videoData = await containerResponse.json();
+    return videoData.id;
+  }
+
+  /**
+   * Bepaal optimization goal op basis van objective
+   */
+  private getOptimizationGoal(objective: string): string {
+    switch (objective) {
+      case 'AWARENESS':
+        return 'REACH';
+      case 'CONSIDERATION':
+        return 'LINK_CLICKS';
+      case 'CONVERSIONS':
+        return 'OFFSITE_CONVERSIONS';
+      case 'ENGAGEMENT':
+        return 'POST_ENGAGEMENT';
+      case 'LEADS':
+        return 'LEAD_GENERATION';
+      case 'SALES':
+        return 'OFFSITE_CONVERSIONS';
+      case 'TRAFFIC':
+        return 'LINK_CLICKS';
+      default:
+        return 'LINK_CLICKS';
+    }
+  }
+
+  /**
+   * Update campagne status
+   */
+  async updateCampaign(campaignId: string, updates: Partial<FacebookCampaign>): Promise<FacebookCampaign> {
+    const serverToken = await this.getServerSideToken();
+    const response = await fetch(
+      `${this.baseUrl}/${campaignId}?access_token=${serverToken}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates)
       }
     );
 
     if (!response.ok) {
-      throw new Error(`Facebook API error: ${response.status} ${response.statusText}`);
+      const errorData = await response.json();
+      throw new Error(`Campaign update failed: ${JSON.stringify(errorData)}`);
     }
 
     return response.json();
   }
 
   /**
-   * Pause/Resume een campagne
+   * Toggle campagne status
    */
   async toggleCampaignStatus(campaignId: string, status: 'ACTIVE' | 'PAUSED'): Promise<FacebookCampaign> {
     return this.updateCampaign(campaignId, { status });
   }
+}
 
-  /**
-   * Haal alle data op voor het marketing dashboard
-   */
-  async getDashboardData(dateRange: { start: string; end: string }) {
-    try {
-      // Test connection first
-      const isConnected = await this.testConnection();
-      if (!isConnected) {
-        throw new Error('Facebook Ad Manager connection failed');
-      }
+// Singleton instance
+let facebookAdManager: FacebookAdManagerAPI | null = null;
 
-      // Get account info
-      const account = await this.getAdAccount();
-      
-      // Get campaigns with insights
-      const campaigns = await this.getCampaignsWithInsights(dateRange);
-      
-      // Get account insights
-      const accountInsights = await this.getAccountInsights(dateRange);
-
-      // Calculate totals
-      const totalImpressions = campaigns.reduce((sum, campaign) => 
-        sum + (campaign.insights?.impressions || 0), 0
-      );
-      const totalClicks = campaigns.reduce((sum, campaign) => 
-        sum + (campaign.insights?.clicks || 0), 0
-      );
-      const totalSpent = campaigns.reduce((sum, campaign) => 
-        sum + (campaign.insights?.spend || 0), 0
-      );
-
-      return {
-        success: true,
-        account,
-        campaigns,
-        insights: accountInsights,
-        totals: {
-          impressions: totalImpressions,
-          clicks: totalClicks,
-          spent: totalSpent,
-          ctr: totalImpressions > 0 ? (totalClicks / totalImpressions) * 100 : 0,
-          cpc: totalClicks > 0 ? totalSpent / totalClicks : 0,
-          cpm: totalImpressions > 0 ? (totalSpent / totalImpressions) * 1000 : 0,
-        },
-        dateRange
-      };
-    } catch (error) {
-      console.error('Error fetching Facebook Ad Manager dashboard data:', error);
-      throw error;
-    }
+export function initializeFacebookAdManager(accessToken: string, adAccountId: string): FacebookAdManagerAPI {
+  if (!facebookAdManager) {
+    facebookAdManager = new FacebookAdManagerAPI(accessToken, adAccountId);
   }
+  return facebookAdManager;
 }
 
-// Environment variables
-const FACEBOOK_ACCESS_TOKEN = process.env.FACEBOOK_ACCESS_TOKEN;
-const FACEBOOK_AD_ACCOUNT_ID = process.env.FACEBOOK_AD_ACCOUNT_ID;
-const FACEBOOK_APP_SECRET = process.env.FACEBOOK_APP_SECRET;
-
-// Export singleton instance
-export const facebookAdManager = FACEBOOK_ACCESS_TOKEN && FACEBOOK_AD_ACCOUNT_ID
-  ? new FacebookAdManagerAPI(FACEBOOK_ACCESS_TOKEN, FACEBOOK_AD_ACCOUNT_ID, FACEBOOK_APP_SECRET)
-  : null;
-
-/**
- * Maak een Facebook Ad Manager instance met user credentials
- */
-export function createFacebookAdManager(accessToken: string, adAccountId: string): FacebookAdManagerAPI {
-  return new FacebookAdManagerAPI(accessToken, adAccountId, FACEBOOK_APP_SECRET);
+export function getFacebookAdManager(): FacebookAdManagerAPI | null {
+  return facebookAdManager;
 }
 
-export type { 
-  FacebookCampaign, 
-  FacebookAdSet, 
-  FacebookAd, 
-  FacebookAdAccount 
+export type {
+  FacebookCampaign,
+  FacebookAdSet,
+  FacebookAd,
+  FacebookAdAccount,
+  CreateCampaignData
 };
