@@ -42,6 +42,9 @@ export default function MarketingDashboard() {
   const [campaignsCount, setCampaignsCount] = useState<number>(0);
   const [totalSpend, setTotalSpend] = useState<number>(0);
   const [campaigns, setCampaigns] = useState<any[]>([]);
+  const [adSets, setAdSets] = useState<any[]>([]);
+  const [ads, setAds] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<'campaigns' | 'adsets' | 'ads'>('campaigns');
 
   // Temporarily disable authentication check for testing
   // Check authentication and Facebook connection on component mount
@@ -236,6 +239,26 @@ export default function MarketingDashboard() {
             totalBudget: totalBudget,
             campaigns: campaignsData.data
           });
+        }
+      }
+
+      // Load ad sets data
+      const adSetsResponse = await fetch('/api/facebook/get-adsets');
+      if (adSetsResponse.ok) {
+        const adSetsData = await adSetsResponse.json();
+        if (adSetsData.success) {
+          setAdSets(adSetsData.data);
+          console.log('✅ Ad sets loaded:', adSetsData.data.length);
+        }
+      }
+
+      // Load ads data
+      const adsResponse = await fetch('/api/facebook/get-ads');
+      if (adsResponse.ok) {
+        const adsData = await adsResponse.json();
+        if (adsData.success) {
+          setAds(adsData.data);
+          console.log('✅ Ads loaded:', adsData.data.length);
         }
       }
       
@@ -553,35 +576,225 @@ export default function MarketingDashboard() {
           </div>
         </div>
 
-        {/* Campaigns Table */}
+        {/* Data Table with Tabs */}
         <div className="bg-[#1E293B] rounded-lg p-3 sm:p-4 lg:p-6 border border-[#334155] mb-6 sm:mb-8">
+          {/* Tab Navigation */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
-            <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-white">Campagnes Overzicht</h3>
-            <span className="text-gray-400 text-xs sm:text-sm">Resultaten van {campaigns.length} campagnes</span>
+            <div className="flex items-center space-x-1">
+              <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-white mr-4">Overzicht</h3>
+              <div className="flex bg-[#334155] rounded-lg p-1">
+                <button
+                  onClick={() => setActiveTab('campaigns')}
+                  className={`px-3 py-1 rounded-md text-xs sm:text-sm font-medium transition-colors ${
+                    activeTab === 'campaigns'
+                      ? 'bg-[#3B82F6] text-white'
+                      : 'text-gray-400 hover:text-white'
+                  }`}
+                >
+                  Campagnes
+                </button>
+                <button
+                  onClick={() => setActiveTab('adsets')}
+                  className={`px-3 py-1 rounded-md text-xs sm:text-sm font-medium transition-colors ${
+                    activeTab === 'adsets'
+                      ? 'bg-[#3B82F6] text-white'
+                      : 'text-gray-400 hover:text-white'
+                  }`}
+                >
+                  Advertentiesets
+                </button>
+                <button
+                  onClick={() => setActiveTab('ads')}
+                  className={`px-3 py-1 rounded-md text-xs sm:text-sm font-medium transition-colors ${
+                    activeTab === 'ads'
+                      ? 'bg-[#3B82F6] text-white'
+                      : 'text-gray-400 hover:text-white'
+                  }`}
+                >
+                  Advertenties
+                </button>
+              </div>
+            </div>
+            <span className="text-gray-400 text-xs sm:text-sm">
+              Resultaten van {
+                activeTab === 'campaigns' ? campaigns.length :
+                activeTab === 'adsets' ? adSets.length :
+                ads.length
+              } {activeTab === 'campaigns' ? 'campagnes' : activeTab === 'adsets' ? 'advertentiesets' : 'advertenties'}
+            </span>
           </div>
           
           {/* Desktop Table */}
           <div className="hidden lg:block overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-[#334155]">
-                  <th className="text-left py-3 px-2 text-gray-400 font-medium">Status</th>
-                  <th className="text-left py-3 px-2 text-gray-400 font-medium">Campagne</th>
-                  <th className="text-left py-3 px-2 text-gray-400 font-medium">Budget</th>
-                  <th className="text-left py-3 px-2 text-gray-400 font-medium">Weergaven</th>
-                  <th className="text-left py-3 px-2 text-gray-400 font-medium">Bereik</th>
-                  <th className="text-left py-3 px-2 text-gray-400 font-medium">Klikken</th>
-                  <th className="text-left py-3 px-2 text-gray-400 font-medium">CTR</th>
-                  <th className="text-left py-3 px-2 text-gray-400 font-medium">CPC</th>
-                  <th className="text-left py-3 px-2 text-gray-400 font-medium">Uitgegeven</th>
-                </tr>
-              </thead>
-              <tbody>
+            {activeTab === 'campaigns' && (
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-[#334155]">
+                    <th className="text-left py-3 px-2 text-gray-400 font-medium">Status</th>
+                    <th className="text-left py-3 px-2 text-gray-400 font-medium">Campagne</th>
+                    <th className="text-left py-3 px-2 text-gray-400 font-medium">Budget</th>
+                    <th className="text-left py-3 px-2 text-gray-400 font-medium">Weergaven</th>
+                    <th className="text-left py-3 px-2 text-gray-400 font-medium">Bereik</th>
+                    <th className="text-left py-3 px-2 text-gray-400 font-medium">Klikken</th>
+                    <th className="text-left py-3 px-2 text-gray-400 font-medium">CTR</th>
+                    <th className="text-left py-3 px-2 text-gray-400 font-medium">CPC</th>
+                    <th className="text-left py-3 px-2 text-gray-400 font-medium">Uitgegeven</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {campaigns.length > 0 ? (
+                    campaigns.map((campaign, index) => (
+                      <tr key={campaign.id} className="border-b border-[#334155]/50 hover:bg-[#334155]/20">
+                        <td className="py-3 px-2">
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                            campaign.status === 'active' ? 'bg-green-900/20 text-green-400' :
+                            campaign.status === 'paused' ? 'bg-yellow-900/20 text-yellow-400' :
+                            'bg-gray-900/20 text-gray-400'
+                          }`}>
+                            {campaign.status === 'active' ? 'Actief' :
+                             campaign.status === 'paused' ? 'Gepauzeerd' :
+                             campaign.status}
+                          </span>
+                        </td>
+                        <td className="py-3 px-2 text-white font-medium">{campaign.name}</td>
+                        <td className="py-3 px-2 text-white">€{(campaign.dailyBudget / 100).toFixed(2)}/dag</td>
+                        <td className="py-3 px-2 text-white">{campaign.impressions.toLocaleString()}</td>
+                        <td className="py-3 px-2 text-white">{campaign.reach ? campaign.reach.toLocaleString() : '-'}</td>
+                        <td className="py-3 px-2 text-white">{campaign.clicks.toLocaleString()}</td>
+                        <td className="py-3 px-2 text-white">{campaign.ctr ? `${(campaign.ctr * 100).toFixed(2)}%` : '-'}</td>
+                        <td className="py-3 px-2 text-white">{campaign.cpc ? `€${(campaign.cpc / 100).toFixed(2)}` : '-'}</td>
+                        <td className="py-3 px-2 text-white">€{(campaign.spent / 100).toFixed(2)}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={9} className="py-8 text-center text-gray-400">
+                        Campagnes laden...
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            )}
+
+            {activeTab === 'adsets' && (
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-[#334155]">
+                    <th className="text-left py-3 px-2 text-gray-400 font-medium">Status</th>
+                    <th className="text-left py-3 px-2 text-gray-400 font-medium">Advertentieset</th>
+                    <th className="text-left py-3 px-2 text-gray-400 font-medium">Campagne</th>
+                    <th className="text-left py-3 px-2 text-gray-400 font-medium">Budget</th>
+                    <th className="text-left py-3 px-2 text-gray-400 font-medium">Weergaven</th>
+                    <th className="text-left py-3 px-2 text-gray-400 font-medium">Bereik</th>
+                    <th className="text-left py-3 px-2 text-gray-400 font-medium">Klikken</th>
+                    <th className="text-left py-3 px-2 text-gray-400 font-medium">CTR</th>
+                    <th className="text-left py-3 px-2 text-gray-400 font-medium">CPC</th>
+                    <th className="text-left py-3 px-2 text-gray-400 font-medium">Uitgegeven</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {adSets.length > 0 ? (
+                    adSets.map((adSet, index) => (
+                      <tr key={adSet.id} className="border-b border-[#334155]/50 hover:bg-[#334155]/20">
+                        <td className="py-3 px-2">
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                            adSet.status === 'active' ? 'bg-green-900/20 text-green-400' :
+                            adSet.status === 'paused' ? 'bg-yellow-900/20 text-yellow-400' :
+                            'bg-gray-900/20 text-gray-400'
+                          }`}>
+                            {adSet.status === 'active' ? 'Actief' :
+                             adSet.status === 'paused' ? 'Gepauzeerd' :
+                             adSet.status}
+                          </span>
+                        </td>
+                        <td className="py-3 px-2 text-white font-medium">{adSet.name}</td>
+                        <td className="py-3 px-2 text-white">{adSet.campaign_name || '-'}</td>
+                        <td className="py-3 px-2 text-white">€{(adSet.daily_budget / 100).toFixed(2)}/dag</td>
+                        <td className="py-3 px-2 text-white">{adSet.impressions?.toLocaleString() || '0'}</td>
+                        <td className="py-3 px-2 text-white">{adSet.reach?.toLocaleString() || '-'}</td>
+                        <td className="py-3 px-2 text-white">{adSet.clicks?.toLocaleString() || '0'}</td>
+                        <td className="py-3 px-2 text-white">{adSet.ctr ? `${(adSet.ctr * 100).toFixed(2)}%` : '-'}</td>
+                        <td className="py-3 px-2 text-white">{adSet.cpc ? `€${(adSet.cpc / 100).toFixed(2)}` : '-'}</td>
+                        <td className="py-3 px-2 text-white">€{(adSet.spent / 100).toFixed(2) || '0.00'}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={10} className="py-8 text-center text-gray-400">
+                        Advertentiesets laden...
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            )}
+
+            {activeTab === 'ads' && (
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-[#334155]">
+                    <th className="text-left py-3 px-2 text-gray-400 font-medium">Status</th>
+                    <th className="text-left py-3 px-2 text-gray-400 font-medium">Advertentie</th>
+                    <th className="text-left py-3 px-2 text-gray-400 font-medium">Advertentieset</th>
+                    <th className="text-left py-3 px-2 text-gray-400 font-medium">Type</th>
+                    <th className="text-left py-3 px-2 text-gray-400 font-medium">Weergaven</th>
+                    <th className="text-left py-3 px-2 text-gray-400 font-medium">Bereik</th>
+                    <th className="text-left py-3 px-2 text-gray-400 font-medium">Klikken</th>
+                    <th className="text-left py-3 px-2 text-gray-400 font-medium">CTR</th>
+                    <th className="text-left py-3 px-2 text-gray-400 font-medium">CPC</th>
+                    <th className="text-left py-3 px-2 text-gray-400 font-medium">Uitgegeven</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {ads.length > 0 ? (
+                    ads.map((ad, index) => (
+                      <tr key={ad.id} className="border-b border-[#334155]/50 hover:bg-[#334155]/20">
+                        <td className="py-3 px-2">
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                            ad.status === 'active' ? 'bg-green-900/20 text-green-400' :
+                            ad.status === 'paused' ? 'bg-yellow-900/20 text-yellow-400' :
+                            'bg-gray-900/20 text-gray-400'
+                          }`}>
+                            {ad.status === 'active' ? 'Actief' :
+                             ad.status === 'paused' ? 'Gepauzeerd' :
+                             ad.status}
+                          </span>
+                        </td>
+                        <td className="py-3 px-2 text-white font-medium">{ad.name}</td>
+                        <td className="py-3 px-2 text-white">{ad.adset_name || '-'}</td>
+                        <td className="py-3 px-2 text-white">{ad.creative_type || 'Video'}</td>
+                        <td className="py-3 px-2 text-white">{ad.impressions?.toLocaleString() || '0'}</td>
+                        <td className="py-3 px-2 text-white">{ad.reach?.toLocaleString() || '-'}</td>
+                        <td className="py-3 px-2 text-white">{ad.clicks?.toLocaleString() || '0'}</td>
+                        <td className="py-3 px-2 text-white">{ad.ctr ? `${(ad.ctr * 100).toFixed(2)}%` : '-'}</td>
+                        <td className="py-3 px-2 text-white">{ad.cpc ? `€${(ad.cpc / 100).toFixed(2)}` : '-'}</td>
+                        <td className="py-3 px-2 text-white">€{(ad.spent / 100).toFixed(2) || '0.00'}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={10} className="py-8 text-center text-gray-400">
+                        Advertenties laden...
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            )}
+          </div>
+
+          {/* Mobile Cards */}
+          <div className="lg:hidden space-y-4">
+            {activeTab === 'campaigns' && (
+              <>
                 {campaigns.length > 0 ? (
                   campaigns.map((campaign, index) => (
-                    <tr key={campaign.id} className="border-b border-[#334155]/50 hover:bg-[#334155]/20">
-                      <td className="py-3 px-2">
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                    <div key={campaign.id} className="bg-[#334155]/20 rounded-lg p-4 border border-[#334155]/50">
+                      {/* Header */}
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="text-white font-medium text-sm truncate flex-1 mr-2">{campaign.name}</h4>
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium flex-shrink-0 ${
                           campaign.status === 'active' ? 'bg-green-900/20 text-green-400' :
                           campaign.status === 'paused' ? 'bg-yellow-900/20 text-yellow-400' :
                           'bg-gray-900/20 text-gray-400'
@@ -590,86 +803,185 @@ export default function MarketingDashboard() {
                            campaign.status === 'paused' ? 'Gepauzeerd' :
                            campaign.status}
                         </span>
-                      </td>
-                      <td className="py-3 px-2 text-white font-medium">{campaign.name}</td>
-                      <td className="py-3 px-2 text-white">€{(campaign.dailyBudget / 100).toFixed(2)}/dag</td>
-                      <td className="py-3 px-2 text-white">{campaign.impressions.toLocaleString()}</td>
-                      <td className="py-3 px-2 text-white">{campaign.reach ? campaign.reach.toLocaleString() : '-'}</td>
-                      <td className="py-3 px-2 text-white">{campaign.clicks.toLocaleString()}</td>
-                      <td className="py-3 px-2 text-white">{campaign.ctr ? `${(campaign.ctr * 100).toFixed(2)}%` : '-'}</td>
-                      <td className="py-3 px-2 text-white">{campaign.cpc ? `€${(campaign.cpc / 100).toFixed(2)}` : '-'}</td>
-                      <td className="py-3 px-2 text-white">€{(campaign.spent / 100).toFixed(2)}</td>
-                    </tr>
+                      </div>
+                      
+                      {/* Budget */}
+                      <div className="mb-3">
+                        <p className="text-gray-400 text-xs">Budget</p>
+                        <p className="text-white font-medium">€{(campaign.dailyBudget / 100).toFixed(2)}/dag</p>
+                      </div>
+                      
+                      {/* Performance Grid */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-gray-400 text-xs">Weergaven</p>
+                          <p className="text-white font-medium">{campaign.impressions.toLocaleString()}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-400 text-xs">Bereik</p>
+                          <p className="text-white font-medium">{campaign.reach ? campaign.reach.toLocaleString() : '-'}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-400 text-xs">Klikken</p>
+                          <p className="text-white font-medium">{campaign.clicks.toLocaleString()}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-400 text-xs">CTR</p>
+                          <p className="text-white font-medium">{campaign.ctr ? `${(campaign.ctr * 100).toFixed(2)}%` : '-'}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-400 text-xs">CPC</p>
+                          <p className="text-white font-medium">{campaign.cpc ? `€${(campaign.cpc / 100).toFixed(2)}` : '-'}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-400 text-xs">Uitgegeven</p>
+                          <p className="text-white font-medium">€{(campaign.spent / 100).toFixed(2)}</p>
+                        </div>
+                      </div>
+                    </div>
                   ))
                 ) : (
-                  <tr>
-                    <td colSpan={9} className="py-8 text-center text-gray-400">
-                      Campagnes laden...
-                    </td>
-                  </tr>
+                  <div className="text-center py-8 text-gray-400">
+                    Campagnes laden...
+                  </div>
                 )}
-              </tbody>
-            </table>
-          </div>
+              </>
+            )}
 
-          {/* Mobile Cards */}
-          <div className="lg:hidden space-y-4">
-            {campaigns.length > 0 ? (
-              campaigns.map((campaign, index) => (
-                <div key={campaign.id} className="bg-[#334155]/20 rounded-lg p-4 border border-[#334155]/50">
-                  {/* Header */}
-                  <div className="flex items-center justify-between mb-3">
-                    <h4 className="text-white font-medium text-sm truncate flex-1 mr-2">{campaign.name}</h4>
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium flex-shrink-0 ${
-                      campaign.status === 'active' ? 'bg-green-900/20 text-green-400' :
-                      campaign.status === 'paused' ? 'bg-yellow-900/20 text-yellow-400' :
-                      'bg-gray-900/20 text-gray-400'
-                    }`}>
-                      {campaign.status === 'active' ? 'Actief' :
-                       campaign.status === 'paused' ? 'Gepauzeerd' :
-                       campaign.status}
-                    </span>
+            {activeTab === 'adsets' && (
+              <>
+                {adSets.length > 0 ? (
+                  adSets.map((adSet, index) => (
+                    <div key={adSet.id} className="bg-[#334155]/20 rounded-lg p-4 border border-[#334155]/50">
+                      {/* Header */}
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="text-white font-medium text-sm truncate flex-1 mr-2">{adSet.name}</h4>
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium flex-shrink-0 ${
+                          adSet.status === 'active' ? 'bg-green-900/20 text-green-400' :
+                          adSet.status === 'paused' ? 'bg-yellow-900/20 text-yellow-400' :
+                          'bg-gray-900/20 text-gray-400'
+                        }`}>
+                          {adSet.status === 'active' ? 'Actief' :
+                           adSet.status === 'paused' ? 'Gepauzeerd' :
+                           adSet.status}
+                        </span>
+                      </div>
+                      
+                      {/* Campaign */}
+                      <div className="mb-3">
+                        <p className="text-gray-400 text-xs">Campagne</p>
+                        <p className="text-white font-medium">{adSet.campaign_name || '-'}</p>
+                      </div>
+                      
+                      {/* Budget */}
+                      <div className="mb-3">
+                        <p className="text-gray-400 text-xs">Budget</p>
+                        <p className="text-white font-medium">€{(adSet.daily_budget / 100).toFixed(2)}/dag</p>
+                      </div>
+                      
+                      {/* Performance Grid */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-gray-400 text-xs">Weergaven</p>
+                          <p className="text-white font-medium">{adSet.impressions?.toLocaleString() || '0'}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-400 text-xs">Bereik</p>
+                          <p className="text-white font-medium">{adSet.reach?.toLocaleString() || '-'}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-400 text-xs">Klikken</p>
+                          <p className="text-white font-medium">{adSet.clicks?.toLocaleString() || '0'}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-400 text-xs">CTR</p>
+                          <p className="text-white font-medium">{adSet.ctr ? `${(adSet.ctr * 100).toFixed(2)}%` : '-'}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-400 text-xs">CPC</p>
+                          <p className="text-white font-medium">{adSet.cpc ? `€${(adSet.cpc / 100).toFixed(2)}` : '-'}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-400 text-xs">Uitgegeven</p>
+                          <p className="text-white font-medium">€{(adSet.spent / 100).toFixed(2) || '0.00'}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-gray-400">
+                    Advertentiesets laden...
                   </div>
-                  
-                  {/* Budget */}
-                  <div className="mb-3">
-                    <p className="text-gray-400 text-xs">Budget</p>
-                    <p className="text-white font-medium">€{(campaign.dailyBudget / 100).toFixed(2)}/dag</p>
+                )}
+              </>
+            )}
+
+            {activeTab === 'ads' && (
+              <>
+                {ads.length > 0 ? (
+                  ads.map((ad, index) => (
+                    <div key={ad.id} className="bg-[#334155]/20 rounded-lg p-4 border border-[#334155]/50">
+                      {/* Header */}
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="text-white font-medium text-sm truncate flex-1 mr-2">{ad.name}</h4>
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium flex-shrink-0 ${
+                          ad.status === 'active' ? 'bg-green-900/20 text-green-400' :
+                          ad.status === 'paused' ? 'bg-yellow-900/20 text-yellow-400' :
+                          'bg-gray-900/20 text-gray-400'
+                        }`}>
+                          {ad.status === 'active' ? 'Actief' :
+                           ad.status === 'paused' ? 'Gepauzeerd' :
+                           ad.status}
+                        </span>
+                      </div>
+                      
+                      {/* Ad Set */}
+                      <div className="mb-3">
+                        <p className="text-gray-400 text-xs">Advertentieset</p>
+                        <p className="text-white font-medium">{ad.adset_name || '-'}</p>
+                      </div>
+                      
+                      {/* Type */}
+                      <div className="mb-3">
+                        <p className="text-gray-400 text-xs">Type</p>
+                        <p className="text-white font-medium">{ad.creative_type || 'Video'}</p>
+                      </div>
+                      
+                      {/* Performance Grid */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-gray-400 text-xs">Weergaven</p>
+                          <p className="text-white font-medium">{ad.impressions?.toLocaleString() || '0'}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-400 text-xs">Bereik</p>
+                          <p className="text-white font-medium">{ad.reach?.toLocaleString() || '-'}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-400 text-xs">Klikken</p>
+                          <p className="text-white font-medium">{ad.clicks?.toLocaleString() || '0'}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-400 text-xs">CTR</p>
+                          <p className="text-white font-medium">{ad.ctr ? `${(ad.ctr * 100).toFixed(2)}%` : '-'}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-400 text-xs">CPC</p>
+                          <p className="text-white font-medium">{ad.cpc ? `€${(ad.cpc / 100).toFixed(2)}` : '-'}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-400 text-xs">Uitgegeven</p>
+                          <p className="text-white font-medium">€{(ad.spent / 100).toFixed(2) || '0.00'}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-gray-400">
+                    Advertenties laden...
                   </div>
-                  
-                  {/* Performance Grid */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-gray-400 text-xs">Weergaven</p>
-                      <p className="text-white font-medium">{campaign.impressions.toLocaleString()}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-400 text-xs">Bereik</p>
-                      <p className="text-white font-medium">{campaign.reach ? campaign.reach.toLocaleString() : '-'}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-400 text-xs">Klikken</p>
-                      <p className="text-white font-medium">{campaign.clicks.toLocaleString()}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-400 text-xs">CTR</p>
-                      <p className="text-white font-medium">{campaign.ctr ? `${(campaign.ctr * 100).toFixed(2)}%` : '-'}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-400 text-xs">CPC</p>
-                      <p className="text-white font-medium">{campaign.cpc ? `€${(campaign.cpc / 100).toFixed(2)}` : '-'}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-400 text-xs">Uitgegeven</p>
-                      <p className="text-white font-medium">€{(campaign.spent / 100).toFixed(2)}</p>
-                    </div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="text-center py-8 text-gray-400">
-                Campagnes laden...
-              </div>
+                )}
+              </>
             )}
           </div>
         </div>
