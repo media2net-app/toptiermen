@@ -67,10 +67,12 @@ export async function POST() {
       adset_name?: string;
       ad_id?: string;
       ad_name?: string;
+      creative_id?: string;
       status: string;
       added_interest?: string;
       total_interests?: number;
       error?: string;
+      new_body?: string;
     }> = [];
 
     // Update each ad's creative
