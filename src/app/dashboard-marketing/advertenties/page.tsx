@@ -31,6 +31,7 @@ interface Advertisement {
   id: string;
   name: string;
   campaign: string;
+  adSet: string;
   platform: string;
   status: 'active' | 'paused' | 'rejected' | 'draft' | 'pending_review';
   type: 'image' | 'video' | 'carousel' | 'story';
@@ -50,255 +51,28 @@ interface Advertisement {
   videoName?: string;
 }
 
-// Real ad sets data from Facebook campaigns
-const realAdSets = [
-  // Algemene Campagne - 5 ad sets
-  {
-    id: "adset_algemene_1",
-    name: "TTM - Algemeen - Prelaunch Awareness",
-    campaign: "TTM - Algemene Prelaunch Campagne",
-    platform: "Facebook",
-    status: "paused" as const,
-    type: "video" as const,
-    impressions: 0,
-    clicks: 0,
-    ctr: 0,
-    cpc: 0,
-    spent: 0,
-    performance: "good" as const,
-    targetAudience: "Algemeen (18-65 jaar, alle geslachten, NL/BE)",
-    startDate: "2025-08-22",
-    endDate: "2025-12-31",
-    budget: 5,
-    dailyBudget: 5,
-    createdAt: "2025-08-22T11:58:20+0200",
-    lastUpdated: "2025-08-22T11:58:20+0200",
-    videoName: "algemeen_01"
-  },
-  {
-    id: "adset_algemene_2",
-    name: "TTM - Algemeen - Fitness Community",
-    campaign: "TTM - Algemene Prelaunch Campagne",
-    platform: "Facebook",
-    status: "paused" as const,
-    type: "video" as const,
-    impressions: 0,
-    clicks: 0,
-    ctr: 0,
-    cpc: 0,
-    spent: 0,
-    performance: "good" as const,
-    targetAudience: "Algemeen (25-55 jaar, mannen, NL)",
-    startDate: "2025-01-01",
-    endDate: "2025-12-31",
-    budget: 5,
-    dailyBudget: 5,
-    createdAt: "2025-01-01T00:00:00Z",
-    lastUpdated: "2025-01-01T00:00:00Z",
-    videoName: "algemeen_02"
-  },
-  {
-    id: "adset_algemene_3",
-    name: "TTM - Algemeen - Lifestyle Upgrade",
-    campaign: "TTM - Algemene Prelaunch Campagne",
-    platform: "Facebook",
-    status: "paused" as const,
-    type: "video" as const,
-    impressions: 0,
-    clicks: 0,
-    ctr: 0,
-    cpc: 0,
-    spent: 0,
-    performance: "good" as const,
-    targetAudience: "Algemeen (30-50 jaar, alle geslachten, NL/BE/DE)",
-    startDate: "2025-01-01",
-    endDate: "2025-12-31",
-    budget: 5,
-    dailyBudget: 5,
-    createdAt: "2025-01-01T00:00:00Z",
-    lastUpdated: "2025-01-01T00:00:00Z",
-    videoName: "algemeen_03"
-  },
-  {
-    id: "adset_algemene_4",
-    name: "TTM - Algemeen - Business Professionals",
-    campaign: "TTM - Algemene Prelaunch Campagne",
-    platform: "Facebook",
-    status: "paused" as const,
-    type: "video" as const,
-    impressions: 0,
-    clicks: 0,
-    ctr: 0,
-    cpc: 0,
-    spent: 0,
-    performance: "good" as const,
-    targetAudience: "Algemeen (28-45 jaar, alle geslachten, NL)",
-    startDate: "2025-01-01",
-    endDate: "2025-12-31",
-    budget: 5,
-    dailyBudget: 5,
-    createdAt: "2025-01-01T00:00:00Z",
-    lastUpdated: "2025-01-01T00:00:00Z",
-    videoName: "algemeen_04"
-  },
-  {
-    id: "adset_algemene_5",
-    name: "TTM - Algemeen - Community Building",
-    campaign: "TTM - Algemene Prelaunch Campagne",
-    platform: "Facebook",
-    status: "paused" as const,
-    type: "video" as const,
-    impressions: 0,
-    clicks: 0,
-    ctr: 0,
-    cpc: 0,
-    spent: 0,
-    performance: "good" as const,
-    targetAudience: "Algemeen (22-40 jaar, alle geslachten, NL/BE)",
-    startDate: "2025-01-01",
-    endDate: "2025-12-31",
-    budget: 5,
-    dailyBudget: 5,
-    createdAt: "2025-01-01T00:00:00Z",
-    lastUpdated: "2025-01-01T00:00:00Z",
-    videoName: "algemeen_05"
-  },
-  // Jongeren Campagne - 2 ad sets
-  {
-    id: "adset_jongeren_1",
-    name: "TTM - Jongeren - Fitness & Lifestyle",
-    campaign: "TTM - Jongeren Prelaunch Campagne",
-    platform: "Facebook",
-    status: "paused" as const,
-    type: "video" as const,
-    impressions: 0,
-    clicks: 0,
-    ctr: 0,
-    cpc: 0,
-    spent: 0,
-    performance: "good" as const,
-    targetAudience: "Jongeren (18-25 jaar, alle geslachten, NL/BE)",
-    startDate: "2025-01-01",
-    endDate: "2025-12-31",
-    budget: 5,
-    dailyBudget: 5,
-    createdAt: "2025-01-01T00:00:00Z",
-    lastUpdated: "2025-01-01T00:00:00Z",
-    videoName: "jongeren_01"
-  },
-  {
-    id: "adset_jongeren_2",
-    name: "TTM - Jongeren - Social & Community",
-    campaign: "TTM - Jongeren Prelaunch Campagne",
-    platform: "Facebook",
-    status: "paused" as const,
-    type: "video" as const,
-    impressions: 0,
-    clicks: 0,
-    ctr: 0,
-    cpc: 0,
-    spent: 0,
-    performance: "good" as const,
-    targetAudience: "Jongeren (18-25 jaar, alle geslachten, NL)",
-    startDate: "2025-01-01",
-    endDate: "2025-12-31",
-    budget: 5,
-    dailyBudget: 5,
-    createdAt: "2025-01-01T00:00:00Z",
-    lastUpdated: "2025-01-01T00:00:00Z",
-    videoName: "jongeren_02"
-  },
-  // Vaders Campagne - 2 ad sets
-  {
-    id: "adset_vaders_1",
-    name: "TTM - Vaders - Family & Leadership",
-    campaign: "TTM - Vaders Prelaunch Campagne",
-    platform: "Facebook",
-    status: "paused" as const,
-    type: "video" as const,
-    impressions: 0,
-    clicks: 0,
-    ctr: 0,
-    cpc: 0,
-    spent: 0,
-    performance: "good" as const,
-    targetAudience: "Vaders (30-50 jaar, mannen, NL/BE)",
-    startDate: "2025-01-01",
-    endDate: "2025-12-31",
-    budget: 5,
-    dailyBudget: 5,
-    createdAt: "2025-01-01T00:00:00Z",
-    lastUpdated: "2025-01-01T00:00:00Z",
-    videoName: "vaders_01"
-  },
-  {
-    id: "adset_vaders_2",
-    name: "TTM - Vaders - Role Model & Success",
-    campaign: "TTM - Vaders Prelaunch Campagne",
-    platform: "Facebook",
-    status: "paused" as const,
-    type: "video" as const,
-    impressions: 0,
-    clicks: 0,
-    ctr: 0,
-    cpc: 0,
-    spent: 0,
-    performance: "good" as const,
-    targetAudience: "Vaders (35-55 jaar, mannen, NL)",
-    startDate: "2025-01-01",
-    endDate: "2025-12-31",
-    budget: 5,
-    dailyBudget: 5,
-    createdAt: "2025-01-01T00:00:00Z",
-    lastUpdated: "2025-01-01T00:00:00Z",
-    videoName: "vaders_02"
-  },
-  // Zakelijk Campagne - 2 ad sets
-  {
-    id: "adset_zakelijk_1",
-    name: "TTM - Zakelijk - Business Professionals",
-    campaign: "TTM - Zakelijk Prelaunch Campagne",
-    platform: "Facebook",
-    status: "paused" as const,
-    type: "video" as const,
-    impressions: 0,
-    clicks: 0,
-    ctr: 0,
-    cpc: 0,
-    spent: 0,
-    performance: "good" as const,
-    targetAudience: "Zakelijk (28-45 jaar, alle geslachten, NL/BE)",
-    startDate: "2025-01-01",
-    endDate: "2025-12-31",
-    budget: 5,
-    dailyBudget: 5,
-    createdAt: "2025-01-01T00:00:00Z",
-    lastUpdated: "2025-01-01T00:00:00Z",
-    videoName: "zakelijk_01"
-  },
-  {
-    id: "adset_zakelijk_2",
-    name: "TTM - Zakelijk - Entrepreneurs & Leaders",
-    campaign: "TTM - Zakelijk Prelaunch Campagne",
-    platform: "Facebook",
-    status: "paused" as const,
-    type: "video" as const,
-    impressions: 0,
-    clicks: 0,
-    ctr: 0,
-    cpc: 0,
-    spent: 0,
-    performance: "good" as const,
-    targetAudience: "Zakelijk (30-50 jaar, alle geslachten, NL)",
-    startDate: "2025-01-01",
-    endDate: "2025-12-31",
-    budget: 5,
-    dailyBudget: 5,
-    createdAt: "2025-01-01T00:00:00Z",
-    lastUpdated: "2025-01-01T00:00:00Z",
-    videoName: "zakelijk_02"
-  }
-];
+interface FacebookCampaign {
+  id: string;
+  name: string;
+  status: string;
+  created_time: string;
+}
+
+interface FacebookAdSet {
+  id: string;
+  name: string;
+  campaign_id: string;
+  status: string;
+  created_time: string;
+}
+
+interface FacebookAd {
+  id: string;
+  name: string;
+  adset_id: string;
+  status: string;
+  created_time: string;
+}
 
 export default function AdvertisementsPage() {
   const [ads, setAds] = useState<Advertisement[]>([]);
@@ -311,11 +85,74 @@ export default function AdvertisementsPage() {
   const [showAdModal, setShowAdModal] = useState(false);
   const [viewMode, setViewMode] = useState<'table' | 'cards' | 'calendar'>('table');
 
-  // Load mock ad sets data
+  // Load Facebook data on component mount
   useEffect(() => {
-    setAds(realAdSets);
-    setLoading(false);
+    loadFacebookData();
   }, []);
+
+  const loadFacebookData = async () => {
+    setLoading(true);
+    try {
+      // Load campaigns, ad sets, and ads in parallel
+      const [campaignsRes, adSetsRes, adsRes] = await Promise.all([
+        fetch('/api/facebook/get-campaigns'),
+        fetch('/api/facebook/get-adsets'),
+        fetch('/api/facebook/get-ads')
+      ]);
+
+      const campaignsData = await campaignsRes.json();
+      const adSetsData = await adSetsRes.json();
+      const adsData = await adsRes.json();
+
+      if (campaignsData.success && adSetsData.success && adsData.success) {
+        const facebookCampaigns: FacebookCampaign[] = campaignsData.data;
+        const facebookAdSets: FacebookAdSet[] = adSetsData.data;
+        const facebookAds: FacebookAd[] = adsData.data;
+
+        // Create a map for quick lookup
+        const campaignMap = new Map(facebookCampaigns.map(c => [c.id, c]));
+        const adSetMap = new Map(facebookAdSets.map(ads => [ads.id, ads]));
+
+        // Transform Facebook ads to our Advertisement format
+        const transformedAds: Advertisement[] = facebookAds.map(ad => {
+          const adSet = adSetMap.get(ad.adset_id);
+          const campaign = adSet ? campaignMap.get(adSet.campaign_id) : null;
+
+          return {
+            id: ad.id,
+            name: ad.name,
+            campaign: campaign?.name || 'Onbekende Campagne',
+            adSet: adSet?.name || 'Onbekende Ad Set',
+            platform: 'Facebook',
+            status: ad.status.toLowerCase() as 'active' | 'paused' | 'rejected' | 'draft' | 'pending_review',
+            type: 'video' as const, // Default for now
+            impressions: 0,
+            clicks: 0,
+            ctr: 0,
+            cpc: 0,
+            spent: 0,
+            performance: 'good' as const,
+            targetAudience: 'Facebook Targeting',
+            startDate: new Date(ad.created_time).toISOString().split('T')[0],
+            endDate: '2025-12-31',
+            budget: 5, // Default budget
+            dailyBudget: 5,
+            createdAt: ad.created_time,
+            lastUpdated: ad.created_time,
+            videoName: 'Facebook Video'
+          };
+        });
+
+        setAds(transformedAds);
+      } else {
+        console.error('Failed to load Facebook data:', { campaignsData, adSetsData, adsData });
+      }
+    } catch (error) {
+      console.error('Error loading Facebook data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAdClick = (ad: Advertisement) => {
     setSelectedAd(ad);
@@ -361,7 +198,8 @@ export default function AdvertisementsPage() {
 
   const filteredAds = ads.filter(ad => {
     const matchesSearch = ad.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         ad.campaign.toLowerCase().includes(searchTerm.toLowerCase());
+                         ad.campaign.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         ad.adSet.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === 'all' || ad.status === filterStatus;
     const matchesPlatform = filterPlatform === 'all' || ad.platform === filterPlatform;
     
@@ -386,51 +224,11 @@ export default function AdvertisementsPage() {
         </div>
         <div className="flex items-center space-x-3">
           <button 
-            onClick={async () => {
-              setLoading(true);
-              try {
-                const response = await fetch('/api/facebook/get-campaigns');
-                const result = await response.json();
-                if (result.success) {
-                  // Transform campaigns to ad sets format
-                  const adSetsFromCampaigns = result.data.flatMap(campaign => 
-                    campaign.adSets?.map(adSet => ({
-                      id: adSet.id,
-                      name: adSet.name,
-                      campaign: campaign.name,
-                      platform: 'Facebook',
-                      status: adSet.status.toLowerCase() as 'active' | 'paused' | 'rejected' | 'draft' | 'pending_review',
-                      type: 'video' as const,
-                      impressions: 0,
-                      clicks: 0,
-                      ctr: 0,
-                      cpc: 0,
-                      spent: 0,
-                      performance: 'good' as const,
-                      targetAudience: 'Facebook Targeting',
-                      startDate: campaign.startDate,
-                      endDate: campaign.endDate,
-                      budget: adSet.daily_budget || 0,
-                      dailyBudget: adSet.daily_budget || 0,
-                      createdAt: campaign.createdAt,
-                      lastUpdated: campaign.lastUpdated,
-                      videoName: adSet.video_name || ''
-                    })) || []
-                  );
-                  setAds(adSetsFromCampaigns);
-                } else {
-                  console.error('Failed to load Facebook ad sets:', result.error);
-                }
-              } catch (error) {
-                console.error('Error loading Facebook ad sets:', error);
-              } finally {
-                setLoading(false);
-              }
-            }}
+            onClick={loadFacebookData}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
           >
             <ChartBarIcon className="w-5 h-5" />
-            <span>Laad Facebook Ad Sets</span>
+            <span>Ververs Facebook Data</span>
           </button>
           <button 
             onClick={() => setShowCreateModal(true)}
@@ -443,24 +241,23 @@ export default function AdvertisementsPage() {
       </div>
 
       {/* Info Banner */}
-      <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mb-6">
+      <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-4 mb-6">
         <div className="flex items-start space-x-3">
-          <ExclamationTriangleIcon className="w-6 h-6 text-blue-400 mt-0.5" />
+          <CheckCircleIcon className="w-6 h-6 text-green-400 mt-0.5" />
           <div>
-            <h3 className="text-blue-400 font-semibold mb-1">Facebook Ad Sets</h3>
-            <p className="text-blue-200 text-sm mb-2">
-              Momenteel worden demo ad sets getoond. Klik op "Laad Facebook Ad Sets" om echte ad sets van Facebook op te halen, 
-              of ga naar "Advertentie Materiaal" om nieuwe campagnes aan te maken.
+            <h3 className="text-green-400 font-semibold mb-1">Live Facebook Data</h3>
+            <p className="text-green-200 text-sm mb-2">
+              De advertenties worden nu live geladen van Facebook. Elke advertentie is gekoppeld aan een campagne en ad set.
             </p>
-            <div className="flex items-center space-x-4 text-xs text-blue-300">
-              <span>📊 Demo: 11 ad sets (5 Algemeen + 2 Jongeren + 2 Vaders + 2 Zakelijk)</span>
-              <span>💰 Budget: €55/dag totaal</span>
-              <span>🎯 Doel: TRAFFIC naar prelaunch</span>
+            <div className="flex items-center space-x-4 text-xs text-green-300">
+              <span>📊 Live: {ads.length} advertenties van Facebook</span>
+              <span>🎯 Campagnes: {new Set(ads.map(ad => ad.campaign)).size} uniek</span>
+              <span>📱 Ad Sets: {new Set(ads.map(ad => ad.adSet)).size} uniek</span>
               <a 
-                href="/dashboard-marketing/advertentie-materiaal" 
-                className="text-blue-400 hover:text-blue-300 underline"
+                href="/dashboard-marketing/campagnes" 
+                className="text-green-400 hover:text-green-300 underline"
               >
-                → Ga naar Advertentie Materiaal
+                → Bekijk Campagnes
               </a>
             </div>
           </div>
@@ -592,12 +389,10 @@ export default function AdvertisementsPage() {
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-400 text-sm">Gemiddelde CTR</p>
-              <p className="text-2xl font-bold text-white">
-                {(ads.reduce((sum, ad) => sum + ad.ctr, 0) / ads.length).toFixed(1)}%
-              </p>
+              <p className="text-gray-400 text-sm">Unieke Campagnes</p>
+              <p className="text-2xl font-bold text-white">{new Set(ads.map(ad => ad.campaign)).size}</p>
             </div>
-            <ArrowTrendingUpIcon className="w-8 h-8 text-blue-400" />
+            <UserGroupIcon className="w-8 h-8 text-blue-400" />
           </div>
         </motion.div>
         
@@ -610,12 +405,12 @@ export default function AdvertisementsPage() {
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-400 text-sm">Totaal Uitgegeven</p>
+              <p className="text-gray-400 text-sm">Gemiddelde CTR</p>
               <p className="text-2xl font-bold text-white">
-                €{ads.reduce((sum, ad) => sum + ad.spent, 0).toLocaleString()}
+                {ads.length > 0 ? (ads.reduce((sum, ad) => sum + ad.ctr, 0) / ads.length).toFixed(1) : '0.0'}%
               </p>
             </div>
-            <CurrencyDollarIcon className="w-8 h-8 text-[#8BAE5A]" />
+            <ArrowTrendingUpIcon className="w-8 h-8 text-[#8BAE5A]" />
           </div>
         </motion.div>
       </div>
@@ -643,16 +438,16 @@ export default function AdvertisementsPage() {
                 <p className="text-white font-medium text-sm">{ad.campaign}</p>
               </div>
               <div>
-                <p className="text-gray-400 text-sm">Video</p>
-                <p className="text-white font-medium text-sm">{ad.videoName || 'N/A'}</p>
+                <p className="text-gray-400 text-sm">Ad Set</p>
+                <p className="text-white font-medium text-sm">{ad.adSet}</p>
               </div>
               <div>
                 <p className="text-gray-400 text-sm">Budget</p>
                 <p className="text-white font-medium">€{ad.budget.toLocaleString()}</p>
               </div>
               <div>
-                <p className="text-gray-400 text-sm">Uitgegeven</p>
-                <p className="text-white font-medium">€{ad.spent.toLocaleString()}</p>
+                <p className="text-gray-400 text-sm">Type</p>
+                <p className="text-white font-medium text-sm">{ad.type}</p>
               </div>
             </div>
 
@@ -682,7 +477,10 @@ export default function AdvertisementsPage() {
                 {ad.startDate} - {ad.endDate}
               </div>
               <div className="flex items-center space-x-2">
-                <button className="text-[#8BAE5A] hover:text-[#9BBE6A]">
+                <button 
+                  onClick={() => handleAdClick(ad)}
+                  className="text-[#8BAE5A] hover:text-[#9BBE6A]"
+                >
                   <EyeIcon className="w-4 h-4" />
                 </button>
                 <button className="text-blue-400 hover:text-blue-300">
