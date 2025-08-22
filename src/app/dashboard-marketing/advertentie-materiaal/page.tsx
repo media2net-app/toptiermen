@@ -115,7 +115,11 @@ export default function AdvertentieMateriaalPage() {
       const videosData = await VideosService.getVideos();
       console.log('✅ Fetched videos:', videosData.length);
       
-      setVideos(videosData);
+      // Filter out deleted videos
+      const activeVideos = videosData.filter(video => !video.is_deleted);
+      console.log('✅ Active videos:', activeVideos.length);
+      
+      setVideos(activeVideos);
     } catch (err) {
       console.error('❌ Error fetching videos:', err);
       setError('Kan geen video\'s ophalen uit de storage bucket');
@@ -571,40 +575,32 @@ export default function AdvertentieMateriaalPage() {
                 </button>
               </div>
 
-              {/* Target Audience Input */}
+              {/* Target Audience Dropdown */}
               <div className="mt-2 sm:mt-3 space-y-1 sm:space-y-2">
                 <label className="block text-xs font-medium text-gray-300">
                   🎯 Doelgroep
                 </label>
                 <div className="flex space-x-1 sm:space-x-2">
-                  <input
-                    type="text"
-                    placeholder="Bijv: Mannen 25-45, fitness, Nederland"
-                    defaultValue={video.target_audience || ''}
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter') {
-                        const target = (e.target as HTMLInputElement).value;
-                        if (target.trim()) {
-                          saveTargetAudience(video.id, target.trim());
-                          (e.target as HTMLInputElement).blur();
-                        }
-                      }
-                    }}
-                    onBlur={(e) => {
+                  <select
+                    value={video.target_audience || 'Algemeen'}
+                    onChange={(e) => {
                       const target = e.target.value;
-                      if (target.trim() && target !== video.target_audience) {
-                        saveTargetAudience(video.id, target.trim());
+                      if (target && target !== video.target_audience) {
+                        saveTargetAudience(video.id, target);
                       }
                     }}
                     className="flex-1 px-2 py-1 text-xs bg-gray-800 border border-gray-700 rounded text-white focus:outline-none focus:border-blue-500"
-                  />
+                  >
+                    <option value="Algemeen">Algemeen</option>
+                    <option value="Vaders">Vaders</option>
+                    <option value="Jongeren">Jongeren</option>
+                    <option value="Zakelijk">Zakelijk</option>
+                  </select>
                   <button
-                    onClick={(e) => {
-                      const input = e.currentTarget.previousElementSibling as HTMLInputElement;
-                      const target = input.value.trim();
-                      if (target) {
-                        saveTargetAudience(video.id, target);
-                        input.blur();
+                    onClick={() => {
+                      const select = document.querySelector(`select[data-video-id="${video.id}"]`) as HTMLSelectElement;
+                      if (select) {
+                        saveTargetAudience(video.id, select.value);
                       }
                     }}
                     className="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-medium transition-colors flex-shrink-0"
