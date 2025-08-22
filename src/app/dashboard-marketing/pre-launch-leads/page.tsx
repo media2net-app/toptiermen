@@ -57,8 +57,8 @@ export default function PreLaunchLeadsPage() {
   };
 
   // Get unique campaigns and ad sets for filtering
-  const campaigns = [...new Set(leads.map(lead => lead.utm_campaign).filter(Boolean))];
-  const adSets = [...new Set(leads.map(lead => lead.utm_content).filter(Boolean))];
+  const campaigns = [...new Set(leads.map(lead => lead.utm_campaign).filter(Boolean))] as string[];
+  const adSets = [...new Set(leads.map(lead => lead.utm_content).filter(Boolean))] as string[];
 
   // Filter leads based on search and filters
   const filteredLeads = leads.filter(lead => {
@@ -78,7 +78,8 @@ export default function PreLaunchLeadsPage() {
     count: leads.filter(lead => lead.utm_campaign === campaign).length
   }));
 
-  const getCampaignColor = (campaign: string) => {
+  const getCampaignColor = (campaign: string | null) => {
+    if (!campaign) return 'bg-gray-500';
     const colors = ['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-orange-500', 'bg-red-500'];
     const index = campaigns.indexOf(campaign);
     return colors[index % colors.length];
