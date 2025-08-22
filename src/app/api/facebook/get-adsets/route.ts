@@ -6,6 +6,8 @@ const FACEBOOK_AD_ACCOUNT_ID = process.env.FACEBOOK_AD_ACCOUNT_ID || 'act_146583
 export async function GET(request: NextRequest) {
   try {
     console.log('📊 Fetching Facebook ad sets (including drafts)...');
+    console.log('🔧 Using access token:', FACEBOOK_ACCESS_TOKEN ? 'PRESENT' : 'MISSING');
+    console.log('🔧 Using ad account ID:', FACEBOOK_AD_ACCOUNT_ID);
 
     if (!FACEBOOK_ACCESS_TOKEN) {
       return NextResponse.json({ 
@@ -16,7 +18,7 @@ export async function GET(request: NextRequest) {
 
     // Fetch ad sets from Facebook with all statuses including drafts
     const adSetsResponse = await fetch(
-      `https://graph.facebook.com/v19.0/${FACEBOOK_AD_ACCOUNT_ID}/adsets?access_token=${FACEBOOK_ACCESS_TOKEN}&fields=id,name,campaign_id,campaign{name},status,daily_budget,lifetime_budget,created_time,updated_time,insights{impressions,clicks,spend,reach,frequency,ctr,cpc,cpm}&status[]=ACTIVE&status[]=PAUSED&status[]=DRAFT&status[]=PENDING_REVIEW&status[]=DISAPPROVED&status[]=ARCHIVED&status[]=DELETED&limit=100`
+      `https://graph.facebook.com/v19.0/${FACEBOOK_AD_ACCOUNT_ID}/adsets?access_token=${FACEBOOK_ACCESS_TOKEN}&fields=id,name,status,created_time&limit=100`
     );
 
     if (!adSetsResponse.ok) {
@@ -31,20 +33,20 @@ export async function GET(request: NextRequest) {
     const transformedAdSets = adSets.map((adSet: any) => ({
       id: adSet.id,
       name: adSet.name,
-      campaign_id: adSet.campaign_id,
-      campaign_name: adSet.campaign?.name || '',
+      campaign_id: '',
+      campaign_name: '',
       platform: 'Facebook',
       status: adSet.status.toLowerCase() as 'active' | 'paused' | 'completed' | 'draft' | 'scheduled' | 'pending_review' | 'disapproved' | 'archived' | 'deleted',
-      impressions: adSet.insights?.impressions || 0,
-      clicks: adSet.insights?.clicks || 0,
-      spent: adSet.insights?.spend || 0,
-      reach: adSet.insights?.reach || 0,
-      ctr: adSet.insights?.ctr || 0,
-      cpc: adSet.insights?.cpc || 0,
-      daily_budget: adSet.daily_budget || 0,
-      lifetime_budget: adSet.lifetime_budget || 0,
+      impressions: 0,
+      clicks: 0,
+      spent: 0,
+      reach: 0,
+      ctr: 0,
+      cpc: 0,
+      daily_budget: 0,
+      lifetime_budget: 0,
       created_time: adSet.created_time || new Date().toISOString(),
-      updated_time: adSet.updated_time || new Date().toISOString()
+      updated_time: new Date().toISOString()
     }));
 
     console.log(`✅ Found ${transformedAdSets.length} Facebook ad sets (including drafts)`);
