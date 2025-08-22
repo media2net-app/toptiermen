@@ -17,7 +17,7 @@ export async function GET() {
     console.log('🔧 Using ad account ID:', FACEBOOK_AD_ACCOUNT_ID);
 
     const response = await fetch(
-      `https://graph.facebook.com/v19.0/${FACEBOOK_AD_ACCOUNT_ID}/adsets?access_token=${FACEBOOK_ACCESS_TOKEN}&fields=id,name,status,created_time&limit=100`
+      `https://graph.facebook.com/v19.0/${FACEBOOK_AD_ACCOUNT_ID}/adsets?access_token=${FACEBOOK_ACCESS_TOKEN}&fields=id,name,status,created_time&limit=1000`
     );
 
     if (!response.ok) {
@@ -33,6 +33,7 @@ export async function GET() {
 
     console.log(`📋 Raw ad sets from Facebook: ${data.data.length}`);
     console.log('📋 Sample ad set names:', data.data.slice(0, 3).map((adSet: any) => adSet.name));
+    console.log('📋 All ad set names:', data.data.map((adSet: any) => adSet.name));
 
     // Filter to only show TTM ad sets
     const ttmAdSets = data.data.filter((adSet: any) => 
@@ -40,6 +41,7 @@ export async function GET() {
     );
 
     console.log(`✅ Found ${ttmAdSets.length} TTM ad sets (filtered from ${data.data.length} total)`);
+    console.log('📋 TTM ad set names:', ttmAdSets.map((adSet: any) => adSet.name));
 
     const transformedAdSets = ttmAdSets.map((adSet: any) => ({
       id: adSet.id,
