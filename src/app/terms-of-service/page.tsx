@@ -263,9 +263,9 @@ export default function TermsOfService() {
             
             <div className="bg-gray-700 rounded-lg p-4">
               <p className="text-gray-300">
-                <strong>E-mail:</strong> legal@toptiermen.com<br/>
-                <strong>Adres:</strong> [Bedrijfsadres]<br/>
-                <strong>Telefoon:</strong> [Telefoonnummer]
+                <strong>E-mail:</strong> contact@media2net.nl<br/>
+                <strong>Website:</strong> https://platform.toptiermen.eu<br/>
+                <strong>Platform:</strong> Top Tier Men
               </p>
             </div>
           </div>
