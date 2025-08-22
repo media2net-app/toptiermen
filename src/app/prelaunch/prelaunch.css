@@ -390,16 +390,18 @@
   
   .prelaunch-story-box p {
     font-size: 16px;
-    line-height: 1.5;
+    line-height: 1.6;
     margin-bottom: 32px;
     text-align: center !important;
+    padding: 0 8px;
   }
   
   .prelaunch-section p {
     font-size: 16px;
-    line-height: 1.5;
+    line-height: 1.6;
     margin-bottom: 24px;
     text-align: center !important;
+    padding: 0 8px;
   }
   
   /* Grid mobile optimization - CENTER CONTENT */
@@ -432,10 +434,13 @@
     width: 100% !important;
     max-width: 320px;
     margin: 24px auto 0 auto !important;
-    display: block !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     text-align: center !important;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(139, 174, 90, 0.3);
+    gap: 8px;
   }
   
   /* Form mobile optimization - CENTER FORM */
@@ -448,7 +453,7 @@
   /* Badge mobile optimization - CENTER BADGES */
   .prelaunch-badge {
     font-size: 13px;
-    padding: 8px 16px;
+    padding: 10px 20px;
     margin: 0 auto 32px auto !important;
     display: inline-block !important;
   }
@@ -588,16 +593,18 @@
   
   .prelaunch-story-box p {
     font-size: 15px;
-    line-height: 1.4;
+    line-height: 1.5;
     margin-bottom: 28px;
     text-align: center !important;
+    padding: 0 6px;
   }
   
   .prelaunch-section p {
     font-size: 15px;
-    line-height: 1.4;
+    line-height: 1.5;
     margin-bottom: 28px;
     text-align: center !important;
+    padding: 0 6px;
   }
   
   /* Grid small mobile optimization - CENTER CONTENT */
@@ -629,10 +636,13 @@
     width: 100% !important;
     max-width: 300px;
     margin: 20px auto 0 auto !important;
-    display: block !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     text-align: center !important;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(139, 174, 90, 0.3);
+    gap: 6px;
   }
   
   /* Form small mobile optimization - CENTER FORM */
@@ -645,7 +655,7 @@
   /* Badge small mobile optimization - CENTER BADGES */
   .prelaunch-badge {
     font-size: 12px;
-    padding: 6px 12px;
+    padding: 8px 16px;
     margin: 0 auto 24px auto !important;
     display: inline-block !important;
   }
