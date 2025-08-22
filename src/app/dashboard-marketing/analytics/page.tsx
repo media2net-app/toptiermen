@@ -121,7 +121,7 @@ interface AudienceInsights {
 }
 
 export default function AnalyticsPage() {
-  const [timeRange, setTimeRange] = useState('last_30d');
+  const [timeRange, setTimeRange] = useState('last_90d');
   const [selectedMetric, setSelectedMetric] = useState('impressions');
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData[]>([]);
   const [facebookAnalytics, setFacebookAnalytics] = useState<FacebookAnalyticsData | null>(null);
@@ -279,14 +279,15 @@ export default function AnalyticsPage() {
             onChange={(e) => setTimeRange(e.target.value)}
             className="px-4 py-2 bg-[#2D3748] border border-[#4A5568] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A]"
           >
+            <option value="today">Vandaag</option>
+            <option value="yesterday">Gisteren</option>
             <option value="last_7d">Laatste 7 dagen</option>
             <option value="last_30d">Laatste 30 dagen</option>
             <option value="last_90d">Laatste 90 dagen</option>
-            <option value="last_1y">Laatste jaar</option>
-            <option value="today">Vandaag</option>
-            <option value="yesterday">Gisteren</option>
             <option value="this_month">Deze maand</option>
             <option value="last_month">Vorige maand</option>
+            <option value="last_1y">Laatste jaar</option>
+            <option value="lifetime">Alle tijd</option>
           </select>
           <motion.button
             whileHover={{ scale: 1.05 }}
