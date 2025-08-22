@@ -5,7 +5,7 @@ const FACEBOOK_AD_ACCOUNT_ID = process.env.FACEBOOK_AD_ACCOUNT_ID || 'act_146583
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('📊 Fetching Facebook ads...');
+    console.log('📊 Fetching Facebook ads (including drafts)...');
 
     if (!FACEBOOK_ACCESS_TOKEN) {
       return NextResponse.json({ 
@@ -14,9 +14,9 @@ export async function GET(request: NextRequest) {
       }, { status: 500 });
     }
 
-    // Fetch ads from Facebook
+    // Fetch ads from Facebook with all statuses including drafts
     const adsResponse = await fetch(
-      `https://graph.facebook.com/v19.0/${FACEBOOK_AD_ACCOUNT_ID}/ads?access_token=${FACEBOOK_ACCESS_TOKEN}&fields=id,name,adset_id,adset{name},status,creative{id,title,body,image_url,video_id,link_url,call_to_action_type},created_time,updated_time,insights{impressions,clicks,spend,reach,frequency,ctr,cpc,cpm}`
+      `https://graph.facebook.com/v19.0/${FACEBOOK_AD_ACCOUNT_ID}/ads?access_token=${FACEBOOK_ACCESS_TOKEN}&fields=id,name,adset_id,adset{name},status,creative{id,title,body,image_url,video_id,link_url,call_to_action_type},created_time,updated_time,insights{impressions,clicks,spend,reach,frequency,ctr,cpc,cpm}&status[]=ACTIVE&status[]=PAUSED&status[]=DRAFT&status[]=PENDING_REVIEW&status[]=DISAPPROVED&status[]=ARCHIVED&status[]=DELETED&limit=100`
     );
 
     if (!adsResponse.ok) {
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
       adset_id: ad.adset_id,
       adset_name: ad.adset?.name || '',
       platform: 'Facebook',
-      status: ad.status.toLowerCase() as 'active' | 'paused' | 'completed' | 'draft' | 'scheduled' | 'pending_review' | 'disapproved',
+      status: ad.status.toLowerCase() as 'active' | 'paused' | 'completed' | 'draft' | 'scheduled' | 'pending_review' | 'disapproved' | 'archived' | 'deleted',
       creative_type: ad.creative?.video_id ? 'Video' : ad.creative?.image_url ? 'Image' : 'Link',
       creative_id: ad.creative?.id || '',
       title: ad.creative?.title || '',
@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
       updated_time: ad.updated_time || new Date().toISOString()
     }));
 
-    console.log(`✅ Found ${transformedAds.length} Facebook ads`);
+    console.log(`✅ Found ${transformedAds.length} Facebook ads (including drafts)`);
 
     return NextResponse.json({
       success: true,

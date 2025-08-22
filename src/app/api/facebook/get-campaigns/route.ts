@@ -5,7 +5,7 @@ const FACEBOOK_AD_ACCOUNT_ID = process.env.FACEBOOK_AD_ACCOUNT_ID || 'act_146583
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('📊 Fetching Facebook campaigns...');
+    console.log('📊 Fetching Facebook campaigns (including drafts)...');
 
     if (!FACEBOOK_ACCESS_TOKEN) {
       return NextResponse.json({ 
@@ -14,9 +14,9 @@ export async function GET(request: NextRequest) {
       }, { status: 500 });
     }
 
-    // Fetch campaigns from Facebook
+    // Fetch campaigns from Facebook with all statuses including drafts
     const campaignsResponse = await fetch(
-      `https://graph.facebook.com/v19.0/${FACEBOOK_AD_ACCOUNT_ID}/campaigns?access_token=${FACEBOOK_ACCESS_TOKEN}&fields=id,name,status,objective,daily_budget,lifetime_budget,created_time,updated_time,start_time,stop_time,insights{impressions,clicks,spend,reach,frequency,ctr,cpc,cpm}`
+      `https://graph.facebook.com/v19.0/${FACEBOOK_AD_ACCOUNT_ID}/campaigns?access_token=${FACEBOOK_ACCESS_TOKEN}&fields=id,name,status,objective,daily_budget,lifetime_budget,created_time,updated_time,start_time,stop_time,insights{impressions,clicks,spend,reach,frequency,ctr,cpc,cpm}&status[]=ACTIVE&status[]=PAUSED&status[]=DRAFT&status[]=PENDING_REVIEW&status[]=DISAPPROVED&status[]=ARCHIVED&status[]=DELETED&limit=100`
     );
 
     if (!campaignsResponse.ok) {
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
       id: campaign.id,
       name: campaign.name,
       platform: 'Facebook',
-      status: campaign.status.toLowerCase() as 'active' | 'paused' | 'completed' | 'draft' | 'scheduled',
+      status: campaign.status.toLowerCase() as 'active' | 'paused' | 'completed' | 'draft' | 'scheduled' | 'pending_review' | 'disapproved' | 'archived' | 'deleted',
       objective: campaign.objective.toLowerCase() as 'awareness' | 'traffic' | 'conversions' | 'engagement' | 'sales',
       impressions: campaign.insights?.impressions || 0,
       clicks: campaign.insights?.clicks || 0,
@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
       adFormat: 'VIDEO' as const
     }));
 
-    console.log(`✅ Found ${transformedCampaigns.length} Facebook campaigns`);
+    console.log(`✅ Found ${transformedCampaigns.length} Facebook campaigns (including drafts)`);
 
     return NextResponse.json({
       success: true,
