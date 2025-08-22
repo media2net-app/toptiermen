@@ -33,10 +33,10 @@ async function updateVideoTitlesByTargetAudience() {
 
     // Group videos by target audience
     const groupedVideos = {
-      'Zakelijk': [],
-      'Vaders': [],
+      'Algemeen': [],
       'Jongeren': [],
-      'Algemeen': []
+      'Vaders': [],
+      'Zakelijk': []
     };
 
     videos.forEach(video => {
