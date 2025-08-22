@@ -64,94 +64,43 @@ export default function CampaignOverview({ onClose }: CampaignOverviewProps) {
   // Mock campaign data for demonstration
   const mockCampaign: CampaignData = {
     id: 'campaign_123',
-    name: 'TTM - Algemene Prelaunch Campagne',
+    name: 'TTM - Jongeren Prelaunch Campagne',
     status: 'PAUSED',
     objective: 'TRAFFIC',
-    daily_budget: 150,
+    daily_budget: 80,
     ad_sets: [
       {
         id: 'adset_1',
-        name: 'TTM - Algemeen - Prelaunch Awareness',
+        name: 'TTM - Jongeren - Fitness & Lifestyle',
         status: 'PAUSED',
-        daily_budget: 25,
+        daily_budget: 45,
         targeting: {
           age_min: 18,
-          age_max: 65,
+          age_max: 25,
           genders: ['all'],
           locations: ['NL', 'BE']
         },
-        video_name: 'algemeen_01',
+        video_name: 'jongeren_01',
         ad_creative: {
-          title: 'Word Lid van Top Tier Men',
-          body: 'Sluit je aan bij een community van mannen die streven naar excellentie. Meld je aan voor de wachtrij en krijg exclusieve toegang tot onze prelaunch.'
-        }
-      },
-      {
-        id: 'adset_2',
-        name: 'TTM - Algemeen - Fitness Community',
-        status: 'PAUSED',
-        daily_budget: 30,
-        targeting: {
-          age_min: 25,
-          age_max: 55,
-          genders: ['men'],
-          locations: ['NL']
-        },
-        video_name: 'algemeen_02',
-        ad_creative: {
-          title: 'Fitness Community voor Mannen',
+          title: 'Fitness & Lifestyle voor Jongeren',
           body: 'Ontdek een nieuwe manier van trainen en leven. Top Tier Men - waar fitness, mindset en community samenkomen. Meld je aan voor exclusieve toegang.'
         }
       },
       {
-        id: 'adset_3',
-        name: 'TTM - Algemeen - Lifestyle Upgrade',
+        id: 'adset_2',
+        name: 'TTM - Jongeren - Social & Community',
         status: 'PAUSED',
         daily_budget: 35,
         targeting: {
-          age_min: 30,
-          age_max: 50,
-          genders: ['all'],
-          locations: ['NL', 'BE', 'DE']
-        },
-        video_name: 'algemeen_03',
-        ad_creative: {
-          title: 'Upgrade Je Lifestyle',
-          body: 'Klaar voor de volgende stap? Top Tier Men helpt je je leven naar het volgende niveau te tillen. Fitness, mindset, community. Meld je aan voor de wachtrij.'
-        }
-      },
-      {
-        id: 'adset_4',
-        name: 'TTM - Algemeen - Business Professionals',
-        status: 'PAUSED',
-        daily_budget: 40,
-        targeting: {
-          age_min: 28,
-          age_max: 45,
+          age_min: 18,
+          age_max: 25,
           genders: ['all'],
           locations: ['NL']
         },
-        video_name: 'algemeen_04',
-        ad_creative: {
-          title: 'Voor Business Professionals',
-          body: 'Balans tussen werk en gezondheid. Top Tier Men biedt een community waar ambitieuze professionals hun fitness en mindset kunnen ontwikkelen.'
-        }
-      },
-      {
-        id: 'adset_5',
-        name: 'TTM - Algemeen - Community Building',
-        status: 'PAUSED',
-        daily_budget: 20,
-        targeting: {
-          age_min: 22,
-          age_max: 40,
-          genders: ['all'],
-          locations: ['NL', 'BE']
-        },
-        video_name: 'algemeen_05',
+        video_name: 'jongeren_02',
         ad_creative: {
           title: 'Word Onderdeel van Onze Community',
-          body: 'Zoek je een community van gelijkgestemden? Top Tier Men brengt mannen samen die streven naar excellentie. Meld je aan voor exclusieve toegang.'
+          body: 'Zoek je een community van gelijkgestemden? Top Tier Men brengt jongeren samen die streven naar excellentie. Meld je aan voor exclusieve toegang.'
         }
       }
     ]
@@ -222,8 +171,8 @@ export default function CampaignOverview({ onClose }: CampaignOverviewProps) {
         <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold">Facebook Campaign Overview</h2>
-              <p className="text-blue-100">1 Campaign • 5 Ad Sets • 5 Ads</p>
+                             <h2 className="text-2xl font-bold">Facebook Campaign Overview</h2>
+               <p className="text-blue-100">1 Campaign • 2 Ad Sets • 2 Ads</p>
             </div>
             <button
               onClick={onClose}
