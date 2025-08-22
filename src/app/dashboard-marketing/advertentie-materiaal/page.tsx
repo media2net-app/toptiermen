@@ -140,6 +140,24 @@ export default function AdvertentieMateriaalPage() {
                          video.original_name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === 'all' || video.campaign_status === filterStatus;
     return matchesSearch && matchesStatus;
+  }).sort((a, b) => {
+    // Sort by target audience priority: Algemeen, Jongeren, Vaders, Zakelijk
+    const priorityOrder = {
+      'Algemeen': 1,
+      'Jongeren': 2,
+      'Vaders': 3,
+      'Zakelijk': 4
+    };
+    
+    const aPriority = priorityOrder[a.target_audience as keyof typeof priorityOrder] || 5;
+    const bPriority = priorityOrder[b.target_audience as keyof typeof priorityOrder] || 5;
+    
+    if (aPriority !== bPriority) {
+      return aPriority - bPriority;
+    }
+    
+    // If same target audience, sort by name
+    return a.name.localeCompare(b.name);
   });
 
   // Helper function to identify duplicate videos
