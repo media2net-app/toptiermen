@@ -33,6 +33,16 @@ export default function PreLaunchPage() {
   const [error, setError] = useState('');
   const [alreadyExists, setAlreadyExists] = useState(false);
 
+  const handleEmailFocus = () => {
+    // Track when user focuses on email field
+    if (typeof window !== 'undefined' && window.fbq) {
+      window.fbq('track', 'ViewContent', {
+        content_name: 'Email Input Field',
+        content_category: 'Form Interaction'
+      });
+    }
+  };
+
   // Initialize Facebook SDK
   useEffect(() => {
     // Load Facebook SDK
@@ -62,6 +72,15 @@ export default function PreLaunchPage() {
     };
 
     loadFacebookSDK();
+    
+    // Track page view for prelaunch page
+    if (typeof window !== 'undefined' && window.fbq) {
+      window.fbq('track', 'ViewContent', {
+        content_name: 'Prelaunch Page',
+        content_category: 'Landing Page',
+        content_type: 'page'
+      });
+    }
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -69,6 +88,14 @@ export default function PreLaunchPage() {
     if (!email) {
       setError('Vul je email adres in');
       return;
+    }
+
+    // Track form submission attempt
+    if (typeof window !== 'undefined' && window.fbq) {
+      window.fbq('track', 'InitiateCheckout', {
+        content_name: 'Email Signup Form',
+        content_category: 'Form Submission'
+      });
     }
 
     setIsSubmitting(true);
@@ -90,6 +117,26 @@ export default function PreLaunchPage() {
         setIsSubmitted(true);
         // Track email signup with Facebook Pixel
         trackEmailSignup();
+        
+        // Additional tracking for better conversion optimization
+        if (typeof window !== 'undefined' && window.fbq) {
+          // Track the registration event with more details
+          window.fbq('track', 'CompleteRegistration', {
+            content_name: 'Prelaunch Email Signup',
+            content_category: 'Lead Generation',
+            value: 1.00,
+            currency: 'EUR',
+            content_type: 'form',
+            status: 'success'
+          });
+          
+          // Also track as a lead event
+          window.fbq('track', 'Lead', {
+            content_name: 'Prelaunch Waitlist',
+            value: 1.00,
+            currency: 'EUR'
+          });
+        }
       } else if (result.alreadyExists) {
         setAlreadyExists(true);
         setError(result.message);
@@ -682,6 +729,7 @@ export default function PreLaunchPage() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    onFocus={handleEmailFocus}
                     placeholder="Vul je email adres in"
                     className="w-full px-6 py-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] focus:border-transparent"
                     required
