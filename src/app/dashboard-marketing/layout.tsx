@@ -56,6 +56,8 @@ const navigation = [
   { name: 'Concurentie', href: '/dashboard-marketing/concurentie', icon: BuildingStorefrontIcon },
   { name: 'Pre-launch', href: '/dashboard-marketing/pre-launch', icon: RocketLaunchIcon, badge: 'NEW' },
   { name: 'Pre-launch Leads', href: '/dashboard-marketing/pre-launch-leads', icon: UserGroupIcon, badge: 'TRACKING' },
+  { name: 'Conversie Overzicht', href: '/dashboard-marketing/conversie-overzicht', icon: ChartBarIcon, badge: 'DATA' },
+  { name: 'Ads Logboek', href: '/dashboard-marketing/ads-logboek', icon: DocumentTextIcon, badge: 'LOG' },
   { name: 'AI Insights', href: '/dashboard-marketing/ai-insights', icon: AcademicCapIcon, badge: 'AI' },
   { name: 'AI Voice', href: '/dashboard-marketing/ai-voice', icon: MicrophoneIcon, badge: 'BETA' },
   { name: 'Executive Dashboard', href: '/dashboard-marketing/executive-dashboard', icon: StarIcon },

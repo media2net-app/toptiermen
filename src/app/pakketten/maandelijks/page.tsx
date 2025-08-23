@@ -110,7 +110,7 @@ export default function MaandelijksPakketPage() {
             </div>
 
             <button
-              onClick={() => router.push('/register')}
+              onClick={() => router.push('/prelaunch')}
               onMouseEnter={() => setIsHovered(true)}
               onMouseLeave={() => setIsHovered(false)}
               className="group relative px-12 py-4 bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] text-[#181F17] font-bold text-lg rounded-xl shadow-2xl hover:shadow-[#B6C948]/25 transition-all duration-300 transform hover:scale-105"
@@ -223,7 +223,7 @@ export default function MaandelijksPakketPage() {
                 <div className="text-[#8BAE5A]">€47 per maand × 6 maanden = €282 totaal</div>
               </div>
               <button
-                onClick={() => router.push('/register')}
+                onClick={() => router.push('/prelaunch')}
                 className="px-8 py-3 bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] text-[#181F17] font-bold rounded-lg hover:shadow-lg transition-all duration-300"
               >
                 Start nu

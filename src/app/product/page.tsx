@@ -221,7 +221,7 @@ export default function ProductPage() {
       window.location.href = '/contact';
     } else {
       // Redirect to registration with plan selection
-      window.location.href = `/register?plan=${tier.id}&period=${selectedPricing}`;
+      window.location.href = `/prelaunch?plan=${tier.id}&period=${selectedPricing}`;
     }
   };
 

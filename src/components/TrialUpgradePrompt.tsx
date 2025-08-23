@@ -65,7 +65,7 @@ export default function TrialUpgradePrompt({
       onUpgrade(selectedPlan);
     } else {
       // Default upgrade flow
-      window.location.href = `/register?plan=${selectedPlan}&period=monthly`;
+      window.location.href = `/prelaunch?plan=${selectedPlan}&period=monthly`;
     }
   };
 
