@@ -347,15 +347,7 @@ export default function PreLaunchPage() {
                   </p>
                 </div>
 
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="prelaunch-btn-primary inline-flex items-center"
-                  onClick={() => document.getElementById('signup')?.scrollIntoView({ behavior: 'smooth' })}
-                >
-                  <ArrowRightIcon className="w-5 h-5 mr-2" />
-                  Breek door
-                </motion.button>
+
               </div>
             </motion.div>
           </div>
