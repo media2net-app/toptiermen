@@ -4,6 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase-admin';
 export async function POST(request: NextRequest) {
   try {
     const { 
+      name,
       email, 
       utm_source, 
       utm_medium, 
@@ -15,6 +16,13 @@ export async function POST(request: NextRequest) {
     // Log UTM data for debugging
     if (utm_source || utm_medium || utm_campaign || utm_content || utm_term) {
       console.log('🎯 UTM data received:', { utm_source, utm_medium, utm_campaign, utm_content, utm_term });
+    }
+
+    if (!name) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Name is required' 
+      }, { status: 400 });
     }
 
     if (!email) {
@@ -56,6 +64,7 @@ export async function POST(request: NextRequest) {
     const { data: newEmail, error: insertError } = await supabaseAdmin
       .from('prelaunch_emails')
       .insert({
+        name: name.trim(),
         email: email.toLowerCase(),
         source: 'Pre-launch landingspagina',
         status: 'active',

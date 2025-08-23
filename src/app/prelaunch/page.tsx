@@ -27,6 +27,7 @@ declare global {
 }
 
 export default function PreLaunchPage() {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -109,6 +110,10 @@ export default function PreLaunchPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!name) {
+      setError('Vul je naam in');
+      return;
+    }
     if (!email) {
       setError('Vul je email adres in');
       return;
@@ -133,6 +138,7 @@ export default function PreLaunchPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
+          name,
           email,
           utm_source: utmData.utm_source,
           utm_medium: utmData.utm_medium,
@@ -725,7 +731,15 @@ export default function PreLaunchPage() {
                 transition={{ duration: 0.8, delay: 0.2 }}
                 viewport={{ once: true }}
               >
-                <div>
+                <div className="space-y-4">
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Vul je naam in"
+                    className="w-full px-6 py-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] focus:border-transparent"
+                    required
+                  />
                   <input
                     type="email"
                     value={email}
