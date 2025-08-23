@@ -398,7 +398,7 @@ export default function PreLaunchPage() {
             >
               <div className="prelaunch-story-image">
                 <img 
-                  src="/prelaunch/korps-foto.jpg" 
+                  src="/leger-blur.jpg" 
                   alt="Rick Cuijpers - Korps Mariniers" 
                   className="w-full h-auto rounded-lg shadow-lg"
                 />
@@ -719,7 +719,7 @@ export default function PreLaunchPage() {
             
             <p>
               Door je te registreren kom je op de wachtlijst te staan voor de lancering op 10 september 2025. 
-              Je behoort dan tot de groep eerste gebruikers van het platform.
+              Je zit nergens aan vast en kunt je altijd uitschrijven. In de dagen voor de lancering ontvang je meer informatie over het platform en een exclusief aanbod voor de eerste 100 mannen die Top Tier Men joinen.
             </p>
 
             {!isSubmitted ? (
@@ -731,6 +731,12 @@ export default function PreLaunchPage() {
                 transition={{ duration: 0.8, delay: 0.2 }}
                 viewport={{ once: true }}
               >
+                <div className="text-center mb-4">
+                  <p className="text-sm font-bold text-gray-300">
+                    <ShieldCheckIcon className="w-4 h-4 inline mr-1" />
+                    Geen verplichting - je kunt je altijd uitschrijven
+                  </p>
+                </div>
                 <div className="space-y-4">
                   <input
                     type="text"
@@ -794,8 +800,8 @@ export default function PreLaunchPage() {
                 <CheckCircleIcon className="w-16 h-16 text-[#8BAE5A] mx-auto mb-4" />
                 <h3 className="text-2xl font-bold text-white mb-2">Je bent ingeschreven!</h3>
                 <p className="text-gray-300">
-                  Bedankt voor je interesse! Je staat nu op de wachtlijst en behoort tot de groep eerste gebruikers. 
-                  Je ontvangt binnenkort meer informatie over de lancering op 10 september 2025.
+                  Bedankt voor je interesse! Je staat nu op de wachtlijst en zit nergens aan vast. 
+                  Je ontvangt in de dagen voor de lancering meer informatie over het platform en een exclusief aanbod voor de eerste 100 mannen die Top Tier Men joinen.
                 </p>
               </motion.div>
             )}
