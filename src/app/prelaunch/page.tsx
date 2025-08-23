@@ -363,10 +363,25 @@ export default function PreLaunchPage() {
       {/* Hero Section */}
       <section className="prelaunch-hero relative py-8 sm:py-12 md:py-16 lg:py-20 px-4 sm:px-8 md:px-12 lg:px-20">
         <div className="w-full">
-          <div className="w-full text-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 md:gap-16 items-center">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              className="relative"
+            >
+              <div className="prelaunch-story-image">
+                <img 
+                  src="/prelaunch/rick.jpg" 
+                  alt="Rick Cuijpers - Top Tier Men" 
+                  className="w-full h-auto rounded-lg shadow-lg"
+                />
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
               className="space-y-4 sm:space-y-6 md:space-y-8"
             >
@@ -413,13 +428,6 @@ export default function PreLaunchPage() {
               className="space-y-8"
             >
               <div>
-                <div className="prelaunch-story-image mb-8">
-                  <img 
-                    src="/prelaunch/rick.jpg" 
-                    alt="Rick Cuijpers - Top Tier Men" 
-                    className="w-full max-w-md mx-auto h-auto rounded-lg shadow-lg"
-                  />
-                </div>
                 <h1>
                   <span>MIJN</span>
                   <span className="block">VERHAAL</span>
