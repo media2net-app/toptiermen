@@ -374,10 +374,16 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  /* Reduce padding and margins for mobile */
+  /* Add proper padding for mobile */
   .prelaunch-hero,
   .prelaunch-section {
-    padding: 60px 20px !important;
+    padding: 60px 10px !important;
+  }
+  
+  /* Add padding to the entire page container */
+  .prelaunch-page {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
   }
   
   /* Header mobile optimization */
@@ -470,6 +476,22 @@
     font-size: 16px;
     padding: 12px;
     text-align: center !important;
+    width: 100% !important;
+    max-width: 320px !important;
+    margin: 0 auto !important;
+  }
+  
+  /* Make form fields match button width */
+  .prelaunch-section form .space-y-4 {
+    width: 100% !important;
+    max-width: 320px !important;
+    margin: 0 auto !important;
+  }
+  
+  .prelaunch-section form .space-y-4 input {
+    width: 100% !important;
+    max-width: 320px !important;
+    margin: 0 auto !important;
   }
   
   /* Badge mobile optimization - CENTER BADGES */
@@ -585,7 +607,13 @@
   /* Further reduce spacing for small mobile */
   .prelaunch-hero,
   .prelaunch-section {
-    padding: 40px 16px !important;
+    padding: 40px 10px !important;
+  }
+  
+  /* Add padding to the entire page container */
+  .prelaunch-page {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
   }
   
   header .w-full {
@@ -656,7 +684,7 @@
     font-weight: 600;
     padding: 14px 28px;
     width: 100% !important;
-    max-width: 300px;
+    max-width: 450px;
     margin: 20px auto 0 auto !important;
     display: flex !important;
     align-items: center !important;
@@ -672,6 +700,22 @@
     font-size: 14px;
     padding: 10px;
     text-align: center !important;
+    width: 100% !important;
+    max-width: 450px !important;
+    margin: 0 auto !important;
+  }
+  
+  /* Make form fields match button width */
+  .prelaunch-section form .space-y-4 {
+    width: 100% !important;
+    max-width: 450px !important;
+    margin: 0 auto !important;
+  }
+  
+  .prelaunch-section form .space-y-4 input {
+    width: 100% !important;
+    max-width: 450px !important;
+    margin: 0 auto !important;
   }
   
   /* Badge small mobile optimization - CENTER BADGES */
