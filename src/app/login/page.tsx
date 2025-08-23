@@ -290,7 +290,7 @@ export default function Login() {
         <div className="mt-6 text-center">
           <p className="text-[#B6C948] text-sm font-figtree">
             Nog geen account?{" "}
-            <a href="/register" className="text-[#8BAE5A] hover:text-white transition-colors font-semibold">
+            <a href="/prelaunch" className="text-[#8BAE5A] hover:text-white transition-colors font-semibold">
               Registreer hier
             </a>
           </p>

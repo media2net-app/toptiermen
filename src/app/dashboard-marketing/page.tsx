@@ -221,8 +221,8 @@ export default function MarketingDashboard() {
         setAdAccountInfo(JSON.parse(adAccountInfoStored));
       }
       
-      // Load comprehensive analytics data
-      const analyticsResponse = await fetch('/api/facebook/comprehensive-analytics?dateRange=last_30d');
+      // Load comprehensive analytics data with manual data override
+      const analyticsResponse = await fetch('/api/facebook/comprehensive-analytics?dateRange=maximum&useManualData=true');
       if (analyticsResponse.ok) {
         const analyticsData = await analyticsResponse.json();
         if (analyticsData.success && analyticsData.data) {
