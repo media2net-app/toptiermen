@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
     // Fetch insights for each campaign with full date range
     analyticsData.campaigns = await Promise.all(ttmCampaigns.map(async (campaign: any) => {
       try {
-        let insights = null;
+        let insights: any = null;
         
         if (useManualData && MANUAL_DATA_OVERRIDE[campaign.name]) {
           // Use manual data override
