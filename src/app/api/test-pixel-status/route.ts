@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
       pixelStatus = 'error';
     }
 
-    const pixelInfo = {
+    const pixelInfo: any = {
       pixelId,
       status: pixelStatus,
       testUrl,
