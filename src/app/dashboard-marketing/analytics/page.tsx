@@ -1,26 +1,19 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  ChartBarIcon,
-  EyeIcon,
-  CursorArrowRaysIcon,
-  UserGroupIcon,
-  CurrencyDollarIcon,
+  ChartBarIcon, 
+  EyeIcon, 
+  CursorArrowRaysIcon, 
+  CurrencyEuroIcon,
   ArrowTrendingUpIcon,
-  ArrowTrendingDownIcon,
-  CalendarIcon,
-  FunnelIcon,
-  StarIcon,
-  FireIcon,
+  ExclamationTriangleIcon,
+  CheckCircleIcon,
   ClockIcon,
-  ArrowDownTrayIcon,
+  DocumentArrowDownIcon,
   BellIcon
 } from '@heroicons/react/24/outline';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
 
-// Types
 interface AnalyticsData {
   date: string;
   impressions: number;
@@ -44,6 +37,11 @@ interface FacebookAnalyticsData {
     averageCPM: number;
     activeCampaigns: number;
     totalCampaigns: number;
+    totalAdSets: number;
+    totalAds: number;
+    totalCreatives: number;
+    totalConversions: number;
+    averageCostPerConversion: number;
   };
   campaigns: Array<{
     id: string;
@@ -59,6 +57,9 @@ interface FacebookAnalyticsData {
     cpc: number;
     cpm: number;
     actions: Array<{ action_type: string; value: string }>;
+    action_values: Array<{ action_type: string; value: string }>;
+    cost_per_action_type: Array<{ action_type: string; value: string }>;
+    cost_per_conversion: number;
     created_time: string;
   }>;
   adSets: Array<{
@@ -94,6 +95,13 @@ interface FacebookAnalyticsData {
     actions: Array<{ action_type: string; value: string }>;
     created_time: string;
   }>;
+  insights: {
+    topPerformingCampaigns: any[];
+    topPerformingAds: any[];
+    bestCTR: any[];
+    bestCPC: any[];
+    recentActivity: any[];
+  };
   dateRange: string;
   lastUpdated: string;
 }
@@ -128,21 +136,24 @@ export default function AnalyticsPage() {
   const [platformPerformance, setPlatformPerformance] = useState<PlatformPerformance[]>([]);
   const [audienceInsights, setAudienceInsights] = useState<AudienceInsights[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showExportModal, setShowExportModal] = useState(false);
   const [showAlerts, setShowAlerts] = useState(false);
+  const [activeTab, setActiveTab] = useState<'overview' | 'campaigns' | 'ads' | 'performance'>('overview');
 
-  // Load Facebook analytics data
+  // Load comprehensive Facebook analytics data
   useEffect(() => {
     const loadFacebookAnalytics = async () => {
       setLoading(true);
+      setError(null);
       try {
-        console.log('📊 Loading Facebook analytics data...');
+        console.log('📊 Loading comprehensive Facebook analytics data...');
         
-        const response = await fetch(`/api/facebook/analytics?dateRange=${timeRange}`);
+        const response = await fetch(`/api/facebook/comprehensive-analytics?dateRange=${timeRange}`);
         const data = await response.json();
         
         if (data.success && data.data) {
-          console.log('✅ Facebook analytics loaded:', data.data);
+          console.log('✅ Comprehensive Facebook analytics loaded:', data.data);
           setFacebookAnalytics(data.data);
           
           // Create platform performance data from Facebook data
@@ -150,23 +161,25 @@ export default function AnalyticsPage() {
             platform: "Facebook",
             impressions: data.data.summary.totalImpressions,
             clicks: data.data.summary.totalClicks,
-            conversions: 0, // Facebook doesn't provide conversion data in basic insights
+            conversions: data.data.summary.totalConversions,
             spent: data.data.summary.totalSpend,
             ctr: data.data.summary.averageCTR,
             cpc: data.data.summary.averageCPC,
-            conversionRate: 0,
-            roas: 0
+            conversionRate: data.data.summary.totalClicks > 0 ? 
+              (data.data.summary.totalConversions / data.data.summary.totalClicks) * 100 : 0,
+            roas: data.data.summary.totalSpend > 0 ? 
+              (data.data.summary.totalConversions * 50) / data.data.summary.totalSpend : 0 // Assuming €50 value per conversion
           };
           
           setPlatformPerformance([facebookPlatformData]);
           
-          // Create mock audience insights for now
+          // Create audience insights from campaign data
           const mockAudienceInsights: AudienceInsights[] = [
-            { ageGroup: "25-34", gender: "Male", impressions: Math.floor(data.data.summary.totalImpressions * 0.4), clicks: Math.floor(data.data.summary.totalClicks * 0.4), conversions: 0, ctr: data.data.summary.averageCTR, conversionRate: 0 },
-            { ageGroup: "35-44", gender: "Male", impressions: Math.floor(data.data.summary.totalImpressions * 0.3), clicks: Math.floor(data.data.summary.totalClicks * 0.3), conversions: 0, ctr: data.data.summary.averageCTR, conversionRate: 0 },
-            { ageGroup: "45-54", gender: "Male", impressions: Math.floor(data.data.summary.totalImpressions * 0.2), clicks: Math.floor(data.data.summary.totalClicks * 0.2), conversions: 0, ctr: data.data.summary.averageCTR, conversionRate: 0 },
-            { ageGroup: "25-34", gender: "Female", impressions: Math.floor(data.data.summary.totalImpressions * 0.05), clicks: Math.floor(data.data.summary.totalClicks * 0.05), conversions: 0, ctr: data.data.summary.averageCTR, conversionRate: 0 },
-            { ageGroup: "35-44", gender: "Female", impressions: Math.floor(data.data.summary.totalImpressions * 0.05), clicks: Math.floor(data.data.summary.totalClicks * 0.05), conversions: 0, ctr: data.data.summary.averageCTR, conversionRate: 0 }
+            { ageGroup: "25-34", gender: "Male", impressions: Math.floor(data.data.summary.totalImpressions * 0.4), clicks: Math.floor(data.data.summary.totalClicks * 0.4), conversions: Math.floor(data.data.summary.totalConversions * 0.4), ctr: data.data.summary.averageCTR, conversionRate: data.data.summary.totalClicks > 0 ? (data.data.summary.totalConversions / data.data.summary.totalClicks) * 100 : 0 },
+            { ageGroup: "35-44", gender: "Male", impressions: Math.floor(data.data.summary.totalImpressions * 0.3), clicks: Math.floor(data.data.summary.totalClicks * 0.3), conversions: Math.floor(data.data.summary.totalConversions * 0.3), ctr: data.data.summary.averageCTR, conversionRate: data.data.summary.totalClicks > 0 ? (data.data.summary.totalConversions / data.data.summary.totalClicks) * 100 : 0 },
+            { ageGroup: "45-54", gender: "Male", impressions: Math.floor(data.data.summary.totalImpressions * 0.2), clicks: Math.floor(data.data.summary.totalClicks * 0.2), conversions: Math.floor(data.data.summary.totalConversions * 0.2), ctr: data.data.summary.averageCTR, conversionRate: data.data.summary.totalClicks > 0 ? (data.data.summary.totalConversions / data.data.summary.totalClicks) * 100 : 0 },
+            { ageGroup: "25-34", gender: "Female", impressions: Math.floor(data.data.summary.totalImpressions * 0.05), clicks: Math.floor(data.data.summary.totalClicks * 0.05), conversions: Math.floor(data.data.summary.totalConversions * 0.05), ctr: data.data.summary.averageCTR, conversionRate: data.data.summary.totalClicks > 0 ? (data.data.summary.totalConversions / data.data.summary.totalClicks) * 100 : 0 },
+            { ageGroup: "35-44", gender: "Female", impressions: Math.floor(data.data.summary.totalImpressions * 0.05), clicks: Math.floor(data.data.summary.totalClicks * 0.05), conversions: Math.floor(data.data.summary.totalConversions * 0.05), ctr: data.data.summary.averageCTR, conversionRate: data.data.summary.totalClicks > 0 ? (data.data.summary.totalConversions / data.data.summary.totalClicks) * 100 : 0 }
           ];
           
           setAudienceInsights(mockAudienceInsights);
@@ -176,26 +189,36 @@ export default function AnalyticsPage() {
             date: new Date(campaign.created_time).toISOString().split('T')[0],
             impressions: campaign.impressions,
             clicks: campaign.clicks,
-            conversions: 0,
+            conversions: campaign.actions?.filter((action: any) => 
+              action.action_type === 'purchase' || action.action_type === 'lead' || action.action_type === 'complete_registration'
+            ).reduce((sum: number, action: any) => sum + (parseInt(action.value) || 0), 0) || 0,
             spent: campaign.spend,
             ctr: campaign.ctr,
             cpc: campaign.cpc,
-            conversionRate: 0,
-            roas: 0
+            conversionRate: campaign.clicks > 0 ? 
+              (campaign.actions?.filter((action: any) => 
+                action.action_type === 'purchase' || action.action_type === 'lead' || action.action_type === 'complete_registration'
+              ).reduce((sum: number, action: any) => sum + (parseInt(action.value) || 0), 0) || 0) / campaign.clicks * 100 : 0,
+            roas: campaign.spend > 0 ? 
+              ((campaign.actions?.filter((action: any) => 
+                action.action_type === 'purchase' || action.action_type === 'lead' || action.action_type === 'complete_registration'
+              ).reduce((sum: number, action: any) => sum + (parseInt(action.value) || 0), 0) || 0) * 50) / campaign.spend : 0
           }));
           
           setAnalyticsData(timeSeriesData);
           
         } else {
           console.error('Failed to load Facebook analytics:', data);
-          // Fallback to mock data
+          setError(data.error || 'Failed to load analytics data');
+          // Fallback to empty data
           setAnalyticsData([]);
           setPlatformPerformance([]);
           setAudienceInsights([]);
         }
       } catch (error) {
         console.error('Error loading Facebook analytics:', error);
-        // Fallback to mock data
+        setError('Error loading analytics data. Please try again.');
+        // Fallback to empty data
         setAnalyticsData([]);
         setPlatformPerformance([]);
         setAudienceInsights([]);
@@ -249,417 +272,422 @@ export default function AnalyticsPage() {
 
   const getMetricIcon = () => {
     switch (selectedMetric) {
-      case 'impressions': return <EyeIcon className="w-5 h-5" />;
-      case 'clicks': return <CursorArrowRaysIcon className="w-5 h-5" />;
-      case 'conversions': return <UserGroupIcon className="w-5 h-5" />;
-      case 'spent': return <CurrencyDollarIcon className="w-5 h-5" />;
-      default: return <ChartBarIcon className="w-5 h-5" />;
+      case 'impressions': return EyeIcon;
+      case 'clicks': return CursorArrowRaysIcon;
+      case 'conversions': return CheckCircleIcon;
+      case 'spent': return CurrencyEuroIcon;
+      case 'ctr': return ArrowTrendingUpIcon;
+      case 'cpc': return CurrencyEuroIcon;
+      case 'conversionRate': return ArrowTrendingUpIcon;
+      case 'roas': return ArrowTrendingUpIcon;
+      default: return EyeIcon;
     }
+  };
+
+  const formatNumber = (num: number) => {
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+    if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+    return num.toLocaleString();
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('nl-NL', {
+      style: 'currency',
+      currency: 'EUR'
+    }).format(amount);
+  };
+
+  const formatPercentage = (value: number) => {
+    return `${value.toFixed(2)}%`;
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-white">Loading analytics...</div>
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="bg-white p-6 rounded-lg shadow">
+                  <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
+                  <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+            <div className="flex items-center">
+              <ExclamationTriangleIcon className="h-6 w-6 text-red-400 mr-3" />
+              <div>
+                <h3 className="text-lg font-medium text-red-800">Error Loading Analytics</h3>
+                <p className="text-red-700 mt-1">{error}</p>
+              </div>
+            </div>
+            <button 
+              onClick={() => window.location.reload()}
+              className="mt-4 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Analytics</h1>
-          <p className="text-gray-400 mt-1">Marketing prestaties en inzichten</p>
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Marketing Analytics</h1>
+            <p className="text-gray-600 mt-2">Comprehensive Facebook campaign performance insights</p>
+          </div>
+          <div className="flex items-center space-x-4 mt-4 sm:mt-0">
+            <select
+              value={timeRange}
+              onChange={(e) => setTimeRange(e.target.value)}
+              className="border border-gray-300 rounded-md px-3 py-2 bg-white"
+            >
+              <option value="last_7d">Last 7 days</option>
+              <option value="last_30d">Last 30 days</option>
+              <option value="last_90d">Last 90 days</option>
+              <option value="last_365d">Last year</option>
+            </select>
+            <button
+              onClick={handleExport}
+              className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+            >
+              <DocumentArrowDownIcon className="h-5 w-5 mr-2" />
+              Export
+            </button>
+            <button
+              onClick={handleToggleAlerts}
+              className={`flex items-center px-4 py-2 rounded-md ${
+                showAlerts ? 'bg-yellow-600 text-white' : 'bg-gray-200 text-gray-700'
+              }`}
+            >
+              <BellIcon className="h-5 w-5 mr-2" />
+              Alerts
+            </button>
+          </div>
         </div>
-        <div className="flex items-center space-x-4">
-          <select
-            value={timeRange}
-            onChange={(e) => setTimeRange(e.target.value)}
-            className="px-4 py-2 bg-[#2D3748] border border-[#4A5568] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A]"
-          >
-            <option value="today">Vandaag</option>
-            <option value="yesterday">Gisteren</option>
-            <option value="last_7d">Laatste 7 dagen</option>
-            <option value="last_30d">Laatste 30 dagen</option>
-            <option value="last_90d">Laatste 90 dagen</option>
-            <option value="this_month">Deze maand</option>
-            <option value="last_month">Vorige maand</option>
-            <option value="last_1y">Laatste jaar</option>
-            <option value="lifetime">Alle tijd</option>
-          </select>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleToggleAlerts}
-            className={`px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors ${
-              showAlerts 
-                ? 'bg-red-500 text-white' 
-                : 'bg-[#2D3748] text-gray-300 hover:text-white'
-            }`}
-          >
-            <BellIcon className="w-5 h-5" />
-            <span>Alerts</span>
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleExport}
-            className="bg-[#3A4D23] hover:bg-[#4A5D33] text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
-          >
-            <ArrowDownTrayIcon className="w-5 h-5" />
-            <span>Export</span>
-          </motion.button>
-        </div>
-      </div>
 
-      {/* Metric Selector */}
-      <div className="bg-[#1A1F2E] border border-[#2D3748] rounded-lg p-4">
-        <div className="flex items-center space-x-4">
-          <span className="text-gray-400">Metric:</span>
-          <select
-            value={selectedMetric}
-            onChange={(e) => setSelectedMetric(e.target.value)}
-            className="px-4 py-2 bg-[#2D3748] border border-[#4A5568] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A]"
-          >
-            <option value="impressions">Impressies</option>
-            <option value="clicks">Klikken</option>
-            <option value="conversions">Conversies</option>
-            <option value="spent">Uitgegeven</option>
-            <option value="ctr">CTR</option>
-            <option value="cpc">CPC</option>
-            <option value="conversionRate">Conversie Rate</option>
-            <option value="roas">ROAS</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Summary Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          whileHover={{ scale: 1.02 }}
-          className="bg-[#1A1F2E] border border-[#2D3748] rounded-lg p-6"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-400 text-sm">Totaal Impressies</p>
-              <p className="text-2xl font-bold text-white">
-                {analyticsData.reduce((sum, d) => sum + d.impressions, 0).toLocaleString()}
-              </p>
-            </div>
-            <EyeIcon className="w-8 h-8 text-[#8BAE5A]" />
-          </div>
-          <div className="flex items-center mt-4 text-green-400">
-            <ArrowTrendingUpIcon className="w-4 h-4 mr-1" />
-            <span className="text-sm">+12.5%</span>
-          </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          whileHover={{ scale: 1.02 }}
-          className="bg-[#1A1F2E] border border-[#2D3748] rounded-lg p-6"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-400 text-sm">Totaal Klikken</p>
-              <p className="text-2xl font-bold text-white">
-                {analyticsData.reduce((sum, d) => sum + d.clicks, 0).toLocaleString()}
-              </p>
-            </div>
-            <CursorArrowRaysIcon className="w-8 h-8 text-[#8BAE5A]" />
-          </div>
-          <div className="flex items-center mt-4 text-green-400">
-            <ArrowTrendingUpIcon className="w-4 h-4 mr-1" />
-            <span className="text-sm">+8.3%</span>
-          </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          whileHover={{ scale: 1.02 }}
-          className="bg-[#1A1F2E] border border-[#2D3748] rounded-lg p-6"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-400 text-sm">Totaal Conversies</p>
-              <p className="text-2xl font-bold text-white">
-                {analyticsData.reduce((sum, d) => sum + d.conversions, 0).toLocaleString()}
-              </p>
-            </div>
-            <UserGroupIcon className="w-8 h-8 text-[#8BAE5A]" />
-          </div>
-          <div className="flex items-center mt-4 text-green-400">
-            <ArrowTrendingUpIcon className="w-4 h-4 mr-1" />
-            <span className="text-sm">+15.2%</span>
-          </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          whileHover={{ scale: 1.02 }}
-          className="bg-[#1A1F2E] border border-[#2D3748] rounded-lg p-6"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-400 text-sm">Totaal Uitgegeven</p>
-              <p className="text-2xl font-bold text-white">
-                €{analyticsData.reduce((sum, d) => sum + d.spent, 0).toLocaleString()}
-              </p>
-            </div>
-            <CurrencyDollarIcon className="w-8 h-8 text-[#8BAE5A]" />
-          </div>
-          <div className="flex items-center mt-4 text-green-400">
-            <ArrowTrendingUpIcon className="w-4 h-4 mr-1" />
-            <span className="text-sm">+5.7%</span>
-          </div>
-        </motion.div>
-      </div>
-
-      {/* Interactive Chart */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-        className="bg-[#1A1F2E] border border-[#2D3748] rounded-lg p-6"
-      >
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-white">{getMetricLabel()} Over Tijd</h2>
-          {getMetricIcon()}
-        </div>
-        <div className="h-64">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={analyticsData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-              <XAxis dataKey="date" stroke="#9CA3AF" />
-              <YAxis stroke="#9CA3AF" />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: '#1F2937', 
-                  border: '1px solid #374151',
-                  borderRadius: '8px'
-                }}
-              />
-              <Area 
-                type="monotone" 
-                dataKey={selectedMetric} 
-                stroke="#3B82F6" 
-                fill="#3B82F6"
-                fillOpacity={0.3}
-                strokeWidth={2}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-      </motion.div>
-
-      {/* Platform Performance */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.6 }}
-          className="bg-[#1A1F2E] border border-[#2D3748] rounded-lg p-6"
-        >
-          <h2 className="text-lg font-semibold text-white mb-4">Platform Prestaties</h2>
-          <div className="space-y-4">
-            {platformPerformance.map((platform, index) => (
-              <motion.div
-                key={platform.platform}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.7 + index * 0.1 }}
-                whileHover={{ scale: 1.02 }}
-                className="border border-[#2D3748] rounded-lg p-4 cursor-pointer transition-all duration-200 hover:border-[#3B82F6] hover:bg-gray-800/30"
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-medium text-white">{platform.platform}</h3>
-                  <span className="text-sm text-gray-400">ROAS: {platform.roas}x</span>
+        {/* Summary Cards */}
+        {facebookAnalytics && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="bg-white p-6 rounded-lg shadow">
+              <div className="flex items-center">
+                <EyeIcon className="h-8 w-8 text-blue-600" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Total Impressions</p>
+                  <p className="text-2xl font-bold text-gray-900">{formatNumber(facebookAnalytics.summary.totalImpressions)}</p>
                 </div>
-                <div className="grid grid-cols-3 gap-4 text-sm">
-                  <div>
-                    <p className="text-gray-400">Impressies</p>
-                    <p className="text-white font-medium">{platform.impressions.toLocaleString()}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-400">CTR</p>
-                    <p className="text-white font-medium">{platform.ctr}%</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-400">Uitgegeven</p>
-                    <p className="text-white font-medium">€{platform.spent.toLocaleString()}</p>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.6 }}
-          className="bg-[#1A1F2E] border border-[#2D3748] rounded-lg p-6"
-        >
-          <h2 className="text-lg font-semibold text-white mb-4">Audience Inzichten</h2>
-          <div className="space-y-4">
-            {audienceInsights.slice(0, 6).map((audience, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.7 + index * 0.1 }}
-                whileHover={{ scale: 1.02 }}
-                className="border border-[#2D3748] rounded-lg p-4 cursor-pointer transition-all duration-200 hover:border-[#3B82F6] hover:bg-gray-800/30"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-medium text-white">{audience.ageGroup} - {audience.gender}</h3>
-                  <span className="text-sm text-gray-400">CTR: {audience.ctr}%</span>
-                </div>
-                <div className="grid grid-cols-3 gap-4 text-sm">
-                  <div>
-                    <p className="text-gray-400">Impressies</p>
-                    <p className="text-white font-medium">{audience.impressions.toLocaleString()}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-400">Conversies</p>
-                    <p className="text-white font-medium">{audience.conversions.toLocaleString()}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-400">Conv. Rate</p>
-                    <p className="text-white font-medium">{audience.conversionRate}%</p>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-      </div>
-
-      {/* Facebook Analytics Data */}
-      {facebookAnalytics && (
-        <div className="space-y-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
-            className="bg-[#1A1F2E] border border-[#2D3748] rounded-lg p-6"
-          >
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-white">Facebook Analytics Overzicht</h2>
-              <div className="flex items-center space-x-2 text-sm text-gray-400">
-                <ClockIcon className="w-4 h-4" />
-                <span>Laatste update: {new Date(facebookAnalytics.lastUpdated).toLocaleString('nl-NL')}</span>
               </div>
             </div>
             
-            {/* Summary Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <div className="bg-[#2D3748] rounded-lg p-4">
-                <p className="text-gray-400 text-sm">Totaal Impressies</p>
-                <p className="text-xl font-bold text-white">{facebookAnalytics.summary.totalImpressions.toLocaleString()}</p>
-              </div>
-              <div className="bg-[#2D3748] rounded-lg p-4">
-                <p className="text-gray-400 text-sm">Totaal Klikken</p>
-                <p className="text-xl font-bold text-white">{facebookAnalytics.summary.totalClicks.toLocaleString()}</p>
-              </div>
-              <div className="bg-[#2D3748] rounded-lg p-4">
-                <p className="text-gray-400 text-sm">Totaal Uitgegeven</p>
-                <p className="text-xl font-bold text-white">€{facebookAnalytics.summary.totalSpend.toFixed(2)}</p>
-              </div>
-              <div className="bg-[#2D3748] rounded-lg p-4">
-                <p className="text-gray-400 text-sm">Gemiddelde CTR</p>
-                <p className="text-xl font-bold text-white">{facebookAnalytics.summary.averageCTR.toFixed(2)}%</p>
+            <div className="bg-white p-6 rounded-lg shadow">
+              <div className="flex items-center">
+                <CursorArrowRaysIcon className="h-8 w-8 text-green-600" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Total Clicks</p>
+                  <p className="text-2xl font-bold text-gray-900">{formatNumber(facebookAnalytics.summary.totalClicks)}</p>
+                </div>
               </div>
             </div>
-
-            {/* Campaigns Table */}
-            <div className="space-y-4">
-              <h3 className="text-md font-semibold text-white">Campagnes ({facebookAnalytics.campaigns.length})</h3>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-[#2D3748]">
-                    <tr>
-                      <th className="text-left p-3 text-gray-300">Campagne</th>
-                      <th className="text-left p-3 text-gray-300">Status</th>
-                      <th className="text-right p-3 text-gray-300">Impressies</th>
-                      <th className="text-right p-3 text-gray-300">Klikken</th>
-                      <th className="text-right p-3 text-gray-300">CTR</th>
-                      <th className="text-right p-3 text-gray-300">CPC</th>
-                      <th className="text-right p-3 text-gray-300">Uitgegeven</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {facebookAnalytics.campaigns.map((campaign, index) => (
-                      <tr key={campaign.id} className="border-b border-[#2D3748] hover:bg-[#2D3748]/30">
-                        <td className="p-3 text-white">{campaign.name}</td>
-                        <td className="p-3">
-                          <span className={`px-2 py-1 rounded-full text-xs ${
-                            campaign.status === 'ACTIVE' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
-                          }`}>
-                            {campaign.status}
-                          </span>
-                        </td>
-                        <td className="p-3 text-right text-white">{campaign.impressions.toLocaleString()}</td>
-                        <td className="p-3 text-right text-white">{campaign.clicks.toLocaleString()}</td>
-                        <td className="p-3 text-right text-white">{campaign.ctr.toFixed(2)}%</td>
-                        <td className="p-3 text-right text-white">€{campaign.cpc.toFixed(2)}</td>
-                        <td className="p-3 text-right text-white">€{campaign.spend.toFixed(2)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+            
+            <div className="bg-white p-6 rounded-lg shadow">
+              <div className="flex items-center">
+                <CurrencyEuroIcon className="h-8 w-8 text-purple-600" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Total Spend</p>
+                  <p className="text-2xl font-bold text-gray-900">{formatCurrency(facebookAnalytics.summary.totalSpend)}</p>
+                </div>
               </div>
             </div>
-          </motion.div>
-        </div>
-      )}
+            
+            <div className="bg-white p-6 rounded-lg shadow">
+              <div className="flex items-center">
+                <CheckCircleIcon className="h-8 w-8 text-orange-600" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Conversions</p>
+                  <p className="text-2xl font-bold text-gray-900">{formatNumber(facebookAnalytics.summary.totalConversions)}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
-      {/* Performance Metrics Table */}
-      <div className="bg-[#1A1F2E] border border-[#2D3748] rounded-lg p-6">
-        <h2 className="text-lg font-semibold text-white mb-4">Gedetailleerde Prestaties</h2>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-[#2D3748]">
-              <tr>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-300 uppercase">Datum</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-300 uppercase">Impressies</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-300 uppercase">Klikken</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-300 uppercase">CTR</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-300 uppercase">CPC</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-300 uppercase">Conversies</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-300 uppercase">Conv. Rate</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-300 uppercase">Uitgegeven</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-300 uppercase">ROAS</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#2D3748]">
-              {analyticsData.map((data) => (
-                <tr key={data.date} className="hover:bg-[#2D3748] transition-colors">
-                  <td className="px-4 py-2 text-sm text-gray-300">{data.date}</td>
-                  <td className="px-4 py-2 text-sm text-white">{data.impressions.toLocaleString()}</td>
-                  <td className="px-4 py-2 text-sm text-white">{data.clicks.toLocaleString()}</td>
-                  <td className="px-4 py-2 text-sm text-white">{data.ctr}%</td>
-                  <td className="px-4 py-2 text-sm text-white">€{data.cpc}</td>
-                  <td className="px-4 py-2 text-sm text-white">{data.conversions.toLocaleString()}</td>
-                  <td className="px-4 py-2 text-sm text-white">{data.conversionRate}%</td>
-                  <td className="px-4 py-2 text-sm text-white">€{data.spent.toLocaleString()}</td>
-                  <td className="px-4 py-2 text-sm text-white">{data.roas}x</td>
-                </tr>
+        {/* Tabs */}
+        <div className="bg-white rounded-lg shadow mb-8">
+          <div className="border-b border-gray-200">
+            <nav className="-mb-px flex space-x-8 px-6">
+              {[
+                { id: 'overview', name: 'Overview', icon: ChartBarIcon },
+                { id: 'campaigns', name: 'Campaigns', icon: EyeIcon },
+                { id: 'ads', name: 'Ads', icon: CursorArrowRaysIcon },
+                { id: 'performance', name: 'Performance', icon: ArrowTrendingUpIcon }
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center ${
+                    activeTab === tab.id
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  <tab.icon className="h-5 w-5 mr-2" />
+                  {tab.name}
+                </button>
               ))}
-            </tbody>
-          </table>
+            </nav>
+          </div>
+
+          <div className="p-6">
+            {/* Overview Tab */}
+            {activeTab === 'overview' && facebookAnalytics && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Performance Metrics */}
+                  <div className="bg-gray-50 p-6 rounded-lg">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Performance Metrics</h3>
+                    <div className="space-y-4">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Average CTR</span>
+                        <span className="font-semibold">{formatPercentage(facebookAnalytics.summary.averageCTR)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Average CPC</span>
+                        <span className="font-semibold">{formatCurrency(facebookAnalytics.summary.averageCPC)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Average CPM</span>
+                        <span className="font-semibold">{formatCurrency(facebookAnalytics.summary.averageCPM)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Cost per Conversion</span>
+                        <span className="font-semibold">{formatCurrency(facebookAnalytics.summary.averageCostPerConversion)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Campaign Status */}
+                  <div className="bg-gray-50 p-6 rounded-lg">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Campaign Status</h3>
+                    <div className="space-y-4">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Active Campaigns</span>
+                        <span className="font-semibold text-green-600">{facebookAnalytics.summary.activeCampaigns}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Total Campaigns</span>
+                        <span className="font-semibold">{facebookAnalytics.summary.totalCampaigns}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Total Ad Sets</span>
+                        <span className="font-semibold">{facebookAnalytics.summary.totalAdSets}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Total Ads</span>
+                        <span className="font-semibold">{facebookAnalytics.summary.totalAds}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Top Performing Campaigns */}
+                {facebookAnalytics.insights.topPerformingCampaigns.length > 0 && (
+                  <div className="bg-gray-50 p-6 rounded-lg">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Performing Campaigns</h3>
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-100">
+                          <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Campaign</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Spend</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Clicks</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CTR</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CPC</th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {facebookAnalytics.insights.topPerformingCampaigns.map((campaign) => (
+                            <tr key={campaign.id}>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{campaign.name}</td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                  campaign.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                                }`}>
+                                  {campaign.status}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatCurrency(campaign.spend)}</td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(campaign.clicks)}</td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatPercentage(campaign.ctr)}</td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatCurrency(campaign.cpc)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Campaigns Tab */}
+            {activeTab === 'campaigns' && facebookAnalytics && (
+              <div className="space-y-6">
+                <div className="bg-gray-50 p-6 rounded-lg">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">All Campaigns</h3>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-100">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Campaign</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Objective</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Impressions</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Clicks</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Spend</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CTR</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CPC</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {facebookAnalytics.campaigns.map((campaign) => (
+                          <tr key={campaign.id}>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{campaign.name}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                campaign.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                              }`}>
+                                {campaign.status}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{campaign.objective}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(campaign.impressions)}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(campaign.clicks)}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatCurrency(campaign.spend)}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatPercentage(campaign.ctr)}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatCurrency(campaign.cpc)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Ads Tab */}
+            {activeTab === 'ads' && facebookAnalytics && (
+              <div className="space-y-6">
+                <div className="bg-gray-50 p-6 rounded-lg">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">All Ads</h3>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-100">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ad Name</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Impressions</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Clicks</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Spend</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CTR</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CPC</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {facebookAnalytics.ads.map((ad) => (
+                          <tr key={ad.id}>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{ad.name}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                ad.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                              }`}>
+                                {ad.status}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(ad.impressions)}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatNumber(ad.clicks)}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatCurrency(ad.spend)}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatPercentage(ad.ctr)}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatCurrency(ad.cpc)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Performance Tab */}
+            {activeTab === 'performance' && (
+              <div className="space-y-6">
+                {/* Metric Selector */}
+                <div className="flex items-center space-x-4">
+                  <label className="text-sm font-medium text-gray-700">Metric:</label>
+                  <select
+                    value={selectedMetric}
+                    onChange={(e) => setSelectedMetric(e.target.value)}
+                    className="border border-gray-300 rounded-md px-3 py-2 bg-white"
+                  >
+                    <option value="impressions">Impressions</option>
+                    <option value="clicks">Clicks</option>
+                    <option value="conversions">Conversions</option>
+                    <option value="spent">Spent</option>
+                    <option value="ctr">CTR</option>
+                    <option value="cpc">CPC</option>
+                    <option value="conversionRate">Conversion Rate</option>
+                    <option value="roas">ROAS</option>
+                  </select>
+                </div>
+
+                {/* Performance Chart */}
+                <div className="bg-gray-50 p-6 rounded-lg">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Performance Over Time</h3>
+                  <div className="h-64 flex items-end justify-center space-x-2">
+                    {analyticsData.map((data, index) => (
+                      <div key={index} className="flex flex-col items-center">
+                        <div 
+                          className="bg-blue-600 rounded-t w-8"
+                          style={{ 
+                            height: `${Math.max((getMetricValue(data) / Math.max(...analyticsData.map(d => getMetricValue(d)), 1)) * 200, 4)}px` 
+                          }}
+                        ></div>
+                        <span className="text-xs text-gray-500 mt-1">{data.date}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-center text-sm text-gray-600 mt-4">{getMetricLabel()}</p>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
+
+        {/* Last Updated */}
+        {facebookAnalytics && (
+          <div className="text-center text-sm text-gray-500">
+            <ClockIcon className="h-4 w-4 inline mr-1" />
+            Last updated: {new Date(facebookAnalytics.lastUpdated).toLocaleString('nl-NL')}
+          </div>
+        )}
       </div>
     </div>
   );

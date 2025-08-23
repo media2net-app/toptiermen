@@ -207,7 +207,7 @@ export default function MarketingDashboard() {
 
   const loadFacebookData = async () => {
     try {
-      console.log('🔍 Loading real Facebook data...');
+      console.log('🔍 Loading comprehensive Facebook data...');
       
       // Load user info
       const userInfoStored = localStorage.getItem('facebook_user_info');
@@ -221,45 +221,70 @@ export default function MarketingDashboard() {
         setAdAccountInfo(JSON.parse(adAccountInfoStored));
       }
       
-      // Load campaigns data from our API
-      const campaignsResponse = await fetch('/api/facebook/get-campaigns');
-      if (campaignsResponse.ok) {
-        const campaignsData = await campaignsResponse.json();
-        if (campaignsData.success) {
-          setCampaigns(campaignsData.data);
-          setCampaignsCount(campaignsData.data.length);
+      // Load comprehensive analytics data
+      const analyticsResponse = await fetch('/api/facebook/comprehensive-analytics?dateRange=last_30d');
+      if (analyticsResponse.ok) {
+        const analyticsData = await analyticsResponse.json();
+        if (analyticsData.success && analyticsData.data) {
+          console.log('✅ Comprehensive Facebook analytics loaded:', analyticsData.data);
           
-          // Calculate total daily budget
-          const totalBudget = campaignsData.data.reduce((sum: number, campaign: any) => {
-            return sum + (campaign.daily_budget || 0);
+          // Set campaigns data
+          setCampaigns(analyticsData.data.campaigns);
+          setCampaignsCount(analyticsData.data.campaigns.length);
+          
+          // Set ad sets data
+          setAdSets(analyticsData.data.adSets);
+          
+          // Set ads data
+          setAds(analyticsData.data.ads);
+          
+          // Calculate total spend from actual spend data
+          const totalSpendAmount = analyticsData.data.campaigns.reduce((sum: number, campaign: any) => {
+            return sum + (campaign.spend || 0);
           }, 0);
-          setTotalSpend(totalBudget);
+          setTotalSpend(totalSpendAmount);
           
           console.log('✅ Facebook data loaded:', {
-            campaignsCount: campaignsData.data.length,
-            totalBudget: totalBudget,
-            campaigns: campaignsData.data
+            campaignsCount: analyticsData.data.campaigns.length,
+            adSetsCount: analyticsData.data.adSets.length,
+            adsCount: analyticsData.data.ads.length,
+            totalSpend: totalSpendAmount,
+            summary: analyticsData.data.summary
           });
         }
-      }
-
-      // Load ad sets data
-      const adSetsResponse = await fetch('/api/facebook/get-adsets');
-      if (adSetsResponse.ok) {
-        const adSetsData = await adSetsResponse.json();
-        if (adSetsData.success) {
-          setAdSets(adSetsData.data);
-          console.log('✅ Ad sets loaded:', adSetsData.data.length);
+      } else {
+        console.error('❌ Failed to load comprehensive analytics:', analyticsResponse.status);
+        
+        // Fallback to individual API calls
+        const campaignsResponse = await fetch('/api/facebook/get-campaigns');
+        if (campaignsResponse.ok) {
+          const campaignsData = await campaignsResponse.json();
+          if (campaignsData.success) {
+            setCampaigns(campaignsData.data);
+            setCampaignsCount(campaignsData.data.length);
+            
+            // Calculate total daily budget
+            const totalBudget = campaignsData.data.reduce((sum: number, campaign: any) => {
+              return sum + (campaign.daily_budget || 0);
+            }, 0);
+            setTotalSpend(totalBudget);
+          }
         }
-      }
 
-      // Load ads data
-      const adsResponse = await fetch('/api/facebook/get-ads');
-      if (adsResponse.ok) {
-        const adsData = await adsResponse.json();
-        if (adsData.success) {
-          setAds(adsData.data);
-          console.log('✅ Ads loaded:', adsData.data.length);
+        const adSetsResponse = await fetch('/api/facebook/get-adsets');
+        if (adSetsResponse.ok) {
+          const adSetsData = await adSetsResponse.json();
+          if (adSetsData.success) {
+            setAdSets(adSetsData.data);
+          }
+        }
+
+        const adsResponse = await fetch('/api/facebook/get-ads');
+        if (adsResponse.ok) {
+          const adsData = await adsResponse.json();
+          if (adsData.success) {
+            setAds(adsData.data);
+          }
         }
       }
       
