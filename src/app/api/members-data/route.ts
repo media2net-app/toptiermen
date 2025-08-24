@@ -18,36 +18,49 @@ export async function GET() {
     // Initialize Supabase client
     const supabase = getSupabaseClient();
 
-    console.log('🔍 Fetching members data...');
+    console.log('🔍 Fetching ALL members data...');
 
-    // Get all profiles with basic data first
-    const { data: profiles, error: profilesError } = await supabase
+    // Step 1: Get ALL profiles first
+    const { data: allProfiles, error: profilesError } = await supabase
       .from('profiles')
-      .select('*')
-      .order('created_at', { ascending: false });
+      .select('*');
 
     if (profilesError) {
       console.error('Error fetching profiles:', profilesError);
       return NextResponse.json({ error: 'Failed to fetch profiles' }, { status: 500 });
     }
 
-    console.log(`📊 Found ${profiles?.length || 0} profiles`);
-
-    // Get real-time online status from user_presence table
-    const { data: presenceData, error: presenceError } = await supabase
-      .from('user_presence')
-      .select('user_id, is_online, last_seen')
-      .eq('is_online', true);
-
-    if (presenceError) {
-      console.error('Error fetching presence data:', presenceError);
-      // Continue without presence data if there's an error
+    console.log(`📊 Found ${allProfiles?.length || 0} total profiles`);
+    
+    // Debug: Log all profile IDs
+    if (allProfiles) {
+      console.log('🔍 ALL Profile IDs found:');
+      allProfiles.forEach((profile, index) => {
+        const name = profile.display_name || profile.full_name || 'Unknown';
+        console.log(`   ${index + 1}. ${name} (${profile.email}) - ID: ${profile.id}`);
+      });
     }
 
-    console.log(`🟢 Found ${presenceData?.length || 0} online users`);
+    // Step 2: Get badge counts for all users
+    const { data: allBadges, error: badgesError } = await supabase
+      .from('user_badges')
+      .select('user_id');
 
-    // Get XP data separately
-    const { data: xpData, error: xpError } = await supabase
+    if (badgesError) {
+      console.error('Error fetching badges:', badgesError);
+    }
+
+    // Create badge count map
+    const badgeCounts = new Map();
+    if (allBadges) {
+      allBadges.forEach(badge => {
+        const count = badgeCounts.get(badge.user_id) || 0;
+        badgeCounts.set(badge.user_id, count + 1);
+      });
+    }
+
+    // Step 3: Get XP data
+    const { data: allXp, error: xpError } = await supabase
       .from('user_xp')
       .select(`
         user_id,
@@ -65,30 +78,10 @@ export async function GET() {
       console.error('Error fetching XP data:', xpError);
     }
 
-    // Get badges count
-    const { data: badgesData, error: badgesError } = await supabase
-      .from('user_badges')
-      .select('user_id, status')
-      .eq('status', 'unlocked');
-
-    if (badgesError) {
-      console.error('Error fetching badges data:', badgesError);
-    }
-
-    // Create maps for efficient lookup
-    const onlineUsers = new Map();
-    if (presenceData) {
-      presenceData.forEach(presence => {
-        onlineUsers.set(presence.user_id, {
-          is_online: presence.is_online,
-          last_seen: presence.last_seen
-        });
-      });
-    }
-
+    // Create XP map
     const xpMap = new Map();
-    if (xpData) {
-      xpData.forEach(xp => {
+    if (allXp) {
+      allXp.forEach(xp => {
         xpMap.set(xp.user_id, {
           total_xp: xp.total_xp,
           rank: xp.ranks,
@@ -97,27 +90,40 @@ export async function GET() {
       });
     }
 
-    const badgesMap = new Map();
-    if (badgesData) {
-      badgesData.forEach(badge => {
-        const count = badgesMap.get(badge.user_id) || 0;
-        badgesMap.set(badge.user_id, count + 1);
+    // Step 4: Get online status
+    const { data: onlineUsers, error: onlineError } = await supabase
+      .from('user_presence')
+      .select('user_id, is_online, last_seen')
+      .eq('is_online', true);
+
+    if (onlineError) {
+      console.error('Error fetching online status:', onlineError);
+    }
+
+    // Create online map
+    const onlineMap = new Map();
+    if (onlineUsers) {
+      onlineUsers.forEach(user => {
+        onlineMap.set(user.user_id, {
+          is_online: user.is_online,
+          last_seen: user.last_seen
+        });
       });
     }
 
-    // Enrich profiles with all data
-    const enrichedMembers = (profiles || []).map(profile => {
+    // Step 5: Enrich ALL profiles with data
+    const enrichedMembers = (allProfiles || []).map(profile => {
       const xpInfo = xpMap.get(profile.id);
-      const badgeCount = badgesMap.get(profile.id) || 0;
-      const presence = onlineUsers.get(profile.id);
+      const badgeCount = badgeCounts.get(profile.id) || 0;
+      const onlineInfo = onlineMap.get(profile.id);
 
       return {
         ...profile,
         current_xp: xpInfo?.total_xp || 0,
         current_rank: xpInfo?.rank || null,
         badges_count: badgeCount,
-        is_online: presence?.is_online || false,
-        last_seen: presence?.last_seen || null,
+        is_online: onlineInfo?.is_online || false,
+        last_seen: onlineInfo?.last_seen || null,
         fallback_rank: profile.rank
       };
     });
