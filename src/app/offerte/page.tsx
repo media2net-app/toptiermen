@@ -215,11 +215,11 @@ export default function OffertePage() {
           transition={{ delay: 0.1 }}
         >
           <Link 
-            href="/dashboard-marketing"
+            href="/dashboard-admin"
             className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 border border-white/20 hover:border-white/30"
           >
             <ArrowLeftIcon className="w-4 h-4" />
-            Terug naar Marketing Dashboard
+            Terug naar Admin Dashboard
           </Link>
         </motion.div>
       </div>
