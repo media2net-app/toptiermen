@@ -175,12 +175,12 @@ export async function POST(request: NextRequest) {
       success: true, 
       message: 'Ebooks table created successfully',
       errors: {
-        createTable: createTableError?.message,
-        index: indexError?.message,
-        rls: rlsError?.message,
-        policy: policyError?.message,
-        insert: insertError?.message,
-        trigger: triggerError?.message
+        createTable: createTableError ? String(createTableError) : null,
+        index: indexError ? String(indexError) : null,
+        rls: rlsError ? String(rlsError) : null,
+        policy: policyError ? String(policyError) : null,
+        insert: insertError ? String(insertError) : null,
+        trigger: triggerError ? String(triggerError) : null
       }
     });
 
