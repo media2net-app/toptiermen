@@ -43,10 +43,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Count completed lessons per module
-    const moduleCompletion = {};
-    lessonProgress?.forEach(progress => {
-      const moduleId = progress.academy_lessons.module_id;
-      moduleCompletion[moduleId] = (moduleCompletion[moduleId] || 0) + 1;
+    const moduleCompletion: any = {};
+    lessonProgress?.forEach((progress: any) => {
+      if (progress.academy_lessons && Array.isArray(progress.academy_lessons)) {
+        progress.academy_lessons.forEach((lesson: any) => {
+          const moduleId = lesson.module_id;
+          moduleCompletion[moduleId] = (moduleCompletion[moduleId] || 0) + 1;
+        });
+      }
     });
 
     // Check if user has completed all modules

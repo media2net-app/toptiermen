@@ -21,22 +21,14 @@ export async function GET(request: NextRequest) {
     });
 
     // List all properties the service account has access to
-    const [response] = await analyticsDataClient.listProperties();
-
-    const properties = response.properties || [];
+    // Note: BetaAnalyticsDataClient doesn't have listProperties method
+    // This would need to be implemented differently or removed
+    const properties: any[] = [];
 
     return NextResponse.json({
       success: true,
-      message: 'Available Google Analytics properties:',
-      properties: properties.map(property => ({
-        name: property.displayName,
-        propertyId: property.name?.split('/').pop(), // Extract numeric ID
-        propertyName: property.name,
-        account: property.account,
-        currencyCode: property.currencyCode,
-        timeZone: property.timeZone,
-        websiteUri: property.websiteUri
-      })),
+      message: 'Google Analytics property listing not implemented in this version',
+      properties: [],
       timestamp: new Date().toISOString()
     });
 
