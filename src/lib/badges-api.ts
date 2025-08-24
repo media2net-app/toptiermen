@@ -44,6 +44,7 @@ export interface Badge {
   title: string;
   description: string;
   icon_name: string;
+  image_url?: string;
   requirements: any;
   xp_reward: number;
   rarity_level: string;

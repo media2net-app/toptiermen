@@ -16,6 +16,7 @@ import PageLayout from '@/components/PageLayout';
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { supabase } from "@/lib/supabase";
 import Breadcrumb, { createBreadcrumbs } from '@/components/Breadcrumb';
+import BadgeUnlockModal from '@/components/BadgeUnlockModal';
 
 interface Module {
   id: string;
@@ -67,19 +68,22 @@ export default function AcademyPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedModule, setSelectedModule] = useState<string | null>(null);
+  const [showBadgeModal, setShowBadgeModal] = useState(false);
+  const [badgeData, setBadgeData] = useState<any>(null);
+  const [academyCompleted, setAcademyCompleted] = useState(false);
+  const [hasAcademyBadge, setHasAcademyBadge] = useState(false);
+  const [academyBadgeData, setAcademyBadgeData] = useState<any>(null);
 
-  // Simple data fetching without complex useCallback dependencies
+  // Fetch academy data
   useEffect(() => {
     let isMounted = true;
 
     const fetchAcademyData = async () => {
-      // Check if user exists
       if (!user) {
         console.log('🎓 Academy: No user, skipping data fetch...');
         return;
       }
 
-      // Reset state
       if (isMounted) {
         setLoading(true);
         setError(null);
@@ -87,7 +91,7 @@ export default function AcademyPage() {
       }
 
       try {
-        // Step 1: Fetch modules
+        // Fetch modules
         console.log('📚 Academy: Fetching modules...');
         const { data: modulesData, error: modulesError } = await supabase
           .from('academy_modules')
@@ -95,14 +99,9 @@ export default function AcademyPage() {
           .eq('status', 'published')
           .order('order_index');
 
-        if (modulesError) {
-          throw new Error(`Modules query failed: ${modulesError.message}`);
-        }
+        if (modulesError) throw modulesError;
 
-        if (!isMounted) return;
-        console.log(`✅ Academy: Loaded ${modulesData?.length || 0} modules`);
-
-        // Step 2: Fetch lessons
+        // Fetch lessons
         console.log('📖 Academy: Fetching lessons...');
         const { data: lessonsData, error: lessonsError } = await supabase
           .from('academy_lessons')
@@ -110,175 +109,183 @@ export default function AcademyPage() {
           .eq('status', 'published')
           .order('order_index');
 
-        if (lessonsError) {
-          throw new Error(`Lessons query failed: ${lessonsError.message}`);
-        }
+        if (lessonsError) throw lessonsError;
 
-        if (!isMounted) return;
-        console.log(`✅ Academy: Loaded ${lessonsData?.length || 0} lessons`);
-
-        // Step 3: Fetch user progress
+        // Fetch user progress
         console.log('📊 Academy: Fetching user progress...');
-        const { data: progressRows, error: progressError } = await supabase
-          .from('user_progress')
-          .select('*')
-          .eq('user_id', user.id)
-          .eq('content_type', 'module');
-
-        if (progressError) {
-          console.warn('⚠️ Progress query failed, continuing without progress data:', progressError.message);
-        }
-
-        if (!isMounted) return;
-
-        // Step 4: Fetch lesson progress
-        console.log('📊 Academy: Fetching lesson progress...');
-        const { data: lessonProgressRows, error: lessonProgressError } = await supabase
-          .from('user_progress')
-          .select('*')
-          .eq('user_id', user.id)
-          .eq('content_type', 'lesson');
-
-        if (lessonProgressError) {
-          console.warn('⚠️ Lesson progress query failed, continuing without lesson progress data:', lessonProgressError.message);
-        }
-
-        if (!isMounted) return;
-
-        // Step 5: Fetch module unlocks
-        console.log('🔓 Academy: Fetching module unlocks...');
-        const { data: unlockRows, error: unlockError } = await supabase
-          .from('module_unlocks')
+        const { data: progressData, error: progressError } = await supabase
+          .from('user_module_progress')
           .select('*')
           .eq('user_id', user.id);
 
-        if (unlockError) {
-          console.warn('⚠️ Unlocks query failed, continuing without unlock data:', unlockError.message);
-        }
+        if (progressError) throw progressError;
 
-        if (!isMounted) return;
+        // Fetch lesson progress
+        console.log('📝 Academy: Fetching lesson progress...');
+        const { data: lessonProgressData, error: lessonProgressError } = await supabase
+          .from('user_lesson_progress')
+          .select('*')
+          .eq('user_id', user.id);
 
-        // Process progress data
-        const progressMap: ProgressData = {};
-        if (progressRows) {
-          progressRows.forEach(row => {
-            progressMap[row.content_id] = row.progress_percentage || 0;
-          });
-        }
+        if (lessonProgressError) throw lessonProgressError;
 
-        // Process lesson progress data
-        const lessonProgressMap: LessonProgress = {};
-        if (lessonProgressRows) {
-          lessonProgressRows.forEach(row => {
-            lessonProgressMap[row.content_id] = {
-              completed: row.progress_percentage === 100,
-              completed_at: row.completed_at,
-              time_spent: row.time_spent
-            };
-          });
-        }
+        // Fetch module unlocks
+        console.log('🔓 Academy: Fetching module unlocks...');
+        const { data: unlocksData, error: unlocksError } = await supabase
+          .from('user_module_unlocks')
+          .select('*')
+          .eq('user_id', user.id);
 
-        // Process unlock data
-        const unlockMap: UnlockData = {};
-        if (unlockRows) {
-          unlockRows.forEach(row => {
-            unlockMap[row.module_id] = {
-              unlocked_at: row.unlocked_at,
-              opened_at: row.opened_at
-            };
-          });
-        }
+        if (unlocksError) throw unlocksError;
 
-        // Update state
         if (isMounted) {
           setModules(modulesData || []);
           setLessons(lessonsData || []);
+          
+          // Transform progress data
+          const progressMap: ProgressData = {};
+          (progressData || []).forEach((progress: any) => {
+            progressMap[progress.module_id] = progress.progress_percentage || 0;
+          });
           setProgressData(progressMap);
-          setLessonProgress(lessonProgressMap);
-          setUnlocks(unlockMap);
-          setLoading(false);
-          console.log('✅ Academy: All data loaded successfully');
-        }
 
-      } catch (err) {
-        console.error('❌ Academy: Error fetching data:', err);
+          // Transform lesson progress data
+          const lessonProgressMap: LessonProgress = {};
+          (lessonProgressData || []).forEach((progress: any) => {
+            lessonProgressMap[progress.lesson_id] = {
+              completed: progress.completed || false,
+              completed_at: progress.completed_at,
+              time_spent: progress.time_spent
+            };
+          });
+          setLessonProgress(lessonProgressMap);
+
+          // Transform unlocks data
+          const unlocksMap: UnlockData = {};
+          (unlocksData || []).forEach((unlock: any) => {
+            unlocksMap[unlock.module_id] = {
+              unlocked_at: unlock.unlocked_at,
+              opened_at: unlock.opened_at
+            };
+          });
+          setUnlocks(unlocksMap);
+
+          setLoading(false);
+          console.log('✅ Academy: Data fetch completed successfully');
+        }
+      } catch (error) {
+        console.error('❌ Academy: Error fetching data:', error);
         if (isMounted) {
-          setError(err instanceof Error ? err.message : 'Onbekende fout opgetreden');
+          setError('Er is een fout opgetreden bij het laden van de academy data.');
           setLoading(false);
         }
       }
     };
 
-    // Only fetch if user exists
-    if (user) {
-      fetchAcademyData();
-    } else if (user === null) {
-      // User is explicitly null (not logged in)
-      setLoading(false);
-      setError('Je bent niet ingelogd. Log opnieuw in.');
-    }
-    // If user is undefined, auth is still loading
+    fetchAcademyData();
 
-    // Cleanup function
     return () => {
       isMounted = false;
-      console.log('🧹 Academy: Component unmounted, stopping any pending operations');
     };
-  }, [user]); // Only depend on user
+  }, [user]);
+
+  // Check academy completion
+  useEffect(() => {
+    const checkAcademyCompletion = async () => {
+      if (!user || modules.length === 0) return;
+
+      try {
+        const response = await fetch('/api/badges/check-academy-completion', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ userId: user.id }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setAcademyCompleted(data.academyCompleted);
+          setHasAcademyBadge(data.hasBadge);
+          setAcademyBadgeData(data.badgeData);
+
+          if (data.newBadgeUnlocked && data.badgeData) {
+            setBadgeData(data.badgeData);
+            setShowBadgeModal(true);
+          }
+        }
+      } catch (error) {
+        console.error('Error checking academy completion:', error);
+      }
+    };
+
+    checkAcademyCompletion();
+  }, [user, modules, lessonProgress]);
+
+  // Check for badge unlock from localStorage
+  useEffect(() => {
+    const storedBadgeData = localStorage.getItem('academyBadgeUnlock');
+    if (storedBadgeData) {
+      try {
+        const badgeData = JSON.parse(storedBadgeData);
+        setBadgeData(badgeData);
+        setShowBadgeModal(true);
+        localStorage.removeItem('academyBadgeUnlock');
+      } catch (error) {
+        console.error('Error parsing stored badge data:', error);
+        localStorage.removeItem('academyBadgeUnlock');
+      }
+    }
+  }, []);
 
   // Helper functions
-  const getFirstLesson = (moduleId: string) => {
-    return lessons.find(l => l.module_id === moduleId && l.status === 'published');
-  };
-
   const getModuleLessons = (moduleId: string) => {
-    return lessons.filter(l => l.module_id === moduleId && l.status === 'published').sort((a, b) => a.order_index - b.order_index);
+    return lessons.filter(lesson => lesson.module_id === moduleId);
   };
 
-  const getCompletedLessons = (moduleId: string) => {
+  const getCompletedLessonsCount = (moduleId: string) => {
     const moduleLessons = getModuleLessons(moduleId);
     return moduleLessons.filter(lesson => lessonProgress[lesson.id]?.completed).length;
   };
 
-  const isModuleLocked = (moduleIndex: number) => {
-    // TEMPORARILY DISABLED: All modules unlocked for checking lessons
-    return false;
-    
-    // Original lock logic (commented out):
-    // if (moduleIndex === 0) return false; // First module is always unlocked
-    // const module = modules[moduleIndex];
-    // const prevModule = modules[moduleIndex - 1];
-    // 
-    // // Check if previous module is completed AND current module is unlocked
-    // return progressData[prevModule.id] < 100 || !unlocks[module.id];
+  const isModuleLocked = (module: Module, index: number) => {
+    if (index === 0) return false;
+    const previousModule = modules[index - 1];
+    const previousLessons = getModuleLessons(previousModule.id);
+    const completedPreviousLessons = previousLessons.filter(lesson => lessonProgress[lesson.id]?.completed).length;
+    return completedPreviousLessons < previousLessons.length;
   };
 
-  const getModuleNumber = (module: Module, index: number) => {
-    return index + 1;
+  const getModuleNumber = (index: number) => {
+    return (index + 1).toString().padStart(2, '0');
+  };
+
+  const getFirstLesson = (moduleId: string) => {
+    const moduleLessons = getModuleLessons(moduleId);
+    return moduleLessons[0];
   };
 
   const getModuleStatus = (module: Module, index: number) => {
-    const progress = progressData[module.id] || 0;
-    const completedLessons = getCompletedLessons(module.id);
-    const totalLessons = getModuleLessons(module.id).length;
-    const locked = isModuleLocked(index);
-
-    if (locked) return 'locked';
-    if (progress === 100) return 'completed';
-    if (completedLessons > 0) return 'in_progress';
-    return 'not_started';
+    if (isModuleLocked(module, index)) return 'locked';
+    
+    const moduleLessons = getModuleLessons(module.id);
+    const completedLessons = getCompletedLessonsCount(module.id);
+    
+    if (completedLessons === 0) return 'not_started';
+    if (completedLessons === moduleLessons.length) return 'completed';
+    return 'in_progress';
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'completed':
-        return <CheckCircleIcon className="w-5 h-5 text-green-400" />;
+        return <CheckCircleIcon className="w-6 h-6 text-green-400" />;
       case 'in_progress':
-        return <PlayIcon className="w-5 h-5 text-blue-400" />;
+        return <PlayIcon className="w-6 h-6 text-blue-400" />;
       case 'locked':
-        return <LockClosedIcon className="w-5 h-5 text-gray-400" />;
+        return <LockClosedIcon className="w-6 h-6 text-gray-400" />;
       default:
-        return <BookOpenIcon className="w-5 h-5 text-gray-400" />;
+        return <StarIcon className="w-6 h-6 text-[#8BAE5A]" />;
     }
   };
 
@@ -298,25 +305,20 @@ export default function AcademyPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed':
-        return 'text-green-400 bg-green-400/10';
+        return 'bg-green-400/10 text-green-400 border-green-400/30';
       case 'in_progress':
-        return 'text-blue-400 bg-blue-400/10';
+        return 'bg-blue-400/10 text-blue-400 border-blue-400/30';
       case 'locked':
-        return 'text-gray-400 bg-gray-400/10';
+        return 'bg-gray-400/10 text-gray-400 border-gray-400/30';
       default:
-        return 'text-gray-400 bg-gray-400/10';
+        return 'bg-[#8BAE5A]/10 text-[#8BAE5A] border-[#8BAE5A]/30';
     }
   };
 
   const handleRetry = () => {
     setError(null);
     setLoading(true);
-    // Force a re-render to trigger useEffect
     window.location.reload();
-  };
-
-  const handleModuleClick = (moduleId: string) => {
-    setSelectedModule(selectedModule === moduleId ? null : moduleId);
   };
 
   // Calculate overall progress
@@ -324,13 +326,18 @@ export default function AcademyPage() {
   const completedModules = modules.filter((_, index) => getModuleStatus(_, index) === 'completed').length;
   const overallProgress = totalModules > 0 ? Math.round((completedModules / totalModules) * 100) : 0;
 
-  // Render loading state
-  if (loading) {
-    return (
-      <PageLayout 
-        title="Academy"
-        subtitle="Overzicht van alle modules en jouw voortgang"
-      >
+  return (
+    <PageLayout 
+      title="Academy"
+      subtitle="Overzicht van alle modules en jouw voortgang"
+    >
+      {/* Breadcrumb */}
+      <div className="mb-6">
+        <Breadcrumb items={createBreadcrumbs('Academy')} />
+      </div>
+
+      {/* Loading State */}
+      {loading && (
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
@@ -338,17 +345,10 @@ export default function AcademyPage() {
             <p className="text-gray-500 text-sm mt-2">Dit kan even duren...</p>
           </div>
         </div>
-      </PageLayout>
-    );
-  }
+      )}
 
-  // Render error state
-  if (error) {
-    return (
-      <PageLayout 
-        title="Academy"
-        subtitle="Overzicht van alle modules en jouw voortgang"
-      >
+      {/* Error State */}
+      {error && (
         <div className="text-center py-12">
           <div className="text-red-400 mb-4 text-lg font-semibold">{error}</div>
           <div className="text-gray-400 mb-6 text-sm">
@@ -361,266 +361,291 @@ export default function AcademyPage() {
             Opnieuw proberen
           </button>
         </div>
-      </PageLayout>
-    );
-  }
+      )}
 
-  // Render success state
-  return (
-    <PageLayout 
-      title="Academy"
-      subtitle="Overzicht van alle modules en jouw voortgang"
-    >
-      {/* Breadcrumb */}
-      <div className="mb-6">
-        <Breadcrumb items={createBreadcrumbs('Academy')} />
-      </div>
-      {/* Overall Progress Section */}
-      <div className="mb-8 p-6 bg-[#181F17]/90 rounded-xl border border-[#3A4D23]">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <TrophyIcon className="w-6 h-6 text-[#8BAE5A]" />
-            <h2 className="text-xl font-semibold text-[#8BAE5A]">Jouw Voortgang</h2>
-          </div>
-          <div className="text-right">
-            <div className="text-2xl font-bold text-[#8BAE5A]">{overallProgress}%</div>
-            <div className="text-sm text-[#A6C97B]">{completedModules} van {totalModules} modules voltooid</div>
-          </div>
-        </div>
-        
-        {/* Overall Progress Bar */}
-        <div className="w-full h-3 bg-[#8BAE5A]/20 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] rounded-full transition-all duration-1000 ease-out"
-            style={{ width: `${overallProgress}%` }}
-          />
-        </div>
-        
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 mt-4">
-          <div className="text-center">
-            <div className="text-lg font-bold text-[#8BAE5A]">{completedModules}</div>
-            <div className="text-xs text-[#A6C97B]">Voltooid</div>
-          </div>
-          <div className="text-center">
-            <div className="text-lg font-bold text-[#8BAE5A]">
-              {modules.filter((_, index) => getModuleStatus(_, index) === 'in_progress').length}
+      {/* Success State */}
+      {!loading && !error && (
+        <>
+          {/* Overall Progress Section */}
+          <div className="mb-8 p-6 bg-[#181F17]/90 rounded-xl border border-[#3A4D23]">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <TrophyIcon className="w-6 h-6 text-[#8BAE5A]" />
+                <h2 className="text-xl font-semibold text-[#8BAE5A]">Jouw Voortgang</h2>
+              </div>
+              <div className="text-right">
+                <div className="text-2xl font-bold text-[#8BAE5A]">{overallProgress}%</div>
+                <div className="text-sm text-[#A6C97B]">{completedModules} van {totalModules} modules voltooid</div>
+              </div>
             </div>
-            <div className="text-xs text-[#A6C97B]">Bezig</div>
-          </div>
-          <div className="text-center">
-            <div className="text-lg font-bold text-[#8BAE5A]">
-              {modules.filter((_, index) => getModuleStatus(_, index) === 'not_started').length}
-            </div>
-            <div className="text-xs text-[#A6C97B]">Niet gestart</div>
-          </div>
-        </div>
-      </div>
-
-      {modules.length === 0 ? (
-        <div className="text-center py-12 text-gray-400">
-          <div className="text-lg font-medium mb-2">Geen modules gevonden</div>
-          <div className="text-sm mb-4">Er zijn momenteel geen gepubliceerde modules beschikbaar.</div>
-          <button
-            onClick={handleRetry}
-            className="px-6 py-3 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold"
-          >
-            Vernieuwen
-          </button>
-        </div>
-      ) : (
-        <div className="space-y-6">
-          {modules.map((module, index) => {
-            const moduleNum = getModuleNumber(module, index);
-            const status = getModuleStatus(module, index);
-            const locked = status === 'locked';
-            const firstLesson = getFirstLesson(module.id);
-            const progress = progressData[module.id] || 0;
-            const unlock = unlocks[module.id];
-            const justUnlocked = unlock && !unlock.opened_at;
-            const moduleLessons = getModuleLessons(module.id);
-            const completedLessons = getCompletedLessons(module.id);
-            const isExpanded = selectedModule === module.id;
             
-            // Determine link - either to first lesson or module overview
-            const linkHref = locked ? '#' : 
-              firstLesson ? `/dashboard/academy/${module.id}/${firstLesson.id}` : 
-              `/dashboard/academy/${module.id}`;
+            {/* Overall Progress Bar */}
+            <div className="w-full h-3 bg-[#8BAE5A]/20 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] rounded-full transition-all duration-1000 ease-out"
+                style={{ width: `${overallProgress}%` }}
+              />
+            </div>
+            
+            {/* Stats */}
+            <div className="grid grid-cols-3 gap-4 mt-4">
+              <div className="text-center">
+                <div className="text-lg font-bold text-[#8BAE5A]">{completedModules}</div>
+                <div className="text-xs text-[#A6C97B]">Voltooid</div>
+              </div>
+              <div className="text-center">
+                <div className="text-lg font-bold text-[#8BAE5A]">
+                  {modules.filter((_, index) => getModuleStatus(_, index) === 'in_progress').length}
+                </div>
+                <div className="text-xs text-[#A6C97B]">Bezig</div>
+              </div>
+              <div className="text-center">
+                <div className="text-lg font-bold text-[#8BAE5A]">
+                  {modules.filter((_, index) => getModuleStatus(_, index) === 'not_started').length}
+                </div>
+                <div className="text-xs text-[#A6C97B]">Niet gestart</div>
+              </div>
+            </div>
+          </div>
 
-            return (
-              <div key={module.id} className={`relative ${justUnlocked ? 'animate-pulse shadow-[0_0_0_4px_#8BAE5A80]' : ''}`}>
-                <div className={`bg-[#181F17]/90 rounded-xl sm:rounded-2xl shadow-xl border border-[#3A4D23] overflow-hidden transition-all duration-300 ${isExpanded ? 'ring-2 ring-[#8BAE5A]' : ''}`}>
-                  {/* Module Header */}
-                  <div className="p-4 sm:p-6">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <span className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border flex items-center justify-center font-bold text-lg sm:text-xl bg-[#232D1A] border-[#8BAE5A] text-[#8BAE5A]">
-                          {moduleNum}
-                        </span>
+          {/* Academy Completion Info Box */}
+          {academyCompleted && (
+            <div className="mb-8 p-6 bg-gradient-to-r from-green-500/20 to-green-600/20 rounded-xl border border-green-500/30">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                  <TrophyIcon className="w-5 h-5 text-white" />
+                </div>
+                <h3 className="text-lg font-semibold text-green-400">Academy Voltooid! 🎉</h3>
+              </div>
+              
+              <div className="space-y-3">
+                <p className="text-green-300">
+                  Gefeliciteerd! Je hebt alle Academy modules succesvol voltooid.
+                </p>
+                
+                {hasAcademyBadge && academyBadgeData ? (
+                  <div className="flex items-center gap-3 p-3 bg-green-500/10 rounded-lg border border-green-500/20">
+                    <span className="text-2xl">{academyBadgeData.icon_name}</span>
+                    <div>
+                      <div className="font-semibold text-green-400">
+                        {academyBadgeData.title} Badge Unlocked!
+                      </div>
+                      <div className="text-sm text-green-300">
+                        {academyBadgeData.description}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3 p-3 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
+                    <span className="text-2xl">⚠️</span>
+                    <div>
+                      <div className="font-semibold text-yellow-400">
+                        Badge Check Status
+                      </div>
+                      <div className="text-sm text-yellow-300">
+                        Academy voltooid maar badge status wordt gecontroleerd...
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                <div className="text-xs text-[#8BAE5A]/70">
+                  Debug Info: Academy Completed = {academyCompleted.toString()}, Has Badge = {hasAcademyBadge.toString()}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Almost Complete Info Box */}
+          {!academyCompleted && overallProgress >= 90 && (
+            <div className="mb-8 p-6 bg-gradient-to-r from-blue-500/20 to-blue-600/20 rounded-xl border border-blue-500/30">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                  <TrophyIcon className="w-5 h-5 text-white" />
+                </div>
+                <h3 className="text-lg font-semibold text-blue-400">Bijna Klaar! 🔥</h3>
+              </div>
+              
+              <div className="space-y-3">
+                <p className="text-blue-300">
+                  Je bent bijna klaar met de Academy! Nog even doorzetten voor de Academy Master badge.
+                </p>
+                
+                <div className="text-xs text-blue-400/70">
+                  Debug Info: Progress = {overallProgress}%, Academy Completed = {academyCompleted.toString()}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Modules Grid */}
+          <div className="space-y-6">
+            {modules.map((module, index) => {
+              const status = getModuleStatus(module, index);
+              const isLocked = isModuleLocked(module, index);
+              const moduleLessons = getModuleLessons(module.id);
+              const completedLessons = getCompletedLessonsCount(module.id);
+              const totalLessons = moduleLessons.length;
+              const progress = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
+              const isExpanded = selectedModule === module.id;
+
+              return (
+                <div key={module.id} className="bg-[#181F17] rounded-xl border border-[#3A4D23] overflow-hidden">
+                  <div className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-[#8BAE5A]/20 rounded-full flex items-center justify-center">
+                          <span className="text-[#8BAE5A] font-bold text-lg">{getModuleNumber(index)}</span>
+                        </div>
                         <div>
-                          <h3 className="text-lg sm:text-xl font-semibold text-[#8BAE5A] flex items-center gap-2">
-                            {module.title}
-                            {getStatusIcon(status)}
-                          </h3>
-                          <p className="text-[#A6C97B] text-sm">
-                            {completedLessons} van {moduleLessons.length} lessen voltooid
-                          </p>
+                          <h3 className="text-xl font-bold text-white mb-1">{module.title}</h3>
+                          <p className="text-[#A6C97B] text-sm">{module.description}</p>
                         </div>
                       </div>
-                      
                       <div className="flex items-center gap-3">
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(status)}`}>
+                        {getStatusIcon(status)}
+                        <span className={`text-xs font-semibold px-2 py-1 rounded ${getStatusColor(status)}`}>
                           {getStatusText(status)}
                         </span>
-                        <span className="text-[#8BAE5A] font-mono text-sm">{progress}%</span>
                       </div>
                     </div>
 
-                    {/* Cover Image */}
-                    {module.cover_image && (
-                      <div className="mb-4 -mx-4 -mt-4 sm:-mx-6 sm:-mt-6">
-                        <img
-                          src={module.cover_image}
-                          alt={`Cover voor ${module.title}`}
-                          className="w-full h-32 sm:h-40 object-cover"
-                        />
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-4">
+                        <div className="text-sm text-[#8BAE5A]">
+                          {completedLessons} van {totalLessons} lessen voltooid
+                        </div>
+                        <div className="text-sm text-[#A6C97B]">
+                          {progress}% voltooid
+                        </div>
                       </div>
-                    )}
-                    
-                    <p className="text-[#A6C97B] mb-4 text-sm line-clamp-2">
-                      {module.short_description || module.description}
-                    </p>
-                    
-                    {/* Progress bar */}
-                    <div className="w-full h-2 bg-[#8BAE5A]/20 rounded-full mb-4">
+                      <div className="flex items-center gap-2">
+                        {!isLocked && (
+                          <Link
+                            href={`/dashboard/academy/${module.id}/${getFirstLesson(module.id)?.id || ''}`}
+                            className="px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold"
+                          >
+                            Start Module
+                          </Link>
+                        )}
+                        {moduleLessons.length > 0 && (
+                          <button
+                            onClick={() => setSelectedModule(isExpanded ? null : module.id)}
+                            className="p-2 text-[#8BAE5A] hover:bg-[#3A4D23] rounded-lg transition-colors"
+                          >
+                            <BookOpenIcon className="w-5 h-5" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Progress Bar */}
+                    <div className="w-full h-2 bg-[#3A4D23] rounded-full overflow-hidden">
                       <div
-                        className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] rounded-full transition-all duration-500"
+                        className="h-full bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] rounded-full transition-all duration-700"
                         style={{ width: `${progress}%` }}
                       />
                     </div>
 
-                    {/* Action Buttons */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-[#8BAE5A] text-sm">
-                        <ClockIcon className="w-4 h-4" />
-                        <span>{moduleLessons.length} lessen</span>
-                        {moduleLessons.some(l => l.duration) && (
-                          <>
-                            <span>•</span>
-                            <span>{moduleLessons.reduce((total, l) => total + (parseInt(l.duration?.split(' ')[0] || '0') || 0), 0)} min</span>
-                          </>
-                        )}
-                      </div>
-                      
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => handleModuleClick(module.id)}
-                          className="px-3 py-1 text-[#8BAE5A] text-sm border border-[#8BAE5A] rounded hover:bg-[#8BAE5A]/10 transition-colors"
-                        >
-                          {isExpanded ? 'Verberg' : 'Details'}
-                        </button>
-                        
-                        {!locked && (
-                          <Link
-                            href={linkHref}
-                            className="px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold text-sm flex items-center gap-2"
-                          >
-                            {status === 'completed' ? 'Herbekijken' : 'Start'}
-                            <ArrowRightIcon className="w-4 h-4" />
-                          </Link>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Expanded Lessons List */}
-                  {isExpanded && (
-                    <div className="border-t border-[#3A4D23] bg-[#232D1A]/50">
-                      <div className="p-4 sm:p-6">
-                        <h4 className="text-[#8BAE5A] font-semibold mb-4 flex items-center gap-2">
-                          <BookOpenIcon className="w-5 h-5" />
-                          Lessen in deze module
-                        </h4>
-                        
-                        <div className="space-y-3">
-                                                     {moduleLessons.map((lesson, lessonIndex) => {
-                             const currentLessonProgress = lessonProgress[lesson.id];
-                             const isCompleted = currentLessonProgress?.completed;
-                             const isCurrent = !isCompleted && (lessonIndex === 0 || moduleLessons[lessonIndex - 1] && lessonProgress[moduleLessons[lessonIndex - 1].id]?.completed);
-                            
-                            return (
-                              <Link
-                                key={lesson.id}
-                                href={`/dashboard/academy/${module.id}/${lesson.id}`}
-                                className={`flex items-center justify-between p-3 rounded-lg border transition-all hover:scale-[1.02] ${
-                                  isCompleted 
-                                    ? 'bg-green-400/10 border-green-400/30' 
-                                    : isCurrent 
-                                    ? 'bg-blue-400/10 border-blue-400/30' 
-                                    : 'bg-[#3A4D23]/30 border-[#3A4D23]'
-                                }`}
-                              >
-                                <div className="flex items-center gap-3">
-                                  <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                    {/* Lessons List */}
+                    {isExpanded && (
+                      <div className="border-t border-[#3A4D23] bg-[#232D1A]/50 mt-6">
+                        <div className="p-4">
+                          <h4 className="text-[#8BAE5A] font-semibold mb-4 flex items-center gap-2">
+                            <BookOpenIcon className="w-5 h-5" />
+                            Lessen in deze module
+                          </h4>
+                          
+                          <div className="space-y-3">
+                            {moduleLessons.map((lesson, lessonIndex) => {
+                              const currentLessonProgress = lessonProgress[lesson.id];
+                              const isCompleted = currentLessonProgress?.completed;
+                              const isCurrent = !isCompleted && (lessonIndex === 0 || moduleLessons[lessonIndex - 1] && lessonProgress[moduleLessons[lessonIndex - 1].id]?.completed);
+                              
+                              return (
+                                <Link
+                                  key={lesson.id}
+                                  href={`/dashboard/academy/${module.id}/${lesson.id}`}
+                                  className={`flex items-center justify-between p-3 rounded-lg border transition-all hover:scale-[1.02] ${
                                     isCompleted 
-                                      ? 'bg-green-400 text-[#181F17]' 
+                                      ? 'bg-green-400/10 border-green-400/30' 
                                       : isCurrent 
-                                      ? 'bg-blue-400 text-[#181F17]' 
-                                      : 'bg-[#8BAE5A]/20 text-[#8BAE5A]'
-                                  }`}>
-                                    {isCompleted ? (
-                                      <CheckCircleIcon className="w-4 h-4" />
-                                    ) : isCurrent ? (
-                                      <PlayIcon className="w-4 h-4" />
-                                    ) : (
-                                      <span className="text-xs font-bold">{lessonIndex + 1}</span>
-                                    )}
-                                  </div>
-                                  <div>
-                                    <div className={`font-medium ${
+                                      ? 'bg-blue-400/10 border-blue-400/30' 
+                                      : 'bg-[#3A4D23]/30 border-[#3A4D23]'
+                                  }`}
+                                >
+                                  <div className="flex items-center gap-3">
+                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
                                       isCompleted 
-                                        ? 'text-green-400' 
+                                        ? 'bg-green-400 text-[#181F17]' 
                                         : isCurrent 
-                                        ? 'text-blue-400' 
-                                        : 'text-[#A6C97B]'
+                                        ? 'bg-blue-400 text-[#181F17]' 
+                                        : 'bg-[#8BAE5A]/20 text-[#8BAE5A]'
                                     }`}>
-                                      {lesson.title}
+                                      {isCompleted ? (
+                                        <CheckCircleIcon className="w-4 h-4" />
+                                      ) : isCurrent ? (
+                                        <PlayIcon className="w-4 h-4" />
+                                      ) : (
+                                        <span className="text-xs font-bold">{lessonIndex + 1}</span>
+                                      )}
                                     </div>
-                                    {lesson.duration && (
-                                      <div className="text-xs text-[#8BAE5A]/70 flex items-center gap-1">
-                                        <ClockIcon className="w-3 h-3" />
-                                        {lesson.duration}
+                                    <div>
+                                      <div className={`font-medium ${
+                                        isCompleted 
+                                          ? 'text-green-400' 
+                                          : isCurrent 
+                                          ? 'text-blue-400' 
+                                          : 'text-[#A6C97B]'
+                                      }`}>
+                                        {lesson.title}
                                       </div>
-                                    )}
+                                      {lesson.duration && (
+                                        <div className="text-xs text-[#8BAE5A]/70 flex items-center gap-1">
+                                          <ClockIcon className="w-3 h-3" />
+                                          {lesson.duration}
+                                        </div>
+                                      )}
+                                    </div>
                                   </div>
-                                </div>
-                                
-                                <div className="flex items-center gap-2">
-                                  {isCompleted && (
-                                    <span className="text-xs text-green-400 bg-green-400/10 px-2 py-1 rounded">
-                                      Voltooid
-                                    </span>
-                                  )}
-                                  {isCurrent && (
-                                    <span className="text-xs text-blue-400 bg-blue-400/10 px-2 py-1 rounded">
-                                      Volgende
-                                    </span>
-                                  )}
-                                  <ArrowRightIcon className="w-4 h-4 text-[#8BAE5A]" />
-                                </div>
-                              </Link>
-                            );
-                          })}
+                                  
+                                  <div className="flex items-center gap-2">
+                                    {isCompleted && (
+                                      <span className="text-xs text-green-400 bg-green-400/10 px-2 py-1 rounded">
+                                        Voltooid
+                                      </span>
+                                    )}
+                                    {isCurrent && (
+                                      <span className="text-xs text-blue-400 bg-blue-400/10 px-2 py-1 rounded">
+                                        Volgende
+                                      </span>
+                                    )}
+                                    <ArrowRightIcon className="w-4 h-4 text-[#8BAE5A]" />
+                                  </div>
+                                </Link>
+                              );
+                            })}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        </>
+      )}
+
+      {/* Badge Unlock Modal */}
+      {badgeData && (
+        <BadgeUnlockModal
+          isOpen={showBadgeModal}
+          onClose={() => setShowBadgeModal(false)}
+          badge={badgeData}
+          hasUnlockedBadge={false}
+        />
       )}
     </PageLayout>
   );
-} 
+}

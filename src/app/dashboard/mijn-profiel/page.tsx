@@ -3,6 +3,7 @@ import ClientLayout from '@/app/components/ClientLayout';
 import { useState, useEffect, useRef } from 'react';
 import { CameraIcon, TrashIcon, PlusIcon, UserGroupIcon, TrophyIcon, FireIcon, BookOpenIcon, ArrowDownTrayIcon, ShieldCheckIcon, BellIcon, PencilIcon, CheckIcon, XMarkIcon, ExclamationTriangleIcon } from '@heroicons/react/24/solid';
 import CropModal from '../../../components/CropModal';
+import BadgeDisplay from '@/components/BadgeDisplay';
 import { toast } from 'react-hot-toast';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { supabase } from '@/lib/supabase';
@@ -74,7 +75,16 @@ export default function MijnProfiel() {
   // Badges & Ranks states
   const [currentRank, setCurrentRank] = useState<any>(null);
   const [currentXP, setCurrentXP] = useState(0);
-  const [userBadges, setUserBadges] = useState<any[]>([]);
+  const [userBadges, setUserBadges] = useState<Array<{
+    id: string;
+    title: string;
+    description: string;
+    icon_name: string;
+    image_url?: string;
+    rarity_level: 'common' | 'rare' | 'epic' | 'legendary';
+    xp_reward: number;
+    unlocked_at?: string;
+  }>>([]);
   
   // Affiliate states
   const [affiliateData, setAffiliateData] = useState({
@@ -150,12 +160,31 @@ export default function MijnProfiel() {
   };
 
   const fetchBadgesAndRanks = async () => {
+    if (!user) return;
+
     try {
+      // Fetch user badges via API
+      const badgesResponse = await fetch(`/api/badges/get-user-badges?userId=${user.id}`);
+      const badgesData = await badgesResponse.json();
+      
+      const userBadges = badgesData.success ? badgesData.badges.map((item: any) => ({
+        id: item.badges.id,
+        title: item.badges.title,
+        description: item.badges.description,
+        icon_name: item.badges.icon_name,
+        image_url: item.badges.image_url,
+        rarity_level: item.badges.rarity_level,
+        xp_reward: item.badges.xp_reward,
+        unlocked_at: item.unlocked_at
+      })) : [];
+
+      setUserBadges(userBadges);
+
       // Get user XP and current rank
       const { data: xpData, error: xpError } = await supabase
         .from('user_xp')
         .select('total_xp, current_rank_id')
-        .eq('user_id', user?.id)
+        .eq('user_id', user.id)
         .single();
 
       if (!xpError && xpData) {
@@ -171,26 +200,6 @@ export default function MijnProfiel() {
         if (!rankError && rankData) {
           setCurrentRank(rankData);
         }
-      }
-
-      // Get user badges
-      const { data: badgesData, error: badgesError } = await supabase
-        .from('user_badges')
-        .select(`
-          badge_id,
-          awarded_at,
-          badges (
-            title,
-            description,
-            icon_name,
-            category_id
-          )
-        `)
-        .eq('user_id', user?.id)
-        .eq('status', 'unlocked');
-
-      if (!badgesError && badgesData) {
-        setUserBadges(badgesData);
       }
     } catch (error) {
       console.error('Error fetching badges and ranks:', error);
@@ -1114,6 +1123,16 @@ export default function MijnProfiel() {
                 <h3 className="text-xl font-bold text-white mb-2">{currentRank ? `Level ${currentRank.rank_order}` : 'Level 1'}</h3>
                 <p className="text-[#8BAE5A]">{currentRank?.name || 'Recruit'}</p>
               </div>
+            </div>
+            
+            {/* Badges Section */}
+            <div className="bg-[#181F17] rounded-xl p-6">
+              <BadgeDisplay 
+                badges={userBadges} 
+                maxDisplay={12} 
+                showTitle={true} 
+                size="md" 
+              />
             </div>
             
             <div className="text-center text-[#8BAE5A]">

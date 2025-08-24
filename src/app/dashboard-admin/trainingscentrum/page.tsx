@@ -213,6 +213,14 @@ const categories = ['Gym', 'Outdoor', 'Bodyweight'];
 const muscleGroups = ['Borst', 'Rug', 'Benen', 'Schouders', 'Armen', 'Core', 'Glutes', 'Buik'];
 const equipment = ['Barbell', 'Dumbbell', 'Bodyweight', 'Machine', 'Cable', 'Kettlebell'];
 
+// Equipment categories for filtering
+const equipmentCategories = [
+  { label: 'Gym', equipment: ['Barbell', 'Dumbbell', 'Dumbbells', 'Machine', 'Cable Machine', 'Cable', 'Dip Bars'] },
+  { label: 'Outdoor', equipment: ['Bodyweight'] },
+  { label: 'Home', equipment: ['Bodyweight', 'Dumbbell', 'Dumbbells'] },
+  { label: 'Geen Equipment', equipment: ['Bodyweight', 'Geen'] }
+];
+
 const mapDbSchemaToForm = (dbSchema: any) => ({
   id: dbSchema.id,
   name: dbSchema.name,
@@ -250,6 +258,7 @@ export default function TrainingscentrumBeheer() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('Alle Categorieën');
   const [filterMuscle, setFilterMuscle] = useState('Alle Spiergroepen');
+  const [filterEquipment, setFilterEquipment] = useState('Alle Materialen');
   
   // Database state
   const [exercises, setExercises] = useState<any[]>([]);
@@ -307,7 +316,13 @@ export default function TrainingscentrumBeheer() {
         setErrorSchemas('Fout bij het laden van trainingsschema\'s');
         toast.error('Fout bij het laden van trainingsschema\'s');
       } else {
-        setSchemas(data || []);
+        // Sort schemas by number of days (ascending)
+        const sortedSchemas = (data || []).sort((a, b) => {
+          const daysA = a.training_schema_days?.length || 0;
+          const daysB = b.training_schema_days?.length || 0;
+          return daysA - daysB;
+        });
+        setSchemas(sortedSchemas);
       }
     } catch (err) {
       setErrorSchemas('Fout bij het laden van trainingsschema\'s');
@@ -604,16 +619,25 @@ export default function TrainingscentrumBeheer() {
   const filteredExercises = exercises.filter(exercise => {
     const matchesSearch = exercise.name.toLowerCase().includes(searchTerm.toLowerCase());
     
-    if (filterMuscle === 'Alle Spiergroepen') {
-      return matchesSearch;
+    // Equipment filter
+    let matchesEquipment = true;
+    if (filterEquipment !== 'Alle Materialen') {
+      const selectedCategory = equipmentCategories.find(cat => cat.label === filterEquipment);
+      matchesEquipment = selectedCategory ? selectedCategory.equipment.includes(exercise.equipment) : true;
     }
     
-    // Special handling for "Armen" to include Biceps and Triceps
-    if (filterMuscle === 'Armen') {
-      return matchesSearch && (exercise.primary_muscle === 'Biceps' || exercise.primary_muscle === 'Triceps');
+    // Muscle filter
+    let matchesMuscle = true;
+    if (filterMuscle !== 'Alle Spiergroepen') {
+      // Special handling for "Armen" to include Biceps and Triceps
+      if (filterMuscle === 'Armen') {
+        matchesMuscle = exercise.primary_muscle === 'Biceps' || exercise.primary_muscle === 'Triceps';
+      } else {
+        matchesMuscle = exercise.primary_muscle === filterMuscle;
+      }
     }
     
-    return matchesSearch && exercise.primary_muscle === filterMuscle;
+    return matchesSearch && matchesEquipment && matchesMuscle;
   });
 
   // Show loading state if component is not mounted yet
@@ -806,20 +830,20 @@ export default function TrainingscentrumBeheer() {
                       <th className="px-6 py-4 text-center text-sm font-medium text-[#8BAE5A] w-1/12">Dagen</th>
                       <th className="px-6 py-4 text-center text-sm font-medium text-[#8BAE5A] w-1/12">Status</th>
                       <th className="px-6 py-4 text-center text-sm font-medium text-[#8BAE5A] w-1/12">Gebruikers</th>
-                      <th className="px-6 py-4 text-center text-sm font-medium text-[#8BAE5A] w-1/3">Acties</th>
+                      <th className="px-6 py-4 text-center text-sm font-medium text-[#8BAE5A] w-1/4">Acties</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#3A4D23]">
                     {filteredSchemas.map((schema) => (
                       <tr key={schema.id} className="hover:bg-[#181F17] transition-colors duration-200">
                         <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 rounded-xl bg-[#8BAE5A]/20 flex items-center justify-center">
+                          <div className="flex items-start gap-3">
+                            <div className="w-12 h-12 rounded-xl bg-[#8BAE5A]/20 flex items-center justify-center flex-shrink-0">
                               <CalendarIcon className="w-6 h-6 text-[#8BAE5A]" />
                             </div>
-                            <div>
-                              <h3 className="text-[#8BAE5A] font-semibold">{schema.name}</h3>
-                              <p className="text-[#B6C948] text-sm">{schema.description}</p>
+                            <div className="min-w-0 flex-1">
+                              <h3 className="text-[#8BAE5A] font-semibold truncate">{schema.name}</h3>
+                              <p className="text-[#B6C948] text-sm line-clamp-2">{schema.description}</p>
                             </div>
                           </div>
                         </td>
@@ -840,7 +864,7 @@ export default function TrainingscentrumBeheer() {
                           <span className="text-[#8BAE5A] font-semibold">0</span>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="flex items-center justify-center gap-2 flex-wrap">
+                          <div className="flex items-center justify-center gap-1.5">
                             <AdminButton 
                               onClick={() => {
                                 // Navigate to schema view page in same tab
@@ -848,7 +872,7 @@ export default function TrainingscentrumBeheer() {
                               }}
                               variant="secondary" 
                               size="sm"
-                              className="min-w-[80px] text-xs"
+                              className="!w-[70px] !min-w-[70px] !max-w-[70px] text-xs"
                             >
                               <EyeIcon className="w-3 h-3" />
                               Bekijk
@@ -860,7 +884,7 @@ export default function TrainingscentrumBeheer() {
                               }}
                               variant="secondary"
                               size="sm"
-                              className="min-w-[80px] text-xs"
+                              className="!w-[70px] !min-w-[70px] !max-w-[70px] text-xs"
                             >
                               <PencilIcon className="w-3 h-3" />
                               Bewerk
@@ -879,19 +903,19 @@ export default function TrainingscentrumBeheer() {
                               }}
                               variant="secondary" 
                               size="sm"
-                              className="min-w-[80px] text-xs"
+                              className="!w-[70px] !min-w-[70px] !max-w-[70px] text-xs"
                             >
                               <DocumentDuplicateIcon className="w-3 h-3" />
-                              Dupliceer
+                              Kopieer
                             </AdminButton>
                             <AdminButton 
                               onClick={() => handleDeleteSchema(schema.id)}
                               variant="danger"
                               size="sm"
-                              className="min-w-[80px] text-xs"
+                              className="!w-[70px] !min-w-[70px] !max-w-[70px] text-xs"
                             >
                               <TrashIcon className="w-3 h-3" />
-                              Verwijder
+                              Del
                             </AdminButton>
                           </div>
                         </td>
@@ -941,13 +965,24 @@ export default function TrainingscentrumBeheer() {
                   <option key={muscle} value={muscle}>{muscle}</option>
                 ))}
               </select>
+              <select
+                value={filterEquipment}
+                onChange={(e) => setFilterEquipment(e.target.value)}
+                className="px-4 py-3 rounded-xl bg-[#232D1A] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+              >
+                <option value="Alle Materialen">Alle Materialen</option>
+                {equipmentCategories.map(category => (
+                  <option key={category.label} value={category.label}>{category.label}</option>
+                ))}
+              </select>
             </div>
             <div className="flex items-center gap-4">
               {/* Debug info */}
               <div className="text-[#B6C948] text-sm">
                 {filteredExercises.length} van {exercises.length} oefeningen
-                {searchTerm && ` (gefilterd op: "${searchTerm}")`}
+                {searchTerm && ` (gevonden: "${searchTerm}")`}
                 {filterMuscle !== 'Alle Spiergroepen' && ` (spiergroep: ${filterMuscle})`}
+                {filterEquipment !== 'Alle Materialen' && ` (materiaal: ${filterEquipment})`}
               </div>
               <button
                 onClick={() => {

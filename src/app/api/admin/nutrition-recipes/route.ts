@@ -3,40 +3,40 @@ import { supabaseAdmin } from '@/lib/supabase-admin';
 
 export async function GET(request: NextRequest) {
   try {
+    console.log('📊 Fetching nutrition recipes from database...');
+    
     const { searchParams } = new URL(request.url);
-    const meal_type = searchParams.get('meal_type');
-    const difficulty = searchParams.get('difficulty');
-    const limit = parseInt(searchParams.get('limit') || '50');
+    const category = searchParams.get('category');
+    const plan = searchParams.get('plan');
+    const limit = parseInt(searchParams.get('limit') || '100');
     const offset = parseInt(searchParams.get('offset') || '0');
 
     let query = supabaseAdmin
       .from('nutrition_recipes')
-      .select(`
-        *,
-        author:users(full_name, email)
-      `)
-      .order('created_at', { ascending: false });
+      .select('*')
+      .order('name');
 
-    if (meal_type) {
-      query = query.eq('meal_type', meal_type);
+    if (category) {
+      query = query.eq('meal_type', category);
     }
 
-    if (difficulty) {
-      query = query.eq('difficulty', difficulty);
+    if (plan) {
+      query = query.contains('suitable_plans', [plan]);
     }
 
     const { data: recipes, error } = await query
       .range(offset, offset + limit - 1);
 
     if (error) {
-      console.error('Error fetching nutrition recipes:', error);
-      return NextResponse.json({ error: 'Failed to fetch nutrition recipes' }, { status: 500 });
+      console.error('❌ Error fetching nutrition recipes:', error);
+      return NextResponse.json({ error: `Failed to fetch nutrition recipes: ${error.message}` }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, recipes });
+    console.log('✅ Nutrition recipes fetched successfully:', recipes?.length || 0, 'recipes');
+    return NextResponse.json({ success: true, recipes: recipes || [] });
   } catch (error) {
-    console.error('Error in nutrition recipes API:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error('❌ Error in nutrition recipes API:', error);
+    return NextResponse.json({ error: `Internal server error: ${error instanceof Error ? error.message : 'Unknown error'}` }, { status: 500 });
   }
 }
 
@@ -46,21 +46,16 @@ export async function POST(request: NextRequest) {
     const { 
       name, 
       description, 
-      instructions, 
-      prep_time_minutes, 
-      cook_time_minutes, 
-      servings, 
-      difficulty, 
-      cuisine_type, 
       meal_type, 
+      suitable_plans, 
       calories_per_serving, 
       protein_per_serving, 
       carbs_per_serving, 
       fat_per_serving, 
-      image_url, 
-      is_featured, 
-      is_public, 
-      author_id 
+      servings, 
+      prep_time_minutes, 
+      difficulty, 
+      instructions 
     } = body;
 
     const { data: recipe, error } = await supabaseAdmin
@@ -68,21 +63,16 @@ export async function POST(request: NextRequest) {
       .insert({
         name,
         description,
-        instructions,
-        prep_time_minutes,
-        cook_time_minutes,
-        servings,
-        difficulty,
-        cuisine_type,
         meal_type,
+        suitable_plans,
         calories_per_serving,
         protein_per_serving,
         carbs_per_serving,
         fat_per_serving,
-        image_url,
-        is_featured,
-        is_public,
-        author_id
+        servings,
+        prep_time_minutes,
+        difficulty,
+        instructions
       })
       .select()
       .single();
@@ -93,6 +83,60 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true, recipe });
+  } catch (error) {
+    console.error('Error in nutrition recipes API:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { id, ...updateData } = body;
+
+    if (!id) {
+      return NextResponse.json({ error: 'ID is required for update' }, { status: 400 });
+    }
+
+    const { data: recipe, error } = await supabaseAdmin
+      .from('nutrition_recipes')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating nutrition recipe:', error);
+      return NextResponse.json({ error: 'Failed to update nutrition recipe' }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, recipe });
+  } catch (error) {
+    console.error('Error in nutrition recipes API:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json({ error: 'ID is required for deletion' }, { status: 400 });
+    }
+
+    const { error } = await supabaseAdmin
+      .from('nutrition_recipes')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error deleting nutrition recipe:', error);
+      return NextResponse.json({ error: 'Failed to delete nutrition recipe' }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, message: 'Nutrition recipe deleted successfully' });
   } catch (error) {
     console.error('Error in nutrition recipes API:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

@@ -25,6 +25,7 @@ interface Badge {
   name: string;
   description: string;
   icon: string;
+  image?: string;
   category: string;
   levels: BadgeLevel[];
   trigger: string;
@@ -149,7 +150,10 @@ export default function BadgeModal({
 
   useEffect(() => {
     if (badge) {
-      setForm(badge);
+      setForm({
+        ...badge,
+        image: badge.image || '/badge-no-excuses.png'
+      });
       setConditions(badge.conditions || []);
       setLevels(badge.levels || []);
       setRuleLogic(badge.ruleLogic || 'AND');
@@ -164,6 +168,7 @@ export default function BadgeModal({
         name: '',
         description: '',
         icon: '',
+        image: '/badge-no-excuses.png',
         category: '',
         levels: [],
         trigger: '',

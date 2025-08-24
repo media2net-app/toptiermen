@@ -40,6 +40,7 @@ interface Badge {
   name: string;
   description: string;
   icon: string;
+  image?: string;
   category: string;
   levels: any[];
   trigger: string;
@@ -127,6 +128,7 @@ export default function AdminBadgesRangenPage() {
           name: 'First Workout',
           description: 'Complete your first workout',
           icon: 'FaDumbbell',
+          image: '/badge-no-excuses.png',
           category: 'Training',
           levels: [],
           trigger: 'workout_completed',
@@ -147,6 +149,7 @@ export default function AdminBadgesRangenPage() {
           name: 'Streak Master',
           description: 'Complete 7 workouts in a row',
           icon: 'FaFire',
+          image: '/badge-no-excuses.png',
           category: 'Training',
           levels: [],
           trigger: 'workout_completed',
@@ -167,6 +170,7 @@ export default function AdminBadgesRangenPage() {
           name: 'Early Bird',
           description: '5 dagen vroeg op',
           icon: 'FaClock',
+          image: '/badge-no-excuses.png',
           category: 'Lifestyle',
           levels: [],
           trigger: 'early_wake',
@@ -187,6 +191,7 @@ export default function AdminBadgesRangenPage() {
           name: 'No Excuses',
           description: '10 dagen geen excuus',
           icon: 'FaCheck',
+          image: '/badge-no-excuses.png',
           category: 'Lifestyle',
           levels: [],
           trigger: 'daily_check',
@@ -652,7 +657,7 @@ export default function AdminBadgesRangenPage() {
                         <td className="px-6 py-4">
                           <div className="flex items-center">
                             <img 
-                              src="/badge-no-excuses.png" 
+                              src={badge.image || "/badge-no-excuses.png"} 
                               alt={`${badge.name} badge`}
                               className="w-12 h-12 rounded-lg object-cover border-2 border-[#3A4D23]"
                             />

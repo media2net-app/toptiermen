@@ -10,6 +10,7 @@ interface BadgeUnlockModalProps {
     name: string;
     icon?: string;
     image?: string;
+    image_url?: string;
     description?: string;
   };
   hasUnlockedBadge?: boolean;
@@ -149,9 +150,9 @@ export default function BadgeUnlockModal({
                 
                 {/* Badge icon/image */}
                 <div className="relative z-10 flex items-center justify-center shadow-lg">
-                  {badge.image ? (
+                  {(badge.image || badge.image_url) ? (
                     <img 
-                      src={badge.image} 
+                      src={badge.image || badge.image_url} 
                       alt={badge.name}
                       className="max-w-[200px] max-h-[200px] w-auto h-auto object-contain drop-shadow-lg"
                       style={{ 

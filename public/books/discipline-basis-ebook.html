@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>De Basis van Discipline - Top Tier Men Academy</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background: #f9fafb;
+        }
+        
+        .ebook-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #8BAE5A 0%, #3A4D23 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -0.025em;
+        }
+        
+        .header .subtitle {
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: white;
+            opacity: 1;
+        }
+        
+        .content {
+            padding: 50px;
+        }
+        
+        .toc {
+            background: #f8fafc;
+            border-left: 4px solid #8BAE5A;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 8px;
+        }
+        
+        .toc h2 {
+            color: #8BAE5A;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .toc ol {
+            list-style: none;
+            counter-reset: toc-counter;
+        }
+        
+        .toc li {
+            counter-increment: toc-counter;
+            margin-bottom: 8px;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        .toc li::before {
+            content: counter(toc-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #8BAE5A;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .toc a {
+            color: #374151;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .toc a:hover {
+            color: #8BAE5A;
+        }
+        
+        h2 {
+            color: #8BAE5A;
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin: 40px 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        h3 {
+            color: #374151;
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 30px 0 15px 0;
+        }
+        
+        h4 {
+            color: #4b5563;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 20px 0 10px 0;
+        }
+        
+        p {
+            margin-bottom: 15px;
+            color: #4b5563;
+        }
+        
+        ul, ol {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+            color: #4b5563;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left: 4px solid #f59e0b;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .highlight-box h4 {
+            color: #92400e;
+            margin-top: 0;
+        }
+        
+        .exercise-box {
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .exercise-box h4 {
+            color: #0369a1;
+            margin-top: 0;
+        }
+        
+        .checklist {
+            background: #f0fdf4;
+            border: 1px solid #16a34a;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .checklist h4 {
+            color: #15803d;
+            margin-top: 0;
+        }
+        
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .checklist-item input[type="checkbox"] {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+        }
+        
+        .time-slot {
+            font-weight: 600;
+            color: #8BAE5A;
+            min-width: 60px;
+        }
+        
+        .quote {
+            font-style: italic;
+            color: #6b7280;
+            border-left: 3px solid #8BAE5A;
+            padding-left: 20px;
+            margin: 20px 0;
+        }
+        
+        .footer {
+            background: #1f2937;
+            color: white;
+            text-align: center;
+            padding: 30px;
+            margin-top: 40px;
+        }
+        
+        .footer p {
+            color: #d1d5db;
+            margin-bottom: 5px;
+        }
+        
+        .page-break {
+            page-break-before: always;
+        }
+        
+        @media print {
+            body {
+                background: white;
+            }
+            .ebook-container {
+                box-shadow: none;
+                max-width: none;
+            }
+            .header {
+                background: #8BAE5A !important;
+                -webkit-print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ebook-container">
+        <div class="header">
+            <h1>De Basis van Discipline</h1>
+            <p class="subtitle">Module 1 - Les 1: Top Tier Men Academy</p>
+        </div>
+        
+        <div class="content">
+            <div class="toc">
+                <h2>Inhoudsopgave</h2>
+                <ol>
+                    <li><a href="#inleiding">Inleiding</a></li>
+                    <li><a href="#wat-is-discipline">Wat is Discipline?</a></li>
+                    <li><a href="#de-3-pijlers">De 3 Pijlers van Discipline</a></li>
+                    <li><a href="#praktische-oefeningen">Praktische Oefeningen</a></li>
+                    <li><a href="#dagelijkse-checklist">Dagelijkse Discipline Checklist</a></li>
+                    <li><a href="#belangrijke-inzichten">Belangrijke Inzichten</a></li>
+                    <li><a href="#reflectie-vragen">Reflectie Vragen</a></li>
+                    <li><a href="#volgende-stappen">Volgende Stappen</a></li>
+                </ol>
+            </div>
+
+            <h2 id="inleiding">Inleiding</h2>
+            <p>Welkom bij de eerste les van de Top Tier Men Academy. In deze les gaan we de fundering leggen voor alle succes in je leven: <strong>discipline</strong>.</p>
+            
+            <p>Discipline is niet alleen een vaardigheid - het is een levensstijl. Het is de basis waarop je alle andere doelen en ambities kunt bouwen. Of je nu wilt afvallen, meer geld verdienen, betere relaties wilt hebben, of gewoon een beter mens wilt worden: discipline is de sleutel.</p>
+            
+            <div class="highlight-box">
+                <h4>Wat je gaat leren in dit ebook:</h4>
+                <ul>
+                    <li>Wat discipline echt betekent</li>
+                    <li>Hoe je discipline kunt ontwikkelen</li>
+                    <li>Praktische oefeningen die je direct kunt toepassen</li>
+                    <li>Een dagelijkse routine die discipline versterkt</li>
+                </ul>
+            </div>
+
+            <h2 id="wat-is-discipline">Wat is Discipline?</h2>
+            <p>Discipline is niet alleen over hard werken of jezelf dwingen om dingen te doen die je niet leuk vindt. Het is over <strong>consistentie</strong>, <strong>focus</strong> en de bereidheid om korte-termijn plezier op te offeren voor lange-termijn doelen.</p>
+            
+            <h3>De Misvatting over Discipline</h3>
+            <p>Veel mensen denken dat discipline betekent dat je jezelf moet martelen met taken die je haat. Dat is niet waar. Discipline gaat over:</p>
+            <ul>
+                <li><strong>Slimme keuzes maken</strong> in plaats van emotionele keuzes</li>
+                <li><strong>Consistent zijn</strong> in plaats van perfect</li>
+                <li><strong>Focus behouden</strong> op wat echt belangrijk is</li>
+                <li><strong>Volhouden</strong> wanneer het moeilijk wordt</li>
+            </ul>
+            
+            <h3>Discipline als Spier</h3>
+            <p>Denk aan discipline als een spier die je kunt trainen. Net zoals je biceps sterker worden door gewichten te tillen, wordt je discipline sterker door elke dag kleine acties te ondernemen.</p>
+            
+            <div class="quote">
+                <strong>Hoe sterker je discipline-spier wordt, hoe makkelijker het wordt om:</strong><br>
+                • Op tijd op te staan<br>
+                • Gezond te eten<br>
+                • Te trainen<br>
+                • Te studeren<br>
+                • Relaties te onderhouden<br>
+                • Financiële doelen te bereiken
+            </div>
+
+            <h2 id="de-3-pijlers">De 3 Pijlers van Discipline</h2>
+            <p>Discipline rust op drie fundamentele pijlers. Als je deze drie pijlers versterkt, wordt je discipline automatisch sterker.</p>
+            
+            <h3>1. Consistentie</h3>
+            <div class="exercise-box">
+                <h4>Wat het is:</h4>
+                <p>Elke dag iets doen, hoe klein ook, om je doelen te bereiken.</p>
+                
+                <h4>Waarom het belangrijk is:</h4>
+                <p>Kleine dagelijkse acties zijn krachtiger dan grote, sporadische inspanningen.</p>
+                
+                <h4>Hoe je het ontwikkelt:</h4>
+                <ul>
+                    <li>Begin met 5 minuten per dag</li>
+                    <li>Bouw geleidelijk op naar 15, 30, 60 minuten</li>
+                    <li>Focus op het proces, niet het resultaat</li>
+                    <li>Vier kleine overwinningen</li>
+                </ul>
+                
+                <p><strong>Voorbeeld:</strong> In plaats van 3 uur per week te trainen, train je elke dag 30 minuten.</p>
+            </div>
+            
+            <h3>2. Focus</h3>
+            <div class="exercise-box">
+                <h4>Wat het is:</h4>
+                <p>Je aandacht richten op één ding tegelijk en afleidingen elimineren.</p>
+                
+                <h4>Waarom het belangrijk is:</h4>
+                <p>Multitasking is een mythe. Echte productiviteit komt van diepe focus.</p>
+                
+                <h4>Hoe je het ontwikkelt:</h4>
+                <ul>
+                    <li>Elimineer afleidingen (telefoon weg, notificaties uit)</li>
+                    <li>Werk in tijdsblokken van 25-90 minuten</li>
+                    <li>Leer nee zeggen tegen onnodige verplichtingen</li>
+                    <li>Creëer een focus-omgeving</li>
+                </ul>
+                
+                <p><strong>Voorbeeld:</strong> In plaats van constant je telefoon te checken, werk je 90 minuten onafgebroken aan je belangrijkste taak.</p>
+            </div>
+            
+            <h3>3. Doelgerichtheid</h3>
+            <div class="exercise-box">
+                <h4>Wat het is:</h4>
+                <p>Weten waarom je doet wat je doet en je acties afstemmen op je doelen.</p>
+                
+                <h4>Waarom het belangrijk is:</h4>
+                <p>Zonder een duidelijk doel is discipline zinloos.</p>
+                
+                <h4>Hoe je het ontwikkelt:</h4>
+                <ul>
+                    <li>Ken je "waarom" - waarom wil je dit bereiken?</li>
+                    <li>Visualiseer je doelen dagelijks</li>
+                    <li>Meet je voortgang regelmatig</li>
+                    <li>Stel duidelijke, meetbare doelen</li>
+                </ul>
+                
+                <p><strong>Voorbeeld:</strong> In plaats van "ik wil afvallen", zeg je "ik wil 10 kilo afvallen in 3 maanden zodat ik me energieker voel en langer kan leven voor mijn gezin."</p>
+            </div>
+
+            <h2 id="praktische-oefeningen">Praktische Oefeningen</h2>
+            <p>Hier zijn 4 oefeningen die je discipline direct versterken:</p>
+            
+            <h3>Oefening 1: De 5-Minuten Regel</h3>
+            <div class="exercise-box">
+                <h4>Wat:</h4>
+                <p>Begin elke dag met 5 minuten van je belangrijkste taak.</p>
+                
+                <h4>Waarom:</h4>
+                <p>Het overwint uitstelgedrag en bouwt momentum op.</p>
+                
+                <h4>Hoe:</h4>
+                <ol>
+                    <li>Identificeer je belangrijkste taak voor vandaag</li>
+                    <li>Zet een timer op 5 minuten</li>
+                    <li>Begin met de taak</li>
+                    <li>Als je na 5 minuten wilt stoppen, mag dat</li>
+                    <li>Meestal wil je doorgaan</li>
+                </ol>
+                
+                <p><strong>Resultaat:</strong> Je overwint de weerstand om te beginnen en bouwt een gewoonte op.</p>
+            </div>
+            
+            <h3>Oefening 2: Habit Stacking</h3>
+            <div class="exercise-box">
+                <h4>Wat:</h4>
+                <p>Koppel nieuwe gewoonten aan bestaande routines.</p>
+                
+                <h4>Waarom:</h4>
+                <p>Het maakt nieuwe gewoonten makkelijker om te volhouden.</p>
+                
+                <h4>Hoe:</h4>
+                <ol>
+                    <li>Identificeer een bestaande gewoonte (bijv. koffie drinken)</li>
+                    <li>Koppel er een nieuwe gewoonte aan (bijv. 10 push-ups)</li>
+                    <li>Maak het specifiek: "Na mijn ochtendkoffie doe ik 10 push-ups"</li>
+                </ol>
+                
+                <h4>Voorbeelden:</h4>
+                <ul>
+                    <li>Na het tandenpoetsen → 5 minuten mediteren</li>
+                    <li>Na het avondeten → 30 minuten lezen</li>
+                    <li>Voor het slapen → morgen plannen</li>
+                </ul>
+            </div>
+            
+            <h3>Oefening 3: Environment Design</h3>
+            <div class="exercise-box">
+                <h4>Wat:</h4>
+                <p>Maak je omgeving zo dat goede keuzes makkelijk zijn.</p>
+                
+                <h4>Waarom:</h4>
+                <p>Je omgeving beïnvloedt je gedrag meer dan je wilskracht.</p>
+                
+                <h4>Hoe:</h4>
+                <ul>
+                    <li><strong>Voor gezond eten:</strong> Leg fruit op het aanrecht, verberg junkfood</li>
+                    <li><strong>Voor trainen:</strong> Leg je sportkleren klaar, zet je wekker ver weg</li>
+                    <li><strong>Voor productiviteit:</strong> Maak een aparte werkruimte, elimineer afleidingen</li>
+                    <li><strong>Voor lezen:</strong> Leg boeken op strategische plekken</li>
+                </ul>
+                
+                <p><strong>Resultaat:</strong> Je maakt automatisch betere keuzes zonder extra wilskracht.</p>
+            </div>
+            
+            <h3>Oefening 4: Accountability</h3>
+            <div class="exercise-box">
+                <h4>Wat:</h4>
+                <p>Vind iemand die je verantwoordelijk houdt voor je doelen.</p>
+                
+                <h4>Waarom:</h4>
+                <p>Externe verantwoordelijkheid is krachtiger dan interne motivatie.</p>
+                
+                <h4>Hoe:</h4>
+                <ol>
+                    <li>Kies iemand die je vertrouwt en respecteert</li>
+                    <li>Deel je doelen en tijdlijn</li>
+                    <li>Spreek regelmatige check-ins af</li>
+                    <li>Vier successen samen</li>
+                    <li>Bespreek uitdagingen openlijk</li>
+                </ol>
+                
+                <h4>Voorbeelden:</h4>
+                <ul>
+                    <li>Een vriend die ook wilt afvallen</li>
+                    <li>Een coach of mentor</li>
+                    <li>Een online community</li>
+                    <li>Je partner of familielid</li>
+                </ul>
+            </div>
+
+            <h2 id="dagelijkse-checklist">Dagelijkse Discipline Checklist</h2>
+            <p>Gebruik deze checklist om je discipline elke dag te versterken:</p>
+            
+            <h3>Ochtend Routine (5:30 - 7:00)</h3>
+            <div class="checklist">
+                <div class="checklist-item">
+                    <input type="checkbox" id="morning1">
+                    <label for="morning1"><span class="time-slot">5:30</span> - Sta op tijd op (geen snooze)</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="morning2">
+                    <label for="morning2"><span class="time-slot">5:35</span> - Drink 500ml water</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="morning3">
+                    <label for="morning3"><span class="time-slot">5:40</span> - Mediteer (10 minuten)</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="morning4">
+                    <label for="morning4"><span class="time-slot">5:50</span> - Lees (30 minuten)</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="morning5">
+                    <label for="morning5"><span class="time-slot">6:20</span> - Train (45 minuten)</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="morning6">
+                    <label for="morning6"><span class="time-slot">7:05</span> - Douche en kleed je aan</label>
+                </div>
+            </div>
+            
+            <h3>Werkdag (8:00 - 17:00)</h3>
+            <div class="checklist">
+                <div class="checklist-item">
+                    <input type="checkbox" id="work1">
+                    <label for="work1"><span class="time-slot">8:00</span> - Plan je 3 belangrijkste taken</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="work2">
+                    <label for="work2"><span class="time-slot">8:30</span> - Werk 90 minuten onafgebroken</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="work3">
+                    <label for="work3"><span class="time-slot">10:00</span> - Korte pauze (10 minuten)</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="work4">
+                    <label for="work4"><span class="time-slot">10:10</span> - Werk nog 90 minuten</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="work5">
+                    <label for="work5"><span class="time-slot">11:40</span> - Lunch</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="work6">
+                    <label for="work6"><span class="time-slot">12:30</span> - Werk aan tweede belangrijke taak</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="work7">
+                    <label for="work7"><span class="time-slot">15:00</span> - Korte pauze</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="work8">
+                    <label for="work8"><span class="time-slot">15:10</span> - Werk aan derde belangrijke taak</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="work9">
+                    <label for="work9"><span class="time-slot">17:00</span> - Einde werkdag</label>
+                </div>
+            </div>
+            
+            <h3>Avond Routine (18:00 - 22:00)</h3>
+            <div class="checklist">
+                <div class="checklist-item">
+                    <input type="checkbox" id="evening1">
+                    <label for="evening1"><span class="time-slot">18:00</span> - Avondeten</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="evening2">
+                    <label for="evening2"><span class="time-slot">19:00</span> - Reflectie op de dag (10 minuten)</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="evening3">
+                    <label for="evening3"><span class="time-slot">19:10</span> - Plan morgen (10 minuten)</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="evening4">
+                    <label for="evening4"><span class="time-slot">19:20</span> - Tijd met familie/vrienden</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="evening5">
+                    <label for="evening5"><span class="time-slot">21:30</span> - Voorbereiden voor morgen</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="evening6">
+                    <label for="evening6"><span class="time-slot">22:00</span> - Slapen</label>
+                </div>
+            </div>
+            
+            <h3>Wekelijkse Reflectie</h3>
+            <div class="checklist">
+                <div class="checklist-item">
+                    <input type="checkbox" id="weekly1">
+                    <label for="weekly1"><strong>Zondag</strong> - Weekplanning maken</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="weekly2">
+                    <label for="weekly2"><strong>Zaterdag</strong> - Week evalueren</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="weekly3">
+                    <label for="weekly3"><strong>Elke dag</strong> - Minimaal 1 ding leren</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="weekly4">
+                    <label for="weekly4"><strong>Elke dag</strong> - Iemand helpen</label>
+                </div>
+            </div>
+
+            <h2 id="belangrijke-inzichten">Belangrijke Inzichten</h2>
+            
+            <div class="highlight-box">
+                <h4>1. Discipline is een Spier</h4>
+                <p>Net zoals je spieren sterker worden door training, wordt je discipline sterker door dagelijks gebruik. Start klein en bouw geleidelijk op.</p>
+            </div>
+            
+            <div class="highlight-box">
+                <h4>2. Focus op het Proces</h4>
+                <p>Resultaten komen vanzelf als je het proces volgt. Focus op wat je vandaag kunt doen, niet op waar je over een jaar wilt zijn.</p>
+            </div>
+            
+            <div class="highlight-box">
+                <h4>3. Perfectie is de Vijand van Vooruitgang</h4>
+                <p>Het is beter om elke dag 80% te doen dan één keer 100%. Consistentie wint altijd van perfectie.</p>
+            </div>
+            
+            <div class="highlight-box">
+                <h4>4. Kleine Overwinningen Bouwen Momentum</h4>
+                <p>Vier elke kleine overwinning. Elke keer dat je je aan je plan houdt, wordt het makkelijker om het de volgende keer te doen.</p>
+            </div>
+            
+            <div class="highlight-box">
+                <h4>5. Je Omgeving Bepaalt Je Succes</h4>
+                <p>Je omgeving beïnvloedt je gedrag meer dan je wilskracht. Ontwerp je omgeving voor succes.</p>
+            </div>
+            
+            <div class="highlight-box">
+                <h4>6. Discipline = Vrijheid</h4>
+                <p>Ironisch genoeg geeft discipline je meer vrijheid. Hoe meer discipline je hebt, hoe meer keuzes je hebt in het leven.</p>
+            </div>
+
+            <h2 id="reflectie-vragen">Reflectie Vragen</h2>
+            <p>Neem de tijd om deze vragen te beantwoorden. Schrijf je antwoorden op in een notitieboek:</p>
+            
+            <h3>Over Je Huidige Discipline</h3>
+            <ol>
+                <li>Op welke gebieden van je leven ben je al gedisciplineerd?</li>
+                <li>Waar heb je de meeste moeite mee om consistent te zijn?</li>
+                <li>Wat zijn je grootste afleidingen?</li>
+                <li>Welke excuses gebruik je om uit te stellen?</li>
+            </ol>
+            
+            <h3>Over Je Doelen</h3>
+            <ol>
+                <li>Wat zijn je 3 belangrijkste doelen voor de komende 6 maanden?</li>
+                <li>Waarom zijn deze doelen belangrijk voor je?</li>
+                <li>Wat zou er gebeuren als je deze doelen niet bereikt?</li>
+                <li>Hoe zou je leven eruit zien als je deze doelen wel bereikt?</li>
+            </ol>
+            
+            <h3>Over Je Routine</h3>
+            <ol>
+                <li>Wat is je huidige ochtendroutine?</li>
+                <li>Hoe kun je deze verbeteren?</li>
+                <li>Welke gewoonten wil je toevoegen?</li>
+                <li>Welke gewoonten wil je elimineren?</li>
+            </ol>
+            
+            <h3>Over Je Omgeving</h3>
+            <ol>
+                <li>Welke mensen in je leven ondersteunen je doelen?</li>
+                <li>Welke mensen houden je tegen?</li>
+                <li>Hoe kun je je fysieke omgeving aanpassen voor meer discipline?</li>
+                <li>Welke tools of hulpmiddelen heb je nodig?</li>
+            </ol>
+
+            <h2 id="volgende-stappen">Volgende Stappen</h2>
+            <p>Nu je dit ebook hebt gelezen, is het tijd om actie te ondernemen:</p>
+            
+            <h3>Deze Week</h3>
+            <div class="exercise-box">
+                <ol>
+                    <li><strong>Kies 1 oefening</strong> uit de praktische oefeningen en begin vandaag</li>
+                    <li><strong>Implementeer de 5-minuten regel</strong> voor je belangrijkste taak</li>
+                    <li><strong>Pas je omgeving aan</strong> - maak goede keuzes makkelijker</li>
+                    <li><strong>Vind een accountability partner</strong> - deel je doelen met iemand</li>
+                </ol>
+            </div>
+            
+            <h3>Deze Maand</h3>
+            <div class="exercise-box">
+                <ol>
+                    <li><strong>Bouw een ochtendroutine</strong> op die je elke dag volgt</li>
+                    <li><strong>Elimineer je grootste afleidingen</strong></li>
+                    <li><strong>Begin met habit stacking</strong> - koppel nieuwe gewoonten aan bestaande</li>
+                    <li><strong>Meet je voortgang</strong> - houd bij wat je doet</li>
+                </ol>
+            </div>
+            
+            <h3>De Komende 3 Maanden</h3>
+            <div class="exercise-box">
+                <ol>
+                    <li><strong>Versterk je discipline-spier</strong> door dagelijks gebruik</li>
+                    <li><strong>Bouw momentum op</strong> door kleine dagelijkse overwinningen</li>
+                    <li><strong>Evalueer en pas aan</strong> - wat werkt voor jou?</li>
+                    <li><strong>Vier je successen</strong> - beloon jezelf voor volharding</li>
+                </ol>
+            </div>
+            
+            <h3>Lange Termijn</h3>
+            <div class="exercise-box">
+                <ol>
+                    <li><strong>Maak discipline een levensstijl</strong> - niet iets wat je "doet"</li>
+                    <li><strong>Word een voorbeeld</strong> voor anderen</li>
+                    <li><strong>Help anderen</strong> hun discipline te ontwikkelen</li>
+                    <li><strong>Blijf groeien</strong> - discipline is een levenslange reis</li>
+                </ol>
+            </div>
+            
+            <div class="highlight-box">
+                <h4>Conclusie</h4>
+                <p>Discipline is niet iets wat je hebt of niet hebt - het is iets wat je ontwikkelt door dagelijkse actie. Door de principes in dit ebook toe te passen, leg je een sterke basis voor alle succes in je leven.</p>
+                
+                <div class="quote">
+                    <strong>Discipline is de brug tussen doelen en prestaties.</strong>
+                </div>
+                
+                <p>Begin vandaag. Start klein. Blijf consistent. En vier elke overwinning, hoe klein ook.</p>
+                
+                <p>Je hebt de kennis. Nu is het tijd voor actie.</p>
+                
+                <p><strong>Succes met je discipline-reis!</strong></p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Dit ebook is onderdeel van de Top Tier Men Academy - Module 1: Discipline & Identiteit</p>
+            <p>© 2024 Top Tier Men. Alle rechten voorbehouden.</p>
+        </div>
+    </div>
+</body>
+</html>

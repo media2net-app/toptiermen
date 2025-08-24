@@ -2,13 +2,15 @@
 
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from '@/lib/supabase';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import PageLayout from '@/components/PageLayout';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import Breadcrumb, { createBreadcrumbs } from '@/components/Breadcrumb';
+import EbookDownload from '@/components/EbookDownload';
+import { PlayIcon } from '@heroicons/react/24/solid';
 
 interface Module {
   id: string;
@@ -46,6 +48,9 @@ export default function LessonDetailPage() {
   const [saving, setSaving] = useState(false);
   const [completedLessonIds, setCompletedLessonIds] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [ebook, setEbook] = useState<any>(null);
+  const [showVideoOverlay, setShowVideoOverlay] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   // Simplified data fetching
   useEffect(() => {
@@ -111,12 +116,25 @@ export default function LessonDetailPage() {
         const isCompleted = progressData?.some(p => p.lesson_id === lessonId) || false;
         const completedIds = progressData?.map(p => p.lesson_id) || [];
 
+        // Fetch ebook for this lesson
+        const { data: ebookData, error: ebookError } = await supabase
+          .from('academy_ebooks')
+          .select('*')
+          .eq('lesson_id', lessonId)
+          .eq('status', 'published')
+          .single();
+
+        if (ebookError && ebookError.code !== 'PGRST116') {
+          console.error('Ebook error:', ebookError);
+        }
+
         // Update state
         setModule(moduleData);
         setLessons(lessonsData || []);
         setLesson(currentLesson);
         setCompleted(isCompleted);
         setCompletedLessonIds(completedIds);
+        setEbook(ebookData);
 
         console.log('Data loaded successfully');
 
@@ -151,6 +169,37 @@ export default function LessonDetailPage() {
       } else {
         setCompleted(true);
         setCompletedLessonIds(prev => [...prev, lesson.id]);
+        
+        // Check for Academy completion after lesson is completed
+        setTimeout(async () => {
+          try {
+            const response = await fetch('/api/badges/check-academy-completion', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.completed && data.newlyUnlocked) {
+              // Show badge unlock modal
+              const badgeData = {
+                name: data.badge.title,
+                icon: data.badge.icon_name,
+                description: data.badge.description
+              };
+              
+              // Store badge data in localStorage to show modal on next page load
+              localStorage.setItem('academyBadgeUnlock', JSON.stringify(badgeData));
+              
+              // Show success message
+              alert('🎉 Gefeliciteerd! Je hebt de Academy Master badge ontgrendeld!');
+            }
+          } catch (error) {
+            console.error('Error checking academy completion:', error);
+          }
+        }, 1000);
       }
     } catch (error) {
       console.error('Error completing lesson:', error);
@@ -275,12 +324,11 @@ export default function LessonDetailPage() {
             <div className="mb-6">
               <div className="aspect-video bg-[#232D1A] rounded-lg overflow-hidden relative border border-[#3A4D23]">
                 <video
+                  ref={videoRef}
                   src={lesson.video_url}
                   controls
                   className="w-full h-full rounded-lg bg-black"
-                  preload="auto"
-                  autoPlay
-                  muted
+                  preload="metadata"
                   onError={(e) => {
                     console.error('❌ Video error:', e);
                     console.log('🎥 Video URL:', lesson.video_url);
@@ -291,9 +339,31 @@ export default function LessonDetailPage() {
                   onCanPlay={() => {
                     console.log('🎥 Video can start playing');
                   }}
+                  onPlay={() => {
+                    setShowVideoOverlay(false);
+                  }}
                 >
                   Je browser ondersteunt deze video niet.
                 </video>
+                
+                {/* Video Play Overlay */}
+                {showVideoOverlay && (
+                  <div 
+                    className="absolute inset-0 bg-black/60 flex items-center justify-center cursor-pointer group"
+                    onClick={() => {
+                      if (videoRef.current) {
+                        videoRef.current.play();
+                      }
+                    }}
+                  >
+                    <div className="bg-[#8BAE5A] hover:bg-[#B6C948] text-[#181F17] rounded-full p-4 transition-all duration-200 group-hover:scale-110 shadow-lg">
+                      <PlayIcon className="w-12 h-12" />
+                    </div>
+                    <div className="absolute bottom-4 left-4 right-4 text-center">
+                      <p className="text-white text-sm font-medium">Klik om video af te spelen</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -339,6 +409,17 @@ export default function LessonDetailPage() {
                 </div>
               </div>
             </div>
+          )}
+
+          {/* Ebook Download */}
+          {ebook && (
+            <EbookDownload
+              lessonId={lesson.id}
+              lessonTitle={lesson.title}
+              moduleTitle={module.title}
+              ebookUrl={ebook.file_url}
+              isCompleted={completed}
+            />
           )}
 
           {/* Complete button */}

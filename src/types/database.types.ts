@@ -284,6 +284,50 @@ export interface Database {
           updated_by?: string | null
         }
       }
+      academy_ebooks: {
+        Row: {
+          id: string
+          lesson_id: string
+          title: string
+          description: string | null
+          file_url: string
+          file_size: number | null
+          page_count: number
+          status: 'draft' | 'published' | 'archived'
+          created_at: string
+          updated_at: string
+          created_by: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          id?: string
+          lesson_id: string
+          title: string
+          description?: string | null
+          file_url: string
+          file_size?: number | null
+          page_count?: number
+          status?: 'draft' | 'published' | 'archived'
+          created_at?: string
+          updated_at?: string
+          created_by?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          id?: string
+          lesson_id?: string
+          title?: string
+          description?: string | null
+          file_url?: string
+          file_size?: number | null
+          page_count?: number
+          status?: 'draft' | 'published' | 'archived'
+          created_at?: string
+          updated_at?: string
+          created_by?: string | null
+          updated_by?: string | null
+        }
+      }
       user_lesson_progress: {
         Row: {
           id: string

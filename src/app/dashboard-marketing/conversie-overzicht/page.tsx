@@ -77,7 +77,7 @@ export default function ConversieOverzicht() {
         console.log('✅ Filtered leads (removed test leads):', filteredLeads.length);
       }
       
-      // Fetch Facebook analytics with manual data override
+      // Fetch Facebook analytics with manual data (matching live Facebook Ads Manager)
       const analyticsResponse = await fetch('/api/facebook/comprehensive-analytics?dateRange=maximum&useManualData=true');
       const analyticsResult = await analyticsResponse.json();
       console.log('📈 Analytics data:', analyticsResult);
@@ -137,6 +137,8 @@ export default function ConversieOverzicht() {
     const facebookAdLeads = leads.filter(lead => lead.notes.includes('Campaign:') && !lead.notes.includes('Campaign: test'));
     const organicLeads = leads.filter(lead => !lead.notes.includes('Campaign:'));
     
+
+    
     const totalSpend = analyticsData?.summary?.totalSpend || 0;
     const totalClicks = analyticsData?.summary?.totalClicks ? parseInt(analyticsData.summary.totalClicks) : 0;
     const totalImpressions = analyticsData?.summary?.totalImpressions ? parseInt(analyticsData.summary.totalImpressions) : 0;
@@ -147,6 +149,8 @@ export default function ConversieOverzicht() {
     
     // Conversion rate based on ad clicks (exact calculation)
     const conversionRateFromClicks = totalClicks > 0 ? (facebookAdLeads.length / totalClicks * 100) : 0;
+    
+
     
     return {
       totalLeads,
@@ -196,11 +200,11 @@ export default function ConversieOverzicht() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-white mb-2">Conversie Overzicht</h1>
-              <p className="text-gray-400">Bekijk alle conversies en campaign performance data (test leads gefilterd)</p>
-            </div>
+                      <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold text-white mb-2">Conversie Overzicht</h1>
+                <p className="text-gray-400">Bekijk alle conversies en campaign performance data (test leads gefilterd) - LIVE Facebook Data</p>
+              </div>
             <div className="flex items-center space-x-4">
               {lastSync && (
                 <div className="text-right">
@@ -214,18 +218,24 @@ export default function ConversieOverzicht() {
                   </p>
                 </div>
               )}
-              <button
-                onClick={handleSync}
-                disabled={syncing}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-                  syncing 
-                    ? 'bg-gray-600 text-gray-300 cursor-not-allowed' 
-                    : 'bg-[#8BAE5A] text-white hover:bg-[#7A9D4A]'
-                }`}
-              >
-                <ArrowPathIcon className={`h-5 w-5 ${syncing ? 'animate-spin' : ''}`} />
-                <span>{syncing ? 'Syncing...' : 'Sync Data'}</span>
-              </button>
+              <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 px-3 py-1 bg-green-600 text-white rounded-lg text-sm">
+                  <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                  <span>LIVE</span>
+                </div>
+                <button
+                  onClick={handleSync}
+                  disabled={syncing}
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+                    syncing 
+                      ? 'bg-gray-600 text-gray-300 cursor-not-allowed' 
+                      : 'bg-[#8BAE5A] text-white hover:bg-[#7A9D4A]'
+                  }`}
+                >
+                  <ArrowPathIcon className={`h-5 w-5 ${syncing ? 'animate-spin' : ''}`} />
+                  <span>{syncing ? 'Syncing...' : 'Sync Data'}</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>

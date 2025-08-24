@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Je Identiteit Definiëren - Top Tier Men Academy</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background: #f9fafb;
+        }
+        
+        .ebook-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #8BAE5A 0%, #3A4D23 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -0.025em;
+        }
+        
+        .header .subtitle {
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: white;
+            opacity: 1;
+        }
+        
+        .content {
+            padding: 50px;
+        }
+        
+        .toc {
+            background: #f8fafc;
+            border-left: 4px solid #8BAE5A;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 8px;
+        }
+        
+        .toc h2 {
+            color: #8BAE5A;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .toc ol {
+            list-style: none;
+            counter-reset: toc-counter;
+        }
+        
+        .toc li {
+            counter-increment: toc-counter;
+            margin-bottom: 8px;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        .toc li::before {
+            content: counter(toc-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #8BAE5A;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .toc a {
+            color: #374151;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .toc a:hover {
+            color: #8BAE5A;
+        }
+        
+        h2 {
+            color: #8BAE5A;
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin: 40px 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        h3 {
+            color: #374151;
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 30px 0 15px 0;
+        }
+        
+        h4 {
+            color: #4b5563;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 20px 0 10px 0;
+        }
+        
+        p {
+            margin-bottom: 15px;
+            color: #4b5563;
+        }
+        
+        ul, ol {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+            color: #4b5563;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left: 4px solid #f59e0b;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .highlight-box h4 {
+            color: #92400e;
+            margin-top: 0;
+        }
+        
+        .exercise-box {
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .exercise-box h4 {
+            color: #0369a1;
+            margin-top: 0;
+        }
+        
+        .checklist {
+            background: #f0fdf4;
+            border: 1px solid #16a34a;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .checklist h4 {
+            color: #15803d;
+            margin-top: 0;
+        }
+        
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .checklist-item input[type="checkbox"] {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+        }
+        
+        .time-slot {
+            font-weight: 600;
+            color: #8BAE5A;
+            min-width: 60px;
+        }
+        
+        .quote {
+            font-style: italic;
+            color: #6b7280;
+            border-left: 3px solid #8BAE5A;
+            padding-left: 20px;
+            margin: 20px 0;
+        }
+        
+        .footer {
+            background: #1f2937;
+            color: white;
+            text-align: center;
+            padding: 30px;
+            margin-top: 40px;
+        }
+        
+        .footer p {
+            color: #d1d5db;
+            margin-bottom: 5px;
+        }
+        
+        .page-break {
+            page-break-before: always;
+        }
+        
+        @media print {
+            body {
+                background: white;
+            }
+            .ebook-container {
+                box-shadow: none;
+                max-width: none;
+            }
+            .header {
+                background: #8BAE5A !important;
+                -webkit-print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ebook-container">
+        <div class="header">
+            <h1>Je Identiteit Definiëren</h1>
+            <p class="subtitle">Module 1 - Les 2: Top Tier Men Academy</p>
+        </div>
+        
+        <div class="content">
+            <div class="toc">
+                <h2>Inhoudsopgave</h2>
+                <ol>
+                    <li><a href="#inleiding">Inleiding</a></li>
+                    <li><a href="#wat-is-identiteit">Wat is Identiteit?</a></li>
+                    <li><a href="#de-5-pijlers">De 5 Pijlers van Identiteit</a></li>
+                    <li><a href="#praktische-oefeningen">Praktische Oefeningen</a></li>
+                    <li><a href="#identiteit-worksheet">Identiteit Worksheet</a></li>
+                    <li><a href="#belangrijke-inzichten">Belangrijke Inzichten</a></li>
+                    <li><a href="#reflectie-vragen">Reflectie Vragen</a></li>
+                    <li><a href="#volgende-stappen">Volgende Stappen</a></li>
+                </ol>
+            </div>
+
+            <h2 id="inleiding">Inleiding</h2>
+            <p>Welkom bij de tweede les van de Top Tier Men Academy. In deze les gaan we dieper in op een van de meest fundamentele aspecten van persoonlijke groei: <strong>je identiteit definiëren</strong>.</p>
+            
+            <p>Je identiteit is niet alleen wie je bent, maar vooral wie je wilt worden. Het is de basis van alle beslissingen die je maakt, de manier waarop je je gedraagt, en de richting waarin je je leven stuurt.</p>
+            
+            <div class="highlight-box">
+                <h4>Wat je gaat leren in deze les:</h4>
+                <ul>
+                    <li>Wat identiteit echt betekent en waarom het cruciaal is</li>
+                    <li>De 5 pijlers van een sterke identiteit</li>
+                    <li>Hoe je je identiteit kunt definiëren en versterken</li>
+                    <li>Praktische oefeningen om je identiteit te ontwikkelen</li>
+                    <li>Een complete worksheet om je identiteit te mappen</li>
+                </ul>
+            </div>
+
+            <h2 id="wat-is-identiteit">Wat is Identiteit?</h2>
+            <p>Identiteit is het antwoord op de vraag: "Wie ben ik?" Maar het is veel meer dan alleen je naam, leeftijd of beroep. Je identiteit omvat:</p>
+            
+            <ul>
+                <li><strong>Je waarden</strong> - Wat vind je belangrijk in het leven?</li>
+                <li><strong>Je overtuigingen</strong> - Wat geloof je over jezelf en de wereld?</li>
+                <li><strong>Je doelen</strong> - Waar werk je naartoe?</li>
+                <li><strong>Je gedrag</strong> - Hoe handel je consistent met je waarden?</li>
+                <li><strong>Je verhaal</strong> - Hoe zie je jezelf en je reis?</li>
+            </ul>
+            
+            <h3>Waarom Identiteit Cruciaal Is</h3>
+            <p>Je identiteit is als het fundament van een gebouw. Zonder een sterk fundament kan geen gebouw lang staan, hoe mooi het er ook uitziet. Hetzelfde geldt voor je leven:</p>
+            
+            <div class="quote">
+                <strong>Je identiteit bepaalt:</strong><br>
+                • Welke beslissingen je neemt<br>
+                • Hoe je reageert op uitdagingen<br>
+                • Welke doelen je nastreeft<br>
+                • Hoe anderen je zien en behandelen<br>
+                • Je niveau van zelfvertrouwen en eigenwaarde
+            </div>
+
+            <h2 id="de-5-pijlers">De 5 Pijlers van Identiteit</h2>
+            <p>Een sterke identiteit rust op vijf fundamentele pijlers. Als je deze pijlers versterkt, wordt je identiteit automatisch sterker en duidelijker.</p>
+            
+            <h3>1. Zelfbewustzijn</h3>
+            <div class="exercise-box">
+                <h4>Wat het is:</h4>
+                <p>Het vermogen om jezelf objectief te observeren en te begrijpen wie je bent, wat je drijft, en waarom je doet wat je doet.</p>
+                
+                <h4>Waarom het belangrijk is:</h4>
+                <p>Zonder zelfbewustzijn kun je geen bewuste keuzes maken over wie je wilt zijn.</p>
+                
+                <h4>Hoe je het ontwikkelt:</h4>
+                <ul>
+                    <li>Dagelijkse zelfreflectie en journaling</li>
+                    <li>Feedback vragen aan anderen</li>
+                    <li>Je gedrag en reacties observeren</li>
+                    <li>Meditatie en mindfulness</li>
+                </ul>
+                
+                <p><strong>Voorbeeld:</strong> In plaats van automatisch te reageren op stress, neem je een moment om te observeren wat er gebeurt en waarom.</p>
+            </div>
+            
+            <h3>2. Kernwaarden</h3>
+            <div class="exercise-box">
+                <h4>Wat het is:</h4>
+                <p>De fundamentele principes die je leven sturen en bepalen wat je belangrijk vindt.</p>
+                
+                <h4>Waarom het belangrijk is:</h4>
+                <p>Je waarden zijn je morele kompas en helpen je bij elke beslissing.</p>
+                
+                <h4>Hoe je het ontwikkelt:</h4>
+                <ul>
+                    <li>Identificeer wat je echt belangrijk vindt</li>
+                    <li>Prioriteer je waarden (top 5-7)</li>
+                    <li>Leef consistent met je waarden</li>
+                    <li>Evalueer regelmatig of je waarden nog kloppen</li>
+                </ul>
+                
+                <p><strong>Voorbeeld:</strong> Als integriteit een van je kernwaarden is, weiger je om te liegen, zelfs als het makkelijker zou zijn.</p>
+            </div>
+            
+            <h3>3. Doelgerichtheid</h3>
+            <div class="exercise-box">
+                <h4>Wat het is:</h4>
+                <p>Een duidelijk beeld hebben van waar je naartoe wilt en waarom dat belangrijk is.</p>
+                
+                <h4>Waarom het belangrijk is:</h4>
+                <p>Zonder doel is identiteit betekenisloos. Je doelen geven richting aan je identiteit.</p>
+                
+                <h4>Hoe je het ontwikkelt:</h4>
+                <ul>
+                    <li>Stel duidelijke, meetbare doelen</li>
+                    <li>Visualiseer je gewenste toekomst</li>
+                    <li>Breek grote doelen op in kleine stappen</li>
+                    <li>Houd je doelen regelmatig bij</li>
+                </ul>
+                
+                <p><strong>Voorbeeld:</strong> In plaats van "ik wil succesvol zijn", zeg je "ik wil over 5 jaar een bedrijf hebben dat 100 mensen helpt hun doelen te bereiken."</p>
+            </div>
+            
+            <h3>4. Consistentie</h3>
+            <div class="exercise-box">
+                <h4>Wat het is:</h4>
+                <p>Je gedrag en acties afstemmen op je identiteit, ongeacht de omstandigheden.</p>
+                
+                <h4>Waarom het belangrijk is:</h4>
+                <p>Consistentie bouwt vertrouwen op - zowel bij jezelf als bij anderen.</p>
+                
+                <h4>Hoe je het ontwikkelt:</h4>
+                <ul>
+                    <li>Maak beloften aan jezelf en houd ze</li>
+                    <li>Handel consistent met je waarden</li>
+                    <li>Wees betrouwbaar voor anderen</li>
+                    <li>Evalueer regelmatig je consistentie</li>
+                </ul>
+                
+                <p><strong>Voorbeeld:</strong> Als je zegt dat gezondheid belangrijk is, train je ook als je moe bent of geen zin hebt.</p>
+            </div>
+            
+            <h3>5. Groei Mindset</h3>
+            <div class="exercise-box">
+                <h4>Wat het is:</h4>
+                <p>Geloven dat je identiteit niet vaststaat, maar dat je kunt groeien en veranderen.</p>
+                
+                <h4>Waarom het belangrijk is:</h4>
+                <p>Een groei mindset stelt je in staat om je identiteit bewust te ontwikkelen.</p>
+                
+                <h4>Hoe je het ontwikkelt:</h4>
+                <ul>
+                    <li>Zie uitdagingen als kansen om te groeien</li>
+                    <li>Leer van fouten en feedback</li>
+                    <li>Omarm verandering en nieuwe ervaringen</li>
+                    <li>Vier kleine overwinningen en vooruitgang</li>
+                </ul>
+                
+                <p><strong>Voorbeeld:</strong> In plaats van "ik ben gewoon niet goed in spreken", zeg je "ik kan leren om een betere spreker te worden."</p>
+            </div>
+
+            <h2 id="praktische-oefeningen">Praktische Oefeningen</h2>
+            <p>Hier zijn 4 oefeningen die je helpen om je identiteit te definiëren en te versterken:</p>
+            
+            <h3>Oefening 1: De Identiteit Audit</h3>
+            <div class="exercise-box">
+                <h4>Wat:</h4>
+                <p>Een complete evaluatie van je huidige identiteit en wie je wilt worden.</p>
+                
+                <h4>Waarom:</h4>
+                <p>Het geeft je een duidelijk beeld van waar je staat en waar je naartoe wilt.</p>
+                
+                <h4>Hoe:</h4>
+                <ol>
+                    <li>Neem 30 minuten de tijd in een rustige omgeving</li>
+                    <li>Beantwoord de vragen in de worksheet hieronder</li>
+                    <li>Wees eerlijk en specifiek in je antwoorden</li>
+                    <li>Identificeer de grootste kloof tussen wie je bent en wie je wilt zijn</li>
+                </ol>
+                
+                <p><strong>Resultaat:</strong> Een duidelijk beeld van je huidige en gewenste identiteit.</p>
+            </div>
+            
+            <h3>Oefening 2: Waarden Prioritering</h3>
+            <div class="exercise-box">
+                <h4>Wat:</h4>
+                <p>Je kernwaarden identificeren en prioriteren.</p>
+                
+                <h4>Waarom:</h4>
+                <p>Je waarden zijn de basis van je identiteit en bepalen al je beslissingen.</p>
+                
+                <h4>Hoe:</h4>
+                <ol>
+                    <li>Maak een lijst van 20 waarden die je belangrijk vindt</li>
+                    <li>Kies de 10 meest belangrijke</li>
+                    <li>Rangschik deze van 1-10 (1 = meest belangrijk)</li>
+                    <li>Schrijf bij elke waarde waarom deze belangrijk is</li>
+                </ol>
+                
+                <h4>Voorbeelden van waarden:</h4>
+                <ul>
+                    <li>Integriteit, Loyaal, Moed, Discipline, Groei</li>
+                    <li>Creativiteit, Verantwoordelijkheid, Respect, Balans, Leiderschap</li>
+                </ul>
+            </div>
+            
+            <h3>Oefening 3: Identiteit Verklaring</h3>
+            <div class="exercise-box">
+                <h4>Wat:</h4>
+                <p>Een korte, krachtige verklaring schrijven over wie je bent en wilt zijn.</p>
+                
+                <h4>Waarom:</h4>
+                <p>Het helpt je om je identiteit helder te hebben en consistent te handelen.</p>
+                
+                <h4>Hoe:</h4>
+                <ol>
+                    <li>Schrijf in 2-3 zinnen wie je bent</li>
+                    <li>Voeg toe wat je belangrijk vindt</li>
+                    <li>Beschrijf wat je wilt bereiken</li>
+                    <li>Lees dit elke ochtend hardop</li>
+                </ol>
+                
+                <p><strong>Voorbeeld:</strong> "Ik ben een gedisciplineerde leider die anderen helpt hun potentieel te bereiken. Ik waardeer integriteit, groei en impact. Ik werk aan het bouwen van een bedrijf dat duizenden mensen helpt."</p>
+            </div>
+            
+            <h3>Oefening 4: Dagelijkse Identiteit Check</h3>
+            <div class="exercise-box">
+                <h4>Wat:</h4>
+                <p>Elke dag evalueren of je acties overeenkomen met je identiteit.</p>
+                
+                <h4>Waarom:</h4>
+                <p>Het helpt je om consistent te blijven en je identiteit te versterken.</p>
+                
+                <h4>Hoe:</h4>
+                <ol>
+                    <li>Stel jezelf elke avond 3 vragen:</li>
+                    <li>Heb ik vandaag gehandeld volgens mijn waarden?</li>
+                    <li>Heb ik een stap gezet richting mijn doelen?</li>
+                    <li>Ben ik trots op wie ik vandaag ben geweest?</li>
+                    <li>Schrijf je antwoorden op en identificeer verbeterpunten</li>
+                </ol>
+                
+                <p><strong>Resultaat:</strong> Bewustzijn en consistentie in je dagelijkse acties.</p>
+            </div>
+
+            <h2 id="identiteit-worksheet">Identiteit Worksheet</h2>
+            <p>Gebruik deze worksheet om je identiteit volledig te mappen en te definiëren:</p>
+            
+            <h3>Deel 1: Huidige Identiteit</h3>
+            <div class="checklist">
+                <h4>Wie ben ik nu?</h4>
+                <div class="checklist-item">
+                    <input type="checkbox" id="current1">
+                    <label for="current1">Mijn naam en leeftijd</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="current2">
+                    <label for="current2">Mijn beroep en rol</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="current3">
+                    <label for="current3">Mijn belangrijkste relaties</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="current4">
+                    <label for="current4">Mijn huidige doelen</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="current5">
+                    <label for="current5">Mijn grootste uitdagingen</label>
+                </div>
+            </div>
+            
+            <h3>Deel 2: Mijn Waarden</h3>
+            <div class="checklist">
+                <h4>Wat vind ik belangrijk?</h4>
+                <div class="checklist-item">
+                    <input type="checkbox" id="values1">
+                    <label for="values1">Integriteit - Eerlijk en betrouwbaar zijn</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="values2">
+                    <label for="values2">Discipline - Consistent zijn in mijn acties</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="values3">
+                    <label for="values3">Groei - Altijd leren en verbeteren</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="values4">
+                    <label for="values4">Impact - Anderen helpen en verschil maken</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="values5">
+                    <label for="values5">Balans - Harmonie tussen verschillende levensgebieden</label>
+                </div>
+            </div>
+            
+            <h3>Deel 3: Mijn Doelen</h3>
+            <div class="checklist">
+                <h4>Waar werk ik naartoe?</h4>
+                <div class="checklist-item">
+                    <input type="checkbox" id="goals1">
+                    <label for="goals1">Korte termijn (3-6 maanden)</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="goals2">
+                    <label for="goals2">Middellange termijn (1-2 jaar)</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="goals3">
+                    <label for="goals3">Lange termijn (5-10 jaar)</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="goals4">
+                    <label for="goals4">Levensdoel - Mijn missie</label>
+                </div>
+            </div>
+            
+            <h3>Deel 4: Mijn Identiteit Verklaring</h3>
+            <div class="exercise-box">
+                <h4>Schrijf je identiteit verklaring:</h4>
+                <p><strong>Ik ben...</strong> [Wie ben je?]</p>
+                <p><strong>Ik waardeer...</strong> [Wat vind je belangrijk?]</p>
+                <p><strong>Ik werk aan...</strong> [Wat wil je bereiken?]</p>
+                <p><strong>Ik word...</strong> [Wie wil je worden?]</p>
+            </div>
+
+            <h2 id="belangrijke-inzichten">Belangrijke Inzichten</h2>
+            
+            <div class="highlight-box">
+                <h4>1. Identiteit is een Keuze</h4>
+                <p>Je identiteit is niet iets wat je hebt, maar iets wat je kiest. Je kunt op elk moment beslissen wie je wilt zijn.</p>
+            </div>
+            
+            <div class="highlight-box">
+                <h4>2. Consistentie Bouwt Vertrouwen</h4>
+                <p>Hoe consistenter je handelt volgens je identiteit, hoe meer vertrouwen je krijgt - van jezelf en anderen.</p>
+            </div>
+            
+            <div class="highlight-box">
+                <h4>3. Je Verhaal is Krachtig</h4>
+                <p>De manier waarop je jezelf ziet en je verhaal vertelt, bepaalt hoe anderen je zien en behandelen.</p>
+            </div>
+            
+            <div class="highlight-box">
+                <h4>4. Identiteit Groeit met Je</h4>
+                <p>Je identiteit is niet statisch. Het groeit en ontwikkelt zich naarmate je groeit en nieuwe ervaringen opdoet.</p>
+            </div>
+            
+            <div class="highlight-box">
+                <h4>5. Actie Versterkt Identiteit</h4>
+                <p>Je identiteit wordt versterkt door je acties. Elke keer dat je handelt volgens je waarden, wordt je identiteit sterker.</p>
+            </div>
+            
+            <div class="highlight-box">
+                <h4>6. Omgeving Beïnvloedt Identiteit</h4>
+                <p>De mensen om je heen en de omgeving waarin je je bevindt, beïnvloeden sterk je identiteit. Kies bewust.</p>
+            </div>
+
+            <h2 id="reflectie-vragen">Reflectie Vragen</h2>
+            <p>Neem de tijd om deze vragen te beantwoorden. Schrijf je antwoorden op in een notitieboek:</p>
+            
+            <h3>Over Je Huidige Identiteit</h3>
+            <ol>
+                <li>Wie ben ik nu? Hoe zou ik mezelf beschrijven?</li>
+                <li>Welke aspecten van mijn identiteit ben ik trots op?</li>
+                <li>Welke aspecten wil ik veranderen of verbeteren?</li>
+                <li>Hoe zien anderen mij? Klopt dit met hoe ik mezelf zie?</li>
+            </ol>
+            
+            <h3>Over Je Waarden</h3>
+            <ol>
+                <li>Wat zijn mijn 5 belangrijkste waarden?</li>
+                <li>Waarom zijn deze waarden belangrijk voor mij?</li>
+                <li>Leef ik consistent met deze waarden?</li>
+                <li>Welke waarden wil ik meer ontwikkelen?</li>
+            </ol>
+            
+            <h3>Over Je Doelen</h3>
+            <ol>
+                <li>Wat zijn mijn belangrijkste doelen voor de komende 5 jaar?</li>
+                <li>Waarom zijn deze doelen belangrijk voor mij?</li>
+                <li>Hoe dragen deze doelen bij aan wie ik wil worden?</li>
+                <li>Wat moet ik doen om deze doelen te bereiken?</li>
+            </ol>
+            
+            <h3>Over Je Groei</h3>
+            <ol>
+                <li>Hoe ben ik de afgelopen 5 jaar gegroeid?</li>
+                <li>Welke ervaringen hebben me het meest gevormd?</li>
+                <li>Wie wil ik over 5 jaar zijn?</li>
+                <li>Wat moet ik doen om die persoon te worden?</li>
+            </ol>
+
+            <h2 id="volgende-stappen">Volgende Stappen</h2>
+            <p>Nu je je identiteit hebt gedefinieerd, is het tijd om actie te ondernemen:</p>
+            
+            <h3>Deze Week</h3>
+            <div class="exercise-box">
+                <ol>
+                    <li><strong>Voltooi de identiteit worksheet</strong> - Neem de tijd om alle vragen te beantwoorden</li>
+                    <li><strong>Schrijf je identiteit verklaring</strong> - Maak deze krachtig en memorabel</li>
+                    <li><strong>Begin met de dagelijkse check</strong> - Evalueer elke avond je acties</li>
+                    <li><strong>Deel je inzichten</strong> - Bespreek je identiteit met iemand die je vertrouwt</li>
+                </ol>
+            </div>
+            
+            <h3>Deze Maand</h3>
+            <div class="exercise-box">
+                <ol>
+                    <li><strong>Leef je identiteit</strong> - Handel consistent met je waarden en doelen</li>
+                    <li><strong>Pas je omgeving aan</strong> - Omring je met mensen die je identiteit ondersteunen</li>
+                    <li><strong>Evalueer en pas aan</strong> - Herzie je identiteit verklaring als nodig</li>
+                    <li><strong>Bouw momentum op</strong> - Vier elke overwinning die je identiteit versterkt</li>
+                </ol>
+            </div>
+            
+            <h3>De Komende 3 Maanden</h3>
+            <div class="exercise-box">
+                <ol>
+                    <li><strong>Word je identiteit</strong> - Laat je acties je identiteit weerspiegelen</li>
+                    <li><strong>Inspireer anderen</strong> - Help anderen hun identiteit te ontwikkelen</li>
+                    <li><strong>Blijf groeien</strong> - Blijf leren en je identiteit verfijnen</li>
+                    <li><strong>Bouw je legacy</strong> - Creëer iets dat je identiteit overleeft</li>
+                </ol>
+            </div>
+            
+            <h3>Lange Termijn</h3>
+            <div class="exercise-box">
+                <ol>
+                    <li><strong>Word een voorbeeld</strong> - Laat anderen zien wat mogelijk is</li>
+                    <li><strong>Bouw een community</strong> - Creëer een groep mensen met vergelijkbare waarden</li>
+                    <li><strong>Maak impact</strong> - Gebruik je identiteit om de wereld te verbeteren</li>
+                    <li><strong>Blijf authentiek</strong> - Blijf trouw aan wie je bent en wilt zijn</li>
+                </ol>
+            </div>
+            
+            <div class="highlight-box">
+                <h4>Conclusie</h4>
+                <p>Je identiteit is niet iets wat je vindt, maar iets wat je creëert. Door bewust te kiezen wie je wilt zijn en consistent te handelen volgens die keuze, bouw je een identiteit waar je trots op kunt zijn.</p>
+                
+                <div class="quote">
+                    <strong>Je identiteit is je meest krachtige bezit. Koester het, ontwikkel het, en leef het elke dag.</strong>
+                </div>
+                
+                <p>Begin vandaag. Kies bewust. Word wie je wilt zijn.</p>
+                
+                <p><strong>Succes met het definiëren van je identiteit!</strong></p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Dit ebook is onderdeel van de Top Tier Men Academy - Module 1: Discipline & Identiteit</p>
+            <p>© 2024 Top Tier Men. Alle rechten voorbehouden.</p>
+        </div>
+    </div>
+</body>
+</html>

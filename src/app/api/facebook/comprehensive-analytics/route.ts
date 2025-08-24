@@ -3,31 +3,43 @@ import { NextRequest, NextResponse } from 'next/server';
 const FACEBOOK_ACCESS_TOKEN = process.env.FACEBOOK_ACCESS_TOKEN;
 const FACEBOOK_AD_ACCOUNT_ID = process.env.FACEBOOK_AD_ACCOUNT_ID;
 
-// Manual data override based on Facebook Ads Manager
+// Manual data override based on Facebook Ads Manager (Live Data)
 const MANUAL_DATA_OVERRIDE = {
   'TTM - Zakelijk Prelaunch Campagne': {
-    clicks: 72,
-    spend: 8.41,
-    impressions: 1352,
-    reach: 1256
+    clicks: 88,
+    spend: 19.15,
+    impressions: 1533,
+    reach: 1533,
+    ctr: 5.74, // (88/1533)*100
+    cpc: 0.22, // 19.15/88
+    frequency: 1.09
   },
   'TTM - Vaders Prelaunch Campagne': {
-    clicks: 96,
-    spend: 8.45,
-    impressions: 1438,
-    reach: 1331
+    clicks: 112,
+    spend: 11.67,
+    impressions: 1526,
+    reach: 1526,
+    ctr: 7.34, // (112/1526)*100
+    cpc: 0.10, // 11.67/112
+    frequency: 1.09
   },
   'TTM - Jongeren Prelaunch Campagne': {
-    clicks: 69,
-    spend: 8.22,
-    impressions: 1404,
-    reach: 1314
+    clicks: 80,
+    spend: 13.15,
+    impressions: 1526,
+    reach: 1526,
+    ctr: 5.24, // (80/1526)*100
+    cpc: 0.16, // 13.15/80
+    frequency: 1.06
   },
   'TTM - Algemene Prelaunch Campagne': {
-    clicks: 189,
-    spend: 21.44,
-    impressions: 3267,
-    reach: 2919
+    clicks: 192,
+    spend: 23.55,
+    impressions: 2994,
+    reach: 2994,
+    ctr: 6.41, // (192/2994)*100
+    cpc: 0.12, // 23.55/192
+    frequency: 1.12
   }
 };
 
@@ -96,9 +108,9 @@ export async function GET(request: NextRequest) {
             clicks: manualData.clicks.toString(),
             spend: manualData.spend.toString(),
             reach: manualData.reach.toString(),
-            frequency: '0',
-            ctr: '0',
-            cpc: '0',
+            frequency: manualData.frequency ? manualData.frequency.toString() : '0',
+            ctr: manualData.ctr ? manualData.ctr.toString() : '0',
+            cpc: manualData.cpc ? manualData.cpc.toString() : '0',
             cpm: '0',
             actions: [],
             action_values: [],
@@ -107,9 +119,9 @@ export async function GET(request: NextRequest) {
           };
           console.log(`📊 Using manual data for ${campaign.name}:`, manualData);
         } else {
-          // Fetch from API
+          // Fetch from API with maximum date range
           const insightsResponse = await fetch(
-            `https://graph.facebook.com/v19.0/${campaign.id}/insights?access_token=${FACEBOOK_ACCESS_TOKEN}&fields=impressions,clicks,spend,reach,frequency,ctr,cpc,cpm,actions,action_values,cost_per_action_type,cost_per_conversion&limit=1000`
+            `https://graph.facebook.com/v19.0/${campaign.id}/insights?access_token=${FACEBOOK_ACCESS_TOKEN}&fields=impressions,clicks,spend,reach,frequency,ctr,cpc,cpm,actions,action_values,cost_per_action_type,cost_per_conversion&time_range={"since":"2024-01-01","until":"today"}&limit=1000`
           );
           
           if (insightsResponse.ok) {
@@ -174,7 +186,7 @@ export async function GET(request: NextRequest) {
     // 2. Fetch ad sets with insights
     console.log('📋 Fetching ad sets...');
     const adSetsResponse = await fetch(
-      `https://graph.facebook.com/v19.0/${FACEBOOK_AD_ACCOUNT_ID}/adsets?access_token=${FACEBOOK_ACCESS_TOKEN}&fields=id,name,status,campaign_id,created_time,start_time,stop_time,daily_budget,lifetime_budget,bid_amount,bid_strategy,targeting,optimization_goal,insights{impressions,clicks,spend,reach,frequency,ctr,cpc,cpm,actions,action_values,cost_per_action_type,cost_per_conversion}&limit=1000`
+      `https://graph.facebook.com/v19.0/${FACEBOOK_AD_ACCOUNT_ID}/adsets?access_token=${FACEBOOK_ACCESS_TOKEN}&fields=id,name,status,campaign_id,created_time,start_time,stop_time,daily_budget,lifetime_budget,bid_amount,bid_strategy,targeting,optimization_goal,insights{impressions,clicks,spend,reach,frequency,ctr,cpc,cpm,actions,action_values,cost_per_action_type,cost_per_conversion}&time_range={"since":"2024-01-01","until":"today"}&limit=1000`
     );
 
     if (adSetsResponse.ok) {
@@ -218,7 +230,7 @@ export async function GET(request: NextRequest) {
     // 3. Fetch ads with insights
     console.log('📋 Fetching ads...');
     const adsResponse = await fetch(
-      `https://graph.facebook.com/v19.0/${FACEBOOK_AD_ACCOUNT_ID}/ads?access_token=${FACEBOOK_ACCESS_TOKEN}&fields=id,name,status,effective_status,adset_id,campaign_id,created_time,creative{id,title,body,image_url,video_id,link_url,object_story_spec},insights{impressions,clicks,spend,reach,frequency,ctr,cpc,cpm,actions,action_values,cost_per_action_type,cost_per_conversion}&limit=1000`
+      `https://graph.facebook.com/v19.0/${FACEBOOK_AD_ACCOUNT_ID}/ads?access_token=${FACEBOOK_ACCESS_TOKEN}&fields=id,name,status,effective_status,adset_id,campaign_id,created_time,creative{id,title,body,image_url,video_id,link_url,object_story_spec},insights{impressions,clicks,spend,reach,frequency,ctr,cpc,cpm,actions,action_values,cost_per_action_type,cost_per_conversion}&time_range={"since":"2024-01-01","until":"today"}&limit=1000`
     );
 
     if (adsResponse.ok) {

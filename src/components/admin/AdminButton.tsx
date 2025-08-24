@@ -27,19 +27,19 @@ export default function AdminButton({
   icon,
   fullWidth = false
 }: AdminButtonProps) {
-  const baseClasses = "font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap";
+  const baseClasses = "font-medium rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed border";
   
   const variantClasses = {
-    primary: "bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#0A0F0A] hover:from-[#A6C97B] hover:to-[#FFE55C] shadow-lg",
-    secondary: "bg-[#181F17] text-gray-400 border border-[#3A4D23] hover:bg-[#232D1A] hover:text-[#8BAE5A]",
-    danger: "bg-gradient-to-r from-red-600 to-red-700 text-white hover:from-red-700 hover:to-red-800 shadow-lg",
-    success: "bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 shadow-lg"
+    primary: "bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#0A0F0A] hover:from-[#A6C97B] hover:to-[#FFE55C] shadow-lg border-transparent",
+    secondary: "bg-[#232D1A] text-[#8BAE5A] border-[#3A4D23] hover:bg-[#181F17] hover:text-[#B6C948] hover:border-[#8BAE5A]",
+    danger: "bg-gradient-to-r from-red-600 to-red-700 text-white hover:from-red-700 hover:to-red-800 shadow-lg border-transparent",
+    success: "bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 shadow-lg border-transparent"
   };
 
   const sizeClasses = {
-    sm: "px-3 py-2 text-xs h-8 min-w-[80px]",
-    md: "px-4 py-2.5 text-sm h-10 min-w-[100px]",
-    lg: "px-6 py-3 text-base h-12 min-w-[120px]"
+    sm: "px-2 py-1.5 text-xs h-7",
+    md: "px-4 py-2.5 text-sm h-10",
+    lg: "px-6 py-3 text-base h-12"
   };
 
   const widthClass = fullWidth ? "w-full" : "";
@@ -52,10 +52,10 @@ export default function AdminButton({
       className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${widthClass} ${className}`}
     >
       {loading && (
-        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin flex-shrink-0"></div>
+        <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin flex-shrink-0"></div>
       )}
       {!loading && icon && <span className="flex-shrink-0">{icon}</span>}
-      <span className="leading-none text-center">{children}</span>
+      <span className="flex-shrink-0">{children}</span>
     </button>
   );
 } 
