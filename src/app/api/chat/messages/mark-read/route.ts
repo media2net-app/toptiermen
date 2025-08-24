@@ -39,7 +39,14 @@ export async function POST(request: NextRequest) {
 
     // Check if user is part of the conversation
     const conversation = message.chat_conversations;
-    if (conversation.participant1_id !== userId && conversation.participant2_id !== userId) {
+    if (!conversation || !Array.isArray(conversation) || conversation.length === 0) {
+      return NextResponse.json({ 
+        error: 'Conversation not found' 
+      }, { status: 404 });
+    }
+    
+    const conv = conversation[0];
+    if (conv.participant1_id !== userId && conv.participant2_id !== userId) {
       return NextResponse.json({ 
         error: 'Access denied' 
       }, { status: 403 });

@@ -114,7 +114,10 @@ export function useChatNotifications(
         (payload) => {
           console.log('💬 Conversation update:', payload);
           if (onConversationUpdate) {
-            onConversationUpdate(payload.new?.id || payload.old?.id);
+            const conversationId = (payload.new as any)?.id || (payload.old as any)?.id;
+            if (conversationId) {
+              onConversationUpdate(conversationId);
+            }
           }
         }
       )

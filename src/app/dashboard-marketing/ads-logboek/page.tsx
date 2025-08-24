@@ -20,7 +20,7 @@ interface LogEntry {
   id: string;
   date: string;
   title: string;
-  category: 'strategy' | 'performance' | 'budget' | 'creative' | 'targeting' | 'optimization';
+  category: 'strategy' | 'performance' | 'budget' | 'creative' | 'targeting' | 'optimization' | 'setup' | 'fix' | 'feature';
   content: string;
   impact: 'positive' | 'negative' | 'neutral' | 'monitoring';
   tags: string[];

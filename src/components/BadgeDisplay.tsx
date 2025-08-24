@@ -8,6 +8,7 @@ interface Badge {
   title: string;
   description: string;
   icon_name: string;
+  image_url?: string;
   rarity_level: 'common' | 'rare' | 'epic' | 'legendary';
   xp_reward: number;
   unlocked_at?: string;
