@@ -672,6 +672,7 @@ export default function AcademyManagement() {
                   }}
                   variant="secondary"
                   size="sm"
+                  className="!w-[100px] !min-w-[100px] !max-w-[100px]"
                 >
                   <PencilIcon className="w-4 h-4" />
                   Bewerk
@@ -683,6 +684,7 @@ export default function AcademyManagement() {
                   }}
                   variant="secondary"
                   size="sm"
+                  className="!w-[120px] !min-w-[120px] !max-w-[120px]"
                 >
                   <EyeIcon className="w-4 h-4" />
                   Bekijk Lessen

@@ -12,7 +12,7 @@ export default function TestFacebookAnalytics() {
       try {
         console.log('🧪 Testing comprehensive Facebook analytics API...');
         
-        const response = await fetch('/api/facebook/comprehensive-analytics?dateRange=last_30d');
+        const response = await fetch('/api/facebook/comprehensive-analytics?dateRange=last_30d&useManualData=true');
         const result = await response.json();
         
         console.log('🧪 API Response:', result);

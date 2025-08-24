@@ -74,6 +74,7 @@ export default function ForcedOnboardingModal({ isOpen, onComplete }: ForcedOnbo
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [videoWatched, setVideoWatched] = useState(false);
+  const [showVideoOverlay, setShowVideoOverlay] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   // Step-specific state
@@ -113,12 +114,12 @@ export default function ForcedOnboardingModal({ isOpen, onComplete }: ForcedOnbo
     }
   };
 
-  // Auto-play video when step 0 opens
+  // Reset video when step 0 opens
   useEffect(() => {
     if (isOpen && currentStep === 0 && videoRef.current) {
-      videoRef.current.play().catch(error => {
-        console.log('Auto-play failed:', error);
-      });
+      videoRef.current.currentTime = 0;
+      setVideoWatched(false);
+      setShowVideoOverlay(true);
     }
   }, [isOpen, currentStep]);
 
@@ -319,19 +320,38 @@ export default function ForcedOnboardingModal({ isOpen, onComplete }: ForcedOnbo
                 </p>
               </div>
 
-              <div className="bg-[#181F17] rounded-xl p-4 mb-6 border border-[#3A4D23]">
+              <div className="bg-[#181F17] rounded-xl p-4 mb-6 border border-[#3A4D23] relative">
                 <video
                   ref={videoRef}
                   className="w-full rounded-lg"
                   controls
-                  autoPlay
-                  muted
+                  preload="metadata"
                   onEnded={() => setVideoWatched(true)}
+                  onPlay={() => setShowVideoOverlay(false)}
                 >
                   <source src="/welkom-v2.MP4" type="video/mp4" />
                   <source src="/welkom.MP4" type="video/mp4" />
                   Je browser ondersteunt geen video afspelen.
                 </video>
+                
+                {/* Video Play Overlay */}
+                {showVideoOverlay && (
+                  <div 
+                    className="absolute inset-0 bg-black/60 flex items-center justify-center cursor-pointer group rounded-lg"
+                    onClick={() => {
+                      if (videoRef.current) {
+                        videoRef.current.play();
+                      }
+                    }}
+                  >
+                    <div className="bg-[#8BAE5A] hover:bg-[#B6C948] text-[#181F17] rounded-full p-4 transition-all duration-200 group-hover:scale-110 shadow-lg">
+                      <PlayIcon className="w-12 h-12" />
+                    </div>
+                    <div className="absolute bottom-4 left-4 right-4 text-center">
+                      <p className="text-white text-sm font-medium">Klik om video af te spelen</p>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {videoWatched && (

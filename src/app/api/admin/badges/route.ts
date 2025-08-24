@@ -22,6 +22,7 @@ export async function GET(request: NextRequest) {
       name: badge.title,
       description: badge.description,
       icon: badge.icon_name || '🏆',
+      image: badge.image_url || '/badge-no-excuses.png',
       category: badge.category_id ? `Category ${badge.category_id}` : 'General',
       levels: [], // Default empty array
       trigger: badge.requirements?.type || 'custom',

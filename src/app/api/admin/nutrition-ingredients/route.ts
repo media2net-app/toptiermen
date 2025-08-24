@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
     
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
-    const limit = parseInt(searchParams.get('limit') || '50');
+    const limit = parseInt(searchParams.get('limit') || '100');
     const offset = parseInt(searchParams.get('offset') || '0');
 
     let query = supabaseAdmin
@@ -105,6 +105,32 @@ export async function PUT(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true, ingredient });
+  } catch (error) {
+    console.error('Error in nutrition ingredients API:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json({ error: 'ID is required for deletion' }, { status: 400 });
+    }
+
+    const { error } = await supabaseAdmin
+      .from('nutrition_ingredients')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error deleting nutrition ingredient:', error);
+      return NextResponse.json({ error: 'Failed to delete nutrition ingredient' }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, message: 'Nutrition ingredient deleted successfully' });
   } catch (error) {
     console.error('Error in nutrition ingredients API:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

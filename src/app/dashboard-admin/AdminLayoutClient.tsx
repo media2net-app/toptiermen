@@ -106,6 +106,7 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
       type: 'section',
       items: [
         { label: 'Academy', icon: AcademicCapIcon, href: '/dashboard-admin/academy' },
+        { label: 'Ebooks Setup', icon: BookOpenIcon, href: '/dashboard-admin/ebooks-setup', badge: 'NEW' },
         { label: 'Trainingscentrum', icon: FireIcon, href: '/dashboard-admin/trainingscentrum' },
         { label: 'Voedingsplannen', icon: BookOpenIcon, href: '/dashboard-admin/voedingsplannen' },
         { label: 'Boekenkamer', icon: BookOpenIcon, href: '/dashboard-admin/boekenkamer' },
@@ -171,6 +172,11 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
                       {subItem.icon && <subItem.icon className="w-5 h-5" />}
                       <span className="flex items-center gap-2">
                         {subItem.label}
+                        {subItem.badge && (
+                          <span className="px-2 py-1 text-xs font-bold text-white bg-red-500 rounded-full">
+                            {subItem.badge}
+                          </span>
+                        )}
                       </span>
                     </Link>
                   ))}

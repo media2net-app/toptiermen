@@ -667,6 +667,16 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
                           {...provided.droppableProps}
                           className={`space-y-2 min-h-[50px] ${snapshot.isDraggingOver ? 'bg-[#8BAE5A]/10 rounded-lg' : ''}`}
                         >
+                          {/* Column headers */}
+                          <div className="flex items-center space-x-2 p-2 bg-gray-700 rounded text-xs text-gray-300 font-medium">
+                            <div className="w-6"></div> {/* Drag handle space */}
+                            <div className="flex-1">Oefening</div>
+                            <div className="w-16 text-center">Sets</div>
+                            <div className="w-20 text-center">Reps</div>
+                            <div className="w-20 text-center">Rust (s)</div>
+                            <div className="w-6"></div> {/* Delete button space */}
+                          </div>
+                          
                           {day.exercises.map((exercise, exerciseIndex) => (
                             <Draggable
                               key={`${dayIndex}-${exerciseIndex}`}

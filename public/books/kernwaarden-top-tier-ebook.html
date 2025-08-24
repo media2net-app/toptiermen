@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ontdek je kernwaarden en bouw je Top Tier identiteit - Top Tier Men Academy</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background: #f9fafb;
+        }
+        
+        .ebook-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #8BAE5A 0%, #3A4D23 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -0.025em;
+        }
+        
+        .header .subtitle {
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: white;
+            opacity: 1;
+        }
+        
+        .content {
+            padding: 50px;
+        }
+        
+        .toc {
+            background: #f8fafc;
+            border-left: 4px solid #8BAE5A;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 8px;
+        }
+        
+        .toc h2 {
+            color: #8BAE5A;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .toc ol {
+            list-style: none;
+            counter-reset: toc-counter;
+        }
+        
+        .toc li {
+            counter-increment: toc-counter;
+            margin-bottom: 8px;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        .toc li::before {
+            content: counter(toc-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #8BAE5A;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .toc a {
+            color: #374151;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .toc a:hover {
+            color: #8BAE5A;
+        }
+        
+        h2 {
+            color: #8BAE5A;
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin: 40px 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        h3 {
+            color: #374151;
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 30px 0 15px 0;
+        }
+        
+        h4 {
+            color: #4b5563;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 20px 0 10px 0;
+        }
+        
+        p {
+            margin-bottom: 15px;
+            color: #4b5563;
+        }
+        
+        ul, ol {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+            color: #4b5563;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left: 4px solid #f59e0b;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .highlight-box h4 {
+            color: #92400e;
+            margin-top: 0;
+        }
+        
+        .exercise-box {
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .exercise-box h4 {
+            color: #0369a1;
+            margin-top: 0;
+        }
+        
+        .checklist {
+            background: #f0fdf4;
+            border: 1px solid #16a34a;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .checklist h4 {
+            color: #15803d;
+            margin-top: 0;
+        }
+        
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .checklist-item input[type="checkbox"] {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+        }
+        
+        .quote {
+            font-style: italic;
+            color: #6b7280;
+            border-left: 3px solid #8BAE5A;
+            padding-left: 20px;
+            margin: 20px 0;
+        }
+        
+        .footer {
+            background: #1f2937;
+            color: white;
+            text-align: center;
+            padding: 30px;
+            margin-top: 40px;
+        }
+        
+        .footer p {
+            color: #d1d5db;
+            margin-bottom: 5px;
+        }
+        
+        @media print {
+            body {
+                background: white;
+            }
+            .ebook-container {
+                box-shadow: none;
+                max-width: none;
+            }
+            .header {
+                background: #8BAE5A !important;
+                -webkit-print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ebook-container">
+        <div class="header">
+            <h1>Ontdek je kernwaarden en bouw je Top Tier identiteit</h1>
+            <p class="subtitle">Module 1 - Les 5: Top Tier Men Academy</p>
+        </div>
+        
+        <div class="content">
+            <div class="toc">
+                <h2>Inhoudsopgave</h2>
+                <ol>
+                    <li><a href="#inleiding">Inleiding</a></li>
+                    <li><a href="#wat-is-top-tier">Wat is Top Tier?</a></li>
+                    <li><a href="#kernwaarden-ontdekken">Kernwaarden Ontdekken</a></li>
+                    <li><a href="#top-tier-identiteit">Top Tier Identiteit Bouwen</a></li>
+                    <li><a href="#praktische-oefeningen">Praktische Oefeningen</a></li>
+                    <li><a href="#levensstijl-integratie">Levensstijl Integratie</a></li>
+                    <li><a href="#volgende-stappen">Volgende Stappen</a></li>
+                </ol>
+            </div>
+
+            <h2 id="inleiding">Inleiding</h2>
+            <p>Welkom bij de vijfde en laatste les van de Discipline & Identiteit module. In deze les gaan we alles samenbrengen en je helpen om je <strong>Top Tier identiteit te bouwen</strong> op basis van je ontdekte kernwaarden.</p>
+            
+            <p>Dit is waar alles samenkomt - waar je de kennis en inzichten uit de vorige lessen gebruikt om de beste versie van jezelf te worden.</p>
+            
+            <div class="highlight-box">
+                <h4>Wat je gaat leren in deze les:</h4>
+                <ul>
+                    <li>Wat het betekent om Top Tier te zijn</li>
+                    <li>Hoe je je kernwaarden kunt ontdekken en leven</li>
+                    <li>Het bouwen van een Top Tier identiteit</li>
+                    <li>Praktische oefeningen voor zelfontdekking</li>
+                    <li>Integratie van je nieuwe identiteit in je levensstijl</li>
+                    <li>Volgende stappen voor je persoonlijke groei</li>
+                </ul>
+            </div>
+
+            <h2 id="wat-is-top-tier">Wat is Top Tier?</h2>
+            <p>Top Tier is niet alleen een label - het is een levensstijl, een mindset, en een identiteit. Het betekent dat je de beste versie van jezelf bent en blijft worden.</p>
+            
+            <h3>De Top Tier Mindset</h3>
+            <div class="exercise-box">
+                <h4>1. Existentieel</h4>
+                <p>Je streeft naar excellentie in alles wat je doet, niet omdat je moet, maar omdat je wilt.</p>
+                
+                <h4>2. Verantwoordelijk</h4>
+                <p>Je neemt volledige verantwoordelijkheid voor je leven, je keuzes en je resultaten.</p>
+                
+                <h4>3. Groei-georiënteerd</h4>
+                <p>Je ziet elke uitdaging als een kans om te groeien en te verbeteren.</p>
+                
+                <h4>4. Authentiek</h4>
+                <p>Je bent trouw aan jezelf en je kernwaarden, ongeacht de omstandigheden.</p>
+                
+                <h4>5. Dienstbaar</h4>
+                <p>Je gebruikt je kracht en vaardigheden om anderen te helpen en te inspireren.</p>
+            </div>
+
+            <h2 id="kernwaarden-ontdekken">Kernwaarden Ontdekken</h2>
+            <p>Het ontdekken van je kernwaarden is een diepgaand proces van zelfonderzoek. Hier zijn praktische methoden:</p>
+            
+            <h3>Methode 1: De Waarden Audit</h3>
+            <div class="exercise-box">
+                <h4>Stap 1: Brainstorm</h4>
+                <p>Schrijf alle waarden op die je belangrijk vindt (minimaal 20).</p>
+                
+                <h4>Stap 2: Categoriseer</h4>
+                <p>Groep je waarden in categorieën: moreel, persoonlijk, relationeel, creatief, spiritueel.</p>
+                
+                <h4>Stap 3: Prioriteer</h4>
+                <p>Kies je top 5-7 waarden die het meest belangrijk voor je zijn.</p>
+                
+                <h4>Stap 4: Definieer</h4>
+                <p>Schrijf voor elke waarde op wat het voor jou betekent.</p>
+            </div>
+            
+            <h3>Methode 2: De Reflectie Methode</h3>
+            <div class="exercise-box">
+                <h4>Vragen om jezelf te stellen:</h4>
+                <ul>
+                    <li>Wanneer voel ik me het meest trots op mezelf?</li>
+                    <li>Wat maakt me boos of gefrustreerd?</li>
+                    <li>Wat bewonder ik in anderen?</li>
+                    <li>Wat zou ik willen dat anderen over me zeggen?</li>
+                    <li>Waar voel ik me het meest authentiek?</li>
+                </ul>
+            </div>
+
+            <h2 id="top-tier-identiteit">Top Tier Identiteit Bouwen</h2>
+            <p>Nu je je kernwaarden hebt ontdekt, is het tijd om je Top Tier identiteit te bouwen:</p>
+            
+            <h3>De 5 Pijlers van Top Tier Identiteit</h3>
+            <div class="exercise-box">
+                <h4>1. Zelfbewustzijn</h4>
+                <p>Je kent jezelf volledig - je sterke punten, zwakke punten, drijfveren en doelen.</p>
+                
+                <h4>2. Authenticiteit</h4>
+                <p>Je bent trouw aan jezelf en je kernwaarden in alle situaties.</p>
+                
+                <h4>3. Consistentie</h4>
+                <p>Je handelt consistent volgens je identiteit, ongeacht de omstandigheden.</p>
+                
+                <h4>4. Groei</h4>
+                <p>Je bent altijd bezig met het verbeteren en ontwikkelen van jezelf.</p>
+                
+                <h4>5. Impact</h4>
+                <p>Je gebruikt je kracht om positieve verandering te creëren in de wereld.</p>
+            </div>
+
+            <h2 id="praktische-oefeningen">Praktische Oefeningen</h2>
+            <p>Hier zijn concrete oefeningen om je Top Tier identiteit te ontwikkelen:</p>
+            
+            <h3>Oefening 1: De Top Tier Verklaring</h3>
+            <div class="exercise-box">
+                <h4>Schrijf je Top Tier identiteit verklaring:</h4>
+                <p>"Ik ben een Top Tier man die [kernwaarde 1], [kernwaarde 2], en [kernwaarde 3] waardeert. Ik ben [identiteit kenmerk 1] en [identiteit kenmerk 2]. Mijn missie is [je missie]."</p>
+            </div>
+            
+            <h3>Oefening 2: Dagelijkse Top Tier Check</h3>
+            <div class="exercise-box">
+                <h4>Vraag jezelf elke avond:</h4>
+                <ul>
+                    <li>Heb ik vandaag gehandeld als een Top Tier man?</li>
+                    <li>Heb ik mijn kernwaarden geleefd?</li>
+                    <li>Wat kan ik morgen beter doen?</li>
+                </ul>
+            </div>
+
+            <h2 id="levensstijl-integratie">Levensstijl Integratie</h2>
+            <p>Integreer je Top Tier identiteit in je dagelijks leven:</p>
+            
+            <h3>Gebieden van Integratie</h3>
+            <div class="checklist">
+                <h4>Fysiek:</h4>
+                <div class="checklist-item">
+                    <input type="checkbox" id="physical1">
+                    <label for="physical1">Consistente training en gezonde voeding</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="physical2">
+                    <label for="physical2">Voldoende slaap en herstel</label>
+                </div>
+            </div>
+            
+            <div class="checklist">
+                <h4>Mentaal:</h4>
+                <div class="checklist-item">
+                    <input type="checkbox" id="mental1">
+                    <label for="mental1">Dagelijkse zelfreflectie en journaling</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="mental2">
+                    <label for="mental2">Continue leren en groei</label>
+                </div>
+            </div>
+            
+            <div class="checklist">
+                <h4>Relational:</h4>
+                <div class="checklist-item">
+                    <input type="checkbox" id="relational1">
+                    <label for="relational1">Authentieke en betekenisvolle relaties</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="relational2">
+                    <label for="relational2">Dienstbaarheid en leiderschap</label>
+                </div>
+            </div>
+
+            <h2 id="volgende-stappen">Volgende Stappen</h2>
+            <p>Je reis naar een Top Tier identiteit is net begonnen:</p>
+            
+            <h3>Deze Week</h3>
+            <div class="exercise-box">
+                <ol>
+                    <li>Schrijf je Top Tier verklaring</li>
+                    <li>Begin met dagelijkse checks</li>
+                    <li>Identificeer 3 gebieden voor verbetering</li>
+                </ol>
+            </div>
+            
+            <h3>Deze Maand</h3>
+            <div class="exercise-box">
+                <ol>
+                    <li>Integreer je identiteit in alle levensgebieden</li>
+                    <li>Zoek een accountability partner</li>
+                    <li>Begin met de volgende module</li>
+                </ol>
+            </div>
+            
+            <div class="highlight-box">
+                <h4>Conclusie</h4>
+                <p>Je hebt nu alle tools om je Top Tier identiteit te bouwen. Blijf trouw aan jezelf, leef je kernwaarden, en word de beste versie van jezelf.</p>
+                
+                <div class="quote">
+                    <strong>Je bent wat je herhaaldelijk doet. Excellentie is geen daad, maar een gewoonte.</strong>
+                </div>
+                
+                <p><strong>Succes met het bouwen van je Top Tier identiteit!</strong></p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Dit ebook is onderdeel van de Top Tier Men Academy - Module 1: Discipline & Identiteit</p>
+            <p>© 2024 Top Tier Men. Alle rechten voorbehouden.</p>
+        </div>
+    </div>
+</body>
+</html>

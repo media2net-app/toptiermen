@@ -47,6 +47,7 @@ const navigation = [
   { name: 'Advertentiesets', href: '/dashboard-marketing/advertentiesets', icon: PresentationChartLineIcon },
   { name: 'Campagnes', href: '/dashboard-marketing/campagnes', icon: ChartBarIcon },
   { name: 'Analytics', href: '/dashboard-marketing/analytics', icon: DocumentChartBarIcon },
+  { name: 'Prelaunch Analytics', href: '/dashboard-marketing/prelaunch-analytics', icon: ChartBarIcon, badge: 'NEW' },
   { name: 'Conversies', href: '/dashboard-marketing/conversies', icon: CursorArrowRaysIcon },
   { name: 'Audience', href: '/dashboard-marketing/audience', icon: UserGroupIcon },
   { name: 'Budget', href: '/dashboard-marketing/budget', icon: CurrencyDollarIcon },

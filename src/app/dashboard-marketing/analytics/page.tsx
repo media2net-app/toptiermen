@@ -149,7 +149,7 @@ export default function AnalyticsPage() {
       try {
         console.log('📊 Loading comprehensive Facebook analytics data...');
         
-        const response = await fetch(`/api/facebook/comprehensive-analytics?dateRange=${timeRange}`);
+        const response = await fetch(`/api/facebook/comprehensive-analytics?dateRange=${timeRange}&useManualData=true`);
         const data = await response.json();
         
         if (data.success && data.data) {

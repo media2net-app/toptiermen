@@ -3,6 +3,8 @@ import ClientLayout from '@/app/components/ClientLayout';
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useChatNotifications } from '@/hooks/useChatNotifications';
+import ChatNotificationSettings from '@/components/ChatNotificationSettings';
 
 interface ChatMessage {
   id: string;
@@ -48,46 +50,61 @@ export default function Inbox() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [showChat, setShowChat] = useState(false);
-  const [isTyping, setIsTyping] = useState(false);
   const [loading, setLoading] = useState(true);
   const [availableUsers, setAvailableUsers] = useState<Profile[]>([]);
   const [showNewChat, setShowNewChat] = useState(false);
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
+  const [isCreatingConversation, setIsCreatingConversation] = useState(false);
+  const [showNotificationSettings, setShowNotificationSettings] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Set up real-time notifications
+  const { isOnline } = useChatNotifications(
+    // onNewMessage callback
+    (notification) => {
+      console.log('📨 New message notification:', notification);
+      
+      // If the message is for the currently selected conversation, add it to the chat
+      if (selectedConversation && notification.conversationId === selectedConversation.id) {
+        const newMessage: ChatMessage = {
+          id: notification.id,
+          content: notification.content,
+          messageType: 'text',
+          isRead: false,
+          readAt: null,
+          createdAt: notification.timestamp,
+          fromMe: false
+        };
+        
+        setChatMessages(prev => [...prev, newMessage]);
+        
+        // Mark message as read since user is viewing the conversation
+        markMessageAsRead(notification.id);
+      }
+      
+      // Update conversation list to show new message
+      fetchConversations();
+    },
+    // onConversationUpdate callback
+    (conversationId) => {
+      console.log('💬 Conversation updated:', conversationId);
+      fetchConversations();
+    }
+  );
 
   useEffect(() => {
     if (user) {
       fetchConversations();
       fetchAvailableUsers();
-      updateOnlineStatus(true);
     }
-
-    // Update online status when component unmounts
-    return () => {
-      if (user) {
-        updateOnlineStatus(false);
-      }
-    };
   }, [user]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages]);
-
-  const updateOnlineStatus = async (isOnline: boolean) => {
-    if (!user) return;
-    
-    try {
-      await fetch('/api/chat/online-status', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id, isOnline })
-      });
-    } catch (error) {
-      console.error('Error updating online status:', error);
-    }
-  };
 
   const fetchConversations = async () => {
     try {
@@ -99,16 +116,28 @@ export default function Inbox() {
       if (response.ok) {
         setConversations(data.conversations);
         
-        // Set first conversation as selected by default
+        // Set first conversation as selected by default if no conversation is selected
         if (data.conversations.length > 0 && !selectedConversation) {
           setSelectedConversation(data.conversations[0]);
           fetchMessages(data.conversations[0].id);
+          setShowChat(true);
+        }
+        // If we have a selected conversation, make sure it's still in the list
+        else if (selectedConversation && data.conversations.length > 0) {
+          const currentConversation = data.conversations.find(c => c.id === selectedConversation.id);
+          if (currentConversation) {
+            setSelectedConversation(currentConversation);
+          }
         }
       } else {
         console.error('Error fetching conversations:', data.error);
+        // Fallback to empty conversations if API fails
+        setConversations([]);
       }
     } catch (error) {
       console.error('Error fetching conversations:', error);
+      // Fallback to empty conversations if API fails
+      setConversations([]);
     } finally {
       setLoading(false);
     }
@@ -144,9 +173,13 @@ export default function Inbox() {
         setChatMessages(data.messages);
       } else {
         console.error('Error fetching messages:', data.error);
+        // Fallback to empty messages if API fails
+        setChatMessages([]);
       }
     } catch (error) {
       console.error('Error fetching messages:', error);
+      // Fallback to empty messages if API fails
+      setChatMessages([]);
     }
   };
 
@@ -173,8 +206,27 @@ export default function Inbox() {
         // Add new message to chat
         setChatMessages(prev => [...prev, data.message]);
         
-        // Update conversation list
-        fetchConversations();
+        // Update the selected conversation with the new last message
+        if (selectedConversation) {
+          const updatedConversation = {
+            ...selectedConversation,
+            lastMessage: {
+              content: messageContent,
+              time: new Date().toISOString(),
+              fromMe: true
+            },
+            updatedAt: new Date().toISOString()
+          };
+          
+          setSelectedConversation(updatedConversation);
+          
+          // Update the conversation in the list
+          setConversations(prev => 
+            prev.map(conv => 
+              conv.id === selectedConversation.id ? updatedConversation : conv
+            )
+          );
+        }
       } else {
         console.error('Error sending message:', data.error);
       }
@@ -190,10 +242,26 @@ export default function Inbox() {
     }
   };
 
+  const markMessageAsRead = async (messageId: string) => {
+    try {
+      await fetch('/api/chat/messages/mark-read', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messageId,
+          userId: user?.id
+        })
+      });
+    } catch (error) {
+      console.error('Error marking message as read:', error);
+    }
+  };
+
   const startNewConversation = async (userId: string) => {
-    if (!user) return;
+    if (!user || isCreatingConversation) return;
 
     console.log('Starting new conversation with user:', userId);
+    setIsCreatingConversation(true);
     
     try {
       const response = await fetch('/api/chat/conversations', {
@@ -209,15 +277,47 @@ export default function Inbox() {
       
       if (response.ok) {
         console.log('Conversation created successfully:', data);
-        // Refresh conversations and select the new one
-        await fetchConversations();
+        
+        // Get the user profile for the new conversation
+        const selectedUserProfile = availableUsers.find(u => u.id === userId);
+        const userName = selectedUserProfile?.display_name || selectedUserProfile?.full_name || 'Gebruiker';
+        
+        // Create the new conversation object
+        const newConversation: Conversation = {
+          id: data.conversation.id,
+          participant: {
+            id: userId,
+            name: userName,
+            avatar: selectedUserProfile?.avatar_url || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+            rank: selectedUserProfile?.rank || 'Member'
+          },
+          lastMessage: null,
+          unreadCount: 0,
+          online: false,
+          lastSeen: null,
+          updatedAt: new Date().toISOString()
+        };
+        
+        // Add the new conversation to the list and select it
+        setConversations(prev => [newConversation, ...prev]);
+        setSelectedConversation(newConversation);
+        setChatMessages([]);
+        setShowChat(true);
+        
         setShowNewChat(false);
         setSelectedUser(null);
+        
+        // Show success message
+        alert(`Gesprek succesvol gestart met ${userName}!`);
       } else {
         console.error('Error creating conversation:', data.error);
+        alert('Fout bij het starten van het gesprek: ' + (data.error || 'Onbekende fout'));
       }
     } catch (error) {
       console.error('Error creating conversation:', error);
+      alert('Fout bij het starten van het gesprek: ' + error.message);
+    } finally {
+      setIsCreatingConversation(false);
     }
   };
 
@@ -244,8 +344,31 @@ export default function Inbox() {
 
   return (
     <ClientLayout>
-      <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">Inbox</h1>
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-3">
+          <h1 className="text-3xl md:text-4xl font-bold text-white drop-shadow-lg">Inbox</h1>
+          <div className="flex items-center gap-2">
+            <div className={`w-3 h-3 rounded-full ${isOnline ? 'bg-green-500' : 'bg-gray-500'} animate-pulse`}></div>
+            <span className="text-sm text-[#8BAE5A]">
+              {isOnline ? 'Online' : 'Offline'}
+            </span>
+          </div>
+        </div>
+        <button
+          onClick={() => setShowNotificationSettings(!showNotificationSettings)}
+          className="px-3 py-1 bg-[#3A4D23] text-[#8BAE5A] rounded-lg text-sm font-semibold hover:bg-[#4A5D2E] transition-colors"
+        >
+          ⚙️ Instellingen
+        </button>
+      </div>
       <p className="text-[#8BAE5A] text-lg mb-8">Beheer je berichten en connecties</p>
+
+      {/* Notification Settings */}
+      {showNotificationSettings && (
+        <div className="mb-6">
+          <ChatNotificationSettings />
+        </div>
+      )}
 
       <div className="bg-[#232D1A]/80 rounded-2xl shadow-xl border border-[#3A4D23]/40 overflow-hidden">
         <div className="flex h-[600px]">
@@ -287,17 +410,25 @@ export default function Inbox() {
                         <div
                           key={user.id}
                           onClick={() => startNewConversation(user.id)}
-                          className="flex items-center gap-3 p-3 rounded-lg hover:bg-[#3A4D23]/40 cursor-pointer transition-colors"
+                          className={`flex items-center gap-3 p-3 rounded-lg hover:bg-[#3A4D23]/40 cursor-pointer transition-colors ${
+                            isCreatingConversation ? 'opacity-50 cursor-not-allowed' : ''
+                          }`}
                         >
                           <img
                             src={user.avatar_url || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'}
                             alt={user.display_name || user.full_name}
                             className="w-10 h-10 rounded-full"
                           />
-                          <div>
+                          <div className="flex-1">
                             <h4 className="font-semibold text-white">
                               {user.display_name || user.full_name || 'Onbekende gebruiker'}
                             </h4>
+                            {isCreatingConversation && (
+                              <div className="flex items-center gap-2 mt-1">
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#8BAE5A]"></div>
+                                <span className="text-sm text-[#8BAE5A]">Gesprek starten...</span>
+                              </div>
+                            )}
                             <p className="text-[#8BAE5A] text-sm">{user.rank || 'Member'}</p>
                           </div>
                         </div>
@@ -341,9 +472,16 @@ export default function Inbox() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
                           <h3 className="font-semibold text-white truncate">{conversation.participant.name}</h3>
-                          <span className="text-[#8BAE5A] text-xs">
-                            {conversation.lastMessage ? formatTimeAgo(conversation.lastMessage.time) : 'Nieuw'}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            {conversation.unreadCount > 0 && (
+                              <div className="bg-[#8BAE5A] text-[#181F17] text-xs px-2 py-1 rounded-full font-bold min-w-[20px] text-center">
+                                {conversation.unreadCount}
+                              </div>
+                            )}
+                            <span className="text-[#8BAE5A] text-xs">
+                              {conversation.lastMessage ? formatTimeAgo(conversation.lastMessage.time) : 'Nieuw'}
+                            </span>
+                          </div>
                         </div>
                         <p className="text-[#8BAE5A] text-sm truncate">
                           {conversation.lastMessage ? conversation.lastMessage.content : 'Start een gesprek...'}
@@ -380,9 +518,15 @@ export default function Inbox() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-white">{selectedConversation.participant.name}</h3>
-                      <p className="text-[#8BAE5A] text-sm">
-                        {selectedConversation.online ? 'Online' : 'Offline'}
-                      </p>
+                      <div className="flex items-center gap-2">
+                        <div className={`w-2 h-2 rounded-full ${selectedConversation.online ? 'bg-green-500' : 'bg-gray-500'}`}></div>
+                        <p className="text-[#8BAE5A] text-sm">
+                          {selectedConversation.online ? 'Online' : 'Offline'}
+                        </p>
+                        {typingUsers.has(selectedConversation.participant.id) && (
+                          <span className="text-[#8BAE5A] text-xs animate-pulse">typt...</span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -404,10 +548,28 @@ export default function Inbox() {
                         <p className="text-sm">{msg.content}</p>
                         <p className="text-xs opacity-70 mt-1">
                           {formatTimeAgo(msg.createdAt)}
+                          {msg.fromMe && msg.isRead && ' ✓'}
                         </p>
                       </div>
                     </div>
                   ))}
+                  
+                  {/* Typing indicator */}
+                  {typingUsers.size > 0 && (
+                    <div className="flex justify-start">
+                      <div className="bg-[#3A4D23] text-white px-4 py-2 rounded-lg">
+                        <div className="flex items-center gap-1">
+                          <div className="flex space-x-1">
+                            <div className="w-2 h-2 bg-[#8BAE5A] rounded-full animate-bounce"></div>
+                            <div className="w-2 h-2 bg-[#8BAE5A] rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                            <div className="w-2 h-2 bg-[#8BAE5A] rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                          </div>
+                          <span className="text-xs ml-2">typt...</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
                   <div ref={messagesEndRef} />
                 </div>
 
