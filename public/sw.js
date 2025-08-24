@@ -111,6 +111,7 @@ self.addEventListener('push', (event) => {
     }
   }
 
+  // iPhone-specific notification options
   const options = {
     body: notificationData.body,
     icon: notificationData.icon,
@@ -120,17 +121,23 @@ self.addEventListener('push', (event) => {
     requireInteraction: false,
     silent: false,
     vibrate: [200, 100, 200],
-    actions: [
-      {
-        action: 'open',
-        title: 'Openen',
-        icon: '/logo.svg'
-      },
-      {
-        action: 'dismiss',
-        title: 'Sluiten'
-      }
-    ]
+    // iPhone doesn't support actions in push notifications
+    // actions: [
+    //   {
+    //     action: 'open',
+    //     title: 'Openen',
+    //     icon: '/logo.svg'
+    //   },
+    //   {
+    //     action: 'dismiss',
+    //     title: 'Sluiten'
+    //   }
+    // ],
+    // iPhone-specific options
+    renotify: true,
+    dir: 'ltr',
+    lang: 'nl',
+    timestamp: Date.now()
   };
 
   event.waitUntil(
