@@ -19,10 +19,37 @@ export const metadata = {
     capable: true,
     statusBarStyle: 'default',
     title: 'Top Tier Men',
+    startupImage: [
+      {
+        url: '/logo_white-full.svg',
+        media: '(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)',
+      },
+      {
+        url: '/logo_white-full.svg',
+        media: '(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)',
+      },
+      {
+        url: '/logo_white-full.svg',
+        media: '(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3)',
+      },
+      {
+        url: '/logo_white-full.svg',
+        media: '(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)',
+      },
+      {
+        url: '/logo_white-full.svg',
+        media: '(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)',
+      },
+      {
+        url: '/logo_white-full.svg',
+        media: '(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)',
+      },
+    ],
   },
   icons: {
     icon: '/logo_white-full.svg',
     apple: '/logo_white-full.svg',
+    shortcut: '/logo_white-full.svg',
   },
   // Open Graph / Facebook
   openGraph: {
