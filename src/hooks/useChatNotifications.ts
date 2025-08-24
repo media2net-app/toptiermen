@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
-interface ChatNotification {
+export interface ChatNotification {
   id: string;
   conversationId: string;
   senderId: string;
@@ -16,7 +16,10 @@ export function useChatNotifications(
   onConversationUpdate?: (conversationId: string) => void
 ) {
   const { user } = useSupabaseAuth();
-  const subscriptionRef = useRef<any>(null);
+  const subscriptionRef = useRef<{
+    message: any;
+    conversation: any;
+  } | null>(null);
   const isOnlineRef = useRef<boolean>(true);
 
   // Set up real-time subscriptions
@@ -77,14 +80,11 @@ export function useChatNotifications(
             timestamp: newMessage.created_at
           };
 
+          console.log('📨 Processing notification:', notification);
+
           // Call callback if provided
           if (onNewMessage) {
             onNewMessage(notification);
-          }
-
-          // Send push notification if user is not focused on the page
-          if (!document.hasFocus() && isOnlineRef.current) {
-            sendPushNotification(notification);
           }
 
           // Show in-app notification if user is online
@@ -120,20 +120,17 @@ export function useChatNotifications(
       )
       .subscribe();
 
-    // Track online status
+    // Track online status (simplified - no database updates)
     const handleVisibilityChange = () => {
       isOnlineRef.current = !document.hidden;
-      updateOnlineStatus(!document.hidden);
     };
 
     const handleFocus = () => {
       isOnlineRef.current = true;
-      updateOnlineStatus(true);
     };
 
     const handleBlur = () => {
       isOnlineRef.current = false;
-      updateOnlineStatus(false);
     };
 
     // Set up event listeners
@@ -148,7 +145,7 @@ export function useChatNotifications(
     };
 
     // Initial online status
-    updateOnlineStatus(true);
+    isOnlineRef.current = !document.hidden;
 
     // Cleanup function
     return () => {
@@ -162,65 +159,8 @@ export function useChatNotifications(
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleFocus);
       window.removeEventListener('blur', handleBlur);
-
-      updateOnlineStatus(false);
     };
   }, [user, onNewMessage, onConversationUpdate]);
-
-  // Helper function to get user's conversation IDs
-  const getUserConversationIds = async () => {
-    if (!user) return '';
-    
-    const { data: conversations } = await supabase
-      .from('chat_conversations')
-      .select('id')
-      .or(`participant1_id.eq.${user.id},participant2_id.eq.${user.id}`)
-      .eq('is_active', true);
-
-    return conversations?.map(c => c.id).join(',') || '';
-  };
-
-  // Update online status
-  const updateOnlineStatus = async (isOnline: boolean) => {
-    if (!user) return;
-
-    try {
-      await fetch('/api/chat/online-status', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id, isOnline })
-      });
-    } catch (error) {
-      console.error('Error updating online status:', error);
-    }
-  };
-
-  // Send push notification
-  const sendPushNotification = async (notification: ChatNotification) => {
-    try {
-      await fetch('/api/push/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: user?.id,
-          title: `Nieuw bericht van ${notification.senderName}`,
-          body: notification.content.length > 50 
-            ? notification.content.substring(0, 50) + '...' 
-            : notification.content,
-          icon: '/favicon.ico',
-          badge: '/badge-no-excuses.png',
-          data: {
-            conversationId: notification.conversationId,
-            senderId: notification.senderId,
-            type: 'chat_message'
-          },
-          tag: `chat_${notification.conversationId}`
-        })
-      });
-    } catch (error) {
-      console.error('Error sending push notification:', error);
-    }
-  };
 
   // Show in-app notification
   const showInAppNotification = (notification: ChatNotification) => {

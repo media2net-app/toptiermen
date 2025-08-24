@@ -36,6 +36,14 @@ interface Profile {
   // Real-time online status
   is_online?: boolean;
   last_seen?: string | null;
+  // Badges data
+  badges?: Array<{
+    id: string;
+    name: string;
+    description: string;
+    icon_url: string;
+    unlocked_at: string;
+  }>;
 }
 
 const ranks = [
@@ -46,6 +54,118 @@ const ranks = [
 ];
 
 const interests = ['Finance', 'Fitness', 'Mindset', 'Vaderschap', 'Digitale Nomaden', 'Ondernemerschap'];
+
+// Simple badge display component for member cards
+const MemberBadgeDisplay = ({ badges, totalCount }: { badges?: Array<any>, totalCount: number }) => {
+  const [hoveredBadge, setHoveredBadge] = useState<any>(null);
+
+  if (!badges || badges.length === 0) {
+    return (
+      <div className="flex items-center justify-center gap-1">
+        <span className="text-xs text-[#8BAE5A]">0 badges</span>
+      </div>
+    );
+  }
+  
+  const displayBadges = badges.slice(-3); // Get last 3 badges
+  const additionalCount = totalCount - displayBadges.length;
+  
+  return (
+    <div className="flex items-center justify-center gap-1 relative">
+      {displayBadges.map((badge, index) => (
+        <div
+          key={badge.id}
+          className="relative"
+          onMouseEnter={() => setHoveredBadge(badge)}
+          onMouseLeave={() => setHoveredBadge(null)}
+        >
+          <div
+            className="w-10 h-10 rounded-full flex items-center justify-center border border-[#8BAE5A] shadow-sm cursor-pointer transition-all duration-200 hover:scale-110 hover:shadow-lg"
+            title={badge.name}
+          >
+            {badge.icon_url ? (
+              <Image
+                src={badge.icon_url}
+                alt={badge.name}
+                width={24}
+                height={24}
+                className="w-6 h-6 rounded-full"
+              />
+            ) : (
+              <span className="text-base text-[#FFD700] font-bold">🏆</span>
+            )}
+          </div>
+
+          {/* Hover Tooltip */}
+          {hoveredBadge?.id === badge.id && (
+            <div className="absolute z-50 bottom-full left-1/2 transform -translate-x-1/2 mb-2">
+              <div className="bg-[#181F17] border border-[#3A4D23] rounded-lg p-3 shadow-xl min-w-[200px] max-w-[250px]">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center border border-[#8BAE5A] overflow-hidden">
+                    {badge.icon_url ? (
+                      <Image
+                        src={badge.icon_url}
+                        alt={badge.name}
+                        width={20}
+                        height={20}
+                        className="w-5 h-5 rounded-full"
+                      />
+                    ) : (
+                      <span className="text-sm text-[#FFD700] font-bold">🏆</span>
+                    )}
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-[#8BAE5A] text-sm">{badge.name}</h4>
+                    <span className="text-xs text-[#A6C97B]">Badge</span>
+                  </div>
+                </div>
+                <p className="text-[#A6C97B] text-xs mb-2 leading-relaxed">
+                  {badge.description}
+                </p>
+                {badge.unlocked_at && (
+                  <div className="text-xs text-[#8BAE5A]/70">
+                    Behaald op {new Date(badge.unlocked_at).toLocaleDateString('nl-NL', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric'
+                    })}
+                  </div>
+                )}
+                {/* Arrow */}
+                <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-[#181F17]" />
+              </div>
+            </div>
+          )}
+        </div>
+      ))}
+      {additionalCount > 0 && (
+        <div 
+          className="w-10 h-10 rounded-full bg-[#3A4D23] flex items-center justify-center border border-[#8BAE5A] shadow-sm cursor-pointer transition-all duration-200 hover:scale-110 hover:shadow-lg"
+          onMouseEnter={() => setHoveredBadge({ id: 'additional', name: `+${additionalCount} extra badges` })}
+          onMouseLeave={() => setHoveredBadge(null)}
+        >
+          <span className="text-sm text-[#8BAE5A] font-bold">+{additionalCount}</span>
+          
+          {/* Hover Tooltip for additional count */}
+          {hoveredBadge?.id === 'additional' && (
+            <div className="absolute z-50 bottom-full left-1/2 transform -translate-x-1/2 mb-2">
+              <div className="bg-[#181F17] border border-[#3A4D23] rounded-lg p-3 shadow-xl min-w-[150px]">
+                <div className="text-center">
+                  <h4 className="font-semibold text-[#8BAE5A] text-sm mb-1">Extra Badges</h4>
+                  <p className="text-[#A6C97B] text-xs">
+                    Nog {additionalCount} badge{additionalCount > 1 ? 's' : ''} behaald
+                  </p>
+                </div>
+                {/* Arrow */}
+                <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-[#181F17]" />
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default function LedenOverzicht() {
   const { user } = useSupabaseAuth();
@@ -156,10 +276,53 @@ export default function LedenOverzicht() {
       }
 
       const { members: enrichedMembers } = await response.json();
-      setMembers(enrichedMembers);
+      
+      // Fetch badges for each member
+      const membersWithBadges = await Promise.all(
+        enrichedMembers.map(async (member: Profile) => {
+          try {
+            const { data: badges, error } = await supabase
+              .from('user_badges')
+              .select(`
+                id,
+                badge_id,
+                unlocked_at,
+                badges (
+                  id,
+                  title,
+                  description,
+                  image_url
+                )
+              `)
+              .eq('user_id', member.id)
+              .order('unlocked_at', { ascending: false })
+              .limit(5); // Get last 5 badges for display
+
+            if (error) {
+              console.error('Error fetching badges for user:', member.id, error);
+              return { ...member, badges: [] };
+            }
+
+            const formattedBadges = badges?.map((badge: any) => ({
+              id: badge.id,
+              name: badge.badges?.title || 'Unknown Badge',
+              description: badge.badges?.description || '',
+              icon_url: badge.badges?.image_url || null,
+              unlocked_at: badge.unlocked_at
+            })) || [];
+
+            return { ...member, badges: formattedBadges };
+          } catch (error) {
+            console.error('Error fetching badges for user:', member.id, error);
+            return { ...member, badges: [] };
+          }
+        })
+      );
+
+      setMembers(membersWithBadges);
       
       // Count online members
-      const onlineMembers = enrichedMembers.filter((m: Profile) => m.is_online);
+      const onlineMembers = membersWithBadges.filter((m: Profile) => m.is_online);
       setOnlineCount(onlineMembers.length);
     } catch (err) {
       console.error('Error fetching members:', err);
@@ -328,7 +491,6 @@ export default function LedenOverzicht() {
           const memberInterests = getMemberInterests(m.interests);
           const memberRank = m.current_rank?.name || m.fallback_rank || 'Recruit';
           const rankIcon = getRankIcon(memberRank);
-          const avatarUrl = m.avatar_url || '/profielfoto.png';
           const isMemberOnline = m.is_online || false;
           const isMemberNew = isNewMember(m.created_at);
           const memberName = m.display_name || m.full_name || 'Onbekend';
@@ -339,17 +501,35 @@ export default function LedenOverzicht() {
           const displayXP = m.current_xp || 0;
           const displayBadges = m.badges_count || 0;
           
+          // Generate initials for default avatar
+          const getInitials = (name: string) => {
+            return name
+              .split(' ')
+              .map(word => word.charAt(0))
+              .join('')
+              .toUpperCase()
+              .slice(0, 2);
+          };
+          
           return (
             <div key={m.id} className="bg-[#232D1A]/90 rounded-2xl shadow-xl border border-[#3A4D23]/40 p-4 sm:p-5 flex flex-col items-center gap-3 hover:shadow-2xl transition-all">
               <Link href={`/dashboard/brotherhood/leden/${m.id}`} className="w-full flex flex-col items-center gap-3 group cursor-pointer" style={{ textDecoration: 'none' }}>
                 <div className="relative">
-                  <Image 
-                    src={avatarUrl} 
-                    alt={memberName} 
-                    width={80} 
-                    height={80} 
-                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-[#8BAE5A] object-cover group-hover:scale-105 transition-transform" 
-                  />
+                  {m.avatar_url ? (
+                    <Image 
+                      src={m.avatar_url} 
+                      alt={memberName} 
+                      width={80} 
+                      height={80} 
+                      className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-[#8BAE5A] object-cover group-hover:scale-105 transition-transform" 
+                    />
+                  ) : (
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-[#8BAE5A] bg-gradient-to-br from-[#3A4D23] to-[#232D1A] flex items-center justify-center group-hover:scale-105 transition-transform">
+                      <span className="text-[#8BAE5A] font-bold text-lg sm:text-xl">
+                        {getInitials(memberName)}
+                      </span>
+                    </div>
+                  )}
                   {isMemberOnline && (
                     <span 
                       className="absolute bottom-1 right-1 w-4 h-4 sm:w-5 sm:h-5 bg-[#8BAE5A] border-3 border-white rounded-full shadow-lg" 
@@ -377,6 +557,8 @@ export default function LedenOverzicht() {
                     )}
                   </div>
                 )}
+                {/* Badge Display */}
+                <MemberBadgeDisplay badges={m.badges} totalCount={m.badges?.length || 0} />
                 <div className="text-xs text-[#FFD700] font-semibold text-center">
                   {displayXP} XP • {displayBadges} badges
                 </div>
