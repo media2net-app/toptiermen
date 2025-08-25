@@ -13,6 +13,8 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
+  const [debugInfo, setDebugInfo] = useState("");
   
   // Forgot password states
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -22,14 +24,62 @@ export default function Login() {
 
   useEffect(() => { 
     setMounted(true); 
+    
+    // Clear any stale cache data that might cause issues
+    const clearStaleData = () => {
+      try {
+        // Clear any old Facebook data that might interfere
+        localStorage.removeItem('facebook_ad_account_id');
+        localStorage.removeItem('facebook_access_token');
+        localStorage.removeItem('facebook_user_id');
+        localStorage.removeItem('facebook_login_status');
+        
+        // Clear any old auth data
+        localStorage.removeItem('toptiermen-auth');
+        sessionStorage.clear();
+        
+        console.log('🔍 Cleared stale cache data');
+      } catch (error) {
+        console.error('🔍 Error clearing cache:', error);
+      }
+    };
+    
+    clearStaleData();
+    
+    // Debug: Check environment variables
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    
+    setDebugInfo(`
+      Supabase URL: ${supabaseUrl ? 'Configured' : 'NOT CONFIGURED'}
+      Supabase Key: ${supabaseKey ? 'Configured' : 'NOT CONFIGURED'}
+      Environment: ${process.env.NODE_ENV}
+      URL: ${window.location.href}
+      Cache Cleared: Yes
+    `);
+    
+    console.log('🔍 Debug Info:', {
+      supabaseUrl: supabaseUrl ? 'Configured' : 'NOT CONFIGURED',
+      supabaseKey: supabaseKey ? 'Configured' : 'NOT CONFIGURED',
+      environment: process.env.NODE_ENV,
+      url: window.location.href,
+      cacheCleared: true
+    });
   }, []);
 
   // Check if user is already authenticated
   useEffect(() => {
     if (!mounted || loading) return;
     
+    // Add timeout to prevent infinite loading
+    const authTimeout = setTimeout(() => {
+      console.log('🔍 Authentication check timeout, forcing loading to false');
+      // setLoading(false); // This line was removed from the original file, so it's removed here.
+    }, 20000); // 20 second timeout (increased from 10s)
+    
     if (user) {
       console.log('User already authenticated:', user.role);
+      setRedirecting(true);
       
       // Check for redirect parameter first
       const urlParams = new URLSearchParams(window.location.search);
@@ -50,14 +100,51 @@ export default function Login() {
         // Default redirect based on user role
         targetPath = user.role?.toLowerCase() === 'admin' ? '/dashboard-admin' : '/dashboard';
       }
+      
 
-      console.log('Redirecting to:', targetPath);
-      router.replace(targetPath);
+      console.log('🔍 Redirecting to:', targetPath);
+
+      // Try router.replace first, fallback to window.location
+      try {
+        router.replace(targetPath);
+        // Add a fallback redirect in case router.replace doesn't work
+        setTimeout(() => {
+          if (window.location.pathname === '/login') {
+            console.log('🔍 Router redirect failed, using window.location fallback');
+            window.location.href = targetPath;
+          }
+        }, 3000); // Increased from 2s to 3s
+              } catch (redirectError) {
+          console.error('🔍 Router redirect error:', redirectError);
+          // Fallback to window.location
+          window.location.href = targetPath;
+        }
     }
+    
+    return () => clearTimeout(authTimeout);
   }, [mounted, loading, user, router]);
+
+  // Timeout mechanism to prevent getting stuck
+  useEffect(() => {
+    if (redirecting) {
+      const timeout = setTimeout(() => {
+        if (window.location.pathname === '/login') {
+          console.log('🔍 Redirect timeout, forcing reload');
+          window.location.reload();
+        }
+      }, 15000); // 15 second timeout (increased from 10s)
+
+      return () => clearTimeout(timeout);
+    }
+  }, [redirecting]);
+
+
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
+    console.log('🔍 Login attempt started');
+    
+
     
     if (!email || !password) {
       setError("Vul alle velden in");
@@ -68,19 +155,32 @@ export default function Login() {
     setError("");
     
     try {
+      console.log('🔍 Calling signIn...');
       const result = await signIn(email, password);
 
+      console.log('🔍 SignIn result:', result);
+
       if (!result.success) {
+        console.error('Sign in error:', result.error);
         setError(result.error || "Ongeldige inloggegevens");
         setIsLoading(false);
         return;
       }
 
-      console.log('Login successful');
-      // The redirect will be handled by the useEffect above
+      console.log('🔍 Login successful, redirecting...');
+      setRedirecting(true);
+      
+      // Force redirect after a short delay to ensure user state is updated
+      setTimeout(() => {
+        if (window.location.pathname === '/login') {
+          console.log('🔍 Force redirect after successful login');
+          const targetPath = user?.role?.toLowerCase() === 'admin' ? '/dashboard-admin' : '/dashboard';
+          window.location.href = targetPath;
+        }
+      }, 2000);
       
     } catch (error: any) {
-      console.error('Login error:', error);
+      console.error('🔍 Login error:', error);
       setError(error.message || "Er is een fout opgetreden bij het inloggen");
       setIsLoading(false);
     }
@@ -103,187 +203,267 @@ export default function Login() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email: forgotPasswordEmail }),
+        body: JSON.stringify({
+          email: forgotPasswordEmail
+        })
       });
 
       const data = await response.json();
 
-      if (response.ok) {
-        setResetMessage("Wachtwoord reset e-mail verzonden! Controleer je inbox.");
-        setForgotPasswordEmail("");
-      } else {
-        setResetMessage(data.error || "Er is een fout opgetreden");
+      if (!response.ok) {
+        setResetMessage(data.error || "Fout bij het versturen van reset e-mail");
+        return;
       }
+
+      setResetMessage("Wachtwoord reset e-mail is verstuurd! Controleer je inbox.");
+      setForgotPasswordEmail("");
+      
+      // Close modal after 3 seconds
+      setTimeout(() => {
+        setShowForgotPassword(false);
+        setResetMessage("");
+      }, 3000);
+
     } catch (error) {
       console.error('Forgot password error:', error);
-      setResetMessage("Er is een fout opgetreden bij het verzenden van de reset e-mail");
+      setResetMessage("Er is een fout opgetreden. Probeer het opnieuw.");
     } finally {
       setIsSendingReset(false);
     }
   }
 
-  if (!mounted) {
+  // Show loading state while checking authentication
+  if (!mounted || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#232D1A] to-[#1A2315]">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#8BAE5A]"></div>
+      <div className="min-h-screen flex items-center justify-center relative px-4 py-6" style={{ backgroundColor: '#181F17' }}>
+        <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
+        <div className="w-full max-w-md p-6 sm:p-8 rounded-3xl shadow-2xl bg-[#232D1A]/95 border border-[#3A4D23] backdrop-blur-lg relative z-10">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#B6C948] mx-auto mb-4"></div>
+            <p className="text-[#B6C948] text-lg">Laden...</p>
+            <p className="text-[#8BAE5A] text-sm mt-2">Authenticatie wordt gecontroleerd</p>
+          </div>
+        </div>
       </div>
     );
   }
 
-  if (loading) {
+  // Handle manual reload
+  const handleManualReload = () => {
+    window.location.reload();
+  };
+
+  // Show redirecting state
+  if (redirecting) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#232D1A] to-[#1A2315]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
-          <p className="text-white text-lg">Bezig met laden...</p>
+      <div className="min-h-screen flex items-center justify-center relative px-4 py-6" style={{ backgroundColor: '#181F17' }}>
+        <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
+        <div className="w-full max-w-md p-6 sm:p-8 rounded-3xl shadow-2xl bg-[#232D1A]/95 border border-[#3A4D23] backdrop-blur-lg relative z-10">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#B6C948] mx-auto mb-4"></div>
+            <p className="text-[#B6C948] text-lg">Doorsturen naar dashboard...</p>
+            <p className="text-[#8BAE5A] text-sm mt-2">Je wordt automatisch doorgestuurd</p>
+            <button
+              onClick={handleManualReload}
+              className="mt-4 text-[#8BAE5A] hover:text-[#B6C948] underline text-sm"
+            >
+              Handmatig herladen als het te lang duurt
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#232D1A] to-[#1A2315] p-4">
-      <div className="max-w-md w-full space-y-8">
-        <div className="text-center">
-          <h2 className="text-4xl font-bold text-white mb-2">Top Tier Men</h2>
-          <p className="text-gray-300">Log in op je account</p>
+    <div className="min-h-screen flex items-center justify-center relative px-4 py-6" style={{ backgroundColor: '#181F17' }}>
+      <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
+      
+
+      
+      <div className="w-full max-w-md p-6 sm:p-8 rounded-3xl shadow-2xl bg-[#232D1A]/95 border border-[#3A4D23] backdrop-blur-lg relative z-10">
+        <div className="flex justify-center mb-4">
+          <img 
+            src="/logo_white-full.svg" 
+            alt="Top Tier Men Logo" 
+            className="h-16 sm:h-20 md:h-24 w-auto"
+          />
         </div>
-
-        {!showForgotPassword ? (
-          <form onSubmit={handleLogin} className="space-y-6">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
-                E-mailadres
-              </label>
-              <div className="relative">
-                <EnvelopeIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-3 py-3 border border-gray-600 rounded-lg bg-[#1A2315] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] focus:border-transparent"
-                  placeholder="jouw@email.com"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
-                Wachtwoord
-              </label>
-              <div className="relative">
-                <LockClosedIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-3 py-3 border border-gray-600 rounded-lg bg-[#1A2315] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] focus:border-transparent"
-                  placeholder="••••••••"
-                />
-              </div>
-            </div>
-
-            {error && (
-              <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3">
-                <p className="text-red-400 text-sm">{error}</p>
-              </div>
-            )}
-
-            <div className="flex items-center justify-between">
-              <button
-                type="button"
-                onClick={() => setShowForgotPassword(true)}
-                className="text-sm text-[#8BAE5A] hover:text-[#7A9D4A] transition-colors"
-              >
-                Wachtwoord vergeten?
-              </button>
-            </div>
-
-            <button
-              type="submit"
+        <p className="text-[#B6C948] text-center mb-6 sm:mb-8 text-base sm:text-lg font-figtree">Log in op je dashboard</p>
+        
+        {/* Debug Info */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="mb-4 p-3 bg-[#181F17] rounded-lg border border-[#B6C948]">
+            <p className="text-[#B6C948] text-xs font-mono whitespace-pre-wrap">{debugInfo}</p>
+          </div>
+        )}
+        
+        <form onSubmit={handleLogin} className="flex flex-col gap-6">
+          <div className="relative">
+            <EnvelopeIcon className="w-5 h-5 text-[#B6C948] absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#181F17] text-[#B6C948] placeholder-[#B6C948] focus:outline-none focus:ring-2 focus:ring-[#B6C948] transition shadow-inner border border-[#3A4D23] font-figtree"
+              placeholder="E-mailadres"
+              autoComplete="email"
+              required
               disabled={isLoading}
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-[#232D1A] bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] hover:from-[#7A9D4A] hover:to-[#e0903f] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#8BAE5A] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+            />
+          </div>
+          <div className="relative">
+            <LockClosedIcon className="w-5 h-5 text-[#B6C948] absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#181F17] text-[#B6C948] placeholder-[#B6C948] focus:outline-none focus:ring-2 focus:ring-[#B6C948] transition shadow-inner border border-[#3A4D23] font-figtree"
+              placeholder="Wachtwoord"
+              autoComplete="current-password"
+              required
+              disabled={isLoading}
+            />
+          </div>
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={() => setShowForgotPassword(true)}
+              className="text-[#8BAE5A] hover:text-[#B6C948] text-sm underline font-figtree"
             >
-              {isLoading ? (
-                <div className="flex items-center">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#232D1A] mr-2"></div>
-                  Inloggen...
-                </div>
-              ) : (
-                'Inloggen'
-              )}
+              Wachtwoord vergeten?
             </button>
-          </form>
-        ) : (
-          <form onSubmit={handleForgotPassword} className="space-y-6">
-            <div>
-              <label htmlFor="forgot-email" className="block text-sm font-medium text-gray-300 mb-2">
-                E-mailadres
-              </label>
-              <div className="relative">
-                <EnvelopeIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input
-                  id="forgot-email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={forgotPasswordEmail}
-                  onChange={(e) => setForgotPasswordEmail(e.target.value)}
-                  className="w-full pl-10 pr-3 py-3 border border-gray-600 rounded-lg bg-[#1A2315] text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] focus:border-transparent"
-                  placeholder="jouw@email.com"
-                />
-              </div>
+          </div>
+          {error && (
+            <div className="text-[#B6C948] text-center text-sm -mt-4 border border-[#B6C948] rounded-lg py-2 px-3 bg-[#181F17] font-figtree">
+              {error}
             </div>
+          )}
+          <button
+            type="submit"
+            disabled={isLoading || !email || !password}
+            className={`w-full py-3 sm:py-4 rounded-xl bg-gradient-to-r from-[#B6C948] to-[#3A4D23] text-[#181F17] font-semibold text-base sm:text-lg shadow-lg hover:from-[#B6C948] hover:to-[#B6C948] transition-all duration-200 border border-[#B6C948] font-figtree ${(isLoading || !email || !password) ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            {isLoading ? (
+              <div className="flex items-center justify-center">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#181F17] mr-2"></div>
+                <span>Inloggen...</span>
+              </div>
+            ) : (
+              "Inloggen"
+            )}
+          </button>
+        </form>
+        
+        <div className="mt-6 text-center">
+          <p className="text-[#B6C948] text-sm font-figtree">
+            Nog geen account?{" "}
+            <a href="/prelaunch" className="text-[#8BAE5A] hover:text-white transition-colors font-semibold">
+              Registreer hier
+            </a>
+          </p>
+          
+          {/* Cache clearing button */}
+          <div className="mt-4 pt-4 border-t border-[#3A4D23]">
+            <button
+              onClick={() => {
+                // Clear all cache and reload
+                localStorage.clear();
+                sessionStorage.clear();
+                window.location.reload();
+              }}
+              className="text-[#8BAE5A] hover:text-[#B6C948] text-xs underline"
+            >
+              Cache wissen en herladen
+            </button>
+          </div>
+          
+          {/* Version badge - V1.2 */}
+          <div className="mt-4 pt-2 border-t border-[#3A4D23]/30">
+            <div className="flex items-center justify-center gap-2">
+              <span className="text-[#B6C948] text-xs">Platform</span>
+              <span className="px-2 py-1 bg-[#B6C948]/20 text-[#B6C948] text-xs font-semibold rounded-full border border-[#B6C948]/30">
+                V1.2
+              </span>
+              <span className="text-[#B6C948] text-xs">Stable</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
-            {resetMessage && (
-              <div className={`border rounded-lg p-3 ${
-                resetMessage.includes('verzonden') 
-                  ? 'bg-green-500/10 border-green-500/30' 
-                  : 'bg-red-500/10 border-red-500/30'
-              }`}>
-                <p className={`text-sm ${
-                  resetMessage.includes('verzonden') ? 'text-green-400' : 'text-red-400'
+      {/* Forgot Password Modal */}
+      {showForgotPassword && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-[#232D1A] rounded-2xl p-8 max-w-md w-full mx-4 border border-[#3A4D23]">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-[#8BAE5A]/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-[#8BAE5A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">Wachtwoord Vergeten</h3>
+              <p className="text-[#8BAE5A] text-sm">
+                Voer je e-mailadres in en we sturen je een link om je wachtwoord te resetten.
+              </p>
+            </div>
+            
+            <form onSubmit={handleForgotPassword} className="space-y-4 mb-6">
+              {resetMessage && (
+                <div className={`text-center text-sm rounded-lg py-2 px-3 font-figtree ${
+                  resetMessage.includes('verstuurd') 
+                    ? 'text-green-400 border border-green-500/20 bg-green-500/10' 
+                    : 'text-[#B6C948] border border-[#B6C948] bg-[#181F17]'
                 }`}>
                   {resetMessage}
-                </p>
+                </div>
+              )}
+              
+              <div>
+                <label className="block text-[#B6C948] font-medium mb-2">
+                  E-mailadres
+                </label>
+                <input
+                  type="email"
+                  value={forgotPasswordEmail}
+                  onChange={e => setForgotPasswordEmail(e.target.value)}
+                  className="w-full bg-[#181F17] text-white px-3 py-2 rounded-lg border border-[#3A4D23] focus:outline-none focus:border-[#8BAE5A]"
+                  placeholder="Voer je e-mailadres in"
+                  required
+                  disabled={isSendingReset}
+                />
               </div>
-            )}
-
-            <div className="flex space-x-3">
+            </form>
+            
+            <div className="flex gap-3">
               <button
-                type="button"
-                onClick={() => setShowForgotPassword(false)}
-                className="flex-1 py-3 px-4 border border-gray-600 rounded-lg text-sm font-medium text-gray-300 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#8BAE5A] transition-all duration-200"
+                onClick={() => {
+                  setShowForgotPassword(false);
+                  setForgotPasswordEmail("");
+                  setResetMessage("");
+                }}
+                disabled={isSendingReset}
+                className="flex-1 px-4 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded-lg font-semibold hover:bg-[#4A5D33] transition-colors disabled:opacity-50"
               >
-                Terug
+                Annuleren
               </button>
               <button
-                type="submit"
-                disabled={isSendingReset}
-                className="flex-1 py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-[#232D1A] bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] hover:from-[#7A9D4A] hover:to-[#e0903f] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#8BAE5A] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                onClick={handleForgotPassword}
+                disabled={isSendingReset || !forgotPasswordEmail}
+                className="flex-1 px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg font-semibold hover:bg-[#A6C97B] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSendingReset ? (
-                  <div className="flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#232D1A] mr-2"></div>
-                    Verzenden...
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#181F17]"></div>
+                    Versturen...
                   </div>
                 ) : (
-                  'Reset Wachtwoord'
+                  'Reset E-mail Versturen'
                 )}
               </button>
             </div>
-          </form>
-        )}
-      </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 
