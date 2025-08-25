@@ -283,10 +283,12 @@ export default function AdminVoedingsplannenPage() {
     }
   };
 
-  // Filter data based on search term
-  const filteredFoodItems = foodItems.filter(item => 
-    item.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter data based on search term and category
+  const filteredFoodItems = foodItems.filter(item => {
+    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = activeTab === 'voeding' || item.category === activeTab;
+    return matchesSearch && matchesCategory;
+  });
 
   const filteredPlans = plans.filter(plan => 
     plan.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -396,8 +398,29 @@ export default function AdminVoedingsplannenPage() {
                   <h3 className="text-[#8BAE5A] font-semibold text-lg">Voedingswaarden Informatie</h3>
                   <p className="text-[#B6C948] text-sm mt-1">
                     Alle voedingswaarden zijn gebaseerd op <strong>per 100 gram</strong> van het voedingsitem.
+                    <br />
+                    <span className="text-[#8BAE5A] font-semibold">Specifieke items:</span> 1 Ei, 1 Appel, 1 Banaan, en alle noten per handje zijn nu beschikbaar!
                   </p>
                 </div>
+              </div>
+            </div>
+
+            {/* Category Filter */}
+            <div className="mb-6">
+              <div className="flex flex-wrap gap-2">
+                {['alle', 'fruit', 'eieren', 'noten', 'vlees', 'vis', 'groenten', 'zuivel', 'granen'].map((category) => (
+                  <button
+                    key={category}
+                    onClick={() => setActiveTab(category === 'alle' ? 'voeding' : category)}
+                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                      activeTab === (category === 'alle' ? 'voeding' : category)
+                        ? 'bg-[#8BAE5A] text-[#181F17]'
+                        : 'bg-[#232D1A] text-[#8BAE5A] hover:bg-[#3A4D23] border border-[#3A4D23]'
+                    }`}
+                  >
+                    {category.charAt(0).toUpperCase() + category.slice(1)} ({foodItems.filter(item => category === 'alle' || item.category === category).length})
+                  </button>
+                ))}
               </div>
             </div>
             
