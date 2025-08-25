@@ -50,14 +50,13 @@ export default function Inbox() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [showChat, setShowChat] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
   const [loading, setLoading] = useState(true);
   const [availableUsers, setAvailableUsers] = useState<Profile[]>([]);
   const [showNewChat, setShowNewChat] = useState(false);
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
   const [showNotificationSettings, setShowNotificationSettings] = useState(false);
-  const [isTyping, setIsTyping] = useState(false);
-  const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Set up real-time notifications
@@ -79,9 +78,6 @@ export default function Inbox() {
         };
         
         setChatMessages(prev => [...prev, newMessage]);
-        
-        // Mark message as read since user is viewing the conversation
-        markMessageAsRead(notification.id);
       }
       
       // Update conversation list to show new message
@@ -239,21 +235,6 @@ export default function Inbox() {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
-    }
-  };
-
-  const markMessageAsRead = async (messageId: string) => {
-    try {
-      await fetch('/api/chat/messages/mark-read', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messageId,
-          userId: user?.id
-        })
-      });
-    } catch (error) {
-      console.error('Error marking message as read:', error);
     }
   };
 
@@ -518,15 +499,9 @@ export default function Inbox() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-white">{selectedConversation.participant.name}</h3>
-                      <div className="flex items-center gap-2">
-                        <div className={`w-2 h-2 rounded-full ${selectedConversation.online ? 'bg-green-500' : 'bg-gray-500'}`}></div>
-                        <p className="text-[#8BAE5A] text-sm">
-                          {selectedConversation.online ? 'Online' : 'Offline'}
-                        </p>
-                        {typingUsers.has(selectedConversation.participant.id) && (
-                          <span className="text-[#8BAE5A] text-xs animate-pulse">typt...</span>
-                        )}
-                      </div>
+                      <p className="text-[#8BAE5A] text-sm">
+                        {selectedConversation.online ? 'Online' : 'Offline'}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -548,28 +523,10 @@ export default function Inbox() {
                         <p className="text-sm">{msg.content}</p>
                         <p className="text-xs opacity-70 mt-1">
                           {formatTimeAgo(msg.createdAt)}
-                          {msg.fromMe && msg.isRead && ' ✓'}
                         </p>
                       </div>
                     </div>
                   ))}
-                  
-                  {/* Typing indicator */}
-                  {typingUsers.size > 0 && (
-                    <div className="flex justify-start">
-                      <div className="bg-[#3A4D23] text-white px-4 py-2 rounded-lg">
-                        <div className="flex items-center gap-1">
-                          <div className="flex space-x-1">
-                            <div className="w-2 h-2 bg-[#8BAE5A] rounded-full animate-bounce"></div>
-                            <div className="w-2 h-2 bg-[#8BAE5A] rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                            <div className="w-2 h-2 bg-[#8BAE5A] rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                          </div>
-                          <span className="text-xs ml-2">typt...</span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  
                   <div ref={messagesEndRef} />
                 </div>
 
