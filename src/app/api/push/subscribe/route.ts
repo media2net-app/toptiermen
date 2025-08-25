@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ 
       success: true, 
       message: 'Push subscription created successfully',
-      subscriptionId: Array.isArray(data) && data.length > 0 ? data[0].id : null
+      subscriptionId: null
     });
 
   } catch (error) {
