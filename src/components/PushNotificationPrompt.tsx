@@ -80,30 +80,36 @@ export default function PushNotificationPrompt({ onClose }: PushNotificationProm
         applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
       });
 
-      // Save subscription to database
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      );
-
-      const { error } = await supabase
-        .from('push_subscriptions')
-        .upsert({
-          user_id: user.id,
+      // Save subscription to database using API route
+      const subscriptionData = {
+        userId: user.id,
+        subscription: {
           endpoint: subscription.endpoint,
-          p256dh_key: btoa(String.fromCharCode.apply(null, 
-            new Uint8Array(subscription.getKey('p256dh')!)
-          )),
-          auth_key: btoa(String.fromCharCode.apply(null, 
-            new Uint8Array(subscription.getKey('auth')!)
-          ))
-        }, { onConflict: 'user_id' });
+          keys: {
+            p256dh: btoa(String.fromCharCode.apply(null, 
+              new Uint8Array(subscription.getKey('p256dh')!)
+            )),
+            auth: btoa(String.fromCharCode.apply(null, 
+              new Uint8Array(subscription.getKey('auth')!)
+            ))
+          }
+        }
+      };
 
-      if (error) {
-        console.error('Error saving subscription:', error);
-        toast.error('Fout bij het opslaan van push notificatie instellingen');
-        return;
+      const response = await fetch('/api/push/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(subscriptionData)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to save subscription');
       }
+
+      // Subscription saved successfully
 
       toast.success('Push notificaties succesvol geactiveerd!');
       setShowPrompt(false);
