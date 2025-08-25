@@ -24,7 +24,7 @@ export default function PushNotificationPrompt({ onClose }: PushNotificationProm
         // Check if running in standalone mode (PWA installed)
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
         // Check if running in fullscreen mode (iOS PWA)
-        const isFullscreen = window.navigator.standalone === true;
+        const isFullscreen = (window.navigator as any).standalone === true;
         
         setIsPWAInstalled(isStandalone || isFullscreen);
       }
