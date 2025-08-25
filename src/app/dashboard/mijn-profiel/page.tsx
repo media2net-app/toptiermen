@@ -105,6 +105,14 @@ export default function MijnProfiel() {
   const [isSubscribing, setIsSubscribing] = useState(false);
   const [isUnsubscribing, setIsUnsubscribing] = useState(false);
   
+  // Password change states
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch user profile
@@ -662,6 +670,74 @@ export default function MijnProfiel() {
     }
   };
 
+  // Password change functions
+  const handleChangePassword = async () => {
+    // Reset error state
+    setPasswordError(null);
+
+    // Validate inputs
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      setPasswordError('Alle velden zijn verplicht');
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setPasswordError('Nieuw wachtwoord moet minimaal 6 karakters lang zijn');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setPasswordError('Nieuwe wachtwoorden komen niet overeen');
+      return;
+    }
+
+    setIsChangingPassword(true);
+    try {
+      // Get the current session token
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.access_token) {
+        setPasswordError('Geen geldige sessie gevonden');
+        return;
+      }
+
+      const response = await fetch('/api/user/change-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          currentPassword,
+          newPassword
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setPasswordError(data.error || 'Fout bij het wijzigen van wachtwoord');
+        return;
+      }
+
+      // Success - close modal and show success message
+      setShowPasswordModal(false);
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setPasswordError(null);
+      
+      // Show success message
+      toast.success('Wachtwoord succesvol gewijzigd!');
+      
+    } catch (error) {
+      console.error('Error changing password:', error);
+      setPasswordError('Fout bij het wijzigen van wachtwoord');
+    } finally {
+      setIsChangingPassword(false);
+    }
+  };
+
   const cancelDeleteAccount = () => {
     setShowDeleteModal(false);
     setDeleteConfirmation('');
@@ -1161,7 +1237,10 @@ export default function MijnProfiel() {
                   <h3 className="font-semibold text-white">Wachtwoord</h3>
                   <p className="text-[#8BAE5A] text-sm">Laatst gewijzigd: onbekend</p>
                 </div>
-                <button className="px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg font-semibold hover:bg-[#A6C97B] transition-colors">
+                <button 
+                  onClick={() => setShowPasswordModal(true)}
+                  className="px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg font-semibold hover:bg-[#A6C97B] transition-colors"
+                >
                   Wijzigen
                 </button>
               </div>
@@ -1615,6 +1694,102 @@ export default function MijnProfiel() {
         )}
       </div>
       
+      {/* Password Change Modal */}
+      {showPasswordModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-[#232D1A] rounded-2xl p-8 max-w-md w-full mx-4 border border-[#3A4D23]">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-[#8BAE5A]/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-[#8BAE5A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">Wachtwoord Wijzigen</h3>
+              <p className="text-[#8BAE5A] text-sm">
+                Voer je huidige wachtwoord in en kies een nieuw wachtwoord.
+              </p>
+            </div>
+            
+            <div className="space-y-4 mb-6">
+              {passwordError && (
+                <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
+                  <p className="text-red-400 text-sm">{passwordError}</p>
+                </div>
+              )}
+              
+              <div>
+                <label className="block text-[#B6C948] font-medium mb-2">
+                  Huidig Wachtwoord
+                </label>
+                <input
+                  type="password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  className="w-full bg-[#181F17] text-white px-3 py-2 rounded-lg border border-[#3A4D23] focus:outline-none focus:border-[#8BAE5A]"
+                  placeholder="Voer je huidige wachtwoord in"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-[#B6C948] font-medium mb-2">
+                  Nieuw Wachtwoord
+                </label>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full bg-[#181F17] text-white px-3 py-2 rounded-lg border border-[#3A4D23] focus:outline-none focus:border-[#8BAE5A]"
+                  placeholder="Minimaal 6 karakters"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-[#B6C948] font-medium mb-2">
+                  Bevestig Nieuw Wachtwoord
+                </label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full bg-[#181F17] text-white px-3 py-2 rounded-lg border border-[#3A4D23] focus:outline-none focus:border-[#8BAE5A]"
+                  placeholder="Herhaal je nieuwe wachtwoord"
+                />
+              </div>
+            </div>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowPasswordModal(false);
+                  setCurrentPassword('');
+                  setNewPassword('');
+                  setConfirmPassword('');
+                  setPasswordError(null);
+                }}
+                disabled={isChangingPassword}
+                className="flex-1 px-4 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded-lg font-semibold hover:bg-[#4A5D33] transition-colors disabled:opacity-50"
+              >
+                Annuleren
+              </button>
+              <button
+                onClick={handleChangePassword}
+                disabled={isChangingPassword || !currentPassword || !newPassword || !confirmPassword}
+                className="flex-1 px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg font-semibold hover:bg-[#A6C97B] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isChangingPassword ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#181F17]"></div>
+                    Wijzigen...
+                  </div>
+                ) : (
+                  'Wachtwoord Wijzigen'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Delete Account Confirmation Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
