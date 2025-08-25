@@ -49,7 +49,7 @@ const interestOptions = [
 ];
 
 export default function MijnProfiel() {
-  const { user, updateUser, signOut } = useSupabaseAuth();
+  const { user, signOut } = useSupabaseAuth();
   const [activeTab, setActiveTab] = useState('publiek');
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
