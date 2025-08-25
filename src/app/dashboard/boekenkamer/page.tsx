@@ -23,10 +23,12 @@ interface Category {
 }
 
 const defaultCategories = [
+  { id: 'all', label: 'Alle Boeken', icon: '📚', description: 'Complete collectie' },
+  { id: 'financiën', label: 'Financiën', icon: '💰', description: 'Geld & investeren' },
   { id: 'mindset', label: 'Mindset', icon: '🧠', description: 'Mentale groei' },
+  { id: 'ondernemerschap', label: 'Ondernemerschap', icon: '🚀', description: 'Business & leiderschap' },
   { id: 'discipline', label: 'Discipline', icon: '⚡', description: 'Zelfbeheersing' },
   { id: 'training', label: 'Training & voeding', icon: '💪', description: 'Fysieke groei' },
-  { id: 'ondernemerschap', label: 'Ondernemerschap', icon: '🚀', description: 'Business' },
   { id: 'relaties', label: 'Relaties & mannelijkheid', icon: '👑', description: 'Mannelijkheid' },
   { id: 'stoicisme', label: 'Stoïcisme', icon: '🏛️', description: 'Filosofie' },
   { id: 'audio', label: 'Audioboeken / Podcasts', icon: '🎧', description: 'Luisteren' },
