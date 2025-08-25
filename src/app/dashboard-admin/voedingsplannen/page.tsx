@@ -133,19 +133,22 @@ export default function AdminVoedingsplannenPage() {
         // Fallback to mock meals if database is not available
         console.log('⚠️ Falling back to mock meals...');
         const fallbackMeals = [
-          // CARNIVOOR / ANIMAL BASED PLAN MAALTIJDEN
+          // CARNIVOOR / ANIMAL BASED PLAN MAALTIJDEN - VOLLEDIGE WEEK
+          
+          // MAANDAG
           {
             id: '1',
-            name: '🥩 Carnivoor Ontbijt - Eieren & Bacon',
+            name: '🥩 Maandag - Carnivoor Ontbijt - Eieren & Bacon',
             description: 'Een eiwitrijk ontbijt perfect voor carnivoor dieet. Rijk aan eiwitten en gezonde vetten.',
             meal_type: 'ontbijt',
             category: 'carnivoor',
             plan_type: 'Carnivoor / Animal Based',
             goal: 'Spiermassa',
+            day: 'maandag',
             ingredients: [
-              { name: '1 Ei (gekookt)', quantity: 2, unit: 'stuks' },
-              { name: 'Bacon', quantity: 50, unit: 'gram' },
-              { name: 'Boter', quantity: 10, unit: 'gram' }
+              { name: '1 Ei (gekookt)', quantity: 3, unit: 'stuks' },
+              { name: 'Bacon', quantity: 80, unit: 'gram' },
+              { name: 'Boter', quantity: 15, unit: 'gram' }
             ],
             instructions: [
               'Kook de eieren 6-7 minuten voor een zachtgekookt ei',
@@ -153,10 +156,10 @@ export default function AdminVoedingsplannenPage() {
               'Serveer met een klontje boter'
             ],
             nutrition_info: {
-              calories: 450,
-              protein: 28,
+              calories: 580,
+              protein: 35,
               carbs: 2,
-              fat: 35
+              fat: 45
             },
             prep_time: 15,
             difficulty: 'makkelijk',
@@ -165,16 +168,17 @@ export default function AdminVoedingsplannenPage() {
           },
           {
             id: '2',
-            name: '🥩 Carnivoor Lunch - Biefstuk Salade',
-            description: 'Een stevige lunch met premium vlees. Perfect voor carnivoor dieet en spiermassa.',
+            name: '🥩 Maandag - Carnivoor Lunch - Biefstuk & Eieren',
+            description: 'Een stevige lunch met premium vlees en eieren. Perfect voor carnivoor dieet en spiermassa.',
             meal_type: 'lunch',
             category: 'carnivoor',
             plan_type: 'Carnivoor / Animal Based',
             goal: 'Spiermassa',
+            day: 'maandag',
             ingredients: [
-              { name: 'Biefstuk', quantity: 150, unit: 'gram' },
+              { name: 'Biefstuk', quantity: 200, unit: 'gram' },
               { name: 'Eieren', quantity: 2, unit: 'stuks' },
-              { name: 'Boter', quantity: 15, unit: 'gram' },
+              { name: 'Boter', quantity: 20, unit: 'gram' },
               { name: 'Kruiden', quantity: 1, unit: 'snufje' }
             ],
             instructions: [
@@ -183,10 +187,10 @@ export default function AdminVoedingsplannenPage() {
               'Serveer met boter en kruiden'
             ],
             nutrition_info: {
-              calories: 520,
-              protein: 45,
+              calories: 650,
+              protein: 55,
               carbs: 0,
-              fat: 38
+              fat: 48
             },
             prep_time: 20,
             difficulty: 'gemiddeld',
@@ -195,14 +199,205 @@ export default function AdminVoedingsplannenPage() {
           },
           {
             id: '3',
-            name: '🥩 Carnivoor Diner - Ribeye Steak',
+            name: '🥩 Maandag - Carnivoor Diner - Ribeye Steak',
             description: 'Een premium ribeye steak met boter en kruiden. Perfect voor carnivoor dieet en spiermassa.',
             meal_type: 'diner',
             category: 'carnivoor',
             plan_type: 'Carnivoor / Animal Based',
             goal: 'Spiermassa',
+            day: 'maandag',
             ingredients: [
-              { name: 'Ribeye Steak', quantity: 250, unit: 'gram' },
+              { name: 'Ribeye Steak', quantity: 300, unit: 'gram' },
+              { name: 'Boter', quantity: 30, unit: 'gram' },
+              { name: 'Rozemarijn', quantity: 1, unit: 'takje' },
+              { name: 'Knoflook', quantity: 3, unit: 'teentjes' }
+            ],
+            instructions: [
+              'Laat de steak op kamertemperatuur komen',
+              'Verhit een pan op hoog vuur',
+              'Bak de steak 4-5 minuten per kant voor medium-rare',
+              'Voeg boter, rozemarijn en knoflook toe in de laatste minuut'
+            ],
+            nutrition_info: {
+              calories: 820,
+              protein: 65,
+              carbs: 0,
+              fat: 58
+            },
+            prep_time: 30,
+            difficulty: 'gemiddeld',
+            is_featured: true,
+            is_active: true
+          },
+
+          // DINSDAG
+          {
+            id: '4',
+            name: '🥩 Dinsdag - Carnivoor Ontbijt - Eieren & Worst',
+            description: 'Een stevig ontbijt met eieren en worst. Perfect voor carnivoor dieet.',
+            meal_type: 'ontbijt',
+            category: 'carnivoor',
+            plan_type: 'Carnivoor / Animal Based',
+            goal: 'Spiermassa',
+            day: 'dinsdag',
+            ingredients: [
+              { name: '1 Ei (gekookt)', quantity: 3, unit: 'stuks' },
+              { name: 'Varkensworst', quantity: 100, unit: 'gram' },
+              { name: 'Boter', quantity: 15, unit: 'gram' }
+            ],
+            instructions: [
+              'Kook de eieren 6-7 minuten voor een zachtgekookt ei',
+              'Bak de worst knapperig in een pan',
+              'Serveer met een klontje boter'
+            ],
+            nutrition_info: {
+              calories: 620,
+              protein: 38,
+              carbs: 1,
+              fat: 52
+            },
+            prep_time: 15,
+            difficulty: 'makkelijk',
+            is_featured: true,
+            is_active: true
+          },
+          {
+            id: '5',
+            name: '🥩 Dinsdag - Carnivoor Lunch - Lamsvlees & Eieren',
+            description: 'Een rijke lunch met lamsvlees en eieren. Perfect voor carnivoor dieet.',
+            meal_type: 'lunch',
+            category: 'carnivoor',
+            plan_type: 'Carnivoor / Animal Based',
+            goal: 'Spiermassa',
+            day: 'dinsdag',
+            ingredients: [
+              { name: 'Lamsvlees', quantity: 200, unit: 'gram' },
+              { name: 'Eieren', quantity: 2, unit: 'stuks' },
+              { name: 'Boter', quantity: 20, unit: 'gram' },
+              { name: 'Rozemarijn', quantity: 1, unit: 'takje' }
+            ],
+            instructions: [
+              'Bak het lamsvlees medium-rare',
+              'Kook de eieren zachtgekookt',
+              'Serveer met boter en rozemarijn'
+            ],
+            nutrition_info: {
+              calories: 680,
+              protein: 58,
+              carbs: 0,
+              fat: 50
+            },
+            prep_time: 25,
+            difficulty: 'gemiddeld',
+            is_featured: true,
+            is_active: true
+          },
+          {
+            id: '6',
+            name: '🥩 Dinsdag - Carnivoor Diner - T-Bone Steak',
+            description: 'Een indrukwekkende T-Bone steak. Perfect voor carnivoor dieet en spiermassa.',
+            meal_type: 'diner',
+            category: 'carnivoor',
+            plan_type: 'Carnivoor / Animal Based',
+            goal: 'Spiermassa',
+            day: 'dinsdag',
+            ingredients: [
+              { name: 'T-Bone Steak', quantity: 350, unit: 'gram' },
+              { name: 'Boter', quantity: 25, unit: 'gram' },
+              { name: 'Tijm', quantity: 1, unit: 'takje' },
+              { name: 'Knoflook', quantity: 2, unit: 'teentjes' }
+            ],
+            instructions: [
+              'Laat de steak op kamertemperatuur komen',
+              'Verhit een pan op hoog vuur',
+              'Bak de steak 5-6 minuten per kant voor medium-rare',
+              'Voeg boter, tijm en knoflook toe in de laatste minuut'
+            ],
+            nutrition_info: {
+              calories: 890,
+              protein: 72,
+              carbs: 0,
+              fat: 62
+            },
+            prep_time: 35,
+            difficulty: 'gemiddeld',
+            is_featured: true,
+            is_active: true
+          },
+
+          // WOENSDAG
+          {
+            id: '7',
+            name: '🥩 Woensdag - Carnivoor Ontbijt - Eieren & Ham',
+            description: 'Een gebalanceerd ontbijt met eieren en ham. Perfect voor carnivoor dieet.',
+            meal_type: 'ontbijt',
+            category: 'carnivoor',
+            plan_type: 'Carnivoor / Animal Based',
+            goal: 'Spiermassa',
+            day: 'woensdag',
+            ingredients: [
+              { name: '1 Ei (gekookt)', quantity: 3, unit: 'stuks' },
+              { name: 'Ham', quantity: 80, unit: 'gram' },
+              { name: 'Boter', quantity: 15, unit: 'gram' }
+            ],
+            instructions: [
+              'Kook de eieren 6-7 minuten voor een zachtgekookt ei',
+              'Bak de ham lichtjes in een pan',
+              'Serveer met een klontje boter'
+            ],
+            nutrition_info: {
+              calories: 540,
+              protein: 42,
+              carbs: 1,
+              fat: 38
+            },
+            prep_time: 15,
+            difficulty: 'makkelijk',
+            is_featured: true,
+            is_active: true
+          },
+          {
+            id: '8',
+            name: '🥩 Woensdag - Carnivoor Lunch - Kalfsvlees & Eieren',
+            description: 'Een verfijnde lunch met kalfsvlees en eieren. Perfect voor carnivoor dieet.',
+            meal_type: 'lunch',
+            category: 'carnivoor',
+            plan_type: 'Carnivoor / Animal Based',
+            goal: 'Spiermassa',
+            day: 'woensdag',
+            ingredients: [
+              { name: 'Kalfsvlees', quantity: 200, unit: 'gram' },
+              { name: 'Eieren', quantity: 2, unit: 'stuks' },
+              { name: 'Boter', quantity: 20, unit: 'gram' },
+              { name: 'Tijm', quantity: 1, unit: 'takje' }
+            ],
+            instructions: [
+              'Bak het kalfsvlees medium-rare',
+              'Kook de eieren zachtgekookt',
+              'Serveer met boter en tijm'
+            ],
+            nutrition_info: {
+              calories: 620,
+              protein: 52,
+              carbs: 0,
+              fat: 44
+            },
+            prep_time: 20,
+            difficulty: 'gemiddeld',
+            is_featured: true,
+            is_active: true
+          },
+          {
+            id: '9',
+            name: '🥩 Woensdag - Carnivoor Diner - Porterhouse Steak',
+            description: 'Een premium Porterhouse steak. Perfect voor carnivoor dieet en spiermassa.',
+            meal_type: 'diner',
+            category: 'carnivoor',
+            plan_type: 'Carnivoor / Animal Based',
+            goal: 'Spiermassa',
+            day: 'woensdag',
+            ingredients: [
+              { name: 'Porterhouse Steak', quantity: 300, unit: 'gram' },
               { name: 'Boter', quantity: 25, unit: 'gram' },
               { name: 'Rozemarijn', quantity: 1, unit: 'takje' },
               { name: 'Knoflook', quantity: 3, unit: 'teentjes' }
@@ -214,12 +409,304 @@ export default function AdminVoedingsplannenPage() {
               'Voeg boter, rozemarijn en knoflook toe in de laatste minuut'
             ],
             nutrition_info: {
-              calories: 680,
-              protein: 55,
+              calories: 820,
+              protein: 68,
               carbs: 0,
-              fat: 48
+              fat: 58
             },
             prep_time: 30,
+            difficulty: 'gemiddeld',
+            is_featured: true,
+            is_active: true
+          },
+
+          // DONDERDAG
+          {
+            id: '10',
+            name: '🥩 Donderdag - Carnivoor Ontbijt - Eieren & Spek',
+            description: 'Een stevig ontbijt met eieren en spek. Perfect voor carnivoor dieet.',
+            meal_type: 'ontbijt',
+            category: 'carnivoor',
+            plan_type: 'Carnivoor / Animal Based',
+            goal: 'Spiermassa',
+            day: 'donderdag',
+            ingredients: [
+              { name: '1 Ei (gekookt)', quantity: 3, unit: 'stuks' },
+              { name: 'Spek', quantity: 80, unit: 'gram' },
+              { name: 'Boter', quantity: 15, unit: 'gram' }
+            ],
+            instructions: [
+              'Kook de eieren 6-7 minuten voor een zachtgekookt ei',
+              'Bak het spek knapperig in een pan',
+              'Serveer met een klontje boter'
+            ],
+            nutrition_info: {
+              calories: 580,
+              protein: 36,
+              carbs: 1,
+              fat: 48
+            },
+            prep_time: 15,
+            difficulty: 'makkelijk',
+            is_featured: true,
+            is_active: true
+          },
+          {
+            id: '11',
+            name: '🥩 Donderdag - Carnivoor Lunch - Geitenvlees & Eieren',
+            description: 'Een unieke lunch met geitenvlees en eieren. Perfect voor carnivoor dieet.',
+            meal_type: 'lunch',
+            category: 'carnivoor',
+            plan_type: 'Carnivoor / Animal Based',
+            goal: 'Spiermassa',
+            day: 'donderdag',
+            ingredients: [
+              { name: 'Geitenvlees', quantity: 200, unit: 'gram' },
+              { name: 'Eieren', quantity: 2, unit: 'stuks' },
+              { name: 'Boter', quantity: 20, unit: 'gram' },
+              { name: 'Rozemarijn', quantity: 1, unit: 'takje' }
+            ],
+            instructions: [
+              'Bak het geitenvlees medium-rare',
+              'Kook de eieren zachtgekookt',
+              'Serveer met boter en rozemarijn'
+            ],
+            nutrition_info: {
+              calories: 640,
+              protein: 54,
+              carbs: 0,
+              fat: 46
+            },
+            prep_time: 25,
+            difficulty: 'gemiddeld',
+            is_featured: true,
+            is_active: true
+          },
+          {
+            id: '12',
+            name: '🥩 Donderdag - Carnivoor Diner - Tomahawk Steak',
+            description: 'Een indrukwekkende Tomahawk steak. Perfect voor carnivoor dieet en spiermassa.',
+            meal_type: 'diner',
+            category: 'carnivoor',
+            plan_type: 'Carnivoor / Animal Based',
+            goal: 'Spiermassa',
+            day: 'donderdag',
+            ingredients: [
+              { name: 'Tomahawk Steak', quantity: 400, unit: 'gram' },
+              { name: 'Boter', quantity: 30, unit: 'gram' },
+              { name: 'Tijm', quantity: 1, unit: 'takje' },
+              { name: 'Knoflook', quantity: 4, unit: 'teentjes' }
+            ],
+            instructions: [
+              'Laat de steak op kamertemperatuur komen',
+              'Verhit een pan op hoog vuur',
+              'Bak de steak 6-7 minuten per kant voor medium-rare',
+              'Voeg boter, tijm en knoflook toe in de laatste minuut'
+            ],
+            nutrition_info: {
+              calories: 1080,
+              protein: 88,
+              carbs: 0,
+              fat: 78
+            },
+            prep_time: 40,
+            difficulty: 'gemiddeld',
+            is_featured: true,
+            is_active: true
+          },
+
+          // VRIJDAG
+          {
+            id: '13',
+            name: '🥩 Vrijdag - Carnivoor Ontbijt - Eieren & Chorizo',
+            description: 'Een pittig ontbijt met eieren en chorizo. Perfect voor carnivoor dieet.',
+            meal_type: 'ontbijt',
+            category: 'carnivoor',
+            plan_type: 'Carnivoor / Animal Based',
+            goal: 'Spiermassa',
+            day: 'vrijdag',
+            ingredients: [
+              { name: '1 Ei (gekookt)', quantity: 3, unit: 'stuks' },
+              { name: 'Chorizo', quantity: 80, unit: 'gram' },
+              { name: 'Boter', quantity: 15, unit: 'gram' }
+            ],
+            instructions: [
+              'Kook de eieren 6-7 minuten voor een zachtgekookt ei',
+              'Bak de chorizo knapperig in een pan',
+              'Serveer met een klontje boter'
+            ],
+            nutrition_info: {
+              calories: 620,
+              protein: 38,
+              carbs: 2,
+              fat: 52
+            },
+            prep_time: 15,
+            difficulty: 'makkelijk',
+            is_featured: true,
+            is_active: true
+          },
+          {
+            id: '14',
+            name: '🥩 Vrijdag - Carnivoor Lunch - Wildvlees & Eieren',
+            description: 'Een wild lunch met wildvlees en eieren. Perfect voor carnivoor dieet.',
+            meal_type: 'lunch',
+            category: 'carnivoor',
+            plan_type: 'Carnivoor / Animal Based',
+            goal: 'Spiermassa',
+            day: 'vrijdag',
+            ingredients: [
+              { name: 'Wildvlees (Hert)', quantity: 200, unit: 'gram' },
+              { name: 'Eieren', quantity: 2, unit: 'stuks' },
+              { name: 'Boter', quantity: 20, unit: 'gram' },
+              { name: 'Jeneverbes', quantity: 3, unit: 'bessen' }
+            ],
+            instructions: [
+              'Bak het wildvlees medium-rare',
+              'Kook de eieren zachtgekookt',
+              'Serveer met boter en jeneverbes'
+            ],
+            nutrition_info: {
+              calories: 600,
+              protein: 56,
+              carbs: 0,
+              fat: 42
+            },
+            prep_time: 25,
+            difficulty: 'gemiddeld',
+            is_featured: true,
+            is_active: true
+          },
+          {
+            id: '15',
+            name: '🥩 Vrijdag - Carnivoor Diner - Wagyu Steak',
+            description: 'Een premium Wagyu steak. Perfect voor carnivoor dieet en spiermassa.',
+            meal_type: 'diner',
+            category: 'carnivoor',
+            plan_type: 'Carnivoor / Animal Based',
+            goal: 'Spiermassa',
+            day: 'vrijdag',
+            ingredients: [
+              { name: 'Wagyu Steak', quantity: 250, unit: 'gram' },
+              { name: 'Boter', quantity: 20, unit: 'gram' },
+              { name: 'Zeezout', quantity: 1, unit: 'snufje' },
+              { name: 'Zwarte Peper', quantity: 1, unit: 'snufje' }
+            ],
+            instructions: [
+              'Laat de steak op kamertemperatuur komen',
+              'Verhit een pan op hoog vuur',
+              'Bak de steak 3-4 minuten per kant voor medium-rare',
+              'Serveer met boter, zeezout en peper'
+            ],
+            nutrition_info: {
+              calories: 720,
+              protein: 58,
+              carbs: 0,
+              fat: 52
+            },
+            prep_time: 25,
+            difficulty: 'gemiddeld',
+            is_featured: true,
+            is_active: true
+          },
+
+          // ZATERDAG (CHEAT DAY)
+          {
+            id: '16',
+            name: '🎉 Zaterdag - Cheat Day Ontbijt - Mega Eieren & Bacon',
+            description: 'Een mega ontbijt voor cheat day. Extra veel eiwitten en vetten.',
+            meal_type: 'ontbijt',
+            category: 'carnivoor',
+            plan_type: 'Carnivoor / Animal Based',
+            goal: 'Spiermassa',
+            day: 'zaterdag',
+            is_cheat_day: true,
+            ingredients: [
+              { name: '1 Ei (gekookt)', quantity: 4, unit: 'stuks' },
+              { name: 'Bacon', quantity: 120, unit: 'gram' },
+              { name: 'Boter', quantity: 20, unit: 'gram' },
+              { name: 'Kaas', quantity: 50, unit: 'gram' }
+            ],
+            instructions: [
+              'Kook de eieren 6-7 minuten voor een zachtgekookt ei',
+              'Bak de bacon knapperig in een pan',
+              'Voeg kaas toe en laat smelten',
+              'Serveer met extra boter'
+            ],
+            nutrition_info: {
+              calories: 780,
+              protein: 48,
+              carbs: 2,
+              fat: 62
+            },
+            prep_time: 20,
+            difficulty: 'makkelijk',
+            is_featured: true,
+            is_active: true
+          },
+          {
+            id: '17',
+            name: '🎉 Zaterdag - Cheat Day Lunch - Mixed Grill',
+            description: 'Een mixed grill voor cheat day. Verschillende soorten vlees.',
+            meal_type: 'lunch',
+            category: 'carnivoor',
+            plan_type: 'Carnivoor / Animal Based',
+            goal: 'Spiermassa',
+            day: 'zaterdag',
+            is_cheat_day: true,
+            ingredients: [
+              { name: 'Biefstuk', quantity: 150, unit: 'gram' },
+              { name: 'Lamsvlees', quantity: 100, unit: 'gram' },
+              { name: 'Varkensvlees', quantity: 100, unit: 'gram' },
+              { name: 'Eieren', quantity: 2, unit: 'stuks' },
+              { name: 'Boter', quantity: 25, unit: 'gram' }
+            ],
+            instructions: [
+              'Bak alle vleessoorten medium-rare',
+              'Kook de eieren zachtgekookt',
+              'Serveer alles samen met boter'
+            ],
+            nutrition_info: {
+              calories: 820,
+              protein: 68,
+              carbs: 0,
+              fat: 58
+            },
+            prep_time: 30,
+            difficulty: 'gemiddeld',
+            is_featured: true,
+            is_active: true
+          },
+          {
+            id: '18',
+            name: '🎉 Zaterdag - Cheat Day Diner - Mixed Steak Platter',
+            description: 'Een mixed steak platter voor cheat day. Verschillende steaks.',
+            meal_type: 'diner',
+            category: 'carnivoor',
+            plan_type: 'Carnivoor / Animal Based',
+            goal: 'Spiermassa',
+            day: 'zaterdag',
+            is_cheat_day: true,
+            ingredients: [
+              { name: 'Ribeye Steak', quantity: 200, unit: 'gram' },
+              { name: 'T-Bone Steak', quantity: 200, unit: 'gram' },
+              { name: 'Porterhouse Steak', quantity: 200, unit: 'gram' },
+              { name: 'Boter', quantity: 40, unit: 'gram' },
+              { name: 'Knoflook', quantity: 4, unit: 'teentjes' }
+            ],
+            instructions: [
+              'Laat alle steaks op kamertemperatuur komen',
+              'Verhit een pan op hoog vuur',
+              'Bak elke steak 4-5 minuten per kant voor medium-rare',
+              'Serveer met boter en knoflook'
+            ],
+            nutrition_info: {
+              calories: 1200,
+              protein: 96,
+              carbs: 0,
+              fat: 88
+            },
+            prep_time: 45,
             difficulty: 'gemiddeld',
             is_featured: true,
             is_active: true
@@ -605,7 +1092,8 @@ export default function AdminVoedingsplannenPage() {
 
   const filteredMeals = meals.filter(meal => {
     const matchesSearch = meal.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesPlanType = activeTab === 'maaltijden' || meal.plan_type === activeTab;
+    const matchesPlanType = activeTab === 'maaltijden' || 
+                           (activeTab === 'Cheat Day' ? meal.is_cheat_day : meal.plan_type === activeTab);
     return matchesSearch && matchesPlanType;
   });
 
@@ -955,17 +1443,23 @@ export default function AdminVoedingsplannenPage() {
             {/* Meal Plan Filter */}
             <div className="mb-6">
               <div className="flex flex-wrap gap-2">
-                {['alle', 'Carnivoor / Animal Based', 'Voedingsplan op Maat'].map((planType) => (
+                {['alle', 'Carnivoor / Animal Based', 'Voedingsplan op Maat', 'Cheat Day'].map((planType) => (
                   <button
                     key={planType}
                     onClick={() => setActiveTab(planType === 'alle' ? 'maaltijden' : planType)}
                     className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
                       activeTab === (planType === 'alle' ? 'maaltijden' : planType)
-                        ? 'bg-[#8BAE5A] text-[#181F17]'
+                        ? planType === 'Cheat Day' 
+                          ? 'bg-[#FF6B6B] text-white'
+                          : 'bg-[#8BAE5A] text-[#181F17]'
                         : 'bg-[#232D1A] text-[#8BAE5A] hover:bg-[#3A4D23] border border-[#3A4D23]'
                     }`}
                   >
-                    {planType === 'alle' ? 'Alle Plannen' : planType} ({meals.filter(meal => planType === 'alle' || meal.plan_type === planType).length})
+                    {planType === 'alle' ? 'Alle Plannen' : planType} ({meals.filter(meal => {
+                      if (planType === 'alle') return true;
+                      if (planType === 'Cheat Day') return meal.is_cheat_day;
+                      return meal.plan_type === planType;
+                    }).length})
                   </button>
                 ))}
               </div>
@@ -1056,6 +1550,12 @@ export default function AdminVoedingsplannenPage() {
 
                   {/* Meal Tags */}
                   <div className="flex flex-wrap gap-2 mt-4">
+                    {/* Cheat Day */}
+                    {meal.is_cheat_day && (
+                      <span className="px-3 py-1 bg-[#FF6B6B] text-white rounded-full text-xs font-semibold">
+                        🎉 Cheat Day
+                      </span>
+                    )}
                     {/* Voedingsplan Type */}
                     {meal.plan_type && (
                       <span className="px-3 py-1 bg-[#8BAE5A] text-[#181F17] rounded-full text-xs font-semibold">
@@ -1066,6 +1566,12 @@ export default function AdminVoedingsplannenPage() {
                     {meal.goal && (
                       <span className="px-3 py-1 bg-[#B6C948] text-[#181F17] rounded-full text-xs font-semibold">
                         🎯 {meal.goal}
+                      </span>
+                    )}
+                    {/* Dag */}
+                    {meal.day && (
+                      <span className="px-3 py-1 bg-[#4A90E2] text-white rounded-full text-xs font-semibold">
+                        📅 {meal.day.charAt(0).toUpperCase() + meal.day.slice(1)}
                       </span>
                     )}
                     {/* Meal Type */}
