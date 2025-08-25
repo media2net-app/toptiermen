@@ -205,12 +205,14 @@ export default function AcademyPage() {
 
         if (response.ok) {
           const data = await response.json();
-          setAcademyCompleted(data.academyCompleted);
-          setHasAcademyBadge(data.hasBadge);
-          setAcademyBadgeData(data.badgeData);
+          console.log('🎓 Academy completion check response:', data);
+          
+          setAcademyCompleted(data.completed);
+          setHasAcademyBadge(data.alreadyUnlocked || data.newlyUnlocked);
+          setAcademyBadgeData(data.badge);
 
-          if (data.newBadgeUnlocked && data.badgeData) {
-            setBadgeData(data.badgeData);
+          if (data.newlyUnlocked && data.badge) {
+            setBadgeData(data.badge);
             setShowBadgeModal(true);
           }
         }

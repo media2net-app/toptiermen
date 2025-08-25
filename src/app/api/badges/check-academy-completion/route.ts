@@ -10,10 +10,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get all published modules
+    // Get all published modules with their lessons
     const { data: modules, error: modulesError } = await supabase
       .from('academy_modules')
-      .select('id, title')
+      .select(`
+        id, 
+        title,
+        academy_lessons (
+          id,
+          title,
+          status
+        )
+      `)
       .eq('status', 'published')
       .order('order_index');
 
@@ -45,18 +53,19 @@ export async function POST(request: NextRequest) {
     // Count completed lessons per module
     const moduleCompletion: any = {};
     lessonProgress?.forEach((progress: any) => {
-      if (progress.academy_lessons && Array.isArray(progress.academy_lessons)) {
-        progress.academy_lessons.forEach((lesson: any) => {
-          const moduleId = lesson.module_id;
-          moduleCompletion[moduleId] = (moduleCompletion[moduleId] || 0) + 1;
-        });
-      }
+      const moduleId = progress.academy_lessons.module_id;
+      moduleCompletion[moduleId] = (moduleCompletion[moduleId] || 0) + 1;
     });
 
-    // Check if user has completed all modules
+    // Check if user has completed ALL lessons in ALL modules
     const allModulesCompleted = modules?.every(module => {
+      const publishedLessons = module.academy_lessons?.filter(l => l.status === 'published') || [];
       const completedLessons = moduleCompletion[module.id] || 0;
-      return completedLessons > 0; // At least one lesson completed per module
+      const isCompleted = completedLessons === publishedLessons.length && publishedLessons.length > 0;
+      
+      console.log(`Module ${module.title}: ${completedLessons}/${publishedLessons.length} lessons completed - ${isCompleted ? '✅' : '❌'}`);
+      
+      return isCompleted;
     });
 
     if (!allModulesCompleted) {

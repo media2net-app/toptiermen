@@ -270,6 +270,15 @@ export default function TrainingscentrumBeheer() {
   const [errorExercises, setErrorExercises] = useState<string | null>(null);
   const [errorSchemas, setErrorSchemas] = useState<string | null>(null);
   
+  // Stats state
+  const [stats, setStats] = useState({
+    totalSchemas: 0,
+    totalExercises: 0,
+    totalChallenges: 0,
+    activeUsers: 0
+  });
+  const [loadingStats, setLoadingStats] = useState(true);
+  
   // Lazy loading state
   const [visibleExercises, setVisibleExercises] = useState<Set<number>>(new Set());
   const [loadedThumbnails, setLoadedThumbnails] = useState<Set<number>>(new Set());
@@ -332,13 +341,69 @@ export default function TrainingscentrumBeheer() {
     }
   }, []);
 
+  const fetchStats = useCallback(async () => {
+    setLoadingStats(true);
+    try {
+      // Get total schemas
+      const { count: schemasCount } = await supabase
+        .from('training_schemas')
+        .select('*', { count: 'exact', head: true });
+
+      // Get total exercises
+      const { count: exercisesCount } = await supabase
+        .from('exercises')
+        .select('*', { count: 'exact', head: true });
+
+      // Get total challenges (from challenges table if it exists, otherwise 0)
+      let challengesCount = 0;
+      try {
+        const { count } = await supabase
+          .from('challenges')
+          .select('*', { count: 'exact', head: true });
+        challengesCount = count || 0;
+      } catch {
+        // Challenges table doesn't exist yet
+        challengesCount = 0;
+      }
+
+      // Get active users (users who have completed a workout in the last 30 days)
+      let activeUsersCount = 0;
+      try {
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        
+        const { count } = await supabase
+          .from('workout_sessions')
+          .select('user_id', { count: 'exact', head: true })
+          .gte('completed_at', thirtyDaysAgo.toISOString());
+        
+        activeUsersCount = count || 0;
+      } catch {
+        // Workout sessions table doesn't exist yet or no recent sessions
+        activeUsersCount = 0;
+      }
+
+      setStats({
+        totalSchemas: schemasCount || 0,
+        totalExercises: exercisesCount || 0,
+        totalChallenges: challengesCount,
+        activeUsers: activeUsersCount
+      });
+    } catch (err) {
+      console.error('Error fetching stats:', err);
+    } finally {
+      setLoadingStats(false);
+    }
+  }, []);
+
   // Load data when component mounts
   useEffect(() => {
     if (mounted) {
       fetchExercises();
       fetchSchemas();
+      fetchStats();
     }
-  }, [mounted, fetchExercises, fetchSchemas]);
+  }, [mounted, fetchExercises, fetchSchemas, fetchStats]);
 
   // Lazy load thumbnails one by one
   useEffect(() => {
@@ -663,25 +728,25 @@ export default function TrainingscentrumBeheer() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <AdminStatsCard
           icon={<CalendarIcon className="w-6 h-6" />}
-          value={schemas.length}
+          value={loadingStats ? "..." : stats.totalSchemas}
           title="Trainingsschema's"
           color="blue"
         />
         <AdminStatsCard
           icon={<PlayIcon className="w-6 h-6" />}
-          value={exercises.length}
+          value={loadingStats ? "..." : stats.totalExercises}
           title="Oefeningen"
           color="green"
         />
         <AdminStatsCard
           icon={<FireIcon className="w-6 h-6" />}
-          value={mockChallenges.length}
+          value={loadingStats ? "..." : stats.totalChallenges}
           title="Challenges"
           color="orange"
         />
         <AdminStatsCard
           icon={<UserGroupIcon className="w-6 h-6" />}
-          value="2,139"
+          value={loadingStats ? "..." : stats.activeUsers.toLocaleString('nl-NL')}
           title="Actieve Gebruikers"
           color="purple"
         />
