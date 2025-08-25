@@ -8,10 +8,10 @@ interface SessionMonitorProps {
 }
 
 export default function SessionMonitor({ isAdmin = false }: SessionMonitorProps) {
-  const { user, refreshSession } = useSupabaseAuth();
+  const { user } = useSupabaseAuth();
   const [lastActivity, setLastActivity] = useState(Date.now());
   const [sessionWarning, setSessionWarning] = useState(false);
-  const [isRefreshing, setIsRefreshing] = useState(false);
+
 
   // Update last activity on user interaction
   useEffect(() => {
@@ -32,39 +32,24 @@ export default function SessionMonitor({ isAdmin = false }: SessionMonitorProps)
     };
   }, []);
 
-  // Check session health periodically with extended timeouts
+  // Check session health periodically
   useEffect(() => {
     if (!isAdmin) return;
 
-    const checkSession = async () => {
+    const checkSession = () => {
       const now = Date.now();
       const inactiveTime = now - lastActivity;
-      const warningThreshold = 45 * 60 * 1000; // 45 minutes (increased from 25)
-      const criticalThreshold = 55 * 60 * 1000; // 55 minutes (increased from 30)
+      const warningThreshold = 45 * 60 * 1000; // 45 minutes
 
-      if (inactiveTime > criticalThreshold) {
-        // Session is critical, try to refresh
-        setIsRefreshing(true);
-        try {
-          const refreshed = await refreshSession();
-          if (!refreshed) {
-            console.warn('Session refresh failed, user may need to re-authenticate');
-            // Don't force logout immediately, give user a chance to interact
-          }
-        } catch (error) {
-          console.error('Session refresh error:', error);
-        } finally {
-          setIsRefreshing(false);
-        }
-      } else if (inactiveTime > warningThreshold) {
+      if (inactiveTime > warningThreshold) {
         setSessionWarning(true);
       }
     };
 
-    const interval = setInterval(checkSession, 5 * 60 * 1000); // Check every 5 minutes (increased from 1)
+    const interval = setInterval(checkSession, 5 * 60 * 1000); // Check every 5 minutes
 
     return () => clearInterval(interval);
-  }, [lastActivity, isAdmin, refreshSession]);
+  }, [lastActivity, isAdmin]);
 
   // Show session warning if needed
   if (sessionWarning && isAdmin) {
@@ -95,17 +80,7 @@ export default function SessionMonitor({ isAdmin = false }: SessionMonitorProps)
     );
   }
 
-  // Show refreshing indicator
-  if (isRefreshing && isAdmin) {
-    return (
-      <div className="fixed top-4 right-4 z-50 bg-blue-500 text-white p-3 rounded-lg shadow-lg">
-        <div className="flex items-center gap-2">
-          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-          <span className="text-sm">Sessie verlengen...</span>
-        </div>
-      </div>
-    );
-  }
+
 
   return null;
 } 
