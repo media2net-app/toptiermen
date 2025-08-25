@@ -8,16 +8,37 @@ const supabase = createClient(
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId, subscription } = await request.json();
+    console.log('🔍 Push subscription API called');
+    
+    const body = await request.json();
+    console.log('📦 Request body:', JSON.stringify(body, null, 2));
+    
+    const { userId, subscription } = body;
 
     if (!userId || !subscription) {
+      console.error('❌ Missing required fields:', { userId: !!userId, subscription: !!subscription });
       return NextResponse.json(
         { error: 'Missing userId or subscription' },
         { status: 400 }
       );
     }
 
+    console.log('✅ Validating subscription data...');
+    console.log('👤 User ID:', userId);
+    console.log('📡 Endpoint:', subscription.endpoint?.substring(0, 50) + '...');
+    console.log('🔑 Has p256dh key:', !!subscription.keys?.p256dh);
+    console.log('🔑 Has auth key:', !!subscription.keys?.auth);
+
+    if (!subscription.endpoint || !subscription.keys?.p256dh || !subscription.keys?.auth) {
+      console.error('❌ Invalid subscription data');
+      return NextResponse.json(
+        { error: 'Invalid subscription data' },
+        { status: 400 }
+      );
+    }
+
     // Store push subscription in database
+    console.log('💾 Storing subscription in database...');
     const { data, error } = await supabase
       .from('push_subscriptions')
       .upsert({
@@ -32,24 +53,26 @@ export async function POST(request: NextRequest) {
       });
 
     if (error) {
-      console.error('Database error:', error);
+      console.error('❌ Database error:', error);
       return NextResponse.json(
-        { error: 'Failed to store subscription' },
+        { error: `Failed to store subscription: ${error.message}` },
         { status: 500 }
       );
     }
 
     console.log('✅ Push subscription stored for user:', userId);
+    console.log('📊 Stored data:', data);
 
     return NextResponse.json({ 
       success: true, 
-      message: 'Push subscription created successfully' 
+      message: 'Push subscription created successfully',
+      subscriptionId: data?.[0]?.id
     });
 
   } catch (error) {
-    console.error('Push subscription error:', error);
+    console.error('❌ Push subscription error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: `Internal server error: ${error.message}` },
       { status: 500 }
     );
   }
