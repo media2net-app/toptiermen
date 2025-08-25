@@ -106,7 +106,8 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const dateRange = searchParams.get('dateRange') || 'maximum';
     const includeInsights = searchParams.get('includeInsights') !== 'false';
-    const useManualData = searchParams.get('useManualData') !== 'false'; // Default to true
+    const forceManual = searchParams.get('forceManual') === 'true';
+    const useManualData = forceManual || searchParams.get('useManualData') !== 'false'; // Always use manual data
 
     console.log('📊 Fetching comprehensive Facebook analytics data...');
     console.log('🔧 Date range:', dateRange);
@@ -146,8 +147,8 @@ export async function GET(request: NextRequest) {
     
     console.log('📋 TTM campaigns found:', ttmCampaigns.length);
 
-    // Use manual data if requested, otherwise fetch from Facebook API
-    if (useManualData) {
+    // Always use manual data for consistency between environments
+    if (useManualData || !FACEBOOK_ACCESS_TOKEN || !FACEBOOK_AD_ACCOUNT_ID) {
       console.log('🔧 Using manual data override...');
       analyticsData.campaigns = Object.entries(CURRENT_MANUAL_DATA).map(([name, data]) => ({
         id: `manual_${name.replace(/\s+/g, '_').toLowerCase()}`,
