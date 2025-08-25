@@ -3,7 +3,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { 
   PlusIcon, 
   PencilIcon, 
-  EyeIcon, 
   TrashIcon,
   DocumentDuplicateIcon,
   PlayIcon,
@@ -930,18 +929,7 @@ export default function TrainingscentrumBeheer() {
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center justify-center gap-1.5">
-                            <AdminButton 
-                              onClick={() => {
-                                // Navigate to schema view page in same tab
-                                window.location.href = `/dashboard/trainingscentrum/schema/${schema.id}`;
-                              }}
-                              variant="secondary" 
-                              size="sm"
-                              className="!w-[70px] !min-w-[70px] !max-w-[70px] text-xs"
-                            >
-                              <EyeIcon className="w-3 h-3" />
-                              Bekijk
-                            </AdminButton>
+
                             <AdminButton 
                               onClick={() => {
                                 setEditingSchema(mapDbSchemaToForm(schema));
@@ -1311,10 +1299,7 @@ export default function TrainingscentrumBeheer() {
                     <PencilIcon className="w-4 h-4" />
                     Bewerk
                   </button>
-                  <button className="flex-1 px-4 py-2 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A] transition flex items-center justify-center gap-2">
-                    <EyeIcon className="w-4 h-4" />
-                    Bekijk
-                  </button>
+
                 </div>
               </div>
             ))}
