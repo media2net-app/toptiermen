@@ -1,12 +1,13 @@
 'use client';
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { LockClosedIcon, EnvelopeIcon } from "@heroicons/react/24/solid";
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
-export default function Login() {
-  const [mounted, setMounted] = useState(false);
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { EnvelopeIcon, LockClosedIcon } from '@heroicons/react/24/outline';
+
+export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, loading, signIn } = useSupabaseAuth();
   
   const [email, setEmail] = useState("");
@@ -14,8 +15,7 @@ export default function Login() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
-  const [debugInfo, setDebugInfo] = useState("");
-  
+
   // Forgot password states
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
@@ -23,164 +23,60 @@ export default function Login() {
   const [resetMessage, setResetMessage] = useState("");
 
   useEffect(() => { 
-    setMounted(true); 
-    
-    // Clear any stale cache data that might cause issues
-    const clearStaleData = () => {
-      try {
-        // Clear any old Facebook data that might interfere
-        localStorage.removeItem('facebook_ad_account_id');
-        localStorage.removeItem('facebook_access_token');
-        localStorage.removeItem('facebook_user_id');
-        localStorage.removeItem('facebook_login_status');
-        
-        // Clear any old auth data
-        localStorage.removeItem('toptiermen-auth');
-        sessionStorage.clear();
-        
-        console.log('🔍 Cleared stale cache data');
-      } catch (error) {
-        console.error('🔍 Error clearing cache:', error);
-      }
-    };
-    
-    clearStaleData();
-    
-    // Debug: Check environment variables
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    
-    setDebugInfo(`
-      Supabase URL: ${supabaseUrl ? 'Configured' : 'NOT CONFIGURED'}
-      Supabase Key: ${supabaseKey ? 'Configured' : 'NOT CONFIGURED'}
-      Environment: ${process.env.NODE_ENV}
-      URL: ${window.location.href}
-      Cache Cleared: Yes
-    `);
-    
-    console.log('🔍 Debug Info:', {
-      supabaseUrl: supabaseUrl ? 'Configured' : 'NOT CONFIGURED',
-      supabaseKey: supabaseKey ? 'Configured' : 'NOT CONFIGURED',
-      environment: process.env.NODE_ENV,
-      url: window.location.href,
-      cacheCleared: true
-    });
+    // V2.0: Simplified initialization
+    console.log('V2.0: Login page initialized');
   }, []);
 
   // Check if user is already authenticated
   useEffect(() => {
-    if (!mounted || loading) return;
-    
-    // Add timeout to prevent infinite loading
-    const authTimeout = setTimeout(() => {
-      console.log('🔍 Authentication check timeout, forcing loading to false');
-      // setLoading(false); // This line was removed from the original file, so it's removed here.
-    }, 20000); // 20 second timeout (increased from 10s)
+    if (loading) return;
     
     if (user) {
-      console.log('User already authenticated:', user.role);
+      console.log('V2.0: User already authenticated:', user.role);
       setRedirecting(true);
       
       // Check for redirect parameter first
-      const urlParams = new URLSearchParams(window.location.search);
-      const redirectPath = urlParams.get('redirect');
+      const redirectTo = searchParams.get('redirect');
+      let targetPath = '/dashboard';
       
-      let targetPath: string;
-      if (redirectPath && redirectPath.startsWith('/dashboard-admin')) {
-        // If redirecting to admin page, verify user is admin
-        if (user.role?.toLowerCase() === 'admin') {
-          targetPath = redirectPath;
-        } else {
-          targetPath = '/dashboard';
-        }
-      } else if (redirectPath && redirectPath.startsWith('/dashboard')) {
-        // If redirecting to regular dashboard
-        targetPath = redirectPath;
+      if (redirectTo) {
+        targetPath = redirectTo;
       } else {
         // Default redirect based on user role
         targetPath = user.role?.toLowerCase() === 'admin' ? '/dashboard-admin' : '/dashboard';
       }
-      
 
-      console.log('🔍 Redirecting to:', targetPath);
-
-      // Try router.replace first, fallback to window.location
-      try {
-        router.replace(targetPath);
-        // Add a fallback redirect in case router.replace doesn't work
-        setTimeout(() => {
-          if (window.location.pathname === '/login') {
-            console.log('🔍 Router redirect failed, using window.location fallback');
-            window.location.href = targetPath;
-          }
-        }, 3000); // Increased from 2s to 3s
-              } catch (redirectError) {
-          console.error('🔍 Router redirect error:', redirectError);
-          // Fallback to window.location
-          window.location.href = targetPath;
-        }
+      console.log('V2.0: Redirecting to:', targetPath);
+      router.replace(targetPath);
     }
-    
-    return () => clearTimeout(authTimeout);
-  }, [mounted, loading, user, router]);
-
-  // Timeout mechanism to prevent getting stuck
-  useEffect(() => {
-    if (redirecting) {
-      const timeout = setTimeout(() => {
-        if (window.location.pathname === '/login') {
-          console.log('🔍 Redirect timeout, forcing reload');
-          window.location.reload();
-        }
-      }, 15000); // 15 second timeout (increased from 10s)
-
-      return () => clearTimeout(timeout);
-    }
-  }, [redirecting]);
-
-
+  }, [loading, user, router, searchParams]);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    console.log('🔍 Login attempt started');
-    
-
     
     if (!email || !password) {
       setError("Vul alle velden in");
       return;
     }
-    
+
     setIsLoading(true);
     setError("");
     
     try {
-      console.log('🔍 Calling signIn...');
       const result = await signIn(email, password);
 
-      console.log('🔍 SignIn result:', result);
-
       if (!result.success) {
-        console.error('Sign in error:', result.error);
+        console.error('V2.0: Sign in error:', result.error);
         setError(result.error || "Ongeldige inloggegevens");
         setIsLoading(false);
         return;
       }
 
-      console.log('🔍 Login successful, redirecting...');
+      console.log('V2.0: Login successful, redirecting...');
       setRedirecting(true);
       
-      // Force redirect after a short delay to ensure user state is updated
-      setTimeout(() => {
-        if (window.location.pathname === '/login') {
-          console.log('🔍 Force redirect after successful login');
-          const targetPath = user?.role?.toLowerCase() === 'admin' ? '/dashboard-admin' : '/dashboard';
-          window.location.href = targetPath;
-        }
-      }, 2000);
-      
     } catch (error: any) {
-      console.error('🔍 Login error:', error);
+      console.error('V2.0: Login error:', error);
       setError(error.message || "Er is een fout opgetreden bij het inloggen");
       setIsLoading(false);
     }
@@ -190,22 +86,20 @@ export default function Login() {
     e.preventDefault();
     
     if (!forgotPasswordEmail) {
-      setResetMessage("Vul je e-mailadres in");
+      setResetMessage("Vul een e-mailadres in");
       return;
     }
-    
+
     setIsSendingReset(true);
     setResetMessage("");
-    
+
     try {
       const response = await fetch('/api/auth/forgot-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          email: forgotPasswordEmail
-        })
+        body: JSON.stringify({ email: forgotPasswordEmail }),
       });
 
       const data = await response.json();
@@ -225,7 +119,7 @@ export default function Login() {
       }, 3000);
 
     } catch (error) {
-      console.error('Forgot password error:', error);
+      console.error('V2.0: Forgot password error:', error);
       setResetMessage("Er is een fout opgetreden. Probeer het opnieuw.");
     } finally {
       setIsSendingReset(false);
@@ -233,7 +127,7 @@ export default function Login() {
   }
 
   // Show loading state while checking authentication
-  if (!mounted || loading) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center relative px-4 py-6" style={{ backgroundColor: '#181F17' }}>
         <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
@@ -248,11 +142,6 @@ export default function Login() {
     );
   }
 
-  // Handle manual reload
-  const handleManualReload = () => {
-    window.location.reload();
-  };
-
   // Show redirecting state
   if (redirecting) {
     return (
@@ -264,7 +153,7 @@ export default function Login() {
             <p className="text-[#B6C948] text-lg">Doorsturen naar dashboard...</p>
             <p className="text-[#8BAE5A] text-sm mt-2">Je wordt automatisch doorgestuurd</p>
             <button
-              onClick={handleManualReload}
+              onClick={() => window.location.reload()}
               className="mt-4 text-[#8BAE5A] hover:text-[#B6C948] underline text-sm"
             >
               Handmatig herladen als het te lang duurt
@@ -279,8 +168,6 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center relative px-4 py-6" style={{ backgroundColor: '#181F17' }}>
       <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
       
-
-      
       <div className="w-full max-w-md p-6 sm:p-8 rounded-3xl shadow-2xl bg-[#232D1A]/95 border border-[#3A4D23] backdrop-blur-lg relative z-10">
         <div className="flex justify-center mb-4">
           <img 
@@ -289,14 +176,8 @@ export default function Login() {
             className="h-16 sm:h-20 md:h-24 w-auto"
           />
         </div>
+
         <p className="text-[#B6C948] text-center mb-6 sm:mb-8 text-base sm:text-lg font-figtree">Log in op je dashboard</p>
-        
-        {/* Debug Info */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="mb-4 p-3 bg-[#181F17] rounded-lg border border-[#B6C948]">
-            <p className="text-[#B6C948] text-xs font-mono whitespace-pre-wrap">{debugInfo}</p>
-          </div>
-        )}
         
         <form onSubmit={handleLogin} className="flex flex-col gap-6">
           <div className="relative">
@@ -363,27 +244,12 @@ export default function Login() {
             </a>
           </p>
           
-          {/* Cache clearing button */}
-          <div className="mt-4 pt-4 border-t border-[#3A4D23]">
-            <button
-              onClick={() => {
-                // Clear all cache and reload
-                localStorage.clear();
-                sessionStorage.clear();
-                window.location.reload();
-              }}
-              className="text-[#8BAE5A] hover:text-[#B6C948] text-xs underline"
-            >
-              Cache wissen en herladen
-            </button>
-          </div>
-          
-          {/* Version badge - V1.2 */}
+          {/* Version badge - V2.0 */}
           <div className="mt-4 pt-2 border-t border-[#3A4D23]/30">
             <div className="flex items-center justify-center gap-2">
               <span className="text-[#B6C948] text-xs">Platform</span>
               <span className="px-2 py-1 bg-[#B6C948]/20 text-[#B6C948] text-xs font-semibold rounded-full border border-[#B6C948]/30">
-                V1.2
+                V2.0
               </span>
               <span className="text-[#B6C948] text-xs">Stable</span>
             </div>
@@ -417,7 +283,7 @@ export default function Login() {
                   {resetMessage}
                 </div>
               )}
-              
+                
               <div>
                 <label className="block text-[#B6C948] font-medium mb-2">
                   E-mailadres
