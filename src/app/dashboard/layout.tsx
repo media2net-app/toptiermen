@@ -131,6 +131,14 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: { collapse
                       : 'text-white hover:text-[#8BAE5A] hover:bg-[#3A4D23]/50'
                   } ${collapsed ? 'justify-center px-2' : ''}`}
                   onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (!collapsed) {
+                      setIsOpen(v => !v);
+                    }
+                  }}
+                  onTouchEnd={(e) => {
+                    e.preventDefault();
                     e.stopPropagation();
                     if (!collapsed) {
                       setIsOpen(v => !v);
@@ -163,10 +171,22 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: { collapse
                           key={sub.label}
                           href={sub.href}
                           onClick={(e) => {
+                            e.preventDefault();
                             e.stopPropagation();
                             if (handleLinkClick) {
                               handleLinkClick();
                             }
+                            // Navigate programmatically
+                            window.location.href = sub.href;
+                          }}
+                          onTouchEnd={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (handleLinkClick) {
+                              handleLinkClick();
+                            }
+                            // Navigate programmatically
+                            window.location.href = sub.href;
                           }}
                           className={`block px-4 py-2 rounded-lg text-sm transition-all duration-150 ${
                             isSubActive 
@@ -192,10 +212,22 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: { collapse
               key={item.label}
               href={item.href}
               onClick={(e) => {
+                e.preventDefault();
                 e.stopPropagation();
                 if (handleLinkClick) {
                   handleLinkClick();
                 }
+                // Navigate programmatically
+                window.location.href = item.href;
+              }}
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (handleLinkClick) {
+                  handleLinkClick();
+                }
+                // Navigate programmatically
+                window.location.href = item.href;
               }}
               className={`grid grid-cols-[auto_1fr] items-center gap-4 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide transition-all duration-150 font-figtree ${
                 isActive 
@@ -606,6 +638,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
                   stiffness: 200,
                   duration: 0.3
                 }}
+                onClick={(e) => e.stopPropagation()}
               >
                 {/* Header */}
                 <div className="p-4 border-b border-[#3A4D23] flex-shrink-0 bg-[#232D1A] z-10">
