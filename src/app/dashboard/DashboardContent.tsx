@@ -24,6 +24,8 @@ import DebugPanel from '@/components/DebugPanel';
 import ForcedOnboardingModal from '@/components/ForcedOnboardingModal';
 import TestUserFeedback from '@/components/TestUserFeedback';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
+import V2MonitoringDashboard from '@/components/V2MonitoringDashboard';
+import V2PerformanceAlerts from '@/components/V2PerformanceAlerts';
 
 // V2.0: Dashboard menu configuration
 const menu = [
@@ -595,6 +597,12 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
         />
 
         <PWAInstallPrompt />
+        
+        {/* V2.0: Monitoring Dashboard */}
+        <V2MonitoringDashboard />
+        
+        {/* V2.0: Performance Alerts */}
+        <V2PerformanceAlerts />
       </div>
     </>
   );

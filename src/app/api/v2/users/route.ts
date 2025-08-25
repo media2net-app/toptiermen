@@ -56,14 +56,19 @@ export const GET = withApiHandler(async (request: NextRequest) => {
     query = query.range(offset, offset + limit - 1);
 
     // Execute query
-    const { data, error, count } = await safeDbOperation(
-      () => query,
+    const { data: result, error: dbError } = await safeDbOperation(
+      async () => {
+        const { data, error, count } = await query;
+        return { data, error, count };
+      },
       'Failed to fetch users'
     );
 
-    if (error) {
-      return createErrorResponse(error, 500);
+    if (dbError || result?.error) {
+      return createErrorResponse(dbError || result?.error, 500);
     }
+
+    const { data, count } = result;
 
     // Add cache headers for public data
     const response = createSuccessResponse({
