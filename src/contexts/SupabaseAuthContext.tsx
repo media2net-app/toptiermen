@@ -78,10 +78,10 @@ const normalizeRole = (role?: string) => {
   return role.toUpperCase();
 };
 
-// V1.1 OPTIMIZATIONS: Reduced timeouts and intervals
-const SESSION_CHECK_INTERVAL = 15 * 60 * 1000; // 15 minutes (was 5 minutes)
-const SESSION_WARNING_TIME = 10 * 60 * 1000; // 10 minutes before expiry
-const AUTH_TIMEOUT = 5000; // 5 seconds (was 15 seconds)
+// V1.2 OPTIMIZATIONS: Extended timeouts and improved session management
+const SESSION_CHECK_INTERVAL = 60 * 60 * 1000; // 60 minutes (was 15 minutes)
+const SESSION_WARNING_TIME = 30 * 60 * 1000; // 30 minutes before expiry (was 10 minutes)
+const AUTH_TIMEOUT = 15000; // 15 seconds (was 5 seconds)
 const MAX_RETRY_ATTEMPTS = 3;
 const RETRY_DELAY = 1000; // 1 second base delay
 
@@ -287,9 +287,9 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       try {
         dispatch({ type: 'SET_LOADING', payload: true });
         
-        // V1.1: Reduced timeout from 15s to 5s
+        // V1.2: Extended timeout from 5s to 15s for better reliability
         const timeoutId = setTimeout(() => {
-          console.warn('⚠️ Auth initialization timeout (5s), forcing loading to false');
+          console.warn('⚠️ Auth initialization timeout (15s), forcing loading to false');
           dispatch({ type: 'SET_LOADING', payload: false });
           dispatch({ type: 'SET_INITIALIZED', payload: true });
         }, AUTH_TIMEOUT);
