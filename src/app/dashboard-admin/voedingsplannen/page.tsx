@@ -65,6 +65,7 @@ interface NutritionPlan {
 
 export default function AdminVoedingsplannenPage() {
   const [activeTab, setActiveTab] = useState('voeding');
+  const [mealsFilter, setMealsFilter] = useState('alle');
   const [showPlanBuilder, setShowPlanBuilder] = useState(false);
   const [showFoodItemModal, setShowFoodItemModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<NutritionPlan | null>(null);
@@ -1092,8 +1093,8 @@ export default function AdminVoedingsplannenPage() {
 
   const filteredMeals = meals.filter(meal => {
     const matchesSearch = meal.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesPlanType = activeTab === 'maaltijden' || 
-                           (activeTab === 'Cheat Day' ? meal.is_cheat_day : meal.plan_type === activeTab);
+    const matchesPlanType = mealsFilter === 'alle' || 
+                           (mealsFilter === 'Cheat Day' ? meal.is_cheat_day : meal.plan_type === mealsFilter);
     return matchesSearch && matchesPlanType;
   });
 
@@ -1149,7 +1150,12 @@ export default function AdminVoedingsplannenPage() {
           {tabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => {
+                setActiveTab(tab.id);
+                if (tab.id !== 'maaltijden') {
+                  setMealsFilter('alle');
+                }
+              }}
               className={`flex-shrink-0 px-4 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center gap-2 whitespace-nowrap ${
                 activeTab === tab.id
                   ? 'bg-[#8BAE5A] text-[#181F17]'
@@ -1446,9 +1452,9 @@ export default function AdminVoedingsplannenPage() {
                 {['alle', 'Carnivoor / Animal Based', 'Voedingsplan op Maat', 'Cheat Day'].map((planType) => (
                   <button
                     key={planType}
-                    onClick={() => setActiveTab(planType === 'alle' ? 'maaltijden' : planType)}
+                    onClick={() => setMealsFilter(planType)}
                     className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
-                      activeTab === (planType === 'alle' ? 'maaltijden' : planType)
+                      mealsFilter === planType
                         ? planType === 'Cheat Day' 
                           ? 'bg-[#FF6B6B] text-white'
                           : 'bg-[#8BAE5A] text-[#181F17]'
