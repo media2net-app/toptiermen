@@ -75,7 +75,7 @@ export default function Login() {
     const authTimeout = setTimeout(() => {
       console.log('🔍 Authentication check timeout, forcing loading to false');
       // setLoading(false); // This line was removed from the original file, so it's removed here.
-    }, 10000); // 10 second timeout
+    }, 20000); // 20 second timeout (increased from 10s)
     
     if (user) {
       console.log('User already authenticated:', user.role);
@@ -113,7 +113,7 @@ export default function Login() {
             console.log('🔍 Router redirect failed, using window.location fallback');
             window.location.href = targetPath;
           }
-        }, 2000);
+        }, 3000); // Increased from 2s to 3s
               } catch (redirectError) {
           console.error('🔍 Router redirect error:', redirectError);
           // Fallback to window.location
@@ -132,7 +132,7 @@ export default function Login() {
           console.log('🔍 Redirect timeout, forcing reload');
           window.location.reload();
         }
-      }, 10000); // 10 second timeout
+      }, 15000); // 15 second timeout (increased from 10s)
 
       return () => clearTimeout(timeout);
     }
@@ -170,7 +170,14 @@ export default function Login() {
       console.log('🔍 Login successful, redirecting...');
       setRedirecting(true);
       
-      // The redirect will be handled by the useEffect above when user state updates
+      // Force redirect after a short delay to ensure user state is updated
+      setTimeout(() => {
+        if (window.location.pathname === '/login') {
+          console.log('🔍 Force redirect after successful login');
+          const targetPath = user?.role?.toLowerCase() === 'admin' ? '/dashboard-admin' : '/dashboard';
+          window.location.href = targetPath;
+        }
+      }, 2000);
       
     } catch (error: any) {
       console.error('🔍 Login error:', error);

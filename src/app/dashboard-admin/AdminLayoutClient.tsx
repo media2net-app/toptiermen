@@ -36,6 +36,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { SwipeIndicator } from '@/components/ui';
 import SessionMonitor from '@/components/SessionMonitor';
+import AuthDebugPanel from '@/components/AuthDebugPanel';
 
 // Type definitions for menu items
 interface MenuItem {
@@ -620,6 +621,9 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
       
       {/* Session Monitor for Admin */}
       <SessionMonitor isAdmin={true} />
+      
+      {/* Auth Debug Panel - Only visible in development or when debug is enabled */}
+      <AuthDebugPanel isVisible={process.env.NODE_ENV === 'development' || showDebug} />
     </div>
   );
 } 
