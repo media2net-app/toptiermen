@@ -14,7 +14,7 @@ import {
   cacheHeaders,
   noCacheHeaders
 } from '@/lib/v2-api-utils';
-import { getSupabaseClient } from '@/lib/supabase/client';
+
 
 // V2.0: Dashboard API Route with enhanced monitoring and error handling
 export const GET = withApiHandler(async (request: NextRequest) => {
@@ -36,8 +36,8 @@ export const GET = withApiHandler(async (request: NextRequest) => {
 
   try {
     // V2.0: Get dashboard data with error recovery
-    const dashboardData = await safeDbOperation(async () => {
-      const supabase = getSupabaseClient();
+    const { data: dashboardData, error: dbError } = await safeDbOperation(async () => {
+      const { supabase } = auth;
       
       // V2.0: Parallel data fetching for better performance
       const [
@@ -85,6 +85,10 @@ export const GET = withApiHandler(async (request: NextRequest) => {
         timestamp: new Date().toISOString()
       };
     }, 'Failed to fetch dashboard data');
+
+    if (dbError) {
+      return createErrorResponse(dbError, 500);
+    }
 
     // V2.0: Success response with cache headers
     const response = createSuccessResponse({

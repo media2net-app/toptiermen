@@ -1,0 +1,83 @@
+{
+  "timestamp": "2025-08-25T19:51:57.417Z",
+  "config": {
+    "successCriteria": {
+      "apiResponseTime": 200,
+      "errorRate": 2,
+      "uptime": 99.9,
+      "securityScore": 95,
+      "monitoringScore": 90
+    },
+    "validationChecks": [
+      "api-performance",
+      "database-security",
+      "authentication",
+      "monitoring-systems",
+      "error-handling",
+      "user-experience"
+    ]
+  },
+  "status": {
+    "checks": {
+      "api-performance": {
+        "score": 35.65625,
+        "details": {
+          "avgResponseTime": 114.75,
+          "errorRate": 50,
+          "performanceScore": 71.3125,
+          "errorScore": 0
+        },
+        "passed": false
+      },
+      "database-security": {
+        "score": 100,
+        "details": {
+          "passedChecks": 4,
+          "totalChecks": 4
+        },
+        "passed": true
+      },
+      "authentication": {
+        "score": 100,
+        "details": {
+          "passedChecks": 4,
+          "totalChecks": 4
+        },
+        "passed": true
+      },
+      "monitoring-systems": {
+        "score": 100,
+        "details": {
+          "passedChecks": 4,
+          "totalChecks": 4
+        },
+        "passed": true
+      },
+      "error-handling": {
+        "score": 100,
+        "details": {
+          "passedChecks": 4,
+          "totalChecks": 4
+        },
+        "passed": true
+      },
+      "user-experience": {
+        "score": 100,
+        "details": {
+          "passedChecks": 4,
+          "totalChecks": 4
+        },
+        "passed": true
+      }
+    },
+    "overall": {
+      "success": false,
+      "score": 89.27604166666667,
+      "message": "V2.0 Final deployment validation failed"
+    },
+    "deployment": {
+      "status": "failed",
+      "timestamp": "2025-08-25T19:51:57.415Z"
+    }
+  }
+}
