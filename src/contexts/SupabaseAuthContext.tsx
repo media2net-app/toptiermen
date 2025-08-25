@@ -4,67 +4,26 @@ import { createContext, useContext, useEffect, useReducer, useCallback } from 'r
 import { createClient } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
 
-// Create Supabase client with better error handling
+// V2.0: Simplified Supabase client with proper error handling
 const getSupabaseClient = () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   
-  // Check if environment variables are properly configured
-  if (!supabaseUrl || supabaseUrl === 'https://placeholder.supabase.co') {
-    console.error('❌ NEXT_PUBLIC_SUPABASE_URL is not configured properly');
-    console.error('Please create a .env.local file with your Supabase credentials');
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error('❌ V2.0: Missing Supabase environment variables');
+    throw new Error('Supabase configuration is missing');
   }
-
-  if (!supabaseAnonKey || supabaseAnonKey === 'placeholder-key') {
-    console.error('❌ NEXT_PUBLIC_SUPABASE_ANON_KEY is not configured properly');
-    console.error('Please create a .env.local file with your Supabase credentials');
-  }
-
-  // Use fallback values for development, but warn the user
-  const finalSupabaseUrl = supabaseUrl || 'https://placeholder.supabase.co';
-  const finalSupabaseAnonKey = supabaseAnonKey || 'placeholder-key';
   
-  return createClient(finalSupabaseUrl, finalSupabaseAnonKey, {
+  return createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: true,
-      storageKey: 'toptiermen-auth',
-      storage: {
-        getItem: (key: string) => {
-          if (typeof window !== 'undefined') {
-            try {
-              return localStorage.getItem(key);
-            } catch (error) {
-              console.error('Error reading from localStorage:', error);
-              return null;
-            }
-          }
-          return null;
-        },
-        setItem: (key: string, value: string) => {
-          if (typeof window !== 'undefined') {
-            try {
-              localStorage.setItem(key, value);
-            } catch (error) {
-              console.error('Error writing to localStorage:', error);
-            }
-          }
-        },
-        removeItem: (key: string) => {
-          if (typeof window !== 'undefined') {
-            try {
-              localStorage.removeItem(key);
-            } catch (error) {
-              console.error('Error removing from localStorage:', error);
-            }
-          }
-        }
-      }
+      storageKey: 'toptiermen-v2-auth'
     },
     global: {
       headers: {
-        'X-Client-Info': 'toptiermen-admin'
+        'X-Client-Info': 'toptiermen-v2'
       }
     }
   });
@@ -72,18 +31,20 @@ const getSupabaseClient = () => {
 
 const supabase = getSupabaseClient();
 
+// V2.0: Unified session management constants
+const SESSION_CONFIG = {
+  CHECK_INTERVAL: 5 * 60 * 1000,        // 5 minutes (was 60)
+  WARNING_TIME: 2 * 60 * 1000,          // 2 minutes before expiry (was 30)
+  AUTH_TIMEOUT: 5000,                   // 5 seconds (was 15)
+  MAX_RETRIES: 2,                       // Reduced retries (was 3)
+  RETRY_DELAY: 1000                     // 1 second base delay
+};
+
 // Helper function to normalize role
 const normalizeRole = (role?: string) => {
   if (!role) return 'USER';
   return role.toUpperCase();
 };
-
-// V1.2 OPTIMIZATIONS: Extended timeouts and improved session management
-const SESSION_CHECK_INTERVAL = 60 * 60 * 1000; // 60 minutes (was 15 minutes)
-const SESSION_WARNING_TIME = 30 * 60 * 1000; // 30 minutes before expiry (was 10 minutes)
-const AUTH_TIMEOUT = 15000; // 15 seconds (was 5 seconds)
-const MAX_RETRY_ATTEMPTS = 3;
-const RETRY_DELAY = 1000; // 1 second base delay
 
 // Types
 interface User {
@@ -110,13 +71,13 @@ type AuthAction =
   | { type: 'RESET_RETRY' }
   | { type: 'RESET_STATE' };
 
-// V1.1: useReducer for better state management
+// V2.0: Simplified reducer
 const authReducer = (state: AuthState, action: AuthAction): AuthState => {
   switch (action.type) {
     case 'SET_LOADING':
       return { ...state, loading: action.payload };
     case 'SET_USER':
-      return { ...state, user: action.payload, error: null };
+      return { ...state, user: action.payload, error: null, loading: false };
     case 'SET_ERROR':
       return { ...state, error: action.payload, loading: false };
     case 'SET_INITIALIZED':
@@ -153,10 +114,10 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// V1.1: Retry mechanism with exponential backoff
+// V2.0: Simplified retry mechanism
 const retryWithBackoff = async <T,>(
   operation: () => Promise<T>,
-  maxAttempts: number = MAX_RETRY_ATTEMPTS
+  maxAttempts: number = SESSION_CONFIG.MAX_RETRIES
 ): Promise<T> => {
   let lastError: Error;
   
@@ -170,9 +131,8 @@ const retryWithBackoff = async <T,>(
         throw lastError;
       }
       
-      // Exponential backoff: 1s, 2s, 4s
-      const delay = RETRY_DELAY * Math.pow(2, attempt - 1);
-      console.log(`Auth operation failed, retrying in ${delay}ms (attempt ${attempt}/${maxAttempts})`);
+      const delay = SESSION_CONFIG.RETRY_DELAY * Math.pow(2, attempt - 1);
+      console.log(`V2.0: Auth operation failed, retrying in ${delay}ms (attempt ${attempt}/${maxAttempts})`);
       await new Promise(resolve => setTimeout(resolve, delay));
     }
   }
@@ -191,12 +151,12 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
   
   const router = useRouter();
 
-  // V1.1: Memoized functions to prevent unnecessary re-renders
+  // V2.0: Simplified error clearing
   const clearError = useCallback(() => {
     dispatch({ type: 'SET_ERROR', payload: null });
   }, []);
 
-  // V1.1: Optimized session refresh with retry mechanism
+  // V2.0: Simplified session refresh
   const refreshSession = useCallback(async (): Promise<boolean> => {
     try {
       const result = await retryWithBackoff(async () => {
@@ -206,30 +166,30 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       });
 
       if (result.session) {
-        console.log('✅ Session refreshed successfully');
+        console.log('✅ V2.0: Session refreshed successfully');
         dispatch({ type: 'RESET_RETRY' });
         return true;
       }
       return false;
     } catch (error) {
-      console.error('❌ Session refresh failed after retries:', error);
+      console.error('❌ V2.0: Session refresh failed:', error);
       dispatch({ type: 'SET_ERROR', payload: 'Session refresh failed' });
       return false;
     }
   }, []);
 
-  // V1.1: Optimized session health check
+  // V2.0: Simplified session health check
   const checkSessionHealth = useCallback(async () => {
     try {
       const { data: { session }, error } = await supabase.auth.getSession();
       
       if (error) {
-        console.error('Session check error:', error);
+        console.error('V2.0: Session check error:', error);
         return;
       }
 
       if (!session) {
-        console.log('No active session found');
+        console.log('V2.0: No active session found');
         return;
       }
 
@@ -239,20 +199,20 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         const now = Math.floor(Date.now() / 1000);
         const timeUntilExpiry = expiresAt - now;
         
-        if (timeUntilExpiry < SESSION_WARNING_TIME && timeUntilExpiry > 0) {
-          console.log('⚠️ Session expiring soon, attempting refresh...');
+        if (timeUntilExpiry < SESSION_CONFIG.WARNING_TIME && timeUntilExpiry > 0) {
+          console.log('⚠️ V2.0: Session expiring soon, attempting refresh...');
           const refreshed = await refreshSession();
           if (!refreshed) {
-            console.warn('Failed to refresh session, user may need to re-authenticate');
+            console.warn('V2.0: Failed to refresh session, user may need to re-authenticate');
           }
         }
       }
     } catch (error) {
-      console.error('Session health check failed:', error);
+      console.error('V2.0: Session health check failed:', error);
     }
   }, [refreshSession]);
 
-  // V1.1: Optimized user profile fetching with retry
+  // V2.0: Simplified user profile fetching
   const fetchUserProfile = useCallback(async (userId: string): Promise<User | null> => {
     try {
       const result = await retryWithBackoff(async () => {
@@ -265,7 +225,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         if (error) throw error;
         return profile;
       });
-
+      
       if (result) {
         return {
           id: result.id,
@@ -276,37 +236,36 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       }
       return null;
     } catch (error) {
-      console.error('Error fetching user profile:', error);
+      console.error('V2.0: Error fetching user profile:', error);
       return null;
     }
   }, []);
 
+  // V2.0: Simplified initial session loading
   useEffect(() => {
-    // V1.1: Optimized initial session loading with reduced timeout
     const getInitialSession = async () => {
       try {
         dispatch({ type: 'SET_LOADING', payload: true });
         
-        // V1.2: Extended timeout from 5s to 15s for better reliability
+        // V2.0: Reduced timeout for faster loading
         const timeoutId = setTimeout(() => {
-          console.warn('⚠️ Auth initialization timeout (15s), forcing loading to false');
+          console.warn('⚠️ V2.0: Auth initialization timeout, forcing loading to false');
           dispatch({ type: 'SET_LOADING', payload: false });
           dispatch({ type: 'SET_INITIALIZED', payload: true });
-        }, AUTH_TIMEOUT);
+        }, SESSION_CONFIG.AUTH_TIMEOUT);
 
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
-          console.error('Error getting session:', error);
+          console.error('V2.0: Error getting session:', error);
           dispatch({ type: 'SET_ERROR', payload: 'Failed to get session' });
         } else if (session?.user) {
-          // V1.1: Use optimized profile fetching
           const profile = await fetchUserProfile(session.user.id);
           
           if (profile) {
             dispatch({ type: 'SET_USER', payload: profile });
           } else {
-            // Fallback: set minimal user info from auth session
+            // Fallback to auth user if profile not readable
             dispatch({ type: 'SET_USER', payload: {
               id: session.user.id,
               email: session.user.email || '',
@@ -319,7 +278,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         clearTimeout(timeoutId);
         dispatch({ type: 'SET_INITIALIZED', payload: true });
       } catch (error) {
-        console.error('Error in getInitialSession:', error);
+        console.error('V2.0: Error in getInitialSession:', error);
         dispatch({ type: 'SET_ERROR', payload: 'Failed to initialize authentication' });
       } finally {
         dispatch({ type: 'SET_LOADING', payload: false });
@@ -328,23 +287,22 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
 
     getInitialSession();
 
-    // V1.1: Increased session check interval from 5min to 15min
-    const interval = setInterval(checkSessionHealth, SESSION_CHECK_INTERVAL);
-    console.log(`🔄 Session health check interval set to ${SESSION_CHECK_INTERVAL / 60000} minutes`);
+    // V2.0: Reduced session check interval
+    const interval = setInterval(checkSessionHealth, SESSION_CONFIG.CHECK_INTERVAL);
+    console.log(`🔄 V2.0: Session health check interval set to ${SESSION_CONFIG.CHECK_INTERVAL / 60000} minutes`);
 
-    // V1.1: Optimized auth state change listener
+    // V2.0: Simplified auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('🔄 Auth state changed:', event, session?.user?.email);
+        console.log('🔄 V2.0: Auth state changed:', event, session?.user?.email);
         
         if (event === 'SIGNED_IN' && session?.user) {
-          // V1.1: Use optimized profile fetching
           const profile = await fetchUserProfile(session.user.id);
           
           if (profile) {
             dispatch({ type: 'SET_USER', payload: profile });
           } else {
-            // Fallback to auth session user if profile cannot be fetched
+            // Fallback to auth user if profile cannot be fetched
             dispatch({ type: 'SET_USER', payload: {
               id: session.user.id,
               email: session.user.email || '',
@@ -355,7 +313,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         } else if (event === 'SIGNED_OUT') {
           dispatch({ type: 'RESET_STATE' });
         } else if (event === 'TOKEN_REFRESHED') {
-          console.log('✅ Token refreshed successfully');
+          console.log('✅ V2.0: Token refreshed successfully');
         }
         
         dispatch({ type: 'SET_LOADING', payload: false });
@@ -368,7 +326,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     };
   }, [fetchUserProfile, checkSessionHealth]);
 
-  // V1.1: Optimized sign in with retry mechanism
+  // V2.0: Simplified sign in
   const signIn = useCallback(async (email: string, password: string) => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
@@ -384,7 +342,6 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       });
 
       if (result.user) {
-        // V1.1: Use optimized profile fetching
         const profile = await fetchUserProfile(result.user.id);
         
         if (profile) {
@@ -405,7 +362,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       
       return { success: false, error: 'Sign in failed' };
     } catch (error) {
-      console.error('Sign in error:', error);
+      console.error('V2.0: Sign in error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Sign in failed';
       dispatch({ type: 'SET_ERROR', payload: errorMessage });
       return { success: false, error: errorMessage };
@@ -427,7 +384,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       });
 
       if (error) {
-        console.error('Sign up error:', error);
+        console.error('V2.0: Sign up error:', error);
         return { success: false, error: error.message };
       }
 
@@ -445,7 +402,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
           ]);
 
         if (profileError) {
-          console.error('Error creating profile:', profileError);
+          console.error('V2.0: Error creating profile:', profileError);
           // Fallback: still consider sign-up successful with auth user only
           dispatch({ type: 'SET_USER', payload: {
             id: data.user.id,
@@ -466,7 +423,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
 
       return { success: true };
     } catch (error) {
-      console.error('Sign up error:', error);
+      console.error('V2.0: Sign up error:', error);
       return { success: false, error: 'An unexpected error occurred' };
     }
   };
@@ -475,31 +432,29 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     try {
       const { error } = await supabase.auth.signOut();
       if (error) {
-        console.error('Sign out error:', error);
+        console.error('V2.0: Sign out error:', error);
         throw error;
       } else {
         dispatch({ type: 'RESET_STATE' });
-        // Don't automatically redirect - let components handle their own redirect logic
-        console.log('User signed out successfully');
+        console.log('V2.0: User signed out successfully');
       }
     } catch (error) {
-      console.error('Sign out error:', error);
+      console.error('V2.0: Sign out error:', error);
       throw error;
     }
   };
 
-  // Utility function for consistent logout handling across the app
+  // V2.0: Simplified logout and redirect
   const logoutAndRedirect = async (redirectUrl: string = '/login') => {
     try {
-      console.log('Logout and redirect initiated...');
+      console.log('V2.0: Logout and redirect initiated...');
       await signOut();
       
-      // Use window.location.href for consistent redirect behavior
-      console.log(`Redirecting to: ${redirectUrl}`);
+      console.log(`V2.0: Redirecting to: ${redirectUrl}`);
       window.location.href = redirectUrl;
       
     } catch (error) {
-      console.error('Error during logout and redirect:', error);
+      console.error('V2.0: Error during logout and redirect:', error);
       
       // Show user feedback
       alert('Er is een fout opgetreden bij het uitloggen. Probeer het opnieuw.');
@@ -521,15 +476,15 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         .eq('id', state.user.id);
 
       if (error) {
-        console.error('Update user error:', error);
+        console.error('V2.0: Update user error:', error);
       } else {
         dispatch({ type: 'SET_USER', payload: { ...state.user, ...updates } });
       }
     } catch (error) {
-      console.error('Update user error:', error);
+      console.error('V2.0: Update user error:', error);
     }
   };
-
+  
   const value = {
     user: state.user,
     loading: state.loading,
