@@ -15,6 +15,12 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
   const [debugInfo, setDebugInfo] = useState("");
+  
+  // Forgot password states
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
+  const [isSendingReset, setIsSendingReset] = useState(false);
+  const [resetMessage, setResetMessage] = useState("");
 
   useEffect(() => { 
     setMounted(true); 
@@ -173,6 +179,52 @@ export default function Login() {
     }
   }
 
+  async function handleForgotPassword(e: React.FormEvent) {
+    e.preventDefault();
+    
+    if (!forgotPasswordEmail) {
+      setResetMessage("Vul je e-mailadres in");
+      return;
+    }
+    
+    setIsSendingReset(true);
+    setResetMessage("");
+    
+    try {
+      const response = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: forgotPasswordEmail
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setResetMessage(data.error || "Fout bij het versturen van reset e-mail");
+        return;
+      }
+
+      setResetMessage("Wachtwoord reset e-mail is verstuurd! Controleer je inbox.");
+      setForgotPasswordEmail("");
+      
+      // Close modal after 3 seconds
+      setTimeout(() => {
+        setShowForgotPassword(false);
+        setResetMessage("");
+      }, 3000);
+
+    } catch (error) {
+      console.error('Forgot password error:', error);
+      setResetMessage("Er is een fout opgetreden. Probeer het opnieuw.");
+    } finally {
+      setIsSendingReset(false);
+    }
+  }
+
   // Show loading state while checking authentication
   if (!mounted || loading) {
     return (
@@ -266,6 +318,15 @@ export default function Login() {
               disabled={isLoading}
             />
           </div>
+          <div className="text-right">
+            <button
+              type="button"
+              onClick={() => setShowForgotPassword(true)}
+              className="text-[#8BAE5A] hover:text-[#B6C948] text-sm underline font-figtree"
+            >
+              Wachtwoord vergeten?
+            </button>
+          </div>
           {error && (
             <div className="text-[#B6C948] text-center text-sm -mt-4 border border-[#B6C948] rounded-lg py-2 px-3 bg-[#181F17] font-figtree">
               {error}
@@ -322,6 +383,80 @@ export default function Login() {
           </div>
         </div>
       </div>
+
+      {/* Forgot Password Modal */}
+      {showForgotPassword && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-[#232D1A] rounded-2xl p-8 max-w-md w-full mx-4 border border-[#3A4D23]">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-[#8BAE5A]/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-[#8BAE5A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">Wachtwoord Vergeten</h3>
+              <p className="text-[#8BAE5A] text-sm">
+                Voer je e-mailadres in en we sturen je een link om je wachtwoord te resetten.
+              </p>
+            </div>
+            
+            <form onSubmit={handleForgotPassword} className="space-y-4 mb-6">
+              {resetMessage && (
+                <div className={`text-center text-sm rounded-lg py-2 px-3 font-figtree ${
+                  resetMessage.includes('verstuurd') 
+                    ? 'text-green-400 border border-green-500/20 bg-green-500/10' 
+                    : 'text-[#B6C948] border border-[#B6C948] bg-[#181F17]'
+                }`}>
+                  {resetMessage}
+                </div>
+              )}
+              
+              <div>
+                <label className="block text-[#B6C948] font-medium mb-2">
+                  E-mailadres
+                </label>
+                <input
+                  type="email"
+                  value={forgotPasswordEmail}
+                  onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                  className="w-full bg-[#181F17] text-white px-3 py-2 rounded-lg border border-[#3A4D23] focus:outline-none focus:border-[#8BAE5A]"
+                  placeholder="Voer je e-mailadres in"
+                  required
+                  disabled={isSendingReset}
+                />
+              </div>
+            </form>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowForgotPassword(false);
+                  setForgotPasswordEmail("");
+                  setResetMessage("");
+                }}
+                disabled={isSendingReset}
+                className="flex-1 px-4 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded-lg font-semibold hover:bg-[#4A5D33] transition-colors disabled:opacity-50"
+              >
+                Annuleren
+              </button>
+              <button
+                onClick={handleForgotPassword}
+                disabled={isSendingReset || !forgotPasswordEmail}
+                className="flex-1 px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg font-semibold hover:bg-[#A6C97B] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSendingReset ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#181F17]"></div>
+                    Versturen...
+                  </div>
+                ) : (
+                  'Reset E-mail Versturen'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 
