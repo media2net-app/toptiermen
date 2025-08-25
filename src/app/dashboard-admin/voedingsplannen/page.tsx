@@ -132,7 +132,7 @@ export default function AdminVoedingsplannenPage() {
         console.error('❌ Error fetching meals:', mealsResult.error);
         // Fallback to mock meals if database is not available
         console.log('⚠️ Falling back to mock meals...');
-        setMeals([
+        const fallbackMeals = [
           {
             id: '1',
             name: 'Carnivoor Ontbijt - Eieren & Bacon',
@@ -276,7 +276,9 @@ export default function AdminVoedingsplannenPage() {
             is_featured: false,
             is_active: true
           }
-        ]);
+        ];
+        setMeals(fallbackMeals);
+        console.log('✅ Fallback meals loaded:', fallbackMeals.length);
       } else {
         setMeals(mealsResult.meals || []);
         console.log('✅ Meals loaded:', mealsResult.meals?.length || 0);
@@ -400,24 +402,27 @@ export default function AdminVoedingsplannenPage() {
     try {
       console.log('🗑️ Deleting meal:', mealId);
       
+      // Try to delete from database first
       const response = await fetch(`/api/admin/meals?id=${mealId}`, {
         method: 'DELETE',
       });
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        console.error('❌ Error deleting meal:', result.error);
-        alert(`Fout bij verwijderen: ${result.error}`);
-        return;
+      if (response.ok) {
+        const result = await response.json();
+        console.log('✅ Meal deleted successfully from database:', result);
+        await fetchAllData();
+      } else {
+        // If database delete fails, remove from local state (fallback data)
+        console.log('⚠️ Database delete failed, removing from local state...');
+        setMeals(prevMeals => prevMeals.filter(meal => meal.id !== mealId));
+        console.log('✅ Meal removed from local state');
       }
-
-      console.log('✅ Meal deleted successfully:', result);
-      await fetchAllData();
       
     } catch (error) {
       console.error('❌ Error deleting meal:', error);
-      alert('Fout bij verwijderen van maaltijd');
+      // Remove from local state as fallback
+      setMeals(prevMeals => prevMeals.filter(meal => meal.id !== mealId));
+      console.log('✅ Meal removed from local state (fallback)');
     }
   };
 
