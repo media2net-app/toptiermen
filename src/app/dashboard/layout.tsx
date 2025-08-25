@@ -13,6 +13,7 @@ import ForcedOnboardingModal from '@/components/ForcedOnboardingModal';
 import TestUserFeedback from '@/components/TestUserFeedback';
 import { useTestUser } from '@/hooks/useTestUser';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
+import PushNotificationPrompt from '@/components/PushNotificationPrompt';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
 import Image from 'next/image';
@@ -678,6 +679,9 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
       {/* PWA Install Prompt */}
       <PWAInstallPrompt />
+      
+      {/* Push Notification Prompt */}
+      <PushNotificationPrompt />
       
       
     </div>
