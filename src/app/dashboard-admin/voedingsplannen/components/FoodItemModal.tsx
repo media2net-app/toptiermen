@@ -1,12 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { XMarkIcon, CheckIcon } from '@heroicons/react/24/outline';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 interface FoodItem {
   id: string;
@@ -92,27 +86,41 @@ export default function FoodItemModal({ isOpen, onClose, foodItem, onSave }: Foo
 
     try {
       if (foodItem) {
-        // Update existing item
-        const { error: updateError } = await supabase
-          .from('nutrition_ingredients')
-          .update({
+        // Update existing item using API
+        const response = await fetch('/api/admin/nutrition-ingredients', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            id: foodItem.id,
             ...formData,
             updated_at: new Date().toISOString()
           })
-          .eq('id', foodItem.id);
+        });
 
-        if (updateError) throw updateError;
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to update food item');
+        }
       } else {
-        // Create new item
-        const { error: insertError } = await supabase
-          .from('nutrition_ingredients')
-          .insert([{
+        // Create new item using API
+        const response = await fetch('/api/admin/nutrition-ingredients', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
             ...formData,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
-          }]);
+          })
+        });
 
-        if (insertError) throw insertError;
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to create food item');
+        }
       }
 
       onSave();

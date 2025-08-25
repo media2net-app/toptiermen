@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { supabase } from '@/lib/supabase';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 export default function AdminLessonDetailPage() {
   const params = useParams();
@@ -106,10 +108,28 @@ export default function AdminLessonDetailPage() {
         <p className="text-[#B6C948] text-lg mb-4">
           {lesson.description}
         </p>
-        <div 
-          className="prose prose-lg prose-invert max-w-none text-[#B6C948] [&_*]:text-[#B6C948] [&>h1]:text-[#FFD700] [&>h2]:text-[#8BAE5A] [&>h3]:text-[#8BAE5A] [&>strong]:text-white [&>ul]:list-disc [&>ol]:list-decimal [&>blockquote]:border-l-4 [&>blockquote]:border-[#FFD700] [&>blockquote]:pl-4 [&>blockquote]:italic"
-          dangerouslySetInnerHTML={{ __html: lesson.content || '' }}
-        />
+        <div className="prose prose-lg prose-invert max-w-none text-[#B6C948]">
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            components={{
+              h1: ({children}) => <h1 className="text-2xl font-bold text-[#FFD700] mb-4 mt-6">{children}</h1>,
+              h2: ({children}) => <h2 className="text-xl font-bold text-[#8BAE5A] mb-3 mt-5">{children}</h2>,
+              h3: ({children}) => <h3 className="text-lg font-semibold text-[#8BAE5A] mb-2 mt-4">{children}</h3>,
+              p: ({children}) => <p className="mb-3 text-[#B6C948] leading-relaxed">{children}</p>,
+              ul: ({children}) => <ul className="list-disc list-inside mb-4 space-y-1 text-[#B6C948]">{children}</ul>,
+              ol: ({children}) => <ol className="list-decimal list-inside mb-4 space-y-1 text-[#B6C948]">{children}</ol>,
+              li: ({children}) => <li className="text-[#B6C948]">{children}</li>,
+              strong: ({children}) => <strong className="font-semibold text-white">{children}</strong>,
+              blockquote: ({children}) => (
+                <blockquote className="border-l-4 border-[#FFD700] pl-4 italic text-[#B6C948] my-4">
+                  {children}
+                </blockquote>
+              ),
+            }}
+          >
+            {lesson.content || ''}
+          </ReactMarkdown>
+        </div>
         
         {/* Werkblad Download */}
         {lesson.worksheet_url && (

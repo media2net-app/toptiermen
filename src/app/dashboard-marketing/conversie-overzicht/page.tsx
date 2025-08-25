@@ -425,7 +425,7 @@ export default function ConversieOverzicht() {
                       return leadCampaign === campaign.id;
                     });
                     
-                    const costPerConversion = campaignLeads.length > 0 ? campaign.spend / campaignLeads.length : 0;
+                    const costPerConversion = campaignLeads.length > 0 && campaign.spend ? campaign.spend / campaignLeads.length : 0;
                     
                     return (
                       <tr key={campaign.id} className="border-b border-gray-800 hover:bg-gray-800/50">
@@ -437,9 +437,9 @@ export default function ConversieOverzicht() {
                         </td>
                         <td className="text-right py-3 px-4 text-gray-300">{parseInt(campaign.impressions).toLocaleString()}</td>
                         <td className="text-right py-3 px-4 text-gray-300">{parseInt(campaign.clicks).toLocaleString()}</td>
-                        <td className="text-right py-3 px-4 text-gray-300">{parseFloat(campaign.ctr).toFixed(2)}%</td>
-                        <td className="text-right py-3 px-4 text-gray-300">€{campaign.cpc.toFixed(3)}</td>
-                        <td className="text-right py-3 px-4 text-gray-300">€{campaign.spend.toFixed(2)}</td>
+                        <td className="text-right py-3 px-4 text-gray-300">{campaign.ctr ? `${(campaign.ctr * 100).toFixed(2)}%` : '0.00%'}</td>
+                        <td className="text-right py-3 px-4 text-gray-300">€{campaign.cpc ? campaign.cpc.toFixed(3) : '0.000'}</td>
+                        <td className="text-right py-3 px-4 text-gray-300">€{campaign.spend ? campaign.spend.toFixed(2) : '0.00'}</td>
                         <td className="text-right py-3 px-4">
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                             {campaignLeads.length}

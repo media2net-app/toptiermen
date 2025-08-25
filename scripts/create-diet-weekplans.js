@@ -252,3 +252,4 @@ function getMealSuggestions(dietName, mealType, focus) {
 createDietWeekplans();
 
 
+

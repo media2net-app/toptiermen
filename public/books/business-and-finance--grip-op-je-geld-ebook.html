@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grip op je geld - Top Tier Men Academy</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background: #f9fafb;
+        }
+        
+        .ebook-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #8BAE5A 0%, #3A4D23 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -0.025em;
+        }
+        
+        .header .subtitle {
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: white;
+            opacity: 1;
+        }
+        
+        .content {
+            padding: 50px;
+        }
+        
+        .toc {
+            background: #f8fafc;
+            border-left: 4px solid #8BAE5A;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 8px;
+        }
+        
+        .toc h2 {
+            color: #8BAE5A;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .toc ol {
+            list-style: none;
+            counter-reset: toc-counter;
+        }
+        
+        .toc li {
+            counter-increment: toc-counter;
+            margin-bottom: 8px;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        .toc li::before {
+            content: counter(toc-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #8BAE5A;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .toc a {
+            color: #374151;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .toc a:hover {
+            color: #8BAE5A;
+        }
+        
+        .chapter {
+            margin: 40px 0;
+        }
+        
+        .chapter h2 {
+            color: #8BAE5A;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 10px;
+        }
+        
+        .chapter h3 {
+            color: #374151;
+            font-size: 1.4rem;
+            margin: 25px 0 15px 0;
+        }
+        
+        .chapter p {
+            margin-bottom: 15px;
+            color: #4b5563;
+        }
+        
+        .chapter ul, .chapter ol {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+        
+        .chapter li {
+            margin-bottom: 8px;
+            color: #4b5563;
+        }
+        
+        .highlight-box {
+            background: #f0f9ff;
+            border-left: 4px solid #0ea5e9;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .highlight-box h4 {
+            color: #0c4a6e;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .action-item {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .action-item h4 {
+            color: #92400e;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .footer {
+            background: #f8fafc;
+            padding: 30px;
+            text-align: center;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .footer p {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                padding: 40px 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .content {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ebook-container">
+        <div class="header">
+            <h1>Grip op je geld</h1>
+            <div class="subtitle">Business and Finance  - Top Tier Men Academy</div>
+        </div>
+        
+        <div class="content">
+            <div class="toc">
+                <h2>Inhoudsopgave</h2>
+                <ol>
+                    <li><a href="#intro">Inleiding</a></li>
+                    <li><a href="#main-content">Hoofdinhoud</a></li>
+                    <li><a href="#practical-tips">Praktische Tips</a></li>
+                    <li><a href="#reflection">Reflectie Vragen</a></li>
+                    <li><a href="#next-steps">Volgende Stappen</a></li>
+                </ol>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="intro">Inleiding</h2>
+                <p>Welkom bij deze les van de Business and Finance  module. In deze les gaan we dieper in op grip op je geld en hoe dit je kan helpen om een Top Tier Man te worden.</p>
+                
+                <div class="highlight-box">
+                    <h4>🎯 Wat je gaat leren</h4>
+                    <ul>
+                        <li>De fundamenten van grip op je geld</li>
+                        <li>Praktische toepassingen in je dagelijks leven</li>
+                        <li>Strategieën voor langdurige implementatie</li>
+                        <li>Hoe dit past in je Top Tier Men reis</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="main-content">Hoofdinhoud</h2>
+                <h2>Budgetteren en Geld Management: De Fundering van Financiële Vrijheid</h2><p>Budgetteren is niet saai - het is je roadmap naar financiële vrijheid. Leer hoe je controle krijgt over je geld en bewuste keuzes maakt.</p><h3>Waarom Budgetteren Zo Belangrijk Is:</h3><ul><li>Geeft je controle over je financiën</li><li>Helpt je doelen te bereiken</li><li>Vermindert financiële stress</li><li>Maakt je bewust van uitgavenpatronen</li><li>Bereidt je voor op onverwachte uitgaven</li></ul><h3>De 50/30/20 Regel:</h3><p>Een eenvoudige maar effectieve budgetmethode:</p><ul><li><strong>50% - Essentiële Uitgaven:</strong> Huur, boodschappen, transport, verzekeringen</li><li><strong>30% - Lifestyle:</strong> Entertainment, uitgaan, hobbies, kleding</li><li><strong>20% - Financiële Doelen:</strong> Sparen, investeren, schulden aflossen</li></ul><h3>Praktische Budgettering:</h3><h4>1. Zero-Based Budget</h4><p>Geef elke euro een doel voordat de maand begint:</p><ol><li>Tel al je inkomsten op</li><li>Plan alle uitgaven</li><li>Zorg dat inkomen - uitgaven = 0</li><li>Track elke uitgave</li><li>Pas aan waar nodig</li></ol><h4>2. Envelope Systeem</h4><p>Voor cash-gebruikers:</p><ul><li>Maak enveloppen voor elke uitgavencategorie</li><li>Stop het budgetteerde bedrag in elke envelop</li><li>Gebruik alleen het geld uit de juiste envelop</li><li>Als een envelop leeg is, wacht tot volgende maand</li></ul><h4>3. Digitale Budget Apps</h4><p>Populaire opties:</p><ul><li>YNAB (You Need A Budget)</li><li>Mint</li><li>Personal Capital</li><li>Excel/Google Sheets</li></ul><h3>Uitgaven Categoriseren:</h3><h4>Vaste Uitgaven (Essentieel):</h4><ul><li>Huur/hypotheek</li><li>Verzekeringen</li><li>Basis boodschappen</li><li>Transport (OV of benzine)</li><li>Basis utilities</li></ul><h4>Variabele Uitgaven (Essentieel):</h4><ul><li>Extra boodschappen</li><li>Kleding (basis)</li><li>Medische kosten</li><li>Onderhoud huis/auto</li></ul><h4>Discretionaire Uitgaven (Lifestyle):</h4><ul><li>Entertainment</li><li>Uit eten</li><li>Hobbies</li><li>Luxe items</li><li>Vakanties</li></ul><h3>Geld Management Strategieën:</h3><h4>1. Emergency Fund</h4><p>Bouw een noodfonds op van 3-6 maanden uitgaven:</p><ul><li>Begin met €1000</li><li>Bouw op naar 3 maanden uitgaven</li><li>Uiteindelijk 6 maanden voor volledige veiligheid</li><li>Houd in een aparte spaarrekening</li></ul><h4>2. Automatiseren</h4><p>Maak geld management automatisch:</p><ul><li>Automatische overboekingen naar spaarrekening</li><li>Automatische betalingen voor vaste lasten</li><li>Automatische investeringen</li><li>Automatische budget tracking</li></ul><h4>3. Cash Flow Management</h4><p>Zorg dat je altijd geld hebt:</p><ul><li>Plan voor onregelmatige inkomsten</li><li>Houd rekening met seizoensuitgaven</li><li>Plan voor grote uitgaven (belastingen, verzekeringen)</li><li>Gebruik sinking funds voor grote aankopen</li></ul><h3>Veelgemaakte Budgettering Fouten:</h3><ul><li>Te complexe systemen</li><li>Niet realistisch zijn</li><li>Geen buffer inbouwen</li><li>Niet regelmatig reviewen</li><li>Geen doelen stellen</li><li>Te streng zijn met jezelf</li></ul><h3>Budgettering Tips:</h3><h4>1. Begin Klein</h4><p>Begin met één categorie en breid uit.</p><h4>2. Wees Realistisch</h4><p>Stel doelen die je kunt halen.</p><h4>3. Review Regelmatig</h4><p>Check je budget wekelijks/maandelijks.</p><h4>4. Vier Successen</h4><p>Beloon jezelf voor het halen van doelen.</p><h4>5. Blijf Flexibel</h4><p>Pas je budget aan wanneer nodig.</p><h3>Tools en Hulpmiddelen:</h3><h4>Gratis Opties:</h4><ul><li>Excel/Google Sheets templates</li><li>Mint (gratis versie)</li><li>Bank apps met categorisering</li><li>Pen en papier</li></ul><h4>Betaalde Opties:</h4><ul><li>YNAB (€12/maand)</li><li>Personal Capital (gratis + premium)</li><li>Quicken</li><li>Custom software</li></ul><h3>Volgende Stappen:</h3><ol><li>Begin met het tracken van je huidige uitgaven</li><li>Maak een basis budget</li><li>Implementeer één nieuwe strategie</li><li>Bouw je emergency fund op</li><li>Stel financiële doelen</li></ol><p><strong>Onthoud:</strong> Budgetteren is een vaardigheid die je ontwikkelt. Begin vandaag en wees geduldig met jezelf.</p>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="practical-tips">Praktische Tips</h2>
+                <div class="action-item">
+                    <h4>💪 Direct Toepasbaar</h4>
+                    <ul>
+                        <li>Begin vandaag nog met kleine stappen</li>
+                        <li>Houd je voortgang bij in een dagboek</li>
+                        <li>Zoek een accountability partner</li>
+                        <li>Vier je kleine overwinningen</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="reflection">Reflectie Vragen</h2>
+                <p>Neem de tijd om over deze vragen na te denken:</p>
+                <ul>
+                    <li>Hoe kan je grip op je geld implementeren in je huidige situatie?</li>
+                    <li>Welke uitdagingen verwacht je en hoe ga je ze overwinnen?</li>
+                    <li>Hoe zal dit je helpen om je doelen te bereiken?</li>
+                    <li>Welke ondersteuning heb je nodig om succesvol te zijn?</li>
+                </ul>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="next-steps">Volgende Stappen</h2>
+                <p>Nu je deze les hebt afgerond, is het tijd om actie te ondernemen:</p>
+                <ol>
+                    <li>Implementeer minstens één tip uit deze les</li>
+                    <li>Plan je volgende acties</li>
+                    <li>Deel je ervaringen met je broeders</li>
+                    <li>Ga door naar de volgende les</li>
+                </ol>
+                
+                <div class="highlight-box">
+                    <h4>🎯 Herinnering</h4>
+                    <p>Onthoud: Top Tier Men worden niet geboren, ze worden gemaakt door consistente actie en onwrikbare discipline.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2025 Top Tier Men Academy. Alle rechten voorbehouden.</p>
+            <p>Deze ebook is onderdeel van de Business and Finance  module.</p>
+        </div>
+    </div>
+</body>
+</html>

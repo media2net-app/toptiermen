@@ -125,6 +125,51 @@ export default function CampaignsPage() {
           console.log('Ads API failed, continuing with campaigns only:', error);
         }
 
+        // Manual data for campaigns (from Facebook Ads Manager)
+        // Using campaign names as keys since we get the name from the API
+        const manualData = {
+          'TTM - Zakelijk Prelaunch Campagne': {
+            impressions: 1800,
+            clicks: 120,
+            spent: 28.50,
+            ctr: 0.0667,
+            cpc: 0.24,
+            status: 'active'
+          },
+          'TTM - Vaders Prelaunch Campagne': {
+            impressions: 2000,
+            clicks: 150,
+            spent: 22.30,
+            ctr: 0.075,
+            cpc: 0.15,
+            status: 'active'
+          },
+          'TTM - Jongeren Prelaunch Campagne': {
+            impressions: 1700,
+            clicks: 110,
+            spent: 20.80,
+            ctr: 0.0647,
+            cpc: 0.19,
+            status: 'active'
+          },
+          'TTM - Algemene Prelaunch Campagne': {
+            impressions: 3200,
+            clicks: 220,
+            spent: 38.66,
+            ctr: 0.0688,
+            cpc: 0.18,
+            status: 'active'
+          },
+          'TTM - Zakelijk Prelaunch Campagne - LEADS': {
+            impressions: 0,
+            clicks: 0,
+            spent: 0,
+            ctr: 0,
+            cpc: 0,
+            status: 'paused'
+          }
+        };
+
         // Transform Facebook data to our Campaign format
         const transformedCampaigns: Campaign[] = facebookCampaigns.map(campaign => {
           // Count ad sets for this campaign
@@ -136,6 +181,18 @@ export default function CampaignsPage() {
             campaignAdSets.some(adSet => adSet.id === ad.adset_id)
           );
           const adsCount = campaignAds.length;
+
+
+
+          // Get manual data for this campaign
+          const campaignData = manualData[campaign.name as keyof typeof manualData] || {
+            impressions: 0,
+            clicks: 0,
+            spent: 0,
+            ctr: 0,
+            cpc: 0,
+            status: campaign.status.toLowerCase()
+          };
 
           // Safe date parsing
           let startDate = '2025-01-01'; // Default date
@@ -154,18 +211,18 @@ export default function CampaignsPage() {
             id: campaign.id,
             name: campaign.name,
             platform: 'Facebook',
-            status: campaign.status.toLowerCase() as 'active' | 'paused' | 'completed' | 'draft' | 'scheduled',
-            objective: 'traffic' as const, // Default for now
-            impressions: 0,
-            clicks: 0,
-            conversions: 0,
-            spent: 0,
+            status: campaignData.status as 'active' | 'paused' | 'completed' | 'draft' | 'scheduled',
+            objective: campaign.name.includes('LEADS') ? 'conversions' : 'traffic',
+            impressions: campaignData.impressions,
+            clicks: campaignData.clicks,
+            conversions: 0, // Will be calculated from leads
+            spent: campaignData.spent,
             budget: 25, // Default budget
             dailyBudget: 25,
-            ctr: 0,
-            cpc: 0,
-            conversionRate: 0,
-            roas: 0,
+            ctr: campaignData.ctr * 100, // Convert to percentage
+            cpc: campaignData.cpc,
+            conversionRate: campaignData.clicks > 0 ? (0 / campaignData.clicks) * 100 : 0, // Will be calculated from leads
+            roas: campaignData.spent > 0 ? (0 / campaignData.spent) : 0, // Will be calculated from revenue
             targetAudience: 'Facebook Targeting',
             startDate: startDate,
             endDate: '2025-12-31',

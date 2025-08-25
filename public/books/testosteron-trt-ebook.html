@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRT en mijn Visie - Top Tier Men Academy</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background: #f9fafb;
+        }
+        
+        .ebook-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #8BAE5A 0%, #3A4D23 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -0.025em;
+        }
+        
+        .header .subtitle {
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: white;
+            opacity: 1;
+        }
+        
+        .content {
+            padding: 50px;
+        }
+        
+        .toc {
+            background: #f8fafc;
+            border-left: 4px solid #8BAE5A;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 8px;
+        }
+        
+        .toc h2 {
+            color: #8BAE5A;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .toc ol {
+            list-style: none;
+            counter-reset: toc-counter;
+        }
+        
+        .toc li {
+            counter-increment: toc-counter;
+            margin-bottom: 8px;
+        }
+        
+        .toc a {
+            color: #374151;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        
+        .toc a:hover {
+            color: #8BAE5A;
+        }
+        
+        .toc a::before {
+            content: counter(toc-counter) ". ";
+            color: #8BAE5A;
+            font-weight: 600;
+        }
+        
+        h2 {
+            color: #8BAE5A;
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin: 40px 0 20px 0;
+            padding-top: 20px;
+            border-top: 2px solid #e5e7eb;
+        }
+        
+        h3 {
+            color: #374151;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 30px 0 15px 0;
+        }
+        
+        p {
+            margin-bottom: 16px;
+            color: #374151;
+            font-size: 1rem;
+        }
+        
+        ul, ol {
+            margin: 20px 0;
+            padding-left: 30px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+            color: #374151;
+        }
+        
+        strong {
+            color: #1f2937;
+            font-weight: 600;
+        }
+        
+        .highlight-box {
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0;
+        }
+        
+        .highlight-box h4 {
+            color: #0c4a6e;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .warning-box {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0;
+        }
+        
+        .warning-box h4 {
+            color: #92400e;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .danger-box {
+            background: #fef2f2;
+            border: 1px solid #ef4444;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0;
+        }
+        
+        .danger-box h4 {
+            color: #991b1b;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .checklist {
+            background: #f0fdf4;
+            border: 1px solid #16a34a;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0;
+        }
+        
+        .checklist h4 {
+            color: #166534;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+        
+        .checklist ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .checklist li {
+            padding: 8px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        .checklist li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #16a34a;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        .page-break {
+            page-break-before: always;
+        }
+        
+        @media print {
+            body {
+                background: white;
+            }
+            .ebook-container {
+                box-shadow: none;
+                max-width: none;
+            }
+            .header {
+                background: #8BAE5A !important;
+                -webkit-print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ebook-container">
+        <div class="header">
+            <h1>TRT en mijn Visie</h1>
+            <p class="subtitle">Module 2 - Les 4: Top Tier Men Academy</p>
+        </div>
+        
+        <div class="content">
+            <div class="toc">
+                <h2>Inhoudsopgave</h2>
+                <ol>
+                    <li><a href="#inleiding">Inleiding</a></li>
+                    <li><a href="#wat-is-trt">Wat is TRT?</a></li>
+                    <li><a href="#wanneer-nodig">Wanneer is TRT Echt Nodig?</a></li>
+                    <li><a href="#diagnostische-criteria">De Diagnostische Criteria</a></li>
+                    <li><a href="#mijn-visie">Mijn Visie op TRT</a></li>
+                    <li><a href="#natuurlijke-methoden">Het Natuurlijke Pad Eerst</a></li>
+                    <li><a href="#risicos">De Risico's van Onnodige TRT</a></li>
+                    <li><a href="#mijn-aanbeveling">Mijn Aanbeveling</a></li>
+                    <li><a href="#toekomst-trt">De Toekomst van TRT</a></li>
+                    <li><a href="#praktische-stappen">Praktische Stappen</a></li>
+                    <li><a href="#reflectie-vragen">Reflectie Vragen</a></li>
+                    <li><a href="#volgende-stappen">Volgende Stappen</a></li>
+                </ol>
+            </div>
+
+            <h2 id="inleiding">Inleiding</h2>
+            <p>Testosteron Replacement Therapy (TRT) is een complex en vaak controversieel onderwerp. Hier deel ik mijn eerlijke visie gebaseerd op jarenlange ervaring in de fitness industrie.</p>
+            
+            <p>Het is belangrijk om te begrijpen dat TRT geen wondermiddel is, maar een medische behandeling die alleen onder specifieke omstandigheden moet worden overwogen. In deze les deel ik mijn eerlijke perspectief op wanneer TRT wel en niet geschikt is.</p>
+            
+            <div class="highlight-box">
+                <h4>🎯 Wat je gaat leren</h4>
+                <ul>
+                    <li>Wat TRT precies is en hoe het werkt</li>
+                    <li>Wanneer TRT echt nodig is</li>
+                    <li>Mijn eerlijke visie op TRT</li>
+                    <li>Waarom natuurlijke methoden altijd eerst geprobeerd moeten worden</li>
+                    <li>De risico's en voordelen van TRT</li>
+                </ul>
+            </div>
+
+            <h2 id="wat-is-trt">Wat is TRT?</h2>
+            <p>TRT is een medische behandeling waarbij testosteron wordt toegediend aan mannen met klinisch lage testosteronwaarden. Het wordt alleen voorgeschreven door gekwalificeerde artsen na uitgebreide diagnostiek.</p>
+            
+            <h3>Hoe TRT werkt:</h3>
+            <ul>
+                <li><strong>Externe toediening:</strong> Testosteron wordt via injecties, gels, of pleisters toegediend</li>
+                <li><strong>Vervanging van tekort:</strong> Vult het tekort aan natuurlijke testosteron aan</li>
+                <li><strong>Regelmatige monitoring:</strong> Bloedwaarden worden regelmatig gecontroleerd</li>
+                <li><strong>Lange-termijn commitment:</strong> Meestal levenslange behandeling</li>
+            </ul>
+            
+            <div class="warning-box">
+                <h4>⚠️ Belangrijk</h4>
+                <p>TRT is geen vervanging voor een gezonde levensstijl. Het is een medische behandeling die alleen onder strikte begeleiding moet worden gebruikt.</p>
+            </div>
+
+            <h2 id="wanneer-nodig">Wanneer is TRT Echt Nodig?</h2>
+            
+            <div class="highlight-box">
+                <h4>✅ Wanneer TRT Legitiem is</h4>
+                <ul>
+                    <li><strong>Primaire Hypogonadisme:</strong> Testikels produceren onvoldoende testosteron</li>
+                    <li><strong>Secundaire Hypogonadisme:</strong> Hersenen sturen onvoldoende signalen</li>
+                    <li><strong>Leeftijdsgerelateerde Daling:</strong> Natuurlijke afname na 40-50 jaar</li>
+                    <li><strong>Medische Aandoeningen:</strong> Bepaalde ziekten die testosteron beïnvloeden</li>
+                </ul>
+            </div>
+            
+            <h3>Specifieke medische indicaties:</h3>
+            <ul>
+                <li><strong>Klinefelter syndroom:</strong> Genetische aandoening</li>
+                <li><strong>Hypofyse tumoren:</strong> Beïnvloeden hormoonproductie</li>
+                <li><strong>Testikelbeschadiging:</strong> Door trauma of infectie</li>
+                <li><strong>Chemotherapie:</strong> Kan testikelweefsel beschadigen</li>
+                <li><strong>HIV/AIDS:</strong> Kan testosteronproductie beïnvloeden</li>
+            </ul>
+
+            <h2 id="diagnostische-criteria">De Diagnostische Criteria</h2>
+            
+            <div class="checklist">
+                <h4>📋 Medische Criteria voor TRT</h4>
+                <ul>
+                    <li><strong>Testosteron onder 300 ng/dL</strong> (gemeten in de ochtend)</li>
+                    <li><strong>Duidelijke symptomen</strong> van lage testosteron</li>
+                    <li><strong>Uitsluiting van andere oorzaken</strong></li>
+                    <li><strong>Meerdere metingen over tijd</strong></li>
+                    <li><strong>Leeftijd en gezondheidsstatus</strong> in overweging</li>
+                </ul>
+            </div>
+            
+            <h3>Belangrijke diagnostische stappen:</h3>
+            <ul>
+                <li><strong>Uitgebreide bloedtesten:</strong> Totaal en vrij testosteron, LH, FSH, SHBG</li>
+                <li><strong>Medische geschiedenis:</strong> Symptomen, medicatie, levensstijl</li>
+                <li><strong>Lichamelijk onderzoek:</strong> Testikelgrootte, haargroei, spierkracht</li>
+                <li><strong>Beeldvorming:</strong> MRI van hypofyse indien nodig</li>
+                <li><strong>Uitsluiting van andere oorzaken:</strong> Schildklier, lever, nieren</li>
+            </ul>
+
+            <h2 id="mijn-visie">Mijn Visie op TRT</h2>
+            
+            <h3>✅ Wanneer ik TRT Ondersteun:</h3>
+            <ul>
+                <li><strong>Bij bewezen klinisch lage testosteron:</strong> Onder 300 ng/dL met symptomen</li>
+                <li><strong>Wanneer alle natuurlijke methoden zijn uitgeput:</strong> Na 6-12 maanden optimale levensstijl</li>
+                <li><strong>Onder strikt medisch toezicht:</strong> Regelmatige monitoring en aanpassingen</li>
+                <li><strong>Bij mannen die echt lijden onder de symptomen:</strong> Significante impact op kwaliteit van leven</li>
+                <li><strong>Als onderdeel van een holistische gezondheidsaanpak:</strong> Niet als vervanging voor gezonde levensstijl</li>
+            </ul>
+            
+            <h3>❌ Wanneer ik TRT Niet Ondersteun:</h3>
+            <ul>
+                <li><strong>Voor snelle spiergroei of atletische prestaties:</strong> Dit is doping, geen TRT</li>
+                <li><strong>Zonder eerst natuurlijke optimalisatie te proberen:</strong> Minimaal 6 maanden levensstijl interventies</li>
+                <li><strong>Bij normale testosteronwaarden:</strong> Boven 400 ng/dL zonder duidelijke symptomen</li>
+                <li><strong>Zonder medische begeleiding:</strong> Zelfmedicatie is gevaarlijk</li>
+                <li><strong>Als vervanging voor gezonde levensstijl:</strong> TRT is geen excuus voor slechte gewoonten</li>
+            </ul>
+
+            <h2 id="natuurlijke-methoden">Het Natuurlijke Pad Eerst</h2>
+            
+            <div class="highlight-box">
+                <h4>🌱 Natuurlijke Optimalisatie Eerst</h4>
+                <p>Voordat je TRT overweegt, moet je eerst alle natuurlijke methoden uitputten. Dit is niet alleen veiliger, maar ook effectiever op lange termijn.</p>
+            </div>
+            
+            <h3>1. Optimaliseer je slaap</h3>
+            <ul>
+                <li><strong>7-9 uur kwaliteitsslaap:</strong> Elke nacht, regelmatige tijden</li>
+                <li><strong>Donkere, koele slaapkamer:</strong> Optimaliseer je slaapomgeving</li>
+                <li><strong>Geen schermen voor het slapen:</strong> Minimaal 1 uur voor bedtijd</li>
+                <li><strong>Ontspanningstechnieken:</strong> Meditatie, ademhaling, lezen</li>
+            </ul>
+            
+            <h3>2. Verbeter je voeding</h3>
+            <ul>
+                <li><strong>Gezonde vetten:</strong> Avocado's, noten, olijfolie, vette vis</li>
+                <li><strong>Kwaliteitseiwitten:</strong> Vlees, vis, eieren, zuivel</li>
+                <li><strong>Micronutriënten:</strong> Vitamine D, zink, magnesium</li>
+                <li><strong>Vermijd:</strong> Overmatige suiker, alcohol, verwerkte voeding</li>
+            </ul>
+            
+            <h3>3. Start krachttraining</h3>
+            <ul>
+                <li><strong>3-4x per week intensieve training:</strong> Compound oefeningen</li>
+                <li><strong>Progressieve overload:</strong> Geleidelijk gewicht verhogen</li>
+                <li><strong>Voldoende rust:</strong> 48-72 uur tussen spiergroepen</li>
+                <li><strong>Consistentie:</strong> Regelmatige training is belangrijker dan perfectie</li>
+            </ul>
+            
+            <h3>4. Beheer stress</h3>
+            <ul>
+                <li><strong>Meditatie:</strong> 10-20 minuten per dag</li>
+                <li><strong>Ademhalingsoefeningen:</strong> Diepe buikademhaling</li>
+                <li><strong>Natuur:</strong> Regelmatige wandelingen buiten</li>
+                <li><strong>Sociale connecties:</strong> Onderhoud betekenisvolle relaties</li>
+            </ul>
+            
+            <h3>5. Verlies overtollig vet</h3>
+            <ul>
+                <li><strong>Focus op buikvet:</strong> Dit produceert oestrogeen</li>
+                <li><strong>Calorietekort:</strong> 300-500 calorieën onder onderhoud</li>
+                <li><strong>Krachttraining behouden:</strong> Voorkom spierverlies</li>
+                <li><strong>Geduld:</strong> 0.5-1 kg per week is optimaal</li>
+            </ul>
+            
+            <h3>6. Test je micronutriënten</h3>
+            <ul>
+                <li><strong>Vitamine D:</strong> Streef naar 40-60 ng/mL</li>
+                <li><strong>Zink:</strong> 15-30 mg per dag</li>
+                <li><strong>Magnesium:</strong> 400-600 mg per dag</li>
+                <li><strong>B-vitaminen:</strong> Voor energie en hormoonproductie</li>
+            </ul>
+
+            <h2 id="risicos">De Risico's van Onnodige TRT</h2>
+            
+            <div class="danger-box">
+                <h4>🚨 Belangrijke Risico's</h4>
+                <p>TRT is niet zonder risico's, vooral wanneer het onnodig wordt gebruikt of zonder medische begeleiding.</p>
+            </div>
+            
+            <h3>Korte-termijn risico's:</h3>
+            <ul>
+                <li><strong>Acne en huidproblemen:</strong> Verhoogde talgproductie</li>
+                <li><strong>Vochtretentie:</strong> Gewichtstoename door vocht</li>
+                <li><strong>Mood swings:</strong> Emotionele instabiliteit</li>
+                <li><strong>Verhoogde bloeddruk:</strong> Mogelijke hypertensie</li>
+            </ul>
+            
+            <h3>Lange-termijn risico's:</h3>
+            <ul>
+                <li><strong>Onderdrukking van natuurlijke productie:</strong> Testikels stoppen met produceren</li>
+                <li><strong>Afhankelijkheid:</strong> Levenslange behandeling nodig</li>
+                <li><strong>Vruchtbaarheidsproblemen:</strong> Verminderde spermakwaliteit</li>
+                <li><strong>Hart- en vaatziekten:</strong> Mogelijk verhoogd risico</li>
+                <li><strong>Prostaatproblemen:</strong> BPH en prostaatkanker risico</li>
+            </ul>
+            
+            <h3>Psychologische risico's:</h3>
+            <ul>
+                <li><strong>Afhankelijkheid:</strong> Psychologische afhankelijkheid van externe testosteron</li>
+                <li><strong>Verhoogde agressie:</strong> Mogelijke stemmingsveranderingen</li>
+                <li><strong>Verhoogde risicogedrag:</strong> Impulsiviteit en roekeloosheid</li>
+            </ul>
+
+            <h2 id="mijn-aanbeveling">Mijn Aanbeveling</h2>
+            
+            <div class="highlight-box">
+                <h4>💡 Mijn Eerlijke Advies</h4>
+                <p>Als je vermoedt dat je lage testosteron hebt, volg dan deze stappen in volgorde:</p>
+            </div>
+            
+            <h3>Stap 1: Levensstijl Optimalisatie (6-12 maanden)</h3>
+            <ul>
+                <li><strong>Slaap:</strong> 7-9 uur per nacht, regelmatige tijden</li>
+                <li><strong>Voeding:</strong> Gezonde vetten, eiwitten, micronutriënten</li>
+                <li><strong>Beweging:</strong> Krachttraining 3-4x per week</li>
+                <li><strong>Stress management:</strong> Meditatie, ademhaling, natuur</li>
+                <li><strong>Gewichtsverlies:</strong> Focus op buikvet reductie</li>
+            </ul>
+            
+            <h3>Stap 2: Bloedtesten (na 6 maanden)</h3>
+            <ul>
+                <li><strong>Testosteron totaal en vrij:</strong> In de ochtend (7-10 uur)</li>
+                <li><strong>LH, FSH, SHBG:</strong> Voor complete hormoonprofiel</li>
+                <li><strong>Vitamine D, zink, magnesium:</strong> Micronutriënten status</li>
+                <li><strong>Schildklier functie:</strong> TSH, T3, T4</li>
+            </ul>
+            
+            <h3>Stap 3: Medische Evaluatie</h3>
+            <ul>
+                <li><strong>Zoek een endocrinoloog of uroloog:</strong> Met TRT ervaring</li>
+                <li><strong>Vraag om uitgebreide diagnostiek:</strong> Niet alleen testosteron</li>
+                <li><strong>Bespreken van alternatieven:</strong> Natuurlijke methoden</li>
+                <li><strong>Risico-baten analyse:</strong> Persoonlijke situatie</li>
+            </ul>
+            
+            <h3>Stap 4: TRT Overwegen (alleen indien nodig)</h3>
+            <ul>
+                <li><strong>Alleen bij bewezen klinisch lage waarden:</strong> Onder 300 ng/dL</li>
+                <li><strong>Onder strikt medisch toezicht:</strong> Regelmatige monitoring</li>
+                <li><strong>Als onderdeel van holistische aanpak:</strong> Niet als vervanging</li>
+                <li><strong>Met realistische verwachtingen:</strong> Geen wondermiddel</li>
+            </ul>
+
+            <h2 id="toekomst-trt">De Toekomst van TRT</h2>
+            <p>TRT wordt steeds meer geaccepteerd als legitieme medische behandeling, maar het moet verantwoordelijk worden gebruikt. De focus moet liggen op het verbeteren van kwaliteit van leven, niet op cosmetische doelen.</p>
+            
+            <h3>Ontwikkelingen in TRT:</h3>
+            <ul>
+                <li><strong>Betere toedieningsmethoden:</strong> Langwerkende injecties, gels, pleisters</li>
+                <li><strong>Persoonlijke dosering:</strong> Op maat gemaakte behandelingen</li>
+                <li><strong>Betere monitoring:</strong> Regelmatige bloedtesten en aanpassingen</li>
+                <li><strong>Integratie met levensstijl:</strong> Holistische benadering</li>
+            </ul>
+            
+            <div class="warning-box">
+                <h4>⚠️ Mijn Boodschap</h4>
+                <p>TRT kan levensveranderend zijn voor de juiste persoon, maar het is geen wondermiddel. De beste aanpak is altijd eerst je natuurlijke potentieel te maximaliseren voordat je externe interventies overweegt.</p>
+            </div>
+
+            <h2 id="praktische-stappen">Praktische Stappen</h2>
+            
+            <div class="checklist">
+                <h4>📋 Actieplan voor Natuurlijke Optimalisatie</h4>
+                <ul>
+                    <li><strong>Week 1-4:</strong> Slaap optimaliseren (7-9 uur, regelmatige tijden)</li>
+                    <li><strong>Week 5-8:</strong> Voeding verbeteren (gezonde vetten, eiwitten)</li>
+                    <li><strong>Week 9-12:</strong> Krachttraining toevoegen (3-4x per week)</li>
+                    <li><strong>Week 13-16:</strong> Stress management (meditatie, ademhaling)</li>
+                    <li><strong>Week 17-20:</strong> Gewichtsverlies (focus op buikvet)</li>
+                    <li><strong>Week 21-24:</strong> Bloedtesten en evaluatie</li>
+                </ul>
+            </div>
+
+            <h2 id="reflectie-vragen">Reflectie Vragen</h2>
+            <p>Neem de tijd om over deze vragen na te denken:</p>
+            <ol>
+                <li>Heb je alle natuurlijke methoden uitgeprobeerd voordat je TRT overweegt?</li>
+                <li>Wat zijn je verwachtingen van TRT? Zijn deze realistisch?</li>
+                <li>Ben je bereid om levenslange behandeling en monitoring te ondergaan?</li>
+                <li>Wat zijn de grootste obstakels in je huidige levensstijl die je testosteron beïnvloeden?</li>
+                <li>Hoe zou je leven eruitzien als je eerst je natuurlijke potentieel zou maximaliseren?</li>
+            </ol>
+
+            <h2 id="volgende-stappen">Volgende Stappen</h2>
+            <p>In de volgende les gaan we dieper in op:</p>
+            <ul>
+                <li><strong>Les 5:</strong> De waarheid over testosteron doping</li>
+            </ul>
+            
+            <div class="highlight-box">
+                <h4>🎯 Actiepunten voor deze week</h4>
+                <ul>
+                    <li>Evalueer je huidige levensstijl en identificeer verbeterpunten</li>
+                    <li>Begin met het optimaliseren van je slaap (7-9 uur per nacht)</li>
+                    <li>Plan een bloedtest om je huidige testosteronwaarden te meten</li>
+                    <li>Zoek een arts met TRT ervaring voor een consult</li>
+                    <li>Stel realistische verwachtingen over wat TRT wel en niet kan doen</li>
+                </ul>
+            </div>
+            
+            <p><strong>Onthoud:</strong> TRT is een medische behandeling, geen lifestyle choice. De beste aanpak is altijd eerst je natuurlijke potentieel te maximaliseren.</p>
+        </div>
+    </div>
+</body>
+</html>

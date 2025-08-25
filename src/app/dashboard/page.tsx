@@ -6,6 +6,7 @@ import { BeakerIcon as DumbbellIcon, LightBulbIcon as BrainIcon } from '@heroico
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 import BadgeDisplay from '@/components/BadgeDisplay';
+import UserTasksWidget from '@/components/UserTasksWidget';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
 interface DashboardStats {
@@ -157,6 +158,11 @@ export default function Dashboard() {
               showTitle={true}
               size="md"
             />
+          </div>
+
+          {/* User Tasks Widget */}
+          <div className="mb-6 sm:mb-8">
+            <UserTasksWidget userName={user?.full_name || ''} />
           </div>
 
           {/* Dashboard Content */}
