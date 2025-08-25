@@ -73,6 +73,7 @@ export default function AdminVoedingsplannenPage() {
   const [plans, setPlans] = useState<NutritionPlan[]>([]);
   const [weekplans, setWeekplans] = useState<any[]>([]);
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
+  const [meals, setMeals] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingFoodItems, setIsLoadingFoodItems] = useState(true);
 
@@ -119,6 +120,19 @@ export default function AdminVoedingsplannenPage() {
       } else {
         setWeekplans(weekplansResult.weekplans || []);
         console.log('✅ Nutrition weekplans loaded:', weekplansResult.weekplans?.length || 0);
+      }
+
+      // Fetch meals from database
+      console.log('🍽️ Fetching meals from database...');
+      
+      const mealsResponse = await fetch('/api/admin/meals');
+      const mealsResult = await mealsResponse.json();
+      
+      if (!mealsResponse.ok) {
+        console.error('❌ Error fetching meals:', mealsResult.error);
+      } else {
+        setMeals(mealsResult.meals || []);
+        console.log('✅ Meals loaded:', mealsResult.meals?.length || 0);
       }
       
     } catch (error) {
@@ -221,6 +235,45 @@ export default function AdminVoedingsplannenPage() {
     setShowPlanBuilder(true);
   };
 
+  const handleAddMeal = () => {
+    // TODO: Implement meal modal
+    console.log('Add meal functionality to be implemented');
+  };
+
+  const handleEditMeal = (meal: any) => {
+    // TODO: Implement meal modal
+    console.log('Edit meal functionality to be implemented');
+  };
+
+  const handleDeleteMeal = async (mealId: string) => {
+    if (!confirm('Weet je zeker dat je deze maaltijd wilt verwijderen?')) {
+      return;
+    }
+
+    try {
+      console.log('🗑️ Deleting meal:', mealId);
+      
+      const response = await fetch(`/api/admin/meals?id=${mealId}`, {
+        method: 'DELETE',
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        console.error('❌ Error deleting meal:', result.error);
+        alert(`Fout bij verwijderen: ${result.error}`);
+        return;
+      }
+
+      console.log('✅ Meal deleted successfully:', result);
+      await fetchAllData();
+      
+    } catch (error) {
+      console.error('❌ Error deleting meal:', error);
+      alert('Fout bij verwijderen van maaltijd');
+    }
+  };
+
   const handleSavePlan = async (plan: NutritionPlan) => {
     try {
       console.log('💾 Saving nutrition plan:', plan);
@@ -294,10 +347,14 @@ export default function AdminVoedingsplannenPage() {
     plan.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const filteredMeals = meals.filter(meal => 
+    meal.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   const tabs = [
     { id: 'voeding', label: 'Voeding', count: foodItems.length, icon: '🥗' },
     { id: 'plans', label: 'Plannen', count: plans.length, icon: '📋' },
-    { id: 'recepten', label: 'Recepten', count: 0, icon: '🍳' },
+    { id: 'maaltijden', label: 'Maaltijden', count: meals.length, icon: '🍽️' },
   ];
 
   if (isLoading) {
@@ -319,7 +376,7 @@ export default function AdminVoedingsplannenPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <AdminStatsCard
           icon={<UserGroupIcon className="w-6 h-6" />}
           value={foodItems.length}
@@ -331,6 +388,12 @@ export default function AdminVoedingsplannenPage() {
           value={plans.length}
           title="Voedingsplannen"
           color="green"
+        />
+        <AdminStatsCard
+          icon={<ChartBarIcon className="w-6 h-6" />}
+          value={meals.length}
+          title="Maaltijden"
+          color="blue"
         />
       </div>
 
@@ -374,6 +437,7 @@ export default function AdminVoedingsplannenPage() {
           onClick={
             activeTab === 'voeding' ? handleAddFoodItem :
             activeTab === 'plans' ? handleAddPlan : 
+            activeTab === 'maaltijden' ? handleAddMeal :
             handleAddFoodItem
           }
           variant="primary"
@@ -381,6 +445,7 @@ export default function AdminVoedingsplannenPage() {
           <PlusIcon className="w-4 h-4 mr-2" />
           {activeTab === 'voeding' && 'Nieuw Voedingsitem'}
           {activeTab === 'plans' && 'Nieuw Plan'}
+          {activeTab === 'maaltijden' && 'Nieuwe Maaltijd'}
         </AdminButton>
       </div>
 
@@ -627,12 +692,114 @@ export default function AdminVoedingsplannenPage() {
           </div>
         )}
 
-        {activeTab === 'recepten' && (
-          <div className="space-y-4">
-            <div className="text-center py-8">
-              <p className="text-[#B6C948]">Recepten functionaliteit komt binnenkort</p>
-              <p className="text-[#8BAE5A] text-sm mt-2">Hier kunnen recepten worden beheerd per voedingsplan</p>
-            </div>
+        {activeTab === 'maaltijden' && (
+          <div className="space-y-6">
+            {filteredMeals.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-[#B6C948]">Geen maaltijden gevonden</p>
+                <p className="text-[#8BAE5A] text-sm mt-2">Voeg maaltijden toe om te gebruiken in voedingsplannen</p>
+              </div>
+            ) : (
+              filteredMeals.map((meal) => (
+                <div key={meal.id} className="bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]/40 hover:border-[#8BAE5A]/40 transition-colors">
+                  {/* Meal Header */}
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex-1">
+                      <h3 className="text-white font-semibold text-xl mb-2">{meal.name}</h3>
+                      <p className="text-[#8BAE5A] text-sm leading-relaxed">{meal.description}</p>
+                    </div>
+                    <div className="flex gap-2 ml-4">
+                      <AdminButton
+                        onClick={() => handleEditMeal(meal)}
+                        variant="secondary"
+                        size="sm"
+                      >
+                        <PencilIcon className="w-4 h-4 mr-2" />
+                        Bewerk
+                      </AdminButton>
+                      <AdminButton
+                        onClick={() => handleDeleteMeal(meal.id)}
+                        variant="danger"
+                        size="sm"
+                      >
+                        <TrashIcon className="w-4 h-4 mr-2" />
+                        Verwijder
+                      </AdminButton>
+                    </div>
+                  </div>
+
+                  {/* Meal Info */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div className="bg-[#3A4D23] p-4 rounded-lg">
+                      <div className="text-[#8BAE5A] font-semibold text-lg">{meal.nutrition_info?.calories || 0}</div>
+                      <div className="text-[#B6C948] text-xs">Calorieën</div>
+                    </div>
+                    <div className="bg-[#3A4D23] p-4 rounded-lg">
+                      <div className="text-[#8BAE5A] font-semibold text-lg">{meal.nutrition_info?.protein || 0}g</div>
+                      <div className="text-[#B6C948] text-xs">Eiwitten</div>
+                    </div>
+                    <div className="bg-[#3A4D23] p-4 rounded-lg">
+                      <div className="text-[#8BAE5A] font-semibold text-lg">{meal.nutrition_info?.carbs || 0}g</div>
+                      <div className="text-[#B6C948] text-xs">Koolhydraten</div>
+                    </div>
+                    <div className="bg-[#3A4D23] p-4 rounded-lg">
+                      <div className="text-[#8BAE5A] font-semibold text-lg">{meal.nutrition_info?.fat || 0}g</div>
+                      <div className="text-[#B6C948] text-xs">Vetten</div>
+                    </div>
+                  </div>
+
+                  {/* Meal Details */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Ingredients */}
+                    <div>
+                      <h4 className="text-[#8BAE5A] font-semibold text-lg mb-3">🥗 Ingrediënten</h4>
+                      <div className="space-y-2">
+                        {meal.ingredients?.map((ingredient: any, index: number) => (
+                          <div key={index} className="flex justify-between items-center bg-[#232D1A] p-3 rounded-lg">
+                            <span className="text-white">{ingredient.name}</span>
+                            <span className="text-[#8BAE5A] font-semibold">{ingredient.quantity} {ingredient.unit}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Instructions */}
+                    <div>
+                      <h4 className="text-[#8BAE5A] font-semibold text-lg mb-3">📝 Bereiding</h4>
+                      <div className="space-y-2">
+                        {meal.instructions?.map((instruction: string, index: number) => (
+                          <div key={index} className="flex items-start bg-[#232D1A] p-3 rounded-lg">
+                            <span className="text-[#8BAE5A] font-bold mr-2">{index + 1}.</span>
+                            <span className="text-white text-sm">{instruction}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Meal Tags */}
+                  <div className="flex flex-wrap gap-2 mt-4">
+                    <span className="px-3 py-1 bg-[#3A4D23] text-[#8BAE5A] rounded-full text-xs capitalize">
+                      {meal.meal_type}
+                    </span>
+                    <span className="px-3 py-1 bg-[#3A4D23] text-[#8BAE5A] rounded-full text-xs capitalize">
+                      {meal.category}
+                    </span>
+                    <span className="px-3 py-1 bg-[#3A4D23] text-[#8BAE5A] rounded-full text-xs capitalize">
+                      {meal.difficulty}
+                    </span>
+                    <span className="px-3 py-1 bg-[#3A4D23] text-[#8BAE5A] rounded-full text-xs">
+                      {meal.prep_time} min
+                    </span>
+                    {meal.is_featured && (
+                      <span className="px-3 py-1 bg-[#8BAE5A] text-[#181F17] rounded-full text-xs font-semibold">
+                        ⭐ Aanbevolen
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         )}
       </AdminCard>
