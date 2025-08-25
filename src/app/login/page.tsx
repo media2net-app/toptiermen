@@ -318,7 +318,7 @@ export default function Login() {
               disabled={isLoading}
             />
           </div>
-          <div className="text-right">
+          <div className="text-center">
             <button
               type="button"
               onClick={() => setShowForgotPassword(true)}
