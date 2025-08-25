@@ -20,7 +20,7 @@ interface OnboardingWidgetProps {
 }
 
 export default function OnboardingWidget({ isVisible, onComplete }: OnboardingWidgetProps) {
-  const { user, updateUser } = useSupabaseAuth();
+  const { user } = useSupabaseAuth();
   const router = useRouter();
   const [steps, setSteps] = useState<OnboardingStep[]>([
     {
@@ -124,15 +124,13 @@ export default function OnboardingWidget({ isVisible, onComplete }: OnboardingWi
         localStorage.setItem('onboardingCompletedSteps', JSON.stringify(completedIds));
       }
 
-      // Save goal to Supabase if user is authenticated
+      // Save goal to localStorage (database integration can be added later)
       if (user) {
         try {
-          await updateUser({ 
-            // Store goal in a custom field or use a separate table
-            // For now, we'll store it in localStorage and can extend later
-          });
+          // Store goal in localStorage for now
+          localStorage.setItem('userGoal', goalText);
         } catch (error) {
-          console.error('Error saving goal to database:', error);
+          console.error('Error saving goal:', error);
         }
       }
 
@@ -155,15 +153,13 @@ export default function OnboardingWidget({ isVisible, onComplete }: OnboardingWi
         localStorage.setItem('onboardingCompletedSteps', JSON.stringify(completedIds));
       }
 
-      // Save missions to Supabase if user is authenticated
+      // Save missions to localStorage (database integration can be added later)
       if (user) {
         try {
-          await updateUser({ 
-            // Store selected missions in a custom field or use a separate table
-            // For now, we'll store it in localStorage and can extend later
-          });
+          // Store missions in localStorage for now
+          localStorage.setItem('userMissions', JSON.stringify(selectedMissions));
         } catch (error) {
-          console.error('Error saving missions to database:', error);
+          console.error('Error saving missions:', error);
         }
       }
 
@@ -186,15 +182,13 @@ export default function OnboardingWidget({ isVisible, onComplete }: OnboardingWi
         localStorage.setItem('onboardingCompletedSteps', JSON.stringify(completedIds));
       }
 
-      // Save challenge to Supabase if user is authenticated
+      // Save challenge to localStorage (database integration can be added later)
       if (user) {
         try {
-          await updateUser({ 
-            // Store selected challenge in a custom field or use a separate table
-            // For now, we'll store it in localStorage and can extend later
-          });
+          // Store challenge in localStorage for now
+          localStorage.setItem('userChallenge', selectedChallenge);
         } catch (error) {
-          console.error('Error saving challenge to database:', error);
+          console.error('Error saving challenge:', error);
         }
       }
 
