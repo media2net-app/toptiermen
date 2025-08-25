@@ -34,9 +34,9 @@ WHERE target_reps IS NULL;
 -- 5. Update all exercises with 10 reps to show 8-12 range
 UPDATE training_schema_exercises 
 SET 
-  reps = 10,
+  reps = '10',
   target_reps = '8-12'
-WHERE reps = 10;
+WHERE reps = '10';
 
 -- 6. Add muscle failure warning to all schema descriptions
 UPDATE training_schemas 
@@ -62,5 +62,5 @@ SELECT
   'Training exercises updated successfully!' as status,
   COUNT(*) as total_exercises,
   COUNT(CASE WHEN target_reps = '8-12' THEN 1 END) as correct_target_reps_exercises,
-  COUNT(CASE WHEN reps = 10 THEN 1 END) as exercises_with_10_reps
+  COUNT(CASE WHEN reps = '10' THEN 1 END) as exercises_with_10_reps
 FROM training_schema_exercises;

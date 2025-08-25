@@ -21,10 +21,10 @@ async function updateTrainingSchemasRepsAndWarning() {
     const { error: updateRepsError } = await supabase
       .from('training_schema_exercises')
       .update({ 
-        reps: 10, // Set to middle of 8-12 range
+        reps: '10', // Set to middle of 8-12 range
         target_reps: '8-12'
       })
-      .eq('reps', 10) // Only update exercises that currently have 10 reps
+      .eq('reps', '10') // Only update exercises that currently have 10 reps
       .neq('id', '00000000-0000-0000-0000-000000000000');
 
     if (updateRepsError) {
