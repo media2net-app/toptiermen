@@ -13,6 +13,7 @@ import {
 import { createClient } from '@supabase/supabase-js';
 import PlanBuilder from './components/PlanBuilder';
 import FoodItemModal from './components/FoodItemModal';
+import MealModal from '@/components/admin/MealModal';
 import AdminCard from '@/components/admin/AdminCard';
 import AdminStatsCard from '@/components/admin/AdminStatsCard';
 import AdminButton from '@/components/admin/AdminButton';
@@ -68,8 +69,10 @@ export default function AdminVoedingsplannenPage() {
   const [mealsFilter, setMealsFilter] = useState('alle');
   const [showPlanBuilder, setShowPlanBuilder] = useState(false);
   const [showFoodItemModal, setShowFoodItemModal] = useState(false);
+  const [showMealModal, setShowMealModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<NutritionPlan | null>(null);
   const [selectedFoodItem, setSelectedFoodItem] = useState<FoodItem | null>(null);
+  const [selectedMeal, setSelectedMeal] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [plans, setPlans] = useState<NutritionPlan[]>([]);
   const [weekplans, setWeekplans] = useState<any[]>([]);
@@ -977,13 +980,47 @@ export default function AdminVoedingsplannenPage() {
   };
 
   const handleAddMeal = () => {
-    // TODO: Implement meal modal
-    console.log('Add meal functionality to be implemented');
+    setSelectedMeal(null);
+    setShowMealModal(true);
   };
 
   const handleEditMeal = (meal: any) => {
-    // TODO: Implement meal modal
-    console.log('Edit meal functionality to be implemented');
+    setSelectedMeal(meal);
+    setShowMealModal(true);
+  };
+
+  const handleSaveMeal = async (meal: any) => {
+    try {
+      console.log('💾 Saving meal:', meal);
+      
+      const url = meal.id ? '/api/admin/meals' : '/api/admin/meals';
+      const method = meal.id ? 'PUT' : 'POST';
+      
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(meal),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        console.error('❌ Error saving meal:', result.error);
+        alert(`Fout bij opslaan: ${result.error}`);
+        return;
+      }
+
+      console.log('✅ Meal saved successfully:', result);
+      await fetchAllData();
+      setShowMealModal(false);
+      setSelectedMeal(null);
+      
+    } catch (error) {
+      console.error('❌ Error saving meal:', error);
+      alert('Fout bij opslaan van maaltijd');
+    }
   };
 
   const handleDeleteMeal = async (mealId: string) => {
@@ -1623,6 +1660,16 @@ export default function AdminVoedingsplannenPage() {
         onClose={() => setShowFoodItemModal(false)}
         foodItem={selectedFoodItem}
         onSave={handleSaveFoodItem}
+      />
+
+      <MealModal
+        isOpen={showMealModal}
+        onClose={() => {
+          setShowMealModal(false);
+          setSelectedMeal(null);
+        }}
+        meal={selectedMeal}
+        onSave={handleSaveMeal}
       />
     </div>
   );
