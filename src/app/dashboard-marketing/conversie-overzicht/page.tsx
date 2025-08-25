@@ -78,7 +78,7 @@ export default function ConversieOverzicht() {
       }
       
       // Fetch Facebook analytics with manual data (matching live Facebook Ads Manager)
-      const analyticsResponse = await fetch('/api/facebook/comprehensive-analytics?dateRange=maximum&useManualData=true');
+      const analyticsResponse = await fetch('/api/facebook/comprehensive-analytics?dateRange=maximum&useManualData=true&forceManual=true');
       const analyticsResult = await analyticsResponse.json();
       console.log('📈 Analytics data:', analyticsResult);
       
