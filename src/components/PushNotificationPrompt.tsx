@@ -54,33 +54,49 @@ export default function PushNotificationPrompt({ onClose }: PushNotificationProm
 
     try {
       setIsSubscribing(true);
+      console.log('🔍 Starting push notification subscription process...');
+      console.log('👤 User ID:', user.id);
 
       // Check if service worker and push manager are supported
       if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+        console.error('❌ Service worker or PushManager not supported');
         toast.error('Push notificaties worden niet ondersteund door je browser');
         return;
       }
+      console.log('✅ Service worker and PushManager supported');
 
       // Request permission
+      console.log('🔐 Requesting notification permission...');
       const permission = await Notification.requestPermission();
       setHasPermission(permission);
+      console.log('🔐 Permission result:', permission);
 
       if (permission !== 'granted') {
+        console.error('❌ Permission denied');
         toast.error('Toestemming voor push notificaties is vereist');
         return;
       }
+      console.log('✅ Permission granted');
 
       // Register service worker
+      console.log('🔧 Registering service worker...');
       const registration = await navigator.serviceWorker.register('/sw.js');
       await navigator.serviceWorker.ready;
+      console.log('✅ Service worker registered and ready');
 
       // Subscribe to push notifications
+      console.log('📡 Subscribing to push notifications...');
+      console.log('🔑 VAPID Public Key:', process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY?.substring(0, 20) + '...');
+      
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
       });
+      console.log('✅ Push subscription created');
+      console.log('📡 Endpoint:', subscription.endpoint.substring(0, 50) + '...');
 
       // Save subscription to database using API route
+      console.log('💾 Saving subscription to database...');
       const subscriptionData = {
         userId: user.id,
         subscription: {
@@ -95,6 +111,11 @@ export default function PushNotificationPrompt({ onClose }: PushNotificationProm
           }
         }
       };
+      console.log('📦 Subscription data prepared:', {
+        userId: subscriptionData.userId,
+        endpoint: subscriptionData.subscription.endpoint.substring(0, 50) + '...',
+        hasKeys: !!subscriptionData.subscription.keys.p256dh && !!subscriptionData.subscription.keys.auth
+      });
 
       const response = await fetch('/api/push/subscribe', {
         method: 'POST',
@@ -104,12 +125,19 @@ export default function PushNotificationPrompt({ onClose }: PushNotificationProm
         body: JSON.stringify(subscriptionData)
       });
 
+      console.log('📡 API Response status:', response.status);
+      
       if (!response.ok) {
         const errorData = await response.json();
+        console.error('❌ API Error:', errorData);
         throw new Error(errorData.error || 'Failed to save subscription');
       }
 
+      const responseData = await response.json();
+      console.log('✅ API Response:', responseData);
+
       // Subscription saved successfully
+      console.log('✅ Subscription saved successfully');
 
       toast.success('Push notificaties succesvol geactiveerd!');
       setShowPrompt(false);
@@ -120,8 +148,8 @@ export default function PushNotificationPrompt({ onClose }: PushNotificationProm
       }, 1000);
 
     } catch (error) {
-      console.error('Error subscribing to push notifications:', error);
-      toast.error('Fout bij het activeren van push notificaties');
+      console.error('❌ Error subscribing to push notifications:', error);
+      toast.error(`Fout bij het activeren van push notificaties: ${error.message}`);
     } finally {
       setIsSubscribing(false);
     }
