@@ -133,12 +133,15 @@ export default function AdminVoedingsplannenPage() {
         // Fallback to mock meals if database is not available
         console.log('⚠️ Falling back to mock meals...');
         const fallbackMeals = [
+          // CARNIVOOR / ANIMAL BASED PLAN MAALTIJDEN
           {
             id: '1',
-            name: 'Carnivoor Ontbijt - Eieren & Bacon',
+            name: '🥩 Carnivoor Ontbijt - Eieren & Bacon',
             description: 'Een eiwitrijk ontbijt perfect voor carnivoor dieet. Rijk aan eiwitten en gezonde vetten.',
             meal_type: 'ontbijt',
             category: 'carnivoor',
+            plan_type: 'Carnivoor / Animal Based',
+            goal: 'Spiermassa',
             ingredients: [
               { name: '1 Ei (gekookt)', quantity: 2, unit: 'stuks' },
               { name: 'Bacon', quantity: 50, unit: 'gram' },
@@ -162,10 +165,105 @@ export default function AdminVoedingsplannenPage() {
           },
           {
             id: '2',
-            name: 'Flexibel Lunch - Kip Salade',
+            name: '🥩 Carnivoor Lunch - Biefstuk Salade',
+            description: 'Een stevige lunch met premium vlees. Perfect voor carnivoor dieet en spiermassa.',
+            meal_type: 'lunch',
+            category: 'carnivoor',
+            plan_type: 'Carnivoor / Animal Based',
+            goal: 'Spiermassa',
+            ingredients: [
+              { name: 'Biefstuk', quantity: 150, unit: 'gram' },
+              { name: 'Eieren', quantity: 2, unit: 'stuks' },
+              { name: 'Boter', quantity: 15, unit: 'gram' },
+              { name: 'Kruiden', quantity: 1, unit: 'snufje' }
+            ],
+            instructions: [
+              'Bak de biefstuk medium-rare',
+              'Kook de eieren zachtgekookt',
+              'Serveer met boter en kruiden'
+            ],
+            nutrition_info: {
+              calories: 520,
+              protein: 45,
+              carbs: 0,
+              fat: 38
+            },
+            prep_time: 20,
+            difficulty: 'gemiddeld',
+            is_featured: true,
+            is_active: true
+          },
+          {
+            id: '3',
+            name: '🥩 Carnivoor Diner - Ribeye Steak',
+            description: 'Een premium ribeye steak met boter en kruiden. Perfect voor carnivoor dieet en spiermassa.',
+            meal_type: 'diner',
+            category: 'carnivoor',
+            plan_type: 'Carnivoor / Animal Based',
+            goal: 'Spiermassa',
+            ingredients: [
+              { name: 'Ribeye Steak', quantity: 250, unit: 'gram' },
+              { name: 'Boter', quantity: 25, unit: 'gram' },
+              { name: 'Rozemarijn', quantity: 1, unit: 'takje' },
+              { name: 'Knoflook', quantity: 3, unit: 'teentjes' }
+            ],
+            instructions: [
+              'Laat de steak op kamertemperatuur komen',
+              'Verhit een pan op hoog vuur',
+              'Bak de steak 4-5 minuten per kant voor medium-rare',
+              'Voeg boter, rozemarijn en knoflook toe in de laatste minuut'
+            ],
+            nutrition_info: {
+              calories: 680,
+              protein: 55,
+              carbs: 0,
+              fat: 48
+            },
+            prep_time: 30,
+            difficulty: 'gemiddeld',
+            is_featured: true,
+            is_active: true
+          },
+          // VOEDINGSPLAN OP MAAT GEMAAKTE MAALTIJDEN
+          {
+            id: '4',
+            name: '🍗 Flexibel Ontbijt - Kip & Eieren',
+            description: 'Een gebalanceerd ontbijt met mager vlees en eieren. Perfect voor onderhoud en spiermassa.',
+            meal_type: 'ontbijt',
+            category: 'flexibel',
+            plan_type: 'Voedingsplan op Maat',
+            goal: 'Onderhoud',
+            ingredients: [
+              { name: 'Kipfilet', quantity: 100, unit: 'gram' },
+              { name: '1 Ei (gekookt)', quantity: 2, unit: 'stuks' },
+              { name: '1 Appel', quantity: 1, unit: 'stuk' },
+              { name: 'Olijfolie', quantity: 10, unit: 'ml' }
+            ],
+            instructions: [
+              'Gril de kipfilet 6-8 minuten per kant',
+              'Kook de eieren 6-7 minuten',
+              'Snijd de appel in stukjes',
+              'Serveer met olijfolie'
+            ],
+            nutrition_info: {
+              calories: 380,
+              protein: 35,
+              carbs: 15,
+              fat: 20
+            },
+            prep_time: 15,
+            difficulty: 'makkelijk',
+            is_featured: true,
+            is_active: true
+          },
+          {
+            id: '5',
+            name: '🥗 Flexibel Lunch - Kip Salade',
             description: 'Een gezonde lunch met mager vlees en verse groenten. Perfect voor onderhoud en spiermassa.',
             meal_type: 'lunch',
             category: 'flexibel',
+            plan_type: 'Voedingsplan op Maat',
+            goal: 'Onderhoud',
             ingredients: [
               { name: 'Kipfilet', quantity: 150, unit: 'gram' },
               { name: 'Sla', quantity: 50, unit: 'gram' },
@@ -191,40 +289,44 @@ export default function AdminVoedingsplannenPage() {
             is_active: true
           },
           {
-            id: '3',
-            name: 'Carnivoor Diner - Biefstuk',
-            description: 'Een premium biefstuk met boter en kruiden. Perfect voor carnivoor dieet en spiermassa.',
+            id: '6',
+            name: '🍖 Flexibel Diner - Zalm & Groenten',
+            description: 'Een gebalanceerd diner met vis en groenten. Perfect voor onderhoud en gezondheid.',
             meal_type: 'diner',
-            category: 'carnivoor',
+            category: 'flexibel',
+            plan_type: 'Voedingsplan op Maat',
+            goal: 'Onderhoud',
             ingredients: [
-              { name: 'Biefstuk', quantity: 200, unit: 'gram' },
-              { name: 'Boter', quantity: 20, unit: 'gram' },
-              { name: 'Rozemarijn', quantity: 1, unit: 'takje' },
-              { name: 'Knoflook', quantity: 2, unit: 'teentjes' }
+              { name: 'Zalmfilet', quantity: 200, unit: 'gram' },
+              { name: 'Broccoli', quantity: 100, unit: 'gram' },
+              { name: 'Zoete Aardappel', quantity: 100, unit: 'gram' },
+              { name: 'Olijfolie', quantity: 15, unit: 'ml' }
             ],
             instructions: [
-              'Laat de biefstuk op kamertemperatuur komen',
-              'Verhit een pan op hoog vuur',
-              'Bak de biefstuk 3-4 minuten per kant voor medium-rare',
-              'Voeg boter, rozemarijn en knoflook toe in de laatste minuut'
+              'Bak de zalm 8-10 minuten per kant',
+              'Kook de broccoli 5-7 minuten',
+              'Bak de zoete aardappel in stukjes',
+              'Serveer met olijfolie en kruiden'
             ],
             nutrition_info: {
-              calories: 480,
-              protein: 42,
-              carbs: 0,
-              fat: 32
+              calories: 420,
+              protein: 38,
+              carbs: 25,
+              fat: 22
             },
             prep_time: 25,
-            difficulty: 'gemiddeld',
+            difficulty: 'makkelijk',
             is_featured: true,
             is_active: true
           },
           {
-            id: '4',
-            name: 'Flexibel Snack - Noten Mix',
+            id: '7',
+            name: '🥜 Flexibel Snack - Noten Mix',
             description: 'Een gezonde snack met noten en zaden. Rijk aan gezonde vetten en eiwitten.',
             meal_type: 'snack',
             category: 'flexibel',
+            plan_type: 'Voedingsplan op Maat',
+            goal: 'Onderhoud',
             ingredients: [
               { name: 'Amandelen', quantity: 30, unit: 'gram' },
               { name: 'Walnoten', quantity: 20, unit: 'gram' },
@@ -247,11 +349,13 @@ export default function AdminVoedingsplannenPage() {
             is_active: true
           },
           {
-            id: '5',
-            name: 'Vegetarisch Ontbijt - Havermout',
+            id: '8',
+            name: '🥣 Vegetarisch Ontbijt - Havermout',
             description: 'Een vezelrijk ontbijt met havermout en fruit. Perfect voor onderhoud en energie.',
             meal_type: 'ontbijt',
             category: 'vegetarisch',
+            plan_type: 'Voedingsplan op Maat',
+            goal: 'Onderhoud',
             ingredients: [
               { name: 'Havermout', quantity: 60, unit: 'gram' },
               { name: '1 Appel', quantity: 1, unit: 'stuk' },
@@ -499,9 +603,11 @@ export default function AdminVoedingsplannenPage() {
     plan.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const filteredMeals = meals.filter(meal => 
-    meal.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredMeals = meals.filter(meal => {
+    const matchesSearch = meal.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesPlanType = activeTab === 'maaltijden' || meal.plan_type === activeTab;
+    return matchesSearch && matchesPlanType;
+  });
 
   const tabs = [
     { id: 'voeding', label: 'Voeding', count: foodItems.length, icon: '🥗' },
@@ -846,6 +952,25 @@ export default function AdminVoedingsplannenPage() {
 
         {activeTab === 'maaltijden' && (
           <div className="space-y-6">
+            {/* Meal Plan Filter */}
+            <div className="mb-6">
+              <div className="flex flex-wrap gap-2">
+                {['alle', 'Carnivoor / Animal Based', 'Voedingsplan op Maat'].map((planType) => (
+                  <button
+                    key={planType}
+                    onClick={() => setActiveTab(planType === 'alle' ? 'maaltijden' : planType)}
+                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                      activeTab === (planType === 'alle' ? 'maaltijden' : planType)
+                        ? 'bg-[#8BAE5A] text-[#181F17]'
+                        : 'bg-[#232D1A] text-[#8BAE5A] hover:bg-[#3A4D23] border border-[#3A4D23]'
+                    }`}
+                  >
+                    {planType === 'alle' ? 'Alle Plannen' : planType} ({meals.filter(meal => planType === 'alle' || meal.plan_type === planType).length})
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {filteredMeals.length === 0 ? (
               <div className="text-center py-8">
                 <p className="text-[#B6C948]">Geen maaltijden gevonden</p>
@@ -931,18 +1056,35 @@ export default function AdminVoedingsplannenPage() {
 
                   {/* Meal Tags */}
                   <div className="flex flex-wrap gap-2 mt-4">
+                    {/* Voedingsplan Type */}
+                    {meal.plan_type && (
+                      <span className="px-3 py-1 bg-[#8BAE5A] text-[#181F17] rounded-full text-xs font-semibold">
+                        📋 {meal.plan_type}
+                      </span>
+                    )}
+                    {/* Doel */}
+                    {meal.goal && (
+                      <span className="px-3 py-1 bg-[#B6C948] text-[#181F17] rounded-full text-xs font-semibold">
+                        🎯 {meal.goal}
+                      </span>
+                    )}
+                    {/* Meal Type */}
                     <span className="px-3 py-1 bg-[#3A4D23] text-[#8BAE5A] rounded-full text-xs capitalize">
                       {meal.meal_type}
                     </span>
+                    {/* Category */}
                     <span className="px-3 py-1 bg-[#3A4D23] text-[#8BAE5A] rounded-full text-xs capitalize">
                       {meal.category}
                     </span>
+                    {/* Difficulty */}
                     <span className="px-3 py-1 bg-[#3A4D23] text-[#8BAE5A] rounded-full text-xs capitalize">
                       {meal.difficulty}
                     </span>
+                    {/* Prep Time */}
                     <span className="px-3 py-1 bg-[#3A4D23] text-[#8BAE5A] rounded-full text-xs">
                       {meal.prep_time} min
                     </span>
+                    {/* Featured */}
                     {meal.is_featured && (
                       <span className="px-3 py-1 bg-[#8BAE5A] text-[#181F17] rounded-full text-xs font-semibold">
                         ⭐ Aanbevolen
