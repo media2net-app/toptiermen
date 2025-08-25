@@ -863,7 +863,7 @@ export default function TrainingscentrumPage() {
                           </div>
                           <div className="flex items-center space-x-4 text-sm text-gray-400">
                             <span>{exercise.sets} sets</span>
-                            <span>{exercise.reps === 10 ? '8-12' : exercise.reps} reps</span>
+                            <span>{exercise.reps === '10' ? '8-12' : exercise.reps} reps</span>
                             <span>{exercise.rest} rust</span>
                           </div>
                         </div>
