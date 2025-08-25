@@ -1,733 +1,183 @@
 'use client';
-import { HomeIcon, FireIcon, AcademicCapIcon, ChartBarIcon, CurrencyDollarIcon, UsersIcon, BookOpenIcon, StarIcon, UserCircleIcon, ChatBubbleLeftRightIcon, ChevronUpIcon, ChevronDownIcon, Bars3Icon, XMarkIcon, BellIcon, EnvelopeIcon, CheckCircleIcon, UserGroupIcon, TrophyIcon, CalendarDaysIcon, ShoppingBagIcon } from '@heroicons/react/24/solid';
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
-import { motion, AnimatePresence } from 'framer-motion';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
-import { useDebug } from '@/contexts/DebugContext';
-import { OnboardingProvider, useOnboarding } from '@/contexts/OnboardingContext';
-import DebugPanel from '@/components/DebugPanel';
-import ForcedOnboardingModal from '@/components/ForcedOnboardingModal';
-import TestUserFeedback from '@/components/TestUserFeedback';
-import { useTestUser } from '@/hooks/useTestUser';
-import PWAInstallPrompt from '@/components/PWAInstallPrompt';
+import { useV2State } from '@/contexts/V2StateContext';
+import { useV2Monitoring } from '@/lib/v2-monitoring';
+import { useV2ErrorRecovery } from '@/lib/v2-error-recovery';
+import { useV2Cache } from '@/lib/v2-cache-strategy';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import PushNotificationPrompt from '@/components/PushNotificationPrompt';
-import ErrorBoundary from '@/components/ErrorBoundary';
+import DashboardContent from './DashboardContent';
 
-import Image from 'next/image';
-
-
-function slugify(str: string) {
-  return str
-    .toLowerCase()
-    .normalize('NFD').replace(/\p{Diacritic}/gu, '') // verwijder accenten
-    .replace(/&/g, 'en')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '');
-}
-
-function getOnboardingTargetPath(currentStep: number): string {
-  switch (currentStep) {
-    case 0:
-    case 1:
-      return '/dashboard'; // Modal steps - stay on dashboard
-    case 2:
-      return '/dashboard/mijn-missies';
-    case 3:
-    case 4:
-      return '/dashboard/trainingscentrum';
-    case 5:
-      return '/dashboard/brotherhood/forum';
-    default:
-      return '/dashboard';
-  }
-}
-
-const menu = [
-  { label: 'Dashboard', icon: HomeIcon, href: '/dashboard' },
-  { label: 'Onboarding', icon: CheckCircleIcon, href: '/dashboard/onboarding' },
-  { label: 'Mijn Profiel', icon: UserCircleIcon, parent: 'Dashboard', href: '/dashboard/mijn-profiel', isSub: true },
-  { label: 'Inbox', icon: EnvelopeIcon, parent: 'Dashboard', href: '/dashboard/inbox', isSub: true },
-  {
-    label: 'Mijn Missies',
-    icon: FireIcon,
-    parent: 'Dashboard',
-    href: '/dashboard/mijn-missies',
-    isSub: true
-  },
-  {
-    label: 'Challenges',
-    icon: TrophyIcon,
-    parent: 'Dashboard',
-    href: '/dashboard/challenges',
-    isSub: true
-  },
-  { label: 'Mijn Trainingen', icon: AcademicCapIcon, parent: 'Dashboard', href: '/dashboard/mijn-trainingen', isSub: true },
-  { label: 'Voedingsplannen', icon: BookOpenIcon, href: '/dashboard/voedingsplannen' },
-  { label: 'Finance & Business', icon: CurrencyDollarIcon, href: '/dashboard/finance-en-business' },
-  { label: 'Academy', icon: FireIcon, href: '/dashboard/academy' },
-  { label: 'Trainingscentrum', icon: AcademicCapIcon, href: '/dashboard/trainingscentrum' },
-  { label: 'Mind & Focus', icon: ChartBarIcon, href: '/dashboard/mind-en-focus' },
-  { label: 'Brotherhood', icon: UsersIcon, href: '/dashboard/brotherhood' },
-  { label: 'Social Feed', icon: ChatBubbleLeftRightIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/social-feed', isSub: true },
-  { label: 'Forum', icon: FireIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/forum', isSub: true },
-  { label: 'Leden', icon: UsersIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/leden', isSub: true },
-  { label: 'Mijn Groepen & Evenementen', icon: StarIcon, parent: 'Brotherhood', href: '/dashboard/brotherhood/mijn-groepen', isSub: true },
-  { label: 'Boekenkamer', icon: BookOpenIcon, href: '/dashboard/boekenkamer' },
-  { label: 'Badges & Rangen', icon: StarIcon, href: '/dashboard/badges-en-rangen' },
-  { label: 'Producten', icon: ShoppingBagIcon, href: '/dashboard/producten' },
-  { label: 'Mentorship & Coaching', icon: ChatBubbleLeftRightIcon, href: '/dashboard/mentorship-en-coaching' },
-];
-
-const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: { collapsed: boolean, onLinkClick?: () => void, onboardingStatus?: any }) => {
-  const pathname = usePathname();
-  const [openBrotherhood, setOpenBrotherhood] = useState(false);
-  const [openDashboard, setOpenDashboard] = useState(false);
-  const safePathname = pathname || '';
-  const { isOnboarding, highlightedMenu, isTransitioning } = useOnboarding();
-
-  const handleLinkClick = () => {
-    if(onLinkClick) {
-      onLinkClick();
-    }
-  }
-
-  // Auto-open submenu if current page is a submenu item
-  useEffect(() => {
-    const currentItem = menu.find(item => item.href === safePathname);
-    if (currentItem?.parent === 'Dashboard') {
-      setOpenDashboard(true);
-    } else if (currentItem?.parent === 'Brotherhood') {
-      setOpenBrotherhood(true);
-    }
-  }, [safePathname]);
-
-  return (
-    <nav className="flex flex-col gap-2">
-      {menu.map((item) => {
-        // Skip onboarding menu item if onboarding is completed
-        if (item.label === 'Onboarding' && onboardingStatus?.onboarding_completed) {
-          return null;
-        }
-        
-        if (!item.parent) {
-          const isActive = safePathname === item.href;
-          const hasSubmenu = menu.some(sub => sub.parent === item.label);
-
-          if (hasSubmenu) {
-            const isOpen = item.label === 'Dashboard' ? openDashboard : openBrotherhood;
-            const setIsOpen = item.label === 'Dashboard' ? setOpenDashboard : setOpenBrotherhood;
-            const subItems = menu.filter(sub => sub.parent === item.label);
-            const hasActiveSubItem = subItems.some(sub => sub.href === safePathname);
-            
-            return (
-              <div key={item.label} className="group">
-                <button
-                  className={`grid grid-cols-[auto_1fr_auto] items-center gap-4 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide transition-all duration-150 font-figtree w-full text-left ${
-                    isActive || hasActiveSubItem 
-                      ? 'bg-[#8BAE5A] text-black shadow-lg' 
-                      : 'text-white hover:text-[#8BAE5A] hover:bg-[#3A4D23]/50'
-                  } ${collapsed ? 'justify-center px-2' : ''}`}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    if (!collapsed) {
-                      setIsOpen(v => !v);
-                    }
-                  }}
-                  onTouchEnd={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    if (!collapsed) {
-                      setIsOpen(v => !v);
-                    }
-                  }}
-                >
-                  <item.icon className={`w-6 h-6 ${isActive || hasActiveSubItem ? 'text-white' : 'text-[#8BAE5A]'}`} />
-                  {!collapsed && (
-                    <span className="truncate col-start-2">{item.label}</span>
-                  )}
-                  {!collapsed && (
-                    <ChevronDownIcon 
-                      className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} 
-                    />
-                  )}
-                </button>
-                {isOpen && !collapsed && (
-                  <motion.div 
-                    className="ml-4 mt-2 space-y-1"
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    {subItems.map(sub => {
-                      const isSubActive = safePathname === sub.href;
-                      const isHighlighted = isOnboarding && highlightedMenu === sub.label;
-                      return (
-                        <Link
-                          key={sub.label}
-                          href={sub.href}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            if (handleLinkClick) {
-                              handleLinkClick();
-                            }
-                            // Navigate programmatically
-                            window.location.href = sub.href;
-                          }}
-                          onTouchEnd={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            if (handleLinkClick) {
-                              handleLinkClick();
-                            }
-                            // Navigate programmatically
-                            window.location.href = sub.href;
-                          }}
-                          className={`block px-4 py-2 rounded-lg text-sm transition-all duration-150 ${
-                            isSubActive 
-                              ? 'bg-[#8BAE5A] text-black font-semibold' 
-                              : isHighlighted
-                              ? 'bg-[#FFD700]/20 text-[#FFD700] border border-[#FFD700]/30'
-                              : 'text-gray-300 hover:text-[#8BAE5A] hover:bg-[#8BAE5A]/10'
-                          }`}
-                        >
-                          {sub.label}
-                        </Link>
-                      );
-                    })}
-                  </motion.div>
-                )}
-              </div>
-            );
-          }
-
-          const isHighlighted = isOnboarding && highlightedMenu === item.label;
-          return (
-            <Link
-              key={item.label}
-              href={item.href}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                if (handleLinkClick) {
-                  handleLinkClick();
-                }
-                // Navigate programmatically
-                window.location.href = item.href;
-              }}
-              onTouchEnd={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                if (handleLinkClick) {
-                  handleLinkClick();
-                }
-                // Navigate programmatically
-                window.location.href = item.href;
-              }}
-              className={`grid grid-cols-[auto_1fr] items-center gap-4 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide transition-all duration-150 font-figtree ${
-                isActive 
-                  ? 'bg-[#8BAE5A] text-black shadow-lg' 
-                  : isHighlighted 
-                    ? 'bg-[#FFD700]/20 text-[#FFD700] border border-[#FFD700]/30' 
-                    : 'text-white hover:text-[#8BAE5A] hover:bg-[#3A4D23]/50'
-              } ${collapsed ? 'justify-center px-2' : ''}`}
-            >
-              <item.icon className={`w-6 h-6 ${isActive ? 'text-white' : isHighlighted ? 'text-[#FFD700]' : 'text-[#8BAE5A]'}`} />
-              {!collapsed && <span className="truncate">{item.label}</span>}
-            </Link>
-          );
-        }
-        return null;
-      })}
-    </nav>
-  );
-};
-
-function DashboardContent({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
+// V2.0: Enhanced Dashboard Layout with monitoring and error handling
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const router = useRouter();
-  const { user, loading, logoutAndRedirect } = useSupabaseAuth();
-  const isAuthenticated = !!user;
-  const { showDebug, toggleDebug } = useDebug();
-  const { isOnboarding, currentStep, isTransitioning } = useOnboarding();
-  const isTestUser = useTestUser();
-  
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [onboardingStatus, setOnboardingStatus] = useState<any>(null);
-  const [showForcedOnboarding, setShowForcedOnboarding] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user, loading, signOut } = useSupabaseAuth();
+  const { 
+    setUserProfile, 
+    addNotification, 
+    setLoadingState,
+    recordPageLoadTime,
+    setGlobalError,
+    clearAllErrors 
+  } = useV2State();
+  const { trackPageLoad, trackSessionStart, trackFeatureUsage } = useV2Monitoring();
+  const { handleError } = useV2ErrorRecovery();
+  const { set, clearAllCache } = useV2Cache();
 
-  // Define checkOnboardingStatus function first (before useEffect hooks)
-  const checkOnboardingStatus = useCallback(async () => {
-    if (!user) return;
+  // V2.0: Track page load performance
+  useEffect(() => {
+    const startTime = performance.now();
+    
+    return () => {
+      const loadTime = performance.now() - startTime;
+      trackPageLoad('/dashboard', loadTime);
+      recordPageLoadTime('/dashboard', loadTime);
+    };
+  }, [trackPageLoad, recordPageLoadTime]);
 
-    try {
-      // Add timeout to the fetch request
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+  // V2.0: Enhanced authentication check with error recovery
+  useEffect(() => {
+    if (loading) {
+      setLoadingState('auth-check', true);
+      return;
+    }
 
-      const response = await fetch(`/api/onboarding?userId=${user.id}`, {
-        signal: controller.signal
+    setLoadingState('auth-check', false);
+
+    if (!user) {
+      addNotification({
+        type: 'warning',
+        message: 'Je bent niet ingelogd. Je wordt doorgestuurd naar de login pagina.'
       });
       
-      clearTimeout(timeoutId);
-      const data = await response.json();
-
-      if (response.ok) {
-        setOnboardingStatus(data);
-        // Redirect to appropriate onboarding step if not completed
-        if (!data.onboarding_completed) {
-          const currentPath = window.location.pathname;
-          const targetPath = getOnboardingTargetPath(data.current_step);
-          
-          // Only redirect if we're not already on the target path and not on onboarding pages
-          if (currentPath !== targetPath && 
-              !currentPath.includes('/dashboard/onboarding') && 
-              !currentPath.includes('/dashboard/mijn-missies') &&
-              !currentPath.includes('/dashboard/trainingscentrum') &&
-              !currentPath.includes('/dashboard/brotherhood/forum')) {
-            router.push(targetPath);
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Error checking onboarding status:', error);
-      if (error instanceof Error && error.name === 'AbortError') {
-        console.warn('Onboarding check timed out, continuing without onboarding data');
-      }
+      handleError(
+        () => Promise.resolve(),
+        'User not authenticated',
+        'auth',
+        undefined,
+        'dashboard-auth'
+      );
+      
+      router.push('/login');
+      return;
     }
-  }, [user?.id, router]);
 
-  // Check onboarding status on mount and when user changes
+    // V2.0: Track successful session
+    trackSessionStart(user.id);
+    trackFeatureUsage('dashboard-access', user.id);
+    
+    // V2.0: Cache user profile
+    handleError(
+      async () => {
+        setUserProfile(user);
+        await set('user-profile', user, 'user-profile');
+        addNotification({
+          type: 'success',
+          message: `Welkom terug, ${user.full_name || user.email}!`
+        });
+      },
+      'Failed to load user profile',
+      'database',
+      undefined,
+      'user-profile'
+    );
+
+  }, [user, loading, router, setUserProfile, addNotification, setLoadingState, trackSessionStart, trackFeatureUsage, set, handleError]);
+
+  // V2.0: Handle authentication errors
   useEffect(() => {
-    if (user && !loading) {
-      // Add timeout to prevent infinite loading
-      const timeoutId = setTimeout(() => {
-        console.warn('Onboarding check timeout, forcing loading to false');
-        setIsLoading(false);
-      }, 10000); // 10 second timeout
-
-      checkOnboardingStatus().finally(() => {
-        clearTimeout(timeoutId);
-        setIsLoading(false);
-      });
-    } else if (!user && !loading) {
-      setIsLoading(false);
-    }
-  }, [user?.id, loading, checkOnboardingStatus]);
-
-  // Show forced onboarding if user hasn't completed onboarding
-  useEffect(() => {
-    if (onboardingStatus && !onboardingStatus.onboarding_completed) {
-      // Only show modal for steps 0 and 1 (welcome video and goal setting)
-      // For other steps, let the user navigate to the specific pages
-      if (onboardingStatus.current_step <= 1) {
-        setShowForcedOnboarding(true);
-      } else {
-        setShowForcedOnboarding(false);
-      }
-    } else if (onboardingStatus?.onboarding_completed) {
-      setShowForcedOnboarding(false);
-    }
-  }, [onboardingStatus]);
-
-  // Mobile menu resize handler
-  useEffect(() => {
-    // Close mobile menu on resize to desktop
-    const handleResize = () => {
-      if (window.innerWidth >= 768) {
-        setIsMobileMenuOpen(false);
-      }
+    const handleAuthError = (error: any) => {
+      console.error('V2.0: Auth error in dashboard:', error);
+      setGlobalError('Er is een probleem met je authenticatie. Probeer opnieuw in te loggen.');
+      
+      handleError(
+        async () => {
+          await signOut();
+          router.push('/login');
+        },
+        'Authentication error recovery',
+        'auth',
+        undefined,
+        'auth-recovery'
+      );
     };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
-  // Mobile menu click outside handler
+    // Listen for auth errors
+    window.addEventListener('auth-error', handleAuthError);
+    
+    return () => {
+      window.removeEventListener('auth-error', handleAuthError);
+    };
+  }, [setGlobalError, handleError, signOut, router]);
+
+  // V2.0: Cleanup on unmount
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      const target = event.target as HTMLElement;
-      if (isMobileMenuOpen && !target.closest('.mobile-menu')) {
-        setIsMobileMenuOpen(false);
-      }
-    }
+    return () => {
+      clearAllErrors();
+      clearAllCache();
+    };
+  }, [clearAllErrors, clearAllCache]);
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isMobileMenuOpen]);
-
-  // Show loading state while authentication is in progress
-  if (loading || isLoading) {
+  // V2.0: Show loading state
+  if (loading) {
     return (
-      <div className="min-h-screen bg-[#0A0F0A] flex items-center justify-center" suppressHydrationWarning>
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
-          <p className="text-[#8BAE5A]">Laden...</p>
-          {/* Add timeout indicator */}
-          <div className="mt-4">
-            <p className="text-[#B6C948] text-sm">Dashboard wordt geladen</p>
-            <div className="flex flex-col gap-2 mt-4">
-              <button
-                onClick={() => window.location.reload()}
-                className="text-[#8BAE5A] hover:text-[#B6C948] underline text-sm"
-              >
-                Pagina herladen als het te lang duurt
-              </button>
-              <button
-                onClick={() => {
-                  console.warn('Force loading state to false');
-                  setIsLoading(false);
-                }}
-                className="text-[#B6C948] hover:text-[#8BAE5A] underline text-sm"
-              >
-                Forceer doorladen (als er problemen zijn)
-              </button>
-            </div>
+      <ErrorBoundary>
+        <div className="min-h-screen flex items-center justify-center bg-[#181F17]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
+            <p className="text-[#8BAE5A]">Dashboard wordt geladen...</p>
           </div>
         </div>
-      </div>
+      </ErrorBoundary>
     );
   }
 
-  // Redirect to login if no user
+  // V2.0: Show authentication required
   if (!user) {
-    // Preserve current URL for redirect back after login
-    const currentPath = window.location.pathname;
-    if (currentPath !== '/login') {
-      router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
-    } else {
-      router.push('/login');
-    }
-    return null;
+    return (
+      <ErrorBoundary>
+        <div className="min-h-screen flex items-center justify-center bg-[#181F17]">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold text-white mb-2">Authenticatie Vereist</h2>
+            <p className="text-[#8BAE5A] text-sm mb-4">
+              Je moet ingelogd zijn om toegang te krijgen tot het dashboard.
+            </p>
+            <button
+              onClick={() => router.push('/login')}
+              className="px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg font-semibold hover:bg-[#A6C97B] transition-colors"
+            >
+              Inloggen
+            </button>
+          </div>
+        </div>
+      </ErrorBoundary>
+    );
   }
 
-  const handleLogout = async () => {
-    try {
-      console.log('Dashboard logout initiated...');
-      setIsLoggingOut(true);
-      await logoutAndRedirect();
-    } catch (error) {
-      console.error('Error logging out:', error);
-      setIsLoggingOut(false);
-    }
-  };
-
-
-
-  return (
-    <>
-      <style jsx>{`
-        .sidebar-scrollbar::-webkit-scrollbar {
-          width: 8px;
-        }
-        .sidebar-scrollbar::-webkit-scrollbar-track {
-          background: #181F17;
-          border-radius: 4px;
-        }
-        .sidebar-scrollbar::-webkit-scrollbar-thumb {
-          background: #3A4D23;
-          border-radius: 4px;
-        }
-        .sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #4A5D33;
-        }
-        .sidebar-scrollbar {
-          scrollbar-width: thin;
-          scrollbar-color: #3A4D23 #181F17;
-        }
-        
-        /* Mobile specific scrollbar */
-        @media (max-width: 1024px) {
-          .sidebar-scrollbar::-webkit-scrollbar {
-            width: 6px;
-          }
-          .sidebar-scrollbar::-webkit-scrollbar-thumb {
-            background: #8BAE5A;
-          }
-          .sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #B6C948;
-          }
-        }
-      `}</style>
-      <div className="min-h-screen bg-[#0A0F0A] flex" suppressHydrationWarning>
-      {/* Sidebar */}
-      <div className={`bg-[#232D1A] border-r border-[#3A4D23] transition-all duration-300 ease-in-out ${
-        sidebarCollapsed ? 'w-16' : 'w-64 lg:w-72'
-      } hidden lg:flex flex-col fixed h-full z-40`}>
-        {/* Logo - Fixed at top */}
-        <div className="p-4 border-b border-[#3A4D23] flex-shrink-0">
-          <Link href="/dashboard" className="flex items-center justify-center">
-            <Image
-              src="/logo_white-full.svg"
-              alt="Top Tier Men Logo"
-              width={sidebarCollapsed ? 40 : 240}
-              height={40}
-              className={`${sidebarCollapsed ? 'w-10 h-10' : 'w-full h-10'} object-contain hover:opacity-80 transition-opacity`}
-            />
-          </Link>
-        </div>
-
-        {/* Scrollable Navigation Area */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden sidebar-scrollbar">
-          <div className="p-4">
-            <SidebarContent 
-              collapsed={sidebarCollapsed} 
-              onboardingStatus={onboardingStatus}
-            />
-          </div>
-        </div>
-
-        {/* User Profile - Fixed at bottom */}
-        <div className="p-4 border-t border-[#3A4D23] flex-shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-[#8BAE5A] rounded-full flex items-center justify-center">
-              <span className="text-[#0A0F0A] font-bold text-sm">
-                {user.email?.charAt(0).toUpperCase()}
-              </span>
-            </div>
-            {!sidebarCollapsed && (
-              <div className="flex-1 min-w-0">
-                <p className="text-white text-sm font-medium truncate">
-                  {user.email}
-                </p>
-                <p className="text-[#8BAE5A] text-xs">
-                  {user.role?.toLowerCase() === 'admin' ? 'Admin' : 
-                   user.role?.toLowerCase() === 'test' ? 'Test' :
-                   user.email?.toLowerCase().includes('test') ? 'Test' : 'Lid'}
-                </p>
-              </div>
-            )}
-          </div>
-          
-          {/* Debug Toggle for Test Users */}
-          {(isTestUser || user?.role?.toLowerCase() === 'admin' || user?.email?.toLowerCase().includes('test')) && (
-            <div className="mt-3 pt-3 border-t border-[#3A4D23]">
-              <button
-                onClick={toggleDebug}
-                className={`w-full px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
-                  showDebug 
-                    ? 'bg-[#8BAE5A] text-black' 
-                    : 'bg-[#3A4D23] text-[#8BAE5A] hover:bg-[#4A5D33]'
-                }`}
-              >
-                {!sidebarCollapsed ? 'Debug Mode' : 'D'}
-                {showDebug && !sidebarCollapsed && ' ✓'}
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Collapse Button - Fixed at bottom */}
-        <div className="p-4 border-t border-[#3A4D23] flex-shrink-0">
-          <button
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="w-full p-2 bg-[#181F17] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors flex items-center justify-center"
-          >
-            {sidebarCollapsed ? (
-              <ChevronRightIcon className="w-4 h-4" />
-            ) : (
-              <ChevronLeftIcon className="w-4 h-4" />
-            )}
-          </button>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className={`flex-1 transition-all duration-300 ease-in-out ${
-        sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64 lg:ml-72'
-      }`}>
-        {/* Top Bar */}
-        <div className="bg-[#232D1A] border-b border-[#3A4D23] p-4 flex items-center justify-between">
-          <div className="flex items-center gap-2 sm:gap-4">
-            {/* Mobile/Tablet Menu Button */}
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-2 bg-[#181F17] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors"
-            >
-              <Bars3Icon className="w-5 h-5 sm:w-6 sm:h-6" />
-            </button>
-
-            {/* Page Title */}
-            <h1 className="text-base sm:text-lg md:text-xl font-bold text-white">
-              {menu.find(item => item.href === pathname)?.label || 'Dashboard'}
-            </h1>
-          </div>
-
-          <div className="flex items-center gap-2 sm:gap-4">
-            {/* Admin Dashboard Button */}
-            {user.role?.toLowerCase() === 'admin' && (
-              <Link
-                href="/dashboard-admin"
-                className="px-2 sm:px-3 md:px-4 py-2 bg-[#8BAE5A] text-[#0A0F0A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold flex items-center gap-1 md:gap-2 text-xs sm:text-sm md:text-base"
-              >
-                <UserGroupIcon className="w-3 h-3 sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline">Admin Dashboard</span>
-                <span className="sm:hidden">Admin</span>
-              </Link>
-            )}
-
-            {/* Notifications */}
-            <button className="p-2 bg-[#181F17] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors">
-              <BellIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-            </button>
-
-            {/* Messages */}
-            <button className="p-2 bg-[#181F17] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors">
-              <EnvelopeIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-            </button>
-
-            {/* Logout */}
-            <button
-              onClick={handleLogout}
-              disabled={isLoggingOut}
-              className="px-2 sm:px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
-            >
-              {isLoggingOut ? (
-                <>
-                  <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  <span className="hidden sm:inline">Uitloggen...</span>
-                  <span className="sm:hidden">...</span>
-                </>
-              ) : (
-                <>
-                  <XMarkIcon className="w-3 h-3 sm:w-4 sm:h-4" />
-                  <span className="hidden sm:inline">Uitloggen</span>
-                  <span className="sm:hidden">x Uit</span>
-                </>
-              )}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile/Tablet Menu */}
-        <AnimatePresence>
-          {isMobileMenuOpen && (
-            <motion.div 
-              className="lg:hidden fixed inset-0 z-50"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              {/* Backdrop */}
-              <motion.div 
-                className="absolute inset-0 bg-black bg-opacity-50"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                onClick={() => setIsMobileMenuOpen(false)}
-              />
-              
-              {/* Sidebar */}
-              <motion.div 
-                className="absolute left-0 top-0 h-full w-[85%] max-w-[400px] bg-[#232D1A] flex flex-col shadow-2xl"
-                initial={{ x: '-100%' }}
-                animate={{ x: 0 }}
-                exit={{ x: '-100%' }}
-                transition={{ 
-                  type: "spring", 
-                  damping: 25, 
-                  stiffness: 200,
-                  duration: 0.3
-                }}
-                onClick={(e) => e.stopPropagation()}
-              >
-                {/* Header */}
-                <div className="p-4 border-b border-[#3A4D23] flex-shrink-0 bg-[#232D1A] z-10">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Image
-                        src="/logo_white-full.svg"
-                        alt="Top Tier Men Logo"
-                        width={120}
-                        height={30}
-                        className="h-8 w-auto object-contain"
-                      />
-                    </div>
-                    <motion.button
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="p-2 bg-[#181F17] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <XMarkIcon className="w-5 h-5 sm:w-6 sm:h-6" />
-                    </motion.button>
-                  </div>
-                </div>
-                
-                {/* Scrollable Content */}
-                <div className="flex-1 overflow-y-auto overflow-x-hidden sidebar-scrollbar" style={{ height: 'calc(100vh - 80px)', maxHeight: 'calc(100vh - 80px)' }}>
-                  <div className="p-4 pb-8">
-                    <SidebarContent 
-                      collapsed={false} 
-                      onLinkClick={() => setIsMobileMenuOpen(false)}
-                      onboardingStatus={onboardingStatus}
-                    />
-                  </div>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Page Content */}
-        <div className="p-3 sm:p-4 md:p-6 lg:p-8">
-          {/* Main Content */}
-          <div className={`transition-all duration-300 ${isTransitioning ? 'opacity-50 scale-95' : 'opacity-100 scale-100'}`}>
-            {children}
-          </div>
-        </div>
-      </div>
-
-      {/* Forced Onboarding Modal */}
-      <ForcedOnboardingModal 
-        isOpen={showForcedOnboarding}
-        onComplete={() => {
-          setShowForcedOnboarding(false);
-          // Don't refresh status here as the modal handles navigation
-        }}
-      />
-
-      {/* Debug Panel */}
-              {/* {showDebug && <DebugPanel />} */}
-
-      {/* Test User Feedback */}
-      <TestUserFeedback 
-        isTestUser={isTestUser}
-        currentPage={pathname || '/'}
-        userRole={user?.role}
-        onNoteCreated={(note) => {
-          console.log('Test note created:', note);
-          // In a real app, this would send the note to the server
-        }}
-      />
-
-      {/* PWA Install Prompt */}
-      <PWAInstallPrompt />
-      
-      {/* Push Notification Prompt */}
-      <PushNotificationPrompt />
-      
-      
-    </div>
-    </>
-  );
-}
-
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  // V2.0: Main dashboard layout with error boundary
   return (
     <ErrorBoundary>
-      <OnboardingProvider>
-        <DashboardContent>{children}</DashboardContent>
-      </OnboardingProvider>
+      <div className="min-h-screen bg-[#181F17]">
+        {/* V2.0: Push notification prompt */}
+        <PushNotificationPrompt />
+        
+        {/* V2.0: Main content with existing dashboard structure */}
+        <DashboardContent>
+          {children}
+        </DashboardContent>
+      </div>
     </ErrorBoundary>
   );
 } 
