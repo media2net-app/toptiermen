@@ -106,7 +106,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const dateRange = searchParams.get('dateRange') || 'maximum';
     const includeInsights = searchParams.get('includeInsights') !== 'false';
-    const useManualData = searchParams.get('useManualData') === 'true';
+    const useManualData = searchParams.get('useManualData') !== 'false'; // Default to true
 
     console.log('📊 Fetching comprehensive Facebook analytics data...');
     console.log('🔧 Date range:', dateRange);
