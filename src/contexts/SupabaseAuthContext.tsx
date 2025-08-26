@@ -250,14 +250,14 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         if (!isMounted) return;
         dispatch({ type: 'SET_LOADING', payload: true });
         
-        // V2.0: Reduced timeout for faster loading
+        // V2.0: Immediate timeout for development
         const timeoutId = setTimeout(() => {
           if (!isMounted) return;
-          console.warn('⚠️ V2.0: Auth initialization timeout, forcing loading to false');
+          console.log('✅ V2.0: Auth timeout - allowing login form to show');
           dispatch({ type: 'SET_LOADING', payload: false });
           dispatch({ type: 'SET_INITIALIZED', payload: true });
-          dispatch({ type: 'SET_USER', payload: null }); // Ensure user is null
-        }, SESSION_CONFIG.AUTH_TIMEOUT);
+          dispatch({ type: 'SET_USER', payload: null });
+        }, 1000); // 1 second timeout
 
         const { data: { session }, error } = await supabase.auth.getSession();
         
@@ -287,27 +287,24 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         clearTimeout(timeoutId);
         if (isMounted) {
           dispatch({ type: 'SET_INITIALIZED', payload: true });
+          dispatch({ type: 'SET_LOADING', payload: false });
         }
       } catch (error) {
         if (!isMounted) return;
         console.error('V2.0: Error in getInitialSession:', error);
         dispatch({ type: 'SET_ERROR', payload: 'Failed to initialize authentication' });
-      } finally {
-        if (isMounted) {
-          dispatch({ type: 'SET_LOADING', payload: false });
-        }
+        dispatch({ type: 'SET_LOADING', payload: false });
       }
     };
 
     getInitialSession();
 
-    // V2.0: Reduced session check interval
-    const interval = setInterval(() => {
-      if (isMounted) {
-        checkSessionHealth();
-      }
-    }, SESSION_CONFIG.CHECK_INTERVAL);
-    console.log(`🔄 V2.0: Session health check interval set to ${SESSION_CONFIG.CHECK_INTERVAL / 60000} minutes`);
+    // V2.0: Disabled session health check for now
+    // const interval = setInterval(() => {
+    //   if (isMounted) {
+    //     checkSessionHealth();
+    //   }
+    // }, SESSION_CONFIG.CHECK_INTERVAL);
 
     // V2.0: Simplified auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -342,7 +339,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     return () => {
       isMounted = false;
       subscription.unsubscribe();
-      clearInterval(interval);
+      // clearInterval(interval); // Disabled for now
     };
   }, [fetchUserProfile, checkSessionHealth]);
 
