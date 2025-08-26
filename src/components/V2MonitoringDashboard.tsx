@@ -19,6 +19,9 @@ export default function V2MonitoringDashboard() {
   });
 
   useEffect(() => {
+    // V2.0: Completely disabled to prevent infinite loops
+    return;
+    
     // Only run when dashboard becomes visible
     if (!isVisible) return;
     
@@ -36,6 +39,9 @@ export default function V2MonitoringDashboard() {
   }, [isVisible]); // Simplified dependencies
 
   const updateMetrics = () => {
+    // V2.0: Completely disabled to prevent infinite loops
+    return;
+    
     // Simulate real-time data
     setMetrics(prev => ({
       ...prev,
