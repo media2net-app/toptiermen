@@ -35,7 +35,7 @@ const supabase = getSupabaseClient();
 const SESSION_CONFIG = {
   CHECK_INTERVAL: 5 * 60 * 1000,        // 5 minutes (was 60)
   WARNING_TIME: 2 * 60 * 1000,          // 2 minutes before expiry (was 30)
-  AUTH_TIMEOUT: 5000,                   // 5 seconds (was 15)
+  AUTH_TIMEOUT: 2000,                   // 2 seconds (was 5)
   MAX_RETRIES: 2,                       // Reduced retries (was 3)
   RETRY_DELAY: 1000                     // 1 second base delay
 };
@@ -256,6 +256,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
           console.warn('⚠️ V2.0: Auth initialization timeout, forcing loading to false');
           dispatch({ type: 'SET_LOADING', payload: false });
           dispatch({ type: 'SET_INITIALIZED', payload: true });
+          dispatch({ type: 'SET_USER', payload: null }); // Ensure user is null
         }, SESSION_CONFIG.AUTH_TIMEOUT);
 
         const { data: { session }, error } = await supabase.auth.getSession();
