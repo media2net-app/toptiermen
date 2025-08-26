@@ -255,8 +255,20 @@ export class V2MonitoringManager {
     });
   }
   
-  // V2.0: Track feature usage
+  // V2.0: Track feature usage with debouncing
+  private featureUsageCache = new Map<string, number>();
+  
   trackFeatureUsage(feature: string, userId?: string): void {
+    const key = `${feature}-${userId || 'anonymous'}`;
+    const now = Date.now();
+    const lastTracked = this.featureUsageCache.get(key) || 0;
+    
+    // Debounce: only track once per second per feature-user combination
+    if (now - lastTracked < 1000) {
+      return;
+    }
+    
+    this.featureUsageCache.set(key, now);
     this.trackUserAction('feature_usage', feature, userId);
   }
   
@@ -585,18 +597,23 @@ export function useV2Monitoring() {
   };
 }
 
-// V2.0: Performance monitoring hook
+// V2.0: Performance monitoring hook with debouncing
 export function useV2PerformanceMonitoring() {
   const { trackPerformance, trackPageLoad, trackApiCall, trackComponentRender } = useV2Monitoring();
   
-  // V2.0: Track component performance
+  // V2.0: Track component performance with debouncing
   const trackComponentPerformance = React.useCallback((componentName: string) => {
     const startTime = performance.now();
+    const key = `component-${componentName}`;
     
     return () => {
       const endTime = performance.now();
       const renderTime = endTime - startTime;
-      trackComponentRender(componentName, renderTime);
+      
+      // Only track if render time is significant (> 10ms)
+      if (renderTime > 10) {
+        trackComponentRender(componentName, renderTime);
+      }
     };
   }, [trackComponentRender]);
   

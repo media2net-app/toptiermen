@@ -77,7 +77,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
       onLinkClick();
     }
     
-    // V2.0: Track navigation
+    // V2.0: Track navigation (debounced by the monitoring system)
     trackFeatureUsage(`nav-${label.toLowerCase().replace(/\s+/g, '-')}`, user?.id);
   };
 

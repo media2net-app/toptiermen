@@ -19,16 +19,20 @@ export default function V2MonitoringDashboard() {
   });
 
   useEffect(() => {
-    // Track dashboard usage
-    trackFeatureUsage('monitoring-dashboard-view', state.user.profile?.id);
+    // Track dashboard usage only once when component mounts
+    if (isVisible) {
+      trackFeatureUsage('monitoring-dashboard-view', state.user.profile?.id);
+    }
     
     // Simulate real-time metrics updates
     const interval = setInterval(() => {
-      updateMetrics();
+      if (isVisible) {
+        updateMetrics();
+      }
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [trackFeatureUsage, state.user.profile?.id]);
+  }, [isVisible, trackFeatureUsage, state.user.profile?.id]);
 
   const updateMetrics = () => {
     // Simulate real-time data
