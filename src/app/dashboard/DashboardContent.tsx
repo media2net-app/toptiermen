@@ -3,10 +3,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
-import { useV2State } from '@/contexts/V2StateContext';
-import { useV2Monitoring } from '@/lib/v2-monitoring';
-import { useV2ErrorRecovery } from '@/lib/v2-error-recovery';
-import { useV2Cache } from '@/lib/v2-cache-strategy';
+// import { useV2State } from '@/contexts/V2StateContext';
+// import { useV2Monitoring } from '@/lib/v2-monitoring';
+// import { useV2ErrorRecovery } from '@/lib/v2-error-recovery';
+// import { useV2Cache } from '@/lib/v2-cache-strategy';
 import { OnboardingProvider, useOnboarding } from '@/contexts/OnboardingContext';
 import { useDebug } from '@/contexts/DebugContext';
 import { useTestUser } from '@/hooks/useTestUser';
@@ -62,7 +62,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
   const [openBrotherhood, setOpenBrotherhood] = useState(false);
   const [openDashboard, setOpenDashboard] = useState(false);
   const { isOnboarding, highlightedMenu } = useOnboarding();
-  const { trackFeatureUsage } = useV2Monitoring();
+  // const { trackFeatureUsage } = useV2Monitoring();
   const { user } = useSupabaseAuth();
   
   const safePathname = pathname || '';
@@ -204,9 +204,9 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
   const { showDebug, toggleDebug } = useDebug();
   const { isOnboarding, isTransitioning } = useOnboarding();
   const isTestUser = useTestUser();
-  const { addNotification, setLoadingState } = useV2State();
-  const { trackFeatureUsage } = useV2Monitoring();
-  const { handleError } = useV2ErrorRecovery();
+  // const { addNotification, setLoadingState } = useV2State();
+  // const { trackFeatureUsage } = useV2Monitoring();
+  // const { handleError } = useV2ErrorRecovery();
   
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -215,42 +215,43 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
   const [showForcedOnboarding, setShowForcedOnboarding] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // V2.0: Enhanced onboarding status check with error recovery
+  // V2.0: Enhanced onboarding status check with error recovery - DISABLED
   const checkOnboardingStatus = useCallback(async () => {
     if (!user) return;
 
     try {
-      setLoadingState('onboarding-check', true);
+      // setLoadingState('onboarding-check', true);
       
       const response = await fetch(`/api/onboarding?userId=${user.id}`);
       const data = await response.json();
 
       if (response.ok) {
         setOnboardingStatus(data);
-        trackFeatureUsage('onboarding-status-check', user.id);
+        // trackFeatureUsage('onboarding-status-check', user.id);
       } else {
         throw new Error('Failed to fetch onboarding status');
       }
     } catch (error) {
-      handleError(
-        async () => {
-          console.error('Error checking onboarding status:', error);
-          addNotification({
-            type: 'error',
-            message: 'Kon onboarding status niet laden',
-            read: false
-          });
-        },
-        'Onboarding status check failed',
-        'network',
-        undefined,
-        'onboarding-check'
-      );
+      console.error('Error checking onboarding status:', error);
+      // handleError(
+      //   async () => {
+      //     console.error('Error checking onboarding status:', error);
+      //     addNotification({
+      //       type: 'error',
+      //       message: 'Kon onboarding status niet laden',
+      //       read: false
+      //     });
+      //   },
+      //   'Onboarding status check failed',
+      //   'network',
+      //   undefined,
+      //   'onboarding-check'
+      // );
     } finally {
-      setLoadingState('onboarding-check', false);
+      // setLoadingState('onboarding-check', false);
       setIsLoading(false);
     }
-  }, [user?.id, setLoadingState, trackFeatureUsage, handleError, addNotification]);
+  }, [user?.id]);
 
   // Check onboarding status on mount
   useEffect(() => {
@@ -272,31 +273,32 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
     }
   }, [onboardingStatus]);
 
-  // V2.0: Enhanced logout with error recovery
+  // V2.0: Enhanced logout with error recovery - DISABLED
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true);
-      setLoadingState('logout', true);
+      // setLoadingState('logout', true);
       
-      trackFeatureUsage('logout', user?.id);
+      // trackFeatureUsage('logout', user?.id);
       
-      await handleError(
-        async () => {
-          await logoutAndRedirect();
-        },
-        'Logout failed',
-        'auth',
-        undefined,
-        'logout'
-      );
+      // await handleError(
+      //   async () => {
+      //     await logoutAndRedirect();
+      //   },
+      //   'Logout failed',
+      //   'auth',
+      //   undefined,
+      //   'logout'
+      // );
+      await logoutAndRedirect();
     } catch (error) {
-      addNotification({
-        type: 'error',
-        message: 'Uitloggen mislukt. Probeer het opnieuw.',
-        read: false
-      });
+      // addNotification({
+      //   type: 'error',
+      //   message: 'Uitloggen mislukt. Probeer het opnieuw.',
+      //   read: false
+      // });
       setIsLoggingOut(false);
-      setLoadingState('logout', false);
+      // setLoadingState('logout', false);
     }
   };
 
