@@ -29,8 +29,9 @@ export interface DashboardPreferences {
 
 // V2.0: Dashboard hook with enhanced functionality
 export function useV2Dashboard() {
-  const { user } = useV2State();
-  const { set, get, clearCacheData } = useV2Cache();
+  const { state } = useV2State();
+  const user = state.user.profile;
+  const { set, get, clear } = useV2Cache();
   const { handleError } = useV2ErrorRecovery();
   const { trackFeatureUsage, trackApiCall } = useV2Monitoring();
   
@@ -149,7 +150,7 @@ export function useV2Dashboard() {
       setPreferences(updatedData.preferences);
       
       // V2.0: Clear cached data to force refresh
-      await clearCacheData('dashboard-data');
+      await clear();
       
       // V2.0: Refresh dashboard data
       await fetchDashboardData(true);
@@ -163,7 +164,7 @@ export function useV2Dashboard() {
     } finally {
       setLoading(false);
     }
-  }, [user?.id, handleError, trackFeatureUsage, trackApiCall, clearCacheData, fetchDashboardData]);
+  }, [user?.id, handleError, trackFeatureUsage, trackApiCall, clear, fetchDashboardData]);
 
   // V2.0: Mark notification as read
   const markNotificationRead = useCallback(async (notificationId: string) => {
@@ -330,7 +331,8 @@ async function getAuthToken(): Promise<string> {
 // V2.0: Dashboard analytics hook
 export function useV2DashboardAnalytics() {
   const { trackFeatureUsage, trackUserAction } = useV2Monitoring();
-  const { user } = useV2State();
+  const { state } = useV2State();
+  const user = state.user.profile;
 
   // V2.0: Track dashboard interactions
   const trackDashboardInteraction = useCallback((action: string, details?: any) => {

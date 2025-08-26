@@ -23,9 +23,9 @@ function ResetPasswordContent() {
     setMounted(true);
     
     // Check if we have the necessary URL parameters for password reset
-    const accessToken = searchParams.get('access_token');
-    const refreshToken = searchParams.get('refresh_token');
-    const type = searchParams.get('type');
+    const accessToken = searchParams?.get('access_token');
+    const refreshToken = searchParams?.get('refresh_token');
+    const type = searchParams?.get('type');
     
     console.log('🔍 Reset password URL params:', { accessToken: !!accessToken, refreshToken: !!refreshToken, type });
     

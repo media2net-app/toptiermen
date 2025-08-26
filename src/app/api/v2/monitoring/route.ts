@@ -17,7 +17,7 @@ export const GET = withApiHandler(async (request: NextRequest) => {
   }
 
   // Log request
-  logApiRequest(request, 'GET_MONITORING', null);
+  logApiRequest(request, 'GET_MONITORING', undefined);
 
   try {
     // V2.0: Collect system metrics

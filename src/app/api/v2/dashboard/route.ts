@@ -12,7 +12,8 @@ import {
   buildSortQuery,
   safeDbOperation,
   cacheHeaders,
-  noCacheHeaders
+  noCacheHeaders,
+  getSupabaseClient
 } from '@/lib/v2-api-utils';
 
 

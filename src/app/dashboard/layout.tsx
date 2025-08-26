@@ -29,7 +29,7 @@ export default function DashboardLayout({
   } = useV2State();
   const { trackPageLoad, trackSessionStart, trackFeatureUsage } = useV2Monitoring();
   const { handleError } = useV2ErrorRecovery();
-  const { set, clearAllCache } = useV2Cache();
+  const { set, clear } = useV2Cache();
 
   // V2.0: Track page load performance
   useEffect(() => {
@@ -54,7 +54,8 @@ export default function DashboardLayout({
     if (!user) {
       addNotification({
         type: 'warning',
-        message: 'Je bent niet ingelogd. Je wordt doorgestuurd naar de login pagina.'
+        message: 'Je bent niet ingelogd. Je wordt doorgestuurd naar de login pagina.',
+        read: false
       });
       
       handleError(
@@ -80,7 +81,8 @@ export default function DashboardLayout({
         await set('user-profile', user, 'user-profile');
         addNotification({
           type: 'success',
-          message: `Welkom terug, ${user.full_name || user.email}!`
+          message: `Welkom terug, ${user.full_name || user.email}!`,
+          read: false
         });
       },
       'Failed to load user profile',
@@ -121,9 +123,9 @@ export default function DashboardLayout({
   useEffect(() => {
     return () => {
       clearAllErrors();
-      clearAllCache();
+      clear();
     };
-  }, [clearAllErrors, clearAllCache]);
+  }, [clearAllErrors, clear]);
 
   // V2.0: Show loading state
   if (loading) {

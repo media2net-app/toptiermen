@@ -12,7 +12,8 @@ import {
   buildSortQuery,
   safeDbOperation,
   cacheHeaders,
-  noCacheHeaders
+  noCacheHeaders,
+  validateRequiredFields
 } from '@/lib/v2-api-utils';
 
 // V2.0: Users API Route with standardized patterns
@@ -66,6 +67,10 @@ export const GET = withApiHandler(async (request: NextRequest) => {
 
     if (dbError || result?.error) {
       return createErrorResponse(dbError || result?.error, 500);
+    }
+
+    if (!result) {
+      return createErrorResponse('No data returned from database', 500);
     }
 
     const { data, count } = result;

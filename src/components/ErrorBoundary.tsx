@@ -128,9 +128,7 @@ export function useErrorHandler() {
     // Example: logErrorToService(error, errorInfo);
     
     // Optionally show a toast notification
-    if (typeof window !== 'undefined' && window.toast) {
-      window.toast.error('Er is een fout opgetreden. Probeer het opnieuw.');
-    }
+    // Note: Toast functionality removed for build compatibility
   };
 
   return { handleError };

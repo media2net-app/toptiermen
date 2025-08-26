@@ -228,7 +228,8 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
           console.error('Error checking onboarding status:', error);
           addNotification({
             type: 'error',
-            message: 'Kon onboarding status niet laden'
+            message: 'Kon onboarding status niet laden',
+            read: false
           });
         },
         'Onboarding status check failed',
@@ -282,7 +283,8 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
     } catch (error) {
       addNotification({
         type: 'error',
-        message: 'Uitloggen mislukt. Probeer het opnieuw.'
+        message: 'Uitloggen mislukt. Probeer het opnieuw.',
+        read: false
       });
       setIsLoggingOut(false);
       setLoadingState('logout', false);

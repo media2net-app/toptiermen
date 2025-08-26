@@ -1,4 +1,5 @@
 // V2.0: Comprehensive Monitoring System
+import React from 'react';
 import { useV2State } from '@/contexts/V2StateContext';
 
 // V2.0: Metric types
