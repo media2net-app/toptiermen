@@ -327,8 +327,8 @@ export default function MijnProfiel() {
       }
 
       // Register service worker
-      const registration = await navigator.serviceWorker.register('/sw.js');
-      await navigator.serviceWorker.ready;
+      // const registration = await navigator.serviceWorker.register('/sw.js');
+      // await navigator.serviceWorker.ready;
 
       // Subscribe to push notifications
       const subscription = await registration.pushManager.subscribe({

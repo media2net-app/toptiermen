@@ -70,38 +70,38 @@ export const usePWA = () => {
     };
   }, []);
 
-  // Register service worker
-  useEffect(() => {
-    const registerServiceWorker = async () => {
-      if ('serviceWorker' in navigator) {
-        try {
-          const reg = await navigator.serviceWorker.register('/sw.js');
-          setRegistration(reg);
-          setPwaState(prev => ({ ...prev, isServiceWorkerRegistered: true }));
+  // Register service worker - DISABLED to prevent navigation issues
+  // useEffect(() => {
+  //   const registerServiceWorker = async () => {
+  //     if ('serviceWorker' in navigator) {
+  //       try {
+  //         const reg = await navigator.serviceWorker.register('/sw.js');
+  //         setRegistration(reg);
+  //         setPwaState(prev => ({ ...prev, isServiceWorkerRegistered: true }));
           
-          console.log('✅ Service Worker registered:', reg);
+  //         console.log('✅ Service Worker registered:', reg);
           
-          // Check for updates
-          reg.addEventListener('updatefound', () => {
-            const newWorker = reg.installing;
-            if (newWorker) {
-              newWorker.addEventListener('statechange', () => {
-                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  // New version available
-                  console.log('🔄 New version available');
-                }
-              });
-            }
-          });
+  //         // Check for updates
+  //         reg.addEventListener('updatefound', () => {
+  //           const newWorker = reg.installing;
+  //           if (newWorker) {
+  //             newWorker.addEventListener('statechange', () => {
+  //               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+  //                 // New version available
+  //                 console.log('🔄 New version available');
+  //               }
+  //             });
+  //           }
+  //         });
           
-        } catch (error) {
-          console.error('❌ Service Worker registration failed:', error);
-        }
-      }
-    };
+  //       } catch (error) {
+  //         console.error('❌ Service Worker registration failed:', error);
+  //       }
+  //     }
+  //   };
 
-    registerServiceWorker();
-  }, []);
+  //   registerServiceWorker();
+  // }, []);
 
   // Check push permission
   useEffect(() => {
