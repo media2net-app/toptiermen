@@ -196,20 +196,20 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         return;
       }
 
-      // Check if session is about to expire
-      const expiresAt = session.expires_at;
-      if (expiresAt) {
-        const now = Math.floor(Date.now() / 1000);
-        const timeUntilExpiry = expiresAt - now;
+      // Check if session is about to expire - DISABLED
+      // const expiresAt = session?.expires_at;
+      // if (expiresAt && typeof expiresAt === 'number') {
+      //   const now = Math.floor(Date.now() / 1000);
+      //   const timeUntilExpiry = expiresAt - now;
         
-        if (timeUntilExpiry < SESSION_CONFIG.WARNING_TIME && timeUntilExpiry > 0) {
-          console.log('⚠️ V2.0: Session expiring soon, attempting refresh...');
-          const refreshed = await refreshSession();
-          if (!refreshed) {
-            console.warn('V2.0: Failed to refresh session, user may need to re-authenticate');
-          }
-        }
-      }
+      //   if (timeUntilExpiry < SESSION_CONFIG.WARNING_TIME && timeUntilExpiry > 0) {
+      //     console.log('⚠️ V2.0: Session expiring soon, attempting refresh...');
+      //     const refreshed = await refreshSession();
+      //     if (!refreshed) {
+      //       console.warn('V2.0: Failed to refresh session, user may need to re-authenticate');
+      //     }
+      //   }
+      // }
     } catch (error) {
       console.error('V2.0: Session health check failed:', error);
     }
