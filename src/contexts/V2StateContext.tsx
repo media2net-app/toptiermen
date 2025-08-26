@@ -471,51 +471,51 @@ export function V2StateProvider({ children }: V2StateProviderProps) {
   // V2.0: Action creators
   const setUserProfile = useCallback((profile: any) => {
     dispatch({ type: 'SET_USER_PROFILE', payload: profile });
-  }, []);
+  }, [dispatch]);
   
   const setUserPreferences = useCallback((preferences: any) => {
     dispatch({ type: 'SET_USER_PREFERENCES', payload: preferences });
-  }, []);
+  }, [dispatch]);
   
   const clearUserData = useCallback(() => {
     dispatch({ type: 'CLEAR_USER_DATA' });
-  }, []);
+  }, [dispatch]);
   
   const setTheme = useCallback((theme: 'light' | 'dark' | 'auto') => {
     dispatch({ type: 'SET_THEME', payload: theme });
-  }, []);
+  }, [dispatch]);
   
   const toggleSidebar = useCallback(() => {
     dispatch({ type: 'TOGGLE_SIDEBAR' });
-  }, []);
+  }, [dispatch]);
   
   const addNotification = useCallback((notification: Omit<V2AppState['ui']['notifications'][0], 'id' | 'timestamp'>) => {
     dispatch({ type: 'ADD_NOTIFICATION', payload: notification });
-  }, []);
+  }, [dispatch]);
   
   const removeNotification = useCallback((id: string) => {
     dispatch({ type: 'REMOVE_NOTIFICATION', payload: id });
-  }, []);
+  }, [dispatch]);
   
   const markNotificationRead = useCallback((id: string) => {
     dispatch({ type: 'MARK_NOTIFICATION_READ', payload: id });
-  }, []);
+  }, [dispatch]);
   
   const clearAllNotifications = useCallback(() => {
     dispatch({ type: 'CLEAR_ALL_NOTIFICATIONS' });
-  }, []);
+  }, [dispatch]);
   
   const setModalState = useCallback((key: string, isOpen: boolean) => {
     dispatch({ type: 'SET_MODAL_STATE', payload: { key, isOpen } });
-  }, []);
+  }, [dispatch]);
   
   const setLoadingState = useCallback((key: string, isLoading: boolean) => {
     dispatch({ type: 'SET_LOADING_STATE', payload: { key, isLoading } });
-  }, []);
+  }, [dispatch]);
   
   const setCacheData = useCallback((key: string, data: any, ttl?: number) => {
     dispatch({ type: 'SET_CACHE_DATA', payload: { key, data, ttl } });
-  }, []);
+  }, [dispatch]);
   
   const getCacheData = useCallback((key: string) => {
     const entry = state.data.cache[key];
@@ -528,19 +528,19 @@ export function V2StateProvider({ children }: V2StateProviderProps) {
     }
     
     return entry.data;
-  }, []); // Remove dependency to prevent infinite loops
+  }, [dispatch]); // Add dispatch dependency
   
   const clearCacheData = useCallback((key: string) => {
     dispatch({ type: 'CLEAR_CACHE_DATA', payload: key });
-  }, []);
+  }, [dispatch]);
   
   const clearAllCache = useCallback(() => {
     dispatch({ type: 'CLEAR_ALL_CACHE' });
-  }, []);
+  }, [dispatch]);
   
   const setLastSync = useCallback((key: string) => {
     dispatch({ type: 'SET_LAST_SYNC', payload: { key, timestamp: Date.now() } });
-  }, []);
+  }, [dispatch]);
   
   const needsSync = useCallback((key: string, maxAge: number = 5 * 60 * 1000) => {
     const lastSync = state.data.lastSync[key];
@@ -550,27 +550,27 @@ export function V2StateProvider({ children }: V2StateProviderProps) {
   
   const setGlobalError = useCallback((error: string | null) => {
     dispatch({ type: 'SET_GLOBAL_ERROR', payload: error });
-  }, []);
+  }, [dispatch]);
   
   const setComponentError = useCallback((key: string, error: string | null) => {
     dispatch({ type: 'SET_COMPONENT_ERROR', payload: { key, error } });
-  }, []);
+  }, [dispatch]);
   
   const clearAllErrors = useCallback(() => {
     dispatch({ type: 'CLEAR_ALL_ERRORS' });
-  }, []);
+  }, [dispatch]);
   
   const recordPageLoadTime = useCallback((page: string, time: number) => {
     dispatch({ type: 'RECORD_PAGE_LOAD_TIME', payload: { page, time } });
-  }, []);
+  }, [dispatch]);
   
   const recordApiCallTime = useCallback((endpoint: string, time: number) => {
     dispatch({ type: 'RECORD_API_CALL_TIME', payload: { endpoint, time } });
-  }, []);
+  }, [dispatch]);
   
   const clearPerformanceData = useCallback(() => {
     dispatch({ type: 'CLEAR_PERFORMANCE_DATA' });
-  }, []);
+  }, [dispatch]);
   
   // V2.0: Utility functions
   const isLoading = useCallback((key: string) => {

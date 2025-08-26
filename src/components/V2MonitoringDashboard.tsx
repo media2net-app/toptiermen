@@ -22,13 +22,15 @@ export default function V2MonitoringDashboard() {
     // Only run when dashboard becomes visible
     if (!isVisible) return;
     
-    // Track dashboard usage only once
-    trackFeatureUsage('monitoring-dashboard-view', state.user.profile?.id);
+    // Track dashboard usage only once (disabled in development)
+    if (process.env.NODE_ENV === 'production') {
+      trackFeatureUsage('monitoring-dashboard-view', state.user.profile?.id);
+    }
     
-    // Simulate real-time metrics updates
+    // Simulate real-time metrics updates (reduced frequency)
     const interval = setInterval(() => {
       updateMetrics();
-    }, 10000); // Increased to 10 seconds to reduce frequency
+    }, 30000); // Increased to 30 seconds to reduce frequency
 
     return () => clearInterval(interval);
   }, [isVisible]); // Simplified dependencies
