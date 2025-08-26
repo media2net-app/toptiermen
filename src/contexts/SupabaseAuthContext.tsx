@@ -243,12 +243,16 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
 
   // V2.0: Simplified initial session loading
   useEffect(() => {
+    let isMounted = true;
+    
     const getInitialSession = async () => {
       try {
+        if (!isMounted) return;
         dispatch({ type: 'SET_LOADING', payload: true });
         
         // V2.0: Reduced timeout for faster loading
         const timeoutId = setTimeout(() => {
+          if (!isMounted) return;
           console.warn('⚠️ V2.0: Auth initialization timeout, forcing loading to false');
           dispatch({ type: 'SET_LOADING', payload: false });
           dispatch({ type: 'SET_INITIALIZED', payload: true });
@@ -256,11 +260,15 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
 
         const { data: { session }, error } = await supabase.auth.getSession();
         
+        if (!isMounted) return;
+        
         if (error) {
           console.error('V2.0: Error getting session:', error);
           dispatch({ type: 'SET_ERROR', payload: 'Failed to get session' });
         } else if (session?.user) {
           const profile = await fetchUserProfile(session.user.id);
+          
+          if (!isMounted) return;
           
           if (profile) {
             dispatch({ type: 'SET_USER', payload: profile });
@@ -276,24 +284,34 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         }
         
         clearTimeout(timeoutId);
-        dispatch({ type: 'SET_INITIALIZED', payload: true });
+        if (isMounted) {
+          dispatch({ type: 'SET_INITIALIZED', payload: true });
+        }
       } catch (error) {
+        if (!isMounted) return;
         console.error('V2.0: Error in getInitialSession:', error);
         dispatch({ type: 'SET_ERROR', payload: 'Failed to initialize authentication' });
       } finally {
-        dispatch({ type: 'SET_LOADING', payload: false });
+        if (isMounted) {
+          dispatch({ type: 'SET_LOADING', payload: false });
+        }
       }
     };
 
     getInitialSession();
 
     // V2.0: Reduced session check interval
-    const interval = setInterval(checkSessionHealth, SESSION_CONFIG.CHECK_INTERVAL);
+    const interval = setInterval(() => {
+      if (isMounted) {
+        checkSessionHealth();
+      }
+    }, SESSION_CONFIG.CHECK_INTERVAL);
     console.log(`🔄 V2.0: Session health check interval set to ${SESSION_CONFIG.CHECK_INTERVAL / 60000} minutes`);
 
     // V2.0: Simplified auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!isMounted) return;
         console.log('🔄 V2.0: Auth state changed:', event, session?.user?.email);
         
         if (event === 'SIGNED_IN' && session?.user) {
@@ -321,6 +339,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     );
 
     return () => {
+      isMounted = false;
       subscription.unsubscribe();
       clearInterval(interval);
     };
