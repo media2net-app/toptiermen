@@ -80,8 +80,8 @@ export default function PushNotificationPrompt({ onClose }: PushNotificationProm
 
       // Register service worker
       console.log('🔧 Registering service worker...');
-      const registration = await navigator.serviceWorker.register('/sw.js');
-      await navigator.serviceWorker.ready;
+      // const registration = await navigator.serviceWorker.register('/sw.js');
+      // await navigator.serviceWorker.ready;
       console.log('✅ Service worker registered and ready');
 
       // Subscribe to push notifications
