@@ -79,19 +79,33 @@ export default function Dashboard() {
       if (!user) return;
 
       try {
+        console.log('V2.0: Fetching dashboard data for user:', user.id);
+        
         // Fetch dashboard stats and badges in parallel
         const [statsResponse, badgesResponse] = await Promise.all([
           fetch(`/api/dashboard-stats?userId=${user.id}`),
           fetch(`/api/badges/get-user-badges?userId=${user.id}`)
         ]);
 
+        console.log('V2.0: API responses received:', {
+          statsStatus: statsResponse.status,
+          badgesStatus: badgesResponse.status
+        });
+
         const [statsData, badgesData] = await Promise.all([
           statsResponse.json(),
           badgesResponse.json()
         ]);
 
+        console.log('V2.0: Parsed data:', {
+          statsSuccess: statsData.success,
+          badgesSuccess: badgesData.success
+        });
+
         if (statsData.success) {
           setStats(statsData.stats);
+        } else {
+          console.error('V2.0: Stats API error:', statsData.error);
         }
 
         if (badgesData.success) {
@@ -110,7 +124,13 @@ export default function Dashboard() {
 
         setLoading(false);
       } catch (error) {
-        console.error('Error fetching dashboard data:', error);
+        console.error('V2.0: Error fetching dashboard data:', error);
+        console.error('V2.0: Error details:', {
+          message: error instanceof Error ? error.message : 'Unknown error',
+          stack: error instanceof Error ? error.stack : undefined,
+          user: user?.id,
+          timestamp: new Date().toISOString()
+        });
         setLoading(false);
       }
     };
