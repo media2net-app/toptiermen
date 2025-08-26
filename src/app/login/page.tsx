@@ -51,6 +51,18 @@ function LoginPageContent() {
     }
   }, [loading, user, router, searchParams]);
 
+  // V2.0: Force show login form after 2 seconds if still loading
+  useEffect(() => {
+    if (loading) {
+      const timer = setTimeout(() => {
+        console.log('V2.0: Force showing login form after timeout');
+        setRedirecting(false);
+      }, 2000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [loading]);
+
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     
@@ -126,8 +138,8 @@ function LoginPageContent() {
     }
   }
 
-  // Show loading state while checking authentication
-  if (loading) {
+  // Show loading state while checking authentication (with timeout)
+  if (loading && !redirecting) {
     return (
       <div className="min-h-screen flex items-center justify-center relative px-4 py-6" style={{ backgroundColor: '#181F17' }}>
         <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
@@ -136,6 +148,12 @@ function LoginPageContent() {
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#B6C948] mx-auto mb-4"></div>
             <p className="text-[#B6C948] text-lg">Laden...</p>
             <p className="text-[#8BAE5A] text-sm mt-2">Authenticatie wordt gecontroleerd</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-4 text-[#8BAE5A] hover:text-[#B6C948] underline text-sm"
+            >
+              Handmatig herladen als het te lang duurt
+            </button>
           </div>
         </div>
       </div>
