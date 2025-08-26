@@ -528,7 +528,7 @@ export function V2StateProvider({ children }: V2StateProviderProps) {
     }
     
     return entry.data;
-  }, [state.data.cache]);
+  }, []); // Remove dependency to prevent infinite loops
   
   const clearCacheData = useCallback((key: string) => {
     dispatch({ type: 'CLEAR_CACHE_DATA', payload: key });
@@ -546,7 +546,7 @@ export function V2StateProvider({ children }: V2StateProviderProps) {
     const lastSync = state.data.lastSync[key];
     if (!lastSync) return true;
     return Date.now() - lastSync > maxAge;
-  }, [state.data.lastSync]);
+  }, []); // Remove dependency to prevent infinite loops
   
   const setGlobalError = useCallback((error: string | null) => {
     dispatch({ type: 'SET_GLOBAL_ERROR', payload: error });
@@ -575,21 +575,21 @@ export function V2StateProvider({ children }: V2StateProviderProps) {
   // V2.0: Utility functions
   const isLoading = useCallback((key: string) => {
     return state.ui.loading[key] || false;
-  }, [state.ui.loading]);
+  }, []); // Remove dependency to prevent infinite loops
   
   const hasError = useCallback((key?: string) => {
     if (key) {
       return !!state.errors.components[key];
     }
     return !!state.errors.global;
-  }, [state.errors]);
+  }, []); // Remove dependency to prevent infinite loops
   
   const getError = useCallback((key?: string) => {
     if (key) {
       return state.errors.components[key] || null;
     }
     return state.errors.global;
-  }, [state.errors]);
+  }, []); // Remove dependency to prevent infinite loops
   
   const value: V2StateContextType = {
     state,

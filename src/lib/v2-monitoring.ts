@@ -255,16 +255,21 @@ export class V2MonitoringManager {
     });
   }
   
-  // V2.0: Track feature usage with debouncing
+  // V2.0: Track feature usage with strict debouncing
   private featureUsageCache = new Map<string, number>();
   
   trackFeatureUsage(feature: string, userId?: string): void {
+    // Disable tracking in development to prevent infinite loops
+    if (process.env.NODE_ENV === 'development') {
+      return;
+    }
+    
     const key = `${feature}-${userId || 'anonymous'}`;
     const now = Date.now();
     const lastTracked = this.featureUsageCache.get(key) || 0;
     
-    // Debounce: only track once per second per feature-user combination
-    if (now - lastTracked < 1000) {
+    // Debounce: only track once per 5 seconds per feature-user combination
+    if (now - lastTracked < 5000) {
       return;
     }
     
