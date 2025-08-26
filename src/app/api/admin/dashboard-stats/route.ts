@@ -154,7 +154,7 @@ async function fetchRealDashboardStats(period: string) {
 
     // Fetch total users
     const { count: totalUsers, error: usersError } = await supabaseAdmin
-      .from('users')
+      .from('profiles')
       .select('*', { count: 'exact', head: true });
 
     if (usersError) {
@@ -168,10 +168,10 @@ async function fetchRealDashboardStats(period: string) {
       thirtyDaysAgo.setDate(now.getDate() - 30);
       
       const { count: activeUsersCount, error: activeError } = await supabaseAdmin
-        .from('users')
+        .from('profiles')
         .select('*', { count: 'exact', head: true })
-        .gte('last_sign_in_at', thirtyDaysAgo.toISOString())
-        .not('last_sign_in_at', 'is', null);
+        .gte('last_login', thirtyDaysAgo.toISOString())
+        .not('last_login', 'is', null);
 
       if (activeError) {
         console.log('⚠️ Error fetching active users, assuming all users are active:', activeError);
@@ -206,7 +206,7 @@ async function fetchRealDashboardStats(period: string) {
     let newRegistrationsThisWeek = 0;
     try {
       const { count: newUsers, error: newUsersError } = await supabaseAdmin
-        .from('users')
+        .from('profiles')
         .select('*', { count: 'exact', head: true })
         .gte('created_at', periodStart.toISOString());
 
@@ -223,9 +223,9 @@ async function fetchRealDashboardStats(period: string) {
     let averageDailyLogins = 0;
     try {
       const { count: weeklyLogins, error: loginsError } = await supabaseAdmin
-        .from('users')
+        .from('profiles')
         .select('*', { count: 'exact', head: true })
-        .gte('last_sign_in_at', periodStart.toISOString());
+        .gte('last_login', periodStart.toISOString());
 
       if (loginsError) {
         console.log('⚠️ Error fetching daily logins:', loginsError);
@@ -240,7 +240,7 @@ async function fetchRealDashboardStats(period: string) {
     let activeCoachingPackages = 0;
     try {
       const { count: coachingUsers, error: coachingError } = await supabaseAdmin
-        .from('users')
+        .from('profiles')
         .select('*', { count: 'exact', head: true })
         .not('selected_schema_id', 'is', null);
 
