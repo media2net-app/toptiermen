@@ -19,24 +19,39 @@ CREATE INDEX IF NOT EXISTS idx_admin_notifications_created_at ON public.admin_no
 -- Enable RLS
 ALTER TABLE public.admin_notifications ENABLE ROW LEVEL SECURITY;
 
--- Create RLS policies
-CREATE POLICY "Admin notifications are viewable by admins" ON public.admin_notifications
-    FOR SELECT USING (
-        auth.role() = 'authenticated' AND 
-        (auth.jwt() ->> 'role')::text = 'admin'
-    );
+-- Create RLS policies (only if they don't exist)
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'admin_notifications' AND policyname = 'Admin notifications are viewable by admins') THEN
+        CREATE POLICY "Admin notifications are viewable by admins" ON public.admin_notifications
+            FOR SELECT USING (
+                auth.role() = 'authenticated' AND 
+                (auth.jwt() ->> 'role')::text = 'admin'
+            );
+    END IF;
+END $$;
 
-CREATE POLICY "Admin notifications are insertable by admins" ON public.admin_notifications
-    FOR INSERT WITH CHECK (
-        auth.role() = 'authenticated' AND 
-        (auth.jwt() ->> 'role')::text = 'admin'
-    );
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'admin_notifications' AND policyname = 'Admin notifications are insertable by admins') THEN
+        CREATE POLICY "Admin notifications are insertable by admins" ON public.admin_notifications
+            FOR INSERT WITH CHECK (
+                auth.role() = 'authenticated' AND 
+                (auth.jwt() ->> 'role')::text = 'admin'
+            );
+    END IF;
+END $$;
 
-CREATE POLICY "Admin notifications are updatable by admins" ON public.admin_notifications
-    FOR UPDATE USING (
-        auth.role() = 'authenticated' AND 
-        (auth.jwt() ->> 'role')::text = 'admin'
-    );
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'admin_notifications' AND policyname = 'Admin notifications are updatable by admins') THEN
+        CREATE POLICY "Admin notifications are updatable by admins" ON public.admin_notifications
+            FOR UPDATE USING (
+                auth.role() = 'authenticated' AND 
+                (auth.jwt() ->> 'role')::text = 'admin'
+            );
+    END IF;
+END $$;
 
 -- Create trigger to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -47,6 +62,11 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
-CREATE TRIGGER update_admin_notifications_updated_at 
-    BEFORE UPDATE ON public.admin_notifications 
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_admin_notifications_updated_at') THEN
+        CREATE TRIGGER update_admin_notifications_updated_at 
+            BEFORE UPDATE ON public.admin_notifications 
+            FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+    END IF;
+END $$;
