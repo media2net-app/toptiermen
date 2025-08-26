@@ -42,7 +42,7 @@ export const GET = withApiHandler(async (request: NextRequest) => {
     });
 
   } catch (error) {
-    return createErrorResponse('Health check failed', 500, error);
+    return createErrorResponse('Health check failed', 500);
   }
 });
 
@@ -76,6 +76,6 @@ export const POST = withApiHandler(async (request: NextRequest) => {
     });
 
   } catch (error) {
-    return createErrorResponse('Extended health check failed', 500, error);
+    return createErrorResponse('Extended health check failed', 500);
   }
 });

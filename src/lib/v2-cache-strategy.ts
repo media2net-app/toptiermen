@@ -1,4 +1,5 @@
 // V2.0: Intelligent Cache Strategy System
+import React from 'react';
 import { useV2State } from '@/contexts/V2StateContext';
 
 // V2.0: Cache strategy types
@@ -96,7 +97,10 @@ export class V2CacheManager {
   
   constructor(configs: Record<string, CacheConfig> = CACHE_CONFIGS) {
     this.configs = configs;
-    this.cleanupExpiredEntries();
+    // Only cleanup on client side
+    if (typeof window !== 'undefined') {
+      this.cleanupExpiredEntries();
+    }
   }
   
   // V2.0: Set cache entry
@@ -201,17 +205,23 @@ export class V2CacheManager {
         break;
         
       case 'session':
-        sessionStorage.removeItem(`v2-cache-${key}`);
+        if (typeof window !== 'undefined') {
+          sessionStorage.removeItem(`v2-cache-${key}`);
+        }
         break;
         
       case 'local':
-        localStorage.removeItem(`v2-cache-${key}`);
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem(`v2-cache-${key}`);
+        }
         break;
         
       case 'hybrid':
         this.memoryCache.delete(key);
-        sessionStorage.removeItem(`v2-cache-${key}`);
-        localStorage.removeItem(`v2-cache-${key}`);
+        if (typeof window !== 'undefined') {
+          sessionStorage.removeItem(`v2-cache-${key}`);
+          localStorage.removeItem(`v2-cache-${key}`);
+        }
         break;
     }
   }
@@ -219,6 +229,8 @@ export class V2CacheManager {
   // V2.0: Clear all cache
   async clear(): Promise<void> {
     this.memoryCache.clear();
+    
+    if (typeof window === 'undefined') return;
     
     // Clear session storage cache
     const sessionKeys = Object.keys(sessionStorage).filter(key => key.startsWith('v2-cache-'));
@@ -234,6 +246,8 @@ export class V2CacheManager {
     // Clear memory cache
     const memoryKeys = Array.from(this.memoryCache.keys()).filter(key => key.includes(pattern));
     memoryKeys.forEach(key => this.memoryCache.delete(key));
+    
+    if (typeof window === 'undefined') return;
     
     // Clear session storage
     const sessionKeys = Object.keys(sessionStorage).filter(key => 
@@ -255,6 +269,15 @@ export class V2CacheManager {
     localSize: number;
     totalEntries: number;
   } {
+    if (typeof window === 'undefined') {
+      return {
+        memorySize: this.memoryCache.size,
+        sessionSize: 0,
+        localSize: 0,
+        totalEntries: this.memoryCache.size,
+      };
+    }
+    
     const sessionKeys = Object.keys(sessionStorage).filter(key => key.startsWith('v2-cache-'));
     const localKeys = Object.keys(localStorage).filter(key => key.startsWith('v2-cache-'));
     
@@ -277,6 +300,7 @@ export class V2CacheManager {
   }
   
   private setSessionCache<T>(key: string, entry: CacheEntry<T>): void {
+    if (typeof window === 'undefined') return;
     try {
       sessionStorage.setItem(`v2-cache-${key}`, JSON.stringify(entry));
     } catch (error) {
@@ -285,6 +309,7 @@ export class V2CacheManager {
   }
   
   private setLocalCache<T>(key: string, entry: CacheEntry<T>): void {
+    if (typeof window === 'undefined') return;
     try {
       localStorage.setItem(`v2-cache-${key}`, JSON.stringify(entry));
     } catch (error) {
@@ -297,6 +322,7 @@ export class V2CacheManager {
   }
   
   private getSessionCache<T>(key: string): CacheEntry<T> | null {
+    if (typeof window === 'undefined') return null;
     try {
       const item = sessionStorage.getItem(`v2-cache-${key}`);
       return item ? JSON.parse(item) : null;
@@ -307,6 +333,7 @@ export class V2CacheManager {
   }
   
   private getLocalCache<T>(key: string): CacheEntry<T> | null {
+    if (typeof window === 'undefined') return null;
     try {
       const item = localStorage.getItem(`v2-cache-${key}`);
       return item ? JSON.parse(item) : null;
@@ -327,6 +354,8 @@ export class V2CacheManager {
         this.memoryCache.delete(key);
       }
     }
+    
+    if (typeof window === 'undefined') return;
     
     // Clean up session storage
     const sessionKeys = Object.keys(sessionStorage).filter(key => key.startsWith('v2-cache-'));
