@@ -567,7 +567,11 @@ export default function TestUserFeedback({ isTestUser, currentPage, onNoteCreate
       {/* Screenshot Button */}
       <button
         ref={buttonRef}
-        onClick={startScreenshotMode}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          startScreenshotMode();
+        }}
         disabled={isScreenshotMode}
         className="fixed right-4 bottom-20 z-50 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         title="Screenshot maken (macOS-style)"
@@ -582,7 +586,11 @@ export default function TestUserFeedback({ isTestUser, currentPage, onNoteCreate
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-[#8BAE5A]">Test Gebruiker Feedback</h3>
               <button
-                onClick={handleCancel}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleCancel();
+                }}
                 className="text-gray-400 hover:text-white"
               >
                 <XMarkIcon className="w-5 h-5" />
@@ -594,7 +602,11 @@ export default function TestUserFeedback({ isTestUser, currentPage, onNoteCreate
               <label className="block text-[#8BAE5A] font-semibold mb-2">Type</label>
               <div className="grid grid-cols-3 gap-2">
                 <button
-                  onClick={() => setNoteType('bug')}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setNoteType('bug');
+                  }}
                   className={`p-2 rounded-lg text-sm font-medium transition-colors ${
                     noteType === 'bug'
                       ? 'bg-red-600 text-white'
@@ -605,7 +617,11 @@ export default function TestUserFeedback({ isTestUser, currentPage, onNoteCreate
                   Bug
                 </button>
                 <button
-                  onClick={() => setNoteType('improvement')}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setNoteType('improvement');
+                  }}
                   className={`p-2 rounded-lg text-sm font-medium transition-colors ${
                     noteType === 'improvement'
                       ? 'bg-blue-600 text-white'
@@ -616,7 +632,11 @@ export default function TestUserFeedback({ isTestUser, currentPage, onNoteCreate
                   Verbetering
                 </button>
                 <button
-                  onClick={() => setNoteType('general')}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setNoteType('general');
+                  }}
                   className={`p-2 rounded-lg text-sm font-medium transition-colors ${
                     noteType === 'general'
                       ? 'bg-gray-600 text-white'
@@ -674,13 +694,21 @@ export default function TestUserFeedback({ isTestUser, currentPage, onNoteCreate
             {/* Action Buttons */}
             <div className="flex items-center gap-4">
               <button
-                onClick={handleCancel}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleCancel();
+                }}
                 className="flex-1 px-4 py-3 rounded-xl bg-[#232D1A] text-gray-300 hover:bg-[#3A4D23] transition-colors"
               >
                 Annuleren
               </button>
               <button
-                onClick={handleSubmit}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleSubmit();
+                }}
                 disabled={isSubmitting || !description.trim()}
                 className="flex-1 px-4 py-3 rounded-xl bg-[#8BAE5A] text-white hover:bg-[#B6C948] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
               >
@@ -703,7 +731,11 @@ export default function TestUserFeedback({ isTestUser, currentPage, onNoteCreate
 
       {/* Notes List Button */}
       <button
-        onClick={() => setShowNotes(!showNotes)}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setShowNotes(!showNotes);
+        }}
         className="fixed right-4 bottom-32 z-50 bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-full shadow-lg transition-colors"
         title="Bekijk notities"
       >
@@ -716,7 +748,11 @@ export default function TestUserFeedback({ isTestUser, currentPage, onNoteCreate
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-[#8BAE5A]">Notities ({notes.length})</h3>
             <button
-              onClick={() => setShowNotes(false)}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setShowNotes(false);
+              }}
               className="text-gray-400 hover:text-white"
             >
               <XMarkIcon className="w-5 h-5" />
