@@ -78,9 +78,9 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
     }
     
     // V2.0: Track navigation (disabled in development to prevent errors)
-    if (process.env.NODE_ENV === 'production') {
-      trackFeatureUsage(`nav-${label.toLowerCase().replace(/\s+/g, '-')}`, user?.id);
-    }
+    // if (process.env.NODE_ENV === 'production') {
+    //   trackFeatureUsage(`nav-${label.toLowerCase().replace(/\s+/g, '-')}`, user?.id);
+    // }
   };
 
   // Auto-open submenu if current page is a submenu item
