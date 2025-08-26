@@ -10,6 +10,7 @@ import { useV2Cache } from '@/lib/v2-cache-strategy';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import PushNotificationPrompt from '@/components/PushNotificationPrompt';
 import DashboardContent from './DashboardContent';
+import { DebugProvider } from '@/contexts/DebugContext';
 
 // V2.0: Enhanced Dashboard Layout with monitoring and error handling
 export default function DashboardLayout({
@@ -171,15 +172,17 @@ export default function DashboardLayout({
   // V2.0: Main dashboard layout with error boundary
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-[#181F17]">
-        {/* V2.0: Push notification prompt */}
-        <PushNotificationPrompt />
-        
-        {/* V2.0: Main content with existing dashboard structure */}
-        <DashboardContent>
-          {children}
-        </DashboardContent>
-      </div>
+      <DebugProvider>
+        <div className="min-h-screen bg-[#181F17]">
+          {/* V2.0: Push notification prompt */}
+          <PushNotificationPrompt />
+          
+          {/* V2.0: Main content with existing dashboard structure */}
+          <DashboardContent>
+            {children}
+          </DashboardContent>
+        </div>
+      </DebugProvider>
     </ErrorBoundary>
   );
 } 

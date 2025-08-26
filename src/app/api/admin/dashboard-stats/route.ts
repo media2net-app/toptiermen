@@ -170,7 +170,8 @@ async function fetchRealDashboardStats(period: string) {
       const { count: activeUsersCount, error: activeError } = await supabaseAdmin
         .from('users')
         .select('*', { count: 'exact', head: true })
-        .gte('last_sign_in_at', thirtyDaysAgo.toISOString());
+        .gte('last_sign_in_at', thirtyDaysAgo.toISOString())
+        .not('last_sign_in_at', 'is', null);
 
       if (activeError) {
         console.log('⚠️ Error fetching active users, assuming all users are active:', activeError);
@@ -239,8 +240,9 @@ async function fetchRealDashboardStats(period: string) {
     let activeCoachingPackages = 0;
     try {
       const { count: coachingUsers, error: coachingError } = await supabaseAdmin
-        .from('user_training_schema')
-        .select('*', { count: 'exact', head: true });
+        .from('users')
+        .select('*', { count: 'exact', head: true })
+        .not('selected_schema_id', 'is', null);
 
       if (coachingError) {
         console.log('⚠️ Error fetching coaching packages:', coachingError);
