@@ -330,44 +330,44 @@ export default function MijnProfiel() {
       // const registration = await navigator.serviceWorker.register('/sw.js');
       // await navigator.serviceWorker.ready;
 
-      // Subscribe to push notifications
-      const subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
-      });
+      // Subscribe to push notifications - DISABLED
+      // const subscription = await registration.pushManager.subscribe({
+      //   userVisibleOnly: true,
+      //   applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+      // });
 
-      // Save subscription to database
-      const { error } = await supabase
-        .from('push_subscriptions')
-        .upsert({
-          user_id: user.id,
-          endpoint: subscription.endpoint,
-          p256dh_key: btoa(String.fromCharCode.apply(null, 
-            new Uint8Array(subscription.getKey('p256dh')!)
-          )),
-          auth_key: btoa(String.fromCharCode.apply(null, 
-            new Uint8Array(subscription.getKey('auth')!)
-          ))
-        }, { onConflict: 'user_id' });
+      // Save subscription to database - DISABLED
+      // const { error } = await supabase
+      //   .from('push_subscriptions')
+      //   .upsert({
+      //     user_id: user.id,
+      //     endpoint: subscription.endpoint,
+      //     p256dh_key: btoa(String.fromCharCode.apply(null, 
+      //       new Uint8Array(subscription.getKey('p256dh')!)
+      //     )),
+      //     auth_key: btoa(String.fromCharCode.apply(null, 
+      //       new Uint8Array(subscription.getKey('auth')!)
+      //     ))
+      //   }, { onConflict: 'user_id' });
 
-      if (error) {
-        console.error('Error saving subscription:', error);
-        toast.error('Fout bij het opslaan van push notificatie instellingen');
-        return;
-      }
+      // if (error) {
+      //   console.error('Error saving subscription:', error);
+      //   toast.error('Fout bij het opslaan van push notificatie instellingen');
+      //   return;
+      // }
 
-      setPushSubscription({
-        user_id: user.id,
-        endpoint: subscription.endpoint,
-        p256dh_key: btoa(String.fromCharCode.apply(null, 
-          new Uint8Array(subscription.getKey('p256dh')!)
-        )),
-        auth_key: btoa(String.fromCharCode.apply(null, 
-          new Uint8Array(subscription.getKey('auth')!)
-        ))
-      });
+      // setPushSubscription({
+      //   user_id: user.id,
+      //   endpoint: subscription.endpoint,
+      //   p256dh_key: btoa(String.fromCharCode.apply(null, 
+      //     new Uint8Array(subscription.getKey('p256dh')!)
+      //   )),
+      //   auth_key: btoa(String.fromCharCode.apply(null, 
+      //     new Uint8Array(subscription.getKey('auth')!)
+      //   ))
+      // });
 
-      toast.success('Push notificaties succesvol geactiveerd!');
+      // toast.success('Push notificaties succesvol geactiveerd!');
     } catch (error) {
       console.error('Error subscribing to push notifications:', error);
       toast.error('Fout bij het activeren van push notificaties');
@@ -382,14 +382,14 @@ export default function MijnProfiel() {
     try {
       setIsUnsubscribing(true);
 
-      // Unsubscribe from push manager
-      const registration = await navigator.serviceWorker.getRegistration();
-      if (registration) {
-        const subscription = await registration.pushManager.getSubscription();
-        if (subscription) {
-          await subscription.unsubscribe();
-        }
-      }
+      // Unsubscribe from push manager - DISABLED
+      // const registration = await navigator.serviceWorker.getRegistration();
+      // if (registration) {
+      //   const subscription = await registration.pushManager.getSubscription();
+      //   if (subscription) {
+      //     await subscription.unsubscribe();
+      //   }
+      // }
 
       // Remove from database
       const { error } = await supabase
