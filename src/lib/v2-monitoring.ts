@@ -259,6 +259,9 @@ export class V2MonitoringManager {
   private featureUsageCache = new Map<string, number>();
   
   trackFeatureUsage(feature: string, userId?: string): void {
+    // V2.0: Completely disabled to prevent infinite loops
+    return;
+    
     // Disable tracking in development to prevent infinite loops
     if (process.env.NODE_ENV === 'development') {
       return;
@@ -608,6 +611,9 @@ export function useV2PerformanceMonitoring() {
   
   // V2.0: Track component performance with debouncing
   const trackComponentPerformance = React.useCallback((componentName: string) => {
+    // V2.0: Completely disabled to prevent infinite loops
+    return () => {};
+    
     const startTime = performance.now();
     const key = `component-${componentName}`;
     
