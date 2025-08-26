@@ -180,6 +180,9 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
 
   // V2.0: Simplified session health check
   const checkSessionHealth = useCallback(async () => {
+    // V2.0: Completely disabled to prevent infinite loops
+    return;
+    
     try {
       const { data: { session }, error } = await supabase.auth.getSession();
       
