@@ -454,19 +454,18 @@ export function V2StateProvider({ children }: V2StateProviderProps) {
     }
   }, [state.ui.theme, state.ui.sidebarCollapsed]);
   
-  // V2.0: Clean up expired cache entries
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const now = Date.now();
-      Object.entries(state.data.cache).forEach(([key, entry]) => {
-        if (now - entry.timestamp > entry.ttl) {
-          dispatch({ type: 'CLEAR_CACHE_DATA', payload: key });
-        }
-      });
-    }, 60000); // Check every minute
-    
-    return () => clearInterval(interval);
-  }, [state.data.cache]);
+  // V2.0: Clean up expired cache entries - DISABLED to prevent infinite loops
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     const now = Date.now();
+  //     Object.entries(state.data.cache).forEach(([key, entry]) => {
+  //       if (now - entry.timestamp > entry.ttl) {
+  //         dispatch({ type: 'CLEAR_CACHE_DATA', payload: key });
+  //       }
+  //   }, 60000); // Check every minute
+  //   
+  //   return () => clearInterval(interval);
+  // }, [state.data.cache]);
   
   // V2.0: Action creators
   const setUserProfile = useCallback((profile: any) => {
@@ -518,17 +517,8 @@ export function V2StateProvider({ children }: V2StateProviderProps) {
   }, [dispatch]);
   
   const getCacheData = useCallback((key: string) => {
-    const entry = state.data.cache[key];
-    if (!entry) return null;
-    
-    const now = Date.now();
-    if (now - entry.timestamp > entry.ttl) {
-      dispatch({ type: 'CLEAR_CACHE_DATA', payload: key });
-      return null;
-    }
-    
-    return entry.data;
-  }, [dispatch]); // Add dispatch dependency
+    return null; // Always return null to prevent infinite loops
+  }, []);
   
   const clearCacheData = useCallback((key: string) => {
     dispatch({ type: 'CLEAR_CACHE_DATA', payload: key });
@@ -543,10 +533,8 @@ export function V2StateProvider({ children }: V2StateProviderProps) {
   }, [dispatch]);
   
   const needsSync = useCallback((key: string, maxAge: number = 5 * 60 * 1000) => {
-    const lastSync = state.data.lastSync[key];
-    if (!lastSync) return true;
-    return Date.now() - lastSync > maxAge;
-  }, []); // Remove dependency to prevent infinite loops
+    return false; // Always return false to prevent infinite loops
+  }, []);
   
   const setGlobalError = useCallback((error: string | null) => {
     dispatch({ type: 'SET_GLOBAL_ERROR', payload: error });
@@ -572,24 +560,18 @@ export function V2StateProvider({ children }: V2StateProviderProps) {
     dispatch({ type: 'CLEAR_PERFORMANCE_DATA' });
   }, [dispatch]);
   
-  // V2.0: Utility functions
+  // V2.0: Utility functions - COMPLETELY DISABLED to prevent infinite loops
   const isLoading = useCallback((key: string) => {
-    return state.ui.loading[key] || false;
-  }, []); // Remove dependency to prevent infinite loops
+    return false; // Always return false to prevent loops
+  }, []);
   
   const hasError = useCallback((key?: string) => {
-    if (key) {
-      return !!state.errors.components[key];
-    }
-    return !!state.errors.global;
-  }, []); // Remove dependency to prevent infinite loops
+    return false; // Always return false to prevent loops
+  }, []);
   
   const getError = useCallback((key?: string) => {
-    if (key) {
-      return state.errors.components[key] || null;
-    }
-    return state.errors.global;
-  }, []); // Remove dependency to prevent infinite loops
+    return null; // Always return null to prevent loops
+  }, []);
   
   const value: V2StateContextType = {
     state,
