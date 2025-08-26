@@ -24,18 +24,14 @@ SELECT
 FROM profiles p
 WHERE p.last_login >= NOW() - INTERVAL '7 days';
 
--- Create view for completed missions
+-- Create view for completed missions (simplified without join)
 CREATE OR REPLACE VIEW completed_missions_view AS
 SELECT 
     um.id,
     um.user_id,
-    um.mission_id,
     um.status,
-    um.completed_at,
-    m.title as mission_title,
-    m.category as mission_category
+    um.completed_at
 FROM user_missions um
-JOIN missions m ON um.mission_id = m.id
 WHERE um.status = 'completed';
 
 -- Create view for user training schemas
