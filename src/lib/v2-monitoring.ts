@@ -585,6 +585,8 @@ export function useV2Monitoring() {
     
     // V2.0: Track feature usage
     trackFeatureUsage: (feature: string, userId?: string): void => {
+      // V2.0: Completely disabled to prevent infinite loops
+      return;
       v2Monitoring.trackFeatureUsage(feature, userId);
     },
     
