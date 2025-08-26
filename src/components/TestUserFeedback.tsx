@@ -95,11 +95,10 @@ export default function TestUserFeedback({ isTestUser, currentPage, onNoteCreate
     }
   };
 
-  // Only show for test users
-  if (!isTestUser) return null;
-
   // Cleanup any leftover screenshot elements on component mount
   useEffect(() => {
+    if (!isTestUser) return;
+
     const cleanupScreenshotElements = () => {
       const allElements = document.querySelectorAll('div');
       allElements.forEach(element => {
@@ -123,7 +122,7 @@ export default function TestUserFeedback({ isTestUser, currentPage, onNoteCreate
 
     window.addEventListener('focus', handleFocus);
     return () => window.removeEventListener('focus', handleFocus);
-  }, []);
+  }, [isTestUser]);
 
   const startScreenshotMode = () => {
     console.log('🎯 Starting macOS-style screenshot mode...');
@@ -559,6 +558,9 @@ export default function TestUserFeedback({ isTestUser, currentPage, onNoteCreate
     setSelectedArea(null);
     setIsOpen(false);
   };
+
+  // Only show for test users
+  if (!isTestUser) return null;
 
   return (
     <>
