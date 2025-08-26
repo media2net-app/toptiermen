@@ -84,68 +84,68 @@ export default function PushNotificationPrompt({ onClose }: PushNotificationProm
       // await navigator.serviceWorker.ready;
       console.log('✅ Service worker registered and ready');
 
-      // Subscribe to push notifications
-      console.log('📡 Subscribing to push notifications...');
-      console.log('🔑 VAPID Public Key:', process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY?.substring(0, 20) + '...');
+      // Subscribe to push notifications - DISABLED
+      // console.log('📡 Subscribing to push notifications...');
+      // console.log('🔑 VAPID Public Key:', process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY?.substring(0, 20) + '...');
       
-      const subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
-      });
-      console.log('✅ Push subscription created');
-      console.log('📡 Endpoint:', subscription.endpoint.substring(0, 50) + '...');
+      // const subscription = await registration.pushManager.subscribe({
+      //   userVisibleOnly: true,
+      //   applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+      // });
+      // console.log('✅ Push subscription created');
+      // console.log('📡 Endpoint:', subscription.endpoint.substring(0, 50) + '...');
 
-      // Save subscription to database using API route
-      console.log('💾 Saving subscription to database...');
-      const subscriptionData = {
-        userId: user.id,
-        subscription: {
-          endpoint: subscription.endpoint,
-          keys: {
-            p256dh: btoa(String.fromCharCode.apply(null, 
-              new Uint8Array(subscription.getKey('p256dh')!)
-            )),
-            auth: btoa(String.fromCharCode.apply(null, 
-              new Uint8Array(subscription.getKey('auth')!)
-            ))
-          }
-        }
-      };
-      console.log('📦 Subscription data prepared:', {
-        userId: subscriptionData.userId,
-        endpoint: subscriptionData.subscription.endpoint.substring(0, 50) + '...',
-        hasKeys: !!subscriptionData.subscription.keys.p256dh && !!subscriptionData.subscription.keys.auth
-      });
+      // Save subscription to database using API route - DISABLED
+      // console.log('💾 Saving subscription to database...');
+      // const subscriptionData = {
+      //   userId: user.id,
+      //   subscription: {
+      //     endpoint: subscription.endpoint,
+      //     keys: {
+      //       p256dh: btoa(String.fromCharCode.apply(null, 
+      //         new Uint8Array(subscription.getKey('p256dh')!)
+      //       )),
+      //       auth: btoa(String.fromCharCode.apply(null, 
+      //         new Uint8Array(subscription.getKey('auth')!)
+      //       ))
+      //     }
+      //   }
+      // };
+      // console.log('📦 Subscription data prepared:', {
+      //   userId: subscriptionData.userId,
+      //   endpoint: subscriptionData.subscription.endpoint.substring(0, 50) + '...',
+      //   hasKeys: !!subscriptionData.subscription.keys.p256dh && !!subscriptionData.subscription.keys.auth
+      // });
 
-      const response = await fetch('/api/push/subscribe', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(subscriptionData)
-      });
+      // const response = await fetch('/api/push/subscribe', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify(subscriptionData)
+      // });
 
-      console.log('📡 API Response status:', response.status);
+      // console.log('📡 API Response status:', response.status);
       
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('❌ API Error:', errorData);
-        throw new Error(errorData.error || 'Failed to save subscription');
-      }
+      // if (!response.ok) {
+      //   const errorData = await response.json();
+      //   console.error('❌ API Error:', errorData);
+      //   throw new Error(errorData.error || 'Failed to save subscription');
+      // }
 
-      const responseData = await response.json();
-      console.log('✅ API Response:', responseData);
+      // const responseData = await response.json();
+      // console.log('✅ API Response:', responseData);
 
-      // Subscription saved successfully
-      console.log('✅ Subscription saved successfully');
+      // // Subscription saved successfully
+      // console.log('✅ Subscription saved successfully');
 
-      toast.success('Push notificaties succesvol geactiveerd!');
-      setShowPrompt(false);
+      // toast.success('Push notificaties succesvol geactiveerd!');
+      // setShowPrompt(false);
       
-      // Send test notification
-      setTimeout(() => {
-        sendTestNotification();
-      }, 1000);
+      // // Send test notification
+      // setTimeout(() => {
+      //   sendTestNotification();
+      // }, 1000);
 
     } catch (error) {
       console.error('❌ Error subscribing to push notifications:', error);
