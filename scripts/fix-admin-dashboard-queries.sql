@@ -30,13 +30,13 @@ SELECT
     um.id,
     um.user_id,
     um.mission_id,
-    um.completed,
+    um.status,
     um.completed_at,
     m.title as mission_title,
     m.category as mission_category
 FROM user_missions um
 JOIN missions m ON um.mission_id = m.id
-WHERE um.completed = true;
+WHERE um.status = 'completed';
 
 -- Create view for user training schemas
 CREATE OR REPLACE VIEW user_training_schema_view AS
@@ -59,5 +59,5 @@ GRANT SELECT ON user_training_schema_view TO authenticated;
 
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_profiles_last_login ON profiles(last_login);
-CREATE INDEX IF NOT EXISTS idx_user_missions_completed ON user_missions(completed);
+CREATE INDEX IF NOT EXISTS idx_user_missions_status ON user_missions(status);
 CREATE INDEX IF NOT EXISTS idx_user_missions_completed_at ON user_missions(completed_at);

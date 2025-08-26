@@ -566,7 +566,7 @@ async function fetchRealDashboardStats(period: string) {
       const { count: completedCount, error: completedError } = await supabaseAdmin
         .from('user_missions')
         .select('*', { count: 'exact', head: true })
-        .eq('completed', true);
+        .eq('status', 'completed');
 
       if (completedError) {
         console.log('⚠️ Error fetching completed missions:', completedError);
