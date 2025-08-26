@@ -29,6 +29,16 @@ export class ErrorBoundary extends Component<Props, State> {
     // Log error to console and any error reporting service
     console.error('V2.0: ErrorBoundary caught an error:', error, errorInfo);
     
+    // Log additional context for debugging
+    console.error('V2.0: Error details:', {
+      message: error.message,
+      stack: error.stack,
+      componentStack: errorInfo.componentStack,
+      timestamp: new Date().toISOString(),
+      url: window.location.href,
+      userAgent: navigator.userAgent
+    });
+    
     // Update state with error info
     this.setState({
       error,
