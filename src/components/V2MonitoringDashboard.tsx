@@ -80,7 +80,11 @@ export default function V2MonitoringDashboard() {
     return (
       <div className="fixed bottom-4 right-4 z-50">
         <button
-          onClick={() => setIsVisible(true)}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setIsVisible(true);
+          }}
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2"
         >
           📊 V2.0 Monitor
@@ -100,7 +104,11 @@ export default function V2MonitoringDashboard() {
               <p className="text-blue-100">Real-time system health and performance metrics</p>
             </div>
             <button
-              onClick={() => setIsVisible(false)}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsVisible(false);
+              }}
               className="text-white hover:text-blue-200 text-2xl"
             >
               ✕

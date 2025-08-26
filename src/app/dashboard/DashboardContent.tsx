@@ -67,7 +67,12 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
   
   const safePathname = pathname || '';
 
-  const handleLinkClick = (href: string, label: string) => {
+  const handleLinkClick = (href: string, label: string, e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
     if (onLinkClick) {
       onLinkClick();
     }
@@ -112,7 +117,9 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
                       ? 'bg-[#8BAE5A] text-black shadow-lg' 
                       : 'text-white hover:text-[#8BAE5A] hover:bg-[#3A4D23]/50'
                   } ${collapsed ? 'justify-center px-2' : ''}`}
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
                     if (!collapsed) {
                       setIsOpen(v => !v);
                     }
@@ -143,7 +150,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
                         <Link
                           key={sub.label}
                           href={sub.href}
-                          onClick={() => handleLinkClick(sub.href, sub.label)}
+                          onClick={(e) => handleLinkClick(sub.href, sub.label, e)}
                           className={`block px-4 py-2 rounded-lg text-sm transition-all duration-150 ${
                             isSubActive 
                               ? 'bg-[#8BAE5A] text-black font-semibold' 
@@ -167,7 +174,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
             <Link
               key={item.label}
               href={item.href}
-              onClick={() => handleLinkClick(item.href, item.label)}
+              onClick={(e) => handleLinkClick(item.href, item.label, e)}
               className={`grid grid-cols-[auto_1fr] items-center gap-4 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide transition-all duration-150 font-figtree ${
                 isActive 
                   ? 'bg-[#8BAE5A] text-black shadow-lg' 

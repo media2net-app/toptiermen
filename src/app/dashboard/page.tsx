@@ -136,13 +136,15 @@ export default function Dashboard() {
     };
 
     fetchData();
-  }, [user]);
+  }, [user?.id]);
 
   // Simple fade in effect
   useEffect(() => {
-    const timer = setTimeout(() => setFadeIn(true), 100);
-    return () => clearTimeout(timer);
-  }, []);
+    if (!loading) {
+      const timer = setTimeout(() => setFadeIn(true), 100);
+      return () => clearTimeout(timer);
+    }
+  }, [loading]);
 
   if (loading) {
     return (
