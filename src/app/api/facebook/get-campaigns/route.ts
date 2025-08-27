@@ -6,27 +6,22 @@ const FACEBOOK_AD_ACCOUNT_ID = process.env.FACEBOOK_AD_ACCOUNT_ID;
 // Manual data override based on Facebook Ads Manager (Live Data - Updated 8/27/2025)
 // Conversion data updated with actual leads from database
 // CTR values are in decimal format (0.0667 = 6.67%)
-// Using real Facebook campaign IDs to match ad sets and ads (Live Data - Updated 8/27/2025)
-// CTR values are in decimal format (0.0667 = 6.67%)
 // Using real Facebook campaign IDs to match ad sets and ads
 const CURRENT_MANUAL_DATA = {
   "120232433872750324": {
-                "name": "TTM - Campaign 120232433872750324",
-                "clicks": 0,
-                "spend": 0,
-                "impressions": 0,
-                "reach": 0,
-                "ctr": 0,
-                "cpc": 0,
-                "frequency": 0,
-                "status": "ACTIVE",
-                "leads": 1,
-                "conversions": 1,
-                "budget": 2500,
-                "budgetRemaining": 1540
-              },
+    "name": "TTM - Zakelijk Prelaunch Campagne - LEADS V2",
+    "clicks": 32,
+    "spend": 6.70,
+    "impressions": 358,
+    "reach": 358,
+    "ctr": 0.0893854748603352,
+    "cpc": 0.209375,
+    "frequency": 1.0,
+    "status": "ACTIVE",
+    "leads": 1,
+    "conversions": 1,
     "budget": 2500,
-    "budgetRemaining": 870
+    "budgetRemaining": 2493.30
   },
   "120232394482520324": {
     "name": "TTM - Algemene Prelaunch Campagne - LEADS",
@@ -104,22 +99,19 @@ const CURRENT_MANUAL_DATA = {
     "budgetRemaining": 500
   },
   "120232181493720324": {
-                "name": "TTM - Campaign 120232181493720324",
-                "clicks": 0,
-                "spend": 0,
-                "impressions": 0,
-                "reach": 0,
-                "ctr": 0,
-                "cpc": 0,
-                "frequency": 0,
-                "status": "ACTIVE",
-                "leads": 2,
-                "conversions": 2,
-                "budget": 2500,
-                "budgetRemaining": 1540
-              },
+    "name": "TTM - Zakelijk Prelaunch Campagne",
+    "clicks": 1235,
+    "spend": 107.88,
+    "impressions": 14968,
+    "reach": 12456,
+    "ctr": 0.082503339,
+    "cpc": 0.087352226,
+    "frequency": 1.201285,
+    "status": "PAUSED",
+    "leads": 2,
+    "conversions": 2,
     "budget": 1500,
-    "budgetRemaining": 1500
+    "budgetRemaining": 1392.12
   },
   "120232181491490324": {
     "name": "TTM - Vaders Prelaunch Campagne",
@@ -137,20 +129,17 @@ const CURRENT_MANUAL_DATA = {
     "budgetRemaining": 0
   },
   "120232181487970324": {
-                "name": "TTM - Campaign 120232181487970324",
-                "clicks": 0,
-                "spend": 0,
-                "impressions": 0,
-                "reach": 0,
-                "ctr": 0,
-                "cpc": 0,
-                "frequency": 0,
-                "status": "ACTIVE",
-                "leads": 3,
-                "conversions": 3,
-                "budget": 2500,
-                "budgetRemaining": 1540
-              },
+    "name": "TTM - Jongeren Prelaunch Campagne",
+    "clicks": 679,
+    "spend": 44.44,
+    "impressions": 6867,
+    "reach": 5867,
+    "ctr": 0.098878695,
+    "cpc": 0.065449190,
+    "frequency": 1.170445,
+    "status": "PAUSED",
+    "leads": 3,
+    "conversions": 3,
     "budget": 25,
     "budgetRemaining": 0
   },
@@ -164,8 +153,8 @@ const CURRENT_MANUAL_DATA = {
     "cpc": 0.07366733466933867,
     "frequency": 1.210253,
     "status": "PAUSED",
-    "leads": 3,
-    "conversions": 4,
+    "leads": 0,
+    "conversions": 0,
     "budget": 25,
     "budgetRemaining": 0
   }
@@ -191,7 +180,9 @@ export async function GET() {
         reach: data.reach,
         ctr: data.ctr,
         cpc: data.cpc,
-        budget: 25,
+        leads: data.leads,
+        conversions: data.conversions,
+        budget: data.budget,
         dailyBudget: 25,
         startDate: '2025-08-22',
         endDate: '2025-12-31',
@@ -199,7 +190,7 @@ export async function GET() {
         videoId: '',
         videoName: '',
         createdAt: '2025-08-22T00:00:00Z',
-        lastUpdated: '2025-08-25T00:00:00Z'
+        lastUpdated: '2025-08-27T00:00:00Z'
       };
     });
 
