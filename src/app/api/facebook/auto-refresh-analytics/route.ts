@@ -171,7 +171,7 @@ export async function GET(request: NextRequest) {
     };
 
     console.log(`✅ Auto-refresh complete. Data range: 2025-08-01 to ${today}`);
-    console.log(`📊 Summary: €${totalSpend.toFixed(2)} spent, ${totalConversions} conversions`);
+    console.log(`📊 Summary: €${totalSpend.toFixed(2)} spent, ${summary.totalConversions} conversions`);
 
     return NextResponse.json({
       success: true,
