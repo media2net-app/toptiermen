@@ -77,32 +77,16 @@ export default function ConversieOverzicht() {
         console.log('✅ Filtered leads (removed test leads):', filteredLeads.length);
       }
       
-      // Fetch Facebook analytics with auto-refresh (live data up to today)
-      const analyticsResponse = await fetch('/api/facebook/auto-refresh-analytics');
+      // Fetch Facebook analytics with manual data (fallback to existing API)
+      const analyticsResponse = await fetch('/api/facebook/comprehensive-analytics?dateRange=maximum&useManualData=true&forceManual=true');
       const analyticsResult = await analyticsResponse.json();
-      console.log('📈 Auto-refresh analytics data:', analyticsResult);
+      console.log('📈 Analytics data:', analyticsResult);
       
       if (analyticsResult.success) {
-        console.log('✅ Setting auto-refresh analytics data:', analyticsResult.data);
+        console.log('✅ Setting analytics data:', analyticsResult.data);
         setAnalyticsData(analyticsResult.data);
-        
-        // Show date range info
-        if (analyticsResult.meta?.dateRange) {
-          console.log(`📅 Data range: ${analyticsResult.meta.dateRange}`);
-        }
       } else {
-        console.error('❌ Auto-refresh analytics API failed:', analyticsResult);
-        // Fallback to manual data if auto-refresh fails
-        console.log('🔄 Falling back to manual data...');
-        const fallbackResponse = await fetch('/api/facebook/comprehensive-analytics?dateRange=maximum&useManualData=true&forceManual=true');
-        const fallbackResult = await fallbackResponse.json();
-        
-        if (fallbackResult.success) {
-          console.log('✅ Using fallback manual data');
-          setAnalyticsData(fallbackResult.data);
-        } else {
-          console.error('❌ Fallback also failed:', fallbackResult);
-        }
+        console.error('❌ Analytics API failed:', analyticsResult);
       }
       
       setLastSync(new Date());
@@ -219,7 +203,7 @@ export default function ConversieOverzicht() {
                       <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-3xl font-bold text-white mb-2">Conversie Overzicht</h1>
-                <p className="text-gray-400">Bekijk alle conversies en campaign performance data (test leads gefilterd) - AUTO-REFRESH tot vandaag</p>
+                <p className="text-gray-400">Bekijk alle conversies en campaign performance data (test leads gefilterd) - LIVE Facebook Data</p>
               </div>
             <div className="flex items-center space-x-4">
               {lastSync && (
@@ -249,7 +233,7 @@ export default function ConversieOverzicht() {
                   }`}
                 >
                   <ArrowPathIcon className={`h-5 w-5 ${syncing ? 'animate-spin' : ''}`} />
-                  <span>{syncing ? 'Auto-refreshing...' : 'Auto-refresh'}</span>
+                  <span>{syncing ? 'Syncing...' : 'Sync Data'}</span>
                 </button>
               </div>
             </div>
