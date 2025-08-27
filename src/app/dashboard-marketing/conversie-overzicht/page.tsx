@@ -419,12 +419,29 @@ export default function ConversieOverzicht() {
         {/* Campaign Performance */}
         {analyticsData?.campaigns && (
           <div className="bg-black/50 border border-gray-800 rounded-xl p-6 mb-8">
-            <h2 className="text-xl font-semibold text-white mb-6">Campaign Performance</h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold text-white">Campaign Performance</h2>
+              <div className="flex items-center space-x-4 text-sm">
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                  <span className="text-gray-300">
+                    {analyticsData.campaigns.filter((c: any) => c.status === 'ACTIVE').length} Actief
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 rounded-full bg-gray-500"></div>
+                  <span className="text-gray-300">
+                    {analyticsData.campaigns.filter((c: any) => c.status !== 'ACTIVE').length} Inactief
+                  </span>
+                </div>
+              </div>
+            </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-700">
                     <th className="text-left py-3 px-4">Campaign</th>
+                    <th className="text-center py-3 px-4">Status</th>
                     <th className="text-right py-3 px-4">Impressions</th>
                     <th className="text-right py-3 px-4">Clicks</th>
                     <th className="text-right py-3 px-4">CTR</th>
@@ -435,18 +452,38 @@ export default function ConversieOverzicht() {
                   </tr>
                 </thead>
                 <tbody>
-                  {analyticsData.campaigns.map((campaign: any) => {
+                  {analyticsData.campaigns
+                    .sort((a: any, b: any) => {
+                      // Sort active campaigns first, then by name
+                      if (a.status === 'ACTIVE' && b.status !== 'ACTIVE') return -1;
+                      if (a.status !== 'ACTIVE' && b.status === 'ACTIVE') return 1;
+                      return a.name.localeCompare(b.name);
+                    })
+                    .map((campaign: any) => {
                     // Use conversions directly from API instead of calculating from leads
                     const conversions = campaign.conversions || 0;
                     const costPerConversion = conversions > 0 && campaign.spend ? campaign.spend / conversions : 0;
+                    const isActive = campaign.status === 'ACTIVE';
                     
                     return (
-                      <tr key={campaign.id} className="border-b border-gray-800 hover:bg-gray-800/50">
+                      <tr key={campaign.id} className={`border-b border-gray-800 hover:bg-gray-800/50 ${isActive ? 'bg-green-900/10' : ''}`}>
                         <td className="py-3 px-4">
-                          <div>
-                            <p className="font-medium text-white">{campaign.name}</p>
-                            <p className="text-xs text-gray-400">{campaign.id}</p>
+                          <div className="flex items-center space-x-2">
+                            <div className={`w-2 h-2 rounded-full ${isActive ? 'bg-green-500' : 'bg-gray-500'}`}></div>
+                            <div>
+                              <p className="font-medium text-white">{campaign.name}</p>
+                              <p className="text-xs text-gray-400">{campaign.id}</p>
+                            </div>
                           </div>
+                        </td>
+                        <td className="text-center py-3 px-4">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            isActive 
+                              ? 'bg-green-100 text-green-800' 
+                              : 'bg-gray-100 text-gray-800'
+                          }`}>
+                            {isActive ? 'Actief' : 'Inactief'}
+                          </span>
                         </td>
                         <td className="text-right py-3 px-4 text-gray-300">{parseInt(campaign.impressions).toLocaleString()}</td>
                         <td className="text-right py-3 px-4 text-gray-300">{parseInt(campaign.clicks).toLocaleString()}</td>
