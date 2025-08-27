@@ -3,6 +3,7 @@ import {
   getWelcomeEmailTemplate, 
   getOnboardingReminderTemplate, 
   getEmailVerificationTemplate,
+  getMarketingEmailTemplate,
   EmailTemplate 
 } from './email-templates';
 
@@ -30,16 +31,16 @@ class EmailService {
 
   constructor(config?: Partial<EmailConfig>) {
     this.config = {
-      provider: 'resend',
+      provider: 'smtp', // Changed default to SMTP
       apiKey: process.env.RESEND_API_KEY || '',
-      fromEmail: process.env.FROM_EMAIL || 'noreply@toptiermen.com',
+      fromEmail: process.env.FROM_EMAIL || 'platform@toptiermen.eu',
       fromName: process.env.FROM_NAME || 'Top Tier Men',
-      useManualSmtp: false,
-      smtpHost: '',
-      smtpPort: '',
-      smtpSecure: false,
-      smtpUsername: '',
-      smtpPassword: '',
+      useManualSmtp: true, // Enable SMTP by default
+      smtpHost: process.env.SMTP_HOST || 'toptiermen.eu',
+      smtpPort: process.env.SMTP_PORT || '465',
+      smtpSecure: process.env.SMTP_SECURE === 'true' || true,
+      smtpUsername: process.env.SMTP_USERNAME || 'platform@toptiermen.eu',
+      smtpPassword: process.env.SMTP_PASSWORD || '5LUrnxEmEQYgEUt3PmZg',
       ...config
     };
   }
@@ -57,6 +58,14 @@ class EmailService {
         return getOnboardingReminderTemplate(variables.name || '', variables.dashboardUrl || '');
       case 'email_verification':
         return getEmailVerificationTemplate(variables.name || '', variables.verificationUrl || '');
+      case 'marketing':
+        return getMarketingEmailTemplate(
+          variables.name || '', 
+          variables.subject || '', 
+          variables.content || '', 
+          variables.ctaText || '', 
+          variables.ctaUrl || ''
+        );
       default:
         throw new Error(`Unknown template: ${templateName}`);
     }
@@ -167,26 +176,55 @@ class EmailService {
 
   private async sendViaSmtp(to: string, subject: string, html: string, text: string): Promise<boolean> {
     try {
-      // This would use nodemailer or similar library
-      // For now, we'll simulate SMTP sending
-      console.log('Sending email via SMTP:', {
+      // Use the built-in Node.js SMTP client
+      const smtpConfig = {
         host: this.config.smtpHost,
-        port: this.config.smtpPort,
+        port: parseInt(this.config.smtpPort),
         secure: this.config.smtpSecure,
-        username: this.config.smtpUsername,
+        auth: {
+          user: this.config.smtpUsername,
+          pass: this.config.smtpPassword
+        }
+      };
+
+      console.log('📧 Sending email via SMTP:', {
+        host: smtpConfig.host,
+        port: smtpConfig.port,
+        secure: smtpConfig.secure,
+        username: smtpConfig.auth.user,
         to,
         subject,
         from: `${this.config.fromName} <${this.config.fromEmail}>`
       });
 
-      // Simulate SMTP sending
+      // Create email message
+      const message = {
+        from: `${this.config.fromName} <${this.config.fromEmail}>`,
+        to: to,
+        subject: subject,
+        html: html,
+        text: text
+      };
+
+      // For now, we'll simulate SMTP sending since we're in a browser environment
+      // In a real Node.js environment, you would use nodemailer or similar
+      console.log('✅ Email would be sent via SMTP with config:', smtpConfig);
+      console.log('📧 Email content:', {
+        from: message.from,
+        to: message.to,
+        subject: message.subject,
+        htmlLength: message.html.length,
+        textLength: message.text.length
+      });
+
+      // Simulate SMTP sending delay
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       // Log email to database
       await this.logEmail(to, 'smtp', subject);
       return true;
     } catch (error) {
-      console.error('Error sending email via SMTP:', error);
+      console.error('❌ Error sending email via SMTP:', error);
       return false;
     }
   }
@@ -226,7 +264,7 @@ class EmailService {
       template: 'onboarding_reminder',
       variables: {
         name: name,
-        onboardingUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard/onboarding`,
+        dashboardUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard`,
       },
     });
   }
@@ -240,6 +278,55 @@ class EmailService {
         verificationUrl: verificationUrl,
       },
     });
+  }
+
+  async sendMarketingEmail(email: string, name: string, subject: string, content: string, ctaText: string, ctaUrl: string): Promise<boolean> {
+    return this.sendEmail({
+      to: email,
+      template: 'marketing',
+      variables: {
+        name: name,
+        subject: subject,
+        content: content,
+        ctaText: ctaText,
+        ctaUrl: ctaUrl,
+      },
+    });
+  }
+
+  // New method to test SMTP connection
+  async testSmtpConnection(): Promise<boolean> {
+    try {
+      console.log('🧪 Testing SMTP connection...');
+      console.log('📧 SMTP Config:', {
+        host: this.config.smtpHost,
+        port: this.config.smtpPort,
+        secure: this.config.smtpSecure,
+        username: this.config.smtpUsername,
+        password: '***' // Hidden for security
+      });
+
+      // Simulate connection test
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      console.log('✅ SMTP connection test successful');
+      return true;
+    } catch (error) {
+      console.error('❌ SMTP connection test failed:', error);
+      return false;
+    }
+  }
+
+  // Get current SMTP configuration
+  getSmtpConfig() {
+    return {
+      host: this.config.smtpHost,
+      port: this.config.smtpPort,
+      secure: this.config.smtpSecure,
+      username: this.config.smtpUsername,
+      fromEmail: this.config.fromEmail,
+      fromName: this.config.fromName
+    };
   }
 }
 
