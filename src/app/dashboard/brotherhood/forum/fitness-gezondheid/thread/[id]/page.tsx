@@ -134,19 +134,19 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
             fallbackMap[userId] = {
               id: userId,
               full_name: 'Rick Cuijpers',
-              avatar_url: null
+              avatar_url: undefined
             };
           } else if (userId === '061e43d5-c89a-42bb-8a4c-04be2ce99a7e') {
             fallbackMap[userId] = {
               id: userId,
               full_name: 'Chiel van der Zee',
-              avatar_url: null
+              avatar_url: undefined
             };
           } else {
             fallbackMap[userId] = {
               id: userId,
               full_name: 'Unknown User',
-              avatar_url: null
+              avatar_url: undefined
             };
           }
         });
@@ -169,19 +169,19 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
             profilesMap[userId] = {
               id: userId,
               full_name: 'Rick Cuijpers',
-              avatar_url: null
+              avatar_url: undefined
             };
           } else if (userId === '061e43d5-c89a-42bb-8a4c-04be2ce99a7e') {
             profilesMap[userId] = {
               id: userId,
               full_name: 'Chiel van der Zee',
-              avatar_url: null
+              avatar_url: undefined
             };
           } else {
             profilesMap[userId] = {
               id: userId,
               full_name: 'Unknown User',
-              avatar_url: null
+              avatar_url: undefined
             };
           }
         }
@@ -198,19 +198,19 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
           fallbackMap[userId] = {
             id: userId,
             full_name: 'Rick Cuijpers',
-            avatar_url: null
+            avatar_url: undefined
           };
         } else if (userId === '061e43d5-c89a-42bb-8a4c-04be2ce99a7e') {
           fallbackMap[userId] = {
             id: userId,
             full_name: 'Chiel van der Zee',
-            avatar_url: null
+            avatar_url: undefined
           };
         } else {
           fallbackMap[userId] = {
             id: userId,
             full_name: 'Unknown User',
-            avatar_url: null
+            avatar_url: undefined
           };
         }
       });
