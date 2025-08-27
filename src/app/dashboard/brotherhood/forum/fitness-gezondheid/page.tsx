@@ -26,21 +26,24 @@ interface ForumTopic {
 const FitnessGezondheidPage = () => {
   const [topics, setTopics] = useState<ForumTopic[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [userProfiles, setUserProfiles] = useState<{ [key: string]: UserProfile }>({});
 
   useEffect(() => {
+    console.log('🔄 Forum page mounted, fetching topics...');
     fetchTopics();
   }, []);
 
   const fetchUserProfiles = async (userIds: string[]) => {
     try {
+      console.log('👤 Fetching user profiles for:', userIds);
       const { data: profiles, error } = await supabase
         .from('profiles')
         .select('id, full_name, avatar_url')
         .in('id', userIds);
 
       if (error) {
-        console.error('Error fetching profiles:', error);
+        console.error('❌ Error fetching profiles:', error);
         return {};
       }
 
@@ -49,15 +52,20 @@ const FitnessGezondheidPage = () => {
         profilesMap[profile.id] = profile;
       });
 
+      console.log('✅ User profiles fetched:', profilesMap);
       return profilesMap;
     } catch (error) {
-      console.error('Error fetching profiles:', error);
+      console.error('❌ Error fetching profiles:', error);
       return {};
     }
   };
 
   const fetchTopics = async () => {
     try {
+      console.log('📝 Fetching forum topics...');
+      setLoading(true);
+      setError(null);
+
       const { data: topicsData, error } = await supabase
         .from('forum_topics')
         .select(`
@@ -73,15 +81,27 @@ const FitnessGezondheidPage = () => {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching topics:', error);
+        console.error('❌ Error fetching topics:', error);
+        setError(`Error fetching topics: ${error.message}`);
+        return;
+      }
+
+      console.log('✅ Topics data received:', topicsData);
+
+      if (!topicsData || topicsData.length === 0) {
+        console.log('⚠️ No topics found');
+        setTopics([]);
+        setLoading(false);
         return;
       }
 
       // Collect all user IDs
       const userIds = new Set<string>();
-      topicsData?.forEach(topic => {
+      topicsData.forEach(topic => {
         if (topic.author_id) userIds.add(topic.author_id);
       });
+
+      console.log('👥 Unique user IDs found:', Array.from(userIds));
 
       // Fetch user profiles
       const profiles = await fetchUserProfiles(Array.from(userIds));
@@ -105,7 +125,7 @@ const FitnessGezondheidPage = () => {
         };
       };
 
-      const processedTopics = (topicsData || []).map((topic: any) => ({
+      const processedTopics = topicsData.map((topic: any) => ({
         id: topic.id,
         title: topic.title,
         created_at: topic.created_at,
@@ -115,9 +135,11 @@ const FitnessGezondheidPage = () => {
         author: getAuthorInfo(topic.author_id)
       }));
 
+      console.log('✅ Processed topics:', processedTopics);
       setTopics(processedTopics);
     } catch (error) {
-      console.error('Error fetching topics:', error);
+      console.error('❌ Error in fetchTopics:', error);
+      setError(`Unexpected error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
@@ -160,6 +182,24 @@ const FitnessGezondheidPage = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="px-4 md:px-12">
+        <div className="text-center text-white py-12">
+          <div className="text-6xl mb-4">⚠️</div>
+          <h3 className="text-xl font-bold mb-2">Error Loading Topics</h3>
+          <p className="text-[#8BAE5A] mb-6">{error}</p>
+          <button 
+            onClick={fetchTopics}
+            className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold shadow hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="px-4 md:px-12">
       {/* Header */}
@@ -171,6 +211,13 @@ const FitnessGezondheidPage = () => {
         <button className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold shadow hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all">
           + Start Nieuwe Topic
         </button>
+      </div>
+
+      {/* Debug Info */}
+      <div className="mb-4 p-4 bg-[#232D1A]/50 rounded-lg">
+        <p className="text-sm text-[#8BAE5A]">
+          Debug: {topics.length} topics loaded | Loading: {loading.toString()} | Error: {error || 'None'}
+        </p>
       </div>
 
       {/* Topics List */}
