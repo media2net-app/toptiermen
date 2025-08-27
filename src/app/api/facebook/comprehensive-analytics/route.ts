@@ -43,44 +43,53 @@ const MANUAL_DATA_OVERRIDE = {
   }
 };
 
-// Updated manual data based on Facebook Ads Manager screenshot (26 August 2025)
+// Updated manual data based on Facebook Ads Manager (27 August 2025)
 // Live data from Facebook Ads Manager with maximum date range
 const CURRENT_MANUAL_DATA = {
   'TTM - Zakelijk Prelaunch Campagne': {
-    clicks: 576,
-    spend: 83.11,
-    impressions: 12346,
-    reach: 8911,
-    ctr: 0.0466, // 4.66% in decimal (576/12346)
-    cpc: 0.14, // 83.11/576
-    frequency: 1.39 // 12346/8911
+    clicks: 1235,
+    spend: 107.88,
+    impressions: 14968,
+    reach: 12456,
+    ctr: 0.082503339,
+    cpc: 0.087352226,
+    frequency: 1.201285
   },
   'TTM - Vaders Prelaunch Campagne': {
-    clicks: 293,
-    spend: 22.54,
-    impressions: 3886,
-    reach: 3404,
-    ctr: 0.0754, // 7.54% in decimal (293/3886)
-    cpc: 0.08, // 22.54/293
-    frequency: 1.14 // 3886/3404
+    clicks: 473,
+    spend: 25.15,
+    impressions: 4189,
+    reach: 3671,
+    ctr: 0.11291477679637145,
+    cpc: 0.053171247357293866,
+    frequency: 1.141106
   },
   'TTM - Jongeren Prelaunch Campagne': {
-    clicks: 337,
-    spend: 34.44,
-    impressions: 5618,
-    reach: 4142,
-    ctr: 0.0600, // 6.00% in decimal (337/5618)
-    cpc: 0.10, // 34.44/337
-    frequency: 1.36 // 5618/4142
+    clicks: 679,
+    spend: 44.44,
+    impressions: 6867,
+    reach: 5867,
+    ctr: 0.098878695,
+    cpc: 0.065449190,
+    frequency: 1.170445
   },
   'TTM - Algemene Prelaunch Campagne': {
-    clicks: 291,
-    spend: 33.36,
-    impressions: 4752,
-    reach: 4012,
-    ctr: 0.0612, // 6.12% in decimal (291/4752)
-    cpc: 0.11, // 33.36/291
-    frequency: 1.18 // 4752/4012
+    clicks: 499,
+    spend: 36.76,
+    impressions: 5123,
+    reach: 4233,
+    ctr: 0.09740386492289674,
+    cpc: 0.07366733466933867,
+    frequency: 1.210253
+  },
+  'TTM - Zakelijk Prelaunch Campagne - LEADS V2': {
+    clicks: 32,
+    spend: 6.70,
+    impressions: 358,
+    reach: 358,
+    ctr: 0.0893854748603352,
+    cpc: 0.209375,
+    frequency: 1.0
   },
   'TTM - Zakelijk Prelaunch Campagne - LEADS': {
     clicks: 0,
