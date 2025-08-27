@@ -43,47 +43,73 @@ const MANUAL_DATA_OVERRIDE = {
   }
 };
 
-// Updated manual data based on current Facebook Ads Manager (25 August 2025)
-// Total spend: €110.26 (user reported)
-// CTR values are in decimal format (0.0667 = 6.67%)
+// Updated manual data based on Facebook Ads Manager screenshot (26 August 2025)
+// Live data from Facebook Ads Manager with maximum date range
 const CURRENT_MANUAL_DATA = {
   'TTM - Zakelijk Prelaunch Campagne': {
-    clicks: 120,
-    spend: 28.50,
-    impressions: 1800,
-    reach: 1800,
-    ctr: 0.0667, // 6.67% in decimal
-    cpc: 0.24,
-    frequency: 1.10
+    clicks: 576,
+    spend: 83.11,
+    impressions: 12346,
+    reach: 8911,
+    ctr: 0.0466, // 4.66% in decimal (576/12346)
+    cpc: 0.14, // 83.11/576
+    frequency: 1.39 // 12346/8911
   },
   'TTM - Vaders Prelaunch Campagne': {
-    clicks: 150,
-    spend: 22.30,
-    impressions: 2000,
-    reach: 2000,
-    ctr: 0.075, // 7.50% in decimal
-    cpc: 0.15,
-    frequency: 1.08
+    clicks: 293,
+    spend: 22.54,
+    impressions: 3886,
+    reach: 3404,
+    ctr: 0.0754, // 7.54% in decimal (293/3886)
+    cpc: 0.08, // 22.54/293
+    frequency: 1.14 // 3886/3404
   },
   'TTM - Jongeren Prelaunch Campagne': {
-    clicks: 110,
-    spend: 20.80,
-    impressions: 1700,
-    reach: 1700,
-    ctr: 0.0647, // 6.47% in decimal
-    cpc: 0.19,
-    frequency: 1.05
+    clicks: 337,
+    spend: 34.44,
+    impressions: 5618,
+    reach: 4142,
+    ctr: 0.0600, // 6.00% in decimal (337/5618)
+    cpc: 0.10, // 34.44/337
+    frequency: 1.36 // 5618/4142
   },
   'TTM - Algemene Prelaunch Campagne': {
-    clicks: 220,
-    spend: 38.66,
-    impressions: 3200,
-    reach: 3200,
-    ctr: 0.0688, // 6.88% in decimal
-    cpc: 0.18,
-    frequency: 1.15
+    clicks: 291,
+    spend: 33.36,
+    impressions: 4752,
+    reach: 4012,
+    ctr: 0.0612, // 6.12% in decimal (291/4752)
+    cpc: 0.11, // 33.36/291
+    frequency: 1.18 // 4752/4012
   },
   'TTM - Zakelijk Prelaunch Campagne - LEADS': {
+    clicks: 0,
+    spend: 0,
+    impressions: 0,
+    reach: 0,
+    ctr: 0,
+    cpc: 0,
+    frequency: 0
+  },
+  'TTM - Vaders Prelaunch Campagne - LEADS': {
+    clicks: 0,
+    spend: 0,
+    impressions: 0,
+    reach: 0,
+    ctr: 0,
+    cpc: 0,
+    frequency: 0
+  },
+  'TTM - Jongeren Prelaunch Campagne - LEADS': {
+    clicks: 0,
+    spend: 0,
+    impressions: 0,
+    reach: 0,
+    ctr: 0,
+    cpc: 0,
+    frequency: 0
+  },
+  'TTM - Algemene Prelaunch Campagne - LEADS': {
     clicks: 0,
     spend: 0,
     impressions: 0,
@@ -194,7 +220,7 @@ export async function GET(request: NextRequest) {
         averageCTR: weightedCTR,
         averageCPC: weightedCPC,
         activeCampaigns: Object.keys(CURRENT_MANUAL_DATA).length,
-        totalConversions: 0
+        totalConversions: 6
       };
 
       analyticsData.summary = summary;
