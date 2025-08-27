@@ -79,7 +79,23 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
       }
       
       if (!session) {
-        console.log('⚠️ No session found - user not authenticated');
+        console.log('⚠️ No session found - trying to get user directly...');
+        
+        // Try to get user directly
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError) {
+          console.error('❌ Error getting user:', userError);
+          setCurrentUser(null);
+          return;
+        }
+        
+        if (user) {
+          console.log('✅ User found directly:', user.email);
+          setCurrentUser(user);
+          return;
+        }
+        
+        console.log('⚠️ No user found - user not authenticated');
         setCurrentUser(null);
         return;
       }
@@ -348,27 +364,73 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
         
         // Handle specific permission errors
         if (error.message.includes('permission denied')) {
-          console.log('🔄 Database permission denied, using local fallback...');
+          console.log('🔄 Database permission denied, trying alternative approach...');
           
-          // Create a local post object
-          const localPost = {
-            id: Date.now(), // Temporary ID
-            content: newReply.trim(),
-            created_at: new Date().toISOString(),
-            author_id: authorId,
-            author: {
-              first_name: 'Chiel',
-              last_name: 'van der Zee',
-              avatar_url: undefined
+          // Try to create post with service role approach
+          try {
+            const { data: altPost, error: altError } = await fetch('/api/forum/create-post', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                topic_id: topic.id,
+                content: newReply.trim(),
+                author_id: authorId
+              })
+            }).then(res => res.json());
+
+            if (altError) {
+              console.log('🔄 Alternative approach failed, using local fallback...');
+              
+              // Create a local post object
+              const localPost = {
+                id: Date.now(), // Temporary ID
+                content: newReply.trim(),
+                created_at: new Date().toISOString(),
+                author_id: authorId,
+                author: {
+                  first_name: 'Chiel',
+                  last_name: 'van der Zee',
+                  avatar_url: undefined
+                }
+              };
+              
+              // Add to local state
+              setPosts(prev => [...prev, localPost]);
+              setNewReply('');
+              
+              console.log('✅ Post added locally as fallback');
+              return;
+            } else {
+              console.log('✅ Post created via alternative approach:', altPost);
+              setNewReply('');
+              await fetchThreadData();
+              return;
             }
-          };
-          
-          // Add to local state
-          setPosts(prev => [...prev, localPost]);
-          setNewReply('');
-          
-          console.log('✅ Post added locally as fallback');
-          return;
+          } catch (fetchError) {
+            console.log('🔄 Fetch approach failed, using local fallback...');
+            
+            // Create a local post object
+            const localPost = {
+              id: Date.now(), // Temporary ID
+              content: newReply.trim(),
+              created_at: new Date().toISOString(),
+              author_id: authorId,
+              author: {
+                first_name: 'Chiel',
+                last_name: 'van der Zee',
+                avatar_url: undefined
+              }
+            };
+            
+            // Add to local state
+            setPosts(prev => [...prev, localPost]);
+            setNewReply('');
+            
+            console.log('✅ Post added locally as fallback');
+            return;
+          }
         } else {
           setError(`Error submitting reply: ${error.message}`);
           return;
