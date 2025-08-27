@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('✅ Forum post created successfully:', post.id);
+    console.log('✅ Forum post created successfully on live:', post.id);
 
     return NextResponse.json({
       success: true,
