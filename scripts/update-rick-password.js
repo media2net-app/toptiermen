@@ -19,7 +19,7 @@ async function updateRickPassword() {
     
     // First, find Rick's user ID by email
     const { data: users, error: searchError } = await supabase
-      .from('users')
+      .from('profiles')
       .select('id, email, full_name')
       .or('email.ilike.%rick%,full_name.ilike.%rick%')
       .limit(10);

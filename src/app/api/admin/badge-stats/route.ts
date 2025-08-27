@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     ] = await Promise.all([
       supabaseAdmin.from('badges').select('*'),
       supabaseAdmin.from('user_badges').select('*'),
-      supabaseAdmin.from('users').select('id')
+      supabaseAdmin.from('profiles').select('id')
     ]);
 
     if (badgesError) console.error('Error fetching badges:', badgesError);

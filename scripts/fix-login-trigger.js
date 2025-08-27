@@ -78,7 +78,7 @@ async function fixLoginTrigger() {
       console.log('✅ Trigger recreated successfully');
     }
 
-    // 4. Check RLS policies on users table
+    // 4. Check RLS policies on profiles table
     console.log('🔒 Checking RLS policies on users table...');
     const { data: policies, error: policiesError } = await supabase.rpc('exec_sql', {
       sql_query: `
@@ -92,7 +92,7 @@ async function fixLoginTrigger() {
           qual,
           with_check
         FROM pg_policies 
-        WHERE tablename = 'users';
+        WHERE tablename = 'profiles';
       `
     });
 
@@ -106,7 +106,7 @@ async function fixLoginTrigger() {
     // 5. Test the authentication flow
     console.log('🧪 Testing authentication flow...');
     const { data: testUser, error: testError } = await supabase
-      .from('users')
+      .from('profiles')
       .select('id, email, status, last_login')
       .limit(1);
 

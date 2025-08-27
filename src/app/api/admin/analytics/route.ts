@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
       { data: forumPosts, error: forumError },
       { data: books, error: booksError }
     ] = await Promise.all([
-      supabaseAdmin.from('users').select('*'),
+      supabaseAdmin.from('profiles').select('*'),
       supabaseAdmin.from('onboarding_status').select('*'),
       supabaseAdmin.from('profiles').select('*'),
       supabaseAdmin.from('user_missions').select('*'),

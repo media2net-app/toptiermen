@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
 
     // Build query
     let query = supabaseAdmin
-      .from('users')
+      .from('profiles')
       .select(`
         id,
         email,
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
 
     // Get total count for pagination
     const { count } = await supabaseAdmin
-      .from('users')
+      .from('profiles')
       .select('*', { count: 'exact', head: true });
 
     // Get paginated results
@@ -145,7 +145,7 @@ export async function POST(request: NextRequest) {
 async function updateUserStatus(userId: string, status: string) {
   try {
     const { error } = await supabaseAdmin
-      .from('users')
+      .from('profiles')
       .update({ status })
       .eq('id', userId);
 
@@ -174,7 +174,7 @@ async function updateUserStatus(userId: string, status: string) {
 async function updateUserRole(userId: string, role: string) {
   try {
     const { error } = await supabaseAdmin
-      .from('users')
+      .from('profiles')
       .update({ role })
       .eq('id', userId);
 
@@ -243,7 +243,7 @@ async function deleteUser(userId: string) {
 
     // Delete from users
     const { error: userError } = await supabaseAdmin
-      .from('users')
+      .from('profiles')
       .delete()
       .eq('id', userId);
 

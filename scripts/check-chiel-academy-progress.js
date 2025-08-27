@@ -26,9 +26,9 @@ async function checkChielAcademyProgress() {
     if (usersError || !users || users.length === 0) {
       console.error('❌ User "Chiel" not found in profiles table');
       
-      // Try users table as fallback
+      // Try profiles table as fallback
       const { data: authUsers, error: authError } = await supabase
-        .from('users')
+        .from('profiles')
         .select('id, email')
         .ilike('email', '%chiel%')
         .limit(1);

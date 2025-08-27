@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { Database } from '@/types/database.types';
 
-type User = Database['public']['Tables']['users']['Row'];
+type User = Database['public']['Tables']['profiles']['Row'];
 
 const ranks = [
   { name: 'Legende', icon: '🦁' },
@@ -48,7 +48,7 @@ export default function ProfielDetail() {
       setError(null);
 
       const { data, error: fetchError } = await supabase
-        .from('users')
+        .from('profiles')
         .select('*')
         .eq('id', id)
         .single();

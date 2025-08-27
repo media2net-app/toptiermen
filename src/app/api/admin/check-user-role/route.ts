@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     
     // Get user role from database
     const { data: allUsers, error } = await supabaseAdmin
-      .from('users')
+      .from('profiles')
       .select('role, full_name, email, id, created_at')
       .eq('email', email)
       .order('created_at', { ascending: false });
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
       // Delete older records
       for (let i = 1; i < allUsers.length; i++) {
         await supabaseAdmin
-          .from('users')
+          .from('profiles')
           .delete()
           .eq('id', allUsers[i].id);
       }

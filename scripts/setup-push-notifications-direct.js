@@ -22,7 +22,7 @@ async function setupPushNotificationsDirect() {
     // Test database connection
     console.log('1️⃣ Testing database connection...');
     const { data: testData, error: testError } = await supabase
-      .from('users')
+      .from('profiles')
       .select('count')
       .limit(1);
 

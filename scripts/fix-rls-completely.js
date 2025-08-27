@@ -27,7 +27,7 @@ async function fixRLSCompletely() {
           qual,
           with_check
         FROM pg_policies 
-        WHERE tablename = 'users'
+        WHERE tablename = 'profiles'
         ORDER BY policyname;
       `
     });
@@ -98,7 +98,7 @@ async function fixRLSCompletely() {
     
     // Test with service role (should work)
     const { data: serviceRoleTest, error: serviceRoleError } = await supabase
-      .from('users')
+      .from('profiles')
       .select('id, email, status, role')
       .limit(1);
 
@@ -111,7 +111,7 @@ async function fixRLSCompletely() {
     // 5. Test with anon key (should fail)
     const anonSupabase = createClient(supabaseUrl, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
     const { data: anonTest, error: anonError } = await anonSupabase
-      .from('users')
+      .from('profiles')
       .select('id, email')
       .limit(1);
 

@@ -10,9 +10,9 @@ async function checkUsersTable() {
   try {
     console.log('🔍 Checking if rank column exists in users table...');
     
-    // Try to select from users table to see what columns exist
+    // Try to select from profiles table to see what columns exist
     const { data: userData, error: userError } = await supabase
-      .from('users')
+      .from('profiles')
       .select('*')
       .limit(1);
 

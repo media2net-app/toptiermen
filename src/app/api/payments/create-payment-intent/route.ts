@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
 
     // Update user with Stripe customer ID
     await supabaseAdmin
-      .from('users')
+      .from('profiles')
       .update({ 
         stripe_customer_id: customer.id,
         selected_plan: planId 

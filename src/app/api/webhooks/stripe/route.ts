@@ -80,7 +80,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: any) {
   
   // Update user subscription status
   await supabaseAdmin
-    .from('users')
+    .from('profiles')
     .update({
       subscription_status: 'active',
       subscription_plan: plan_id,
@@ -97,7 +97,7 @@ async function handlePaymentIntentFailed(paymentIntent: any) {
   
   // Update user payment status
   await supabaseAdmin
-    .from('users')
+    .from('profiles')
     .update({
       payment_status: 'failed',
       subscription_status: 'inactive',
@@ -111,7 +111,7 @@ async function handleSubscriptionCreated(subscription: any) {
   const { user_id } = subscription.metadata;
   
   await supabaseAdmin
-    .from('users')
+    .from('profiles')
     .update({
       subscription_status: 'active',
       stripe_subscription_id: subscription.id,
@@ -126,7 +126,7 @@ async function handleSubscriptionUpdated(subscription: any) {
   const { user_id } = subscription.metadata;
   
   await supabaseAdmin
-    .from('users')
+    .from('profiles')
     .update({
       subscription_status: subscription.status,
       subscription_current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
@@ -140,7 +140,7 @@ async function handleSubscriptionDeleted(subscription: any) {
   const { user_id } = subscription.metadata;
   
   await supabaseAdmin
-    .from('users')
+    .from('profiles')
     .update({
       subscription_status: 'cancelled',
       subscription_end_date: new Date().toISOString(),
@@ -154,7 +154,7 @@ async function handleInvoicePaymentSucceeded(invoice: any) {
   const { user_id } = invoice.metadata;
   
   await supabaseAdmin
-    .from('users')
+    .from('profiles')
     .update({
       payment_status: 'paid',
       last_payment_date: new Date().toISOString(),
@@ -168,7 +168,7 @@ async function handleInvoicePaymentFailed(invoice: any) {
   const { user_id } = invoice.metadata;
   
   await supabaseAdmin
-    .from('users')
+    .from('profiles')
     .update({
       payment_status: 'failed',
       subscription_status: 'past_due',

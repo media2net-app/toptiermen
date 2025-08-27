@@ -18,7 +18,7 @@ async function checkChielProgress() {
     // 1. Find Chiel's user account
     console.log('1️⃣ Finding Chiel\'s user account...');
     const { data: users, error: usersError } = await supabase
-      .from('users')
+      .from('profiles')
       .select('id, email, created_at')
       .ilike('email', '%chiel%');
 

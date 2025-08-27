@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
 
     // Verify the update
     const { data: user, error: verifyError } = await supabaseAdmin
-      .from('users')
+      .from('profiles')
       .select('email, role')
       .eq('email', 'test@toptiermen.com')
       .single();

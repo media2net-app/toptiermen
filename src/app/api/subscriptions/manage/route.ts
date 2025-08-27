@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
 
     // Get user subscription data
     const { data: user, error: userError } = await supabaseAdmin
-      .from('users')
+      .from('profiles')
       .select('*')
       .eq('id', userId)
       .single();
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
 
     // Get user data
     const { data: user, error: userError } = await supabaseAdmin
-      .from('users')
+      .from('profiles')
       .select('*')
       .eq('id', userId)
       .single();
@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
 
         // Update user status
         await supabaseAdmin
-          .from('users')
+          .from('profiles')
           .update({
             subscription_status: 'cancelling',
             subscription_end_date: new Date(cancelledSubscription.current_period_end * 1000).toISOString(),
@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
 
         // Update user status
         await supabaseAdmin
-          .from('users')
+          .from('profiles')
           .update({
             subscription_status: 'active',
             subscription_end_date: null,

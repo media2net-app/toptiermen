@@ -30,7 +30,7 @@ export async function GET(request: Request) {
     try {
       // Get user's selected schema
       const { data: userData, error: userError } = await supabase
-        .from('users')
+        .from('profiles')
         .select('selected_schema_id')
         .eq('id', userId)
         .single();

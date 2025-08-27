@@ -141,7 +141,7 @@ async function testNutritionStatus() {
     console.log('\n7️⃣ Checking frontend integration...');
     try {
       const { data: usersWithNutrition, error: usersError } = await supabase
-        .from('users')
+        .from('profiles')
         .select('id, email, selected_nutrition_plan')
         .not('selected_nutrition_plan', 'is', null)
         .limit(5);

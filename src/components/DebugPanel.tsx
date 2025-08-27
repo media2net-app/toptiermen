@@ -98,7 +98,7 @@ export default function DebugPanel() {
       
       // Test user-specific queries
       const [userResult, progressResult] = await Promise.allSettled([
-        supabase.from('users').select('id, email, role').eq('id', user.id).single(),
+        supabase.from('profiles').select('id, email, role').eq('id', user.id).single(),
         supabase.from('user_lesson_progress').select('id').eq('user_id', user.id).limit(1)
       ]);
       

@@ -31,10 +31,10 @@ async function debugChielProfile() {
       console.log('✅ Chiel\'s profile:', chielProfile);
     }
 
-    // Check Chiel's data in users table
+    // Check Chiel's data in profiles table
     console.log('\n👤 Checking Chiel\'s data in users table...');
     const { data: chielUser, error: userError } = await supabase
-      .from('users')
+      .from('profiles')
       .select('*')
       .eq('id', chielUserId)
       .single();

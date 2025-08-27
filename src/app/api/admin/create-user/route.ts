@@ -47,9 +47,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-            // Create user record in users table
+            // Create user record in profiles table
         const { error: userError } = await supabaseAdmin
-          .from('users')
+          .from('profiles')
           .insert({
         id: authData.user.id,
         email: email,

@@ -595,9 +595,9 @@ export default function MijnProfiel() {
         .delete()
         .eq('id', userId);
 
-      // Delete from users table
+      // Delete from profiles table
       await supabase
-        .from('users')
+        .from('profiles')
         .delete()
         .eq('id', userId);
 

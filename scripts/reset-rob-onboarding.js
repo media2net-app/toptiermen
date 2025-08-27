@@ -12,7 +12,7 @@ async function resetRobOnboarding() {
 
     // Find Rob's user ID
     const { data: robUser, error: userError } = await supabase
-      .from('users')
+      .from('profiles')
       .select('id, email, full_name')
       .eq('email', 'rob@media2net.nl')
       .single();

@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
     
     // Get all users
     const { data: allUsers, error: fetchError } = await supabaseAdmin
-      .from('users')
+      .from('profiles')
       .select('*')
       .order('created_at', { ascending: false });
 
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
       // Delete duplicate records
       for (const user of deleteUsers) {
         const { error: deleteError } = await supabaseAdmin
-          .from('users')
+          .from('profiles')
           .delete()
           .eq('id', user.id);
         
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
 
     // Update test user role
     const { error: updateError } = await supabaseAdmin
-      .from('users')
+      .from('profiles')
       .update({ role: 'test' })
       .eq('email', 'test@toptiermen.com');
 
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
 
     // Verify the fix
     const { data: finalUsers, error: verifyError } = await supabaseAdmin
-      .from('users')
+      .from('profiles')
       .select('*')
       .order('created_at', { ascending: false });
 

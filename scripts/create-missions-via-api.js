@@ -139,7 +139,7 @@ const createMissionsSystem = async () => {
     
     // Get Rick's user ID
     const { data: users } = await supabase
-      .from('users')
+      .from('profiles')
       .select('id')
       .eq('email', 'rick@toptiermen.nl')
       .limit(1);

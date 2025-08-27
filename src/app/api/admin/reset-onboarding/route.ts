@@ -372,10 +372,10 @@ export async function POST(request: Request) {
       }
     }
 
-    // 28. Reset user stats in users table
+    // 28. Reset user stats in profiles table
     try {
       const { error: userStatsError } = await supabase
-        .from('users')
+        .from('profiles')
         .update({
           points: 0,
           missions_completed: 0,
@@ -390,7 +390,7 @@ export async function POST(request: Request) {
     } catch (error) {
       // Try without updated_at column
       const { error: userStatsError2 } = await supabase
-        .from('users')
+        .from('profiles')
         .update({
           points: 0,
           missions_completed: 0,

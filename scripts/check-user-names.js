@@ -10,9 +10,9 @@ async function checkUserNames() {
   try {
     console.log('🔍 Checking user names in database...\n');
 
-    // Check users table
+    // Check profiles table
     const { data: users, error: usersError } = await supabase
-      .from('users')
+      .from('profiles')
       .select('id, full_name, email, rank, points, missions_completed');
 
     if (usersError) {

@@ -86,7 +86,7 @@ async function addAcademyCompletionBadge() {
 
     // Get all users
     const { data: users, error: usersError } = await supabase
-      .from('users')
+      .from('profiles')
       .select('id, email');
 
     if (usersError) {

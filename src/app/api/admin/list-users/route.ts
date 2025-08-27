@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
     
     // Get all users from database
     const { data, error } = await supabaseAdmin
-      .from('users')
+      .from('profiles')
       .select('id, email, role, full_name, created_at')
       .order('created_at', { ascending: false });
 

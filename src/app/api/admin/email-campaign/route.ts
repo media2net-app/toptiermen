@@ -135,7 +135,7 @@ export async function GET(request: NextRequest) {
     console.log('User authenticated:', user.email);
 
     const { data: userData, error: userError } = await supabase
-      .from('users')
+      .from('profiles')
       .select('role')
       .eq('id', user.id)
       .single();
@@ -182,7 +182,7 @@ export async function POST(request: NextRequest) {
 
     // Check if user is admin
     const { data: userData, error: userError } = await supabase
-      .from('users')
+      .from('profiles')
       .select('role')
       .eq('id', user.id)
       .single();
@@ -229,7 +229,7 @@ export async function PUT(request: NextRequest) {
 
     // Check if user is admin
     const { data: userData, error: userError } = await supabase
-      .from('users')
+      .from('profiles')
       .select('role')
       .eq('id', user.id)
       .single();
@@ -276,7 +276,7 @@ export async function DELETE(request: NextRequest) {
 
     // Check if user is admin
     const { data: userData, error: userError } = await supabase
-      .from('users')
+      .from('profiles')
       .select('role')
       .eq('id', user.id)
       .single();

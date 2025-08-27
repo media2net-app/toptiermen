@@ -99,7 +99,7 @@ export async function requireAdmin(request: NextRequest): Promise<{
 
   // Check if user is admin
   const { data: profile, error } = await auth.supabase
-    .from('users')
+    .from('profiles')
     .select('role')
     .eq('id', auth.user.id)
     .single();

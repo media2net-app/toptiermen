@@ -141,7 +141,7 @@ export default function VoedingsplannenPage() {
         } else {
           // Fallback to old method
           const { data, error } = await supabase
-            .from('users')
+            .from('profiles')
             .select('selected_nutrition_plan')
             .eq('id', user.id)
             .single();
@@ -161,7 +161,7 @@ export default function VoedingsplannenPage() {
     const fetchNutritionProfile = async () => {
       if (!user) return;
       const { data, error } = await supabase
-        .from('users')
+        .from('profiles')
         .select('nutrition_profile')
         .eq('id', user.id)
         .single();
@@ -181,7 +181,7 @@ export default function VoedingsplannenPage() {
     if (!userData.age && !userData.height && !userData.weight) return;
     const saveNutritionProfile = async () => {
       await supabase
-        .from('users')
+        .from('profiles')
         .update({ nutrition_profile: userData })
         .eq('id', user.id);
     };
@@ -839,7 +839,7 @@ export default function VoedingsplannenPage() {
   const handleConfirmNutritionPlan = async () => {
     if (!user || !selectedDiet) return;
     const { error } = await supabase
-      .from('users')
+      .from('profiles')
       .update({ selected_nutrition_plan: selectedDiet })
       .eq('id', user.id);
     if (!error) {

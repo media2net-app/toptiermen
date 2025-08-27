@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     
     // First, delete existing user if exists
     const { error: deleteError } = await supabaseAdmin
-      .from('users')
+      .from('profiles')
       .delete()
       .eq('email', email);
 
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
       
       // Create user profile with test role
       const { error: profileError } = await supabaseAdmin
-        .from('users')
+        .from('profiles')
         .insert([
           {
             id: authData.user.id,

@@ -5,7 +5,7 @@ export async function GET(request: NextRequest) {
   try {
     // Fetch all users
     const { data: users, error: usersError } = await supabaseAdmin
-      .from('users')
+      .from('profiles')
       .select(`
         id,
         email,
