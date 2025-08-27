@@ -1,86 +1,82 @@
-const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config({ path: '.env.local' });
+const { createClient } = require('@supabase/supabase-js');
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-if (!supabaseUrl || !supabaseServiceKey) {
-  console.error('Missing Supabase environment variables');
-  process.exit(1);
-}
-
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 async function checkDatabaseSchema() {
   try {
-    console.log('🔍 Checking database schema...');
-
-    // Check training_schemas table
-    console.log('\n📋 Checking training_schemas table...');
-    const { data: schemas, error: schemasError } = await supabase
-      .from('training_schemas')
+    console.log('🔍 Checking database schema...\n');
+    
+    // Check user_badges table
+    console.log('🏆 Checking user_badges table...');
+    const { data: userBadgesSample, error: userBadgesError } = await supabase
+      .from('user_badges')
       .select('*')
       .limit(1);
-
-    if (schemasError) {
-      console.log('❌ Error with training_schemas:', schemasError.message);
+    
+    if (userBadgesError) {
+      console.log('❌ user_badges error:', userBadgesError.message);
     } else {
-      console.log('✅ training_schemas table exists');
-      if (schemas && schemas.length > 0) {
-        console.log('📊 Sample schema:', schemas[0]);
-      }
+      console.log('✅ user_badges columns:', Object.keys(userBadgesSample[0] || {}));
     }
-
-    // Check training_schema_days table
-    console.log('\n📋 Checking training_schema_days table...');
-    const { data: days, error: daysError } = await supabase
-      .from('training_schema_days')
+    
+    // Check user_missions table
+    console.log('\n🎯 Checking user_missions table...');
+    const { data: userMissionsSample, error: userMissionsError } = await supabase
+      .from('user_missions')
       .select('*')
       .limit(1);
-
-    if (daysError) {
-      console.log('❌ Error with training_schema_days:', daysError.message);
+    
+    if (userMissionsError) {
+      console.log('❌ user_missions error:', userMissionsError.message);
     } else {
-      console.log('✅ training_schema_days table exists');
-      if (days && days.length > 0) {
-        console.log('📊 Sample day:', days[0]);
-      }
+      console.log('✅ user_missions columns:', Object.keys(userMissionsSample[0] || {}));
     }
-
-    // Check training_schema_exercises table
-    console.log('\n📋 Checking training_schema_exercises table...');
-    const { data: exercises, error: exercisesError } = await supabase
-      .from('training_schema_exercises')
+    
+    // Check user_nutrition_plans table
+    console.log('\n🥗 Checking user_nutrition_plans table...');
+    const { data: userNutritionSample, error: userNutritionError } = await supabase
+      .from('user_nutrition_plans')
       .select('*')
       .limit(1);
-
-    if (exercisesError) {
-      console.log('❌ Error with training_schema_exercises:', exercisesError.message);
+    
+    if (userNutritionError) {
+      console.log('❌ user_nutrition_plans error:', userNutritionError.message);
     } else {
-      console.log('✅ training_schema_exercises table exists');
-      if (exercises && exercises.length > 0) {
-        console.log('📊 Sample exercise:', exercises[0]);
-      }
+      console.log('✅ user_nutrition_plans columns:', Object.keys(userNutritionSample[0] || {}));
     }
-
-    // Check if user_training_schemas table exists
-    console.log('\n📋 Checking user_training_schemas table...');
-    const { data: userSchemas, error: userSchemasError } = await supabase
-      .from('user_training_schemas')
+    
+    // Check badges table
+    console.log('\n🏆 Checking badges table...');
+    const { data: badgesSample, error: badgesError } = await supabase
+      .from('badges')
       .select('*')
       .limit(1);
-
-    if (userSchemasError) {
-      console.log('❌ Error with user_training_schemas:', userSchemasError.message);
+    
+    if (badgesError) {
+      console.log('❌ badges error:', badgesError.message);
     } else {
-      console.log('✅ user_training_schemas table exists');
-      if (userSchemas && userSchemas.length > 0) {
-        console.log('📊 Sample user schema:', userSchemas[0]);
-      }
+      console.log('✅ badges columns:', Object.keys(badgesSample[0] || {}));
     }
-
+    
+    // Check onboarding_status table
+    console.log('\n📋 Checking onboarding_status table...');
+    const { data: onboardingSample, error: onboardingError } = await supabase
+      .from('onboarding_status')
+      .select('*')
+      .limit(1);
+    
+    if (onboardingError) {
+      console.log('❌ onboarding_status error:', onboardingError.message);
+    } else {
+      console.log('✅ onboarding_status columns:', Object.keys(onboardingSample[0] || {}));
+    }
+    
   } catch (error) {
-    console.error('❌ Error checking database schema:', error);
+    console.error('❌ Error:', error);
   }
 }
 
