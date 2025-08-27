@@ -9,10 +9,10 @@ export async function GET() {
       .from('forum_moderation_logs')
       .select(`
         *,
-        moderator:users(email, profiles(first_name, last_name))
+        moderator:users!forum_moderation_logs_moderator_id_fkey(email, profiles(first_name, last_name)),
+        target_user:users!forum_moderation_logs_target_user_id_fkey(email, profiles(first_name, last_name))
       `)
-      .order('created_at', { ascending: false })
-      .limit(100);
+      .order('created_at', { ascending: false });
 
     if (error) {
       console.error('Error fetching forum moderation logs:', error);
@@ -21,15 +21,14 @@ export async function GET() {
 
     // Transform the data to match the frontend interface
     const transformedLogs = logs?.map(log => ({
-      id: log.id,
-      moderatorId: log.moderator_id,
+      id: log.id.toString(),
       moderatorName: log.moderator?.profiles?.first_name 
         ? `${log.moderator.profiles.first_name} ${log.moderator.profiles.last_name}`
         : log.moderator?.email || 'Onbekend',
-      action: log.action,
+      actionType: log.action_type,
       targetType: log.target_type,
-      targetId: log.target_id,
-      details: log.details,
+      reason: log.reason,
+      duration: log.duration,
       createdAt: log.created_at
     })) || [];
 
@@ -58,14 +57,17 @@ export async function POST(request: NextRequest) {
       .from('forum_moderation_logs')
       .insert({
         moderator_id: body.moderatorId,
-        action: body.action,
+        target_user_id: body.targetUserId,
+        action_type: body.actionType,
         target_type: body.targetType,
         target_id: body.targetId,
-        details: body.details
+        reason: body.reason,
+        duration: body.duration
       })
       .select(`
         *,
-        moderator:users(email, profiles(first_name, last_name))
+        moderator:users!forum_moderation_logs_moderator_id_fkey(email, profiles(first_name, last_name)),
+        target_user:users!forum_moderation_logs_target_user_id_fkey(email, profiles(first_name, last_name))
       `)
       .single();
 
@@ -76,15 +78,14 @@ export async function POST(request: NextRequest) {
 
     // Transform the response
     const transformedLog = {
-      id: log.id,
-      moderatorId: log.moderator_id,
+      id: log.id.toString(),
       moderatorName: log.moderator?.profiles?.first_name 
         ? `${log.moderator.profiles.first_name} ${log.moderator.profiles.last_name}`
         : log.moderator?.email || 'Onbekend',
-      action: log.action,
+      actionType: log.action_type,
       targetType: log.target_type,
-      targetId: log.target_id,
-      details: log.details,
+      reason: log.reason,
+      duration: log.duration,
       createdAt: log.created_at
     };
 
