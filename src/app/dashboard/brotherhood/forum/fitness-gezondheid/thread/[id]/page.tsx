@@ -54,15 +54,32 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
   const fetchCurrentUser = async () => {
     try {
       console.log('👤 Fetching current user...');
+      
+      // First try to get the session
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) {
+        console.error('❌ Error getting session:', sessionError);
+      } else {
+        console.log('✅ Session found:', session ? 'Yes' : 'No');
+      }
+      
+      // Then get the user
       const { data: { user }, error } = await supabase.auth.getUser();
       if (error) {
         console.error('❌ Error fetching current user:', error);
+        setCurrentUser(null);
         return;
       }
+      
       setCurrentUser(user);
-      console.log('✅ Current user fetched:', user?.email);
+      console.log('✅ Current user fetched:', user ? user.email : 'No user');
+      
+      if (!user) {
+        console.log('⚠️ No user found - user might not be authenticated');
+      }
     } catch (error) {
       console.error('❌ Error fetching current user:', error);
+      setCurrentUser(null);
     }
   };
 
@@ -337,6 +354,9 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
         <p className="text-sm text-[#8BAE5A]">
           Debug: Topic ID {topic.id} | Posts: {posts.length} | Loading: {loading.toString()} | Error: {error || 'None'}
         </p>
+        <p className="text-sm text-[#8BAE5A] mt-2">
+          Auth: {currentUser ? `Logged in as ${currentUser.email}` : 'Not logged in'} | Reply: {newReply.length} chars
+        </p>
       </div>
 
       {/* Back Button */}
@@ -398,12 +418,22 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
         {!currentUser ? (
           <div className="text-center py-8">
             <p className="text-[#8BAE5A] mb-4">Je moet ingelogd zijn om een reactie te plaatsen.</p>
-            <Link 
-              href="/auth/login"
-              className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold shadow hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all"
-            >
-              Inloggen
-            </Link>
+            <div className="space-y-4">
+              <Link 
+                href="/auth/login"
+                className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold shadow hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all"
+              >
+                Inloggen
+              </Link>
+              <div className="mt-4">
+                <button 
+                  onClick={fetchCurrentUser}
+                  className="px-4 py-2 rounded-lg bg-gray-600 text-white text-sm hover:bg-gray-700 transition-colors"
+                >
+                  Refresh Auth Status
+                </button>
+              </div>
+            </div>
           </div>
         ) : (
           <>
