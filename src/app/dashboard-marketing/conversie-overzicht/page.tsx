@@ -420,12 +420,9 @@ export default function ConversieOverzicht() {
                 </thead>
                 <tbody>
                   {analyticsData.campaigns.map((campaign: any) => {
-                    const campaignLeads = leads.filter(lead => {
-                      const { campaign: leadCampaign } = getCampaignFromNotes(lead.notes);
-                      return leadCampaign === campaign.id;
-                    });
-                    
-                    const costPerConversion = campaignLeads.length > 0 && campaign.spend ? campaign.spend / campaignLeads.length : 0;
+                    // Use conversions directly from API instead of calculating from leads
+                    const conversions = campaign.conversions || 0;
+                    const costPerConversion = conversions > 0 && campaign.spend ? campaign.spend / conversions : 0;
                     
                     return (
                       <tr key={campaign.id} className="border-b border-gray-800 hover:bg-gray-800/50">
@@ -442,7 +439,7 @@ export default function ConversieOverzicht() {
                         <td className="text-right py-3 px-4 text-gray-300">€{campaign.spend ? campaign.spend.toFixed(2) : '0.00'}</td>
                         <td className="text-right py-3 px-4">
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            {campaignLeads.length}
+                            {conversions}
                           </span>
                         </td>
                         <td className="text-right py-3 px-4 text-gray-300">
