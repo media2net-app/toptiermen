@@ -68,11 +68,13 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
   const safePathname = pathname || '';
 
   const handleLinkClick = (href: string, label: string, e?: React.MouseEvent) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
+    // Don't prevent default - let the Link component handle navigation
+    // if (e) {
+    //   e.preventDefault();
+    //   e.stopPropagation();
+    // }
     
+    // Close mobile menu if it's open (but don't block navigation)
     if (onLinkClick) {
       onLinkClick();
     }
@@ -120,9 +122,10 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
                       : 'text-white hover:text-[#8BAE5A] hover:bg-[#3A4D23]/50'
                   } ${collapsed ? 'justify-center px-2' : ''}`}
                   onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
+                    // Only prevent default for submenu toggles, not for navigation
                     if (!collapsed) {
+                      e.preventDefault();
+                      e.stopPropagation();
                       setIsOpen(v => !v);
                     }
                   }}
@@ -152,7 +155,6 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
                         <Link
                           key={sub.label}
                           href={sub.href}
-                          onClick={(e) => handleLinkClick(sub.href, sub.label, e)}
                           className={`block px-4 py-2 rounded-lg text-sm transition-all duration-150 ${
                             isSubActive 
                               ? 'bg-[#8BAE5A] text-black font-semibold' 
@@ -176,7 +178,6 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
             <Link
               key={item.label}
               href={item.href}
-              onClick={(e) => handleLinkClick(item.href, item.label, e)}
               className={`grid grid-cols-[auto_1fr] items-center gap-4 px-4 py-3 rounded-xl font-bold uppercase text-sm tracking-wide transition-all duration-150 font-figtree ${
                 isActive 
                   ? 'bg-[#8BAE5A] text-black shadow-lg' 

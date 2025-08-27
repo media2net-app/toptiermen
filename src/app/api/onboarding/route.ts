@@ -6,7 +6,11 @@ const getSupabaseClient = () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   
+  console.log('🔍 Supabase URL:', supabaseUrl ? 'Present' : 'Missing');
+  console.log('🔍 Supabase Key:', supabaseKey ? 'Present' : 'Missing');
+  
   if (!supabaseUrl || !supabaseKey) {
+    console.error('❌ Missing Supabase environment variables');
     throw new Error('Missing Supabase environment variables');
   }
   
@@ -25,17 +29,39 @@ export async function GET(request: Request) {
     console.log('🔍 Fetching onboarding status for user:', userId);
 
     // Initialize Supabase client
-    const supabase = getSupabaseClient();
+    let supabase;
+    try {
+      supabase = getSupabaseClient();
+    } catch (error) {
+      console.error('❌ Failed to initialize Supabase client:', error);
+      return NextResponse.json({ error: 'Database connection failed' }, { status: 500 });
+    }
 
     // First, get all records for this user
+    console.log('🔍 Querying onboarding_status table...');
     const { data: allRecords, error: fetchError } = await supabase
       .from('onboarding_status')
       .select('*')
       .eq('user_id', userId);
 
+    console.log('🔍 Query result:', { data: allRecords, error: fetchError });
+
     if (fetchError) {
       console.log('❌ Error fetching onboarding status:', fetchError.message);
-      return NextResponse.json({ error: 'Failed to fetch onboarding status' }, { status: 500 });
+      // Return mock data instead of error to prevent dashboard crashes
+      return NextResponse.json({
+        user_id: userId,
+        welcome_video_watched: false,
+        step_1_completed: false,
+        step_2_completed: false,
+        step_3_completed: false,
+        step_4_completed: false,
+        step_5_completed: false,
+        onboarding_completed: false,
+        current_step: 1,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      });
     }
 
     // If multiple records exist, keep only the most recent one
