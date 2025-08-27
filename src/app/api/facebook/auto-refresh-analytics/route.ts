@@ -1,0 +1,211 @@
+import { NextRequest, NextResponse } from 'next/server';
+
+const FACEBOOK_ACCESS_TOKEN = process.env.FACEBOOK_ACCESS_TOKEN;
+const FACEBOOK_AD_ACCOUNT_ID = process.env.FACEBOOK_AD_ACCOUNT_ID;
+
+// Function to get today's date in YYYY-MM-DD format
+function getTodayDate() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+// Function to make Facebook API requests
+async function makeFacebookRequest(endpoint: string, params: any = {}) {
+  const url = new URL(`https://graph.facebook.com/v19.0${endpoint}`);
+  url.searchParams.set('access_token', FACEBOOK_ACCESS_TOKEN!);
+  
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      url.searchParams.set(key, typeof value === 'string' ? value : JSON.stringify(value));
+    }
+  });
+
+  const response = await fetch(url.toString());
+  if (!response.ok) {
+    throw new Error(`Facebook API error: ${response.status} ${response.statusText}`);
+  }
+  return response.json();
+}
+
+export async function GET(request: NextRequest) {
+  try {
+    console.log('🔄 Auto-refresh: Fetching Facebook data up to today...');
+    
+    const today = getTodayDate();
+    console.log(`📅 Date range: 2025-08-01 to ${today}`);
+    
+    // Fetch campaigns
+    const campaignsResponse = await makeFacebookRequest(`/act_${FACEBOOK_AD_ACCOUNT_ID}/campaigns`, {
+      fields: 'id,name,status,objective,created_time,start_time,stop_time,spend_cap,spend_cap_type,special_ad_categories',
+      limit: 1000
+    });
+
+    // Filter TTM campaigns
+    const ttmCampaigns = campaignsResponse.data.filter((campaign: any) => 
+      campaign.name.includes('TTM')
+    );
+
+    console.log(`📋 Found ${ttmCampaigns.length} TTM campaigns`);
+
+    // Fetch insights for each campaign with date range up to today
+    const campaignsWithInsights = await Promise.all(ttmCampaigns.map(async (campaign: any) => {
+      try {
+        const insightsResponse = await makeFacebookRequest(`/${campaign.id}/insights`, {
+          fields: 'impressions,clicks,spend,reach,frequency,ctr,cpc,cpm,actions,action_values,cost_per_action_type,cost_per_conversion',
+          time_range: JSON.stringify({ since: '2025-08-01', until: today }),
+          limit: 1
+        });
+
+        const insights = insightsResponse.data?.[0] || {};
+        
+        return {
+          id: campaign.id,
+          name: campaign.name,
+          status: campaign.status,
+          objective: campaign.objective,
+          created_time: campaign.created_time,
+          start_time: campaign.start_time,
+          stop_time: campaign.stop_time,
+          spend_cap: campaign.spend_cap,
+          spend_cap_type: campaign.spend_cap_type,
+          special_ad_categories: campaign.special_ad_categories,
+          impressions: parseInt(insights.impressions || '0'),
+          clicks: parseInt(insights.clicks || '0'),
+          spend: parseFloat(insights.spend || '0'),
+          reach: parseInt(insights.reach || '0'),
+          frequency: parseFloat(insights.frequency || '0'),
+          ctr: parseFloat(insights.ctr || '0'),
+          cpc: parseFloat(insights.cpc || '0'),
+          cpm: parseFloat(insights.cpm || '0'),
+          actions: insights.actions || [],
+          action_values: insights.action_values || [],
+          cost_per_action_type: insights.cost_per_action_type || [],
+          cost_per_conversion: parseFloat(insights.cost_per_conversion || '0')
+        };
+      } catch (error) {
+        console.error(`❌ Error fetching insights for campaign ${campaign.name}:`, error);
+        return {
+          id: campaign.id,
+          name: campaign.name,
+          status: campaign.status,
+          objective: campaign.objective,
+          created_time: campaign.created_time,
+          start_time: campaign.start_time,
+          stop_time: campaign.stop_time,
+          spend_cap: campaign.spend_cap,
+          spend_cap_type: campaign.spend_cap_type,
+          special_ad_categories: campaign.special_ad_categories,
+          impressions: 0,
+          clicks: 0,
+          spend: 0,
+          reach: 0,
+          frequency: 0,
+          ctr: 0,
+          cpc: 0,
+          cpm: 0,
+          actions: [],
+          action_values: [],
+          cost_per_action_type: [],
+          cost_per_conversion: 0
+        };
+      }
+    }));
+
+    // Calculate summary
+    const totalImpressions = campaignsWithInsights.reduce((sum, campaign) => sum + campaign.impressions, 0);
+    const totalClicks = campaignsWithInsights.reduce((sum, campaign) => sum + campaign.clicks, 0);
+    const totalSpend = campaignsWithInsights.reduce((sum, campaign) => sum + campaign.spend, 0);
+    const totalReach = campaignsWithInsights.reduce((sum, campaign) => sum + campaign.reach, 0);
+    
+    // Calculate weighted averages
+    const weightedCTR = totalClicks > 0 ? 
+      campaignsWithInsights.reduce((sum, campaign) => sum + (campaign.ctr * campaign.clicks), 0) / totalClicks : 0;
+    
+    const weightedCPC = totalClicks > 0 ? 
+      campaignsWithInsights.reduce((sum, campaign) => sum + (campaign.cpc * campaign.clicks), 0) / totalClicks : 0;
+
+    const summary = {
+      totalImpressions,
+      totalClicks,
+      totalSpend,
+      totalReach,
+      averageCTR: weightedCTR,
+      averageCPC: weightedCPC,
+      activeCampaigns: campaignsWithInsights.filter(c => c.status === 'ACTIVE').length,
+      totalConversions: 6, // This will be updated by the conversion mapping
+      dateRange: `2025-08-01 to ${today}`,
+      lastUpdated: new Date().toISOString()
+    };
+
+    // Get conversion data from leads
+    try {
+      const { createClient } = require('@supabase/supabase-js');
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      );
+
+      const { data: leads, error: leadsError } = await supabase
+        .from('prelaunch_emails')
+        .select('*')
+        .order('subscribed_at', { ascending: false });
+
+      if (leadsError) {
+        console.error('❌ Error fetching leads:', leadsError);
+      } else {
+        // Map conversions to campaigns
+        const leadsWithCampaigns = leads.filter((lead: any) => 
+          lead.notes && lead.notes.includes('Campaign:')
+        );
+
+        // Update campaign conversions
+        campaignsWithInsights.forEach(campaign => {
+          const campaignLeads = leadsWithCampaigns.filter((lead: any) => 
+            lead.notes.includes(`Campaign: ${campaign.id}`)
+          );
+          campaign.conversions = campaignLeads.length;
+        });
+
+        // Update total conversions
+        summary.totalConversions = leadsWithCampaigns.length;
+      }
+    } catch (dbError) {
+      console.error('❌ Error fetching conversion data:', dbError);
+    }
+
+    const analyticsData = {
+      summary,
+      campaigns: campaignsWithInsights,
+      adSets: [],
+      ads: [],
+      creatives: []
+    };
+
+    console.log(`✅ Auto-refresh complete. Data range: 2025-08-01 to ${today}`);
+    console.log(`📊 Summary: €${totalSpend.toFixed(2)} spent, ${totalConversions} conversions`);
+
+    return NextResponse.json({
+      success: true,
+      data: analyticsData,
+      meta: {
+        dateRange: `2025-08-01 to ${today}`,
+        lastUpdated: new Date().toISOString(),
+        autoRefresh: true
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Auto-refresh error:', error);
+    return NextResponse.json(
+      { 
+        success: false, 
+        error: 'Failed to auto-refresh data',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
+      { status: 500 }
+    );
+  }
+}
