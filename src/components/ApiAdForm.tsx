@@ -33,6 +33,7 @@ interface FormData {
     interests: string[];
     behaviors: string[];
     optimizationGoal: string;
+    status: string;
   };
   ad: {
     name: string;
@@ -106,7 +107,8 @@ export default function ApiAdForm() {
       countries: ['NL'],
       interests: [],
       behaviors: [],
-      optimizationGoal: 'LEADS'
+      optimizationGoal: 'LEADS',
+      status: 'PAUSED'
     },
     ad: {
       name: 'TTM - API Ad',
