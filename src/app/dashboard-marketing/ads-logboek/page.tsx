@@ -233,7 +233,7 @@ STATUS: ✅ GECORRIGEERD - Conversie overzicht toont nu accurate data`,
       id: '15',
       date: '2025-08-26',
       title: '📋 Facebook Lead Formulier API Analyse',
-      category: 'analysis',
+      category: 'strategy',
       impact: 'neutral',
       content: `FACEBOOK LEAD FORMULIER ANALYSE: API beperkingen en handmatige aanpak geïdentificeerd.
 
