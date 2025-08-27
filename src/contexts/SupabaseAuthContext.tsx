@@ -220,7 +220,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     try {
       const result = await retryWithBackoff(async () => {
         const { data: profile, error } = await supabase
-          .from('users')
+          .from('profiles')
           .select('*')
           .eq('id', userId)
           .single();
