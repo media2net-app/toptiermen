@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import Image from 'next/image';
+import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
 interface UserProfile {
@@ -13,7 +13,7 @@ interface ForumPost {
   id: number;
   content: string;
   created_at: string;
-  like_count: number;
+  author_id: string;
   author: {
     first_name: string;
     last_name: string;
@@ -27,6 +27,7 @@ interface ForumTopic {
   content: string;
   created_at: string;
   like_count: number;
+  author_id: string;
   author: {
     first_name: string;
     last_name: string;
@@ -38,37 +39,24 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
   const [topic, setTopic] = useState<ForumTopic | null>(null);
   const [posts, setPosts] = useState<ForumPost[]>([]);
   const [loading, setLoading] = useState(true);
-  const [newReply, setNewReply] = useState('');
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
   const [userProfiles, setUserProfiles] = useState<{ [key: string]: UserProfile }>({});
 
   useEffect(() => {
-    fetchCurrentUser();
+    console.log('🔄 Thread page mounted, fetching data for topic ID:', params.id);
     fetchThreadData();
   }, [params.id]);
 
-  const fetchCurrentUser = async () => {
-    try {
-      const { data: { user }, error } = await supabase.auth.getUser();
-      if (error) {
-        console.error('Error fetching user:', error);
-        return;
-      }
-      setCurrentUser(user);
-    } catch (error) {
-      console.error('Error fetching user:', error);
-    }
-  };
-
   const fetchUserProfiles = async (userIds: string[]) => {
     try {
+      console.log('👤 Fetching user profiles for:', userIds);
       const { data: profiles, error } = await supabase
         .from('profiles')
         .select('id, full_name, avatar_url')
         .in('id', userIds);
 
       if (error) {
-        console.error('Error fetching profiles:', error);
+        console.error('❌ Error fetching profiles:', error);
         return {};
       }
 
@@ -77,17 +65,23 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
         profilesMap[profile.id] = profile;
       });
 
+      console.log('✅ User profiles fetched:', profilesMap);
       return profilesMap;
     } catch (error) {
-      console.error('Error fetching profiles:', error);
+      console.error('❌ Error fetching profiles:', error);
       return {};
     }
   };
 
   const fetchThreadData = async () => {
     try {
+      console.log('📝 Fetching thread data...');
+      setLoading(true);
+      setError(null);
+
       const topicId = parseInt(params.id);
-      
+      console.log('🔍 Topic ID:', topicId);
+
       // Fetch topic
       const { data: topicData, error: topicError } = await supabase
         .from('forum_topics')
@@ -103,27 +97,32 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
         .single();
 
       if (topicError) {
-        console.error('Error fetching topic:', topicError);
+        console.error('❌ Error fetching topic:', topicError);
+        setError(`Topic niet gevonden: ${topicError.message}`);
         return;
       }
 
-      // Fetch posts (replies)
+      console.log('✅ Topic data received:', topicData);
+
+      // Fetch posts
       const { data: postsData, error: postsError } = await supabase
         .from('forum_posts')
         .select(`
           id,
           content,
           created_at,
-          like_count,
           author_id
         `)
         .eq('topic_id', topicId)
         .order('created_at', { ascending: true });
 
       if (postsError) {
-        console.error('Error fetching posts:', postsError);
+        console.error('❌ Error fetching posts:', postsError);
+        setError(`Error fetching posts: ${postsError.message}`);
         return;
       }
+
+      console.log('✅ Posts data received:', postsData);
 
       // Collect all user IDs
       const userIds = new Set<string>();
@@ -131,6 +130,8 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
       postsData?.forEach(post => {
         if (post.author_id) userIds.add(post.author_id);
       });
+
+      console.log('👥 Unique user IDs found:', Array.from(userIds));
 
       // Fetch user profiles
       const profiles = await fetchUserProfiles(Array.from(userIds));
@@ -154,56 +155,36 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
         };
       };
 
-      // Process topic data
-      const processedTopic = {
+      // Process topic
+      const processedTopic: ForumTopic = {
         id: topicData.id,
         title: topicData.title,
         content: topicData.content,
         created_at: topicData.created_at,
-        like_count: topicData.like_count,
+        like_count: topicData.like_count || 0,
+        author_id: topicData.author_id,
         author: getAuthorInfo(topicData.author_id)
       };
 
-      // Process posts data
+      // Process posts
       const processedPosts = (postsData || []).map((post: any) => ({
         id: post.id,
         content: post.content,
         created_at: post.created_at,
-        like_count: post.like_count,
+        author_id: post.author_id,
         author: getAuthorInfo(post.author_id)
       }));
+
+      console.log('✅ Processed topic:', processedTopic);
+      console.log('✅ Processed posts:', processedPosts);
 
       setTopic(processedTopic);
       setPosts(processedPosts);
     } catch (error) {
-      console.error('Error fetching thread data:', error);
+      console.error('❌ Error in fetchThreadData:', error);
+      setError(`Unexpected error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleSubmitReply = async () => {
-    if (!newReply.trim() || !topic || !currentUser) return;
-
-    try {
-      const { error } = await supabase
-        .from('forum_posts')
-        .insert({
-          topic_id: topic.id,
-          content: newReply.trim(),
-          author_id: currentUser.id
-        });
-
-      if (error) {
-        console.error('Error posting reply:', error);
-        return;
-      }
-
-      // Refresh the thread data
-      setNewReply('');
-      fetchThreadData();
-    } catch (error) {
-      console.error('Error posting reply:', error);
     }
   };
 
@@ -222,10 +203,37 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
     return (
       <div className="px-4 md:px-12">
         <div className="animate-pulse">
-          <div className="h-6 bg-gray-700 rounded mb-6"></div>
-          <div className="bg-[#232D1A]/90 rounded-2xl p-6 mb-8">
-            <div className="h-4 bg-gray-700 rounded mb-4"></div>
-            <div className="h-20 bg-gray-700 rounded"></div>
+          <div className="h-8 bg-gray-700 rounded mb-6"></div>
+          <div className="bg-[#232D1A]/90 rounded-2xl p-6 mb-6">
+            <div className="h-6 bg-gray-700 rounded mb-4"></div>
+            <div className="h-4 bg-gray-700 rounded mb-2"></div>
+            <div className="h-4 bg-gray-700 rounded w-2/3"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="px-4 md:px-12">
+        <div className="text-center text-white py-12">
+          <div className="text-6xl mb-4">⚠️</div>
+          <h3 className="text-xl font-bold mb-2">Error Loading Thread</h3>
+          <p className="text-[#8BAE5A] mb-6">{error}</p>
+          <div className="flex gap-4 justify-center">
+            <button 
+              onClick={fetchThreadData}
+              className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold shadow hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all"
+            >
+              Try Again
+            </button>
+            <Link 
+              href="/dashboard/brotherhood/forum/fitness-gezondheid"
+              className="px-6 py-3 rounded-xl bg-[#3A4D23] text-white font-bold shadow hover:bg-[#4A5D33] transition-all"
+            >
+              Back to Forum
+            </Link>
           </div>
         </div>
       </div>
@@ -235,9 +243,16 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
   if (!topic) {
     return (
       <div className="px-4 md:px-12">
-        <div className="text-center text-white">
-          <h2 className="text-2xl font-bold mb-4">Topic niet gevonden</h2>
-          <p className="text-[#8BAE5A]">Het opgevraagde topic bestaat niet of is verwijderd.</p>
+        <div className="text-center text-white py-12">
+          <div className="text-6xl mb-4">❓</div>
+          <h3 className="text-xl font-bold mb-2">Topic niet gevonden</h3>
+          <p className="text-[#8BAE5A] mb-6">Het opgevraagde topic bestaat niet of is verwijderd.</p>
+          <Link 
+            href="/dashboard/brotherhood/forum/fitness-gezondheid"
+            className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold shadow hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all"
+          >
+            Terug naar Forum
+          </Link>
         </div>
       </div>
     );
@@ -245,82 +260,75 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
 
   return (
     <div className="px-4 md:px-12">
-      {/* Breadcrumb */}
-      <nav className="text-xs text-[#8BAE5A] mb-6 flex gap-2 items-center">
-        <span>Forum</span>
-        <span className="mx-1">&gt;</span>
-        <span>Fitness & Gezondheid</span>
-        <span className="mx-1">&gt;</span>
-        <span className="text-white font-semibold">{topic.title}</span>
-      </nav>
-
-      {/* Opening Post */}
-      <div className="bg-[#232D1A]/90 rounded-2xl shadow-xl border-l-4 border-[#FFD700] border border-[#3A4D23]/40 p-6 mb-8">
-        <div className="flex items-center gap-4 mb-2">
-          <Image 
-            src={topic.author.avatar_url || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face'} 
-            alt={`${topic.author.first_name} ${topic.author.last_name}`} 
-            width={48} 
-            height={48} 
-            className="w-12 h-12 rounded-full border-2 border-[#8BAE5A] object-cover" 
-          />
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-white">{topic.author.first_name} {topic.author.last_name}</span>
-              <span className="text-xs text-[#FFD700] bg-[#3A4D23] px-2 py-0.5 rounded">Member</span>
-            </div>
-            <div className="text-xs text-[#8BAE5A]">{formatDate(topic.created_at)}</div>
-          </div>
-        </div>
-        <div className="text-white text-base mt-2 whitespace-pre-line">{topic.content}</div>
+      {/* Debug Info */}
+      <div className="mb-4 p-4 bg-[#232D1A]/50 rounded-lg">
+        <p className="text-sm text-[#8BAE5A]">
+          Debug: Topic ID {topic.id} | Posts: {posts.length} | Loading: {loading.toString()} | Error: {error || 'None'}
+        </p>
       </div>
 
-      {/* Replies */}
-      <div className="space-y-6 mb-10">
+      {/* Back Button */}
+      <div className="mb-6">
+        <Link 
+          href="/dashboard/brotherhood/forum/fitness-gezondheid"
+          className="inline-flex items-center gap-2 text-[#8BAE5A] hover:text-[#FFD700] transition-colors"
+        >
+          ← Terug naar Fitness & Gezondheid
+        </Link>
+      </div>
+
+      {/* Topic */}
+      <div className="bg-[#232D1A]/90 rounded-2xl shadow-xl border border-[#3A4D23]/40 p-6 mb-6">
+        <h1 className="text-2xl font-bold text-white mb-4">{topic.title}</h1>
+        <div className="prose prose-invert max-w-none mb-6">
+          <p className="text-[#E5E5E5] whitespace-pre-wrap">{topic.content}</p>
+        </div>
+        <div className="flex items-center justify-between text-sm text-[#8BAE5A]">
+          <div className="flex items-center gap-4">
+            <span>Door {topic.author.first_name} {topic.author.last_name}</span>
+            <span>•</span>
+            <span>{formatDate(topic.created_at)}</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <span>❤️ {topic.like_count}</span>
+            <span>💬 {posts.length} reacties</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Posts */}
+      <div className="space-y-6">
+        <h2 className="text-xl font-bold text-white">Reacties ({posts.length})</h2>
         {posts.map((post) => (
-          <div key={post.id} className="bg-[#232D1A]/80 rounded-2xl shadow border border-[#3A4D23]/40 p-5 flex gap-4">
-            <Image 
-              src={post.author.avatar_url || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face'} 
-              alt={`${post.author.first_name} ${post.author.last_name}`} 
-              width={40} 
-              height={40} 
-              className="w-10 h-10 rounded-full border-2 border-[#8BAE5A] object-cover" 
-            />
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="font-bold text-white">{post.author.first_name} {post.author.last_name}</span>
-                <span className="text-xs text-[#FFD700] bg-[#3A4D23] px-2 py-0.5 rounded">Member</span>
-                <span className="text-xs text-[#8BAE5A] ml-2">{formatDate(post.created_at)}</span>
-              </div>
-              <div className="text-[#E1CBB3] mb-2">{post.content}</div>
-              <div className="flex gap-4 text-[#8BAE5A] text-sm">
-                <button className="hover:text-[#FFD700] transition-colors flex items-center gap-1">
-                  <span role="img" aria-label="boks">👊</span> Boks ({post.like_count})
-                </button>
-                <button className="hover:text-[#FFD700] transition-colors flex items-center gap-1">
-                  <span role="img" aria-label="reageer">💬</span> Reageer
-                </button>
-              </div>
+          <div key={post.id} className="bg-[#232D1A]/70 rounded-xl p-6 border border-[#3A4D23]/30">
+            <div className="prose prose-invert max-w-none mb-4">
+              <p className="text-[#E5E5E5] whitespace-pre-wrap">{post.content}</p>
+            </div>
+            <div className="flex items-center justify-between text-sm text-[#8BAE5A]">
+              <span>Door {post.author.first_name} {post.author.last_name}</span>
+              <span>{formatDate(post.created_at)}</span>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Reply Box */}
-      <div className="bg-[#232D1A]/80 rounded-2xl shadow border border-[#3A4D23]/40 p-5">
-        <textarea
-          className="w-full bg-[#181F17] text-white rounded-xl p-3 border-none focus:ring-0 placeholder:text-[#8BAE5A] mb-3"
-          rows={3}
-          placeholder="Schrijf een reactie..."
-          value={newReply}
-          onChange={(e) => setNewReply(e.target.value)}
+      {posts.length === 0 && (
+        <div className="text-center text-white py-12">
+          <div className="text-4xl mb-4">💬</div>
+          <h3 className="text-lg font-bold mb-2">Nog geen reacties</h3>
+          <p className="text-[#8BAE5A]">Wees de eerste om te reageren op dit topic!</p>
+        </div>
+      )}
+
+      {/* Reply Form */}
+      <div className="mt-8 bg-[#232D1A]/90 rounded-2xl p-6 border border-[#3A4D23]/40">
+        <h3 className="text-lg font-bold text-white mb-4">Plaats een reactie</h3>
+        <textarea 
+          className="w-full h-32 bg-[#3A4D23]/50 border border-[#8BAE5A]/30 rounded-lg p-4 text-white placeholder-[#8BAE5A]/50 focus:outline-none focus:border-[#FFD700] resize-none"
+          placeholder="Schrijf je reactie hier..."
         />
-        <div className="flex justify-end">
-          <button 
-            className="px-6 py-2 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold shadow hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all"
-            onClick={handleSubmitReply}
-            disabled={!newReply.trim() || !currentUser}
-          >
+        <div className="flex justify-end mt-4">
+          <button className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold shadow hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all">
             Plaats Reactie
           </button>
         </div>
