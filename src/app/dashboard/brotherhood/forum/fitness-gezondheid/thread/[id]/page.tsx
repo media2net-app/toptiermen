@@ -41,11 +41,30 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userProfiles, setUserProfiles] = useState<{ [key: string]: UserProfile }>({});
+  const [newReply, setNewReply] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
   useEffect(() => {
     console.log('🔄 Thread page mounted, fetching data for topic ID:', params.id);
+    fetchCurrentUser();
     fetchThreadData();
   }, [params.id]);
+
+  const fetchCurrentUser = async () => {
+    try {
+      console.log('👤 Fetching current user...');
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error) {
+        console.error('❌ Error fetching current user:', error);
+        return;
+      }
+      setCurrentUser(user);
+      console.log('✅ Current user fetched:', user?.email);
+    } catch (error) {
+      console.error('❌ Error fetching current user:', error);
+    }
+  };
 
   const fetchUserProfiles = async (userIds: string[]) => {
     try {
@@ -199,6 +218,48 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
     }
   };
 
+  const handleSubmitReply = async () => {
+    try {
+      if (!newReply.trim() || !currentUser || !topic) {
+        console.log('⚠️ Cannot submit reply: missing data');
+        return;
+      }
+
+      console.log('📝 Submitting reply...');
+      setSubmitting(true);
+
+      const { data: post, error } = await supabase
+        .from('forum_posts')
+        .insert({
+          topic_id: topic.id,
+          content: newReply.trim(),
+          author_id: currentUser.id
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('❌ Error submitting reply:', error);
+        setError(`Error submitting reply: ${error.message}`);
+        return;
+      }
+
+      console.log('✅ Reply submitted successfully:', post);
+      
+      // Clear the form
+      setNewReply('');
+      
+      // Refresh the thread data
+      await fetchThreadData();
+      
+    } catch (error) {
+      console.error('❌ Error submitting reply:', error);
+      setError(`Unexpected error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('nl-NL', {
@@ -334,15 +395,39 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
       {/* Reply Form */}
       <div className="mt-8 bg-[#232D1A]/90 rounded-2xl p-6 border border-[#3A4D23]/40">
         <h3 className="text-lg font-bold text-white mb-4">Plaats een reactie</h3>
-        <textarea 
-          className="w-full h-32 bg-[#3A4D23]/50 border border-[#8BAE5A]/30 rounded-lg p-4 text-white placeholder-[#8BAE5A]/50 focus:outline-none focus:border-[#FFD700] resize-none"
-          placeholder="Schrijf je reactie hier..."
-        />
-        <div className="flex justify-end mt-4">
-          <button className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold shadow hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all">
-            Plaats Reactie
-          </button>
-        </div>
+        {!currentUser ? (
+          <div className="text-center py-8">
+            <p className="text-[#8BAE5A] mb-4">Je moet ingelogd zijn om een reactie te plaatsen.</p>
+            <Link 
+              href="/auth/login"
+              className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold shadow hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all"
+            >
+              Inloggen
+            </Link>
+          </div>
+        ) : (
+          <>
+            <textarea 
+              value={newReply}
+              onChange={(e) => setNewReply(e.target.value)}
+              className="w-full h-32 bg-[#3A4D23]/50 border border-[#8BAE5A]/30 rounded-lg p-4 text-white placeholder-[#8BAE5A]/50 focus:outline-none focus:border-[#FFD700] resize-none"
+              placeholder="Schrijf je reactie hier..."
+              disabled={submitting}
+            />
+            <div className="flex justify-between items-center mt-4">
+              <span className="text-sm text-gray-400">
+                {currentUser?.email} • {newReply.length} karakters
+              </span>
+              <button 
+                onClick={handleSubmitReply}
+                disabled={!newReply.trim() || submitting}
+                className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#181F17] font-bold shadow hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {submitting ? 'Plaatsen...' : 'Plaats Reactie'}
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
