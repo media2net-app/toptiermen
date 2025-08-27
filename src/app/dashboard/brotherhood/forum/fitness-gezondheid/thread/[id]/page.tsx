@@ -102,23 +102,37 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
         return {};
       }
 
-      // Use a more specific query to avoid permission issues
-      const { data: profiles, error } = await supabase
-        .from('profiles')
-        .select('id, full_name, avatar_url')
-        .in('id', userIds)
-        .limit(100); // Add limit for safety
-
-      if (error) {
-        console.error('❌ Error fetching profiles:', error);
-        // Return empty map instead of failing completely
-        return {};
-      }
-
+      // Use the new get_user_info function for each author
       const profilesMap: { [key: string]: UserProfile } = {};
-      profiles?.forEach(profile => {
-        profilesMap[profile.id] = profile;
-      });
+      
+      for (const userId of userIds) {
+        const { data: userInfo, error } = await supabase.rpc('get_user_info', {
+          user_id: userId
+        });
+
+        if (error) {
+          console.error(`❌ Error fetching user info for ${userId}:`, error);
+          // Fallback to basic info
+          profilesMap[userId] = {
+            id: userId,
+            full_name: 'Unknown User',
+            avatar_url: null
+          };
+        } else if (userInfo && userInfo.length > 0) {
+          profilesMap[userId] = {
+            id: userInfo[0].id,
+            full_name: userInfo[0].full_name || 'Unknown User',
+            avatar_url: userInfo[0].avatar_url
+          };
+        } else {
+          // Fallback for missing user
+          profilesMap[userId] = {
+            id: userId,
+            full_name: 'Unknown User',
+            avatar_url: null
+          };
+        }
+      }
 
       console.log('✅ User profiles fetched:', profilesMap);
       return profilesMap;
