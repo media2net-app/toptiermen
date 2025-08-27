@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
 
     // Check if admin user already exists
     const { data: existingAdmin, error: checkError } = await supabaseAdmin
-      .from('users')
+      .from('profiles')
       .select('id, email, role')
       .eq('email', 'admin@toptiermen.com')
       .single();
@@ -62,9 +62,9 @@ export async function POST(request: NextRequest) {
       `
     });
 
-    // Insert admin user into public.users table
+    // Insert admin user into public.profiles table
     const { error: userError } = await supabaseAdmin
-      .from('users')
+      .from('profiles')
       .upsert({
         id: adminUserId,
         email: 'admin@toptiermen.com',

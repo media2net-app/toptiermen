@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     // Test Supabase connection first
     try {
       const { data: testData, error: testError } = await supabaseAdmin
-        .from('users')
+        .from('profiles')
         .select('id')
         .limit(1);
 
@@ -154,7 +154,7 @@ async function fetchRealDashboardStats(period: string) {
 
     // Fetch total users
     const { count: totalUsers, error: usersError } = await supabaseAdmin
-      .from('users')
+      .from('profiles')
       .select('*', { count: 'exact', head: true });
 
     if (usersError) {
@@ -168,7 +168,7 @@ async function fetchRealDashboardStats(period: string) {
       thirtyDaysAgo.setDate(now.getDate() - 30);
       
       const { count: activeUsersCount, error: activeError } = await supabaseAdmin
-        .from('users')
+        .from('profiles')
         .select('*', { count: 'exact', head: true })
         .gte('last_login', thirtyDaysAgo.toISOString())
         .not('last_login', 'is', null);
@@ -206,7 +206,7 @@ async function fetchRealDashboardStats(period: string) {
     let newRegistrationsThisWeek = 0;
     try {
       const { count: newUsers, error: newUsersError } = await supabaseAdmin
-        .from('users')
+        .from('profiles')
         .select('*', { count: 'exact', head: true })
         .gte('created_at', periodStart.toISOString());
 
@@ -223,7 +223,7 @@ async function fetchRealDashboardStats(period: string) {
     let averageDailyLogins = 0;
     try {
       const { count: weeklyLogins, error: loginsError } = await supabaseAdmin
-        .from('users')
+        .from('profiles')
         .select('*', { count: 'exact', head: true })
         .gte('last_login', periodStart.toISOString());
 
@@ -240,7 +240,7 @@ async function fetchRealDashboardStats(period: string) {
     let activeCoachingPackages = 0;
     try {
       const { count: coachingUsers, error: coachingError } = await supabaseAdmin
-        .from('users')
+        .from('profiles')
         .select('*', { count: 'exact', head: true })
         .not('selected_schema_id', 'is', null);
 

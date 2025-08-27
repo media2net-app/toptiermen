@@ -411,7 +411,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       if (data.user) {
         // Create user profile
         const { error: profileError } = await supabase
-          .from('users')
+          .from('profiles')
           .insert([
             {
               id: data.user.id,
@@ -491,7 +491,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
 
     try {
       const { error } = await supabase
-        .from('users')
+        .from('profiles')
         .update(updates)
         .eq('id', state.user.id);
 

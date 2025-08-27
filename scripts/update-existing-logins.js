@@ -17,7 +17,7 @@ async function updateExistingLogins() {
   try {
     // Get all users
     const { data: users, error: fetchError } = await supabase
-      .from('users')
+      .from('profiles')
       .select('id, email, created_at, last_login');
 
     if (fetchError) {
@@ -38,7 +38,7 @@ async function updateExistingLogins() {
       const lastLogin = new Date(now.getTime() - (daysAgo * 24 * 60 * 60 * 1000) - (hoursAgo * 60 * 60 * 1000) - (minutesAgo * 60 * 1000));
 
       const { error: updateError } = await supabase
-        .from('users')
+        .from('profiles')
         .update({ last_login: lastLogin.toISOString() })
         .eq('id', user.id);
 
@@ -53,7 +53,7 @@ async function updateExistingLogins() {
 
     // Show the results
     const { data: updatedUsers, error: showError } = await supabase
-      .from('users')
+      .from('profiles')
       .select('email, status, last_login, created_at')
       .order('last_login', { ascending: false });
 

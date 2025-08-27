@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
 
     // Verify the update
     const { data: verifyData, error: verifyError } = await supabaseAdmin
-      .from('users')
+      .from('profiles')
       .select('role, email')
       .eq('email', email)
       .single();

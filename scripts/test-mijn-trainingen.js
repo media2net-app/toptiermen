@@ -16,7 +16,7 @@ async function testMijnTrainingen() {
     // Step 1: Check current user's selected schema
     console.log('📋 Step 1: Checking user\'s selected schema...');
     const { data: userData, error: userError } = await supabase
-      .from('users')
+      .from('profiles')
       .select('selected_schema_id')
       .eq('id', userId)
       .single();
@@ -66,7 +66,7 @@ async function testMijnTrainingen() {
 
         // Update user's selected schema
         const { error: updateError } = await supabase
-          .from('users')
+          .from('profiles')
           .update({ selected_schema_id: schemaToSelect.id })
           .eq('id', userId);
 

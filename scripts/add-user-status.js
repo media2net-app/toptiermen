@@ -15,7 +15,7 @@ async function addUserStatus() {
   console.log('🚀 Starting to add status column and last login tracking...');
 
   try {
-    // 1. Add status column to users table
+    // 1. Add status column to profiles table
     console.log('📝 Adding status column to users table...');
     const { error: alterError } = await supabase.rpc('exec_sql', {
       sql_query: `
@@ -125,7 +125,7 @@ async function addUserStatus() {
     // Test the setup
     console.log('🧪 Testing the setup...');
     const { data: testUsers, error: testError } = await supabase
-      .from('users')
+      .from('profiles')
       .select('id, email, status, last_login')
       .limit(5);
 

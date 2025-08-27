@@ -124,7 +124,7 @@ export default function TrainingscentrumPage() {
       // Step 1: Fetch user data
       console.log('Trainingscentrum: Fetching user data...');
       const { data: userData, error: userError } = await supabase
-        .from('users')
+        .from('profiles')
         .select('selected_schema_id, selected_nutrition_plan')
         .eq('id', user.id)
         .single();
@@ -239,7 +239,7 @@ export default function TrainingscentrumPage() {
 
     try {
       const { error } = await supabase
-        .from('users')
+        .from('profiles')
         .update({ selected_schema_id: schemaId })
         .eq('id', user.id);
 
@@ -959,7 +959,7 @@ export default function TrainingscentrumPage() {
                       if (user) {
                         try {
                           const { error } = await supabase
-                            .from('users')
+                            .from('profiles')
                             .update({ selected_nutrition_plan: diet.id })
                             .eq('id', user.id);
 

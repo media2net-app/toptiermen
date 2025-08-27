@@ -32,10 +32,10 @@ async function checkProfileTables() {
       });
     }
 
-    // Check users table
+    // Check profiles table
     console.log('\n2️⃣ Checking users table...');
     const { data: users, error: usersError } = await supabase
-      .from('users')
+      .from('profiles')
       .select('*')
       .order('created_at', { ascending: false });
 
@@ -49,7 +49,7 @@ async function checkProfileTables() {
       });
     }
 
-    // Check auth.users table (if accessible)
+    // Check auth.profiles table (if accessible)
     console.log('\n3️⃣ Checking auth.users table...');
     try {
       const { data: authUsers, error: authError } = await supabase

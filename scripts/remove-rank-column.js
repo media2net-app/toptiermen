@@ -25,7 +25,7 @@ async function removeRankColumn() {
     console.log('🔍 Verifying column removal...');
     
     const { data: userData, error: userError } = await supabase
-      .from('users')
+      .from('profiles')
       .select('*')
       .limit(1);
 

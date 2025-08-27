@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
       
       await withDatabaseConnection(async (client) => {
         const { data, error } = await client
-          .from('users')
+          .from('profiles')
           .select('count')
           .limit(1);
 
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
       const concurrentPromises = Array.from({ length: 10 }, (_, i) =>
         withDatabaseConnection(async (client) => {
           const { data, error } = await client
-            .from('users')
+            .from('profiles')
             .select('count')
             .limit(1);
 
@@ -159,7 +159,7 @@ export async function POST(request: NextRequest) {
             const connectionStart = Date.now();
             try {
               const { data, error } = await client
-                .from('users')
+                .from('profiles')
                 .select('count')
                 .limit(1);
 

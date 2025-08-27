@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     // Verify user exists if userId is provided
     if (userId) {
       const { data: user, error: userError } = await supabaseAdmin
-        .from('users')
+        .from('profiles')
         .select('id, email, full_name')
         .eq('id', userId)
         .single();

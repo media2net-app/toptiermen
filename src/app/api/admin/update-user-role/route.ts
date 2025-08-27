@@ -7,9 +7,9 @@ export async function POST(request: NextRequest) {
     
     console.log('🔧 Updating user role:', email, 'to', role);
     
-    // Update user role in users table
+    // Update user role in profiles table
     const { error: updateError } = await supabaseAdmin
-      .from('users')
+      .from('profiles')
       .update({ role: role })
       .eq('email', email);
 

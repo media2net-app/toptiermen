@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     
     // Update user role by ID
     const { error: updateError } = await supabaseAdmin
-      .from('users')
+      .from('profiles')
       .update({ role: role })
       .eq('id', userId);
 
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
 
     // Verify the update
     const { data: verifyData, error: verifyError } = await supabaseAdmin
-      .from('users')
+      .from('profiles')
       .select('role, email, id')
       .eq('id', userId)
       .single();

@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
 
     // Step 2: Clean up any duplicate records first
     const { data: allUsers, error: usersError } = await supabaseAdmin
-      .from('users')
+      .from('profiles')
       .select('*')
       .order('created_at', { ascending: false });
 
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
           // Delete all but the first (most recent)
           for (let i = 1; i < sortedUsers.length; i++) {
             await supabaseAdmin
-              .from('users')
+              .from('profiles')
               .delete()
               .eq('id', sortedUsers[i].id);
           }
@@ -155,7 +155,7 @@ export async function POST(request: NextRequest) {
 
     // Step 6: Verify everything works
     const { data: finalUsers, error: verifyError } = await supabaseAdmin
-      .from('users')
+      .from('profiles')
       .select('*')
       .order('created_at', { ascending: false });
 

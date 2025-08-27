@@ -16,10 +16,10 @@ async function testLoginFlow() {
   console.log('🧪 Testing login flow with anon key...');
 
   try {
-    // 1. Test if we can query users table (should fail with anon key due to RLS)
+    // 1. Test if we can query profiles table (should fail with anon key due to RLS)
     console.log('📋 Testing user table access with anon key...');
     const { data: users, error: usersError } = await supabase
-      .from('users')
+      .from('profiles')
       .select('id, email, status, role')
       .limit(1);
 
@@ -52,7 +52,7 @@ async function testLoginFlow() {
       
       // Test if we can now query the user's own profile
       const { data: profile, error: profileError } = await supabase
-        .from('users')
+        .from('profiles')
         .select('*')
         .eq('id', authData.user?.id)
         .single();

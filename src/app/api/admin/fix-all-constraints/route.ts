@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
 
     // Step 4: Update test user role
     const { error: updateError } = await supabaseAdmin
-      .from('users')
+      .from('profiles')
       .update({ role: 'test' })
       .eq('email', 'test@toptiermen.com');
 
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
 
     // Step 5: Verify everything
     const { data: testUser, error: verifyError } = await supabaseAdmin
-      .from('users')
+      .from('profiles')
       .select('email, role')
       .eq('email', 'test@toptiermen.com')
       .single();

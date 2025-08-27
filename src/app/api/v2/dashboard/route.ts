@@ -49,7 +49,7 @@ export const GET = withApiHandler(async (request: NextRequest) => {
       ] = await Promise.all([
         // User profile
         supabase
-          .from('users')
+          .from('profiles')
           .select('*')
           .eq('id', auth.user?.id)
           .single(),
@@ -153,7 +153,7 @@ export const PUT = withApiHandler(async (request: NextRequest) => {
       }
 
       const { data, error } = await supabase
-        .from('users')
+        .from('profiles')
         .update({
           ...updates,
           updated_at: new Date().toISOString()
@@ -247,7 +247,7 @@ export const DELETE = withApiHandler(async (request: NextRequest) => {
         
         // Delete user preferences
         supabase
-          .from('users')
+          .from('profiles')
           .update({
             preferences: null,
             settings: null,
@@ -258,7 +258,7 @@ export const DELETE = withApiHandler(async (request: NextRequest) => {
 
       return {
         deleted: true,
-        affectedTables: ['notifications', 'user_activity', 'user_stats', 'users'],
+        affectedTables: ['notifications', 'user_activity', 'user_stats', 'profiles'],
         timestamp: new Date().toISOString()
       };
     }, 'Failed to delete dashboard data');

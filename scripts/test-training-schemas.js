@@ -167,7 +167,7 @@ async function testTrainingSchemas() {
         
         // Check if user has selected schema
         const { data: userData, error: userError } = await supabase
-          .from('users')
+          .from('profiles')
           .select('selected_schema_id')
           .eq('id', testUser.id)
           .single();

@@ -42,7 +42,7 @@ export const GET = withApiHandler(async (request: NextRequest) => {
 
     // Build query
     let query = auth.supabase
-      .from('users')
+      .from('profiles')
       .select('*', { count: 'exact' });
 
     // Apply search
@@ -128,7 +128,7 @@ export const POST = withApiHandler(async (request: NextRequest) => {
     // Create user
     const { data, error } = await safeDbOperation(
       () => auth.supabase
-        .from('users')
+        .from('profiles')
         .insert([body])
         .select()
         .single(),
@@ -175,7 +175,7 @@ export const PUT = withApiHandler(async (request: NextRequest) => {
 
     // Users can only update their own profile unless they're admin
     const { data: profile } = await auth.supabase
-      .from('users')
+      .from('profiles')
       .select('role')
       .eq('id', auth.user.id)
       .single();
@@ -187,7 +187,7 @@ export const PUT = withApiHandler(async (request: NextRequest) => {
     // Update user
     const { data, error } = await safeDbOperation(
       () => auth.supabase
-        .from('users')
+        .from('profiles')
         .update(body)
         .eq('id', userId)
         .select()
@@ -245,7 +245,7 @@ export const DELETE = withApiHandler(async (request: NextRequest) => {
     // Delete user
     const { error } = await safeDbOperation(
       () => auth.supabase
-        .from('users')
+        .from('profiles')
         .delete()
         .eq('id', userId),
       'Failed to delete user'

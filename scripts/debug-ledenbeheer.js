@@ -12,7 +12,7 @@ async function debugLedenbeheer() {
   // Test 1: Simple users query
   console.log('\n📋 Test 1: Simple users query');
   const { data: users, error: usersError } = await supabase
-    .from('users')
+    .from('profiles')
     .select('*');
   
   if (usersError) {
@@ -51,7 +51,7 @@ async function debugLedenbeheer() {
   // Test 3: Combined query (like the page uses)
   console.log('\n📋 Test 3: Combined query');
   const { data: combined, error: combinedError } = await supabase
-    .from('users')
+    .from('profiles')
     .select(`
       *,
       profiles(*)

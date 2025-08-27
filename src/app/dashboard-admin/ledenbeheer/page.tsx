@@ -92,7 +92,7 @@ export default function Ledenbeheer() {
       
       // Fetch users and profiles separately since there's no foreign key relationship
       const [usersResult, profilesResult] = await Promise.all([
-        supabase.from('users').select('*').order('created_at', { ascending: false }),
+        supabase.from('profiles').select('*').order('created_at', { ascending: false }),
         supabase.from('profiles').select('*')
       ]);
       
@@ -269,7 +269,7 @@ export default function Ledenbeheer() {
     setIsLoading(true);
     try {
       console.log('🔄 Saving member updates...', { editingMember, formData });
-      // Update users table
+      // Update profiles table
       const userUpdates: any = {
         full_name: formData.name,
         username: formData.username,
@@ -288,7 +288,7 @@ export default function Ledenbeheer() {
       
       // Update both tables
       const [userResult, profileResult] = await Promise.all([
-        supabase.from('users').update(userUpdates).eq('id', editingMember.id),
+        supabase.from('profiles').update(userUpdates).eq('id', editingMember.id),
         supabase.from('profiles').update(profileUpdates).eq('id', editingMember.id)
       ]);
       

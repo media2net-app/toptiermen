@@ -129,7 +129,7 @@ export async function GET(request: Request) {
 
       // 3. Training Statistics
       const { data: userData, error: userError } = await supabase
-        .from('users')
+        .from('profiles')
         .select('selected_schema_id')
         .eq('id', userId)
         .single();

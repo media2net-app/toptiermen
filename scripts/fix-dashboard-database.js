@@ -208,7 +208,7 @@ async function fixDashboardDatabase() {
     console.log('\n📊 Inserting sample data...');
     
     // Get a user to use for sample data
-    const { data: users } = await supabase.from('users').select('id').limit(1);
+    const { data: users } = await supabase.from('profiles').select('id').limit(1);
     
     if (users && users.length > 0) {
       const userId = users[0].id;

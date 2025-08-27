@@ -31,9 +31,9 @@ async function testUserAuth() {
       return;
     }
     
-    // Check if Rob exists in users table
+    // Check if Rob exists in profiles table
     const { data: usersData, error: usersError } = await supabase
-      .from('users')
+      .from('profiles')
       .select('*')
       .eq('id', robAuth.id);
     
