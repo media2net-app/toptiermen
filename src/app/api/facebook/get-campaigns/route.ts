@@ -170,7 +170,7 @@ export async function GET() {
     // Create campaign objects from manual data
     const transformedCampaigns = Object.entries(CURRENT_MANUAL_DATA).map(([campaignId, data]) => {
       return {
-        id: campaignId, // Use real Facebook campaign ID
+        id: campaignId,
         name: data.name,
         status: data.status,
         objective: data.name.includes('LEADS') ? 'leads' : 'traffic',
