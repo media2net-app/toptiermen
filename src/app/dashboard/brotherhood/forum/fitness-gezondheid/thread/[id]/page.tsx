@@ -453,12 +453,15 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
       if (error.message?.includes('permission denied')) {
         console.log('🔄 Trying local fallback for post...');
         
+        // Determine author ID for fallback
+        const fallbackAuthorId = currentUser?.id || '061e43d5-c89a-42bb-8a4c-04be2ce99a7e';
+        
         // Create a local post object
         const localPost = {
           id: Date.now(), // Temporary ID
           content: newReply.trim(),
           created_at: new Date().toISOString(),
-          author_id: authorId,
+          author_id: fallbackAuthorId,
           author: {
             first_name: 'Chiel',
             last_name: 'van der Zee',
