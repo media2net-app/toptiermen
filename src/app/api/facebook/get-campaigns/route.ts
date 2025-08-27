@@ -3,64 +3,159 @@ import { NextRequest, NextResponse } from 'next/server';
 const FACEBOOK_ACCESS_TOKEN = process.env.FACEBOOK_ACCESS_TOKEN;
 const FACEBOOK_AD_ACCOUNT_ID = process.env.FACEBOOK_AD_ACCOUNT_ID;
 
-// Manual data override based on Facebook Ads Manager (Live Data - Updated 25 August)
+// Manual data override based on Facebook Ads Manager (Live Data - Updated 8/27/2025)
 // CTR values are in decimal format (0.0667 = 6.67%)
 // Using real Facebook campaign IDs to match ad sets and ads
 const CURRENT_MANUAL_DATA = {
-  '120232181493720324': { // TTM - Zakelijk Prelaunch Campagne
-    name: 'TTM - Zakelijk Prelaunch Campagne',
-    clicks: 120,
-    spend: 28.50,
-    impressions: 1800,
-    reach: 1800,
-    ctr: 0.0667, // 6.67% in decimal
-    cpc: 0.24,
-    frequency: 1.10,
-    status: 'active'
+  "120232433872750324": {
+    "name": "TTM - Zakelijk Prelaunch Campagne - LEADS V2",
+    "clicks": 0,
+    "spend": 0,
+    "impressions": 0,
+    "reach": 0,
+    "ctr": 0,
+    "cpc": 0,
+    "frequency": 0,
+    "status": "ACTIVE",
+    "leads": 0,
+    "conversions": 0,
+    "budget": 2500,
+    "budgetRemaining": 1540
   },
-  '120232181491490324': { // TTM - Vaders Prelaunch Campagne
-    name: 'TTM - Vaders Prelaunch Campagne',
-    clicks: 150,
-    spend: 22.30,
-    impressions: 2000,
-    reach: 2000,
-    ctr: 0.075, // 7.50% in decimal
-    cpc: 0.15,
-    frequency: 1.08,
-    status: 'active'
+  "120232394482520324": {
+    "name": "TTM - Algemene Prelaunch Campagne - LEADS",
+    "clicks": 0,
+    "spend": 0,
+    "impressions": 0,
+    "reach": 0,
+    "ctr": 0,
+    "cpc": 0,
+    "frequency": 0,
+    "status": "PAUSED",
+    "leads": 0,
+    "conversions": 0,
+    "budget": 5000,
+    "budgetRemaining": 5000
   },
-  '120232181487970324': { // TTM - Jongeren Prelaunch Campagne
-    name: 'TTM - Jongeren Prelaunch Campagne',
-    clicks: 110,
-    spend: 20.80,
-    impressions: 1700,
-    reach: 1700,
-    ctr: 0.0647, // 6.47% in decimal
-    cpc: 0.19,
-    frequency: 1.05,
-    status: 'active'
+  "120232394479720324": {
+    "name": "TTM - Jongeren Prelaunch Campagne - LEADS",
+    "clicks": 0,
+    "spend": 0,
+    "impressions": 0,
+    "reach": 0,
+    "ctr": 0,
+    "cpc": 0,
+    "frequency": 0,
+    "status": "PAUSED",
+    "leads": 0,
+    "conversions": 0,
+    "budget": 5000,
+    "budgetRemaining": 5000
   },
-  '120232181480080324': { // TTM - Algemene Prelaunch Campagne
-    name: 'TTM - Algemene Prelaunch Campagne',
-    clicks: 220,
-    spend: 38.66,
-    impressions: 3200,
-    reach: 3200,
-    ctr: 0.0688, // 6.88% in decimal
-    cpc: 0.18,
-    frequency: 1.15,
-    status: 'active'
+  "120232394477760324": {
+    "name": "TTM - Vaders Prelaunch Campagne - LEADS",
+    "clicks": 0,
+    "spend": 0,
+    "impressions": 0,
+    "reach": 0,
+    "ctr": 0,
+    "cpc": 0,
+    "frequency": 0,
+    "status": "PAUSED",
+    "leads": 0,
+    "conversions": 0,
+    "budget": 5000,
+    "budgetRemaining": 5000
   },
-  '120232271577190324': { // TTM - Zakelijk Prelaunch Campagne - LEADS
-    name: 'TTM - Zakelijk Prelaunch Campagne - LEADS',
-    clicks: 0,
-    spend: 0,
-    impressions: 0,
-    reach: 0,
-    ctr: 0,
-    cpc: 0,
-    frequency: 0,
-    status: 'paused'
+  "120232394476410324": {
+    "name": "TTM - Zakelijk Prelaunch Campagne - LEADS",
+    "clicks": 0,
+    "spend": 0,
+    "impressions": 0,
+    "reach": 0,
+    "ctr": 0,
+    "cpc": 0,
+    "frequency": 0,
+    "status": "PAUSED",
+    "leads": 0,
+    "conversions": 0,
+    "budget": 5000,
+    "budgetRemaining": 5000
+  },
+  "120232271577190324": {
+    "name": "TTM - Zakelijk Prelaunch Campagne - LEADS",
+    "clicks": 0,
+    "spend": 0,
+    "impressions": 0,
+    "reach": 0,
+    "ctr": 0,
+    "cpc": 0,
+    "frequency": 0,
+    "status": "PAUSED",
+    "leads": 0,
+    "conversions": 0,
+    "budget": 500,
+    "budgetRemaining": 500
+  },
+  "120232181493720324": {
+    "name": "TTM - Zakelijk Prelaunch Campagne",
+    "clicks": 0,
+    "spend": 0,
+    "impressions": 0,
+    "reach": 0,
+    "ctr": 0,
+    "cpc": 0,
+    "frequency": 0,
+    "status": "PAUSED",
+    "leads": 0,
+    "conversions": 0,
+    "budget": 1500,
+    "budgetRemaining": 1500
+  },
+  "120232181491490324": {
+    "name": "TTM - Vaders Prelaunch Campagne",
+    "clicks": 0,
+    "spend": 0,
+    "impressions": 0,
+    "reach": 0,
+    "ctr": 0,
+    "cpc": 0,
+    "frequency": 0,
+    "status": "ACTIVE",
+    "leads": 0,
+    "conversions": 0,
+    "budget": 25,
+    "budgetRemaining": 0
+  },
+  "120232181487970324": {
+    "name": "TTM - Jongeren Prelaunch Campagne",
+    "clicks": 0,
+    "spend": 0,
+    "impressions": 0,
+    "reach": 0,
+    "ctr": 0,
+    "cpc": 0,
+    "frequency": 0,
+    "status": "ACTIVE",
+    "leads": 0,
+    "conversions": 0,
+    "budget": 25,
+    "budgetRemaining": 0
+  },
+  "120232181480080324": {
+    "name": "TTM - Algemene Prelaunch Campagne",
+    "clicks": 0,
+    "spend": 0,
+    "impressions": 0,
+    "reach": 0,
+    "ctr": 0,
+    "cpc": 0,
+    "frequency": 0,
+    "status": "ACTIVE",
+    "leads": 0,
+    "conversions": 0,
+    "budget": 25,
+    "budgetRemaining": 0
   }
 };
 
