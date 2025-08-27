@@ -184,7 +184,7 @@ export default function ProfielDetail() {
         <div className="relative">
           <Image 
             src={avatarUrl} 
-            alt={member.full_name} 
+            alt={member.full_name || 'Lid profiel'} 
             width={120} 
             height={120} 
             className="w-32 h-32 rounded-full border-4 border-[#8BAE5A] object-cover" 
@@ -192,7 +192,7 @@ export default function ProfielDetail() {
         </div>
         <div className="flex-1 flex flex-col gap-2">
           <div className="flex items-center gap-3">
-            <h2 className="text-2xl font-bold text-white">{member.full_name}</h2>
+            <h2 className="text-2xl font-bold text-white">{member.full_name || 'Onbekende gebruiker'}</h2>
             <span className="flex items-center gap-1 text-[#FFD700] font-semibold text-lg">
               {rankIcon} {currentMemberRank ? `Level ${currentMemberRank.rank_order} - ${currentMemberRank.name}` : displayRank}
             </span>
