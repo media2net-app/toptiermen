@@ -247,27 +247,27 @@ export default function ForumModeration() {
         <AdminStatsCard
           title="Totaal Reports"
           value={stats?.totalReports || 0}
-          icon={ShieldExclamationIcon}
+          icon={<ShieldExclamationIcon className="h-6 w-6" />}
           color="red"
-          change={stats?.recentReports || 0}
-          changeLabel="nieuwe deze week"
+          trend={stats?.recentReports || 0}
+          subtitle="nieuwe deze week"
         />
         <AdminStatsCard
           title="In Behandeling"
           value={stats?.pendingReports || 0}
-          icon={ClockIcon}
+          icon={<ClockIcon className="h-6 w-6" />}
           color="orange"
         />
         <AdminStatsCard
           title="Opgelost"
           value={stats?.resolvedReports || 0}
-          icon={CheckCircleIcon}
+          icon={<CheckCircleIcon className="h-6 w-6" />}
           color="green"
         />
         <AdminStatsCard
           title="Moderatie Acties"
           value={stats?.totalLogs || 0}
-          icon={ChatBubbleLeftRightIcon}
+          icon={<ChatBubbleLeftRightIcon className="h-6 w-6" />}
           color="blue"
         />
       </div>
@@ -368,7 +368,7 @@ export default function ForumModeration() {
                                   onClick={() => handleReportAction(report.id, 'investigate')}
                                   variant="success"
                                   size="sm"
-                                  icon={EyeIcon}
+                                  icon={<EyeIcon className="h-3 w-3" />}
                                 >
                                   Onderzoek
                                 </AdminButton>
@@ -376,7 +376,7 @@ export default function ForumModeration() {
                                   onClick={() => handleReportAction(report.id, 'dismiss')}
                                   variant="danger"
                                   size="sm"
-                                  icon={XCircleIcon}
+                                  icon={<XCircleIcon className="h-3 w-3" />}
                                 >
                                   Afwijzen
                                 </AdminButton>
@@ -387,7 +387,7 @@ export default function ForumModeration() {
                                 onClick={() => handleReportAction(report.id, 'resolve')}
                                 variant="success"
                                 size="sm"
-                                icon={CheckCircleIcon}
+                                icon={<CheckCircleIcon className="h-3 w-3" />}
                               >
                                 Oplossen
                               </AdminButton>
