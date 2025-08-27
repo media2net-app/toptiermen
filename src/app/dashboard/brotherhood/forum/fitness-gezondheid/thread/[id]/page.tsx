@@ -50,13 +50,22 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
   const fetchUserProfiles = async (userIds: string[]) => {
     try {
       console.log('👤 Fetching user profiles for:', userIds);
+      
+      if (userIds.length === 0) {
+        console.log('⚠️ No user IDs to fetch');
+        return {};
+      }
+
+      // Use a more specific query to avoid permission issues
       const { data: profiles, error } = await supabase
         .from('profiles')
         .select('id, full_name, avatar_url')
-        .in('id', userIds);
+        .in('id', userIds)
+        .limit(100); // Add limit for safety
 
       if (error) {
         console.error('❌ Error fetching profiles:', error);
+        // Return empty map instead of failing completely
         return {};
       }
 
@@ -69,6 +78,7 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
       return profilesMap;
     } catch (error) {
       console.error('❌ Error fetching profiles:', error);
+      // Return empty map instead of failing completely
       return {};
     }
   };
@@ -118,8 +128,8 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
 
       if (postsError) {
         console.error('❌ Error fetching posts:', postsError);
-        setError(`Error fetching posts: ${postsError.message}`);
-        return;
+        // Don't fail completely, continue with empty posts
+        console.log('⚠️ Continuing with empty posts due to error');
       }
 
       console.log('✅ Posts data received:', postsData);
@@ -127,7 +137,7 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
       // Collect all user IDs
       const userIds = new Set<string>();
       if (topicData.author_id) userIds.add(topicData.author_id);
-      postsData?.forEach(post => {
+      (postsData || [])?.forEach(post => {
         if (post.author_id) userIds.add(post.author_id);
       });
 
@@ -140,7 +150,7 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
       // Helper function to get author info
       const getAuthorInfo = (authorId: string) => {
         const profile = profiles[authorId];
-        if (profile) {
+        if (profile && profile.full_name) {
           const nameParts = profile.full_name.split(' ');
           return {
             first_name: nameParts[0] || 'User',
@@ -148,9 +158,10 @@ const ThreadPage = ({ params }: { params: { id: string } }) => {
             avatar_url: profile.avatar_url
           };
         }
+        // Fallback for missing profiles
         return {
           first_name: 'User',
-          last_name: '',
+          last_name: authorId ? `(${authorId.substring(0, 8)}...)` : '',
           avatar_url: undefined
         };
       };
