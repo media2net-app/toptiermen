@@ -133,7 +133,8 @@ export default function ApiAdForm() {
   };
 
   const toggleArrayField = (section: keyof FormData, field: string, value: string) => {
-    const currentArray = formData[section][field as keyof typeof formData[typeof section]] as string[];
+    const currentValue = formData[section][field as keyof typeof formData[typeof section]];
+    const currentArray = Array.isArray(currentValue) ? currentValue as string[] : [];
     const newArray = currentArray.includes(value)
       ? currentArray.filter(item => item !== value)
       : [...currentArray, value];
