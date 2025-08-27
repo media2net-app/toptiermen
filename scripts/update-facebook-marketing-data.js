@@ -83,10 +83,10 @@ async function fetchCampaignsWithInsights() {
       try {
         console.log(`🔍 Fetching insights for campaign: ${campaign.name}`);
         
-        // Get campaign insights
+        // Get campaign insights with specific date range
         const insightsResponse = await makeFacebookRequest(`/${campaign.id}/insights`, {
           fields: 'impressions,clicks,spend,reach,frequency,ctr,cpc,cpm,actions',
-          time_range: '{"since":"2025-08-01","until":"today"}',
+          time_range: '{"since":"2025-08-01","until":"2025-08-27"}',
           limit: 1
         });
         
@@ -280,6 +280,8 @@ async function updateMarketingDashboard(campaignsData) {
 // Generate summary report
 function generateSummaryReport(campaignsData) {
   console.log('\n📊 Facebook Marketing Summary Report');
+  console.log('=' .repeat(50));
+  console.log(`📅 Data Range: 1 Augustus 2025 - 27 Augustus 2025`);
   console.log('=' .repeat(50));
   
   const totalClicks = campaignsData.reduce((sum, c) => sum + c.clicks, 0);
