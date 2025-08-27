@@ -588,6 +588,195 @@ export const getOnboardingReminderTemplate = (name: string, dashboardUrl: string
   `
 });
 
+export const getMarketingEmailTemplate = (name: string, subject: string, content: string, ctaText: string, ctaUrl: string): EmailTemplate => ({
+  subject: subject,
+  html: `
+    <!DOCTYPE html>
+    <html lang="nl">
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>${subject}</title>
+      <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+          line-height: 1.6; 
+          color: #2c3e50; 
+          background-color: #f8f9fa;
+        }
+        .email-container { 
+          max-width: 600px; 
+          margin: 0 auto; 
+          background: #ffffff;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+          border-radius: 12px;
+          overflow: hidden;
+        }
+        .header { 
+          background: linear-gradient(135deg, #1a2e1a 0%, #2d4a2d 50%, #3a5f3a 100%); 
+          padding: 40px 30px;
+          text-align: center;
+          position: relative;
+        }
+        .header::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.1)"/><circle cx="10" cy="60" r="0.5" fill="rgba(255,255,255,0.1)"/><circle cx="90" cy="40" r="0.5" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+          opacity: 0.3;
+        }
+        .logo {
+          width: 120px;
+          height: 60px;
+          background: linear-gradient(45deg, #8bae5a, #b6c948);
+          border-radius: 8px;
+          margin: 0 auto 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: bold;
+          font-size: 18px;
+          color: white;
+          position: relative;
+          z-index: 1;
+        }
+        .header h1 { 
+          color: white; 
+          font-size: 28px; 
+          font-weight: 700;
+          margin-bottom: 10px;
+          position: relative;
+          z-index: 1;
+        }
+        .header p { 
+          color: #e8f5e8; 
+          font-size: 16px;
+          position: relative;
+          z-index: 1;
+        }
+        .content { 
+          padding: 40px 30px; 
+          background: #ffffff;
+        }
+        .greeting {
+          font-size: 24px;
+          font-weight: 600;
+          color: #2c3e50;
+          margin-bottom: 20px;
+        }
+        .intro-text {
+          font-size: 16px;
+          color: #5a6c7d;
+          margin-bottom: 30px;
+          line-height: 1.8;
+        }
+        .cta-section {
+          text-align: center;
+          margin: 40px 0;
+          padding: 30px;
+          background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+          border-radius: 12px;
+        }
+        .cta-button {
+          display: inline-block;
+          background: linear-gradient(135deg, #8bae5a 0%, #b6c948 100%);
+          color: white;
+          padding: 16px 32px;
+          text-decoration: none;
+          border-radius: 8px;
+          font-weight: 600;
+          font-size: 16px;
+          transition: all 0.3s ease;
+          box-shadow: 0 4px 15px rgba(139, 174, 90, 0.3);
+        }
+        .cta-button:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(139, 174, 90, 0.4);
+        }
+        .footer { 
+          background: #2c3e50; 
+          color: #bdc3c7; 
+          padding: 30px;
+          text-align: center;
+          font-size: 14px;
+        }
+        .footer a {
+          color: #8bae5a;
+          text-decoration: none;
+        }
+        .social-links {
+          margin-top: 20px;
+        }
+        .social-links a {
+          display: inline-block;
+          margin: 0 10px;
+          color: #8bae5a;
+          text-decoration: none;
+        }
+        @media (max-width: 600px) {
+          .header h1 {
+            font-size: 20px;
+          }
+          .content {
+            padding: 20px;
+          }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="email-container">
+        <div class="header">
+          <div class="logo">TOP TIER MEN</div>
+          <h1>Top Tier Men</h1>
+          <p>Excellence in every aspect of life</p>
+        </div>
+        
+        <div class="content">
+          <div class="greeting">Beste ${name},</div>
+          
+          <div class="intro-text">
+            ${content}
+          </div>
+          
+          <div class="cta-section">
+            <a href="${ctaUrl}" class="cta-button">${ctaText}</a>
+          </div>
+        </div>
+        
+        <div class="footer">
+          <p>Met vriendelijke groet,<br><strong>Het Top Tier Men Team</strong></p>
+          <div class="social-links">
+            <a href="https://platform.toptiermen.eu">Website</a> | <a href="#">Instagram</a> | <a href="#">LinkedIn</a>
+          </div>
+          <p style="margin-top: 20px; font-size: 12px;">
+            Als je vragen hebt, neem contact op via <a href="mailto:platform@toptiermen.eu">platform@toptiermen.eu</a>
+          </p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `,
+  text: `
+    ${subject}
+    
+    Beste ${name},
+    
+    ${content}
+    
+    ${ctaText}: ${ctaUrl}
+    
+    Met vriendelijke groet,
+    Het Top Tier Men Team
+    
+    Website: https://platform.toptiermen.eu
+    Contact: platform@toptiermen.eu
+  `
+});
+
 export const getEmailVerificationTemplate = (name: string, verificationUrl: string): EmailTemplate => ({
   subject: 'Verifieer je e-mailadres - Top Tier Men',
   html: `
