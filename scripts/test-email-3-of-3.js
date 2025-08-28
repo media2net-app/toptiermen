@@ -35,7 +35,7 @@ async function sendTestEmail3Of3() {
           campaign_type: 'info_series',
           email_type: 'info_email_2',
           email_number: '3 van 3',
-          launch_date: '10 september 2024',
+          launch_date: '10 september 2025',
           rick_background: true,
           vision_content: true
         }
