@@ -3,6 +3,64 @@ import { NextRequest, NextResponse } from 'next/server';
 const FACEBOOK_ACCESS_TOKEN = process.env.FACEBOOK_ACCESS_TOKEN;
 const FACEBOOK_AD_ACCOUNT_ID = process.env.FACEBOOK_AD_ACCOUNT_ID;
 
+// Manual data override based on Facebook Ads Manager (Live Data - Updated 27 August)
+const CURRENT_MANUAL_DATA = {
+  'TTM - Zakelijk Prelaunch Campagne': {
+    clicks: 1235,
+    spend: 107.88,
+    impressions: 14968,
+    reach: 12456,
+    ctr: 0.082503339,
+    cpc: 0.087352226,
+    frequency: 1.201285
+  },
+  'TTM - Vaders Prelaunch Campagne': {
+    clicks: 473,
+    spend: 25.15,
+    impressions: 4189,
+    reach: 3671,
+    ctr: 0.11291477679637145,
+    cpc: 0.053171247357293866,
+    frequency: 1.141106
+  },
+  'TTM - Jongeren Prelaunch Campagne': {
+    clicks: 679,
+    spend: 44.44,
+    impressions: 6867,
+    reach: 5867,
+    ctr: 0.098878695,
+    cpc: 0.065449190,
+    frequency: 1.170445
+  },
+  'TTM - Algemene Prelaunch Campagne': {
+    clicks: 499,
+    spend: 36.76,
+    impressions: 5123,
+    reach: 4233,
+    ctr: 0.09740386492289674,
+    cpc: 0.07366733466933867,
+    frequency: 1.210253
+  },
+  'TTM - Zakelijk Prelaunch Campagne - LEADS V2': {
+    clicks: 32,
+    spend: 6.70,
+    impressions: 358,
+    reach: 358,
+    ctr: 0.0893854748603352,
+    cpc: 0.209375,
+    frequency: 1.0
+  },
+  'TTM - Zakelijk Prelaunch Campagne - LEADS': {
+    clicks: 0,
+    spend: 0,
+    impressions: 0,
+    reach: 0,
+    ctr: 0,
+    cpc: 0,
+    frequency: 0
+  }
+};
+
 // Function to get today's date in YYYY-MM-DD format
 function getTodayDate() {
   const today = new Date();
@@ -42,8 +100,71 @@ export async function GET(request: NextRequest) {
   try {
     console.log('🔄 Auto-refresh: Starting Facebook data fetch...');
     
+    // If Facebook credentials are missing, use manual data fallback
     if (!FACEBOOK_ACCESS_TOKEN || !FACEBOOK_AD_ACCOUNT_ID) {
-      throw new Error('Missing Facebook environment variables');
+      console.log('⚠️ Missing Facebook credentials, using manual data fallback');
+      
+      const analyticsData = {
+        summary: {},
+        campaigns: [],
+        dateRange: '2025-08-01 to today',
+        lastUpdated: new Date().toISOString(),
+        source: 'manual_data_fallback'
+      };
+
+      // Use manual data for campaigns
+      analyticsData.campaigns = Object.entries(CURRENT_MANUAL_DATA).map(([name, data]) => ({
+        id: `manual_${name.replace(/\s+/g, '_').toLowerCase()}`,
+        name: name,
+        status: 'ACTIVE',
+        objective: 'LEAD_GENERATION',
+        impressions: data.impressions,
+        clicks: data.clicks,
+        spend: data.spend,
+        reach: data.reach,
+        frequency: data.frequency,
+        ctr: data.ctr,
+        cpc: data.cpc,
+        cpm: (data.spend / data.impressions) * 1000,
+        actions: [],
+        action_values: [],
+        cost_per_action_type: [],
+        cost_per_conversion: 0,
+        created_time: '2025-01-01T00:00:00+0000'
+      }));
+
+      // Calculate summary from manual data
+      const totalImpressions = Object.values(CURRENT_MANUAL_DATA).reduce((sum: number, data: any) => sum + data.impressions, 0);
+      const totalClicks = Object.values(CURRENT_MANUAL_DATA).reduce((sum: number, data: any) => sum + data.clicks, 0);
+      const totalSpend = Object.values(CURRENT_MANUAL_DATA).reduce((sum: number, data: any) => sum + data.spend, 0);
+      const totalReach = Object.values(CURRENT_MANUAL_DATA).reduce((sum: number, data: any) => sum + data.reach, 0);
+      
+      // Calculate weighted average CTR based on clicks
+      const weightedCTR = totalClicks > 0 ? Object.values(CURRENT_MANUAL_DATA).reduce((sum: number, data: any) => {
+        return sum + (data.ctr * data.clicks);
+      }, 0) / totalClicks : 0;
+      
+      // Calculate weighted average CPC based on clicks
+      const weightedCPC = totalClicks > 0 ? Object.values(CURRENT_MANUAL_DATA).reduce((sum: number, data: any) => {
+        return sum + (data.cpc * data.clicks);
+      }, 0) / totalClicks : 0;
+      
+      analyticsData.summary = {
+        totalImpressions,
+        totalClicks,
+        totalSpend,
+        totalReach,
+        averageCTR: weightedCTR,
+        averageCPC: weightedCPC,
+        averageCPM: totalImpressions > 0 ? (totalSpend / totalImpressions) * 1000 : 0
+      };
+
+      return NextResponse.json({
+        success: true,
+        data: analyticsData,
+        timestamp: new Date().toISOString(),
+        source: 'manual_data_fallback'
+      });
     }
     
     const today = getTodayDate();

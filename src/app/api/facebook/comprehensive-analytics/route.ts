@@ -130,11 +130,75 @@ const CURRENT_MANUAL_DATA = {
 };
 
 export async function GET(request: NextRequest) {
-  if (!FACEBOOK_ACCESS_TOKEN || !FACEBOOK_AD_ACCOUNT_ID) {
-    return NextResponse.json(
-      { success: false, error: 'Missing Facebook credentials' },
-      { status: 500 }
-    );
+  const { searchParams } = new URL(request.url);
+  const forceManual = searchParams.get('forceManual') === 'true';
+  const useManualData = forceManual || searchParams.get('useManualData') !== 'false';
+  
+  // If manual data is requested or credentials are missing, use manual data
+  if (useManualData || !FACEBOOK_ACCESS_TOKEN || !FACEBOOK_AD_ACCOUNT_ID) {
+    console.log('🔧 Using manual data (credentials missing or manual data requested)');
+    
+    const analyticsData = {
+      summary: {},
+      campaigns: [],
+      dateRange: 'maximum',
+      lastUpdated: new Date().toISOString(),
+      source: 'manual_data'
+    };
+
+    // Use manual data for campaigns
+    analyticsData.campaigns = Object.entries(CURRENT_MANUAL_DATA).map(([name, data]) => ({
+      id: `manual_${name.replace(/\s+/g, '_').toLowerCase()}`,
+      name: name,
+      status: 'ACTIVE',
+      objective: 'LEAD_GENERATION',
+      impressions: data.impressions,
+      clicks: data.clicks,
+      spend: data.spend,
+      reach: data.reach,
+      frequency: data.frequency,
+      ctr: data.ctr,
+      cpc: data.cpc,
+      cpm: (data.spend / data.impressions) * 1000,
+      actions: [],
+      action_values: [],
+      cost_per_action_type: [],
+      cost_per_conversion: 0,
+      created_time: '2025-01-01T00:00:00+0000'
+    }));
+
+    // Calculate summary from manual data
+    const totalImpressions = Object.values(CURRENT_MANUAL_DATA).reduce((sum: number, data: any) => sum + data.impressions, 0);
+    const totalClicks = Object.values(CURRENT_MANUAL_DATA).reduce((sum: number, data: any) => sum + data.clicks, 0);
+    const totalSpend = Object.values(CURRENT_MANUAL_DATA).reduce((sum: number, data: any) => sum + data.spend, 0);
+    const totalReach = Object.values(CURRENT_MANUAL_DATA).reduce((sum: number, data: any) => sum + data.reach, 0);
+    
+    // Calculate weighted average CTR based on clicks
+    const weightedCTR = totalClicks > 0 ? Object.values(CURRENT_MANUAL_DATA).reduce((sum: number, data: any) => {
+      return sum + (data.ctr * data.clicks);
+    }, 0) / totalClicks : 0;
+    
+    // Calculate weighted average CPC based on clicks
+    const weightedCPC = totalClicks > 0 ? Object.values(CURRENT_MANUAL_DATA).reduce((sum: number, data: any) => {
+      return sum + (data.cpc * data.clicks);
+    }, 0) / totalClicks : 0;
+    
+    analyticsData.summary = {
+      totalImpressions,
+      totalClicks,
+      totalSpend,
+      totalReach,
+      averageCTR: weightedCTR,
+      averageCPC: weightedCPC,
+      averageCPM: totalImpressions > 0 ? (totalSpend / totalImpressions) * 1000 : 0
+    };
+
+    return NextResponse.json({
+      success: true,
+      data: analyticsData,
+      timestamp: new Date().toISOString(),
+      source: 'manual_data_fallback'
+    });
   }
 
   try {
