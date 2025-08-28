@@ -49,7 +49,7 @@ export default function PlanningLanceringPage() {
             </div>
             <div className="text-right">
               <div className="text-2xl font-bold text-[#B6C948]">
-                {Math.ceil((new Date('2024-09-10').getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} dagen
+                {Math.ceil((new Date('2025-09-10').getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} dagen
               </div>
               <div className="text-[#8BAE5A] text-sm">tot lancering</div>
             </div>
@@ -117,7 +117,7 @@ export default function PlanningLanceringPage() {
                       <span className="text-2xl">⚙️</span>
                       <div>
                         <h3 className="text-xl font-semibold text-[#B6C948]">E-mail Server Configuratie</h3>
-                        <p className="text-[#8BAE5A] text-sm">2024-08-28</p>
+                        <p className="text-[#8BAE5A] text-sm">2025-08-28</p>
                       </div>
                     </div>
                     <div className="text-right">
@@ -144,7 +144,7 @@ export default function PlanningLanceringPage() {
                       <span className="text-2xl">📧</span>
                       <div>
                         <h3 className="text-xl font-semibold text-[#B6C948]">Eerste E-mail Campagne</h3>
-                        <p className="text-[#8BAE5A] text-sm">2024-08-29</p>
+                        <p className="text-[#8BAE5A] text-sm">2025-08-29</p>
                       </div>
                     </div>
                     <div className="text-right">
@@ -171,7 +171,7 @@ export default function PlanningLanceringPage() {
                       <span className="text-2xl">📧</span>
                       <div>
                         <h3 className="text-xl font-semibold text-[#B6C948]">Informatieve E-mail #1</h3>
-                        <p className="text-[#8BAE5A] text-sm">2024-09-02</p>
+                        <p className="text-[#8BAE5A] text-sm">2025-09-02</p>
                       </div>
                     </div>
                     <div className="text-right">
@@ -198,7 +198,7 @@ export default function PlanningLanceringPage() {
                       <span className="text-2xl">📝</span>
                       <div>
                         <h3 className="text-xl font-semibold text-[#B6C948]">Informatieve E-mail #2</h3>
-                        <p className="text-[#8BAE5A] text-sm">2024-09-05</p>
+                        <p className="text-[#8BAE5A] text-sm">2025-09-05</p>
                       </div>
                     </div>
                     <div className="text-right">
@@ -225,7 +225,7 @@ export default function PlanningLanceringPage() {
                       <span className="text-2xl">📢</span>
                       <div>
                         <h3 className="text-xl font-semibold text-[#B6C948]">Prelaunch Pakket Aanbod</h3>
-                        <p className="text-[#8BAE5A] text-sm">2024-09-09</p>
+                        <p className="text-[#8BAE5A] text-sm">2025-09-09</p>
                       </div>
                     </div>
                     <div className="text-right">
@@ -252,7 +252,7 @@ export default function PlanningLanceringPage() {
                       <span className="text-2xl">⚙️</span>
                       <div>
                         <h3 className="text-xl font-semibold text-[#B6C948]">Platform Launch</h3>
-                        <p className="text-[#8BAE5A] text-sm">2024-09-10</p>
+                        <p className="text-[#8BAE5A] text-sm">2025-09-10</p>
                       </div>
                     </div>
                     <div className="text-right">
@@ -290,7 +290,7 @@ export default function PlanningLanceringPage() {
                       <h3 className="text-xl font-semibold text-[#B6C948] mb-2">Welkom bij Top Tier Men - Jouw reis naar het volgende niveau begint hier</h3>
                       <p className="text-[#8BAE5A] mb-2">Welkomst e-mail met platform introductie en wat te verwachten</p>
                       <div className="flex items-center space-x-4 text-sm text-[#8BAE5A]">
-                        <span>📅 2024-08-29</span>
+                        <span>📅 2025-08-29</span>
                         <span>👥 Alle bestaande leads</span>
                       </div>
                     </div>
@@ -308,7 +308,7 @@ export default function PlanningLanceringPage() {
                       <h3 className="text-xl font-semibold text-[#B6C948] mb-2">Ontdek de kracht van het Top Tier Men platform</h3>
                       <p className="text-[#8BAE5A] mb-2">Uitgebreide uitleg van platform features en voordelen</p>
                       <div className="flex items-center space-x-4 text-sm text-[#8BAE5A]">
-                        <span>📅 2024-09-02</span>
+                        <span>📅 2025-09-02</span>
                         <span>👥 Actieve leads</span>
                       </div>
                     </div>
@@ -326,7 +326,7 @@ export default function PlanningLanceringPage() {
                       <h3 className="text-xl font-semibold text-[#B6C948] mb-2">Ontmoet Rick - De visie achter Top Tier Men</h3>
                       <p className="text-[#8BAE5A] mb-2">Rick's achtergrond, ervaring en visie voor de community</p>
                       <div className="flex items-center space-x-4 text-sm text-[#8BAE5A]">
-                        <span>📅 2024-09-05</span>
+                        <span>📅 2025-09-05</span>
                         <span>👥 Engaged leads</span>
                       </div>
                     </div>
@@ -344,7 +344,7 @@ export default function PlanningLanceringPage() {
                       <h3 className="text-xl font-semibold text-[#B6C948] mb-2">🚀 EXCLUSIEF: 50% Early Access Korting - Beperkte tijd beschikbaar</h3>
                       <p className="text-[#8BAE5A] mb-2">Prelaunch aanbieding met 50% korting voor early access</p>
                       <div className="flex items-center space-x-4 text-sm text-[#8BAE5A]">
-                        <span>📅 2024-09-09</span>
+                        <span>📅 2025-09-09</span>
                         <span>👥 Alle leads</span>
                       </div>
                     </div>
@@ -373,7 +373,7 @@ export default function PlanningLanceringPage() {
                       <span className="text-xl">⚙️</span>
                       <div>
                         <h3 className="font-semibold text-[#B6C948]">E-mail Server Configuratie</h3>
-                        <p className="text-sm text-[#8BAE5A]">2024-08-28</p>
+                        <p className="text-sm text-[#8BAE5A]">2025-08-28</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-3">
@@ -389,7 +389,7 @@ export default function PlanningLanceringPage() {
                       <span className="text-xl">📧</span>
                       <div>
                         <h3 className="font-semibold text-[#B6C948]">Eerste E-mail Campagne</h3>
-                        <p className="text-sm text-[#8BAE5A]">2024-08-29</p>
+                        <p className="text-sm text-[#8BAE5A]">2025-08-29</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-3">
@@ -405,7 +405,7 @@ export default function PlanningLanceringPage() {
                       <span className="text-xl">📧</span>
                       <div>
                         <h3 className="font-semibold text-[#B6C948]">Informatieve E-mail #1</h3>
-                        <p className="text-sm text-[#8BAE5A]">2024-09-02</p>
+                        <p className="text-sm text-[#8BAE5A]">2025-09-02</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-3">
@@ -421,7 +421,7 @@ export default function PlanningLanceringPage() {
                       <span className="text-xl">📝</span>
                       <div>
                         <h3 className="font-semibold text-[#B6C948]">Informatieve E-mail #2</h3>
-                        <p className="text-sm text-[#8BAE5A]">2024-09-05</p>
+                        <p className="text-sm text-[#8BAE5A]">2025-09-05</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-3">
@@ -437,7 +437,7 @@ export default function PlanningLanceringPage() {
                       <span className="text-xl">📢</span>
                       <div>
                         <h3 className="font-semibold text-[#B6C948]">Prelaunch Pakket Aanbod</h3>
-                        <p className="text-sm text-[#8BAE5A]">2024-09-09</p>
+                        <p className="text-sm text-[#8BAE5A]">2025-09-09</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-3">
@@ -453,7 +453,7 @@ export default function PlanningLanceringPage() {
                       <span className="text-xl">⚙️</span>
                       <div>
                         <h3 className="font-semibold text-[#B6C948]">Platform Launch</h3>
-                        <p className="text-sm text-[#8BAE5A]">2024-09-10</p>
+                        <p className="text-sm text-[#8BAE5A]">2025-09-10</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-3">
