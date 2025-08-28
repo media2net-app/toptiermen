@@ -1,0 +1,109 @@
+{
+  "generated_at": "2025-08-28T13:44:02.759Z",
+  "overall": {
+    "total_ebooks": 36,
+    "pdf_ebooks": 36,
+    "html_ebooks": 0,
+    "completion_rate": "100.0"
+  },
+  "modules": [
+    {
+      "module": {
+        "id": "c671fea4-bfb1-4ccc-b23e-220e80783d06",
+        "title": "Testosteron",
+        "slug": "test",
+        "order_index": 1,
+        "status": "published"
+      },
+      "pdf_count": 5,
+      "html_count": 0,
+      "total_count": 5,
+      "completion_rate": "100.0",
+      "status": "✅ COMPLETE"
+    },
+    {
+      "module": {
+        "id": "ba58a203-b2d0-442b-83a3-62cfb0a79478",
+        "title": "Discipline & Identiteit",
+        "slug": "discipline-identiteit",
+        "order_index": 2,
+        "status": "published"
+      },
+      "pdf_count": 5,
+      "html_count": 0,
+      "total_count": 5,
+      "completion_rate": "100.0",
+      "status": "✅ COMPLETE"
+    },
+    {
+      "module": {
+        "id": "0d02e65a-c109-440d-9286-690b21fbdecb",
+        "title": "Fysieke Dominantie",
+        "slug": "fysieke-dominantie",
+        "order_index": 3,
+        "status": "published"
+      },
+      "pdf_count": 5,
+      "html_count": 0,
+      "total_count": 5,
+      "completion_rate": "100.0",
+      "status": "✅ COMPLETE"
+    },
+    {
+      "module": {
+        "id": "c66b25e3-869f-4c2c-8037-a552726c6b62",
+        "title": "Mentale Kracht/Weerbaarheid",
+        "slug": "mentale-kracht-weerbaarheid",
+        "order_index": 4,
+        "status": "published"
+      },
+      "pdf_count": 5,
+      "html_count": 0,
+      "total_count": 5,
+      "completion_rate": "100.0",
+      "status": "✅ COMPLETE"
+    },
+    {
+      "module": {
+        "id": "309b7450-3c77-4aa5-bc14-f5514cafd886",
+        "title": "Business and Finance ",
+        "slug": "business-and-finance-",
+        "order_index": 5,
+        "status": "published"
+      },
+      "pdf_count": 5,
+      "html_count": 0,
+      "total_count": 5,
+      "completion_rate": "100.0",
+      "status": "✅ COMPLETE"
+    },
+    {
+      "module": {
+        "id": "6102f6c8-7f38-4501-ab94-e9a68622e46f",
+        "title": "Brotherhood",
+        "slug": "brotherhood",
+        "order_index": 6,
+        "status": "published"
+      },
+      "pdf_count": 5,
+      "html_count": 0,
+      "total_count": 5,
+      "completion_rate": "100.0",
+      "status": "✅ COMPLETE"
+    },
+    {
+      "module": {
+        "id": "f5dfaee3-87a7-4d32-9548-751391642e2b",
+        "title": "Voeding & Gezondheid",
+        "slug": "voeding-gezondheid",
+        "order_index": 7,
+        "status": "published"
+      },
+      "pdf_count": 6,
+      "html_count": 0,
+      "total_count": 6,
+      "completion_rate": "100.0",
+      "status": "✅ COMPLETE"
+    }
+  ]
+}
