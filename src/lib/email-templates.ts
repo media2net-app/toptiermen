@@ -18,15 +18,17 @@ export const getWelcomeEmailTemplate = (name: string, dashboardUrl: string): Ema
         body { 
           font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
           line-height: 1.6; 
-          color: #2c3e50; 
-          background-color: #f8f9fa;
+          color: #ffffff; 
+          background-color: #181F17;
+          margin: 0;
+          padding: 0;
         }
         .email-container { 
-          max-width: 600px; 
-          margin: 0 auto; 
-          background: #ffffff;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-          border-radius: 12px;
+          width: 100%; 
+          max-width: 100%; 
+          margin: 0; 
+          background: #181F17;
+          border-radius: 0;
           overflow: hidden;
         }
         .header { 
@@ -76,17 +78,17 @@ export const getWelcomeEmailTemplate = (name: string, dashboardUrl: string): Ema
         }
         .content { 
           padding: 40px 30px; 
-          background: #ffffff;
+          background: #181F17;
         }
         .greeting {
           font-size: 24px;
           font-weight: 600;
-          color: #2c3e50;
+          color: #ffffff;
           margin-bottom: 20px;
         }
         .intro-text {
           font-size: 16px;
-          color: #5a6c7d;
+          color: #B6C948;
           margin-bottom: 30px;
           line-height: 1.8;
         }
@@ -97,19 +99,19 @@ export const getWelcomeEmailTemplate = (name: string, dashboardUrl: string): Ema
           margin: 30px 0;
         }
         .feature-card {
-          background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+          background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
           padding: 20px;
           border-radius: 8px;
-          border-left: 4px solid #8bae5a;
+          border-left: 4px solid #B6C948;
         }
         .feature-title {
           font-weight: 600;
-          color: #2c3e50;
+          color: #ffffff;
           margin-bottom: 8px;
           font-size: 16px;
         }
         .feature-desc {
-          color: #6c757d;
+          color: #8BAE5A;
           font-size: 14px;
           line-height: 1.5;
         }
@@ -117,7 +119,7 @@ export const getWelcomeEmailTemplate = (name: string, dashboardUrl: string): Ema
           text-align: center;
           margin: 40px 0;
           padding: 30px;
-          background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+          background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
           border-radius: 12px;
         }
         .cta-button {
@@ -137,8 +139,8 @@ export const getWelcomeEmailTemplate = (name: string, dashboardUrl: string): Ema
           box-shadow: 0 6px 20px rgba(139, 174, 90, 0.4);
         }
         .footer { 
-          background: #2c3e50; 
-          color: #bdc3c7; 
+          background: #232D1A; 
+          color: #8BAE5A; 
           padding: 30px;
           text-align: center;
           font-size: 14px;
@@ -205,32 +207,32 @@ export const getWelcomeEmailTemplate = (name: string, dashboardUrl: string): Ema
           </div>
           
           <div class="cta-section">
-            <h3 style="margin-bottom: 20px; color: #2c3e50;">Klaar om te beginnen?</h3>
+            <h3 style="margin-bottom: 20px; color: #ffffff;">Klaar om te beginnen?</h3>
             <a href="${dashboardUrl}" class="cta-button">Ga naar je Dashboard</a>
           </div>
           
-          <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
-            <h4 style="color: #2c3e50; margin-bottom: 15px;">Wat je de komende 6 maanden kunt verwachten:</h4>
+          <div style="margin-top: 30px; padding: 20px; background: #232D1A; border-radius: 8px;">
+            <h4 style="color: #ffffff; margin-bottom: 15px;">Wat je de komende 6 maanden kunt verwachten:</h4>
             <div style="display: grid; gap: 15px;">
               <div>
-                <strong style="color: #8bae5a;">Maand 1-2: Foundation</strong>
-                <ul style="margin-left: 20px; margin-top: 5px; color: #6c757d;">
+                <strong style="color: #B6C948;">Maand 1-2: Foundation</strong>
+                <ul style="margin-left: 20px; margin-top: 5px; color: #8BAE5A;">
                   <li>Toegang tot alle academy modules en training content</li>
                   <li>Persoonlijke voedingsplannen en trainingsschema's</li>
                   <li>Introductie in de broederschap community</li>
                 </ul>
               </div>
               <div>
-                <strong style="color: #8bae5a;">Maand 3-4: Growth</strong>
-                <ul style="margin-left: 20px; margin-top: 5px; color: #6c757d;">
+                <strong style="color: #B6C948;">Maand 3-4: Growth</strong>
+                <ul style="margin-left: 20px; margin-top: 5px; color: #8BAE5A;">
                   <li>Diepgaande coaching sessies</li>
                   <li>Community challenges en accountability</li>
                   <li>Wekelijkse evaluaties en voortgang tracking</li>
                 </ul>
               </div>
               <div>
-                <strong style="color: #8bae5a;">Maand 5-6: Mastery</strong>
-                <ul style="margin-left: 20px; margin-top: 5px; color: #6c757d;">
+                <strong style="color: #B6C948;">Maand 5-6: Mastery</strong>
+                <ul style="margin-left: 20px; margin-top: 5px; color: #8BAE5A;">
                   <li>Advanced strategieën en technieken</li>
                   <li>Leadership development</li>
                   <li>Mentorship programma's</li>
@@ -602,15 +604,17 @@ export const getMarketingEmailTemplate = (name: string, subject: string, content
         body { 
           font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
           line-height: 1.6; 
-          color: #2c3e50; 
-          background-color: #f8f9fa;
+          color: #ffffff; 
+          background-color: #181F17;
+          margin: 0;
+          padding: 0;
         }
         .email-container { 
-          max-width: 600px; 
-          margin: 0 auto; 
-          background: #ffffff;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-          border-radius: 12px;
+          width: 100%; 
+          max-width: 100%; 
+          margin: 0; 
+          background: #181F17;
+          border-radius: 0;
           overflow: hidden;
         }
         .header { 
@@ -660,17 +664,17 @@ export const getMarketingEmailTemplate = (name: string, subject: string, content
         }
         .content { 
           padding: 40px 30px; 
-          background: #ffffff;
+          background: #181F17;
         }
         .greeting {
           font-size: 24px;
           font-weight: 600;
-          color: #2c3e50;
+          color: #ffffff;
           margin-bottom: 20px;
         }
         .intro-text {
           font-size: 16px;
-          color: #5a6c7d;
+          color: #B6C948;
           margin-bottom: 30px;
           line-height: 1.8;
         }
@@ -678,7 +682,7 @@ export const getMarketingEmailTemplate = (name: string, subject: string, content
           text-align: center;
           margin: 40px 0;
           padding: 30px;
-          background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+          background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
           border-radius: 12px;
         }
         .cta-button {
@@ -698,8 +702,8 @@ export const getMarketingEmailTemplate = (name: string, subject: string, content
           box-shadow: 0 6px 20px rgba(139, 174, 90, 0.4);
         }
         .footer { 
-          background: #2c3e50; 
-          color: #bdc3c7; 
+          background: #232D1A; 
+          color: #8BAE5A; 
           padding: 30px;
           text-align: center;
           font-size: 14px;
