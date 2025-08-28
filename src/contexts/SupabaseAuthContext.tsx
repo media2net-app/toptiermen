@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useReducer, useCallback } from 'r
 import { createClient } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
 
-// 2.0.1: Simplified Supabase client with proper error handling
+// 2.0.1: Enhanced Supabase client with extended session support
 const getSupabaseClient = () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -19,7 +19,10 @@ const getSupabaseClient = () => {
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: true,
-      storageKey: 'toptiermen-v2-auth'
+      storageKey: 'toptiermen-v2-auth',
+      // Extended session configuration
+      flowType: 'pkce',
+      debug: false
     },
     global: {
       headers: {
@@ -31,13 +34,15 @@ const getSupabaseClient = () => {
 
 const supabase = getSupabaseClient();
 
-// 2.0.1: Unified session management constants
+// 2.0.1: Extended session management constants for better UX
 const SESSION_CONFIG = {
-  CHECK_INTERVAL: 5 * 60 * 1000,        // 5 minutes (was 60)
-  WARNING_TIME: 2 * 60 * 1000,          // 2 minutes before expiry (was 30)
-  AUTH_TIMEOUT: 2000,                   // 2 seconds (was 5)
+  CHECK_INTERVAL: 10 * 60 * 1000,       // 10 minutes (increased for better UX)
+  WARNING_TIME: 5 * 60 * 1000,          // 5 minutes before expiry (increased)
+  AUTH_TIMEOUT: 3000,                   // 3 seconds (increased for stability)
   MAX_RETRIES: 2,                       // Reduced retries (was 3)
-  RETRY_DELAY: 1000                     // 1 second base delay
+  RETRY_DELAY: 1000,                    // 1 second base delay
+  REMEMBER_ME_DURATION: 30 * 24 * 60 * 60 * 1000, // 30 days for remember me
+  SESSION_DURATION: 7 * 24 * 60 * 60 * 1000       // 7 days for normal sessions
 };
 
 // Helper function to normalize role
@@ -103,7 +108,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   error: string | null;
-  signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  signIn: (email: string, password: string, rememberMe?: boolean) => Promise<{ success: boolean; error?: string }>;
   signUp: (email: string, password: string, fullName: string) => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<void>;
   logoutAndRedirect: (redirectUrl?: string) => Promise<void>;
@@ -156,7 +161,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     dispatch({ type: 'SET_ERROR', payload: null });
   }, []);
 
-  // 2.0.1: Simplified session refresh
+  // 2.0.1: Enhanced session refresh with remember me support
   const refreshSession = useCallback(async (): Promise<boolean> => {
     try {
       const result = await retryWithBackoff(async () => {
@@ -178,11 +183,47 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     }
   }, []);
 
-  // 2.0.1: Simplified session health check
+  // 2.0.1: Check if remember me is enabled
+  const isRememberMeEnabled = useCallback(() => {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem('toptiermen-remember-me') === 'true' || 
+           sessionStorage.getItem('toptiermen-remember-me') === 'true';
+  }, []);
+
+  // 2.0.1: Extended session management for remember me
+  const extendSession = useCallback(async () => {
+    try {
+      if (!isRememberMeEnabled()) {
+        console.log('2.0.1: Remember me not enabled, skipping session extension');
+        return;
+      }
+
+      const { data: { session }, error } = await supabase.auth.getSession();
+      
+      if (error || !session) {
+        console.log('2.0.1: No active session to extend');
+        return;
+      }
+
+      // Check if session needs extension
+      const expiresAt = session.expires_at;
+      if (expiresAt && typeof expiresAt === 'number') {
+        const now = Math.floor(Date.now() / 1000);
+        const timeUntilExpiry = expiresAt - now;
+        
+        // Extend session if it expires within 24 hours
+        if (timeUntilExpiry < 24 * 60 * 60) {
+          console.log('🔄 2.0.1: Extending session for remember me user');
+          await refreshSession();
+        }
+      }
+    } catch (error) {
+      console.error('2.0.1: Error extending session:', error);
+    }
+  }, [isRememberMeEnabled, refreshSession]);
+
+  // 2.0.1: Enhanced session health check with remember me support
   const checkSessionHealth = useCallback(async () => {
-    // 2.0.1: Completely disabled to prevent infinite loops
-    return;
-    
     try {
       const { data: { session }, error } = await supabase.auth.getSession();
       
@@ -196,24 +237,33 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         return;
       }
 
-      // Check if session is about to expire - DISABLED
-      // const expiresAt = session?.expires_at;
-      // if (expiresAt && typeof expiresAt === 'number') {
-      //   const now = Math.floor(Date.now() / 1000);
-      //   const timeUntilExpiry = expiresAt - now;
+      // Check if session is about to expire
+      const expiresAt = session?.expires_at;
+      if (expiresAt && typeof expiresAt === 'number') {
+        const now = Math.floor(Date.now() / 1000);
+        const timeUntilExpiry = expiresAt - now;
         
-      //   if (timeUntilExpiry < SESSION_CONFIG.WARNING_TIME && timeUntilExpiry > 0) {
-      //     console.log('⚠️ 2.0.1: Session expiring soon, attempting refresh...');
-      //     const refreshed = await refreshSession();
-      //     if (!refreshed) {
-      //       console.warn('2.0.1: Failed to refresh session, user may need to re-authenticate');
-      //     }
-      //   }
-      // }
+        // For remember me users, extend session earlier
+        if (isRememberMeEnabled()) {
+          if (timeUntilExpiry < 24 * 60 * 60) { // 24 hours
+            console.log('🔄 2.0.1: Remember me user - extending session');
+            await extendSession();
+          }
+        } else {
+          // For regular users, refresh when close to expiry
+          if (timeUntilExpiry < SESSION_CONFIG.WARNING_TIME && timeUntilExpiry > 0) {
+            console.log('⚠️ 2.0.1: Session expiring soon, attempting refresh...');
+            const refreshed = await refreshSession();
+            if (!refreshed) {
+              console.warn('2.0.1: Failed to refresh session, user may need to re-authenticate');
+            }
+          }
+        }
+      }
     } catch (error) {
       console.error('2.0.1: Session health check failed:', error);
     }
-  }, [refreshSession]);
+  }, [refreshSession, isRememberMeEnabled, extendSession]);
 
   // 2.0.1: Simplified user profile fetching without retry
   const fetchUserProfile = useCallback(async (userId: string): Promise<User | null> => {
@@ -305,12 +355,12 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
 
     getInitialSession();
 
-    // 2.0.1: Disabled session health check for now
-    // const interval = setInterval(() => {
-    //   if (isMounted) {
-    //     checkSessionHealth();
-    //   }
-    // }, SESSION_CONFIG.CHECK_INTERVAL);
+    // 2.0.1: Re-enabled session health check with remember me support
+    const interval = setInterval(() => {
+      if (isMounted) {
+        checkSessionHealth();
+      }
+    }, SESSION_CONFIG.CHECK_INTERVAL);
 
     // 2.0.1: Simplified auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -355,16 +405,25 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     return () => {
       isMounted = false;
       subscription.unsubscribe();
-      // clearInterval(interval); // Disabled for now
+      clearInterval(interval);
     };
   }, [fetchUserProfile, checkSessionHealth]);
 
-  // 2.0.1: Simplified sign in without retry mechanism
-  const signIn = useCallback(async (email: string, password: string) => {
+  // 2.0.1: Enhanced sign in with remember me functionality
+  const signIn = useCallback(async (email: string, password: string, rememberMe: boolean = false) => {
     try {
-      console.log('2.0.1: Starting sign in process...');
+      console.log('2.0.1: Starting sign in process...', { rememberMe });
       dispatch({ type: 'SET_LOADING', payload: true });
       dispatch({ type: 'SET_ERROR', payload: null });
+
+      // Store remember me preference
+      if (rememberMe) {
+        localStorage.setItem('toptiermen-remember-me', 'true');
+        sessionStorage.setItem('toptiermen-remember-me', 'true');
+      } else {
+        localStorage.removeItem('toptiermen-remember-me');
+        sessionStorage.removeItem('toptiermen-remember-me');
+      }
 
       // Direct sign in without retry
       const { data, error } = await supabase.auth.signInWithPassword({

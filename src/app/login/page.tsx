@@ -14,6 +14,7 @@ function LoginPageContent() {
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
@@ -94,7 +95,7 @@ function LoginPageContent() {
     setError("");
     
     try {
-      const result = await signIn(email, password);
+      const result = await signIn(email, password, rememberMe);
 
       if (!result.success) {
         console.error('2.0.1: Sign in error:', result.error);
@@ -246,7 +247,20 @@ function LoginPageContent() {
               disabled={isLoading}
             />
           </div>
-          <div className="text-center">
+          
+          {/* Remember Me Checkbox */}
+          <div className="flex items-center justify-between">
+            <label className="flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={e => setRememberMe(e.target.checked)}
+                className="w-4 h-4 text-[#B6C948] bg-[#181F17] border-[#3A4D23] rounded focus:ring-[#B6C948] focus:ring-2"
+                disabled={isLoading}
+              />
+              <span className="ml-2 text-[#B6C948] text-sm font-figtree">Ingelogd blijven</span>
+            </label>
+            
             <button
               type="button"
               onClick={() => setShowForgotPassword(true)}
