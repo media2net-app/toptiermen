@@ -394,6 +394,23 @@ export default function PlanDetail({ slug, onBack }: PlanDetailProps) {
           </p>
         </div>
 
+        {/* Plan Goal Badge */}
+        <div className="bg-[#232D1A] rounded-xl p-6 mb-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-[#B6C948] mb-2">Plan Doel</h2>
+              <p className="text-[#8BAE5A]">Dit plan is specifiek ontworpen voor jouw fitness doel</p>
+            </div>
+            <div className="text-right">
+              <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-gradient-to-r from-red-600 to-orange-500 text-white">
+                {slug === 'carnivoor_droogtrainen' && '🎯 Droogtrainen'}
+                {slug === 'carnivoor_onderhoud' && '⚖️ Onderhoud'}
+                {slug === 'carnivoor_spiermassa' && '💪 Spiermassa'}
+              </span>
+            </div>
+          </div>
+        </div>
+
         {/* Macro Overview */}
         <div className="bg-[#232D1A] rounded-xl p-6 mb-8">
           <h2 className="text-xl font-semibold text-[#B6C948] mb-4">Dagelijkse Voedingswaarden</h2>

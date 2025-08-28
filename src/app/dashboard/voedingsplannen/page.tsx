@@ -209,6 +209,15 @@ export default function VoedingsplannenPage() {
                 </div>
               </div>
 
+              {/* Plan Goal Badge */}
+              <div className="mb-3">
+                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-red-600 to-orange-500 text-white">
+                  {plan.goal === 'droogtrainen' && '🎯 Droogtrainen'}
+                  {plan.goal === 'onderhoud' && '⚖️ Onderhoud'}
+                  {plan.goal === 'spiermassa' && '💪 Spiermassa'}
+                </span>
+              </div>
+
               {/* Plan Description */}
               <p className="text-[#B6C948] text-sm mb-4 line-clamp-3">
                 {plan.description}

@@ -240,7 +240,13 @@ SELECT
     target_protein,
     target_carbs,
     target_fat,
-    goal
+    goal,
+    CASE 
+        WHEN goal = 'droogtrainen' THEN '🎯 Droogtrainen - Vetverbranding'
+        WHEN goal = 'onderhoud' THEN '⚖️ Onderhoud - Behoud'
+        WHEN goal = 'spiermassa' THEN '💪 Spiermassa - Opbouw'
+        ELSE goal
+    END as goal_display
 FROM nutrition_plans 
 WHERE category = 'carnivoor'
 ORDER BY plan_id;
