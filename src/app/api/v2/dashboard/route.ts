@@ -17,30 +17,30 @@ import {
 } from '@/lib/v2-api-utils';
 
 
-// V2.0: Dashboard API Route with enhanced monitoring and error handling
+// 2.0.1: Dashboard API Route with enhanced monitoring and error handling
 export const GET = withApiHandler(async (request: NextRequest) => {
   const clientIp = request.headers.get('x-forwarded-for') || 'unknown';
   
-  // V2.0: Rate limiting
+  // 2.0.1: Rate limiting
   if (!checkRateLimit(`dashboard_get_${clientIp}`, 50, 60000)) {
     return createErrorResponse('Rate limit exceeded', 429);
   }
 
-  // V2.0: Authentication
+  // 2.0.1: Authentication
   const auth = await authenticateRequest(request);
   if (auth.error) {
     return createErrorResponse(auth.error, 401);
   }
 
-  // V2.0: Log request
+  // 2.0.1: Log request
   logApiRequest(request, 'GET_DASHBOARD', auth.user?.id);
 
   try {
-    // V2.0: Get dashboard data with error recovery
+    // 2.0.1: Get dashboard data with error recovery
     const { data: dashboardData, error: dbError } = await safeDbOperation(async () => {
       const { supabase } = auth;
       
-      // V2.0: Parallel data fetching for better performance
+      // 2.0.1: Parallel data fetching for better performance
       const [
         userProfile,
         notifications,
@@ -91,14 +91,14 @@ export const GET = withApiHandler(async (request: NextRequest) => {
       return createErrorResponse(dbError, 500);
     }
 
-    // V2.0: Success response with cache headers
+    // 2.0.1: Success response with cache headers
     const response = createSuccessResponse({
       dashboard: dashboardData,
       version: '2.0',
       timestamp: new Date().toISOString()
     });
 
-    // V2.0: Set cache headers for dashboard data
+    // 2.0.1: Set cache headers for dashboard data
     Object.entries(cacheHeaders).forEach(([key, value]) => {
       response.headers.set(key, value);
     });
@@ -106,39 +106,39 @@ export const GET = withApiHandler(async (request: NextRequest) => {
     return response;
 
   } catch (error) {
-    console.error('V2.0: Dashboard API error:', error);
+    console.error('2.0.1: Dashboard API error:', error);
     return createErrorResponse('Failed to load dashboard data', 500);
   }
 });
 
-// V2.0: Update dashboard preferences
+// 2.0.1: Update dashboard preferences
 export const PUT = withApiHandler(async (request: NextRequest) => {
   const clientIp = request.headers.get('x-forwarded-for') || 'unknown';
   
-  // V2.0: Rate limiting for updates
+  // 2.0.1: Rate limiting for updates
   if (!checkRateLimit(`dashboard_put_${clientIp}`, 20, 60000)) {
     return createErrorResponse('Rate limit exceeded', 429);
   }
 
-  // V2.0: Authentication
+  // 2.0.1: Authentication
   const auth = await authenticateRequest(request);
   if (auth.error) {
     return createErrorResponse(auth.error, 401);
   }
 
-  // V2.0: Log request
+  // 2.0.1: Log request
   logApiRequest(request, 'PUT_DASHBOARD', auth.user?.id);
 
   try {
     const body = await request.json();
     const { preferences, settings } = body;
 
-    // V2.0: Validate required fields
+    // 2.0.1: Validate required fields
     if (!preferences && !settings) {
       return createErrorResponse('No data provided for update', 400);
     }
 
-    // V2.0: Update dashboard preferences with error recovery
+    // 2.0.1: Update dashboard preferences with error recovery
     const updatedData = await safeDbOperation(async () => {
       const supabase = getSupabaseClient();
       
@@ -169,7 +169,7 @@ export const PUT = withApiHandler(async (request: NextRequest) => {
       return data;
     }, 'Failed to update dashboard preferences');
 
-    // V2.0: Success response with no-cache headers for updates
+    // 2.0.1: Success response with no-cache headers for updates
     const response = createSuccessResponse({
       user: updatedData,
       message: 'Dashboard preferences updated successfully',
@@ -177,7 +177,7 @@ export const PUT = withApiHandler(async (request: NextRequest) => {
       timestamp: new Date().toISOString()
     });
 
-    // V2.0: Set no-cache headers for updated data
+    // 2.0.1: Set no-cache headers for updated data
     Object.entries(noCacheHeaders).forEach(([key, value]) => {
       response.headers.set(key, value);
     });
@@ -185,21 +185,21 @@ export const PUT = withApiHandler(async (request: NextRequest) => {
     return response;
 
   } catch (error) {
-    console.error('V2.0: Dashboard update error:', error);
+    console.error('2.0.1: Dashboard update error:', error);
     return createErrorResponse('Failed to update dashboard preferences', 500);
   }
 });
 
-// V2.0: Delete dashboard data (admin only)
+// 2.0.1: Delete dashboard data (admin only)
 export const DELETE = withApiHandler(async (request: NextRequest) => {
   const clientIp = request.headers.get('x-forwarded-for') || 'unknown';
   
-  // V2.0: Rate limiting for deletions
+  // 2.0.1: Rate limiting for deletions
   if (!checkRateLimit(`dashboard_delete_${clientIp}`, 5, 60000)) {
     return createErrorResponse('Rate limit exceeded', 429);
   }
 
-  // V2.0: Authentication and admin authorization
+  // 2.0.1: Authentication and admin authorization
   const auth = await authenticateRequest(request);
   if (auth.error) {
     return createErrorResponse(auth.error, 401);
@@ -210,7 +210,7 @@ export const DELETE = withApiHandler(async (request: NextRequest) => {
     return createErrorResponse(adminCheck.error, 403);
   }
 
-  // V2.0: Log request
+  // 2.0.1: Log request
   logApiRequest(request, 'DELETE_DASHBOARD', auth.user?.id);
 
   try {
@@ -221,11 +221,11 @@ export const DELETE = withApiHandler(async (request: NextRequest) => {
       return createErrorResponse('User ID is required for deletion', 400);
     }
 
-    // V2.0: Delete user dashboard data with error recovery
+    // 2.0.1: Delete user dashboard data with error recovery
     const deletionResult = await safeDbOperation(async () => {
       const supabase = getSupabaseClient();
       
-      // V2.0: Cascade delete related data
+      // 2.0.1: Cascade delete related data
       const deletions = await Promise.all([
         // Delete notifications
         supabase
@@ -263,7 +263,7 @@ export const DELETE = withApiHandler(async (request: NextRequest) => {
       };
     }, 'Failed to delete dashboard data');
 
-    // V2.0: Success response
+    // 2.0.1: Success response
     const response = createSuccessResponse({
       result: deletionResult,
       message: 'Dashboard data deleted successfully',
@@ -271,7 +271,7 @@ export const DELETE = withApiHandler(async (request: NextRequest) => {
       timestamp: new Date().toISOString()
     });
 
-    // V2.0: Set no-cache headers
+    // 2.0.1: Set no-cache headers
     Object.entries(noCacheHeaders).forEach(([key, value]) => {
       response.headers.set(key, value);
     });
@@ -279,7 +279,7 @@ export const DELETE = withApiHandler(async (request: NextRequest) => {
     return response;
 
   } catch (error) {
-    console.error('V2.0: Dashboard deletion error:', error);
+    console.error('2.0.1: Dashboard deletion error:', error);
     return createErrorResponse('Failed to delete dashboard data', 500);
   }
 });

@@ -1,8 +1,8 @@
-// V2.0: Intelligent Cache Strategy System
+// 2.0.1: Intelligent Cache Strategy System
 import React from 'react';
 import { useV2State } from '@/contexts/V2StateContext';
 
-// V2.0: Cache strategy types
+// 2.0.1: Cache strategy types
 export type CacheStrategy = 
   | 'memory'      // In-memory cache (fastest, lost on refresh)
   | 'session'     // Session storage (persists during session)
@@ -10,7 +10,7 @@ export type CacheStrategy =
   | 'network'     // Network cache (HTTP cache headers)
   | 'hybrid';     // Combination of strategies
 
-// V2.0: Cache entry interface
+// 2.0.1: Cache entry interface
 export interface CacheEntry<T = any> {
   data: T;
   timestamp: number;
@@ -21,7 +21,7 @@ export interface CacheEntry<T = any> {
   lastModified?: string;
 }
 
-// V2.0: Cache configuration
+// 2.0.1: Cache configuration
 export interface CacheConfig {
   strategy: CacheStrategy;
   ttl: number; // Time to live in milliseconds
@@ -30,7 +30,7 @@ export interface CacheConfig {
   staleWhileRevalidate?: number; // Time to serve stale data while revalidating
 }
 
-// V2.0: Default cache configurations
+// 2.0.1: Default cache configurations
 export const CACHE_CONFIGS: Record<string, CacheConfig> = {
   // User data - short TTL, memory strategy
   'user-profile': {
@@ -90,7 +90,7 @@ export const CACHE_CONFIGS: Record<string, CacheConfig> = {
   },
 };
 
-// V2.0: Cache manager class
+// 2.0.1: Cache manager class
 export class V2CacheManager {
   private memoryCache = new Map<string, CacheEntry>();
   private configs: Record<string, CacheConfig>;
@@ -103,11 +103,11 @@ export class V2CacheManager {
     }
   }
   
-  // V2.0: Set cache entry
+  // 2.0.1: Set cache entry
   async set<T>(key: string, data: T, configKey?: string): Promise<void> {
     const config = configKey ? this.configs[configKey] : this.configs['api-response'];
     if (!config) {
-      throw new Error(`V2.0: No cache config found for key: ${configKey}`);
+      throw new Error(`2.0.1: No cache config found for key: ${configKey}`);
     }
     
     const entry: CacheEntry<T> = {
@@ -142,7 +142,7 @@ export class V2CacheManager {
     }
   }
   
-  // V2.0: Get cache entry
+  // 2.0.1: Get cache entry
   async get<T>(key: string, configKey?: string): Promise<T | null> {
     const config = configKey ? this.configs[configKey] : this.configs['api-response'];
     if (!config) {
@@ -192,7 +192,7 @@ export class V2CacheManager {
     return entry.data;
   }
   
-  // V2.0: Delete cache entry
+  // 2.0.1: Delete cache entry
   async delete(key: string, configKey?: string): Promise<void> {
     const config = configKey ? this.configs[configKey] : this.configs['api-response'];
     if (!config) {
@@ -226,7 +226,7 @@ export class V2CacheManager {
     }
   }
   
-  // V2.0: Clear all cache
+  // 2.0.1: Clear all cache
   async clear(): Promise<void> {
     this.memoryCache.clear();
     
@@ -241,7 +241,7 @@ export class V2CacheManager {
     localKeys.forEach(key => localStorage.removeItem(key));
   }
   
-  // V2.0: Clear cache by pattern
+  // 2.0.1: Clear cache by pattern
   async clearPattern(pattern: string): Promise<void> {
     // Clear memory cache
     const memoryKeys = Array.from(this.memoryCache.keys()).filter(key => key.includes(pattern));
@@ -262,7 +262,7 @@ export class V2CacheManager {
     localKeys.forEach(key => localStorage.removeItem(key));
   }
   
-  // V2.0: Get cache statistics
+  // 2.0.1: Get cache statistics
   getStats(): {
     memorySize: number;
     sessionSize: number;
@@ -289,7 +289,7 @@ export class V2CacheManager {
     };
   }
   
-  // V2.0: Private methods
+  // 2.0.1: Private methods
   private setMemoryCache<T>(key: string, entry: CacheEntry<T>, maxSize?: number): void {
     if (maxSize && this.memoryCache.size >= maxSize) {
       // Remove oldest entry
@@ -304,7 +304,7 @@ export class V2CacheManager {
     try {
       sessionStorage.setItem(`v2-cache-${key}`, JSON.stringify(entry));
     } catch (error) {
-      console.error('V2.0: Error setting session cache:', error);
+      console.error('2.0.1: Error setting session cache:', error);
     }
   }
   
@@ -313,7 +313,7 @@ export class V2CacheManager {
     try {
       localStorage.setItem(`v2-cache-${key}`, JSON.stringify(entry));
     } catch (error) {
-      console.error('V2.0: Error setting local cache:', error);
+      console.error('2.0.1: Error setting local cache:', error);
     }
   }
   
@@ -327,7 +327,7 @@ export class V2CacheManager {
       const item = sessionStorage.getItem(`v2-cache-${key}`);
       return item ? JSON.parse(item) : null;
     } catch (error) {
-      console.error('V2.0: Error getting session cache:', error);
+      console.error('2.0.1: Error getting session cache:', error);
       return null;
     }
   }
@@ -338,7 +338,7 @@ export class V2CacheManager {
       const item = localStorage.getItem(`v2-cache-${key}`);
       return item ? JSON.parse(item) : null;
     } catch (error) {
-      console.error('V2.0: Error getting local cache:', error);
+      console.error('2.0.1: Error getting local cache:', error);
       return null;
     }
   }
@@ -385,21 +385,21 @@ export class V2CacheManager {
   }
 }
 
-// V2.0: Global cache manager instance
+// 2.0.1: Global cache manager instance
 export const v2CacheManager = new V2CacheManager();
 
-// V2.0: React hook for cache management
+// 2.0.1: React hook for cache management
 export function useV2Cache() {
   const { setCacheData, getCacheData, clearCacheData, clearAllCache } = useV2State();
   
   return {
-    // V2.0: Set cache with strategy
+    // 2.0.1: Set cache with strategy
     set: async <T>(key: string, data: T, configKey?: string): Promise<void> => {
       await v2CacheManager.set(key, data, configKey);
       setCacheData(key, data, configKey ? CACHE_CONFIGS[configKey]?.ttl : undefined);
     },
     
-    // V2.0: Get cache with strategy
+    // 2.0.1: Get cache with strategy
     get: async <T>(key: string, configKey?: string): Promise<T | null> => {
       const cacheData = await v2CacheManager.get<T>(key, configKey);
       if (cacheData) {
@@ -408,31 +408,31 @@ export function useV2Cache() {
       return cacheData;
     },
     
-    // V2.0: Delete cache
+    // 2.0.1: Delete cache
     delete: async (key: string, configKey?: string): Promise<void> => {
       await v2CacheManager.delete(key, configKey);
       clearCacheData(key);
     },
     
-    // V2.0: Clear all cache
+    // 2.0.1: Clear all cache
     clear: async (): Promise<void> => {
       await v2CacheManager.clear();
       clearAllCache();
     },
     
-    // V2.0: Clear cache by pattern
+    // 2.0.1: Clear cache by pattern
     clearPattern: async (pattern: string): Promise<void> => {
       await v2CacheManager.clearPattern(pattern);
     },
     
-    // V2.0: Get cache statistics
+    // 2.0.1: Get cache statistics
     getStats: (): ReturnType<typeof v2CacheManager.getStats> => {
       return v2CacheManager.getStats();
     },
   };
 }
 
-// V2.0: Cache-aware data fetching hook
+// 2.0.1: Cache-aware data fetching hook
 export function useV2CachedData<T>(
   key: string,
   fetcher: () => Promise<T>,

@@ -1,4 +1,4 @@
-// V2.0: Monitoring Hook Export
+// 2.0.1: Monitoring Hook Export
 export { 
   useV2Monitoring, 
   useV2PerformanceMonitoring 

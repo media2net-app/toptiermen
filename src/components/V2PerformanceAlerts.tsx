@@ -1,6 +1,6 @@
 'use client';
 
-// V2.0: Performance Alerts Component - COMPLETELY DISABLED to prevent crashes
+// 2.0.1: Performance Alerts Component - COMPLETELY DISABLED to prevent crashes
 export default function V2PerformanceAlerts() {
   // Return null to completely disable the component
   return null;

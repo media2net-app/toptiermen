@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useReducer, useEffect, useCallback, ReactNode } from 'react';
 
-// V2.0: Centralized State Management Types
+// 2.0.1: Centralized State Management Types
 interface V2AppState {
   // User state
   user: {
@@ -63,7 +63,7 @@ interface V2AppState {
   };
 }
 
-// V2.0: Action types
+// 2.0.1: Action types
 type V2Action =
   // User actions
   | { type: 'SET_USER_PROFILE'; payload: any }
@@ -96,7 +96,7 @@ type V2Action =
   | { type: 'RECORD_API_CALL_TIME'; payload: { endpoint: string; time: number } }
   | { type: 'CLEAR_PERFORMANCE_DATA' };
 
-// V2.0: Initial state
+// 2.0.1: Initial state
 const initialState: V2AppState = {
   user: {
     profile: null,
@@ -124,7 +124,7 @@ const initialState: V2AppState = {
   },
 };
 
-// V2.0: State reducer
+// 2.0.1: State reducer
 function v2StateReducer(state: V2AppState, action: V2Action): V2AppState {
   switch (action.type) {
     // User actions
@@ -363,7 +363,7 @@ function v2StateReducer(state: V2AppState, action: V2Action): V2AppState {
   }
 }
 
-// V2.0: Context interface
+// 2.0.1: Context interface
 interface V2StateContextType {
   state: V2AppState;
   dispatch: React.Dispatch<V2Action>;
@@ -407,10 +407,10 @@ interface V2StateContextType {
   getError: (key?: string) => string | null;
 }
 
-// V2.0: Create context
+// 2.0.1: Create context
 const V2StateContext = createContext<V2StateContextType | undefined>(undefined);
 
-// V2.0: Provider component
+// 2.0.1: Provider component
 interface V2StateProviderProps {
   children: ReactNode;
 }
@@ -418,7 +418,7 @@ interface V2StateProviderProps {
 export function V2StateProvider({ children }: V2StateProviderProps) {
   const [state, dispatch] = useReducer(v2StateReducer, initialState);
   
-  // V2.0: Load persisted state on mount
+  // 2.0.1: Load persisted state on mount
   useEffect(() => {
     try {
       const persisted = localStorage.getItem('v2-app-state');
@@ -435,11 +435,11 @@ export function V2StateProvider({ children }: V2StateProviderProps) {
         }
       }
     } catch (error) {
-      console.error('V2.0: Error loading persisted state:', error);
+      console.error('2.0.1: Error loading persisted state:', error);
     }
   }, []);
   
-  // V2.0: Persist state changes
+  // 2.0.1: Persist state changes
   useEffect(() => {
     try {
       const toPersist = {
@@ -450,11 +450,11 @@ export function V2StateProvider({ children }: V2StateProviderProps) {
       };
       localStorage.setItem('v2-app-state', JSON.stringify(toPersist));
     } catch (error) {
-      console.error('V2.0: Error persisting state:', error);
+      console.error('2.0.1: Error persisting state:', error);
     }
   }, [state.ui.theme, state.ui.sidebarCollapsed]);
   
-  // V2.0: Clean up expired cache entries - DISABLED to prevent infinite loops
+  // 2.0.1: Clean up expired cache entries - DISABLED to prevent infinite loops
   // useEffect(() => {
   //   const interval = setInterval(() => {
   //     const now = Date.now();
@@ -467,7 +467,7 @@ export function V2StateProvider({ children }: V2StateProviderProps) {
   //   return () => clearInterval(interval);
   // }, [state.data.cache]);
   
-  // V2.0: Action creators
+  // 2.0.1: Action creators
   const setUserProfile = useCallback((profile: any) => {
     dispatch({ type: 'SET_USER_PROFILE', payload: profile });
   }, [dispatch]);
@@ -560,7 +560,7 @@ export function V2StateProvider({ children }: V2StateProviderProps) {
     dispatch({ type: 'CLEAR_PERFORMANCE_DATA' });
   }, [dispatch]);
   
-  // V2.0: Utility functions - COMPLETELY DISABLED to prevent infinite loops
+  // 2.0.1: Utility functions - COMPLETELY DISABLED to prevent infinite loops
   const isLoading = useCallback((key: string) => {
     return false; // Always return false to prevent loops
   }, []);
@@ -611,7 +611,7 @@ export function V2StateProvider({ children }: V2StateProviderProps) {
   );
 }
 
-// V2.0: Hook to use the context
+// 2.0.1: Hook to use the context
 export function useV2State() {
   const context = useContext(V2StateContext);
   if (context === undefined) {

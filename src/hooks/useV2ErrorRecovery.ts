@@ -1,4 +1,4 @@
-// V2.0: Error Recovery Hook Export
+// 2.0.1: Error Recovery Hook Export
 export { 
   useV2ErrorRecovery, 
   useV2ErrorBoundary, 

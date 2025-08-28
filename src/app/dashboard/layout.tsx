@@ -16,7 +16,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const router = useRouter();
   const [userProfile, setUserProfile] = useState<any>(null);
 
-  // V2.0: All V2.0 functionality DISABLED to prevent crashes
+  // 2.0.1: All 2.0.1 functionality DISABLED to prevent crashes
   // const {
   //   addNotification, 
   //   setLoadingState,
@@ -28,7 +28,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   // const { handleError } = useV2ErrorRecovery();
   // const { set, clear } = useV2Cache();
 
-  // V2.0: Track page load performance - DISABLED
+  // 2.0.1: Track page load performance - DISABLED
   // useEffect(() => {
   //   const startTime = performance.now();
     
@@ -39,7 +39,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   //   };
   // }, [trackPageLoad, recordPageLoadTime]);
 
-  // V2.0: Enhanced authentication check with error recovery - DISABLED
+  // 2.0.1: Enhanced authentication check with error recovery - DISABLED
   useEffect(() => {
     if (loading) {
       // setLoadingState('auth-check', true);
@@ -67,11 +67,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       return;
     }
 
-    // V2.0: Track successful session - DISABLED
+    // 2.0.1: Track successful session - DISABLED
     // trackSessionStart(user.id);
     // trackFeatureUsage('dashboard-access', user.id);
     
-    // V2.0: Cache user profile - DISABLED
+    // 2.0.1: Cache user profile - DISABLED
     // handleError(
     //   async () => {
     //     setUserProfile(user);
@@ -93,10 +93,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   }, [user, loading, router, setUserProfile]);
 
-  // V2.0: Handle authentication errors - DISABLED
+  // 2.0.1: Handle authentication errors - DISABLED
   // useEffect(() => {
   //   const handleAuthError = (error: any) => {
-  //     console.error('V2.0: Auth error in dashboard:', error);
+  //     console.error('2.0.1: Auth error in dashboard:', error);
   //     setGlobalError('Er is een probleem met je authenticatie. Probeer opnieuw in te loggen.');
       
   //     handleError(
@@ -119,7 +119,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   //   };
   // }, [setGlobalError, handleError, signOut, router]);
 
-  // V2.0: Cleanup on unmount - DISABLED
+  // 2.0.1: Cleanup on unmount - DISABLED
   // useEffect(() => {
   //   return () => {
   //     clear();

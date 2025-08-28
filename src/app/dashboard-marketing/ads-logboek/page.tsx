@@ -96,20 +96,20 @@ STATUS: 🚀 LIVE - API Advertentie maken systeem is nu beschikbaar voor snelle 
     {
       id: '17',
       date: '2025-08-26',
-      title: '🔧 V2.0 Platform Stabiliteit Verbeterd',
+      title: '🔧 2.0.1 Platform Stabiliteit Verbeterd',
       category: 'fix',
       impact: 'positive',
-      content: `V2.0 PLATFORM STABILITEIT: Dashboard freezing en crashing issues opgelost.
+      content: `2.0.1 PLATFORM STABILITEIT: Dashboard freezing en crashing issues opgelost.
 
 PROBLEEM:
 ❌ Dashboard freezing en unresponsive UI
 ❌ "Maximum update depth exceeded" errors
 ❌ 63+ console errors en infinite loops
-❌ V2.0 monitoring system veroorzaakte crashes
+❌ 2.0.1 monitoring system veroorzaakte crashes
 ❌ Service Worker navigatie problemen
 
 OPLOSSING:
-✅ V2.0 monitoring system volledig uitgeschakeld
+✅ 2.0.1 monitoring system volledig uitgeschakeld
 ✅ V2StateContext infinite loops opgelost
 ✅ Service Worker registratie uitgeschakeld
 ✅ Push notification system uitgeschakeld
@@ -143,7 +143,7 @@ RESULTAAT:
 ✅ Sidebar navigatie functioneel
 
 STATUS: ✅ STABILITEIT HERSTELD - Platform is nu stabiel en bruikbaar`,
-      tags: ['fix', 'v2.0', 'stability', 'dashboard', 'monitoring', 'performance'],
+              tags: ['fix', '2.0.1', 'stability', 'dashboard', 'monitoring', 'performance'],
       data: {
         spend: 0,
         clicks: 0,
@@ -1175,7 +1175,7 @@ RESULTAAT:
               <ul className="space-y-2 text-gray-300">
                 <li>✅ API Advertentie maken systeem geïmplementeerd</li>
                 <li>✅ Facebook Analytics data gecorrigeerd</li>
-                <li>✅ V2.0 platform stabiliteit hersteld</li>
+                <li>✅ 2.0.1 platform stabiliteit hersteld</li>
                 <li>✅ Facebook Lead Formulier API geanalyseerd</li>
                 <li>✅ 4 nieuwe log entries toegevoegd</li>
               </ul>
@@ -1209,7 +1209,7 @@ RESULTAAT:
             <ul className="space-y-2 text-gray-300">
               <li>• Gebruik API Advertentie maken systeem voor nieuwe campagnes</li>
               <li>• Koppel bestaand lead formulier aan LEADS campagnes</li>
-              <li>• Monitor V2.0 platform stabiliteit</li>
+              <li>• Monitor 2.0.1 platform stabiliteit</li>
               <li>• Test nieuwe API scripts met echte campagnes</li>
               <li>• Implementeer lead tracking voor conversie monitoring</li>
             </ul>

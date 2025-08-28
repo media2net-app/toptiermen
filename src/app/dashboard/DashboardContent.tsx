@@ -28,7 +28,7 @@ import V2MonitoringDashboard from '@/components/V2MonitoringDashboard';
 import V2PerformanceAlerts from '@/components/V2PerformanceAlerts';
 import CacheIssueHelper from '@/components/CacheIssueHelper';
 
-// V2.0: Dashboard menu configuration
+// 2.0.1: Dashboard menu configuration
 const menu = [
   { label: 'Dashboard', icon: HomeIcon, href: '/dashboard' },
   { label: 'Onboarding', icon: CheckCircleIcon, href: '/dashboard/onboarding' },
@@ -53,7 +53,7 @@ const menu = [
   { label: 'Mentorship & Coaching', icon: ChatBubbleLeftRightIcon, href: '/dashboard/mentorship-en-coaching' },
 ];
 
-// V2.0: Sidebar component with enhanced monitoring
+// 2.0.1: Sidebar component with enhanced monitoring
 const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: { 
   collapsed: boolean, 
   onLinkClick?: () => void, 
@@ -80,7 +80,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
       onLinkClick();
     }
     
-    // V2.0: Track navigation (disabled in development to prevent errors)
+    // 2.0.1: Track navigation (disabled in development to prevent errors)
     // if (process.env.NODE_ENV === 'production') {
     //   trackFeatureUsage(`nav-${label.toLowerCase().replace(/\s+/g, '-')}`, user?.id);
     // }
@@ -198,7 +198,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
   );
 };
 
-// V2.0: Main dashboard content component
+// 2.0.1: Main dashboard content component
 function DashboardContentInner({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -217,7 +217,7 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
   const [showForcedOnboarding, setShowForcedOnboarding] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // V2.0: Cache busting for existing users
+  // 2.0.1: Cache busting for existing users
   useEffect(() => {
     // Check if this is an existing user with potential cache issues
     const lastVersion = localStorage.getItem('ttm-app-version');
@@ -269,7 +269,7 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // V2.0: Enhanced onboarding status check with error recovery - DISABLED
+  // 2.0.1: Enhanced onboarding status check with error recovery - DISABLED
   const checkOnboardingStatus = useCallback(async () => {
     if (!user) return;
 
@@ -334,7 +334,7 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
     }
   }, [onboardingStatus]);
 
-  // V2.0: Enhanced logout with error recovery - DISABLED
+  // 2.0.1: Enhanced logout with error recovery - DISABLED
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true);
@@ -672,20 +672,20 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
 
         <PWAInstallPrompt />
         
-        {/* V2.0: Monitoring Dashboard */}
+        {/* 2.0.1: Monitoring Dashboard */}
         <V2MonitoringDashboard />
         
-        {/* V2.0: Performance Alerts */}
+        {/* 2.0.1: Performance Alerts */}
         <V2PerformanceAlerts />
         
-        {/* V2.0: Cache issue helper */}
+        {/* 2.0.1: Cache issue helper */}
         <CacheIssueHelper />
       </div>
     </>
   );
 }
 
-// V2.0: Wrapper component with providers
+// 2.0.1: Wrapper component with providers
 export default function DashboardContent({ children }: { children: React.ReactNode }) {
   return (
     <OnboardingProvider>

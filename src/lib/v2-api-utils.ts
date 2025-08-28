@@ -1,8 +1,8 @@
-// V2.0: Standardized API Utilities
+// 2.0.1: Standardized API Utilities
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-// V2.0: Supabase client for API routes
+// 2.0.1: Supabase client for API routes
 export const getSupabaseClient = () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -15,7 +15,7 @@ export const getSupabaseClient = () => {
   });
 };
 
-// V2.0: Standard API response types
+// 2.0.1: Standard API response types
 export interface V2ApiResponse<T = any> {
   success: boolean;
   data?: T;
@@ -25,7 +25,7 @@ export interface V2ApiResponse<T = any> {
   version: string;
 }
 
-// V2.0: Standard error response
+// 2.0.1: Standard error response
 export function createErrorResponse(error: string, status: number = 400): NextResponse {
   const response: V2ApiResponse = {
     success: false,
@@ -37,7 +37,7 @@ export function createErrorResponse(error: string, status: number = 400): NextRe
   return NextResponse.json(response, { status });
 }
 
-// V2.0: Standard success response
+// 2.0.1: Standard success response
 export function createSuccessResponse<T>(data: T, message?: string): NextResponse {
   const response: V2ApiResponse<T> = {
     success: true,
@@ -50,7 +50,7 @@ export function createSuccessResponse<T>(data: T, message?: string): NextRespons
   return NextResponse.json(response);
 }
 
-// V2.0: Authentication middleware
+// 2.0.1: Authentication middleware
 export async function authenticateRequest(request: NextRequest): Promise<{
   user: any;
   supabase: any;
@@ -80,12 +80,12 @@ export async function authenticateRequest(request: NextRequest): Promise<{
 
     return { user, supabase };
   } catch (error) {
-    console.error('V2.0: Authentication error:', error);
+    console.error('2.0.1: Authentication error:', error);
     return { user: null, supabase: null, error: 'Authentication failed' };
   }
 }
 
-// V2.0: Admin authorization check
+// 2.0.1: Admin authorization check
 export async function requireAdmin(request: NextRequest): Promise<{
   user: any;
   supabase: any;
@@ -115,7 +115,7 @@ export async function requireAdmin(request: NextRequest): Promise<{
   return auth;
 }
 
-// V2.0: Rate limiting utility
+// 2.0.1: Rate limiting utility
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 
 export function checkRateLimit(identifier: string, limit: number = 100, windowMs: number = 60000): boolean {
@@ -135,7 +135,7 @@ export function checkRateLimit(identifier: string, limit: number = 100, windowMs
   return true;
 }
 
-// V2.0: Input validation utility
+// 2.0.1: Input validation utility
 export function validateRequiredFields(data: any, fields: string[]): string | null {
   for (const field of fields) {
     if (!data[field] || (typeof data[field] === 'string' && data[field].trim() === '')) {
@@ -145,7 +145,7 @@ export function validateRequiredFields(data: any, fields: string[]): string | nu
   return null;
 }
 
-// V2.0: Database operation wrapper with error handling
+// 2.0.1: Database operation wrapper with error handling
 export async function safeDbOperation<T>(
   operation: () => Promise<T>,
   errorMessage: string = 'Database operation failed'
@@ -154,14 +154,14 @@ export async function safeDbOperation<T>(
     const data = await operation();
     return { data, error: null };
   } catch (error) {
-    console.error('V2.0: Database operation error:', error);
+    console.error('2.0.1: Database operation error:', error);
     return { data: null, error: errorMessage };
   }
 }
 
-// V2.0: Logging utility
+// 2.0.1: Logging utility
 export function logApiRequest(request: NextRequest, operation: string, userId?: string) {
-  console.log(`V2.0: API Request - ${operation}`, {
+  console.log(`2.0.1: API Request - ${operation}`, {
     method: request.method,
     url: request.url,
     userId,
@@ -171,7 +171,7 @@ export function logApiRequest(request: NextRequest, operation: string, userId?: 
   });
 }
 
-// V2.0: CORS headers
+// 2.0.1: CORS headers
 export const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
@@ -179,7 +179,7 @@ export const corsHeaders = {
   'Access-Control-Max-Age': '86400',
 };
 
-// V2.0: Standard API handler wrapper
+// 2.0.1: Standard API handler wrapper
 export function withApiHandler(handler: (req: NextRequest) => Promise<NextResponse>) {
   return async (request: NextRequest) => {
     // Handle CORS preflight
@@ -196,13 +196,13 @@ export function withApiHandler(handler: (req: NextRequest) => Promise<NextRespon
       
       return response;
     } catch (error) {
-      console.error('V2.0: API Handler error:', error);
+      console.error('2.0.1: API Handler error:', error);
       return createErrorResponse('Internal server error', 500);
     }
   };
 }
 
-// V2.0: Pagination utility
+// 2.0.1: Pagination utility
 export function getPaginationParams(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const page = parseInt(searchParams.get('page') || '1');
@@ -212,7 +212,7 @@ export function getPaginationParams(request: NextRequest) {
   return { page, limit, offset };
 }
 
-// V2.0: Search utility
+// 2.0.1: Search utility
 export function buildSearchQuery(baseQuery: any, searchTerm: string, searchFields: string[]) {
   if (!searchTerm) return baseQuery;
   
@@ -223,21 +223,21 @@ export function buildSearchQuery(baseQuery: any, searchTerm: string, searchField
   return baseQuery.or(searchConditions.join(','));
 }
 
-// V2.0: Sorting utility
+// 2.0.1: Sorting utility
 export function buildSortQuery(baseQuery: any, sortBy: string, sortOrder: 'asc' | 'desc' = 'asc') {
   if (!sortBy) return baseQuery;
   
   return baseQuery.order(sortBy, { ascending: sortOrder === 'asc' });
 }
 
-// V2.0: Cache control headers
+// 2.0.1: Cache control headers
 export const cacheHeaders = {
   'Cache-Control': 'public, max-age=30, s-maxage=60',
   'X-Cache-Version': '2.0',
   'X-TTM-Version': '2.0'
 };
 
-// V2.0: No-cache headers for sensitive data
+// 2.0.1: No-cache headers for sensitive data
 export const noCacheHeaders = {
   'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
   'Pragma': 'no-cache',
