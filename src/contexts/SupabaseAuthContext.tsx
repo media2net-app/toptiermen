@@ -215,26 +215,29 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     }
   }, [refreshSession]);
 
-  // 2.0.1: Simplified user profile fetching
+  // 2.0.1: Simplified user profile fetching without retry
   const fetchUserProfile = useCallback(async (userId: string): Promise<User | null> => {
     try {
-      const result = await retryWithBackoff(async () => {
-        const { data: profile, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', userId)
-          .single();
-        
-        if (error) throw error;
-        return profile;
-      });
+      console.log('2.0.1: Fetching user profile for:', userId);
       
-      if (result) {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+      
+      if (error) {
+        console.error('2.0.1: Profile fetch error:', error);
+        throw error;
+      }
+      
+      if (profile) {
+        console.log('2.0.1: Profile fetched successfully');
         return {
-          id: result.id,
-          email: result.email,
-          full_name: result.full_name,
-          role: normalizeRole(result.role)
+          id: profile.id,
+          email: profile.email,
+          full_name: profile.full_name,
+          role: normalizeRole(profile.role)
         };
       }
       return null;
@@ -253,14 +256,14 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         if (!isMounted) return;
         dispatch({ type: 'SET_LOADING', payload: true });
         
-        // 2.0.1: Immediate timeout for development
+        // 2.0.1: Shorter timeout to prevent hanging
         const timeoutId = setTimeout(() => {
           if (!isMounted) return;
           console.log('✅ 2.0.1: Auth timeout - allowing login form to show');
           dispatch({ type: 'SET_LOADING', payload: false });
           dispatch({ type: 'SET_INITIALIZED', payload: true });
           dispatch({ type: 'SET_USER', payload: null });
-        }, 1000); // 1 second timeout
+        }, 500); // 500ms timeout to prevent hanging
 
         const { data: { session }, error } = await supabase.auth.getSession();
         
@@ -316,11 +319,14 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         console.log('🔄 2.0.1: Auth state changed:', event, session?.user?.email);
         
         if (event === 'SIGNED_IN' && session?.user) {
+          console.log('2.0.1: User signed in, fetching profile...');
           const profile = await fetchUserProfile(session.user.id);
           
           if (profile) {
+            console.log('2.0.1: Profile fetched in auth state change');
             dispatch({ type: 'SET_USER', payload: profile });
           } else {
+            console.log('2.0.1: Using fallback user data in auth state change');
             // Fallback to auth user if profile cannot be fetched
             dispatch({ type: 'SET_USER', payload: {
               id: session.user.id,
@@ -330,12 +336,19 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
             }});
           }
         } else if (event === 'SIGNED_OUT') {
+          console.log('2.0.1: User signed out');
           dispatch({ type: 'RESET_STATE' });
         } else if (event === 'TOKEN_REFRESHED') {
           console.log('✅ 2.0.1: Token refreshed successfully');
+        } else if (event === 'INITIAL_SESSION') {
+          console.log('2.0.1: Initial session loaded');
+          // Don't set loading to false here, let the main flow handle it
         }
         
-        dispatch({ type: 'SET_LOADING', payload: false });
+        // Only set loading to false for actual auth changes, not initial session
+        if (event !== 'INITIAL_SESSION') {
+          dispatch({ type: 'SET_LOADING', payload: false });
+        }
       }
     );
 
@@ -346,32 +359,57 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     };
   }, [fetchUserProfile, checkSessionHealth]);
 
-  // 2.0.1: Simplified sign in
+  // 2.0.1: Simplified sign in without retry mechanism
   const signIn = useCallback(async (email: string, password: string) => {
     try {
+      console.log('2.0.1: Starting sign in process...');
       dispatch({ type: 'SET_LOADING', payload: true });
       dispatch({ type: 'SET_ERROR', payload: null });
 
-      const result = await retryWithBackoff(async () => {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (error) throw error;
-        return data;
+      // Direct sign in without retry
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
 
-      if (result.user) {
-        const profile = await fetchUserProfile(result.user.id);
+      if (error) {
+        console.error('2.0.1: Sign in error:', error);
+        dispatch({ type: 'SET_ERROR', payload: error.message });
+        return { success: false, error: error.message };
+      }
+
+      if (data.user) {
+        console.log('2.0.1: User signed in successfully, fetching profile...');
         
-        if (profile) {
-          dispatch({ type: 'SET_USER', payload: profile });
-        } else {
-          // Fallback to auth user if profile not readable
+        // Fetch profile with timeout
+        const profilePromise = fetchUserProfile(data.user.id);
+        const timeoutPromise = new Promise<User | null>((_, reject) => 
+          setTimeout(() => reject(new Error('Profile fetch timeout')), 5000)
+        );
+        
+        try {
+          const profile = await Promise.race([profilePromise, timeoutPromise]);
+          
+          if (profile) {
+            console.log('2.0.1: Profile fetched successfully');
+            dispatch({ type: 'SET_USER', payload: profile });
+          } else {
+            console.log('2.0.1: Using fallback user data');
+            // Fallback to auth user if profile not readable
+            dispatch({ type: 'SET_USER', payload: {
+              id: data.user.id,
+              email: data.user.email!,
+              full_name: (data.user.user_metadata as any)?.full_name,
+              role: 'USER'
+            }});
+          }
+        } catch (profileError) {
+          console.error('2.0.1: Profile fetch failed, using fallback:', profileError);
+          // Fallback to auth user if profile fetch fails
           dispatch({ type: 'SET_USER', payload: {
-            id: result.user.id,
-            email: result.user.email!,
-            full_name: (result.user.user_metadata as any)?.full_name,
+            id: data.user.id,
+            email: data.user.email!,
+            full_name: (data.user.user_metadata as any)?.full_name,
             role: 'USER'
           }});
         }
