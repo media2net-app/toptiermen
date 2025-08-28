@@ -22,7 +22,13 @@ export interface MacroResult {
 
 export const CalorieMacroContext = createContext<MacroResult | null>(null);
 export function useCalorieMacro() {
-  return useContext(CalorieMacroContext);
+  const result = useContext(CalorieMacroContext);
+  return {
+    totalCalories: result?.calories || 0,
+    totalProtein: result?.protein || 0,
+    totalCarbs: result?.carbs || 0,
+    totalFat: result?.fat || 0
+  };
 }
 
 export default function CalorieMacroCalculator({ children }: { children?: React.ReactNode }) {
