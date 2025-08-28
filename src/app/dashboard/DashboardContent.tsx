@@ -26,6 +26,7 @@ import TestUserFeedback from '@/components/TestUserFeedback';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 import V2MonitoringDashboard from '@/components/V2MonitoringDashboard';
 import V2PerformanceAlerts from '@/components/V2PerformanceAlerts';
+import CacheIssueHelper from '@/components/CacheIssueHelper';
 
 // V2.0: Dashboard menu configuration
 const menu = [
@@ -216,6 +217,58 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
   const [showForcedOnboarding, setShowForcedOnboarding] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  // V2.0: Cache busting for existing users
+  useEffect(() => {
+    // Check if this is an existing user with potential cache issues
+    const lastVersion = localStorage.getItem('ttm-app-version');
+    const currentVersion = '2.0.1'; // Increment this when making breaking changes
+    
+    if (lastVersion && lastVersion !== currentVersion) {
+      console.log('🔄 Cache busting: Version mismatch detected');
+      console.log(`   - Previous version: ${lastVersion}`);
+      console.log(`   - Current version: ${currentVersion}`);
+      
+      // Clear all cached data
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      // Force a hard refresh to clear all caches
+      window.location.reload();
+      return;
+    }
+    
+    // Store current version
+    localStorage.setItem('ttm-app-version', currentVersion);
+    
+    // Additional cache busting for specific issues
+    const cacheBustKey = localStorage.getItem('ttm-cache-bust');
+    if (!cacheBustKey) {
+      console.log('🔄 Cache busting: First time user or cache reset');
+      localStorage.setItem('ttm-cache-bust', Date.now().toString());
+      
+      // Clear any potentially problematic cached data
+      if (typeof window !== 'undefined') {
+        // Clear service worker cache if exists
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(registrations => {
+            registrations.forEach(registration => {
+              registration.unregister();
+            });
+          });
+        }
+        
+        // Clear fetch cache
+        if ('caches' in window) {
+          caches.keys().then(names => {
+            names.forEach(name => {
+              caches.delete(name);
+            });
+          });
+        }
+      }
+    }
+  }, []);
+
   // V2.0: Enhanced onboarding status check with error recovery - DISABLED
   const checkOnboardingStatus = useCallback(async () => {
     if (!user) return;
@@ -223,7 +276,14 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
     try {
       // setLoadingState('onboarding-check', true);
       
-      const response = await fetch(`/api/onboarding?userId=${user.id}`);
+      const response = await fetch(`/api/onboarding?userId=${user.id}&t=${Date.now()}`, {
+        cache: 'no-cache', // Prevent caching of onboarding status
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      });
       const data = await response.json();
 
       if (response.ok) {
@@ -617,6 +677,9 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
         
         {/* V2.0: Performance Alerts */}
         <V2PerformanceAlerts />
+        
+        {/* V2.0: Cache issue helper */}
+        <CacheIssueHelper />
       </div>
     </>
   );
