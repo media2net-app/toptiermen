@@ -8,27 +8,93 @@ interface PlanDetailProps {
 }
 
 const planData: Record<string, { title: string; meals: { time: string; name: string; main: string; options: string[]; ingredients: { name: string; amount: number; unit: string }[] }[] }> = {
-  balanced: {
-    title: "Gebalanceerd Dieet",
+  carnivoor_animal_based: {
+    title: "Carnivoor / Animal Based",
     meals: [
       { 
         time: "08:00", 
         name: "Ontbijt", 
-        main: "Havermout met fruit en noten", 
-        options: ["Griekse yoghurt met muesli", "Volkoren boterham met pindakaas"],
+        main: "Orgaanvlees & Eieren Ontbijt", 
+        options: ["Gebakken eieren met spek", "Ribeye steak"],
+        ingredients: [
+          { name: "Runderlever", amount: 100, unit: "g" },
+          { name: "Runderhart", amount: 50, unit: "g" },
+          { name: "Eieren", amount: 3, unit: "stuks" },
+          { name: "Roomboter", amount: 25, unit: "g" },
+          { name: "Honing", amount: 10, unit: "g" },
+          { name: "Zout", amount: 5, unit: "g" }
+        ]
+      },
+      { 
+        time: "10:30", 
+        name: "Snack 1", 
+        main: "Gerookte Zalm met Boter", 
+        options: ["Droge worst", "Goudse kaas"],
+        ingredients: [
+          { name: "Gerookte Zalm", amount: 120, unit: "g" },
+          { name: "Roomboter", amount: 15, unit: "g" },
+          { name: "Zout", amount: 2, unit: "g" }
+        ]
+      },
+      { 
+        time: "13:00", 
+        name: "Lunch", 
+        main: "Ribeye Steak met Boter", 
+        options: ["T-Bone Steak", "Entrecote"],
+        ingredients: [
+          { name: "Ribeye Steak", amount: 250, unit: "g" },
+          { name: "Roomboter", amount: 30, unit: "g" },
+          { name: "Talow", amount: 10, unit: "g" },
+          { name: "Zout", amount: 5, unit: "g" }
+        ]
+      },
+      { 
+        time: "15:30", 
+        name: "Snack 2", 
+        main: "Eieren met Spek", 
+        options: ["Griekse yoghurt", "Droge worst"],
+        ingredients: [
+          { name: "Eieren", amount: 2, unit: "stuks" },
+          { name: "Spek", amount: 40, unit: "g" },
+          { name: "Roomboter", amount: 10, unit: "g" }
+        ]
+      },
+      { 
+        time: "19:00", 
+        name: "Diner", 
+        main: "Lamskotelet met Orgaanvlees", 
+        options: ["Gans met eendenborst", "T-Bone Steak"],
+        ingredients: [
+          { name: "Lamskotelet", amount: 200, unit: "g" },
+          { name: "Kippenlever", amount: 50, unit: "g" },
+          { name: "Roomboter", amount: 20, unit: "g" },
+          { name: "Honing", amount: 15, unit: "g" },
+          { name: "Zout", amount: 5, unit: "g" }
+        ]
+      },
+    ],
+  },
+  voedingsplan_op_maat: {
+    title: "Voedingsplan op Maat",
+    meals: [
+      { 
+        time: "08:00", 
+        name: "Ontbijt", 
+        main: "Flexibel Ontbijt", 
+        options: ["Havermout met fruit", "Eieren met toast", "Griekse yoghurt"],
         ingredients: [
           { name: "Havermout", amount: 60, unit: "g" },
-          { name: "Melk (halfvolle)", amount: 250, unit: "ml" },
-          { name: "Blauwe bessen", amount: 50, unit: "g" },
-          { name: "Walnoten", amount: 15, unit: "g" },
+          { name: "Melk", amount: 250, unit: "ml" },
+          { name: "Bessen", amount: 50, unit: "g" },
+          { name: "Noten", amount: 15, unit: "g" },
           { name: "Honing", amount: 10, unit: "g" }
         ]
       },
       { 
         time: "12:30", 
         name: "Lunch", 
-        main: "Kipfilet met rijst en broccoli", 
-        options: ["Kabeljauw met aardappel en sperziebonen", "Tofu met quinoa en groenten"],
+        main: "Flexibele Lunch", 
+        options: ["Kipfilet met rijst", "Zalm met groenten", "Vegetarische optie"],
         ingredients: [
           { name: "Kipfilet", amount: 150, unit: "g" },
           { name: "Bruine rijst", amount: 100, unit: "g" },
@@ -39,18 +105,19 @@ const planData: Record<string, { title: string; meals: { time: string; name: str
       { 
         time: "15:30", 
         name: "Snack", 
-        main: "Griekse yoghurt met honing", 
-        options: ["Handje noten", "Banaan"],
+        main: "Flexibele Snack", 
+        options: ["Fruit met noten", "Griekse yoghurt", "Proteïne reep"],
         ingredients: [
           { name: "Griekse yoghurt", amount: 150, unit: "g" },
+          { name: "Bessen", amount: 50, unit: "g" },
           { name: "Honing", amount: 15, unit: "g" }
         ]
       },
       { 
         time: "18:30", 
         name: "Diner", 
-        main: "Zalm met zoete aardappel en spinazie", 
-        options: ["Rundergehakt met volkoren pasta en tomatensaus", "Vegetarische curry met kikkererwten"],
+        main: "Flexibel Diner", 
+        options: ["Zalm met zoete aardappel", "Rundergehakt met pasta", "Vegetarische curry"],
         ingredients: [
           { name: "Zalm", amount: 150, unit: "g" },
           { name: "Zoete aardappel", amount: 200, unit: "g" },
@@ -60,214 +127,66 @@ const planData: Record<string, { title: string; meals: { time: string; name: str
       },
     ],
   },
-  lowcarb: {
-    title: "Koolhydraatarm",
+  keto_optimalisatie: {
+    title: "Keto Optimalisatie",
     meals: [
       { 
         time: "08:00", 
         name: "Ontbijt", 
-        main: "Omelet met spinazie en kaas", 
-        options: ["Griekse yoghurt met noten", "Kokoskwark met chiazaad"],
+        main: "Keto Omelet met Avocado", 
+        options: ["Bulletproof koffie", "Griekse yoghurt met noten"],
         ingredients: [
           { name: "Eieren", amount: 3, unit: "stuks" },
-          { name: "Spinazie", amount: 50, unit: "g" },
-          { name: "Feta", amount: 30, unit: "g" },
-          { name: "Olijfolie", amount: 10, unit: "ml" }
+          { name: "Avocado", amount: 1, unit: "stuks" },
+          { name: "Roomboter", amount: 20, unit: "g" },
+          { name: "Spek", amount: 30, unit: "g" },
+          { name: "Kaas", amount: 30, unit: "g" }
         ]
       },
       { 
         time: "12:30", 
         name: "Lunch", 
-        main: "Kipsalade met avocado", 
-        options: ["Tonijnsalade", "Geitenkaas met walnoten"],
-        ingredients: [
-          { name: "Kipfilet", amount: 150, unit: "g" },
-          { name: "Avocado", amount: 1, unit: "stuks" },
-          { name: "Tomaat", amount: 1, unit: "stuks" },
-          { name: "Komkommer", amount: 50, unit: "g" },
-          { name: "Olijfolie", amount: 15, unit: "ml" }
-        ]
-      },
-      { 
-        time: "15:30", 
-        name: "Snack", 
-        main: "Komkommer met hummus", 
-        options: ["Handje amandelen", "Olijven"],
-        ingredients: [
-          { name: "Komkommer", amount: 100, unit: "g" },
-          { name: "Hummus", amount: 30, unit: "g" }
-        ]
-      },
-      { 
-        time: "18:30", 
-        name: "Diner", 
-        main: "Zalm met courgette en pesto", 
-        options: ["Biefstuk met bloemkoolpuree", "Kipfilet met broccoli"],
+        main: "Keto Salade met Vette Vis", 
+        options: ["Kipfilet met avocado", "Biefstuk met boter"],
         ingredients: [
           { name: "Zalm", amount: 150, unit: "g" },
-          { name: "Courgette", amount: 200, unit: "g" },
-          { name: "Pesto", amount: 20, unit: "g" },
+          { name: "Avocado", amount: 1, unit: "stuks" },
+          { name: "Olijven", amount: 50, unit: "g" },
+          { name: "Olijfolie", amount: 15, unit: "ml" },
+          { name: "Noten", amount: 20, unit: "g" }
+        ]
+      },
+      { 
+        time: "15:30", 
+        name: "Snack", 
+        main: "Keto Snack", 
+        options: ["Handje noten", "Kaasblokjes", "Olijven"],
+        ingredients: [
+          { name: "Amandelen", amount: 30, unit: "g" },
+          { name: "Goudse kaas", amount: 40, unit: "g" },
+          { name: "Olijven", amount: 30, unit: "g" }
+        ]
+      },
+      { 
+        time: "18:30", 
+        name: "Diner", 
+        main: "Keto Biefstuk met Groenten", 
+        options: ["Kipfilet met broccoli", "Zalm met spinazie"],
+        ingredients: [
+          { name: "Biefstuk", amount: 200, unit: "g" },
+          { name: "Broccoli", amount: 150, unit: "g" },
+          { name: "Roomboter", amount: 25, unit: "g" },
           { name: "Olijfolie", amount: 10, unit: "ml" }
         ]
       },
     ],
   },
-  vegetarian: {
-    title: "Vegetarisch",
-    meals: [
-      { 
-        time: "08:00", 
-        name: "Ontbijt", 
-        main: "Sojayoghurt met muesli en bessen", 
-        options: ["Havermout met amandelmelk", "Smoothiebowl"],
-        ingredients: [
-          { name: "Sojayoghurt", amount: 200, unit: "g" },
-          { name: "Muesli", amount: 50, unit: "g" },
-          { name: "Bessen", amount: 50, unit: "g" },
-          { name: "Honing", amount: 10, unit: "g" }
-        ]
-      },
-      { 
-        time: "12:30", 
-        name: "Lunch", 
-        main: "Falafel wrap met groenten", 
-        options: ["Linzensalade", "Gegrilde groente met hummus"],
-        ingredients: [
-          { name: "Falafel", amount: 100, unit: "g" },
-          { name: "Volkoren wrap", amount: 1, unit: "stuks" },
-          { name: "Tomaat", amount: 1, unit: "stuks" },
-          { name: "Komkommer", amount: 50, unit: "g" },
-          { name: "Hummus", amount: 30, unit: "g" }
-        ]
-      },
-      { 
-        time: "15:30", 
-        name: "Snack", 
-        main: "Fruit met noten", 
-        options: ["Rijstwafels met pindakaas", "Snackgroenten"],
-        ingredients: [
-          { name: "Appel", amount: 1, unit: "stuks" },
-          { name: "Amandelen", amount: 20, unit: "g" }
-        ]
-      },
-      { 
-        time: "18:30", 
-        name: "Diner", 
-        main: "Vegetarische curry met kikkererwten", 
-        options: ["Tofu roerbak", "Vegetarische lasagne"],
-        ingredients: [
-          { name: "Kikkererwten", amount: 200, unit: "g" },
-          { name: "Bruine rijst", amount: 100, unit: "g" },
-          { name: "Curry kruiden", amount: 10, unit: "g" },
-          { name: "Kokosmelk", amount: 200, unit: "ml" },
-          { name: "Groenten mix", amount: 150, unit: "g" }
-        ]
-      },
-    ],
-  },
-  highprotein: {
-    title: "High Protein",
-    meals: [
-      { 
-        time: "08:00", 
-        name: "Ontbijt", 
-        main: "Eiwitpannenkoeken met kwark", 
-        options: ["Proteïne shake met banaan", "Omelet met kipfilet"],
-        ingredients: [
-          { name: "Eiwitpoeder", amount: 30, unit: "g" },
-          { name: "Kwark", amount: 150, unit: "g" },
-          { name: "Eieren", amount: 2, unit: "stuks" },
-          { name: "Havermout", amount: 40, unit: "g" },
-          { name: "Banaan", amount: 1, unit: "stuks" }
-        ]
-      },
-      { 
-        time: "12:30", 
-        name: "Lunch", 
-        main: "Kipfilet met zoete aardappel en broccoli", 
-        options: ["Tonijn met quinoa", "Rundergehakt met bonen"],
-        ingredients: [
-          { name: "Kipfilet", amount: 200, unit: "g" },
-          { name: "Zoete aardappel", amount: 150, unit: "g" },
-          { name: "Broccoli", amount: 100, unit: "g" },
-          { name: "Olijfolie", amount: 15, unit: "ml" }
-        ]
-      },
-      { 
-        time: "15:30", 
-        name: "Snack", 
-        main: "Cottage cheese met ananas", 
-        options: ["Proteïne reep", "Griekse yoghurt"],
-        ingredients: [
-          { name: "Cottage cheese", amount: 200, unit: "g" },
-          { name: "Ananas", amount: 100, unit: "g" }
-        ]
-      },
-      { 
-        time: "18:30", 
-        name: "Diner", 
-        main: "Zalmfilet met linzen en spinazie", 
-        options: ["Kipfilet met volkoren pasta", "Tofu met edamame"],
-        ingredients: [
-          { name: "Zalmfilet", amount: 200, unit: "g" },
-          { name: "Linzen", amount: 100, unit: "g" },
-          { name: "Spinazie", amount: 100, unit: "g" },
-          { name: "Olijfolie", amount: 15, unit: "ml" }
-        ]
-      },
-    ],
-  },
-  carnivore: {
-    title: "Carnivoor Dieet",
-    meals: [
-      { 
-        time: "08:00", 
-        name: "Ontbijt", 
-        main: "Ribeye steak", 
-        options: ["Gebakken eieren met spek", "Rundergehakt"],
-        ingredients: [
-          { name: "Ribeye steak", amount: 250, unit: "g" },
-          { name: "Roomboter", amount: 20, unit: "g" },
-          { name: "Zout", amount: 5, unit: "g" }
-        ]
-      },
-      { 
-        time: "12:30", 
-        name: "Lunch", 
-        main: "Kipfilet met roomboter", 
-        options: ["Zalmfilet", "Hamburger zonder brood"],
-        ingredients: [
-          { name: "Kipfilet", amount: 200, unit: "g" },
-          { name: "Roomboter", amount: 30, unit: "g" },
-          { name: "Zout", amount: 5, unit: "g" }
-        ]
-      },
-      { 
-        time: "15:30", 
-        name: "Snack", 
-        main: "Gerookte zalm", 
-        options: ["Droge worst", "Kipreepjes"],
-        ingredients: [
-          { name: "Gerookte zalm", amount: 100, unit: "g" }
-        ]
-      },
-      { 
-        time: "18:30", 
-        name: "Diner", 
-        main: "Lamskotelet", 
-        options: ["Entrecote", "Gebakken lever"],
-        ingredients: [
-          { name: "Lamskotelet", amount: 250, unit: "g" },
-          { name: "Roomboter", amount: 25, unit: "g" },
-          { name: "Zout", amount: 5, unit: "g" }
-        ]
-      },
-    ],
-  },
+
+
 };
 
 export default function PlanDetail({ slug, onBack }: PlanDetailProps) {
-  const plan = planData[slug] || planData["balanced"];
+  const plan = planData[slug] || planData["carnivoor_animal_based"];
   const macro = useCalorieMacro();
   return (
     <div className="mt-8 bg-[#232D1A] rounded-2xl p-6 shadow-xl border border-[#8BAE5A]/40 max-w-2xl mx-auto">
