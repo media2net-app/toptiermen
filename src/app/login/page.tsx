@@ -202,7 +202,10 @@ function LoginPageContent() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative px-4 py-6" style={{ backgroundColor: '#181F17' }}>
+    <div 
+      className={`min-h-screen flex items-center justify-center relative px-4 py-6 ${isLoading ? 'login-loading' : ''}`} 
+      style={{ backgroundColor: '#181F17' }}
+    >
       <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
       
       <div className="w-full max-w-md p-6 sm:p-8 rounded-3xl shadow-2xl bg-[#232D1A]/95 border border-[#3A4D23] backdrop-blur-lg relative z-10">
@@ -223,7 +226,7 @@ function LoginPageContent() {
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#181F17] text-[#B6C948] placeholder-[#B6C948] focus:outline-none focus:ring-2 focus:ring-[#B6C948] transition shadow-inner border border-[#3A4D23] font-figtree"
+              className={`w-full pl-10 pr-4 py-3 rounded-xl bg-[#181F17] text-[#B6C948] placeholder-[#B6C948] focus:outline-none focus:ring-2 focus:ring-[#B6C948] transition shadow-inner border border-[#3A4D23] font-figtree ${isLoading ? 'cursor-wait opacity-75' : 'cursor-text'}`}
               placeholder="E-mailadres"
               autoComplete="email"
               required
@@ -236,7 +239,7 @@ function LoginPageContent() {
               type="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#181F17] text-[#B6C948] placeholder-[#B6C948] focus:outline-none focus:ring-2 focus:ring-[#B6C948] transition shadow-inner border border-[#3A4D23] font-figtree"
+              className={`w-full pl-10 pr-4 py-3 rounded-xl bg-[#181F17] text-[#B6C948] placeholder-[#B6C948] focus:outline-none focus:ring-2 focus:ring-[#B6C948] transition shadow-inner border border-[#3A4D23] font-figtree ${isLoading ? 'cursor-wait opacity-75' : 'cursor-text'}`}
               placeholder="Wachtwoord"
               autoComplete="current-password"
               required
@@ -247,7 +250,8 @@ function LoginPageContent() {
             <button
               type="button"
               onClick={() => setShowForgotPassword(true)}
-              className="text-[#8BAE5A] hover:text-[#B6C948] text-sm underline font-figtree"
+              className={`text-[#8BAE5A] hover:text-[#B6C948] text-sm underline font-figtree ${isLoading ? 'cursor-wait opacity-75' : 'cursor-pointer'}`}
+              disabled={isLoading}
             >
               Wachtwoord vergeten?
             </button>
@@ -260,7 +264,13 @@ function LoginPageContent() {
           <button
             type="submit"
             disabled={isLoading || !email || !password}
-            className={`w-full py-3 sm:py-4 rounded-xl bg-gradient-to-r from-[#B6C948] to-[#3A4D23] text-[#181F17] font-semibold text-base sm:text-lg shadow-lg hover:from-[#B6C948] hover:to-[#B6C948] transition-all duration-200 border border-[#B6C948] font-figtree ${(isLoading || !email || !password) ? 'opacity-50 cursor-not-allowed' : ''}`}
+            className={`w-full py-3 sm:py-4 rounded-xl bg-gradient-to-r from-[#B6C948] to-[#3A4D23] text-[#181F17] font-semibold text-base sm:text-lg shadow-lg hover:from-[#B6C948] hover:to-[#B6C948] transition-all duration-200 border border-[#B6C948] font-figtree ${
+              isLoading 
+                ? 'opacity-75 cursor-wait' 
+                : (!email || !password) 
+                  ? 'opacity-50 cursor-not-allowed' 
+                  : 'cursor-pointer'
+            }`}
           >
             {isLoading ? (
               <div className="flex items-center justify-center">
@@ -290,7 +300,8 @@ function LoginPageContent() {
                   console.log('🔄 Manual cache busting triggered from login page');
                   bustCache();
                 }}
-                className="w-full px-3 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded text-sm font-medium hover:bg-[#4A5D33] transition-colors"
+                className={`w-full px-3 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded text-sm font-medium hover:bg-[#4A5D33] transition-colors ${isLoading ? 'cursor-wait opacity-75' : 'cursor-pointer'}`}
+                disabled={isLoading}
               >
                 🔄 Cache Verversen & Herladen
               </button>
