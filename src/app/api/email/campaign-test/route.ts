@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { EmailService } from '@/lib/email-service';
+import { emailService } from '@/lib/email-service';
 import { EmailTrackingService } from '@/lib/email-tracking-service';
 
 export async function POST(request: NextRequest) {
@@ -58,25 +58,19 @@ export async function POST(request: NextRequest) {
     };
 
     // Send email with tracking
-    const emailResult = await EmailService.sendEmail({
+    const emailResult = await emailService.sendEmail({
       to: to,
-      subject: subject,
-      template_type: template_type,
-      variables: emailVariables,
-      tracking_options: tracking_options ? {
-        campaign_id: tracking_options.campaign_id,
-        template_type: template_type
-      } : undefined
+      template: template_type,
+      variables: emailVariables
     });
 
-    if (emailResult.success) {
+    if (emailResult) {
       console.log('✅ Test email sent successfully');
       
       return NextResponse.json({
         success: true,
         message: 'Test email sent successfully',
         tracking_id: tracking_id,
-        email_id: emailResult.email_id,
         test_data: {
           width_styling: '100% applied',
           green_background: 'No white backgrounds',
@@ -85,11 +79,10 @@ export async function POST(request: NextRequest) {
         }
       });
     } else {
-      console.error('❌ Failed to send test email:', emailResult.error);
+      console.error('❌ Failed to send test email');
       return NextResponse.json(
         { 
-          error: 'Failed to send test email',
-          details: emailResult.error 
+          error: 'Failed to send test email'
         },
         { status: 500 }
       );

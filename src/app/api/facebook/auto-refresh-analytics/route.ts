@@ -104,7 +104,7 @@ export async function GET(request: NextRequest) {
     if (!FACEBOOK_ACCESS_TOKEN || !FACEBOOK_AD_ACCOUNT_ID) {
       console.log('⚠️ Missing Facebook credentials, using manual data fallback');
       
-      const analyticsData = {
+      const analyticsData: any = {
         summary: {},
         campaigns: [],
         dateRange: '2025-08-01 to today',
@@ -113,7 +113,7 @@ export async function GET(request: NextRequest) {
       };
 
       // Use manual data for campaigns
-      analyticsData.campaigns = Object.entries(CURRENT_MANUAL_DATA).map(([name, data]) => ({
+      analyticsData.campaigns = Object.entries(CURRENT_MANUAL_DATA).map(([name, data]: [string, any]) => ({
         id: `manual_${name.replace(/\s+/g, '_').toLowerCase()}`,
         name: name,
         status: 'ACTIVE',

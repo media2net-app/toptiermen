@@ -147,7 +147,7 @@ export async function GET(request: NextRequest) {
     };
 
     // Use manual data for campaigns
-    analyticsData.campaigns = Object.entries(CURRENT_MANUAL_DATA).map(([name, data]) => ({
+    (analyticsData as any).campaigns = Object.entries(CURRENT_MANUAL_DATA).map(([name, data]: [string, any]) => ({
       id: `manual_${name.replace(/\s+/g, '_').toLowerCase()}`,
       name: name,
       status: 'ACTIVE',

@@ -15,24 +15,48 @@ export function CacheBuster({ version = '2.0.1', forceRefresh = false }: CacheBu
       
       // Clear only non-auth storage to preserve login state
       try {
-        // Preserve auth-related keys
-        const authKeys = ['toptiermen-v2-auth', 'toptiermen-remember-me'];
-        const preservedData: Record<string, string> = {};
-        
-        // Save auth data before clearing
-        authKeys.forEach(key => {
-          const value = localStorage.getItem(key);
-          if (value) preservedData[key] = value;
-        });
-        
-        // Clear all storage
-        localStorage.clear();
-        sessionStorage.clear();
-        
-        // Restore auth data
-        Object.entries(preservedData).forEach(([key, value]) => {
-          localStorage.setItem(key, value);
-        });
+        const clearStorageExceptAuth = () => {
+          try {
+            // Get auth tokens before clearing
+            const authToken = localStorage.getItem('toptiermen-v2-auth');
+            const rememberMe = localStorage.getItem('toptiermen-remember-me');
+            const supabaseAuth = localStorage.getItem('sb-toptiermen-auth-token');
+            
+            // Clear all storage
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            // Clear service worker cache if available
+            if ('serviceWorker' in navigator) {
+              navigator.serviceWorker.getRegistrations().then(registrations => {
+                registrations.forEach(registration => registration.unregister());
+              });
+            }
+            
+            // Clear all caches
+            if ('caches' in window) {
+              caches.keys().then(names => {
+                names.forEach(name => caches.delete(name));
+              });
+            }
+            
+            // Restore auth tokens
+            if (authToken) {
+              localStorage.setItem('toptiermen-v2-auth', authToken);
+            }
+            if (rememberMe) {
+              localStorage.setItem('toptiermen-remember-me', rememberMe);
+            }
+            if (supabaseAuth) {
+              localStorage.setItem('sb-toptiermen-auth-token', supabaseAuth);
+            }
+            
+            console.log('🧹 Storage and caches cleared (auth preserved)');
+          } catch (error) {
+            console.error('Error clearing storage:', error);
+          }
+        };
+        clearStorageExceptAuth();
         
         console.log('✅ CacheBuster: Cleared browser storage (preserved auth)');
       } catch (error) {

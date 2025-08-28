@@ -139,10 +139,12 @@ class EmailService {
           tracking_id = trackingRecord.tracking_id;
           
           // Add tracking to email HTML
-          const trackedHtml = EmailTrackingService.addTrackingToEmail(html, tracking_id);
+          const trackedHtml = tracking_id ? EmailTrackingService.addTrackingToEmail(html, tracking_id) : html;
           
           // Mark as sent
-          await EmailTrackingService.markAsSent(tracking_id);
+          if (tracking_id) {
+            await EmailTrackingService.markAsSent(tracking_id);
+          }
           
           console.log('✅ Email tracking enabled:', tracking_id);
           

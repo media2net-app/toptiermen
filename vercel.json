@@ -1,31 +1,11 @@
 {
   "version": 2,
-  "name": "toptiermen",
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/next"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
-    }
-  ],
-  "env": {
-    "NODE_ENV": "production"
-  },
   "functions": {
     "src/app/api/**/*.ts": {
       "maxDuration": 30
     }
   },
-  "regions": ["ams1"],
+  "regions": ["fra1"],
   "github": {
     "enabled": true,
     "autoAlias": false
