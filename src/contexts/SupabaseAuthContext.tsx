@@ -36,11 +36,11 @@ const supabase = getSupabaseClient();
 
 // 2.0.1: Extended session management constants for better UX
 const SESSION_CONFIG = {
-  CHECK_INTERVAL: 10 * 60 * 1000,       // 10 minutes (increased for better UX)
-  WARNING_TIME: 5 * 60 * 1000,          // 5 minutes before expiry (increased)
-  AUTH_TIMEOUT: 3000,                   // 3 seconds (increased for stability)
-  MAX_RETRIES: 2,                       // Reduced retries (was 3)
-  RETRY_DELAY: 1000,                    // 1 second base delay
+  CHECK_INTERVAL: 2 * 60 * 1000,        // 2 minutes (veel frequenter)
+  WARNING_TIME: 10 * 60 * 1000,         // 10 minutes before expiry (meer tijd)
+  AUTH_TIMEOUT: 8000,                   // 8 seconds (meer tijd voor auth)
+  MAX_RETRIES: 3,                       // Meer retries voor stabiliteit
+  RETRY_DELAY: 1500,                    // Langere delay tussen retries
   REMEMBER_ME_DURATION: 30 * 24 * 60 * 60 * 1000, // 30 days for remember me
   SESSION_DURATION: 7 * 24 * 60 * 60 * 1000       // 7 days for normal sessions
 };
@@ -306,14 +306,19 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         if (!isMounted) return;
         dispatch({ type: 'SET_LOADING', payload: true });
         
-        // 2.0.1: Shorter timeout to prevent hanging
+        // 2.0.1: Longer timeout to prevent premature logout
         const timeoutId = setTimeout(() => {
           if (!isMounted) return;
-          console.log('✅ 2.0.1: Auth timeout - allowing login form to show');
-          dispatch({ type: 'SET_LOADING', payload: false });
-          dispatch({ type: 'SET_INITIALIZED', payload: true });
-          dispatch({ type: 'SET_USER', payload: null });
-        }, 500); // 500ms timeout to prevent hanging
+          console.log('⚠️ 2.0.1: Auth timeout - checking for existing session before logout');
+          // Alleen uitloggen als er echt geen sessie is
+          supabase.auth.getSession().then(({ data: { session } }) => {
+            if (!session) {
+              dispatch({ type: 'SET_LOADING', payload: false });
+              dispatch({ type: 'SET_INITIALIZED', payload: true });
+              dispatch({ type: 'SET_USER', payload: null });
+            }
+          });
+        }, 3000); // 3 seconden timeout - meer tijd voor auth
 
         const { data: { session }, error } = await supabase.auth.getSession();
         
