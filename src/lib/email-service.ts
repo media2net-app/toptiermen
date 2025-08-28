@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { EmailTrackingService } from './email-tracking-service';
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -104,7 +105,7 @@ class EmailService {
     }
   }
 
-  async sendEmail(emailData: EmailData): Promise<boolean> {
+  async sendEmail(emailData: EmailData, trackingOptions?: { campaign_id?: string; template_type?: string }): Promise<boolean> {
     try {
       // Load latest configuration from database
       await this.loadConfigFromDatabase();
@@ -119,8 +120,42 @@ class EmailService {
         subject,
         template,
         provider: this.config.provider,
-        useManualSmtp: this.config.useManualSmtp
+        useManualSmtp: this.config.useManualSmtp,
+        tracking: !!trackingOptions
       });
+
+      // Create tracking record if tracking is enabled
+      let tracking_id: string | undefined;
+      if (trackingOptions) {
+        try {
+          const trackingRecord = await EmailTrackingService.createTrackingRecord({
+            campaign_id: trackingOptions.campaign_id,
+            recipient_email: to,
+            recipient_name: variables.name,
+            subject,
+            template_type: trackingOptions.template_type || 'marketing'
+          });
+          
+          tracking_id = trackingRecord.tracking_id;
+          
+          // Add tracking to email HTML
+          const trackedHtml = EmailTrackingService.addTrackingToEmail(html, tracking_id);
+          
+          // Mark as sent
+          await EmailTrackingService.markAsSent(tracking_id);
+          
+          console.log('✅ Email tracking enabled:', tracking_id);
+          
+          // Choose sending method based on configuration
+          if (this.config.useManualSmtp) {
+            return await this.sendViaSmtp(to, subject, trackedHtml, text);
+          } else {
+            return await this.sendViaApi(to, subject, trackedHtml, text);
+          }
+        } catch (trackingError) {
+          console.error('⚠️ Email tracking failed, sending without tracking:', trackingError);
+        }
+      }
 
       // Choose sending method based on configuration
       if (this.config.useManualSmtp) {
