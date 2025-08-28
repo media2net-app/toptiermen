@@ -35,6 +35,32 @@ body {
   font-family: 'Figtree', Arial, Helvetica, sans-serif;
 }
 
+/* Login page cursor improvements */
+.login-loading {
+  cursor: wait !important;
+}
+
+.login-loading * {
+  cursor: wait !important;
+}
+
+.login-loading input {
+  cursor: wait !important;
+}
+
+.login-loading button {
+  cursor: wait !important;
+}
+
+/* Prevent cursor changes during loading */
+.login-loading .cursor-pointer {
+  cursor: wait !important;
+}
+
+.login-loading .cursor-text {
+  cursor: wait !important;
+}
+
 /* Mobile bottom nav improvements */
 @media (max-width: 767px) {
   nav {
