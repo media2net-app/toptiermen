@@ -23,3 +23,4 @@
 - Test email campaigns
 - Launch preparation continues
 - Final deployment completed
+- Continuous deployment active
