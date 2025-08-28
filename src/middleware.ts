@@ -8,12 +8,14 @@ export function middleware(request: NextRequest) {
   if (request.nextUrl.pathname === '/login' || 
       request.nextUrl.pathname.startsWith('/auth') ||
       request.nextUrl.pathname === '/logout') {
-    response.headers.set('Cache-Control', 'no-cache, must-revalidate, max-age=300'); // 5 min cache voor auth
+    response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
     response.headers.set('Pragma', 'no-cache');
-    response.headers.set('X-TTM-Version', '2.0.1');
+    response.headers.set('Expires', '0');
+    response.headers.set('X-TTM-Version', '2.0.2');
     response.headers.set('X-Frame-Options', 'DENY');
     response.headers.set('X-Content-Type-Options', 'nosniff');
-    response.headers.set('X-Session-Preserve', 'true'); // Nieuwe header voor session preservatie
+    response.headers.set('X-Session-Preserve', 'true'); 
+    response.headers.set('Clear-Site-Data', '"cache", "storage"'); 
   }
 
   // Add aggressive cache-busting headers for dashboard routes to prevent caching issues
