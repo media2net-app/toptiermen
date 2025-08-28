@@ -77,7 +77,7 @@ export default function ConversieOverzicht() {
         console.log('✅ Filtered leads (removed test leads):', filteredLeads.length);
       }
       
-      // Fetch Facebook analytics with auto-refresh API
+      // Fetch Facebook analytics with auto-refresh API (with manual data fallback)
       const analyticsResponse = await fetch('/api/facebook/auto-refresh-analytics');
       const analyticsResult = await analyticsResponse.json();
       console.log('📈 Analytics data:', analyticsResult);
@@ -87,13 +87,19 @@ export default function ConversieOverzicht() {
         setAnalyticsData(analyticsResult.data);
       } else {
         console.error('❌ Analytics API failed:', analyticsResult);
-        // Fallback to comprehensive analytics if auto-refresh fails
-        console.log('🔄 Trying fallback API...');
+        // Fallback to comprehensive analytics with manual data
+        console.log('🔄 Trying fallback API with manual data...');
         const fallbackResponse = await fetch('/api/facebook/comprehensive-analytics?dateRange=maximum&useManualData=true&forceManual=true');
         const fallbackResult = await fallbackResponse.json();
         if (fallbackResult.success) {
           console.log('✅ Fallback successful');
           setAnalyticsData(fallbackResult.data);
+        } else {
+          console.error('❌ Both APIs failed, using empty data');
+          setAnalyticsData({
+            summary: { totalSpend: 0, totalClicks: 0, totalImpressions: 0, totalReach: 0 },
+            campaigns: []
+          });
         }
       }
       
