@@ -113,6 +113,27 @@ export default function MijnProfiel() {
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   
+  // Password strength indicator
+  const getPasswordStrength = (password: string) => {
+    if (!password) return { score: 0, label: '', color: '' };
+    
+    let score = 0;
+    if (password.length >= 8) score++;
+    if (/[A-Z]/.test(password)) score++;
+    if (/[a-z]/.test(password)) score++;
+    if (/\d/.test(password)) score++;
+    if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score++;
+    
+    const labels = ['Zeer zwak', 'Zwak', 'Gemiddeld', 'Sterk', 'Zeer sterk'];
+    const colors = ['text-red-400', 'text-orange-400', 'text-yellow-400', 'text-green-400', 'text-green-500'];
+    
+    return {
+      score: Math.min(score, 4),
+      label: labels[Math.min(score - 1, 4)],
+      color: colors[Math.min(score - 1, 4)]
+    };
+  };
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch user profile
@@ -681,8 +702,19 @@ export default function MijnProfiel() {
       return;
     }
 
-    if (newPassword.length < 6) {
-      setPasswordError('Nieuw wachtwoord moet minimaal 6 karakters lang zijn');
+    if (newPassword.length < 8) {
+      setPasswordError('Nieuw wachtwoord moet minimaal 8 karakters lang zijn');
+      return;
+    }
+
+    // Check for password strength
+    const hasUpperCase = /[A-Z]/.test(newPassword);
+    const hasLowerCase = /[a-z]/.test(newPassword);
+    const hasNumbers = /\d/.test(newPassword);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(newPassword);
+
+    if (!hasUpperCase || !hasLowerCase || !hasNumbers) {
+      setPasswordError('Wachtwoord moet minimaal 1 hoofdletter, 1 kleine letter en 1 cijfer bevatten');
       return;
     }
 
@@ -701,6 +733,8 @@ export default function MijnProfiel() {
         return;
       }
 
+      console.log('🔧 Attempting to change password...');
+
       const response = await fetch('/api/user/change-password', {
         method: 'POST',
         headers: {
@@ -714,6 +748,7 @@ export default function MijnProfiel() {
       });
 
       const data = await response.json();
+      console.log('🔧 Password change response:', data);
 
       if (!response.ok) {
         setPasswordError(data.error || 'Fout bij het wijzigen van wachtwoord');
@@ -1705,9 +1740,19 @@ export default function MijnProfiel() {
                 </svg>
               </div>
               <h3 className="text-xl font-bold text-white mb-2">Wachtwoord Wijzigen</h3>
-              <p className="text-[#8BAE5A] text-sm">
+              <p className="text-[#8BAE5A] text-sm mb-4">
                 Voer je huidige wachtwoord in en kies een nieuw wachtwoord.
               </p>
+              <div className="bg-[#181F17] rounded-lg p-3 text-left">
+                <p className="text-[#B6C948] text-xs font-semibold mb-2">Wachtwoord vereisten:</p>
+                <ul className="text-[#8BAE5A] text-xs space-y-1">
+                  <li>• Minimaal 8 karakters</li>
+                  <li>• Minimaal 1 hoofdletter (A-Z)</li>
+                  <li>• Minimaal 1 kleine letter (a-z)</li>
+                  <li>• Minimaal 1 cijfer (0-9)</li>
+                  <li>• Optioneel: speciaal karakter (!@#$%^&*)</li>
+                </ul>
+              </div>
             </div>
             
             <div className="space-y-4 mb-6">
@@ -1739,8 +1784,29 @@ export default function MijnProfiel() {
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   className="w-full bg-[#181F17] text-white px-3 py-2 rounded-lg border border-[#3A4D23] focus:outline-none focus:border-[#8BAE5A]"
-                  placeholder="Minimaal 6 karakters"
+                  placeholder="Minimaal 8 karakters"
                 />
+                {newPassword && (
+                  <div className="mt-2">
+                    <div className="flex gap-1 mb-1">
+                      {[1, 2, 3, 4, 5].map((level) => {
+                        const strength = getPasswordStrength(newPassword);
+                        const isActive = level <= strength.score;
+                        return (
+                          <div
+                            key={level}
+                            className={`h-1 flex-1 rounded-full transition-colors ${
+                              isActive ? 'bg-green-400' : 'bg-[#3A4D23]'
+                            }`}
+                          />
+                        );
+                      })}
+                    </div>
+                    <p className={`text-xs ${getPasswordStrength(newPassword).color}`}>
+                      {getPasswordStrength(newPassword).label}
+                    </p>
+                  </div>
+                )}
               </div>
               
               <div>
@@ -1751,9 +1817,22 @@ export default function MijnProfiel() {
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full bg-[#181F17] text-white px-3 py-2 rounded-lg border border-[#3A4D23] focus:outline-none focus:border-[#8BAE5A]"
+                  className={`w-full bg-[#181F17] text-white px-3 py-2 rounded-lg border focus:outline-none ${
+                    confirmPassword && newPassword !== confirmPassword 
+                      ? 'border-red-500 focus:border-red-500' 
+                      : confirmPassword && newPassword === confirmPassword 
+                      ? 'border-green-500 focus:border-green-500'
+                      : 'border-[#3A4D23] focus:border-[#8BAE5A]'
+                  }`}
                   placeholder="Herhaal je nieuwe wachtwoord"
                 />
+                {confirmPassword && (
+                  <p className={`text-xs mt-1 ${
+                    newPassword === confirmPassword ? 'text-green-400' : 'text-red-400'
+                  }`}>
+                    {newPassword === confirmPassword ? '✓ Wachtwoorden komen overeen' : '✗ Wachtwoorden komen niet overeen'}
+                  </p>
+                )}
               </div>
             </div>
             
@@ -1773,7 +1852,17 @@ export default function MijnProfiel() {
               </button>
               <button
                 onClick={handleChangePassword}
-                disabled={isChangingPassword || !currentPassword || !newPassword || !confirmPassword}
+                disabled={
+                  isChangingPassword || 
+                  !currentPassword || 
+                  !newPassword || 
+                  !confirmPassword ||
+                  newPassword !== confirmPassword ||
+                  newPassword.length < 8 ||
+                  !/[A-Z]/.test(newPassword) ||
+                  !/[a-z]/.test(newPassword) ||
+                  !/\d/.test(newPassword)
+                }
                 className="flex-1 px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg font-semibold hover:bg-[#A6C97B] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isChangingPassword ? (

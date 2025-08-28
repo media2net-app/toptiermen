@@ -4,6 +4,16 @@ import type { NextRequest } from 'next/server';
 export function middleware(request: NextRequest) {
   const response = NextResponse.next();
 
+  // Add cache-busting headers for login and auth routes
+  if (request.nextUrl.pathname === '/login' || request.nextUrl.pathname.startsWith('/auth')) {
+    response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
+    response.headers.set('X-TTM-Version', '2.0.1');
+    response.headers.set('X-Frame-Options', 'DENY');
+    response.headers.set('X-Content-Type-Options', 'nosniff');
+  }
+
   // Add cache-busting headers for dashboard routes to prevent caching issues
   if (request.nextUrl.pathname.startsWith('/dashboard')) {
     response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');

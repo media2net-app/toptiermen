@@ -1,7 +1,8 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { XMarkIcon, PlusIcon, TrashIcon, CalendarIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, PlusIcon, TrashIcon, CalendarIcon, PencilIcon } from '@heroicons/react/24/outline';
 import AdminButton from '@/components/admin/AdminButton';
+import MealEditModal from './MealEditModal';
 
 interface NutritionPlan {
   id?: string;
@@ -14,6 +15,7 @@ interface NutritionPlan {
   duration_weeks?: number;
   difficulty?: string;
   goal?: string;
+  fitness_goal?: 'droogtrainen' | 'spiermassa' | 'onderhoud';
   is_featured?: boolean;
   is_public?: boolean;
   daily_plans?: DailyPlan[];
@@ -49,6 +51,34 @@ interface PlanBuilderProps {
 }
 
 export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuilderProps) {
+  // Fitness goal configurations
+  const fitnessGoalConfigs = {
+    droogtrainen: {
+      calories_multiplier: 0.85,
+      protein_multiplier: 1.2,
+      carbs_multiplier: 0.7,
+      fat_multiplier: 0.9,
+      description: 'Focus op vetverlies met behoud van spiermassa',
+      color: 'text-red-400'
+    },
+    spiermassa: {
+      calories_multiplier: 1.15,
+      protein_multiplier: 1.3,
+      carbs_multiplier: 1.2,
+      fat_multiplier: 1.1,
+      description: 'Focus op spiergroei en krachttoename',
+      color: 'text-green-400'
+    },
+    onderhoud: {
+      calories_multiplier: 1.0,
+      protein_multiplier: 1.0,
+      carbs_multiplier: 1.0,
+      fat_multiplier: 1.0,
+      description: 'Behoud van huidige lichaamscompositie',
+      color: 'text-blue-400'
+    }
+  };
+
   const [formData, setFormData] = useState<NutritionPlan>({
     name: '',
     description: '',
@@ -59,6 +89,7 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
     duration_weeks: 12,
     difficulty: 'beginner',
     goal: 'spiermassa',
+    fitness_goal: 'spiermassa',
     is_featured: false,
     is_public: true,
     daily_plans: []
@@ -67,6 +98,9 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
   const [activeTab, setActiveTab] = useState('basic');
   const [isLoading, setIsLoading] = useState(false);
   const [selectedDay, setSelectedDay] = useState<string>('monday');
+  const [isMealModalOpen, setIsMealModalOpen] = useState(false);
+  const [editingMeal, setEditingMeal] = useState<any>(null);
+  const [editingMealType, setEditingMealType] = useState<string>('');
 
   // Initialize form data when plan changes
   useEffect(() => {
@@ -174,9 +208,69 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
   };
 
   const handleInputChange = (field: keyof NutritionPlan, value: any) => {
+    setFormData(prev => {
+      const updatedData = {
+        ...prev,
+        [field]: value
+      };
+
+      // If calories are changed, automatically adjust portion sizes
+      if (field === 'target_calories' && value) {
+        const oldCalories = prev.target_calories || 2200;
+        const newCalories = value;
+        const calorieRatio = newCalories / oldCalories;
+
+        // Update daily plans with adjusted portion sizes
+        updatedData.daily_plans = prev.daily_plans?.map(dailyPlan => ({
+          ...dailyPlan,
+          meals: {
+            ontbijt: adjustMealPortions(dailyPlan.meals.ontbijt, calorieRatio),
+            snack1: adjustMealPortions(dailyPlan.meals.snack1, calorieRatio),
+            lunch: adjustMealPortions(dailyPlan.meals.lunch, calorieRatio),
+            snack2: adjustMealPortions(dailyPlan.meals.snack2, calorieRatio),
+            diner: adjustMealPortions(dailyPlan.meals.diner, calorieRatio)
+          }
+        }));
+      }
+
+      return updatedData;
+    });
+  };
+
+  // Helper function to adjust meal portions based on calorie ratio
+  const adjustMealPortions = (meal: any, calorieRatio: number) => {
+    if (!meal || !meal.ingredients) return meal;
+
+    return {
+      ...meal,
+      calories: Math.round(meal.calories * calorieRatio),
+      protein: Math.round(meal.protein * calorieRatio),
+      carbs: Math.round(meal.carbs * calorieRatio),
+      fat: Math.round(meal.fat * calorieRatio),
+      ingredients: meal.ingredients.map((ingredient: any) => ({
+        ...ingredient,
+        amount: Math.round(ingredient.amount * calorieRatio * 10) / 10 // Round to 1 decimal
+      }))
+    };
+  };
+
+  // Function to update macros based on fitness goal
+  const updateMacrosForFitnessGoal = (fitnessGoal: 'droogtrainen' | 'spiermassa' | 'onderhoud') => {
+    const config = fitnessGoalConfigs[fitnessGoal];
+    const baseCalories = 2200; // Base calories for 80kg person
+    
+    const newCalories = Math.round(baseCalories * config.calories_multiplier);
+    const newProtein = Math.round(165 * config.protein_multiplier);
+    const newCarbs = Math.round(220 * config.carbs_multiplier);
+    const newFat = Math.round(73 * config.fat_multiplier);
+
     setFormData(prev => ({
       ...prev,
-      [field]: value
+      fitness_goal: fitnessGoal,
+      target_calories: newCalories,
+      target_protein: newProtein,
+      target_carbs: newCarbs,
+      target_fat: newFat
     }));
   };
 
@@ -219,6 +313,64 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
     }
   };
 
+  const handleEditMeal = (mealType: string) => {
+    setEditingMealType(mealType);
+    setEditingMeal(null); // For new meal
+    setIsMealModalOpen(true);
+  };
+
+  const handleSaveMeal = async (meal: any) => {
+    // Update the form data with the new meal
+    setFormData(prev => ({
+      ...prev,
+      daily_plans: prev.daily_plans?.map(dailyPlan => {
+        if (dailyPlan.day === selectedDay) {
+          return {
+            ...dailyPlan,
+            meals: {
+              ...dailyPlan.meals,
+              [editingMealType]: {
+                name: meal.name,
+                calories: meal.calories,
+                protein: meal.protein,
+                carbs: meal.carbs,
+                fat: meal.fat,
+                ingredients: meal.ingredients
+              }
+            }
+          };
+        }
+        return dailyPlan;
+      })
+    }));
+  };
+
+  const handleDeleteMeal = async (mealId: string) => {
+    // Remove the meal from the current day
+    setFormData(prev => ({
+      ...prev,
+      daily_plans: prev.daily_plans?.map(dailyPlan => {
+        if (dailyPlan.day === selectedDay) {
+          return {
+            ...dailyPlan,
+            meals: {
+              ...dailyPlan.meals,
+              [editingMealType]: {
+                name: '',
+                calories: 0,
+                protein: 0,
+                carbs: 0,
+                fat: 0,
+                ingredients: []
+              }
+            }
+          };
+        }
+        return dailyPlan;
+      })
+    }));
+  };
+
   const calculateMacroPercentages = () => {
     const total = (formData.target_protein || 0) * 4 + (formData.target_carbs || 0) * 4 + (formData.target_fat || 0) * 9;
     const proteinPct = total > 0 ? Math.round(((formData.target_protein || 0) * 4 / total) * 100) : 0;
@@ -242,6 +394,16 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
     friday: 'Vrijdag',
     saturday: 'Zaterdag',
     sunday: 'Zondag'
+  };
+
+  const dayThemes = {
+    monday: 'Dag 1',
+    tuesday: 'Dag 2', 
+    wednesday: 'Dag 3',
+    thursday: 'Dag 4',
+    friday: 'Dag 5',
+    saturday: 'Dag 6',
+    sunday: 'Dag 7'
   };
 
   if (!isOpen) return null;
@@ -368,6 +530,56 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
 
           {activeTab === 'macros' && (
             <div className="space-y-6">
+              {/* Fitness Goals */}
+              <div>
+                <label className="block text-[#8BAE5A] font-semibold mb-3">
+                  Fitness Doel
+                </label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {[
+                    { 
+                      value: 'droogtrainen', 
+                      label: 'Droogtrainen', 
+                      description: 'Vetverlies met behoud van spiermassa',
+                      icon: '🔥'
+                    },
+                    { 
+                      value: 'spiermassa', 
+                      label: 'Spiermassa', 
+                      description: 'Spiergroei en krachttoename',
+                      icon: '💪'
+                    },
+                    { 
+                      value: 'onderhoud', 
+                      label: 'Onderhoud', 
+                      description: 'Behoud van lichaamscompositie',
+                      icon: '⚖️'
+                    }
+                  ].map(goal => (
+                    <button
+                      key={goal.value}
+                      onClick={() => updateMacrosForFitnessGoal(goal.value as any)}
+                      className={`p-4 rounded-lg border-2 transition-all text-left ${
+                        formData.fitness_goal === goal.value
+                          ? `border-[#8BAE5A] bg-[#232D1A] ${fitnessGoalConfigs[goal.value as keyof typeof fitnessGoalConfigs].color}`
+                          : 'border-[#3A4D23] bg-[#181F17] text-[#8BAE5A] hover:border-[#5A6D43]'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xl">{goal.icon}</span>
+                        <div className="font-semibold">{goal.label}</div>
+                      </div>
+                      <div className="text-sm text-gray-400">{goal.description}</div>
+                      {formData.fitness_goal === goal.value && (
+                        <div className="text-xs mt-2 text-[#B6C948]">
+                          {fitnessGoalConfigs[goal.value as keyof typeof fitnessGoalConfigs].description}
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               {/* Daily Calories */}
               <div>
                 <label className="block text-[#8BAE5A] font-semibold mb-2">
@@ -382,6 +594,11 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
                   max="5000"
                   step="50"
                 />
+                {formData.fitness_goal && (
+                  <div className={`text-sm mt-1 ${fitnessGoalConfigs[formData.fitness_goal].color}`}>
+                    💡 Automatisch aangepast voor {formData.fitness_goal} doel
+                  </div>
+                )}
               </div>
 
               {/* Macro Distribution */}
@@ -438,15 +655,15 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <div>
                     <div className="text-[#8BAE5A] font-semibold">{formData.target_protein}g</div>
-                    <div className="text-[#B6C948] text-sm">Eiwitten</div>
+                    <div className="text-[#B6C948] text-sm">Protein</div>
                   </div>
                   <div>
                     <div className="text-[#8BAE5A] font-semibold">{formData.target_carbs}g</div>
-                    <div className="text-[#B6C948] text-sm">Koolhydraten</div>
+                    <div className="text-[#B6C948] text-sm">Carbs</div>
                   </div>
                   <div>
                     <div className="text-[#8BAE5A] font-semibold">{formData.target_fat}g</div>
-                    <div className="text-[#B6C948] text-sm">Vetten</div>
+                    <div className="text-[#B6C948] text-sm">Fat</div>
                   </div>
                 </div>
                 <div className="mt-3 text-center">
@@ -484,12 +701,12 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
                     <div className="flex items-center gap-3 mb-3">
                       <CalendarIcon className="w-6 h-6 text-[#8BAE5A]" />
                       <h3 className="text-[#8BAE5A] font-semibold text-lg">
-                        {dayNames[selectedDay as keyof typeof dayNames]} - {getCurrentDayPlan()?.theme}
+                        {dayNames[selectedDay as keyof typeof dayNames]} - {dayThemes[selectedDay as keyof typeof dayThemes]}
                       </h3>
                     </div>
                     <div className="flex gap-2">
                       <span className="px-2 py-1 bg-[#8BAE5A] text-[#181F17] rounded text-xs font-semibold">
-                        {getCurrentDayPlan()?.focus}
+                        Carnivor Animal Based
                       </span>
                     </div>
                   </div>
@@ -497,27 +714,415 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
                   {/* Meals */}
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div className="bg-[#181F17] rounded-lg p-4 border border-[#3A4D23]">
-                      <h4 className="text-[#8BAE5A] font-semibold mb-3">Ontbijt</h4>
-                      <div className="text-[#B6C948] text-sm">
-                        Dagelijkse maaltijd planning functionaliteit komt binnenkort
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="text-[#8BAE5A] font-semibold">Ontbijt</h4>
+                        <div className="flex gap-2">
+                          <button 
+                            onClick={() => handleEditMeal('ontbijt')}
+                            className="text-[#8BAE5A] hover:text-[#7A9D4B] text-sm"
+                            title="Maaltijd toevoegen/bewerken"
+                          >
+                            <PlusIcon className="w-4 h-4" />
+                          </button>
+                          <button 
+                            onClick={() => handleEditMeal('ontbijt')}
+                            className="text-[#8BAE5A] hover:text-[#7A9D4B] text-sm"
+                            title="Maaltijd bewerken"
+                          >
+                            <PencilIcon className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        <div className="text-[#B6C948] font-medium">
+                          {selectedDay === 'monday' && 'Orgaanvlees & Eieren Ontbijt'}
+                          {selectedDay === 'tuesday' && 'T-Bone Steak & Eieren'}
+                          {selectedDay === 'wednesday' && 'Spek & Eieren Ontbijt'}
+                          {selectedDay === 'thursday' && 'Ribeye & Eieren'}
+                          {selectedDay === 'friday' && 'Orgaanvlees Mix'}
+                          {selectedDay === 'saturday' && 'Spek & Eieren'}
+                          {selectedDay === 'sunday' && 'Ribeye & Eieren'}
+                        </div>
+                        <div className="text-[#8BAE5A] text-sm">08:00 • 520 cal</div>
+                        <div className="text-xs text-gray-400 space-y-1">
+                          {selectedDay === 'monday' && (
+                            <>
+                              <div>• Runderlever (100g)</div>
+                              <div>• Runderhart (50g)</div>
+                              <div>• Eieren (3 stuks)</div>
+                              <div>• Roomboter (25g)</div>
+                              <div>• Honing (10g)</div>
+                            </>
+                          )}
+                          {selectedDay === 'tuesday' && (
+                            <>
+                              <div>• T-Bone Steak (200g)</div>
+                              <div>• Eieren (3 stuks)</div>
+                              <div>• Roomboter (30g)</div>
+                              <div>• Talow (10g)</div>
+                            </>
+                          )}
+                          {selectedDay === 'wednesday' && (
+                            <>
+                              <div>• Spek (80g)</div>
+                              <div>• Eieren (4 stuks)</div>
+                              <div>• Roomboter (20g)</div>
+                              <div>• Honing (10g)</div>
+                            </>
+                          )}
+                          {selectedDay === 'thursday' && (
+                            <>
+                              <div>• Ribeye Steak (200g)</div>
+                              <div>• Eieren (3 stuks)</div>
+                              <div>• Roomboter (30g)</div>
+                            </>
+                          )}
+                          {selectedDay === 'friday' && (
+                            <>
+                              <div>• Kippenlever (100g)</div>
+                              <div>• Runderhart (50g)</div>
+                              <div>• Roomboter (25g)</div>
+                              <div>• Honing (10g)</div>
+                            </>
+                          )}
+                          {selectedDay === 'saturday' && (
+                            <>
+                              <div>• Spek (80g)</div>
+                              <div>• Eieren (4 stuks)</div>
+                              <div>• Roomboter (20g)</div>
+                              <div>• Honing (10g)</div>
+                            </>
+                          )}
+                          {selectedDay === 'sunday' && (
+                            <>
+                              <div>• Ribeye Steak (200g)</div>
+                              <div>• Eieren (3 stuks)</div>
+                              <div>• Roomboter (30g)</div>
+                            </>
+                          )}
+                        </div>
                       </div>
                     </div>
                     <div className="bg-[#181F17] rounded-lg p-4 border border-[#3A4D23]">
-                      <h4 className="text-[#8BAE5A] font-semibold mb-3">Lunch</h4>
-                      <div className="text-[#B6C948] text-sm">
-                        Dagelijkse maaltijd planning functionaliteit komt binnenkort
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="text-[#8BAE5A] font-semibold">Lunch</h4>
+                        <div className="flex gap-2">
+                          <button 
+                            onClick={() => handleEditMeal('lunch')}
+                            className="text-[#8BAE5A] hover:text-[#7A9D4B] text-sm"
+                            title="Maaltijd toevoegen/bewerken"
+                          >
+                            <PlusIcon className="w-4 h-4" />
+                          </button>
+                          <button 
+                            onClick={() => handleEditMeal('lunch')}
+                            className="text-[#8BAE5A] hover:text-[#7A9D4B] text-sm"
+                            title="Maaltijd bewerken"
+                          >
+                            <PencilIcon className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        <div className="text-[#B6C948] font-medium">
+                          {selectedDay === 'monday' && 'Ribeye Steak met Boter'}
+                          {selectedDay === 'tuesday' && 'Kipfilet met Boter'}
+                          {selectedDay === 'wednesday' && 'Lamsvlees met Boter'}
+                          {selectedDay === 'thursday' && 'Zalmfilet met Boter'}
+                          {selectedDay === 'friday' && 'Kipfilet met Boter'}
+                          {selectedDay === 'saturday' && 'Entrecote met Boter'}
+                          {selectedDay === 'sunday' && 'Lamskotelet met Boter'}
+                        </div>
+                        <div className="text-[#8BAE5A] text-sm">13:00 • 650 cal</div>
+                        <div className="text-xs text-gray-400 space-y-1">
+                          {selectedDay === 'monday' && (
+                            <>
+                              <div>• Ribeye Steak (250g)</div>
+                              <div>• Roomboter (30g)</div>
+                              <div>• Talow (10g)</div>
+                            </>
+                          )}
+                          {selectedDay === 'tuesday' && (
+                            <>
+                              <div>• Kipfilet (250g)</div>
+                              <div>• Roomboter (30g)</div>
+                            </>
+                          )}
+                          {selectedDay === 'wednesday' && (
+                            <>
+                              <div>• Lamsvlees (250g)</div>
+                              <div>• Roomboter (35g)</div>
+                            </>
+                          )}
+                          {selectedDay === 'thursday' && (
+                            <>
+                              <div>• Zalmfilet (250g)</div>
+                              <div>• Roomboter (25g)</div>
+                            </>
+                          )}
+                          {selectedDay === 'friday' && (
+                            <>
+                              <div>• Kipfilet (250g)</div>
+                              <div>• Roomboter (30g)</div>
+                            </>
+                          )}
+                          {selectedDay === 'saturday' && (
+                            <>
+                              <div>• Entrecote (250g)</div>
+                              <div>• Roomboter (35g)</div>
+                              <div>• Talow (10g)</div>
+                            </>
+                          )}
+                          {selectedDay === 'sunday' && (
+                            <>
+                              <div>• Lamskotelet (250g)</div>
+                              <div>• Roomboter (35g)</div>
+                            </>
+                          )}
+                        </div>
                       </div>
                     </div>
                     <div className="bg-[#181F17] rounded-lg p-4 border border-[#3A4D23]">
-                      <h4 className="text-[#8BAE5A] font-semibold mb-3">Diner</h4>
-                      <div className="text-[#B6C948] text-sm">
-                        Dagelijkse maaltijd planning functionaliteit komt binnenkort
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="text-[#8BAE5A] font-semibold">Diner</h4>
+                        <div className="flex gap-2">
+                          <button 
+                            onClick={() => handleEditMeal('diner')}
+                            className="text-[#8BAE5A] hover:text-[#7A9D4B] text-sm"
+                            title="Maaltijd toevoegen/bewerken"
+                          >
+                            <PlusIcon className="w-4 h-4" />
+                          </button>
+                          <button 
+                            onClick={() => handleEditMeal('diner')}
+                            className="text-[#8BAE5A] hover:text-[#7A9D4B] text-sm"
+                            title="Maaltijd bewerken"
+                          >
+                            <PencilIcon className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        <div className="text-[#B6C948] font-medium">
+                          {selectedDay === 'monday' && 'Lamskotelet met Orgaanvlees'}
+                          {selectedDay === 'tuesday' && 'Entrecote met Orgaanvlees'}
+                          {selectedDay === 'wednesday' && 'Gebakken Lever met Boter'}
+                          {selectedDay === 'thursday' && 'Lamskotelet met Boter'}
+                          {selectedDay === 'friday' && 'Gans met Eendenborst'}
+                          {selectedDay === 'saturday' && 'T-Bone Steak met Orgaanvlees'}
+                          {selectedDay === 'sunday' && 'Orgaanvlees Mix'}
+                        </div>
+                        <div className="text-[#8BAE5A] text-sm">19:00 • 580 cal</div>
+                        <div className="text-xs text-gray-400 space-y-1">
+                          {selectedDay === 'monday' && (
+                            <>
+                              <div>• Lamskotelet (200g)</div>
+                              <div>• Kippenlever (50g)</div>
+                              <div>• Roomboter (20g)</div>
+                              <div>• Honing (15g)</div>
+                            </>
+                          )}
+                          {selectedDay === 'tuesday' && (
+                            <>
+                              <div>• Entrecote (250g)</div>
+                              <div>• Rundernieren (50g)</div>
+                              <div>• Roomboter (25g)</div>
+                              <div>• Honing (15g)</div>
+                            </>
+                          )}
+                          {selectedDay === 'wednesday' && (
+                            <>
+                              <div>• Runderlever (200g)</div>
+                              <div>• Roomboter (40g)</div>
+                              <div>• Honing (15g)</div>
+                            </>
+                          )}
+                          {selectedDay === 'thursday' && (
+                            <>
+                              <div>• Lamskotelet (250g)</div>
+                              <div>• Roomboter (30g)</div>
+                              <div>• Honing (15g)</div>
+                            </>
+                          )}
+                          {selectedDay === 'friday' && (
+                            <>
+                              <div>• Gans (200g)</div>
+                              <div>• Eendenborst (100g)</div>
+                              <div>• Roomboter (30g)</div>
+                              <div>• Honing (15g)</div>
+                            </>
+                          )}
+                          {selectedDay === 'saturday' && (
+                            <>
+                              <div>• T-Bone Steak (200g)</div>
+                              <div>• Rundernieren (50g)</div>
+                              <div>• Roomboter (25g)</div>
+                              <div>• Honing (15g)</div>
+                            </>
+                          )}
+                          {selectedDay === 'sunday' && (
+                            <>
+                              <div>• Runderlever (100g)</div>
+                              <div>• Kippenlever (50g)</div>
+                              <div>• Runderhart (50g)</div>
+                              <div>• Roomboter (25g)</div>
+                              <div>• Honing (15g)</div>
+                            </>
+                          )}
+                        </div>
                       </div>
                     </div>
                     <div className="bg-[#181F17] rounded-lg p-4 border border-[#3A4D23]">
-                      <h4 className="text-[#8BAE5A] font-semibold mb-3">Snacks</h4>
-                      <div className="text-[#B6C948] text-sm">
-                        Dagelijkse maaltijd planning functionaliteit komt binnenkort
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="text-[#8BAE5A] font-semibold">Snacks</h4>
+                        <div className="flex gap-2">
+                          <button 
+                            onClick={() => handleEditMeal('snack1')}
+                            className="text-[#8BAE5A] hover:text-[#7A9D4B] text-sm"
+                            title="Maaltijd toevoegen/bewerken"
+                          >
+                            <PlusIcon className="w-4 h-4" />
+                          </button>
+                          <button 
+                            onClick={() => handleEditMeal('snack1')}
+                            className="text-[#8BAE5A] hover:text-[#7A9D4B] text-sm"
+                            title="Maaltijd bewerken"
+                          >
+                            <PencilIcon className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        <div className="text-[#B6C948] font-medium">
+                          {selectedDay === 'monday' && 'Gerookte Zalm + Eieren met Spek'}
+                          {selectedDay === 'tuesday' && 'Droge Worst + Kaas met Boter'}
+                          {selectedDay === 'wednesday' && 'Kipreepjes + Griekse Yoghurt'}
+                          {selectedDay === 'thursday' && 'Gerookte Zalm + Eieren met Kaas'}
+                          {selectedDay === 'friday' && 'Droge Worst + Spek met Eieren'}
+                          {selectedDay === 'saturday' && 'Lamsvlees + Gebakken Lever'}
+                          {selectedDay === 'sunday' && 'Gerookte Zalm + Kaas met Boter'}
+                        </div>
+                        <div className="text-[#8BAE5A] text-sm">10:30 & 15:30 • 600 cal</div>
+                        <div className="text-xs text-gray-400 space-y-1">
+                          {selectedDay === 'monday' && (
+                            <>
+                              <div>• Gerookte Zalm (120g)</div>
+                              <div>• Roomboter (15g)</div>
+                              <div>• Eieren (2 stuks)</div>
+                              <div>• Spek (40g)</div>
+                            </>
+                          )}
+                          {selectedDay === 'tuesday' && (
+                            <>
+                              <div>• Droge Worst (80g)</div>
+                              <div>• Goudse Kaas (60g)</div>
+                              <div>• Roomboter (20g)</div>
+                            </>
+                          )}
+                          {selectedDay === 'wednesday' && (
+                            <>
+                              <div>• Kipfilet (100g)</div>
+                              <div>• Roomboter (10g)</div>
+                              <div>• Griekse Yoghurt (150g)</div>
+                              <div>• Honing (15g)</div>
+                            </>
+                          )}
+                          {selectedDay === 'thursday' && (
+                            <>
+                              <div>• Gerookte Zalm (100g)</div>
+                              <div>• Eieren (2 stuks)</div>
+                              <div>• Goudse Kaas (50g)</div>
+                              <div>• Roomboter (15g)</div>
+                            </>
+                          )}
+                          {selectedDay === 'friday' && (
+                            <>
+                              <div>• Droge Worst (80g)</div>
+                              <div>• Spek (40g)</div>
+                              <div>• Eieren (2 stuks)</div>
+                              <div>• Roomboter (10g)</div>
+                            </>
+                          )}
+                          {selectedDay === 'saturday' && (
+                            <>
+                              <div>• Lamsvlees (120g)</div>
+                              <div>• Roomboter (15g)</div>
+                              <div>• Runderlever (100g)</div>
+                              <div>• Roomboter (20g)</div>
+                              <div>• Honing (10g)</div>
+                            </>
+                          )}
+                          {selectedDay === 'sunday' && (
+                            <>
+                              <div>• Gerookte Zalm (100g)</div>
+                              <div>• Goudse Kaas (60g)</div>
+                              <div>• Roomboter (20g)</div>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Daily Nutrition Summary */}
+                  <div className="bg-[#181F17] rounded-lg p-4 border border-[#3A4D23]">
+                    <h4 className="text-[#8BAE5A] font-semibold mb-3">Dagelijkse Voeding Overzicht</h4>
+                    <div className="grid grid-cols-4 gap-4 text-center">
+                      <div>
+                        <div className="text-[#8BAE5A] font-semibold">
+                          {getCurrentDayPlan()?.meals?.ontbijt?.calories || 520} + 
+                          {getCurrentDayPlan()?.meals?.lunch?.calories || 650} + 
+                          {getCurrentDayPlan()?.meals?.diner?.calories || 580} + 
+                          {getCurrentDayPlan()?.meals?.snack1?.calories || 280} + 
+                          {getCurrentDayPlan()?.meals?.snack2?.calories || 320} = 
+                          {((getCurrentDayPlan()?.meals?.ontbijt?.calories || 520) + 
+                            (getCurrentDayPlan()?.meals?.lunch?.calories || 650) + 
+                            (getCurrentDayPlan()?.meals?.diner?.calories || 580) + 
+                            (getCurrentDayPlan()?.meals?.snack1?.calories || 280) + 
+                            (getCurrentDayPlan()?.meals?.snack2?.calories || 320))}
+                        </div>
+                        <div className="text-[#B6C948] text-sm">Totaal Calorieën</div>
+                      </div>
+                      <div>
+                        <div className="text-[#8BAE5A] font-semibold">
+                          {((getCurrentDayPlan()?.meals?.ontbijt?.protein || 42) + 
+                            (getCurrentDayPlan()?.meals?.lunch?.protein || 45) + 
+                            (getCurrentDayPlan()?.meals?.diner?.protein || 58) + 
+                            (getCurrentDayPlan()?.meals?.snack1?.protein || 22) + 
+                            (getCurrentDayPlan()?.meals?.snack2?.protein || 18))}
+                        </div>
+                        <div className="text-[#B6C948] text-sm">Totaal Protein (g)</div>
+                      </div>
+                      <div>
+                        <div className="text-[#8BAE5A] font-semibold">
+                          {((getCurrentDayPlan()?.meals?.ontbijt?.carbs || 8) + 
+                            (getCurrentDayPlan()?.meals?.lunch?.carbs || 0) + 
+                            (getCurrentDayPlan()?.meals?.diner?.carbs || 15) + 
+                            (getCurrentDayPlan()?.meals?.snack1?.carbs || 0) + 
+                            (getCurrentDayPlan()?.meals?.snack2?.carbs || 2))}
+                        </div>
+                        <div className="text-[#B6C948] text-sm">Totaal Carbs (g)</div>
+                      </div>
+                      <div>
+                        <div className="text-[#8BAE5A] font-semibold">
+                          {((getCurrentDayPlan()?.meals?.ontbijt?.fat || 35) + 
+                            (getCurrentDayPlan()?.meals?.lunch?.fat || 50) + 
+                            (getCurrentDayPlan()?.meals?.diner?.fat || 35) + 
+                            (getCurrentDayPlan()?.meals?.snack1?.fat || 20) + 
+                            (getCurrentDayPlan()?.meals?.snack2?.fat || 25))}
+                        </div>
+                        <div className="text-[#B6C948] text-sm">Totaal Fat (g)</div>
+                      </div>
+                    </div>
+                    <div className="mt-3 text-center">
+                      <div className="text-[#8BAE5A] text-sm font-semibold">
+                        🥩 100% Carnivor Animal Based Compliant
+                      </div>
+                      <div className="text-[#B6C948] text-xs">
+                        Orgaanvlees • Vette vis • Dierlijke vetten • Beperkte koolhydraten
+                      </div>
+                      <div className="text-[#B6C948] text-xs mt-2">
+                        💡 Tip: Wijzig dagelijkse calorieën om portie groottes automatisch aan te passen
                       </div>
                     </div>
                   </div>
@@ -586,6 +1191,16 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
           </AdminButton>
         </div>
       </div>
+
+                  {/* Meal Edit Modal */}
+            <MealEditModal
+              isOpen={isMealModalOpen}
+              onClose={() => setIsMealModalOpen(false)}
+              meal={editingMeal}
+              mealType={editingMealType}
+              onSave={handleSaveMeal}
+              onDelete={handleDeleteMeal}
+            />
     </div>
   );
 } 
