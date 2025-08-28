@@ -34,7 +34,7 @@ async function testLiveLogin() {
   console.log('----------------------------------------');
   
   const email = 'chiel@media2net.nl';
-  const password = 'TopTierMen2025!';
+  const password = 'W4t3rk0k3r^';
   
   try {
     console.log('🔄 Attempting login on live environment...');

@@ -334,32 +334,39 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
     }
   }, [onboardingStatus]);
 
-  // 2.0.1: Enhanced logout with error recovery - DISABLED
+  // 2.0.1: Enhanced logout with error recovery
   const handleLogout = async () => {
+    if (isLoggingOut) return; // Prevent double click
+    
     try {
+      console.log('2.0.1: Dashboard logout initiated...');
       setIsLoggingOut(true);
-      // setLoadingState('logout', true);
       
-      // trackFeatureUsage('logout', user?.id);
+      // Show loading state
+      const logoutButton = document.querySelector('[data-logout-button]');
+      if (logoutButton) {
+        logoutButton.setAttribute('disabled', 'true');
+      }
       
-      // await handleError(
-      //   async () => {
-      //     await logoutAndRedirect();
-      //   },
-      //   'Logout failed',
-      //   'auth',
-      //   undefined,
-      //   'logout'
-      // );
-      await logoutAndRedirect();
+      // Perform logout
+      await logoutAndRedirect('/login');
+      
     } catch (error) {
-      // addNotification({
-      //   type: 'error',
-      //   message: 'Uitloggen mislukt. Probeer het opnieuw.',
-      //   read: false
-      // });
+      console.error('2.0.1: Dashboard logout error:', error);
+      
+      // Show error message
+      if (typeof window !== 'undefined') {
+        alert('Er is een fout opgetreden bij het uitloggen. Probeer het opnieuw of ververs de pagina.');
+      }
+      
+      // Reset loading state
       setIsLoggingOut(false);
-      // setLoadingState('logout', false);
+      
+      // Re-enable button
+      const logoutButton = document.querySelector('[data-logout-button]');
+      if (logoutButton) {
+        logoutButton.removeAttribute('disabled');
+      }
     }
   };
 
@@ -552,6 +559,7 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
               <button
                 onClick={handleLogout}
                 disabled={isLoggingOut}
+                data-logout-button
                 className="px-2 sm:px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
               >
                 {isLoggingOut ? (
