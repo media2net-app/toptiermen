@@ -25,7 +25,24 @@ function LoginPageContent() {
   useEffect(() => { 
     // 2.0.1: Simplified initialization
     console.log('2.0.1: Login page initialized');
+    
+    // Check Supabase status on page load
+    checkSupabaseStatus();
   }, []);
+
+  const checkSupabaseStatus = async () => {
+    try {
+      const response = await fetch('/api/check-supabase-status');
+      const data = await response.json();
+      
+      if (data.status === 'unhealthy') {
+        console.log('2.0.1: Supabase unhealthy, redirecting to maintenance');
+        router.push('/login/maintenance');
+      }
+    } catch (error) {
+      console.log('2.0.1: Could not check Supabase status:', error);
+    }
+  };
 
   // Check if user is already authenticated
   useEffect(() => {

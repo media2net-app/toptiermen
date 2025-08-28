@@ -25,8 +25,8 @@ export const supabase = createClient(finalSupabaseUrl, finalSupabaseAnonKey, {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: true,
-    // Verleng sessie timeout naar 30 dagen (2592000 seconden)
-    storageKey: 'toptiermen-auth',
+    // 2.0.1: Unified storage key across all clients
+    storageKey: 'toptiermen-v2-auth',
     storage: {
       getItem: (key: string) => {
         if (typeof window !== 'undefined') {

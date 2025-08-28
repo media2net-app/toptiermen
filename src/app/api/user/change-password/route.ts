@@ -14,10 +14,22 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    if (newPassword.length < 6) {
+    if (newPassword.length < 8) {
       return NextResponse.json({
         success: false,
-        error: 'Nieuw wachtwoord moet minimaal 6 karakters lang zijn'
+        error: 'Nieuw wachtwoord moet minimaal 8 karakters lang zijn'
+      }, { status: 400 });
+    }
+
+    // Check for password strength
+    const hasUpperCase = /[A-Z]/.test(newPassword);
+    const hasLowerCase = /[a-z]/.test(newPassword);
+    const hasNumbers = /\d/.test(newPassword);
+
+    if (!hasUpperCase || !hasLowerCase || !hasNumbers) {
+      return NextResponse.json({
+        success: false,
+        error: 'Wachtwoord moet minimaal 1 hoofdletter, 1 kleine letter en 1 cijfer bevatten'
       }, { status: 400 });
     }
 
@@ -32,12 +44,13 @@ export async function POST(request: NextRequest) {
 
     const token = authHeader.substring(7);
 
-    // Initialize Supabase client with the user's token
+    // Initialize Supabase client with service role key for admin operations
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const supabase = createClient(supabaseUrl, token);
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Get the current user
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    // Get the current user from the token
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
     
     if (userError || !user) {
       console.error('❌ Error getting user:', userError);
@@ -61,10 +74,11 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // Now update the password
-    const { data: updateData, error: updateError } = await supabase.auth.updateUser({
-      password: newPassword
-    });
+    // Now update the password using admin API
+    const { data: updateData, error: updateError } = await supabase.auth.admin.updateUserById(
+      user.id,
+      { password: newPassword }
+    );
 
     if (updateError) {
       console.error('❌ Error updating password:', updateError);
