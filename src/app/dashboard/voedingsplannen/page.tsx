@@ -503,18 +503,18 @@ export default function VoedingsplannenPage() {
     const weekPlan: WeekPlan = {};
     
     if (dietType === 'carnivore') {
-      // Generate different carnivore meal plans for each day
-      const carnivoreMeals = {
+      // Complete carnivore week plan with variety
+      const carnivoreWeekPlan = {
         monday: {
           meals: [
             createMealWithMacros(
               'monday-breakfast',
-              'Rundvlees & Eieren Ontbijt',
+              'Ribeye Steak & Eieren',
               '/images/meals/beef-eggs.jpg',
               [
-                { name: 'Rundvlees (biefstuk)', amount: 200, unit: 'g' },
+                { name: 'Ribeye steak', amount: 200, unit: 'g' },
                 { name: 'Eieren', amount: 3, unit: 'stuks' },
-                { name: 'Boter', amount: 30, unit: 'g' },
+                { name: 'Roomboter', amount: 30, unit: 'g' },
                 { name: 'Zout', amount: 5, unit: 'g' }
               ],
               '08:00',
@@ -522,34 +522,352 @@ export default function VoedingsplannenPage() {
             ),
             createMealWithMacros(
               'monday-lunch',
-              'Lamsvlees Lunch',
-              '/images/meals/lamb.jpg',
+              'Kipfilet met Roomboter',
+              '/images/meals/chicken.jpg',
               [
-                { name: 'Lamsvlees (lende)', amount: 250, unit: 'g' },
-                { name: 'Boter', amount: 25, unit: 'g' },
-                { name: 'Zout', amount: 5, unit: 'g' },
-                { name: 'Peper', amount: 3, unit: 'g' }
+                { name: 'Kipfilet', amount: 250, unit: 'g' },
+                { name: 'Roomboter', amount: 40, unit: 'g' },
+                { name: 'Zout', amount: 5, unit: 'g' }
               ],
               '13:00',
               'lunch'
             ),
             createMealWithMacros(
               'monday-dinner',
-              'Varkensvlees Avondeten',
-              '/images/meals/pork.jpg',
+              'Lamskotelet',
+              '/images/meals/lamb.jpg',
               [
-                { name: 'Varkensvlees (varkenshaas)', amount: 300, unit: 'g' },
-                { name: 'Spek', amount: 50, unit: 'g' },
-                { name: 'Boter', amount: 20, unit: 'g' },
+                { name: 'Lamskotelet', amount: 300, unit: 'g' },
+                { name: 'Roomboter', amount: 30, unit: 'g' },
                 { name: 'Zout', amount: 5, unit: 'g' }
               ],
               '19:00',
               'dinner'
+            ),
+            createMealWithMacros(
+              'monday-snack',
+              'Gerookte Zalm',
+              '/images/meals/salmon.jpg',
+              [
+                { name: 'Gerookte zalm', amount: 100, unit: 'g' }
+              ],
+              '15:30',
+              'snack'
             )
           ]
         },
         tuesday: {
           meals: [
+            createMealWithMacros(
+              'tuesday-breakfast',
+              'Orgaanvlees & Eieren',
+              '/images/meals/organ-meat.jpg',
+              [
+                { name: 'Lever', amount: 100, unit: 'g' },
+                { name: 'Hart', amount: 50, unit: 'g' },
+                { name: 'Eieren', amount: 2, unit: 'stuks' },
+                { name: 'Talow', amount: 15, unit: 'g' }
+              ],
+              '08:00',
+              'breakfast'
+            ),
+            createMealWithMacros(
+              'tuesday-lunch',
+              'Zalmfilet',
+              '/images/meals/salmon.jpg',
+              [
+                { name: 'Zalmfilet', amount: 200, unit: 'g' },
+                { name: 'Roomboter', amount: 25, unit: 'g' },
+                { name: 'Zout', amount: 5, unit: 'g' }
+              ],
+              '13:00',
+              'lunch'
+            ),
+            createMealWithMacros(
+              'tuesday-dinner',
+              'Entrecote',
+              '/images/meals/steak.jpg',
+              [
+                { name: 'Entrecote', amount: 250, unit: 'g' },
+                { name: 'Roomboter', amount: 25, unit: 'g' },
+                { name: 'Zout', amount: 5, unit: 'g' }
+              ],
+              '19:00',
+              'dinner'
+            ),
+            createMealWithMacros(
+              'tuesday-snack',
+              'Droge Worst',
+              '/images/meals/sausage.jpg',
+              [
+                { name: 'Droge worst', amount: 80, unit: 'g' }
+              ],
+              '15:30',
+              'snack'
+            )
+          ]
+        },
+        wednesday: {
+          meals: [
+            createMealWithMacros(
+              'wednesday-breakfast',
+              'Spek & Eieren',
+              '/images/meals/bacon-eggs.jpg',
+              [
+                { name: 'Spek', amount: 100, unit: 'g' },
+                { name: 'Eieren', amount: 4, unit: 'stuks' },
+                { name: 'Boter', amount: 20, unit: 'g' }
+              ],
+              '08:00',
+              'breakfast'
+            ),
+            createMealWithMacros(
+              'wednesday-lunch',
+              'Lamsvlees Lende',
+              '/images/meals/lamb.jpg',
+              [
+                { name: 'Lamsvlees (lende)', amount: 250, unit: 'g' },
+                { name: 'Boter', amount: 25, unit: 'g' },
+                { name: 'Zout', amount: 5, unit: 'g' }
+              ],
+              '13:00',
+              'lunch'
+            ),
+            createMealWithMacros(
+              'wednesday-dinner',
+              'Gebakken Lever',
+              '/images/meals/liver.jpg',
+              [
+                { name: 'Runderlever', amount: 150, unit: 'g' },
+                { name: 'Boter', amount: 20, unit: 'g' },
+                { name: 'Zout', amount: 5, unit: 'g' }
+              ],
+              '19:00',
+              'dinner'
+            ),
+            createMealWithMacros(
+              'wednesday-snack',
+              'Kipreepjes',
+              '/images/meals/chicken-strips.jpg',
+              [
+                { name: 'Kipfilet', amount: 100, unit: 'g' },
+                { name: 'Boter', amount: 10, unit: 'g' }
+              ],
+              '15:30',
+              'snack'
+            )
+          ]
+        },
+        thursday: {
+          meals: [
+            createMealWithMacros(
+              'thursday-breakfast',
+              'Ribeye Steak & Eieren',
+              '/images/meals/beef-eggs.jpg',
+              [
+                { name: 'Ribeye steak', amount: 200, unit: 'g' },
+                { name: 'Eieren', amount: 3, unit: 'stuks' },
+                { name: 'Roomboter', amount: 30, unit: 'g' },
+                { name: 'Zout', amount: 5, unit: 'g' }
+              ],
+              '08:00',
+              'breakfast'
+            ),
+            createMealWithMacros(
+              'thursday-lunch',
+              'Zalmfilet',
+              '/images/meals/salmon.jpg',
+              [
+                { name: 'Zalmfilet', amount: 200, unit: 'g' },
+                { name: 'Roomboter', amount: 25, unit: 'g' },
+                { name: 'Zout', amount: 5, unit: 'g' }
+              ],
+              '13:00',
+              'lunch'
+            ),
+            createMealWithMacros(
+              'thursday-dinner',
+              'Lamskotelet',
+              '/images/meals/lamb.jpg',
+              [
+                { name: 'Lamskotelet', amount: 300, unit: 'g' },
+                { name: 'Roomboter', amount: 30, unit: 'g' },
+                { name: 'Zout', amount: 5, unit: 'g' }
+              ],
+              '19:00',
+              'dinner'
+            ),
+            createMealWithMacros(
+              'thursday-snack',
+              'Gerookte Zalm',
+              '/images/meals/salmon.jpg',
+              [
+                { name: 'Gerookte zalm', amount: 100, unit: 'g' }
+              ],
+              '15:30',
+              'snack'
+            )
+          ]
+        },
+        friday: {
+          meals: [
+            createMealWithMacros(
+              'friday-breakfast',
+              'Orgaanvlees & Eieren',
+              '/images/meals/organ-meat.jpg',
+              [
+                { name: 'Lever', amount: 100, unit: 'g' },
+                { name: 'Hart', amount: 50, unit: 'g' },
+                { name: 'Eieren', amount: 2, unit: 'stuks' },
+                { name: 'Talow', amount: 15, unit: 'g' }
+              ],
+              '08:00',
+              'breakfast'
+            ),
+            createMealWithMacros(
+              'friday-lunch',
+              'Kipfilet met Roomboter',
+              '/images/meals/chicken.jpg',
+              [
+                { name: 'Kipfilet', amount: 250, unit: 'g' },
+                { name: 'Roomboter', amount: 40, unit: 'g' },
+                { name: 'Zout', amount: 5, unit: 'g' }
+              ],
+              '13:00',
+              'lunch'
+            ),
+            createMealWithMacros(
+              'friday-dinner',
+              'Entrecote',
+              '/images/meals/steak.jpg',
+              [
+                { name: 'Entrecote', amount: 250, unit: 'g' },
+                { name: 'Roomboter', amount: 25, unit: 'g' },
+                { name: 'Zout', amount: 5, unit: 'g' }
+              ],
+              '19:00',
+              'dinner'
+            ),
+            createMealWithMacros(
+              'friday-snack',
+              'Droge Worst',
+              '/images/meals/sausage.jpg',
+              [
+                { name: 'Droge worst', amount: 80, unit: 'g' }
+              ],
+              '15:30',
+              'snack'
+            )
+          ]
+        },
+        saturday: {
+          meals: [
+            createMealWithMacros(
+              'saturday-breakfast',
+              'Spek & Eieren',
+              '/images/meals/bacon-eggs.jpg',
+              [
+                { name: 'Spek', amount: 100, unit: 'g' },
+                { name: 'Eieren', amount: 4, unit: 'stuks' },
+                { name: 'Boter', amount: 20, unit: 'g' }
+              ],
+              '08:00',
+              'breakfast'
+            ),
+            createMealWithMacros(
+              'saturday-lunch',
+              'Lamsvlees Lende',
+              '/images/meals/lamb.jpg',
+              [
+                { name: 'Lamsvlees (lende)', amount: 250, unit: 'g' },
+                { name: 'Boter', amount: 25, unit: 'g' },
+                { name: 'Zout', amount: 5, unit: 'g' }
+              ],
+              '13:00',
+              'lunch'
+            ),
+            createMealWithMacros(
+              'saturday-dinner',
+              'Gebakken Lever',
+              '/images/meals/liver.jpg',
+              [
+                { name: 'Runderlever', amount: 150, unit: 'g' },
+                { name: 'Boter', amount: 20, unit: 'g' },
+                { name: 'Zout', amount: 5, unit: 'g' }
+              ],
+              '19:00',
+              'dinner'
+            ),
+            createMealWithMacros(
+              'saturday-snack',
+              'Kipreepjes',
+              '/images/meals/chicken-strips.jpg',
+              [
+                { name: 'Kipfilet', amount: 100, unit: 'g' },
+                { name: 'Boter', amount: 10, unit: 'g' }
+              ],
+              '15:30',
+              'snack'
+            )
+          ]
+        },
+        sunday: {
+          meals: [
+            createMealWithMacros(
+              'sunday-breakfast',
+              'Ribeye Steak & Eieren',
+              '/images/meals/beef-eggs.jpg',
+              [
+                { name: 'Ribeye steak', amount: 200, unit: 'g' },
+                { name: 'Eieren', amount: 3, unit: 'stuks' },
+                { name: 'Roomboter', amount: 30, unit: 'g' },
+                { name: 'Zout', amount: 5, unit: 'g' }
+              ],
+              '08:00',
+              'breakfast'
+            ),
+            createMealWithMacros(
+              'sunday-lunch',
+              'Zalmfilet',
+              '/images/meals/salmon.jpg',
+              [
+                { name: 'Zalmfilet', amount: 200, unit: 'g' },
+                { name: 'Roomboter', amount: 25, unit: 'g' },
+                { name: 'Zout', amount: 5, unit: 'g' }
+              ],
+              '13:00',
+              'lunch'
+            ),
+            createMealWithMacros(
+              'sunday-dinner',
+              'Lamskotelet',
+              '/images/meals/lamb.jpg',
+              [
+                { name: 'Lamskotelet', amount: 300, unit: 'g' },
+                { name: 'Roomboter', amount: 30, unit: 'g' },
+                { name: 'Zout', amount: 5, unit: 'g' }
+              ],
+              '19:00',
+              'dinner'
+            ),
+            createMealWithMacros(
+              'sunday-snack',
+              'Gerookte Zalm',
+              '/images/meals/salmon.jpg',
+              [
+                { name: 'Gerookte zalm', amount: 100, unit: 'g' }
+              ],
+              '15:30',
+              'snack'
+            )
+          ]
+        }
+      };
+      
+      // Assign the complete carnivore week plan
+      Object.keys(carnivoreWeekPlan).forEach(day => {
+        weekPlan[day] = carnivoreWeekPlan[day];
+      }); [
             createMealWithMacros(
               'tuesday-breakfast',
               'Eieren & Spek Ontbijt',
