@@ -66,6 +66,12 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
 
   const adminMenu: MenuItem[] = [
     { 
+      label: '🚀 PLANNING LANCERING', 
+      icon: RocketLaunchIcon, 
+      href: '/dashboard-admin/planning-lancering',
+      badge: 'CRITICAL'
+    },
+    { 
       label: 'Dashboard', 
       icon: HomeIcon, 
       href: '/dashboard-admin'
@@ -195,11 +201,22 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
               className={`flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-all duration-200 ${
                 pathname === item.href 
                   ? 'bg-[#8BAE5A] text-[#181F17] shadow-lg' 
-                  : 'text-[#8BAE5A] hover:bg-[#181F17]'
+                  : item.label.includes('PLANNING LANCERING')
+                    ? 'bg-gradient-to-r from-[#B6C948] to-[#3A4D23] text-[#181F17] shadow-lg border-2 border-[#8BAE5A]'
+                    : 'text-[#8BAE5A] hover:bg-[#181F17]'
               }`}
             >
               {item.icon && <item.icon className="w-6 h-6" />}
               <span>{item.label}</span>
+              {item.badge && (
+                <span className={`ml-auto px-2 py-1 rounded-full text-xs font-bold ${
+                  item.badge === 'CRITICAL' 
+                    ? 'bg-red-600 text-white' 
+                    : 'bg-[#8BAE5A] text-[#181F17]'
+                }`}>
+                  {item.badge}
+                </span>
+              )}
             </Link>
           );
         }
