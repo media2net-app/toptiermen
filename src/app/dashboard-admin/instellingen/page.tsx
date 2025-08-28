@@ -62,17 +62,17 @@ export default function AdminSettings() {
 
   // Email Configuration
   const [emailConfig, setEmailConfig] = useState<EmailConfig>({
-    provider: 'resend',
+    provider: 'smtp',
     apiKey: '',
-    fromEmail: '',
-    fromName: '',
+    fromEmail: 'platform@toptiermen.eu',
+    fromName: 'Top Tier Men',
     // SMTP Configuration
-    smtpHost: '',
-    smtpPort: '',
-    smtpSecure: false,
-    smtpUsername: '',
-    smtpPassword: '',
-    useManualSmtp: false
+    smtpHost: 'toptiermen.eu',
+    smtpPort: '465',
+    smtpSecure: true,
+    smtpUsername: 'platform@toptiermen.eu',
+    smtpPassword: '5LUrnxEmEQYgEUt3PmZg',
+    useManualSmtp: true
   });
 
   // Platform Configuration
@@ -99,17 +99,17 @@ export default function AdminSettings() {
       });
 
       setEmailConfig({
-        provider: 'resend',
-        apiKey: process.env.RESEND_API_KEY || '',
-        fromEmail: 'noreply@toptiermen.com',
+        provider: 'smtp',
+        apiKey: '',
+        fromEmail: 'platform@toptiermen.eu',
         fromName: 'Top Tier Men',
         // SMTP Configuration
-        smtpHost: '',
-        smtpPort: '',
-        smtpSecure: false,
-        smtpUsername: '',
-        smtpPassword: '',
-        useManualSmtp: false
+        smtpHost: 'toptiermen.eu',
+        smtpPort: '465',
+        smtpSecure: true,
+        smtpUsername: 'platform@toptiermen.eu',
+        smtpPassword: '5LUrnxEmEQYgEUt3PmZg',
+        useManualSmtp: true
       });
 
       // Try to load platform settings from database
@@ -483,6 +483,7 @@ export default function AdminSettings() {
                       onChange={(e) => setEmailConfig(prev => ({ ...prev, provider: e.target.value }))}
                       className="w-full p-3 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white focus:border-[#B6C948] focus:outline-none"
                     >
+                      <option value="smtp">SMTP</option>
                       <option value="resend">Resend</option>
                       <option value="sendgrid">SendGrid</option>
                       <option value="mailgun">Mailgun</option>
@@ -514,7 +515,7 @@ export default function AdminSettings() {
                       value={emailConfig.fromEmail}
                       onChange={(e) => setEmailConfig(prev => ({ ...prev, fromEmail: e.target.value }))}
                       className="w-full p-3 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white focus:border-[#B6C948] focus:outline-none"
-                      placeholder="noreply@toptiermen.com"
+                      placeholder="platform@toptiermen.eu"
                     />
                   </div>
 
