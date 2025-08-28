@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSearchParams, usePathname } from 'next/navigation';
+import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 import { 
   UserGroupIcon, 
   ChartBarIcon, 
@@ -131,8 +131,16 @@ interface DashboardStats {
 export default function AdminDashboard() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const router = useRouter();
   const [selectedPeriod, setSelectedPeriod] = useState<'7d' | '30d' | '90d'>('7d');
   const { user } = useSupabaseAuth();
+
+  // Redirect to planning-lancering as default page
+  useEffect(() => {
+    if (pathname === '/dashboard-admin' && !searchParams?.get('tab')) {
+      router.push('/dashboard-admin/planning-lancering');
+    }
+  }, [pathname, searchParams, router]);
   
   // State voor echte data - geoptimaliseerd voor performance
   const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(null);
