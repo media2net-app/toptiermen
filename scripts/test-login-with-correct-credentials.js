@@ -28,7 +28,7 @@ async function testLoginWithCorrectCredentials() {
     console.log('-----------------------------------------------');
     
     const email = 'chiel@media2net.nl';
-    const password = 'TopTierMen2025!';
+    const password = 'W4t3rk0k3r^';
     
     console.log('📧 Email:', email);
     console.log('🔑 Password:', password);

@@ -246,10 +246,37 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
     setIsLoggingOut(true);
     try {
       console.log('Admin logout initiated...');
+      
+      // Show loading state
+      const logoutButton = document.querySelector('[data-admin-logout-button]');
+      if (logoutButton) {
+        logoutButton.setAttribute('disabled', 'true');
+      }
+      
+      // Perform logout with redirect
       await signOut();
+      
+      // Force redirect to login
+      if (typeof window !== 'undefined') {
+        const timestamp = Date.now();
+        window.location.href = `/login?t=${timestamp}`;
+      }
+      
     } catch (error) {
       console.error('Error logging out:', error);
+      
+      // Show error message
+      if (typeof window !== 'undefined') {
+        alert('Er is een fout opgetreden bij het uitloggen. Probeer het opnieuw.');
+      }
+      
       setIsLoggingOut(false);
+      
+      // Re-enable button
+      const logoutButton = document.querySelector('[data-admin-logout-button]');
+      if (logoutButton) {
+        logoutButton.removeAttribute('disabled');
+      }
     }
   };
 
@@ -402,6 +429,7 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
             <button
               onClick={handleLogout}
               disabled={isLoggingOut}
+              data-admin-logout-button
               className="px-3 sm:px-4 py-2 rounded-xl bg-[#181F17] text-[#8BAE5A] text-sm font-semibold border border-[#3A4D23] hover:bg-[#232D1A] transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoggingOut ? 'Uitloggen...' : 'Uitloggen'}

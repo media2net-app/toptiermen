@@ -450,38 +450,113 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
 
   const signOut = async () => {
     try {
+      console.log('2.0.1: Starting sign out process...');
+      
+      // Clear all local storage and session storage
+      if (typeof window !== 'undefined') {
+        console.log('2.0.1: Clearing browser storage...');
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        // Clear specific auth storage
+        localStorage.removeItem('toptiermen-v2-auth');
+        localStorage.removeItem('supabase.auth.token');
+        
+        // Clear any other auth-related items
+        const keysToRemove: string[] = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && (key.includes('auth') || key.includes('supabase') || key.includes('session'))) {
+            keysToRemove.push(key);
+          }
+        }
+        keysToRemove.forEach(key => localStorage.removeItem(key));
+      }
+      
+      // Sign out from Supabase
       const { error } = await supabase.auth.signOut();
       if (error) {
-        console.error('2.0.1: Sign out error:', error);
+        console.error('2.0.1: Supabase sign out error:', error);
         throw error;
-      } else {
-        dispatch({ type: 'RESET_STATE' });
-        console.log('2.0.1: User signed out successfully');
       }
+      
+      // Reset state
+      dispatch({ type: 'RESET_STATE' });
+      console.log('2.0.1: User signed out successfully');
+      
     } catch (error) {
       console.error('2.0.1: Sign out error:', error);
+      // Even if Supabase fails, clear local state
+      dispatch({ type: 'RESET_STATE' });
       throw error;
     }
   };
 
-  // 2.0.1: Simplified logout and redirect
+  // 2.0.1: Enhanced logout and redirect with better error handling
   const logoutAndRedirect = async (redirectUrl: string = '/login') => {
     try {
       console.log('2.0.1: Logout and redirect initiated...');
+      
+      // First, try to sign out via Supabase
       await signOut();
       
+      // Also call our logout API for additional cleanup
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) {
+          await fetch('/api/auth/logout', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${session.access_token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+        }
+      } catch (apiError) {
+        console.log('2.0.1: Logout API call failed (non-critical):', apiError);
+      }
+      
       console.log(`2.0.1: Redirecting to: ${redirectUrl}`);
-      window.location.href = redirectUrl;
+      
+      // Force a hard redirect to clear any cached state
+      if (typeof window !== 'undefined') {
+        // Clear any remaining cached data
+        if ('caches' in window) {
+          try {
+            const cacheNames = await caches.keys();
+            await Promise.all(cacheNames.map(name => caches.delete(name)));
+          } catch (cacheError) {
+            console.log('2.0.1: Cache clearing failed:', cacheError);
+          }
+        }
+        
+        // Force redirect with cache busting
+        const timestamp = Date.now();
+        const finalUrl = redirectUrl.includes('?') 
+          ? `${redirectUrl}&t=${timestamp}` 
+          : `${redirectUrl}?t=${timestamp}`;
+        
+        window.location.href = finalUrl;
+      }
       
     } catch (error) {
       console.error('2.0.1: Error during logout and redirect:', error);
       
       // Show user feedback
-      alert('Er is een fout opgetreden bij het uitloggen. Probeer het opnieuw.');
+      if (typeof window !== 'undefined') {
+        alert('Er is een fout opgetreden bij het uitloggen. Je wordt doorgestuurd naar de login pagina.');
+      }
       
       // Fallback: force redirect even if signOut fails
       setTimeout(() => {
-        window.location.href = redirectUrl;
+        if (typeof window !== 'undefined') {
+          const timestamp = Date.now();
+          const finalUrl = redirectUrl.includes('?') 
+            ? `${redirectUrl}&t=${timestamp}` 
+            : `${redirectUrl}?t=${timestamp}`;
+          
+          window.location.href = finalUrl;
+        }
       }, 1000);
     }
   };
