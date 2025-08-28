@@ -1,54 +1,47 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { 
-  getCurrentVersion, 
-  getVersion, 
-  getPerformanceSummary,
-  isSystemReady,
-  VERSION_HISTORY 
-} from '@/lib/version-config';
+import { NextResponse } from 'next/server';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    const currentVersion = getCurrentVersion();
-    const performanceSummary = getPerformanceSummary();
-    const systemReady = isSystemReady();
+    const versionInfo = {
+      version: '2.0.1',
+      platform: 'Top Tier Men',
+      environment: process.env.NODE_ENV || 'development',
+      timestamp: new Date().toISOString(),
+      features: {
+        cacheBusting: true,
+        autoRefresh: true,
+        userMigration: true,
+        onboarding: true,
+        forum: true,
+        academy: true,
+        brotherhood: true,
+        marketing: true,
+        admin: true
+      },
+      database: {
+        primaryTable: 'profiles',
+        migrationCompleted: true,
+        usersTableRemoved: false // Will be true after manual cleanup
+      },
+      cache: {
+        version: '2.0.1',
+        localStorageKey: 'ttm-app-version',
+        cacheBustKey: 'ttm-cache-bust'
+      }
+    };
 
-    return NextResponse.json({
-      success: true,
-      system: {
-        currentVersion: currentVersion.version,
-        name: currentVersion.name,
-        status: currentVersion.status,
-        releaseDate: currentVersion.releaseDate,
-        ready: systemReady,
-        score: systemReady ? 100 : 0,
-      },
-      features: currentVersion.features,
-      performance: {
-        current: currentVersion.performance,
-        improvements: performanceSummary,
-      },
-      tests: currentVersion.tests,
-      readiness: {
-        ready: systemReady,
-        score: systemReady ? 100 : 0,
-      },
-      changelog: [], // V1.2: Simplified - no changelog in this version
-      history: VERSION_HISTORY.map(v => ({
-        version: v.version,
-        name: v.name,
-        status: v.status,
-        releaseDate: v.releaseDate,
-      })),
+    return NextResponse.json(versionInfo, {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'X-TTM-Version': '2.0.1'
+      }
     });
   } catch (error) {
-    console.error('❌ System version API error:', error);
+    console.error('Error in system version API:', error);
     return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to get system version information',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      },
+      { error: 'Failed to get system version' },
       { status: 500 }
     );
   }

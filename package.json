@@ -1,16 +1,17 @@
 {
   "name": "toptiermen",
-  "version": "0.1.0",
+  "version": "2.0.1",
+  "description": "Top Tier Men Platform - Complete lifestyle transformation platform",
   "private": true,
   "scripts": {
     "dev": "next dev -p 3000",
-    "dev:clean": "rm -rf .next && next dev -p 3000",
     "build": "next build",
-    "build:analyze": "ANALYZE=true next build",
     "start": "next start",
     "lint": "next lint",
-    "cache:clear": "rm -rf .next && rm -rf node_modules/.cache",
-    "performance:check": "npm run build && npm run start"
+    "type-check": "tsc --noEmit",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
