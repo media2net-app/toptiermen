@@ -1023,6 +1023,27 @@ export default function AdminDashboard() {
       )}
 
       {activeTab === 'timeline' && (
+        <div className="space-y-6">
+          {/* Redirect to prelaunch page */}
+          <div className="bg-gradient-to-r from-[#8BAE5A]/20 to-[#3A4D23]/20 rounded-xl p-6 border border-[#8BAE5A]/30">
+            <div className="text-center">
+              <h2 className="text-2xl font-bold text-[#8BAE5A] mb-4">🚀 Platform Lancering Dashboard</h2>
+              <p className="text-gray-300 mb-6">
+                Bekijk de volledige prelaunch pagina met countdown timer, features en wachtlijst registratie.
+              </p>
+              <button
+                onClick={() => window.open('/prelaunch', '_blank')}
+                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-[#8BAE5A] to-[#3A4D23] text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-300"
+              >
+                <span className="mr-2">🚀</span>
+                Open Prelaunch Pagina
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'old-timeline' && (
         <AdminCard
           title="🚀 Launch Timeline"
           subtitle="Planning van 16 augustus t/m 10 september - Platform lancering"
