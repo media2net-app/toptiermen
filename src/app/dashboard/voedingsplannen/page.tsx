@@ -35,7 +35,7 @@ export default function VoedingsplannenPage() {
     try {
       setLoading(true);
       
-      // Alleen de eerste carnivoor voedingsplan
+      // 3 carnivoor voedingsplannen
       const correctPlans: NutritionPlan[] = [
         {
           plan_id: 'carnivoor_droogtrainen',
@@ -49,6 +49,38 @@ export default function VoedingsplannenPage() {
           duration_weeks: 12,
           difficulty: 'Makkelijk',
           goal: 'droogtrainen',
+          is_featured: true,
+          is_public: true,
+          created_at: new Date().toISOString()
+        },
+        {
+          plan_id: 'carnivoor_onderhoud',
+          name: 'Carnivoor Onderhoud',
+          description: 'Een carnivoor voedingsplan voor het behouden van je huidige lichaamscompositie en gezondheid. Gebalanceerd voor langdurige gezondheid en welzijn.',
+          category: 'carnivoor',
+          target_calories: 2400,
+          target_protein: 180,
+          target_carbs: 25,
+          target_fat: 150,
+          duration_weeks: 12,
+          difficulty: 'Makkelijk',
+          goal: 'onderhoud',
+          is_featured: true,
+          is_public: true,
+          created_at: new Date().toISOString()
+        },
+        {
+          plan_id: 'carnivoor_spiermassa',
+          name: 'Carnivoor Spiermassa',
+          description: 'Een carnivoor voedingsplan voor spieropbouw en krachttoename. Hoog in eiwitten en gezonde vetten, perfect voor het opbouwen van spiermassa en kracht.',
+          category: 'carnivoor',
+          target_calories: 2800,
+          target_protein: 220,
+          target_carbs: 20,
+          target_fat: 180,
+          duration_weeks: 12,
+          difficulty: 'Makkelijk',
+          goal: 'spiermassa',
           is_featured: true,
           is_public: true,
           created_at: new Date().toISOString()
