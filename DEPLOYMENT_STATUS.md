@@ -24,3 +24,4 @@
 - Launch preparation continues
 - Final deployment completed
 - Continuous deployment active
+- Planning Lancering page fix
