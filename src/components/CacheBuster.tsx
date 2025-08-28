@@ -13,11 +13,28 @@ export function CacheBuster({ version = '2.0.1', forceRefresh = false }: CacheBu
     if (forceRefresh) {
       console.log('🔄 CacheBuster: Forcing cache refresh...');
       
-      // Clear localStorage and sessionStorage
+      // Clear only non-auth storage to preserve login state
       try {
+        // Preserve auth-related keys
+        const authKeys = ['toptiermen-v2-auth', 'toptiermen-remember-me'];
+        const preservedData: Record<string, string> = {};
+        
+        // Save auth data before clearing
+        authKeys.forEach(key => {
+          const value = localStorage.getItem(key);
+          if (value) preservedData[key] = value;
+        });
+        
+        // Clear all storage
         localStorage.clear();
         sessionStorage.clear();
-        console.log('✅ CacheBuster: Cleared browser storage');
+        
+        // Restore auth data
+        Object.entries(preservedData).forEach(([key, value]) => {
+          localStorage.setItem(key, value);
+        });
+        
+        console.log('✅ CacheBuster: Cleared browser storage (preserved auth)');
       } catch (error) {
         console.warn('⚠️ CacheBuster: Could not clear browser storage:', error);
       }
@@ -141,10 +158,24 @@ export function useCacheBuster() {
   const bustCache = () => {
     console.log('🔄 Manual cache busting triggered...');
     
-    // Clear storage
+    // Clear storage but preserve auth
     try {
+      const authKeys = ['toptiermen-v2-auth', 'toptiermen-remember-me'];
+      const preservedData: Record<string, string> = {};
+      
+      // Save auth data
+      authKeys.forEach(key => {
+        const value = localStorage.getItem(key);
+        if (value) preservedData[key] = value;
+      });
+      
       localStorage.clear();
       sessionStorage.clear();
+      
+      // Restore auth data
+      Object.entries(preservedData).forEach(([key, value]) => {
+        localStorage.setItem(key, value);
+      });
     } catch (error) {
       console.warn('Could not clear storage:', error);
     }

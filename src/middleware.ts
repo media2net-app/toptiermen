@@ -4,18 +4,16 @@ import type { NextRequest } from 'next/server';
 export function middleware(request: NextRequest) {
   const response = NextResponse.next();
 
-  // Add aggressive cache-busting headers for login and auth routes
+  // Add session-preserving cache headers for login and auth routes
   if (request.nextUrl.pathname === '/login' || 
       request.nextUrl.pathname.startsWith('/auth') ||
       request.nextUrl.pathname === '/logout') {
-    response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0');
+    response.headers.set('Cache-Control', 'no-cache, must-revalidate, max-age=300'); // 5 min cache voor auth
     response.headers.set('Pragma', 'no-cache');
-    response.headers.set('Expires', '0');
-    response.headers.set('Surrogate-Control', 'no-store');
     response.headers.set('X-TTM-Version', '2.0.1');
     response.headers.set('X-Frame-Options', 'DENY');
     response.headers.set('X-Content-Type-Options', 'nosniff');
-    response.headers.set('X-Cache-Bust', Date.now().toString());
+    response.headers.set('X-Session-Preserve', 'true'); // Nieuwe header voor session preservatie
   }
 
   // Add aggressive cache-busting headers for dashboard routes to prevent caching issues

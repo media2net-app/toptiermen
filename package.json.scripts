@@ -1,0 +1,19 @@
+{
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "deploy": "./deploy.sh",
+    "deploy:quick": "./deploy.sh 'Quick deploy'",
+    "deploy:fix": "./deploy.sh 'Bug fix deployment'",
+    "deploy:feature": "./deploy.sh 'New feature deployment'",
+    "git:push": "git add . && git commit -m 'Auto-commit' && git push origin main",
+    "vercel:deploy": "vercel --prod",
+    "vercel:preview": "vercel"
+  }
+}
