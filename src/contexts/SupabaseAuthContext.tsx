@@ -4,13 +4,13 @@ import { createContext, useContext, useEffect, useReducer, useCallback } from 'r
 import { createClient } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
 
-// V2.0: Simplified Supabase client with proper error handling
+// 2.0.1: Simplified Supabase client with proper error handling
 const getSupabaseClient = () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   
   if (!supabaseUrl || !supabaseAnonKey) {
-    console.error('❌ V2.0: Missing Supabase environment variables');
+    console.error('❌ 2.0.1: Missing Supabase environment variables');
     throw new Error('Supabase configuration is missing');
   }
   
@@ -31,7 +31,7 @@ const getSupabaseClient = () => {
 
 const supabase = getSupabaseClient();
 
-// V2.0: Unified session management constants
+// 2.0.1: Unified session management constants
 const SESSION_CONFIG = {
   CHECK_INTERVAL: 5 * 60 * 1000,        // 5 minutes (was 60)
   WARNING_TIME: 2 * 60 * 1000,          // 2 minutes before expiry (was 30)
@@ -71,7 +71,7 @@ type AuthAction =
   | { type: 'RESET_RETRY' }
   | { type: 'RESET_STATE' };
 
-// V2.0: Simplified reducer
+// 2.0.1: Simplified reducer
 const authReducer = (state: AuthState, action: AuthAction): AuthState => {
   switch (action.type) {
     case 'SET_LOADING':
@@ -114,7 +114,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// V2.0: Simplified retry mechanism
+// 2.0.1: Simplified retry mechanism
 const retryWithBackoff = async <T,>(
   operation: () => Promise<T>,
   maxAttempts: number = SESSION_CONFIG.MAX_RETRIES
@@ -132,7 +132,7 @@ const retryWithBackoff = async <T,>(
       }
       
       const delay = SESSION_CONFIG.RETRY_DELAY * Math.pow(2, attempt - 1);
-      console.log(`V2.0: Auth operation failed, retrying in ${delay}ms (attempt ${attempt}/${maxAttempts})`);
+      console.log(`2.0.1: Auth operation failed, retrying in ${delay}ms (attempt ${attempt}/${maxAttempts})`);
       await new Promise(resolve => setTimeout(resolve, delay));
     }
   }
@@ -151,12 +151,12 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
   
   const router = useRouter();
 
-  // V2.0: Simplified error clearing
+  // 2.0.1: Simplified error clearing
   const clearError = useCallback(() => {
     dispatch({ type: 'SET_ERROR', payload: null });
   }, []);
 
-  // V2.0: Simplified session refresh
+  // 2.0.1: Simplified session refresh
   const refreshSession = useCallback(async (): Promise<boolean> => {
     try {
       const result = await retryWithBackoff(async () => {
@@ -166,33 +166,33 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       });
 
       if (result.session) {
-        console.log('✅ V2.0: Session refreshed successfully');
+        console.log('✅ 2.0.1: Session refreshed successfully');
         dispatch({ type: 'RESET_RETRY' });
         return true;
       }
       return false;
     } catch (error) {
-      console.error('❌ V2.0: Session refresh failed:', error);
+      console.error('❌ 2.0.1: Session refresh failed:', error);
       dispatch({ type: 'SET_ERROR', payload: 'Session refresh failed' });
       return false;
     }
   }, []);
 
-  // V2.0: Simplified session health check
+  // 2.0.1: Simplified session health check
   const checkSessionHealth = useCallback(async () => {
-    // V2.0: Completely disabled to prevent infinite loops
+    // 2.0.1: Completely disabled to prevent infinite loops
     return;
     
     try {
       const { data: { session }, error } = await supabase.auth.getSession();
       
       if (error) {
-        console.error('V2.0: Session check error:', error);
+        console.error('2.0.1: Session check error:', error);
         return;
       }
 
       if (!session) {
-        console.log('V2.0: No active session found');
+        console.log('2.0.1: No active session found');
         return;
       }
 
@@ -203,19 +203,19 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       //   const timeUntilExpiry = expiresAt - now;
         
       //   if (timeUntilExpiry < SESSION_CONFIG.WARNING_TIME && timeUntilExpiry > 0) {
-      //     console.log('⚠️ V2.0: Session expiring soon, attempting refresh...');
+      //     console.log('⚠️ 2.0.1: Session expiring soon, attempting refresh...');
       //     const refreshed = await refreshSession();
       //     if (!refreshed) {
-      //       console.warn('V2.0: Failed to refresh session, user may need to re-authenticate');
+      //       console.warn('2.0.1: Failed to refresh session, user may need to re-authenticate');
       //     }
       //   }
       // }
     } catch (error) {
-      console.error('V2.0: Session health check failed:', error);
+      console.error('2.0.1: Session health check failed:', error);
     }
   }, [refreshSession]);
 
-  // V2.0: Simplified user profile fetching
+  // 2.0.1: Simplified user profile fetching
   const fetchUserProfile = useCallback(async (userId: string): Promise<User | null> => {
     try {
       const result = await retryWithBackoff(async () => {
@@ -239,12 +239,12 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       }
       return null;
     } catch (error) {
-      console.error('V2.0: Error fetching user profile:', error);
+      console.error('2.0.1: Error fetching user profile:', error);
       return null;
     }
   }, []);
 
-  // V2.0: Simplified initial session loading
+  // 2.0.1: Simplified initial session loading
   useEffect(() => {
     let isMounted = true;
     
@@ -253,10 +253,10 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         if (!isMounted) return;
         dispatch({ type: 'SET_LOADING', payload: true });
         
-        // V2.0: Immediate timeout for development
+        // 2.0.1: Immediate timeout for development
         const timeoutId = setTimeout(() => {
           if (!isMounted) return;
-          console.log('✅ V2.0: Auth timeout - allowing login form to show');
+          console.log('✅ 2.0.1: Auth timeout - allowing login form to show');
           dispatch({ type: 'SET_LOADING', payload: false });
           dispatch({ type: 'SET_INITIALIZED', payload: true });
           dispatch({ type: 'SET_USER', payload: null });
@@ -267,7 +267,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         if (!isMounted) return;
         
         if (error) {
-          console.error('V2.0: Error getting session:', error);
+          console.error('2.0.1: Error getting session:', error);
           dispatch({ type: 'SET_ERROR', payload: 'Failed to get session' });
         } else if (session?.user) {
           const profile = await fetchUserProfile(session.user.id);
@@ -294,7 +294,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         }
       } catch (error) {
         if (!isMounted) return;
-        console.error('V2.0: Error in getInitialSession:', error);
+        console.error('2.0.1: Error in getInitialSession:', error);
         dispatch({ type: 'SET_ERROR', payload: 'Failed to initialize authentication' });
         dispatch({ type: 'SET_LOADING', payload: false });
       }
@@ -302,18 +302,18 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
 
     getInitialSession();
 
-    // V2.0: Disabled session health check for now
+    // 2.0.1: Disabled session health check for now
     // const interval = setInterval(() => {
     //   if (isMounted) {
     //     checkSessionHealth();
     //   }
     // }, SESSION_CONFIG.CHECK_INTERVAL);
 
-    // V2.0: Simplified auth state change listener
+    // 2.0.1: Simplified auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (!isMounted) return;
-        console.log('🔄 V2.0: Auth state changed:', event, session?.user?.email);
+        console.log('🔄 2.0.1: Auth state changed:', event, session?.user?.email);
         
         if (event === 'SIGNED_IN' && session?.user) {
           const profile = await fetchUserProfile(session.user.id);
@@ -332,7 +332,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         } else if (event === 'SIGNED_OUT') {
           dispatch({ type: 'RESET_STATE' });
         } else if (event === 'TOKEN_REFRESHED') {
-          console.log('✅ V2.0: Token refreshed successfully');
+          console.log('✅ 2.0.1: Token refreshed successfully');
         }
         
         dispatch({ type: 'SET_LOADING', payload: false });
@@ -346,7 +346,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     };
   }, [fetchUserProfile, checkSessionHealth]);
 
-  // V2.0: Simplified sign in
+  // 2.0.1: Simplified sign in
   const signIn = useCallback(async (email: string, password: string) => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
@@ -382,7 +382,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       
       return { success: false, error: 'Sign in failed' };
     } catch (error) {
-      console.error('V2.0: Sign in error:', error);
+      console.error('2.0.1: Sign in error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Sign in failed';
       dispatch({ type: 'SET_ERROR', payload: errorMessage });
       return { success: false, error: errorMessage };
@@ -404,7 +404,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       });
 
       if (error) {
-        console.error('V2.0: Sign up error:', error);
+        console.error('2.0.1: Sign up error:', error);
         return { success: false, error: error.message };
       }
 
@@ -422,7 +422,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
           ]);
 
         if (profileError) {
-          console.error('V2.0: Error creating profile:', profileError);
+          console.error('2.0.1: Error creating profile:', profileError);
           // Fallback: still consider sign-up successful with auth user only
           dispatch({ type: 'SET_USER', payload: {
             id: data.user.id,
@@ -443,7 +443,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
 
       return { success: true };
     } catch (error) {
-      console.error('V2.0: Sign up error:', error);
+      console.error('2.0.1: Sign up error:', error);
       return { success: false, error: 'An unexpected error occurred' };
     }
   };
@@ -452,29 +452,29 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     try {
       const { error } = await supabase.auth.signOut();
       if (error) {
-        console.error('V2.0: Sign out error:', error);
+        console.error('2.0.1: Sign out error:', error);
         throw error;
       } else {
         dispatch({ type: 'RESET_STATE' });
-        console.log('V2.0: User signed out successfully');
+        console.log('2.0.1: User signed out successfully');
       }
     } catch (error) {
-      console.error('V2.0: Sign out error:', error);
+      console.error('2.0.1: Sign out error:', error);
       throw error;
     }
   };
 
-  // V2.0: Simplified logout and redirect
+  // 2.0.1: Simplified logout and redirect
   const logoutAndRedirect = async (redirectUrl: string = '/login') => {
     try {
-      console.log('V2.0: Logout and redirect initiated...');
+      console.log('2.0.1: Logout and redirect initiated...');
       await signOut();
       
-      console.log(`V2.0: Redirecting to: ${redirectUrl}`);
+      console.log(`2.0.1: Redirecting to: ${redirectUrl}`);
       window.location.href = redirectUrl;
       
     } catch (error) {
-      console.error('V2.0: Error during logout and redirect:', error);
+      console.error('2.0.1: Error during logout and redirect:', error);
       
       // Show user feedback
       alert('Er is een fout opgetreden bij het uitloggen. Probeer het opnieuw.');
@@ -496,12 +496,12 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         .eq('id', state.user.id);
 
       if (error) {
-        console.error('V2.0: Update user error:', error);
+        console.error('2.0.1: Update user error:', error);
       } else {
         dispatch({ type: 'SET_USER', payload: { ...state.user, ...updates } });
       }
     } catch (error) {
-      console.error('V2.0: Update user error:', error);
+      console.error('2.0.1: Update user error:', error);
     }
   };
   

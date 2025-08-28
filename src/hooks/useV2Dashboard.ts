@@ -4,7 +4,7 @@ import { useV2Cache } from '@/lib/v2-cache-strategy';
 import { useV2ErrorRecovery } from '@/lib/v2-error-recovery';
 import { useV2Monitoring } from '@/lib/v2-monitoring';
 
-// V2.0: Dashboard data types
+// 2.0.1: Dashboard data types
 export interface DashboardData {
   userProfile: any;
   notifications: any[];
@@ -27,7 +27,7 @@ export interface DashboardPreferences {
   };
 }
 
-// V2.0: Dashboard hook with enhanced functionality
+// 2.0.1: Dashboard hook with enhanced functionality
 export function useV2Dashboard() {
   const { state } = useV2State();
   const user = state.user.profile;
@@ -41,7 +41,7 @@ export function useV2Dashboard() {
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
-  // V2.0: Fetch dashboard data with caching and error recovery
+  // 2.0.1: Fetch dashboard data with caching and error recovery
   const fetchDashboardData = useCallback(async (forceRefresh = false) => {
     if (!user?.id) return;
 
@@ -49,7 +49,7 @@ export function useV2Dashboard() {
       setLoading(true);
       setError(null);
 
-      // V2.0: Try to get from cache first (unless force refresh)
+      // 2.0.1: Try to get from cache first (unless force refresh)
       if (!forceRefresh) {
         const cachedData = await get<DashboardData>('dashboard-data', 'api-response');
         if (cachedData) {
@@ -61,7 +61,7 @@ export function useV2Dashboard() {
         }
       }
 
-      // V2.0: Fetch fresh data with error recovery
+      // 2.0.1: Fetch fresh data with error recovery
       const startTime = performance.now();
       
       const data = await handleError(
@@ -86,11 +86,11 @@ export function useV2Dashboard() {
         'dashboard-fetch'
       );
 
-      // V2.0: Track API performance
+      // 2.0.1: Track API performance
       const endTime = performance.now();
       trackApiCall('/api/v2/dashboard', 'GET', endTime - startTime, 200);
 
-      // V2.0: Cache the data
+      // 2.0.1: Cache the data
       await set('dashboard-data', data, 'api-response');
       
       setDashboardData(data);
@@ -106,7 +106,7 @@ export function useV2Dashboard() {
     }
   }, [user?.id, set, get, handleError, trackFeatureUsage, trackApiCall]);
 
-  // V2.0: Update dashboard preferences
+  // 2.0.1: Update dashboard preferences
   const updatePreferences = useCallback(async (newPreferences: Partial<DashboardPreferences>) => {
     if (!user?.id) return;
 
@@ -142,17 +142,17 @@ export function useV2Dashboard() {
         'dashboard-preferences-update'
       );
 
-      // V2.0: Track API performance
+      // 2.0.1: Track API performance
       const endTime = performance.now();
       trackApiCall('/api/v2/dashboard', 'PUT', endTime - startTime, 200);
 
-      // V2.0: Update local state
+      // 2.0.1: Update local state
       setPreferences(updatedData.preferences);
       
-      // V2.0: Clear cached data to force refresh
+      // 2.0.1: Clear cached data to force refresh
       await clear();
       
-      // V2.0: Refresh dashboard data
+      // 2.0.1: Refresh dashboard data
       await fetchDashboardData(true);
       
       trackFeatureUsage('dashboard-preferences-updated', user.id);
@@ -166,7 +166,7 @@ export function useV2Dashboard() {
     }
   }, [user?.id, handleError, trackFeatureUsage, trackApiCall, clear, fetchDashboardData]);
 
-  // V2.0: Mark notification as read
+  // 2.0.1: Mark notification as read
   const markNotificationRead = useCallback(async (notificationId: string) => {
     if (!user?.id) return;
 
@@ -193,7 +193,7 @@ export function useV2Dashboard() {
         'notification-read'
       );
 
-      // V2.0: Update local state
+      // 2.0.1: Update local state
       if (dashboardData) {
         setDashboardData({
           ...dashboardData,
@@ -212,7 +212,7 @@ export function useV2Dashboard() {
     }
   }, [user?.id, dashboardData, handleError, trackFeatureUsage]);
 
-  // V2.0: Clear all notifications
+  // 2.0.1: Clear all notifications
   const clearAllNotifications = useCallback(async () => {
     if (!user?.id) return;
 
@@ -239,7 +239,7 @@ export function useV2Dashboard() {
         'notifications-clear'
       );
 
-      // V2.0: Update local state
+      // 2.0.1: Update local state
       if (dashboardData) {
         setDashboardData({
           ...dashboardData,
@@ -254,19 +254,19 @@ export function useV2Dashboard() {
     }
   }, [user?.id, dashboardData, handleError, trackFeatureUsage]);
 
-  // V2.0: Refresh dashboard data
+  // 2.0.1: Refresh dashboard data
   const refresh = useCallback(async () => {
     await fetchDashboardData(true);
   }, [fetchDashboardData]);
 
-  // V2.0: Load initial data
+  // 2.0.1: Load initial data
   useEffect(() => {
     if (user?.id) {
       fetchDashboardData();
     }
   }, [user?.id, fetchDashboardData]);
 
-  // V2.0: Auto-refresh every 5 minutes
+  // 2.0.1: Auto-refresh every 5 minutes
   useEffect(() => {
     if (!user?.id) return;
 
@@ -277,15 +277,15 @@ export function useV2Dashboard() {
     return () => clearInterval(interval);
   }, [user?.id, fetchDashboardData]);
 
-  // V2.0: Get unread notifications count
+  // 2.0.1: Get unread notifications count
   const unreadNotificationsCount = dashboardData?.notifications.filter(
     notification => !notification.read
   ).length || 0;
 
-  // V2.0: Get recent activity count
+  // 2.0.1: Get recent activity count
   const recentActivityCount = dashboardData?.recentActivity.length || 0;
 
-  // V2.0: Get user stats summary
+  // 2.0.1: Get user stats summary
   const statsSummary = {
     totalWorkouts: dashboardData?.stats?.total_workouts || 0,
     totalCalories: dashboardData?.stats?.total_calories || 0,
@@ -313,7 +313,7 @@ export function useV2Dashboard() {
     clearAllNotifications,
     refresh,
     
-    // V2.0: Utility functions
+    // 2.0.1: Utility functions
     isLoading: loading,
     hasError: !!error,
     getError: error,
@@ -321,20 +321,20 @@ export function useV2Dashboard() {
   };
 }
 
-// V2.0: Helper function to get auth token
+// 2.0.1: Helper function to get auth token
 async function getAuthToken(): Promise<string> {
   // This would typically get the token from your auth context
   // For now, we'll return an empty string and let the API handle auth
   return '';
 }
 
-// V2.0: Dashboard analytics hook
+// 2.0.1: Dashboard analytics hook
 export function useV2DashboardAnalytics() {
   const { trackFeatureUsage, trackUserAction } = useV2Monitoring();
   const { state } = useV2State();
   const user = state.user.profile;
 
-  // V2.0: Track dashboard interactions
+  // 2.0.1: Track dashboard interactions
   const trackDashboardInteraction = useCallback((action: string, details?: any) => {
     if (!user?.id) return;
 
@@ -347,7 +347,7 @@ export function useV2DashboardAnalytics() {
     );
   }, [user?.id, trackUserAction]);
 
-  // V2.0: Track feature usage
+  // 2.0.1: Track feature usage
   const trackFeatureUse = useCallback((feature: string) => {
     if (!user?.id) return;
 
@@ -360,16 +360,16 @@ export function useV2DashboardAnalytics() {
   };
 }
 
-// V2.0: Dashboard performance monitoring hook
+// 2.0.1: Dashboard performance monitoring hook
 export function useV2DashboardPerformance() {
   const { trackPerformance, trackComponentRender } = useV2Monitoring();
 
-  // V2.0: Track dashboard load performance
+  // 2.0.1: Track dashboard load performance
   const trackDashboardLoad = useCallback((loadTime: number) => {
     trackPerformance('dashboard_load_time', loadTime, 'ms', { component: 'dashboard' });
   }, [trackPerformance]);
 
-  // V2.0: Track component render performance
+  // 2.0.1: Track component render performance
   const trackComponentPerformance = useCallback((componentName: string) => {
     const startTime = performance.now();
     

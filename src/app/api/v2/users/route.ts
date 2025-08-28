@@ -16,7 +16,7 @@ import {
   validateRequiredFields
 } from '@/lib/v2-api-utils';
 
-// V2.0: Users API Route with standardized patterns
+// 2.0.1: Users API Route with standardized patterns
 export const GET = withApiHandler(async (request: NextRequest) => {
   // Rate limiting
   const clientIp = request.headers.get('x-forwarded-for') || 'unknown';
@@ -94,7 +94,7 @@ export const GET = withApiHandler(async (request: NextRequest) => {
     return response;
 
   } catch (error) {
-    console.error('V2.0: Users GET error:', error);
+    console.error('2.0.1: Users GET error:', error);
     return createErrorResponse('Internal server error', 500);
   }
 });
@@ -148,7 +148,7 @@ export const POST = withApiHandler(async (request: NextRequest) => {
     return response;
 
   } catch (error) {
-    console.error('V2.0: Users POST error:', error);
+    console.error('2.0.1: Users POST error:', error);
     return createErrorResponse('Internal server error', 500);
   }
 });
@@ -208,7 +208,7 @@ export const PUT = withApiHandler(async (request: NextRequest) => {
     return response;
 
   } catch (error) {
-    console.error('V2.0: Users PUT error:', error);
+    console.error('2.0.1: Users PUT error:', error);
     return createErrorResponse('Internal server error', 500);
   }
 });
@@ -264,7 +264,7 @@ export const DELETE = withApiHandler(async (request: NextRequest) => {
     return response;
 
   } catch (error) {
-    console.error('V2.0: Users DELETE error:', error);
+    console.error('2.0.1: Users DELETE error:', error);
     return createErrorResponse('Internal server error', 500);
   }
 });

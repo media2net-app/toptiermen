@@ -73,7 +73,7 @@ export default function Dashboard() {
 
   const { user } = useSupabaseAuth();
 
-  // V2.0: Simplified data fetching - DISABLED to prevent crashes
+  // 2.0.1: Simplified data fetching - DISABLED to prevent crashes
   useEffect(() => {
     // Set mock data to prevent crashes
     setStats({

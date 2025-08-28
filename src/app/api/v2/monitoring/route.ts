@@ -7,7 +7,7 @@ import {
   checkRateLimit
 } from '@/lib/v2-api-utils';
 
-// V2.0: Monitoring API Route for collecting system metrics
+// 2.0.1: Monitoring API Route for collecting system metrics
 export const GET = withApiHandler(async (request: NextRequest) => {
   const clientIp = request.headers.get('x-forwarded-for') || 'unknown';
   
@@ -20,7 +20,7 @@ export const GET = withApiHandler(async (request: NextRequest) => {
   logApiRequest(request, 'GET_MONITORING', undefined);
 
   try {
-    // V2.0: Collect system metrics
+    // 2.0.1: Collect system metrics
     const metrics = {
       system: {
         uptime: process.uptime(),
@@ -77,7 +77,7 @@ export const GET = withApiHandler(async (request: NextRequest) => {
     });
 
   } catch (error) {
-    console.error('V2.0: Monitoring GET error:', error);
+    console.error('2.0.1: Monitoring GET error:', error);
     return createErrorResponse('Failed to collect metrics', 500);
   }
 });
@@ -93,7 +93,7 @@ export const POST = withApiHandler(async (request: NextRequest) => {
   try {
     const body = await request.json();
     
-    // V2.0: Process monitoring data
+    // 2.0.1: Process monitoring data
     const { 
       type, 
       data, 
@@ -105,7 +105,7 @@ export const POST = withApiHandler(async (request: NextRequest) => {
     // Log monitoring event
     logApiRequest(request, `MONITORING_${type?.toUpperCase()}`, userId);
 
-    // V2.0: Store monitoring data (in production, this would go to a monitoring service)
+    // 2.0.1: Store monitoring data (in production, this would go to a monitoring service)
     const monitoringEvent = {
       type,
       data,
@@ -117,22 +117,22 @@ export const POST = withApiHandler(async (request: NextRequest) => {
       processed: true
     };
 
-    // V2.0: Process different types of monitoring data
+    // 2.0.1: Process different types of monitoring data
     switch (type) {
       case 'error':
-        console.log('V2.0: Error tracked:', data);
+        console.log('2.0.1: Error tracked:', data);
         break;
       case 'performance':
-        console.log('V2.0: Performance tracked:', data);
+        console.log('2.0.1: Performance tracked:', data);
         break;
       case 'user_activity':
-        console.log('V2.0: User activity tracked:', data);
+        console.log('2.0.1: User activity tracked:', data);
         break;
       case 'api_call':
-        console.log('V2.0: API call tracked:', data);
+        console.log('2.0.1: API call tracked:', data);
         break;
       default:
-        console.log('V2.0: Unknown monitoring type:', type);
+        console.log('2.0.1: Unknown monitoring type:', type);
     }
 
     return createSuccessResponse({
@@ -142,7 +142,7 @@ export const POST = withApiHandler(async (request: NextRequest) => {
     });
 
   } catch (error) {
-    console.error('V2.0: Monitoring POST error:', error);
+    console.error('2.0.1: Monitoring POST error:', error);
     return createErrorResponse('Failed to process monitoring data', 500);
   }
 });
@@ -158,7 +158,7 @@ export const PUT = withApiHandler(async (request: NextRequest) => {
   try {
     const body = await request.json();
     
-    // V2.0: Update monitoring configuration
+    // 2.0.1: Update monitoring configuration
     const { 
       config, 
       userId 
@@ -166,7 +166,7 @@ export const PUT = withApiHandler(async (request: NextRequest) => {
 
     logApiRequest(request, 'UPDATE_MONITORING_CONFIG', userId);
 
-    // V2.0: Update monitoring settings (in production, this would update a config service)
+    // 2.0.1: Update monitoring settings (in production, this would update a config service)
     const updatedConfig = {
       ...config,
       updatedAt: new Date().toISOString(),
@@ -180,7 +180,7 @@ export const PUT = withApiHandler(async (request: NextRequest) => {
     });
 
   } catch (error) {
-    console.error('V2.0: Monitoring PUT error:', error);
+    console.error('2.0.1: Monitoring PUT error:', error);
     return createErrorResponse('Failed to update monitoring config', 500);
   }
 });

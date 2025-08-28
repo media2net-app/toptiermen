@@ -23,8 +23,8 @@ function LoginPageContent() {
   const [resetMessage, setResetMessage] = useState("");
 
   useEffect(() => { 
-    // V2.0: Simplified initialization
-    console.log('V2.0: Login page initialized');
+    // 2.0.1: Simplified initialization
+    console.log('2.0.1: Login page initialized');
   }, []);
 
   // Check if user is already authenticated
@@ -32,7 +32,7 @@ function LoginPageContent() {
     if (loading) return;
     
     if (user) {
-      console.log('V2.0: User already authenticated:', user.role);
+      console.log('2.0.1: User already authenticated:', user.role);
       setRedirecting(true);
       
       // Check for redirect parameter first
@@ -46,16 +46,16 @@ function LoginPageContent() {
         targetPath = user.role?.toLowerCase() === 'admin' ? '/dashboard-admin' : '/dashboard';
       }
 
-      console.log('V2.0: Redirecting to:', targetPath);
+      console.log('2.0.1: Redirecting to:', targetPath);
       router.replace(targetPath);
     }
   }, [loading, user, router, searchParams]);
 
-  // V2.0: Force show login form after 2 seconds if still loading
+  // 2.0.1: Force show login form after 2 seconds if still loading
   useEffect(() => {
     if (loading) {
       const timer = setTimeout(() => {
-        console.log('V2.0: Force showing login form after timeout');
+        console.log('2.0.1: Force showing login form after timeout');
         setRedirecting(false);
       }, 2000);
       
@@ -78,17 +78,17 @@ function LoginPageContent() {
       const result = await signIn(email, password);
 
       if (!result.success) {
-        console.error('V2.0: Sign in error:', result.error);
+        console.error('2.0.1: Sign in error:', result.error);
         setError(result.error || "Ongeldige inloggegevens");
         setIsLoading(false);
         return;
       }
 
-      console.log('V2.0: Login successful, redirecting...');
+      console.log('2.0.1: Login successful, redirecting...');
       setRedirecting(true);
       
     } catch (error: any) {
-      console.error('V2.0: Login error:', error);
+      console.error('2.0.1: Login error:', error);
       setError(error.message || "Er is een fout opgetreden bij het inloggen");
       setIsLoading(false);
     }
@@ -131,7 +131,7 @@ function LoginPageContent() {
       }, 3000);
 
     } catch (error) {
-      console.error('V2.0: Forgot password error:', error);
+      console.error('2.0.1: Forgot password error:', error);
       setResetMessage("Er is een fout opgetreden. Probeer het opnieuw.");
     } finally {
       setIsSendingReset(false);
@@ -262,12 +262,12 @@ function LoginPageContent() {
             </a>
           </p>
           
-          {/* Version badge - V2.0 */}
+          {/* Version badge - 2.0.1 */}
           <div className="mt-4 pt-2 border-t border-[#3A4D23]/30">
             <div className="flex items-center justify-center gap-2">
               <span className="text-[#B6C948] text-xs">Platform</span>
               <span className="px-2 py-1 bg-[#B6C948]/20 text-[#B6C948] text-xs font-semibold rounded-full border border-[#B6C948]/30">
-                V2.0
+                2.0.1
               </span>
               <span className="text-[#B6C948] text-xs">Stable</span>
             </div>

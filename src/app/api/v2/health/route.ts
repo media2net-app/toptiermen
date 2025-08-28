@@ -37,7 +37,7 @@ export const GET = withApiHandler(async (request: NextRequest) => {
 
     return createSuccessResponse({
       health: healthStatus,
-      message: 'V2.0 API is healthy and ready',
+      message: '2.0.1 API is healthy and ready',
       version: '2.0'
     });
 

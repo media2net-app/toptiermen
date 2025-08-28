@@ -13,7 +13,7 @@ interface State {
   errorInfo?: ErrorInfo;
 }
 
-// V2.0: Error Boundary for better error handling
+// 2.0.1: Error Boundary for better error handling
 export class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
@@ -27,10 +27,10 @@ export class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Log error to console and any error reporting service
-    console.error('V2.0: ErrorBoundary caught an error:', error, errorInfo);
+    console.error('2.0.1: ErrorBoundary caught an error:', error, errorInfo);
     
     // Log additional context for debugging
-    console.error('V2.0: Error details:', {
+    console.error('2.0.1: Error details:', {
       message: error.message,
       stack: error.stack,
       componentStack: errorInfo.componentStack,
@@ -114,7 +114,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 <div className="flex items-center justify-center gap-2">
                   <span className="text-[#B6C948] text-xs">Platform</span>
                   <span className="px-2 py-1 bg-[#B6C948]/20 text-[#B6C948] text-xs font-semibold rounded-full border border-[#B6C948]/30">
-                    V2.0
+                    2.0.1
                   </span>
                   <span className="text-[#B6C948] text-xs">Error Recovery</span>
                 </div>
@@ -129,10 +129,10 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 }
 
-// V2.0: Hook for functional components to handle errors
+// 2.0.1: Hook for functional components to handle errors
 export function useErrorHandler() {
   const handleError = (error: Error, errorInfo?: ErrorInfo) => {
-    console.error('V2.0: useErrorHandler caught an error:', error, errorInfo);
+    console.error('2.0.1: useErrorHandler caught an error:', error, errorInfo);
     
     // You can add error reporting logic here
     // Example: logErrorToService(error, errorInfo);
@@ -144,7 +144,7 @@ export function useErrorHandler() {
   return { handleError };
 }
 
-// V2.0: Higher-order component for error handling
+// 2.0.1: Higher-order component for error handling
 export function withErrorBoundary<P extends object>(
   Component: React.ComponentType<P>,
   fallback?: ReactNode

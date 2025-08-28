@@ -1,11 +1,11 @@
-// V2.0: Intelligent Error Recovery System
+// 2.0.1: Intelligent Error Recovery System
 import { useV2State } from '@/contexts/V2StateContext';
 
-// V2.0: Error types
+// 2.0.1: Error types
 export type ErrorSeverity = 'low' | 'medium' | 'high' | 'critical';
 export type ErrorCategory = 'network' | 'auth' | 'validation' | 'database' | 'ui' | 'unknown';
 
-// V2.0: Error information
+// 2.0.1: Error information
 export interface V2Error {
   id: string;
   message: string;
@@ -20,7 +20,7 @@ export interface V2Error {
   recoveryStrategy?: RecoveryStrategy;
 }
 
-// V2.0: Recovery strategies
+// 2.0.1: Recovery strategies
 export type RecoveryStrategy = 
   | 'retry'           // Retry the operation
   | 'fallback'        // Use fallback data/functionality
@@ -29,7 +29,7 @@ export type RecoveryStrategy =
   | 'ignore'          // Ignore the error
   | 'manual';         // Require manual intervention
 
-// V2.0: Error recovery configuration
+// 2.0.1: Error recovery configuration
 export interface ErrorRecoveryConfig {
   maxRetries: number;
   retryDelay: number;
@@ -41,14 +41,14 @@ export interface ErrorRecoveryConfig {
   onRecovery?: (error: V2Error) => void;
 }
 
-// V2.0: Default error configurations
+// 2.0.1: Default error configurations
 export const ERROR_CONFIGS: Record<ErrorCategory, ErrorRecoveryConfig> = {
   network: {
     maxRetries: 3,
     retryDelay: 1000,
     backoffMultiplier: 2,
     recoveryStrategy: 'retry',
-    onError: (error) => console.error('V2.0: Network error:', error),
+    onError: (error) => console.error('2.0.1: Network error:', error),
   },
   
   auth: {
@@ -56,7 +56,7 @@ export const ERROR_CONFIGS: Record<ErrorCategory, ErrorRecoveryConfig> = {
     retryDelay: 0,
     backoffMultiplier: 1,
     recoveryStrategy: 'redirect',
-    onError: (error) => console.error('V2.0: Auth error:', error),
+    onError: (error) => console.error('2.0.1: Auth error:', error),
   },
   
   validation: {
@@ -64,7 +64,7 @@ export const ERROR_CONFIGS: Record<ErrorCategory, ErrorRecoveryConfig> = {
     retryDelay: 0,
     backoffMultiplier: 1,
     recoveryStrategy: 'ignore',
-    onError: (error) => console.error('V2.0: Validation error:', error),
+    onError: (error) => console.error('2.0.1: Validation error:', error),
   },
   
   database: {
@@ -72,7 +72,7 @@ export const ERROR_CONFIGS: Record<ErrorCategory, ErrorRecoveryConfig> = {
     retryDelay: 2000,
     backoffMultiplier: 1.5,
     recoveryStrategy: 'retry',
-    onError: (error) => console.error('V2.0: Database error:', error),
+    onError: (error) => console.error('2.0.1: Database error:', error),
   },
   
   ui: {
@@ -80,7 +80,7 @@ export const ERROR_CONFIGS: Record<ErrorCategory, ErrorRecoveryConfig> = {
     retryDelay: 0,
     backoffMultiplier: 1,
     recoveryStrategy: 'degrade',
-    onError: (error) => console.error('V2.0: UI error:', error),
+    onError: (error) => console.error('2.0.1: UI error:', error),
   },
   
   unknown: {
@@ -88,17 +88,17 @@ export const ERROR_CONFIGS: Record<ErrorCategory, ErrorRecoveryConfig> = {
     retryDelay: 1000,
     backoffMultiplier: 1,
     recoveryStrategy: 'manual',
-    onError: (error) => console.error('V2.0: Unknown error:', error),
+    onError: (error) => console.error('2.0.1: Unknown error:', error),
   },
 };
 
-// V2.0: Error recovery manager
+// 2.0.1: Error recovery manager
 export class V2ErrorRecoveryManager {
   private errors: Map<string, V2Error> = new Map();
   private retryQueue: Array<{ error: V2Error; retryAt: number }> = [];
   private isProcessing = false;
   
-  // V2.0: Create error
+  // 2.0.1: Create error
   createError(
     message: string,
     category: ErrorCategory = 'unknown',
@@ -127,7 +127,7 @@ export class V2ErrorRecoveryManager {
     return error;
   }
   
-  // V2.0: Handle error with recovery
+  // 2.0.1: Handle error with recovery
   async handleError<T>(
     operation: () => Promise<T>,
     errorMessage: string,
@@ -151,7 +151,7 @@ export class V2ErrorRecoveryManager {
     }
   }
   
-  // V2.0: Attempt recovery
+  // 2.0.1: Attempt recovery
   private async attemptRecovery<T>(
     error: V2Error,
     operation: () => Promise<T>,
@@ -174,7 +174,7 @@ export class V2ErrorRecoveryManager {
         throw new Error(error.message);
         
       case 'ignore':
-        console.warn('V2.0: Ignoring error:', error.message);
+        console.warn('2.0.1: Ignoring error:', error.message);
         throw new Error(error.message);
         
       case 'manual':
@@ -184,18 +184,18 @@ export class V2ErrorRecoveryManager {
     }
   }
   
-  // V2.0: Retry operation with exponential backoff
+  // 2.0.1: Retry operation with exponential backoff
   private async retryOperation<T>(error: V2Error, operation: () => Promise<T>): Promise<T> {
     const config = ERROR_CONFIGS[error.category];
     
     if (error.retryCount >= config.maxRetries) {
-      throw new Error(`V2.0: Max retries exceeded for: ${error.message}`);
+      throw new Error(`2.0.1: Max retries exceeded for: ${error.message}`);
     }
     
     error.retryCount++;
     const delay = config.retryDelay * Math.pow(config.backoffMultiplier, error.retryCount - 1);
     
-    console.log(`V2.0: Retrying operation (${error.retryCount}/${config.maxRetries}) in ${delay}ms`);
+    console.log(`2.0.1: Retrying operation (${error.retryCount}/${config.maxRetries}) in ${delay}ms`);
     
     await this.delay(delay);
     
@@ -208,35 +208,35 @@ export class V2ErrorRecoveryManager {
     }
   }
   
-  // V2.0: Use fallback data
+  // 2.0.1: Use fallback data
   private useFallback<T>(error: V2Error, fallbackData?: T): T {
     if (fallbackData === undefined) {
-      throw new Error(`V2.0: No fallback data available for: ${error.message}`);
+      throw new Error(`2.0.1: No fallback data available for: ${error.message}`);
     }
     
-    console.log('V2.0: Using fallback data for:', error.message);
+    console.log('2.0.1: Using fallback data for:', error.message);
     ERROR_CONFIGS[error.category].onRecovery?.(error);
     return fallbackData;
   }
   
-  // V2.0: Degrade functionality
+  // 2.0.1: Degrade functionality
   private degradeFunctionality<T>(error: V2Error, fallbackData?: T): T {
-    console.log('V2.0: Degrading functionality for:', error.message);
+    console.log('2.0.1: Degrading functionality for:', error.message);
     ERROR_CONFIGS[error.category].onRecovery?.(error);
     
     // Return fallback data or empty/default values
     return fallbackData as T;
   }
   
-  // V2.0: Redirect to error page
+  // 2.0.1: Redirect to error page
   private redirectToError(error: V2Error): void {
-    console.log('V2.0: Redirecting to error page for:', error.message);
+    console.log('2.0.1: Redirecting to error page for:', error.message);
     
     // Store error in session storage for error page
     try {
       sessionStorage.setItem('v2-error-redirect', JSON.stringify(error));
     } catch (e) {
-      console.error('V2.0: Failed to store error for redirect:', e);
+      console.error('2.0.1: Failed to store error for redirect:', e);
     }
     
     // Redirect to error page
@@ -245,9 +245,9 @@ export class V2ErrorRecoveryManager {
     }
   }
   
-  // V2.0: Require manual intervention
+  // 2.0.1: Require manual intervention
   private requireManualIntervention(error: V2Error): void {
-    console.error('V2.0: Manual intervention required for:', error.message);
+    console.error('2.0.1: Manual intervention required for:', error.message);
     
     // Show user-friendly error message
     if (typeof window !== 'undefined') {
@@ -255,7 +255,7 @@ export class V2ErrorRecoveryManager {
     }
   }
   
-  // V2.0: Determine error severity
+  // 2.0.1: Determine error severity
   private determineSeverity(error: any): ErrorSeverity {
     if (error instanceof Error) {
       const message = error.message.toLowerCase();
@@ -276,32 +276,32 @@ export class V2ErrorRecoveryManager {
     return 'medium';
   }
   
-  // V2.0: Utility delay function
+  // 2.0.1: Utility delay function
   private delay(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
   
-  // V2.0: Get all errors
+  // 2.0.1: Get all errors
   getErrors(): V2Error[] {
     return Array.from(this.errors.values());
   }
   
-  // V2.0: Get errors by category
+  // 2.0.1: Get errors by category
   getErrorsByCategory(category: ErrorCategory): V2Error[] {
     return this.getErrors().filter(error => error.category === category);
   }
   
-  // V2.0: Get errors by severity
+  // 2.0.1: Get errors by severity
   getErrorsBySeverity(severity: ErrorSeverity): V2Error[] {
     return this.getErrors().filter(error => error.severity === severity);
   }
   
-  // V2.0: Clear errors
+  // 2.0.1: Clear errors
   clearErrors(): void {
     this.errors.clear();
   }
   
-  // V2.0: Clear errors by category
+  // 2.0.1: Clear errors by category
   clearErrorsByCategory(category: ErrorCategory): void {
     for (const [id, error] of this.errors.entries()) {
       if (error.category === category) {
@@ -310,7 +310,7 @@ export class V2ErrorRecoveryManager {
     }
   }
   
-  // V2.0: Get error statistics
+  // 2.0.1: Get error statistics
   getErrorStats(): {
     total: number;
     byCategory: Record<ErrorCategory, number>;
@@ -360,15 +360,15 @@ export class V2ErrorRecoveryManager {
   }
 }
 
-// V2.0: Global error recovery manager
+// 2.0.1: Global error recovery manager
 export const v2ErrorRecovery = new V2ErrorRecoveryManager();
 
-// V2.0: React hook for error recovery
+// 2.0.1: React hook for error recovery
 export function useV2ErrorRecovery() {
   const { setGlobalError, setComponentError, clearAllErrors } = useV2State();
   
   return {
-    // V2.0: Handle error with recovery
+    // 2.0.1: Handle error with recovery
     handleError: async <T>(
       operation: () => Promise<T>,
       errorMessage: string,
@@ -391,7 +391,7 @@ export function useV2ErrorRecovery() {
       }
     },
     
-    // V2.0: Create error
+    // 2.0.1: Create error
     createError: (
       message: string,
       category: ErrorCategory = 'unknown',
@@ -401,30 +401,30 @@ export function useV2ErrorRecovery() {
       return v2ErrorRecovery.createError(message, category, severity, context);
     },
     
-    // V2.0: Get error statistics
+    // 2.0.1: Get error statistics
     getErrorStats: (): ReturnType<typeof v2ErrorRecovery.getErrorStats> => {
       return v2ErrorRecovery.getErrorStats();
     },
     
-    // V2.0: Clear errors
+    // 2.0.1: Clear errors
     clearErrors: (): void => {
       v2ErrorRecovery.clearErrors();
       clearAllErrors();
     },
     
-    // V2.0: Clear errors by category
+    // 2.0.1: Clear errors by category
     clearErrorsByCategory: (category: ErrorCategory): void => {
       v2ErrorRecovery.clearErrorsByCategory(category);
     },
   };
 }
 
-// V2.0: Error boundary hook
+// 2.0.1: Error boundary hook
 export function useV2ErrorBoundary() {
   const { setGlobalError } = useV2State();
   
   return {
-    // V2.0: Handle component error
+    // 2.0.1: Handle component error
     handleComponentError: (error: Error, errorInfo?: any): void => {
       const v2Error = v2ErrorRecovery.createError(
         error.message,
@@ -434,10 +434,10 @@ export function useV2ErrorBoundary() {
       );
       
       setGlobalError(`Component error: ${error.message}`);
-      console.error('V2.0: Component error caught:', v2Error);
+      console.error('2.0.1: Component error caught:', v2Error);
     },
     
-    // V2.0: Handle async error
+    // 2.0.1: Handle async error
     handleAsyncError: (error: Error): void => {
       const v2Error = v2ErrorRecovery.createError(
         error.message,
@@ -447,17 +447,17 @@ export function useV2ErrorBoundary() {
       );
       
       setGlobalError(`Async error: ${error.message}`);
-      console.error('V2.0: Async error caught:', v2Error);
+      console.error('2.0.1: Async error caught:', v2Error);
     },
   };
 }
 
-// V2.0: Network error recovery hook
+// 2.0.1: Network error recovery hook
 export function useV2NetworkRecovery() {
   const { handleError } = useV2ErrorRecovery();
   
   return {
-    // V2.0: Fetch with automatic retry
+    // 2.0.1: Fetch with automatic retry
     fetchWithRetry: async <T>(
       url: string,
       options?: RequestInit,
@@ -477,7 +477,7 @@ export function useV2NetworkRecovery() {
       );
     },
     
-    // V2.0: API call with retry
+    // 2.0.1: API call with retry
     apiCallWithRetry: async <T>(
       endpoint: string,
       method: string = 'GET',

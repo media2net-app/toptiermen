@@ -1,11 +1,11 @@
-// V2.0: Comprehensive Monitoring System
+// 2.0.1: Comprehensive Monitoring System
 import React from 'react';
 import { useV2State } from '@/contexts/V2StateContext';
 
-// V2.0: Metric types
+// 2.0.1: Metric types
 export type MetricType = 'performance' | 'error' | 'user' | 'system' | 'business';
 
-// V2.0: Metric interface
+// 2.0.1: Metric interface
 export interface V2Metric {
   id: string;
   type: MetricType;
@@ -16,14 +16,14 @@ export interface V2Metric {
   metadata?: Record<string, any>;
 }
 
-// V2.0: Performance metric
+// 2.0.1: Performance metric
 export interface V2PerformanceMetric extends V2Metric {
   type: 'performance';
   value: number;
   unit: 'ms' | 'bytes' | 'count' | 'percentage';
 }
 
-// V2.0: Error metric
+// 2.0.1: Error metric
 export interface V2ErrorMetric extends V2Metric {
   type: 'error';
   value: string;
@@ -31,7 +31,7 @@ export interface V2ErrorMetric extends V2Metric {
   stack?: string;
 }
 
-// V2.0: User metric
+// 2.0.1: User metric
 export interface V2UserMetric extends V2Metric {
   type: 'user';
   value: string | number;
@@ -40,7 +40,7 @@ export interface V2UserMetric extends V2Metric {
   sessionId?: string;
 }
 
-// V2.0: System metric
+// 2.0.1: System metric
 export interface V2SystemMetric extends V2Metric {
   type: 'system';
   value: number | boolean;
@@ -48,7 +48,7 @@ export interface V2SystemMetric extends V2Metric {
   status: 'healthy' | 'warning' | 'error' | 'critical';
 }
 
-// V2.0: Business metric
+// 2.0.1: Business metric
 export interface V2BusinessMetric extends V2Metric {
   type: 'business';
   value: number;
@@ -56,7 +56,7 @@ export interface V2BusinessMetric extends V2Metric {
   revenue?: number;
 }
 
-// V2.0: Monitoring configuration
+// 2.0.1: Monitoring configuration
 export interface V2MonitoringConfig {
   enabled: boolean;
   sampleRate: number; // 0-1, percentage of events to track
@@ -66,7 +66,7 @@ export interface V2MonitoringConfig {
   apiKey?: string; // API key for external monitoring service
 }
 
-// V2.0: Default monitoring configuration
+// 2.0.1: Default monitoring configuration
 export const DEFAULT_MONITORING_CONFIG: V2MonitoringConfig = {
   enabled: true,
   sampleRate: 1.0, // Track all events
@@ -74,7 +74,7 @@ export const DEFAULT_MONITORING_CONFIG: V2MonitoringConfig = {
   flushInterval: 30000, // 30 seconds
 };
 
-// V2.0: Monitoring manager
+// 2.0.1: Monitoring manager
 export class V2MonitoringManager {
   private config: V2MonitoringConfig;
   private metrics: V2Metric[] = [];
@@ -86,7 +86,7 @@ export class V2MonitoringManager {
     this.startFlushTimer();
   }
   
-  // V2.0: Track performance metric
+  // 2.0.1: Track performance metric
   trackPerformance(
     name: string,
     value: number,
@@ -110,7 +110,7 @@ export class V2MonitoringManager {
     this.addMetric(metric);
   }
   
-  // V2.0: Track error metric
+  // 2.0.1: Track error metric
   trackError(
     name: string,
     error: Error | string,
@@ -135,7 +135,7 @@ export class V2MonitoringManager {
     this.addMetric(metric);
   }
   
-  // V2.0: Track user interaction
+  // 2.0.1: Track user interaction
   trackUserAction(
     action: string,
     value: string | number,
@@ -162,7 +162,7 @@ export class V2MonitoringManager {
     this.addMetric(metric);
   }
   
-  // V2.0: Track system health
+  // 2.0.1: Track system health
   trackSystemHealth(
     component: string,
     status: V2SystemMetric['status'],
@@ -187,7 +187,7 @@ export class V2MonitoringManager {
     this.addMetric(metric);
   }
   
-  // V2.0: Track business metric
+  // 2.0.1: Track business metric
   trackBusinessMetric(
     name: string,
     value: number,
@@ -213,12 +213,12 @@ export class V2MonitoringManager {
     this.addMetric(metric);
   }
   
-  // V2.0: Track page load performance
+  // 2.0.1: Track page load performance
   trackPageLoad(page: string, loadTime: number): void {
     this.trackPerformance('page_load_time', loadTime, 'ms', { page });
   }
   
-  // V2.0: Track API call performance
+  // 2.0.1: Track API call performance
   trackApiCall(endpoint: string, method: string, duration: number, status: number): void {
     this.trackPerformance('api_call_duration', duration, 'ms', {
       endpoint,
@@ -227,39 +227,39 @@ export class V2MonitoringManager {
     });
   }
   
-  // V2.0: Track component render performance
+  // 2.0.1: Track component render performance
   trackComponentRender(component: string, renderTime: number): void {
     this.trackPerformance('component_render_time', renderTime, 'ms', { component });
   }
   
-  // V2.0: Track memory usage
+  // 2.0.1: Track memory usage
   trackMemoryUsage(usage: number): void {
     this.trackPerformance('memory_usage', usage, 'bytes');
   }
   
-  // V2.0: Track network performance
+  // 2.0.1: Track network performance
   trackNetworkPerformance(url: string, duration: number, size: number): void {
     this.trackPerformance('network_request_duration', duration, 'ms', { url });
     this.trackPerformance('network_request_size', size, 'bytes', { url });
   }
   
-  // V2.0: Track user session
+  // 2.0.1: Track user session
   trackSessionStart(userId?: string, sessionId?: string): void {
     this.trackUserAction('session_start', 'started', userId, sessionId);
   }
   
-  // V2.0: Track user session end
+  // 2.0.1: Track user session end
   trackSessionEnd(userId?: string, sessionId?: string, duration?: number): void {
     this.trackUserAction('session_end', 'ended', userId, sessionId, {
       duration: duration?.toString() || 'unknown',
     });
   }
   
-  // V2.0: Track feature usage with strict debouncing
+  // 2.0.1: Track feature usage with strict debouncing
   private featureUsageCache = new Map<string, number>();
   
   trackFeatureUsage(feature: string, userId?: string): void {
-    // V2.0: Completely disabled to prevent infinite loops
+    // 2.0.1: Completely disabled to prevent infinite loops
     return;
     
     // Disable tracking in development to prevent infinite loops
@@ -280,24 +280,24 @@ export class V2MonitoringManager {
     this.trackUserAction('feature_usage', feature, userId);
   }
   
-  // V2.0: Track conversion
+  // 2.0.1: Track conversion
   trackConversion(funnel: string, step: string, userId?: string): void {
     this.trackUserAction('conversion', `${funnel}_${step}`, userId);
   }
   
-  // V2.0: Track error rate
+  // 2.0.1: Track error rate
   trackErrorRate(component: string, errorCount: number, totalCount: number): void {
     const errorRate = (errorCount / totalCount) * 100;
     this.trackPerformance('error_rate', errorRate, 'percentage', { component });
   }
   
-  // V2.0: Track cache hit rate
+  // 2.0.1: Track cache hit rate
   trackCacheHitRate(cacheType: string, hitCount: number, totalCount: number): void {
     const hitRate = (hitCount / totalCount) * 100;
     this.trackPerformance('cache_hit_rate', hitRate, 'percentage', { cache_type: cacheType });
   }
   
-  // V2.0: Private methods
+  // 2.0.1: Private methods
   private shouldTrack(): boolean {
     return this.config.enabled && Math.random() <= this.config.sampleRate;
   }
@@ -340,9 +340,9 @@ export class V2MonitoringManager {
       // Store locally for debugging
       this.storeLocally(metricsToSend);
       
-      console.log(`V2.0: Flushed ${metricsToSend.length} metrics`);
+      console.log(`2.0.1: Flushed ${metricsToSend.length} metrics`);
     } catch (error) {
-      console.error('V2.0: Error flushing metrics:', error);
+      console.error('2.0.1: Error flushing metrics:', error);
       // Restore metrics for retry
       this.metrics.unshift(...this.metrics);
     } finally {
@@ -382,28 +382,28 @@ export class V2MonitoringManager {
       const updated = [...stored, ...metrics].slice(-1000);
       localStorage.setItem('v2-metrics', JSON.stringify(updated));
     } catch (error) {
-      console.error('V2.0: Error storing metrics locally:', error);
+      console.error('2.0.1: Error storing metrics locally:', error);
     }
   }
   
-  // V2.0: Get metrics
+  // 2.0.1: Get metrics
   getMetrics(): V2Metric[] {
     return [...this.metrics];
   }
   
-  // V2.0: Get metrics by type
+  // 2.0.1: Get metrics by type
   getMetricsByType(type: MetricType): V2Metric[] {
     return this.metrics.filter(metric => metric.type === type);
   }
   
-  // V2.0: Get metrics by time range
+  // 2.0.1: Get metrics by time range
   getMetricsByTimeRange(startTime: number, endTime: number): V2Metric[] {
     return this.metrics.filter(
       metric => metric.timestamp >= startTime && metric.timestamp <= endTime
     );
   }
   
-  // V2.0: Get metrics statistics
+  // 2.0.1: Get metrics statistics
   getMetricsStats(): {
     total: number;
     byType: Record<MetricType, number>;
@@ -462,18 +462,18 @@ export class V2MonitoringManager {
     };
   }
   
-  // V2.0: Clear metrics
+  // 2.0.1: Clear metrics
   clearMetrics(): void {
     this.metrics = [];
   }
   
-  // V2.0: Update configuration
+  // 2.0.1: Update configuration
   updateConfig(config: Partial<V2MonitoringConfig>): void {
     this.config = { ...this.config, ...config };
     this.startFlushTimer();
   }
   
-  // V2.0: Destroy monitoring
+  // 2.0.1: Destroy monitoring
   destroy(): void {
     if (this.flushTimer) {
       clearInterval(this.flushTimer);
@@ -482,15 +482,15 @@ export class V2MonitoringManager {
   }
 }
 
-// V2.0: Global monitoring instance
+// 2.0.1: Global monitoring instance
 export const v2Monitoring = new V2MonitoringManager();
 
-// V2.0: React hook for monitoring
+// 2.0.1: React hook for monitoring
 export function useV2Monitoring() {
   const { recordPageLoadTime, recordApiCallTime } = useV2State();
   
   return {
-    // V2.0: Track performance
+    // 2.0.1: Track performance
     trackPerformance: (
       name: string,
       value: number,
@@ -501,7 +501,7 @@ export function useV2Monitoring() {
       v2Monitoring.trackPerformance(name, value, unit, tags, metadata);
     },
     
-    // V2.0: Track error
+    // 2.0.1: Track error
     trackError: (
       name: string,
       error: Error | string,
@@ -512,7 +512,7 @@ export function useV2Monitoring() {
       v2Monitoring.trackError(name, error, severity, tags, metadata);
     },
     
-    // V2.0: Track user action
+    // 2.0.1: Track user action
     trackUserAction: (
       action: string,
       value: string | number,
@@ -524,7 +524,7 @@ export function useV2Monitoring() {
       v2Monitoring.trackUserAction(action, value, userId, sessionId, tags, metadata);
     },
     
-    // V2.0: Track system health
+    // 2.0.1: Track system health
     trackSystemHealth: (
       component: string,
       status: V2SystemMetric['status'],
@@ -535,7 +535,7 @@ export function useV2Monitoring() {
       v2Monitoring.trackSystemHealth(component, status, value, tags, metadata);
     },
     
-    // V2.0: Track business metric
+    // 2.0.1: Track business metric
     trackBusinessMetric: (
       name: string,
       value: number,
@@ -547,34 +547,34 @@ export function useV2Monitoring() {
       v2Monitoring.trackBusinessMetric(name, value, category, revenue, tags, metadata);
     },
     
-    // V2.0: Track page load
+    // 2.0.1: Track page load
     trackPageLoad: (page: string, loadTime: number): void => {
       v2Monitoring.trackPageLoad(page, loadTime);
       recordPageLoadTime(page, loadTime);
     },
     
-    // V2.0: Track API call
+    // 2.0.1: Track API call
     trackApiCall: (endpoint: string, method: string, duration: number, status: number): void => {
       v2Monitoring.trackApiCall(endpoint, method, duration, status);
       recordApiCallTime(`${method} ${endpoint}`, duration);
     },
     
-    // V2.0: Track component render
+    // 2.0.1: Track component render
     trackComponentRender: (component: string, renderTime: number): void => {
       v2Monitoring.trackComponentRender(component, renderTime);
     },
     
-    // V2.0: Track memory usage
+    // 2.0.1: Track memory usage
     trackMemoryUsage: (usage: number): void => {
       v2Monitoring.trackMemoryUsage(usage);
     },
     
-    // V2.0: Track network performance
+    // 2.0.1: Track network performance
     trackNetworkPerformance: (url: string, duration: number, size: number): void => {
       v2Monitoring.trackNetworkPerformance(url, duration, size);
     },
     
-    // V2.0: Track session
+    // 2.0.1: Track session
     trackSessionStart: (userId?: string, sessionId?: string): void => {
       v2Monitoring.trackSessionStart(userId, sessionId);
     },
@@ -583,37 +583,37 @@ export function useV2Monitoring() {
       v2Monitoring.trackSessionEnd(userId, sessionId, duration);
     },
     
-    // V2.0: Track feature usage
+    // 2.0.1: Track feature usage
     trackFeatureUsage: (feature: string, userId?: string): void => {
-      // V2.0: Completely disabled to prevent infinite loops
+      // 2.0.1: Completely disabled to prevent infinite loops
       return;
       v2Monitoring.trackFeatureUsage(feature, userId);
     },
     
-    // V2.0: Track conversion
+    // 2.0.1: Track conversion
     trackConversion: (funnel: string, step: string, userId?: string): void => {
       v2Monitoring.trackConversion(funnel, step, userId);
     },
     
-    // V2.0: Get metrics statistics
+    // 2.0.1: Get metrics statistics
     getMetricsStats: (): ReturnType<typeof v2Monitoring.getMetricsStats> => {
       return v2Monitoring.getMetricsStats();
     },
     
-    // V2.0: Clear metrics
+    // 2.0.1: Clear metrics
     clearMetrics: (): void => {
       v2Monitoring.clearMetrics();
     },
   };
 }
 
-// V2.0: Performance monitoring hook with debouncing
+// 2.0.1: Performance monitoring hook with debouncing
 export function useV2PerformanceMonitoring() {
   const { trackPerformance, trackPageLoad, trackApiCall, trackComponentRender } = useV2Monitoring();
   
-  // V2.0: Track component performance with debouncing
+  // 2.0.1: Track component performance with debouncing
   const trackComponentPerformance = React.useCallback((componentName: string) => {
-    // V2.0: Completely disabled to prevent infinite loops
+    // 2.0.1: Completely disabled to prevent infinite loops
     return () => {};
     
     const startTime = performance.now();
@@ -630,7 +630,7 @@ export function useV2PerformanceMonitoring() {
     };
   }, [trackComponentRender]);
   
-  // V2.0: Track API call performance
+  // 2.0.1: Track API call performance
   const trackApiCallPerformance = React.useCallback(async <T>(
     endpoint: string,
     method: string,
