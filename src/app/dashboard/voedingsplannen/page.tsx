@@ -35,9 +35,8 @@ export default function VoedingsplannenPage() {
     try {
       setLoading(true);
       
-      // 6 specifieke voedingsplannen: 3 carnivoor + 3 op maat
+      // Alleen de eerste carnivoor voedingsplan
       const correctPlans: NutritionPlan[] = [
-        // CARNIVOOR PLANNEN
         {
           plan_id: 'carnivoor_droogtrainen',
           name: 'Carnivoor Droogtrainen',
@@ -50,87 +49,6 @@ export default function VoedingsplannenPage() {
           duration_weeks: 12,
           difficulty: 'Makkelijk',
           goal: 'droogtrainen',
-          is_featured: true,
-          is_public: true,
-          created_at: new Date().toISOString()
-        },
-        {
-          plan_id: 'carnivoor_spiermassa',
-          name: 'Carnivoor Spiermassa',
-          description: 'Een carnivoor voedingsplan voor spieropbouw en krachttoename. Hoog in eiwitten en gezonde vetten, perfect voor het opbouwen van spiermassa en kracht.',
-          category: 'carnivoor',
-          target_calories: 2800,
-          target_protein: 220,
-          target_carbs: 20,
-          target_fat: 180,
-          duration_weeks: 12,
-          difficulty: 'Makkelijk',
-          goal: 'spiermassa',
-          is_featured: true,
-          is_public: true,
-          created_at: new Date().toISOString()
-        },
-        {
-          plan_id: 'carnivoor_onderhoud',
-          name: 'Carnivoor Onderhoud',
-          description: 'Een carnivoor voedingsplan voor het behouden van je huidige lichaamscompositie en gezondheid. Gebalanceerd voor langdurige gezondheid en welzijn.',
-          category: 'carnivoor',
-          target_calories: 2400,
-          target_protein: 180,
-          target_carbs: 25,
-          target_fat: 150,
-          duration_weeks: 12,
-          difficulty: 'Makkelijk',
-          goal: 'onderhoud',
-          is_featured: true,
-          is_public: true,
-          created_at: new Date().toISOString()
-        },
-        // VOEDINGSPLANNEN OP MAAT
-        {
-          plan_id: 'op_maat_droogtrainen',
-          name: 'Voedingsplan op Maat - Droogtrainen',
-          description: 'Een flexibel voedingsplan aangepast voor vetverbranding en droogtrainen. Geschikt voor alle voedingsstijlen, met focus op calorietekort en hoog eiwitgehalte.',
-          category: 'flexibel',
-          target_calories: 2100,
-          target_protein: 180,
-          target_carbs: 150,
-          target_fat: 80,
-          duration_weeks: 12,
-          difficulty: 'Makkelijk',
-          goal: 'droogtrainen',
-          is_featured: true,
-          is_public: true,
-          created_at: new Date().toISOString()
-        },
-        {
-          plan_id: 'op_maat_spiermassa',
-          name: 'Voedingsplan op Maat - Spiermassa',
-          description: 'Een flexibel voedingsplan voor spieropbouw en krachttoename. Aanpasbaar aan verschillende voedingsvoorkeuren, met focus op calorieoverschot en hoog eiwitgehalte.',
-          category: 'flexibel',
-          target_calories: 2700,
-          target_protein: 200,
-          target_carbs: 250,
-          target_fat: 100,
-          duration_weeks: 12,
-          difficulty: 'Makkelijk',
-          goal: 'spiermassa',
-          is_featured: true,
-          is_public: true,
-          created_at: new Date().toISOString()
-        },
-        {
-          plan_id: 'op_maat_onderhoud',
-          name: 'Voedingsplan op Maat - Onderhoud',
-          description: 'Een flexibel voedingsplan voor het behouden van je huidige lichaamscompositie. Aanpasbaar aan verschillende voedingsstijlen, met focus op balans en duurzaamheid.',
-          category: 'flexibel',
-          target_calories: 2300,
-          target_protein: 160,
-          target_carbs: 200,
-          target_fat: 90,
-          duration_weeks: 12,
-          difficulty: 'Makkelijk',
-          goal: 'onderhoud',
           is_featured: true,
           is_public: true,
           created_at: new Date().toISOString()
