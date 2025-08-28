@@ -4,6 +4,7 @@ import './globals.css';
 import { SupabaseAuthProvider } from '@/contexts/SupabaseAuthContext';
 // import { V2StateProvider } from '@/contexts/V2StateContext';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { CacheBuster } from '@/components/CacheBuster';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -67,6 +68,9 @@ export const metadata: Metadata = {
     'X-TTM-Version': '2.0.1',
     'X-Platform': 'Top Tier Men',
     'X-Environment': process.env.NODE_ENV || 'development',
+    'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+    'Pragma': 'no-cache',
+    'Expires': '0',
   },
 };
 
@@ -79,6 +83,7 @@ export default function RootLayout({
     <html lang="nl">
       <body className={inter.className}>
         <ErrorBoundary>
+          <CacheBuster version="2.0.1" forceRefresh={false} />
           {/* <V2StateProvider> */}
             <SupabaseAuthProvider>
               {children}

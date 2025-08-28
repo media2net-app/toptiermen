@@ -4,11 +4,13 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { EnvelopeIcon, LockClosedIcon } from '@heroicons/react/24/outline';
+import { useCacheBuster } from '@/components/CacheBuster';
 
 function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, loading, signIn } = useSupabaseAuth();
+  const { bustCache } = useCacheBuster();
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -279,8 +281,22 @@ function LoginPageContent() {
             </a>
           </p>
           
-          {/* Version badge - 2.0.1 */}
+          {/* Cache Busting Section */}
           <div className="mt-4 pt-2 border-t border-[#3A4D23]/30">
+            <div className="mb-3 p-3 bg-[#181F17] rounded-lg border border-[#3A4D23]">
+              <p className="text-[#8BAE5A] text-xs mb-2 text-center">Problemen met inloggen?</p>
+              <button
+                onClick={() => {
+                  console.log('🔄 Manual cache busting triggered from login page');
+                  bustCache();
+                }}
+                className="w-full px-3 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded text-sm font-medium hover:bg-[#4A5D33] transition-colors"
+              >
+                🔄 Cache Verversen & Herladen
+              </button>
+            </div>
+            
+            {/* Version badge - 2.0.1 */}
             <div className="flex items-center justify-center gap-2">
               <span className="text-[#B6C948] text-xs">Platform</span>
               <span className="px-2 py-1 bg-[#B6C948]/20 text-[#B6C948] text-xs font-semibold rounded-full border border-[#B6C948]/30">
