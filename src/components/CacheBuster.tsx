@@ -74,7 +74,19 @@ export function CacheBuster({ version = '2.0.1', forceRefresh = false }: CacheBu
     // Add cache-busting headers to all fetch requests
     const originalFetch = window.fetch;
     window.fetch = function(input, init) {
-      const url = typeof input === 'string' ? input : input.url;
+      let url: string;
+      
+      // Handle different input types
+      if (typeof input === 'string') {
+        url = input;
+      } else if (input instanceof Request) {
+        url = input.url;
+      } else if (input instanceof URL) {
+        url = input.toString();
+      } else {
+        // Fallback for other types
+        return originalFetch(input, init);
+      }
       
       // Add cache-busting parameters to API requests
       if (url.includes('/api/') || url.includes('/auth/')) {
@@ -83,7 +95,16 @@ export function CacheBuster({ version = '2.0.1', forceRefresh = false }: CacheBu
         urlObj.searchParams.set('_v', version);
         
         // Update the request
-        const newInput = typeof input === 'string' ? urlObj.toString() : { ...input, url: urlObj.toString() };
+        let newInput: RequestInfo | URL;
+        if (typeof input === 'string') {
+          newInput = urlObj.toString();
+        } else if (input instanceof Request) {
+          newInput = new Request(urlObj.toString(), input);
+        } else if (input instanceof URL) {
+          newInput = urlObj;
+        } else {
+          newInput = input;
+        }
         
         // Add cache-busting headers
         const newInit = {
