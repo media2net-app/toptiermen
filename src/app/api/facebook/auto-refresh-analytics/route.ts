@@ -12,33 +12,49 @@ function getTodayDate() {
   return `${year}-${month}-${day}`;
 }
 
-// Function to make Facebook API requests
+// Function to make Facebook API requests with better error handling
 async function makeFacebookRequest(endpoint: string, params: any = {}) {
-  const url = new URL(`https://graph.facebook.com/v19.0${endpoint}`);
-  url.searchParams.set('access_token', FACEBOOK_ACCESS_TOKEN!);
-  
-  Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined && value !== null) {
-      url.searchParams.set(key, typeof value === 'string' ? value : JSON.stringify(value));
-    }
-  });
+  try {
+    const url = new URL(`https://graph.facebook.com/v19.0${endpoint}`);
+    url.searchParams.set('access_token', FACEBOOK_ACCESS_TOKEN!);
+    
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        url.searchParams.set(key, typeof value === 'string' ? value : JSON.stringify(value));
+      }
+    });
 
-  const response = await fetch(url.toString());
-  if (!response.ok) {
-    throw new Error(`Facebook API error: ${response.status} ${response.statusText}`);
+    console.log(`🔗 Making Facebook API request to: ${endpoint}`);
+    
+    const response = await fetch(url.toString());
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Facebook API error: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+    return response.json();
+  } catch (error) {
+    console.error(`❌ Facebook API request failed for ${endpoint}:`, error);
+    throw error;
   }
-  return response.json();
 }
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('🔄 Auto-refresh: Fetching Facebook data up to today...');
+    console.log('🔄 Auto-refresh: Starting Facebook data fetch...');
+    
+    if (!FACEBOOK_ACCESS_TOKEN || !FACEBOOK_AD_ACCOUNT_ID) {
+      throw new Error('Missing Facebook environment variables');
+    }
     
     const today = getTodayDate();
     console.log(`📅 Date range: 2025-08-01 to ${today}`);
     
+    // Clean ad account ID
+    const cleanAdAccountId = FACEBOOK_AD_ACCOUNT_ID.replace('act_', '');
+    
     // Fetch campaigns
-    const campaignsResponse = await makeFacebookRequest(`/act_${FACEBOOK_AD_ACCOUNT_ID}/campaigns`, {
+    console.log('📋 Fetching campaigns...');
+    const campaignsResponse = await makeFacebookRequest(`/act_${cleanAdAccountId}/campaigns`, {
       fields: 'id,name,status,objective,created_time,start_time,stop_time,spend_cap,spend_cap_type,special_ad_categories',
       limit: 1000
     });
@@ -51,8 +67,11 @@ export async function GET(request: NextRequest) {
     console.log(`📋 Found ${ttmCampaigns.length} TTM campaigns`);
 
     // Fetch insights for each campaign with date range up to today
+    console.log('📊 Fetching campaign insights...');
     const campaignsWithInsights = await Promise.all(ttmCampaigns.map(async (campaign: any) => {
       try {
+        console.log(`🔍 Fetching insights for campaign: ${campaign.name}`);
+        
         const insightsResponse = await makeFacebookRequest(`/${campaign.id}/insights`, {
           fields: 'impressions,clicks,spend,reach,frequency,ctr,cpc,cpm,actions,action_values,cost_per_action_type,cost_per_conversion',
           time_range: JSON.stringify({ since: '2025-08-01', until: today }),
@@ -60,6 +79,8 @@ export async function GET(request: NextRequest) {
         });
 
         const insights = insightsResponse.data?.[0] || {};
+        
+        console.log(`✅ Campaign ${campaign.name}: €${insights.spend || 0} spent, ${insights.clicks || 0} clicks`);
         
         return {
           id: campaign.id,
@@ -127,20 +148,7 @@ export async function GET(request: NextRequest) {
     const weightedCPC = totalClicks > 0 ? 
       campaignsWithInsights.reduce((sum, campaign) => sum + (campaign.cpc * campaign.clicks), 0) / totalClicks : 0;
 
-    const summary = {
-      totalImpressions,
-      totalClicks,
-      totalSpend,
-      totalReach,
-      averageCTR: weightedCTR,
-      averageCPC: weightedCPC,
-      activeCampaigns: campaignsWithInsights.filter(c => c.status === 'ACTIVE').length,
-      totalConversions: 6, // This will be updated by the conversion mapping
-      dateRange: `2025-08-01 to ${today}`,
-      lastUpdated: new Date().toISOString()
-    };
-
-    // Map conversions to campaigns based on known data
+    // Updated conversion mapping based on actual campaign IDs
     const conversionMapping = {
       '120232181493720324': 2, // TTM - Zakelijk Prelaunch Campagne
       '120232181487970324': 3, // TTM - Jongeren Prelaunch Campagne
@@ -159,8 +167,20 @@ export async function GET(request: NextRequest) {
       campaign.conversions = conversionMapping[campaign.id] || 0;
     });
 
-    // Update total conversions
-    summary.totalConversions = Object.values(conversionMapping).reduce((sum, count) => sum + count, 0);
+    const totalConversions = Object.values(conversionMapping).reduce((sum, count) => sum + count, 0);
+
+    const summary = {
+      totalImpressions,
+      totalClicks,
+      totalSpend,
+      totalReach,
+      averageCTR: weightedCTR,
+      averageCPC: weightedCPC,
+      activeCampaigns: campaignsWithInsights.filter(c => c.status === 'ACTIVE').length,
+      totalConversions,
+      dateRange: `2025-08-01 to ${today}`,
+      lastUpdated: new Date().toISOString()
+    };
 
     const analyticsData = {
       summary,
@@ -171,7 +191,8 @@ export async function GET(request: NextRequest) {
     };
 
     console.log(`✅ Auto-refresh complete. Data range: 2025-08-01 to ${today}`);
-    console.log(`📊 Summary: €${totalSpend.toFixed(2)} spent, ${summary.totalConversions} conversions`);
+    console.log(`📊 Summary: €${totalSpend.toFixed(2)} spent, ${totalConversions} conversions`);
+    console.log(`📈 Active campaigns: ${summary.activeCampaigns}`);
 
     return NextResponse.json({
       success: true,
