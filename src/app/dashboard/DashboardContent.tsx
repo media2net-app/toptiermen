@@ -30,6 +30,7 @@ import CacheIssueHelper from '@/components/CacheIssueHelper';
 
 // 2.0.1: Dashboard menu configuration
 const menu = [
+  { label: '🚀 PLANNING LANCERING', icon: FireIcon, href: '/dashboard/planning-lancering', badge: 'CRITICAL' },
   { label: 'Dashboard', icon: HomeIcon, href: '/dashboard' },
   { label: 'Onboarding', icon: CheckCircleIcon, href: '/dashboard/onboarding' },
   { label: 'Mijn Profiel', icon: UserCircleIcon, parent: 'Dashboard', href: '/dashboard/mijn-profiel', isSub: true },
@@ -184,11 +185,26 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
                   ? 'bg-[#8BAE5A] text-black shadow-lg' 
                   : isHighlighted 
                     ? 'bg-[#FFD700]/20 text-[#FFD700] border border-[#FFD700]/30' 
-                    : 'text-white hover:text-[#8BAE5A] hover:bg-[#3A4D23]/50'
+                    : item.label.includes('PLANNING LANCERING')
+                      ? 'bg-gradient-to-r from-[#B6C948] to-[#3A4D23] text-[#181F17] shadow-lg border-2 border-[#8BAE5A]'
+                      : 'text-white hover:text-[#8BAE5A] hover:bg-[#3A4D23]/50'
               } ${collapsed ? 'justify-center px-2' : ''}`}
             >
               <item.icon className={`w-6 h-6 ${isActive ? 'text-white' : isHighlighted ? 'text-[#FFD700]' : 'text-[#8BAE5A]'}`} />
-              {!collapsed && <span className="truncate">{item.label}</span>}
+              {!collapsed && (
+                <div className="flex items-center justify-between w-full">
+                  <span className="truncate">{item.label}</span>
+                  {item.badge && (
+                    <span className={`ml-auto px-2 py-1 rounded-full text-xs font-bold ${
+                      item.badge === 'CRITICAL' 
+                        ? 'bg-red-600 text-white' 
+                        : 'bg-[#8BAE5A] text-[#181F17]'
+                    }`}>
+                      {item.badge}
+                    </span>
+                  )}
+                </div>
+              )}
             </Link>
           );
         }
