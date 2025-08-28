@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { useCalorieMacro } from "./CalorieMacroCalculator";
 import { calculateMacrosFromIngredients } from "@/lib/nutrition-utils";
+import MealEditModal from "./MealEditModal";
 
 interface PlanDetailProps {
   slug: string;
@@ -370,8 +371,29 @@ const planData: Record<string, { title: string; meals: { time: string; name: str
 };
 
 export default function PlanDetail({ slug, onBack }: PlanDetailProps) {
-  const plan = planData[slug] || planData["carnivoor_droogtrainen"];
+  const [currentPlan, setCurrentPlan] = useState(planData[slug] || planData["carnivoor_droogtrainen"]);
+  const [editingMeal, setEditingMeal] = useState<any>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const { totalCalories, totalProtein, totalCarbs, totalFat } = useCalorieMacro();
+
+  const handleEditMeal = (meal: any, mealIndex: number) => {
+    setEditingMeal({ ...meal, index: mealIndex });
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveMeal = (updatedMeal: any) => {
+    const updatedPlan = { ...currentPlan };
+    updatedPlan.meals[updatedMeal.index] = {
+      name: updatedMeal.name,
+      time: updatedMeal.time,
+      main: updatedMeal.main,
+      options: updatedMeal.options,
+      ingredients: updatedMeal.ingredients
+    };
+    setCurrentPlan(updatedPlan);
+    setIsEditModalOpen(false);
+    setEditingMeal(null);
+  };
 
   return (
     <div className="min-h-screen bg-[#181F17] text-white p-4">
@@ -388,7 +410,7 @@ export default function PlanDetail({ slug, onBack }: PlanDetailProps) {
             Terug naar Voedingsplannen
           </button>
           
-          <h1 className="text-3xl font-bold text-[#B6C948] mb-2">{plan.title}</h1>
+          <h1 className="text-3xl font-bold text-[#B6C948] mb-2">{currentPlan.title}</h1>
           <p className="text-[#8BAE5A] text-lg">
             Een compleet voedingsplan met dagelijkse maaltijden en voedingswaarden
           </p>
@@ -438,15 +460,26 @@ export default function PlanDetail({ slug, onBack }: PlanDetailProps) {
         <div className="space-y-6">
           <h2 className="text-2xl font-bold text-[#B6C948] mb-6">Dagelijkse Maaltijden</h2>
           
-          {plan.meals.map((meal, index) => (
+          {currentPlan.meals.map((meal, index) => (
             <div key={index} className="bg-[#232D1A] rounded-xl p-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h3 className="text-xl font-semibold text-[#B6C948]">{meal.name}</h3>
                   <p className="text-[#8BAE5A] text-sm">{meal.time}</p>
                 </div>
-                <div className="text-right">
-                  <div className="text-lg font-semibold text-white">{meal.main}</div>
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <div className="text-lg font-semibold text-white">{meal.main}</div>
+                  </div>
+                  <button
+                    onClick={() => handleEditMeal(meal, index)}
+                    className="p-2 bg-[#3A4D23] hover:bg-[#4A5D33] rounded-lg transition-colors"
+                    title="Maaltijd bewerken"
+                  >
+                    <svg className="w-4 h-4 text-[#B6C948]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </button>
                 </div>
               </div>
 
@@ -498,6 +531,14 @@ export default function PlanDetail({ slug, onBack }: PlanDetailProps) {
           </ul>
         </div>
       </div>
+
+      {/* Meal Edit Modal */}
+      <MealEditModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        meal={editingMeal}
+        onSave={handleSaveMeal}
+      />
     </div>
   );
 } 
