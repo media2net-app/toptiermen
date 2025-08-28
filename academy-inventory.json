@@ -1,0 +1,535 @@
+{
+  "generated_at": "2025-08-28T13:14:13.143Z",
+  "summary": {
+    "total_modules": 7,
+    "total_lessons": 36,
+    "lessons_with_ebooks": 36,
+    "lessons_without_ebooks": 0,
+    "completion_rate": "100.0"
+  },
+  "modules": [
+    {
+      "module": {
+        "id": "c671fea4-bfb1-4ccc-b23e-220e80783d06",
+        "title": "Testosteron",
+        "slug": "test",
+        "order_index": 1,
+        "status": "published"
+      },
+      "lessons": [
+        {
+          "id": "a352b3db-4c71-48b4-a83d-8983d0bbc7ba",
+          "title": "Wat is Testosteron",
+          "order_index": 0,
+          "has_ebook": true,
+          "ebook": {
+            "id": "029e8b41-08d3-4a0f-9613-668b9b8094e8",
+            "title": "Wat is Testosteron - Ebook",
+            "status": "published",
+            "file_url": "/books/testosteron-basis-ebook.pdf"
+          }
+        },
+        {
+          "id": "42726b47-45c2-4519-8960-0c456c0754a5",
+          "title": "De Kracht van Hoog Testosteron",
+          "order_index": 0,
+          "has_ebook": true,
+          "ebook": {
+            "id": "48bd0222-cfb8-4a66-a0b4-5ea9ceeb4bb7",
+            "title": "De Kracht van Hoog Testosteron - Ebook",
+            "status": "published",
+            "file_url": "/books/testosteron-kracht-ebook.pdf"
+          }
+        },
+        {
+          "id": "5f365043-4549-43c6-91e1-438a512d7f8e",
+          "title": "Testosteron Killers: Wat moet je Elimineren",
+          "order_index": 0,
+          "has_ebook": true,
+          "ebook": {
+            "id": "b5e8e80f-b176-4793-9c4f-b5f0681773fc",
+            "title": "Testosteron Killers: Wat moet je Elimineren - Ebook",
+            "status": "published",
+            "file_url": "/books/testosteron-killers-ebook.pdf"
+          }
+        },
+        {
+          "id": "f79d0cc9-5ec0-4b5e-80f7-d2277897e242",
+          "title": "TRT en mijn Visie",
+          "order_index": 0,
+          "has_ebook": true,
+          "ebook": {
+            "id": "48ad33cd-bf8d-407d-948c-bb3002ffc97b",
+            "title": "TRT en mijn Visie - Ebook",
+            "status": "published",
+            "file_url": "/books/testosteron-trt-ebook.pdf"
+          }
+        },
+        {
+          "id": "5ec29382-cfa5-4c25-9151-35bdb9f224b1",
+          "title": "De Waarheid over Testosteron Doping",
+          "order_index": 0,
+          "has_ebook": true,
+          "ebook": {
+            "id": "3684b0c7-2c6c-4fb3-b0ef-f72a6816ea83",
+            "title": "De Waarheid over Testosteron Doping - Ebook",
+            "status": "published",
+            "file_url": "/books/testosteron-doping-ebook.pdf"
+          }
+        }
+      ],
+      "lessons_with_ebooks": 5,
+      "lessons_without_ebooks": 0
+    },
+    {
+      "module": {
+        "id": "ba58a203-b2d0-442b-83a3-62cfb0a79478",
+        "title": "Discipline & Identiteit",
+        "slug": "discipline-identiteit",
+        "order_index": 2,
+        "status": "published"
+      },
+      "lessons": [
+        {
+          "id": "66a4a5fc-c9dc-452e-954b-bbb0aca66a65",
+          "title": "Wat is Discipline en waarom is dit Essentieel",
+          "order_index": 1,
+          "has_ebook": true,
+          "ebook": {
+            "id": "f4d09278-81ca-403f-9c79-edf4a99a252b",
+            "title": "Wat is Discipline en waarom is dit Essentieel - Ebook",
+            "status": "published",
+            "file_url": "/books/discipline-basis-ebook.pdf"
+          }
+        },
+        {
+          "id": "752d4425-0cec-425c-bcf4-f8217f13f17f",
+          "title": "Je Identiteit Definiëren",
+          "order_index": 2,
+          "has_ebook": true,
+          "ebook": {
+            "id": "1139a019-c771-4d47-8d45-2a054593e466",
+            "title": "Je Identiteit Definiëren - Ebook",
+            "status": "published",
+            "file_url": "/books/identiteit-definieren-ebook.html"
+          }
+        },
+        {
+          "id": "1dcb34e9-9540-4072-871e-dcc206dbd6de",
+          "title": "Discipline van korte termijn naar een levensstijl",
+          "order_index": 3,
+          "has_ebook": true,
+          "ebook": {
+            "id": "53a61e47-022e-456b-aa08-e6fc52667f40",
+            "title": "Discipline van korte termijn naar een levensstijl - Ebook",
+            "status": "published",
+            "file_url": "/books/discipline-levensstijl-ebook.html"
+          }
+        },
+        {
+          "id": "27022297-da6d-404e-b696-63453322c594",
+          "title": "Wat is Identiteit en Waarom zijn Kernwaarden Essentieel?",
+          "order_index": 4,
+          "has_ebook": true,
+          "ebook": {
+            "id": "4ed61cd4-85b1-4fb1-812c-1d9d4ab6de8a",
+            "title": "Wat is Identiteit en Waarom zijn Kernwaarden Essentieel? - Ebook",
+            "status": "published",
+            "file_url": "/books/identiteit-kernwaarden-ebook.html"
+          }
+        },
+        {
+          "id": "f1cd8ff6-2921-4f47-be6f-1ee5bab76e8e",
+          "title": "Ontdek je kernwaarden en bouw je Top Tier identiteit",
+          "order_index": 5,
+          "has_ebook": true,
+          "ebook": {
+            "id": "db82298a-1a6f-4f8d-b12f-6ceb87f7e781",
+            "title": "Ontdek je kernwaarden en bouw je Top Tier identiteit - Ebook",
+            "status": "published",
+            "file_url": "/books/kernwaarden-top-tier-ebook.html"
+          }
+        }
+      ],
+      "lessons_with_ebooks": 5,
+      "lessons_without_ebooks": 0
+    },
+    {
+      "module": {
+        "id": "0d02e65a-c109-440d-9286-690b21fbdecb",
+        "title": "Fysieke Dominantie",
+        "slug": "fysieke-dominantie",
+        "order_index": 3,
+        "status": "published"
+      },
+      "lessons": [
+        {
+          "id": "50bbaa53-b117-42b3-9221-ee1f4f59a2de",
+          "title": "Waarom is fysieke dominantie zo belangrijk?",
+          "order_index": 1,
+          "has_ebook": true,
+          "ebook": {
+            "id": "f69b0878-a2d9-4721-b051-5d1bba4e0bff",
+            "title": "Waarom is fysieke dominantie zo belangrijk?",
+            "status": "published",
+            "file_url": "/books/fysieke-dominantie-waarom-is-fysieke-dominantie-zo-belangrijk--ebook.html"
+          }
+        },
+        {
+          "id": "25ad414f-dcf5-4f89-af2e-3406971da3ce",
+          "title": "Het belang van kracht, spiermassa en conditie",
+          "order_index": 2,
+          "has_ebook": true,
+          "ebook": {
+            "id": "09c8cd8e-48ac-4d61-878b-af6784f9c180",
+            "title": "Het belang van kracht, spiermassa en conditie",
+            "status": "published",
+            "file_url": "/books/fysieke-dominantie-het-belang-van-kracht--spiermassa-en-conditie-ebook.html"
+          }
+        },
+        {
+          "id": "b5ddffc2-e3ff-4ee2-b683-03db5e9e9367",
+          "title": " Status, Zelfrespect en Aantrekkingskracht",
+          "order_index": 3,
+          "has_ebook": true,
+          "ebook": {
+            "id": "0bc61642-3d03-4f95-86a9-f3d94d1be98d",
+            "title": " Status, Zelfrespect en Aantrekkingskracht",
+            "status": "published",
+            "file_url": "/books/fysieke-dominantie--status--zelfrespect-en-aantrekkingskracht-ebook.html"
+          }
+        },
+        {
+          "id": "fb9b50c4-a675-432f-9e1f-ca00ec774d00",
+          "title": "Vitaliteit en Levensduur",
+          "order_index": 4,
+          "has_ebook": true,
+          "ebook": {
+            "id": "9b364598-31f5-4e84-9119-40d257c1a285",
+            "title": "Vitaliteit en Levensduur",
+            "status": "published",
+            "file_url": "/books/fysieke-dominantie-vitaliteit-en-levensduur-ebook.html"
+          }
+        },
+        {
+          "id": "fe9e98a5-6241-4b7e-85bb-d4e2e631b21b",
+          "title": "Embrace the Suck",
+          "order_index": 5,
+          "has_ebook": true,
+          "ebook": {
+            "id": "fccfa855-3075-42ae-b3af-c9fb3bb4d494",
+            "title": "Embrace the Suck",
+            "status": "published",
+            "file_url": "/books/fysieke-dominantie-embrace-the-suck-ebook.html"
+          }
+        }
+      ],
+      "lessons_with_ebooks": 5,
+      "lessons_without_ebooks": 0
+    },
+    {
+      "module": {
+        "id": "c66b25e3-869f-4c2c-8037-a552726c6b62",
+        "title": "Mentale Kracht/Weerbaarheid",
+        "slug": "mentale-kracht-weerbaarheid",
+        "order_index": 4,
+        "status": "published"
+      },
+      "lessons": [
+        {
+          "id": "def1adb6-1802-4875-a5e3-f9df1afeee3e",
+          "title": "Wat is mentale kracht",
+          "order_index": 1,
+          "has_ebook": true,
+          "ebook": {
+            "id": "33d7a968-761b-41bd-b948-a1090a9b015b",
+            "title": "Wat is mentale kracht",
+            "status": "published",
+            "file_url": "/books/mentale-kracht-weerbaarheid-wat-is-mentale-kracht-ebook.html"
+          }
+        },
+        {
+          "id": "275dce47-df0d-4121-afdc-89a632b25a79",
+          "title": "Een Onbreekbare Mindset",
+          "order_index": 2,
+          "has_ebook": true,
+          "ebook": {
+            "id": "e7fae85f-5e6a-457f-9bcf-6742dfe2de33",
+            "title": "Een Onbreekbare Mindset",
+            "status": "published",
+            "file_url": "/books/mentale-kracht-weerbaarheid-een-onbreekbare-mindset-ebook.html"
+          }
+        },
+        {
+          "id": "2b358488-7f45-43a9-aecc-3db899019471",
+          "title": "Mentale Weerbaarheid in de Praktijk",
+          "order_index": 3,
+          "has_ebook": true,
+          "ebook": {
+            "id": "b6b6db96-8317-4cb8-b353-47ee9b290c76",
+            "title": "Mentale Weerbaarheid in de Praktijk",
+            "status": "published",
+            "file_url": "/books/mentale-kracht-weerbaarheid-mentale-weerbaarheid-in-de-praktijk-ebook.html"
+          }
+        },
+        {
+          "id": "2ea3e004-dc7a-4e2a-beb2-1ede0763d033",
+          "title": "Wordt Een Onbreekbare Man",
+          "order_index": 4,
+          "has_ebook": true,
+          "ebook": {
+            "id": "671f46e5-c1ed-4789-bba9-ec115edbf8ed",
+            "title": "Wordt Een Onbreekbare Man",
+            "status": "published",
+            "file_url": "/books/mentale-kracht-weerbaarheid-wordt-een-onbreekbare-man-ebook.html"
+          }
+        },
+        {
+          "id": "54d9d2d0-5038-4215-b864-2bd60afd8b04",
+          "title": "Reflectie & Integratie",
+          "order_index": 6,
+          "has_ebook": true,
+          "ebook": {
+            "id": "b08fba73-6c85-416a-9a85-17eab6365687",
+            "title": "Reflectie & Integratie",
+            "status": "published",
+            "file_url": "/books/mentale-kracht-weerbaarheid-reflectie---integratie-ebook.html"
+          }
+        }
+      ],
+      "lessons_with_ebooks": 5,
+      "lessons_without_ebooks": 0
+    },
+    {
+      "module": {
+        "id": "309b7450-3c77-4aa5-bc14-f5514cafd886",
+        "title": "Business and Finance ",
+        "slug": "business-and-finance-",
+        "order_index": 5,
+        "status": "published"
+      },
+      "lessons": [
+        {
+          "id": "575b7d7c-1bad-4660-abf7-0507f6fca2e9",
+          "title": "De Financiële Mindset ",
+          "order_index": 1,
+          "has_ebook": true,
+          "ebook": {
+            "id": "8d68dfdd-60a6-4943-be88-d497b4edee89",
+            "title": "De Financiële Mindset ",
+            "status": "published",
+            "file_url": "/books/business-and-finance--de-financi-le-mindset--ebook.html"
+          }
+        },
+        {
+          "id": "b852aa9b-ad36-4202-b7e4-a8a58c4a5adc",
+          "title": "Grip op je geld",
+          "order_index": 2,
+          "has_ebook": true,
+          "ebook": {
+            "id": "07a47b44-4751-4f38-962c-944b7afc593f",
+            "title": "Grip op je geld",
+            "status": "published",
+            "file_url": "/books/business-and-finance--grip-op-je-geld-ebook.html"
+          }
+        },
+        {
+          "id": "83a68df6-52d7-4f64-9333-4e9811f5cd46",
+          "title": "Van Werknemer naar eigen Verdienmodellen",
+          "order_index": 3,
+          "has_ebook": true,
+          "ebook": {
+            "id": "ad86207c-3186-45c7-8275-76131c878d30",
+            "title": "Van Werknemer naar eigen Verdienmodellen",
+            "status": "published",
+            "file_url": "/books/business-and-finance--van-werknemer-naar-eigen-verdienmodellen-ebook.html"
+          }
+        },
+        {
+          "id": "02e056c2-db70-41c6-8fb5-fea3472b38e8",
+          "title": "Vermogen Opbouwen Begin met Investeren",
+          "order_index": 4,
+          "has_ebook": true,
+          "ebook": {
+            "id": "535cf6ed-738d-43ad-9a9d-2304325fc0df",
+            "title": "Vermogen Opbouwen Begin met Investeren",
+            "status": "published",
+            "file_url": "/books/business-and-finance--vermogen-opbouwen-begin-met-investeren-ebook.html"
+          }
+        },
+        {
+          "id": "be4630d9-e366-4388-88cf-c71d9bf69d0a",
+          "title": "Financiële Vrijheid en Legacy ",
+          "order_index": 5,
+          "has_ebook": true,
+          "ebook": {
+            "id": "994969f3-07d9-4ffc-b042-75f92ea3c4a5",
+            "title": "Financiële Vrijheid en Legacy ",
+            "status": "published",
+            "file_url": "/books/business-and-finance--financi-le-vrijheid-en-legacy--ebook.html"
+          }
+        }
+      ],
+      "lessons_with_ebooks": 5,
+      "lessons_without_ebooks": 0
+    },
+    {
+      "module": {
+        "id": "6102f6c8-7f38-4501-ab94-e9a68622e46f",
+        "title": "Brotherhood",
+        "slug": "brotherhood",
+        "order_index": 6,
+        "status": "published"
+      },
+      "lessons": [
+        {
+          "id": "f449b3f0-1dd6-4020-a44e-4f276eaa34e0",
+          "title": "Waarom een Brotherhood",
+          "order_index": 1,
+          "has_ebook": true,
+          "ebook": {
+            "id": "469bfa3b-2db0-477f-8b7c-879551b34b8d",
+            "title": "Waarom een Brotherhood",
+            "status": "published",
+            "file_url": "/books/brotherhood-waarom-een-brotherhood-ebook.html"
+          }
+        },
+        {
+          "id": "376405c4-33da-4c25-a83c-2cfd54e99b42",
+          "title": "Eer en Loyaliteit",
+          "order_index": 2,
+          "has_ebook": true,
+          "ebook": {
+            "id": "b0163cf6-1be9-4ad3-b480-2c4dab6d9486",
+            "title": "Eer en Loyaliteit",
+            "status": "published",
+            "file_url": "/books/brotherhood-eer-en-loyaliteit-ebook.html"
+          }
+        },
+        {
+          "id": "0d4b5757-3fc2-4295-859d-e0d6e255b4ab",
+          "title": "Bouw de juiste Kring ",
+          "order_index": 3,
+          "has_ebook": true,
+          "ebook": {
+            "id": "9eb533b6-68ae-48aa-bfc5-6be6b0747626",
+            "title": "Bouw de juiste Kring ",
+            "status": "published",
+            "file_url": "/books/brotherhood-bouw-de-juiste-kring--ebook.html"
+          }
+        },
+        {
+          "id": "6d8fd15c-c6e0-4f28-ac2e-083e2b121cfa",
+          "title": "Cut The Weak",
+          "order_index": 4,
+          "has_ebook": true,
+          "ebook": {
+            "id": "069adeb6-878f-47fc-a506-98e34582db44",
+            "title": "Cut The Weak",
+            "status": "published",
+            "file_url": "/books/brotherhood-cut-the-weak-ebook.html"
+          }
+        },
+        {
+          "id": "0a4fa127-88fa-402c-92c2-50d6814aabf3",
+          "title": "Hoe je je Broeders versterkt en samen groeit",
+          "order_index": 5,
+          "has_ebook": true,
+          "ebook": {
+            "id": "ca2395e1-aa49-4e0c-b744-441bf17a53af",
+            "title": "Hoe je je Broeders versterkt en samen groeit",
+            "status": "published",
+            "file_url": "/books/brotherhood-hoe-je-je-broeders-versterkt-en-samen-groeit-ebook.html"
+          }
+        }
+      ],
+      "lessons_with_ebooks": 5,
+      "lessons_without_ebooks": 0
+    },
+    {
+      "module": {
+        "id": "f5dfaee3-87a7-4d32-9548-751391642e2b",
+        "title": "Voeding & Gezondheid",
+        "slug": "voeding-gezondheid",
+        "order_index": 7,
+        "status": "published"
+      },
+      "lessons": [
+        {
+          "id": "c607f6ff-737d-4a4e-a4d6-0bf1a9ab4234",
+          "title": "De Basisprincipes van Voeding",
+          "order_index": 1,
+          "has_ebook": true,
+          "ebook": {
+            "id": "9b2c767b-8f1f-4650-8c6d-94076074ef40",
+            "title": "De Basisprincipes van Voeding",
+            "status": "published",
+            "file_url": "/books/voeding-gezondheid-de-basisprincipes-van-voeding-ebook.html"
+          }
+        },
+        {
+          "id": "76d62836-cbbc-4453-88ac-e1220eb7d91a",
+          "title": "Hydratatie en Water inname",
+          "order_index": 2,
+          "has_ebook": true,
+          "ebook": {
+            "id": "1d3389c8-f193-44fd-847d-56ac102b52ca",
+            "title": "Hydratatie en Water inname",
+            "status": "published",
+            "file_url": "/books/voeding-gezondheid-hydratatie-en-water-inname-ebook.html"
+          }
+        },
+        {
+          "id": "ebcba654-e979-4176-9fa0-ef66a650832c",
+          "title": "Slaap de vergeten superkracht",
+          "order_index": 3,
+          "has_ebook": true,
+          "ebook": {
+            "id": "a497163e-f785-4e91-94d1-9c7d5e699312",
+            "title": "Slaap de vergeten superkracht",
+            "status": "published",
+            "file_url": "/books/voeding-gezondheid-slaap-de-vergeten-superkracht-ebook.html"
+          }
+        },
+        {
+          "id": "6ffd2993-3a8c-40fa-a273-17b046cee4f2",
+          "title": "Energie en Focus",
+          "order_index": 4,
+          "has_ebook": true,
+          "ebook": {
+            "id": "b46e6382-6e4e-4793-a09d-99fe26e417c3",
+            "title": "Energie en Focus",
+            "status": "published",
+            "file_url": "/books/voeding-gezondheid-energie-en-focus-ebook.html"
+          }
+        },
+        {
+          "id": "d8b02260-dbe6-47db-85db-96d8e6a57814",
+          "title": "Gezondheid als Fundament",
+          "order_index": 5,
+          "has_ebook": true,
+          "ebook": {
+            "id": "341ab18f-028d-45da-b4a1-5d075d780eba",
+            "title": "Gezondheid als Fundament",
+            "status": "published",
+            "file_url": "/books/voeding-gezondheid-gezondheid-als-fundament-ebook.html"
+          }
+        },
+        {
+          "id": "e3780f7f-e6b8-4d62-939d-b113b709bc91",
+          "title": "Praktische opdracht: stel je eigen voedingsplan op",
+          "order_index": 6,
+          "has_ebook": true,
+          "ebook": {
+            "id": "6f42825a-ec39-4620-b300-0ceb19e22de3",
+            "title": "Praktische opdracht: stel je eigen voedingsplan op",
+            "status": "published",
+            "file_url": "/books/voeding-gezondheid-praktische-opdracht--stel-je-eigen-voedingsplan-op-ebook.html"
+          }
+        }
+      ],
+      "lessons_with_ebooks": 6,
+      "lessons_without_ebooks": 0
+    }
+  ]
+}
