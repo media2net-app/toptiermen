@@ -34,7 +34,7 @@ async function testWelcomeEmail() {
           tracking_test: true,
           campaign_type: 'welcome_series',
           email_type: 'welcome_campaign',
-          launch_date: '10 september 2024',
+          launch_date: '10 september 2025',
           early_access: true
         }
       })
