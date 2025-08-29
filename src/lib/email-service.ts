@@ -211,7 +211,7 @@ class EmailService {
                   </p>
                   <div style="text-align: center; background: rgba(139, 174, 90, 0.2); padding: 15px; border-radius: 8px; margin-top: 15px;">
                     <p style="color: #B6C948; font-weight: 700; font-size: 16px; margin: 0;">
-                      ⏰ Nog <strong style="color: #FFFFFF;">${Math.ceil((new Date('2025-09-10') - new Date()) / (1000 * 60 * 60 * 24))}</strong> dagen tot de officiële launch!
+                      ⏰ Nog <strong style="color: #FFFFFF;">${Math.ceil((new Date('2025-09-10').getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))}</strong> dagen tot de officiële launch!
                     </p>
                     <p style="color: #8BAE5A; font-size: 14px; margin: 5px 0 0 0;">
                       10 september 2025
@@ -435,7 +435,7 @@ class EmailService {
           
           Je behoort tot de exclusieve lijst van pre-launch leden! In de komende dagen ontvang je sneak previews van het platform, exclusieve content en diepgaande inzichten in wat Top Tier Men voor jou kan betekenen. Deze previews zijn alleen beschikbaar voor een selecte groep - jij bent een van hen.
           
-          ⏰ Nog ${Math.ceil((new Date('2025-09-10') - new Date()) / (1000 * 60 * 60 * 24))} dagen tot de officiële launch! (10 september 2025)
+          ⏰ Nog ${Math.ceil((new Date('2025-09-10').getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} dagen tot de officiële launch! (10 september 2025)
           
           Wat is Top Tier Men?
           

@@ -43,13 +43,13 @@ interface NutritionPlan {
   id: string;
   name: string;
   description: string;
-  target_calories: number;
-  target_protein: number;
-  target_carbs: number;
-  target_fat: number;
-  duration_weeks: number;
-  difficulty: string;
-  goal: string;
+  target_calories?: number;
+  target_protein?: number;
+  target_carbs?: number;
+  target_fat?: number;
+  duration_weeks?: number;
+  difficulty?: string;
+  goal?: string;
 }
 
 interface WeeklyPlanModalProps {
