@@ -1,18 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-// Use service role key for tracking operations
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+import { supabaseAdmin } from '@/lib/supabase-admin';
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const trackingId = searchParams.get('t');
+    console.log('🔍 Request URL:', request.url);
+    
+    // Try multiple ways to get the tracking ID
+    const url = new URL(request.url);
+    let trackingId = url.searchParams.get('t');
+    
+    // If not found, try to extract from URL path
+    if (!trackingId) {
+      const pathParts = request.url.split('?');
+      if (pathParts.length > 1) {
+        const queryString = pathParts[1];
+        const params = new URLSearchParams(queryString);
+        trackingId = params.get('t');
+      }
+    }
+    
+    console.log('🔍 Search params:', Object.fromEntries(url.searchParams.entries()));
+    console.log('🔍 Tracking ID from param t:', trackingId);
 
     if (!trackingId) {
+      console.error('❌ No tracking ID found in request');
       return new NextResponse('Missing tracking ID', { status: 400 });
     }
 
@@ -35,54 +46,113 @@ export async function GET(request: NextRequest) {
               userAgent.includes('Android') ? 'Android' : 
               userAgent.includes('iOS') ? 'iOS' : 'Unknown';
 
-    // Find the tracking record
-    const { data: tracking, error: trackingError } = await supabase
-      .from('email_tracking')
-      .select('id')
-      .eq('tracking_id', trackingId)
+    // Find the tracking record in both tables
+    console.log('🔍 Looking for tracking record with ID:', trackingId);
+    
+    // First try bulk_email_recipients table
+    let { data: bulkTracking, error: bulkError } = await supabaseAdmin
+      .from('bulk_email_recipients')
+      .select('id, email, status, opened_at, campaign_id')
+      .eq('id', trackingId)
       .single();
 
-    if (trackingError || !tracking) {
-      console.error('❌ Tracking record not found:', trackingId);
+    console.log('🔍 Bulk tracking query result:', { bulkTracking, bulkError });
+
+    if (bulkTracking) {
+      console.log('✅ Found bulk tracking record:', bulkTracking);
+      
+      // Update bulk email recipient record
+      const { error: updateError } = await supabaseAdmin
+        .from('bulk_email_recipients')
+        .update({
+          status: 'opened',
+          opened_at: new Date().toISOString()
+        })
+        .eq('id', trackingId);
+
+      if (updateError) {
+        console.error('❌ Error updating bulk tracking record:', updateError);
+      } else {
+        console.log('✅ Bulk email open tracked successfully');
+        
+        // Update campaign statistics
+        try {
+          const { data: campaign } = await supabaseAdmin
+            .from('bulk_email_campaigns')
+            .select('id, sent_count, open_count')
+            .eq('id', bulkTracking.campaign_id)
+            .single();
+          
+          if (campaign) {
+            const newOpenCount = (campaign.open_count || 0) + 1;
+            await supabaseAdmin
+              .from('bulk_email_campaigns')
+              .update({
+                open_count: newOpenCount,
+                updated_at: new Date().toISOString()
+              })
+              .eq('id', campaign.id);
+            
+            console.log(`✅ Updated campaign open count to ${newOpenCount}`);
+          }
+        } catch (error) {
+          console.error('❌ Error updating campaign stats:', error);
+        }
+      }
+      
       return returnTrackingPixel();
     }
 
-    // Update the email tracking record
-    const { error: updateError } = await supabase
+    // If not found in bulk, try email_tracking table
+    const { data: tracking, error: trackingError } = await supabaseAdmin
+      .from('email_tracking')
+      .select('id, tracking_id, status')
+      .eq('tracking_id', trackingId)
+      .single();
+
+    console.log('🔍 Email tracking query result:', { tracking, trackingError });
+
+    if (trackingError) {
+      console.error('❌ Tracking record error:', trackingError);
+      console.error('❌ Tracking ID searched:', trackingId);
+      return returnTrackingPixel();
+    }
+
+    if (!tracking) {
+      console.error('❌ Tracking record not found for ID:', trackingId);
+      return returnTrackingPixel();
+    }
+
+    console.log('✅ Found email tracking record:', tracking);
+
+    // Update email tracking record directly
+    console.log('🔄 Updating email tracking record directly...');
+    
+    // First get current open_count
+    const { data: currentTracking } = await supabaseAdmin
+      .from('email_tracking')
+      .select('open_count')
+      .eq('tracking_id', trackingId)
+      .single();
+    
+    const newOpenCount = (currentTracking?.open_count || 0) + 1;
+    
+    const { error: updateError } = await supabaseAdmin
       .from('email_tracking')
       .update({
         status: 'opened',
         opened_at: new Date().toISOString(),
-        user_agent: userAgent,
-        ip_address: ip,
+        open_count: newOpenCount,
         updated_at: new Date().toISOString()
       })
       .eq('tracking_id', trackingId);
 
-    // Increment open count using RPC
-    const { error: countError } = await supabase
-      .rpc('increment_open_count', { tracking_id: tracking.id });
+    console.log('🔄 Update result:', { updateError });
 
     if (updateError) {
       console.error('❌ Error updating tracking record:', updateError);
     } else {
       console.log('✅ Email open tracked successfully');
-    }
-
-    // Insert detailed open record
-    const { error: openError } = await supabase
-      .from('email_opens')
-      .insert({
-        tracking_id: tracking.id,
-        user_agent: userAgent,
-        ip_address: ip,
-        device_type: deviceType,
-        browser: browser,
-        os: os
-      });
-
-    if (openError) {
-      console.error('❌ Error inserting open record:', openError);
     }
 
     // Return transparent tracking pixel
