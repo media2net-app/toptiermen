@@ -105,6 +105,10 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
   // Initialize form data when plan changes
   useEffect(() => {
     if (plan) {
+      // Determine fitness goal from plan name
+      const fitnessGoal = plan.name?.toLowerCase().includes('droogtrainen') ? 'droogtrainen' :
+                         plan.name?.toLowerCase().includes('spiermassa') ? 'spiermassa' : 'onderhoud';
+      
       setFormData({
         id: plan.id,
         name: plan.name || '',
@@ -114,8 +118,9 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
         target_carbs: plan.target_carbs || 220,
         target_fat: plan.target_fat || 73,
         duration_weeks: plan.duration_weeks || 12,
-        difficulty: plan.difficulty || 'beginner',
-        goal: plan.goal || 'spiermassa',
+        difficulty: plan.difficulty || 'intermediate',
+        goal: plan.goal || fitnessGoal,
+        fitness_goal: fitnessGoal,
         is_featured: plan.is_featured || false,
         is_public: plan.is_public !== false,
         daily_plans: plan.daily_plans || generateDefaultDailyPlans()
@@ -129,8 +134,9 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
         target_carbs: 220,
         target_fat: 73,
         duration_weeks: 12,
-        difficulty: 'beginner',
-        goal: 'spiermassa',
+        difficulty: 'intermediate',
+        goal: 'onderhoud',
+        fitness_goal: 'onderhoud',
         is_featured: false,
         is_public: true,
         daily_plans: generateDefaultDailyPlans()
@@ -209,69 +215,29 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
 
   const handleInputChange = (field: keyof NutritionPlan, value: any) => {
     setFormData(prev => {
-      const updatedData = {
+      const updated = {
         ...prev,
         [field]: value
       };
-
-      // If calories are changed, automatically adjust portion sizes
-      if (field === 'target_calories' && value) {
-        const oldCalories = prev.target_calories || 2200;
-        const newCalories = value;
-        const calorieRatio = newCalories / oldCalories;
-
-        // Update daily plans with adjusted portion sizes
-        updatedData.daily_plans = prev.daily_plans?.map(dailyPlan => ({
-          ...dailyPlan,
-          meals: {
-            ontbijt: adjustMealPortions(dailyPlan.meals.ontbijt, calorieRatio),
-            snack1: adjustMealPortions(dailyPlan.meals.snack1, calorieRatio),
-            lunch: adjustMealPortions(dailyPlan.meals.lunch, calorieRatio),
-            snack2: adjustMealPortions(dailyPlan.meals.snack2, calorieRatio),
-            diner: adjustMealPortions(dailyPlan.meals.diner, calorieRatio)
-          }
-        }));
+      
+      if (field === 'name' && typeof value === 'string') {
+        const fitnessGoal = value.toLowerCase().includes('droogtrainen') ? 'droogtrainen' :
+                           value.toLowerCase().includes('spiermassa') ? 'spiermassa' : 'onderhoud';
+        
+        updated.fitness_goal = fitnessGoal;
+        updated.goal = fitnessGoal;
+        
+        // Set calories based on fitness goal
+        const baseCalories = 2200;
+        const config = fitnessGoalConfigs[fitnessGoal];
+        updated.target_calories = Math.round(baseCalories * config.calories_multiplier);
+        updated.target_protein = Math.round(165 * config.protein_multiplier);
+        updated.target_carbs = Math.round(220 * config.carbs_multiplier);
+        updated.target_fat = Math.round(73 * config.fat_multiplier);
       }
-
-      return updatedData;
+      
+      return updated;
     });
-  };
-
-  // Helper function to adjust meal portions based on calorie ratio
-  const adjustMealPortions = (meal: any, calorieRatio: number) => {
-    if (!meal || !meal.ingredients) return meal;
-
-    return {
-      ...meal,
-      calories: Math.round(meal.calories * calorieRatio),
-      protein: Math.round(meal.protein * calorieRatio),
-      carbs: Math.round(meal.carbs * calorieRatio),
-      fat: Math.round(meal.fat * calorieRatio),
-      ingredients: meal.ingredients.map((ingredient: any) => ({
-        ...ingredient,
-        amount: Math.round(ingredient.amount * calorieRatio * 10) / 10 // Round to 1 decimal
-      }))
-    };
-  };
-
-  // Function to update macros based on fitness goal
-  const updateMacrosForFitnessGoal = (fitnessGoal: 'droogtrainen' | 'spiermassa' | 'onderhoud') => {
-    const config = fitnessGoalConfigs[fitnessGoal];
-    const baseCalories = 2200; // Base calories for 80kg person
-    
-    const newCalories = Math.round(baseCalories * config.calories_multiplier);
-    const newProtein = Math.round(165 * config.protein_multiplier);
-    const newCarbs = Math.round(220 * config.carbs_multiplier);
-    const newFat = Math.round(73 * config.fat_multiplier);
-
-    setFormData(prev => ({
-      ...prev,
-      fitness_goal: fitnessGoal,
-      target_calories: newCalories,
-      target_protein: newProtein,
-      target_carbs: newCarbs,
-      target_fat: newFat
-    }));
   };
 
   const handleMealChange = (day: string, mealType: string, field: keyof MealPlan, value: any) => {
@@ -462,40 +428,8 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
                     value={formData.name}
                     onChange={(e) => handleInputChange('name', e.target.value)}
                     className="w-full px-4 py-3 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                    placeholder="Bijv. Gebalanceerd, High Protein..."
+                    placeholder="Bijv. Carnivoor - Droogtrainen, Carnivoor - Spiermassa..."
                   />
-                </div>
-
-                <div>
-                  <label className="block text-[#8BAE5A] font-semibold mb-2">
-                    Doel
-                  </label>
-                  <select
-                    value={formData.goal}
-                    onChange={(e) => handleInputChange('goal', e.target.value)}
-                    className="w-full px-4 py-3 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                  >
-                    <option value="spiermassa">Spiermassa</option>
-                    <option value="afvallen">Afvallen</option>
-                    <option value="uithouding">Uithouding</option>
-                    <option value="kracht">Kracht</option>
-                    <option value="gezondheid">Gezondheid</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-[#8BAE5A] font-semibold mb-2">
-                    Moeilijkheidsgraad
-                  </label>
-                  <select
-                    value={formData.difficulty}
-                    onChange={(e) => handleInputChange('difficulty', e.target.value)}
-                    className="w-full px-4 py-3 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                  >
-                    <option value="beginner">Beginner</option>
-                    <option value="intermediate">Gevorderd</option>
-                    <option value="advanced">Expert</option>
-                  </select>
                 </div>
 
                 <div>
@@ -530,53 +464,29 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
 
           {activeTab === 'macros' && (
             <div className="space-y-6">
-              {/* Fitness Goals */}
+              {/* Fitness Goal Display - Read Only */}
               <div>
                 <label className="block text-[#8BAE5A] font-semibold mb-3">
-                  Fitness Doel
+                  Fitness Doel (Automatisch bepaald op basis van plan naam)
                 </label>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {[
-                    { 
-                      value: 'droogtrainen', 
-                      label: 'Droogtrainen', 
-                      description: 'Vetverlies met behoud van spiermassa',
-                      icon: '🔥'
-                    },
-                    { 
-                      value: 'spiermassa', 
-                      label: 'Spiermassa', 
-                      description: 'Spiergroei en krachttoename',
-                      icon: '💪'
-                    },
-                    { 
-                      value: 'onderhoud', 
-                      label: 'Onderhoud', 
-                      description: 'Behoud van lichaamscompositie',
-                      icon: '⚖️'
-                    }
-                  ].map(goal => (
-                    <button
-                      key={goal.value}
-                      onClick={() => updateMacrosForFitnessGoal(goal.value as any)}
-                      className={`p-4 rounded-lg border-2 transition-all text-left ${
-                        formData.fitness_goal === goal.value
-                          ? `border-[#8BAE5A] bg-[#232D1A] ${fitnessGoalConfigs[goal.value as keyof typeof fitnessGoalConfigs].color}`
-                          : 'border-[#3A4D23] bg-[#181F17] text-[#8BAE5A] hover:border-[#5A6D43]'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-xl">{goal.icon}</span>
-                        <div className="font-semibold">{goal.label}</div>
-                      </div>
-                      <div className="text-sm text-gray-400">{goal.description}</div>
-                      {formData.fitness_goal === goal.value && (
-                        <div className="text-xs mt-2 text-[#B6C948]">
-                          {fitnessGoalConfigs[goal.value as keyof typeof fitnessGoalConfigs].description}
-                        </div>
-                      )}
-                    </button>
-                  ))}
+                <div className="p-4 rounded-lg bg-[#232D1A] border border-[#3A4D23]">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">
+                      {formData.fitness_goal === 'droogtrainen' ? '🔥' : 
+                       formData.fitness_goal === 'spiermassa' ? '💪' : '⚖️'}
+                    </span>
+                    <div className="font-semibold text-[#8BAE5A] capitalize">
+                      {formData.fitness_goal || 'Onderhoud'}
+                    </div>
+                  </div>
+                  <div className="text-sm text-gray-400 mt-1">
+                    {formData.fitness_goal === 'droogtrainen' ? 'Vetverlies met behoud van spiermassa' :
+                     formData.fitness_goal === 'spiermassa' ? 'Spiergroei en krachttoename' :
+                     'Behoud van lichaamscompositie'}
+                  </div>
+                  <div className="text-xs mt-2 text-[#B6C948]">
+                    💡 Het fitness doel wordt automatisch bepaald op basis van de plan naam (Carnivoor - Droogtrainen/Onderhoud/Spiermassa)
+                  </div>
                 </div>
               </div>
 
@@ -595,8 +505,8 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
                   step="50"
                 />
                 {formData.fitness_goal && (
-                  <div className={`text-sm mt-1 ${fitnessGoalConfigs[formData.fitness_goal].color}`}>
-                    💡 Automatisch aangepast voor {formData.fitness_goal} doel
+                  <div className="text-sm mt-1 text-[#8BAE5A]">
+                    💡 Calorieën zijn vooraf ingesteld op basis van het fitness doel
                   </div>
                 )}
               </div>
