@@ -14,6 +14,7 @@ import { createClient } from '@supabase/supabase-js';
 import PlanBuilder from './components/PlanBuilder';
 import FoodItemModal from './components/FoodItemModal';
 import MealModal from '@/components/admin/MealModal';
+import WeeklyPlanModal from './components/WeeklyPlanModal';
 import AdminCard from '@/components/admin/AdminCard';
 import AdminStatsCard from '@/components/admin/AdminStatsCard';
 import AdminButton from '@/components/admin/AdminButton';
@@ -69,6 +70,7 @@ export default function AdminVoedingsplannenPage() {
   const [showPlanBuilder, setShowPlanBuilder] = useState(false);
   const [showFoodItemModal, setShowFoodItemModal] = useState(false);
   const [showMealModal, setShowMealModal] = useState(false);
+  const [showWeeklyPlanModal, setShowWeeklyPlanModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<NutritionPlan | null>(null);
   const [selectedFoodItem, setSelectedFoodItem] = useState<FoodItem | null>(null);
   const [selectedMeal, setSelectedMeal] = useState<any>(null);
@@ -233,6 +235,12 @@ export default function AdminVoedingsplannenPage() {
   const handleEditPlan = (plan: NutritionPlan) => {
     setSelectedPlan(plan);
     setShowPlanBuilder(true);
+  };
+
+  const handleViewWeeklyPlan = (plan: NutritionPlan) => {
+    console.log('📅 Viewing weekly plan:', plan);
+    setSelectedPlan(plan);
+    setShowWeeklyPlanModal(true);
   };
 
   const handleAddMeal = () => {
@@ -442,330 +450,562 @@ export default function AdminVoedingsplannenPage() {
   );
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Voedingsplannen Beheer</h1>
-          <p className="text-gray-600">Beheer voedingsplannen, maaltijden en ingrediënten</p>
+    <div className="min-h-screen bg-[#0F1419] text-white">
+      <div className="max-w-7xl mx-auto p-6">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-white">Voedingsplannen Beheer</h1>
+            <p className="text-[#8BAE5A] text-lg">Beheer voedingsplannen, maaltijden en ingrediënten</p>
+          </div>
         </div>
-      </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow">
-          <div className="flex items-center">
-            <ChartBarIcon className="h-8 w-8 text-blue-600" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Voedingsplannen</p>
-              <p className="text-2xl font-bold text-gray-900">{plans.length}</p>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="bg-gradient-to-br from-[#1F2D17] to-[#2A3D1A] p-6 rounded-lg border border-[#8BAE5A]">
+            <div className="flex items-center">
+              <ChartBarIcon className="h-8 w-8 text-[#8BAE5A]" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-[#B6C948]">Voedingsplannen</p>
+                <p className="text-2xl font-bold text-white">{plans.length}</p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-gradient-to-br from-[#1F2D17] to-[#2A3D1A] p-6 rounded-lg border border-[#8BAE5A]">
+            <div className="flex items-center">
+              <BoltIcon className="h-8 w-8 text-[#B6C948]" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-[#B6C948]">Maaltijden</p>
+                <p className="text-2xl font-bold text-white">{meals.length}</p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-gradient-to-br from-[#1F2D17] to-[#2A3D1A] p-6 rounded-lg border border-[#8BAE5A]">
+            <div className="flex items-center">
+              <LightBulbIcon className="h-8 w-8 text-[#8BAE5A]" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-[#B6C948]">Ingrediënten</p>
+                <p className="text-2xl font-bold text-white">{foodItems.length}</p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-gradient-to-br from-[#1F2D17] to-[#2A3D1A] p-6 rounded-lg border border-[#8BAE5A]">
+            <div className="flex items-center">
+              <UserGroupIcon className="h-8 w-8 text-[#B6C948]" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-[#B6C948]">Weekplannen</p>
+                <p className="text-2xl font-bold text-white">{weekplans.length}</p>
+              </div>
             </div>
           </div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <div className="flex items-center">
-            <BoltIcon className="h-8 w-8 text-green-600" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Maaltijden</p>
-              <p className="text-2xl font-bold text-gray-900">{meals.length}</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <div className="flex items-center">
-            <LightBulbIcon className="h-8 w-8 text-orange-600" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Ingrediënten</p>
-              <p className="text-2xl font-bold text-gray-900">{foodItems.length}</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <div className="flex items-center">
-            <UserGroupIcon className="h-8 w-8 text-purple-600" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Weekplannen</p>
-              <p className="text-2xl font-bold text-gray-900">{weekplans.length}</p>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Search and Filter */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1">
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-          <input
-            type="text"
-            placeholder="Zoek voedingsplannen, maaltijden of ingrediënten..."
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-      </div>
-
-      {/* Tabs */}
-      <div className="border-b border-gray-200">
-        <nav className="-mb-px flex space-x-8">
-          {[
-            { id: 'voeding', label: 'Ingrediënten', count: foodItems.length },
-            { id: 'plannen', label: 'Voedingsplannen', count: plans.length },
-            { id: 'maaltijden', label: 'Maaltijden', count: meals.length },
-            { id: 'weekplannen', label: 'Weekplannen', count: weekplans.length }
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === tab.id
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              {tab.label} ({tab.count})
-            </button>
-          ))}
-        </nav>
-      </div>
-
-      {/* Content based on active tab */}
-      {activeTab === 'voeding' && (
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-lg font-semibold">Ingrediënten</h2>
-            <AdminButton onClick={handleAddFoodItem}>
-              <PlusIcon className="h-4 w-4 mr-2" />
-              Nieuw Ingrediënt
-            </AdminButton>
+        {/* Search and Filter */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-8">
+          <div className="relative flex-1">
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#8BAE5A] h-5 w-5" />
+            <input
+              type="text"
+              placeholder="Zoek voedingsplannen, maaltijden of ingrediënten..."
+              className="w-full pl-10 pr-4 py-3 bg-[#1F2D17] border border-[#8BAE5A] rounded-lg focus:ring-2 focus:ring-[#B6C948] focus:border-[#B6C948] text-white placeholder-[#8BAE5A]"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
-          
-          {/* Category Filter */}
-          <div className="mb-6">
-            <div className="flex flex-wrap gap-2">
-              {['alle', 'fruit', 'eieren', 'noten', 'vlees', 'vis', 'groenten', 'zuivel', 'granen'].map((category) => {
-                const categoryCount = category === 'alle' 
-                  ? foodItems.length 
-                  : foodItems.filter(item => item.category.toLowerCase() === category.toLowerCase()).length;
-                
-                return (
-                  <button
-                    key={category}
-                    onClick={() => setCategoryFilter(category)}
-                    className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                      categoryFilter === category
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
-                  >
-                    {category.charAt(0).toUpperCase() + category.slice(1)} ({categoryCount})
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-          
-          {isLoadingFoodItems ? (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="mt-2 text-gray-600">Ingrediënten laden...</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredFoodItems.map((item) => (
-                <AdminCard
-                  key={item.id}
-                  title={item.name}
-                  description={`${item.calories_per_100g} kcal/100g • ${item.category}`}
-                  actions={
-                    <div className="flex space-x-2">
-                      <AdminButton
-                        onClick={() => handleEditFoodItem(item)}
-                        variant="secondary"
-                        size="sm"
-                        icon={PencilIcon}
-                      >
-                        Bewerk
-                      </AdminButton>
-                      <AdminButton
-                        onClick={() => handleDeleteFoodItem(item.id)}
-                        variant="danger"
-                        size="sm"
-                        icon={TrashIcon}
-                      >
-                        Verwijder
-                      </AdminButton>
-                    </div>
-                  }
-                />
-              ))}
-            </div>
-          )}
         </div>
-      )}
 
-      {activeTab === 'plannen' && (
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-lg font-semibold">Voedingsplannen</h2>
-            <AdminButton onClick={handleAddPlan} icon={PlusIcon}>
-              Nieuw Plan
-            </AdminButton>
-          </div>
-          
-          {isLoading ? (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="mt-2 text-gray-600">Plannen laden...</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredPlans.map((plan) => (
-                <AdminCard
-                  key={plan.id}
-                  title={plan.name}
-                  description={plan.description}
-                  actions={
-                    <div className="flex space-x-2">
-                      <AdminButton
-                        onClick={() => handleEditPlan(plan)}
-                        variant="secondary"
-                        size="sm"
-                        icon={PencilIcon}
-                      >
-                        Bewerk
-                      </AdminButton>
-                      <AdminButton
-                        onClick={() => handleDeletePlan(plan.id)}
-                        variant="danger"
-                        size="sm"
-                        icon={TrashIcon}
-                      >
-                        Verwijder
-                      </AdminButton>
-                    </div>
-                  }
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {activeTab === 'maaltijden' && (
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-lg font-semibold">Maaltijden</h2>
-            <div className="flex space-x-2">
-              <select
-                value={mealsFilter}
-                onChange={(e) => setMealsFilter(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        {/* Tabs */}
+        <div className="border-b border-[#8BAE5A] mb-8">
+          <nav className="-mb-px flex space-x-8">
+            {[
+              { id: 'voeding', label: 'Ingrediënten', count: foodItems.length },
+              { id: 'plannen', label: 'Voedingsplannen', count: plans.length },
+              { id: 'maaltijden', label: 'Maaltijden', count: meals.length },
+              { id: 'weekplannen', label: 'Weekplannen', count: weekplans.length }
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`py-3 px-4 border-b-2 font-medium text-sm transition-colors ${
+                  activeTab === tab.id
+                    ? 'border-[#8BAE5A] text-[#8BAE5A]'
+                    : 'border-transparent text-gray-400 hover:text-[#B6C948] hover:border-[#B6C948]'
+                }`}
               >
-                <option value="alle">Alle maaltijden</option>
-                <option value="ontbijt">Ontbijt</option>
-                <option value="lunch">Lunch</option>
-                <option value="diner">Diner</option>
-                <option value="snack">Snack</option>
-              </select>
-              <AdminButton onClick={handleAddMeal} icon={PlusIcon}>
-                Nieuwe Maaltijd
+                {tab.label} ({tab.count})
+              </button>
+            ))}
+          </nav>
+        </div>
+
+        {/* Content based on active tab */}
+        {activeTab === 'voeding' && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold text-white">Ingrediënten</h2>
+              <AdminButton onClick={handleAddFoodItem}>
+                <PlusIcon className="h-4 w-4 mr-2" />
+                Nieuw Ingrediënt
               </AdminButton>
             </div>
-          </div>
           
-          {isLoading ? (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="mt-2 text-gray-600">Maaltijden laden...</p>
+            {/* Category Filter */}
+            <div className="mb-6">
+              <div className="flex flex-wrap gap-2">
+                {['alle', 'eieren', 'fruit', 'granen', 'groenten', 'natuurlijke-suikers', 'noten', 'vetten', 'vis', 'vlees', 'zuivel'].map((category) => {
+                  const categoryCount = category === 'alle' 
+                    ? foodItems.length 
+                    : foodItems.filter(item => item.category.toLowerCase() === category.toLowerCase()).length;
+                  
+                  return (
+                    <button
+                      key={category}
+                      onClick={() => setCategoryFilter(category)}
+                      className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                        categoryFilter === category
+                          ? 'bg-[#8BAE5A] text-[#141A15] border border-[#8BAE5A]'
+                          : 'bg-[#1F2D17] text-[#8BAE5A] border border-[#8BAE5A] hover:bg-[#8BAE5A] hover:text-[#141A15]'
+                      }`}
+                    >
+                      {category.charAt(0).toUpperCase() + category.slice(1)} ({categoryCount})
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredMeals.map((meal) => (
-                <AdminCard
-                  key={meal.id}
-                  title={meal.name || 'Naamloze maaltijd'}
-                  description={`${meal.meal_type || 'Onbekend type'} • ${meal.nutrition_info?.calories || 0} kcal`}
-                  actions={
-                    <div className="flex space-x-2">
-                      <AdminButton
+            
+            {isLoadingFoodItems ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8BAE5A] mx-auto"></div>
+                <p className="mt-2 text-[#8BAE5A]">Ingrediënten laden...</p>
+              </div>
+            ) : (
+            <div className="bg-[#1F2D17] border border-[#8BAE5A] rounded-lg overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="min-w-full">
+                  <thead className="bg-[#2A3D1A] border-b border-[#8BAE5A]">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[#B6C948] uppercase tracking-wider">
+                        Naam
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[#B6C948] uppercase tracking-wider">
+                        Categorie
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[#B6C948] uppercase tracking-wider">
+                        Calorieën (per 100g)
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[#B6C948] uppercase tracking-wider">
+                        Eiwitten (g)
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[#B6C948] uppercase tracking-wider">
+                        Koolhydraten (g)
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[#B6C948] uppercase tracking-wider">
+                        Vetten (g)
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[#B6C948] uppercase tracking-wider">
+                        Acties
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#8BAE5A]">
+                    {filteredFoodItems.map((item) => (
+                      <tr 
+                        key={item.id} 
+                        className="hover:bg-[#2A3D1A] transition-colors cursor-pointer"
+                        onClick={() => handleEditFoodItem(item)}
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-white">{item.name}</div>
+                          {item.description && (
+                            <div className="text-sm text-[#8BAE5A]">{item.description}</div>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#8BAE5A] text-[#141A15]">
+                            {item.category}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                          {item.calories_per_100g} kcal
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                          {item.protein_per_100g}g
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                          {item.carbs_per_100g}g
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                          {item.fat_per_100g}g
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEditFoodItem(item);
+                              }}
+                              className="text-[#8BAE5A] hover:text-[#B6C948] p-1 hover:bg-[#8BAE5A] hover:bg-opacity-20 rounded"
+                              title="Bewerk ingrediënt"
+                            >
+                              <PencilIcon className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteFoodItem(item.id);
+                              }}
+                              className="text-red-400 hover:text-red-300 p-1 hover:bg-red-900 hover:bg-opacity-20 rounded"
+                              title="Verwijder ingrediënt"
+                            >
+                              <TrashIcon className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+        {activeTab === 'plannen' && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold text-white">Voedingsplannen</h2>
+              <AdminButton onClick={handleAddPlan}>
+                <PlusIcon className="h-4 w-4 mr-2" />
+                Nieuw Plan
+              </AdminButton>
+            </div>
+            
+            {isLoading ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8BAE5A] mx-auto"></div>
+                <p className="mt-2 text-[#8BAE5A]">Plannen laden...</p>
+              </div>
+            ) : (
+            <div className="bg-[#1F2D17] border border-[#8BAE5A] rounded-lg overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="min-w-full">
+                  <thead className="bg-[#2A3D1A] border-b border-[#8BAE5A]">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[#B6C948] uppercase tracking-wider">
+                        Naam
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[#B6C948] uppercase tracking-wider">
+                        Beschrijving
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[#B6C948] uppercase tracking-wider">
+                        Type
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[#B6C948] uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[#B6C948] uppercase tracking-wider">
+                        Acties
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#8BAE5A]">
+                    {filteredPlans.map((plan) => (
+                      <tr 
+                        key={plan.id} 
+                        className="hover:bg-[#2A3D1A] transition-colors cursor-pointer"
+                        onClick={() => handleViewWeeklyPlan(plan)}
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-white">{plan.name}</div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm text-white max-w-xs truncate">
+                            {plan.description || 'Geen beschrijving'}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#B6C948] text-[#141A15]">
+                            {plan.type || 'Standaard'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            plan.is_active ? 'bg-green-600 text-white' : 'bg-gray-600 text-white'
+                          }`}>
+                            {plan.is_active ? 'Actief' : 'Inactief'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEditPlan(plan);
+                              }}
+                              className="text-[#8BAE5A] hover:text-[#B6C948] p-1 hover:bg-[#8BAE5A] hover:bg-opacity-20 rounded"
+                              title="Bewerk plan"
+                            >
+                              <PencilIcon className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeletePlan(plan.id);
+                              }}
+                              className="text-red-400 hover:text-red-300 p-1 hover:bg-red-900 hover:bg-opacity-20 rounded"
+                              title="Verwijder plan"
+                            >
+                              <TrashIcon className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+        {activeTab === 'maaltijden' && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold text-white">Maaltijden</h2>
+              <div className="flex space-x-2">
+                <select
+                  value={mealsFilter}
+                  onChange={(e) => setMealsFilter(e.target.value)}
+                  className="px-3 py-2 bg-[#1F2D17] border border-[#8BAE5A] rounded-lg focus:ring-2 focus:ring-[#B6C948] focus:border-[#B6C948] text-white"
+                >
+                  <option value="alle">Alle maaltijden</option>
+                  <option value="ontbijt">Ontbijt</option>
+                  <option value="lunch">Lunch</option>
+                  <option value="diner">Diner</option>
+                  <option value="snack">Snack</option>
+                </select>
+                <AdminButton onClick={handleAddMeal}>
+                  <PlusIcon className="h-4 w-4 mr-2" />
+                  Nieuwe Maaltijd
+                </AdminButton>
+              </div>
+            </div>
+            
+            {isLoading ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8BAE5A] mx-auto"></div>
+                <p className="mt-2 text-[#8BAE5A]">Maaltijden laden...</p>
+              </div>
+            ) : (
+            <div className="bg-[#1F2D17] border border-[#8BAE5A] rounded-lg overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="min-w-full">
+                  <thead className="bg-[#2A3D1A] border-b border-[#8BAE5A]">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[#B6C948] uppercase tracking-wider">
+                        Naam
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[#B6C948] uppercase tracking-wider">
+                        Type
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[#B6C948] uppercase tracking-wider">
+                        Calorieën
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[#B6C948] uppercase tracking-wider">
+                        Eiwitten (g)
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[#B6C948] uppercase tracking-wider">
+                        Koolhydraten (g)
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[#B6C948] uppercase tracking-wider">
+                        Vetten (g)
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-[#B6C948] uppercase tracking-wider">
+                        Acties
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#8BAE5A]">
+                    {filteredMeals.map((meal) => (
+                      <tr 
+                        key={meal.id} 
+                        className="hover:bg-[#2A3D1A] transition-colors cursor-pointer"
                         onClick={() => handleEditMeal(meal)}
-                        variant="secondary"
-                        size="sm"
-                        icon={PencilIcon}
                       >
-                        Bewerk
-                      </AdminButton>
-                      <AdminButton
-                        onClick={() => handleDeleteMeal(meal.id)}
-                        variant="danger"
-                        size="sm"
-                        icon={TrashIcon}
-                      >
-                        Verwijder
-                      </AdminButton>
-                    </div>
-                  }
-                />
-              ))}
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-white">{meal.name || 'Naamloze maaltijd'}</div>
+                          {meal.description && (
+                            <div className="text-sm text-[#8BAE5A]">{meal.description}</div>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#8BAE5A] text-[#141A15]">
+                            {meal.meal_type || 'Onbekend'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                          {meal.nutrition_info?.calories || 0} kcal
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                          {meal.nutrition_info?.protein || 0}g
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                          {meal.nutrition_info?.carbs || 0}g
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                          {meal.nutrition_info?.fat || 0}g
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEditMeal(meal);
+                              }}
+                              className="text-[#8BAE5A] hover:text-[#B6C948] p-1 hover:bg-[#8BAE5A] hover:bg-opacity-20 rounded"
+                              title="Bewerk maaltijd"
+                            >
+                              <PencilIcon className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteMeal(meal.id);
+                              }}
+                              className="text-red-400 hover:text-red-300 p-1 hover:bg-red-900 hover:bg-opacity-20 rounded"
+                              title="Verwijder maaltijd"
+                            >
+                              <TrashIcon className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </div>
       )}
 
-      {activeTab === 'weekplannen' && (
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-lg font-semibold">Weekplannen</h2>
+        {activeTab === 'weekplannen' && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold text-white">Weekplannen</h2>
+            </div>
+            
+            {isLoading ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8BAE5A] mx-auto"></div>
+                <p className="mt-2 text-[#8BAE5A]">Weekplannen laden...</p>
+              </div>
+            ) : (
+              <div className="bg-[#1F2D17] border border-[#8BAE5A] rounded-lg overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full">
+                    <thead className="bg-[#2A3D1A] border-b border-[#8BAE5A]">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-[#B6C948] uppercase tracking-wider">
+                          Naam
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-[#B6C948] uppercase tracking-wider">
+                          Beschrijving
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-[#B6C948] uppercase tracking-wider">
+                          Status
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-[#B6C948] uppercase tracking-wider">
+                          Acties
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#8BAE5A]">
+                      {filteredWeekplans.map((weekplan) => (
+                        <tr key={weekplan.id} className="hover:bg-[#2A3D1A] transition-colors">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-white">{weekplan.name || 'Naamloos weekplan'}</div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="text-sm text-white max-w-xs truncate">
+                              {weekplan.description || 'Geen beschrijving'}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#B6C948] text-[#141A15]">
+                              Concept
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div className="flex space-x-2">
+                              <button
+                                className="text-[#8BAE5A] hover:text-[#B6C948] p-1 hover:bg-[#8BAE5A] hover:bg-opacity-20 rounded"
+                                title="Bewerk"
+                              >
+                                <PencilIcon className="h-4 w-4" />
+                              </button>
+                              <button
+                                className="text-red-400 hover:text-red-300 p-1 hover:bg-red-900 hover:bg-opacity-20 rounded"
+                                title="Verwijder"
+                              >
+                                <TrashIcon className="h-4 w-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
-          
-          {isLoading ? (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="mt-2 text-gray-600">Weekplannen laden...</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredWeekplans.map((weekplan) => (
-                <AdminCard
-                  key={weekplan.id}
-                  title={weekplan.name || 'Naamloos weekplan'}
-                  description={weekplan.description || 'Geen beschrijving'}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+        )}
 
-      {/* Modals */}
-      {showPlanBuilder && (
-        <PlanBuilder
-          plan={selectedPlan}
-          onSave={handleSavePlan}
-          onClose={() => setShowPlanBuilder(false)}
-          foodItems={foodItems}
-          meals={meals}
-        />
-      )}
+        {/* Modals */}
+        {showPlanBuilder && (
+          <PlanBuilder
+            isOpen={showPlanBuilder}
+            plan={selectedPlan}
+            onSave={handleSavePlan}
+            onClose={() => setShowPlanBuilder(false)}
+            foodItems={foodItems}
+            meals={meals}
+          />
+        )}
 
-      {showFoodItemModal && (
-        <FoodItemModal
-          isOpen={showFoodItemModal}
-          foodItem={selectedFoodItem}
-          onSave={handleSaveFoodItem}
-          onClose={() => setShowFoodItemModal(false)}
-        />
-      )}
+        {showFoodItemModal && (
+          <FoodItemModal
+            isOpen={showFoodItemModal}
+            foodItem={selectedFoodItem}
+            onSave={handleSaveFoodItem}
+            onClose={() => setShowFoodItemModal(false)}
+          />
+        )}
 
-      {showMealModal && (
-        <MealModal
-          isOpen={showMealModal}
-          meal={selectedMeal}
-          onSave={handleSaveMeal}
-          onClose={() => setShowMealModal(false)}
-        />
-      )}
+        {showMealModal && (
+          <MealModal
+            isOpen={showMealModal}
+            meal={selectedMeal}
+            onSave={handleSaveMeal}
+            onClose={() => setShowMealModal(false)}
+          />
+        )}
+
+        {showWeeklyPlanModal && (
+          <WeeklyPlanModal
+            isOpen={showWeeklyPlanModal}
+            plan={selectedPlan}
+            onClose={() => {
+              setShowWeeklyPlanModal(false);
+              setSelectedPlan(null);
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 }

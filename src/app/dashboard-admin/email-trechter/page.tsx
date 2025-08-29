@@ -169,13 +169,13 @@ Het TopTierMen Team`,
   const handleStepStatusToggle = (stepId: string) => {
     setEmailSteps(steps => 
       steps.map(step => {
-        if (step.id === stepId) {
+      if (step.id === stepId) {
           return {
             ...step,
             status: step.status === 'active' ? 'paused' : 'active'
           };
-        }
-        return step;
+      }
+      return step;
       })
     );
   };
@@ -200,9 +200,9 @@ Het TopTierMen Team`,
     if (selectedStepForEdit) {
       setEmailSteps(steps =>
         steps.map(step =>
-          step.id === selectedStepForEdit.id
+        step.id === selectedStepForEdit.id 
             ? { ...step, design: content }
-            : step
+          : step
         )
       );
     }
@@ -214,9 +214,9 @@ Het TopTierMen Team`,
     if (selectedStepForEdit) {
       setEmailSteps(steps =>
         steps.map(step =>
-          step.id === selectedStepForEdit.id
+        step.id === selectedStepForEdit.id 
             ? { ...step, design: content }
-            : step
+          : step
         )
       );
     }
@@ -228,9 +228,9 @@ Het TopTierMen Team`,
     if (selectedStepForEdit) {
       setEmailSteps(steps =>
         steps.map(step =>
-          step.id === selectedStepForEdit.id
+        step.id === selectedStepForEdit.id 
             ? { ...step, content }
-            : step
+          : step
         )
       );
     }
@@ -239,7 +239,7 @@ Het TopTierMen Team`,
   };
 
   const handleDuplicate = (step: EmailStep) => {
-    const newStep: EmailStep = {
+      const newStep: EmailStep = {
       ...step,
       id: `${step.id}_copy_${Date.now()}`,
       name: `${step.name} (Kopie)`,
@@ -251,22 +251,22 @@ Het TopTierMen Team`,
   const addNewStep = () => {
     const newStep: EmailStep = {
       id: `step_${Date.now()}`,
-      stepNumber: emailSteps.length + 1,
-      name: 'Nieuwe Email',
+        stepNumber: emailSteps.length + 1,
+        name: 'Nieuwe Email',
       subject: 'Nieuwe email onderwerp',
       content: 'Nieuwe email content...',
       delayDays: emailSteps.length,
-      status: 'draft',
-      sentCount: 0,
+        status: 'draft',
+        sentCount: 0,
       openRate: 0
-    };
-    setEmailSteps([...emailSteps, newStep]);
+      };
+      setEmailSteps([...emailSteps, newStep]);
   };
 
   return (
     <div className="p-6 bg-[#0F1419] min-h-screen">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
+      {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-[#F3F3F1] mb-2">Email Marketing</h1>
           <p className="text-[#8BAE5A]">Beheer de 3-email campagne voor nieuwe leads</p>
@@ -278,21 +278,21 @@ Het TopTierMen Team`,
             <div className="text-center">
               <div className="text-3xl font-bold text-[#8BAE5A] mb-1">{campaignStats.totalSent.toLocaleString()}</div>
               <div className="text-sm text-[#8A9BA8]">Totaal Leads</div>
-            </div>
+        </div>
           </AdminCard>
           
           <AdminCard>
             <div className="text-center">
               <div className="text-3xl font-bold text-[#FFD700] mb-1">{campaignStats.openRate}%</div>
               <div className="text-sm text-[#8A9BA8]">Open Rate</div>
-            </div>
+      </div>
           </AdminCard>
           
           <AdminCard>
             <div className="text-center">
               <div className="text-3xl font-bold text-[#FF6B6B] mb-1">{campaignStats.clickRate}%</div>
               <div className="text-sm text-[#8A9BA8]">Total Clicks</div>
-            </div>
+      </div>
           </AdminCard>
           
           <AdminCard>
@@ -317,17 +317,17 @@ Het TopTierMen Team`,
           </div>
 
           <div className="space-y-4">
-            {emailSteps.map((step, index) => (
+        {emailSteps.map((step, index) => (
               <div key={step.id} className="flex items-center">
                 <div className="flex-1">
                   <div className="bg-[#232D1A] border border-[#3A4D23] rounded-lg p-6 hover:border-[#8BAE5A] transition-colors">
-                    <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-4 mb-3">
                           <div className="w-8 h-8 bg-[#8BAE5A] text-[#0F1419] rounded-full flex items-center justify-center font-bold">
-                            {step.stepNumber}
-                          </div>
-                          <div className="flex-1">
+                  {step.stepNumber}
+                </div>
+                <div className="flex-1">
                             <h3 className="font-semibold text-[#F3F3F1] text-lg">{step.name}</h3>
                             <p className="text-[#8BAE5A] text-sm">{step.subject}</p>
                           </div>
@@ -337,55 +337,55 @@ Het TopTierMen Team`,
                               step.status === 'paused' ? 'bg-[#FFD700] text-[#0F1419]' :
                               'bg-[#8A9BA8] text-white'
                             }`}>
-                              {step.status === 'active' ? 'Actief' : 
+                      {step.status === 'active' ? 'Actief' : 
                                step.status === 'paused' ? 'Gepauzeerd' : 'Concept'}
-                            </span>
+                    </span>
                             <div className="text-right text-sm text-[#8A9BA8]">
                               <div>Verzonden na: {step.delayDays === 0 ? 'Direct' : `${step.delayDays} dagen`}</div>
-                            </div>
-                          </div>
-                        </div>
-                        
+                  </div>
+                </div>
+              </div>
+              
                         <div className="flex items-center justify-between">
                           <div className="flex gap-2">
-                            <AdminButton
+                <AdminButton
                               onClick={() => handlePreview(step)}
-                              size="sm"
+                  size="sm"
                               variant="outline"
                             >
                               <EyeIcon className="w-4 h-4 mr-1" />
                               Bekijk
-                            </AdminButton>
-                            
-                            <AdminButton
+                </AdminButton>
+                
+                <AdminButton
                               onClick={() => handleEdit(step, 'simple')}
-                              size="sm"
+                  size="sm"
                               variant="outline"
-                            >
+                >
                               <PencilIcon className="w-4 h-4 mr-1" />
                               Bewerk
-                            </AdminButton>
-                            
-                            <AdminButton
+                </AdminButton>
+                
+                    <AdminButton
                               onClick={() => handleEdit(step, 'unified')}
-                              size="sm"
+                      size="sm"
                               className="bg-[#8BAE5A] hover:bg-[#B6C948] text-[#0F1419]"
-                            >
+                    >
                               🎨 Design
-                            </AdminButton>
-                            
-                            <AdminButton
+                    </AdminButton>
+                    
+                    <AdminButton
                               onClick={() => handleDuplicate(step)}
-                              size="sm"
+                      size="sm"
                               variant="outline"
-                            >
+                    >
                               <DocumentDuplicateIcon className="w-4 h-4 mr-1" />
                               Kopieer
-                            </AdminButton>
-                            
-                            <AdminButton
+                    </AdminButton>
+                
+                  <AdminButton
                               onClick={() => handleStepStatusToggle(step.id)}
-                              size="sm"
+                    size="sm"
                               variant={step.status === 'active' ? 'danger' : 'primary'}
                             >
                               {step.status === 'active' ? (
@@ -399,32 +399,32 @@ Het TopTierMen Team`,
                                   Start
                                 </>
                               )}
-                            </AdminButton>
-                          </div>
-                          
+                </AdminButton>
+      </div>
+
                           <div className="flex items-center gap-6 text-sm text-[#8A9BA8]">
                             <div>
                               <span className="text-[#F3F3F1] font-medium">{step.sentCount}</span> verzonden
-                            </div>
-                            <div>
+                </div>
+                <div>
                               <span className="text-[#F3F3F1] font-medium">{step.openRate}%</span> geopend
                             </div>
                           </div>
                         </div>
                       </div>
-                    </div>
                   </div>
                 </div>
-                
-                {index < emailSteps.length - 1 && (
+              </div>
+              
+              {index < emailSteps.length - 1 && (
                   <div className="flex flex-col items-center mx-4">
                     <ChevronRightIcon className="w-6 h-6 text-[#8BAE5A]" />
                   </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </AdminCard>
+              )}
+            </div>
+          ))}
+        </div>
+      </AdminCard>
 
         {/* Campaigns Overview */}
         <AdminCard>
@@ -459,9 +459,9 @@ Het TopTierMen Team`,
                 ))}
               </tbody>
             </table>
-          </div>
+              </div>
         </AdminCard>
-      </div>
+              </div>
 
       {/* Email Preview Modal */}
       {showPreview && selectedStep && (
@@ -530,19 +530,19 @@ Het TopTierMen Team`,
                 </div>
 
                 {/* Main Content */}
-                <div className="space-y-6">
-                  {/* Greeting */}
+                      <div className="space-y-6">
+                        {/* Greeting */}
                   <div className="text-center mb-6">
                     <h2 className="text-2xl font-bold text-[#F3F3F1] mb-4">Beste John Doe,</h2>
-                  </div>
+                        </div>
 
                   {/* Content */}
                   <div className="bg-gradient-to-br from-[#1F2D17] to-[#2A3D1A] p-6 rounded-lg border-2 border-[#8BAE5A]">
                     <div className="text-[#B6C948] leading-relaxed whitespace-pre-wrap">
                       {selectedStep.content.replace(/\{\{name\}\}/g, 'John Doe')}
-                    </div>
-                  </div>
-
+                                </div>
+                                  </div>
+                                  
                   {/* CTA Section */}
                   <div className="text-center p-8 bg-[#141A15] border-3 border-[#8BAE5A] rounded-lg">
                     <h3 className="text-2xl font-bold text-[#F3F3F1] mb-4 uppercase tracking-wide">🎯 Klaar om te beginnen?</h3>
@@ -550,18 +550,18 @@ Het TopTierMen Team`,
                     
                     <div className="inline-block bg-[#8BAE5A] text-[#141A15] px-10 py-4 rounded-lg font-bold text-lg uppercase tracking-wide border-3 border-[#8BAE5A] shadow-lg hover:bg-[#B6C948] transition-colors">
                       Start je Journey
-                    </div>
-                  </div>
-                </div>
+                                    </div>
+                                  </div>
+                                    </div>
 
                 {/* Footer */}
                 <div className="mt-8 bg-gradient-to-r from-[#232D1A] to-[#1F2D17] p-6 rounded-lg border-t border-[#8BAE5A] text-center">
                   <p className="text-[#F3F3F1] font-bold mb-2">Met broederlijke groeten,</p>
                   <p className="text-[#8BAE5A] font-semibold">Het TopTierMen Team</p>
-                </div>
-              </div>
-            </div>
-          </div>
+                                </div>
+                                    </div>
+                                  </div>
+                                    </div>
         </div>
       )}
 
@@ -602,4 +602,4 @@ Het TopTierMen Team`,
       />
     </div>
   );
-}
+} 
