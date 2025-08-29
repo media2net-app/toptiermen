@@ -1,27 +1,12 @@
 'use client';
+
 import { useState, useEffect } from 'react';
-import { 
-  EnvelopeIcon,
-  PlayIcon,
-  PauseIcon,
-  CheckCircleIcon,
-  ExclamationTriangleIcon,
-  ClockIcon,
-  ChartBarIcon,
-  UserGroupIcon,
-  ArrowRightIcon,
-  PlusIcon,
-  PencilIcon,
-  TrashIcon,
-  EyeIcon,
-  DocumentTextIcon,
-  CalendarIcon,
-  XMarkIcon,
-  SparklesIcon,
-  WrenchScrewdriverIcon
-} from '@heroicons/react/24/outline';
-import { toast } from 'react-hot-toast';
-import { AdminCard, AdminStatsCard, AdminButton, AdminTable, EmailBuilder, SimpleEmailEditor, UnifiedEmailBuilder } from '@/components/admin';
+import { ChevronRightIcon, PlusIcon, XMarkIcon, EyeIcon, PencilIcon, PlayIcon, PauseIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline';
+import AdminButton from '@/components/admin/AdminButton';
+import AdminCard from '@/components/admin/AdminCard';
+import UnifiedEmailBuilder from '@/components/admin/UnifiedEmailBuilder';
+import EmailBuilder from '@/components/admin/EmailBuilder';
+import SimpleEmailEditor from '@/components/admin/SimpleEmailEditor';
 
 interface EmailStep {
   id: string;
@@ -30,20 +15,36 @@ interface EmailStep {
   subject: string;
   content: string;
   delayDays: number;
-  status: 'draft' | 'active' | 'paused' | 'completed';
+  status: 'active' | 'paused' | 'draft';
   sentCount: number;
   openRate: number;
+  design?: any;
+}
+
+interface EmailCampaign {
+  id: string;
+  name: string;
+  description: string;
+  status: 'active' | 'paused' | 'draft';
+  totalEmails: number;
+  totalOpens: number;
+  totalClicks: number;
+  steps: EmailStep[];
+}
+
+interface Campaign {
+  id: string;
+  name: string;
+  totalEmails: number;
+  openRate: number;
   clickRate: number;
-  scheduledDate?: Date;
-  design?: string; // Added for EmailBuilder
+  conversionRate: number;
 }
 
 interface CampaignStats {
-  totalLeads: number;
-  activeLeads: number;
-  emailsSent: number;
-  totalOpens: number;
-  totalClicks: number;
+  totalSent: number;
+  openRate: number;
+  clickRate: number;
   conversionRate: number;
 }
 
@@ -105,784 +106,447 @@ Het Toptiermen Team
       delayDays: 0,
       status: 'active',
       sentCount: 0,
-      openRate: 0,
-      clickRate: 0
+      openRate: 0
     },
     {
       id: '2',
       stepNumber: 2,
-      name: 'Waarde & Voordelen',
-      subject: '💎 Ontdek hoe Toptiermen jouw leven kan veranderen',
+      name: 'Waarde & Validatie',
+      subject: '💪 Dit is waarom Toptiermen anders is dan de rest',
       content: `Beste {{name}},
 
-Hopelijk heb je onze eerste email kunnen lezen. Vandaag delen we wat het betekent om een echte Top Tier Man te worden en hoe de broederschap je leven gaat veranderen.
+Gisteren stuurde ik je mijn welkomstmail, en vandaag wil ik je laten zien waarom Toptiermen fundamenteel anders is dan elke andere "self-help" cursus of community die je misschien hebt geprobeerd.
 
-**Het Toptiermen verschil - De echte waarde:**
+**Het probleem met de meeste programma's:**
 
-🔥 **1. De Broederschap**
-Dit is geen gewone community - dit is een broederschap van gelijkgestemden die elkaar naar succes duwen. Elke week evalueren we samen je voortgang in video calls met alle broeders.
+❌ Ze geven je alleen informatie, maar geen echte verantwoordelijkheid
+❌ Je bent alleen in je reis - geen echte broederschap
+❌ Geen wekelijkse check-ins of accountability
+❌ Generieke aanpak die niet bij jou past
+❌ Geen lang-termijn community ondersteuning
 
-💪 **2. Persoonlijke Transformatie**
-Je wordt niet alleen beter, je wordt een Top Tier Man. Dit is een complete identiteit transformatie die je leven fundamenteel verandert.
+**Hoe Toptiermen dit oplost:**
 
-🎯 **3. Accountability & Support**
-De broederschap houdt je accountable. Als je achterblijft, zijn er broeders die je weer op het juiste pad krijgen. Als je excellenteert, wordt je gevierd.
+✅ **Echte Broederschap**: Je wordt onderdeel van een hechte groep mannen die samen groeien
+✅ **Wekelijkse Accountability**: Elke week video calls waar we je voortgang bespreken
+✅ **Gepersonaliseerde Aanpak**: Alles wordt aangepast aan jouw specifieke situatie en doelen
+✅ **Levenslange Community**: Eenmaal Top Tier Man, altijd Top Tier Man
+✅ **Bewezen Track Record**: Al 300+ mannen geholpen hun leven te transformeren
 
-🤝 **4. Netwerk van Winners**
-Je netwerk wordt je nettowaarde. De broeders in Toptiermen zijn allemaal mensen die net als jij naar het volgende niveau willen.
+**Wat onze leden zeggen:**
 
-📊 **5. Meetbare Resultaten**
-Elke week tracken we je voortgang. Niet alleen in fitness, maar in alle levensgebieden: carrière, relaties, mindset, en persoonlijke groei.
+"Voordat ik bij Toptiermen kwam, probeerde ik jaren alleen te groeien. In 6 maanden heb ik meer vooruitgang geboekt dan in de 5 jaar daarvoor." - Mark, 34
 
-**Wat onze broeders zeggen:**
-*"De wekelijkse video calls met alle broeders hebben mijn leven veranderd. Ik voel me eindelijk begrepen en gesteund."* - Mark, CEO
-*"Dit is geen gewone community - dit is een broederschap die elkaar naar succes duwt. De accountability is goud waard."* - Thomas, Entrepreneur
-*"De titel Top Tier Man behalen was het moment dat ik besefte dat ik echt veranderd was. Mijn leven is fundamenteel anders."* - Alex, Business Owner
+"De wekelijkse calls houden me scherp. Mijn broeders laten me niet wegkomen met excuses." - David, 28
 
-**Wat je de komende 6 maanden kunt verwachten:**
-
-**Maand 1-2: Foundation**
-• Toegang tot alle academy modules en training content
-• Persoonlijke voedingsplannen en trainingsschema's
-• Introductie in de broederschap community
-• Eerste wekelijkse video call met alle broeders
-
-**Maand 3-4: Growth**
-• Diepgaande coaching sessies
-• Community challenges en accountability
-• Wekelijkse evaluaties en voortgang tracking
-• Netwerken met gelijkgestemden
-
-**Maand 5-6: Mastery**
-• Advanced strategieën en technieken
-• Leadership development binnen de broederschap
-• Voorbereiding op je Top Tier Man titel
-• Levensveranderende resultaten
+"Ik ben niet alleen sterker geworden, maar ook een betere vader, partner en ondernemer." - Robin, 41
 
 **Interesse niveau: {{interestLevel}}**
 
-Als {{interestLevel}} lid krijg je toegang tot:
-• Exclusieve masterclasses
-• Persoonlijke coaching sessies
-• Premium broederschap features
-• Vroegtijdige toegang tot nieuwe content
-• Prioriteit bij wekelijkse video calls
+Morgen deel ik met je het exacte proces dat we gebruiken om mannen te transformeren van waar ze nu zijn naar de Top Tier Man die ze willen worden.
 
-Binnenkort ontvang je je persoonlijke inschrijflink voor de lancering op 10 september.
-
-Met vriendelijke groet,
+Tot morgen,
 Het Toptiermen Team
 
----
-*"Alleen ga je sneller, samen kom je verder. In de broederschap kom je het verst."*`,
-      delayDays: 3,
+P.S. Als je vragen hebt, reply gewoon op deze email. We lezen elke mail persoonlijk.`,
+      delayDays: 1,
       status: 'active',
       sentCount: 0,
-      openRate: 0,
-      clickRate: 0
+      openRate: 0
     },
     {
       id: '3',
       stepNumber: 3,
       name: 'Call-to-Action',
-              subject: '⏰ Beperkte tijd: Schrijf je nu in voor 10 september',
+      subject: '🚀 Klaar voor je transformatie? Hier is je next step...',
       content: `Beste {{name}},
 
-**⏰ WAARSCHUWING: Dit is je laatste kans om een Top Tier Man te worden!**
+De afgelopen 2 dagen heb je een inkijkje gekregen in wat Toptiermen is en waarom we anders zijn. Vandaag is het tijd voor actie.
 
-De lancering van Toptiermen op 10 september nadert snel, en we hebben nog slechts **24 uur** om je inschrijving te verwerken.
+**Je hebt 3 opties:**
 
-**Waarom een 6-maand of 12-maand commitment?**
+**Optie 1: Niets doen** 
+Je sluit deze email, gaat verder met je huidige leven, en over een jaar ben je nog steeds op dezelfde plek. Misschien zelfs verder achteruit.
 
-🎯 **De echte transformatie duurt tijd**
-Een Top Tier Man word je niet in een maand. Het duurt 6 maanden om je identiteit fundamenteel te veranderen. De broederschap en wekelijkse video calls zorgen ervoor dat je consistent blijft groeien.
+**Optie 2: Het alleen proberen**
+Je koopt nog een cursus, leest nog een boek, kijkt nog meer YouTube video's. Je voelt je gemotiveerd voor een paar weken, maar uiteindelijk val je terug in oude patronen. Zonder accountability en broederschap is duurzame verandering bijna onmogelijk.
 
-🤝 **De broederschap heeft tijd nodig**
-Echte connecties en accountability bouw je op over tijd. Na 6 maanden ken je alle broeders, vertrouw je elkaar, en duwen jullie elkaar naar het volgende niveau.
+**Optie 3: Jezelf committeren aan echte groei**
+Je neemt de stap en wordt onderdeel van een broederschap van mannen die net zo serieus zijn over hun ontwikkeling als jij. Je krijgt:
 
-📈 **Meetbare resultaten in alle levensgebieden**
-• Maand 1-2: Foundation en introductie in de broederschap
-• Maand 3-4: Growth en diepgaande coaching
-• Maand 5-6: Mastery en voorbereiding op je Top Tier Man titel
+🎯 **Wekelijkse Video Calls** met je broeders
+💪 **Gepersonaliseerde Fitness & Voedingsplannen**
+🧠 **Mindset Training & Mental Coaching**
+📚 **Toegang tot de volledige Toptiermen Academy**
+👥 **24/7 Brotherhood Support & Community**
+📈 **Maandelijkse Progress Tracking & Evaluaties**
 
-**Waarom NU actie ondernemen?**
+**SPECIAAL VOOR EARLY ADOPTERS:**
 
-🚨 **Beperkte beschikbaarheid**: Slechts 50 plekken beschikbaar
-💰 **Early Bird voordelen**: 50% korting op 6-maand of 12-maand lidmaatschap
-🎁 **Exclusieve bonussen**: 
-   - Persoonlijke coaching sessie (waarde €500)
-   - Premium broederschap toegang
-   - Exclusieve masterclass toegang
-   - 30-dagen geld-terug garantie
-   - Wekelijkse video calls met alle broeders
-
-⚡ **Directe toegang**: Start direct met alle features
-🎯 **Persoonlijke aandacht**: Garantie van 1-op-1 begeleiding
+Omdat je een van de eerste bent die interesse toont, krijg je:
+• 50% korting op je eerste 3 maanden
+• Gratis 1-op-1 kickstart call met een van onze coaches
+• Exclusieve toegang tot de "Brotherhood Inner Circle"
+• Bonus: Toptiermen Nutrition & Training Quick Start Guide
 
 **Interesse niveau: {{interestLevel}}**
 
-Als {{interestLevel}} lid krijg je:
-• Prioriteit bij inschrijving
-• Extra coaching sessies
-• Vroegtijdige toegang tot nieuwe features
-• Directe toegang tot de broederschap
+{{name}}, ik weet dat je hier bent omdat je meer wilt. Je wilt groeien. Je wilt excelleren. Je wilt de man worden die je weet dat je kunt zijn.
 
-**🎯 ACTIE NU:**
+De vraag is: ben je klaar om die stap te zetten?
 
-[INSCHRIJF HIER VOOR 10 SEPTEMBER - 6 MAAND OF 12 MAAND]
+[🚀 JA, IK BEN KLAAR VOOR MIJN TRANSFORMATIE]
 
-**Wat gebeurt er als je wacht?**
-• Je mist de early bird korting
-• Je komt op de wachtlijst
-• Je betaalt de volledige prijs
-• Je mist exclusieve bonussen
-• Je mist de eerste wekelijkse video calls
+Deze aanbieding is alleen geldig tot maandag 23:59. Daarna gaan we door naar de volgende groep early adopters.
 
-**De echte waarde van een 6-maand commitment:**
-Dit is niet alleen content consumeren - dit is een complete levensstijl transformatie. Je wordt onderdeel van een broederschap die elkaar naar succes duwt, wekelijks samen evalueert, en uiteindelijk de prestigieuze titel "Top Tier Man" behaalt.
-
-**Deze kans komt niet meer terug.**
-
-Maak vandaag nog de beslissing die je leven kan veranderen. Word onderdeel van de broederschap die je naar succes duwt.
-
-**Of bel ons direct:**
-📞 +31 6 12345678
-
-        **Deadline: 10 september 2025**
-
-Na deze datum sluiten we de inschrijvingen voor de komende maand.
-
-Met vriendelijke groet,
+Tot snel in de broederschap,
 Het Toptiermen Team
 
----
-*"De beste tijd om te planten was 20 jaar geleden. De tweede beste tijd is nu."*`,
-      delayDays: 7,
+P.S. Nog twijfels? Stuur me gewoon een reply met je vragen. Ik beantwoord ze persoonlijk binnen 24 uur.`,
+      delayDays: 3,
       status: 'active',
       sentCount: 0,
-      openRate: 0,
-      clickRate: 0
+      openRate: 0
+    }
+  ]);
+
+  const [campaigns, setCampaigns] = useState<Campaign[]>([
+    {
+      id: '1',
+      name: 'Welkom Funnel',
+      totalEmails: 1247,
+      openRate: 68.2,
+      clickRate: 12.4,
+      conversionRate: 3.8
+    },
+    {
+      id: '2', 
+      name: 'Re-engagement',
+      totalEmails: 856,
+      openRate: 45.1,
+      clickRate: 8.9,
+      conversionRate: 2.1
+    },
+    {
+      id: '3',
+      name: 'Product Launch',
+      totalEmails: 2341,
+      openRate: 72.6,
+      clickRate: 15.3,
+      conversionRate: 5.2
     }
   ]);
 
   const [campaignStats, setCampaignStats] = useState<CampaignStats>({
-    totalLeads: 0,
-    activeLeads: 0,
-    emailsSent: 0,
-    totalOpens: 0,
-    totalClicks: 0,
-    conversionRate: 0
+    totalSent: 4444,
+    openRate: 62.1,
+    clickRate: 12.2,
+    conversionRate: 3.7
   });
 
-  const [selectedStep, setSelectedStep] = useState<EmailStep | null>(null);
-  const [showEmailEditor, setShowEmailEditor] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-  const [campaignStatus, setCampaignStatus] = useState<'draft' | 'active' | 'paused'>('draft');
-  
+  const [selectedStep, setSelectedStep] = useState<EmailStep | null>(null);
+  const [showUnifiedBuilder, setShowUnifiedBuilder] = useState(false);
   const [showEmailBuilder, setShowEmailBuilder] = useState(false);
   const [showSimpleEditor, setShowSimpleEditor] = useState(false);
-  const [showUnifiedBuilder, setShowUnifiedBuilder] = useState(false);
   const [selectedStepForEdit, setSelectedStepForEdit] = useState<EmailStep | null>(null);
-  const [editorMode, setEditorMode] = useState<'simple' | 'unified' | 'advanced'>('unified');
 
-  // Fetch campaign data
-  useEffect(() => {
-    fetchCampaignData();
-  }, []);
-
-  const fetchCampaignData = async () => {
-    try {
-      // Fetch leads count
-      const leadsResponse = await fetch('/api/admin/prelaunch-emails');
-      const leadsData = await leadsResponse.json();
-      
-      if (leadsData.success) {
-        const totalLeads = leadsData.emails.length;
-        const activeLeads = leadsData.emails.filter((email: any) => email.status === 'active').length;
-        
-        setCampaignStats(prev => ({
-          ...prev,
-          totalLeads,
-          activeLeads
-        }));
-      }
-
-      // Fetch email steps
-      const stepsResponse = await fetch('/api/admin/email-campaign');
-      const stepsData = await stepsResponse.json();
-      
-      if (stepsData.success && stepsData.steps.length > 0) {
-        const formattedSteps = stepsData.steps.map((step: any) => ({
-          id: step.id,
-          stepNumber: step.step_number,
-          name: step.name,
-          subject: step.subject,
-          content: step.content,
-          delayDays: step.delay_days,
-          status: step.status,
-          sentCount: step.sent_count || 0,
-          openRate: step.open_rate || 0,
-          clickRate: step.click_rate || 0,
-          design: step.design // Add design to the fetched step
-        }));
-        setEmailSteps(formattedSteps);
-      }
-    } catch (error) {
-      console.error('Error fetching campaign data:', error);
-    }
-  };
-
-  const updateEmailStep = (stepId: string, updates: Partial<EmailStep>) => {
-    setEmailSteps(prev => prev.map(step => 
-      step.id === stepId ? { ...step, ...updates } : step
-    ));
-  };
-
-  const toggleStepStatus = (stepId: string) => {
-    setEmailSteps(prev => prev.map(step => {
-      if (step.id === stepId) {
-        const newStatus = step.status === 'active' ? 'paused' : 'active';
-        return { ...step, status: newStatus };
-      }
-      return step;
-    }));
-  };
-
-  const saveEmailStep = async (step: EmailStep) => {
-    try {
-      const response = await fetch('/api/admin/email-campaign', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: step.id,
-          stepNumber: step.stepNumber,
-          name: step.name,
-          subject: step.subject,
-          content: step.content,
-          delayDays: step.delayDays,
-          status: step.status
-        })
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        // Update local state
-        setEmailSteps(prev => prev.map(s => 
-          s.id === step.id ? { ...step } : s
-        ));
-        toast.success(`Email stap ${step.stepNumber} opgeslagen`);
-        setShowEmailEditor(false);
-        setSelectedStep(null);
-      } else {
-        toast.error(data.error || 'Fout bij opslaan van email stap');
-      }
-    } catch (error) {
-      console.error('Error saving email step:', error);
-      toast.error('Fout bij opslaan van email stap');
-    }
-  };
-
-  const startCampaign = async () => {
-    try {
-      setCampaignStatus('active');
-      toast.success('Email campagne gestart!');
-    } catch (error) {
-      toast.error('Fout bij starten van campagne');
-    }
-  };
-
-  const pauseCampaign = async () => {
-    try {
-      setCampaignStatus('paused');
-      toast.success('Email campagne gepauzeerd');
-    } catch (error) {
-      toast.error('Fout bij pauzeren van campagne');
-    }
-  };
-
-  const sendTestEmail = async (stepId: string) => {
-    try {
-      const response = await fetch('/api/admin/send-email-campaign', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ stepId, action: 'send_test' })
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        toast.success(`Test email voorbereid: ${data.step.name}`);
-      } else {
-        toast.error(data.error || 'Fout bij verzenden test email');
-      }
-    } catch (error) {
-      console.error('Error sending test email:', error);
-      toast.error('Fout bij verzenden test email');
-    }
-  };
-
-  const sendToLeads = async (stepId: string) => {
-    try {
-      const response = await fetch('/api/admin/send-email-campaign', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ stepId, action: 'send_to_leads' })
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        toast.success(`Email campagne voorbereid voor ${data.sentCount} leads`);
-        // Refresh campaign data
-        fetchCampaignData();
-      } else {
-        toast.error(data.error || 'Fout bij verzenden naar leads');
-      }
-    } catch (error) {
-      console.error('Error sending to leads:', error);
-      toast.error('Fout bij verzenden naar leads');
-    }
-  };
-
-  const deleteEmailStep = async (stepId: string) => {
-    if (window.confirm('Weet je zeker dat je deze email stap wilt verwijderen?')) {
-      try {
-        const response = await fetch(`/api/admin/email-campaign/${stepId}`, {
-          method: 'DELETE',
-        });
-        const data = await response.json();
-        if (data.success) {
-          setEmailSteps(prev => prev.filter(step => step.id !== stepId));
-          toast.success('Email stap succesvol verwijderd.');
-        } else {
-          toast.error(data.error || 'Fout bij verwijderen van email stap');
+  const handleStepStatusToggle = (stepId: string) => {
+    setEmailSteps(steps => 
+      steps.map(step => {
+        if (step.id === stepId) {
+          return {
+            ...step,
+            status: step.status === 'active' ? 'paused' : 'active'
+          };
         }
-      } catch (error) {
-        console.error('Error deleting email step:', error);
-        toast.error('Fout bij verwijderen van email stap');
-      }
-    }
+        return step;
+      })
+    );
   };
 
-  const handleOpenEmailEditor = (step?: EmailStep, mode: 'simple' | 'unified' | 'advanced' = 'unified') => {
-    setSelectedStepForEdit(step || null);
-    setEditorMode(mode);
-    
-    if (mode === 'simple') {
-      setShowSimpleEditor(true);
-    } else if (mode === 'unified') {
+  const handlePreview = (step: EmailStep) => {
+    setSelectedStep(step);
+    setShowPreview(true);
+  };
+
+  const handleEdit = (step: EmailStep, editorType: 'unified' | 'advanced' | 'simple') => {
+    setSelectedStepForEdit(step);
+    if (editorType === 'unified') {
       setShowUnifiedBuilder(true);
-    } else {
+    } else if (editorType === 'advanced') {
       setShowEmailBuilder(true);
+    } else {
+      setShowSimpleEditor(true);
     }
   };
 
-  const handleSaveSimpleEmail = (content: string) => {
+  const handleSaveUnifiedEmail = (content: any) => {
     if (selectedStepForEdit) {
-      // Update existing step
-      const updatedSteps = emailSteps.map(step => 
-        step.id === selectedStepForEdit.id 
-          ? { ...step, content: content }
-          : step
+      setEmailSteps(steps =>
+        steps.map(step =>
+          step.id === selectedStepForEdit.id
+            ? { ...step, design: content }
+            : step
+        )
       );
-      setEmailSteps(updatedSteps);
-      toast.success('Email succesvol bijgewerkt!');
-    } else {
-      // Create new step
-      const newStep: EmailStep = {
-        id: Date.now().toString(),
-        stepNumber: emailSteps.length + 1,
-        name: 'Nieuwe Email',
-        subject: 'Nieuw onderwerp',
-        content: content,
-        delayDays: 0,
-        status: 'draft',
-        sentCount: 0,
-        openRate: 0,
-        clickRate: 0
-      };
-      setEmailSteps([...emailSteps, newStep]);
-      toast.success('Nieuwe email succesvol aangemaakt!');
-    }
-    setShowSimpleEditor(false);
-    setSelectedStepForEdit(null);
-  };
-
-  const handleSaveAdvancedEmail = (html: string, design: any) => {
-    if (selectedStepForEdit) {
-      // Update existing step
-      const updatedSteps = emailSteps.map(step => 
-        step.id === selectedStepForEdit.id 
-          ? { ...step, content: html, design: JSON.stringify(design) }
-          : step
-      );
-      setEmailSteps(updatedSteps);
-      toast.success('Email succesvol bijgewerkt!');
-    } else {
-      // Create new step
-      const newStep: EmailStep = {
-        id: Date.now().toString(),
-        stepNumber: emailSteps.length + 1,
-        name: 'Nieuwe Email',
-        subject: 'Nieuw onderwerp',
-        content: html,
-        design: JSON.stringify(design),
-        delayDays: 0,
-        status: 'draft',
-        sentCount: 0,
-        openRate: 0,
-        clickRate: 0
-      };
-      setEmailSteps([...emailSteps, newStep]);
-      toast.success('Nieuwe email succesvol aangemaakt!');
-    }
-    setShowEmailBuilder(false);
-    setSelectedStepForEdit(null);
-  };
-
-  const handleSaveUnifiedEmail = (html: string, design: any) => {
-    if (selectedStepForEdit) {
-      // Update existing step
-      const updatedSteps = emailSteps.map(step => 
-        step.id === selectedStepForEdit.id 
-          ? { ...step, content: html, design: JSON.stringify(design) }
-          : step
-      );
-      setEmailSteps(updatedSteps);
-      toast.success('Email succesvol bijgewerkt!');
-    } else {
-      // Create new step
-      const newStep: EmailStep = {
-        id: Date.now().toString(),
-        stepNumber: emailSteps.length + 1,
-        name: 'Nieuwe Email',
-        subject: 'Nieuw onderwerp',
-        content: html,
-        design: JSON.stringify(design),
-        delayDays: 0,
-        status: 'draft',
-        sentCount: 0,
-        openRate: 0,
-        clickRate: 0
-      };
-      setEmailSteps([...emailSteps, newStep]);
-      toast.success('Nieuwe email succesvol aangemaakt!');
     }
     setShowUnifiedBuilder(false);
     setSelectedStepForEdit(null);
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active': return 'bg-green-500 text-white';
-      case 'paused': return 'bg-yellow-500 text-white';
-      case 'completed': return 'bg-blue-500 text-white';
-      case 'draft': return 'bg-gray-500 text-white';
-      default: return 'bg-gray-500 text-white';
+  const handleSaveAdvancedEmail = (content: any) => {
+    if (selectedStepForEdit) {
+      setEmailSteps(steps =>
+        steps.map(step =>
+          step.id === selectedStepForEdit.id
+            ? { ...step, design: content }
+            : step
+        )
+      );
     }
+    setShowEmailBuilder(false);
+    setSelectedStepForEdit(null);
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'active': return <PlayIcon className="w-4 h-4" />;
-      case 'paused': return <PauseIcon className="w-4 h-4" />;
-      case 'completed': return <CheckCircleIcon className="w-4 h-4" />;
-      case 'draft': return <DocumentTextIcon className="w-4 h-4" />;
-      default: return <DocumentTextIcon className="w-4 h-4" />;
+  const handleSaveSimpleEmail = (content: string) => {
+    if (selectedStepForEdit) {
+      setEmailSteps(steps =>
+        steps.map(step =>
+          step.id === selectedStepForEdit.id
+            ? { ...step, content }
+            : step
+        )
+      );
     }
+    setShowSimpleEditor(false);
+    setSelectedStepForEdit(null);
+  };
+
+  const handleDuplicate = (step: EmailStep) => {
+    const newStep: EmailStep = {
+      ...step,
+      id: `${step.id}_copy_${Date.now()}`,
+      name: `${step.name} (Kopie)`,
+      status: 'draft'
+    };
+    setEmailSteps(steps => [...steps, newStep]);
+  };
+
+  const addNewStep = () => {
+    const newStep: EmailStep = {
+      id: `step_${Date.now()}`,
+      stepNumber: emailSteps.length + 1,
+      name: 'Nieuwe Email',
+      subject: 'Nieuwe email onderwerp',
+      content: 'Nieuwe email content...',
+      delayDays: emailSteps.length,
+      status: 'draft',
+      sentCount: 0,
+      openRate: 0
+    };
+    setEmailSteps([...emailSteps, newStep]);
   };
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-[#8BAE5A]">Email Marketing Trechter</h1>
-          <p className="text-[#B6C948] mt-2">Beheer de 3-email campagne voor lead warming en conversie</p>
+    <div className="p-6 bg-[#0F1419] min-h-screen">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-[#F3F3F1] mb-2">Email Marketing</h1>
+          <p className="text-[#8BAE5A]">Beheer de 3-email campagne voor nieuwe leads</p>
         </div>
-        <div className="flex items-center gap-4">
-          <span className="text-[#8BAE5A] font-semibold">
-            Campagne Status: 
-            <span className={`ml-2 ${getStatusColor(campaignStatus)}`}>
-              {campaignStatus === 'active' ? 'Actief' : campaignStatus === 'paused' ? 'Gepauzeerd' : 'Concept'}
-            </span>
-          </span>
-          <AdminButton
-            onClick={() => handleOpenEmailEditor()}
-            icon={<PlusIcon className="w-4 h-4" />}
-            variant="primary"
-          >
-            Nieuwe Email
-          </AdminButton>
-          {campaignStatus === 'draft' && (
-            <AdminButton
-              onClick={startCampaign}
-              icon={<PlayIcon className="w-4 h-4" />}
-            >
-              Start Campagne
-            </AdminButton>
-          )}
-          {campaignStatus === 'active' && (
-            <AdminButton
-              variant="secondary"
-              onClick={pauseCampaign}
-              icon={<PauseIcon className="w-4 h-4" />}
-            >
-              Pauzeer Campagne
-            </AdminButton>
-          )}
-        </div>
-      </div>
 
-      {/* Campaign Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
-        <AdminStatsCard
-          title="Totaal Leads"
-          value={campaignStats.totalLeads}
-          icon={<UserGroupIcon className="w-6 h-6" />}
-          color="blue"
-        />
-        <AdminStatsCard
-          title="Actieve Leads"
-          value={campaignStats.activeLeads}
-          icon={<CheckCircleIcon className="w-6 h-6" />}
-          color="green"
-        />
-        <AdminStatsCard
-          title="Emails Verzonden"
-          value={campaignStats.emailsSent}
-          icon={<EnvelopeIcon className="w-6 h-6" />}
-          color="purple"
-        />
-        <AdminStatsCard
-          title="Totaal Opens"
-          value={campaignStats.totalOpens}
-          icon={<EyeIcon className="w-6 h-6" />}
-          color="orange"
-        />
-        <AdminStatsCard
-          title="Totaal Clicks"
-          value={campaignStats.totalClicks}
-          icon={<ChartBarIcon className="w-6 h-6" />}
-          color="red"
-        />
-        <AdminStatsCard
-          title="Conversie Rate"
-          value={`${campaignStats.conversionRate}%`}
-          icon={<ArrowRightIcon className="w-6 h-6" />}
-          color="green"
-        />
-      </div>
-
-      {/* Email Funnel Steps */}
-      <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-[#8BAE5A]">Email Trechter Stappen</h2>
-        
-        {emailSteps.map((step, index) => (
-          <AdminCard key={step.id}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                {/* Step Number */}
-                <div className="w-12 h-12 bg-[#8BAE5A] rounded-full flex items-center justify-center text-[#181F17] font-bold text-lg">
-                  {step.stepNumber}
-                </div>
-                
-                {/* Step Info */}
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="text-lg font-semibold text-[#8BAE5A]">{step.name}</h3>
-                    <span className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs ${getStatusColor(step.status)}`}>
-                      {getStatusIcon(step.status)}
-                      {step.status === 'active' ? 'Actief' : 
-                       step.status === 'paused' ? 'Gepauzeerd' : 
-                       step.status === 'completed' ? 'Voltooid' : 'Concept'}
-                    </span>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm text-[#B6C948]">
-                    <div>
-                      <span className="font-medium">Onderwerp:</span> {step.subject}
-                    </div>
-                    <div>
-                      <span className="font-medium">Vertraging:</span> {step.delayDays} dagen
-                    </div>
-                    <div>
-                      <span className="font-medium">Verzonden:</span> {step.sentCount}
-                    </div>
-                    <div>
-                      <span className="font-medium">Open Rate:</span> {step.openRate}%
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Actions */}
-              <div className="flex items-center gap-2 h-9">
-                <AdminButton
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => {
-                    setSelectedStep(step);
-                    setShowPreview(true);
-                  }}
-                  icon={<EyeIcon className="w-4 h-4" />}
-                >
-                  Preview
-                </AdminButton>
-                
-                <AdminButton
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => handleOpenEmailEditor(step)}
-                  icon={<PencilIcon className="w-4 h-4" />}
-                >
-                  Bewerken
-                </AdminButton>
-                
-                {step.status === 'active' && (
-                  <>
-                    <AdminButton
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => sendTestEmail(step.id)}
-                      icon={<EnvelopeIcon className="w-4 h-4" />}
-                    >
-                      Test Email
-                    </AdminButton>
-                    
-                    <AdminButton
-                      variant="primary"
-                      size="sm"
-                      onClick={() => sendToLeads(step.id)}
-                      icon={<UserGroupIcon className="w-4 h-4" />}
-                    >
-                      Verzend naar Leads
-                    </AdminButton>
-                  </>
-                )}
-                
-                {step.status !== 'completed' && (
-                  <AdminButton
-                    variant={step.status === 'active' ? 'danger' : 'primary'}
-                    size="sm"
-                    onClick={() => toggleStepStatus(step.id)}
-                    icon={step.status === 'active' ? <PauseIcon className="w-4 h-4" /> : <PlayIcon className="w-4 h-4" />}
-                  >
-                    {step.status === 'active' ? 'Pauzeren' : 'Activeren'}
-                  </AdminButton>
-                )}
-                
-                <AdminButton
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => deleteEmailStep(step.id)}
-                  icon={<TrashIcon className="w-4 h-4" />}
-                  className="text-red-400 hover:text-red-300"
-                >
-                  Verwijderen
-                </AdminButton>
-              </div>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <AdminCard>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-[#8BAE5A] mb-1">{campaignStats.totalSent.toLocaleString()}</div>
+              <div className="text-sm text-[#8A9BA8]">Totaal Leads</div>
             </div>
           </AdminCard>
-        ))}
-      </div>
+          
+          <AdminCard>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-[#FFD700] mb-1">{campaignStats.openRate}%</div>
+              <div className="text-sm text-[#8A9BA8]">Open Rate</div>
+            </div>
+          </AdminCard>
+          
+          <AdminCard>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-[#FF6B6B] mb-1">{campaignStats.clickRate}%</div>
+              <div className="text-sm text-[#8A9BA8]">Total Clicks</div>
+            </div>
+          </AdminCard>
+          
+          <AdminCard>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-[#4ECDC4] mb-1">{campaignStats.conversionRate}%</div>
+              <div className="text-sm text-[#8A9BA8]">Conversie Rate</div>
+            </div>
+          </AdminCard>
+        </div>
 
-      {/* Campaign Timeline */}
-      <AdminCard>
-        <h3 className="text-xl font-semibold mb-4 text-[#8BAE5A]">Campagne Timeline</h3>
-        <div className="space-y-4">
-          {emailSteps.map((step, index) => (
-            <div key={step.id} className="flex items-center gap-4">
-              <div className="flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                  step.status === 'completed' ? 'bg-green-500' : 
-                  step.status === 'active' ? 'bg-[#8BAE5A]' : 
-                  'bg-gray-500'
-                }`}>
-                  {step.status === 'completed' ? (
-                    <CheckCircleIcon className="w-5 h-5 text-white" />
-                  ) : (
-                    <span className="text-white font-bold text-sm">{step.stepNumber}</span>
-                  )}
-                </div>
-                <div>
-                  <div className="font-medium text-[#8BAE5A]">{step.name}</div>
-                  <div className="text-sm text-[#B6C948]">
-                    {step.delayDays === 0 ? 'Direct' : `Na ${step.delayDays} dagen`}
+        {/* Email Trechter */}
+        <AdminCard className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold text-[#F3F3F1]">Email Trechter</h2>
+            <AdminButton 
+              onClick={addNewStep}
+              className="bg-[#8BAE5A] hover:bg-[#B6C948] text-[#0F1419]"
+            >
+              <PlusIcon className="w-4 h-4 mr-2" />
+              Nieuwe Email
+            </AdminButton>
+          </div>
+
+          <div className="space-y-4">
+            {emailSteps.map((step, index) => (
+              <div key={step.id} className="flex items-center">
+                <div className="flex-1">
+                  <div className="bg-[#232D1A] border border-[#3A4D23] rounded-lg p-6 hover:border-[#8BAE5A] transition-colors">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-4 mb-3">
+                          <div className="w-8 h-8 bg-[#8BAE5A] text-[#0F1419] rounded-full flex items-center justify-center font-bold">
+                            {step.stepNumber}
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-[#F3F3F1] text-lg">{step.name}</h3>
+                            <p className="text-[#8BAE5A] text-sm">{step.subject}</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                              step.status === 'active' ? 'bg-[#8BAE5A] text-[#0F1419]' :
+                              step.status === 'paused' ? 'bg-[#FFD700] text-[#0F1419]' :
+                              'bg-[#8A9BA8] text-white'
+                            }`}>
+                              {step.status === 'active' ? 'Actief' : 
+                               step.status === 'paused' ? 'Gepauzeerd' : 'Concept'}
+                            </span>
+                            <div className="text-right text-sm text-[#8A9BA8]">
+                              <div>Verzonden na: {step.delayDays === 0 ? 'Direct' : `${step.delayDays} dagen`}</div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center justify-between">
+                          <div className="flex gap-2">
+                            <AdminButton
+                              onClick={() => handlePreview(step)}
+                              size="sm"
+                              variant="outline"
+                            >
+                              <EyeIcon className="w-4 h-4 mr-1" />
+                              Bekijk
+                            </AdminButton>
+                            
+                            <AdminButton
+                              onClick={() => handleEdit(step, 'simple')}
+                              size="sm"
+                              variant="outline"
+                            >
+                              <PencilIcon className="w-4 h-4 mr-1" />
+                              Bewerk
+                            </AdminButton>
+                            
+                            <AdminButton
+                              onClick={() => handleEdit(step, 'unified')}
+                              size="sm"
+                              className="bg-[#8BAE5A] hover:bg-[#B6C948] text-[#0F1419]"
+                            >
+                              🎨 Design
+                            </AdminButton>
+                            
+                            <AdminButton
+                              onClick={() => handleDuplicate(step)}
+                              size="sm"
+                              variant="outline"
+                            >
+                              <DocumentDuplicateIcon className="w-4 h-4 mr-1" />
+                              Kopieer
+                            </AdminButton>
+                            
+                            <AdminButton
+                              onClick={() => handleStepStatusToggle(step.id)}
+                              size="sm"
+                              variant={step.status === 'active' ? 'danger' : 'primary'}
+                            >
+                              {step.status === 'active' ? (
+                                <>
+                                  <PauseIcon className="w-4 h-4 mr-1" />
+                                  Pauzeer
+                                </>
+                              ) : (
+                                <>
+                                  <PlayIcon className="w-4 h-4 mr-1" />
+                                  Start
+                                </>
+                              )}
+                            </AdminButton>
+                          </div>
+                          
+                          <div className="flex items-center gap-6 text-sm text-[#8A9BA8]">
+                            <div>
+                              <span className="text-[#F3F3F1] font-medium">{step.sentCount}</span> verzonden
+                            </div>
+                            <div>
+                              <span className="text-[#F3F3F1] font-medium">{step.openRate}%</span> geopend
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
+                
+                {index < emailSteps.length - 1 && (
+                  <div className="flex flex-col items-center mx-4">
+                    <ChevronRightIcon className="w-6 h-6 text-[#8BAE5A]" />
+                  </div>
+                )}
               </div>
-              
-              {index < emailSteps.length - 1 && (
-                <ArrowRightIcon className="w-6 h-6 text-[#3A4D23]" />
-              )}
-            </div>
-          ))}
-        </div>
-      </AdminCard>
-
-      {/* Email Editor Modal */}
-      {showEmailEditor && selectedStep && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-[#232D1A] p-6 rounded-xl border border-[#3A4D23] w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-semibold mb-4 text-[#8BAE5A]">
-              Email Bewerken: {selectedStep.name}
-            </h2>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-[#B6C948] mb-2">Onderwerp *</label>
-                <input
-                  type="text"
-                  value={selectedStep.subject}
-                  onChange={(e) => setSelectedStep({...selectedStep, subject: e.target.value})}
-                  className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-[#8BAE5A] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-[#B6C948] mb-2">Vertraging (dagen)</label>
-                <input
-                  type="number"
-                  value={selectedStep.delayDays}
-                  onChange={(e) => setSelectedStep({...selectedStep, delayDays: parseInt(e.target.value) || 0})}
-                  className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-[#8BAE5A] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-[#B6C948] mb-2">Email Content *</label>
-                <textarea
-                  value={selectedStep.content}
-                  onChange={(e) => setSelectedStep({...selectedStep, content: e.target.value})}
-                  rows={15}
-                  className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-[#8BAE5A] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                  placeholder="Schrijf hier je email content...&#10;&#10;Beschikbare variabelen:&#10;{{name}} - Naam van de lead&#10;{{email}} - Email adres&#10;{{interestLevel}} - Interesse niveau"
-                />
-              </div>
-            </div>
-            
-            <div className="flex gap-3 mt-6">
-              <AdminButton
-                onClick={() => saveEmailStep(selectedStep)}
-                className="flex-1"
-              >
-                Opslaan
-              </AdminButton>
-              <AdminButton
-                variant="secondary"
-                onClick={() => {
-                  setShowEmailEditor(false);
-                  setSelectedStep(null);
-                }}
-                className="flex-1"
-              >
-                Annuleren
-              </AdminButton>
-            </div>
+            ))}
           </div>
-        </div>
-      )}
+        </AdminCard>
+
+        {/* Campaigns Overview */}
+        <AdminCard>
+          <h2 className="text-xl font-semibold text-[#F3F3F1] mb-6">Campagne Overzicht</h2>
+          
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-[#3A4D23]">
+                  <th className="text-left py-3 px-4 text-[#8A9BA8] font-medium">Campagne</th>
+                  <th className="text-left py-3 px-4 text-[#8A9BA8] font-medium">Emails</th>
+                  <th className="text-left py-3 px-4 text-[#8A9BA8] font-medium">Open Rate</th>
+                  <th className="text-left py-3 px-4 text-[#8A9BA8] font-medium">Click Rate</th>
+                  <th className="text-left py-3 px-4 text-[#8A9BA8] font-medium">Conversie</th>
+                </tr>
+              </thead>
+              <tbody>
+                {campaigns.map((campaign) => (
+                  <tr key={campaign.id} className="border-b border-[#3A4D23] hover:bg-[#232D1A]/50">
+                    <td className="py-3 px-4 text-[#F3F3F1] font-medium">{campaign.name}</td>
+                    <td className="py-3 px-4 text-[#8A9BA8]">{campaign.totalEmails.toLocaleString()}</td>
+                    <td className="py-3 px-4">
+                      <span className="text-[#8BAE5A] font-medium">{campaign.openRate}%</span>
+                    </td>
+                    <td className="py-3 px-4">
+                      <span className="text-[#FFD700] font-medium">{campaign.clickRate}%</span>
+                    </td>
+                    <td className="py-3 px-4">
+                      <span className="text-[#4ECDC4] font-medium">{campaign.conversionRate}%</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </AdminCard>
+      </div>
 
       {/* Email Preview Modal */}
       {showPreview && selectedStep && (
@@ -903,32 +567,32 @@ Het Toptiermen Team
               </button>
             </div>
             
-            <div className="bg-white text-black rounded-lg shadow-lg overflow-hidden">
+            <div className="bg-[#141A15] text-white rounded-lg shadow-lg overflow-hidden border border-[#8BAE5A]">
               {/* Email Header */}
-              <div className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] p-4 text-white">
+              <div className="bg-gradient-to-r from-[#1a2e1a] to-[#3a5f3a] p-4 text-white border-b border-[#8BAE5A]">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                      <span className="text-xl font-bold">T</span>
+                    <div className="w-12 h-12 bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] rounded-lg flex items-center justify-center">
+                      <span className="text-xl font-bold text-[#141A15]">T</span>
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold">Toptiermen</h3>
-                      <p className="text-sm opacity-90">Broederschap van Top Performers</p>
+                      <h3 className="text-lg font-bold text-white">TopTierMen</h3>
+                      <p className="text-sm text-[#B6C948]">Broederschap van Top Performers</p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-sm opacity-90">Verzonden na:</div>
-                    <div className="font-semibold">{selectedStep.delayDays === 0 ? 'Direct' : `${selectedStep.delayDays} dagen`}</div>
+                    <div className="text-sm text-[#B6C948]">Verzonden na:</div>
+                    <div className="font-semibold text-white">{selectedStep.delayDays === 0 ? 'Direct' : `${selectedStep.delayDays} dagen`}</div>
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="text-sm opacity-90 mb-1">Onderwerp:</div>
-                    <div className="font-semibold text-lg">{selectedStep.subject}</div>
+                    <div className="text-sm text-[#B6C948] mb-1">Onderwerp:</div>
+                    <div className="font-semibold text-lg text-white">{selectedStep.subject}</div>
                   </div>
                   <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    selectedStep.status === 'active' ? 'bg-green-500 text-white' :
-                    selectedStep.status === 'paused' ? 'bg-yellow-500 text-white' :
+                    selectedStep.status === 'active' ? 'bg-[#8BAE5A] text-[#141A15]' :
+                    selectedStep.status === 'paused' ? 'bg-[#B6C948] text-[#141A15]' :
                     'bg-gray-500 text-white'
                   }`}>
                     {selectedStep.status === 'active' ? 'Actief' : 
@@ -938,225 +602,94 @@ Het Toptiermen Team
               </div>
               
               {/* Email Content */}
-              <div className="p-6">
+              <div className="p-6 bg-[#141A15]">
                 {/* Hero Section */}
-                <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] rounded-xl p-6 mb-6 text-white">
+                <div className="bg-gradient-to-br from-[#1F2D17] to-[#2A3D1A] rounded-xl p-8 mb-6 text-white border-2 border-[#8BAE5A]">
                   <div className="text-center">
-                    <div className="w-16 h-16 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] rounded-full flex items-center justify-center mx-auto mb-4">
-                      <span className="text-2xl font-bold text-white">T</span>
+                    <div className="w-20 h-20 bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] rounded-lg flex items-center justify-center mx-auto mb-6">
+                      <span className="text-3xl font-bold text-[#141A15]">T</span>
                     </div>
-                    <h1 className="text-2xl font-bold mb-2">🚀 Welkom bij Toptiermen!</h1>
-                    <p className="text-[#B6C948] text-lg">Jouw reis naar succes begint hier</p>
+                    <h1 className="text-3xl font-bold mb-3 text-white">🚀 Welkom bij de Broederschap</h1>
+                    <p className="text-[#8BAE5A] text-xl font-semibold uppercase tracking-wide">Jouw reis naar excellentie begint nu</p>
                   </div>
                 </div>
 
                 {/* Main Content */}
-                <div className="prose prose-sm max-w-none">
-                  <div 
-                    className="text-gray-800 leading-relaxed"
-                    style={{
-                      fontFamily: 'Arial, sans-serif',
-                      lineHeight: '1.6'
-                    }}
-                  >
-                    {selectedStep.content ? (
-                      <div className="space-y-6">
-                        {/* Greeting */}
-                        <div className="bg-gradient-to-r from-[#8BAE5A]/10 to-[#FFD700]/10 p-4 rounded-lg border-l-4 border-[#8BAE5A]">
-                          <p className="text-lg font-semibold text-[#181F17]">
-                            {selectedStep.content.split('\n')[0].replace(/\{\{name\}\}/g, 'John Doe')}
-                          </p>
-                        </div>
+                <div className="space-y-6">
+                  {/* Greeting */}
+                  <div className="text-center mb-6">
+                    <h2 className="text-2xl font-bold text-[#F3F3F1] mb-4">Beste John Doe,</h2>
+                  </div>
 
-                        {/* Content with enhanced styling */}
-                        {selectedStep.content
-                          .split('\n')
-                          .slice(1)
-                          .map((line, index) => {
-                            if (line.includes('**Wat maakt Toptiermen uniek?**')) {
-                              return (
-                                <div key={index} className="bg-gradient-to-r from-[#8BAE5A]/5 to-[#FFD700]/5 p-4 rounded-lg">
-                                  <h2 className="text-xl font-bold text-[#181F17] mb-4 flex items-center gap-2">
-                                    <span className="text-2xl">🏆</span>
-                                    Wat maakt Toptiermen uniek?
-                                  </h2>
-                                </div>
-                              );
-                            }
-                            
-                            if (line.includes('**De Broederschap**')) {
-                              return (
-                                <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
-                                  <div className="bg-gradient-to-br from-[#8BAE5A]/10 to-[#FFD700]/10 p-4 rounded-lg border border-[#8BAE5A]/20">
-                                    <div className="flex items-center gap-3 mb-2">
-                                      <span className="text-2xl">🏆</span>
-                                      <h3 className="font-bold text-[#181F17]">De Broederschap</h3>
-                                    </div>
-                                    <p className="text-gray-700">Exclusieve community van top performers die elkaar naar succes duwen</p>
-                                  </div>
-                                  
-                                  <div className="bg-gradient-to-br from-[#FFD700]/10 to-[#8BAE5A]/10 p-4 rounded-lg border border-[#FFD700]/20">
-                                    <div className="flex items-center gap-3 mb-2">
-                                      <span className="text-2xl">🎯</span>
-                                      <h3 className="font-bold text-[#181F17]">Wekelijkse Video Calls</h3>
-                                    </div>
-                                    <p className="text-gray-700">Wekelijkse progress evaluatie en accountability sessies</p>
-                                  </div>
-                                  
-                                  <div className="bg-gradient-to-br from-[#8BAE5A]/10 to-[#FFD700]/10 p-4 rounded-lg border border-[#8BAE5A]/20">
-                                    <div className="flex items-center gap-3 mb-2">
-                                      <span className="text-2xl">🧗</span>
-                                      <h3 className="font-bold text-[#181F17]">Persoonlijke Transformatie</h3>
-                                    </div>
-                                    <p className="text-gray-700">Ontwikkel je tot een echte "Top Tier Man"</p>
-                                  </div>
-                                  
-                                  <div className="bg-gradient-to-br from-[#FFD700]/10 to-[#8BAE5A]/10 p-4 rounded-lg border border-[#FFD700]/20">
-                                    <div className="flex items-center gap-3 mb-2">
-                                      <span className="text-2xl">💡</span>
-                                      <h3 className="font-bold text-[#181F17]">Bewezen Methoden</h3>
-                                    </div>
-                                    <p className="text-gray-700">Strategieën die al duizenden mannen naar succes hebben gebracht</p>
-                                  </div>
-                                </div>
-                              );
-                            }
-                            
-                            if (line.includes('**Wat je de komende 6 maanden kunt verwachten:**')) {
-                              return (
-                                <div key={index} className="bg-gradient-to-r from-[#181F17]/5 to-[#232D1A]/5 p-4 rounded-lg my-6">
-                                  <h2 className="text-xl font-bold text-[#181F17] mb-4 flex items-center gap-2">
-                                    <span className="text-2xl">📈</span>
-                                    Wat je de komende 6 maanden kunt verwachten:
-                                  </h2>
-                                </div>
-                              );
-                            }
-                            
-                            if (line.includes('**Maand 1-2: Foundation**')) {
-                              return (
-                                <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-4 my-6">
-                                  <div className="bg-gradient-to-br from-[#8BAE5A]/10 to-[#FFD700]/10 p-4 rounded-lg border border-[#8BAE5A]/20">
-                                    <div className="flex items-center gap-2 mb-3">
-                                      <span className="text-xl">🌱</span>
-                                      <h3 className="font-bold text-[#181F17]">Maand 1-2: Foundation</h3>
-                                    </div>
-                                    <ul className="text-sm text-gray-700 space-y-1">
-                                      <li>• Academy modules toegang</li>
-                                      <li>• Training content</li>
-                                      <li>• Persoonlijke voedingsplannen</li>
-                                      <li>• Community introductie</li>
-                                      <li>• Eerste wekelijkse video call</li>
-                                    </ul>
-                                  </div>
-                                  
-                                  <div className="bg-gradient-to-br from-[#FFD700]/10 to-[#8BAE5A]/10 p-4 rounded-lg border border-[#FFD700]/20">
-                                    <div className="flex items-center gap-2 mb-3">
-                                      <span className="text-xl">🚀</span>
-                                      <h3 className="font-bold text-[#181F17]">Maand 3-4: Growth</h3>
-                                    </div>
-                                    <ul className="text-sm text-gray-700 space-y-1">
-                                      <li>• Diepgaande coaching sessies</li>
-                                      <li>• Community challenges</li>
-                                      <li>• Accountability</li>
-                                      <li>• Wekelijkse evaluaties</li>
-                                      <li>• Progress tracking</li>
-                                    </ul>
-                                  </div>
-                                  
-                                  <div className="bg-gradient-to-br from-[#8BAE5A]/10 to-[#FFD700]/10 p-4 rounded-lg border border-[#8BAE5A]/20">
-                                    <div className="flex items-center gap-2 mb-3">
-                                      <span className="text-xl">👑</span>
-                                      <h3 className="font-bold text-[#181F17]">Maand 5-6: Mastery</h3>
-                                    </div>
-                                    <ul className="text-sm text-gray-700 space-y-1">
-                                      <li>• Advanced strategieën</li>
-                                      <li>• Leadership development</li>
-                                      <li>• Top Tier Man voorbereiding</li>
-                                      <li>• Levensveranderende resultaten</li>
-                                    </ul>
-                                  </div>
-                                </div>
-                              );
-                            }
-                            
-                            if (line.includes('**Interesse niveau:**')) {
-                              return (
-                                <div key={index} className="bg-gradient-to-r from-[#FFD700]/10 to-[#8BAE5A]/10 p-4 rounded-lg border border-[#FFD700]/20 my-4">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <span className="text-xl">⭐</span>
-                                    <h3 className="font-bold text-[#181F17]">Interesse niveau: Hoog</h3>
-                                  </div>
-                                  <p className="text-gray-700">Als Hoog lid krijg je toegang tot exclusieve features en prioriteit bij alle services.</p>
-                                </div>
-                              );
-                            }
-                            
-                            if (line.includes('Met vriendelijke groet,')) {
-                              return (
-                                <div key={index} className="bg-gradient-to-r from-[#181F17]/5 to-[#232D1A]/5 p-4 rounded-lg border-l-4 border-[#8BAE5A] my-4">
-                                  <p className="font-semibold text-[#181F17]">Met vriendelijke groet,</p>
-                                  <p className="text-[#8BAE5A] font-bold">Het Toptiermen Team</p>
-                                  <div className="mt-3 p-3 bg-[#8BAE5A]/10 rounded-lg">
-                                    <p className="text-sm italic text-gray-600">
-                                      "Alleen ga je sneller, samen kom je verder. In de broederschap kom je het verst."
-                                    </p>
-                                  </div>
-                                </div>
-                              );
-                            }
-                            
-                            // Regular content
-                            if (line.trim() && !line.startsWith('**') && !line.startsWith('•')) {
-                              return <p key={index} className="text-gray-700">{line.replace(/\{\{name\}\}/g, 'John Doe').replace(/\{\{email\}\}/g, 'john.doe@example.com').replace(/\{\{interestLevel\}\}/g, 'Hoog')}</p>;
-                            }
-                            
-                            return null;
-                          })}
-                      </div>
-                    ) : (
-                      <div className="text-gray-500 italic text-center py-8">
-                        <div className="text-4xl mb-4">📧</div>
-                        <p>Nog geen content ingevuld...</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-              
-              {/* Email Footer */}
-              <div className="bg-gradient-to-r from-[#181F17] to-[#232D1A] p-4 text-white">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] rounded-full flex items-center justify-center">
-                      <span className="text-sm font-bold">T</span>
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold">Toptiermen</p>
-                      <p className="text-xs text-[#B6C948]">Broederschap van Top Performers</p>
+                  {/* Intro Section */}
+                  <div className="bg-gradient-to-br from-[#1F2D17] to-[#2A3D1A] p-6 rounded-lg border-2 border-[#8BAE5A]">
+                    <div className="space-y-4 text-center">
+                      <p className="text-lg text-[#B6C948] font-medium">
+                        🎯 Je hebt de eerste stap gezet naar een leven van <strong className="text-[#8BAE5A]">buitengewone prestaties</strong> en persoonlijke transformatie.
+                      </p>
+                      <p className="text-lg text-[#B6C948] font-medium">
+                        Welkom bij de exclusieve broederschap van <strong className="text-[#F3F3F1]">Top Tier Men</strong> - waar gewone mannen zichzelf ontwikkelen tot uitzonderlijke leiders.
+                      </p>
                     </div>
                   </div>
-                  <div className="text-right text-xs text-[#B6C948]">
-                    <p>Dit is een preview van de e-mail</p>
-                    <p>Variabelen zijn vervangen door voorbeeldwaarden</p>
+
+                  {/* Features Grid */}
+                  <div className="bg-rgba-[139,174,90,0.1] p-8 rounded-lg border-l-5 border-[#8BAE5A]">
+                    <h3 className="text-2xl font-bold text-[#F3F3F1] text-center mb-6 uppercase tracking-wide">🚀 Wat je krijgt als Top Tier Man</h3>
+                    
+                    <div className="grid grid-cols-2 gap-6">
+                      <div className="bg-gradient-to-br from-[#232D1A] to-[#3A4D23] p-6 rounded-lg border-l-4 border-[#B6C948] text-center">
+                        <div className="text-4xl mb-3">🏆</div>
+                        <h4 className="font-bold text-[#F3F3F1] mb-2 uppercase tracking-wide">De Broederschap</h4>
+                        <p className="text-[#8BAE5A] text-sm">Exclusieve community van gelijkgestemde mannen die elkaar naar succes duwen</p>
+                      </div>
+                      
+                      <div className="bg-gradient-to-br from-[#232D1A] to-[#3A4D23] p-6 rounded-lg border-l-4 border-[#B6C948] text-center">
+                        <div className="text-4xl mb-3">📹</div>
+                        <h4 className="font-bold text-[#F3F3F1] mb-2 uppercase tracking-wide">Wekelijkse Calls</h4>
+                        <p className="text-[#8BAE5A] text-sm">Evalueer je voortgang samen met alle broeders elke week</p>
+                      </div>
+                      
+                      <div className="bg-gradient-to-br from-[#232D1A] to-[#3A4D23] p-6 rounded-lg border-l-4 border-[#B6C948] text-center">
+                        <div className="text-4xl mb-3">💪</div>
+                        <h4 className="font-bold text-[#F3F3F1] mb-2 uppercase tracking-wide">Carnivoor Protocol</h4>
+                        <p className="text-[#8BAE5A] text-sm">Bewezen voedings- en trainingsschema's voor optimale performance</p>
+                      </div>
+                      
+                      <div className="bg-gradient-to-br from-[#232D1A] to-[#3A4D23] p-6 rounded-lg border-l-4 border-[#B6C948] text-center">
+                        <div className="text-4xl mb-3">🧠</div>
+                        <h4 className="font-bold text-[#F3F3F1] mb-2 uppercase tracking-wide">Mindset Mastery</h4>
+                        <p className="text-[#8BAE5A] text-sm">Ontwikkel de mentale kracht van een echte Top Tier Man</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* CTA Section */}
+                  <div className="text-center p-8 bg-[#141A15] border-3 border-[#8BAE5A] rounded-lg">
+                    <h3 className="text-2xl font-bold text-[#F3F3F1] mb-4 uppercase tracking-wide">🎯 Klaar om te beginnen?</h3>
+                    <p className="text-[#B6C948] mb-6 font-medium">Test de click tracking en ga naar je dashboard</p>
+                    
+                    <div className="inline-block bg-[#8BAE5A] text-[#141A15] px-10 py-4 rounded-lg font-bold text-lg uppercase tracking-wide border-3 border-[#8BAE5A] shadow-lg hover:bg-[#B6C948] transition-colors">
+                      Start je Journey
+                    </div>
+                  </div>
+
+                  {/* Tracking Info */}
+                  <div className="bg-rgba-[139,174,90,0.1] p-4 rounded-lg border border-[#8BAE5A] text-center">
+                    <h4 className="text-[#8BAE5A] font-bold mb-2 uppercase tracking-wide">📊 Email Tracking Actief</h4>
+                    <p className="text-[#B6C948] text-sm">Deze email wordt getrackt voor analytics</p>
                   </div>
                 </div>
+
+                {/* Footer */}
+                <div className="mt-8 bg-gradient-to-r from-[#232D1A] to-[#1F2D17] p-6 rounded-lg border-t border-[#8BAE5A] text-center">
+                  <p className="text-[#F3F3F1] font-bold mb-2">Met broederlijke groeten,</p>
+                  <p className="text-[#8BAE5A] font-semibold">Het TopTierMen Team</p>
+                </div>
               </div>
-            </div>
-            
-            <div className="flex gap-3 mt-6">
-              <AdminButton
-                onClick={() => {
-                  setShowPreview(false);
-                  setSelectedStep(null);
-                }}
-                className="flex-1"
-              >
-                Sluiten
-              </AdminButton>
             </div>
           </div>
-        </div>
+        )
       )}
 
       {/* Unified Email Builder Modal */}
@@ -1196,4 +729,4 @@ Het Toptiermen Team
       />
     </div>
   );
-} 
+}
