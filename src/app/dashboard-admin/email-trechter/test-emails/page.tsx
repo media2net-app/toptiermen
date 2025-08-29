@@ -44,82 +44,99 @@ export default function TestEmailsPage() {
   const [selectedEmail, setSelectedEmail] = useState<TestEmail | null>(null);
   const [showModal, setShowModal] = useState(false);
 
-  // Mock data - replace with actual API calls
+  // Fetch real email campaigns from database
   useEffect(() => {
-    const mockData: TestEmail[] = [
-      {
-        id: '1',
-        subject: 'Welkom bij TopTierMen - Test Email #1',
-        content: 'Dit is een test email om de delivery rate te meten...',
-        recipients: ['test1@example.com', 'test2@example.com', 'test3@example.com'],
-        sentAt: new Date('2024-01-15T10:00:00'),
-        deliveryRate: 95.5,
-        openingRate: 68.2,
-        clickRate: 12.4,
-        status: 'sent',
-        deliveryStats: {
-          delivered: 191,
-          bounced: 5,
-          failed: 4,
-          total: 200
-        },
-        engagementStats: {
-          opened: 130,
-          clicked: 25,
-          unsubscribed: 2
+    const fetchEmailCampaigns = async () => {
+      try {
+        setIsLoading(true);
+        console.log('📧 Fetching email campaigns from database...');
+        
+        const response = await fetch('/api/admin/email-campaigns');
+        const result = await response.json();
+        
+        if (!response.ok) {
+          console.error('❌ Error fetching email campaigns:', result.error);
+          toast.error('Fout bij laden van email campaigns');
+          return;
         }
-      },
-      {
-        id: '2',
-        subject: 'Carnivoor Dieet Guide - Test Email #2',
-        content: 'Test email voor het carnivoor dieet programma...',
-        recipients: ['test4@example.com', 'test5@example.com'],
-        sentAt: new Date('2024-01-14T14:30:00'),
-        deliveryRate: 88.7,
-        openingRate: 72.1,
-        clickRate: 15.8,
-        status: 'sent',
-        deliveryStats: {
-          delivered: 177,
-          bounced: 12,
-          failed: 11,
-          total: 200
-        },
-        engagementStats: {
-          opened: 128,
-          clicked: 28,
-          unsubscribed: 1
-        }
-      },
-      {
-        id: '3',
-        subject: 'Nieuwe Training Schema - Test Email #3',
-        content: 'Test email voor nieuwe training programma\'s...',
-        recipients: ['test6@example.com'],
-        sentAt: new Date('2024-01-13T09:15:00'),
-        deliveryRate: 92.3,
-        openingRate: 58.9,
-        clickRate: 8.7,
-        status: 'sent',
-        deliveryStats: {
-          delivered: 185,
-          bounced: 8,
-          failed: 7,
-          total: 200
-        },
-        engagementStats: {
-          opened: 109,
-          clicked: 16,
-          unsubscribed: 3
-        }
+        
+        // Transform database campaigns to TestEmail format
+        const transformedEmails: TestEmail[] = result.campaigns.map((campaign: any) => ({
+          id: campaign.id,
+          subject: campaign.subject,
+          content: `Email campaign: ${campaign.name}`, // We'll need to store actual content later
+          recipients: [`${campaign.stats.total_sent} recipients`], // Simplified for now
+          sentAt: campaign.sent_at ? new Date(campaign.sent_at) : new Date(campaign.created_at),
+          deliveryRate: campaign.stats.delivery_rate || 0,
+          openingRate: campaign.stats.open_rate || 0,
+          clickRate: campaign.stats.click_rate || 0,
+          status: campaign.status === 'completed' ? 'sent' : campaign.status,
+          deliveryStats: {
+            delivered: campaign.stats.delivered || 0,
+            bounced: campaign.stats.bounced || 0,
+            failed: campaign.stats.total_sent - campaign.stats.delivered - campaign.stats.bounced || 0,
+            total: campaign.stats.total_sent || 0
+          },
+          engagementStats: {
+            opened: campaign.stats.opened || 0,
+            clicked: campaign.stats.clicked || 0,
+            unsubscribed: campaign.stats.unsubscribed || 0
+          }
+        }));
+        
+        setTestEmails(transformedEmails);
+        console.log(`✅ Loaded ${transformedEmails.length} email campaigns`);
+        
+      } catch (error) {
+        console.error('❌ Error fetching email campaigns:', error);
+        toast.error('Fout bij laden van email data');
+        
+        // Fallback to empty state instead of mock data
+        setTestEmails([]);
+      } finally {
+        setIsLoading(false);
       }
-    ];
+    };
     
-    setTimeout(() => {
-      setTestEmails(mockData);
-      setIsLoading(false);
-    }, 1000);
+    fetchEmailCampaigns();
   }, []);
+
+  const handleSendTestEmail = async () => {
+    try {
+      console.log('📧 Sending test email to chiel@media2net.nl...');
+      toast.loading('Test email versturen...', { id: 'sending-email' });
+
+      const response = await fetch('/api/admin/send-test-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          recipient: 'chiel@media2net.nl',
+          subject: 'TopTierMen Email Tracking Test - ' + new Date().toLocaleTimeString('nl-NL'),
+          campaignName: 'Test Email Campaign - ' + new Date().toLocaleDateString('nl-NL')
+        })
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        toast.success('✅ Test email succesvol verzonden!', { id: 'sending-email' });
+        console.log('✅ Test email sent:', result);
+        
+        // Refresh the email list to show the new campaign
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } else {
+        toast.error(`❌ Fout bij versturen: ${result.error}`, { id: 'sending-email' });
+        console.error('❌ Error sending test email:', result);
+      }
+    } catch (error) {
+      toast.error('❌ Netwerkfout bij versturen van email', { id: 'sending-email' });
+      console.error('❌ Network error:', error);
+    }
+  };
 
   const handleDeleteEmail = async (emailId: string) => {
     if (!confirm('Weet je zeker dat je deze test email wilt verwijderen?')) {
@@ -177,111 +194,114 @@ export default function TestEmailsPage() {
         <div className="flex items-center space-x-4">
           <Link 
             href="/dashboard-admin/email-trechter"
-            className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
           >
             <ArrowLeftIcon className="h-5 w-5" />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Test E-mails</h1>
-            <p className="text-gray-600">Bekijk delivery rates en opening rates van test e-mails</p>
+            <h1 className="text-2xl font-bold text-white">Test E-mails</h1>
+            <p className="text-gray-400">Bekijk delivery rates en opening rates van test e-mails</p>
           </div>
         </div>
-        <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
+        <button 
+          onClick={handleSendTestEmail}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+        >
           <PlusIcon className="h-4 w-4" />
-          <span>Nieuwe Test Email</span>
+          <span>Verstuur Test Email</span>
         </button>
       </div>
 
       {/* Overall Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow">
+        <div className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
           <div className="flex items-center">
-            <EnvelopeIcon className="h-8 w-8 text-blue-600" />
+            <EnvelopeIcon className="h-8 w-8 text-blue-400" />
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Totaal Verzonden</p>
-              <p className="text-2xl font-bold text-gray-900">{overallStats.totalSent}</p>
+              <p className="text-sm font-medium text-gray-400">Totaal Verzonden</p>
+              <p className="text-2xl font-bold text-white">{overallStats.totalSent}</p>
             </div>
           </div>
         </div>
         
-        <div className="bg-white p-6 rounded-lg shadow">
+        <div className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
           <div className="flex items-center">
-            <CheckCircleIcon className="h-8 w-8 text-green-600" />
+            <CheckCircleIcon className="h-8 w-8 text-green-400" />
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Gem. Delivery Rate</p>
-              <p className="text-2xl font-bold text-gray-900">{overallStats.avgDeliveryRate}%</p>
+              <p className="text-sm font-medium text-gray-400">Gem. Delivery Rate</p>
+              <p className="text-2xl font-bold text-white">{overallStats.avgDeliveryRate}%</p>
             </div>
           </div>
         </div>
         
-        <div className="bg-white p-6 rounded-lg shadow">
+        <div className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
           <div className="flex items-center">
-            <EyeIcon className="h-8 w-8 text-purple-600" />
+            <EyeIcon className="h-8 w-8 text-purple-400" />
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Gem. Opening Rate</p>
-              <p className="text-2xl font-bold text-gray-900">{overallStats.avgOpeningRate}%</p>
+              <p className="text-sm font-medium text-gray-400">Gem. Opening Rate</p>
+              <p className="text-2xl font-bold text-white">{overallStats.avgOpeningRate}%</p>
             </div>
           </div>
         </div>
         
-        <div className="bg-white p-6 rounded-lg shadow">
+        <div className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
           <div className="flex items-center">
-            <ChartBarIcon className="h-8 w-8 text-orange-600" />
+            <ChartBarIcon className="h-8 w-8 text-orange-400" />
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Gem. Click Rate</p>
-              <p className="text-2xl font-bold text-gray-900">{overallStats.avgClickRate}%</p>
+              <p className="text-sm font-medium text-gray-400">Gem. Click Rate</p>
+              <p className="text-2xl font-bold text-white">{overallStats.avgClickRate}%</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Test Emails Table */}
-      <div className="bg-white rounded-lg shadow">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">Test E-mails Overzicht</h2>
+      <div className="bg-gray-800 rounded-lg shadow-lg border border-gray-700">
+        <div className="px-6 py-4 border-b border-gray-700">
+          <h2 className="text-lg font-semibold text-white">Test E-mails Overzicht</h2>
         </div>
         
         {isLoading ? (
           <div className="p-8 text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-2 text-gray-600">Test e-mails laden...</p>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400 mx-auto"></div>
+            <p className="mt-2 text-gray-400">Test e-mails laden...</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-gray-700">
+              <thead className="bg-gray-900">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                     Subject
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                     Verzonden
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                     Delivery Rate
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                     Opening Rate
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                     Click Rate
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                     Acties
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-gray-800 divide-y divide-gray-700">
                 {testEmails.map((email) => {
                   const StatusIcon = getStatusIcon(email.status);
                   return (
-                    <tr key={email.id} className="hover:bg-gray-50">
+                    <tr key={email.id} className="hover:bg-gray-700">
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{email.subject}</div>
-                        <div className="text-sm text-gray-500">{email.recipients.length} ontvangers</div>
+                        <div className="text-sm font-medium text-white">{email.subject}</div>
+                        <div className="text-sm text-gray-400">{email.recipients.length} ontvangers</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(email.status)}`}>
@@ -289,24 +309,24 @@ export default function TestEmailsPage() {
                           {email.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
                         {email.sentAt.toLocaleDateString('nl-NL')}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{email.deliveryRate}%</div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-sm font-medium text-white">{email.deliveryRate}%</div>
+                        <div className="text-xs text-gray-400">
                           {email.deliveryStats.delivered}/{email.deliveryStats.total} bezorgd
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{email.openingRate}%</div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-sm font-medium text-white">{email.openingRate}%</div>
+                        <div className="text-xs text-gray-400">
                           {email.engagementStats.opened} geopend
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{email.clickRate}%</div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-sm font-medium text-white">{email.clickRate}%</div>
+                        <div className="text-xs text-gray-400">
                           {email.engagementStats.clicked} geklikt
                         </div>
                       </td>
@@ -317,13 +337,13 @@ export default function TestEmailsPage() {
                               setSelectedEmail(email);
                               setShowModal(true);
                             }}
-                            className="text-blue-600 hover:text-blue-900 p-1 hover:bg-blue-50 rounded"
+                            className="text-blue-400 hover:text-blue-300 p-1 hover:bg-blue-900/20 rounded"
                           >
                             <EyeIcon className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => handleDeleteEmail(email.id)}
-                            className="text-red-600 hover:text-red-900 p-1 hover:bg-red-50 rounded"
+                            className="text-red-400 hover:text-red-300 p-1 hover:bg-red-900/20 rounded"
                           >
                             <TrashIcon className="h-4 w-4" />
                           </button>
