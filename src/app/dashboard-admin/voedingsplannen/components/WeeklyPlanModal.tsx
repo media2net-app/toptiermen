@@ -116,12 +116,15 @@ export default function WeeklyPlanModal({ isOpen, onClose, plan }: WeeklyPlanMod
   };
 
   const generateDayPlan = (day: any, plan: NutritionPlan, ingredients: any[], dayIndex: number): DayPlan => {
+    // Ensure target_calories is valid, use default for carnivore plans
+    const baseCalories = Number(plan.target_calories) || 2200;
+    
     const targetCaloriesPerMeal = {
-      ontbijt: Math.round(plan.target_calories * 0.25), // 25%
-      snack1: Math.round(plan.target_calories * 0.10),  // 10%
-      lunch: Math.round(plan.target_calories * 0.30),   // 30%
-      snack2: Math.round(plan.target_calories * 0.10),  // 10%
-      diner: Math.round(plan.target_calories * 0.25)    // 25%
+      ontbijt: Math.round(baseCalories * 0.25), // 25%
+      snack1: Math.round(baseCalories * 0.10),  // 10%
+      lunch: Math.round(baseCalories * 0.30),   // 30%
+      snack2: Math.round(baseCalories * 0.10),  // 10%
+      diner: Math.round(baseCalories * 0.25)    // 25%
     };
 
     // Create different meal variations based on day
@@ -129,13 +132,18 @@ export default function WeeklyPlanModal({ isOpen, onClose, plan }: WeeklyPlanMod
     const fishOptions = ingredients.filter(i => i.category === 'vis');
     const eggOptions = ingredients.filter(i => i.category === 'eieren');
     const dairyOptions = ingredients.filter(i => i.category === 'zuivel');
+    
+    // For spiermassa carnivore plans, allow some fruit
+    const fruitOptions = ingredients.filter(i => i.category === 'fruit');
+    const isSpiermassa = plan.name.toLowerCase().includes('spiermassa');
+    const allowedFruit = isSpiermassa ? fruitOptions : [];
 
     const meals = {
-      ontbijt: generateMeal('ontbijt', targetCaloriesPerMeal.ontbijt, eggOptions, dairyOptions, dayIndex),
-      snack1: generateMeal('snack1', targetCaloriesPerMeal.snack1, dairyOptions, eggOptions, dayIndex),
-      lunch: generateMeal('lunch', targetCaloriesPerMeal.lunch, meatOptions, fishOptions, dayIndex),
-      snack2: generateMeal('snack2', targetCaloriesPerMeal.snack2, dairyOptions, meatOptions, dayIndex),
-      diner: generateMeal('diner', targetCaloriesPerMeal.diner, meatOptions, fishOptions, dayIndex)
+      ontbijt: generateMeal('ontbijt', targetCaloriesPerMeal.ontbijt, eggOptions, dairyOptions, dayIndex, plan),
+      snack1: generateMeal('snack1', targetCaloriesPerMeal.snack1, dairyOptions, allowedFruit.length > 0 ? allowedFruit : eggOptions, dayIndex, plan),
+      lunch: generateMeal('lunch', targetCaloriesPerMeal.lunch, meatOptions, fishOptions, dayIndex, plan),
+      snack2: generateMeal('snack2', targetCaloriesPerMeal.snack2, dairyOptions, meatOptions, dayIndex, plan),
+      diner: generateMeal('diner', targetCaloriesPerMeal.diner, meatOptions, fishOptions, dayIndex, plan)
     };
 
     const totalCalories = Object.values(meals).reduce((sum, meal) => sum + meal.calories, 0);
@@ -154,7 +162,7 @@ export default function WeeklyPlanModal({ isOpen, onClose, plan }: WeeklyPlanMod
     };
   };
 
-  const generateMeal = (mealType: string, targetCalories: number, primaryIngredients: any[], secondaryIngredients: any[], dayIndex: number): Meal => {
+  const generateMeal = (mealType: string, targetCalories: number, primaryIngredients: any[], secondaryIngredients: any[], dayIndex: number, plan: NutritionPlan): Meal => {
     const mealTemplates = {
       ontbijt: [
         { name: 'Carnivoor Ontbijt', time: '08:00' },
@@ -197,14 +205,25 @@ export default function WeeklyPlanModal({ isOpen, onClose, plan }: WeeklyPlanMod
       const primaryIng = primaryIngredients[dayIndex % primaryIngredients.length];
       const amount = calculateAmount(primaryIng, targetCalories * 0.7); // 70% of calories from primary
       
+      // Ensure we have valid numeric values
+      const calories = Number(primaryIng.calories_per_100g) || 0;
+      const protein = Number(primaryIng.protein_per_100g) || 0;
+      const carbs = Number(primaryIng.carbs_per_100g) || 0;
+      const fat = Number(primaryIng.fat_per_100g) || 0;
+      
+      // For carnivore plans, eliminate carbs (except spiermassa can have minimal fruit)
+      const isPlanCarnivore = plan.name.toLowerCase().includes('carnivoor');
+      const isSpiermassa = plan.name.toLowerCase().includes('spiermassa');
+      const adjustedCarbs = isPlanCarnivore && !isSpiermassa ? 0 : carbs;
+      
       selectedIngredients.push({
         name: primaryIng.name,
         amount: Math.round(amount),
         unit: 'gram',
-        calories: Math.round((primaryIng.calories_per_100g * amount) / 100),
-        protein: Math.round((primaryIng.protein_per_100g * amount) / 100),
-        carbs: Math.round((primaryIng.carbs_per_100g * amount) / 100),
-        fat: Math.round((primaryIng.fat_per_100g * amount) / 100)
+        calories: Math.round((calories * amount) / 100),
+        protein: Math.round((protein * amount) / 100),
+        carbs: Math.round((adjustedCarbs * amount) / 100),
+        fat: Math.round((fat * amount) / 100)
       });
 
       currentCalories += selectedIngredients[0].calories || 0;
@@ -220,14 +239,25 @@ export default function WeeklyPlanModal({ isOpen, onClose, plan }: WeeklyPlanMod
       const amount = calculateAmount(secondaryIng, remainingCalories);
       
       if (amount > 10) { // Only add if meaningful amount
+        // Ensure we have valid numeric values
+        const calories = Number(secondaryIng.calories_per_100g) || 0;
+        const protein = Number(secondaryIng.protein_per_100g) || 0;
+        const carbs = Number(secondaryIng.carbs_per_100g) || 0;
+        const fat = Number(secondaryIng.fat_per_100g) || 0;
+        
+        // For carnivore plans, eliminate carbs (except spiermassa can have minimal fruit)
+        const isPlanCarnivore = plan.name.toLowerCase().includes('carnivoor');
+        const isSpiermassa = plan.name.toLowerCase().includes('spiermassa');
+        const adjustedCarbs = isPlanCarnivore && !isSpiermassa ? 0 : carbs;
+        
         selectedIngredients.push({
           name: secondaryIng.name,
           amount: Math.round(amount),
           unit: 'gram',
-          calories: Math.round((secondaryIng.calories_per_100g * amount) / 100),
-          protein: Math.round((secondaryIng.protein_per_100g * amount) / 100),
-          carbs: Math.round((secondaryIng.carbs_per_100g * amount) / 100),
-          fat: Math.round((secondaryIng.fat_per_100g * amount) / 100)
+          calories: Math.round((calories * amount) / 100),
+          protein: Math.round((protein * amount) / 100),
+          carbs: Math.round((adjustedCarbs * amount) / 100),
+          fat: Math.round((fat * amount) / 100)
         });
 
         currentCalories += selectedIngredients[1].calories || 0;
@@ -250,8 +280,12 @@ export default function WeeklyPlanModal({ isOpen, onClose, plan }: WeeklyPlanMod
   };
 
   const calculateAmount = (ingredient: any, targetCalories: number): number => {
-    if (!ingredient.calories_per_100g || ingredient.calories_per_100g === 0) return 100;
-    return (targetCalories * 100) / ingredient.calories_per_100g;
+    // Ensure we have valid numeric values
+    const calories = Number(ingredient.calories_per_100g) || 0;
+    const target = Number(targetCalories) || 0;
+    
+    if (calories === 0 || target === 0) return 100; // fallback to 100g
+    return Math.max(10, (target * 100) / calories); // minimum 10g
   };
 
   const generatePreparation = (ingredients: Ingredient[]): string => {
