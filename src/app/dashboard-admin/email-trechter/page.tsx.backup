@@ -640,37 +640,37 @@ Het Toptiermen Team
 
       {/* Campaign Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
-        <AdminStatsCard
+        <AdminCard
           title="Totaal Leads"
           value={campaignStats.totalLeads}
           icon={<UserGroupIcon className="w-6 h-6" />}
           color="blue"
         />
-        <AdminStatsCard
+        <AdminCard
           title="Actieve Leads"
           value={campaignStats.activeLeads}
           icon={<CheckCircleIcon className="w-6 h-6" />}
           color="green"
         />
-        <AdminStatsCard
+        <AdminCard
           title="Emails Verzonden"
           value={campaignStats.emailsSent}
           icon={<EnvelopeIcon className="w-6 h-6" />}
           color="purple"
         />
-        <AdminStatsCard
+        <AdminCard
           title="Totaal Opens"
           value={campaignStats.totalOpens}
           icon={<EyeIcon className="w-6 h-6" />}
           color="orange"
         />
-        <AdminStatsCard
+        <AdminCard
           title="Totaal Clicks"
           value={campaignStats.totalClicks}
           icon={<ChartBarIcon className="w-6 h-6" />}
           color="red"
         />
-        <AdminStatsCard
+        <AdminCard
           title="Conversie Rate"
           value={`${campaignStats.conversionRate}%`}
           icon={<ArrowRightIcon className="w-6 h-6" />}
