@@ -43,62 +43,74 @@ export default function TestEmailsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedEmail, setSelectedEmail] = useState<TestEmail | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   // Fetch real email campaigns from database
-  useEffect(() => {
-    const fetchEmailCampaigns = async () => {
-      try {
-        setIsLoading(true);
-        console.log('📧 Fetching email campaigns from database...');
-        
-        const response = await fetch('/api/admin/email-campaigns');
-        const result = await response.json();
-        
-        if (!response.ok) {
-          console.error('❌ Error fetching email campaigns:', result.error);
-          toast.error('Fout bij laden van email campaigns');
-          return;
+  const fetchEmailCampaigns = async () => {
+    try {
+      setIsLoading(true);
+      console.log('📧 Fetching email campaigns from database...');
+      
+      const response = await fetch('/api/admin/email-campaigns', {
+        cache: 'no-store', // Force fresh data
+        headers: {
+          'Cache-Control': 'no-cache'
         }
-        
-        // Transform database campaigns to TestEmail format
-        const transformedEmails: TestEmail[] = result.campaigns.map((campaign: any) => ({
-          id: campaign.id,
-          subject: campaign.subject,
-          content: `Email campaign: ${campaign.name}`, // We'll need to store actual content later
-          recipients: [`${campaign.stats.total_sent} recipients`], // Simplified for now
-          sentAt: campaign.sent_at ? new Date(campaign.sent_at) : new Date(campaign.created_at),
-          deliveryRate: campaign.stats.delivery_rate || 0,
-          openingRate: campaign.stats.open_rate || 0,
-          clickRate: campaign.stats.click_rate || 0,
-          status: campaign.status === 'completed' ? 'sent' : campaign.status,
-          deliveryStats: {
-            delivered: campaign.stats.delivered || 0,
-            bounced: campaign.stats.bounced || 0,
-            failed: campaign.stats.total_sent - campaign.stats.delivered - campaign.stats.bounced || 0,
-            total: campaign.stats.total_sent || 0
-          },
-          engagementStats: {
-            opened: campaign.stats.opened || 0,
-            clicked: campaign.stats.clicked || 0,
-            unsubscribed: campaign.stats.unsubscribed || 0
-          }
-        }));
-        
-        setTestEmails(transformedEmails);
-        console.log(`✅ Loaded ${transformedEmails.length} email campaigns`);
-        
-      } catch (error) {
-        console.error('❌ Error fetching email campaigns:', error);
-        toast.error('Fout bij laden van email data');
-        
-        // Fallback to empty state instead of mock data
-        setTestEmails([]);
-      } finally {
-        setIsLoading(false);
+      });
+      const result = await response.json();
+      
+      if (!response.ok) {
+        console.error('❌ Error fetching email campaigns:', result.error);
+        toast.error('Fout bij laden van email campaigns');
+        return;
       }
-    };
-    
+      
+      // Transform database campaigns to TestEmail format
+      const transformedEmails: TestEmail[] = result.campaigns.map((campaign: any) => ({
+        id: campaign.id,
+        subject: campaign.subject,
+        content: `Email campaign: ${campaign.name}`, // We'll need to store actual content later
+        recipients: [`${campaign.stats.total_sent} recipients`], // Simplified for now
+        sentAt: campaign.sent_at ? new Date(campaign.sent_at) : new Date(campaign.created_at),
+        deliveryRate: campaign.stats.delivery_rate || 0,
+        openingRate: campaign.stats.open_rate || 0,
+        clickRate: campaign.stats.click_rate || 0,
+        status: campaign.status === 'completed' ? 'sent' : campaign.status,
+        deliveryStats: {
+          delivered: campaign.stats.delivered || 0,
+          bounced: campaign.stats.bounced || 0,
+          failed: campaign.stats.total_sent - campaign.stats.delivered - campaign.stats.bounced || 0,
+          total: campaign.stats.total_sent || 0
+        },
+        engagementStats: {
+          opened: campaign.stats.opened || 0,
+          clicked: campaign.stats.clicked || 0,
+          unsubscribed: campaign.stats.unsubscribed || 0
+        }
+      }));
+      
+      setTestEmails(transformedEmails);
+      setLastUpdated(new Date());
+      console.log(`✅ Loaded ${transformedEmails.length} email campaigns with latest stats`);
+      
+    } catch (error) {
+      console.error('❌ Error fetching email campaigns:', error);
+      toast.error('Fout bij laden van email data');
+      
+      // Fallback to empty state instead of mock data
+      setTestEmails([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchEmailCampaigns();
+    
+    // Set up auto-refresh every 15 seconds for live data
+    const interval = setInterval(fetchEmailCampaigns, 15000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   const handleSendTestEmail = async () => {
@@ -216,15 +228,37 @@ export default function TestEmailsPage() {
           <div>
             <h1 className="text-2xl font-bold text-white">Test E-mails</h1>
             <p className="text-gray-400">Bekijk delivery rates en opening rates van test e-mails</p>
+            {lastUpdated && (
+              <p className="text-sm text-[#8BAE5A] mt-1">
+                🔄 Laatste update: {lastUpdated.toLocaleTimeString('nl-NL', { 
+                  hour: '2-digit', 
+                  minute: '2-digit',
+                  second: '2-digit'
+                })} - Live data wordt elke 15 sec vernieuwd
+              </p>
+            )}
           </div>
         </div>
-        <button 
-          onClick={handleSendTestEmail}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
-        >
-          <PlusIcon className="h-4 w-4" />
-          <span>Verstuur Test Email</span>
-        </button>
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={() => {
+              fetchEmailCampaigns();
+              toast.success('Live data vernieuwd');
+            }}
+            disabled={isLoading}
+            className="bg-[#4ECDC4] hover:bg-[#45B7B7] text-white px-4 py-2 rounded-lg font-semibold transition-colors duration-200 flex items-center gap-2 disabled:opacity-50"
+          >
+            <ClockIcon className="w-5 h-5" />
+            {isLoading ? 'Laden...' : 'Vernieuw Live Data'}
+          </button>
+          <button 
+            onClick={handleSendTestEmail}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+          >
+            <PlusIcon className="h-4 w-4" />
+            <span>Verstuur Test Email</span>
+          </button>
+        </div>
       </div>
 
       {/* Overall Stats */}
