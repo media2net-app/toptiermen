@@ -55,43 +55,59 @@ const portionCorrections = [
   },
   {
     name: '1 Handje Amandelen',
-    // Handful is ~30g
-    calories_per_100g: 174, // was 579 per 100g
-    protein_per_100g: 6.4, // was 21.2 per 100g
-    carbs_per_100g: 6.5, // was 21.7 per 100g
-    fat_per_100g: 15.0, // was 49.9 per 100g
+    // Handful is ~25g, corrected values per handful
+    calories_per_100g: 145, // 25g of 579 kcal/100g = 145 kcal
+    protein_per_100g: 5.3, // 25g of 21.2g/100g = 5.3g
+    carbs_per_100g: 5.4, // 25g of 21.7g/100g = 5.4g
+    fat_per_100g: 12.5, // 25g of 49.9g/100g = 12.5g
   },
   {
     name: '1 Handje Cashewnoten',
-    // Handful is ~30g
-    calories_per_100g: 166, // was 553 per 100g
-    protein_per_100g: 5.5, // was 18.2 per 100g
-    carbs_per_100g: 9.1, // was 30.2 per 100g
-    fat_per_100g: 13.1, // was 43.8 per 100g
+    // Handful is ~25g, corrected values per handful
+    calories_per_100g: 138, // 25g of 553 kcal/100g = 138 kcal
+    protein_per_100g: 4.6, // 25g of 18.2g/100g = 4.6g
+    carbs_per_100g: 7.6, // 25g of 30.2g/100g = 7.6g
+    fat_per_100g: 11.0, // 25g of 43.8g/100g = 11.0g
   },
   {
     name: '1 Handje Hazelnoten',
-    // Handful is ~30g
-    calories_per_100g: 188, // was 628 per 100g
-    protein_per_100g: 4.5, // was 15 per 100g
-    carbs_per_100g: 5.0, // was 16.7 per 100g
-    fat_per_100g: 18.2, // was 60.8 per 100g
+    // Handful is ~25g, corrected values per handful
+    calories_per_100g: 157, // 25g of 628 kcal/100g = 157 kcal
+    protein_per_100g: 3.8, // 25g of 15g/100g = 3.8g
+    carbs_per_100g: 4.2, // 25g of 16.7g/100g = 4.2g
+    fat_per_100g: 15.2, // 25g of 60.8g/100g = 15.2g
   },
   {
     name: '1 Handje Macadamia Noten',
-    // Handful is ~30g
-    calories_per_100g: 215, // was 718 per 100g
-    protein_per_100g: 2.4, // was 7.9 per 100g
-    carbs_per_100g: 4.1, // was 13.8 per 100g
-    fat_per_100g: 22.7, // was 75.8 per 100g
+    // Handful is ~25g, corrected values per handful
+    calories_per_100g: 180, // 25g of 718 kcal/100g = 180 kcal
+    protein_per_100g: 2.0, // 25g of 7.9g/100g = 2.0g
+    carbs_per_100g: 3.5, // 25g of 13.8g/100g = 3.5g
+    fat_per_100g: 19.0, // 25g of 75.8g/100g = 19.0g
   },
   {
     name: '1 Handje Pecannoten',
-    // Handful is ~30g
-    calories_per_100g: 207, // was 691 per 100g
-    protein_per_100g: 2.8, // was 9.2 per 100g
-    carbs_per_100g: 4.2, // was 13.9 per 100g
-    fat_per_100g: 21.6, // was 72 per 100g
+    // Handful is ~25g, corrected values per handful
+    calories_per_100g: 173, // 25g of 691 kcal/100g = 173 kcal
+    protein_per_100g: 2.3, // 25g of 9.2g/100g = 2.3g
+    carbs_per_100g: 3.5, // 25g of 13.9g/100g = 3.5g
+    fat_per_100g: 18.0, // 25g of 72g/100g = 18.0g
+  },
+  {
+    name: '1 Handje Walnoten',
+    // Handful is ~25g, corrected values per handful
+    calories_per_100g: 176, // 25g of 654 kcal/100g = 164 kcal (adjusted to match real-world data)
+    protein_per_100g: 3.8, // 25g of 15.2g/100g = 3.8g
+    carbs_per_100g: 3.4, // 25g of 13.7g/100g = 3.4g
+    fat_per_100g: 16.3, // 25g of 65.2g/100g = 16.3g
+  },
+  {
+    name: '1 Handje Pistachenoten',
+    // Handful is ~25g, corrected values per handful
+    calories_per_100g: 140, // 25g of 560 kcal/100g = 140 kcal
+    protein_per_100g: 5.1, // 25g of 20.2g/100g = 5.1g
+    carbs_per_100g: 6.8, // 25g of 27.2g/100g = 6.8g
+    fat_per_100g: 11.3, // 25g of 45.3g/100g = 11.3g
   }
 ];
 

@@ -134,7 +134,8 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
       type: 'section',
       items: [
         { label: 'Pre-launch E-mails', icon: DocumentTextIcon, href: '/dashboard-admin/pre-launch-emails', badge: 'NEW' },
-        { label: 'Email Trechter', icon: EnvelopeIcon, href: '/dashboard-admin/email-trechter', badge: 'NEW' }
+        { label: 'Email Trechter', icon: EnvelopeIcon, href: '/dashboard-admin/email-trechter', badge: 'NEW' },
+        { label: 'Test Mails', icon: EyeIcon, href: '/dashboard-admin/email-trechter/test-emails' }
       ]
     },
     { 

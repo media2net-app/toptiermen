@@ -41,6 +41,11 @@ interface MealPlan {
   carbs: number;
   fat: number;
   suggestions: string[];
+  ingredients?: Array<{
+    name: string;
+    amount: number;
+    unit: string;
+  }>;
 }
 
 interface PlanBuilderProps {
@@ -623,355 +628,53 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
 
                   {/* Meals */}
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div className="bg-[#181F17] rounded-lg p-4 border border-[#3A4D23]">
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="text-[#8BAE5A] font-semibold">Ontbijt</h4>
-                        <div className="flex gap-2">
-                          <button 
-                            onClick={() => handleEditMeal('ontbijt')}
-                            className="text-[#8BAE5A] hover:text-[#7A9D4B] text-sm"
-                            title="Maaltijd toevoegen/bewerken"
-                          >
-                            <PlusIcon className="w-4 h-4" />
-                          </button>
-                          <button 
-                            onClick={() => handleEditMeal('ontbijt')}
-                            className="text-[#8BAE5A] hover:text-[#7A9D4B] text-sm"
-                            title="Maaltijd bewerken"
-                          >
-                            <PencilIcon className="w-4 h-4" />
-                          </button>
+                    {['ontbijt', 'lunch', 'diner', 'snack1'].map((mealType) => {
+                      const currentDay = getCurrentDayPlan();
+                      const meal = currentDay?.meals?.[mealType as keyof typeof currentDay.meals];
+                      const mealNames = {
+                        ontbijt: 'Ontbijt',
+                        lunch: 'Lunch', 
+                        diner: 'Diner',
+                        snack1: 'Snacks'
+                      };
+                      
+                      return (
+                        <div key={mealType} className="bg-[#181F17] rounded-lg p-4 border border-[#3A4D23]">
+                          <div className="flex items-center justify-between mb-3">
+                            <h4 className="text-[#8BAE5A] font-semibold">{mealNames[mealType as keyof typeof mealNames]}</h4>
+                            <div className="flex gap-2">
+                              <button 
+                                onClick={() => handleEditMeal(mealType)}
+                                className="text-[#8BAE5A] hover:text-[#7A9D4B] text-sm"
+                                title="Maaltijd bewerken"
+                              >
+                                <PencilIcon className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                          <div className="space-y-3">
+                            <div className="text-[#B6C948] font-medium">
+                              {meal?.name || `${mealNames[mealType as keyof typeof mealNames]} - Nog niet ingesteld`}
+                            </div>
+                            <div className="text-[#8BAE5A] text-sm">
+                              {meal?.calories || 0} cal • {meal?.protein || 0}g protein • {meal?.carbs || 0}g carbs • {meal?.fat || 0}g fat
+                            </div>
+                            {meal?.ingredients && meal.ingredients.length > 0 && (
+                              <div className="text-xs text-gray-400 space-y-1">
+                                {meal.ingredients.map((ingredient: any, idx: number) => (
+                                  <div key={idx}>• {ingredient.name} ({ingredient.amount}{ingredient.unit})</div>
+                                ))}
+                              </div>
+                            )}
+                            {(!meal?.ingredients || meal.ingredients.length === 0) && (
+                              <div className="text-xs text-gray-400">
+                                Klik op bewerken om ingrediënten toe te voegen
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                      <div className="space-y-3">
-                        <div className="text-[#B6C948] font-medium">
-                          {selectedDay === 'monday' && 'Orgaanvlees & Eieren Ontbijt'}
-                          {selectedDay === 'tuesday' && 'T-Bone Steak & Eieren'}
-                          {selectedDay === 'wednesday' && 'Spek & Eieren Ontbijt'}
-                          {selectedDay === 'thursday' && 'Ribeye & Eieren'}
-                          {selectedDay === 'friday' && 'Orgaanvlees Mix'}
-                          {selectedDay === 'saturday' && 'Spek & Eieren'}
-                          {selectedDay === 'sunday' && 'Ribeye & Eieren'}
-                        </div>
-                        <div className="text-[#8BAE5A] text-sm">08:00 • 520 cal</div>
-                        <div className="text-xs text-gray-400 space-y-1">
-                          {selectedDay === 'monday' && (
-                            <>
-                              <div>• Runderlever (100g)</div>
-                              <div>• Runderhart (50g)</div>
-                              <div>• Eieren (3 stuks)</div>
-                              <div>• Roomboter (25g)</div>
-                              <div>• Honing (10g)</div>
-                            </>
-                          )}
-                          {selectedDay === 'tuesday' && (
-                            <>
-                              <div>• T-Bone Steak (200g)</div>
-                              <div>• Eieren (3 stuks)</div>
-                              <div>• Roomboter (30g)</div>
-                              <div>• Talow (10g)</div>
-                            </>
-                          )}
-                          {selectedDay === 'wednesday' && (
-                            <>
-                              <div>• Spek (80g)</div>
-                              <div>• Eieren (4 stuks)</div>
-                              <div>• Roomboter (20g)</div>
-                              <div>• Honing (10g)</div>
-                            </>
-                          )}
-                          {selectedDay === 'thursday' && (
-                            <>
-                              <div>• Ribeye Steak (200g)</div>
-                              <div>• Eieren (3 stuks)</div>
-                              <div>• Roomboter (30g)</div>
-                            </>
-                          )}
-                          {selectedDay === 'friday' && (
-                            <>
-                              <div>• Kippenlever (100g)</div>
-                              <div>• Runderhart (50g)</div>
-                              <div>• Roomboter (25g)</div>
-                              <div>• Honing (10g)</div>
-                            </>
-                          )}
-                          {selectedDay === 'saturday' && (
-                            <>
-                              <div>• Spek (80g)</div>
-                              <div>• Eieren (4 stuks)</div>
-                              <div>• Roomboter (20g)</div>
-                              <div>• Honing (10g)</div>
-                            </>
-                          )}
-                          {selectedDay === 'sunday' && (
-                            <>
-                              <div>• Ribeye Steak (200g)</div>
-                              <div>• Eieren (3 stuks)</div>
-                              <div>• Roomboter (30g)</div>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="bg-[#181F17] rounded-lg p-4 border border-[#3A4D23]">
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="text-[#8BAE5A] font-semibold">Lunch</h4>
-                        <div className="flex gap-2">
-                          <button 
-                            onClick={() => handleEditMeal('lunch')}
-                            className="text-[#8BAE5A] hover:text-[#7A9D4B] text-sm"
-                            title="Maaltijd toevoegen/bewerken"
-                          >
-                            <PlusIcon className="w-4 h-4" />
-                          </button>
-                          <button 
-                            onClick={() => handleEditMeal('lunch')}
-                            className="text-[#8BAE5A] hover:text-[#7A9D4B] text-sm"
-                            title="Maaltijd bewerken"
-                          >
-                            <PencilIcon className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                      <div className="space-y-3">
-                        <div className="text-[#B6C948] font-medium">
-                          {selectedDay === 'monday' && 'Ribeye Steak met Boter'}
-                          {selectedDay === 'tuesday' && 'Kipfilet met Boter'}
-                          {selectedDay === 'wednesday' && 'Lamsvlees met Boter'}
-                          {selectedDay === 'thursday' && 'Zalmfilet met Boter'}
-                          {selectedDay === 'friday' && 'Kipfilet met Boter'}
-                          {selectedDay === 'saturday' && 'Entrecote met Boter'}
-                          {selectedDay === 'sunday' && 'Lamskotelet met Boter'}
-                        </div>
-                        <div className="text-[#8BAE5A] text-sm">13:00 • 650 cal</div>
-                        <div className="text-xs text-gray-400 space-y-1">
-                          {selectedDay === 'monday' && (
-                            <>
-                              <div>• Ribeye Steak (250g)</div>
-                              <div>• Roomboter (30g)</div>
-                              <div>• Talow (10g)</div>
-                            </>
-                          )}
-                          {selectedDay === 'tuesday' && (
-                            <>
-                              <div>• Kipfilet (250g)</div>
-                              <div>• Roomboter (30g)</div>
-                            </>
-                          )}
-                          {selectedDay === 'wednesday' && (
-                            <>
-                              <div>• Lamsvlees (250g)</div>
-                              <div>• Roomboter (35g)</div>
-                            </>
-                          )}
-                          {selectedDay === 'thursday' && (
-                            <>
-                              <div>• Zalmfilet (250g)</div>
-                              <div>• Roomboter (25g)</div>
-                            </>
-                          )}
-                          {selectedDay === 'friday' && (
-                            <>
-                              <div>• Kipfilet (250g)</div>
-                              <div>• Roomboter (30g)</div>
-                            </>
-                          )}
-                          {selectedDay === 'saturday' && (
-                            <>
-                              <div>• Entrecote (250g)</div>
-                              <div>• Roomboter (35g)</div>
-                              <div>• Talow (10g)</div>
-                            </>
-                          )}
-                          {selectedDay === 'sunday' && (
-                            <>
-                              <div>• Lamskotelet (250g)</div>
-                              <div>• Roomboter (35g)</div>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="bg-[#181F17] rounded-lg p-4 border border-[#3A4D23]">
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="text-[#8BAE5A] font-semibold">Diner</h4>
-                        <div className="flex gap-2">
-                          <button 
-                            onClick={() => handleEditMeal('diner')}
-                            className="text-[#8BAE5A] hover:text-[#7A9D4B] text-sm"
-                            title="Maaltijd toevoegen/bewerken"
-                          >
-                            <PlusIcon className="w-4 h-4" />
-                          </button>
-                          <button 
-                            onClick={() => handleEditMeal('diner')}
-                            className="text-[#8BAE5A] hover:text-[#7A9D4B] text-sm"
-                            title="Maaltijd bewerken"
-                          >
-                            <PencilIcon className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                      <div className="space-y-3">
-                        <div className="text-[#B6C948] font-medium">
-                          {selectedDay === 'monday' && 'Lamskotelet met Orgaanvlees'}
-                          {selectedDay === 'tuesday' && 'Entrecote met Orgaanvlees'}
-                          {selectedDay === 'wednesday' && 'Gebakken Lever met Boter'}
-                          {selectedDay === 'thursday' && 'Lamskotelet met Boter'}
-                          {selectedDay === 'friday' && 'Gans met Eendenborst'}
-                          {selectedDay === 'saturday' && 'T-Bone Steak met Orgaanvlees'}
-                          {selectedDay === 'sunday' && 'Orgaanvlees Mix'}
-                        </div>
-                        <div className="text-[#8BAE5A] text-sm">19:00 • 580 cal</div>
-                        <div className="text-xs text-gray-400 space-y-1">
-                          {selectedDay === 'monday' && (
-                            <>
-                              <div>• Lamskotelet (200g)</div>
-                              <div>• Kippenlever (50g)</div>
-                              <div>• Roomboter (20g)</div>
-                              <div>• Honing (15g)</div>
-                            </>
-                          )}
-                          {selectedDay === 'tuesday' && (
-                            <>
-                              <div>• Entrecote (250g)</div>
-                              <div>• Rundernieren (50g)</div>
-                              <div>• Roomboter (25g)</div>
-                              <div>• Honing (15g)</div>
-                            </>
-                          )}
-                          {selectedDay === 'wednesday' && (
-                            <>
-                              <div>• Runderlever (200g)</div>
-                              <div>• Roomboter (40g)</div>
-                              <div>• Honing (15g)</div>
-                            </>
-                          )}
-                          {selectedDay === 'thursday' && (
-                            <>
-                              <div>• Lamskotelet (250g)</div>
-                              <div>• Roomboter (30g)</div>
-                              <div>• Honing (15g)</div>
-                            </>
-                          )}
-                          {selectedDay === 'friday' && (
-                            <>
-                              <div>• Gans (200g)</div>
-                              <div>• Eendenborst (100g)</div>
-                              <div>• Roomboter (30g)</div>
-                              <div>• Honing (15g)</div>
-                            </>
-                          )}
-                          {selectedDay === 'saturday' && (
-                            <>
-                              <div>• T-Bone Steak (200g)</div>
-                              <div>• Rundernieren (50g)</div>
-                              <div>• Roomboter (25g)</div>
-                              <div>• Honing (15g)</div>
-                            </>
-                          )}
-                          {selectedDay === 'sunday' && (
-                            <>
-                              <div>• Runderlever (100g)</div>
-                              <div>• Kippenlever (50g)</div>
-                              <div>• Runderhart (50g)</div>
-                              <div>• Roomboter (25g)</div>
-                              <div>• Honing (15g)</div>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="bg-[#181F17] rounded-lg p-4 border border-[#3A4D23]">
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="text-[#8BAE5A] font-semibold">Snacks</h4>
-                        <div className="flex gap-2">
-                          <button 
-                            onClick={() => handleEditMeal('snack1')}
-                            className="text-[#8BAE5A] hover:text-[#7A9D4B] text-sm"
-                            title="Maaltijd toevoegen/bewerken"
-                          >
-                            <PlusIcon className="w-4 h-4" />
-                          </button>
-                          <button 
-                            onClick={() => handleEditMeal('snack1')}
-                            className="text-[#8BAE5A] hover:text-[#7A9D4B] text-sm"
-                            title="Maaltijd bewerken"
-                          >
-                            <PencilIcon className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                      <div className="space-y-3">
-                        <div className="text-[#B6C948] font-medium">
-                          {selectedDay === 'monday' && 'Gerookte Zalm + Eieren met Spek'}
-                          {selectedDay === 'tuesday' && 'Droge Worst + Kaas met Boter'}
-                          {selectedDay === 'wednesday' && 'Kipreepjes + Griekse Yoghurt'}
-                          {selectedDay === 'thursday' && 'Gerookte Zalm + Eieren met Kaas'}
-                          {selectedDay === 'friday' && 'Droge Worst + Spek met Eieren'}
-                          {selectedDay === 'saturday' && 'Lamsvlees + Gebakken Lever'}
-                          {selectedDay === 'sunday' && 'Gerookte Zalm + Kaas met Boter'}
-                        </div>
-                        <div className="text-[#8BAE5A] text-sm">10:30 & 15:30 • 600 cal</div>
-                        <div className="text-xs text-gray-400 space-y-1">
-                          {selectedDay === 'monday' && (
-                            <>
-                              <div>• Gerookte Zalm (120g)</div>
-                              <div>• Roomboter (15g)</div>
-                              <div>• Eieren (2 stuks)</div>
-                              <div>• Spek (40g)</div>
-                            </>
-                          )}
-                          {selectedDay === 'tuesday' && (
-                            <>
-                              <div>• Droge Worst (80g)</div>
-                              <div>• Goudse Kaas (60g)</div>
-                              <div>• Roomboter (20g)</div>
-                            </>
-                          )}
-                          {selectedDay === 'wednesday' && (
-                            <>
-                              <div>• Kipfilet (100g)</div>
-                              <div>• Roomboter (10g)</div>
-                              <div>• Griekse Yoghurt (150g)</div>
-                              <div>• Honing (15g)</div>
-                            </>
-                          )}
-                          {selectedDay === 'thursday' && (
-                            <>
-                              <div>• Gerookte Zalm (100g)</div>
-                              <div>• Eieren (2 stuks)</div>
-                              <div>• Goudse Kaas (50g)</div>
-                              <div>• Roomboter (15g)</div>
-                            </>
-                          )}
-                          {selectedDay === 'friday' && (
-                            <>
-                              <div>• Droge Worst (80g)</div>
-                              <div>• Spek (40g)</div>
-                              <div>• Eieren (2 stuks)</div>
-                              <div>• Roomboter (10g)</div>
-                            </>
-                          )}
-                          {selectedDay === 'saturday' && (
-                            <>
-                              <div>• Lamsvlees (120g)</div>
-                              <div>• Roomboter (15g)</div>
-                              <div>• Runderlever (100g)</div>
-                              <div>• Roomboter (20g)</div>
-                              <div>• Honing (10g)</div>
-                            </>
-                          )}
-                          {selectedDay === 'sunday' && (
-                            <>
-                              <div>• Gerookte Zalm (100g)</div>
-                              <div>• Goudse Kaas (60g)</div>
-                              <div>• Roomboter (20g)</div>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    </div>
+                      );
+                    })}
                   </div>
 
                   {/* Daily Nutrition Summary */}
