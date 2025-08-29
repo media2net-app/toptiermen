@@ -141,6 +141,8 @@ export async function GET(request: NextRequest) {
     const analyticsData = {
       summary: {},
       campaigns: [],
+      adSets: [],
+      ads: [],
       dateRange: 'maximum',
       lastUpdated: new Date().toISOString(),
       source: 'manual_data'
@@ -192,6 +194,10 @@ export async function GET(request: NextRequest) {
       averageCPC: weightedCPC,
       averageCPM: totalImpressions > 0 ? (totalSpend / totalImpressions) * 1000 : 0
     };
+
+    // Ensure adSets and ads arrays are always present
+    analyticsData.adSets = analyticsData.adSets || [];
+    analyticsData.ads = analyticsData.ads || [];
 
     return NextResponse.json({
       success: true,
@@ -297,12 +303,158 @@ export async function GET(request: NextRequest) {
       };
 
       analyticsData.summary = summary;
-      analyticsData.adSets = [];
-      analyticsData.ads = [];
+      // Use live Facebook API data for campaigns
+      try {
+        const liveResponse = await fetch(`https://graph.facebook.com/v18.0/${process.env.FACEBOOK_AD_ACCOUNT_ID}/campaigns?access_token=${process.env.FACEBOOK_ACCESS_TOKEN}&fields=id,name,status,objective,created_time,updated_time&limit=50`);
+        if (liveResponse.ok) {
+          const liveData = await liveResponse.json();
+          const liveCampaigns = liveData.data || [];
+          
+          // Get insights for each campaign
+          const campaignInsights = await Promise.all(
+            liveCampaigns.map(async (campaign: any) => {
+              try {
+                const insightsUrl = `https://graph.facebook.com/v18.0/${campaign.id}/insights?access_token=${process.env.FACEBOOK_ACCESS_TOKEN}&time_range={'since':'2025-08-22','until':'${new Date().toISOString().split('T')[0]}'}&fields=impressions,clicks,spend,reach,frequency,ctr,cpc,cpm,actions,conversions&limit=1`;
+                const insightsResponse = await fetch(insightsUrl);
+                
+                if (insightsResponse.ok) {
+                  const insightsData = await insightsResponse.json();
+                  const insights = insightsData.data?.[0] || {};
+                  
+                  const actions = insights.actions || [];
+                  const conversions = actions.reduce((total: number, action: any) => {
+                    if (action.action_type === 'lead' || action.action_type === 'complete_registration' || action.action_type === 'purchase') {
+                      return total + parseInt(action.value || '0');
+                    }
+                    return total;
+                  }, 0);
+
+                  return {
+                    ...campaign,
+                    insights: {
+                      impressions: parseInt(insights.impressions || '0'),
+                      clicks: parseInt(insights.clicks || '0'),
+                      spend: parseFloat(insights.spend || '0'),
+                      reach: parseInt(insights.reach || '0'),
+                      frequency: parseFloat(insights.frequency || '0'),
+                      ctr: parseFloat(insights.ctr || '0'),
+                      cpc: parseFloat(insights.cpc || '0'),
+                      cpm: parseFloat(insights.cpm || '0'),
+                      conversions: conversions,
+                      actions: actions
+                    }
+                  };
+                }
+              } catch (error) {
+                console.error(`Error fetching insights for campaign ${campaign.id}:`, error);
+              }
+              
+              return {
+                ...campaign,
+                insights: {
+                  impressions: 0,
+                  clicks: 0,
+                  spend: 0,
+                  reach: 0,
+                  frequency: 0,
+                  ctr: 0,
+                  cpc: 0,
+                  cpm: 0,
+                  conversions: 0,
+                  actions: []
+                }
+              };
+            })
+          );
+
+          // Update campaigns with live data
+          analyticsData.campaigns = campaignInsights.map((campaign: any) => ({
+            id: campaign.id,
+            name: campaign.name,
+            status: campaign.status,
+            objective: campaign.objective,
+            impressions: campaign.insights.impressions,
+            clicks: campaign.insights.clicks,
+            spend: campaign.insights.spend,
+            reach: campaign.insights.reach,
+            frequency: campaign.insights.frequency,
+            ctr: campaign.insights.ctr,
+            cpc: campaign.insights.cpc,
+            cpm: campaign.insights.cpm,
+            actions: campaign.insights.actions,
+            conversions: campaign.insights.conversions,
+            created_time: campaign.created_time
+          }));
+
+          // Transform campaigns to adSets format for consistency
+          analyticsData.adSets = campaignInsights.map((campaign: any) => ({
+            id: `adset_${campaign.id}`,
+            name: `${campaign.name} - AdSet`,
+            status: campaign.status,
+            campaign_id: campaign.id,
+            impressions: campaign.insights.impressions,
+            clicks: campaign.insights.clicks,
+            spend: campaign.insights.spend,
+            reach: campaign.insights.reach,
+            frequency: campaign.insights.frequency,
+            ctr: campaign.insights.ctr,
+            cpc: campaign.insights.cpc,
+            cpm: campaign.insights.cpm,
+            created_time: campaign.created_time
+          }));
+
+          // Transform campaigns to ads format for consistency
+          analyticsData.ads = campaignInsights.map((campaign: any) => ({
+            id: `ad_${campaign.id}`,
+            name: `${campaign.name} - Ad`,
+            status: campaign.status,
+            campaign_id: campaign.id,
+            adset_id: `adset_${campaign.id}`,
+            impressions: campaign.insights.impressions,
+            clicks: campaign.insights.clicks,
+            spend: campaign.insights.spend,
+            reach: campaign.insights.reach,
+            frequency: campaign.insights.frequency,
+            ctr: campaign.insights.ctr,
+            cpc: campaign.insights.cpc,
+            cpm: campaign.insights.cpm,
+            created_time: campaign.created_time
+          }));
+
+          // Update summary with live data
+          const totalImpressions = campaignInsights.reduce((sum: number, campaign: any) => sum + campaign.insights.impressions, 0);
+          const totalClicks = campaignInsights.reduce((sum: number, campaign: any) => sum + campaign.insights.clicks, 0);
+          const totalSpend = campaignInsights.reduce((sum: number, campaign: any) => sum + campaign.insights.spend, 0);
+          const totalReach = campaignInsights.reduce((sum: number, campaign: any) => sum + campaign.insights.reach, 0);
+          const totalConversions = campaignInsights.reduce((sum: number, campaign: any) => sum + campaign.insights.conversions, 0);
+
+          analyticsData.summary = {
+            totalImpressions,
+            totalClicks,
+            totalSpend,
+            totalReach,
+            averageCTR: totalClicks > 0 ? (totalClicks / totalImpressions) * 100 : 0,
+            averageCPC: totalClicks > 0 ? totalSpend / totalClicks : 0,
+            averageCPM: totalImpressions > 0 ? (totalSpend / totalImpressions) * 1000 : 0,
+            activeCampaigns: campaignInsights.filter((c: any) => c.status === 'ACTIVE').length,
+            totalConversions
+          };
+
+        } else {
+          // Fallback to manual data
+          analyticsData.adSets = [];
+          analyticsData.ads = [];
+        }
+      } catch (error) {
+        console.error('Error fetching live Facebook data:', error);
+        analyticsData.adSets = [];
+        analyticsData.ads = [];
+      }
+
       analyticsData.creatives = [];
 
-      console.log('✅ Manual data applied successfully');
-      console.log('📊 Manual data summary:', summary);
+      console.log('✅ Live Facebook API data applied successfully');
+      console.log('📊 Live data summary:', analyticsData.summary);
 
       return NextResponse.json({
         success: true,

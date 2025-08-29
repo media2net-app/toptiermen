@@ -59,7 +59,14 @@ export default function PrelaunchAnalyticsPage() {
       ).length : 0;
       
       // Get Facebook analytics data for clicks
-      const facebookResponse = await fetch('/api/facebook/comprehensive-analytics?dateRange=maximum&useManualData=true');
+      const timestamp = new Date().getTime();
+      const facebookResponse = await fetch(`/api/facebook/live-data?date=all&_t=${timestamp}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache'
+        }
+      });
       const facebookData = await facebookResponse.json();
       
       const totalClicks = facebookData.success ? 

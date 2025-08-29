@@ -89,7 +89,14 @@ export default function ConversieOverzicht() {
         console.error('❌ Analytics API failed:', analyticsResult);
         // Fallback to comprehensive analytics with manual data
         console.log('🔄 Trying fallback API with manual data...');
-        const fallbackResponse = await fetch('/api/facebook/comprehensive-analytics?dateRange=maximum&useManualData=true&forceManual=true');
+        const timestamp = new Date().getTime();
+        const fallbackResponse = await fetch(`/api/facebook/live-data?date=all&_t=${timestamp}`, {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache'
+          }
+        });
         const fallbackResult = await fallbackResponse.json();
         if (fallbackResult.success) {
           console.log('✅ Fallback successful');

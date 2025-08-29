@@ -149,7 +149,14 @@ export default function AnalyticsPage() {
       try {
         console.log('📊 Loading comprehensive Facebook analytics data...');
         
-        const response = await fetch(`/api/facebook/comprehensive-analytics?dateRange=${timeRange}&useManualData=true`);
+        const timestamp = new Date().getTime();
+        const response = await fetch(`/api/facebook/live-data?date=all&_t=${timestamp}`, {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache'
+          }
+        });
         const data = await response.json();
         
         if (data.success && data.data) {

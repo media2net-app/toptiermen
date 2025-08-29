@@ -106,6 +106,35 @@ export default function MarketingDashboard() {
   loadFacebookData();
   }, []); // Removed loading, user, router dependencies
 
+  useEffect(() => {
+    if (!loading && user) {
+      loadFacebookData();
+    }
+  }, [user, loading]);
+
+  // Auto-refresh data every 5 minutes
+  useEffect(() => {
+    const interval = setInterval(() => {
+      console.log('🔄 Auto-refreshing Facebook data...');
+      loadFacebookData();
+    }, 5 * 60 * 1000); // 5 minutes
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Refresh data when page becomes visible again
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        console.log('👁️ Page visible - refreshing Facebook data...');
+        loadFacebookData();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
+
   // Separate function for Facebook connection check (runs in background)
   const checkFacebookConnection = async () => {
     console.log('🔍 Starting Facebook connection check in background...');
@@ -221,35 +250,73 @@ export default function MarketingDashboard() {
         setAdAccountInfo(JSON.parse(adAccountInfoStored));
       }
       
-      // Load comprehensive analytics data with manual data override
-      const analyticsResponse = await fetch('/api/facebook/comprehensive-analytics?dateRange=maximum&useManualData=true');
+      // Load live Facebook API data (no cache, always fresh)
+      const timestamp = new Date().getTime();
+      const analyticsResponse = await fetch(`/api/facebook/live-data?date=all&_t=${timestamp}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache'
+        }
+      });
       if (analyticsResponse.ok) {
         const analyticsData = await analyticsResponse.json();
-        if (analyticsData.success && analyticsData.data) {
-          console.log('✅ Comprehensive Facebook analytics loaded:', analyticsData.data);
+        if (analyticsData.success && analyticsData.campaigns) {
+          console.log('✅ Live Facebook API data loaded:', analyticsData);
           
-          // Set campaigns data
-          setCampaigns(analyticsData.data.campaigns);
-          setCampaignsCount(analyticsData.data.campaigns.length);
+          // Set campaigns data from live API
+          setCampaigns(analyticsData.campaigns);
+          setCampaignsCount(analyticsData.campaigns.length);
           
-          // Set ad sets data
-          setAdSets(analyticsData.data.adSets);
+          // Transform campaigns to adSets format for consistency
+          const transformedAdSets = analyticsData.campaigns.map((campaign: any) => ({
+            id: `adset_${campaign.id}`,
+            name: `${campaign.name} - AdSet`,
+            status: campaign.status,
+            campaign_id: campaign.id,
+            impressions: campaign.insights?.impressions || 0,
+            clicks: campaign.insights?.clicks || 0,
+            spend: campaign.insights?.spend || 0,
+            reach: campaign.insights?.reach || 0,
+            frequency: campaign.insights?.frequency || 0,
+            ctr: campaign.insights?.ctr || 0,
+            cpc: campaign.insights?.cpc || 0,
+            cpm: campaign.insights?.cpm || 0,
+            conversions: campaign.insights?.conversions || 0,
+            created_time: campaign.created_time
+          }));
+          setAdSets(transformedAdSets);
           
-          // Set ads data
-          setAds(analyticsData.data.ads);
+          // Transform campaigns to ads format for consistency
+          const transformedAds = analyticsData.campaigns.map((campaign: any) => ({
+            id: `ad_${campaign.id}`,
+            name: `${campaign.name} - Ad`,
+            status: campaign.status,
+            campaign_id: campaign.id,
+            adset_id: `adset_${campaign.id}`,
+            impressions: campaign.insights?.impressions || 0,
+            clicks: campaign.insights?.clicks || 0,
+            spend: campaign.insights?.spend || 0,
+            reach: campaign.insights?.reach || 0,
+            frequency: campaign.insights?.frequency || 0,
+            ctr: campaign.insights?.ctr || 0,
+            cpc: campaign.insights?.cpc || 0,
+            cpm: campaign.insights?.cpm || 0,
+            conversions: campaign.insights?.conversions || 0,
+            created_time: campaign.created_time
+          }));
+          setAds(transformedAds);
           
-          // Calculate total spend from actual spend data
-          const totalSpendAmount = analyticsData.data.campaigns.reduce((sum: number, campaign: any) => {
-            return sum + (campaign.spend || 0);
-          }, 0);
+          // Calculate total spend from live API data
+          const totalSpendAmount = analyticsData.totals?.totalSpend || 0;
           setTotalSpend(totalSpendAmount);
           
-          console.log('✅ Facebook data loaded:', {
-            campaignsCount: analyticsData.data.campaigns.length,
-            adSetsCount: analyticsData.data.adSets.length,
-            adsCount: analyticsData.data.ads.length,
+          console.log('✅ Live Facebook data loaded:', {
+            campaignsCount: analyticsData.campaigns.length,
+            adSetsCount: transformedAdSets.length,
+            adsCount: transformedAds.length,
             totalSpend: totalSpendAmount,
-            summary: analyticsData.data.summary
+            totalConversions: analyticsData.totals?.totalConversions || 0
           });
         }
       } else {
