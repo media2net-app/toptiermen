@@ -352,6 +352,35 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- 18. Create increment functions for counters
+CREATE OR REPLACE FUNCTION increment_open_count(tracking_id UUID)
+RETURNS INTEGER AS $$
+DECLARE
+    new_count INTEGER;
+BEGIN
+    UPDATE email_tracking 
+    SET open_count = open_count + 1
+    WHERE id = tracking_id
+    RETURNING open_count INTO new_count;
+    
+    RETURN COALESCE(new_count, 0);
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION increment_click_count(tracking_id UUID)
+RETURNS INTEGER AS $$
+DECLARE
+    new_count INTEGER;
+BEGIN
+    UPDATE email_tracking 
+    SET click_count = click_count + 1
+    WHERE id = tracking_id
+    RETURNING click_count INTO new_count;
+    
+    RETURN COALESCE(new_count, 0);
+END;
+$$ LANGUAGE plpgsql;
+
 COMMENT ON TABLE email_campaigns IS 'Email campaigns for tracking and analytics';
 COMMENT ON TABLE email_tracking IS 'Individual email tracking records';
 COMMENT ON TABLE email_opens IS 'Detailed email open tracking';
