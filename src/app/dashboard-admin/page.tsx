@@ -155,8 +155,8 @@ export default function AdminDashboard() {
   const [sessionLoading, setSessionLoading] = useState(false);
 
   // Read tab from URL parameter and set initial active tab
-  const tabFromUrl = searchParams?.get('tab') as 'overview' | 'content' | 'actions' | 'financial' | 'users' | 'realtime' | 'technical' | 'timeline' | 'session-logs';
-  const [activeTab, setActiveTab] = useState<'overview' | 'content' | 'actions' | 'financial' | 'users' | 'realtime' | 'technical' | 'timeline' | 'session-logs'>(
+  const tabFromUrl = searchParams?.get('tab') as 'overview' | 'content' | 'actions' | 'financial' | 'users' | 'realtime' | 'technical' | 'timeline' | 'session-logs' | 'old-timeline';
+  const [activeTab, setActiveTab] = useState<'overview' | 'content' | 'actions' | 'financial' | 'users' | 'realtime' | 'technical' | 'timeline' | 'session-logs' | 'old-timeline'>(
     tabFromUrl || 'overview'
   );
 
