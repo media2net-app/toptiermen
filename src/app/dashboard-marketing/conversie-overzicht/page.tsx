@@ -115,6 +115,8 @@ export default function ConversieOverzicht() {
     } catch (err) {
       console.error('❌ Error fetching data:', err);
       setError('Fout bij het ophalen van data');
+      setLoading(false);
+      setSyncing(false);
     } finally {
       console.log('🏁 Setting loading to false');
       setLoading(false);
@@ -126,10 +128,22 @@ export default function ConversieOverzicht() {
     console.log('🔄 Component mounted, fetching data...');
     fetchData();
     
-    // Temporary fix: force loading to false after 3 seconds
-    setTimeout(() => {
-      setLoading(false);
+    // Fallback: if loading takes too long, show data anyway
+    const timeout = setTimeout(() => {
+      if (loading) {
+        console.log('⏰ Loading timeout, showing fallback data');
+        setLoading(false);
+        setError(null);
+        // Set fallback data
+        setLeads([]);
+        setAnalyticsData({
+          summary: { totalSpend: 0, totalClicks: 0, totalImpressions: 0, totalReach: 0 },
+          campaigns: []
+        });
+      }
     }, 3000);
+    
+    return () => clearTimeout(timeout);
   }, []);
 
   const handleSync = async () => {

@@ -195,7 +195,7 @@ class EmailService {
               <!-- Content -->
               <div style="padding: 40px 30px; color: #E5E7EB;">
                 <p style="font-size: 18px; color: #8BAE5A; font-weight: 600; margin: 0 0 24px 0;">
-                  Beste ${variables.name || 'Gebruiker'},
+                  Beste ${variables.name && variables.name.trim() !== '' ? variables.name : ''},
                 </p>
                 
                 <p style="font-size: 16px; line-height: 1.6; margin: 0 0 24px 0;">
@@ -223,19 +223,79 @@ class EmailService {
                   Wat is Top Tier Men?
                 </h3>
                 <p style="font-size: 15px; line-height: 1.6; margin: 0 0 24px 0; color: #D1D5DB;">
-                  Top Tier Men is een exclusieve broederschap voor mannen die weigeren te settelen voor middelmatigheid. We geloven dat elke man het potentieel heeft om excellentie te bereiken in alle aspecten van zijn leven - fysiek, mentaal, financieel en spiritueel. Onze community bestaat uit gedreven mannen die elkaar verantwoordelijk houden en samen groeien naar hun hoogste potentieel.
+                  Top Tier Men is een exclusieve community van mannen die streven naar excellentie in alle aspecten van hun leven. Onder leiding van Rick Cuijpers, oud marinier en ervaren coach, bieden we een complete aanpak voor fysieke, mentale en professionele groei.
                 </p>
 
                 <div style="background: rgba(139, 174, 90, 0.05); border: 1px solid rgba(139, 174, 90, 0.2); padding: 24px; margin: 24px 0; border-radius: 12px;">
                   <h3 style="color: #8BAE5A; font-size: 18px; font-weight: 700; margin: 0 0 12px 0;">
-                    Rick Cuijpers
+                    Wat maakt ons uniek?
                   </h3>
-                  <p style="font-size: 14px; color: #9CA3AF; font-style: italic; margin: 0 0 12px 0;">
-                    Rick Cuijpers - Oprichter & Mentor
-                  </p>
-                  <p style="font-size: 15px; line-height: 1.5; margin: 0; color: #D1D5DB;">
-                    Oud marinier met jarenlange ervaring in leiderschap en persoonlijke ontwikkeling. Rick heeft honderden mannen geholpen hun leven te transformeren door discipline, doelgerichtheid en broederschap. Zijn militaire achtergrond en bewezen track record maken hem de ideale mentor voor mannen die serieus zijn over hun groei.
-                  </p>
+                  <ul style="font-size: 15px; line-height: 1.5; margin: 0; color: #D1D5DB; padding-left: 20px;">
+                    <li style="margin-bottom: 8px;"><strong>Bewezen Methoden:</strong> Gebaseerd op militaire discipline en real-world ervaring</li>
+                    <li style="margin-bottom: 8px;"><strong>Persoonlijke Aanpak:</strong> Individuele voedings- en trainingsplannen op maat</li>
+                    <li style="margin-bottom: 8px;"><strong>Community Support:</strong> Een broederschap van gelijkgestemde mannen</li>
+                    <li style="margin-bottom: 8px;"><strong>Holistische Groei:</strong> Focus op lichaam, geest en carrière</li>
+                  </ul>
+                </div>
+
+                <!-- Academy Modules Section -->
+                <div style="background: rgba(139, 174, 90, 0.15); padding: 25px; border-radius: 12px; margin: 30px 0; border: 1px solid rgba(139, 174, 90, 0.3);">
+                  <div style="font-size: 20px; font-weight: 700; color: #B6C948; margin-bottom: 20px; text-align: center;">
+                    🎓 Academy Modules (7 Modules, 36 Lessen)
+                  </div>
+                  
+                  <!-- Desktop: 2-column grid with better styling -->
+                  <div class="academy-desktop" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                    <div style="color: #D1D5DB; font-size: 14px; padding: 16px; background: rgba(139, 174, 90, 0.1); border: 1px solid rgba(139, 174, 90, 0.2); border-radius: 10px; text-align: center; word-wrap: break-word;">
+                      <div style="font-size: 24px; margin-bottom: 8px;">💪</div>
+                      <div style="color: #B6C948; font-weight: 600; font-size: 14px; margin-bottom: 4px;">Module 1</div>
+                      <div style="color: #8BAE5A; font-size: 12px;">Testosteron</div>
+                    </div>
+                    <div style="color: #D1D5DB; font-size: 14px; padding: 16px; background: rgba(139, 174, 90, 0.1); border: 1px solid rgba(139, 174, 90, 0.2); border-radius: 10px; text-align: center; word-wrap: break-word;">
+                      <div style="font-size: 24px; margin-bottom: 8px;">🎯</div>
+                      <div style="color: #B6C948; font-weight: 600; font-size: 14px; margin-bottom: 4px;">Module 2</div>
+                      <div style="color: #8BAE5A; font-size: 12px;">Discipline & Identiteit</div>
+                    </div>
+                    <div style="color: #D1D5DB; font-size: 14px; padding: 16px; background: rgba(139, 174, 90, 0.1); border: 1px solid rgba(139, 174, 90, 0.2); border-radius: 10px; text-align: center; word-wrap: break-word;">
+                      <div style="font-size: 24px; margin-bottom: 8px;">🏋️</div>
+                      <div style="color: #B6C948; font-weight: 600; font-size: 14px; margin-bottom: 4px;">Module 3</div>
+                      <div style="color: #8BAE5A; font-size: 12px;">Fysieke Dominantie</div>
+                    </div>
+                    <div style="color: #D1D5DB; font-size: 14px; padding: 16px; background: rgba(139, 174, 90, 0.1); border: 1px solid rgba(139, 174, 90, 0.2); border-radius: 10px; text-align: center; word-wrap: break-word;">
+                      <div style="font-size: 24px; margin-bottom: 8px;">🧠</div>
+                      <div style="color: #B6C948; font-weight: 600; font-size: 14px; margin-bottom: 4px;">Module 4</div>
+                      <div style="color: #8BAE5A; font-size: 12px;">Mentale Kracht/Weerbaarheid</div>
+                    </div>
+                    <div style="color: #D1D5DB; font-size: 14px; padding: 16px; background: rgba(139, 174, 90, 0.1); border: 1px solid rgba(139, 174, 90, 0.2); border-radius: 10px; text-align: center; word-wrap: break-word;">
+                      <div style="font-size: 24px; margin-bottom: 8px;">💰</div>
+                      <div style="color: #B6C948; font-weight: 600; font-size: 14px; margin-bottom: 4px;">Module 5</div>
+                      <div style="color: #8BAE5A; font-size: 12px;">Business and Finance</div>
+                    </div>
+                    <div style="color: #D1D5DB; font-size: 14px; padding: 16px; background: rgba(139, 174, 90, 0.1); border: 1px solid rgba(139, 174, 90, 0.2); border-radius: 10px; text-align: center; word-wrap: break-word;">
+                      <div style="font-size: 24px; margin-bottom: 8px;">🤝</div>
+                      <div style="color: #B6C948; font-weight: 600; font-size: 14px; margin-bottom: 4px;">Module 6</div>
+                      <div style="color: #8BAE5A; font-size: 12px;">Brotherhood</div>
+                    </div>
+                    <div style="color: #D1D5DB; font-size: 14px; padding: 16px; background: rgba(139, 174, 90, 0.1); border: 1px solid rgba(139, 174, 90, 0.2); border-radius: 10px; grid-column: span 2; text-align: center; word-wrap: break-word;">
+                      <div style="font-size: 24px; margin-bottom: 8px;">🥗</div>
+                      <div style="color: #B6C948; font-weight: 600; font-size: 14px; margin-bottom: 4px;">Module 7</div>
+                      <div style="color: #8BAE5A; font-size: 12px;">Voeding & Gezondheid</div>
+                    </div>
+                  </div>
+                  
+                  <!-- Mobile: Single block with bullet points (hidden on desktop) -->
+                  <div class="academy-mobile" style="display: none; background: rgba(139, 174, 90, 0.1); padding: 20px; border-radius: 10px; border: 1px solid rgba(139, 174, 90, 0.2);">
+                    <div style="color: #B6C948; font-weight: 600; font-size: 14px; margin-bottom: 15px; text-align: center;">🎓 Academy Modules Overzicht</div>
+                    <ul style="color: #D1D5DB; font-size: 14px; line-height: 1.6; margin: 0; padding-left: 20px;">
+                      <li style="margin-bottom: 8px;"><strong style="color: #8BAE5A;">Module 1:</strong> Testosteron</li>
+                      <li style="margin-bottom: 8px;"><strong style="color: #8BAE5A;">Module 2:</strong> Discipline & Identiteit</li>
+                      <li style="margin-bottom: 8px;"><strong style="color: #8BAE5A;">Module 3:</strong> Fysieke Dominantie</li>
+                      <li style="margin-bottom: 8px;"><strong style="color: #8BAE5A;">Module 4:</strong> Mentale Kracht/Weerbaarheid</li>
+                      <li style="margin-bottom: 8px;"><strong style="color: #8BAE5A;">Module 5:</strong> Business and Finance</li>
+                      <li style="margin-bottom: 8px;"><strong style="color: #8BAE5A;">Module 6:</strong> Brotherhood</li>
+                      <li style="margin-bottom: 8px;"><strong style="color: #8BAE5A;">Module 7:</strong> Voeding & Gezondheid</li>
+                    </ul>
+                  </div>
                 </div>
 
                 <!-- Platform Features Section -->
@@ -247,85 +307,122 @@ class EmailService {
                     Ontdek alle krachtige tools en functies die je tot je beschikking hebt:
                   </p>
                   
-                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0;">
-                    <div style="background: rgba(139, 174, 90, 0.1); padding: 15px; border-radius: 8px;">
-                      <div style="color: #B6C948; font-weight: 600; font-size: 14px; margin-bottom: 5px;">🤝 Brotherhood Community</div>
-                      <div style="color: #9CA3AF; font-size: 12px;">Exclusieve community van gelijkgestemden</div>
-                    </div>
-                    
-                    <div style="background: rgba(139, 174, 90, 0.1); padding: 15px; border-radius: 8px;">
-                      <div style="color: #B6C948; font-weight: 600; font-size: 14px; margin-bottom: 5px;">🏆 Badges & Achievements</div>
-                      <div style="color: #9CA3AF; font-size: 12px;">Verdien badges voor je prestaties</div>
-                    </div>
-                    
-                    <div style="background: rgba(139, 174, 90, 0.1); padding: 15px; border-radius: 8px;">
-                      <div style="color: #B6C948; font-weight: 600; font-size: 14px; margin-bottom: 5px;">💪 Challenges & Competitions</div>
-                      <div style="color: #9CA3AF; font-size: 12px;">Uitdagende weekly challenges</div>
-                    </div>
-                    
-                    <div style="background: rgba(139, 174, 90, 0.1); padding: 15px; border-radius: 8px;">
-                      <div style="color: #B6C948; font-weight: 600; font-size: 14px; margin-bottom: 5px;">📚 Digitale Boekenkamer</div>
-                      <div style="color: #9CA3AF; font-size: 12px;">Curated library met topboeken</div>
-                    </div>
-                    
-                    <div style="background: rgba(139, 174, 90, 0.1); padding: 15px; border-radius: 8px;">
-                      <div style="color: #B6C948; font-weight: 600; font-size: 14px; margin-bottom: 5px;">🍖 Carnivoor Voedingsplannen</div>
-                      <div style="color: #9CA3AF; font-size: 12px;">Complete meal plans en recepten</div>
-                    </div>
-                    
-                    <div style="background: rgba(139, 174, 90, 0.1); padding: 15px; border-radius: 8px;">
-                      <div style="color: #B6C948; font-weight: 600; font-size: 14px; margin-bottom: 5px;">💪 Trainingsschema's</div>
-                      <div style="color: #9CA3AF; font-size: 12px;">Gepersonaliseerde workout plans</div>
-                    </div>
-                    
-                    <div style="background: rgba(139, 174, 90, 0.1); padding: 15px; border-radius: 8px;">
-                      <div style="color: #B6C948; font-weight: 600; font-size: 14px; margin-bottom: 5px;">📊 Progress Tracking</div>
-                      <div style="color: #9CA3AF; font-size: 12px;">Houd je vooruitgang bij</div>
-                    </div>
-                    
-                    <div style="background: rgba(139, 174, 90, 0.1); padding: 15px; border-radius: 8px;">
-                      <div style="color: #B6C948; font-weight: 600; font-size: 14px; margin-bottom: 5px;">📱 Mobile App</div>
-                      <div style="color: #9CA3AF; font-size: 12px;">Toegang overal en altijd</div>
-                    </div>
-                    
-                    <div style="background: rgba(139, 174, 90, 0.1); padding: 15px; border-radius: 8px;">
-                      <div style="color: #B6C948; font-weight: 600; font-size: 14px; margin-bottom: 5px;">🎯 Goal Setting & Planning</div>
-                      <div style="color: #9CA3AF; font-size: 12px;">Doelgericht werken aan groei</div>
-                    </div>
-                    
-                    <div style="background: rgba(139, 174, 90, 0.1); padding: 15px; border-radius: 8px;">
-                      <div style="color: #B6C948; font-weight: 600; font-size: 14px; margin-bottom: 5px;">🔥 Accountability System</div>
-                      <div style="color: #9CA3AF; font-size: 12px;">Houd elkaar scherp en gemotiveerd</div>
-                    </div>
-                    
-                    <div style="background: rgba(139, 174, 90, 0.1); padding: 15px; border-radius: 8px;">
-                      <div style="color: #B6C948; font-weight: 600; font-size: 14px; margin-bottom: 5px;">📅 Event Calendar</div>
-                      <div style="color: #9CA3AF; font-size: 12px;">Brotherhood events en meetups</div>
-                    </div>
-                    
-                    <div style="background: rgba(139, 174, 90, 0.1); padding: 15px; border-radius: 8px;">
-                      <div style="color: #B6C948; font-weight: 600; font-size: 14px; margin-bottom: 5px;">🧠 Mindset Modules</div>
-                      <div style="color: #9CA3AF; font-size: 12px;">Mentale training en ontwikkeling</div>
-                    </div>
-                  </div>
+                  <!-- Platform Features - Two columns layout -->
+                  <table width="100%" cellpadding="0" cellspacing="0" style="margin: 20px 0;">
+                    <tr>
+                      <td width="48%" style="vertical-align: top; padding-right: 10px;">
+                        <div style="background: rgba(139, 174, 90, 0.1); padding: 15px; border-radius: 10px; text-align: center; border: 1px solid rgba(139, 174, 90, 0.2); margin-bottom: 15px;">
+                          <div style="font-size: 28px; margin-bottom: 10px;">🤝</div>
+                          <div style="color: #B6C948; font-weight: 600; font-size: 13px; margin-bottom: 6px;">Brotherhood Community</div>
+                          <div style="color: #9CA3AF; font-size: 11px;">Exclusieve community van gelijkgestemden</div>
+                        </div>
+                        
+                        <div style="background: rgba(139, 174, 90, 0.1); padding: 15px; border-radius: 10px; text-align: center; border: 1px solid rgba(139, 174, 90, 0.2); margin-bottom: 15px;">
+                          <div style="font-size: 28px; margin-bottom: 10px;">🔥</div>
+                          <div style="color: #B6C948; font-weight: 600; font-size: 13px; margin-bottom: 6px;">Dagelijkse Challenges</div>
+                          <div style="color: #9CA3AF; font-size: 11px;">Uitdagende opdrachten elke dag</div>
+                        </div>
+                        
+                        <div style="background: rgba(139, 174, 90, 0.1); padding: 15px; border-radius: 10px; text-align: center; border: 1px solid rgba(139, 174, 90, 0.2); margin-bottom: 15px;">
+                          <div style="font-size: 28px; margin-bottom: 10px;">🍖</div>
+                          <div style="color: #B6C948; font-weight: 600; font-size: 13px; margin-bottom: 6px;">Op Maat Voedingsplannen</div>
+                          <div style="color: #9CA3AF; font-size: 11px;">Gepersonaliseerde voeding</div>
+                        </div>
+                        
+                        <div style="background: rgba(139, 174, 90, 0.1); padding: 15px; border-radius: 10px; text-align: center; border: 1px solid rgba(139, 174, 90, 0.2); margin-bottom: 15px;">
+                          <div style="font-size: 28px; margin-bottom: 10px;">📊</div>
+                          <div style="color: #B6C948; font-weight: 600; font-size: 13px; margin-bottom: 6px;">Progress Tracking</div>
+                          <div style="color: #9CA3AF; font-size: 11px;">Houd je vooruitgang bij</div>
+                        </div>
+                        
+                        <div style="background: rgba(139, 174, 90, 0.1); padding: 15px; border-radius: 10px; text-align: center; border: 1px solid rgba(139, 174, 90, 0.2); margin-bottom: 15px;">
+                          <div style="font-size: 28px; margin-bottom: 10px;">🎯</div>
+                          <div style="color: #B6C948; font-weight: 600; font-size: 13px; margin-bottom: 6px;">Goal Setting & Planning</div>
+                          <div style="color: #9CA3AF; font-size: 11px;">Doelgericht werken aan groei</div>
+                        </div>
+                        
+                        <div style="background: rgba(139, 174, 90, 0.1); padding: 15px; border-radius: 10px; text-align: center; border: 1px solid rgba(139, 174, 90, 0.2); margin-bottom: 15px;">
+                          <div style="font-size: 28px; margin-bottom: 10px;">📅</div>
+                          <div style="color: #B6C948; font-weight: 600; font-size: 13px; margin-bottom: 6px;">Event Calendar</div>
+                          <div style="color: #9CA3AF; font-size: 11px;">Brotherhood events en meetups</div>
+                        </div>
+                      </td>
+                      <td width="48%" style="vertical-align: top; padding-left: 10px;">
+                        <div style="background: rgba(139, 174, 90, 0.1); padding: 15px; border-radius: 10px; text-align: center; border: 1px solid rgba(139, 174, 90, 0.2); margin-bottom: 15px;">
+                          <div style="font-size: 28px; margin-bottom: 10px;">🏆</div>
+                          <div style="color: #B6C948; font-weight: 600; font-size: 13px; margin-bottom: 6px;">Badges & Achievements</div>
+                          <div style="color: #9CA3AF; font-size: 11px;">Verdien badges voor je prestaties</div>
+                        </div>
+                        
+                        <div style="background: rgba(139, 174, 90, 0.1); padding: 15px; border-radius: 10px; text-align: center; border: 1px solid rgba(139, 174, 90, 0.2); margin-bottom: 15px;">
+                          <div style="font-size: 28px; margin-bottom: 10px;">📚</div>
+                          <div style="color: #B6C948; font-weight: 600; font-size: 13px; margin-bottom: 6px;">Digitale Boekenkamer</div>
+                          <div style="color: #9CA3AF; font-size: 11px;">Curated library met topboeken</div>
+                        </div>
+                        
+                        <div style="background: rgba(139, 174, 90, 0.1); padding: 15px; border-radius: 10px; text-align: center; border: 1px solid rgba(139, 174, 90, 0.2); margin-bottom: 15px;">
+                          <div style="font-size: 28px; margin-bottom: 10px;">💪</div>
+                          <div style="color: #B6C948; font-weight: 600; font-size: 13px; margin-bottom: 6px;">Op Maat Trainingsschema's</div>
+                          <div style="color: #9CA3AF; font-size: 11px;">Persoonlijke workout plans</div>
+                        </div>
+                        
+                        <div style="background: rgba(139, 174, 90, 0.1); padding: 15px; border-radius: 10px; text-align: center; border: 1px solid rgba(139, 174, 90, 0.2); margin-bottom: 15px;">
+                          <div style="font-size: 28px; margin-bottom: 10px;">📱</div>
+                          <div style="color: #B6C948; font-weight: 600; font-size: 13px; margin-bottom: 6px;">Mobile App</div>
+                          <div style="color: #9CA3AF; font-size: 11px;">Toegang overal en altijd</div>
+                        </div>
+                        
+                        <div style="background: rgba(139, 174, 90, 0.1); padding: 15px; border-radius: 10px; text-align: center; border: 1px solid rgba(139, 174, 90, 0.2); margin-bottom: 15px;">
+                          <div style="font-size: 28px; margin-bottom: 10px;">⚡</div>
+                          <div style="color: #B6C948; font-weight: 600; font-size: 13px; margin-bottom: 6px;">Accountability System</div>
+                          <div style="color: #9CA3AF; font-size: 11px;">Elkaar scherp houden</div>
+                        </div>
+                        
+                        <div style="background: rgba(139, 174, 90, 0.1); padding: 15px; border-radius: 10px; text-align: center; border: 1px solid rgba(139, 174, 90, 0.2); margin-bottom: 15px;">
+                          <div style="font-size: 28px; margin-bottom: 10px;">🧠</div>
+                          <div style="color: #B6C948; font-weight: 600; font-size: 13px; margin-bottom: 6px;">Mindset Training</div>
+                          <div style="color: #9CA3AF; font-size: 11px;">Mentale training en ontwikkeling</div>
+                        </div>
+                      </td>
+                    </tr>
+                  </table>
                   
-                  <p style="font-size: 13px; color: #9CA3AF; text-align: center; margin: 20px 0 0 0; font-style: italic;">
+                  <div style="font-size: 13px; color: #9CA3AF; text-align: center; margin: 20px 0 0 0; font-style: italic;">
                     En nog veel meer! Het platform groeit continue met nieuwe features.
-                  </p>
+                  </div>
                 </div>
 
                 <div style="margin: 40px 0 0 0; padding: 24px 0; border-top: 1px solid rgba(139, 174, 90, 0.2);">
                   <p style="font-size: 15px; margin: 0 0 8px 0; color: #D1D5DB;">
-                    Met vriendelijke groet,<br>
-                    <strong style="color: #8BAE5A;">Het Top Tier Men Team</strong>
+                    Met broederschap,<br>
+                    <strong style="color: #8BAE5A;">Rick Cuijpers</strong><br>
+                    <span style="font-size: 13px; color: #9CA3AF;">Oud marinier & Founder Top Tier Men</span>
                   </p>
                   <p style="font-size: 13px; color: #9CA3AF; font-style: italic; margin: 16px 0 0 0; text-align: center;">
-                    "Excellentie is geen toeval. Het is een keuze, een commitment, een levensstijl."
+                    Dit is een exclusieve pre-launch email. Je bent een van de weinigen die toegang heeft tot deze content.
                   </p>
                 </div>
               </div>
             </div>
           </div>
+          
+          <style>
+            @media (max-width: 600px) {
+              /* Platform features responsive - Force single column on mobile */
+              table[style*="margin: 20px 0"] td {
+                display: block !important;
+                width: 100% !important;
+                padding: 0 !important;
+              }
+              /* Academy modules - Switch desktop/mobile views */
+              .academy-desktop {
+                display: none !important;
+              }
+              .academy-mobile {
+                display: block !important;
+              }
+            }
+          </style>
         `,
         text: `
           🎯 Welkom bij Top Tier Men - Jouw reis naar excellentie begint hier
@@ -342,33 +439,56 @@ class EmailService {
           
           Wat is Top Tier Men?
           
-          Top Tier Men is een exclusieve broederschap voor mannen die weigeren te settelen voor middelmatigheid. We geloven dat elke man het potentieel heeft om excellentie te bereiken in alle aspecten van zijn leven - fysiek, mentaal, financieel en spiritueel. Onze community bestaat uit gedreven mannen die elkaar verantwoordelijk houden en samen groeien naar hun hoogste potentieel.
+          Top Tier Men is een exclusieve community van mannen die streven naar excellentie in alle aspecten van hun leven. Onder leiding van Rick Cuijpers, oud marinier en ervaren coach, bieden we een complete aanpak voor fysieke, mentale en professionele groei.
           
-          Rick Cuijpers - Oprichter & Mentor
+          Wat maakt ons uniek?
           
-          Oud marinier met jarenlange ervaring in leiderschap en persoonlijke ontwikkeling. Rick heeft honderden mannen geholpen hun leven te transformeren door discipline, doelgerichtheid en broederschap. Zijn militaire achtergrond en bewezen track record maken hem de ideale mentor voor mannen die serieus zijn over hun groei.
+          • Bewezen Methoden: Gebaseerd op militaire discipline en real-world ervaring
+          • Persoonlijke Aanpak: Individuele voedings- en trainingsplannen op maat
+          • Community Support: Een broederschap van gelijkgestemde mannen
+          • Holistische Groei: Focus op lichaam, geest en carrière
           
-          🚀 PLATFORM FEATURES:
+          Platform Features:
           
-          • 🤝 Brotherhood Community - Exclusieve community van gelijkgestemden
-          • 🏆 Badges & Achievements - Verdien badges voor je prestaties  
-          • 💪 Challenges & Competitions - Uitdagende weekly challenges
-          • 📚 Digitale Boekenkamer - Curated library met topboeken
-          • 🍖 Carnivoor Voedingsplannen - Complete meal plans en recepten
-          • 💪 Trainingsschema's - Gepersonaliseerde workout plans
-          • 📊 Progress Tracking - Houd je vooruitgang bij
-          • 📱 Mobile App - Toegang overal en altijd
-          • 🎯 Goal Setting & Planning - Doelgericht werken aan groei
-          • 🔥 Accountability System - Houd elkaar scherp en gemotiveerd
-          • 📅 Event Calendar - Brotherhood events en meetups
-          • 🧠 Mindset Modules - Mentale training en ontwikkeling
+          🎓 Academy (7 Modules, 36 Lessen)
+          • Module 1: Testosteron
+          • Module 2: Discipline & Identiteit
+          • Module 3: Fysieke Dominantie
+          • Module 4: Mentale Kracht/Weerbaarheid
+          • Module 5: Business and Finance
+          • Module 6: Brotherhood
+          • Module 7: Voeding & Gezondheid
           
-          En nog veel meer! Het platform groeit continue met nieuwe features.
+          🤝 Brotherhood Community - Exclusieve community van gelijkgestemden
+          🏆 Badges & Achievements - Verdien badges voor je prestaties
+          🔥 Dagelijkse Challenges - Uitdagende opdrachten elke dag
+          📚 Digitale Boekenkamer - Curated library met topboeken
+          🍖 Op Maat Voedingsplannen - Gepersonaliseerde voeding
+          💪 Op Maat Trainingsschema's - Persoonlijke workout plans
+          📊 Progress Tracking - Houd je vooruitgang bij
+          📱 Mobile App - Toegang overal en altijd
+          🎯 Goal Setting & Planning - Doelgericht werken aan groei
+          ⚡ Accountability System - Elkaar scherp houden
+          📅 Event Calendar - Brotherhood events en meetups
+          🧠 Mindset Training - Mentale training en ontwikkeling
           
-          Met vriendelijke groet,
-          Het Top Tier Men Team
+          Wat je kunt verwachten:
           
-          "Excellentie is geen toeval. Het is een keuze, een commitment, een levensstijl."
+          In de komende dagen ontvang je:
+          • Exclusieve sneak previews van het platform
+          • Diepgaande inzichten in onze methoden
+          • Persoonlijke verhalen van community leden
+          • Voorbereidingen voor de officiële launch
+          
+          Klaar om te beginnen?
+          
+          Je reis naar excellentie begint nu. Blijf alert op je inbox voor de volgende updates.
+          
+          Met broederschap,
+          Rick Cuijpers
+          Oud marinier & Founder Top Tier Men
+          
+          Dit is een exclusieve pre-launch email. Je bent een van de weinigen die toegang heeft tot deze content.
         `
       },
       passwordReset: {
@@ -376,7 +496,7 @@ class EmailService {
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h1 style="color: #8BAE5A;">Wachtwoord Reset</h1>
-            <p>Beste ${variables.name || 'Gebruiker'},</p>
+            <p>Beste ${variables.name && variables.name.trim() !== '' ? variables.name : ''},</p>
             <p>Je hebt een wachtwoord reset aangevraagd voor je Top Tier Men account.</p>
             <p>Klik op de onderstaande link om je wachtwoord te resetten:</p>
             <a href="${variables.resetUrl || '#'}" 
@@ -390,7 +510,7 @@ class EmailService {
         text: `
           Wachtwoord Reset - Top Tier Men
           
-          Beste ${variables.name || 'Gebruiker'},
+          Beste ${variables.name && variables.name.trim() !== '' ? variables.name : ''},
           
           Je hebt een wachtwoord reset aangevraagd voor je Top Tier Men account.
           
@@ -408,7 +528,7 @@ class EmailService {
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h1 style="color: #8BAE5A;">Test Email</h1>
-            <p>Beste ${variables.name || 'Gebruiker'},</p>
+            <p>Beste ${variables.name && variables.name.trim() !== '' ? variables.name : ''},</p>
             <p>Dit is een test email van het Top Tier Men platform.</p>
             <p>SMTP configuratie is succesvol geconfigureerd!</p>
             <p><strong>Configuratie details:</strong></p>
@@ -425,7 +545,7 @@ class EmailService {
         text: `
           Test Email - Top Tier Men Platform
           
-          Beste ${variables.name || 'Gebruiker'},
+          Beste ${variables.name && variables.name.trim() !== '' ? variables.name : ''},
           
           Dit is een test email van het Top Tier Men platform.
           
@@ -663,7 +783,7 @@ class EmailService {
               </div>
               
               <div class="content">
-                <div class="greeting">Beste ${variables.name || 'Gebruiker'},</div>
+                <div class="greeting">Beste ${variables.name && variables.name.trim() !== '' ? variables.name : ''},</div>
                 
                 <div class="intro-text">
                   ${variables.content || 'We hebben een belangrijke update voor je van het Top Tier Men platform.'}
@@ -758,7 +878,7 @@ class EmailService {
         text: `
           ${variables.subject || 'Belangrijke update van Top Tier Men'}
           
-          Beste ${variables.name || 'Gebruiker'},
+          Beste ${variables.name && variables.name.trim() !== '' ? variables.name : ''},
           
           ${variables.content || 'We hebben een belangrijke update voor je van het Top Tier Men platform.'}
           

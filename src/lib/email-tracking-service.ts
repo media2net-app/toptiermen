@@ -138,6 +138,18 @@ export class EmailTrackingService {
    */
   static async trackOpen(tracking_id: string, user_agent?: string, ip_address?: string) {
     try {
+      // First, get the actual UUID from the tracking_id string
+      const { data: trackingRecord, error: fetchError } = await supabase
+        .from('email_tracking')
+        .select('id')
+        .eq('tracking_id', tracking_id)
+        .single();
+
+      if (fetchError) {
+        console.error('Error fetching tracking record:', fetchError);
+        throw fetchError;
+      }
+
       // Call the database function to track open
       const { error } = await supabase.rpc('track_email_open', {
         tracking_id_param: tracking_id
@@ -149,7 +161,7 @@ export class EmailTrackingService {
       const { data, error: insertError } = await supabase
         .from('email_opens')
         .insert({
-          tracking_id: tracking_id,
+          tracking_id: trackingRecord.id, // Use the UUID here
           opened_at: new Date().toISOString(),
           user_agent,
           ip_address
@@ -170,6 +182,18 @@ export class EmailTrackingService {
    */
   static async trackClick(tracking_id: string, link_url: string, link_text?: string, user_agent?: string, ip_address?: string) {
     try {
+      // First, get the actual UUID from the tracking_id string
+      const { data: trackingRecord, error: fetchError } = await supabase
+        .from('email_tracking')
+        .select('id')
+        .eq('tracking_id', tracking_id)
+        .single();
+
+      if (fetchError) {
+        console.error('Error fetching tracking record:', fetchError);
+        throw fetchError;
+      }
+
       // Call the database function to track click
       const { error } = await supabase.rpc('track_email_click', {
         tracking_id_param: tracking_id,
@@ -183,7 +207,7 @@ export class EmailTrackingService {
       const { data, error: insertError } = await supabase
         .from('email_clicks')
         .insert({
-          tracking_id: tracking_id,
+          tracking_id: trackingRecord.id, // Use the UUID here
           link_url,
           link_text,
           clicked_at: new Date().toISOString(),

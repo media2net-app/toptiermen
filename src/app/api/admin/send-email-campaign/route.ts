@@ -47,41 +47,61 @@ Je hebt de eerste stap gezet naar een leven van excellentie. Als onderdeel van o
 
 Je behoort tot de exclusieve lijst van pre-launch leden! In de komende dagen ontvang je sneak previews van het platform, exclusieve content en diepgaande inzichten in wat Top Tier Men voor jou kan betekenen. Deze previews zijn alleen beschikbaar voor een selecte groep - jij bent een van hen.
 
-⏰ **Nog ${Math.ceil((new Date('2025-09-10') - new Date()) / (1000 * 60 * 60 * 24))} dagen tot de officiële launch!** (10 september 2025)
+⏰ **Nog ${Math.ceil((new Date('2025-09-10').getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} dagen tot de officiële launch!** (10 september 2025)
 
 **Wat is Top Tier Men?**
 
-Top Tier Men is een exclusieve broederschap voor mannen die weigeren te settelen voor middelmatigheid. We geloven dat elke man het potentieel heeft om excellentie te bereiken in alle aspecten van zijn leven - fysiek, mentaal, financieel en spiritueel. Onze community bestaat uit gedreven mannen die elkaar verantwoordelijk houden en samen groeien naar hun hoogste potentiaal.
+Top Tier Men is een exclusieve community van mannen die streven naar excellentie in alle aspecten van hun leven. Onder leiding van Rick Cuijpers, oud marinier en ervaren coach, bieden we een complete aanpak voor fysieke, mentale en professionele groei.
 
-**Rick Cuijpers**
-*Rick Cuijpers - Oprichter & Mentor*
+**Wat maakt ons uniek?**
 
-Oud marinier met jarenlange ervaring in leiderschap en persoonlijke ontwikkeling. Rick heeft honderden mannen geholpen hun leven te transformeren door discipline, doelgerichtheid en broederschap. Zijn militaire achtergrond en bewezen track record maken hem de ideale mentor voor mannen die serieus zijn over hun groei.
+• **Bewezen Methoden**: Gebaseerd op militaire discipline en real-world ervaring
+• **Persoonlijke Aanpak**: Individuele voedings- en trainingsplannen op maat
+• **Community Support**: Een broederschap van gelijkgestemde mannen
+• **Holistische Groei**: Focus op lichaam, geest en carrière
 
-🚀 **PLATFORM FEATURES**
+**Platform Features:**
 
-Het Top Tier Men platform biedt een complete toolkit voor je persoonlijke groei:
+🎓 **Academy (7 Modules, 36 Lessen)**
+• Module 1: Testosteron
+• Module 2: Discipline & Identiteit
+• Module 3: Fysieke Dominantie
+• Module 4: Mentale Kracht/Weerbaarheid
+• Module 5: Business and Finance
+• Module 6: Brotherhood
+• Module 7: Voeding & Gezondheid
 
-• 🤝 **Brotherhood Community** - Exclusieve community van gelijkgestemden
-• 🏆 **Badges & Achievements** - Verdien badges voor je prestaties  
-• 💪 **Challenges & Competitions** - Uitdagende weekly challenges
-• 📚 **Digitale Boekenkamer** - Curated library met topboeken
-• 🍖 **Carnivoor Voedingsplannen** - Complete meal plans en recepten
-• 💪 **Trainingsschema's** - Gepersonaliseerde workout plans
-• 📊 **Progress Tracking** - Houd je vooruitgang bij
-• 📱 **Mobile App** - Toegang overal en altijd
-• 🎯 **Goal Setting & Planning** - Doelgericht werken aan groei
-• 🔥 **Accountability System** - Houd elkaar scherp en gemotiveerd
-• 📅 **Event Calendar** - Brotherhood events en meetups
-• 🧠 **Mindset Modules** - Mentale training en ontwikkeling
+🤝 **Brotherhood Community** - Exclusieve community van gelijkgestemden
+🏆 **Badges & Achievements** - Verdien badges voor je prestaties
+🔥 **Dagelijkse Challenges** - Uitdagende opdrachten elke dag
+📚 **Digitale Boekenkamer** - Curated library met topboeken
+🍖 **Op Maat Voedingsplannen** - Gepersonaliseerde voeding
+💪 **Op Maat Trainingsschema's** - Persoonlijke workout plans
+📊 **Progress Tracking** - Houd je vooruitgang bij
+📱 **Mobile App** - Toegang overal en altijd
+🎯 **Goal Setting & Planning** - Doelgericht werken aan groei
+⚡ **Accountability System** - Elkaar scherp houden
+📅 **Event Calendar** - Brotherhood events en meetups
+🧠 **Mindset Training** - Mentale training en ontwikkeling
 
-*En nog veel meer! Het platform groeit continue met nieuwe features.*
+**Wat je kunt verwachten:**
 
-Met vriendelijke groet,
-Het Top Tier Men Team
+In de komende dagen ontvang je:
+• Exclusieve sneak previews van het platform
+• Diepgaande inzichten in onze methoden
+• Persoonlijke verhalen van community leden
+• Voorbereidingen voor de officiële launch
+
+**Klaar om te beginnen?**
+
+Je reis naar excellentie begint nu. Blijf alert op je inbox voor de volgende updates.
+
+Met broederschap,
+Rick Cuijpers
+Oud marinier & Founder Top Tier Men
 
 ---
-*"Excellentie is geen toeval. Het is een keuze, een commitment, een levensstijl."*`
+*Dit is een exclusieve pre-launch email. Je bent een van de weinigen die toegang heeft tot deze content.*`
       },
       '2': {
         name: 'Waarde & Voordelen',

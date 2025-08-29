@@ -289,9 +289,9 @@ export default function TestEmailsPage() {
             onClick={handleSendTestEmail}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
           >
-            <PlusIcon className="h-4 w-4" />
+          <PlusIcon className="h-4 w-4" />
             <span>Verstuur Test Email</span>
-          </button>
+        </button>
         </div>
       </div>
 

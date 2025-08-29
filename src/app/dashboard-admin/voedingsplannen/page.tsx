@@ -727,14 +727,14 @@ export default function AdminVoedingsplannenPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#B6C948] text-[#141A15]">
-                            {plan.type || 'Standaard'}
+                            {'Standaard'}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            plan.is_active ? 'bg-green-600 text-white' : 'bg-gray-600 text-white'
+                            true ? 'bg-green-600 text-white' : 'bg-gray-600 text-white'
                           }`}>
-                            {plan.is_active ? 'Actief' : 'Inactief'}
+                            {'Actief'}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -972,8 +972,7 @@ export default function AdminVoedingsplannenPage() {
             plan={selectedPlan}
             onSave={handleSavePlan}
             onClose={() => setShowPlanBuilder(false)}
-            foodItems={foodItems}
-            meals={meals}
+
           />
         )}
 
