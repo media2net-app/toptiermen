@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { EmailTrackingService } from './email-tracking-service';
+import nodemailer from 'nodemailer';
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -274,6 +275,335 @@ class EmailService {
           Met vriendelijke groet,
           Het Top Tier Men Team
         `
+      },
+      marketing: {
+        subject: variables.subject || 'Belangrijke update van Top Tier Men',
+        html: `
+          <!DOCTYPE html>
+          <html lang="nl">
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>${variables.subject || 'Top Tier Men Update'}</title>
+            <style>
+              * { margin: 0; padding: 0; box-sizing: border-box; }
+              body { 
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+                line-height: 1.6; 
+                color: #ffffff; 
+                background-color: #181F17;
+                margin: 0;
+                padding: 0;
+              }
+              .email-container { 
+                width: 100%; 
+                max-width: 100%; 
+                margin: 0; 
+                background: #181F17;
+                border-radius: 0;
+                overflow: hidden;
+              }
+              .header { 
+                background: linear-gradient(135deg, #1a2e1a 0%, #2d4a2d 50%, #3a5f3a 100%); 
+                padding: 40px 30px;
+                text-align: center;
+                position: relative;
+              }
+              .logo {
+                margin: 0 auto 20px;
+                display: block;
+                max-width: 200px;
+                height: auto;
+              }
+              .header h1 { 
+                color: white; 
+                font-size: 28px; 
+                font-weight: 700;
+                margin-bottom: 10px;
+                position: relative;
+                z-index: 1;
+              }
+              .content { 
+                padding: 40px 30px; 
+                background: #181F17;
+              }
+              .greeting {
+                font-size: 24px;
+                font-weight: 600;
+                color: #ffffff;
+                margin-bottom: 20px;
+              }
+              .intro-text {
+                font-size: 16px;
+                color: #B6C948;
+                margin-bottom: 30px;
+                line-height: 1.8;
+              }
+              .definition-section {
+                background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+                padding: 30px;
+                border-radius: 12px;
+                margin: 30px 0;
+                border-left: 4px solid #B6C948;
+              }
+              .definition-title {
+                color: #ffffff;
+                font-size: 20px;
+                font-weight: 600;
+                margin-bottom: 15px;
+              }
+              .definition-text {
+                color: #B6C948;
+                font-size: 16px;
+                line-height: 1.7;
+              }
+              .founder-section {
+                display: flex;
+                align-items: center;
+                margin: 30px 0;
+                padding: 35px;
+                background: rgba(139, 174, 90, 0.1);
+                border-radius: 12px;
+                border-left: 4px solid #8BAE5A;
+              }
+              .founder-image {
+                width: 120px;
+                height: 120px;
+                border-radius: 50%;
+                object-fit: cover;
+                margin-right: 30px;
+                border: 3px solid #8BAE5A;
+              }
+              .founder-content h3 {
+                color: #ffffff;
+                font-size: 18px;
+                font-weight: 600;
+                margin-bottom: 10px;
+              }
+              .founder-content p {
+                color: #B6C948;
+                font-size: 14px;
+                line-height: 1.6;
+              }
+              .platform-features {
+                background: linear-gradient(135deg, #1F2D17 0%, #2A3D1A 100%);
+                padding: 30px;
+                border-radius: 12px;
+                margin: 30px 0;
+              }
+              .platform-features h3 {
+                color: #ffffff;
+                font-size: 20px;
+                font-weight: 600;
+                margin-bottom: 20px;
+                text-align: center;
+              }
+              .features-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 15px;
+                margin-top: 20px;
+              }
+              .feature-item {
+                background: rgba(139, 174, 90, 0.1);
+                padding: 15px;
+                border-radius: 8px;
+                border-left: 3px solid #B6C948;
+              }
+              .feature-item h4 {
+                color: #ffffff;
+                font-size: 14px;
+                font-weight: 600;
+                margin-bottom: 5px;
+              }
+              .feature-item p {
+                color: #8BAE5A;
+                font-size: 12px;
+                line-height: 1.4;
+              }
+              .countdown-section {
+                text-align: center;
+                margin: 30px 0;
+                padding: 30px;
+                background: #141A15;
+                border: 2px solid #8BAE5A;
+                border-radius: 8px;
+                color: #F3F3F1;
+              }
+              .countdown-text {
+                font-size: 18px;
+                font-weight: 700;
+                margin-bottom: 10px;
+                color: #F3F3F1;
+              }
+              .countdown-days {
+                font-size: 32px;
+                font-weight: 900;
+                margin: 10px 0;
+                color: #8BAE5A;
+              }
+              .cta-section {
+                text-align: center;
+                margin: 40px 0;
+                padding: 30px;
+                background: #141A15;
+                border-radius: 8px;
+                border: 2px solid #8BAE5A;
+              }
+              .cta-button {
+                display: inline-block;
+                background: #8BAE5A;
+                color: #141A15;
+                padding: 18px 36px;
+                text-decoration: none;
+                border-radius: 8px;
+                font-weight: 700;
+                font-size: 16px;
+                transition: all 0.3s ease;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                border: 2px solid #8BAE5A;
+              }
+              .footer { 
+                background: #232D1A; 
+                color: #8BAE5A; 
+                padding: 30px;
+                text-align: center;
+                font-size: 14px;
+              }
+              .footer a {
+                color: #8bae5a;
+                text-decoration: none;
+              }
+              @media (max-width: 600px) {
+                .founder-section {
+                  flex-direction: column;
+                  text-align: center;
+                }
+                .features-grid {
+                  grid-template-columns: 1fr;
+                }
+                .countdown-days {
+                  font-size: 24px;
+                }
+              }
+            </style>
+          </head>
+          <body>
+            <div class="email-container">
+              <div class="header">
+                <img src="https://platform.toptiermen.eu/logo_white-full.svg" alt="Top Tier Men Logo" class="logo">
+                <h1>Top Tier Men</h1>
+              </div>
+              
+              <div class="content">
+                <div class="greeting">Beste ${variables.name || 'Gebruiker'},</div>
+                
+                <div class="intro-text">
+                  ${variables.content || 'We hebben een belangrijke update voor je van het Top Tier Men platform.'}
+                </div>
+                
+                <div style="background: #141A15; padding: 30px; border-radius: 8px; margin: 30px 0; color: #F3F3F1; text-align: center; border: 2px solid #8BAE5A;">
+                  <div style="background: rgba(139, 174, 90, 0.1); padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #8BAE5A;">
+                    <h3 style="margin-bottom: 15px; font-size: 20px; font-weight: 800; color: #F3F3F1; text-transform: uppercase; letter-spacing: 1px;">🎯 EXCLUSIEVE PRE-LAUNCH TOEGANG</h3>
+                  </div>
+                  <p style="font-size: 16px; line-height: 1.6; margin: 0; color: #D1D5DB; font-weight: 500;">
+                    Je behoort tot de exclusieve lijst van pre-launch leden! In de komende dagen ontvang je 
+                    <strong style="color: #8BAE5A;">sneak previews</strong> van het platform, exclusieve content en diepgaande inzichten 
+                    in wat Top Tier Men voor jou kan betekenen. Deze previews zijn alleen beschikbaar voor 
+                    een selecte groep - jij bent een van hen.
+                  </p>
+                </div>
+                
+                <div class="definition-section">
+                  <div class="definition-title">Wat is Top Tier Men?</div>
+                  <div class="definition-text">
+                    Top Tier Men is een exclusieve broederschap voor mannen die weigeren te settelen voor middelmatigheid. 
+                    We geloven dat elke man het potentieel heeft om excellentie te bereiken in alle aspecten van zijn leven - 
+                    fysiek, mentaal, financieel en spiritueel. Onze community bestaat uit gedreven mannen die elkaar 
+                    verantwoordelijk houden en samen groeien naar hun hoogste potentiaal.
+                  </div>
+                </div>
+                
+                <div class="founder-section">
+                  <img src="https://platform.toptiermen.eu/prelaunch/rick.jpg" alt="Rick Cuijpers" class="founder-image">
+                  <div class="founder-content">
+                    <h3>Rick Cuijpers - Oprichter & Mentor</h3>
+                    <p>
+                      Ex-Korps Marinier met jarenlange ervaring in leiderschap en persoonlijke ontwikkeling. 
+                      Rick heeft honderden mannen geholpen hun leven te transformeren door discipline, 
+                      doelgerichtheid en broederschap. Zijn militaire achtergrond en bewezen track record 
+                      maken hem de ideale mentor voor mannen die serieus zijn over hun groei.
+                    </p>
+                  </div>
+                </div>
+                
+                <div class="platform-features">
+                  <h3>Wat je krijgt in het platform:</h3>
+                  <div class="features-grid">
+                    <div class="feature-item">
+                      <h4>🎯 Persoonlijke Coaching</h4>
+                      <p>Groepscoaching sessies en persoonlijke begeleiding</p>
+                    </div>
+                    <div class="feature-item">
+                      <h4>💪 Fitness & Voeding</h4>
+                      <p>Gepersonaliseerde trainingsschema's en voedingsplannen</p>
+                    </div>
+                    <div class="feature-item">
+                      <h4>🧠 Mindset Training</h4>
+                      <p>Mentale training en mindset ontwikkeling</p>
+                    </div>
+                    <div class="feature-item">
+                      <h4>💰 Business & Finance</h4>
+                      <p>Strategieën voor financiële groei en ondernemerschap</p>
+                    </div>
+                    <div class="feature-item">
+                      <h4>👥 Broederschap</h4>
+                      <p>Exclusieve community van gelijkgestemde mannen</p>
+                    </div>
+                    <div class="feature-item">
+                      <h4>📚 Academy Content</h4>
+                      <p>Uitgebreide bibliotheek met trainingen en resources</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="countdown-section">
+                  <div class="countdown-text">🚀 PLATFORM LANCERING</div>
+                  <div class="countdown-days">12 DAGEN</div>
+                  <div>Tot de officiële lancering van Top Tier Men</div>
+                </div>
+                
+                <div class="cta-section">
+                  <a href="${variables.ctaUrl || 'https://platform.toptiermen.eu/prelaunch'}" class="cta-button">${variables.ctaText || 'Claim je plek'}</a>
+                </div>
+              </div>
+              
+              <div class="footer">
+                <p>Met vriendelijke groet,<br><strong>Rick Cuijpers & Het Top Tier Men Team</strong></p>
+                <p style="margin-top: 20px; font-size: 12px;">
+                  Als je vragen hebt, neem contact op via <a href="mailto:platform@toptiermen.eu">platform@toptiermen.eu</a>
+                </p>
+              </div>
+            </div>
+          </body>
+          </html>
+        `,
+        text: `
+          ${variables.subject || 'Belangrijke update van Top Tier Men'}
+          
+          Beste ${variables.name || 'Gebruiker'},
+          
+          ${variables.content || 'We hebben een belangrijke update voor je van het Top Tier Men platform.'}
+          
+          ${variables.ctaText || 'Bekijk nu'}: ${variables.ctaUrl || 'https://platform.toptiermen.eu/dashboard'}
+          
+          Met vriendelijke groet,
+          Het Top Tier Men Team
+          
+          Website: https://platform.toptiermen.eu
+          Contact: platform@toptiermen.eu
+        `
       }
     };
 
@@ -321,8 +651,8 @@ class EmailService {
 
   private async sendViaSmtp(to: string, subject: string, html: string, text: string): Promise<boolean> {
     try {
-      // Use the built-in Node.js SMTP client
-      const smtpConfig = {
+      // Create nodemailer transporter
+      const transporter = nodemailer.createTransport({
         host: this.config.smtpHost,
         port: parseInt(this.config.smtpPort),
         secure: this.config.smtpSecure,
@@ -330,13 +660,13 @@ class EmailService {
           user: this.config.smtpUsername,
           pass: this.config.smtpPassword
         }
-      };
+      });
 
       console.log('📧 Sending email via SMTP:', {
-        host: smtpConfig.host,
-        port: smtpConfig.port,
-        secure: smtpConfig.secure,
-        username: smtpConfig.auth.user,
+        host: this.config.smtpHost,
+        port: this.config.smtpPort,
+        secure: this.config.smtpSecure,
+        username: this.config.smtpUsername,
         to,
         subject,
         from: `${this.config.fromName} <${this.config.fromEmail}>`
@@ -351,19 +681,14 @@ class EmailService {
         text: text
       };
 
-      // For now, we'll simulate SMTP sending since we're in a browser environment
-      // In a real Node.js environment, you would use nodemailer or similar
-      console.log('✅ Email would be sent via SMTP with config:', smtpConfig);
-      console.log('📧 Email content:', {
-        from: message.from,
-        to: message.to,
-        subject: message.subject,
-        htmlLength: message.html.length,
-        textLength: message.text.length
+      // Actually send the email
+      const result = await transporter.sendMail(message);
+      
+      console.log('✅ Email sent successfully via SMTP:', {
+        messageId: result.messageId,
+        accepted: result.accepted,
+        rejected: result.rejected
       });
-
-      // Simulate SMTP sending delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
 
       // Log email to database
       await this.logEmail(to, 'smtp', subject);

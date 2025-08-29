@@ -36,6 +36,7 @@
     "@tailwindcss/typography": "^0.5.16",
     "@types/bcryptjs": "^3.0.0",
     "@types/howler": "^2.2.12",
+    "@types/nodemailer": "^7.0.1",
     "@types/pg": "^8.15.4",
     "@types/react-beautiful-dnd": "^13.1.8",
     "@types/web-push": "^3.6.4",
