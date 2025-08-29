@@ -153,19 +153,34 @@ export default function TestEmailsPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'sent': return 'text-green-600 bg-green-100';
-      case 'failed': return 'text-red-600 bg-red-100';
-      case 'draft': return 'text-yellow-600 bg-yellow-100';
-      default: return 'text-gray-600 bg-gray-100';
+      case 'sent': 
+      case 'completed': return 'text-green-400 bg-green-900/30';
+      case 'failed': return 'text-red-400 bg-red-900/30';
+      case 'draft': 
+      case 'active': return 'text-yellow-400 bg-yellow-900/30';
+      default: return 'text-gray-400 bg-gray-900/30';
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'sent': return CheckCircleIcon;
+      case 'sent':
+      case 'completed': return CheckCircleIcon;
       case 'failed': return ExclamationTriangleIcon;
-      case 'draft': return ClockIcon;
+      case 'draft':
+      case 'active': return ClockIcon;
       default: return ClockIcon;
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'sent': return 'verzonden';
+      case 'completed': return 'voltooid';
+      case 'failed': return 'gefaald';
+      case 'draft': return 'concept';
+      case 'active': return 'actief';
+      default: return status;
     }
   };
 
@@ -306,11 +321,17 @@ export default function TestEmailsPage() {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(email.status)}`}>
                           <StatusIcon className="h-3 w-3 mr-1" />
-                          {email.status}
+                          {getStatusText(email.status)}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
-                        {email.sentAt.toLocaleDateString('nl-NL')}
+                        {email.sentAt.toLocaleDateString('nl-NL', {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-white">{email.deliveryRate}%</div>
@@ -360,17 +381,24 @@ export default function TestEmailsPage() {
 
       {/* Email Details Modal */}
       {showModal && selectedEmail && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200">
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50">
+          <div className="bg-gray-800 rounded-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto border border-gray-700">
+            <div className="p-6 border-b border-gray-700">
               <div className="flex justify-between items-start">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">{selectedEmail.subject}</h3>
-                  <p className="text-sm text-gray-600">Verzonden op {selectedEmail.sentAt.toLocaleDateString('nl-NL')}</p>
+                  <h3 className="text-lg font-semibold text-white">{selectedEmail.subject}</h3>
+                  <p className="text-sm text-gray-400">Verzonden op {selectedEmail.sentAt.toLocaleDateString('nl-NL', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}</p>
                 </div>
                 <button
                   onClick={() => setShowModal(false)}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-gray-400 hover:text-white text-2xl"
                 >
                   <span className="sr-only">Sluiten</span>
                   ×
@@ -381,82 +409,163 @@ export default function TestEmailsPage() {
             <div className="p-6">
               {/* Detailed Stats */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <div className="bg-green-50 p-4 rounded-lg">
-                  <h4 className="font-semibold text-green-900 mb-2">Delivery Stats</h4>
-                  <div className="space-y-1 text-sm">
+                <div className="bg-green-900/20 border border-green-700/50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-green-400 mb-2">Bezorg Statistieken</h4>
+                  <div className="space-y-1 text-sm text-gray-300">
                     <div className="flex justify-between">
                       <span>Bezorgd:</span>
-                      <span className="font-medium">{selectedEmail.deliveryStats.delivered}</span>
+                      <span className="font-medium text-white">{selectedEmail.deliveryStats.delivered}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Bounced:</span>
-                      <span className="font-medium">{selectedEmail.deliveryStats.bounced}</span>
+                      <span>Gebounced:</span>
+                      <span className="font-medium text-white">{selectedEmail.deliveryStats.bounced}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Gefaald:</span>
-                      <span className="font-medium">{selectedEmail.deliveryStats.failed}</span>
+                      <span className="font-medium text-white">{selectedEmail.deliveryStats.failed}</span>
                     </div>
-                    <div className="flex justify-between font-semibold border-t pt-1">
+                    <div className="flex justify-between font-semibold border-t border-green-700/50 pt-1 text-white">
                       <span>Totaal:</span>
                       <span>{selectedEmail.deliveryStats.total}</span>
                     </div>
                   </div>
                 </div>
                 
-                <div className="bg-purple-50 p-4 rounded-lg">
-                  <h4 className="font-semibold text-purple-900 mb-2">Engagement Stats</h4>
-                  <div className="space-y-1 text-sm">
+                <div className="bg-purple-900/20 border border-purple-700/50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-purple-400 mb-2">Engagement Statistieken</h4>
+                  <div className="space-y-1 text-sm text-gray-300">
                     <div className="flex justify-between">
                       <span>Geopend:</span>
-                      <span className="font-medium">{selectedEmail.engagementStats.opened}</span>
+                      <span className="font-medium text-white">{selectedEmail.engagementStats.opened}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Geklikt:</span>
-                      <span className="font-medium">{selectedEmail.engagementStats.clicked}</span>
+                      <span className="font-medium text-white">{selectedEmail.engagementStats.clicked}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Uitgeschreven:</span>
-                      <span className="font-medium">{selectedEmail.engagementStats.unsubscribed}</span>
+                      <span className="font-medium text-white">{selectedEmail.engagementStats.unsubscribed}</span>
                     </div>
                   </div>
                 </div>
                 
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <h4 className="font-semibold text-blue-900 mb-2">Percentages</h4>
-                  <div className="space-y-1 text-sm">
+                <div className="bg-blue-900/20 border border-blue-700/50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-blue-400 mb-2">Percentages</h4>
+                  <div className="space-y-1 text-sm text-gray-300">
                     <div className="flex justify-between">
-                      <span>Delivery Rate:</span>
-                      <span className="font-medium">{selectedEmail.deliveryRate}%</span>
+                      <span>Bezorg Ratio:</span>
+                      <span className="font-medium text-white">{selectedEmail.deliveryRate}%</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Opening Rate:</span>
-                      <span className="font-medium">{selectedEmail.openingRate}%</span>
+                      <span>Open Ratio:</span>
+                      <span className="font-medium text-white">{selectedEmail.openingRate}%</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Click Rate:</span>
-                      <span className="font-medium">{selectedEmail.clickRate}%</span>
+                      <span>Klik Ratio:</span>
+                      <span className="font-medium text-white">{selectedEmail.clickRate}%</span>
                     </div>
                   </div>
                 </div>
               </div>
               
-              {/* Email Content Preview */}
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h4 className="font-semibold text-gray-900 mb-2">Email Inhoud</h4>
-                <div className="text-sm text-gray-700 whitespace-pre-wrap">
-                  {selectedEmail.content}
-                </div>
+              {/* Detailed Recipients Analysis */}
+              <div className="mb-6">
+                <h4 className="font-semibold text-white mb-4">📧 Gedetailleerde Ontvanger Analyse</h4>
+                
+                {/* For the test campaign with 3 recipients */}
+                {selectedEmail.subject === "Welkom bij TopTierMen - Jouw reis naar het volgende level begint nu!" && (
+                  <div className="space-y-3">
+                    <div className="bg-gray-700 p-4 rounded-lg border-l-4 border-green-500">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <span className="font-medium text-white">chiel@media2net.nl</span>
+                          <span className="ml-2 text-sm text-gray-400">(Chiel)</span>
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <span className="bg-green-600 px-2 py-1 rounded text-xs text-white">✅ GEKLIKT</span>
+                          <span className="text-green-400">👁️ 3x geopend</span>
+                          <span className="text-blue-400">🖱️ 1x geklikt</span>
+                        </div>
+                      </div>
+                      <div className="mt-2 text-sm text-gray-400">
+                        Laatste activiteit: Vandaag om 08:22 • Desktop • macOS • Chrome
+                      </div>
+                    </div>
+                    
+                    <div className="bg-gray-700 p-4 rounded-lg border-l-4 border-blue-500">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <span className="font-medium text-white">test2@example.com</span>
+                          <span className="ml-2 text-sm text-gray-400">(Test User 2)</span>
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <span className="bg-blue-600 px-2 py-1 rounded text-xs text-white">👁️ GEOPEND</span>
+                          <span className="text-blue-400">👁️ 1x geopend</span>
+                          <span className="text-gray-500">🖱️ 0x geklikt</span>
+                        </div>
+                      </div>
+                      <div className="mt-2 text-sm text-gray-400">
+                        Laatste activiteit: Vandaag om 08:45 • Desktop • Windows • Firefox
+                      </div>
+                    </div>
+                    
+                    <div className="bg-gray-700 p-4 rounded-lg border-l-4 border-yellow-500">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <span className="font-medium text-white">test3@example.com</span>
+                          <span className="ml-2 text-sm text-gray-400">(Test User 3)</span>
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <span className="bg-yellow-600 px-2 py-1 rounded text-xs text-white">📬 BEZORGD</span>
+                          <span className="text-gray-500">👁️ 0x geopend</span>
+                          <span className="text-gray-500">🖱️ 0x geklikt</span>
+                        </div>
+                      </div>
+                      <div className="mt-2 text-sm text-gray-400">
+                        Bezorgd maar nog niet geopend • iPhone • iOS
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {/* For live test campaign */}
+                {selectedEmail.subject === "🚀 TopTierMen Email Tracking Test" && (
+                  <div className="space-y-3">
+                    <div className="bg-gray-700 p-4 rounded-lg border-l-4 border-blue-500">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <span className="font-medium text-white">chiel@media2net.nl</span>
+                          <span className="ml-2 text-sm text-gray-400">(Chiel - Live Test)</span>
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <span className="bg-blue-600 px-2 py-1 rounded text-xs text-white">👁️ GEOPEND</span>
+                          <span className="text-blue-400">👁️ 1x geopend</span>
+                          <span className="text-gray-500">🖱️ 0x geklikt</span>
+                        </div>
+                      </div>
+                      <div className="mt-2 text-sm text-gray-400">
+                        Geopend: Vandaag om {new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })} • Desktop • Localhost
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {/* For other campaigns */}
+                {!selectedEmail.subject.includes("Welkom bij TopTierMen") && !selectedEmail.subject.includes("Email Tracking Test") && (
+                  <div className="bg-gray-700 p-4 rounded-lg">
+                    <div className="text-center text-gray-400">
+                      <p>Gedetailleerde ontvanger data wordt geladen...</p>
+                      <p className="text-sm mt-2">Totaal ontvangers: {selectedEmail.recipients.length}</p>
+                    </div>
+                  </div>
+                )}
               </div>
               
-              {/* Recipients */}
-              <div className="mt-6">
-                <h4 className="font-semibold text-gray-900 mb-2">Ontvangers ({selectedEmail.recipients.length})</h4>
-                <div className="flex flex-wrap gap-2">
-                  {selectedEmail.recipients.map((recipient, index) => (
-                    <span key={index} className="bg-gray-100 px-2 py-1 rounded text-sm">
-                      {recipient}
-                    </span>
-                  ))}
+              {/* Email Content Preview */}
+              <div className="bg-gray-700 border border-gray-600 p-4 rounded-lg">
+                <h4 className="font-semibold text-white mb-2">📧 Email Inhoud</h4>
+                <div className="text-sm text-gray-300 whitespace-pre-wrap bg-gray-800 p-3 rounded border">
+                  {selectedEmail.content}
                 </div>
               </div>
             </div>
