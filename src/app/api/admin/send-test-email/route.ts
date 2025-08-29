@@ -364,7 +364,7 @@ export async function POST(request: NextRequest) {
     <body>
         <div class="email-container">
             <div class="header">
-                <div class="logo">TOP TIER MEN</div>
+                <img src="https://platform.toptiermen.eu/logo_white-full.svg" alt="Top Tier Men Logo" style="width: 200px; height: auto; margin-bottom: 20px; display: block; margin-left: auto; margin-right: auto;">
                 <h1>Welkom bij de Broederschap</h1>
                 <div class="subtitle">Jouw reis naar excellentie begint nu</div>
             </div>
@@ -379,6 +379,15 @@ export async function POST(request: NextRequest) {
                     <div class="intro-text">
                         🎯 <strong>EXCLUSIEVE PRE-LAUNCH TOEGANG</strong><br>
                         Je behoort tot de exclusieve lijst van pre-launch leden! In de komende dagen ontvang je sneak previews van het platform, exclusieve content en diepgaande inzichten in wat Top Tier Men voor jou kan betekenen. Deze previews zijn alleen beschikbaar voor een selecte groep - jij bent een van hen.
+                        <br><br>
+                        <div style="text-align: center; background: rgba(139, 174, 90, 0.2); padding: 15px; border-radius: 8px; margin-top: 15px;">
+                            <div style="color: #B6C948; font-weight: 700; font-size: 18px;">
+                                ⏰ Nog <strong style="color: #FFFFFF;">${Math.ceil((new Date('2025-09-10') - new Date()) / (1000 * 60 * 60 * 24))}</strong> dagen tot de officiële launch!
+                            </div>
+                            <div style="color: #8BAE5A; font-size: 14px; margin-top: 5px;">
+                                10 september 2025
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
@@ -392,18 +401,85 @@ export async function POST(request: NextRequest) {
                         <div style="font-size: 22px; font-weight: 700; color: #8BAE5A; margin-bottom: 10px;">Rick Cuijpers</div>
                         <div style="font-size: 16px; color: #9CA3AF; font-style: italic; margin-bottom: 20px;">Rick Cuijpers - Oprichter & Mentor</div>
                         <div style="font-size: 16px; line-height: 1.6; color: #D1D5DB;">
-                            Ex-Korps Marinier met jarenlange ervaring in leiderschap en persoonlijke ontwikkeling. Rick heeft honderden mannen geholpen hun leven te transformeren door discipline, doelgerichtheid en broederschap. Zijn militaire achtergrond en bewezen track record maken hem de ideale mentor voor mannen die serieus zijn over hun groei.
+                            Oud marinier met jarenlange ervaring in leiderschap en persoonlijke ontwikkeling. Rick heeft honderden mannen geholpen hun leven te transformeren door discipline, doelgerichtheid en broederschap. Zijn militaire achtergrond en bewezen track record maken hem de ideale mentor voor mannen die serieus zijn over hun groei.
                         </div>
                     </div>
                 </div>
                 
-                <div class="cta-section">
-                    <div class="cta-title">🎯 Klaar om te beginnen?</div>
-                    <div class="cta-subtitle">Test de click tracking en ga naar je dashboard</div>
+                <!-- Platform Features Section -->
+                <div style="background: rgba(139, 174, 90, 0.05); border: 1px solid rgba(139, 174, 90, 0.2); padding: 30px; margin: 30px 0; border-radius: 15px;">
+                    <div style="font-size: 24px; font-weight: 700; color: #8BAE5A; margin-bottom: 20px; text-align: center;">
+                        🚀 Platform Features
+                    </div>
+                    <div style="font-size: 16px; line-height: 1.6; margin-bottom: 20px; color: #D1D5DB; text-align: center;">
+                        Ontdek alle krachtige tools en functies die je tot je beschikking hebt:
+                    </div>
                     
-                    <a href="https://platform.toptiermen.eu/email-track/click?t=${trackingId}&url=${encodeURIComponent('https://platform.toptiermen.eu/dashboard')}" class="cta-button">
-                        Start je journey
-                    </a>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0;">
+                        <div style="background: rgba(139, 174, 90, 0.1); padding: 15px; border-radius: 8px;">
+                            <div style="color: #B6C948; font-weight: 600; font-size: 14px; margin-bottom: 5px;">🤝 Brotherhood Community</div>
+                            <div style="color: #9CA3AF; font-size: 12px;">Exclusieve community van gelijkgestemden</div>
+                        </div>
+                        
+                        <div style="background: rgba(139, 174, 90, 0.1); padding: 15px; border-radius: 8px;">
+                            <div style="color: #B6C948; font-weight: 600; font-size: 14px; margin-bottom: 5px;">🏆 Badges & Achievements</div>
+                            <div style="color: #9CA3AF; font-size: 12px;">Verdien badges voor je prestaties</div>
+                        </div>
+                        
+                        <div style="background: rgba(139, 174, 90, 0.1); padding: 15px; border-radius: 8px;">
+                            <div style="color: #B6C948; font-weight: 600; font-size: 14px; margin-bottom: 5px;">💪 Challenges & Competitions</div>
+                            <div style="color: #9CA3AF; font-size: 12px;">Uitdagende weekly challenges</div>
+                        </div>
+                        
+                        <div style="background: rgba(139, 174, 90, 0.1); padding: 15px; border-radius: 8px;">
+                            <div style="color: #B6C948; font-weight: 600; font-size: 14px; margin-bottom: 5px;">📚 Digitale Boekenkamer</div>
+                            <div style="color: #9CA3AF; font-size: 12px;">Curated library met topboeken</div>
+                        </div>
+                        
+                        <div style="background: rgba(139, 174, 90, 0.1); padding: 15px; border-radius: 8px;">
+                            <div style="color: #B6C948; font-weight: 600; font-size: 14px; margin-bottom: 5px;">🍖 Carnivoor Voedingsplannen</div>
+                            <div style="color: #9CA3AF; font-size: 12px;">Complete meal plans en recepten</div>
+                        </div>
+                        
+                        <div style="background: rgba(139, 174, 90, 0.1); padding: 15px; border-radius: 8px;">
+                            <div style="color: #B6C948; font-weight: 600; font-size: 14px; margin-bottom: 5px;">💪 Trainingsschema's</div>
+                            <div style="color: #9CA3AF; font-size: 12px;">Gepersonaliseerde workout plans</div>
+                        </div>
+                        
+                        <div style="background: rgba(139, 174, 90, 0.1); padding: 15px; border-radius: 8px;">
+                            <div style="color: #B6C948; font-weight: 600; font-size: 14px; margin-bottom: 5px;">📊 Progress Tracking</div>
+                            <div style="color: #9CA3AF; font-size: 12px;">Houd je vooruitgang bij</div>
+                        </div>
+                        
+                        <div style="background: rgba(139, 174, 90, 0.1); padding: 15px; border-radius: 8px;">
+                            <div style="color: #B6C948; font-weight: 600; font-size: 14px; margin-bottom: 5px;">📱 Mobile App</div>
+                            <div style="color: #9CA3AF; font-size: 12px;">Toegang overal en altijd</div>
+                        </div>
+                        
+                        <div style="background: rgba(139, 174, 90, 0.1); padding: 15px; border-radius: 8px;">
+                            <div style="color: #B6C948; font-weight: 600; font-size: 14px; margin-bottom: 5px;">🎯 Goal Setting & Planning</div>
+                            <div style="color: #9CA3AF; font-size: 12px;">Doelgericht werken aan groei</div>
+                        </div>
+                        
+                        <div style="background: rgba(139, 174, 90, 0.1); padding: 15px; border-radius: 8px;">
+                            <div style="color: #B6C948; font-weight: 600; font-size: 14px; margin-bottom: 5px;">🔥 Accountability System</div>
+                            <div style="color: #9CA3AF; font-size: 12px;">Houd elkaar scherp en gemotiveerd</div>
+                        </div>
+                        
+                        <div style="background: rgba(139, 174, 90, 0.1); padding: 15px; border-radius: 8px;">
+                            <div style="color: #B6C948; font-weight: 600; font-size: 14px; margin-bottom: 5px;">📅 Event Calendar</div>
+                            <div style="color: #9CA3AF; font-size: 12px;">Brotherhood events en meetups</div>
+                        </div>
+                        
+                        <div style="background: rgba(139, 174, 90, 0.1); padding: 15px; border-radius: 8px;">
+                            <div style="color: #B6C948; font-weight: 600; font-size: 14px; margin-bottom: 5px;">🧠 Mindset Modules</div>
+                            <div style="color: #9CA3AF; font-size: 12px;">Mentale training en ontwikkeling</div>
+                        </div>
+                    </div>
+                    
+                    <div style="font-size: 13px; color: #9CA3AF; text-align: center; margin: 20px 0 0 0; font-style: italic;">
+                        En nog veel meer! Het platform groeit continue met nieuwe features.
+                    </div>
                 </div>
                 
                 <div class="tracking-info">
