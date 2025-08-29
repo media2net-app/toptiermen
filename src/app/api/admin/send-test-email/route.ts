@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import nodemailer from 'nodemailer';
+const nodemailer = require('nodemailer');
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -8,15 +8,14 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 // Use service role key for admin operations
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-// Email configuration - Using Gmail SMTP as example
-// You'll need to set up App Password in Gmail for this to work
+// Email configuration - Using TopTierMen SMTP
 const emailConfig = {
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false,
+  host: 'toptiermen.eu',
+  port: 465,
+  secure: true,
   auth: {
-    user: process.env.EMAIL_USER, // Your Gmail address
-    pass: process.env.EMAIL_APP_PASSWORD // Your Gmail App Password
+    user: 'platform@toptiermen.eu',
+    pass: '5LUrnxEmEQYgEUt3PmZg'
   }
 };
 
@@ -142,45 +141,15 @@ export async function POST(request: NextRequest) {
     </body>
     </html>`;
 
-    // Check if email credentials are configured
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_APP_PASSWORD) {
-      console.log('📧 Email credentials not configured, simulating email send...');
-      
-      // Update tracking to "sent" status for simulation
-      await supabase
-        .from('email_tracking')
-        .update({
-          status: 'sent',
-          sent_at: new Date().toISOString()
-        })
-        .eq('id', tracking.id);
-
-      // Update campaign stats
-      await supabase
-        .from('email_campaigns')
-        .update({
-          sent_count: 1,
-          status: 'completed',
-          sent_at: new Date().toISOString(),
-          completed_at: new Date().toISOString()
-        })
-        .eq('id', campaign.id);
-
-      return NextResponse.json({
-        success: true,
-        message: 'Email simulation completed - tracking records created',
-        campaignId: campaign.id,
-        trackingId: trackingId,
-        note: 'Email credentials not configured. Set EMAIL_USER and EMAIL_APP_PASSWORD to actually send emails.'
-      });
-    }
+    // Email credentials are configured in emailConfig above
+    console.log('📧 Using TopTierMen SMTP credentials for email sending...');
 
     // Create nodemailer transporter
-    const transporter = nodemailer.createTransporter(emailConfig);
+    const transporter = nodemailer.createTransport(emailConfig);
 
     // Send the email
     const mailOptions = {
-      from: `"TopTierMen Platform" <${process.env.EMAIL_USER}>`,
+      from: `"TopTierMen Platform" <platform@toptiermen.eu>`,
       to: recipient,
       subject: subject,
       html: emailHtml
