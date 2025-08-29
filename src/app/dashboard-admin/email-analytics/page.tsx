@@ -195,32 +195,28 @@ export default function EmailAnalytics() {
             title="Emails Verzonden"
             value={totalStats.totalEmails.toLocaleString()}
             icon={<EnvelopeIcon className="w-6 h-6" />}
-            trend={totalStats.totalEmails > 0 ? 'up' : 'neutral'}
-            trendValue=""
+            trend={totalStats.totalEmails > 0 ? 1 : 0}
           />
           
           <AdminStatsCard
             title="Gemiddelde Open Rate"
             value={`${avgOpenRate.toFixed(1)}%`}
             icon={<EyeIcon className="w-6 h-6" />}
-            trend={avgOpenRate > 20 ? 'up' : avgOpenRate > 10 ? 'neutral' : 'down'}
-            trendValue=""
+            trend={avgOpenRate > 20 ? 1 : avgOpenRate > 10 ? 0 : -1}
           />
           
           <AdminStatsCard
             title="Gemiddelde Click Rate"
             value={`${avgClickRate.toFixed(1)}%`}
             icon={<CursorArrowRaysIcon className="w-6 h-6" />}
-            trend={avgClickRate > 3 ? 'up' : avgClickRate > 1 ? 'neutral' : 'down'}
-            trendValue=""
+            trend={avgClickRate > 5 ? 1 : avgClickRate > 2 ? 0 : -1}
           />
           
           <AdminStatsCard
-            title="Totaal Clicks"
-            value={totalStats.totalClicks.toLocaleString()}
+            title="Totaal Opens"
+            value={totalStats.totalOpens.toLocaleString()}
             icon={<ChartBarIcon className="w-6 h-6" />}
-            trend={totalStats.totalClicks > 0 ? 'up' : 'neutral'}
-            trendValue=""
+            trend={totalStats.totalOpens > 0 ? 1 : 0}
           />
         </div>
 
@@ -309,7 +305,6 @@ export default function EmailAnalytics() {
           <AdminCard 
             title="Gedetailleerde Tracking" 
             icon={<UserGroupIcon className="w-6 h-6" />}
-            onClose={() => setSelectedCampaign(null)}
           >
             <div className="overflow-x-auto">
               <table className="w-full">
