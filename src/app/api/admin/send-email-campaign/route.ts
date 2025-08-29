@@ -38,55 +38,50 @@ async function sendTestEmail(stepId: string) {
     const hardcodedSteps = {
       '1': {
         name: 'Welkom & Introductie',
-        subject: '🎯 Welkom bij Toptiermen - Jouw reis naar succes begint hier',
+        subject: '🎯 Welkom bij Top Tier Men - Jouw reis naar excellentie begint hier',
         content: `Beste {{name}},
 
-Welkom bij Toptiermen! 🚀
+Je hebt de eerste stap gezet naar een leven van excellentie. Als onderdeel van onze exclusieve broederschap krijg je toegang tot bewezen strategieën, persoonlijke voedings- en trainingsplannen en een community van gelijkgestemde mannen die elkaar naar succes duwen.
 
-We zijn verheugd dat je interesse hebt getoond in onze exclusieve broederschap van top performers. Je hebt de eerste stap gezet naar een leven van buitengewone prestaties en persoonlijke transformatie.
+🎯 **EXCLUSIEVE PRE-LAUNCH TOEGANG**
 
-**Wat maakt Toptiermen uniek?**
+Je behoort tot de exclusieve lijst van pre-launch leden! In de komende dagen ontvang je sneak previews van het platform, exclusieve content en diepgaande inzichten in wat Top Tier Men voor jou kan betekenen. Deze previews zijn alleen beschikbaar voor een selecte groep - jij bent een van hen.
 
-🏆 **De Broederschap**: Word onderdeel van een exclusieve community van gelijkgestemden die elkaar naar succes duwen
-🎯 **Wekelijkse Video Calls**: Elke week evalueren we samen je voortgang met alle broeders
-💪 **Persoonlijke Transformatie**: Ontwikkel jezelf tot een echte Top Tier Man
-📈 **Bewezen Methoden**: Strategieën die al honderden mensen naar succes hebben geleid
-⚡ **24/7 Brotherhood Support**: Altijd toegang tot je broeders en coaches
+⏰ **Nog ${Math.ceil((new Date('2025-09-10') - new Date()) / (1000 * 60 * 60 * 24))} dagen tot de officiële launch!** (10 september 2025)
 
-**Wat je de komende 6 maanden kunt verwachten:**
+**Wat is Top Tier Men?**
 
-**Maand 1-2: Foundation**
-• Toegang tot alle academy modules en training content
-• Persoonlijke voedingsplannen en trainingsschema's
-• Introductie in de broederschap community
-• Eerste wekelijkse video call met alle broeders
+Top Tier Men is een exclusieve broederschap voor mannen die weigeren te settelen voor middelmatigheid. We geloven dat elke man het potentieel heeft om excellentie te bereiken in alle aspecten van zijn leven - fysiek, mentaal, financieel en spiritueel. Onze community bestaat uit gedreven mannen die elkaar verantwoordelijk houden en samen groeien naar hun hoogste potentiaal.
 
-**Maand 3-4: Growth**
-• Diepgaande coaching sessies
-• Community challenges en accountability
-• Wekelijkse evaluaties en voortgang tracking
-• Netwerken met gelijkgestemden
+**Rick Cuijpers**
+*Rick Cuijpers - Oprichter & Mentor*
 
-**Maand 5-6: Mastery**
-• Advanced strategieën en technieken
-• Leadership development binnen de broederschap
-• Voorbereiding op je Top Tier Man titel
-• Levensveranderende resultaten
+Oud marinier met jarenlange ervaring in leiderschap en persoonlijke ontwikkeling. Rick heeft honderden mannen geholpen hun leven te transformeren door discipline, doelgerichtheid en broederschap. Zijn militaire achtergrond en bewezen track record maken hem de ideale mentor voor mannen die serieus zijn over hun groei.
 
-**De echte waarde:**
-Dit is niet alleen content consumeren - dit is een complete levensstijl transformatie. Je wordt onderdeel van een broederschap die elkaar naar succes duwt, wekelijks samen evalueert, en uiteindelijk de prestigieuze titel "Top Tier Man" behaalt.
+🚀 **PLATFORM FEATURES**
 
-**Interesse niveau: {{interestLevel}}**
+Het Top Tier Men platform biedt een complete toolkit voor je persoonlijke groei:
 
-We hebben je geregistreerd met interesse niveau: {{interestLevel}}. Dit helpt ons om je de meest relevante informatie te sturen.
+• 🤝 **Brotherhood Community** - Exclusieve community van gelijkgestemden
+• 🏆 **Badges & Achievements** - Verdien badges voor je prestaties  
+• 💪 **Challenges & Competitions** - Uitdagende weekly challenges
+• 📚 **Digitale Boekenkamer** - Curated library met topboeken
+• 🍖 **Carnivoor Voedingsplannen** - Complete meal plans en recepten
+• 💪 **Trainingsschema's** - Gepersonaliseerde workout plans
+• 📊 **Progress Tracking** - Houd je vooruitgang bij
+• 📱 **Mobile App** - Toegang overal en altijd
+• 🎯 **Goal Setting & Planning** - Doelgericht werken aan groei
+• 🔥 **Accountability System** - Houd elkaar scherp en gemotiveerd
+• 📅 **Event Calendar** - Brotherhood events en meetups
+• 🧠 **Mindset Modules** - Mentale training en ontwikkeling
 
-Binnenkort ontvang je meer details over hoe we jou kunnen helpen je doelen te bereiken.
+*En nog veel meer! Het platform groeit continue met nieuwe features.*
 
 Met vriendelijke groet,
-Het Toptiermen Team
+Het Top Tier Men Team
 
 ---
-*"Succes is niet toevallig. Het is een keuze, een gewoonte, een levensstijl."*`
+*"Excellentie is geen toeval. Het is een keuze, een commitment, een levensstijl."*`
       },
       '2': {
         name: 'Waarde & Voordelen',

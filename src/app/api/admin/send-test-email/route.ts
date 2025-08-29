@@ -374,39 +374,25 @@ export async function POST(request: NextRequest) {
                 
                 <div class="intro-section">
                     <div class="intro-text">
-                        🎯 Je hebt de eerste stap gezet naar een leven van <strong>buitengewone prestaties</strong> en persoonlijke transformatie.
+                        Je hebt de eerste stap gezet naar een leven van <strong>excellentie</strong>. Als onderdeel van onze exclusieve broederschap krijg je toegang tot bewezen strategieën, persoonlijke voedings- en trainingsplannen en een community van gelijkgestemde mannen die elkaar naar succes duwen.
                     </div>
                     <div class="intro-text">
-                        Welkom bij de exclusieve broederschap van <strong>Top Tier Men</strong> - waar gewone mannen zichzelf ontwikkelen tot uitzonderlijke leiders.
+                        🎯 <strong>EXCLUSIEVE PRE-LAUNCH TOEGANG</strong><br>
+                        Je behoort tot de exclusieve lijst van pre-launch leden! In de komende dagen ontvang je sneak previews van het platform, exclusieve content en diepgaande inzichten in wat Top Tier Men voor jou kan betekenen. Deze previews zijn alleen beschikbaar voor een selecte groep - jij bent een van hen.
                     </div>
                 </div>
                 
                 <div class="features-section">
-                    <div class="features-title">🚀 Wat je krijgt als Top Tier Man</div>
+                    <div class="features-title">Wat is Top Tier Men?</div>
+                    <div class="intro-text" style="text-align: left; margin-bottom: 30px; color: #D1D5DB;">
+                        Top Tier Men is een exclusieve broederschap voor mannen die weigeren te settelen voor middelmatigheid. We geloven dat elke man het potentieel heeft om excellentie te bereiken in alle aspecten van zijn leven - fysiek, mentaal, financieel en spiritueel. Onze community bestaat uit gedreven mannen die elkaar verantwoordelijk houden en samen groeien naar hun hoogste potentiaal.
+                    </div>
                     
-                    <div class="features-grid">
-                        <div class="feature-card">
-                            <span class="feature-emoji">🏆</span>
-                            <div class="feature-title">De Broederschap</div>
-                            <div class="feature-desc">Exclusieve community van gelijkgestemde mannen die elkaar naar succes duwen</div>
-                        </div>
-                        
-                        <div class="feature-card">
-                            <span class="feature-emoji">📹</span>
-                            <div class="feature-title">Wekelijkse Calls</div>
-                            <div class="feature-desc">Evalueer je voortgang samen met alle broeders elke week</div>
-                        </div>
-                        
-                        <div class="feature-card">
-                            <span class="feature-emoji">💪</span>
-                            <div class="feature-title">Carnivoor Protocol</div>
-                            <div class="feature-desc">Bewezen voedings- en trainingsschema's voor optimale performance</div>
-                        </div>
-                        
-                        <div class="feature-card">
-                            <span class="feature-emoji">🧠</span>
-                            <div class="feature-title">Mindset Mastery</div>
-                            <div class="feature-desc">Ontwikkel de mentale kracht van een echte Top Tier Man</div>
+                    <div style="background: rgba(139, 174, 90, 0.05); border: 1px solid rgba(139, 174, 90, 0.2); padding: 30px; margin: 30px 0; border-radius: 15px; text-align: center;">
+                        <div style="font-size: 22px; font-weight: 700; color: #8BAE5A; margin-bottom: 10px;">Rick Cuijpers</div>
+                        <div style="font-size: 16px; color: #9CA3AF; font-style: italic; margin-bottom: 20px;">Rick Cuijpers - Oprichter & Mentor</div>
+                        <div style="font-size: 16px; line-height: 1.6; color: #D1D5DB;">
+                            Ex-Korps Marinier met jarenlange ervaring in leiderschap en persoonlijke ontwikkeling. Rick heeft honderden mannen geholpen hun leven te transformeren door discipline, doelgerichtheid en broederschap. Zijn militaire achtergrond en bewezen track record maken hem de ideale mentor voor mannen die serieus zijn over hun groei.
                         </div>
                     </div>
                 </div>
@@ -432,8 +418,11 @@ export async function POST(request: NextRequest) {
             </div>
             
             <div class="footer">
-                <div class="footer-signature">Met broederlijke groeten,<br>Het TopTierMen Team</div>
-                <p>
+                <div class="footer-signature">Met vriendelijke groet,<br>Het Top Tier Men Team</div>
+                <p style="margin-top: 20px; font-style: italic; color: #9CA3AF;">
+                    "Excellentie is geen toeval. Het is een keuze, een commitment, een levensstijl."
+                </p>
+                <p style="margin-top: 15px;">
                     <a href="mailto:platform@toptiermen.eu">platform@toptiermen.eu</a> | 
                     <a href="https://platform.toptiermen.eu">platform.toptiermen.eu</a>
                 </p>

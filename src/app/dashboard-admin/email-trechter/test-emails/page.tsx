@@ -44,6 +44,40 @@ export default function TestEmailsPage() {
   const [selectedEmail, setSelectedEmail] = useState<TestEmail | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [recipients, setRecipients] = useState<any[]>([]);
+  const [loadingRecipients, setLoadingRecipients] = useState(false);
+
+  // Fetch detailed recipients for a campaign
+  const fetchRecipients = async (campaignId: string) => {
+    try {
+      setLoadingRecipients(true);
+      console.log(`📧 Fetching recipients for campaign: ${campaignId}`);
+      
+      const response = await fetch(`/api/admin/email-recipients?campaignId=${campaignId}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache'
+        }
+      });
+      const result = await response.json();
+      
+      if (!response.ok) {
+        console.error('❌ Error fetching recipients:', result.error);
+        toast.error('Fout bij laden van recipient data');
+        return;
+      }
+      
+      setRecipients(result.recipients || []);
+      console.log(`✅ Loaded ${result.recipients?.length || 0} recipients`);
+      
+    } catch (error) {
+      console.error('❌ Error fetching recipients:', error);
+      toast.error('Fout bij laden van recipient data');
+      setRecipients([]);
+    } finally {
+      setLoadingRecipients(false);
+    }
+  };
 
   // Fetch real email campaigns from database
   const fetchEmailCampaigns = async () => {
@@ -391,6 +425,7 @@ export default function TestEmailsPage() {
                             onClick={() => {
                               setSelectedEmail(email);
                               setShowModal(true);
+                              fetchRecipients(email.id);
                             }}
                             className="text-blue-400 hover:text-blue-300 p-1 hover:bg-blue-900/20 rounded"
                           >
@@ -431,7 +466,10 @@ export default function TestEmailsPage() {
                   })}</p>
                 </div>
                 <button
-                  onClick={() => setShowModal(false)}
+                  onClick={() => {
+                    setShowModal(false);
+                    setRecipients([]);
+                  }}
                   className="text-gray-400 hover:text-white text-2xl"
                 >
                   <span className="sr-only">Sluiten</span>
@@ -502,94 +540,91 @@ export default function TestEmailsPage() {
                 </div>
               </div>
               
-              {/* Detailed Recipients Analysis */}
+              {/* Live Recipients Analysis */}
               <div className="mb-6">
-                <h4 className="font-semibold text-white mb-4">📧 Gedetailleerde Ontvanger Analyse</h4>
+                <h4 className="font-semibold text-white mb-4">👥 Live Ontvanger Analyse</h4>
                 
-                {/* For the test campaign with 3 recipients */}
-                {selectedEmail.subject === "Welkom bij TopTierMen - Jouw reis naar het volgende level begint nu!" && (
-                  <div className="space-y-3">
-                    <div className="bg-gray-700 p-4 rounded-lg border-l-4 border-green-500">
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <span className="font-medium text-white">chiel@media2net.nl</span>
-                          <span className="ml-2 text-sm text-gray-400">(Chiel)</span>
-                        </div>
-                        <div className="flex items-center space-x-3">
-                          <span className="bg-green-600 px-2 py-1 rounded text-xs text-white">✅ GEKLIKT</span>
-                          <span className="text-green-400">👁️ 3x geopend</span>
-                          <span className="text-blue-400">🖱️ 1x geklikt</span>
-                        </div>
-                      </div>
-                      <div className="mt-2 text-sm text-gray-400">
-                        Laatste activiteit: Vandaag om 08:22 • Desktop • macOS • Chrome
-                      </div>
-                    </div>
-                    
-                    <div className="bg-gray-700 p-4 rounded-lg border-l-4 border-blue-500">
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <span className="font-medium text-white">test2@example.com</span>
-                          <span className="ml-2 text-sm text-gray-400">(Test User 2)</span>
-                        </div>
-                        <div className="flex items-center space-x-3">
-                          <span className="bg-blue-600 px-2 py-1 rounded text-xs text-white">👁️ GEOPEND</span>
-                          <span className="text-blue-400">👁️ 1x geopend</span>
-                          <span className="text-gray-500">🖱️ 0x geklikt</span>
-                        </div>
-                      </div>
-                      <div className="mt-2 text-sm text-gray-400">
-                        Laatste activiteit: Vandaag om 08:45 • Desktop • Windows • Firefox
-                      </div>
-                    </div>
-                    
-                    <div className="bg-gray-700 p-4 rounded-lg border-l-4 border-yellow-500">
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <span className="font-medium text-white">test3@example.com</span>
-                          <span className="ml-2 text-sm text-gray-400">(Test User 3)</span>
-                        </div>
-                        <div className="flex items-center space-x-3">
-                          <span className="bg-yellow-600 px-2 py-1 rounded text-xs text-white">📬 BEZORGD</span>
-                          <span className="text-gray-500">👁️ 0x geopend</span>
-                          <span className="text-gray-500">🖱️ 0x geklikt</span>
-                        </div>
-                      </div>
-                      <div className="mt-2 text-sm text-gray-400">
-                        Bezorgd maar nog niet geopend • iPhone • iOS
-                      </div>
-                    </div>
-                  </div>
-                )}
-                
-                {/* For live test campaign */}
-                {selectedEmail.subject === "🚀 TopTierMen Email Tracking Test" && (
-                  <div className="space-y-3">
-                    <div className="bg-gray-700 p-4 rounded-lg border-l-4 border-blue-500">
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <span className="font-medium text-white">chiel@media2net.nl</span>
-                          <span className="ml-2 text-sm text-gray-400">(Chiel - Live Test)</span>
-                        </div>
-                        <div className="flex items-center space-x-3">
-                          <span className="bg-blue-600 px-2 py-1 rounded text-xs text-white">👁️ GEOPEND</span>
-                          <span className="text-blue-400">👁️ 1x geopend</span>
-                          <span className="text-gray-500">🖱️ 0x geklikt</span>
-                        </div>
-                      </div>
-                      <div className="mt-2 text-sm text-gray-400">
-                        Geopend: Vandaag om {new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })} • Desktop • Localhost
-                      </div>
-                    </div>
-                  </div>
-                )}
-                
-                {/* For other campaigns */}
-                {!selectedEmail.subject.includes("Welkom bij TopTierMen") && !selectedEmail.subject.includes("Email Tracking Test") && (
+                {loadingRecipients ? (
                   <div className="bg-gray-700 p-4 rounded-lg">
                     <div className="text-center text-gray-400">
-                      <p>Gedetailleerde ontvanger data wordt geladen...</p>
-                      <p className="text-sm mt-2">Totaal ontvangers: {selectedEmail.recipients.length}</p>
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8BAE5A] mx-auto mb-2"></div>
+                      <p>Live recipient data wordt geladen...</p>
+                    </div>
+                  </div>
+                ) : recipients.length > 0 ? (
+                  <div className="space-y-3">
+                    {recipients.map((recipient, index) => {
+                      // Determine border color and status badge based on recipient status
+                      let borderColor = 'border-gray-500';
+                      let statusBadge = { bg: 'bg-gray-600', text: 'ONBEKEND', icon: '❓' };
+                      
+                      if (recipient.status === 'geklikt') {
+                        borderColor = 'border-green-500';
+                        statusBadge = { bg: 'bg-green-600', text: 'GEKLIKT', icon: '✅' };
+                      } else if (recipient.status === 'geopend') {
+                        borderColor = 'border-blue-500';
+                        statusBadge = { bg: 'bg-blue-600', text: 'GEOPEND', icon: '👁️' };
+                      } else if (recipient.status === 'bezorgd') {
+                        borderColor = 'border-yellow-500';
+                        statusBadge = { bg: 'bg-yellow-600', text: 'BEZORGD', icon: '📬' };
+                      } else if (recipient.status === 'verzonden') {
+                        borderColor = 'border-purple-500';
+                        statusBadge = { bg: 'bg-purple-600', text: 'VERZONDEN', icon: '📤' };
+                      } else if (recipient.status === 'gefaald') {
+                        borderColor = 'border-red-500';
+                        statusBadge = { bg: 'bg-red-600', text: 'GEFAALD', icon: '❌' };
+                      }
+
+                      // Format last activity
+                      let lastActivity = 'Nog geen activiteit';
+                      if (recipient.lastClickDetails) {
+                        const clickDate = new Date(recipient.lastClickDetails.clickedAt);
+                        lastActivity = `Laatste klik: ${clickDate.toLocaleDateString('nl-NL')} om ${clickDate.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}`;
+                        if (recipient.lastClickDetails.browser || recipient.lastClickDetails.os) {
+                          lastActivity += ` • ${recipient.lastClickDetails.browser || 'Onbekende browser'} • ${recipient.lastClickDetails.os || 'Onbekend OS'}`;
+                        }
+                      } else if (recipient.lastOpenDetails) {
+                        const openDate = new Date(recipient.lastOpenDetails.openedAt);
+                        lastActivity = `Laatste open: ${openDate.toLocaleDateString('nl-NL')} om ${openDate.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}`;
+                        if (recipient.lastOpenDetails.browser || recipient.lastOpenDetails.os) {
+                          lastActivity += ` • ${recipient.lastOpenDetails.browser || 'Onbekende browser'} • ${recipient.lastOpenDetails.os || 'Onbekend OS'}`;
+                        }
+                      } else if (recipient.sentAt) {
+                        const sentDate = new Date(recipient.sentAt);
+                        lastActivity = `Verzonden: ${sentDate.toLocaleDateString('nl-NL')} om ${sentDate.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}`;
+                      }
+
+                      return (
+                        <div key={recipient.id} className={`bg-gray-700 p-4 rounded-lg border-l-4 ${borderColor}`}>
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <span className="font-medium text-white">{recipient.email}</span>
+                              <span className="ml-2 text-sm text-gray-400">({recipient.name})</span>
+                            </div>
+                            <div className="flex items-center space-x-3">
+                              <span className={`${statusBadge.bg} px-2 py-1 rounded text-xs text-white`}>
+                                {statusBadge.icon} {statusBadge.text}
+                              </span>
+                              <span className="text-blue-400">👁️ {recipient.openCount}x geopend</span>
+                              <span className="text-green-400">🖱️ {recipient.clickCount}x geklikt</span>
+                            </div>
+                          </div>
+                          <div className="mt-2 text-sm text-gray-400">
+                            {lastActivity}
+                          </div>
+                          {/* Show tracking ID for debugging */}
+                          <div className="mt-1 text-xs text-gray-500">
+                            Tracking ID: {recipient.trackingId}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="bg-gray-700 p-4 rounded-lg">
+                    <div className="text-center text-gray-400">
+                      <p>Geen recipient data beschikbaar voor deze campaign</p>
+                      <p className="text-sm mt-2">Totaal ontvangers in email object: {selectedEmail.recipients.length}</p>
                     </div>
                   </div>
                 )}
