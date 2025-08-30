@@ -598,7 +598,7 @@ function generateEmailHtml(subject: string, recipientName: string, trackingId: s
         </div>
         
                  <!-- Invisible tracking pixel -->
-         <img src="http://localhost:3000/email-track/open?t=${trackingId}" alt="" width="1" height="1" style="display:none !important; visibility:hidden !important; opacity:0 !important; position:absolute !important; top:-9999px !important; left:-9999px !important;" />
+         <img src="https://platform.toptiermen.eu/api/email-track/open?trackingId=${trackingId}" alt="" width="1" height="1" style="display:none !important; visibility:hidden !important; opacity:0 !important; position:absolute !important; top:-9999px !important; left:-9999px !important;" />
         
         <style>
             @media (max-width: 600px) {
