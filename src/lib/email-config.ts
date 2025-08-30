@@ -37,13 +37,13 @@ export const sendgridConfig: EmailConfig = {
   fromName: 'TopTierMen Platform'
 };
 
-// Mailgun Configuration Example
+// Mailgun Configuration - PRODUCTION READY
 export const mailgunConfig: EmailConfig = {
   provider: 'mailgun',
   mailgunApiKey: process.env.MAILGUN_API_KEY || '',
-  mailgunDomain: process.env.MAILGUN_DOMAIN || 'toptiermen.eu',
+  mailgunDomain: 'toptiermen.eu',
   fromEmail: 'platform@toptiermen.eu',
-  fromName: 'TopTierMen Platform'
+  fromName: 'Top Tier Men Platform'
 };
 
 // Function to get current email configuration
