@@ -173,8 +173,7 @@ export default function ProductenPage() {
   };
 
   const handleCheckout = () => {
-    // Hier zou je de checkout logica implementeren
-    toast.success('Checkout functionaliteit wordt binnenkort toegevoegd!');
+    toast.error('Checkout functionaliteit is nog niet beschikbaar. Deze wordt binnenkort toegevoegd!');
     setShowCart(false);
   };
 
@@ -207,6 +206,37 @@ export default function ProductenPage() {
                 </span>
               )}
             </button>
+          </div>
+        </div>
+
+        {/* Development Notice */}
+        <div className="mb-8 bg-gradient-to-r from-[#FFD700]/20 to-[#FFA500]/20 border border-[#FFD700]/30 rounded-xl p-6">
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0">
+              <div className="w-12 h-12 bg-[#FFD700]/20 rounded-full flex items-center justify-center">
+                <svg className="w-6 h-6 text-[#FFD700]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-[#FFD700] mb-2">
+                🚧 Producten Pagina in Ontwikkeling
+              </h3>
+              <p className="text-[#B6C948] mb-3">
+                Deze pagina is momenteel nog in ontwikkeling. De producten die je hier ziet zijn voorbeelden en de functionaliteit om door te klikken naar individuele productlandingspagina's wordt binnenkort toegevoegd.
+              </p>
+              <div className="bg-[#181F17]/50 rounded-lg p-4 border border-[#FFD700]/20">
+                <h4 className="text-[#FFD700] font-semibold mb-2">📋 Wat wordt er toegevoegd:</h4>
+                <ul className="text-[#B6C948] text-sm space-y-1">
+                  <li>• Individuele productlandingspagina's met uitgebreide informatie</li>
+                  <li>• Product reviews en beoordelingen</li>
+                  <li>• Gerelateerde producten en aanbevelingen</li>
+                  <li>• Volledige checkout en betalingsintegratie</li>
+                  <li>• Product filtering en zoekfunctionaliteit</li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -279,7 +309,7 @@ export default function ProductenPage() {
                     className="flex-1 bg-transparent border border-[#8BAE5A] text-[#8BAE5A] hover:bg-[#8BAE5A] hover:text-[#0A0F0A] px-4 py-2 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2"
                   >
                     <EyeIcon className="w-4 h-4" />
-                    Details
+                    Bekijk Details
                   </button>
                   <button
                     onClick={() => addToCart(product)}
@@ -308,6 +338,19 @@ export default function ProductenPage() {
                   >
                     ✕
                   </button>
+                </div>
+
+                {/* Preview Notice */}
+                <div className="mb-6 bg-[#FFD700]/10 border border-[#FFD700]/30 rounded-lg p-4">
+                  <div className="flex items-center gap-2 text-[#FFD700] text-sm">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="font-medium">Preview Mode</span>
+                  </div>
+                  <p className="text-[#B6C948] text-sm mt-1">
+                    Dit is een preview van de productdetailpagina. De volledige functionaliteit wordt binnenkort toegevoegd.
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -403,6 +446,19 @@ export default function ProductenPage() {
                   >
                     ✕
                   </button>
+                </div>
+
+                {/* Cart Notice */}
+                <div className="mb-6 bg-[#FFD700]/10 border border-[#FFD700]/30 rounded-lg p-4">
+                  <div className="flex items-center gap-2 text-[#FFD700] text-sm mb-2">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
+                    <span className="font-medium">Demo Mode</span>
+                  </div>
+                  <p className="text-[#B6C948] text-sm">
+                    De winkelwagen functionaliteit is momenteel in demo modus. Echte aankopen zijn nog niet mogelijk.
+                  </p>
                 </div>
 
                 {cart.length === 0 ? (
