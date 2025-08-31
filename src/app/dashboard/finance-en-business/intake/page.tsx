@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
-import { CheckIcon, ArrowRightIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { CheckIcon, ArrowRightIcon, ArrowLeftIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 
 interface FinancialProfile {
   netWorth: number;
@@ -33,6 +33,30 @@ const investmentCategories = [
   'Pensioen',
   'Ondernemerschap'
 ];
+
+// Tooltip component
+const Tooltip = ({ children, content }: { children: React.ReactNode; content: string }) => {
+  const [showTooltip, setShowTooltip] = useState(false);
+
+  return (
+    <div className="relative inline-block">
+      <div
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+        className="inline-flex items-center"
+      >
+        {children}
+        <InformationCircleIcon className="w-4 h-4 text-[#8BAE5A] ml-1 cursor-help" />
+      </div>
+      {showTooltip && (
+        <div className="absolute z-50 px-3 py-2 text-sm text-white bg-[#232D1A] border border-[#3A4D23] rounded-lg shadow-lg max-w-xs -top-2 left-full ml-2">
+          {content}
+          <div className="absolute top-3 -left-1 w-2 h-2 bg-[#232D1A] border-l border-b border-[#3A4D23] transform rotate-45"></div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default function FinanceIntake() {
   const router = useRouter();
@@ -146,7 +170,9 @@ export default function FinanceIntake() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label className="block text-sm font-medium text-[#8BAE5A] mb-2">
-            Netto Waarde (€)
+            <Tooltip content="Je totale vermogen: alle bezittingen (spaargeld, beleggingen, huis, auto) minus alle schulden (hypotheek, leningen, creditcard).">
+              Netto Waarde (€)
+            </Tooltip>
           </label>
           <input
             type="number"
@@ -160,7 +186,9 @@ export default function FinanceIntake() {
 
         <div>
           <label className="block text-sm font-medium text-[#8BAE5A] mb-2">
-            Maandelijkse Inkomsten (€)
+            <Tooltip content="Je totale maandelijkse inkomsten: salaris, freelance werk, huurinkomsten, dividend, en andere regelmatige inkomsten.">
+              Maandelijkse Inkomsten (€)
+            </Tooltip>
           </label>
           <input
             type="number"
@@ -173,7 +201,9 @@ export default function FinanceIntake() {
 
         <div>
           <label className="block text-sm font-medium text-[#8BAE5A] mb-2">
-            Maandelijkse Uitgaven (€)
+            <Tooltip content="Je totale maandelijkse uitgaven: huur/hypotheek, boodschappen, verzekeringen, abonnementen, transport, en andere vaste kosten.">
+              Maandelijkse Uitgaven (€)
+            </Tooltip>
           </label>
           <input
             type="number"
@@ -186,7 +216,9 @@ export default function FinanceIntake() {
 
         <div>
           <label className="block text-sm font-medium text-[#8BAE5A] mb-2">
-            Berekende Spaarquote
+            <Tooltip content="Het percentage van je inkomen dat je maandelijks kunt sparen. Wordt automatisch berekend op basis van je inkomsten en uitgaven.">
+              Berekende Spaarquote
+            </Tooltip>
           </label>
           <div className="px-4 py-3 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white">
             {calculateSavingsRate()}%
@@ -209,7 +241,9 @@ export default function FinanceIntake() {
       <div className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-[#8BAE5A] mb-2">
-            Passief Inkomen Doel (€/maand)
+            <Tooltip content="Het bedrag dat je maandelijks wilt verdienen zonder actief te werken. Bijvoorbeeld: dividend uit beleggingen, huurinkomsten, of inkomsten uit online business.">
+              Passief Inkomen Doel (€/maand)
+            </Tooltip>
           </label>
           <input
             type="number"
@@ -222,7 +256,9 @@ export default function FinanceIntake() {
 
         <div>
           <label className="block text-sm font-medium text-[#8BAE5A] mb-2">
-            Risicotolerantie
+            <Tooltip content="Hoeveel risico je bereid bent te nemen met je investeringen. Laag = veilig maar lagere rendementen, Hoog = meer risico maar potentieel hogere rendementen.">
+              Risicotolerantie
+            </Tooltip>
           </label>
           <div className="grid grid-cols-3 gap-3">
             {(['low', 'medium', 'high'] as const).map((risk) => (
@@ -249,7 +285,11 @@ export default function FinanceIntake() {
   const renderStep3 = () => (
     <div className="space-y-6">
       <div>
-        <h3 className="text-xl font-bold text-white mb-2">Investeringsvoorkeuren</h3>
+        <h3 className="text-xl font-bold text-white mb-2">
+          <Tooltip content="Deze categorieën helpen ons om je persoonlijke investeringsadviezen en tools te tonen die het beste bij je passen.">
+            Investeringsvoorkeuren
+          </Tooltip>
+        </h3>
         <p className="text-gray-300">Selecteer de investeringscategorieën die je interesseren.</p>
       </div>
 
@@ -280,7 +320,11 @@ export default function FinanceIntake() {
   const renderStep4 = () => (
     <div className="space-y-6">
       <div>
-        <h3 className="text-xl font-bold text-white mb-2">Financiële Doelen</h3>
+        <h3 className="text-xl font-bold text-white mb-2">
+          <Tooltip content="Concrete financiële mijlpalen die je wilt bereiken. Deze helpen je om gefocust te blijven en je voortgang te tracken.">
+            Financiële Doelen
+          </Tooltip>
+        </h3>
         <p className="text-gray-300">Voeg specifieke financiële doelen toe.</p>
       </div>
 
@@ -288,26 +332,47 @@ export default function FinanceIntake() {
         {profile.goals.map((goal, index) => (
           <div key={index} className="p-4 bg-[#181F17] border border-[#3A4D23] rounded-lg">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <input
-                type="text"
-                value={goal.title}
-                onChange={(e) => updateGoal(index, 'title', e.target.value)}
-                placeholder="Doel naam"
-                className="px-3 py-2 bg-[#232D1A] border border-[#3A4D23] rounded text-white"
-              />
-              <input
-                type="number"
-                value={goal.targetAmount === 0 ? '' : goal.targetAmount}
-                onChange={(e) => updateGoal(index, 'targetAmount', parseFloat(e.target.value) || 0)}
-                placeholder="Bedrag (€)"
-                className="px-3 py-2 bg-[#232D1A] border border-[#3A4D23] rounded text-white"
-              />
-              <input
-                type="date"
-                value={goal.targetDate}
-                onChange={(e) => updateGoal(index, 'targetDate', e.target.value)}
-                className="px-3 py-2 bg-[#232D1A] border border-[#3A4D23] rounded text-white"
-              />
+              <div>
+                <div className="text-xs text-[#8BAE5A] mb-1">
+                  <Tooltip content="Een duidelijke naam voor je doel, bijvoorbeeld: 'Noodfonds', 'Huis kopen', 'Pensioen sparen'.">
+                    Doel naam
+                  </Tooltip>
+                </div>
+                <input
+                  type="text"
+                  value={goal.title}
+                  onChange={(e) => updateGoal(index, 'title', e.target.value)}
+                  placeholder="Doel naam"
+                  className="w-full px-3 py-2 bg-[#232D1A] border border-[#3A4D23] rounded text-white"
+                />
+              </div>
+              <div>
+                <div className="text-xs text-[#8BAE5A] mb-1">
+                  <Tooltip content="Het totale bedrag dat je wilt sparen of bereiken voor dit doel.">
+                    Bedrag (€)
+                  </Tooltip>
+                </div>
+                <input
+                  type="number"
+                  value={goal.targetAmount === 0 ? '' : goal.targetAmount}
+                  onChange={(e) => updateGoal(index, 'targetAmount', parseFloat(e.target.value) || 0)}
+                  placeholder="Bedrag (€)"
+                  className="w-full px-3 py-2 bg-[#232D1A] border border-[#3A4D23] rounded text-white"
+                />
+              </div>
+              <div>
+                <div className="text-xs text-[#8BAE5A] mb-1">
+                  <Tooltip content="De datum waarop je dit doel wilt bereiken. Helpt je om je spaarplan te maken.">
+                    Doel datum
+                  </Tooltip>
+                </div>
+                <input
+                  type="date"
+                  value={goal.targetDate}
+                  onChange={(e) => updateGoal(index, 'targetDate', e.target.value)}
+                  className="w-full px-3 py-2 bg-[#232D1A] border border-[#3A4D23] rounded text-white"
+                />
+              </div>
               <button
                 onClick={() => removeGoal(index)}
                 className="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700"
