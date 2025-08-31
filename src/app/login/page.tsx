@@ -4,14 +4,13 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { EnvelopeIcon, LockClosedIcon } from '@heroicons/react/24/outline';
-import { useCacheBuster } from '@/components/CacheBuster';
 import PlatformLoading from '@/components/PlatformLoading';
 
 function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, loading, signIn } = useSupabaseAuth();
-  const { bustCache } = useCacheBuster();
+  // const { bustCache } = useCacheBuster();
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -279,7 +278,7 @@ function LoginPageContent() {
               <button
                 onClick={() => {
                   console.log('🔄 Manual cache busting triggered from login page');
-                  bustCache();
+                  // bustCache(); // This line is removed as per the edit hint
                 }}
                 className={`w-full px-3 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded text-sm font-medium hover:bg-[#4A5D33] transition-colors ${isLoading ? 'cursor-wait opacity-75' : 'cursor-pointer'}`}
                 disabled={isLoading}

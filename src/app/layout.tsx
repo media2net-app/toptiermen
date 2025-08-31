@@ -4,7 +4,7 @@ import './globals.css';
 import { SupabaseAuthProvider } from '@/contexts/SupabaseAuthContext';
 // import { V2StateProvider } from '@/contexts/V2StateContext';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { CacheBuster } from '@/components/CacheBuster';
+import CacheBuster from '@/components/CacheBuster';
 import GlobalLoadingWrapper from '@/components/GlobalLoadingWrapper';
 
 const inter = Inter({ subsets: ['latin'] });
