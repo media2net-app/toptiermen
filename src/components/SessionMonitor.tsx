@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useAuth } from '@/auth-systems/optimal/useAuth';
 
 interface SessionMonitorProps {
   isAdmin?: boolean;
 }
 
 export default function SessionMonitor({ isAdmin = false }: SessionMonitorProps) {
-  const { user } = useSupabaseAuth();
+  const { user } = useAuth();
   const [lastActivity, setLastActivity] = useState(Date.now());
   const [sessionWarning, setSessionWarning] = useState(false);
 

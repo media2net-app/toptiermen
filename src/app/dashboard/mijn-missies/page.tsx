@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useAuth } from '@/auth-systems/optimal/useAuth';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import { toast } from 'react-hot-toast';
 import ClientLayout from '@/app/components/ClientLayout';
@@ -277,7 +277,7 @@ const MISSION_LIBRARY: SuggestedMission[] = [
 ];
 
 export default function MijnMissiesPage() {
-  const { user } = useSupabaseAuth();
+  const { user } = useAuth();
   const { isOnboarding, currentStep, completeCurrentStep } = useOnboarding();
   const [missions, setMissions] = useState<Mission[]>([]);
   const [summary, setSummary] = useState<Summary>({ completedToday: 0, totalToday: 0, dailyStreak: 0 });

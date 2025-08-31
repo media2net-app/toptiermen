@@ -4,7 +4,7 @@ import type { NextRequest } from 'next/server';
 export function middleware(request: NextRequest) {
   const response = NextResponse.next();
 
-  // AGGRESSIVE cache-busting for login and auth routes
+  // MODERATE cache-busting for login and auth routes - REMOVED Clear-Site-Data to prevent logout
   if (request.nextUrl.pathname === '/login' || 
       request.nextUrl.pathname.startsWith('/auth') ||
       request.nextUrl.pathname === '/logout') {
@@ -12,50 +12,47 @@ export function middleware(request: NextRequest) {
     response.headers.set('Pragma', 'no-cache');
     response.headers.set('Expires', '0');
     response.headers.set('Surrogate-Control', 'no-store');
-    response.headers.set('X-TTM-Version', '2.0.3');
+    response.headers.set('X-TTM-Version', '3.0.0');
     response.headers.set('X-Cache-Bust', Date.now().toString());
     response.headers.set('X-Frame-Options', 'DENY');
     response.headers.set('X-Content-Type-Options', 'nosniff');
     response.headers.set('X-Session-Preserve', 'true'); 
-    response.headers.set('Clear-Site-Data', '"cache", "storage"'); 
+    // REMOVED: response.headers.set('Clear-Site-Data', '"cache", "storage"'); - This was causing automatic logout
   }
 
   // Moderate cache-busting for dashboard routes
   if (request.nextUrl.pathname.startsWith('/dashboard')) {
     response.headers.set('Cache-Control', 'no-cache, must-revalidate');
     response.headers.set('Pragma', 'no-cache');
-    response.headers.set('X-TTM-Version', '2.0.3');
+    response.headers.set('X-TTM-Version', '3.0.0');
   }
 
   // Moderate cache-busting headers for API routes
   if (request.nextUrl.pathname.startsWith('/api/')) {
     response.headers.set('Cache-Control', 'no-cache, must-revalidate');
     response.headers.set('Pragma', 'no-cache');
-    response.headers.set('X-TTM-Version', '2.0.3');
+    response.headers.set('X-TTM-Version', '3.0.0');
   }
 
-  // AGGRESSIVE cache-busting for static assets that might be cached
+  // MODERATE cache-busting for static assets - REMOVED aggressive headers to prevent logout
   if (request.nextUrl.pathname.startsWith('/_next/') || 
       request.nextUrl.pathname.includes('.js') || 
       request.nextUrl.pathname.includes('.css')) {
-    response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
+    response.headers.set('Cache-Control', 'no-cache, must-revalidate');
     response.headers.set('Pragma', 'no-cache');
-    response.headers.set('Expires', '0');
-    response.headers.set('X-TTM-Version', '2.0.3');
-    response.headers.set('X-Cache-Bust', Date.now().toString());
+    response.headers.set('X-TTM-Version', '3.0.0');
+    // REMOVED aggressive cache-busting headers that were causing logout issues
   }
 
-  // AGGRESSIVE cache-busting for root and main pages
+  // MODERATE cache-busting for root and main pages - REMOVED aggressive headers to prevent logout
   if (request.nextUrl.pathname === '/' || 
       request.nextUrl.pathname === '/voedingsplannen' ||
       request.nextUrl.pathname === '/brotherhood' ||
       request.nextUrl.pathname === '/academy') {
-    response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0');
+    response.headers.set('Cache-Control', 'no-cache, must-revalidate');
     response.headers.set('Pragma', 'no-cache');
-    response.headers.set('Expires', '0');
-    response.headers.set('Surrogate-Control', 'no-store');
-    response.headers.set('X-TTM-Version', '2.0.3');
-    response.headers.set('X-Cache-Bust', Date.now().toString());
+    response.headers.set('X-TTM-Version', '3.0.0');
+    // REMOVED aggressive cache-busting headers that were causing logout issues
   }
 
   // Force HTTPS in production

@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useAuth } from '@/auth-systems/optimal/useAuth';
 import Breadcrumb, { createBreadcrumbs } from '@/components/Breadcrumb';
 import PageLayout from '@/components/PageLayout';
 
 function PortfolioPageContent() {
-  const { user } = useSupabaseAuth();
+  const { user } = useAuth();
   const [financialProfile, setFinancialProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 

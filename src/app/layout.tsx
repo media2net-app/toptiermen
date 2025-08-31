@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import { SupabaseAuthProvider } from '@/contexts/SupabaseAuthContext';
+import { AuthProvider } from '@/auth-systems/optimal/AuthProvider';
 // import { V2StateProvider } from '@/contexts/V2StateContext';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 // import { CacheBuster } from '@/components/CacheBuster'; - DISABLED TO PREVENT LOGOUT
@@ -65,7 +65,7 @@ export const metadata: Metadata = {
     google: 'your-google-verification-code',
   },
   other: {
-    'X-TTM-Version': '2.0.3',
+    'X-TTM-Version': '3.0.0',
     'X-Platform': 'Top Tier Men',
     'X-Environment': process.env.NODE_ENV || 'development',
     'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
@@ -83,11 +83,11 @@ export default function RootLayout({
     <html lang="nl">
       <body className={inter.className}>
         <ErrorBoundary>
-          {/* <CacheBuster version="2.0.3" forceRefresh={true} /> - DISABLED TO PREVENT LOGOUT */}
+          {/* <CacheBuster version="3.0.0" forceRefresh={true} /> - DISABLED TO PREVENT LOGOUT */}
           {/* <V2StateProvider> */}
-            <SupabaseAuthProvider>
+            <AuthProvider>
               {children}
-            </SupabaseAuthProvider>
+            </AuthProvider>
           {/* </V2StateProvider> */}
         </ErrorBoundary>
       </body>

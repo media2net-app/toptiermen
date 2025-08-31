@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useAuth } from '@/auth-systems/optimal/useAuth';
 // import { useV2State } from '@/contexts/V2StateContext';
 // import { useV2Monitoring } from '@/lib/v2-monitoring';
 // import { useV2ErrorRecovery } from '@/lib/v2-error-recovery';
@@ -66,7 +66,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
   const [openDashboard, setOpenDashboard] = useState(false);
   const { isOnboarding, highlightedMenu } = useOnboarding();
   // const { trackFeatureUsage } = useV2Monitoring();
-  const { user } = useSupabaseAuth();
+  const { user } = useAuth();
   
   const safePathname = pathname || '';
 
@@ -208,7 +208,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
 function DashboardContentInner({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, logoutAndRedirect } = useSupabaseAuth();
+  const { user, signOut } = useAuth();
   const { showDebug, toggleDebug } = useDebug();
   const { isOnboarding, isTransitioning } = useOnboarding();
   const isTestUser = useTestUser();
@@ -228,7 +228,7 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Check if this is an existing user with potential cache issues
     const lastVersion = localStorage.getItem('ttm-app-version');
-    const currentVersion = '2.0.3'; // Increment this when making breaking changes
+    const currentVersion = '3.0.0'; // Increment this when making breaking changes
     
     if (lastVersion && lastVersion !== currentVersion) {
       console.log('🔄 Cache busting: Version mismatch detected');
@@ -367,9 +367,10 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
       }
       
       // Perform logout
-      await logoutAndRedirect('/login');
+      await signOut();
+      router.push('/login');
       
-      // Note: If logoutAndRedirect succeeds, it will redirect the page
+      // Note: If logout succeeds, it will redirect the page
       // so we don't need to reset the loading state here
       
     } catch (error) {

@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useAuth } from '@/auth-systems/optimal/useAuth';
 import { useDebug } from '@/contexts/DebugContext';
 
 import { 
@@ -221,7 +221,7 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
 export default function AdminLayoutClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, loading, signOut, logoutAndRedirect } = useSupabaseAuth();
+  const { user, loading, signOut } = useAuth();
   const isAuthenticated = !!user;
   const { showDebug, setShowDebug } = useDebug();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -269,8 +269,9 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
         logoutButton.setAttribute('disabled', 'true');
       }
       
-      // Use the enhanced logoutAndRedirect function
-      await logoutAndRedirect('/login');
+      // Logout and redirect
+      await signOut();
+      router.push('/login');
       
     } catch (error) {
       console.error('Error logging out:', error);

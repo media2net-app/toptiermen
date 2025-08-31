@@ -1,13 +1,13 @@
 'use client';
 import { useDebug } from '@/contexts/DebugContext';
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useAuth } from '@/auth-systems/optimal/useAuth';
 import { useState, useEffect } from 'react';
 import { getCacheInfo, checkForCacheIssues, clearAppSpecificCache, globalLoadingManager } from '@/lib/cache-utils';
 import { supabase } from '@/lib/supabase';
 
 export default function DebugPanel() {
   const { showDebug, toggleDebug } = useDebug();
-  const { user, loading } = useSupabaseAuth();
+  const { user, loading } = useAuth();
   const [cacheInfo, setCacheInfo] = useState<any>({});
   const [cacheIssues, setCacheIssues] = useState<any>({});
   const [loadingStates, setLoadingStates] = useState<Array<{ key: string; duration: number }>>([]);

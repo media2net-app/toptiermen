@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useAuth } from '@/auth-systems/optimal/useAuth';
 import { 
   UserGroupIcon, 
   VideoCameraIcon, 
@@ -30,7 +30,7 @@ interface IntroductionTaskWidgetProps {
 }
 
 export default function IntroductionTaskWidget({ isVisible, onComplete }: IntroductionTaskWidgetProps) {
-  const { user } = useSupabaseAuth();
+  const { user } = useAuth();
   const router = useRouter();
   const [task, setTask] = useState<IntroductionTask | null>(null);
   const [loading, setLoading] = useState(true);

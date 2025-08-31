@@ -1,7 +1,7 @@
 'use client';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useAuth } from '@/auth-systems/optimal/useAuth';
 
 
 // Force dynamic rendering to prevent navigator errors
@@ -10,7 +10,7 @@ export const revalidate = 0;
 
 export default function OnboardingDashboard() {
   const router = useRouter();
-  const { user } = useSupabaseAuth();
+  const { user } = useAuth();
 
   useEffect(() => {
     if (user) {

@@ -2,14 +2,14 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { FaCheck } from "react-icons/fa6";
-import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
+import { useAuth } from '@/auth-systems/optimal/useAuth';
 import EmailVerificationModal from "@/components/EmailVerificationModal";
 import WelcomeEmailModal from "@/components/WelcomeEmailModal";
 import PaymentModal from "@/components/PaymentModal";
 
 export default function RegisterOriginal() {
   const router = useRouter();
-  const { signUp, user } = useSupabaseAuth();
+  const { signUp, user } = useAuth();
   const isAuthenticated = !!user;
   const [step, setStep] = useState<'intro'|'intake'|'approved'|'rejected'|'register'|'package'|'registration'|'payment'|'success'>('intro');
   const [intake, setIntake] = useState({

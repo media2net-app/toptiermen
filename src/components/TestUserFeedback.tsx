@@ -13,7 +13,7 @@ import {
   Square3Stack3DIcon
 } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useAuth } from '@/auth-systems/optimal/useAuth';
 
 interface TestUserFeedbackProps {
   isTestUser: boolean;
@@ -35,7 +35,7 @@ interface FeedbackNote {
 }
 
 export default function TestUserFeedback({ isTestUser, currentPage, onNoteCreated, userRole }: TestUserFeedbackProps) {
-  const { user } = useSupabaseAuth();
+  const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [isScreenshotMode, setIsScreenshotMode] = useState(false);
   const [selectedElement, setSelectedElement] = useState<HTMLElement | null>(null);

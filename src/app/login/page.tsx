@@ -2,15 +2,15 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useAuth } from '@/auth-systems/optimal/useAuth';
 import { EnvelopeIcon, LockClosedIcon } from '@heroicons/react/24/outline';
-import { useCacheBuster } from '@/components/CacheBuster';
+// import { useCacheBuster } from '@/components/CacheBuster'; - DISABLED TO PREVENT LOGOUT
 
 function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user, loading, signIn } = useSupabaseAuth();
-  const { bustCache } = useCacheBuster();
+  const { user, loading, signIn } = useAuth();
+  // const { bustCache } = useCacheBuster(); - DISABLED TO PREVENT LOGOUT
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -107,7 +107,7 @@ function LoginPageContent() {
     
     try {
       console.log('🔄 Calling signIn function...');
-      const result = await signIn(email, password, rememberMe);
+      const result = await signIn(email, password);
       console.log('📋 SignIn result:', result);
 
       if (!result.success) {
@@ -336,8 +336,8 @@ function LoginPageContent() {
               <p className="text-[#8BAE5A] text-xs mb-2 text-center">Problemen met inloggen?</p>
               <button
                 onClick={() => {
-                  console.log('🔄 Manual cache busting triggered from login page');
-                  bustCache();
+                  console.log('🔄 Manual cache busting: DISABLED to prevent logout issues');
+                  // bustCache(); - DISABLED TO PREVENT LOGOUT
                 }}
                 className={`w-full px-3 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded text-sm font-medium hover:bg-[#4A5D33] transition-colors ${isLoading ? 'cursor-wait opacity-75' : 'cursor-pointer'}`}
                 disabled={isLoading}
@@ -350,7 +350,7 @@ function LoginPageContent() {
             <div className="flex items-center justify-center gap-2">
               <span className="text-[#B6C948] text-xs">Platform</span>
               <span className="px-2 py-1 bg-[#B6C948]/20 text-[#B6C948] text-xs font-semibold rounded-full border border-[#B6C948]/30">
-                2.0.3
+                3.0.0
               </span>
               <span className="text-[#B6C948] text-xs">Stable</span>
             </div>

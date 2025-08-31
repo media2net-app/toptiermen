@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useAuth } from '@/auth-systems/optimal/useAuth';
 
 interface AuthDebugPanelProps {
   isVisible?: boolean;
 }
 
 export default function AuthDebugPanel({ isVisible = false }: AuthDebugPanelProps) {
-  const { user, loading, error } = useSupabaseAuth();
+  const { user, profile, loading, error } = useAuth();
   const [debugInfo, setDebugInfo] = useState<any>({});
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -32,8 +32,8 @@ export default function AuthDebugPanel({ isVisible = false }: AuthDebugPanelProp
         user: user ? {
           id: user.id,
           email: user.email,
-          role: user.role,
-          hasFullName: !!user.full_name,
+          role: profile?.role,
+          hasFullName: !!profile?.full_name,
         } : null,
         loading,
         error,
@@ -46,7 +46,7 @@ export default function AuthDebugPanel({ isVisible = false }: AuthDebugPanelProp
     const interval = setInterval(updateDebugInfo, 5000);
 
     return () => clearInterval(interval);
-  }, [user, loading, error]);
+  }, [user, profile, loading, error]);
 
   if (!isVisible) return null;
 

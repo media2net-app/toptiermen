@@ -4,14 +4,14 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { supabase } from '@/lib/supabase';
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useAuth } from '@/auth-systems/optimal/useAuth';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
 export default function AdminLessonDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { user } = useSupabaseAuth();
+  const { user } = useAuth();
   const slug = (params as any).slug as string;
   const lessonId = (params as any).lessonId as string;
   const [module, setModule] = useState<any>(null);

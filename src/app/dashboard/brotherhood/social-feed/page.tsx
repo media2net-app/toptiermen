@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useAuth } from '@/auth-systems/optimal/useAuth';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'react-hot-toast';
 import { 
@@ -51,7 +51,7 @@ interface Post {
 }
 
 const SocialFeedPage = () => {
-  const { user } = useSupabaseAuth();
+  const { user, profile } = useAuth();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [newPost, setNewPost] = useState('');
@@ -370,7 +370,7 @@ const SocialFeedPage = () => {
             <div className="flex-shrink-0">
               <Image 
                 src="/profielfoto.png" 
-                alt={user?.full_name || "User"} 
+                alt={profile?.full_name || "User"} 
                 width={48} 
                 height={48} 
                 className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-[#8BAE5A] object-cover" 
@@ -385,7 +385,7 @@ const SocialFeedPage = () => {
                   onChange={(e) => setNewPost(e.target.value)}
                   className="w-full border-none focus:ring-0 resize-none bg-[#181F17] text-white rounded-xl p-3 sm:p-4 pr-10 sm:pr-12 placeholder:text-[#8BAE5A] text-sm sm:text-base"
                   rows={3}
-                  placeholder={`Deel een overwinning, stel een vraag of zet je intentie voor vandaag, ${user?.full_name?.split(' ')[0] || 'Brother'}...`}
+                  placeholder={`Deel een overwinning, stel een vraag of zet je intentie voor vandaag, ${profile?.full_name?.split(' ')[0] || 'Brother'}...`}
                   maxLength={500}
                 />
                 <button
@@ -672,7 +672,7 @@ const SocialFeedPage = () => {
               <div className="flex gap-3">
                 <Image 
                   src="/profielfoto.png" 
-                  alt={user?.full_name || "User"} 
+                  alt={profile?.full_name || "User"} 
                   width={32} 
                   height={32} 
                   className="w-8 h-8 rounded-full border border-[#8BAE5A] object-cover flex-shrink-0" 

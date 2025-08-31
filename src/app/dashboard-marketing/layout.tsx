@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useAuth } from '@/auth-systems/optimal/useAuth';
 import { CampaignsProvider } from '@/contexts/CampaignsContext';
 import { 
   ChartBarIcon,
@@ -83,7 +83,7 @@ export default function MarketingLayout({
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
-  const { user, loading } = useSupabaseAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
 
   // Temporarily disable authentication check for testing
