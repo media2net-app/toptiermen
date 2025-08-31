@@ -7,7 +7,7 @@ interface CacheBusterProps {
   forceRefresh?: boolean;
 }
 
-export function CacheBuster({ version = '2.0.1', forceRefresh = false }: CacheBusterProps) {
+export function CacheBuster({ version = '2.0.3', forceRefresh = false }: CacheBusterProps) {
   useEffect(() => {
     // Force cache refresh on mount
     if (forceRefresh) {

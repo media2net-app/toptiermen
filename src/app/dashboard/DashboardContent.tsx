@@ -227,7 +227,7 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Check if this is an existing user with potential cache issues
     const lastVersion = localStorage.getItem('ttm-app-version');
-    const currentVersion = '2.0.1'; // Increment this when making breaking changes
+    const currentVersion = '2.0.3'; // Increment this when making breaking changes
     
     if (lastVersion && lastVersion !== currentVersion) {
       console.log('🔄 Cache busting: Version mismatch detected');

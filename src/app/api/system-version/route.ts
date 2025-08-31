@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 export async function GET() {
   try {
     const versionInfo = {
-      version: '2.0.1',
+      version: '2.0.3',
       platform: 'Top Tier Men',
       environment: process.env.NODE_ENV || 'development',
       timestamp: new Date().toISOString(),
@@ -16,7 +16,9 @@ export async function GET() {
         academy: true,
         brotherhood: true,
         marketing: true,
-        admin: true
+        admin: true,
+        timeoutProtection: true,
+        errorBoundary: true
       },
       database: {
         primaryTable: 'profiles',
@@ -24,7 +26,7 @@ export async function GET() {
         usersTableRemoved: false // Will be true after manual cleanup
       },
       cache: {
-        version: '2.0.1',
+        version: '2.0.3',
         localStorageKey: 'ttm-app-version',
         cacheBustKey: 'ttm-cache-bust'
       }
@@ -35,7 +37,7 @@ export async function GET() {
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Pragma': 'no-cache',
         'Expires': '0',
-        'X-TTM-Version': '2.0.1'
+        'X-TTM-Version': '2.0.3'
       }
     });
   } catch (error) {

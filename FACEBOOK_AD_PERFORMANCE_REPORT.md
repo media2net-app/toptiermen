@@ -1,0 +1,156 @@
+# 📊 Facebook Ad Performance Report
+## Top Tier Men - August 2025
+
+**Period:** Start tot 31 augustus 2025  
+**Generated:** 31 augustus 2025  
+**Total Leads:** 43 (38 in augustus)
+
+---
+
+## 🏆 **BEST PERFORMING FACEBOOK AD**
+
+### **TTM - Zakelijk Prelaunch Campagne - LEADS V2**
+- **Campaign ID:** 120232433872750324
+- **Status:** ACTIVE ✅
+- **Leads Generated:** 4
+- **Spend:** €6.70
+- **Cost per Lead:** €1.68
+- **Conversion Rate:** 12.50%
+- **CTR:** 8.94%
+- **CPC:** €0.209
+
+#### **Generated Leads:**
+1. **Richard Jaspers** (jalissakoosje@gmail.com) - 30 augustus
+2. **Jarreau** (jarreaubraaf@gmail.com) - 30 augustus  
+3. **Lars van der Neut** (larsvanderneut@hotmail.com) - 28 augustus
+4. **Sanjay Raghoenath** (sanjay_raghoenath@live.nl) - 27 augustus
+
+---
+
+## 📈 **PERFORMANCE METRICS**
+
+### **Overall Facebook Ad Performance:**
+- **Total Tracked Leads:** 4
+- **Total Spend:** €6.70
+- **Total Clicks:** 32
+- **Total Impressions:** 358
+- **Average Cost per Lead:** €1.68
+- **Overall Conversion Rate:** 12.50%
+- **Overall CTR:** 8.94%
+
+### **Campaign Status:**
+- ✅ **ACTIVE:** 1 campaign (Zakelijk V2)
+- ⏸️ **PAUSED:** 4 campaigns
+
+---
+
+## 🎯 **KEY FINDINGS**
+
+### **1. Best Performing Campaign**
+**TTM - Zakelijk Prelaunch Campagne - LEADS V2** is de enige actieve campagne en presteert uitstekend:
+- **€1.68 cost per lead** - Zeer gunstig
+- **12.50% conversion rate** - Boven gemiddeld
+- **8.94% CTR** - Goede click-through rate
+
+### **2. Campaign Performance Issues**
+- **4 van 5 campagnes zijn gepauzeerd** - Dit verklaart de lage totale leads
+- **Slechte tracking** - 34 van 38 augustus leads hebben geen campagne tracking
+- **Oude campagne IDs** - Veel leads komen van oude campagnes die niet meer actief zijn
+
+### **3. Lead Source Breakdown (Augustus 2025):**
+- **Pre-launch landingspagina:** 21 leads (55%)
+- **Social Media:** 13 leads (34%)
+- **Direct Contact:** 4 leads (11%)
+- **Facebook Ads:** 4 leads (11%) - **Alleen getrackte leads**
+
+---
+
+## 🔍 **TRACKING ISSUES IDENTIFIED**
+
+### **Untracked Facebook Leads:**
+Deze leads hebben campagne IDs in hun notes maar zijn niet gekoppeld aan actieve campagnes:
+
+1. **Daniël** (inferno3@live.nl) - Campaign: 120232498227590324
+2. **Sebastiaan Slootjes** (timmerbedrijf.sslootjes@gmail.com) - Campaign: 120232181487970324
+3. **Simon Podhalicz** (simon@flower-power.ag) - Campaign: 120232181487970324
+4. **U. Hendriks** (u.hendriks@fontys.nl) - Campaign: 120232181487970324
+5. **Rick** (rickjacobs15@hotmail.com) - Campaign: 120232181493720324
+6. **Matthias** (informeermatthias@gmail.com) - Campaign: 120232181493720324
+
+---
+
+## 💡 **RECOMMENDATIONS**
+
+### **1. Scale Up Best Performer**
+- **Verhoog budget** voor "TTM - Zakelijk Prelaunch Campagne - LEADS V2"
+- **Dupliceer targeting** naar andere campagnes
+- **Test vergelijkbare creatives** in andere campagnes
+
+### **2. Fix Tracking Issues**
+- **Implementeer betere UTM tracking** op alle Facebook ads
+- **Voeg campagne notes toe** aan alle leads
+- **Koppel oude campagne IDs** aan nieuwe campagnes
+
+### **3. Reactivate Paused Campaigns**
+- **Heractiveer gepauzeerde campagnes** met verbeterde targeting
+- **Gebruik learnings** van de best presterende campagne
+- **Test verschillende audience segments**
+
+### **4. Improve Lead Quality**
+- **Analyseer package preferences** (alle leads zijn BASIC)
+- **Test premium targeting** voor hogere conversies
+- **Implementeer lead scoring** systeem
+
+---
+
+## 📊 **COMPARISON WITH OTHER SOURCES**
+
+### **Lead Generation Performance:**
+1. **Pre-launch landingspagina:** 21 leads (55%) - **Beste performer**
+2. **Social Media:** 13 leads (34%) - **Goede organische groei**
+3. **Facebook Ads:** 4 leads (11%) - **Laag volume, hoge kwaliteit**
+4. **Direct Contact:** 4 leads (11%) - **Stabiele bron**
+
+### **Cost Efficiency:**
+- **Facebook Ads:** €1.68 per lead
+- **Pre-launch landingspagina:** €0 per lead (organisch)
+- **Social Media:** €0 per lead (organisch)
+- **Direct Contact:** €0 per lead (organisch)
+
+---
+
+## 🎯 **NEXT STEPS**
+
+### **Immediate Actions (Week 1):**
+1. **Verhoog budget** voor Zakelijk V2 campagne met 200%
+2. **Heractiveer** beste gepauzeerde campagnes
+3. **Fix tracking** voor alle nieuwe leads
+
+### **Short Term (Week 2-4):**
+1. **Test nieuwe creatives** gebaseerd op best performer
+2. **Implementeer betere UTM tracking**
+3. **Analyseer audience insights** van best performer
+
+### **Long Term (Month 2-3):**
+1. **Scale succesvolle targeting** naar nieuwe campagnes
+2. **Implementeer lead scoring** systeem
+3. **Test premium package targeting**
+
+---
+
+## 📈 **SUCCESS METRICS**
+
+### **Current Performance:**
+- ✅ **Cost per Lead:** €1.68 (Zeer goed)
+- ✅ **Conversion Rate:** 12.50% (Boven gemiddeld)
+- ✅ **CTR:** 8.94% (Goed)
+
+### **Target Improvements:**
+- 🎯 **Increase leads:** Van 4 naar 20+ per maand
+- 🎯 **Maintain CPL:** Onder €2.00
+- 🎯 **Improve tracking:** 100% van leads getracked
+
+---
+
+**Report generated by Top Tier Men Analytics System**  
+**Data source:** Supabase prelaunch_emails table + Facebook Ads API
