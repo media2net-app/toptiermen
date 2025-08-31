@@ -408,9 +408,14 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isMobileMenuOpen]);
 
-  // Show loading state for dashboard content
-  if (isLoading) {
-    return <PlatformLoading message="Dashboard laden..." />;
+  // Show loading state for dashboard content - DISABLED TO FIX LOADING ISSUE
+  // if (isLoading && !user) {
+  //   return <PlatformLoading message="Dashboard laden..." />;
+  // }
+
+  // CRITICAL FIX: Don't show loading if user is available
+  if (isLoading && user) {
+    console.log('User available but still loading, proceeding anyway');
   }
 
   return (
