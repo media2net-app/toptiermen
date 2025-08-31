@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import Breadcrumb, { createBreadcrumbs } from '@/components/Breadcrumb';
+import PageLayout from '@/components/PageLayout';
 
 function CashflowPageContent() {
   const { user } = useSupabaseAuth();
@@ -46,7 +47,10 @@ function CashflowPageContent() {
   const savingsRate = income > 0 ? Math.round((savings / income) * 100) : 0;
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
+    <PageLayout
+      title="Cashflow Overzicht"
+      subtitle="Jouw maandelijkse inkomsten en uitgaven in één oogopslag"
+    >
       {/* Breadcrumb */}
       <div className="mb-6">
         <Breadcrumb 
@@ -57,9 +61,6 @@ function CashflowPageContent() {
           )} 
         />
       </div>
-      
-      <h1 className="text-3xl font-bold text-[#B6C948] mb-4">Cashflow Overzicht</h1>
-      <p className="text-[#8BAE5A] mb-8">Jouw maandelijkse inkomsten en uitgaven in één oogopslag</p>
       
       {/* Hoofdoverzicht */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -219,7 +220,7 @@ function CashflowPageContent() {
           </div>
         </div>
       </div>
-    </div>
+    </PageLayout>
   );
 }
 
