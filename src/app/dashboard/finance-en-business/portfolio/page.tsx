@@ -1,15 +1,51 @@
 "use client";
 
-import React from 'react';
-import { useFinance, FinanceProvider } from '../FinanceContext';
+import React, { useState, useEffect } from 'react';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
 function PortfolioPageContent() {
-  const { finance } = useFinance();
-  const totalAssets = finance.assets.reduce((sum, a) => sum + a.value, 0);
-  const totalInvested = finance.assets.filter(a => a.name !== 'Spaarrekening').reduce((sum, a) => sum + a.value, 0);
-  const monthlyPassiveIncome = (totalInvested * 0.04) / 12;
-  const passiveGoal = 100;
-  const passiveProgress = Math.min(100, Math.round((monthlyPassiveIncome / passiveGoal) * 100));
+  const { user } = useSupabaseAuth();
+  const [financialProfile, setFinancialProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchFinancialProfile = async () => {
+      if (!user?.id) return;
+
+      try {
+        const response = await fetch(`/api/finance/profile?userId=${user.id}`);
+        if (response.ok) {
+          const data = await response.json();
+          setFinancialProfile(data.profile);
+        }
+      } catch (error) {
+        console.error('Error fetching financial profile:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFinancialProfile();
+  }, [user?.id]);
+
+  if (loading) {
+    return (
+      <div className="p-8 max-w-6xl mx-auto">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#8BAE5A] mx-auto"></div>
+          <p className="text-white mt-4 text-lg">Portfolio laden...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const netWorth = financialProfile?.net_worth || 0;
+  const monthlyIncome = financialProfile?.monthly_income || 0;
+  const monthlyExpenses = financialProfile?.monthly_expenses || 0;
+  const monthlySavings = monthlyIncome - monthlyExpenses;
+  const passiveIncomeGoal = financialProfile?.passive_income_goal || 0;
+  const currentPassiveIncome = monthlySavings; // Simplified calculation
+  const passiveProgress = passiveIncomeGoal > 0 ? Math.min(100, Math.round((currentPassiveIncome / passiveIncomeGoal) * 100)) : 0;
 
   return (
     <div className="p-8 max-w-6xl mx-auto">
@@ -19,47 +55,46 @@ function PortfolioPageContent() {
       {/* Portfolio Overzicht */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div className="bg-[#232D1A] rounded-2xl shadow-xl p-6 border border-[#3A4D23]">
-          <h3 className="text-lg font-bold text-[#B6C948] mb-2">Totaal Portfolio</h3>
-          <div className="text-2xl font-bold text-[#8BAE5A]">€{totalAssets.toLocaleString('nl-NL')}</div>
+          <h3 className="text-lg font-bold text-[#B6C948] mb-2">Netto Waarde</h3>
+          <div className="text-2xl font-bold text-[#8BAE5A]">€{netWorth.toLocaleString('nl-NL')}</div>
         </div>
         <div className="bg-[#232D1A] rounded-2xl shadow-xl p-6 border border-[#3A4D23]">
-          <h3 className="text-lg font-bold text-[#B6C948] mb-2">Geïnvesteerd</h3>
-          <div className="text-2xl font-bold text-[#8BAE5A]">€{totalInvested.toLocaleString('nl-NL')}</div>
+          <h3 className="text-lg font-bold text-[#B6C948] mb-2">Maandinkomen</h3>
+          <div className="text-2xl font-bold text-[#8BAE5A]">€{monthlyIncome.toLocaleString('nl-NL')}</div>
         </div>
         <div className="bg-[#232D1A] rounded-2xl shadow-xl p-6 border border-[#3A4D23]">
-          <h3 className="text-lg font-bold text-[#B6C948] mb-2">Liquide</h3>
-          <div className="text-2xl font-bold text-[#8BAE5A]">€{(totalAssets - totalInvested).toLocaleString('nl-NL')}</div>
+          <h3 className="text-lg font-bold text-[#B6C948] mb-2">Maandelijkse Besparingen</h3>
+          <div className="text-2xl font-bold text-[#8BAE5A]">€{monthlySavings.toLocaleString('nl-NL')}</div>
         </div>
         <div className="bg-[#232D1A] rounded-2xl shadow-xl p-6 border border-[#3A4D23]">
-          <h3 className="text-lg font-bold text-[#B6C948] mb-2">Passief Inkomen</h3>
-          <div className="text-2xl font-bold text-[#8BAE5A]">€{monthlyPassiveIncome.toLocaleString('nl-NL')}</div>
+          <h3 className="text-lg font-bold text-[#B6C948] mb-2">Passief Inkomen Doel</h3>
+          <div className="text-2xl font-bold text-[#8BAE5A]">€{passiveIncomeGoal.toLocaleString('nl-NL')}</div>
         </div>
       </div>
 
-      {/* Asset Allocation */}
+      {/* Investeringsvoorkeuren */}
       <div className="bg-[#232D1A] rounded-2xl shadow-xl p-8 border border-[#3A4D23] mb-8">
-        <h2 className="text-xl font-bold text-[#B6C948] mb-6">Asset Allocation</h2>
-        <div className="space-y-4">
-          {finance.assets.map((asset, index) => {
-            const percentage = totalAssets > 0 ? Math.round((asset.value / totalAssets) * 100) : 0;
-            return (
-              <div key={asset.name} className="bg-[#181F17] rounded-lg p-4 border border-[#3A4D23]">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-[#B6C948] font-medium">{asset.name}</span>
-                  <span className="text-[#8BAE5A] font-bold">€{asset.value.toLocaleString('nl-NL')}</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="flex-1 bg-[#232D1A] rounded-full h-3 overflow-hidden">
-                    <div 
-                      className="h-full bg-[#8BAE5A] rounded-full transition-all duration-1000"
-                      style={{ width: `${percentage}%` }}
-                    />
-                  </div>
-                  <span className="text-[#8BAE5A] text-sm font-medium">{percentage}%</span>
-                </div>
+        <h2 className="text-xl font-bold text-[#B6C948] mb-6">Investeringsvoorkeuren</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {financialProfile?.investment_categories?.map((category: string, index: number) => (
+            <div key={index} className="bg-[#181F17] rounded-lg p-4 border border-[#3A4D23] text-center">
+              <div className="w-8 h-8 bg-[#8BAE5A] rounded-full mx-auto mb-2 flex items-center justify-center">
+                <span className="text-[#232D1A] text-sm font-bold">✓</span>
               </div>
-            );
-          })}
+              <span className="text-[#8BAE5A] text-sm">{category}</span>
+            </div>
+          )) || (
+            <div className="col-span-full text-center text-[#8BAE5A] opacity-75">
+              Geen investeringsvoorkeuren ingesteld
+            </div>
+          )}
+        </div>
+        
+        <div className="mt-6 p-4 bg-[#181F17] rounded-lg border border-[#3A4D23]">
+          <h3 className="text-lg font-bold text-[#B6C948] mb-2">Risicotolerantie</h3>
+          <div className="text-[#8BAE5A] capitalize">
+            {financialProfile?.risk_tolerance || 'Niet ingesteld'}
+          </div>
         </div>
       </div>
 
@@ -67,12 +102,12 @@ function PortfolioPageContent() {
       <div className="bg-[#232D1A] rounded-2xl shadow-xl p-8 border border-[#3A4D23]">
         <h2 className="text-xl font-bold text-[#B6C948] mb-6">Passief Inkomen Doel</h2>
         <div className="text-center mb-6">
-          <div className="text-3xl font-bold text-[#B6C948] mb-2">€{monthlyPassiveIncome.toLocaleString('nl-NL')}</div>
+          <div className="text-3xl font-bold text-[#B6C948] mb-2">€{currentPassiveIncome.toLocaleString('nl-NL')}</div>
           <div className="text-[#8BAE5A] text-sm">Huidig passief inkomen per maand</div>
         </div>
         <div className="mb-4">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-[#8BAE5A] text-sm">Voortgang naar €{passiveGoal}/maand</span>
+            <span className="text-[#8BAE5A] text-sm">Voortgang naar €{passiveIncomeGoal.toLocaleString('nl-NL')}/maand</span>
             <span className="text-[#B6C948] font-bold">{passiveProgress}%</span>
           </div>
           <div className="w-full bg-[#232D1A] rounded-full h-4 overflow-hidden">
@@ -82,15 +117,14 @@ function PortfolioPageContent() {
             />
           </div>
         </div>
+        <div className="text-center text-[#8BAE5A] text-sm">
+          Nog €{(passiveIncomeGoal - currentPassiveIncome).toLocaleString('nl-NL')} te gaan naar je doel
+        </div>
       </div>
     </div>
   );
 }
 
 export default function PortfolioPage() {
-  return (
-    <FinanceProvider>
-      <PortfolioPageContent />
-    </FinanceProvider>
-  );
+  return <PortfolioPageContent />;
 } 
