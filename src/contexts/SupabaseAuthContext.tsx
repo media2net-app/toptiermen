@@ -400,24 +400,33 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     try {
       console.log('Logout and redirect initiated...');
       
-      // First, try to sign out via Supabase
-      await signOut();
-      
-      // Also call our logout API for additional cleanup
+      // Get session token before signing out
+      let accessToken: string | null = null;
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        if (session?.access_token) {
+        accessToken = session?.access_token || null;
+      } catch (error) {
+        console.log('Could not get session token:', error);
+      }
+      
+      // Call logout API first (if we have a token)
+      if (accessToken) {
+        try {
           await fetch('/api/auth/logout', {
             method: 'POST',
             headers: {
-              'Authorization': `Bearer ${session.access_token}`,
+              'Authorization': `Bearer ${accessToken}`,
               'Content-Type': 'application/json'
             }
           });
+          console.log('Logout API called successfully');
+        } catch (apiError) {
+          console.log('Logout API call failed (non-critical):', apiError);
         }
-      } catch (apiError) {
-        console.log('Logout API call failed (non-critical):', apiError);
       }
+      
+      // Then sign out from Supabase
+      await signOut();
       
       console.log(`Redirecting to: ${redirectUrl}`);
       
@@ -428,6 +437,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
           try {
             const cacheNames = await caches.keys();
             await Promise.all(cacheNames.map(name => caches.delete(name)));
+            console.log('Browser cache cleared');
           } catch (cacheError) {
             console.log('Cache clearing failed:', cacheError);
           }
@@ -439,6 +449,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
           ? `${redirectUrl}&t=${timestamp}` 
           : `${redirectUrl}?t=${timestamp}`;
         
+        console.log(`Redirecting to: ${finalUrl}`);
         window.location.href = finalUrl;
       }
       
@@ -458,6 +469,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
             ? `${redirectUrl}&t=${timestamp}` 
             : `${redirectUrl}?t=${timestamp}`;
           
+          console.log(`Fallback redirect to: ${finalUrl}`);
           window.location.href = finalUrl;
         }
       }, 1000);

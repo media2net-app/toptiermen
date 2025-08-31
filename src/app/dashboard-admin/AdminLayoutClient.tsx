@@ -221,7 +221,7 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
 export default function AdminLayoutClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, loading, signOut } = useSupabaseAuth();
+  const { user, loading, signOut, logoutAndRedirect } = useSupabaseAuth();
   const isAuthenticated = !!user;
   const { showDebug, setShowDebug } = useDebug();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -263,14 +263,8 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
         logoutButton.setAttribute('disabled', 'true');
       }
       
-      // Perform logout with redirect
-      await signOut();
-      
-      // Force redirect to login
-      if (typeof window !== 'undefined') {
-        const timestamp = Date.now();
-        window.location.href = `/login?t=${timestamp}`;
-      }
+      // Use the enhanced logoutAndRedirect function
+      await logoutAndRedirect('/login');
       
     } catch (error) {
       console.error('Error logging out:', error);
