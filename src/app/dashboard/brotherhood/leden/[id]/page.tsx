@@ -6,6 +6,11 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { Database } from '@/types/database.types';
 
+
+// Force dynamic rendering to prevent navigator errors
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 type User = Database['public']['Tables']['profiles']['Row'];
 
 const ranks = [

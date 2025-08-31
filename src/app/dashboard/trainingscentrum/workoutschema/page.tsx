@@ -2,6 +2,11 @@
 import Link from 'next/link';
 import Image from 'next/image';
 
+
+// Force dynamic rendering to prevent navigator errors
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const schemas = [
   {
     title: 'Gym Schema',

@@ -163,7 +163,33 @@ export async function POST(request: Request) {
     if (action === 'complete_step') {
       // Mark specific step as completed
       updateData[`step_${step}_completed`] = true;
-      updateData.current_step = Math.max(step + 1, 6);
+      
+      // Calculate next step based on completion status
+      let nextStep = step + 1;
+      
+      // Check if all steps are completed
+      const stepCompletionCheck = await supabase
+        .from('onboarding_status')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+
+      if (stepCompletionCheck.data) {
+        const allStepsCompleted = 
+          stepCompletionCheck.data.step_1_completed &&
+          stepCompletionCheck.data.step_2_completed &&
+          stepCompletionCheck.data.step_3_completed &&
+          stepCompletionCheck.data.step_4_completed &&
+          stepCompletionCheck.data.step_5_completed;
+
+        if (allStepsCompleted) {
+          updateData.onboarding_completed = true;
+          updateData.completed_at = new Date().toISOString();
+          nextStep = 6; // Completed
+        }
+      }
+      
+      updateData.current_step = nextStep;
       
       // Handle step-specific data
       if (step === 1 && mainGoal) {

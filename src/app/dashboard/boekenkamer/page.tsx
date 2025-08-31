@@ -3,6 +3,11 @@ import { useState, useEffect } from 'react';
 import { FaBookOpen, FaHeadphones, FaStar, FaBookmark, FaFilter, FaSearch, FaTimes, FaCalendarAlt, FaUser, FaGlobe } from 'react-icons/fa';
 import Image from 'next/image';
 
+
+// Force dynamic rendering to prevent navigator errors
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 interface Book {
   id: string;
   title: string;

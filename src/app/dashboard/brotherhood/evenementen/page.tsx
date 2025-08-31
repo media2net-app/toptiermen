@@ -5,6 +5,11 @@ import Link from 'next/link';
 import { MagnifyingGlassIcon, CalendarIcon, ListBulletIcon, MapPinIcon, ClockIcon, UserGroupIcon } from '@heroicons/react/24/outline';
 import { useEvents } from './EventsContext';
 
+
+// Force dynamic rendering to prevent navigator errors
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const eventTypes = ['Alles', 'Online Workshop', 'Fysieke Meetup', 'Mastermind Call'];
 const statusFilters = ['Aankomend', 'Voorbij'];
 

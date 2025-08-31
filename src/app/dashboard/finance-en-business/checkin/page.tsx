@@ -3,6 +3,11 @@ import { useState } from 'react';
 import { useFinance } from '../FinanceContext';
 import { toast } from 'react-hot-toast';
 
+
+// Force dynamic rendering to prevent navigator errors
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 // Mockdata van vorige maand
 const defaultAssets = [
   { name: 'Spaarrekening', value: 5000 },

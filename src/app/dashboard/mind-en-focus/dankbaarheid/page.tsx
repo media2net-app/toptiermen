@@ -3,6 +3,11 @@ import ClientLayout from '../../../components/ClientLayout';
 import { useState } from 'react';
 import { FaSearch, FaFire, FaEdit, FaCheck } from 'react-icons/fa';
 
+
+// Force dynamic rendering to prevent navigator errors
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const QUOTES = [
   'Dankbaarheid opent de volheid van het leven. – Melody Beattie',
   'Het is niet geluk dat ons dankbaar maakt, maar dankbaarheid die ons gelukkig maakt. – David Steindl-Rast',

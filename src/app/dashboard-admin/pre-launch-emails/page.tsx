@@ -10,7 +10,11 @@ import {
   ExclamationTriangleIcon,
   XCircleIcon,
   XMarkIcon,
-  CheckIcon
+  CheckIcon,
+  CalendarIcon,
+  UserGroupIcon,
+  ChartBarIcon,
+  ArrowTrendingUpIcon
 } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
 
@@ -23,6 +27,9 @@ interface PreLaunchEmail {
   status: string;
   notes?: string;
   package?: string;
+  utm_campaign?: string;
+  utm_content?: string;
+  utm_source?: string;
 }
 
 interface NewLeadForm {
@@ -53,6 +60,9 @@ export default function PreLaunchEmails() {
   const [submitting, setSubmitting] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [updating, setUpdating] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterSource, setFilterSource] = useState('all');
+  const [filterStatus, setFilterStatus] = useState('all');
   
   const [newLead, setNewLead] = useState<NewLeadForm>({
     email: '',
@@ -88,7 +98,10 @@ export default function PreLaunchEmails() {
           subscribedAt: new Date(email.subscribed_at || email.subscribedAt),
           status: email.status?.toLowerCase() || 'active',
           notes: email.notes,
-          package: email.package
+          package: email.package,
+          utm_campaign: email.utm_campaign,
+          utm_content: email.utm_content,
+          utm_source: email.utm_source
         }));
         setEmails(formattedEmails);
       } else {
@@ -268,6 +281,32 @@ export default function PreLaunchEmails() {
   const active = emails.filter(e => e.status === 'active').length;
   const pending = emails.filter(e => e.status === 'pending').length;
   const unsubscribed = emails.filter(e => e.status === 'unsubscribed').length;
+  
+  // Get unique sources for filtering
+  const sources = [...new Set(emails.map(e => e.source).filter(Boolean))];
+  
+  // Get recent leads (last 7 days)
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  const recentLeads = emails.filter(e => e.subscribedAt >= sevenDaysAgo);
+  
+  // Filter emails based on search and filters
+  const filteredEmails = emails.filter(email => {
+    const matchesSearch = email.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         email.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (email.notes && email.notes.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesSource = filterSource === 'all' || email.source === filterSource;
+    const matchesStatus = filterStatus === 'all' || email.status === filterStatus;
+    
+    return matchesSearch && matchesSource && matchesStatus;
+  });
+  
+  // Get campaign statistics
+  const campaigns = [...new Set(emails.map(e => e.utm_campaign).filter(Boolean))];
+  const campaignStats = campaigns.map(campaign => ({
+    campaign,
+    count: emails.filter(e => e.utm_campaign === campaign).length
+  }));
 
   if (loading) {
     return (
@@ -337,20 +376,90 @@ export default function PreLaunchEmails() {
         <div className="bg-gradient-to-br from-[#f0a14f]/10 to-[#FFD700]/10 border border-[#f0a14f] rounded-xl p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-[#f0a14f]">In Afwachting</p>
-              <p className="text-2xl font-bold text-[#f0a14f]">{pending}</p>
+              <p className="text-sm text-[#f0a14f]">Nieuwe Leads (7d)</p>
+              <p className="text-2xl font-bold text-[#f0a14f]">{recentLeads.length}</p>
             </div>
-            <ExclamationTriangleIcon className="w-6 h-6 text-[#f0a14f]" />
+            <ArrowTrendingUpIcon className="w-6 h-6 text-[#f0a14f]" />
           </div>
         </div>
         
-        <div className="bg-gradient-to-br from-red-500/10 to-pink-500/10 border border-red-500 rounded-xl p-6">
+        <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-500 rounded-xl p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-red-500">Uitgeschreven</p>
-              <p className="text-2xl font-bold text-red-500">{unsubscribed}</p>
+              <p className="text-sm text-blue-500">Campagnes</p>
+              <p className="text-2xl font-bold text-blue-500">{campaigns.length}</p>
             </div>
-            <XCircleIcon className="w-6 h-6 text-red-500" />
+            <ChartBarIcon className="w-6 h-6 text-blue-500" />
+          </div>
+        </div>
+      </div>
+
+      {/* Recent Leads Section */}
+      {recentLeads.length > 0 && (
+        <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-6">
+          <h3 className="text-xl font-semibold text-[#8BAE5A] mb-4 flex items-center gap-2">
+            <CalendarIcon className="w-5 h-5" />
+            Nieuwe Leads (Laatste 7 dagen)
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {recentLeads.slice(0, 6).map((lead) => (
+              <div key={lead.id} className="bg-[#181F17] border border-[#3A4D23] rounded-lg p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="font-semibold text-[#B6C948]">{lead.name}</h4>
+                  <span className="text-xs text-[#8BAE5A] bg-[#8BAE5A]/20 px-2 py-1 rounded">
+                    {lead.source}
+                  </span>
+                </div>
+                <p className="text-sm text-[#B6C948] mb-2">{lead.email}</p>
+                <p className="text-xs text-gray-400">
+                  {lead.subscribedAt.toLocaleDateString('nl-NL')}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Search and Filters */}
+      <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="relative">
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#8BAE5A]" />
+            <input
+              type="text"
+              placeholder="Zoeken..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-[#B6C948] placeholder-[#8BAE5A] focus:outline-none focus:border-[#8BAE5A]"
+            />
+          </div>
+          
+          <select
+            value={filterSource}
+            onChange={(e) => setFilterSource(e.target.value)}
+            className="px-4 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-[#B6C948] focus:outline-none focus:border-[#8BAE5A]"
+          >
+            <option value="all">Alle Bronnen</option>
+            {sources.map(source => (
+              <option key={source} value={source}>{source}</option>
+            ))}
+          </select>
+          
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            className="px-4 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-[#B6C948] focus:outline-none focus:border-[#8BAE5A]"
+          >
+            <option value="all">Alle Statussen</option>
+            <option value="active">Actief</option>
+            <option value="pending">In Afwachting</option>
+            <option value="unsubscribed">Uitgeschreven</option>
+          </select>
+          
+          <div className="text-right">
+            <span className="text-[#8BAE5A] text-sm">
+              {filteredEmails.length} van {total} leads
+            </span>
           </div>
         </div>
       </div>
@@ -371,6 +480,9 @@ export default function PreLaunchEmails() {
                   BRON
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  CAMPAGNE
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   STATUS
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
@@ -382,7 +494,7 @@ export default function PreLaunchEmails() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#3A4D23]">
-              {emails.map((email) => (
+              {filteredEmails.map((email) => (
                 <tr key={email.id} className="hover:bg-[#232D1A] cursor-pointer">
                   <td 
                     className="px-6 py-4 whitespace-nowrap text-sm text-gray-300"
@@ -401,6 +513,18 @@ export default function PreLaunchEmails() {
                     onClick={() => handleEmailClick(email)}
                   >
                     {email.source}
+                  </td>
+                  <td 
+                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-300"
+                    onClick={() => handleEmailClick(email)}
+                  >
+                    {email.utm_campaign ? (
+                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-500/20 text-blue-400">
+                        {email.utm_campaign}
+                      </span>
+                    ) : (
+                      <span className="text-gray-500">-</span>
+                    )}
                   </td>
                   <td 
                     className="px-6 py-4 whitespace-nowrap text-sm text-gray-300"

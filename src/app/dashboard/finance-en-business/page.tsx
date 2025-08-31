@@ -25,6 +25,11 @@ import FIRECalculator from './components/FIRECalculator';
 import PageLayout from '@/components/PageLayout';
 import { useRouter } from 'next/navigation';
 
+
+// Force dynamic rendering to prevent navigator errors
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 ChartJS.register(
   CategoryScale,
   LinearScale,

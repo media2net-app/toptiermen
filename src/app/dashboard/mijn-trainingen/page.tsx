@@ -7,6 +7,11 @@ import { useRouter } from 'next/navigation';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import PreWorkoutModal from '../trainingscentrum/PreWorkoutModal';
 
+
+// Force dynamic rendering to prevent navigator errors
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 interface TrainingSchema {
   id: string;
   name: string;

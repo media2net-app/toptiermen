@@ -397,53 +397,43 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
 
   // Enhanced logout and redirect with better error handling
   const logoutAndRedirect = async (redirectUrl: string = '/login') => {
+    console.log('Logout and redirect initiated...');
+    
     try {
-      console.log('Logout and redirect initiated...');
-      
-      // Get session token before signing out
-      let accessToken: string | null = null;
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        accessToken = session?.access_token || null;
-      } catch (error) {
-        console.log('Could not get session token:', error);
-      }
-      
-      // Call logout API first (if we have a token)
-      if (accessToken) {
-        try {
-          await fetch('/api/auth/logout', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${accessToken}`,
-              'Content-Type': 'application/json'
-            }
-          });
-          console.log('Logout API called successfully');
-        } catch (apiError) {
-          console.log('Logout API call failed (non-critical):', apiError);
-        }
-      }
-      
-      // Then sign out from Supabase
-      await signOut();
-      
-      console.log(`Redirecting to: ${redirectUrl}`);
-      
-      // Force a hard redirect to clear any cached state
+      // Clear all local state and storage first
       if (typeof window !== 'undefined') {
-        // Clear any remaining cached data
-        if ('caches' in window) {
-          try {
-            const cacheNames = await caches.keys();
-            await Promise.all(cacheNames.map(name => caches.delete(name)));
-            console.log('Browser cache cleared');
-          } catch (cacheError) {
-            console.log('Cache clearing failed:', cacheError);
-          }
+        localStorage.clear();
+        sessionStorage.clear();
+        localStorage.removeItem('toptiermen-v2-auth');
+        localStorage.removeItem('supabase.auth.token');
+      }
+      
+      // Reset state immediately
+      dispatch({ type: 'RESET_STATE' });
+      console.log('Local state cleared');
+      
+      // Sign out from Supabase
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Supabase sign out error:', error);
+        // Don't throw - continue with redirect anyway
+      } else {
+        console.log('Supabase sign out successful');
+      }
+      
+      // Clear browser cache
+      if (typeof window !== 'undefined' && 'caches' in window) {
+        try {
+          const cacheNames = await caches.keys();
+          await Promise.all(cacheNames.map(name => caches.delete(name)));
+          console.log('Browser cache cleared');
+        } catch (cacheError) {
+          console.log('Cache clearing failed:', cacheError);
         }
-        
-        // Force redirect with cache busting
+      }
+      
+      // Force redirect with cache busting
+      if (typeof window !== 'undefined') {
         const timestamp = Date.now();
         const finalUrl = redirectUrl.includes('?') 
           ? `${redirectUrl}&t=${timestamp}` 
@@ -454,25 +444,17 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       }
       
     } catch (error) {
-      console.error('Error during logout and redirect:', error);
-      
-      // Show user feedback
+      console.error('Logout error:', error);
+      // Even if there's an error, try to redirect
       if (typeof window !== 'undefined') {
-        alert('Er is een fout opgetreden bij het uitloggen. Je wordt doorgestuurd naar de login pagina.');
+        const timestamp = Date.now();
+        const finalUrl = redirectUrl.includes('?') 
+          ? `${redirectUrl}&t=${timestamp}` 
+          : `${redirectUrl}?t=${timestamp}`;
+        
+        console.log(`Error occurred, but redirecting to: ${finalUrl}`);
+        window.location.href = finalUrl;
       }
-      
-      // Fallback: force redirect even if signOut fails
-      setTimeout(() => {
-        if (typeof window !== 'undefined') {
-          const timestamp = Date.now();
-          const finalUrl = redirectUrl.includes('?') 
-            ? `${redirectUrl}&t=${timestamp}` 
-            : `${redirectUrl}?t=${timestamp}`;
-          
-          console.log(`Fallback redirect to: ${finalUrl}`);
-          window.location.href = finalUrl;
-        }
-      }, 1000);
     }
   };
 

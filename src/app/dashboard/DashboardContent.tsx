@@ -28,6 +28,7 @@ import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 import V2MonitoringDashboard from '@/components/V2MonitoringDashboard';
 import V2PerformanceAlerts from '@/components/V2PerformanceAlerts';
 import CacheIssueHelper from '@/components/CacheIssueHelper';
+import OnboardingBanner from '@/components/OnboardingBanner';
 
 // 2.0.1: Dashboard menu configuration
 const menu = [
@@ -368,6 +369,9 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
       // Perform logout
       await logoutAndRedirect('/login');
       
+      // Note: If logoutAndRedirect succeeds, it will redirect the page
+      // so we don't need to reset the loading state here
+      
     } catch (error) {
       console.error('2.0.1: Dashboard logout error:', error);
       
@@ -376,7 +380,7 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
         alert('Er is een fout opgetreden bij het uitloggen. Probeer het opnieuw of ververs de pagina.');
       }
       
-      // Reset loading state
+      // Reset loading state only on error
       setIsLoggingOut(false);
       
       // Re-enable button
@@ -675,6 +679,9 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
             </div>
           </div>
         </div>
+
+        {/* Onboarding Banner */}
+        <OnboardingBanner />
 
         {/* Modals and Components */}
         <ForcedOnboardingModal 

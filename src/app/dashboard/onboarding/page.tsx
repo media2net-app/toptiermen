@@ -3,6 +3,11 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
+
+// Force dynamic rendering to prevent navigator errors
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default function OnboardingDashboard() {
   const router = useRouter();
   const { user } = useSupabaseAuth();

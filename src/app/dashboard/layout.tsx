@@ -11,6 +11,10 @@ import { DebugProvider } from '@/contexts/DebugContext';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import DashboardContent from './DashboardContent';
 
+// Force dynamic rendering to prevent navigator errors
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, loading, signOut } = useSupabaseAuth();
   const router = useRouter();

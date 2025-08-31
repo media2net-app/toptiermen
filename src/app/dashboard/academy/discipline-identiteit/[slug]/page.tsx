@@ -3,6 +3,11 @@ import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 
+
+// Force dynamic rendering to prevent navigator errors
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const lessons = [
   {
     title: "Introductie & Welkom",

@@ -1,8 +1,13 @@
 "use client";
 import { useState } from "react";
 
-import dynamic from "next/dynamic";
-const WorkoutPlayerModal = dynamic(() => import("../../WorkoutPlayerModal"), { ssr: false });
+
+// Force dynamic rendering to prevent navigator errors
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+import dynamicImport from "next/dynamic";
+const WorkoutPlayerModal = dynamicImport(() => import("../../WorkoutPlayerModal"), { ssr: false });
 
 const days = [
   {

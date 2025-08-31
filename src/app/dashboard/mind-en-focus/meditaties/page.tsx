@@ -4,6 +4,11 @@ import { useState } from 'react';
 import { FaPlay, FaHeart, FaRegHeart, FaSearch } from 'react-icons/fa';
 import { IoMdClose } from 'react-icons/io';
 
+
+// Force dynamic rendering to prevent navigator errors
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const meditaties = [
   {
     id: 1,
