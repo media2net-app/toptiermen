@@ -437,24 +437,71 @@ async function fetchAcademyStats(userId: string) {
     // Get total academy modules
     const { data: modules, error: modulesError } = await supabaseAdmin
       .from('academy_modules')
-      .select('id')
-      .eq('status', 'published');
+      .select('id, title')
+      .eq('status', 'published')
+      .order('order_index');
 
-    // Get user's academy progress
-    const { data: userProgress, error: progressError } = await supabaseAdmin
-      .from('user_academy_progress')
-      .select('*')
-      .eq('user_id', userId);
+    // Get user's lesson progress (new system)
+    const { data: lessonProgress, error: lessonProgressError } = await supabaseAdmin
+      .from('user_lesson_progress')
+      .select('lesson_id, completed')
+      .eq('user_id', userId)
+      .eq('completed', true);
+
+    if (lessonProgressError) {
+      console.error('Error fetching lesson progress:', lessonProgressError);
+      return {
+        totalCourses: 0,
+        completedCourses: 0,
+        learningProgress: 0,
+        progress: 0
+      };
+    }
+
+    // Get lesson details separately
+    const lessonIds = lessonProgress?.map(p => p.lesson_id) || [];
+    const { data: lessonDetails, error: lessonDetailsError } = await supabaseAdmin
+      .from('academy_lessons')
+      .select('id, module_id, title')
+      .in('id', lessonIds);
+
+    if (lessonDetailsError) {
+      console.error('Error fetching lesson details:', lessonDetailsError);
+      return {
+        totalCourses: 0,
+        completedCourses: 0,
+        learningProgress: 0,
+        progress: 0
+      };
+    }
 
     const totalModules = modules?.length || 0;
-    const completedModules = userProgress?.filter(p => p.progress_percentage >= 100).length || 0;
+    
+    // Create a map of lesson_id to lesson details
+    const lessonDetailsMap = {};
+    lessonDetails?.forEach(lesson => {
+      lessonDetailsMap[lesson.id] = lesson;
+    });
+
+    // Calculate completed modules based on lesson completion
+    const completedModules = new Set();
+    lessonProgress?.forEach(progress => {
+      const lessonDetail = lessonDetailsMap[progress.lesson_id];
+      if (lessonDetail?.module_id) {
+        completedModules.add(lessonDetail.module_id);
+      }
+    });
+    
+    const completedModulesCount = completedModules.size;
     
     // Calculate overall progress based on module completion
-    const learningProgress = totalModules > 0 ? Math.round((completedModules / totalModules) * 100) : 0;
+    const learningProgress = totalModules > 0 ? Math.round((completedModulesCount / totalModules) * 100) : 0;
+
+    console.log(`Academy Stats for user ${userId}: ${completedModulesCount}/${totalModules} modules completed (${learningProgress}%)`);
 
     return {
       totalCourses: totalModules,
-      completedCourses: completedModules,
+      completedCourses: completedModulesCount,
       learningProgress,
       progress: learningProgress
     };
