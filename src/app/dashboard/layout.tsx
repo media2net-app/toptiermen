@@ -15,6 +15,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { user, loading, signOut } = useSupabaseAuth();
   const router = useRouter();
   const [userProfile, setUserProfile] = useState<any>(null);
+  const [authTimeout, setAuthTimeout] = useState(false);
 
   // 2.0.1: All 2.0.1 functionality DISABLED to prevent crashes
   // const {
@@ -43,10 +44,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   useEffect(() => {
     if (loading) {
       // setLoadingState('auth-check', true);
-      return;
+      
+      // Add timeout for auth loading
+      const timeoutId = setTimeout(() => {
+        console.warn('Auth loading timeout - proceeding anyway');
+        setAuthTimeout(true);
+      }, 5000); // 5 second timeout for auth
+
+      return () => clearTimeout(timeoutId);
     }
 
     // setLoadingState('auth-check', false);
+    setAuthTimeout(false);
 
     if (!user) {
       // addNotification({
@@ -128,12 +137,36 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   // }, [clear, clearAllErrors]);
 
   // Show loading state
-  if (loading) {
+  if (loading && !authTimeout) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#181F17]">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#B6C948] mx-auto mb-4"></div>
           <p className="text-[#B6C948] text-lg">Laden...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show auth timeout message
+  if (loading && authTimeout) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#181F17]">
+        <div className="text-center max-w-md">
+          <div className="w-16 h-16 border-4 border-[#B6C948] border-opacity-30 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="text-[#B6C948] text-2xl">⚠️</div>
+          </div>
+          <h2 className="text-white text-lg font-bold mb-2">Authenticatie duurde te lang</h2>
+          <p className="text-[#B6C948] text-sm mb-4">
+            Er was een probleem met het laden van je sessie. 
+            Je wordt doorgestuurd naar de login pagina.
+          </p>
+          <button 
+            onClick={() => router.push('/login')} 
+            className="bg-[#B6C948] text-[#181F17] px-4 py-2 rounded-lg font-semibold hover:bg-[#C6D958] transition-colors"
+          >
+            Naar login
+          </button>
         </div>
       </div>
     );
