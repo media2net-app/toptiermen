@@ -4,13 +4,13 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { EnvelopeIcon, LockClosedIcon } from '@heroicons/react/24/outline';
-import PlatformLoading from '@/components/PlatformLoading';
+import { useCacheBuster } from '@/components/CacheBuster';
 
 function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, loading, signIn } = useSupabaseAuth();
-  // const { bustCache } = useCacheBuster();
+  const { bustCache } = useCacheBuster();
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -71,17 +71,17 @@ function LoginPageContent() {
     }
   }, [loading, user, router, searchParams]);
 
-  // 2.0.1: Force show login form after 2 seconds if still loading
-  useEffect(() => {
-    if (loading) {
-      const timer = setTimeout(() => {
-        console.log('2.0.1: Force showing login form after timeout');
-        setRedirecting(false);
-      }, 2000);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [loading]);
+  // 2.0.1: Force show login form after 2 seconds if still loading - DISABLED TO FIX FLICKERING
+  // useEffect(() => {
+  //   if (loading) {
+  //     const timer = setTimeout(() => {
+  //       console.log('2.0.1: Force showing login form after timeout');
+  //       setRedirecting(false);
+  //     }, 2000);
+  //     
+  //     return () => clearTimeout(timer);
+  //   }
+  // }, [loading]);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -158,19 +158,53 @@ function LoginPageContent() {
     }
   }
 
-  // Show loading state while checking authentication (with timeout)
-  if (loading && !redirecting) {
-    return <PlatformLoading message="Authenticatie controleren..." />;
-  }
+  // Show loading state while checking authentication (with timeout) - DISABLED TO FIX FLICKERING
+  // if (loading && !redirecting) {
+  //   return (
+  //     <div className="min-h-screen flex items-center justify-center relative px-4 py-6" style={{ backgroundColor: '#181F17' }}>
+  //       <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
+  //       <div className="w-full max-w-md p-6 sm:p-8 rounded-3xl shadow-2xl bg-[#232D1A]/95 border border-[#3A4D23] backdrop-blur-lg relative z-10">
+  //         <div className="text-center">
+  //           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#B6C948] mx-auto mb-4"></div>
+  //           <p className="text-[#B6C948] text-lg">Laden...</p>
+  //           <p className="text-[#8BAE5A] text-sm mt-2">Authenticatie wordt gecontroleerd</p>
+  //           <button
+  //             onClick={() => window.location.reload()}
+  //             className="mt-4 text-[#8BAE5A] hover:text-[#B6C948] underline text-sm"
+  //           >
+  //             Handmatig herladen als het te lang duurt
+  //           </button>
+  //         </div>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
-  // Show redirecting state
-  if (redirecting) {
-    return <PlatformLoading message="Doorsturen naar dashboard..." />;
-  }
+  // Show redirecting state - DISABLED TO FIX FLICKERING
+  // if (redirecting) {
+  //   return (
+  //     <div className="min-h-screen flex items-center justify-center relative px-4 py-6" style={{ backgroundColor: '#181F17' }}>
+  //       <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
+  //       <div className="w-full max-w-md p-6 sm:p-8 rounded-3xl shadow-2xl bg-[#232D1A]/95 border border-[#3A4D23] backdrop-blur-lg relative z-10">
+  //         <div className="text-center">
+  //           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#B6C948] mx-auto mb-4"></div>
+  //           <p className="text-[#B6C948] text-lg">Doorsturen naar dashboard...</p>
+  //           <p className="text-[#8BAE5A] text-sm mt-2">Je wordt automatisch doorgestuurd</p>
+  //           <button
+  //             onClick={() => window.location.reload()}
+  //             className="mt-4 text-[#8BAE5A] hover:text-[#B6C948] underline text-sm"
+  //           >
+  //             Handmatig herladen als het te lang duurt
+  //           </button>
+  //         </div>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div 
-      className={`min-h-screen flex items-center justify-center relative px-4 py-6 ${isLoading ? 'login-loading' : ''}`} 
+      className={`min-h-screen flex items-center justify-center relative px-4 py-6 ${isLoading ? 'login-loading' : ''}`}
       style={{ backgroundColor: '#181F17' }}
     >
       <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
@@ -278,7 +312,7 @@ function LoginPageContent() {
               <button
                 onClick={() => {
                   console.log('🔄 Manual cache busting triggered from login page');
-                  // bustCache(); // This line is removed as per the edit hint
+                  bustCache();
                 }}
                 className={`w-full px-3 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded text-sm font-medium hover:bg-[#4A5D33] transition-colors ${isLoading ? 'cursor-wait opacity-75' : 'cursor-pointer'}`}
                 disabled={isLoading}

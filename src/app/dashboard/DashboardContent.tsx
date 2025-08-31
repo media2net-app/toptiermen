@@ -23,7 +23,6 @@ import {
 import DebugPanel from '@/components/DebugPanel';
 import ForcedOnboardingModal from '@/components/ForcedOnboardingModal';
 import TestUserVideoModal from '@/components/TestUserVideoModal';
-import PlatformLoading from '@/components/PlatformLoading';
 import TestUserFeedback from '@/components/TestUserFeedback';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 import V2MonitoringDashboard from '@/components/V2MonitoringDashboard';
@@ -39,6 +38,7 @@ const menu = [
   { label: 'Mijn Missies', icon: FireIcon, parent: 'Dashboard', href: '/dashboard/mijn-missies', isSub: true },
   { label: 'Challenges', icon: TrophyIcon, parent: 'Dashboard', href: '/dashboard/challenges', isSub: true },
   { label: 'Mijn Trainingen', icon: AcademicCapIcon, parent: 'Dashboard', href: '/dashboard/mijn-trainingen', isSub: true },
+  { label: 'Voedingsplannen', icon: BookOpenIcon, href: '/dashboard/voedingsplannen' },
   { label: 'Finance & Business', icon: CurrencyDollarIcon, href: '/dashboard/finance-en-business' },
   { label: 'Academy', icon: FireIcon, href: '/dashboard/academy' },
   { label: 'Trainingscentrum', icon: AcademicCapIcon, href: '/dashboard/trainingscentrum' },
@@ -221,7 +221,7 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
   const [onboardingStatus, setOnboardingStatus] = useState<any>(null);
   const [showForcedOnboarding, setShowForcedOnboarding] = useState(false);
   const [showTestUserVideo, setShowTestUserVideo] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false); // DISABLED TO FIX FLICKERING
 
   // 2.0.1: Cache busting for existing users
   useEffect(() => {
@@ -275,12 +275,12 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // 2.0.1: Enhanced onboarding status check with error recovery
+  // 2.0.1: Enhanced onboarding status check with error recovery - DISABLED
   const checkOnboardingStatus = useCallback(async () => {
     if (!user) return;
 
     try {
-      console.log('🔍 Checking onboarding status for user:', user.email);
+      // setLoadingState('onboarding-check', true);
       
       const response = await fetch(`/api/onboarding?userId=${user.id}&t=${Date.now()}&v=2.0.1`, {
         cache: 'no-cache', // Prevent caching of onboarding status
@@ -293,21 +293,36 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
       const data = await response.json();
 
       if (response.ok) {
-        console.log('✅ Onboarding status received:', data);
         setOnboardingStatus(data);
+        // trackFeatureUsage('onboarding-status-check', user.id);
       } else {
         throw new Error('Failed to fetch onboarding status');
       }
     } catch (error) {
-      console.error('❌ Error checking onboarding status:', error);
+      console.error('Error checking onboarding status:', error);
+      // handleError(
+      //   async () => {
+      //     console.error('Error checking onboarding status:', error);
+      //     addNotification({
+      //       type: 'error',
+      //       message: 'Kon onboarding status niet laden',
+      //       read: false
+      //     });
+      //   },
+      //   'Onboarding status check failed',
+      //   'network',
+      //   undefined,
+      //   'onboarding-check'
+      // );
+    } finally {
+      // setLoadingState('onboarding-check', false);
+      // setIsLoading(false); // DISABLED TO FIX FLICKERING
     }
   }, [user?.id]);
 
   // Check onboarding status on mount
   useEffect(() => {
-    if (user) {
-      // Set loading to false immediately when user is available
-      setIsLoading(false);
+    if (user && !isLoading) {
       checkOnboardingStatus();
     }
   }, [user?.id, checkOnboardingStatus]);
@@ -315,39 +330,26 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
   // Show forced onboarding if user hasn't completed onboarding
   useEffect(() => {
     if (onboardingStatus && !onboardingStatus.onboarding_completed) {
-      // Check if user is a test user (email contains @toptiermen.test or @toptiermen.eu)
-      const isTestUser = user?.email?.includes('@toptiermen.test') || 
-                        user?.email?.includes('@toptiermen.eu') || false;
-      
-      console.log('🔍 Onboarding logic check:', {
-        userEmail: user?.email,
-        isTestUser,
-        onboardingCompleted: onboardingStatus.onboarding_completed,
-        currentStep: onboardingStatus.current_step,
-        welcomeVideoWatched: onboardingStatus.welcome_video_watched
-      });
+      // Check if user is a test user (email contains @toptiermen.test)
+      const isTestUser = user?.email?.includes('@toptiermen.test') || false;
       
       if (isTestUser && !onboardingStatus.onboarding_completed) {
         // Show test video first for test users who haven't completed onboarding
-        console.log('🎬 Showing test video modal for test user');
         setShowTestUserVideo(true);
         setShowForcedOnboarding(false);
       } else if (onboardingStatus.current_step <= 1) {
         // Show normal onboarding for regular users or test users who watched the video
-        console.log('📋 Showing normal onboarding modal');
         setShowForcedOnboarding(true);
         setShowTestUserVideo(false);
       } else {
-        console.log('✅ User is in progress with onboarding, no modals needed');
         setShowForcedOnboarding(false);
         setShowTestUserVideo(false);
       }
     } else if (onboardingStatus?.onboarding_completed) {
-      console.log('🎉 Onboarding completed, no modals needed');
       setShowForcedOnboarding(false);
       setShowTestUserVideo(false);
     }
-  }, [onboardingStatus, user?.email]);
+  }, [onboardingStatus, user?.role]);
 
   // 2.0.1: Enhanced logout with error recovery
   const handleLogout = async () => {
@@ -407,16 +409,6 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isMobileMenuOpen]);
-
-  // Show loading state for dashboard content - DISABLED TO FIX LOADING ISSUE
-  // if (isLoading && !user) {
-  //   return <PlatformLoading message="Dashboard laden..." />;
-  // }
-
-  // CRITICAL FIX: Don't show loading if user is available
-  if (isLoading && user) {
-    console.log('User available but still loading, proceeding anyway');
-  }
 
   return (
     <>

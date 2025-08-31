@@ -4,8 +4,7 @@ import './globals.css';
 import { SupabaseAuthProvider } from '@/contexts/SupabaseAuthContext';
 // import { V2StateProvider } from '@/contexts/V2StateContext';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import CacheBuster from '@/components/CacheBuster';
-import GlobalLoadingWrapper from '@/components/GlobalLoadingWrapper';
+import { CacheBuster } from '@/components/CacheBuster';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -84,12 +83,10 @@ export default function RootLayout({
     <html lang="nl">
       <body className={inter.className}>
         <ErrorBoundary>
-          <CacheBuster version="2.0.1" forceRefresh={true} />
+          <CacheBuster version="2.0.1" forceRefresh={false} />
           {/* <V2StateProvider> */}
             <SupabaseAuthProvider>
-              <GlobalLoadingWrapper>
-                {children}
-              </GlobalLoadingWrapper>
+              {children}
             </SupabaseAuthProvider>
           {/* </V2StateProvider> */}
         </ErrorBoundary>
