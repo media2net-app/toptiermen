@@ -135,10 +135,10 @@ export default function AdminDashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState<'7d' | '30d' | '90d'>('7d');
   const { user } = useSupabaseAuth();
 
-  // Redirect to planning-lancering as default page
+  // Redirect to Community Health (overview tab) as default page
   useEffect(() => {
     if (pathname === '/dashboard-admin' && !searchParams?.get('tab')) {
-      router.push('/dashboard-admin/planning-lancering');
+      router.push('/dashboard-admin?tab=overview');
     }
   }, [pathname, searchParams, router]);
   
