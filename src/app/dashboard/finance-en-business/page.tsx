@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -14,7 +14,9 @@ import {
 } from 'chart.js';
 import BankConnectionModal from '@/app/components/BankConnectionModal';
 import Link from 'next/link';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { FinanceProvider, useFinance } from './FinanceContext';
+import { ArrowRightIcon } from '@heroicons/react/24/outline';
 import ZeroBasedBudget from './components/ZeroBasedBudget';
 import DebtSnowball from './components/DebtSnowball';
 import CompoundInterest from './components/CompoundInterest';
@@ -205,18 +207,120 @@ const chartOptions = {
 };
 
 function FinanceDashboardContent() {
+  const { user } = useSupabaseAuth();
   const { finance } = useFinance();
   const [activeTab, setActiveTab] = useState<'overview' | 'planning'>('overview');
+  const [financialProfile, setFinancialProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [hasProfile, setHasProfile] = useState(false);
+
+  // Fetch financial profile on component mount
+  useEffect(() => {
+    const fetchFinancialProfile = async () => {
+      if (!user?.id) return;
+
+      try {
+        const response = await fetch(`/api/finance/profile?userId=${user.id}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.profile) {
+            setFinancialProfile(data.profile);
+            setHasProfile(true);
+          } else {
+            setHasProfile(false);
+          }
+        } else {
+          setHasProfile(false);
+        }
+      } catch (error) {
+        console.error('Error fetching financial profile:', error);
+        setHasProfile(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFinancialProfile();
+  }, [user?.id]);
+
+  // Use real data from profile if available, otherwise fallback to demo data
   const totalAssets = finance.assets.reduce((sum, a) => sum + a.value, 0);
   const totalDebts = finance.debts.reduce((sum, d) => sum + d.value, 0);
-  const netWorth = totalAssets - totalDebts;
-  const savings = finance.savings;
-  const income = finance.income;
-  const savingsRate = income > 0 ? Math.round((savings / income) * 100) : 0;
-  const passiveGoal = 100;
-  // Voor demo: savings als passief inkomen
-  const passiveIncome = savings;
+  const netWorth = financialProfile?.net_worth || (totalAssets - totalDebts);
+  const savings = financialProfile?.monthly_income - financialProfile?.monthly_expenses || finance.savings;
+  const income = financialProfile?.monthly_income || finance.income;
+  const savingsRate = financialProfile?.savings_rate_percentage || (income > 0 ? Math.round((savings / income) * 100) : 0);
+  const passiveGoal = financialProfile?.passive_income_goal || 100;
+  const passiveIncome = savings; // Simplified for now
   const passiveProgress = Math.min(100, Math.round((passiveIncome / passiveGoal) * 100));
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="p-6 md:p-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#8BAE5A] mx-auto"></div>
+          <p className="text-white mt-4 text-lg">Finance & Business laden...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show intake flow if no profile exists
+  if (!hasProfile) {
+    return (
+      <div className="p-6 md:p-12">
+        <div className="text-center max-w-2xl mx-auto">
+          <h1 className="text-3xl md:text-4xl font-bold text-[#B6C948] mb-4">Finance & Business Setup</h1>
+          <p className="text-[#8BAE5A] text-lg mb-8">
+            Laten we je financiële profiel opbouwen zodat je optimaal gebruik kunt maken van de Finance & Business tools.
+          </p>
+          
+          <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-8 mb-8">
+            <h2 className="text-xl font-bold text-white mb-4">Wat ga je instellen?</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+              <div className="flex items-start space-x-3">
+                <div className="w-6 h-6 bg-[#8BAE5A] rounded-full flex items-center justify-center text-black text-sm font-bold mt-0.5">1</div>
+                <div>
+                  <h3 className="text-white font-semibold">Huidige Financiële Situatie</h3>
+                  <p className="text-gray-300 text-sm">Netto waarde, inkomsten en uitgaven</p>
+                </div>
+              </div>
+              <div className="flex items-start space-x-3">
+                <div className="w-6 h-6 bg-[#8BAE5A] rounded-full flex items-center justify-center text-black text-sm font-bold mt-0.5">2</div>
+                <div>
+                  <h3 className="text-white font-semibold">Financiële Doelen</h3>
+                  <p className="text-gray-300 text-sm">Passief inkomen en risicotolerantie</p>
+                </div>
+              </div>
+              <div className="flex items-start space-x-3">
+                <div className="w-6 h-6 bg-[#8BAE5A] rounded-full flex items-center justify-center text-black text-sm font-bold mt-0.5">3</div>
+                <div>
+                  <h3 className="text-white font-semibold">Investeringsvoorkeuren</h3>
+                  <p className="text-gray-300 text-sm">Categorieën die je interesseren</p>
+                </div>
+              </div>
+              <div className="flex items-start space-x-3">
+                <div className="w-6 h-6 bg-[#8BAE5A] rounded-full flex items-center justify-center text-black text-sm font-bold mt-0.5">4</div>
+                <div>
+                  <h3 className="text-white font-semibold">Specifieke Doelen</h3>
+                  <p className="text-gray-300 text-sm">Concrete financiële mijlpalen</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <Link
+            href="/dashboard/finance-en-business/intake"
+            className="inline-flex items-center px-8 py-4 bg-[#8BAE5A] text-[#232D1A] rounded-xl font-bold text-lg hover:bg-[#7A9D4A] transition-colors"
+          >
+            Start Setup
+            <ArrowRightIcon className="w-5 h-5 ml-2" />
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 md:p-12">
