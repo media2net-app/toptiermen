@@ -6,6 +6,9 @@ const nextConfig = {
     optimizePackageImports: ['@heroicons/react'],
   },
   
+  // Disable static generation for all pages to prevent navigator errors
+  output: 'standalone',
+  
   // Compiler optimizations
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',

@@ -3,6 +3,11 @@ import { useState } from 'react';
 import { FaEdit, FaMapMarkerAlt, FaMedal, FaDumbbell, FaFire, FaUserFriends, FaCrown, FaCog, FaUsers, FaTrophy, FaCommentDots, FaHandshake, FaFistRaised } from 'react-icons/fa';
 import Image from 'next/image';
 
+
+// Force dynamic rendering to prevent navigator errors
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const coverUrl = 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80';
 const avatarUrl = 'https://randomuser.me/api/portraits/men/32.jpg';
 const badges = [

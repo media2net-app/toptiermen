@@ -9,6 +9,11 @@ import BadgeDisplay from '@/components/BadgeDisplay';
 import UserTasksWidget from '@/components/UserTasksWidget';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
+
+// Force dynamic rendering to prevent navigator errors
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 interface DashboardStats {
   missions: {
     total: number;

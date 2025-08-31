@@ -9,16 +9,35 @@ interface ErrorBoundaryProps {
 export function ErrorBoundary({ children }: ErrorBoundaryProps) {
   const [hasError, setHasError] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
     const handleError = (error: ErrorEvent) => {
       console.error('🚨 Error boundary caught error:', error);
+      
+      // Don't show error boundary for hydration errors
+      if (error.message?.includes('hydrating') || error.message?.includes('hydration')) {
+        console.log('Hydration error detected, ignoring...');
+        return;
+      }
+      
       setError(error.error);
       setHasError(true);
     };
 
     const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
       console.error('🚨 Error boundary caught unhandled rejection:', event.reason);
+      
+      // Don't show error boundary for hydration errors
+      if (event.reason?.message?.includes('hydrating') || event.reason?.message?.includes('hydration')) {
+        console.log('Hydration error detected, ignoring...');
+        return;
+      }
+      
       setError(new Error(event.reason?.message || 'Unhandled promise rejection'));
       setHasError(true);
     };
@@ -31,6 +50,11 @@ export function ErrorBoundary({ children }: ErrorBoundaryProps) {
       window.removeEventListener('unhandledrejection', handleUnhandledRejection);
     };
   }, []);
+
+  // Don't render error boundary during hydration
+  if (!isClient) {
+    return <>{children}</>;
+  }
 
   if (hasError) {
     return (
@@ -58,38 +82,51 @@ export function ErrorBoundary({ children }: ErrorBoundaryProps) {
           <div className="space-y-3">
             <button
               onClick={() => window.location.reload()}
-              className="w-full bg-[#B6C948] text-black px-6 py-3 rounded-lg font-semibold hover:bg-[#A5B837] transition-colors"
+              className="w-full px-4 py-3 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#0A0F0A] font-semibold rounded-lg hover:from-[#B6C948] hover:to-[#FFD700] transition-all flex items-center justify-center gap-2"
             >
-              🔄 Pagina Verversen
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Pagina Verversen
             </button>
             
             <button
               onClick={() => {
-                // Clear all storage and reload
-                localStorage.clear();
-                sessionStorage.clear();
-                window.location.reload();
+                if (typeof window !== 'undefined') {
+                  // Clear all caches
+                  if ('caches' in window) {
+                    caches.keys().then(names => {
+                      names.forEach(name => caches.delete(name));
+                    });
+                  }
+                  // Clear storage
+                  localStorage.clear();
+                  sessionStorage.clear();
+                  // Reload
+                  window.location.reload();
+                }
               }}
-              className="w-full bg-[#3A4D23] text-[#B6C948] px-6 py-3 rounded-lg font-semibold hover:bg-[#4A5D33] transition-colors"
+              className="w-full px-4 py-3 bg-[#3A4D23] text-[#8BAE5A] font-semibold rounded-lg hover:bg-[#4A5D33] transition-colors flex items-center justify-center gap-2"
             >
-              🧹 Cache Wissen & Verversen
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              Cache Wissen & Verversen
             </button>
             
             <button
-              onClick={() => {
-                setHasError(false);
-                setError(null);
-              }}
-              className="w-full bg-transparent border border-[#3A4D23] text-[#B6C948] px-6 py-3 rounded-lg font-semibold hover:bg-[#3A4D23]/20 transition-colors"
+              onClick={() => window.history.back()}
+              className="w-full px-4 py-3 bg-[#2D3748] text-gray-300 font-semibold rounded-lg hover:bg-[#4A5568] transition-colors flex items-center justify-center gap-2"
             >
-              🔙 Probeer Opnieuw
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Probeer Opnieuw
             </button>
           </div>
           
-          <div className="mt-6 pt-4 border-t border-[#3A4D23]">
-            <p className="text-[#8BAE5A] text-xs">
-              Platform versie: 2.0.3 | Neem contact op als het probleem aanhoudt
-            </p>
+          <div className="mt-8 text-sm text-gray-500">
+            Platform versie: 2.0.3 | Neem contact op als het probleem aanhoudt
           </div>
         </div>
       </div>

@@ -3,6 +3,11 @@ import React, { useState } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
 
+
+// Force dynamic rendering to prevent navigator errors
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const mockGroups = [
   {
     id: '1',

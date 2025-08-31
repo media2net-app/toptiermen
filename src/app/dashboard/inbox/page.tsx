@@ -6,6 +6,11 @@ import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useChatNotifications } from '@/hooks/useChatNotifications';
 import ChatNotificationSettings from '@/components/ChatNotificationSettings';
 
+
+// Force dynamic rendering to prevent navigator errors
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 interface ChatMessage {
   id: string;
   content: string;

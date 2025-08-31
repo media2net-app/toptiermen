@@ -3,6 +3,11 @@ import Link from 'next/link';
 import { FaLeaf, FaLungs, FaBrain } from 'react-icons/fa6';
 import { FaRegSmileBeam } from 'react-icons/fa';
 
+
+// Force dynamic rendering to prevent navigator errors
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const cards = [
   {
     title: 'Meditatie Bibliotheek',

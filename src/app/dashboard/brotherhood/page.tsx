@@ -10,6 +10,11 @@ import { supabase } from '@/lib/supabase';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import Breadcrumb, { createBreadcrumbs } from '@/components/Breadcrumb';
 
+
+// Force dynamic rendering to prevent navigator errors
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 interface Group {
   id: string;
   name: string;

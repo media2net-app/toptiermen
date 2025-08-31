@@ -1,7 +1,7 @@
 'use client';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import { useRouter } from 'next/navigation';
-import { CheckCircleIcon, ArrowRightIcon, PlayIcon } from '@heroicons/react/24/solid';
+import { CheckCircleIcon, ArrowRightIcon, PlayIcon, InformationCircleIcon } from '@heroicons/react/24/solid';
 import { useState, useEffect } from 'react';
 
 export default function OnboardingBanner() {
@@ -53,88 +53,101 @@ export default function OnboardingBanner() {
 
   const getStepIcon = (step: number) => {
     switch (step) {
-      case 0: return <PlayIcon className="w-4 h-4" />;
-      case 1: return <span className="text-lg">🎯</span>;
-      case 2: return <span className="text-lg">🔥</span>;
-      case 3: return <span className="text-lg">💪</span>;
-      case 4: return <span className="text-lg">🥗</span>;
-      case 5: return <span className="text-lg">💬</span>;
-      default: return <CheckCircleIcon className="w-4 h-4" />;
+      case 0: return '🎬';
+      case 1: return '🎯';
+      case 2: return '🔥';
+      case 3: return '💪';
+      case 4: return '🥗';
+      case 5: return '💬';
+      default: return '📋';
     }
   };
 
-  // Check if we're on a page that handles multiple onboarding steps
-  const isMultiStepPage = () => {
-    const currentPage = window.location.pathname;
-    return currentPage === '/dashboard/trainingscentrum' || currentPage === '/dashboard/onboarding';
+  const getStepInstructions = (step: number) => {
+    switch (step) {
+      case 0: return 'Bekijk de welkomstvideo om het platform te leren kennen';
+      case 1: return 'Beschrijf je hoofddoel - wat wil je bereiken?';
+      case 2: return 'Selecteer 3-5 missies die je dagelijks wilt voltooien';
+      case 3: return 'Kies een trainingsschema dat bij je past';
+      case 4: return 'Selecteer je voedingsplan en een challenge';
+      case 5: return 'Stel je voor aan de community in het forum';
+      default: return 'Voltooi de huidige stap om door te gaan';
+    }
   };
 
+  const { getCurrentStepInstructions } = useOnboarding();
+
   return (
-    <div className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out ${
-      isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
-    }`}>
-      <div className="bg-gradient-to-r from-[#8BAE5A] via-[#7A9D4A] to-[#3A4D23] text-white shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 py-4">
+    <div className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
+      <div className="bg-gradient-to-r from-green-600 to-green-700 text-white shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            {/* Progress and current step */}
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 bg-white/20 px-3 py-1 rounded-full">
-                  {getStepIcon(currentStep)}
-                  <span className="text-sm font-semibold">Stap {currentStep + 1}</span>
+            {/* Progress and Step Info */}
+            <div className="flex items-center space-x-4">
+              {/* Step Progress */}
+              <div className="flex items-center space-x-2">
+                <span className="text-sm font-medium">
+                  Stap {currentStep + 1} van {steps.length}
+                </span>
+                <div className="w-24 h-2 bg-green-500 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-white transition-all duration-300 ease-out"
+                    style={{ width: `${progress}%` }}
+                  />
                 </div>
-                <span className="text-xs opacity-80">van {steps.length}</span>
               </div>
-              
-              {/* Progress bar */}
-              <div className="w-40 h-2 bg-white/20 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-white rounded-full transition-all duration-700 ease-out"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-              
-              <div className="text-sm font-medium max-w-xs truncate">
-                {currentStepData?.title}
+
+              {/* Current Step Info */}
+              <div className="flex items-center space-x-2">
+                <span className="text-lg">{getStepIcon(currentStep)}</span>
+                <div>
+                  <h3 className="font-semibold text-sm">{currentStepData?.title}</h3>
+                  <p className="text-xs text-green-100">{currentStepData?.description}</p>
+                </div>
               </div>
             </div>
 
-            {/* Actions */}
-            <div className="flex items-center gap-3">
-              {/* Skip to onboarding button - only show if not on onboarding page */}
-              {window.location.pathname !== '/dashboard/onboarding' && (
-                <button
-                  onClick={handleSkipToOnboarding}
-                  className="px-4 py-2 text-xs bg-white/20 hover:bg-white/30 rounded-lg transition-all duration-200 hover:scale-105"
-                >
-                  Terug naar Overzicht
-                </button>
-              )}
-              
-              {/* Complete step button */}
-              <button
-                onClick={handleCompleteStep}
-                disabled={isCompleting}
-                className={`flex items-center gap-2 px-6 py-2 bg-white text-[#3A4D23] rounded-lg font-semibold text-sm transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed ${
-                  isCompleting ? 'animate-pulse' : ''
-                }`}
-              >
-                {isCompleting ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-[#3A4D23] border-t-transparent rounded-full animate-spin" />
-                    Voltooid...
-                  </>
+            {/* Instructions and Actions */}
+            <div className="flex items-center space-x-4">
+              {/* Instructions */}
+              <div className="flex items-center space-x-2 bg-green-800/50 px-3 py-1 rounded-lg">
+                <InformationCircleIcon className="w-4 h-4" />
+                <span className="text-sm text-green-100">
+                  {getCurrentStepInstructions()}
+                </span>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center space-x-2">
+                {currentStep === 0 ? (
+                  <button
+                    onClick={handleSkipToOnboarding}
+                    className="flex items-center space-x-1 px-3 py-1.5 bg-green-800 hover:bg-green-900 rounded-lg text-sm font-medium transition-colors"
+                  >
+                    <PlayIcon className="w-4 h-4" />
+                    <span>Start Onboarding</span>
+                  </button>
                 ) : (
-                  <>
-                    <CheckCircleIcon className="w-4 h-4" />
-                    {isMultiStepPage() && currentStep < steps.length - 1 && steps[currentStep + 1]?.targetPage === window.location.pathname 
-                      ? 'Volgende Stap' 
-                      : 'Stap Voltooien'
-                    }
-                    <ArrowRightIcon className="w-4 h-4" />
-                  </>
+                  <button
+                    onClick={handleCompleteStep}
+                    disabled={isCompleting}
+                    className="flex items-center space-x-1 px-4 py-1.5 bg-white text-green-700 hover:bg-green-50 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isCompleting ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-green-700 border-t-transparent rounded-full animate-spin" />
+                        <span>Bezig...</span>
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircleIcon className="w-4 h-4" />
+                        <span>Stap Voltooien</span>
+                        <ArrowRightIcon className="w-4 h-4" />
+                      </>
+                    )}
+                  </button>
                 )}
-              </button>
+              </div>
             </div>
           </div>
         </div>

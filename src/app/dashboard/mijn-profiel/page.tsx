@@ -9,6 +9,11 @@ import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { supabase } from '@/lib/supabase';
 import { convertHeicToJpeg, isHeicFile } from '@/lib/heic-converter';
 
+
+// Force dynamic rendering to prevent navigator errors
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 interface UserProfile {
   id: string;
   email: string;

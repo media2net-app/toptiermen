@@ -1,5 +1,6 @@
 'use client';
-import { createContext, useContext, useState, useEffect } from 'react';
+
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useSupabaseAuth } from './SupabaseAuthContext';
 
 interface OnboardingStep {
@@ -10,6 +11,7 @@ interface OnboardingStep {
   targetMenuLabel: string;
   completed: boolean;
   icon: string;
+  instructions: string;
 }
 
 interface OnboardingContextType {
@@ -23,6 +25,7 @@ interface OnboardingContextType {
   setCurrentStep: (step: number) => void;
   resetOnboarding: () => void;
   goToStep: (step: number) => Promise<void>;
+  getCurrentStepInstructions: () => string;
 }
 
 const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined);
@@ -42,7 +45,8 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       targetPage: '/dashboard/onboarding',
       targetMenuLabel: 'Onboarding',
       completed: false,
-      icon: '🎬'
+      icon: '🎬',
+      instructions: 'Bekijk de welkomstvideo om het platform te leren kennen'
     },
     {
       id: 1,
@@ -51,7 +55,8 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       targetPage: '/dashboard/onboarding',
       targetMenuLabel: 'Onboarding',
       completed: false,
-      icon: '🎯'
+      icon: '🎯',
+      instructions: 'Beschrijf je hoofddoel - wat wil je bereiken?'
     },
     {
       id: 2,
@@ -60,7 +65,8 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       targetPage: '/dashboard/mijn-missies',
       targetMenuLabel: 'Mijn Missies',
       completed: false,
-      icon: '🔥'
+      icon: '🔥',
+      instructions: 'Voeg je eerste missies toe door op "Nieuwe Missie Toevoegen" te klikken of gebruik de "Missie Bibliotheek"'
     },
     {
       id: 3,
@@ -69,7 +75,8 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       targetPage: '/dashboard/trainingscentrum',
       targetMenuLabel: 'Trainingscentrum',
       completed: false,
-      icon: '💪'
+      icon: '💪',
+      instructions: 'Bekijk de beschikbare trainingsschema\'s en selecteer er één die bij je past'
     },
     {
       id: 4,
@@ -78,7 +85,8 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       targetPage: '/dashboard/trainingscentrum',
       targetMenuLabel: 'Trainingscentrum',
       completed: false,
-      icon: '🥗'
+      icon: '🥗',
+      instructions: 'Selecteer je voedingsplan en een challenge'
     },
     {
       id: 5,
@@ -87,7 +95,8 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       targetPage: '/dashboard/brotherhood/forum',
       targetMenuLabel: 'Forum',
       completed: false,
-      icon: '💬'
+      icon: '💬',
+      instructions: 'Maak je eerste forum post om je voor te stellen aan de community'
     }
   ];
 
@@ -124,6 +133,9 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
           } else if (!data.step_4_completed) {
             setCurrentStep(4);
           } else if (!data.step_5_completed) {
+            setCurrentStep(5);
+          } else {
+            // All steps completed but onboarding not marked as complete
             setCurrentStep(5);
           }
         } else {
@@ -197,6 +209,22 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     setCurrentStep(0);
   };
 
+  const getCurrentStepInstructions = () => {
+    const currentPage = window.location.pathname;
+    
+    // Return page-specific instructions if available
+    switch (currentPage) {
+      case '/dashboard/mijn-missies':
+        return 'Voeg je eerste missies toe door op "Nieuwe Missie Toevoegen" te klikken of gebruik de "Missie Bibliotheek"';
+      case '/dashboard/trainingscentrum':
+        return 'Bekijk de beschikbare trainingsschema\'s en selecteer er één die bij je past';
+      case '/dashboard/brotherhood/forum':
+        return 'Maak je eerste forum post om je voor te stellen aan de community';
+      default:
+        return steps[currentStep]?.instructions || 'Voltooi de huidige stap om door te gaan';
+    }
+  };
+
   // Get the highlighted menu item for the current step
   const highlightedMenu = isOnboarding ? steps[currentStep]?.targetMenuLabel || null : null;
 
@@ -211,6 +239,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     setCurrentStep,
     resetOnboarding,
     goToStep,
+    getCurrentStepInstructions,
   };
 
   return (

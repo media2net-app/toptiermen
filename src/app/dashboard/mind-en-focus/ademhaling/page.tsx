@@ -3,6 +3,11 @@ import ClientLayout from '../../../components/ClientLayout';
 import { useState } from 'react';
 import { FaWind, FaRegPauseCircle, FaRegStopCircle, FaVolumeUp, FaVolumeMute } from 'react-icons/fa';
 
+
+// Force dynamic rendering to prevent navigator errors
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const oefeningen = [
   {
     id: 'box',

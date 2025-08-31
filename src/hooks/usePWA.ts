@@ -20,7 +20,7 @@ export const usePWA = () => {
   const [pwaState, setPwaState] = useState<PWAState>({
     isInstalled: false,
     canInstall: false,
-    isOnline: navigator.onLine,
+    isOnline: typeof window !== 'undefined' ? navigator.onLine : true,
     hasPushPermission: false,
     isServiceWorkerRegistered: false,
   });
@@ -30,6 +30,8 @@ export const usePWA = () => {
 
   // Check if app is installed
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const checkInstallation = () => {
       const isInstalled = window.matchMedia('(display-mode: standalone)').matches ||
                          (window.navigator as any).standalone === true;
@@ -45,6 +47,8 @@ export const usePWA = () => {
 
   // Handle install prompt
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e);
@@ -58,6 +62,8 @@ export const usePWA = () => {
 
   // Monitor online status
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const handleOnline = () => setPwaState(prev => ({ ...prev, isOnline: true }));
     const handleOffline = () => setPwaState(prev => ({ ...prev, isOnline: false }));
 
@@ -105,6 +111,8 @@ export const usePWA = () => {
 
   // Check push permission
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const checkPushPermission = async () => {
       if ('Notification' in window) {
         const permission = await Notification.requestPermission();
@@ -135,6 +143,8 @@ export const usePWA = () => {
 
   // Request push permission
   const requestPushPermission = useCallback(async () => {
+    if (typeof window === 'undefined') return 'denied';
+    
     if ('Notification' in window) {
       const permission = await Notification.requestPermission();
       setPwaState(prev => ({ 

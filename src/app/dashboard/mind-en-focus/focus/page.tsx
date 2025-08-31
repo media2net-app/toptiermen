@@ -3,6 +3,11 @@ import ClientLayout from '../../../components/ClientLayout';
 import { useState, useRef, useEffect } from 'react';
 import { FaCog, FaPlay, FaPause, FaCheckCircle, FaMusic, FaBookOpen, FaVolumeUp } from 'react-icons/fa';
 
+
+// Force dynamic rendering to prevent navigator errors
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const DEFAULTS = {
   focus: 25,
   short: 5,

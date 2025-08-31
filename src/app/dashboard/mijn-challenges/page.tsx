@@ -4,6 +4,11 @@ import { useState, useEffect } from 'react';
 import { PlusIcon, TrophyIcon, FireIcon, UserGroupIcon, CheckCircleIcon, StarIcon, BookOpenIcon, HeartIcon, CurrencyDollarIcon, BoltIcon, ShieldCheckIcon } from '@heroicons/react/24/solid';
 import { toast } from 'react-hot-toast';
 
+
+// Force dynamic rendering to prevent navigator errors
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 // Challenge types en categorieën
 const challengeCategories = {
   'Fysieke Uitdagingen': [

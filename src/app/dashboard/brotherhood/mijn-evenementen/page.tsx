@@ -4,6 +4,11 @@ import Link from 'next/link';
 import { useEvents } from '../evenementen/EventsContext';
 import { CalendarIcon, ClockIcon, MapPinIcon, UserIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 
+
+// Force dynamic rendering to prevent navigator errors
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 function formatDate(dateString: string) {
   const date = new Date(dateString);
   return date.toLocaleDateString('nl-NL', { 
