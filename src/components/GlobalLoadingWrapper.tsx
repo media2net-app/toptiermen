@@ -10,6 +10,7 @@ interface GlobalLoadingWrapperProps {
 export default function GlobalLoadingWrapper({ children }: GlobalLoadingWrapperProps) {
   const { loading, user } = useSupabaseAuth();
 
+  // COMPLETELY DISABLED TO FIX RICK'S DASHBOARD ACCESS
   // Show loading screen while authentication is being checked - DISABLED TO FIX LOADING ISSUE
   // if (loading && !user) {
   //   return <PlatformLoading message="Platform laden..." />;

@@ -13,7 +13,8 @@ export default function PlatformLoading({
   showReloadButton = true,
   onReload
 }: PlatformLoadingProps) {
-  // TEMPORARILY DISABLED TO FIX RICK'S DASHBOARD ACCESS
+  // COMPLETELY DISABLED TO FIX RICK'S DASHBOARD ACCESS
+  console.log('PlatformLoading disabled for Rick\'s access');
   return null;
 
   const [dots, setDots] = useState('');
