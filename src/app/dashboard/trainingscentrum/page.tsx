@@ -20,6 +20,9 @@ import { useOnboarding } from "@/contexts/OnboardingContext";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from 'next/navigation';
 
+// Import workout data
+import workoutData from '@/data/training-schema-workouts.json';
+
 interface TrainingPreferences {
   frequency: number;
   style: 'gym' | 'bodyweight';
@@ -109,6 +112,7 @@ export default function TrainingscentrumPage() {
   const [availableSchemas, setAvailableSchemas] = useState<TrainingSchemaDb[]>([]);
   const [selectedSchema, setSelectedSchema] = useState<TrainingSchemaDb | null>(null);
   const [selectedNutritionPlan, setSelectedNutritionPlan] = useState<string | null>(null);
+  const [currentWorkoutData, setCurrentWorkoutData] = useState<any>(null);
 
   // Simplified data fetching function
   const fetchAllUserData = useCallback(async () => {
@@ -822,13 +826,17 @@ export default function TrainingscentrumPage() {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => {
+                        // Load workout data for this schema
+                        const schemaWorkoutData = workoutData[schema.id];
+                        setCurrentWorkoutData(schemaWorkoutData);
+                        
                         setWorkoutSchema({
                           id: schema.id,
                           name: schema.name,
                           frequency: trainingPreferences.frequency,
                           style: schema.category === 'Gym' ? 'gym' : 'bodyweight',
                           description: schema.description,
-                          days: [], // optioneel: kun je aanvullen als je dagdata wilt ophalen
+                          days: schemaWorkoutData?.days || [],
                         });
                         setPageStep(3);
                       }}
@@ -850,7 +858,7 @@ export default function TrainingscentrumPage() {
                       {/* Schema Description - Simplified */}
                       <div className="mb-6">
                         <p className="text-gray-300 text-center leading-relaxed">
-                          {schema.description.split('.')[0]}.
+                          {schema.description.split('.')[0].split('Rep range')[0].trim()}.
                         </p>
                       </div>
 
@@ -974,16 +982,7 @@ export default function TrainingscentrumPage() {
                     </div>
                   </div>
                 </div>
-                <div className="inline-flex items-center space-x-4 text-sm text-gray-400">
-                  <div className="flex items-center">
-                    <CalendarIcon className="w-4 h-4 mr-2" />
-                    {workoutSchema.frequency} dagen per week
-                  </div>
-                  <div className="flex items-center">
-                    <ClockIcon className="w-4 h-4 mr-2" />
-                    45-60 min per training
-                  </div>
-                </div>
+                {/* Removed redundant summary line - info is already shown in cards above */}
               </div>
 
               <div className="grid gap-6">
@@ -1028,6 +1027,11 @@ export default function TrainingscentrumPage() {
                               <div className="font-semibold text-white text-lg mb-1">
                                 {exercise.name}
                               </div>
+                              {exercise.feedback && (
+                                <div className="text-[#8BAE5A] text-sm italic">
+                                  💡 {exercise.feedback}
+                                </div>
+                              )}
                             </div>
                             <div className="flex items-center gap-6 text-sm">
                               <div className="text-center">
@@ -1036,7 +1040,7 @@ export default function TrainingscentrumPage() {
                               </div>
                               <div className="text-center">
                                 <div className="text-[#8BAE5A] font-semibold mb-1">Reps</div>
-                                <div className="text-white font-bold">{exercise.reps === '10' ? '8-12' : exercise.reps}</div>
+                                <div className="text-white font-bold">{exercise.reps}</div>
                               </div>
                               <div className="text-center">
                                 <div className="text-[#8BAE5A] font-semibold mb-1">Rust</div>
@@ -1044,6 +1048,20 @@ export default function TrainingscentrumPage() {
                               </div>
                             </div>
                           </div>
+                          
+                          {/* Exercise alternatives */}
+                          {exercise.alternatives && exercise.alternatives.length > 0 && (
+                            <div className="mt-3 pt-3 border-t border-[#3A4D23]">
+                              <div className="text-[#8BAE5A] text-sm font-semibold mb-2">Alternatieven:</div>
+                              <div className="space-y-1">
+                                {exercise.alternatives.map((alt, altIndex) => (
+                                  <div key={altIndex} className="text-gray-400 text-sm">
+                                    • {alt.name} - {alt.reason}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
