@@ -123,13 +123,62 @@ export default function TrainingscentrumPage() {
     try {
       // Step 1: Fetch user data
       console.log('Trainingscentrum: Fetching user data...');
-      const { data: userData, error: userError } = await supabase
-        .from('profiles')
-        .select('selected_schema_id, selected_nutrition_plan')
-        .eq('id', user.id)
-        .single();
+      let userData = null;
+      let userError = null;
+      
+      // Try to fetch from profiles table first
+      try {
+        const result = await supabase
+          .from('profiles')
+          .select('selected_schema_id, selected_nutrition_plan')
+          .eq('id', user.id)
+          .single();
+        
+        userData = result.data;
+        userError = result.error;
+      } catch (error) {
+        userError = error;
+      }
 
-      if (userError) {
+      // If selected_schema_id column doesn't exist, try user_schema_selections table
+      if (userError && userError.message.includes('selected_schema_id')) {
+        console.log('Trainingscentrum: selected_schema_id column not found, trying user_schema_selections table...');
+        
+        try {
+          const { data: schemaSelectionData, error: schemaSelectionError } = await supabase
+            .from('user_schema_selections')
+            .select('schema_id')
+            .eq('user_id', user.id)
+            .single();
+
+          if (!schemaSelectionError && schemaSelectionData?.schema_id) {
+            userData = { selected_schema_id: schemaSelectionData.schema_id, selected_nutrition_plan: null };
+            userError = null;
+          } else {
+            console.log('Trainingscentrum: No schema selection found in database, checking localStorage...');
+            
+            // Check localStorage as fallback
+            const localSchemaId = localStorage.getItem('selected_schema_id');
+            if (localSchemaId) {
+              console.log('Trainingscentrum: Found schema ID in localStorage:', localSchemaId);
+              userData = { selected_schema_id: localSchemaId, selected_nutrition_plan: null };
+              userError = null;
+            }
+          }
+        } catch (error) {
+          console.log('Trainingscentrum: user_schema_selections table not found, checking localStorage...');
+          
+          // Check localStorage as fallback
+          const localSchemaId = localStorage.getItem('selected_schema_id');
+          if (localSchemaId) {
+            console.log('Trainingscentrum: Found schema ID in localStorage:', localSchemaId);
+            userData = { selected_schema_id: localSchemaId, selected_nutrition_plan: null };
+            userError = null;
+          }
+        }
+      }
+
+      if (userError && !userError.message.includes('selected_schema_id')) {
         console.warn('Trainingscentrum: User data fetch failed:', userError.message);
       }
 
@@ -238,10 +287,38 @@ export default function TrainingscentrumPage() {
     if (!user) return;
 
     try {
-      const { error } = await supabase
+      // Try to save to profiles table first (if column exists)
+      let { error } = await supabase
         .from('profiles')
         .update({ selected_schema_id: schemaId })
         .eq('id', user.id);
+
+      // If that fails, try to save to user_schema_selections table
+      if (error && error.message.includes('selected_schema_id')) {
+        console.log('selected_schema_id column not found, trying user_schema_selections table...');
+        
+        const { error: schemaError } = await supabase
+          .from('user_schema_selections')
+          .upsert({
+            user_id: user.id,
+            schema_id: schemaId
+          }, {
+            onConflict: 'user_id'
+          });
+
+        if (schemaError) {
+          console.error('Error saving to user_schema_selections:', schemaError);
+          
+          // If both fail, save to localStorage as fallback
+          console.log('Saving to localStorage as fallback...');
+          localStorage.setItem('selected_schema_id', schemaId);
+          localStorage.setItem('selected_schema_timestamp', new Date().toISOString());
+          
+          error = null; // Clear error to continue
+        } else {
+          error = null; // Clear error to continue
+        }
+      }
 
       if (error) {
         console.error('Error saving selected schema:', error);
