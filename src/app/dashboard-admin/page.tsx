@@ -135,7 +135,7 @@ export default function AdminDashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState<'7d' | '30d' | '90d'>('7d');
   const { user } = useSupabaseAuth();
 
-  // Redirect to Community Health (overview tab) as default page
+  // Redirect to Community Health (overview tab) as default page - DEPLOYMENT FORCE
   useEffect(() => {
     if (pathname === '/dashboard-admin' && !searchParams?.get('tab')) {
       router.push('/dashboard-admin?tab=overview');
