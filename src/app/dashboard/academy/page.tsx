@@ -195,26 +195,50 @@ export default function AcademyPage() {
       if (!user || modules.length === 0) return;
 
       try {
-        const response = await fetch('/api/badges/check-academy-completion', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ userId: user.id }),
+        // First check if user has Academy Master badge
+        const { data: academyBadge, error: badgeError } = await supabase
+          .from('user_badges')
+          .select(`
+            id,
+            unlocked_at,
+            status,
+            badges!inner(
+              id,
+              title,
+              description,
+              icon_name,
+              rarity_level,
+              xp_reward
+            )
+          `)
+          .eq('user_id', user.id)
+          .eq('badges.title', 'Academy Master')
+          .single();
+
+        if (badgeError && badgeError.code !== 'PGRST116') {
+          console.error('Error checking Academy Master badge:', badgeError);
+        }
+
+        // Check if all modules are completed
+        const totalModules = modules.length;
+        const completedModules = modules.filter((_, index) => getModuleStatus(_, index) === 'completed').length;
+        const allModulesCompleted = completedModules === totalModules && totalModules > 0;
+
+        console.log('🎓 Academy completion check:', {
+          totalModules,
+          completedModules,
+          allModulesCompleted,
+          hasBadge: !!academyBadge
         });
 
-        if (response.ok) {
-          const data = await response.json();
-          console.log('🎓 Academy completion check response:', data);
-          
-          setAcademyCompleted(data.completed);
-          setHasAcademyBadge(data.alreadyUnlocked || data.newlyUnlocked);
-          setAcademyBadgeData(data.badge);
+        setAcademyCompleted(allModulesCompleted);
+        setHasAcademyBadge(!!academyBadge);
+        setAcademyBadgeData(academyBadge?.badges || null);
 
-          if (data.newlyUnlocked && data.badge) {
-            setBadgeData(data.badge);
-            setShowBadgeModal(true);
-          }
+        // If newly completed and has badge, show modal
+        if (allModulesCompleted && academyBadge && !showBadgeModal) {
+          setBadgeData(academyBadge.badges);
+          setShowBadgeModal(true);
         }
       } catch (error) {
         console.error('Error checking academy completion:', error);
@@ -222,7 +246,7 @@ export default function AcademyPage() {
     };
 
     checkAcademyCompletion();
-  }, [user, modules, lessonProgress]);
+  }, [user, modules, lessonProgress, showBadgeModal]);
 
   // Check for badge unlock from localStorage
   useEffect(() => {
