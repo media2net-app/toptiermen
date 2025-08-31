@@ -1502,7 +1502,7 @@
   "d5739133-ff3c-4740-bc69-dc779b4ac336": {
     "id": "d5739133-ff3c-4740-bc69-dc779b4ac336",
     "name": "6x Split - Kracht & Uithouding",
-    "frequency": 3,
+    "frequency": 6,
     "style": "gym",
     "description": "6 dagen split: Borst/Triceps, Rug/Biceps, Benen/Schouders (herhaald) - Focus op kracht en uithoudingsvermogen met hogere herhalingen (15-20) en kortere rusttijden (40-60 seconden).\n\n⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
     "days": [
@@ -1622,13 +1622,130 @@
             "feedback": ""
           }
         ]
+      },
+      {
+        "day": 4,
+        "name": "Workout Day 4",
+        "focus": "Dag 4 Focus",
+        "exercises": [
+          {
+            "name": "Military Press (Dag 4)",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Machine Chest Press (Dag 4)",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Calf Press (Dag 4)",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Barbell Shoulder Press (Dag 4)",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 5,
+        "name": "Workout Day 5",
+        "focus": "Dag 5 Focus",
+        "exercises": [
+          {
+            "name": "Military Press (Dag 5)",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Machine Chest Press (Dag 5)",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Calf Press (Dag 5)",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Barbell Shoulder Press (Dag 5)",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 6,
+        "name": "Workout Day 6",
+        "focus": "Dag 6 Focus",
+        "exercises": [
+          {
+            "name": "Military Press (Dag 6)",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Machine Chest Press (Dag 6)",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Calf Press (Dag 6)",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Barbell Shoulder Press (Dag 6)",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
       }
     ]
   },
   "a2fe31d9-781f-4241-84aa-60e6055bc069": {
     "id": "a2fe31d9-781f-4241-84aa-60e6055bc069",
     "name": "6x Split - Power & Kracht",
-    "frequency": 3,
+    "frequency": 6,
     "style": "gym",
     "description": "6 dagen split: Borst/Triceps, Rug/Biceps, Benen/Schouders (herhaald) - Focus op pure kracht en power met lage herhalingen (3-6) en lange rusttijden (150-180 seconden). Compound oefeningen zijn essentieel.\n\n⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
     "days": [
@@ -1748,13 +1865,130 @@
             "feedback": ""
           }
         ]
+      },
+      {
+        "day": 4,
+        "name": "Workout Day 4",
+        "focus": "Dag 4 Focus",
+        "exercises": [
+          {
+            "name": "Supine Press (Dag 4)",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Military Press (Dag 4)",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Incline Dumbell flyes (Dag 4)",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Incline Dumbell Press (Dag 4)",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 5,
+        "name": "Workout Day 5",
+        "focus": "Dag 5 Focus",
+        "exercises": [
+          {
+            "name": "Supine Press (Dag 5)",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Military Press (Dag 5)",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Incline Dumbell flyes (Dag 5)",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Incline Dumbell Press (Dag 5)",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 6,
+        "name": "Workout Day 6",
+        "focus": "Dag 6 Focus",
+        "exercises": [
+          {
+            "name": "Supine Press (Dag 6)",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Military Press (Dag 6)",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Incline Dumbell flyes (Dag 6)",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Incline Dumbell Press (Dag 6)",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
       }
     ]
   },
   "2c6d09bf-e602-4369-9c80-e80085e4cf42": {
     "id": "2c6d09bf-e602-4369-9c80-e80085e4cf42",
     "name": "5x Split - Kracht & Uithouding",
-    "frequency": 3,
+    "frequency": 5,
     "style": "gym",
     "description": "5 dagen split: Rug, Borst/Schouders, Armen, Benen, Rug - Focus op kracht en uithoudingsvermogen met hogere herhalingen (15-20) en kortere rusttijden (40-60 seconden).\n\n⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
     "days": [
@@ -1874,13 +2108,91 @@
             "feedback": ""
           }
         ]
+      },
+      {
+        "day": 4,
+        "name": "Workout Day 4",
+        "focus": "Dag 4 Focus",
+        "exercises": [
+          {
+            "name": "Machine Shoulder Press (Dag 4)",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Dumbbell Press (Dag 4)",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Military Press (Dag 4)",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Machine Chest Press (Dag 4)",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 5,
+        "name": "Workout Day 5",
+        "focus": "Dag 5 Focus",
+        "exercises": [
+          {
+            "name": "Machine Shoulder Press (Dag 5)",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Dumbbell Press (Dag 5)",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Military Press (Dag 5)",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Machine Chest Press (Dag 5)",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
       }
     ]
   },
   "7048080c-87b9-424f-a502-af2ea09d5f6b": {
     "id": "7048080c-87b9-424f-a502-af2ea09d5f6b",
     "name": "5x Split - Power & Kracht",
-    "frequency": 3,
+    "frequency": 5,
     "style": "gym",
     "description": "5 dagen split: Rug, Borst/Schouders, Armen, Benen, Rug - Focus op pure kracht en power met lage herhalingen (3-6) en lange rusttijden (150-180 seconden). Compound oefeningen zijn essentieel.\n\n⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
     "days": [
@@ -2000,13 +2312,91 @@
             "feedback": ""
           }
         ]
+      },
+      {
+        "day": 4,
+        "name": "Workout Day 4",
+        "focus": "Dag 4 Focus",
+        "exercises": [
+          {
+            "name": "Dumbbell Press (Dag 4)",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Cable Flye (Dag 4)",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Military Press (Dag 4)",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Supine Press (Dag 4)",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 5,
+        "name": "Workout Day 5",
+        "focus": "Dag 5 Focus",
+        "exercises": [
+          {
+            "name": "Dumbbell Press (Dag 5)",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Cable Flye (Dag 5)",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Military Press (Dag 5)",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Supine Press (Dag 5)",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
       }
     ]
   },
   "b6b668bc-78e1-42ec-8494-a2f188660e71": {
     "id": "b6b668bc-78e1-42ec-8494-a2f188660e71",
     "name": "4x Split - Kracht & Uithouding",
-    "frequency": 3,
+    "frequency": 4,
     "style": "gym",
     "description": "4 dagen split: Borst/Triceps/Voorkant Schouders, Rug/Biceps, Achterkant Schouders, Voorkant Benen/Kuiten, Hamstrings/Billen - Focus op kracht en uithoudingsvermogen met hogere herhalingen (15-20) en kortere rusttijden (40-60 seconden).\n\n⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
     "days": [
@@ -2126,13 +2516,52 @@
             "feedback": ""
           }
         ]
+      },
+      {
+        "day": 4,
+        "name": "Workout Day 4",
+        "focus": "Dag 4 Focus",
+        "exercises": [
+          {
+            "name": "Incline Chest Press (Dag 4)",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Cable Flye (Dag 4)",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Calf Press (Dag 4)",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Supine Press (Dag 4)",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
       }
     ]
   },
   "469a1512-8252-4dc2-9849-7510d7fe637b": {
     "id": "469a1512-8252-4dc2-9849-7510d7fe637b",
     "name": "4x Split - Power & Kracht",
-    "frequency": 3,
+    "frequency": 4,
     "style": "gym",
     "description": "4 dagen split: Borst/Triceps/Voorkant Schouders, Rug/Biceps, Achterkant Schouders, Voorkant Benen/Kuiten, Hamstrings/Billen - Focus op pure kracht en power met lage herhalingen (3-6) en lange rusttijden (150-180 seconden). Compound oefeningen zijn essentieel.\n\n⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
     "days": [
@@ -2245,6 +2674,45 @@
           },
           {
             "name": "Squat",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 4,
+        "name": "Workout Day 4",
+        "focus": "Dag 4 Focus",
+        "exercises": [
+          {
+            "name": "Calf Press (Dag 4)",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Pectoral Fly (Dag 4)",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Military Press (Dag 4)",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Dumbbell Shoulder Press (Dag 4)",
             "sets": 3,
             "reps": "8-12",
             "rest": "60-90 sec",
@@ -2510,7 +2978,7 @@
   "cd2fcb31-8c56-4296-abda-83ed4d1eac21": {
     "id": "cd2fcb31-8c56-4296-abda-83ed4d1eac21",
     "name": "6x Split Training - Spiermassa",
-    "frequency": 3,
+    "frequency": 6,
     "style": "gym",
     "description": "6 dagen split: Borst/Triceps, Rug/Biceps, Benen/Schouders (herhaald)\n\n⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
     "days": [
@@ -2624,6 +3092,123 @@
           {
             "name": "Kneeling Leg Curl",
             "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 4,
+        "name": "Workout Day 4",
+        "focus": "Dag 4 Focus",
+        "exercises": [
+          {
+            "name": "Incline Dumbell Press (Dag 4)",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Pectoral Fly (Dag 4)",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Dumbbell Press (Dag 4)",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Military Press (Dag 4)",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 5,
+        "name": "Workout Day 5",
+        "focus": "Dag 5 Focus",
+        "exercises": [
+          {
+            "name": "Incline Dumbell Press (Dag 5)",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Pectoral Fly (Dag 5)",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Dumbbell Press (Dag 5)",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Military Press (Dag 5)",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 6,
+        "name": "Workout Day 6",
+        "focus": "Dag 6 Focus",
+        "exercises": [
+          {
+            "name": "Incline Dumbell Press (Dag 6)",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Pectoral Fly (Dag 6)",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Dumbbell Press (Dag 6)",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Military Press (Dag 6)",
+            "sets": 4,
             "reps": "8-12",
             "rest": "60-90 sec",
             "alternatives": [],
@@ -3000,7 +3585,7 @@
   "69a7cad0-786d-4855-bddb-7206c356f415": {
     "id": "69a7cad0-786d-4855-bddb-7206c356f415",
     "name": "4x Split Training - Spiermassa",
-    "frequency": 3,
+    "frequency": 4,
     "style": "gym",
     "description": "4 dagen split: Borst/Triceps/Voorkant Schouders, Rug/Biceps, Achterkant Schouders, Voorkant Benen/Kuiten, Hamstrings/Billen\n\n⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
     "days": [
@@ -3120,13 +3705,52 @@
             "feedback": ""
           }
         ]
+      },
+      {
+        "day": 4,
+        "name": "Workout Day 4",
+        "focus": "Dag 4 Focus",
+        "exercises": [
+          {
+            "name": "Cable Flye (Dag 4)",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Machine Chest Press (Dag 4)",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Military Press (Dag 4)",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Supine Press (Dag 4)",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
       }
     ]
   },
   "4b9952ad-a0f1-498a-9521-01c5901c0f08": {
     "id": "4b9952ad-a0f1-498a-9521-01c5901c0f08",
     "name": "5x Split Training - Spiermassa",
-    "frequency": 3,
+    "frequency": 5,
     "style": "gym",
     "description": "5 dagen split: Rug, Borst/Schouders, Armen, Benen, Rug\n\n⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
     "days": [
@@ -3240,6 +3864,84 @@
           {
             "name": "Pistol Squats",
             "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 4,
+        "name": "Workout Day 4",
+        "focus": "Dag 4 Focus",
+        "exercises": [
+          {
+            "name": "Dumbbell Shoulder Press (Dag 4)",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Incline Dumbell flyes (Dag 4)",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Cable Flye (Dag 4)",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Pectoral Fly (Dag 4)",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 5,
+        "name": "Workout Day 5",
+        "focus": "Dag 5 Focus",
+        "exercises": [
+          {
+            "name": "Dumbbell Shoulder Press (Dag 5)",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Incline Dumbell flyes (Dag 5)",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Cable Flye (Dag 5)",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Pectoral Fly (Dag 5)",
+            "sets": 5,
             "reps": "8-12",
             "rest": "60-90 sec",
             "alternatives": [],
