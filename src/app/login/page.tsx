@@ -27,7 +27,9 @@ function LoginPageContent() {
 
   useEffect(() => { 
     // 2.0.1: Simplified initialization
-    console.log('2.0.1: Login page initialized');
+    console.log('🔍 Login page initialized');
+    console.log('🌐 Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
+    console.log('🔑 Supabase Key present:', !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
     
     // Check Supabase status on page load
     checkSupabaseStatus();
@@ -230,6 +232,18 @@ function LoginPageContent() {
         </div>
 
         <p className="text-[#B6C948] text-center mb-6 sm:mb-8 text-base sm:text-lg font-figtree">Log in op je dashboard</p>
+        
+        {/* Debug Panel */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="mb-4 p-3 bg-[#181F17] border border-[#B6C948] rounded-lg text-xs">
+            <p className="text-[#B6C948] font-bold mb-2">🔧 Debug Info:</p>
+            <p className="text-[#8BAE5A]">Supabase URL: {process.env.NEXT_PUBLIC_SUPABASE_URL ? '✅' : '❌'}</p>
+            <p className="text-[#8BAE5A]">Supabase Key: {process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? '✅' : '❌'}</p>
+            <p className="text-[#8BAE5A]">Loading: {loading ? '✅' : '❌'}</p>
+            <p className="text-[#8BAE5A]">User: {user ? '✅' : '❌'}</p>
+            <p className="text-[#8BAE5A]">Error: {error || 'None'}</p>
+          </div>
+        )}
         
         <form onSubmit={handleLogin} className="flex flex-col gap-6">
           <div className="relative">
