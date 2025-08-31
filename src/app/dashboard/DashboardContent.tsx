@@ -714,8 +714,8 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
         {/* 2.0.1: Performance Alerts */}
         <V2PerformanceAlerts />
         
-        {/* 2.0.1: Cache issue helper */}
-        <CacheIssueHelper />
+        {/* 2.0.1: Cache issue helper - DISABLED TO PREVENT INFINITE MODAL */}
+        {/* <CacheIssueHelper /> */}
       </div>
     </>
   );

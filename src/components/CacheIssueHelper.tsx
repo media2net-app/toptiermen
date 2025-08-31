@@ -13,21 +13,25 @@ export default function CacheIssueHelper({ onResolve }: CacheIssueHelperProps) {
   const [step, setStep] = useState(1);
 
   useEffect(() => {
-    // Check for potential cache issues
+    // Check for potential cache issues - DISABLED TO PREVENT INFINITE MODAL
     const checkForCacheIssues = () => {
-      const lastVersion = localStorage.getItem('ttm-app-version');
-      const currentVersion = '2.0.1';
+      // DISABLED: This was causing infinite modal loops
+      // Cache issues are now handled by the CacheBuster component
+      return;
       
-      // Show helper if version mismatch or no version stored
-      if (!lastVersion || lastVersion !== currentVersion) {
-        setShowHelper(true);
-      }
-      
-      // Check for other cache-related issues
-      const hasOldCache = localStorage.getItem('ttm-cache-bust') === null;
-      if (hasOldCache) {
-        setShowHelper(true);
-      }
+      // const lastVersion = localStorage.getItem('ttm-app-version');
+      // const currentVersion = '2.0.3';
+      // 
+      // // Show helper if version mismatch or no version stored
+      // if (!lastVersion || lastVersion !== currentVersion) {
+      //   setShowHelper(true);
+      // }
+      // 
+      // // Check for other cache-related issues
+      // const hasOldCache = localStorage.getItem('ttm-cache-bust') === null;
+      // if (hasOldCache) {
+      //   setShowHelper(true);
+      // }
     };
 
     // Delay check to avoid showing immediately on page load
@@ -62,7 +66,7 @@ export default function CacheIssueHelper({ onResolve }: CacheIssueHelperProps) {
       }
       
       // Set new version
-      localStorage.setItem('ttm-app-version', '2.0.1');
+      localStorage.setItem('ttm-app-version', '2.0.3');
       localStorage.setItem('ttm-cache-bust', Date.now().toString());
       
       setStep(3);
