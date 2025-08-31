@@ -382,7 +382,7 @@ export default function MijnMissiesPage() {
 
     async function checkOnboardingStatus() {
       try {
-        const response = await fetch(`/api/onboarding?userId=${user.id}`);
+        const response = await fetch(`/api/onboarding?userId=${user?.id}`);
         if (response.ok) {
           const data = await response.json();
           setOnboardingStatus(data);
