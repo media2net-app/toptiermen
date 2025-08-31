@@ -39,7 +39,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   //   };
   // }, [trackPageLoad, recordPageLoadTime]);
 
-  // 2.0.1: Enhanced authentication check with error recovery - DISABLED
+  // 2.0.1: Enhanced authentication check with error recovery - IMPROVED TO PREVENT LOOPS
   useEffect(() => {
     if (loading) {
       // setLoadingState('auth-check', true);
@@ -63,7 +63,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       //   'dashboard-auth'
       // );
       
-      router.push('/login');
+      // Prevent redirect loops by checking current path
+      if (window.location.pathname !== '/login') {
+        router.push('/login');
+      }
       return;
     }
 

@@ -227,26 +227,30 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  // Check authentication with better handling
+  // Check authentication with better handling - IMPROVED TO PREVENT LOOPS
   useEffect(() => {
     if (!loading && !isAuthenticated) {
       console.log('Admin: User not authenticated, redirecting to login');
       // Redirect to login with current path preserved
       const currentPath = window.location.pathname;
       if (currentPath !== '/login') {
-        router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
-      } else {
-        router.push('/login');
+        // Use setTimeout to prevent immediate redirect loops
+        setTimeout(() => {
+          router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
+        }, 100);
       }
     }
   }, [loading, isAuthenticated, router]);
 
-  // Check admin role with better error handling
+  // Check admin role with better error handling - IMPROVED TO PREVENT LOOPS
   useEffect(() => {
     if (!loading && user && user.role?.toLowerCase() !== 'admin') {
       console.log('Admin: User is not admin, redirecting to dashboard');
       console.log('User role:', user.role);
-      router.push('/dashboard');
+      // Use setTimeout to prevent immediate redirect loops
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 100);
     }
   }, [loading, user, router]);
 

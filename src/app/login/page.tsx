@@ -47,11 +47,11 @@ function LoginPageContent() {
     }
   };
 
-  // Check if user is already authenticated
+  // Check if user is already authenticated - IMPROVED TO PREVENT LOOPS
   useEffect(() => {
     if (loading) return;
     
-    if (user) {
+    if (user && !redirecting) {
       console.log('2.0.1: User already authenticated:', user.role);
       setRedirecting(true);
       
@@ -59,7 +59,7 @@ function LoginPageContent() {
       const redirectTo = searchParams?.get('redirect');
       let targetPath = '/dashboard';
       
-      if (redirectTo) {
+      if (redirectTo && redirectTo !== '/login') {
         targetPath = redirectTo;
       } else {
         // Default redirect based on user role
@@ -67,9 +67,13 @@ function LoginPageContent() {
       }
 
       console.log('2.0.1: Redirecting to:', targetPath);
-      router.replace(targetPath);
+      
+      // Use setTimeout to prevent immediate redirect loops
+      setTimeout(() => {
+        router.replace(targetPath);
+      }, 100);
     }
-  }, [loading, user, router, searchParams]);
+  }, [loading, user, router, searchParams, redirecting]);
 
   // 2.0.1: Force show login form after 2 seconds if still loading - DISABLED TO FIX FLICKERING
   // useEffect(() => {
