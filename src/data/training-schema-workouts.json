@@ -1,0 +1,4837 @@
+{
+  "1c30789e-a311-489f-807d-59eedca968b4": {
+    "id": "1c30789e-a311-489f-807d-59eedca968b4",
+    "name": "Upper/Lower Split - Foundation & Muscle Building",
+    "frequency": 4,
+    "style": "gym",
+    "description": "Verdeling tussen boven- en onderlichaam voor gebalanceerde ontwikkeling. Bouw een sterke basis op met focus op spiergroei en correcte uitvoering. Perfect voor beginners en herstel na een pauze. Rep range: 8-12, Rust: 90s. ⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
+    "days": [
+      {
+        "day": 1,
+        "name": "Upper Body",
+        "focus": "Bovenlichaam (Push)",
+        "exercises": [
+          {
+            "name": "Lat Pulldown",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Military Press",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Push Up",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Dumbbell Biceps Curl",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Kneeling Leg Curl",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "name": "Lower Body",
+        "focus": "Onderlichaam",
+        "exercises": [
+          {
+            "name": "Deadlift",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Seated Leg Curl",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Calf Raises",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Leg Curl",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Calf Press",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 3,
+        "name": "Upper Body",
+        "focus": "Bovenlichaam (Pull)",
+        "exercises": [
+          {
+            "name": "Lat Pulldown",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Handstand Push-ups",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Barbell Shoulder Press",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "T-Bar Row",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Barbell Row",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 4,
+        "name": "Lower Body",
+        "focus": "Onderlichaam",
+        "exercises": [
+          {
+            "name": "Hack Squat",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Deadlift",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Squats",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Calf Raises",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Seated Leg Curl",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      }
+    ]
+  },
+  "cf60f6c1-cee4-4721-be4c-01c93da5ee1b": {
+    "id": "cf60f6c1-cee4-4721-be4c-01c93da5ee1b",
+    "name": "Split Training - Strength & Power Development",
+    "frequency": 3,
+    "style": "gym",
+    "description": "Focus op specifieke spiergroepen per dag voor maximale isolatie en herstel. Verhoog je kracht en power met compound oefeningen en zwaardere gewichten. Focus op neurologische adaptatie. Rep range: 3-6, Rust: 180s. ⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
+    "days": [
+      {
+        "day": 1,
+        "name": "Chest & Triceps",
+        "focus": "Borst & Triceps",
+        "exercises": [
+          {
+            "name": "Supine Press",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Barbell Shoulder Press",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Bench Press",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Military Press",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "name": "Back & Biceps",
+        "focus": "Rug & Biceps",
+        "exercises": [
+          {
+            "name": "Dumbell Row",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Cable Row",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "T-Bar Row",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Machine Pull Up",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 3,
+        "name": "Legs & Shoulders",
+        "focus": "Benen & Schouders",
+        "exercises": [
+          {
+            "name": "Deadlift",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Pistol Squats",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Kneeling Leg Curl",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Squats",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      }
+    ]
+  },
+  "449b54fb-054f-4b36-9638-02de096871fd": {
+    "id": "449b54fb-054f-4b36-9638-02de096871fd",
+    "name": "Push/Pull/Legs - Strength & Power Development",
+    "frequency": 3,
+    "style": "gym",
+    "description": "Efficiënte verdeling van oefeningen gebaseerd op bewegingstype. Verhoog je kracht en power met compound oefeningen en zwaardere gewichten. Focus op neurologische adaptatie. Rep range: 3-6, Rust: 180s. ⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
+    "days": [
+      {
+        "day": 1,
+        "name": "Push Day",
+        "focus": "Push Oefeningen",
+        "exercises": [
+          {
+            "name": "Machine Shoulder Press",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Push-ups",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Spider-man Push-ups",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Machine Chest Press",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Bench Press",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "name": "Pull Day",
+        "focus": "Pull Oefeningen",
+        "exercises": [
+          {
+            "name": "Machine Pull Up",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Seated Row",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Fixed Lat Pulldown",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Dumbbell Biceps Curl",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Machine Biceps Curl",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 3,
+        "name": "Legs Day",
+        "focus": "Been Oefeningen",
+        "exercises": [
+          {
+            "name": "Pistol Squats",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Squats",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Hack Squat",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Deadlift",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Calf Raises",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      }
+    ]
+  },
+  "854a3d3b-b8e8-4ebc-96c9-f456e0578b5e": {
+    "id": "854a3d3b-b8e8-4ebc-96c9-f456e0578b5e",
+    "name": "Upper/Lower Split - Strength & Power Development",
+    "frequency": 4,
+    "style": "gym",
+    "description": "Verdeling tussen boven- en onderlichaam voor gebalanceerde ontwikkeling. Verhoog je kracht en power met compound oefeningen en zwaardere gewichten. Focus op neurologische adaptatie. Rep range: 3-6, Rust: 180s. ⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
+    "days": [
+      {
+        "day": 1,
+        "name": "Upper Body",
+        "focus": "Bovenlichaam (Push)",
+        "exercises": [
+          {
+            "name": "Pull-ups",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Seated Row",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Barbell Shoulder Press",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Dumbbell Shoulder Press",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Push Up",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "name": "Lower Body",
+        "focus": "Onderlichaam",
+        "exercises": [
+          {
+            "name": "Leg Press",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Calf Press",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Lunges",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Squat",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Walking Lunges",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 3,
+        "name": "Upper Body",
+        "focus": "Bovenlichaam (Pull)",
+        "exercises": [
+          {
+            "name": "Push Up",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "T-Bar Row",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Cable Row",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Dumbbell Shoulder Press",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Machine Biceps Curl",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 4,
+        "name": "Lower Body",
+        "focus": "Onderlichaam",
+        "exercises": [
+          {
+            "name": "Walking Lunges",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Calf Press",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Leg Extension",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Hack Squat",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Seated Leg Curl",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      }
+    ]
+  },
+  "e360343c-eeb4-4e6f-9c3f-f1872248440c": {
+    "id": "e360343c-eeb4-4e6f-9c3f-f1872248440c",
+    "name": "Functional Training - Strength & Power Development",
+    "frequency": 2,
+    "style": "gym",
+    "description": "Bewegingspatronen die het dagelijks leven verbeteren en sportprestaties ondersteunen. Verhoog je kracht en power met compound oefeningen en zwaardere gewichten. Focus op neurologische adaptatie. Rep range: 3-6, Rust: 180s. ⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
+    "days": [
+      {
+        "day": 1,
+        "name": "Full Body A",
+        "focus": "Volledige Lichaam",
+        "exercises": [
+          {
+            "name": "Dumbbell Biceps Curl",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Side Raises",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "shruggs",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Military Press",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Calf Press",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Pike Push-ups",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "name": "Full Body B",
+        "focus": "Volledige Lichaam",
+        "exercises": [
+          {
+            "name": "Cable Pull Rope",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Cable Biceps Curl",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Dumbbell Biceps Curl",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Test chiel",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "L-sit Hold",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Machine Biceps Curl",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      }
+    ]
+  },
+  "bb633010-6aea-4196-b8af-83cb51f403cf": {
+    "id": "bb633010-6aea-4196-b8af-83cb51f403cf",
+    "name": "Split Training - Endurance & Conditioning",
+    "frequency": 3,
+    "style": "bodyweight",
+    "description": "Focus op specifieke spiergroepen per dag voor maximale isolatie en herstel. Verbeter je uithoudingsvermogen en conditionering. Hogere herhalingen met kortere rusttijden voor cardiovasculaire fitness. Rep range: 15-20, Rust: 45s. ⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
+    "days": [
+      {
+        "day": 1,
+        "name": "Chest & Triceps",
+        "focus": "Borst & Triceps",
+        "exercises": [
+          {
+            "name": "Machine Shoulder Press",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Barbell Shoulder Press",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Supine Press",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Military Press",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "name": "Back & Biceps",
+        "focus": "Rug & Biceps",
+        "exercises": [
+          {
+            "name": "Lat Pulldown",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Fixed Lat Pulldown",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "T-Bar Row",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Cable Pull Rope",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 3,
+        "name": "Legs & Shoulders",
+        "focus": "Benen & Schouders",
+        "exercises": [
+          {
+            "name": "Seated Leg Curl",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Calf Raises",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Leg Press",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Leg Raises",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      }
+    ]
+  },
+  "980df424-cb56-4a24-bd38-fab03c0fbdf4": {
+    "id": "980df424-cb56-4a24-bd38-fab03c0fbdf4",
+    "name": "Push/Pull/Legs - Endurance & Conditioning",
+    "frequency": 3,
+    "style": "bodyweight",
+    "description": "Efficiënte verdeling van oefeningen gebaseerd op bewegingstype. Verbeter je uithoudingsvermogen en conditionering. Hogere herhalingen met kortere rusttijden voor cardiovasculaire fitness. Rep range: 15-20, Rust: 45s. ⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
+    "days": [
+      {
+        "day": 1,
+        "name": "Push Day",
+        "focus": "Push Oefeningen",
+        "exercises": [
+          {
+            "name": "Pike Push-ups",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Push-ups",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Barbell Shoulder Press",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Bench Press",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Incline Dumbell Press",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "name": "Pull Day",
+        "focus": "Pull Oefeningen",
+        "exercises": [
+          {
+            "name": "Cable Pull Rope",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Machine Pull Up",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "T-Bar Row",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Leg Curl",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Cable Biceps Curl",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 3,
+        "name": "Legs Day",
+        "focus": "Been Oefeningen",
+        "exercises": [
+          {
+            "name": "Deadlift",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Hack Squat",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Calf Raises",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Seated Leg Curl",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Squat",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      }
+    ]
+  },
+  "b3facfcf-f08c-40fa-8025-4f3f5390a92b": {
+    "id": "b3facfcf-f08c-40fa-8025-4f3f5390a92b",
+    "name": "Upper/Lower Split - Endurance & Conditioning",
+    "frequency": 4,
+    "style": "bodyweight",
+    "description": "Verdeling tussen boven- en onderlichaam voor gebalanceerde ontwikkeling. Verbeter je uithoudingsvermogen en conditionering. Hogere herhalingen met kortere rusttijden voor cardiovasculaire fitness. Rep range: 15-20, Rust: 45s. ⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
+    "days": [
+      {
+        "day": 1,
+        "name": "Upper Body",
+        "focus": "Bovenlichaam (Push)",
+        "exercises": [
+          {
+            "name": "Leg Press",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Machine Biceps Curl",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Dumbbell Biceps Curl",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Cable Triceps Pushdown",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Kneeling Leg Curl",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "name": "Lower Body",
+        "focus": "Onderlichaam",
+        "exercises": [
+          {
+            "name": "Lunges",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Leg Curl",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Squat",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Kneeling Leg Curl",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Stiff Leg Deadlift",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 3,
+        "name": "Upper Body",
+        "focus": "Bovenlichaam (Pull)",
+        "exercises": [
+          {
+            "name": "Handstand Push-ups",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Dumbbell Biceps Curl",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Cable Triceps Pushdown",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Barbell Biceps Curl",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Dumbbell Shoulder Press",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 4,
+        "name": "Lower Body",
+        "focus": "Onderlichaam",
+        "exercises": [
+          {
+            "name": "Hack Squat",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Lunges",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Squat",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Walking Lunges",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Leg Press",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      }
+    ]
+  },
+  "08013d86-518b-4003-8f71-5ccf39f6faec": {
+    "id": "08013d86-518b-4003-8f71-5ccf39f6faec",
+    "name": "Full Body - Foundation & Muscle Building",
+    "frequency": 2,
+    "style": "gym",
+    "description": "Alle spiergroepen per training voor optimale frequentie en herstel.",
+    "days": [
+      {
+        "day": 1,
+        "name": "Full Body A",
+        "focus": "Volledige Lichaam",
+        "exercises": [
+          {
+            "name": "Plank",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Lat Pulldown",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Seated Leg Curl",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Test chiel",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Incline Dumbell flyes",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Triceps Dips",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "name": "Full Body B",
+        "focus": "Volledige Lichaam",
+        "exercises": [
+          {
+            "name": "Mountain Climbers",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Machine Biceps Curl",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Plank",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Abductie Machine",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Lunges",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Fixed Lat Pulldown",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      }
+    ]
+  },
+  "63ed6ca2-f0e3-406f-ab52-b36f19442538": {
+    "id": "63ed6ca2-f0e3-406f-ab52-b36f19442538",
+    "name": "Outdoor Calisthenics - Kracht & Uithouding",
+    "frequency": 2,
+    "style": "bodyweight",
+    "description": "Geavanceerde calisthenics training voor kracht en uithoudingsvermogen. Focus op bodyweight oefeningen met hoge intensiteit en korte rusttijden.\n\n⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
+    "days": [
+      {
+        "day": 1,
+        "name": "Full Body A",
+        "focus": "Volledige Lichaam",
+        "exercises": [
+          {
+            "name": "Cable Flye",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "L-sit Hold",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "T-Bar Row",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Side Raises",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "test chiel 3",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Dumbell Row",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "name": "Full Body B",
+        "focus": "Volledige Lichaam",
+        "exercises": [
+          {
+            "name": "Machine Back Extension",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "test chiel 3",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Front Raises",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Test chiel",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Kneeling Leg Curl",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Handstand Push-ups",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      }
+    ]
+  },
+  "d5739133-ff3c-4740-bc69-dc779b4ac336": {
+    "id": "d5739133-ff3c-4740-bc69-dc779b4ac336",
+    "name": "6x Split - Kracht & Uithouding",
+    "frequency": 3,
+    "style": "gym",
+    "description": "6 dagen split: Borst/Triceps, Rug/Biceps, Benen/Schouders (herhaald) - Focus op kracht en uithoudingsvermogen met hogere herhalingen (15-20) en kortere rusttijden (40-60 seconden).\n\n⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
+    "days": [
+      {
+        "day": 1,
+        "name": "Chest & Triceps",
+        "focus": "Borst & Triceps",
+        "exercises": [
+          {
+            "name": "Military Press",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Machine Chest Press",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Calf Press",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Barbell Shoulder Press",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "name": "Back & Biceps",
+        "focus": "Rug & Biceps",
+        "exercises": [
+          {
+            "name": "Pull-ups",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Barbell Row",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Lat Pulldown",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Machine Pull Up",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 3,
+        "name": "Legs & Shoulders",
+        "focus": "Benen & Schouders",
+        "exercises": [
+          {
+            "name": "Squat",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Squats",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Leg Extension",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Leg Press",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      }
+    ]
+  },
+  "a2fe31d9-781f-4241-84aa-60e6055bc069": {
+    "id": "a2fe31d9-781f-4241-84aa-60e6055bc069",
+    "name": "6x Split - Power & Kracht",
+    "frequency": 3,
+    "style": "gym",
+    "description": "6 dagen split: Borst/Triceps, Rug/Biceps, Benen/Schouders (herhaald) - Focus op pure kracht en power met lage herhalingen (3-6) en lange rusttijden (150-180 seconden). Compound oefeningen zijn essentieel.\n\n⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
+    "days": [
+      {
+        "day": 1,
+        "name": "Chest & Triceps",
+        "focus": "Borst & Triceps",
+        "exercises": [
+          {
+            "name": "Supine Press",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Military Press",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Incline Dumbell flyes",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Incline Dumbell Press",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "name": "Back & Biceps",
+        "focus": "Rug & Biceps",
+        "exercises": [
+          {
+            "name": "T-Bar Row",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Cable Pull Rope",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Pull-ups",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Fixed Lat Pulldown",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 3,
+        "name": "Legs & Shoulders",
+        "focus": "Benen & Schouders",
+        "exercises": [
+          {
+            "name": "Hack Squat",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Stiff Leg Deadlift",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Squat",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Calf Press",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      }
+    ]
+  },
+  "2c6d09bf-e602-4369-9c80-e80085e4cf42": {
+    "id": "2c6d09bf-e602-4369-9c80-e80085e4cf42",
+    "name": "5x Split - Kracht & Uithouding",
+    "frequency": 3,
+    "style": "gym",
+    "description": "5 dagen split: Rug, Borst/Schouders, Armen, Benen, Rug - Focus op kracht en uithoudingsvermogen met hogere herhalingen (15-20) en kortere rusttijden (40-60 seconden).\n\n⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
+    "days": [
+      {
+        "day": 1,
+        "name": "Chest & Triceps",
+        "focus": "Borst & Triceps",
+        "exercises": [
+          {
+            "name": "Machine Shoulder Press",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Dumbbell Press",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Military Press",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Machine Chest Press",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "name": "Back & Biceps",
+        "focus": "Rug & Biceps",
+        "exercises": [
+          {
+            "name": "Cable Pull Rope",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Lateral Raises",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Pull-ups",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Fixed Lat Pulldown",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 3,
+        "name": "Legs & Shoulders",
+        "focus": "Benen & Schouders",
+        "exercises": [
+          {
+            "name": "Leg Extension",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Calf Raises",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Pistol Squats",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Calf Press",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      }
+    ]
+  },
+  "7048080c-87b9-424f-a502-af2ea09d5f6b": {
+    "id": "7048080c-87b9-424f-a502-af2ea09d5f6b",
+    "name": "5x Split - Power & Kracht",
+    "frequency": 3,
+    "style": "gym",
+    "description": "5 dagen split: Rug, Borst/Schouders, Armen, Benen, Rug - Focus op pure kracht en power met lage herhalingen (3-6) en lange rusttijden (150-180 seconden). Compound oefeningen zijn essentieel.\n\n⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
+    "days": [
+      {
+        "day": 1,
+        "name": "Chest & Triceps",
+        "focus": "Borst & Triceps",
+        "exercises": [
+          {
+            "name": "Dumbbell Press",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Cable Flye",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Military Press",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Supine Press",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "name": "Back & Biceps",
+        "focus": "Rug & Biceps",
+        "exercises": [
+          {
+            "name": "Dumbell Row",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Cable Row",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "T-Bar Row",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Fixed Lat Pulldown",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 3,
+        "name": "Legs & Shoulders",
+        "focus": "Benen & Schouders",
+        "exercises": [
+          {
+            "name": "Calf Press",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Leg Press",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Leg Curl",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Leg Extension",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      }
+    ]
+  },
+  "b6b668bc-78e1-42ec-8494-a2f188660e71": {
+    "id": "b6b668bc-78e1-42ec-8494-a2f188660e71",
+    "name": "4x Split - Kracht & Uithouding",
+    "frequency": 3,
+    "style": "gym",
+    "description": "4 dagen split: Borst/Triceps/Voorkant Schouders, Rug/Biceps, Achterkant Schouders, Voorkant Benen/Kuiten, Hamstrings/Billen - Focus op kracht en uithoudingsvermogen met hogere herhalingen (15-20) en kortere rusttijden (40-60 seconden).\n\n⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
+    "days": [
+      {
+        "day": 1,
+        "name": "Chest & Triceps",
+        "focus": "Borst & Triceps",
+        "exercises": [
+          {
+            "name": "Incline Chest Press",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Cable Flye",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Calf Press",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Supine Press",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "name": "Back & Biceps",
+        "focus": "Rug & Biceps",
+        "exercises": [
+          {
+            "name": "Fixed Lat Pulldown",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Pull-ups",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Lateral Raises",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Machine Pull Up",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 3,
+        "name": "Legs & Shoulders",
+        "focus": "Benen & Schouders",
+        "exercises": [
+          {
+            "name": "Kneeling Leg Curl",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Leg Extension",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Leg Curl",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Squat",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      }
+    ]
+  },
+  "469a1512-8252-4dc2-9849-7510d7fe637b": {
+    "id": "469a1512-8252-4dc2-9849-7510d7fe637b",
+    "name": "4x Split - Power & Kracht",
+    "frequency": 3,
+    "style": "gym",
+    "description": "4 dagen split: Borst/Triceps/Voorkant Schouders, Rug/Biceps, Achterkant Schouders, Voorkant Benen/Kuiten, Hamstrings/Billen - Focus op pure kracht en power met lage herhalingen (3-6) en lange rusttijden (150-180 seconden). Compound oefeningen zijn essentieel.\n\n⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
+    "days": [
+      {
+        "day": 1,
+        "name": "Chest & Triceps",
+        "focus": "Borst & Triceps",
+        "exercises": [
+          {
+            "name": "Calf Press",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Pectoral Fly",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Military Press",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Dumbbell Shoulder Press",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "name": "Back & Biceps",
+        "focus": "Rug & Biceps",
+        "exercises": [
+          {
+            "name": "Cable Row",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Lat Pulldown",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "T-Bar Row",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Pull-ups",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 3,
+        "name": "Legs & Shoulders",
+        "focus": "Benen & Schouders",
+        "exercises": [
+          {
+            "name": "Pistol Squats",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Deadlift",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Leg Raises",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Squat",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      }
+    ]
+  },
+  "02ffa765-7117-473a-80c8-8b66222a379c": {
+    "id": "02ffa765-7117-473a-80c8-8b66222a379c",
+    "name": "3x Split - Kracht & Uithouding",
+    "frequency": 3,
+    "style": "gym",
+    "description": "3 dagen split: Borst/Triceps, Rug/Biceps, Benen/Schouders - Focus op kracht en uithoudingsvermogen met hogere herhalingen (15-20) en kortere rusttijden (40-60 seconden).\n\n⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
+    "days": [
+      {
+        "day": 1,
+        "name": "Chest & Triceps",
+        "focus": "Borst & Triceps",
+        "exercises": [
+          {
+            "name": "Dumbbell Flyes",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Barbell Shoulder Press",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Machine Chest Press",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Bench Press",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "name": "Back & Biceps",
+        "focus": "Rug & Biceps",
+        "exercises": [
+          {
+            "name": "Cable Pull Rope",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Barbell Row",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Dumbell Row",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Lat Pulldown",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 3,
+        "name": "Legs & Shoulders",
+        "focus": "Benen & Schouders",
+        "exercises": [
+          {
+            "name": "Stiff Leg Deadlift",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Leg Raises",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Seated Leg Curl",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Pistol Squats",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      }
+    ]
+  },
+  "f2525792-1220-4615-91f9-1a39f07ec760": {
+    "id": "f2525792-1220-4615-91f9-1a39f07ec760",
+    "name": "3x Split - Power & Kracht",
+    "frequency": 3,
+    "style": "gym",
+    "description": "3 dagen split: Borst/Triceps, Rug/Biceps, Benen/Schouders - Focus op pure kracht en power met lage herhalingen (3-6) en lange rusttijden (150-180 seconden). Compound oefeningen zijn essentieel.\n\n⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
+    "days": [
+      {
+        "day": 1,
+        "name": "Chest & Triceps",
+        "focus": "Borst & Triceps",
+        "exercises": [
+          {
+            "name": "Military Press",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Machine Chest Press",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Dumbbell Press",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Supine Press",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "name": "Back & Biceps",
+        "focus": "Rug & Biceps",
+        "exercises": [
+          {
+            "name": "Machine Pull Up",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Dumbell Row",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Lat Pulldown",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Fixed Lat Pulldown",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 3,
+        "name": "Legs & Shoulders",
+        "focus": "Benen & Schouders",
+        "exercises": [
+          {
+            "name": "Deadlift",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Leg Press",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Squat",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Calf Raises",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      }
+    ]
+  },
+  "cd2fcb31-8c56-4296-abda-83ed4d1eac21": {
+    "id": "cd2fcb31-8c56-4296-abda-83ed4d1eac21",
+    "name": "6x Split Training - Spiermassa",
+    "frequency": 3,
+    "style": "gym",
+    "description": "6 dagen split: Borst/Triceps, Rug/Biceps, Benen/Schouders (herhaald)\n\n⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
+    "days": [
+      {
+        "day": 1,
+        "name": "Chest & Triceps",
+        "focus": "Borst & Triceps",
+        "exercises": [
+          {
+            "name": "Incline Dumbell Press",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Pectoral Fly",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Dumbbell Press",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Military Press",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "name": "Back & Biceps",
+        "focus": "Rug & Biceps",
+        "exercises": [
+          {
+            "name": "Pull-ups",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Machine Pull Up",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Cable Pull Rope",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Fixed Lat Pulldown",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 3,
+        "name": "Legs & Shoulders",
+        "focus": "Benen & Schouders",
+        "exercises": [
+          {
+            "name": "Seated Leg Curl",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Pistol Squats",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Deadlift",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Kneeling Leg Curl",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      }
+    ]
+  },
+  "8c46ed47-60cc-4cc9-ab6f-1de16683e4b1": {
+    "id": "8c46ed47-60cc-4cc9-ab6f-1de16683e4b1",
+    "name": "Full Body 1x per week - Spiermassa",
+    "frequency": 2,
+    "style": "gym",
+    "description": "Complete full body workout voor 1x per week training\n\n⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
+    "days": [
+      {
+        "day": 1,
+        "name": "Full Body A",
+        "focus": "Volledige Lichaam",
+        "exercises": [
+          {
+            "name": "Barbell Shoulder Press",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Deadlift",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Machine Biceps Curl",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Stiff Leg Deadlift",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Abductie Machine",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Bear Crawls",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "name": "Full Body B",
+        "focus": "Volledige Lichaam",
+        "exercises": [
+          {
+            "name": "Test chiel 2",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Seated Leg Curl",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Cable Biceps Curl",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Cable Row",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Barbell Biceps Curl",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Dumbbell Shoulder Press",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      }
+    ]
+  },
+  "44e8d1c9-e2db-4e12-8ab2-ce381bfee665": {
+    "id": "44e8d1c9-e2db-4e12-8ab2-ce381bfee665",
+    "name": "Full Body 2x per week - Spiermassa",
+    "frequency": 2,
+    "style": "gym",
+    "description": "Complete full body workout voor 2x per week training\n\n⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
+    "days": [
+      {
+        "day": 1,
+        "name": "Full Body A",
+        "focus": "Volledige Lichaam",
+        "exercises": [
+          {
+            "name": "Calf Raises",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Test chiel 2",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Seated Dip",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Triceps Dips",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Fixed Lat Pulldown",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Pistol Squats",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "name": "Full Body B",
+        "focus": "Volledige Lichaam",
+        "exercises": [
+          {
+            "name": "Supine Press",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Barbell Row",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Test chiel 2",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Machine Chest Press",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Jumping Jacks",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Barbell Shoulder Press",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      }
+    ]
+  },
+  "4a512120-afc3-42f2-b41d-9cee4e51e220": {
+    "id": "4a512120-afc3-42f2-b41d-9cee4e51e220",
+    "name": "3x Split Training - Spiermassa",
+    "frequency": 3,
+    "style": "gym",
+    "description": "3 dagen split: Borst/Triceps, Rug/Biceps, Benen/Schouders\n\n⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
+    "days": [
+      {
+        "day": 1,
+        "name": "Chest & Triceps",
+        "focus": "Borst & Triceps",
+        "exercises": [
+          {
+            "name": "Cable Flye",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Barbell Shoulder Press",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Pectoral Fly",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Bench Press",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "name": "Back & Biceps",
+        "focus": "Rug & Biceps",
+        "exercises": [
+          {
+            "name": "Seated Row",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Cable Row",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "T-Bar Row",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Dumbell Row",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 3,
+        "name": "Legs & Shoulders",
+        "focus": "Benen & Schouders",
+        "exercises": [
+          {
+            "name": "Pistol Squats",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Deadlift",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Seated Leg Curl",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Leg Extension",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      }
+    ]
+  },
+  "69a7cad0-786d-4855-bddb-7206c356f415": {
+    "id": "69a7cad0-786d-4855-bddb-7206c356f415",
+    "name": "4x Split Training - Spiermassa",
+    "frequency": 3,
+    "style": "gym",
+    "description": "4 dagen split: Borst/Triceps/Voorkant Schouders, Rug/Biceps, Achterkant Schouders, Voorkant Benen/Kuiten, Hamstrings/Billen\n\n⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
+    "days": [
+      {
+        "day": 1,
+        "name": "Chest & Triceps",
+        "focus": "Borst & Triceps",
+        "exercises": [
+          {
+            "name": "Cable Flye",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Machine Chest Press",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Military Press",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Supine Press",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "name": "Back & Biceps",
+        "focus": "Rug & Biceps",
+        "exercises": [
+          {
+            "name": "Lat Pulldown",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Barbell Row",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Fixed Lat Pulldown",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Lateral Raises",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 3,
+        "name": "Legs & Shoulders",
+        "focus": "Benen & Schouders",
+        "exercises": [
+          {
+            "name": "Pistol Squats",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Squats",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Leg Raises",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Stiff Leg Deadlift",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      }
+    ]
+  },
+  "4b9952ad-a0f1-498a-9521-01c5901c0f08": {
+    "id": "4b9952ad-a0f1-498a-9521-01c5901c0f08",
+    "name": "5x Split Training - Spiermassa",
+    "frequency": 3,
+    "style": "gym",
+    "description": "5 dagen split: Rug, Borst/Schouders, Armen, Benen, Rug\n\n⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
+    "days": [
+      {
+        "day": 1,
+        "name": "Chest & Triceps",
+        "focus": "Borst & Triceps",
+        "exercises": [
+          {
+            "name": "Dumbbell Shoulder Press",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Incline Dumbell flyes",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Cable Flye",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Pectoral Fly",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "name": "Back & Biceps",
+        "focus": "Rug & Biceps",
+        "exercises": [
+          {
+            "name": "Dumbell Row",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Lat Pulldown",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Pull-ups",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Fixed Lat Pulldown",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 3,
+        "name": "Legs & Shoulders",
+        "focus": "Benen & Schouders",
+        "exercises": [
+          {
+            "name": "Calf Raises",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Leg Extension",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Kneeling Leg Curl",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Pistol Squats",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      }
+    ]
+  },
+  "9663e21e-477f-438e-8964-d89043593852": {
+    "id": "9663e21e-477f-438e-8964-d89043593852",
+    "name": "Outdoor Bootcamp - Spiermassa",
+    "frequency": 2,
+    "style": "bodyweight",
+    "description": "Intensieve outdoor training met bodyweight en minimale apparatuur. Tot spier falen voor maximale resultaten. Ideaal voor park training.\n\n⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
+    "days": [
+      {
+        "day": 1,
+        "name": "Full Body A",
+        "focus": "Volledige Lichaam",
+        "exercises": [
+          {
+            "name": "Barbell Shoulder Press",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Burpees",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Deadlift",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Test chiel 2",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Jumping Jacks",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Front Raises",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "name": "Full Body B",
+        "focus": "Volledige Lichaam",
+        "exercises": [
+          {
+            "name": "Plank",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Cable Triceps Rope",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Deadlift",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Calf Raises",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Pectoral Fly",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Hack Squat",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      }
+    ]
+  },
+  "89c7bad0-f6e3-4ea9-a3b4-f0c431368b57": {
+    "id": "89c7bad0-f6e3-4ea9-a3b4-f0c431368b57",
+    "name": "Bodyweight Kracht",
+    "frequency": 2,
+    "style": "gym",
+    "description": "Kracht training met lichaamsgewicht oefeningen. Focus op maximale herhalingen tot spier falen. Perfect voor thuis training zonder apparatuur.\n\n⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
+    "days": [
+      {
+        "day": 1,
+        "name": "Full Body A",
+        "focus": "Volledige Lichaam",
+        "exercises": [
+          {
+            "name": "Cable Triceps Rope",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Jumping Jacks",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Lat Pulldown",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Burpees",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "T-Bar Row",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Stiff Leg Deadlift",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "name": "Full Body B",
+        "focus": "Volledige Lichaam",
+        "exercises": [
+          {
+            "name": "Military Press",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Cable Triceps Pushdown",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Cable Flye",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Spider-man Push-ups",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Dumbbell Press",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Abductie Machine",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      }
+    ]
+  },
+  "38bc8876-a383-41d0-aa84-c3f41e87589c": {
+    "id": "38bc8876-a383-41d0-aa84-c3f41e87589c",
+    "name": "Home Gym Minimal",
+    "frequency": 2,
+    "style": "gym",
+    "description": "Training met minimale apparatuur thuis. Dumbbells en resistance bands. Tot spier falen voor optimale resultaten.\n\n⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
+    "days": [
+      {
+        "day": 1,
+        "name": "Full Body A",
+        "focus": "Volledige Lichaam",
+        "exercises": [
+          {
+            "name": "Bear Crawls",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Dumbell Row",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Calf Press",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Squats",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Jumping Jacks",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Kneeling Leg Curl",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "name": "Full Body B",
+        "focus": "Volledige Lichaam",
+        "exercises": [
+          {
+            "name": "Wall Walks",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Test chiel",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "L-sit Hold",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Test Chiel",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Cable Biceps Curl",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Plank",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      }
+    ]
+  },
+  "49ff88ab-236d-46e3-88d4-aab31410f3a0": {
+    "id": "49ff88ab-236d-46e3-88d4-aab31410f3a0",
+    "name": "Push/Pull/Legs - Foundation & Muscle Building",
+    "frequency": 3,
+    "style": "gym",
+    "description": "Efficiënte verdeling van oefeningen gebaseerd op bewegingstype. Bouw een sterke basis op met focus op spiergroei en correcte uitvoering. Perfect voor beginners en herstel na een pauze. Rep range: 8-12, Rust: 90s. ⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
+    "days": [
+      {
+        "day": 1,
+        "name": "Push Day",
+        "focus": "Push Oefeningen",
+        "exercises": [
+          {
+            "name": "Incline Dumbell Press",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Machine Shoulder Press",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Dumbbell Press",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Pike Push-ups",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Military Press",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "name": "Pull Day",
+        "focus": "Pull Oefeningen",
+        "exercises": [
+          {
+            "name": "Barbell Biceps Curl",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Cable Pull Rope",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Cable Biceps Curl",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Dumbbell Biceps Curl",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Kneeling Leg Curl",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 3,
+        "name": "Legs Day",
+        "focus": "Been Oefeningen",
+        "exercises": [
+          {
+            "name": "Kneeling Leg Curl",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Calf Raises",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Hack Squat",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Leg Curl",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Leg Press",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      }
+    ]
+  },
+  "7583ac25-5985-484f-980c-e5336198c16e": {
+    "id": "7583ac25-5985-484f-980c-e5336198c16e",
+    "name": "Functional Training - Foundation & Muscle Building",
+    "frequency": 2,
+    "style": "gym",
+    "description": "Bewegingspatronen die het dagelijks leven verbeteren en sportprestaties ondersteunen. Bouw een sterke basis op met focus op spiergroei en correcte uitvoering. Perfect voor beginners en herstel na een pauze. Rep range: 8-12, Rust: 90s. ⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
+    "days": [
+      {
+        "day": 1,
+        "name": "Full Body A",
+        "focus": "Volledige Lichaam",
+        "exercises": [
+          {
+            "name": "Cable Biceps Curl",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Incline Dumbell Press",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Triceps Extension Machine",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Tuck Jumps",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Kneeling Leg Curl",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Abdominal Crunch",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "name": "Full Body B",
+        "focus": "Volledige Lichaam",
+        "exercises": [
+          {
+            "name": "Test chiel 2",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Abductie Machine",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Side Raises",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Seated Leg Curl",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Cable Triceps Pushdown",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Incline Dumbell flyes",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      }
+    ]
+  },
+  "01238c1f-3338-45a8-aa77-99900877c5a5": {
+    "id": "01238c1f-3338-45a8-aa77-99900877c5a5",
+    "name": "Full Body - Strength & Power Development",
+    "frequency": 2,
+    "style": "gym",
+    "description": "Alle spiergroepen per training voor optimale frequentie en herstel. Verhoog je kracht en power met compound oefeningen en zwaardere gewichten. Focus op neurologische adaptatie. Rep range: 3-6, Rust: 180s. ⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
+    "days": [
+      {
+        "day": 1,
+        "name": "Full Body A",
+        "focus": "Volledige Lichaam",
+        "exercises": [
+          {
+            "name": "Pike Push-ups",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Box Jumps",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "L-sit Hold",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Booty Builder",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Test Chiel",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "T-Bar Row",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "name": "Full Body B",
+        "focus": "Volledige Lichaam",
+        "exercises": [
+          {
+            "name": "Barbell Biceps Curl",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Hack Squat",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Squat",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Seated Leg Curl",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Machine Shoulder Press",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Kneeling Leg Curl",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      }
+    ]
+  },
+  "8901fcfb-20f6-40bf-801a-6dba29385732": {
+    "id": "8901fcfb-20f6-40bf-801a-6dba29385732",
+    "name": "Full Body - Endurance & Conditioning",
+    "frequency": 2,
+    "style": "bodyweight",
+    "description": "Alle spiergroepen per training voor optimale frequentie en herstel. Verbeter je uithoudingsvermogen en conditionering. Hogere herhalingen met kortere rusttijden voor cardiovasculaire fitness. Rep range: 15-20, Rust: 45s. ⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
+    "days": [
+      {
+        "day": 1,
+        "name": "Full Body A",
+        "focus": "Volledige Lichaam",
+        "exercises": [
+          {
+            "name": "Bench Press",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Pike Push-ups",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Seated Dip",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Test chiel",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Stiff Leg Deadlift",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Cable Flye",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "name": "Full Body B",
+        "focus": "Volledige Lichaam",
+        "exercises": [
+          {
+            "name": "Side Raises",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "L-sit Hold",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Machine Chest Press",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Wall Walks",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Test chiel 2",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Bench Press",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      }
+    ]
+  },
+  "93b1cd02-e2a7-481f-a79c-2a25669c2cb1": {
+    "id": "93b1cd02-e2a7-481f-a79c-2a25669c2cb1",
+    "name": "Split Training - Foundation & Muscle Building",
+    "frequency": 3,
+    "style": "gym",
+    "description": "Focus op specifieke spiergroepen per dag voor maximale isolatie en herstel.",
+    "days": [
+      {
+        "day": 1,
+        "name": "Chest & Triceps",
+        "focus": "Borst & Triceps",
+        "exercises": [
+          {
+            "name": "Machine Chest Press",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Dumbbell Flyes",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Bench Press",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Incline Dumbell flyes",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "name": "Back & Biceps",
+        "focus": "Rug & Biceps",
+        "exercises": [
+          {
+            "name": "Machine Pull Up",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Lateral Raises",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Barbell Row",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Pull-ups",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 3,
+        "name": "Legs & Shoulders",
+        "focus": "Benen & Schouders",
+        "exercises": [
+          {
+            "name": "Seated Leg Curl",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Leg Raises",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Stiff Leg Deadlift",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Hack Squat",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      }
+    ]
+  },
+  "207902e4-1423-4bfc-bdc4-8ec87f28d98d": {
+    "id": "207902e4-1423-4bfc-bdc4-8ec87f28d98d",
+    "name": "Functional Training - Endurance & Conditioning",
+    "frequency": 2,
+    "style": "bodyweight",
+    "description": "Bewegingspatronen die het dagelijks leven verbeteren en sportprestaties ondersteunen. Verbeter je uithoudingsvermogen en conditionering. Hogere herhalingen met kortere rusttijden voor cardiovasculaire fitness. Rep range: 15-20, Rust: 45s. ⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
+    "days": [
+      {
+        "day": 1,
+        "name": "Full Body A",
+        "focus": "Volledige Lichaam",
+        "exercises": [
+          {
+            "name": "Burpees",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Machine Chest Press",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Side Raises",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Fixed Lat Pulldown",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Wall Walks",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Seated Leg Curl",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "name": "Full Body B",
+        "focus": "Volledige Lichaam",
+        "exercises": [
+          {
+            "name": "Cable Triceps Rope",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Cable Triceps Pushdown",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Seated Dip",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Test chiel 2",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Dumbbell Flyes",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Leg Raises",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      }
+    ]
+  },
+  "ff775801-a4ad-474b-85ce-3326170549e8": {
+    "id": "ff775801-a4ad-474b-85ce-3326170549e8",
+    "name": "Specialized: Body Recomposition",
+    "frequency": 2,
+    "style": "gym",
+    "description": "Gelijktijdige vetverlies en spiergroei door geoptimaliseerde training en voeding. Rep range: 8-15, Rust: 75s. ⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
+    "days": [
+      {
+        "day": 1,
+        "name": "Full Body A",
+        "focus": "Volledige Lichaam",
+        "exercises": [
+          {
+            "name": "Dumbbell Flyes",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Lateral Raises",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Cable Flye",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Crab Walks",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Lower Back Extension",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Dumbbell Press",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "name": "Full Body B",
+        "focus": "Volledige Lichaam",
+        "exercises": [
+          {
+            "name": "Cable Flye",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Crab Walks",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Barbell Row",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Lunges",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "shruggs",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Test chiel",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      }
+    ]
+  },
+  "7f4bc900-a98d-47f6-893f-265242cf2b93": {
+    "id": "7f4bc900-a98d-47f6-893f-265242cf2b93",
+    "name": "Specialized: Athletic Performance",
+    "frequency": 2,
+    "style": "gym",
+    "description": "Programma gericht op atletische prestaties, explosiviteit en functionele kracht. Rep range: 5-8, Rust: 120s. ⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
+    "days": [
+      {
+        "day": 1,
+        "name": "Full Body A",
+        "focus": "Volledige Lichaam",
+        "exercises": [
+          {
+            "name": "Push-ups",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Dips",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Deadlift",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Front Raises",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Incline Dumbell flyes",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Bench Press",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "name": "Full Body B",
+        "focus": "Volledige Lichaam",
+        "exercises": [
+          {
+            "name": "L-sit Hold",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "test chiel 3",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Test chiel",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Mountain Climbers",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Cable Triceps Rope",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Calf Press",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      }
+    ]
+  },
+  "359e7071-70ae-4b63-a27c-64a220ed1885": {
+    "id": "359e7071-70ae-4b63-a27c-64a220ed1885",
+    "name": "6-Month Progression Overview",
+    "frequency": 2,
+    "style": "gym",
+    "description": "Complete 6-maand progressie systeem voor optimale resultaten:\n\n**Maand 1-2: Foundation & Muscle Building**\n- Focus: Spiergroei en correcte uitvoering\n- Reps: 8-12, Rust: 90s\n- Doel: Sterke basis opbouwen\n\n**Maand 3-4: Strength & Power Development**\n- Focus: Kracht en power\n- Reps: 3-6, Rust: 180s\n- Doel: Neurologische adaptatie\n\n**Maand 5-6: Endurance & Conditioning**\n- Focus: Uithouding en conditionering\n- Reps: 15-20, Rust: 45s\n- Doel: Cardiovasculaire fitness\n\n⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
+    "days": [
+      {
+        "day": 1,
+        "name": "Full Body A",
+        "focus": "Volledige Lichaam",
+        "exercises": [
+          {
+            "name": "Cable Biceps Curl",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Abdominal Crunch",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Booty Builder",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Wall Walks",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Triceps Dips",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Dumbbell Shoulder Press",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "name": "Full Body B",
+        "focus": "Volledige Lichaam",
+        "exercises": [
+          {
+            "name": "Squats",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Calf Raises",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Dumbbell Flyes",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Machine Biceps Curl",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Jumping Jacks",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Lower Back Extension",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      }
+    ]
+  },
+  "136f7856-a3dd-47af-b35f-7df4e53bdb79": {
+    "id": "136f7856-a3dd-47af-b35f-7df4e53bdb79",
+    "name": "Specialized: Sport-Specific Training",
+    "frequency": 2,
+    "style": "bodyweight",
+    "description": "Training aangepast aan specifieke sporten (voetbal, tennis, zwemmen, etc.). Rep range: 6-12, Rust: 90s. ⚠️ **BELANGRIJK:** We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.",
+    "days": [
+      {
+        "day": 1,
+        "name": "Full Body A",
+        "focus": "Volledige Lichaam",
+        "exercises": [
+          {
+            "name": "Bench Press",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Seated Row",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Machine Biceps Curl",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "L-sit Hold",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Squats",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Handstand Push-ups",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "name": "Full Body B",
+        "focus": "Volledige Lichaam",
+        "exercises": [
+          {
+            "name": "Dips",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Pike Push-ups",
+            "sets": 3,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Dumbell Row",
+            "sets": 5,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Cable Triceps Rope",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Abdominal Crunch",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          },
+          {
+            "name": "Leg Press",
+            "sets": 4,
+            "reps": "8-12",
+            "rest": "60-90 sec",
+            "alternatives": [],
+            "feedback": ""
+          }
+        ]
+      }
+    ]
+  }
+}
