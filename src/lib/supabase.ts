@@ -25,7 +25,7 @@ export const supabase = createClient(finalSupabaseUrl, finalSupabaseAnonKey, {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: true,
-    // 2.0.1: Unified storage key across all clients
+    // 2.0.3: Unified storage key across all clients
     storageKey: 'toptiermen-v2-auth',
     storage: {
       getItem: (key: string) => {

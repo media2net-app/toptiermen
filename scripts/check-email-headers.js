@@ -47,7 +47,7 @@ async function checkEmailHeaders() {
       to: 'chiel@media2net.nl',
       subject: 'Email Headers Test - Top Tier Men',
       headers: {
-        'X-Mailer': 'Top Tier Men Platform 2.0.1',
+        'X-Mailer': 'Top Tier Men Platform 2.0.3',
         'X-Priority': '3',
         'X-MSMail-Priority': 'Normal',
         'Importance': 'normal',
@@ -74,7 +74,7 @@ async function checkEmailHeaders() {
           <p>Controleer de email headers om het IP adres te zien.</p>
           
           <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; font-size: 12px;">
-            <p>Platform 2.0.1 - Email Headers Test</p>
+            <p>Platform 2.0.3 - Email Headers Test</p>
           </div>
         </div>
       `

@@ -115,7 +115,7 @@ export default function LoginMaintenancePage() {
 
         {/* Version */}
         <div className="mt-6 text-[#B6C948] text-xs">
-          Platform 2.0.1 • Maintenance Mode
+          Platform 2.0.3 • Maintenance Mode
         </div>
       </div>
     </div>

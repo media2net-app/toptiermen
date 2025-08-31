@@ -63,7 +63,7 @@ async function testSMTPConnection() {
           <p>Als je deze email ontvangt, werkt de SMTP configuratie correct!</p>
           
           <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; font-size: 12px;">
-            <p>Platform 2.0.1 - SMTP Test</p>
+            <p>Platform 2.0.3 - SMTP Test</p>
           </div>
         </div>
       `

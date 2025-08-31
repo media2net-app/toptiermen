@@ -1,4 +1,4 @@
-// 2.0.1: Intelligent Error Recovery System
+// 2.0.3: Intelligent Error Recovery System
 import { useV2State } from '@/contexts/V2StateContext';
 
 // 2.0.1: Error types

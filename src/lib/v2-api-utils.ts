@@ -1,4 +1,4 @@
-// 2.0.1: Standardized API Utilities
+// 2.0.3: Standardized API Utilities
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 

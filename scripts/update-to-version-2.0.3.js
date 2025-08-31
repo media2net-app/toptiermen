@@ -2,7 +2,7 @@ require('dotenv').config({ path: '.env.local' });
 
 const { createClient } = require('@supabase/supabase-js');
 
-console.log('🚀 UPDATING PLATFORM TO VERSION 2.0.1');
+console.log('🚀 UPDATING PLATFORM TO VERSION 2.0.3');
 console.log('============================================================');
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -190,7 +190,7 @@ async function updateToVersion2_0_1() {
     console.log('');
     
     console.log('🎯 RESULT:');
-    console.log('✅ Platform successfully updated to version 2.0.1');
+    console.log('✅ Platform successfully updated to version 2.0.3');
     console.log('✅ All users will automatically benefit from cache busting');
     console.log('✅ Database migration completed successfully');
     console.log('✅ User experience significantly improved');
@@ -204,7 +204,7 @@ async function updateToVersion2_0_1() {
 
 async function main() {
   try {
-    console.log('🚀 Starting platform update to version 2.0.1...');
+    console.log('🚀 Starting platform update to version 2.0.3...');
     console.log('');
     
     await updateToVersion2_0_1();

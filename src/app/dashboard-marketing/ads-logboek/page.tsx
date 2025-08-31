@@ -96,10 +96,10 @@ STATUS: 🚀 LIVE - API Advertentie maken systeem is nu beschikbaar voor snelle 
     {
       id: '17',
       date: '2025-08-26',
-      title: '🔧 2.0.1 Platform Stabiliteit Verbeterd',
+      title: '🔧 2.0.3 Platform Stabiliteit Verbeterd',
       category: 'fix',
       impact: 'positive',
-      content: `2.0.1 PLATFORM STABILITEIT: Dashboard freezing en crashing issues opgelost.
+      content: `2.0.3 PLATFORM STABILITEIT: Dashboard freezing en crashing issues opgelost.
 
 PROBLEEM:
 ❌ Dashboard freezing en unresponsive UI
@@ -1175,7 +1175,7 @@ RESULTAAT:
               <ul className="space-y-2 text-gray-300">
                 <li>✅ API Advertentie maken systeem geïmplementeerd</li>
                 <li>✅ Facebook Analytics data gecorrigeerd</li>
-                <li>✅ 2.0.1 platform stabiliteit hersteld</li>
+                <li>✅ 2.0.3 platform stabiliteit hersteld</li>
                 <li>✅ Facebook Lead Formulier API geanalyseerd</li>
                 <li>✅ 4 nieuwe log entries toegevoegd</li>
               </ul>
@@ -1209,7 +1209,7 @@ RESULTAAT:
             <ul className="space-y-2 text-gray-300">
               <li>• Gebruik API Advertentie maken systeem voor nieuwe campagnes</li>
               <li>• Koppel bestaand lead formulier aan LEADS campagnes</li>
-              <li>• Monitor 2.0.1 platform stabiliteit</li>
+              <li>• Monitor 2.0.3 platform stabiliteit</li>
               <li>• Test nieuwe API scripts met echte campagnes</li>
               <li>• Implementeer lead tracking voor conversie monitoring</li>
             </ul>

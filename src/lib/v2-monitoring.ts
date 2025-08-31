@@ -1,4 +1,4 @@
-// 2.0.1: Comprehensive Monitoring System
+// 2.0.3: Comprehensive Monitoring System
 import React from 'react';
 import { useV2State } from '@/contexts/V2StateContext';
 
