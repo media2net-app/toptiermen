@@ -3,22 +3,20 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import PageLayout from '@/components/PageLayout';
+import Breadcrumb, { createBreadcrumbs } from '@/components/Breadcrumb';
 
 interface NutritionPlan {
+  id: number;
   plan_id: string;
   name: string;
+  subtitle?: string;
   description: string;
-  category: string;
-  target_calories: number;
-  target_protein: number;
-  target_carbs: number;
-  target_fat: number;
-  duration_weeks: number;
-  difficulty: string;
-  goal: string;
-  is_featured: boolean;
-  is_public: boolean;
+  icon?: string;
+  color?: string;
+  meals?: any[];
+  is_active: boolean;
   created_at: string;
+  updated_at: string;
 }
 
 export default function VoedingsplannenPage() {
@@ -35,59 +33,20 @@ export default function VoedingsplannenPage() {
     try {
       setLoading(true);
       
-      // 3 carnivoor voedingsplannen
-      const correctPlans: NutritionPlan[] = [
-        {
-          plan_id: 'carnivoor_droogtrainen',
-          name: 'Carnivoor Droogtrainen',
-          description: 'Een carnivoor voedingsplan specifiek gericht op vetverbranding en droogtrainen. Hoog in eiwitten, zeer laag in koolhydraten, perfect voor het verliezen van lichaamsvet terwijl je spiermassa behoudt.',
-          category: 'carnivoor',
-          target_calories: 2000,
-          target_protein: 200,
-          target_carbs: 5,
-          target_fat: 130,
-          duration_weeks: 12,
-          difficulty: 'Makkelijk',
-          goal: 'droogtrainen',
-          is_featured: true,
-          is_public: true,
-          created_at: new Date().toISOString()
-        },
-        {
-          plan_id: 'carnivoor_onderhoud',
-          name: 'Carnivoor Onderhoud',
-          description: 'Een carnivoor voedingsplan voor het behouden van je huidige lichaamscompositie en gezondheid. Gebalanceerd voor langdurige gezondheid en welzijn.',
-          category: 'carnivoor',
-          target_calories: 2400,
-          target_protein: 180,
-          target_carbs: 8,
-          target_fat: 160,
-          duration_weeks: 12,
-          difficulty: 'Makkelijk',
-          goal: 'onderhoud',
-          is_featured: true,
-          is_public: true,
-          created_at: new Date().toISOString()
-        },
-        {
-          plan_id: 'carnivoor_spiermassa',
-          name: 'Carnivoor Spiermassa',
-          description: 'Een carnivoor voedingsplan voor spieropbouw en krachttoename. Hoog in eiwitten en gezonde vetten, perfect voor het opbouwen van spiermassa en kracht.',
-          category: 'carnivoor',
-          target_calories: 2800,
-          target_protein: 220,
-          target_carbs: 10,
-          target_fat: 200,
-          duration_weeks: 12,
-          difficulty: 'Makkelijk',
-          goal: 'spiermassa',
-          is_featured: true,
-          is_public: true,
-          created_at: new Date().toISOString()
-        }
-      ];
-
-      setPlans(correctPlans);
+      const response = await fetch('/api/nutrition-plans');
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch nutrition plans');
+      }
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setPlans(data.plans);
+      } else {
+        throw new Error(data.error || 'Failed to fetch nutrition plans');
+      }
+      
       setLoading(false);
     } catch (err) {
       console.error('Error fetching nutrition plans:', err);
@@ -100,46 +59,22 @@ export default function VoedingsplannenPage() {
     router.push(`/dashboard/voedingsplannen/${planId}`);
   };
 
-  const getPlanIcon = (category: string) => {
-    switch (category) {
-      case 'carnivoor':
-        return (
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-          </svg>
-        );
-      case 'flexibel':
-        return (
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        );
-      case 'keto':
-        return (
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
-        );
-      default:
-        return (
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-          </svg>
-        );
+  const getPlanIcon = (plan: NutritionPlan) => {
+    if (plan.icon) {
+      return <span className="text-2xl">{plan.icon}</span>;
     }
+    return (
+      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+      </svg>
+    );
   };
 
-  const getPlanColor = (category: string) => {
-    switch (category) {
-      case 'carnivoor':
-        return 'from-red-600 to-orange-500';
-      case 'flexibel':
-        return 'from-green-600 to-blue-500';
-      case 'keto':
-        return 'from-purple-600 to-pink-500';
-      default:
-        return 'from-gray-600 to-gray-500';
+  const getPlanColor = (plan: NutritionPlan) => {
+    if (plan.color) {
+      return `from-[${plan.color}] to-[${plan.color}]`;
     }
+    return 'from-red-600 to-orange-500';
   };
 
   if (loading) {
@@ -177,6 +112,11 @@ export default function VoedingsplannenPage() {
       title="Voedingsplannen"
       subtitle="Kies het voedingsplan dat bij jou past"
     >
+      {/* Breadcrumb */}
+      <div className="mb-6">
+        <Breadcrumb items={createBreadcrumbs('Voedingsplannen')} />
+      </div>
+      
       <div className="max-w-6xl mx-auto">
         {/* Header Section */}
         <div className="mb-8">
@@ -196,26 +136,19 @@ export default function VoedingsplannenPage() {
             >
               {/* Plan Header */}
               <div className="flex items-center mb-4">
-                <div className={`w-12 h-12 bg-gradient-to-r ${getPlanColor(plan.category)} rounded-lg flex items-center justify-center mr-4 group-hover:scale-110 transition-transform`}>
+                <div className={`w-12 h-12 bg-gradient-to-r ${getPlanColor(plan)} rounded-lg flex items-center justify-center mr-4 group-hover:scale-110 transition-transform`}>
                   <div className="text-white">
-                    {getPlanIcon(plan.category)}
+                    {getPlanIcon(plan)}
                   </div>
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-white group-hover:text-[#B6C948] transition-colors">
                     {plan.name}
                   </h3>
-                  <p className="text-[#8BAE5A] text-sm">{plan.difficulty}</p>
+                  {plan.subtitle && (
+                    <p className="text-[#8BAE5A] text-sm">{plan.subtitle}</p>
+                  )}
                 </div>
-              </div>
-
-              {/* Plan Goal Badge */}
-              <div className="mb-3">
-                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-red-600 to-orange-500 text-white">
-                  {plan.goal === 'droogtrainen' && '🎯 Droogtrainen'}
-                  {plan.goal === 'onderhoud' && '⚖️ Onderhoud'}
-                  {plan.goal === 'spiermassa' && '💪 Spiermassa'}
-                </span>
               </div>
 
               {/* Plan Description */}
@@ -223,35 +156,13 @@ export default function VoedingsplannenPage() {
                 {plan.description}
               </p>
 
-              {/* Nutrition Info */}
-              <div className="bg-[#181F17] rounded-lg p-4 mb-4">
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <p className="text-[#8BAE5A]">Calorieën</p>
-                    <p className="text-white font-semibold">{plan.target_calories}</p>
-                  </div>
-                  <div>
-                    <p className="text-[#8BAE5A]">Eiwitten</p>
-                    <p className="text-white font-semibold">{plan.target_protein}g</p>
-                  </div>
-                  <div>
-                    <p className="text-[#8BAE5A]">Koolhydraten</p>
-                    <p className="text-white font-semibold">{plan.target_carbs}g</p>
-                  </div>
-                  <div>
-                    <p className="text-[#8BAE5A]">Vetten</p>
-                    <p className="text-white font-semibold">{plan.target_fat}g</p>
-                  </div>
-                </div>
-              </div>
-
               {/* Plan Features */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center text-[#8BAE5A] text-sm">
                   <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  {plan.duration_weeks} weken
+                  12 weken
                 </div>
                 <div className="text-[#B6C948] group-hover:text-white transition-colors">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
