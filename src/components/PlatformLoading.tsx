@@ -13,6 +13,9 @@ export default function PlatformLoading({
   showReloadButton = true,
   onReload
 }: PlatformLoadingProps) {
+  // TEMPORARILY DISABLED TO FIX RICK'S DASHBOARD ACCESS
+  return null;
+
   const [dots, setDots] = useState('');
 
   // Animate loading dots
