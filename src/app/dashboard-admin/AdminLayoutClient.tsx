@@ -66,11 +66,6 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
 
   const adminMenu: MenuItem[] = [
     { 
-      label: 'Planning Lancering', 
-      icon: RocketLaunchIcon, 
-      href: '/dashboard-admin/planning-lancering'
-    },
-    { 
       label: 'Dashboard', 
       icon: HomeIcon, 
       href: '/dashboard-admin'
