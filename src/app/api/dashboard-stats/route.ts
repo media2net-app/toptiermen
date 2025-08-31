@@ -319,16 +319,19 @@ async function fetchUserBadges(userId: string) {
       return [];
     }
 
-    return badges?.map(userBadge => ({
-      id: userBadge.id,
-      title: userBadge.badges?.name || 'Unknown Badge',
-      description: userBadge.badges?.description || '',
-      icon_name: userBadge.badges?.icon_name || 'star',
-      image_url: userBadge.badges?.image_url,
-      rarity_level: userBadge.badges?.rarity_level || 'common',
-      xp_reward: userBadge.badges?.xp_reward || 0,
-      unlocked_at: userBadge.unlocked_at
-    })) || [];
+    return badges?.map(userBadge => {
+      const badge = userBadge.badges?.[0]; // Get first badge from the array
+      return {
+        id: userBadge.id,
+        title: badge?.name || 'Unknown Badge',
+        description: badge?.description || '',
+        icon_name: badge?.icon_name || 'star',
+        image_url: badge?.image_url,
+        rarity_level: badge?.rarity_level || 'common',
+        xp_reward: badge?.xp_reward || 0,
+        unlocked_at: userBadge.unlocked_at
+      };
+    }) || [];
   } catch (error) {
     console.error('Error fetching user badges:', error);
     return [];

@@ -21,6 +21,7 @@ import ZeroBasedBudget from './components/ZeroBasedBudget';
 import DebtSnowball from './components/DebtSnowball';
 import CompoundInterest from './components/CompoundInterest';
 import FIRECalculator from './components/FIRECalculator';
+import { useRouter } from 'next/navigation';
 
 ChartJS.register(
   CategoryScale,
@@ -42,6 +43,17 @@ const assets = [
 const debts = [
   { name: 'Hypotheek', amount: 200000 },
   { name: 'Studieschuld', amount: 15000 },
+];
+
+const investmentCategories = [
+  'Aandelen',
+  'Obligaties',
+  'Vastgoed',
+  'Cryptocurrency',
+  'Goud/Zilver',
+  'ETF\'s',
+  'Pensioen',
+  'Ondernemerschap'
 ];
 
 const generateChartData = (period: string) => {
@@ -207,6 +219,7 @@ const chartOptions = {
 };
 
 function FinanceDashboardContent() {
+  const router = useRouter();
   const { user } = useSupabaseAuth();
   const { finance } = useFinance();
   const [activeTab, setActiveTab] = useState<'overview' | 'planning'>('overview');
@@ -518,75 +531,75 @@ function FinanceDashboardContent() {
             <div className="text-[#8BAE5A] text-sm">Hoe dicht zit je bij je doel?</div>
           </Link>
         </div>
+      )}
 
-        {/* Financiële Doelen Sectie */}
-        {financialGoals.length > 0 && (
-          <div className="mt-8">
-            <h2 className="text-2xl font-bold text-[#B6C948] mb-6">Jouw Financiële Doelen</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {financialGoals.map((goal, index) => {
-                const targetDate = new Date(goal.target_date);
-                const today = new Date();
-                const daysRemaining = Math.ceil((targetDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-                const progress = Math.min(100, Math.round((goal.current_amount || 0) / goal.target_amount * 100));
-                
-                return (
-                  <div key={index} className="bg-[#232D1A] rounded-2xl shadow-xl p-6 border border-[#3A4D23] hover:border-[#B6C948] transition-all">
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="flex-1">
-                        <h3 className="text-lg font-bold text-white">{goal.title}</h3>
-                        <span className="text-xs text-[#8BAE5A] bg-[#181F17] px-2 py-1 rounded-full">
-                          {goal.category}
-                        </span>
-                      </div>
-                      <button
-                        onClick={() => handleEditGoal(goal)}
-                        className="p-2 text-[#8BAE5A] hover:text-[#B6C948] hover:bg-[#181F17] rounded-lg transition-colors"
-                        title="Voortgang bijwerken"
-                      >
-                        <PencilIcon className="w-4 h-4" />
-                      </button>
+      {/* Financiële Doelen Sectie */}
+      {activeTab === 'overview' && financialGoals.length > 0 && (
+        <div className="mt-8">
+          <h2 className="text-2xl font-bold text-[#B6C948] mb-6">Jouw Financiële Doelen</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {financialGoals.map((goal, index) => {
+              const targetDate = new Date(goal.target_date);
+              const today = new Date();
+              const daysRemaining = Math.ceil((targetDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+              const progress = Math.min(100, Math.round((goal.current_amount || 0) / goal.target_amount * 100));
+              
+              return (
+                <div key={index} className="bg-[#232D1A] rounded-2xl shadow-xl p-6 border border-[#3A4D23] hover:border-[#B6C948] transition-all">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-bold text-white">{goal.title}</h3>
+                      <span className="text-xs text-[#8BAE5A] bg-[#181F17] px-2 py-1 rounded-full">
+                        {goal.category}
+                      </span>
                     </div>
-                    
-                    <div className="mb-4">
-                      <div className="flex justify-between text-sm mb-2">
-                        <span className="text-[#8BAE5A]">Voortgang</span>
-                        <span className="text-white">{progress}%</span>
-                      </div>
-                      <div className="w-full h-2 bg-[#181F17] rounded-full">
-                        <div 
-                          className="h-2 rounded-full bg-gradient-to-r from-[#8BAE5A] to-[#B6C948]" 
-                          style={{ width: `${progress}%` }}
-                        />
-                      </div>
+                    <button
+                      onClick={() => handleEditGoal(goal)}
+                      className="p-2 text-[#8BAE5A] hover:text-[#B6C948] hover:bg-[#181F17] rounded-lg transition-colors"
+                      title="Voortgang bijwerken"
+                    >
+                      <PencilIcon className="w-4 h-4" />
+                    </button>
+                  </div>
+                  
+                  <div className="mb-4">
+                    <div className="flex justify-between text-sm mb-2">
+                      <span className="text-[#8BAE5A]">Voortgang</span>
+                      <span className="text-white">{progress}%</span>
                     </div>
-                    
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-[#8BAE5A]">Doelbedrag:</span>
-                        <span className="text-white font-semibold">€{goal.target_amount?.toLocaleString('nl-NL')}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-[#8BAE5A]">Huidig bedrag:</span>
-                        <span className="text-white">€{(goal.current_amount || 0).toLocaleString('nl-NL')}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-[#8BAE5A]">Doeldatum:</span>
-                        <span className="text-white">{targetDate.toLocaleDateString('nl-NL')}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-[#8BAE5A]">Dagen resterend:</span>
-                        <span className={`font-semibold ${daysRemaining < 0 ? 'text-red-400' : daysRemaining < 30 ? 'text-yellow-400' : 'text-green-400'}`}>
-                          {daysRemaining < 0 ? `${Math.abs(daysRemaining)} dagen over tijd` : `${daysRemaining} dagen`}
-                        </span>
-                      </div>
+                    <div className="w-full h-2 bg-[#181F17] rounded-full">
+                      <div 
+                        className="h-2 rounded-full bg-gradient-to-r from-[#8BAE5A] to-[#B6C948]" 
+                        style={{ width: `${progress}%` }}
+                      />
                     </div>
                   </div>
-                );
-              })}
-            </div>
+                  
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-[#8BAE5A]">Doelbedrag:</span>
+                      <span className="text-white font-semibold">€{goal.target_amount?.toLocaleString('nl-NL')}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-[#8BAE5A]">Huidig bedrag:</span>
+                      <span className="text-white">€{(goal.current_amount || 0).toLocaleString('nl-NL')}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-[#8BAE5A]">Doeldatum:</span>
+                      <span className="text-white">{targetDate.toLocaleDateString('nl-NL')}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-[#8BAE5A]">Dagen resterend:</span>
+                      <span className={`font-semibold ${daysRemaining < 0 ? 'text-red-400' : daysRemaining < 30 ? 'text-yellow-400' : 'text-green-400'}`}>
+                        {daysRemaining < 0 ? `${Math.abs(daysRemaining)} dagen over tijd` : `${daysRemaining} dagen`}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        )}
+        </div>
       )}
 
       {activeTab === 'planning' && (
