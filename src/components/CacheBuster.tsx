@@ -75,15 +75,14 @@ export function CacheBuster({ version = '2.0.1', forceRefresh = false }: CacheBu
         });
       }
 
-      // Force page reload with cache busting
+      // Force page reload with cache busting - ALWAYS RELOAD
       const currentUrl = new URL(window.location.href);
       currentUrl.searchParams.set('_cb', Date.now().toString());
       currentUrl.searchParams.set('_v', version);
+      currentUrl.searchParams.set('_force', 'true');
       
-      // Only reload if we're not already on a cache-busted URL
-      if (!currentUrl.searchParams.has('_cb')) {
-        window.location.href = currentUrl.toString();
-      }
+      // Always reload to force cache refresh
+      window.location.href = currentUrl.toString();
     }
 
     // Add cache-busting meta tags dynamically
