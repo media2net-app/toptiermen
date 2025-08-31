@@ -90,6 +90,15 @@ export default function AcademyPage() {
         console.log('🎓 Academy: Starting data fetch...');
       }
 
+      // Add timeout to prevent infinite loading
+      const timeoutId = setTimeout(() => {
+        if (isMounted) {
+          console.warn('⚠️ Academy: Data fetch timeout, setting loading to false');
+          setLoading(false);
+          setError('Het laden duurde te lang. Probeer de pagina te verversen.');
+        }
+      }, 10000); // 10 second timeout
+
       try {
         // Fetch modules
         console.log('📚 Academy: Fetching modules...');
@@ -99,7 +108,10 @@ export default function AcademyPage() {
           .eq('status', 'published')
           .order('order_index');
 
-        if (modulesError) throw modulesError;
+        if (modulesError) {
+          console.error('❌ Academy: Error fetching modules:', modulesError);
+          throw modulesError; // This is critical, so we throw
+        }
 
         // Fetch lessons
         console.log('📖 Academy: Fetching lessons...');
@@ -109,7 +121,10 @@ export default function AcademyPage() {
           .eq('status', 'published')
           .order('order_index');
 
-        if (lessonsError) throw lessonsError;
+        if (lessonsError) {
+          console.error('❌ Academy: Error fetching lessons:', lessonsError);
+          throw lessonsError; // This is critical, so we throw
+        }
 
         // Fetch user progress
         console.log('📊 Academy: Fetching user progress...');
@@ -118,7 +133,10 @@ export default function AcademyPage() {
           .select('*')
           .eq('user_id', user.id);
 
-        if (progressError) throw progressError;
+        if (progressError) {
+          console.warn('⚠️ Academy: Warning fetching user progress:', progressError);
+          // Don't throw, continue with empty data
+        }
 
         // Fetch lesson progress
         console.log('📝 Academy: Fetching lesson progress...');
@@ -127,7 +145,10 @@ export default function AcademyPage() {
           .select('*')
           .eq('user_id', user.id);
 
-        if (lessonProgressError) throw lessonProgressError;
+        if (lessonProgressError) {
+          console.warn('⚠️ Academy: Warning fetching lesson progress:', lessonProgressError);
+          // Don't throw, continue with empty data
+        }
 
         // Fetch module unlocks
         console.log('🔓 Academy: Fetching module unlocks...');
@@ -136,7 +157,10 @@ export default function AcademyPage() {
           .select('*')
           .eq('user_id', user.id);
 
-        if (unlocksError) throw unlocksError;
+        if (unlocksError) {
+          console.warn('⚠️ Academy: Warning fetching module unlocks:', unlocksError);
+          // Don't throw, continue with empty data
+        }
 
         if (isMounted) {
           setModules(modulesData || []);
@@ -179,6 +203,8 @@ export default function AcademyPage() {
           setError('Er is een fout opgetreden bij het laden van de academy data.');
           setLoading(false);
         }
+      } finally {
+        clearTimeout(timeoutId);
       }
     };
 
