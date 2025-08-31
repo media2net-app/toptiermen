@@ -162,7 +162,7 @@ export async function GET(request: Request) {
           progress: mission.current_progress,
           shared: mission.is_shared || false,
           accountabilityPartner: null,
-          xp_reward: mission.xp_reward || 15,
+          xp_reward: mission.points || mission.xp_reward || 15,
           last_completion_date: mission.last_completion_date
         };
       }) || [];
@@ -196,7 +196,7 @@ export async function GET(request: Request) {
             progress: fileMission.progress,
             shared: fileMission.shared,
             accountabilityPartner: fileMission.accountabilityPartner,
-            xp_reward: fileMission.xp_reward,
+            xp_reward: fileMission.points || fileMission.xp_reward,
             last_completion_date: fileMission.last_completion_date
           });
         }
@@ -719,14 +719,10 @@ export async function POST(request: Request) {
             title: missionTitle,
             description: missionTitle,
             frequency_type: missionType === 'Dagelijks' ? 'daily' : missionType === 'Wekelijks' ? 'weekly' : 'monthly',
-            difficulty_level: 'medium',
-            xp_reward: missionXp,
-            status: 'active',
-            category_slug: missionCategory.toLowerCase().replace(/\s+/g, '-'),
-            icon: missionIcon,
-            badge_name: 'Custom Badge',
-            current_progress: 0,
-            is_shared: false,
+            difficulty: 'medium',
+            points: missionXp,
+            status: 'pending',
+            category: missionCategory,
             last_completion_date: null,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
@@ -735,7 +731,8 @@ export async function POST(request: Request) {
           .single();
 
         if (createError) {
-          console.log('⚠️  Error creating mission in database, using dummy create');
+          console.log('⚠️  Error creating mission in database:', createError.message);
+          console.log('📊 Error details:', createError);
           throw createError;
         }
 
