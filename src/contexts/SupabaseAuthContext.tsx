@@ -361,15 +361,15 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     try {
       console.log('Starting sign out process...');
       
-      // Clear all local storage and session storage
+      // Clear only auth-related storage, not everything
       if (typeof window !== 'undefined') {
-        console.log('Clearing browser storage...');
-        localStorage.clear();
-        sessionStorage.clear();
+        console.log('Clearing auth storage...');
         
         // Clear specific auth storage
         localStorage.removeItem('toptiermen-v2-auth');
         localStorage.removeItem('supabase.auth.token');
+        sessionStorage.removeItem('toptiermen-v2-auth');
+        sessionStorage.removeItem('supabase.auth.token');
         
         // Clear any other auth-related items
         const keysToRemove: string[] = [];
@@ -380,6 +380,14 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
           }
         }
         keysToRemove.forEach(key => localStorage.removeItem(key));
+        
+        // Clear session storage auth items
+        for (let i = 0; i < sessionStorage.length; i++) {
+          const key = sessionStorage.key(i);
+          if (key && (key.includes('auth') || key.includes('supabase') || key.includes('session'))) {
+            sessionStorage.removeItem(key);
+          }
+        }
       }
       
       // Sign out from Supabase
@@ -406,17 +414,49 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     console.log('Logout and redirect initiated...');
     
     try {
-      // Clear all local state and storage first
+      // Clear only auth-related storage, preserve app state
       if (typeof window !== 'undefined') {
-        localStorage.clear();
-        sessionStorage.clear();
+        console.log('Clearing auth storage...');
+        
+        // Clear specific auth storage
         localStorage.removeItem('toptiermen-v2-auth');
         localStorage.removeItem('supabase.auth.token');
+        sessionStorage.removeItem('toptiermen-v2-auth');
+        sessionStorage.removeItem('supabase.auth.token');
+        
+        // Clear any other auth-related items
+        const keysToRemove: string[] = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && (key.includes('auth') || key.includes('supabase') || key.includes('session'))) {
+            keysToRemove.push(key);
+          }
+        }
+        keysToRemove.forEach(key => localStorage.removeItem(key));
+        
+        // Clear session storage auth items
+        for (let i = 0; i < sessionStorage.length; i++) {
+          const key = sessionStorage.key(i);
+          if (key && (key.includes('auth') || key.includes('supabase') || key.includes('session'))) {
+            sessionStorage.removeItem(key);
+          }
+        }
       }
       
       // Reset state immediately
       dispatch({ type: 'RESET_STATE' });
       console.log('Local state cleared');
+      
+      // Debug: Log remaining localStorage items
+      if (typeof window !== 'undefined') {
+        console.log('🔍 Remaining localStorage items after logout:');
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key) {
+            console.log(`  - ${key}: ${localStorage.getItem(key)?.substring(0, 50)}...`);
+          }
+        }
+      }
       
       // Sign out from Supabase
       const { error } = await supabase.auth.signOut();
@@ -427,15 +467,12 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
         console.log('Supabase sign out successful');
       }
       
-      // Clear browser cache
-      if (typeof window !== 'undefined' && 'caches' in window) {
-        try {
-          const cacheNames = await caches.keys();
-          await Promise.all(cacheNames.map(name => caches.delete(name)));
-          console.log('Browser cache cleared');
-        } catch (cacheError) {
-          console.log('Cache clearing failed:', cacheError);
-        }
+      // Reset Supabase client to clear any cached session
+      try {
+        await supabase.auth.refreshSession();
+        console.log('Supabase client refreshed');
+      } catch (refreshError) {
+        console.log('Supabase refresh failed (expected after logout):', refreshError);
       }
       
       // Force redirect with cache busting
