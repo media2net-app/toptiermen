@@ -20,24 +20,18 @@ export function middleware(request: NextRequest) {
     response.headers.set('Clear-Site-Data', '"cache", "storage"'); 
   }
 
-  // AGGRESSIVE cache-busting for dashboard routes to prevent caching issues
+  // Moderate cache-busting for dashboard routes
   if (request.nextUrl.pathname.startsWith('/dashboard')) {
-    response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0');
+    response.headers.set('Cache-Control', 'no-cache, must-revalidate');
     response.headers.set('Pragma', 'no-cache');
-    response.headers.set('Expires', '0');
-    response.headers.set('Surrogate-Control', 'no-store');
     response.headers.set('X-TTM-Version', '2.0.3');
-    response.headers.set('X-Cache-Bust', Date.now().toString());
   }
 
-  // AGGRESSIVE cache-busting headers for API routes
+  // Moderate cache-busting headers for API routes
   if (request.nextUrl.pathname.startsWith('/api/')) {
-    response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0');
+    response.headers.set('Cache-Control', 'no-cache, must-revalidate');
     response.headers.set('Pragma', 'no-cache');
-    response.headers.set('Expires', '0');
-    response.headers.set('Surrogate-Control', 'no-store');
     response.headers.set('X-TTM-Version', '2.0.3');
-    response.headers.set('X-Cache-Bust', Date.now().toString());
   }
 
   // AGGRESSIVE cache-busting for static assets that might be cached

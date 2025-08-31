@@ -75,14 +75,16 @@ export function CacheBuster({ version = '2.0.3', forceRefresh = false }: CacheBu
         });
       }
 
-      // Force page reload with cache busting - ALWAYS RELOAD
+          // Force page reload with cache busting - ONLY FOR LOGIN PAGE
+    if (window.location.pathname === '/login') {
       const currentUrl = new URL(window.location.href);
       currentUrl.searchParams.set('_cb', Date.now().toString());
       currentUrl.searchParams.set('_v', version);
       currentUrl.searchParams.set('_force', 'true');
       
-      // Always reload to force cache refresh
+      // Only reload on login page
       window.location.href = currentUrl.toString();
+    }
     }
 
     // Add cache-busting meta tags dynamically
@@ -128,8 +130,8 @@ export function CacheBuster({ version = '2.0.3', forceRefresh = false }: CacheBu
         return originalFetch(input, init);
       }
       
-      // Add cache-busting parameters to API requests
-      if (url.includes('/api/') || url.includes('/auth/')) {
+      // Add cache-busting parameters to API requests ONLY
+      if (url.includes('/api/') && !url.includes('/api/auth/logout')) {
         const urlObj = new URL(url, window.location.origin);
         urlObj.searchParams.set('_cb', Date.now().toString());
         urlObj.searchParams.set('_v', version);
@@ -212,10 +214,15 @@ export function useCacheBuster() {
       });
     }
 
-    // Force reload
-    const currentUrl = new URL(window.location.href);
-    currentUrl.searchParams.set('_cb', Date.now().toString());
-    window.location.href = currentUrl.toString();
+    // Force reload - ONLY FOR LOGIN PAGE
+    if (window.location.pathname === '/login') {
+      const currentUrl = new URL(window.location.href);
+      currentUrl.searchParams.set('_cb', Date.now().toString());
+      window.location.href = currentUrl.toString();
+    } else {
+      // For other pages, just reload without cache busting
+      window.location.reload();
+    }
   };
 
   return { bustCache };
