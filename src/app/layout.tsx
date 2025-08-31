@@ -83,7 +83,7 @@ export default function RootLayout({
     <html lang="nl">
       <body className={inter.className}>
         <ErrorBoundary>
-                           <CacheBuster version="2.0.2" forceRefresh={true} />
+                           <CacheBuster version="2.0.3" forceRefresh={true} />
           {/* <V2StateProvider> */}
             <SupabaseAuthProvider>
               {children}
