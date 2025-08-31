@@ -10,6 +10,31 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
     }
 
+    return await fetchDashboardStats(userId);
+  } catch (error) {
+    console.error('❌ Error in GET dashboard stats:', error);
+    return NextResponse.json({ error: 'Failed to fetch dashboard stats' }, { status: 500 });
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { userId } = body;
+
+    if (!userId) {
+      return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
+    }
+
+    return await fetchDashboardStats(userId);
+  } catch (error) {
+    console.error('❌ Error in POST dashboard stats:', error);
+    return NextResponse.json({ error: 'Failed to fetch dashboard stats' }, { status: 500 });
+  }
+}
+
+async function fetchDashboardStats(userId: string) {
+
     console.log('📊 Fetching dashboard stats for user:', userId);
 
     // Fetch all stats in parallel
@@ -68,12 +93,7 @@ export async function GET(request: NextRequest) {
       stats,
       userBadges
     });
-
-  } catch (error) {
-    console.error('❌ Error fetching dashboard stats:', error);
-    return NextResponse.json({ error: 'Failed to fetch dashboard stats' }, { status: 500 });
   }
-}
 
 async function fetchMissionsStats(userId: string) {
   try {
@@ -303,7 +323,7 @@ async function fetchUserBadges(userId: string) {
         unlocked_at,
         badges (
           id,
-          name,
+          title,
           description,
           icon_name,
           image_url,
@@ -320,10 +340,10 @@ async function fetchUserBadges(userId: string) {
     }
 
     return badges?.map(userBadge => {
-      const badge = userBadge.badges?.[0]; // Get first badge from the array
+      const badge = userBadge.badges; // badges is already a single object, not an array
       return {
         id: userBadge.id,
-        title: badge?.name || 'Unknown Badge',
+        title: badge?.title || 'Unknown Badge',
         description: badge?.description || '',
         icon_name: badge?.icon_name || 'star',
         image_url: badge?.image_url,

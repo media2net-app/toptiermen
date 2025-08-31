@@ -100,13 +100,18 @@ export default function Dashboard() {
       try {
         setLoading(true);
         
-        const response = await fetch(`/api/dashboard-stats?userId=${user.id}&t=${Date.now()}`, {
+        const response = await fetch(`/api/dashboard-stats`, {
+          method: 'POST',
           cache: 'no-cache',
           headers: {
+            'Content-Type': 'application/json',
             'Cache-Control': 'no-cache, no-store, must-revalidate',
             'Pragma': 'no-cache',
             'Expires': '0'
-          }
+          },
+          body: JSON.stringify({
+            userId: user.id
+          })
         });
 
         if (response.ok) {
