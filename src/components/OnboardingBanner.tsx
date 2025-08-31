@@ -18,6 +18,14 @@ export default function OnboardingBanner() {
   // Don't render if not onboarding
   if (!isOnboarding) return null;
 
+  // Debug info
+  console.log('🎯 OnboardingBanner Debug:', {
+    isOnboarding,
+    currentStep,
+    isVisible,
+    progress: `${progress}%`
+  });
+
   const currentStepData = steps[currentStep];
   const progress = ((currentStep + 1) / steps.length) * 100;
 
@@ -76,8 +84,8 @@ export default function OnboardingBanner() {
   const { getCurrentStepInstructions } = useOnboarding();
 
   return (
-    <div className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
-      <div className="bg-gradient-to-r from-[#8BAE5A] to-[#3A4D23] text-white shadow-lg border-b-2 border-[#FFD700]">
+    <div className={`fixed top-0 left-0 right-0 z-[9999] transition-all duration-500 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`} style={{ display: isVisible ? 'block' : 'none' }}>
+      <div className="bg-gradient-to-r from-[#8BAE5A] to-[#3A4D23] text-white shadow-lg border-b-2 border-[#FFD700] min-h-[80px]">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             {/* Progress and Step Info */}
