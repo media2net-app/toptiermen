@@ -40,9 +40,9 @@ export default function NotFound() {
             <Link href="/trainingscentrum" className="block text-[#8BAE5A] hover:text-[#B6C948] transition-colors">
               Trainingscentrum
             </Link>
-            <Link href="/voedingsplannen" className="block text-[#8BAE5A] hover:text-[#B6C948] transition-colors">
-              Voedingsplannen
-            </Link>
+                    <Link href="/dashboard/trainingscentrum" className="block text-[#8BAE5A] hover:text-[#B6C948] transition-colors">
+          Trainingscentrum
+        </Link>
             <Link href="/brotherhood" className="block text-[#8BAE5A] hover:text-[#B6C948] transition-colors">
               Brotherhood
             </Link>
