@@ -1,17 +1,11 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { 
-  ShoppingCartIcon, 
   HeartIcon, 
   StarIcon,
-  TruckIcon,
-  ShieldCheckIcon,
-  CreditCardIcon,
-  EyeIcon,
-  PlusIcon,
-  MinusIcon
+  EyeIcon
 } from '@heroicons/react/24/outline';
-import { toast } from 'react-hot-toast';
+
 
 interface Product {
   id: string;
@@ -30,10 +24,7 @@ interface Product {
   ingredients?: string[];
 }
 
-interface CartItem {
-  product: Product;
-  quantity: number;
-}
+
 
 export default function ProductenPage() {
   const [products, setProducts] = useState<Product[]>([
@@ -123,59 +114,10 @@ export default function ProductenPage() {
     }
   ]);
 
-  const [cart, setCart] = useState<CartItem[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [showProductModal, setShowProductModal] = useState(false);
-  const [showCart, setShowCart] = useState(false);
 
-  const addToCart = (product: Product, quantity: number = 1) => {
-    setCart(prevCart => {
-      const existingItem = prevCart.find(item => item.product.id === product.id);
-      
-      if (existingItem) {
-        return prevCart.map(item =>
-          item.product.id === product.id
-            ? { ...item, quantity: item.quantity + quantity }
-            : item
-        );
-      } else {
-        return [...prevCart, { product, quantity }];
-      }
-    });
-    
-    toast.success(`${quantity}x ${product.name} toegevoegd aan winkelwagen`);
-  };
 
-  const removeFromCart = (productId: string) => {
-    setCart(prevCart => prevCart.filter(item => item.product.id !== productId));
-    toast('Product verwijderd uit winkelwagen');
-  };
-
-  const updateCartQuantity = (productId: string, quantity: number) => {
-    if (quantity <= 0) {
-      removeFromCart(productId);
-      return;
-    }
-    
-    setCart(prevCart => prevCart.map(item =>
-      item.product.id === productId
-        ? { ...item, quantity }
-        : item
-    ));
-  };
-
-  const getCartTotal = () => {
-    return cart.reduce((total, item) => total + (item.product.price * item.quantity), 0);
-  };
-
-  const getCartItemCount = () => {
-    return cart.reduce((total, item) => total + item.quantity, 0);
-  };
-
-  const handleCheckout = () => {
-    toast.error('Checkout functionaliteit is nog niet beschikbaar. Deze wordt binnenkort toegevoegd!');
-    setShowCart(false);
-  };
 
   const openProductModal = (product: Product) => {
     setSelectedProduct(product);
@@ -192,20 +134,6 @@ export default function ProductenPage() {
               <h1 className="text-3xl font-bold text-[#8BAE5A] mb-2">Producten</h1>
               <p className="text-[#B6C948]">Premium supplementen en diagnostiek voor optimale prestaties</p>
             </div>
-            
-            {/* Cart Button */}
-            <button
-              onClick={() => setShowCart(true)}
-              className="relative bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#0A0F0A] px-6 py-3 rounded-lg font-semibold transition-all duration-300 flex items-center gap-2 shadow-lg hover:from-[#A6C97B] hover:to-[#FFE55C]"
-            >
-              <ShoppingCartIcon className="w-5 h-5" />
-              Winkelwagen
-              {getCartItemCount() > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold">
-                  {getCartItemCount()}
-                </span>
-              )}
-            </button>
           </div>
         </div>
 
@@ -302,22 +230,14 @@ export default function ProductenPage() {
                   </span>
                 </div>
 
-                {/* Action Buttons */}
+                {/* Action Button */}
                 <div className="flex gap-3">
                   <button
                     onClick={() => openProductModal(product)}
-                    className="flex-1 bg-transparent border border-[#8BAE5A] text-[#8BAE5A] hover:bg-[#8BAE5A] hover:text-[#0A0F0A] px-4 py-2 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2"
+                    className="w-full bg-transparent border border-[#8BAE5A] text-[#8BAE5A] hover:bg-[#8BAE5A] hover:text-[#0A0F0A] px-4 py-2 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2"
                   >
                     <EyeIcon className="w-4 h-4" />
                     Bekijk Details
-                  </button>
-                  <button
-                    onClick={() => addToCart(product)}
-                    disabled={!product.inStock}
-                    className="flex-1 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] hover:from-[#A6C97B] hover:to-[#FFE55C] disabled:bg-[#3A4D23] text-[#0A0F0A] px-4 py-2 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2 shadow-md"
-                  >
-                    <PlusIcon className="w-4 h-4" />
-                    Toevoegen
                   </button>
                 </div>
               </div>
@@ -414,17 +334,12 @@ export default function ProductenPage() {
                       </div>
                     )}
 
-                    {/* Add to Cart */}
+                    {/* Close Button */}
                     <button
-                      onClick={() => {
-                        addToCart(selectedProduct);
-                        setShowProductModal(false);
-                      }}
-                      disabled={!selectedProduct.inStock}
-                      className="w-full bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] hover:from-[#A6C97B] hover:to-[#FFE55C] disabled:bg-[#3A4D23] text-[#0A0F0A] py-3 px-6 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2 shadow-lg"
+                      onClick={() => setShowProductModal(false)}
+                      className="w-full bg-transparent border border-[#8BAE5A] text-[#8BAE5A] hover:bg-[#8BAE5A] hover:text-[#0A0F0A] py-3 px-6 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2"
                     >
-                      <ShoppingCartIcon className="w-5 h-5" />
-                      Toevoegen aan winkelwagen
+                      Sluiten
                     </button>
                   </div>
                 </div>
@@ -433,107 +348,7 @@ export default function ProductenPage() {
           </div>
         )}
 
-        {/* Cart Modal */}
-        {showCart && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-bold text-[#8BAE5A]">Winkelwagen</h2>
-                  <button
-                    onClick={() => setShowCart(false)}
-                    className="text-[#B6C948] hover:text-[#8BAE5A] text-2xl font-bold"
-                  >
-                    ✕
-                  </button>
-                </div>
 
-                {/* Cart Notice */}
-                <div className="mb-6 bg-[#FFD700]/10 border border-[#FFD700]/30 rounded-lg p-4">
-                  <div className="flex items-center gap-2 text-[#FFD700] text-sm mb-2">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                    </svg>
-                    <span className="font-medium">Demo Mode</span>
-                  </div>
-                  <p className="text-[#B6C948] text-sm">
-                    De winkelwagen functionaliteit is momenteel in demo modus. Echte aankopen zijn nog niet mogelijk.
-                  </p>
-                </div>
-
-                {cart.length === 0 ? (
-                  <div className="text-center py-8">
-                    <ShoppingCartIcon className="w-16 h-16 text-[#B6C948] mx-auto mb-4" />
-                    <p className="text-[#B6C948]">Je winkelwagen is leeg</p>
-                  </div>
-                ) : (
-                  <>
-                    {/* Cart Items */}
-                    <div className="space-y-4 mb-6">
-                      {cart.map((item) => (
-                        <div key={item.product.id} className="flex items-center gap-4 p-4 bg-[#181F17] rounded-lg border border-[#3A4D23]">
-                          <div className="w-16 h-16 bg-gradient-to-br from-[#8BAE5A]/10 to-[#FFD700]/10 rounded-lg flex items-center justify-center">
-                            <span className="text-[#8BAE5A] font-bold text-sm">
-                              {item.product.name.split(' ')[0]}
-                            </span>
-                          </div>
-                          
-                          <div className="flex-1">
-                            <h3 className="font-semibold text-[#8BAE5A]">{item.product.name}</h3>
-                            <p className="text-[#B6C948] text-sm">€{item.product.price.toFixed(2)} per stuk</p>
-                          </div>
-                          
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => updateCartQuantity(item.product.id, item.quantity - 1)}
-                              className="w-8 h-8 bg-[#3A4D23] hover:bg-[#8BAE5A] hover:text-[#0A0F0A] text-[#B6C948] rounded-lg flex items-center justify-center transition-colors"
-                            >
-                              <MinusIcon className="w-4 h-4" />
-                            </button>
-                            <span className="w-12 text-center text-[#8BAE5A] font-semibold">{item.quantity}</span>
-                            <button
-                              onClick={() => updateCartQuantity(item.product.id, item.quantity + 1)}
-                              className="w-8 h-8 bg-[#3A4D23] hover:bg-[#8BAE5A] hover:text-[#0A0F0A] text-[#B6C948] rounded-lg flex items-center justify-center transition-colors"
-                            >
-                              <PlusIcon className="w-4 h-4" />
-                            </button>
-                          </div>
-                          
-                          <div className="text-right">
-                            <p className="font-semibold text-[#8BAE5A]">€{(item.product.price * item.quantity).toFixed(2)}</p>
-                            <button
-                              onClick={() => removeFromCart(item.product.id)}
-                              className="text-red-500 hover:text-red-400 text-sm"
-                            >
-                              Verwijderen
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Cart Total */}
-                    <div className="border-t border-[#3A4D23] pt-4 mb-6">
-                      <div className="flex justify-between items-center text-xl font-bold text-[#8BAE5A]">
-                        <span>Totaal</span>
-                        <span>€{getCartTotal().toFixed(2)}</span>
-                      </div>
-                    </div>
-
-                    {/* Checkout Button */}
-                    <button
-                      onClick={handleCheckout}
-                      className="w-full bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] hover:from-[#A6C97B] hover:to-[#FFE55C] text-[#0A0F0A] py-3 px-6 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2 shadow-lg"
-                    >
-                      <CreditCardIcon className="w-5 h-5" />
-                      Afrekenen
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
