@@ -227,9 +227,10 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  // Check authentication
+  // Check authentication with better handling
   useEffect(() => {
     if (!loading && !isAuthenticated) {
+      console.log('Admin: User not authenticated, redirecting to login');
       // Redirect to login with current path preserved
       const currentPath = window.location.pathname;
       if (currentPath !== '/login') {
@@ -243,7 +244,8 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
   // Check admin role with better error handling
   useEffect(() => {
     if (!loading && user && user.role?.toLowerCase() !== 'admin') {
-      console.log('User is not admin, redirecting to dashboard');
+      console.log('Admin: User is not admin, redirecting to dashboard');
+      console.log('User role:', user.role);
       router.push('/dashboard');
     }
   }, [loading, user, router]);
@@ -311,6 +313,7 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
 
   // Show unauthorized message if not authenticated or not admin
   if (!isAuthenticated || (user && user.role?.toLowerCase() !== 'admin')) {
+    console.log('Admin: Access denied - isAuthenticated:', isAuthenticated, 'user:', user?.email, 'role:', user?.role);
     return (
       <div className="min-h-screen bg-[#181F17] flex items-center justify-center" suppressHydrationWarning>
         <div className="text-center">
@@ -331,6 +334,16 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
 
   return (
     <div className="min-h-screen bg-[#181F17]" suppressHydrationWarning>
+      {/* Debug info - only show if showDebug is true */}
+      {showDebug && (
+        <div className="fixed top-4 right-4 bg-black/80 text-white p-4 rounded-lg text-xs z-50">
+          <div>Loading: {loading.toString()}</div>
+          <div>Authenticated: {isAuthenticated.toString()}</div>
+          <div>User: {user?.email || 'null'}</div>
+          <div>Role: {user?.role || 'null'}</div>
+          <div>Path: {pathname}</div>
+        </div>
+      )}
       {/* Top Navigation Bar */}
       <div className="bg-[#232D1A] border-b border-[#3A4D23] px-4 sm:px-6 py-4">
         <div className="flex items-center justify-between">
