@@ -770,10 +770,10 @@ export default function TrainingscentrumPage() {
                         </div>
                       </div>
 
-                      {/* Schema Description */}
+                      {/* Schema Description - Simplified */}
                       <div className="mb-6">
                         <p className="text-gray-300 text-center leading-relaxed">
-                          {schema.description}
+                          {schema.description.split('.')[0]}.
                         </p>
                       </div>
 
