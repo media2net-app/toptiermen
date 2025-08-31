@@ -16,7 +16,7 @@ import BankConnectionModal from '@/app/components/BankConnectionModal';
 import Link from 'next/link';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { FinanceProvider, useFinance } from './FinanceContext';
-import { ArrowRightIcon, PencilIcon } from '@heroicons/react/24/outline';
+import { ArrowRightIcon, PencilIcon, Cog6ToothIcon } from '@heroicons/react/24/outline';
 import ZeroBasedBudget from './components/ZeroBasedBudget';
 import DebtSnowball from './components/DebtSnowball';
 import CompoundInterest from './components/CompoundInterest';
@@ -217,6 +217,8 @@ function FinanceDashboardContent() {
   const [editingGoal, setEditingGoal] = useState<any>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [newCurrentAmount, setNewCurrentAmount] = useState('');
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [editingProfile, setEditingProfile] = useState<any>(null);
 
   // Fetch financial profile on component mount
   useEffect(() => {
@@ -287,6 +289,58 @@ function FinanceDashboardContent() {
     if (editingGoal && newCurrentAmount) {
       updateGoalProgress(editingGoal.id, parseFloat(newCurrentAmount));
     }
+  };
+
+  const handleSaveProfile = async () => {
+    if (!editingProfile || !user?.id) return;
+
+    try {
+      const response = await fetch('/api/finance/profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          profile: {
+            netWorth: editingProfile.net_worth,
+            monthlyIncome: editingProfile.monthly_income,
+            monthlyExpenses: editingProfile.monthly_expenses,
+            savingsRate: Math.round(((editingProfile.monthly_income - editingProfile.monthly_expenses) / editingProfile.monthly_income) * 100),
+            passiveIncomeGoal: editingProfile.passive_income_goal,
+            riskTolerance: editingProfile.risk_tolerance,
+            investmentCategories: editingProfile.investment_categories || [],
+            goals: financialGoals.map(goal => ({
+              title: goal.title,
+              targetAmount: goal.target_amount,
+              targetDate: goal.target_date,
+              category: goal.category
+            }))
+          }
+        }),
+      });
+
+      if (response.ok) {
+        // Refresh the profile data
+        const profileResponse = await fetch(`/api/finance/profile?userId=${user.id}`);
+        if (profileResponse.ok) {
+          const data = await profileResponse.json();
+          setFinancialProfile(data.profile);
+          setFinancialGoals(data.goals || []);
+        }
+        setShowSettingsModal(false);
+        setEditingProfile(null);
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+    }
+  };
+
+  const updateEditingProfile = (field: string, value: any) => {
+    setEditingProfile(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   // Use real data from profile if available, otherwise fallback to demo data
@@ -370,8 +424,36 @@ function FinanceDashboardContent() {
 
   return (
     <div className="p-6 md:p-12">
-      <h1 className="text-3xl md:text-4xl font-bold text-[#B6C948] mb-2 drop-shadow-lg">Finance & Business</h1>
-      <p className="text-[#8BAE5A] text-lg mb-8">Jouw financiële gezondheid en planning in één oogopslag</p>
+      <div className="flex justify-between items-start mb-8">
+        <div>
+          <h1 className="text-3xl md:text-4xl font-bold text-[#B6C948] mb-2 drop-shadow-lg">Finance & Business</h1>
+          <p className="text-[#8BAE5A] text-lg">Jouw financiële gezondheid en planning in één oogopslag</p>
+        </div>
+        <div className="flex space-x-2">
+          <button
+            onClick={() => {
+              setEditingProfile(financialProfile);
+              setShowSettingsModal(true);
+            }}
+            className="flex items-center space-x-2 px-4 py-2 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-[#8BAE5A] hover:bg-[#3A4D23] hover:text-[#B6C948] transition-colors"
+            title="Instellingen bewerken"
+          >
+            <Cog6ToothIcon className="w-5 h-5" />
+            <span className="hidden sm:inline">Instellingen</span>
+          </button>
+          <button
+            onClick={() => {
+              if (confirm('Weet je zeker dat je je financiële profiel wilt resetten? Dit zal je terug naar de intake flow sturen.')) {
+                router.push('/dashboard/finance-en-business/intake');
+              }
+            }}
+            className="px-4 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-[#8BAE5A] hover:bg-[#3A4D23] hover:text-[#B6C948] transition-colors"
+            title="Profiel resetten"
+          >
+            <span className="hidden sm:inline">Reset</span>
+          </button>
+        </div>
+      </div>
       
       {/* Tab Navigation */}
       <div className="flex space-x-1 bg-[#181F17] rounded-xl p-1 mb-8">
@@ -563,6 +645,164 @@ function FinanceDashboardContent() {
               </button>
               <button
                 onClick={handleSaveGoalProgress}
+                className="flex-1 px-4 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold"
+              >
+                Opslaan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Settings Modal */}
+      {showSettingsModal && editingProfile && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-white">
+                Financiële Profiel Bewerken
+              </h3>
+              <button
+                onClick={() => {
+                  setShowSettingsModal(false);
+                  setEditingProfile(null);
+                }}
+                className="text-[#8BAE5A] hover:text-[#B6C948] transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="space-y-6">
+              {/* Stap 1: Huidige Financiële Situatie */}
+              <div>
+                <h4 className="text-lg font-semibold text-[#B6C948] mb-4">Huidige Financiële Situatie</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-[#8BAE5A] mb-2">
+                      Netto Waarde (€)
+                    </label>
+                    <input
+                      type="number"
+                      value={editingProfile.net_worth || ''}
+                      onChange={(e) => updateEditingProfile('net_worth', parseFloat(e.target.value) || 0)}
+                      placeholder="0"
+                      className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#8BAE5A] mb-2">
+                      Maandelijkse Inkomsten (€)
+                    </label>
+                    <input
+                      type="number"
+                      value={editingProfile.monthly_income || ''}
+                      onChange={(e) => updateEditingProfile('monthly_income', parseFloat(e.target.value) || 0)}
+                      placeholder="0"
+                      className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#8BAE5A] mb-2">
+                      Maandelijkse Uitgaven (€)
+                    </label>
+                    <input
+                      type="number"
+                      value={editingProfile.monthly_expenses || ''}
+                      onChange={(e) => updateEditingProfile('monthly_expenses', parseFloat(e.target.value) || 0)}
+                      placeholder="0"
+                      className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#8BAE5A] mb-2">
+                      Berekende Spaarquote
+                    </label>
+                    <div className="px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded text-white">
+                      {editingProfile.monthly_income > 0 
+                        ? Math.round(((editingProfile.monthly_income - editingProfile.monthly_expenses) / editingProfile.monthly_income) * 100)
+                        : 0}%
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Stap 2: Financiële Doelen */}
+              <div>
+                <h4 className="text-lg font-semibold text-[#B6C948] mb-4">Financiële Doelen</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-[#8BAE5A] mb-2">
+                      Passief Inkomen Doel (€/maand)
+                    </label>
+                    <input
+                      type="number"
+                      value={editingProfile.passive_income_goal || ''}
+                      onChange={(e) => updateEditingProfile('passive_income_goal', parseFloat(e.target.value) || 0)}
+                      placeholder="0"
+                      className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#8BAE5A] mb-2">
+                      Risicotolerantie
+                    </label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {['low', 'medium', 'high'].map((risk) => (
+                        <button
+                          key={risk}
+                          onClick={() => updateEditingProfile('risk_tolerance', risk)}
+                          className={`py-2 px-3 rounded text-sm font-medium transition-colors ${
+                            editingProfile.risk_tolerance === risk
+                              ? 'bg-[#8BAE5A] text-[#232D1A]'
+                              : 'bg-[#181F17] text-[#8BAE5A] hover:bg-[#3A4D23]'
+                          }`}
+                        >
+                          {risk === 'low' ? 'Laag' : risk === 'medium' ? 'Gemiddeld' : 'Hoog'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Stap 3: Investeringsvoorkeuren */}
+              <div>
+                <h4 className="text-lg font-semibold text-[#B6C948] mb-4">Investeringsvoorkeuren</h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                  {investmentCategories.map((category) => (
+                    <label key={category} className="flex items-center space-x-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={editingProfile.investment_categories?.includes(category) || false}
+                        onChange={(e) => {
+                          const current = editingProfile.investment_categories || [];
+                          const updated = e.target.checked
+                            ? [...current, category]
+                            : current.filter((c: string) => c !== category);
+                          updateEditingProfile('investment_categories', updated);
+                        }}
+                        className="w-4 h-4 text-[#8BAE5A] bg-[#181F17] border-[#3A4D23] rounded focus:ring-[#8BAE5A]"
+                      />
+                      <span className="text-sm text-[#8BAE5A]">{category}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex space-x-3 mt-8">
+              <button
+                onClick={() => {
+                  setShowSettingsModal(false);
+                  setEditingProfile(null);
+                }}
+                className="flex-1 px-4 py-2 bg-[#181F17] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors"
+              >
+                Annuleren
+              </button>
+              <button
+                onClick={handleSaveProfile}
                 className="flex-1 px-4 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold"
               >
                 Opslaan
