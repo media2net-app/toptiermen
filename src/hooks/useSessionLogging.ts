@@ -38,7 +38,7 @@ export function useSessionLogging() {
           user_id: user?.id || '',
           user_email: user?.email || '',
           current_page: currentPage,
-          user_agent: navigator.userAgent,
+          user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : 'Unknown',
           action_type: 'loop_detected',
           loop_detected: true,
         });
@@ -79,7 +79,7 @@ export function useSessionLogging() {
       user_id: user.id,
       user_email: user.email || '',
       current_page: currentPage,
-      user_agent: navigator.userAgent,
+      user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : 'Unknown',
       action_type: 'page_load',
       cache_hit: false, // We'll implement cache detection later
       // user_type: userType, // Add user type for filtering - removed for build compatibility
@@ -99,7 +99,7 @@ export function useSessionLogging() {
         user_id: user.id,
         user_email: user.email || '',
         current_page: currentPage,
-        user_agent: navigator.userAgent,
+        user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : 'Unknown',
         action_type: 'navigation',
       });
     }
@@ -118,7 +118,7 @@ export function useSessionLogging() {
         user_id: user.id,
         user_email: user.email || '',
         current_page: window.location.pathname,
-        user_agent: navigator.userAgent,
+        user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : 'Unknown',
         action_type: 'error',
         error_message: event.message,
       });
@@ -131,7 +131,7 @@ export function useSessionLogging() {
         user_id: user.id,
         user_email: user.email || '',
         current_page: window.location.pathname,
-        user_agent: navigator.userAgent,
+        user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : 'Unknown',
         action_type: 'error',
         error_message: event.reason?.toString() || 'Unhandled promise rejection',
       });
@@ -154,7 +154,7 @@ export function useSessionLogging() {
       user_id: user.id,
       user_email: user.email || '',
       current_page: window.location.pathname,
-      user_agent: navigator.userAgent,
+      user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : 'Unknown',
       action_type: 'cache_hit',
       cache_hit: true,
     });
@@ -168,7 +168,7 @@ export function useSessionLogging() {
       user_id: user.id,
       user_email: user.email || '',
       current_page: window.location.pathname,
-      user_agent: navigator.userAgent,
+      user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : 'Unknown',
       action_type: 'loop_detected',
       loop_detected: true,
     });

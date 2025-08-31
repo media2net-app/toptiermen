@@ -50,7 +50,7 @@ export default function CacheIssueHelper({ onResolve }: CacheIssueHelperProps) {
       sessionStorage.clear();
       
       // Clear service worker cache
-      if ('serviceWorker' in navigator) {
+      if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
         const registrations = await navigator.serviceWorker.getRegistrations();
         for (const registration of registrations) {
           await registration.unregister();

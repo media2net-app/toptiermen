@@ -65,7 +65,7 @@ export const metadata: Metadata = {
     google: 'your-google-verification-code',
   },
   other: {
-    'X-TTM-Version': '2.0.1',
+    'X-TTM-Version': '2.0.3',
     'X-Platform': 'Top Tier Men',
     'X-Environment': process.env.NODE_ENV || 'development',
     'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',

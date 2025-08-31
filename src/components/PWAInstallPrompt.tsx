@@ -11,6 +11,13 @@ import {
 } from '@heroicons/react/24/outline';
 
 export default function PWAInstallPrompt() {
+  const [isClient, setIsClient] = useState(false);
+
+  // Client-side safety check
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
   const {
     isInstalled,
     canInstall,

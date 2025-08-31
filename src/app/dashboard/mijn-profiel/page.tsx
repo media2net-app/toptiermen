@@ -302,7 +302,7 @@ export default function MijnProfiel() {
 
     try {
       // Check if service worker and push manager are supported
-      if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+      if (!(typeof navigator !== 'undefined' && 'serviceWorker' in navigator) || !('PushManager' in window)) {
         console.log('Push notifications not supported');
         return;
       }
@@ -338,7 +338,7 @@ export default function MijnProfiel() {
       setIsSubscribing(true);
 
       // Check if service worker and push manager are supported
-      if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+      if (!(typeof navigator !== 'undefined' && 'serviceWorker' in navigator) || !('PushManager' in window)) {
         toast.error('Push notificaties worden niet ondersteund door je browser');
         return;
       }
@@ -353,8 +353,8 @@ export default function MijnProfiel() {
       }
 
       // Register service worker
-      // const registration = await navigator.serviceWorker.register('/sw.js');
-      // await navigator.serviceWorker.ready;
+      // const registration = await typeof navigator !== 'undefined' ? navigator.serviceWorker : null.register('/sw.js');
+      // await typeof navigator !== 'undefined' ? navigator.serviceWorker : null.ready;
 
       // Subscribe to push notifications - DISABLED
       // const subscription = await registration.pushManager.subscribe({
@@ -409,7 +409,7 @@ export default function MijnProfiel() {
       setIsUnsubscribing(true);
 
       // Unsubscribe from push manager - DISABLED
-      // const registration = await navigator.serviceWorker.getRegistration();
+      // const registration = await typeof navigator !== 'undefined' ? navigator.serviceWorker : null.getRegistration();
       // if (registration) {
       //   const subscription = await registration.pushManager.getSubscription();
       //   if (subscription) {
@@ -1366,7 +1366,7 @@ export default function MijnProfiel() {
                   </div>
 
                   {/* Browser Support */}
-                  {!('serviceWorker' in navigator) || !('PushManager' in window) ? (
+                  {!(typeof navigator !== 'undefined' && 'serviceWorker' in navigator) || !('PushManager' in window) ? (
                     <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
                       <div className="flex items-center gap-2 mb-2">
                         <ExclamationTriangleIcon className="w-5 h-5 text-red-400" />

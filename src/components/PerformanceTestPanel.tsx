@@ -31,7 +31,7 @@ export function PerformanceTestPanel() {
     const info = {
       userType: getUserType(),
       userEmail: user?.email,
-      userAgent: navigator.userAgent,
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'Unknown',
       timestamp: new Date().toISOString(),
       
       // Memory info
@@ -66,8 +66,8 @@ export function PerformanceTestPanel() {
       
       // Browser info
       browser: {
-        hasServiceWorker: 'serviceWorker' in navigator,
-        serviceWorkerController: navigator.serviceWorker?.controller ? true : false,
+        hasServiceWorker: typeof navigator !== 'undefined' && 'serviceWorker' in navigator,
+        serviceWorkerController: typeof navigator !== 'undefined' && navigator.serviceWorker?.controller ? true : false,
         hasWebWorkers: 'Worker' in window,
         hasSharedWorkers: 'SharedWorker' in window
       }
@@ -173,7 +173,7 @@ export function PerformanceTestPanel() {
     });
     
     // Test 5: Service Worker
-    const hasServiceWorker = 'serviceWorker' in navigator && navigator.serviceWorker.controller;
+    const hasServiceWorker = typeof navigator !== 'undefined' && 'serviceWorker' in navigator && navigator.serviceWorker?.controller;
     tests.push({
       name: 'Service Worker',
       status: hasServiceWorker ? '✅ Active' : '❌ Inactive',

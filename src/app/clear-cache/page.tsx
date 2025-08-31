@@ -19,7 +19,7 @@ export default function ClearCachePage() {
         sessionStorage.clear();
         
         // Clear service workers
-        if ('serviceWorker' in navigator) {
+        if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
           const registrations = await navigator.serviceWorker.getRegistrations();
           await Promise.all(registrations.map(reg => reg.unregister()));
         }
