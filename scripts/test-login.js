@@ -1,85 +1,76 @@
 const { createClient } = require('@supabase/supabase-js');
-require('dotenv').config();
 
+// Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
+if (!supabaseUrl || !supabaseKey) {
   console.error('❌ Missing Supabase environment variables');
   process.exit(1);
 }
 
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function testLogin() {
-  console.log('🔐 Testing login functionality...\n');
-
+  const testEmail = 'test.user.1756630044380@toptiermen.test';
+  const testPassword = 'test123';
+  
+  console.log('🔍 Testing login functionality...\n');
+  console.log('📧 Email:', testEmail);
+  console.log('🔑 Password:', testPassword);
+  console.log('🌐 Supabase URL:', supabaseUrl);
+  console.log('🔑 Supabase Key:', supabaseKey ? '✅ Present' : '❌ Missing');
+  
   try {
-    const testEmail = 'test@toptiermen.eu';
-    const testPassword = 'TestPassword123!';
-
-    console.log('📋 Login Credentials:');
-    console.log(`   Email: ${testEmail}`);
-    console.log(`   Password: ${testPassword}`);
-    console.log('');
-
-    // Test login
-    console.log('🔑 Attempting login...');
+    console.log('\n🔄 Attempting login...');
+    
     const { data, error } = await supabase.auth.signInWithPassword({
       email: testEmail,
-      password: testPassword
+      password: testPassword,
     });
 
     if (error) {
       console.error('❌ Login failed:', error.message);
+      console.error('Error details:', error);
       return;
     }
 
     if (data.user) {
       console.log('✅ Login successful!');
-      console.log('👤 User details:');
-      console.log(`   ID: ${data.user.id}`);
-      console.log(`   Email: ${data.user.email}`);
-      console.log(`   Created: ${data.user.created_at}`);
-      console.log(`   Last sign in: ${data.user.last_sign_in_at}`);
+      console.log('👤 User ID:', data.user.id);
+      console.log('📧 Email:', data.user.email);
+      console.log('🔑 Session:', data.session ? '✅ Present' : '❌ Missing');
       
       if (data.session) {
-        console.log('🔑 Session details:');
-        console.log(`   Access token: ${data.session.access_token.substring(0, 20)}...`);
-        console.log(`   Refresh token: ${data.session.refresh_token.substring(0, 20)}...`);
-        console.log(`   Expires at: ${new Date(data.session.expires_at * 1000).toLocaleString()}`);
+        console.log('🎫 Access Token:', data.session.access_token ? '✅ Present' : '❌ Missing');
+        console.log('🔄 Refresh Token:', data.session.refresh_token ? '✅ Present' : '❌ Missing');
       }
-
-      // Test dashboard API with session
-      console.log('\n📊 Testing dashboard API with session...');
-      const response = await fetch('http://localhost:3000/api/dashboard-stats', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${data.session.access_token}`
-        },
-        body: JSON.stringify({
-          userId: data.user.id
-        })
-      });
-
-      if (response.ok) {
-        const dashboardData = await response.json();
-        console.log('✅ Dashboard API working!');
-        console.log('📈 Dashboard stats received');
+      
+      // Test profile fetch
+      console.log('\n🔄 Fetching user profile...');
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', data.user.id)
+        .single();
+      
+      if (profileError) {
+        console.error('❌ Profile fetch failed:', profileError.message);
       } else {
-        const errorText = await response.text();
-        console.error('❌ Dashboard API failed:', response.status, response.statusText);
-        console.error('Error details:', errorText);
+        console.log('✅ Profile fetched successfully');
+        console.log('👤 Full Name:', profile.full_name);
+        console.log('🎭 Role:', profile.role);
+        console.log('🎯 Main Goal:', profile.main_goal);
       }
-
+      
     } else {
-      console.log('⚠️ No user data returned');
+      console.log('❌ No user data returned');
     }
-
+    
   } catch (error) {
-    console.error('❌ Error during login test:', error);
+    console.error('❌ Unexpected error:', error);
   }
 }
 
+// Run the test
 testLogin();
