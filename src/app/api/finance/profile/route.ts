@@ -45,16 +45,21 @@ export async function POST(request: NextRequest) {
         status: 'active'
       }));
 
-      const { error: goalsError } = await supabaseAdmin
+      console.log('Saving goals data:', goalsData);
+
+      const { data: savedGoals, error: goalsError } = await supabaseAdmin
         .from('financial_goals')
         .upsert(goalsData, {
           onConflict: 'user_id,title'
-        });
+        })
+        .select('*');
 
       if (goalsError) {
         console.error('Error saving financial goals:', goalsError);
-        // Don't fail the entire request if goals fail
+        return NextResponse.json({ error: `Failed to save goals: ${goalsError.message}` }, { status: 500 });
       }
+
+      console.log('Goals saved successfully:', savedGoals);
     }
 
     return NextResponse.json({ 

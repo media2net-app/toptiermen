@@ -377,9 +377,20 @@ function FinanceDashboardContent() {
         body: JSON.stringify({
           userId: user.id,
           profile: {
-            ...financialProfile,
+            netWorth: financialProfile?.net_worth || 0,
+            monthlyIncome: financialProfile?.monthly_income || 0,
+            monthlyExpenses: financialProfile?.monthly_expenses || 0,
+            savingsRate: financialProfile?.savings_rate_percentage || 0,
+            passiveIncomeGoal: financialProfile?.passive_income_goal || 0,
+            riskTolerance: financialProfile?.risk_tolerance || 'medium',
+            investmentCategories: financialProfile?.investment_categories || [],
             goals: [
-              ...financialGoals,
+              ...financialGoals.map(goal => ({
+                title: goal.title,
+                targetAmount: goal.target_amount,
+                targetDate: goal.target_date,
+                category: goal.category
+              })),
               {
                 title: newGoal.title,
                 targetAmount: parseFloat(newGoal.targetAmount),
@@ -405,6 +416,8 @@ function FinanceDashboardContent() {
           targetDate: '',
           category: 'sparen'
         });
+      } else {
+        console.error('Failed to add goal:', await response.text());
       }
     } catch (error) {
       console.error('Error adding goal:', error);
