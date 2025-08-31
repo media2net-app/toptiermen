@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { PlusIcon, PencilIcon, TrashIcon, ArrowDownTrayIcon, ArrowUpTrayIcon, TrophyIcon, StarIcon, FireIcon, AcademicCapIcon, UserGroupIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, PencilIcon, TrashIcon, ArrowDownTrayIcon, ArrowUpTrayIcon, TrophyIcon, StarIcon, FireIcon, AcademicCapIcon, UserGroupIcon, ArrowPathIcon, PlayIcon } from '@heroicons/react/24/outline';
 import { AdminCard, AdminStatsCard, AdminButton } from '../../../components/admin';
 import BadgeModal from './components/BadgeModal';
 import RankModal from './components/RankModal';
@@ -448,6 +448,38 @@ export default function AdminBadgesRangenPage() {
     }
   };
 
+  // Test badge unlock function
+  const handleTestBadgeUnlock = async (badgeId: string, badgeName: string) => {
+    try {
+      // Find a test user (Chiel)
+      const testUserEmail = 'chiel@media2net.nl';
+      
+      const response = await fetch('/api/badges/test-unlock', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          badgeId: badgeId,
+          userEmail: testUserEmail
+        })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        alert(`✅ Badge "${badgeName}" succesvol toegekend aan ${testUserEmail}!`);
+        console.log('Badge unlock result:', result);
+      } else {
+        const error = await response.json();
+        alert(`❌ Fout bij unlocken van badge: ${error.error}`);
+        console.error('Badge unlock error:', error);
+      }
+    } catch (error) {
+      console.error('Error testing badge unlock:', error);
+      alert('❌ Er is een fout opgetreden bij het testen van de badge unlock');
+    }
+  };
+
   const handleEditRank = (rank: Rank) => {
     setEditingRank(rank);
     setIsRankModalOpen(true);
@@ -695,6 +727,7 @@ export default function AdminBadgesRangenPage() {
                                 setIsBadgeModalOpen(true);
                               }}
                               className="p-1 text-[#8BAE5A] hover:text-white hover:bg-[#3A4D23] rounded"
+                              title="Bewerken"
                             >
                               <PencilIcon className="w-4 h-4" />
                             </button>
@@ -705,12 +738,21 @@ export default function AdminBadgesRangenPage() {
                                   ? 'text-orange-400 hover:text-orange-300' 
                                   : 'text-green-400 hover:text-green-300'
                               } hover:bg-[#3A4D23]`}
+                              title={badge.isActive ? 'Pauzeren' : 'Activeren'}
                             >
                               {badge.isActive ? '⏸️' : '▶️'}
                             </button>
                             <button
+                              onClick={() => handleTestBadgeUnlock(badge.id, badge.name)}
+                              className="p-1 text-blue-400 hover:text-blue-300 hover:bg-[#3A4D23] rounded"
+                              title="Test Unlock"
+                            >
+                              <PlayIcon className="w-4 h-4" />
+                            </button>
+                            <button
                               onClick={() => handleBadgeDelete(badge.id)}
                               className="p-1 text-red-400 hover:text-red-300 hover:bg-[#3A4D23] rounded"
+                              title="Verwijderen"
                             >
                               <TrashIcon className="w-4 h-4" />
                             </button>
