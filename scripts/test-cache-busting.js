@@ -93,9 +93,9 @@ async function testCacheBustingParameters() {
   console.log('----------------------------------------');
   
   const testUrls = [
-    'https://platform.toptiermen.eu/login?_cb=1234567890&_v=2.0.1',
-    'https://platform.toptiermen.eu/dashboard?_cb=1234567890&_v=2.0.1',
-    'https://platform.toptiermen.eu/api/check-supabase-status?_cb=1234567890&_v=2.0.1'
+    'https://platform.toptiermen.eu/login?_cb=1234567890&_v=2.0.3',
+'https://platform.toptiermen.eu/dashboard?_cb=1234567890&_v=2.0.3',
+'https://platform.toptiermen.eu/api/check-supabase-status?_cb=1234567890&_v=2.0.3'
   ];
   
   for (const url of testUrls) {

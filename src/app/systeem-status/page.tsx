@@ -182,7 +182,7 @@ export default function SystemStatusPage() {
       current: '2.0.1 ✅',
       target: '2.0.1',
       status: 'optimal',
-      description: '2.0.1 Platform Successfully Deployed - Production Ready'
+      description: '2.0.3 Platform Successfully Deployed - Production Ready'
     }
   ];
 
@@ -252,7 +252,7 @@ export default function SystemStatusPage() {
                 </span>
               </div>
               <p className="text-gray-300 mt-1">
-                2.0.1 Platform Successfully Deployed - Production Ready with Advanced Monitoring & Security
+                2.0.3 Platform Successfully Deployed - Production Ready with Advanced Monitoring & Security
               </p>
             </div>
             <div className="text-right">
@@ -593,7 +593,7 @@ export default function SystemStatusPage() {
                   </div>
                   <div className="mt-4 p-3 bg-green-600 bg-opacity-20 rounded-lg">
                     <p className="text-green-400 text-sm font-medium">Status: Production Ready</p>
-                    <p className="text-green-300 text-xs mt-1">2.0.1 platform successfully deployed and operational</p>
+                    <p className="text-green-300 text-xs mt-1">2.0.3 platform successfully deployed and operational</p>
                   </div>
                 </div>
                 <div className="border border-green-600 bg-green-600 bg-opacity-10 rounded-lg p-6">
@@ -650,7 +650,7 @@ export default function SystemStatusPage() {
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold text-white flex items-center">
                   <BeakerIcon className="h-6 w-6 mr-2 text-purple-400" />
-                  2.0.1 Platform System Tests
+                  2.0.3 Platform System Tests
                 </h2>
                 <button
                   onClick={runTests}
@@ -741,7 +741,7 @@ export default function SystemStatusPage() {
               {!testResults && !runningTests && (
                 <div className="text-center py-8">
                   <BeakerIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-400">Klik op "2.0.1 Tests Uitvoeren" om comprehensive 2.0.1 platform testing te starten</p>
+                  <p className="text-gray-400">Klik op "2.0.3 Tests Uitvoeren" om comprehensive 2.0.3 platform testing te starten</p>
                 </div>
               )}
             </div>
