@@ -150,7 +150,7 @@ export default function FinanceIntake() {
           </label>
           <input
             type="number"
-            value={profile.netWorth}
+            value={profile.netWorth === 0 ? '' : profile.netWorth}
             onChange={(e) => updateProfile('netWorth', parseFloat(e.target.value) || 0)}
             className="w-full px-4 py-3 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:ring-1 focus:ring-[#8BAE5A]"
             placeholder="0"
@@ -164,7 +164,7 @@ export default function FinanceIntake() {
           </label>
           <input
             type="number"
-            value={profile.monthlyIncome}
+            value={profile.monthlyIncome === 0 ? '' : profile.monthlyIncome}
             onChange={(e) => updateProfile('monthlyIncome', parseFloat(e.target.value) || 0)}
             className="w-full px-4 py-3 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:ring-1 focus:ring-[#8BAE5A]"
             placeholder="0"
@@ -177,7 +177,7 @@ export default function FinanceIntake() {
           </label>
           <input
             type="number"
-            value={profile.monthlyExpenses}
+            value={profile.monthlyExpenses === 0 ? '' : profile.monthlyExpenses}
             onChange={(e) => updateProfile('monthlyExpenses', parseFloat(e.target.value) || 0)}
             className="w-full px-4 py-3 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:ring-1 focus:ring-[#8BAE5A]"
             placeholder="0"
@@ -213,7 +213,7 @@ export default function FinanceIntake() {
           </label>
           <input
             type="number"
-            value={profile.passiveIncomeGoal}
+            value={profile.passiveIncomeGoal === 0 ? '' : profile.passiveIncomeGoal}
             onChange={(e) => updateProfile('passiveIncomeGoal', parseFloat(e.target.value) || 0)}
             className="w-full px-4 py-3 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:ring-1 focus:ring-[#8BAE5A]"
             placeholder="0"
@@ -297,7 +297,7 @@ export default function FinanceIntake() {
               />
               <input
                 type="number"
-                value={goal.targetAmount}
+                value={goal.targetAmount === 0 ? '' : goal.targetAmount}
                 onChange={(e) => updateGoal(index, 'targetAmount', parseFloat(e.target.value) || 0)}
                 placeholder="Bedrag (€)"
                 className="px-3 py-2 bg-[#232D1A] border border-[#3A4D23] rounded text-white"
