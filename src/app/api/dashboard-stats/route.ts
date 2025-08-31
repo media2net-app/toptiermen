@@ -434,25 +434,27 @@ async function fetchBrotherhoodStats(userId: string) {
 
 async function fetchAcademyStats(userId: string) {
   try {
-    // Get total books read (as a proxy for academy progress)
-    const { data: booksRead, error: booksError } = await supabaseAdmin
-      .from('book_reviews')
+    // Get total academy modules
+    const { data: modules, error: modulesError } = await supabaseAdmin
+      .from('academy_modules')
       .select('id')
+      .eq('status', 'published');
+
+    // Get user's academy progress
+    const { data: userProgress, error: progressError } = await supabaseAdmin
+      .from('user_academy_progress')
+      .select('*')
       .eq('user_id', userId);
 
-    // Get completed missions (as learning progress)
-    const { data: completedMissions, error: missionsError } = await supabaseAdmin
-      .from('user_mission_logs')
-      .select('id')
-      .eq('user_id', userId);
-
-    const totalCourses = Math.max(booksRead?.length || 0, 1); // Dynamic based on available content
-    const completedCourses = Math.min(Math.round((booksRead?.length || 0) / 2), totalCourses);
-    const learningProgress = Math.min(Math.round(((booksRead?.length || 0) + (completedMissions?.length || 0)) / 50 * 100), 100);
+    const totalModules = modules?.length || 0;
+    const completedModules = userProgress?.filter(p => p.progress_percentage >= 100).length || 0;
+    
+    // Calculate overall progress based on module completion
+    const learningProgress = totalModules > 0 ? Math.round((completedModules / totalModules) * 100) : 0;
 
     return {
-      totalCourses,
-      completedCourses,
+      totalCourses: totalModules,
+      completedCourses: completedModules,
       learningProgress,
       progress: learningProgress
     };
