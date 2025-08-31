@@ -18,6 +18,9 @@ export default function OnboardingBanner() {
   // Don't render if not onboarding
   if (!isOnboarding) return null;
 
+  const currentStepData = steps[currentStep];
+  const progress = ((currentStep + 1) / steps.length) * 100;
+
   // Debug info
   console.log('🎯 OnboardingBanner Debug:', {
     isOnboarding,
@@ -25,9 +28,6 @@ export default function OnboardingBanner() {
     isVisible,
     progress: `${progress}%`
   });
-
-  const currentStepData = steps[currentStep];
-  const progress = ((currentStep + 1) / steps.length) * 100;
 
   const handleCompleteStep = async () => {
     setIsCompleting(true);
