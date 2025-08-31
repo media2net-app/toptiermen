@@ -296,6 +296,10 @@ export default function MijnMissiesPage() {
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
 
+  // Onboarding status
+  const [onboardingStatus, setOnboardingStatus] = useState<any>(null);
+  const [showOnboardingStep3, setShowOnboardingStep3] = useState(false);
+
   // Helper function to check if mission was completed today
   const isMissionCompletedToday = (completionDate: string | null | undefined): boolean => {
     if (!completionDate) return false;
@@ -371,6 +375,28 @@ export default function MijnMissiesPage() {
       toast.error('Er is een fout opgetreden bij het toevoegen van de missie.');
     }
   };
+
+  // Check onboarding status
+  useEffect(() => {
+    if (!user?.id) return;
+
+    async function checkOnboardingStatus() {
+      try {
+        const response = await fetch(`/api/onboarding?userId=${user.id}`);
+        if (response.ok) {
+          const data = await response.json();
+          setOnboardingStatus(data);
+          
+          // Only show onboarding step 3 if onboarding is not completed and user is on step 3
+          setShowOnboardingStep3(!data.onboarding_completed && data.current_step === 3);
+        }
+      } catch (error) {
+        console.error('Error checking onboarding status:', error);
+      }
+    }
+
+    checkOnboardingStatus();
+  }, [user?.id]);
 
   // Load missions
   useEffect(() => {
@@ -759,8 +785,9 @@ export default function MijnMissiesPage() {
         </div>
 
         {/* Onboarding Progress - Step 3: Missions */}
-        <div className="mb-6 sm:mb-8">
-          <div className="bg-gradient-to-br from-[#8BAE5A]/10 to-[#FFD700]/10 border-2 border-[#8BAE5A] rounded-2xl p-4 sm:p-6">
+        {showOnboardingStep3 && (
+          <div className="mb-6 sm:mb-8">
+            <div className="bg-gradient-to-br from-[#8BAE5A]/10 to-[#FFD700]/10 border-2 border-[#8BAE5A] rounded-2xl p-4 sm:p-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
               <div className="flex items-center gap-3">
                 <span className="text-2xl sm:text-3xl">🔥</span>
@@ -832,6 +859,7 @@ export default function MijnMissiesPage() {
             )}
           </div>
         </div>
+        )}
 
         {/* Daily Completion Celebration */}
         {showDailyCompletion && (
