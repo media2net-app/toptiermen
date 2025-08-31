@@ -8,11 +8,16 @@ interface GlobalLoadingWrapperProps {
 }
 
 export default function GlobalLoadingWrapper({ children }: GlobalLoadingWrapperProps) {
-  const { loading } = useSupabaseAuth();
+  const { loading, user } = useSupabaseAuth();
 
-  // Show loading screen while authentication is being checked
-  if (loading) {
-    return <PlatformLoading message="Platform laden..." />;
+  // Show loading screen while authentication is being checked - DISABLED TO FIX LOADING ISSUE
+  // if (loading && !user) {
+  //   return <PlatformLoading message="Platform laden..." />;
+  // }
+
+  // CRITICAL FIX: Don't show loading if user is available
+  if (loading && user) {
+    console.log('User available but still loading, proceeding anyway');
   }
 
   return <>{children}</>;

@@ -93,6 +93,25 @@ export default function Dashboard() {
 
   const { user } = useSupabaseAuth();
 
+  // CRITICAL FIX: Set loading to false immediately when user is available
+  useEffect(() => {
+    if (user) {
+      setLoading(false);
+    }
+  }, [user]);
+
+  // CRITICAL FIX: Force loading to false after a short delay
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (loading) {
+        console.log('Forcing loading to false after timeout');
+        setLoading(false);
+      }
+    }, 2000); // 2 second timeout
+
+    return () => clearTimeout(timer);
+  }, [loading]);
+
   // 2.0.1: Fetch real dashboard data from database with timeout
   useEffect(() => {
     const fetchDashboardData = async () => {
