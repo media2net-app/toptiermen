@@ -77,7 +77,7 @@ const getGreeting = () => {
 
 export default function Dashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // FORCE LOADING TO FALSE
   const [fadeIn, setFadeIn] = useState(false);
   const [userBadges, setUserBadges] = useState<Array<{
     id: string;
@@ -111,6 +111,11 @@ export default function Dashboard() {
 
     return () => clearTimeout(timer);
   }, [loading]);
+
+  // CRITICAL FIX: Force loading to false immediately
+  useEffect(() => {
+    setLoading(false);
+  }, []);
 
   // 2.0.1: Fetch real dashboard data from database with timeout
   useEffect(() => {
