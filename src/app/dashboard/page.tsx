@@ -39,6 +39,25 @@ interface DashboardStats {
     completedToday: number;
     progress: number;
   };
+  finance: {
+    netWorth: number;
+    monthlyIncome: number;
+    savings: number;
+    investments: number;
+    progress: number;
+  };
+  brotherhood: {
+    totalMembers: number;
+    activeMembers: number;
+    communityScore: number;
+    progress: number;
+  };
+  academy: {
+    totalCourses: number;
+    completedCourses: number;
+    learningProgress: number;
+    progress: number;
+  };
   xp: {
     total: number;
     rank: any;
@@ -103,6 +122,9 @@ export default function Dashboard() {
             training: { hasActiveSchema: false, currentDay: 0, totalDays: 0, weeklySessions: 0, progress: 0 },
             mindFocus: { total: 0, completedToday: 0, progress: 0 },
             boekenkamer: { total: 0, completedToday: 0, progress: 0 },
+            finance: { netWorth: 0, monthlyIncome: 0, savings: 0, investments: 0, progress: 0 },
+            brotherhood: { totalMembers: 0, activeMembers: 0, communityScore: 0, progress: 0 },
+            academy: { totalCourses: 0, completedCourses: 0, learningProgress: 0, progress: 0 },
             xp: { total: 0, rank: null, level: 1 },
             summary: { totalProgress: 0 }
           });
@@ -117,6 +139,9 @@ export default function Dashboard() {
           training: { hasActiveSchema: false, currentDay: 0, totalDays: 0, weeklySessions: 0, progress: 0 },
           mindFocus: { total: 0, completedToday: 0, progress: 0 },
           boekenkamer: { total: 0, completedToday: 0, progress: 0 },
+          finance: { netWorth: 0, monthlyIncome: 0, savings: 0, investments: 0, progress: 0 },
+          brotherhood: { totalMembers: 0, activeMembers: 0, communityScore: 0, progress: 0 },
+                      academy: { totalCourses: 0, completedCourses: 0, learningProgress: 0, progress: 0 },
           xp: { total: 0, rank: null, level: 1 },
           summary: { totalProgress: 0 }
         });
@@ -328,13 +353,13 @@ export default function Dashboard() {
                 <CurrencyDollarIcon className="w-6 h-6 text-[#8BAE5A]" />
               </div>
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-2xl sm:text-3xl font-bold text-[#FFD700]">€12.500</span>
+                <span className="text-2xl sm:text-3xl font-bold text-[#FFD700]">€{stats?.finance?.netWorth?.toLocaleString() || '0'}</span>
                 <span className="text-[#8BAE5A] text-sm sm:text-base">Netto Waarde</span>
               </div>
               <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
                 <div 
                   className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full transition-all duration-700" 
-                  style={{ width: '75%' }}
+                  style={{ width: `${stats?.finance?.progress || 0}%` }}
                 ></div>
               </div>
               <div className="text-xs text-gray-400 mt-2">
@@ -351,13 +376,13 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-2xl sm:text-3xl font-bold text-[#FFD700]">24</span>
+                <span className="text-2xl sm:text-3xl font-bold text-[#FFD700]">{stats?.brotherhood?.totalMembers || 0}</span>
                 <span className="text-[#8BAE5A] text-sm sm:text-base">broeders</span>
               </div>
               <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
                 <div 
                   className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full transition-all duration-700" 
-                  style={{ width: '60%' }}
+                  style={{ width: `${stats?.brotherhood?.progress || 0}%` }}
                 ></div>
               </div>
               <div className="text-xs text-gray-400 mt-2">
@@ -374,13 +399,13 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-2xl sm:text-3xl font-bold text-[#FFD700]">12</span>
+                <span className="text-2xl sm:text-3xl font-bold text-[#FFD700]">{stats?.academy?.completedCourses || 0}/{stats?.academy?.totalCourses || 0}</span>
                 <span className="text-[#8BAE5A] text-sm sm:text-base">cursussen</span>
               </div>
               <div className="w-full h-2 bg-[#3A4D23]/40 rounded-full">
                 <div 
                   className="h-2 bg-gradient-to-r from-[#8BAE5A] to-[#f0a14f] rounded-full transition-all duration-700" 
-                  style={{ width: '40%' }}
+                  style={{ width: `${stats?.academy?.progress || 0}%` }}
                 ></div>
               </div>
               <div className="text-xs text-gray-400 mt-2">

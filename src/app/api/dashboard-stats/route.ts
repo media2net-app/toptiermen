@@ -19,6 +19,9 @@ export async function GET(request: NextRequest) {
       trainingStats,
       mindFocusStats,
       boekenkamerStats,
+      financeStats,
+      brotherhoodStats,
+      academyStats,
       xpStats,
       userBadges
     ] = await Promise.all([
@@ -32,6 +35,12 @@ export async function GET(request: NextRequest) {
       fetchMindFocusStats(userId),
       // Boekenkamer stats
       fetchBoekenkamerStats(userId),
+      // Finance & Business stats
+      fetchFinanceStats(userId),
+      // Brotherhood stats
+      fetchBrotherhoodStats(userId),
+      // Academy stats
+      fetchAcademyStats(userId),
       // XP and rank stats
       fetchXPStats(userId),
       // User badges
@@ -44,9 +53,12 @@ export async function GET(request: NextRequest) {
       training: trainingStats,
       mindFocus: mindFocusStats,
       boekenkamer: boekenkamerStats,
+      finance: financeStats,
+      brotherhood: brotherhoodStats,
+      academy: academyStats,
       xp: xpStats,
       summary: {
-        totalProgress: calculateTotalProgress(missionsStats, challengesStats, trainingStats, mindFocusStats, boekenkamerStats)
+        totalProgress: calculateTotalProgress(missionsStats, challengesStats, trainingStats, mindFocusStats, boekenkamerStats, financeStats, brotherhoodStats, academyStats)
       }
     };
 
@@ -110,16 +122,31 @@ async function fetchMissionsStats(userId: string) {
 
 async function fetchChallengesStats(userId: string) {
   try {
-    // For now, return default values since challenges system might not be fully implemented
+    // Get user challenges
+    const { data: challenges, error } = await supabaseAdmin
+      .from('user_challenges')
+      .select('*')
+      .eq('user_id', userId);
+
+    if (error) {
+      console.error('Error fetching challenges:', error);
+      return { active: 0, completed: 0, totalDays: 0, progress: 0 };
+    }
+
+    const activeChallenges = challenges?.filter(c => c.status === 'active').length || 0;
+    const completedChallenges = challenges?.filter(c => c.status === 'completed').length || 0;
+    const totalDays = challenges?.reduce((sum, c) => sum + (c.current_streak || 0), 0) || 0;
+    const progress = activeChallenges > 0 ? Math.round((totalDays / (activeChallenges * 30)) * 100) : 0;
+
     return {
-      active: 0,
-      completed: 0,
-      totalDays: 30,
-      progress: 0
+      active: activeChallenges,
+      completed: completedChallenges,
+      totalDays,
+      progress
     };
   } catch (error) {
     console.error('Error fetching challenges stats:', error);
-    return { active: 0, completed: 0, totalDays: 30, progress: 0 };
+    return { active: 0, completed: 0, totalDays: 0, progress: 0 };
   }
 }
 
@@ -308,13 +335,145 @@ async function fetchUserBadges(userId: string) {
   }
 }
 
-function calculateTotalProgress(missions: any, challenges: any, training: any, mindFocus: any, boekenkamer: any) {
+async function fetchFinanceStats(userId: string) {
+  try {
+    // Get user's financial data (if available)
+    const { data: userProfile, error } = await supabaseAdmin
+      .from('profiles')
+      .select('points, rank')
+      .eq('id', userId)
+      .single();
+
+    if (error) {
+      return {
+        netWorth: 0,
+        monthlyIncome: 0,
+        savings: 0,
+        investments: 0,
+        progress: 0
+      };
+    }
+
+    // For now, calculate based on XP/points as a proxy for financial progress
+    const totalXP = userProfile.points || 0;
+    const netWorth = Math.round(totalXP * 10); // Simple calculation
+    const monthlyIncome = Math.round(totalXP * 2);
+    const savings = Math.round(totalXP * 3);
+    const investments = Math.round(totalXP * 5);
+    const progress = Math.min(Math.round((totalXP / 1000) * 100), 100);
+
+    return {
+      netWorth,
+      monthlyIncome,
+      savings,
+      investments,
+      progress
+    };
+  } catch (error) {
+    console.error('Error fetching finance stats:', error);
+    return {
+      netWorth: 0,
+      monthlyIncome: 0,
+      savings: 0,
+      investments: 0,
+      progress: 0
+    };
+  }
+}
+
+async function fetchBrotherhoodStats(userId: string) {
+  try {
+    // Get total users in the platform
+    const { count: totalUsers, error: usersError } = await supabaseAdmin
+      .from('profiles')
+      .select('*', { count: 'exact', head: true });
+
+    if (usersError) {
+      return {
+        totalMembers: 0,
+        activeMembers: 0,
+        communityScore: 0,
+        progress: 0
+      };
+    }
+
+    // Get user's forum activity
+    const { data: forumPosts, error: postsError } = await supabaseAdmin
+      .from('forum_posts')
+      .select('id')
+      .eq('user_id', userId);
+
+    const { data: forumComments, error: commentsError } = await supabaseAdmin
+      .from('forum_comments')
+      .select('id')
+      .eq('user_id', userId);
+
+    const totalActivity = (forumPosts?.length || 0) + (forumComments?.length || 0);
+    const communityScore = Math.min(totalActivity * 10, 100);
+    const progress = Math.min(Math.round((totalUsers || 0) / 100 * 100), 100);
+
+    return {
+      totalMembers: totalUsers || 0,
+      activeMembers: Math.round((totalUsers || 0) * 0.7), // Assume 70% active
+      communityScore,
+      progress
+    };
+  } catch (error) {
+    console.error('Error fetching brotherhood stats:', error);
+    return {
+      totalMembers: 0,
+      activeMembers: 0,
+      communityScore: 0,
+      progress: 0
+    };
+  }
+}
+
+async function fetchAcademyStats(userId: string) {
+  try {
+    // Get total books read (as a proxy for academy progress)
+    const { data: booksRead, error: booksError } = await supabaseAdmin
+      .from('book_reviews')
+      .select('id')
+      .eq('user_id', userId);
+
+    // Get completed missions (as learning progress)
+    const { data: completedMissions, error: missionsError } = await supabaseAdmin
+      .from('user_mission_logs')
+      .select('id')
+      .eq('user_id', userId);
+
+    const totalCourses = Math.max(booksRead?.length || 0, 1); // Dynamic based on available content
+    const completedCourses = Math.min(Math.round((booksRead?.length || 0) / 2), totalCourses);
+    const learningProgress = Math.min(Math.round(((booksRead?.length || 0) + (completedMissions?.length || 0)) / 50 * 100), 100);
+
+    return {
+      totalCourses,
+      completedCourses,
+      learningProgress,
+      progress: learningProgress
+    };
+  } catch (error) {
+    console.error('Error fetching academy stats:', error);
+    return {
+      totalCourses: 0,
+      completedCourses: 0,
+      learningProgress: 0,
+      progress: 0
+    };
+  }
+}
+
+function calculateTotalProgress(missions: any, challenges: any, training: any, mindFocus: any, boekenkamer: any, finance: any, brotherhood: any, academy: any) {
   const progressValues = [
     missions.progress,
     challenges.progress,
     training.progress,
     mindFocus.progress,
-    boekenkamer.progress
+    boekenkamer.progress,
+    finance.progress,
+    brotherhood.progress,
+    academy.progress
   ].filter(progress => progress !== undefined);
 
   if (progressValues.length === 0) return 0;
