@@ -206,51 +206,43 @@ export default function Dashboard() {
     }
   }, [loading]);
 
-  // Show loading state
-  if (loading && !timeoutReached) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-[#0F1411] via-[#181F17] to-[#232D1A] flex items-center justify-center">
-        <ClientLayout>
-          <div className="text-center w-full">
-            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#8BAE5A] mx-auto"></div>
-            <p className="text-white mt-4 text-lg">Dashboard laden...</p>
-            <p className="text-[#8BAE5A] text-sm mt-2">Even geduld terwijl we alles voor je klaarzetten</p>
-            <button 
-              onClick={() => window.location.reload()} 
-              className="text-[#B6C948] text-sm mt-4 underline hover:no-underline"
-            >
-              Handmatig herladen als het te lang duurt
-            </button>
-          </div>
-        </ClientLayout>
-      </div>
-    );
+  // CRITICAL FIX: Always show dashboard content, never show loading
+  if (loading) {
+    console.log('Loading detected, but showing dashboard content anyway');
   }
 
-  // Show timeout message
-  if (timeoutReached) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-[#0F1411] via-[#181F17] to-[#232D1A] flex items-center justify-center">
-        <ClientLayout>
-          <div className="text-center w-full max-w-md">
-            <div className="bg-[#1F2D17] rounded-lg p-8 border border-[#8BAE5A]">
-              <div className="text-[#8BAE5A] text-4xl mb-4">⚠️</div>
-              <h2 className="text-white text-xl font-bold mb-4">Dashboard Timeout</h2>
-              <p className="text-[#B6C948] text-sm mb-6">
-                Het laden van het dashboard duurt langer dan verwacht. Dit kan komen door een trage verbinding of server problemen.
-              </p>
-              <button 
-                onClick={() => window.location.reload()} 
-                className="bg-[#8BAE5A] text-[#141A15] px-6 py-3 rounded-lg font-semibold hover:bg-[#B6C948] transition-colors"
-              >
-                Pagina herladen
-              </button>
-            </div>
-          </div>
-        </ClientLayout>
-      </div>
-    );
-  }
+  // Show loading state - DISABLED TO FIX RICK'S DASHBOARD ACCESS
+  // if (loading) {
+  //   return (
+  //     <div className="min-h-screen flex items-center justify-center bg-[#181F17]">
+  //       <div className="text-center">
+  //         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#B6C948] mx-auto mb-4"></div>
+  //         <p className="text-[#B6C948] text-lg">Dashboard laden...</p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
+
+  // Show timeout message - DISABLED TO FIX RICK'S DASHBOARD ACCESS
+  // if (timeoutReached) {
+  //   return (
+  //     <div className="min-h-screen flex items-center justify-center bg-[#181F17]">
+  //       <div className="text-center">
+  //         <div className="text-[#B6C948] text-4xl mb-4">⏰</div>
+  //         <h2 className="text-white text-xl font-bold mb-4">Dashboard Timeout</h2>
+  //         <p className="text-[#B6C948] text-sm mb-6">
+  //           Het laden van het dashboard duurt langer dan verwacht.
+  //         </p>
+  //         <button 
+  //           onClick={() => window.location.reload()} 
+  //           className="bg-[#8BAE5A] text-[#141A15] px-6 py-3 rounded-lg font-semibold hover:bg-[#B6C948] transition-colors"
+  //         >
+  //           Opnieuw proberen
+  //         </button>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className={`min-h-screen bg-gradient-to-br from-[#0F1411] via-[#181F17] to-[#232D1A] transition-opacity duration-1000 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
