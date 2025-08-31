@@ -16,7 +16,7 @@ export default function AuthDebugPanel({ isVisible = false }: AuthDebugPanelProp
     const updateDebugInfo = () => {
       setDebugInfo({
         timestamp: new Date().toISOString(),
-        userAgent: navigator.userAgent,
+        userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'Unknown',
         localStorage: {
           hasAuthKey: !!localStorage.getItem('toptiermen-auth'),
           authKeyLength: localStorage.getItem('toptiermen-auth')?.length || 0,

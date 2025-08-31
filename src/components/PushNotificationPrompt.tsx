@@ -24,7 +24,7 @@ export default function PushNotificationPrompt({ onClose }: PushNotificationProm
         // Check if running in standalone mode (PWA installed)
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
         // Check if running in fullscreen mode (iOS PWA)
-        const isFullscreen = (window.navigator as any).standalone === true;
+        const isFullscreen = typeof navigator !== 'undefined' ? (navigator as any).standalone === true : false;
         
         setIsPWAInstalled(isStandalone || isFullscreen);
       }
@@ -58,7 +58,7 @@ export default function PushNotificationPrompt({ onClose }: PushNotificationProm
       console.log('👤 User ID:', user.id);
 
       // Check if service worker and push manager are supported
-      if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+      if (!(typeof navigator !== 'undefined' && 'serviceWorker' in navigator) || !('PushManager' in window)) {
         console.error('❌ Service worker or PushManager not supported');
         toast.error('Push notificaties worden niet ondersteund door je browser');
         return;
@@ -80,8 +80,8 @@ export default function PushNotificationPrompt({ onClose }: PushNotificationProm
 
       // Register service worker
       console.log('🔧 Registering service worker...');
-      // const registration = await navigator.serviceWorker.register('/sw.js');
-      // await navigator.serviceWorker.ready;
+      // const registration = await typeof navigator !== 'undefined' ? navigator.serviceWorker : null.register('/sw.js');
+      // await typeof navigator !== 'undefined' ? navigator.serviceWorker : null.ready;
       console.log('✅ Service worker registered and ready');
 
       // Subscribe to push notifications - DISABLED

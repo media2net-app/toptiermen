@@ -25,8 +25,8 @@ export function CacheTestPanel() {
     const info = {
       userType: getUserType(),
       userEmail: user?.email,
-      userAgent: navigator.userAgent,
-      isChrome: /Chrome/.test(navigator.userAgent) && !/Edge/.test(navigator.userAgent),
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'Unknown',
+      isChrome: /Chrome/.test(typeof navigator !== 'undefined' ? navigator.userAgent : 'Unknown') && !/Edge/.test(typeof navigator !== 'undefined' ? navigator.userAgent : 'Unknown'),
       timestamp: new Date().toISOString(),
       
       // Performance metrics
@@ -48,8 +48,8 @@ export function CacheTestPanel() {
       storage: {
         localStorageSize: JSON.stringify(localStorage).length,
         sessionStorageSize: JSON.stringify(sessionStorage).length,
-        hasServiceWorker: 'serviceWorker' in navigator,
-        serviceWorkerController: navigator.serviceWorker?.controller ? true : false,
+        hasServiceWorker: typeof navigator !== 'undefined' && 'serviceWorker' in navigator,
+        serviceWorkerController: typeof navigator !== 'undefined' && navigator.serviceWorker?.controller ? true : false,
       },
       
       // Cache headers
@@ -91,7 +91,7 @@ export function CacheTestPanel() {
       sessionStorage.clear();
 
       // Clear service worker
-      if ('serviceWorker' in navigator) {
+      if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
         const registrations = await navigator.serviceWorker.getRegistrations();
         await Promise.all(registrations.map(reg => reg.unregister()));
       }

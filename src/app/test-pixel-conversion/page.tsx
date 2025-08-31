@@ -140,7 +140,7 @@ export default function TestPixelConversion() {
           <div className="text-sm text-gray-300">
             <p><strong>Pixel ID:</strong> 1333919368069015</p>
             <p><strong>Test URL:</strong> {typeof window !== 'undefined' ? window.location.href : 'Loading...'}</p>
-            <p><strong>User Agent:</strong> {typeof window !== 'undefined' ? window.navigator.userAgent : 'Loading...'}</p>
+            <p><strong>User Agent:</strong> {typeof window !== 'undefined' ? (typeof navigator !== 'undefined' ? navigator.userAgent : 'Unknown') : 'Loading...'}</p>
           </div>
         </div>
       </div>

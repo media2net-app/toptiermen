@@ -20,7 +20,7 @@ export const usePWA = () => {
   const [pwaState, setPwaState] = useState<PWAState>({
     isInstalled: false,
     canInstall: false,
-    isOnline: typeof window !== 'undefined' ? navigator.onLine : true,
+    isOnline: typeof window !== 'undefined' && typeof navigator !== 'undefined' ? typeof navigator !== 'undefined' ? navigator.onLine : true : true,
     hasPushPermission: false,
     isServiceWorkerRegistered: false,
   });
@@ -34,7 +34,7 @@ export const usePWA = () => {
     
     const checkInstallation = () => {
       const isInstalled = window.matchMedia('(display-mode: standalone)').matches ||
-                         (window.navigator as any).standalone === true;
+                         (typeof navigator !== 'undefined' ? (navigator as any).standalone : false) === true;
       
       setPwaState(prev => ({ ...prev, isInstalled }));
     };
@@ -79,9 +79,9 @@ export const usePWA = () => {
   // Register service worker - DISABLED to prevent navigation issues
   // useEffect(() => {
   //   const registerServiceWorker = async () => {
-  //     if ('serviceWorker' in navigator) {
+  //     if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
   //       try {
-  //         const reg = await navigator.serviceWorker.register('/sw.js');
+  //         const reg = await typeof navigator !== 'undefined' ? navigator.serviceWorker : null.register('/sw.js');
   //         setRegistration(reg);
   //         setPwaState(prev => ({ ...prev, isServiceWorkerRegistered: true }));
           
@@ -92,7 +92,7 @@ export const usePWA = () => {
   //           const newWorker = reg.installing;
   //           if (newWorker) {
   //             newWorker.addEventListener('statechange', () => {
-  //               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+  //               if (newWorker.state === 'installed' && typeof navigator !== 'undefined' ? navigator.serviceWorker : null.controller) {
   //                 // New version available
   //                 console.log('🔄 New version available');
   //               }

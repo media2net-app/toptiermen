@@ -59,7 +59,7 @@ export default function DebugLoginPage() {
         sessionError: sessionError?.message,
         localStorage: localStorageInfo,
         sessionStorage: sessionStorageInfo,
-        userAgent: navigator.userAgent,
+        userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'Unknown',
         url: window.location.href
       });
     } catch (error) {

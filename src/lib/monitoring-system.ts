@@ -448,7 +448,7 @@ class AdvancedMonitoringSystem {
       };
     }
 
-    const userAgent = navigator.userAgent;
+    const userAgent = typeof navigator !== 'undefined' ? navigator.userAgent : 'Unknown';
     
     return {
       userAgent,

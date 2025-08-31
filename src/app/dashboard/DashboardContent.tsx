@@ -256,7 +256,7 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
       // Clear any potentially problematic cached data
       if (typeof window !== 'undefined') {
         // Clear service worker cache if exists
-        if ('serviceWorker' in navigator) {
+        if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
           navigator.serviceWorker.getRegistrations().then(registrations => {
             registrations.forEach(registration => {
               registration.unregister();
