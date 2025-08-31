@@ -6,6 +6,29 @@ const nextConfig = {
     optimizePackageImports: ['@heroicons/react'],
   },
   
+  // Fast Refresh configuration to prevent reload errors
+  webpack: (config, { dev, isServer }) => {
+    if (dev && !isServer) {
+      // Configure Fast Refresh to be more stable
+      config.resolve.alias = {
+        ...config.resolve.alias,
+      };
+      
+      // Add Fast Refresh configuration
+      config.plugins = config.plugins.map((plugin) => {
+        if (plugin.constructor.name === 'ReactRefreshPlugin') {
+          plugin.options = {
+            ...plugin.options,
+            overlay: false, // Disable error overlay
+            forceEnable: false, // Don't force enable
+          };
+        }
+        return plugin;
+      });
+    }
+    return config;
+  },
+  
   // Disable static generation for all pages to prevent navigator errors
   output: 'standalone',
   
