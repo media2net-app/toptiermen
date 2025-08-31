@@ -16,7 +16,7 @@ import BankConnectionModal from '@/app/components/BankConnectionModal';
 import Link from 'next/link';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { FinanceProvider, useFinance } from './FinanceContext';
-import { ArrowRightIcon, PencilIcon, Cog6ToothIcon } from '@heroicons/react/24/outline';
+import { ArrowRightIcon, PencilIcon, Cog6ToothIcon, PlusIcon } from '@heroicons/react/24/outline';
 import ZeroBasedBudget from './components/ZeroBasedBudget';
 import DebtSnowball from './components/DebtSnowball';
 import CompoundInterest from './components/CompoundInterest';
@@ -232,6 +232,13 @@ function FinanceDashboardContent() {
   const [newCurrentAmount, setNewCurrentAmount] = useState('');
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [editingProfile, setEditingProfile] = useState<any>(null);
+  const [showAddGoalModal, setShowAddGoalModal] = useState(false);
+  const [newGoal, setNewGoal] = useState({
+    title: '',
+    targetAmount: '',
+    targetDate: '',
+    category: 'sparen'
+  });
 
   // Fetch financial profile on component mount
   useEffect(() => {
@@ -351,6 +358,61 @@ function FinanceDashboardContent() {
 
   const updateEditingProfile = (field: string, value: any) => {
     setEditingProfile(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleAddGoal = async () => {
+    if (!user?.id || !newGoal.title || !newGoal.targetAmount || !newGoal.targetDate) {
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/finance/profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          profile: {
+            ...financialProfile,
+            goals: [
+              ...financialGoals,
+              {
+                title: newGoal.title,
+                targetAmount: parseFloat(newGoal.targetAmount),
+                targetDate: newGoal.targetDate,
+                category: newGoal.category
+              }
+            ]
+          }
+        }),
+      });
+
+      if (response.ok) {
+        // Refresh the goals data
+        const profileResponse = await fetch(`/api/finance/profile?userId=${user.id}`);
+        if (profileResponse.ok) {
+          const data = await profileResponse.json();
+          setFinancialGoals(data.goals || []);
+        }
+        setShowAddGoalModal(false);
+        setNewGoal({
+          title: '',
+          targetAmount: '',
+          targetDate: '',
+          category: 'sparen'
+        });
+      }
+    } catch (error) {
+      console.error('Error adding goal:', error);
+    }
+  };
+
+  const updateNewGoal = (field: string, value: string) => {
+    setNewGoal(prev => ({
       ...prev,
       [field]: value
     }));
@@ -533,12 +595,22 @@ function FinanceDashboardContent() {
         </div>
       )}
 
-      {/* Financiële Doelen Sectie */}
-      {activeTab === 'overview' && financialGoals.length > 0 && (
-        <div className="mt-8">
-          <h2 className="text-2xl font-bold text-[#B6C948] mb-6">Jouw Financiële Doelen</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {financialGoals.map((goal, index) => {
+              {/* Financiële Doelen Sectie */}
+        {activeTab === 'overview' && (
+          <div className="mt-8">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-[#B6C948]">Jouw Financiële Doelen</h2>
+              <button
+                onClick={() => setShowAddGoalModal(true)}
+                className="flex items-center space-x-2 px-4 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold"
+              >
+                <PlusIcon className="w-4 h-4" />
+                <span>Nieuw Doel</span>
+              </button>
+            </div>
+                      {financialGoals.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {financialGoals.map((goal, index) => {
               const targetDate = new Date(goal.target_date);
               const today = new Date();
               const daysRemaining = Math.ceil((targetDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
@@ -595,12 +667,29 @@ function FinanceDashboardContent() {
                       </span>
                     </div>
                   </div>
+                                  </div>
+                );
+              })}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <div className="bg-[#232D1A] rounded-2xl p-8 border border-[#3A4D23]">
+                  <div className="w-16 h-16 bg-[#8BAE5A] rounded-full mx-auto mb-4 flex items-center justify-center">
+                    <PlusIcon className="w-8 h-8 text-[#232D1A]" />
+                  </div>
+                  <h3 className="text-xl font-bold text-[#B6C948] mb-2">Nog geen doelen</h3>
+                  <p className="text-[#8BAE5A] mb-6">Voeg je eerste financiële doel toe om te beginnen met plannen</p>
+                  <button
+                    onClick={() => setShowAddGoalModal(true)}
+                    className="px-6 py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold"
+                  >
+                    Eerste Doel Toevoegen
+                  </button>
                 </div>
-              );
-            })}
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        )}
 
       {activeTab === 'planning' && (
         <div className="space-y-8">
@@ -819,6 +908,115 @@ function FinanceDashboardContent() {
                 className="flex-1 px-4 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold"
               >
                 Opslaan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Goal Modal */}
+      {showAddGoalModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-6 max-w-md w-full">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-white">
+                Nieuw Financieel Doel Toevoegen
+              </h3>
+              <button
+                onClick={() => {
+                  setShowAddGoalModal(false);
+                  setNewGoal({
+                    title: '',
+                    targetAmount: '',
+                    targetDate: '',
+                    category: 'sparen'
+                  });
+                }}
+                className="text-[#8BAE5A] hover:text-[#B6C948] transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-[#8BAE5A] mb-2">
+                  Doel Naam
+                </label>
+                <input
+                  type="text"
+                  value={newGoal.title}
+                  onChange={(e) => updateNewGoal('title', e.target.value)}
+                  placeholder="Bijv. Huis kopen, Noodfonds, Vakantie"
+                  className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#8BAE5A] mb-2">
+                  Doelbedrag (€)
+                </label>
+                <input
+                  type="number"
+                  value={newGoal.targetAmount}
+                  onChange={(e) => updateNewGoal('targetAmount', e.target.value)}
+                  placeholder="0"
+                  className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#8BAE5A] mb-2">
+                  Doeldatum
+                </label>
+                <input
+                  type="date"
+                  value={newGoal.targetDate}
+                  onChange={(e) => updateNewGoal('targetDate', e.target.value)}
+                  className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#8BAE5A] mb-2">
+                  Categorie
+                </label>
+                <select
+                  value={newGoal.category}
+                  onChange={(e) => updateNewGoal('category', e.target.value)}
+                  className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded text-white"
+                >
+                  <option value="sparen">Sparen</option>
+                  <option value="investeren">Investeren</option>
+                  <option value="aflossen">Aflossen</option>
+                  <option value="vakantie">Vakantie</option>
+                  <option value="onderhoud">Onderhoud</option>
+                  <option value="overig">Overig</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex space-x-3 mt-8">
+              <button
+                onClick={() => {
+                  setShowAddGoalModal(false);
+                  setNewGoal({
+                    title: '',
+                    targetAmount: '',
+                    targetDate: '',
+                    category: 'sparen'
+                  });
+                }}
+                className="flex-1 px-4 py-2 bg-[#181F17] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors"
+              >
+                Annuleren
+              </button>
+              <button
+                onClick={handleAddGoal}
+                disabled={!newGoal.title || !newGoal.targetAmount || !newGoal.targetDate}
+                className="flex-1 px-4 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Doel Toevoegen
               </button>
             </div>
           </div>
