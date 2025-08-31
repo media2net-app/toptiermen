@@ -20,5 +20,6 @@ export default function GlobalLoadingWrapper({ children }: GlobalLoadingWrapperP
     console.log('User available but still loading, proceeding anyway');
   }
 
+  // FORCE DEPLOYMENT: Loading screen completely disabled for Rick's access
   return <>{children}</>;
 }
