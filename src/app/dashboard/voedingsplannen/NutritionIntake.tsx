@@ -7,7 +7,6 @@ import {
   UserIcon,
   ScaleIcon,
   HeartIcon,
-  TargetIcon,
   CheckIcon,
   ArrowRightIcon,
   ArrowLeftIcon
@@ -373,9 +372,9 @@ export default function NutritionIntake({ onComplete, onSkip }: NutritionIntakeP
       className="space-y-6"
     >
       <div className="text-center">
-        <div className="w-16 h-16 bg-[#8BAE5A]/20 rounded-full flex items-center justify-center mx-auto mb-4">
-          <TargetIcon className="w-8 h-8 text-[#8BAE5A]" />
-        </div>
+                       <div className="w-16 h-16 bg-[#8BAE5A]/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                 <CalculatorIcon className="w-8 h-8 text-[#8BAE5A]" />
+               </div>
         <h2 className="text-2xl font-bold text-white mb-2">
           Jouw Doel
         </h2>
