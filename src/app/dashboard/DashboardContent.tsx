@@ -39,7 +39,6 @@ const menu = [
   { label: 'Mijn Missies', icon: FireIcon, parent: 'Dashboard', href: '/dashboard/mijn-missies', isSub: true },
   { label: 'Challenges', icon: TrophyIcon, parent: 'Dashboard', href: '/dashboard/challenges', isSub: true },
   { label: 'Mijn Trainingen', icon: AcademicCapIcon, parent: 'Dashboard', href: '/dashboard/mijn-trainingen', isSub: true },
-  { label: 'Voedingsplannen', icon: BookOpenIcon, href: '/dashboard/voedingsplannen' },
   { label: 'Finance & Business', icon: CurrencyDollarIcon, href: '/dashboard/finance-en-business' },
   { label: 'Academy', icon: FireIcon, href: '/dashboard/academy' },
   { label: 'Trainingscentrum', icon: AcademicCapIcon, href: '/dashboard/trainingscentrum' },
@@ -301,14 +300,14 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
       }
     } catch (error) {
       console.error('❌ Error checking onboarding status:', error);
-    } finally {
-      setIsLoading(false);
     }
   }, [user?.id]);
 
   // Check onboarding status on mount
   useEffect(() => {
-    if (user && !isLoading) {
+    if (user) {
+      // Set loading to false immediately when user is available
+      setIsLoading(false);
       checkOnboardingStatus();
     }
   }, [user?.id, checkOnboardingStatus]);
@@ -316,8 +315,9 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
   // Show forced onboarding if user hasn't completed onboarding
   useEffect(() => {
     if (onboardingStatus && !onboardingStatus.onboarding_completed) {
-      // Check if user is a test user (email contains @toptiermen.test)
-      const isTestUser = user?.email?.includes('@toptiermen.test') || false;
+      // Check if user is a test user (email contains @toptiermen.test or @toptiermen.eu)
+      const isTestUser = user?.email?.includes('@toptiermen.test') || 
+                        user?.email?.includes('@toptiermen.eu') || false;
       
       console.log('🔍 Onboarding logic check:', {
         userEmail: user?.email,

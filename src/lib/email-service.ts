@@ -173,6 +173,15 @@ class EmailService {
   }
 
   private generateEmailContent(template: string, variables: Record<string, string>) {
+    // Check for custom template
+    if (template === 'custom' && variables.subject && variables.html && variables.text) {
+      return {
+        subject: variables.subject,
+        html: variables.html,
+        text: variables.text
+      };
+    }
+
     // Email templates
     const templates: Record<string, { subject: string; html: string; text: string }> = {
       welcome: {

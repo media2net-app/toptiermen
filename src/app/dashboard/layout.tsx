@@ -72,6 +72,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       //   'dashboard-auth'
       // );
       
+      console.log('No user found, redirecting to login');
       router.push('/login');
       return;
     }
@@ -99,8 +100,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     // Simple user profile set
     setUserProfile(user);
-
-  }, [user, loading, router, setUserProfile]);
+  }, [user, loading, router]);
 
   // 2.0.1: Handle authentication errors - DISABLED
   // useEffect(() => {
@@ -151,22 +151,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   // Show auth timeout message
   if (loading && authTimeout) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#181F17]">
-        <div className="text-center max-w-md">
-          <div className="w-16 h-16 border-4 border-[#B6C948] border-opacity-30 rounded-full flex items-center justify-center mx-auto mb-4">
-            <div className="text-[#B6C948] text-2xl">⚠️</div>
+      <div className="min-h-screen bg-gradient-to-br from-[#0F1411] via-[#181F17] to-[#232D1A] flex items-center justify-center">
+        <div className="text-center w-full max-w-md">
+          <div className="bg-[#1F2D17] rounded-lg p-8 border border-[#8BAE5A]">
+            <div className="text-[#8BAE5A] text-4xl mb-4">🔐</div>
+            <h2 className="text-white text-xl font-bold mb-4">Authenticatie Timeout</h2>
+            <p className="text-[#B6C948] text-sm mb-6">
+              Het inloggen duurt langer dan verwacht. Je wordt doorgestuurd naar de login pagina.
+            </p>
+            <button 
+              onClick={() => router.push('/login')} 
+              className="bg-[#8BAE5A] text-[#141A15] px-6 py-3 rounded-lg font-semibold hover:bg-[#B6C948] transition-colors"
+            >
+              Naar login
+            </button>
           </div>
-          <h2 className="text-white text-lg font-bold mb-2">Authenticatie duurde te lang</h2>
-          <p className="text-[#B6C948] text-sm mb-4">
-            Er was een probleem met het laden van je sessie. 
-            Je wordt doorgestuurd naar de login pagina.
-          </p>
-          <button 
-            onClick={() => router.push('/login')} 
-            className="bg-[#B6C948] text-[#181F17] px-4 py-2 rounded-lg font-semibold hover:bg-[#C6D958] transition-colors"
-          >
-            Naar login
-          </button>
         </div>
       </div>
     );

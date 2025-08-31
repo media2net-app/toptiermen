@@ -49,7 +49,7 @@ export default function OnboardingWidget({ isVisible, onComplete }: OnboardingWi
       title: 'Kies je Voedingsplan',
       description: 'Selecteer een voedingsplan voor optimale prestaties',
       completed: false,
-      action: () => router.push('/dashboard/voedingsplannen'),
+      action: () => router.push('/dashboard/trainingscentrum'),
     },
     {
       id: 'challenge',

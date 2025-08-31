@@ -96,7 +96,11 @@ export default function Dashboard() {
   // 2.0.1: Fetch real dashboard data from database with timeout
   useEffect(() => {
     const fetchDashboardData = async () => {
-      if (!user?.id) return;
+      if (!user?.id) {
+        console.log('No user ID available, skipping dashboard data fetch');
+        setLoading(false);
+        return;
+      }
 
       try {
         setLoading(true);
@@ -178,6 +182,7 @@ export default function Dashboard() {
     }
   }, [loading]);
 
+  // Show loading state
   if (loading && !timeoutReached) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#0F1411] via-[#181F17] to-[#232D1A] flex items-center justify-center">
@@ -198,26 +203,25 @@ export default function Dashboard() {
     );
   }
 
-  // Show timeout message if API took too long
+  // Show timeout message
   if (timeoutReached) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#0F1411] via-[#181F17] to-[#232D1A] flex items-center justify-center">
         <ClientLayout>
           <div className="text-center w-full max-w-md">
-            <div className="w-32 h-32 border-4 border-[#8BAE5A] border-opacity-30 rounded-full flex items-center justify-center mx-auto mb-6">
-              <div className="text-[#8BAE5A] text-4xl">⚠️</div>
+            <div className="bg-[#1F2D17] rounded-lg p-8 border border-[#8BAE5A]">
+              <div className="text-[#8BAE5A] text-4xl mb-4">⚠️</div>
+              <h2 className="text-white text-xl font-bold mb-4">Dashboard Timeout</h2>
+              <p className="text-[#B6C948] text-sm mb-6">
+                Het laden van het dashboard duurt langer dan verwacht. Dit kan komen door een trage verbinding of server problemen.
+              </p>
+              <button 
+                onClick={() => window.location.reload()} 
+                className="bg-[#8BAE5A] text-[#141A15] px-6 py-3 rounded-lg font-semibold hover:bg-[#B6C948] transition-colors"
+              >
+                Pagina herladen
+              </button>
             </div>
-            <h2 className="text-white text-xl font-bold mb-4">Dashboard laden duurde te lang</h2>
-            <p className="text-[#8BAE5A] text-sm mb-6">
-              Er was een probleem met het laden van je dashboard gegevens. 
-              Je kunt de pagina herladen om het opnieuw te proberen.
-            </p>
-            <button 
-              onClick={() => window.location.reload()} 
-              className="bg-[#8BAE5A] text-[#181F17] px-6 py-3 rounded-lg font-semibold hover:bg-[#A6C97B] transition-colors"
-            >
-              Pagina herladen
-            </button>
           </div>
         </ClientLayout>
       </div>
