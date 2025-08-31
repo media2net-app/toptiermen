@@ -295,30 +295,30 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
     }
   };
 
-  // Show loading state with better feedback - only for initial auth loading
-  if (loading && !user) {
-    return (
-      <div className="min-h-screen bg-[#181F17] flex items-center justify-center" suppressHydrationWarning>
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
-          <div className="text-[#8BAE5A] text-xl">
-            Admin Dashboard laden...
-          </div>
-          <div className="mt-4">
-            <p className="text-[#B6C948] text-sm">
-              Beheerpaneel wordt geladen
-            </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="mt-2 text-[#8BAE5A] hover:text-[#B6C948] underline text-sm"
-            >
-              Pagina herladen als het te lang duurt
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Show loading state with better feedback - only for initial auth loading - DISABLED TO FIX FLICKERING
+  // if (loading && !user) {
+  //   return (
+  //     <div className="min-h-screen bg-[#181F17] flex items-center justify-center" suppressHydrationWarning>
+  //       <div className="text-center">
+  //         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
+  //         <div className="text-[#8BAE5A] text-xl">
+  //           Admin Dashboard laden...
+  //         </div>
+  //         <div className="mt-4">
+  //           <p className="text-[#B6C948] text-sm">
+  //             Beheerpaneel wordt geladen
+  //           </p>
+  //           <button
+  //             onClick={() => window.location.reload()}
+  //             className="mt-2 text-[#8BAE5A] hover:text-[#B6C948] underline text-sm"
+  //           >
+  //             Pagina herladen als het te lang duurt
+  //           </button>
+  //         </div>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   // Show unauthorized message if not authenticated or not admin
   if (!isAuthenticated || (user && user.role?.toLowerCase() !== 'admin')) {

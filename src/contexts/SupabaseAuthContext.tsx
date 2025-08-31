@@ -190,13 +190,13 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
 
     getInitialSession();
 
-    // CRITICAL FIX: Reset loading state more quickly
-    const timeoutId = setTimeout(() => {
-      if (isMounted && state.loading) {
-        console.log('Auth loading timeout - resetting loading state');
-        dispatch({ type: 'SET_LOADING', payload: false });
-      }
-    }, 3000); // 3 second timeout
+    // CRITICAL FIX: Reset loading state more quickly - DISABLED TO FIX FLICKERING
+    // const timeoutId = setTimeout(() => {
+    //   if (isMounted && state.loading) {
+    //     console.log('Auth loading timeout - resetting loading state');
+    //     dispatch({ type: 'SET_LOADING', payload: false });
+    //   }
+    // }, 3000); // 3 second timeout
 
     // Simplified auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -227,7 +227,7 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
 
     return () => {
       isMounted = false;
-      clearTimeout(timeoutId);
+      // clearTimeout(timeoutId); // Disabled timeout
       subscription.unsubscribe();
     };
   }, [fetchUserProfile, state.loading]);

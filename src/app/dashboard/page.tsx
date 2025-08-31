@@ -77,7 +77,7 @@ const getGreeting = () => {
 
 export default function Dashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [loading, setLoading] = useState(false); // FORCE LOADING TO FALSE
+  const [loading, setLoading] = useState(false); // DISABLED TO FIX FLICKERING
   const [fadeIn, setFadeIn] = useState(false);
   const [userBadges, setUserBadges] = useState<Array<{
     id: string;
@@ -89,54 +89,17 @@ export default function Dashboard() {
     xp_reward: number;
     unlocked_at?: string;
   }>>([]);
-  const [timeoutReached, setTimeoutReached] = useState(false);
 
   const { user } = useSupabaseAuth();
 
-  // CRITICAL FIX: Set loading to false immediately when user is available
-  useEffect(() => {
-    if (user) {
-      setLoading(false);
-    }
-  }, [user]);
-
-  // CRITICAL FIX: Force loading to false after a short delay
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (loading) {
-        console.log('Forcing loading to false after timeout');
-        setLoading(false);
-      }
-    }, 2000); // 2 second timeout
-
-    return () => clearTimeout(timer);
-  }, [loading]);
-
-  // CRITICAL FIX: Force loading to false immediately
-  useEffect(() => {
-    setLoading(false);
-  }, []);
-
-  // 2.0.1: Fetch real dashboard data from database with timeout
+  // 2.0.1: Fetch real dashboard data from database
   useEffect(() => {
     const fetchDashboardData = async () => {
-      if (!user?.id) {
-        console.log('No user ID available, skipping dashboard data fetch');
-        setLoading(false);
-        return;
-      }
+      if (!user?.id) return;
 
       try {
-        setLoading(true);
-        setTimeoutReached(false);
+        // setLoading(true); // DISABLED TO FIX FLICKERING
         
-        // Add timeout to prevent infinite loading
-        const timeoutId = setTimeout(() => {
-          console.warn('Dashboard API timeout - using fallback data');
-          setTimeoutReached(true);
-          setLoading(false);
-        }, 10000); // 10 second timeout
-
         const response = await fetch(`/api/dashboard-stats`, {
           method: 'POST',
           cache: 'no-cache',
@@ -151,14 +114,12 @@ export default function Dashboard() {
           })
         });
 
-        clearTimeout(timeoutId);
-
         if (response.ok) {
           const data = await response.json();
           setStats(data.stats);
           setUserBadges(data.userBadges || []);
         } else {
-          console.error('Failed to fetch dashboard stats:', response.status, response.statusText);
+          console.error('Failed to fetch dashboard stats');
           // Set minimal fallback data (not mock, just empty)
           setStats({
             missions: { total: 0, completedToday: 0, completedThisWeek: 0, progress: 0 },
@@ -185,13 +146,13 @@ export default function Dashboard() {
           boekenkamer: { total: 0, completedToday: 0, progress: 0 },
           finance: { netWorth: 0, monthlyIncome: 0, savings: 0, investments: 0, progress: 0 },
           brotherhood: { totalMembers: 0, activeMembers: 0, communityScore: 0, progress: 0 },
-          academy: { totalCourses: 0, completedCourses: 0, learningProgress: 0, progress: 0 },
+                      academy: { totalCourses: 0, completedCourses: 0, learningProgress: 0, progress: 0 },
           xp: { total: 0, rank: null, level: 1 },
           summary: { totalProgress: 0 }
         });
         setUserBadges([]);
       } finally {
-        setLoading(false);
+        // setLoading(false); // DISABLED TO FIX FLICKERING
       }
     };
 
@@ -206,40 +167,15 @@ export default function Dashboard() {
     }
   }, [loading]);
 
-  // CRITICAL FIX: Always show dashboard content, never show loading
-  if (loading) {
-    console.log('Loading detected, but showing dashboard content anyway');
-  }
-
-  // Show loading state - DISABLED TO FIX RICK'S DASHBOARD ACCESS
   // if (loading) {
   //   return (
-  //     <div className="min-h-screen flex items-center justify-center bg-[#181F17]">
-  //       <div className="text-center">
-  //         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#B6C948] mx-auto mb-4"></div>
-  //         <p className="text-[#B6C948] text-lg">Dashboard laden...</p>
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
-  // Show timeout message - DISABLED TO FIX RICK'S DASHBOARD ACCESS
-  // if (timeoutReached) {
-  //   return (
-  //     <div className="min-h-screen flex items-center justify-center bg-[#181F17]">
-  //       <div className="text-center">
-  //         <div className="text-[#B6C948] text-4xl mb-4">⏰</div>
-  //         <h2 className="text-white text-xl font-bold mb-4">Dashboard Timeout</h2>
-  //         <p className="text-[#B6C948] text-sm mb-6">
-  //           Het laden van het dashboard duurt langer dan verwacht.
-  //         </p>
-  //         <button 
-  //           onClick={() => window.location.reload()} 
-  //           className="bg-[#8BAE5A] text-[#141A15] px-6 py-3 rounded-lg font-semibold hover:bg-[#B6C948] transition-colors"
-  //         >
-  //           Opnieuw proberen
-  //         </button>
-  //       </div>
+  //     <div className="min-h-screen bg-gradient-to-br from-[#0F1411] via-[#181F17] to-[#232D1A] flex items-center justify-center">
+  //       <ClientLayout>
+  //         <div className="text-center w-full">
+  //           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#8BAE5A] mx-auto"></div>
+  //           <p className="text-white mt-4 text-lg">Dashboard laden...</p>
+  //         </div>
+  //       </ClientLayout>
   //     </div>
   //   );
   // }
