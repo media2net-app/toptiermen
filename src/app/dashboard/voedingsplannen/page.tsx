@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import PageLayout from '@/components/PageLayout';
 import Breadcrumb, { createBreadcrumbs } from '@/components/Breadcrumb';
+import NutritionIntake from './NutritionIntake';
+import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 
 interface NutritionPlan {
   id: number;
@@ -23,11 +25,30 @@ export default function VoedingsplannenPage() {
   const [plans, setPlans] = useState<NutritionPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showIntake, setShowIntake] = useState(false);
+  const [userProfile, setUserProfile] = useState<any>(null);
   const router = useRouter();
+  const { user } = useSupabaseAuth();
 
   useEffect(() => {
     fetchNutritionPlans();
-  }, []);
+    checkUserProfile();
+  }, [user]);
+
+  const checkUserProfile = async () => {
+    if (!user?.id) return;
+    
+    try {
+      const response = await fetch(`/api/nutrition-profile?userId=${user.id}`);
+      const data = await response.json();
+      
+      if (data.success && data.profile) {
+        setUserProfile(data.profile);
+      }
+    } catch (error) {
+      console.error('Error checking user profile:', error);
+    }
+  };
 
   const fetchNutritionPlans = async () => {
     try {
@@ -57,6 +78,16 @@ export default function VoedingsplannenPage() {
 
   const handlePlanClick = (planId: string) => {
     router.push(`/dashboard/voedingsplannen/${planId}`);
+  };
+
+  const handleIntakeComplete = (calculations: any) => {
+    setUserProfile(calculations);
+    setShowIntake(false);
+    checkUserProfile();
+  };
+
+  const handleIntakeSkip = () => {
+    setShowIntake(false);
   };
 
   const getPlanIcon = (plan: NutritionPlan) => {
@@ -120,7 +151,57 @@ export default function VoedingsplannenPage() {
       <div className="max-w-6xl mx-auto">
         {/* Header Section */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-4">Voedingsplannen</h1>
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-3xl font-bold text-white">Voedingsplannen</h1>
+            {!userProfile && (
+              <button
+                onClick={() => setShowIntake(true)}
+                className="px-6 py-3 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold flex items-center space-x-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                <span>Persoonlijk Profiel</span>
+              </button>
+            )}
+          </div>
+          
+          {userProfile ? (
+            <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-4 mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-[#8BAE5A] font-semibold mb-1">Jouw Voedingsprofiel</h3>
+                  <p className="text-gray-300 text-sm">
+                    {userProfile.targetCalories} kcal/dag • {userProfile.targetProtein}g eiwit • {userProfile.targetCarbs}g koolhydraten • {userProfile.targetFat}g vet
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowIntake(true)}
+                  className="text-[#8BAE5A] hover:text-[#B6C948] transition-colors text-sm"
+                >
+                  Wijzigen
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-4 mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-[#8BAE5A] font-semibold mb-1">Persoonlijk Voedingsprofiel</h3>
+                  <p className="text-gray-300 text-sm">
+                    Maak een persoonlijk profiel aan voor aangepaste voedingsplannen op basis van jouw leeftijd, lengte, gewicht en doelen.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowIntake(true)}
+                  className="px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold text-sm"
+                >
+                  Profiel Aanmaken
+                </button>
+              </div>
+            </div>
+          )}
+          
           <p className="text-[#B6C948] text-lg">
             Ontdek onze wetenschappelijk onderbouwde voedingsplannen voor optimale prestaties en gezondheid.
           </p>
@@ -208,6 +289,14 @@ export default function VoedingsplannenPage() {
           </div>
         </div>
       </div>
+
+      {/* Nutrition Intake Modal */}
+      {showIntake && (
+        <NutritionIntake
+          onComplete={handleIntakeComplete}
+          onSkip={handleIntakeSkip}
+        />
+      )}
     </PageLayout>
   );
 }
