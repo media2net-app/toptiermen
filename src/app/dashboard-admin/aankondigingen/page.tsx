@@ -114,43 +114,8 @@ export default function AnnouncementsManagement() {
         const data = await announcementsResponse.value.json();
         setAnnouncements(data.announcements || []);
       } else {
-        console.log('Using mock announcements data');
-        // Fallback to mock data
-        const mockAnnouncements: Announcement[] = [
-          {
-            id: '1',
-            title: 'Lancering Brotherhood 2.0',
-            content: 'Ontdek de nieuwe Brotherhood features met verbeterde groepen en evenementen!',
-            category: 'Brotherhood',
-            categoryColor: '#FF6B6B',
-            categoryIcon: '🤝',
-            author: 'Admin',
-            status: 'published',
-            priority: 'high',
-            isPinned: true,
-            isFeatured: true,
-            viewCount: 1247,
-            createdAt: '2024-01-14T15:30:00',
-            updatedAt: '2024-01-14T15:30:00'
-          },
-          {
-            id: '2',
-            title: 'Gepland Onderhoud - 25 Januari',
-            content: 'Het platform zal op 25 januari van 02:00-04:00 uur niet beschikbaar zijn voor gepland onderhoud.',
-            category: 'Algemeen',
-            categoryColor: '#8BAE5A',
-            categoryIcon: '📢',
-            author: 'Admin',
-            status: 'draft',
-            priority: 'normal',
-            isPinned: false,
-            isFeatured: false,
-            viewCount: 0,
-            createdAt: '2024-01-20T09:15:00',
-            updatedAt: '2024-01-20T09:15:00'
-          }
-        ];
-        setAnnouncements(mockAnnouncements);
+        console.error('Failed to fetch announcements:', announcementsResponse.status === 'rejected' ? announcementsResponse.reason : 'API error');
+        setAnnouncements([]);
       }
 
       // Handle categories
@@ -158,31 +123,8 @@ export default function AnnouncementsManagement() {
         const data = await categoriesResponse.value.json();
         setCategories(data.categories || []);
       } else {
-        console.log('Using mock categories data');
-        // Fallback to mock data
-        const mockCategories: AnnouncementCategory[] = [
-          {
-            id: '1',
-            name: 'Algemeen',
-            description: 'Algemene aankondigingen voor alle leden',
-            color: '#8BAE5A',
-            icon: '📢',
-            announcementCount: 2,
-            createdAt: '2024-01-01T00:00:00',
-            updatedAt: '2024-01-01T00:00:00'
-          },
-          {
-            id: '2',
-            name: 'Brotherhood',
-            description: 'Brotherhood-specifieke updates',
-            color: '#FF6B6B',
-            icon: '🤝',
-            announcementCount: 1,
-            createdAt: '2024-01-01T00:00:00',
-            updatedAt: '2024-01-01T00:00:00'
-          }
-        ];
-        setCategories(mockCategories);
+        console.error('Failed to fetch categories:', categoriesResponse.status === 'rejected' ? categoriesResponse.reason : 'API error');
+        setCategories([]);
       }
 
       // Handle stats
@@ -190,16 +132,15 @@ export default function AnnouncementsManagement() {
         const data = await statsResponse.value.json();
         setStats(data.stats);
       } else {
-        console.log('Using mock stats data');
-        // Fallback to mock data
+        console.error('Failed to fetch stats:', statsResponse.status === 'rejected' ? statsResponse.reason : 'API error');
         setStats({
-          totalAnnouncements: 2,
-          publishedAnnouncements: 1,
-          draftAnnouncements: 1,
-          pinnedAnnouncements: 1,
-          totalViews: 1247,
-          totalCategories: 2,
-          recentAnnouncements: 2
+          totalAnnouncements: 0,
+          publishedAnnouncements: 0,
+          draftAnnouncements: 0,
+          pinnedAnnouncements: 0,
+          totalViews: 0,
+          totalCategories: 0,
+          recentAnnouncements: 0
         });
       }
 
@@ -289,34 +230,7 @@ export default function AnnouncementsManagement() {
       setEditingAnnouncement(null);
     } catch (error) {
       console.error('Error saving announcement:', error);
-      // Fallback to local state update
-      const newAnnouncement: Announcement = {
-        id: editingAnnouncement?.id || Date.now().toString(),
-        title: formData.title,
-        content: formData.content,
-        category: categories.find(c => c.id === formData.categoryId)?.name || 'Algemeen',
-        categoryColor: categories.find(c => c.id === formData.categoryId)?.color || '#8BAE5A',
-        categoryIcon: categories.find(c => c.id === formData.categoryId)?.icon || '📢',
-        author: 'Admin',
-        status: action === 'draft' ? 'draft' : 'published',
-        priority: formData.priority,
-        isPinned: formData.isPinned,
-        isFeatured: formData.isFeatured,
-        publishAt: formData.publishAt || undefined,
-        expiresAt: formData.expiresAt || undefined,
-        viewCount: editingAnnouncement?.viewCount || 0,
-        createdAt: editingAnnouncement?.createdAt || new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-
-      if (editingAnnouncement) {
-        setAnnouncements(prev => prev.map(a => a.id === editingAnnouncement.id ? newAnnouncement : a));
-      } else {
-        setAnnouncements(prev => [newAnnouncement, ...prev]);
-      }
-
-      setShowForm(false);
-      setEditingAnnouncement(null);
+      toast.error('Er is een fout opgetreden bij het opslaan van de aankondiging');
     }
   };
 
@@ -331,8 +245,7 @@ export default function AnnouncementsManagement() {
       }
     } catch (error) {
       console.error('Error deleting announcement:', error);
-      // Fallback to local state update
-      setAnnouncements(prev => prev.filter(a => a.id !== id));
+      toast.error('Er is een fout opgetreden bij het verwijderen van de aankondiging');
     }
   };
 

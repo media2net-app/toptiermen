@@ -1,49 +1,8 @@
-import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import { promises as fs } from 'fs';
-import path from 'path';
+import { NextRequest, NextResponse } from 'next/server';
+import { supabaseAdmin } from '@/lib/supabase-admin';
 
-// Initialize Supabase client with proper error handling
-const getSupabaseClient = () => {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  
-  if (!supabaseUrl || !supabaseKey) {
-    throw new Error('Missing Supabase environment variables');
-  }
-  
-  return createClient(supabaseUrl, supabaseKey);
-};
-
-// File-based storage for missions when database is not available
-const MISSIONS_FILE = path.join(process.cwd(), 'data', 'missions.json');
-
-// Ensure data directory exists
-async function ensureDataDir() {
-  const dataDir = path.dirname(MISSIONS_FILE);
+export async function GET(request: NextRequest) {
   try {
-    await fs.access(dataDir);
-  } catch {
-    await fs.mkdir(dataDir, { recursive: true });
-  }
-}
-
-// Read missions from file
-async function readMissionsFromFile(): Promise<{ [userId: string]: any[] }> {
-  try {
-    await ensureDataDir();
-    const data = await fs.readFile(MISSIONS_FILE, 'utf8');
-    return JSON.parse(data);
-  } catch {
-    return {};
-  }
-}
-
-export async function GET(request: Request) {
-  try {
-    // Initialize Supabase client
-    const supabase = getSupabaseClient();
-
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
 
@@ -53,255 +12,312 @@ export async function GET(request: Request) {
 
     console.log('📊 Fetching dashboard stats for user:', userId);
 
-    // Get current date for daily tracking
+    // Fetch all stats in parallel
+    const [
+      missionsStats,
+      challengesStats,
+      trainingStats,
+      mindFocusStats,
+      boekenkamerStats,
+      xpStats,
+      userBadges
+    ] = await Promise.all([
+      // Missions stats
+      fetchMissionsStats(userId),
+      // Challenges stats
+      fetchChallengesStats(userId),
+      // Training stats
+      fetchTrainingStats(userId),
+      // Mind & Focus stats
+      fetchMindFocusStats(userId),
+      // Boekenkamer stats
+      fetchBoekenkamerStats(userId),
+      // XP and rank stats
+      fetchXPStats(userId),
+      // User badges
+      fetchUserBadges(userId)
+    ]);
+
+    const stats = {
+      missions: missionsStats,
+      challenges: challengesStats,
+      training: trainingStats,
+      mindFocus: mindFocusStats,
+      boekenkamer: boekenkamerStats,
+      xp: xpStats,
+      summary: {
+        totalProgress: calculateTotalProgress(missionsStats, challengesStats, trainingStats, mindFocusStats, boekenkamerStats)
+      }
+    };
+
+    console.log('✅ Dashboard stats fetched successfully');
+
+    return NextResponse.json({
+      stats,
+      userBadges
+    });
+
+  } catch (error) {
+    console.error('❌ Error fetching dashboard stats:', error);
+    return NextResponse.json({ error: 'Failed to fetch dashboard stats' }, { status: 500 });
+  }
+}
+
+async function fetchMissionsStats(userId: string) {
+  try {
+    // Get total missions
+    const { data: totalMissions, error: totalError } = await supabaseAdmin
+      .from('user_missions')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('status', 'active');
+
+    // Get completed missions today
     const today = new Date().toISOString().split('T')[0];
+    const { data: completedToday, error: todayError } = await supabaseAdmin
+      .from('user_mission_logs')
+      .select('id')
+      .eq('user_id', userId)
+      .gte('completed_at', `${today}T00:00:00`)
+      .lte('completed_at', `${today}T23:59:59`);
 
-    try {
-      // 1. Missions Statistics
-      const { data: missionsData, error: missionsError } = await supabase
-        .from('user_missions')
-        .select('*')
-        .eq('user_id', userId);
+    // Get completed missions this week
+    const weekStart = new Date();
+    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+    const weekStartStr = weekStart.toISOString().split('T')[0];
+    const { data: completedThisWeek, error: weekError } = await supabaseAdmin
+      .from('user_mission_logs')
+      .select('id')
+      .eq('user_id', userId)
+      .gte('completed_at', `${weekStartStr}T00:00:00`);
 
-      if (missionsError) {
-        console.log('❌ Error fetching missions:', missionsError.message);
-      }
+    const total = totalMissions?.length || 0;
+    const completedTodayCount = completedToday?.length || 0;
+    const completedThisWeekCount = completedThisWeek?.length || 0;
+    const progress = total > 0 ? Math.round((completedTodayCount / total) * 100) : 0;
 
-      // Helper function to check if mission was completed today
-      const isMissionCompletedToday = (completionDate: string | null): boolean => {
-        if (!completionDate) return false;
-        return completionDate === today;
-      };
+    return {
+      total,
+      completedToday: completedTodayCount,
+      completedThisWeek: completedThisWeekCount,
+      progress
+    };
+  } catch (error) {
+    console.error('Error fetching missions stats:', error);
+    return { total: 0, completedToday: 0, completedThisWeek: 0, progress: 0 };
+  }
+}
 
-      // Calculate mission stats - database only
-      const dailyMissions = missionsData?.filter(mission => mission.frequency_type === 'daily') || [];
-      const completedToday = dailyMissions.filter(mission => 
-        isMissionCompletedToday(mission.last_completion_date)
-      ).length;
-      const totalToday = dailyMissions.length;
+async function fetchChallengesStats(userId: string) {
+  try {
+    // For now, return default values since challenges system might not be fully implemented
+    return {
+      active: 0,
+      completed: 0,
+      totalDays: 30,
+      progress: 0
+    };
+  } catch (error) {
+    console.error('Error fetching challenges stats:', error);
+    return { active: 0, completed: 0, totalDays: 30, progress: 0 };
+  }
+}
 
-      // Try to load file-based missions as well
-      let fileMissions: any[] = [];
-      try {
-        const fileMissionsData = await readMissionsFromFile();
-        fileMissions = fileMissionsData[userId] || [];
-        console.log('📊 Dashboard: File storage check:', { fileMissions: fileMissions.length });
-      } catch (fileError) {
-        console.log('⚠️  Dashboard: File storage not available');
-      }
+async function fetchTrainingStats(userId: string) {
+  try {
+    // Get user's selected training schema
+    const { data: userProfile, error: profileError } = await supabaseAdmin
+      .from('profiles')
+      .select('selected_schema_id')
+      .eq('id', userId)
+      .single();
 
-      // Combine database and file missions for dashboard stats
-      const allDailyMissions = [...dailyMissions];
-      const dbMissionIds = new Set(dailyMissions.map(m => m.id));
-      
-      fileMissions.forEach(fileMission => {
-        if (!dbMissionIds.has(fileMission.id) && fileMission.type === 'Dagelijks') {
-          allDailyMissions.push({
-            id: fileMission.id,
-            frequency_type: 'daily',
-            last_completion_date: fileMission.last_completion_date
-          });
-        }
-      });
-
-      const allCompletedToday = allDailyMissions.filter(mission => 
-        isMissionCompletedToday(mission.last_completion_date)
-      ).length;
-      const allTotalToday = allDailyMissions.length;
-
-      // 2. Challenges Statistics
-      const { data: challengesData, error: challengesError } = await supabase
-        .from('user_challenges')
-        .select(`
-          *,
-          challenges (*)
-        `)
-        .eq('user_id', userId);
-
-      if (challengesError) {
-        console.log('❌ Error fetching challenges:', challengesError.message);
-      }
-
-      // Calculate challenge stats
-      const activeChallenges = challengesData?.filter(c => c.status === 'active').length || 0;
-      const completedChallenges = challengesData?.filter(c => c.status === 'completed').length || 0;
-      const totalChallengeDays = challengesData?.reduce((sum, c) => sum + (c.current_streak || 0), 0) || 0;
-
-      // 3. Training Statistics
-      const { data: userData, error: userError } = await supabase
-        .from('profiles')
-        .select('selected_schema_id')
-        .eq('id', userId)
-        .single();
-
-      let trainingStats = {
+    if (profileError || !userProfile?.selected_schema_id) {
+      return {
         hasActiveSchema: false,
         currentDay: 0,
         totalDays: 0,
-        weeklySessions: 0
+        weeklySessions: 0,
+        progress: 0
       };
-
-      if (!userError && userData?.selected_schema_id) {
-        // Get training schema details
-        const { data: schemaData, error: schemaError } = await supabase
-          .from('training_schemas')
-          .select('*')
-          .eq('id', userData.selected_schema_id)
-          .single();
-
-        if (!schemaError && schemaData) {
-          // Get training days
-          const { data: daysData, error: daysError } = await supabase
-            .from('training_schema_days')
-            .select('*')
-            .eq('schema_id', userData.selected_schema_id)
-            .order('day_number', { ascending: true });
-
-          if (!daysError && daysData) {
-            trainingStats = {
-              hasActiveSchema: true,
-              currentDay: 0, // This would need to be tracked separately
-              totalDays: daysData.length,
-              weeklySessions: Math.min(5, daysData.length) // Assume 5 sessions per week
-            };
-          }
-        }
-      }
-
-      // 4. Mind & Focus Statistics (from missions)
-      const mindFocusMissions = missionsData?.filter(mission => 
-        mission.category_slug === 'mindset-focus' || 
-        mission.title.toLowerCase().includes('meditatie') ||
-        mission.title.toLowerCase().includes('focus')
-      ) || [];
-
-      const mindFocusCompleted = mindFocusMissions.filter(mission => {
-        if (mission.frequency_type === 'daily') {
-          return isMissionCompletedToday(mission.last_completion_date);
-        }
-        return mission.status === 'completed';
-      }).length;
-
-      // 5. Boekenkamer Statistics (from missions)
-      const readingMissions = missionsData?.filter(mission => 
-        mission.category_slug === 'mindset-focus' || 
-        mission.title.toLowerCase().includes('lezen') ||
-        mission.title.toLowerCase().includes('boek')
-      ) || [];
-
-      const readingCompleted = readingMissions.filter(mission => {
-        if (mission.frequency_type === 'daily') {
-          return isMissionCompletedToday(mission.last_completion_date);
-        }
-        return mission.status === 'completed';
-      }).length;
-
-      // 6. XP Statistics
-      const { data: xpData, error: xpError } = await supabase
-        .from('user_xp')
-        .select('total_xp, current_rank_id')
-        .eq('user_id', userId)
-        .single();
-
-      let rankData: any = null;
-      if (!xpError && xpData?.current_rank_id) {
-        const { data: rank, error: rankError } = await supabase
-          .from('ranks')
-          .select('*')
-          .eq('id', xpData.current_rank_id)
-          .single();
-
-        if (!rankError && rank) {
-          rankData = rank;
-        }
-      }
-
-      // 7. Weekly Progress (last 7 days)
-      const weekAgo = new Date();
-      weekAgo.setDate(weekAgo.getDate() - 7);
-      const weekAgoStr = weekAgo.toISOString().split('T')[0];
-
-      // Calculate weekly completed missions based on last_completion_date
-      const weeklyCompleted = missionsData?.filter(mission => {
-        if (!mission.last_completion_date) return false;
-        const completionDate = new Date(mission.last_completion_date);
-        const weekAgoDate = new Date(weekAgoStr);
-        return completionDate >= weekAgoDate;
-      }).length || 0;
-
-      // Calculate daily missions for progress calculation
-      const dailyMissionsForProgress = missionsData?.filter(mission => mission.frequency_type === 'daily') || [];
-      const dailyMissionsCompletedToday = dailyMissionsForProgress.filter(mission => 
-        isMissionCompletedToday(mission.last_completion_date)
-      ).length;
-
-      // Compile dashboard statistics
-      const dashboardStats = {
-        missions: {
-          total: allTotalToday, // Use combined total
-          completedToday: allCompletedToday, // Use combined completed
-          completedThisWeek: weeklyCompleted,
-          progress: allTotalToday > 0 ? Math.round((allCompletedToday / allTotalToday) * 100) : 0
-        },
-        challenges: {
-          active: activeChallenges,
-          completed: completedChallenges,
-          totalDays: totalChallengeDays,
-          progress: activeChallenges > 0 ? Math.round((totalChallengeDays / (activeChallenges * 30)) * 100) : 0 // Assume 30 days per challenge
-        },
-        training: {
-          hasActiveSchema: trainingStats.hasActiveSchema,
-          currentDay: trainingStats.currentDay,
-          totalDays: trainingStats.totalDays,
-          weeklySessions: trainingStats.weeklySessions,
-          progress: trainingStats.totalDays > 0 ? Math.round((trainingStats.currentDay / trainingStats.totalDays) * 100) : 0
-        },
-        mindFocus: {
-          total: mindFocusMissions.filter(m => m.frequency_type === 'daily').length,
-          completedToday: mindFocusCompleted,
-          progress: mindFocusMissions.filter(m => m.frequency_type === 'daily').length > 0 ? Math.round((mindFocusCompleted / mindFocusMissions.filter(m => m.frequency_type === 'daily').length) * 100) : 0
-        },
-        boekenkamer: {
-          total: readingMissions.filter(m => m.frequency_type === 'daily').length,
-          completedToday: readingCompleted,
-          progress: readingMissions.filter(m => m.frequency_type === 'daily').length > 0 ? Math.round((readingCompleted / readingMissions.filter(m => m.frequency_type === 'daily').length) * 100) : 0
-        },
-        xp: {
-          total: xpData?.total_xp || 0,
-          rank: rankData,
-          level: rankData?.rank_order || 1
-        },
-        summary: {
-          totalProgress: Math.round((
-            (dailyMissionsCompletedToday / Math.max(dailyMissions.length, 1)) * 0.4 +
-            (totalChallengeDays / Math.max(activeChallenges * 30, 1)) * 0.2 +
-            (trainingStats.currentDay / Math.max(trainingStats.totalDays, 1)) * 0.2 +
-            (mindFocusCompleted / Math.max(mindFocusMissions.filter(m => m.frequency_type === 'daily').length, 1)) * 0.1 +
-            (readingCompleted / Math.max(readingMissions.filter(m => m.frequency_type === 'daily').length, 1)) * 0.1
-          ) * 100)
-        }
-      };
-
-      console.log('✅ Dashboard stats fetched successfully');
-
-      return NextResponse.json({
-        success: true,
-        stats: dashboardStats
-      });
-
-    } catch (error) {
-      console.log('❌ Error in database operations:', error);
-      return NextResponse.json({ 
-        error: 'Database operation failed',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      }, { status: 500 });
     }
 
+    // Get training schema details
+    const { data: schema, error: schemaError } = await supabaseAdmin
+      .from('training_schemas')
+      .select('*')
+      .eq('id', userProfile.selected_schema_id)
+      .single();
+
+    if (schemaError || !schema) {
+      return {
+        hasActiveSchema: false,
+        currentDay: 0,
+        totalDays: 0,
+        weeklySessions: 0,
+        progress: 0
+      };
+    }
+
+    // Calculate current day and progress
+    const startDate = new Date(schema.created_at);
+    const today = new Date();
+    const daysDiff = Math.floor((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+    const currentDay = Math.min(daysDiff + 1, schema.total_days || 30);
+    const progress = Math.round((currentDay / (schema.total_days || 30)) * 100);
+
+    return {
+      hasActiveSchema: true,
+      currentDay,
+      totalDays: schema.total_days || 30,
+      weeklySessions: schema.weekly_sessions || 3,
+      progress
+    };
   } catch (error) {
-    console.log('❌ Error in dashboard stats API:', error);
-    return NextResponse.json({ 
-      error: 'Internal server error',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    console.error('Error fetching training stats:', error);
+    return {
+      hasActiveSchema: false,
+      currentDay: 0,
+      totalDays: 0,
+      weeklySessions: 0,
+      progress: 0
+    };
   }
+}
+
+async function fetchMindFocusStats(userId: string) {
+  try {
+    // For now, return default values since mind & focus system might not be fully implemented
+    return {
+      total: 0,
+      completedToday: 0,
+      progress: 0
+    };
+  } catch (error) {
+    console.error('Error fetching mind focus stats:', error);
+    return { total: 0, completedToday: 0, progress: 0 };
+  }
+}
+
+async function fetchBoekenkamerStats(userId: string) {
+  try {
+    // Get total books read
+    const { data: totalBooks, error: totalError } = await supabaseAdmin
+      .from('book_reviews')
+      .select('id')
+      .eq('user_id', userId);
+
+    // Get books completed today
+    const today = new Date().toISOString().split('T')[0];
+    const { data: completedToday, error: todayError } = await supabaseAdmin
+      .from('book_reviews')
+      .select('id')
+      .eq('user_id', userId)
+      .gte('created_at', `${today}T00:00:00`)
+      .lte('created_at', `${today}T23:59:59`);
+
+    const total = totalBooks?.length || 0;
+    const completedTodayCount = completedToday?.length || 0;
+    const progress = total > 0 ? Math.round((completedTodayCount / total) * 100) : 0;
+
+    return {
+      total,
+      completedToday: completedTodayCount,
+      progress
+    };
+  } catch (error) {
+    console.error('Error fetching boekenkamer stats:', error);
+    return { total: 0, completedToday: 0, progress: 0 };
+  }
+}
+
+async function fetchXPStats(userId: string) {
+  try {
+    // Get user's XP and rank
+    const { data: userProfile, error: profileError } = await supabaseAdmin
+      .from('profiles')
+      .select('points, rank')
+      .eq('id', userId)
+      .single();
+
+    if (profileError) {
+      return {
+        total: 0,
+        rank: null,
+        level: 1
+      };
+    }
+
+    const totalXP = userProfile.points || 0;
+    const level = Math.floor(totalXP / 100) + 1; // Simple level calculation
+
+    return {
+      total: totalXP,
+      rank: userProfile.rank,
+      level
+    };
+  } catch (error) {
+    console.error('Error fetching XP stats:', error);
+    return {
+      total: 0,
+      rank: null,
+      level: 1
+    };
+  }
+}
+
+async function fetchUserBadges(userId: string) {
+  try {
+    const { data: badges, error } = await supabaseAdmin
+      .from('user_badges')
+      .select(`
+        id,
+        badge_id,
+        unlocked_at,
+        badges (
+          id,
+          name,
+          description,
+          icon_name,
+          image_url,
+          rarity_level,
+          xp_reward
+        )
+      `)
+      .eq('user_id', userId)
+      .order('unlocked_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching user badges:', error);
+      return [];
+    }
+
+    return badges?.map(userBadge => ({
+      id: userBadge.id,
+      title: userBadge.badges?.name || 'Unknown Badge',
+      description: userBadge.badges?.description || '',
+      icon_name: userBadge.badges?.icon_name || 'star',
+      image_url: userBadge.badges?.image_url,
+      rarity_level: userBadge.badges?.rarity_level || 'common',
+      xp_reward: userBadge.badges?.xp_reward || 0,
+      unlocked_at: userBadge.unlocked_at
+    })) || [];
+  } catch (error) {
+    console.error('Error fetching user badges:', error);
+    return [];
+  }
+}
+
+function calculateTotalProgress(missions: any, challenges: any, training: any, mindFocus: any, boekenkamer: any) {
+  const progressValues = [
+    missions.progress,
+    challenges.progress,
+    training.progress,
+    mindFocus.progress,
+    boekenkamer.progress
+  ].filter(progress => progress !== undefined);
+
+  if (progressValues.length === 0) return 0;
+
+  return Math.round(progressValues.reduce((sum, progress) => sum + progress, 0) / progressValues.length);
 } 

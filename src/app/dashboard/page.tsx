@@ -73,33 +73,61 @@ export default function Dashboard() {
 
   const { user } = useSupabaseAuth();
 
-  // 2.0.1: Simplified data fetching - DISABLED to prevent crashes
+  // 2.0.1: Fetch real dashboard data from database
   useEffect(() => {
-    // Set mock data to prevent crashes
-    setStats({
-      missions: { total: 5, completedToday: 0, completedThisWeek: 0, progress: 0 },
-      challenges: { active: 5, completed: 0, totalDays: 30, progress: 0 },
-      training: { hasActiveSchema: true, currentDay: 1, totalDays: 30, weeklySessions: 3, progress: 0 },
-      mindFocus: { total: 0, completedToday: 0, progress: 0 },
-      boekenkamer: { total: 0, completedToday: 0, progress: 0 },
-      xp: { total: 0, rank: null, level: 1 },
-      summary: { totalProgress: 0 }
-    });
-    
-    setUserBadges([
-      {
-        id: '1',
-        title: 'NO EXCUSES',
-        description: 'First badge',
-        icon_name: 'fist',
-        rarity_level: 'common',
-        xp_reward: 10,
-        unlocked_at: new Date().toISOString()
+    const fetchDashboardData = async () => {
+      if (!user?.id) return;
+
+      try {
+        setLoading(true);
+        
+        const response = await fetch(`/api/dashboard-stats?userId=${user.id}&t=${Date.now()}`, {
+          cache: 'no-cache',
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setStats(data.stats);
+          setUserBadges(data.userBadges || []);
+        } else {
+          console.error('Failed to fetch dashboard stats');
+          // Set minimal fallback data (not mock, just empty)
+          setStats({
+            missions: { total: 0, completedToday: 0, completedThisWeek: 0, progress: 0 },
+            challenges: { active: 0, completed: 0, totalDays: 0, progress: 0 },
+            training: { hasActiveSchema: false, currentDay: 0, totalDays: 0, weeklySessions: 0, progress: 0 },
+            mindFocus: { total: 0, completedToday: 0, progress: 0 },
+            boekenkamer: { total: 0, completedToday: 0, progress: 0 },
+            xp: { total: 0, rank: null, level: 1 },
+            summary: { totalProgress: 0 }
+          });
+          setUserBadges([]);
+        }
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+        // Set minimal fallback data (not mock, just empty)
+        setStats({
+          missions: { total: 0, completedToday: 0, completedThisWeek: 0, progress: 0 },
+          challenges: { active: 0, completed: 0, totalDays: 0, progress: 0 },
+          training: { hasActiveSchema: false, currentDay: 0, totalDays: 0, weeklySessions: 0, progress: 0 },
+          mindFocus: { total: 0, completedToday: 0, progress: 0 },
+          boekenkamer: { total: 0, completedToday: 0, progress: 0 },
+          xp: { total: 0, rank: null, level: 1 },
+          summary: { totalProgress: 0 }
+        });
+        setUserBadges([]);
+      } finally {
+        setLoading(false);
       }
-    ]);
-    
-    setLoading(false);
-  }, []);
+    };
+
+    fetchDashboardData();
+  }, [user?.id]);
 
   // Simple fade in effect
   useEffect(() => {
