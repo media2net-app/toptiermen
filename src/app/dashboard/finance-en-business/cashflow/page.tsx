@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import Breadcrumb, { createBreadcrumbs } from '@/components/Breadcrumb';
 
 function CashflowPageContent() {
   const { user } = useSupabaseAuth();
@@ -46,6 +47,17 @@ function CashflowPageContent() {
 
   return (
     <div className="p-8 max-w-4xl mx-auto">
+      {/* Breadcrumb */}
+      <div className="mb-6">
+        <Breadcrumb 
+          items={createBreadcrumbs(
+            'Cashflow Overzicht',
+            'Finance & Business',
+            '/dashboard/finance-en-business'
+          )} 
+        />
+      </div>
+      
       <h1 className="text-3xl font-bold text-[#B6C948] mb-4">Cashflow Overzicht</h1>
       <p className="text-[#8BAE5A] mb-8">Jouw maandelijkse inkomsten en uitgaven in één oogopslag</p>
       
