@@ -1,13 +1,47 @@
 "use client";
 
-import React from 'react';
-import { useFinance, FinanceProvider } from '../FinanceContext';
+import React, { useState, useEffect } from 'react';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
 function CashflowPageContent() {
-  const { finance } = useFinance();
-  const income = finance.income;
-  const savings = finance.savings;
-  const expenses = income - savings; // Berekening: inkomen - spaargeld = uitgaven
+  const { user } = useSupabaseAuth();
+  const [financialProfile, setFinancialProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchFinancialProfile = async () => {
+      if (!user?.id) return;
+
+      try {
+        const response = await fetch(`/api/finance/profile?userId=${user.id}`);
+        if (response.ok) {
+          const data = await response.json();
+          setFinancialProfile(data.profile);
+        }
+      } catch (error) {
+        console.error('Error fetching financial profile:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFinancialProfile();
+  }, [user?.id]);
+
+  if (loading) {
+    return (
+      <div className="p-8 max-w-4xl mx-auto">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#8BAE5A] mx-auto"></div>
+          <p className="text-white mt-4 text-lg">Cashflow laden...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const income = financialProfile?.monthly_income || 0;
+  const expenses = financialProfile?.monthly_expenses || 0;
+  const savings = income - expenses;
   const savingsRate = income > 0 ? Math.round((savings / income) * 100) : 0;
 
   return (
