@@ -136,7 +136,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     console.log('📥 Received request body:', body);
     
-    const { userId, step, action, mainGoal, selectedMissions, selectedTrainingSchema, selectedNutritionPlan, selectedChallenge, forumIntroduction } = body;
+    const { userId, step, action, mainGoal, selectedMissions, selectedTrainingSchema, selectedNutritionPlan, selectedChallenge, forumIntroduction, test_video_watched } = body;
     console.log('🔍 Extracted values:', { userId, step, action, mainGoal, selectedMissions, selectedTrainingSchema, selectedNutritionPlan, selectedChallenge, forumIntroduction });
 
     if (!userId || step === undefined || !action) {
@@ -281,6 +281,9 @@ export async function POST(request: Request) {
       updateData.onboarding_completed = true;
       updateData.completed_at = new Date().toISOString();
       updateData.current_step = 6;
+    } else if (action === 'update_test_video_watched') {
+      updateData.test_video_watched = test_video_watched;
+      updateData.current_step = 1;
     }
 
     // Get the current record to update
