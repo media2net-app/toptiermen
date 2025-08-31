@@ -593,9 +593,13 @@ export default function AcademyPage() {
                         {!isLocked && (
                           <Link
                             href={`/dashboard/academy/${module.id}/${getFirstLesson(module.id)?.id || ''}`}
-                            className="px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold"
+                            className={`px-4 py-2 rounded-lg transition-colors font-semibold ${
+                              progress === 100 
+                                ? 'bg-[#B6C948] text-[#181F17] hover:bg-[#C6D958]' 
+                                : 'bg-[#8BAE5A] text-[#181F17] hover:bg-[#B6C948]'
+                            }`}
                           >
-                            Start Module
+                            {progress === 100 ? 'Bekijk opnieuw' : 'Start Module'}
                           </Link>
                         )}
                         {moduleLessons.length > 0 && (
