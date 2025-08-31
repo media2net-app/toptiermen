@@ -16,7 +16,7 @@ import BankConnectionModal from '@/app/components/BankConnectionModal';
 import Link from 'next/link';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { FinanceProvider, useFinance } from './FinanceContext';
-import { ArrowRightIcon } from '@heroicons/react/24/outline';
+import { ArrowRightIcon, PencilIcon } from '@heroicons/react/24/outline';
 import ZeroBasedBudget from './components/ZeroBasedBudget';
 import DebtSnowball from './components/DebtSnowball';
 import CompoundInterest from './components/CompoundInterest';
@@ -211,8 +211,12 @@ function FinanceDashboardContent() {
   const { finance } = useFinance();
   const [activeTab, setActiveTab] = useState<'overview' | 'planning'>('overview');
   const [financialProfile, setFinancialProfile] = useState<any>(null);
+  const [financialGoals, setFinancialGoals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasProfile, setHasProfile] = useState(false);
+  const [editingGoal, setEditingGoal] = useState<any>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [newCurrentAmount, setNewCurrentAmount] = useState('');
 
   // Fetch financial profile on component mount
   useEffect(() => {
@@ -225,6 +229,7 @@ function FinanceDashboardContent() {
           const data = await response.json();
           if (data.profile) {
             setFinancialProfile(data.profile);
+            setFinancialGoals(data.goals || []);
             setHasProfile(true);
           } else {
             setHasProfile(false);
@@ -242,6 +247,47 @@ function FinanceDashboardContent() {
 
     fetchFinancialProfile();
   }, [user?.id]);
+
+  const updateGoalProgress = async (goalId: string, currentAmount: number) => {
+    try {
+      const response = await fetch('/api/finance/profile', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          goalId,
+          currentAmount
+        }),
+      });
+
+      if (response.ok) {
+        // Refresh the goals data
+        const profileResponse = await fetch(`/api/finance/profile?userId=${user?.id}`);
+        if (profileResponse.ok) {
+          const data = await profileResponse.json();
+          setFinancialGoals(data.goals || []);
+        }
+        setShowEditModal(false);
+        setEditingGoal(null);
+        setNewCurrentAmount('');
+      }
+    } catch (error) {
+      console.error('Error updating goal progress:', error);
+    }
+  };
+
+  const handleEditGoal = (goal: any) => {
+    setEditingGoal(goal);
+    setNewCurrentAmount(goal.current_amount?.toString() || '0');
+    setShowEditModal(true);
+  };
+
+  const handleSaveGoalProgress = () => {
+    if (editingGoal && newCurrentAmount) {
+      updateGoalProgress(editingGoal.id, parseFloat(newCurrentAmount));
+    }
+  };
 
   // Use real data from profile if available, otherwise fallback to demo data
   const totalAssets = finance.assets.reduce((sum, a) => sum + a.value, 0);
@@ -390,6 +436,75 @@ function FinanceDashboardContent() {
             <div className="text-[#8BAE5A] text-sm">Hoe dicht zit je bij je doel?</div>
           </Link>
         </div>
+
+        {/* Financiële Doelen Sectie */}
+        {financialGoals.length > 0 && (
+          <div className="mt-8">
+            <h2 className="text-2xl font-bold text-[#B6C948] mb-6">Jouw Financiële Doelen</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {financialGoals.map((goal, index) => {
+                const targetDate = new Date(goal.target_date);
+                const today = new Date();
+                const daysRemaining = Math.ceil((targetDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                const progress = Math.min(100, Math.round((goal.current_amount || 0) / goal.target_amount * 100));
+                
+                return (
+                  <div key={index} className="bg-[#232D1A] rounded-2xl shadow-xl p-6 border border-[#3A4D23] hover:border-[#B6C948] transition-all">
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex-1">
+                        <h3 className="text-lg font-bold text-white">{goal.title}</h3>
+                        <span className="text-xs text-[#8BAE5A] bg-[#181F17] px-2 py-1 rounded-full">
+                          {goal.category}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => handleEditGoal(goal)}
+                        className="p-2 text-[#8BAE5A] hover:text-[#B6C948] hover:bg-[#181F17] rounded-lg transition-colors"
+                        title="Voortgang bijwerken"
+                      >
+                        <PencilIcon className="w-4 h-4" />
+                      </button>
+                    </div>
+                    
+                    <div className="mb-4">
+                      <div className="flex justify-between text-sm mb-2">
+                        <span className="text-[#8BAE5A]">Voortgang</span>
+                        <span className="text-white">{progress}%</span>
+                      </div>
+                      <div className="w-full h-2 bg-[#181F17] rounded-full">
+                        <div 
+                          className="h-2 rounded-full bg-gradient-to-r from-[#8BAE5A] to-[#B6C948]" 
+                          style={{ width: `${progress}%` }}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-[#8BAE5A]">Doelbedrag:</span>
+                        <span className="text-white font-semibold">€{goal.target_amount?.toLocaleString('nl-NL')}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-[#8BAE5A]">Huidig bedrag:</span>
+                        <span className="text-white">€{(goal.current_amount || 0).toLocaleString('nl-NL')}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-[#8BAE5A]">Doeldatum:</span>
+                        <span className="text-white">{targetDate.toLocaleDateString('nl-NL')}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-[#8BAE5A]">Dagen resterend:</span>
+                        <span className={`font-semibold ${daysRemaining < 0 ? 'text-red-400' : daysRemaining < 30 ? 'text-yellow-400' : 'text-green-400'}`}>
+                          {daysRemaining < 0 ? `${Math.abs(daysRemaining)} dagen over tijd` : `${daysRemaining} dagen`}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       )}
 
       {activeTab === 'planning' && (
@@ -409,6 +524,49 @@ function FinanceDashboardContent() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <CompoundInterest />
               <FIRECalculator />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Goal Progress Modal */}
+      {showEditModal && editingGoal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-6 max-w-md w-full mx-4">
+            <h3 className="text-xl font-bold text-white mb-4">
+              Voortgang bijwerken: {editingGoal.title}
+            </h3>
+            
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-[#8BAE5A] mb-2">
+                Huidig bedrag (€)
+              </label>
+              <input
+                type="number"
+                value={newCurrentAmount}
+                onChange={(e) => setNewCurrentAmount(e.target.value)}
+                placeholder="0"
+                className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded text-white"
+              />
+            </div>
+
+            <div className="flex space-x-3">
+              <button
+                onClick={() => {
+                  setShowEditModal(false);
+                  setEditingGoal(null);
+                  setNewCurrentAmount('');
+                }}
+                className="flex-1 px-4 py-2 bg-[#181F17] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors"
+              >
+                Annuleren
+              </button>
+              <button
+                onClick={handleSaveGoalProgress}
+                className="flex-1 px-4 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold"
+              >
+                Opslaan
+              </button>
             </div>
           </div>
         </div>

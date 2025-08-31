@@ -126,3 +126,38 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
+
+export async function PATCH(request: NextRequest) {
+  try {
+    const { goalId, currentAmount } = await request.json();
+
+    if (!goalId || currentAmount === undefined) {
+      return NextResponse.json({ error: 'Goal ID and current amount are required' }, { status: 400 });
+    }
+
+    // Update the goal's current amount
+    const { data: updatedGoal, error: updateError } = await supabaseAdmin
+      .from('financial_goals')
+      .update({
+        current_amount: currentAmount,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', goalId)
+      .select()
+      .single();
+
+    if (updateError) {
+      console.error('Error updating goal progress:', updateError);
+      return NextResponse.json({ error: 'Failed to update goal progress' }, { status: 500 });
+    }
+
+    return NextResponse.json({ 
+      success: true, 
+      goal: updatedGoal 
+    });
+
+  } catch (error) {
+    console.error('Error in finance profile PATCH API:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
