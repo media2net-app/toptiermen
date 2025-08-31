@@ -4,7 +4,7 @@ import './globals.css';
 import { SupabaseAuthProvider } from '@/contexts/SupabaseAuthContext';
 // import { V2StateProvider } from '@/contexts/V2StateContext';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { CacheBuster } from '@/components/CacheBuster';
+// import { CacheBuster } from '@/components/CacheBuster'; - DISABLED TO PREVENT LOGOUT
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -83,7 +83,7 @@ export default function RootLayout({
     <html lang="nl">
       <body className={inter.className}>
         <ErrorBoundary>
-                           <CacheBuster version="2.0.3" forceRefresh={true} />
+          {/* <CacheBuster version="2.0.3" forceRefresh={true} /> - DISABLED TO PREVENT LOGOUT */}
           {/* <V2StateProvider> */}
             <SupabaseAuthProvider>
               {children}
