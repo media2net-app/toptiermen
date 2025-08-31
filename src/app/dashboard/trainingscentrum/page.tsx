@@ -833,7 +833,7 @@ export default function TrainingscentrumPage() {
                         setWorkoutSchema({
                           id: schema.id,
                           name: schema.name,
-                          frequency: trainingPreferences.frequency,
+                          frequency: schemaWorkoutData?.frequency || trainingPreferences.frequency,
                           style: schema.category === 'Gym' ? 'gym' : 'bodyweight',
                           description: schema.description,
                           days: schemaWorkoutData?.days || [],
