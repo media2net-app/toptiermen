@@ -22,6 +22,7 @@ import DebtSnowball from './components/DebtSnowball';
 import Breadcrumb, { createBreadcrumbs } from '@/components/Breadcrumb';
 import CompoundInterest from './components/CompoundInterest';
 import FIRECalculator from './components/FIRECalculator';
+import PageLayout from '@/components/PageLayout';
 import { useRouter } from 'next/navigation';
 
 ChartJS.register(
@@ -512,17 +513,10 @@ function FinanceDashboardContent() {
   }
 
   return (
-    <div className="p-6 md:p-12">
-      {/* Breadcrumb */}
-      <div className="mb-6">
-        <Breadcrumb items={createBreadcrumbs('Finance & Business')} />
-      </div>
-      
-      <div className="flex justify-between items-start mb-8">
-        <div>
-          <h1 className="text-3xl md:text-4xl font-bold text-[#B6C948] mb-2 drop-shadow-lg">Finance & Business</h1>
-          <p className="text-[#8BAE5A] text-lg">Jouw financiële gezondheid en planning in één oogopslag</p>
-        </div>
+    <PageLayout
+      title="Finance & Business"
+      subtitle="Jouw financiële gezondheid en planning in één oogopslag"
+      actionButtons={
         <div className="flex space-x-2">
           <button
             onClick={() => {
@@ -547,6 +541,11 @@ function FinanceDashboardContent() {
             <span className="hidden sm:inline">Reset</span>
           </button>
         </div>
+      }
+    >
+      {/* Breadcrumb */}
+      <div className="mb-6">
+        <Breadcrumb items={createBreadcrumbs('Finance & Business')} />
       </div>
       
       {/* Tab Navigation */}
@@ -1041,7 +1040,7 @@ function FinanceDashboardContent() {
           </div>
         </div>
       )}
-    </div>
+    </PageLayout>
   );
 }
 

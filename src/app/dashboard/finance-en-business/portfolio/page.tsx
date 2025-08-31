@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import Breadcrumb, { createBreadcrumbs } from '@/components/Breadcrumb';
+import PageLayout from '@/components/PageLayout';
 
 function PortfolioPageContent() {
   const { user } = useSupabaseAuth();
@@ -49,7 +50,10 @@ function PortfolioPageContent() {
   const passiveProgress = passiveIncomeGoal > 0 ? Math.min(100, Math.round((currentPassiveIncome / passiveIncomeGoal) * 100)) : 0;
 
   return (
-    <div className="p-8 max-w-6xl mx-auto">
+    <PageLayout
+      title="Investeringsportfolio"
+      subtitle="Jouw investeringen en passief inkomen in één overzicht"
+    >
       {/* Breadcrumb */}
       <div className="mb-6">
         <Breadcrumb 
@@ -60,9 +64,6 @@ function PortfolioPageContent() {
           )} 
         />
       </div>
-      
-      <h1 className="text-3xl font-bold text-[#B6C948] mb-4">Investeringsportfolio</h1>
-      <p className="text-[#8BAE5A] mb-8">Jouw investeringen en passief inkomen in één overzicht</p>
       
       {/* Portfolio Overzicht */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -133,7 +134,7 @@ function PortfolioPageContent() {
           Nog €{(passiveIncomeGoal - currentPassiveIncome).toLocaleString('nl-NL')} te gaan naar je doel
         </div>
       </div>
-    </div>
+    </PageLayout>
   );
 }
 
