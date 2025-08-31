@@ -235,7 +235,10 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
   // Enhanced sign in with remember me functionality
   const signIn = useCallback(async (email: string, password: string, rememberMe: boolean = false) => {
     try {
-      console.log('Starting sign in process...', { rememberMe });
+      console.log('🔐 Starting sign in process...', { email, rememberMe });
+      console.log('🌐 Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
+      console.log('🔑 Supabase Key present:', !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+      
       dispatch({ type: 'SET_LOADING', payload: true });
       dispatch({ type: 'SET_ERROR', payload: null });
 
@@ -249,13 +252,16 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       }
 
       // Direct sign in
+      console.log('🔄 Calling supabase.auth.signInWithPassword...');
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
+      console.log('📋 Supabase response:', { data: !!data, error: !!error });
+
       if (error) {
-        console.error('Sign in error:', error);
+        console.error('❌ Sign in error:', error);
         dispatch({ type: 'SET_ERROR', payload: error.message });
         return { success: false, error: error.message };
       }

@@ -90,6 +90,11 @@ function LoginPageContent() {
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     
+    console.log('🔍 Login attempt started...');
+    console.log('📧 Email:', email);
+    console.log('🔑 Password length:', password.length);
+    console.log('💾 Remember me:', rememberMe);
+    
     if (!email || !password) {
       setError("Vul alle velden in");
       return;
@@ -99,20 +104,22 @@ function LoginPageContent() {
     setError("");
     
     try {
+      console.log('🔄 Calling signIn function...');
       const result = await signIn(email, password, rememberMe);
+      console.log('📋 SignIn result:', result);
 
       if (!result.success) {
-        console.error('2.0.1: Sign in error:', result.error);
+        console.error('❌ Sign in error:', result.error);
         setError(result.error || "Ongeldige inloggegevens");
         setIsLoading(false);
         return;
       }
 
-      console.log('2.0.1: Login successful, redirecting...');
+      console.log('✅ Login successful, redirecting...');
       setRedirecting(true);
       
     } catch (error: any) {
-      console.error('2.0.1: Login error:', error);
+      console.error('❌ Login error:', error);
       setError(error.message || "Er is een fout opgetreden bij het inloggen");
       setIsLoading(false);
     }
