@@ -212,9 +212,5 @@ function CashflowPageContent() {
 }
 
 export default function CashflowPage() {
-  return (
-    <FinanceProvider>
-      <CashflowPageContent />
-    </FinanceProvider>
-  );
+  return <CashflowPageContent />;
 } 
