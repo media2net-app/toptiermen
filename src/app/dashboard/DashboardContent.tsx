@@ -30,7 +30,6 @@ import CacheIssueHelper from '@/components/CacheIssueHelper';
 
 // 2.0.1: Dashboard menu configuration
 const menu = [
-  { label: 'Planning Lancering', icon: FireIcon, href: '/dashboard/planning-lancering' },
   { label: 'Dashboard', icon: HomeIcon, href: '/dashboard' },
   { label: 'Onboarding', icon: CheckCircleIcon, href: '/dashboard/onboarding' },
   { label: 'Mijn Profiel', icon: UserCircleIcon, parent: 'Dashboard', href: '/dashboard/mijn-profiel', isSub: true },
@@ -100,8 +99,8 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
   return (
     <nav className="flex flex-col gap-2">
       {menu.map((item) => {
-        // Skip onboarding menu item if onboarding is completed
-        if (item.label === 'Onboarding' && onboardingStatus?.onboarding_completed) {
+        // Skip onboarding menu item if onboarding is completed or user is not in onboarding mode
+        if (item.label === 'Onboarding' && (onboardingStatus?.onboarding_completed || !isOnboarding || onboardingStatus?.onboarding_completed)) {
           return null;
         }
         
@@ -281,7 +280,7 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
     try {
       // setLoadingState('onboarding-check', true);
       
-      const response = await fetch(`/api/onboarding?userId=${user.id}&t=${Date.now()}`, {
+      const response = await fetch(`/api/onboarding?userId=${user.id}&t=${Date.now()}&v=2.0.1`, {
         cache: 'no-cache', // Prevent caching of onboarding status
         headers: {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
