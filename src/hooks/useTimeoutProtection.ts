@@ -11,10 +11,10 @@ export function useTimeoutProtection(timeoutMs: number = 10000) {
       setIsLoading(false);
     }, timeoutMs);
 
-    return () => clearTimeout(timeoutId);
+    return () => window.clearTimeout(timeoutId);
   }, [timeoutMs]);
 
-  const clearTimeout = () => {
+  const clearTimeoutState = () => {
     setIsLoading(false);
     setHasTimedOut(false);
   };
@@ -27,7 +27,7 @@ export function useTimeoutProtection(timeoutMs: number = 10000) {
   return { 
     hasTimedOut, 
     isLoading, 
-    clearTimeout, 
+    clearTimeout: clearTimeoutState, 
     resetTimeout 
   };
 }
