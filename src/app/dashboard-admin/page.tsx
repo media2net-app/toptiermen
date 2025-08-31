@@ -135,6 +135,13 @@ export default function AdminDashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState<'7d' | '30d' | '90d'>('7d');
   const { user } = useSupabaseAuth();
 
+  // Add hydration safety
+  const [isClient, setIsClient] = useState(false);
+  
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   // Redirect to Community Health (overview tab) as default page - DEPLOYMENT FORCE
   useEffect(() => {
     if (pathname === '/dashboard-admin' && !searchParams?.get('tab')) {
@@ -287,6 +294,18 @@ export default function AdminDashboard() {
     if (loading) return "Gegevens laden...";
     return value !== undefined ? value.toString() : fallback;
   };
+
+  // Prevent hydration issues by not rendering until client-side
+  if (!isClient) {
+    return (
+      <div className="min-h-screen bg-[#181F17] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
+          <p className="text-[#8BAE5A] text-lg">Admin Dashboard laden...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
