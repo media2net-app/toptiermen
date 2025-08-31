@@ -89,17 +89,26 @@ export default function Dashboard() {
     xp_reward: number;
     unlocked_at?: string;
   }>>([]);
+  const [timeoutReached, setTimeoutReached] = useState(false);
 
   const { user } = useSupabaseAuth();
 
-  // 2.0.1: Fetch real dashboard data from database
+  // 2.0.1: Fetch real dashboard data from database with timeout
   useEffect(() => {
     const fetchDashboardData = async () => {
       if (!user?.id) return;
 
       try {
         setLoading(true);
+        setTimeoutReached(false);
         
+        // Add timeout to prevent infinite loading
+        const timeoutId = setTimeout(() => {
+          console.warn('Dashboard API timeout - using fallback data');
+          setTimeoutReached(true);
+          setLoading(false);
+        }, 10000); // 10 second timeout
+
         const response = await fetch(`/api/dashboard-stats`, {
           method: 'POST',
           cache: 'no-cache',
@@ -114,12 +123,14 @@ export default function Dashboard() {
           })
         });
 
+        clearTimeout(timeoutId);
+
         if (response.ok) {
           const data = await response.json();
           setStats(data.stats);
           setUserBadges(data.userBadges || []);
         } else {
-          console.error('Failed to fetch dashboard stats');
+          console.error('Failed to fetch dashboard stats:', response.status, response.statusText);
           // Set minimal fallback data (not mock, just empty)
           setStats({
             missions: { total: 0, completedToday: 0, completedThisWeek: 0, progress: 0 },
@@ -146,7 +157,7 @@ export default function Dashboard() {
           boekenkamer: { total: 0, completedToday: 0, progress: 0 },
           finance: { netWorth: 0, monthlyIncome: 0, savings: 0, investments: 0, progress: 0 },
           brotherhood: { totalMembers: 0, activeMembers: 0, communityScore: 0, progress: 0 },
-                      academy: { totalCourses: 0, completedCourses: 0, learningProgress: 0, progress: 0 },
+          academy: { totalCourses: 0, completedCourses: 0, learningProgress: 0, progress: 0 },
           xp: { total: 0, rank: null, level: 1 },
           summary: { totalProgress: 0 }
         });
@@ -167,13 +178,46 @@ export default function Dashboard() {
     }
   }, [loading]);
 
-  if (loading) {
+  if (loading && !timeoutReached) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#0F1411] via-[#181F17] to-[#232D1A] flex items-center justify-center">
         <ClientLayout>
           <div className="text-center w-full">
             <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#8BAE5A] mx-auto"></div>
             <p className="text-white mt-4 text-lg">Dashboard laden...</p>
+            <p className="text-[#8BAE5A] text-sm mt-2">Even geduld terwijl we alles voor je klaarzetten</p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="text-[#B6C948] text-sm mt-4 underline hover:no-underline"
+            >
+              Handmatig herladen als het te lang duurt
+            </button>
+          </div>
+        </ClientLayout>
+      </div>
+    );
+  }
+
+  // Show timeout message if API took too long
+  if (timeoutReached) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#0F1411] via-[#181F17] to-[#232D1A] flex items-center justify-center">
+        <ClientLayout>
+          <div className="text-center w-full max-w-md">
+            <div className="w-32 h-32 border-4 border-[#8BAE5A] border-opacity-30 rounded-full flex items-center justify-center mx-auto mb-6">
+              <div className="text-[#8BAE5A] text-4xl">⚠️</div>
+            </div>
+            <h2 className="text-white text-xl font-bold mb-4">Dashboard laden duurde te lang</h2>
+            <p className="text-[#8BAE5A] text-sm mb-6">
+              Er was een probleem met het laden van je dashboard gegevens. 
+              Je kunt de pagina herladen om het opnieuw te proberen.
+            </p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="bg-[#8BAE5A] text-[#181F17] px-6 py-3 rounded-lg font-semibold hover:bg-[#A6C97B] transition-colors"
+            >
+              Pagina herladen
+            </button>
           </div>
         </ClientLayout>
       </div>
