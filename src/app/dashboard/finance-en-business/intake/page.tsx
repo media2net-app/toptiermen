@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { CheckIcon, ArrowRightIcon, ArrowLeftIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
+import Breadcrumb, { createBreadcrumbs } from '@/components/Breadcrumb';
 
 interface FinancialProfile {
   netWorth: number;
@@ -406,6 +407,17 @@ export default function FinanceIntake() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0F1411] via-[#181F17] to-[#232D1A]">
       <div className="max-w-4xl mx-auto px-4 py-8">
+        {/* Breadcrumb */}
+        <div className="mb-6">
+          <Breadcrumb 
+            items={createBreadcrumbs(
+              'Setup',
+              'Finance & Business',
+              '/dashboard/finance-en-business'
+            )} 
+          />
+        </div>
+        
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">

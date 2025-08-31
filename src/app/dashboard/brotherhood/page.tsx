@@ -8,6 +8,7 @@ import { FaUsers, FaTrophy, FaCalendarAlt, FaComments } from 'react-icons/fa';
 import BrotherhoodSubNav from "./SubNav";
 import { supabase } from '@/lib/supabase';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import Breadcrumb, { createBreadcrumbs } from '@/components/Breadcrumb';
 
 interface Group {
   id: string;
@@ -180,6 +181,11 @@ export default function Brotherhood() {
 
   return (
     <ClientLayout>
+      {/* Breadcrumb */}
+      <div className="mb-6">
+        <Breadcrumb items={createBreadcrumbs('Brotherhood')} />
+      </div>
+      
       <div className="space-y-8">
         {/* Stats Overview */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

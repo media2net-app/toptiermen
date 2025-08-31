@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import Breadcrumb, { createBreadcrumbs } from '@/components/Breadcrumb';
 
 function NettoWaardePageContent() {
   const { user } = useSupabaseAuth();
@@ -43,6 +44,17 @@ function NettoWaardePageContent() {
 
   return (
     <div className="p-8 max-w-2xl mx-auto">
+      {/* Breadcrumb */}
+      <div className="mb-6">
+        <Breadcrumb 
+          items={createBreadcrumbs(
+            'Netto Waarde',
+            'Finance & Business',
+            '/dashboard/finance-en-business'
+          )} 
+        />
+      </div>
+      
       <h1 className="text-3xl font-bold text-[#B6C948] mb-4">Netto Waarde Details</h1>
       <div className="bg-[#232D1A] rounded-2xl shadow-xl p-8 border border-[#3A4D23] mb-8">
         <div className="text-center mb-8">

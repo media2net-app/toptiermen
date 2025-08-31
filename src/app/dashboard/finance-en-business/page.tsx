@@ -19,6 +19,7 @@ import { FinanceProvider, useFinance } from './FinanceContext';
 import { ArrowRightIcon, PencilIcon, Cog6ToothIcon, PlusIcon } from '@heroicons/react/24/outline';
 import ZeroBasedBudget from './components/ZeroBasedBudget';
 import DebtSnowball from './components/DebtSnowball';
+import Breadcrumb, { createBreadcrumbs } from '@/components/Breadcrumb';
 import CompoundInterest from './components/CompoundInterest';
 import FIRECalculator from './components/FIRECalculator';
 import { useRouter } from 'next/navigation';
@@ -512,6 +513,11 @@ function FinanceDashboardContent() {
 
   return (
     <div className="p-6 md:p-12">
+      {/* Breadcrumb */}
+      <div className="mb-6">
+        <Breadcrumb items={createBreadcrumbs('Finance & Business')} />
+      </div>
+      
       <div className="flex justify-between items-start mb-8">
         <div>
           <h1 className="text-3xl md:text-4xl font-bold text-[#B6C948] mb-2 drop-shadow-lg">Finance & Business</h1>
