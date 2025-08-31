@@ -340,7 +340,7 @@ async function fetchUserBadges(userId: string) {
     }
 
     return badges?.map(userBadge => {
-      const badge = userBadge.badges; // badges is already a single object, not an array
+      const badge = userBadge.badges as any; // Type assertion to handle the embedded object
       return {
         id: userBadge.id,
         title: badge?.title || 'Unknown Badge',

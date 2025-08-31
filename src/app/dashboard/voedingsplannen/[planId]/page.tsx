@@ -27,7 +27,7 @@ export default function NutritionPlanPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const planId = params.planId as string;
+  const planId = params?.planId as string;
 
   useEffect(() => {
     fetchPlanDetails();

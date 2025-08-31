@@ -127,8 +127,8 @@ export default function TrainingscentrumPage() {
     try {
       // Step 1: Fetch user data
       console.log('Trainingscentrum: Fetching user data...');
-      let userData = null;
-      let userError = null;
+      let userData: any = null;
+      let userError: any = null;
       
       // Try to fetch from profiles table first
       try {
