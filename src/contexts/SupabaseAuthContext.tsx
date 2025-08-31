@@ -89,7 +89,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(authReducer, {
     user: null,
-    loading: true,
+    loading: false, // START MET FALSE OM LOADING SCREEN TE VOORKOMEN
     error: null,
     isInitialized: false
   });

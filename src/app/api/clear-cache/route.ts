@@ -9,14 +9,14 @@ export async function GET(request: NextRequest) {
       success: true,
       message: 'Cache cleared successfully',
       timestamp: new Date().toISOString(),
-      version: '2.0.1'
+      version: '2.0.3'
     });
 
     // Add cache-busting headers
     response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
     response.headers.set('Pragma', 'no-cache');
     response.headers.set('Expires', '0');
-    response.headers.set('X-TTM-Version', '2.0.1');
+    response.headers.set('X-TTM-Version', '2.0.3');
     response.headers.set('X-Cache-Cleared', 'true');
 
     return response;
