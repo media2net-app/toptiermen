@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { EnvelopeIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 import { useCacheBuster } from '@/components/CacheBuster';
+import PlatformLoading from '@/components/PlatformLoading';
 
 function LoginPageContent() {
   const router = useRouter();
@@ -160,46 +161,12 @@ function LoginPageContent() {
 
   // Show loading state while checking authentication (with timeout)
   if (loading && !redirecting) {
-    return (
-      <div className="min-h-screen flex items-center justify-center relative px-4 py-6" style={{ backgroundColor: '#181F17' }}>
-        <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
-        <div className="w-full max-w-md p-6 sm:p-8 rounded-3xl shadow-2xl bg-[#232D1A]/95 border border-[#3A4D23] backdrop-blur-lg relative z-10">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#B6C948] mx-auto mb-4"></div>
-            <p className="text-[#B6C948] text-lg">Laden...</p>
-            <p className="text-[#8BAE5A] text-sm mt-2">Authenticatie wordt gecontroleerd</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="mt-4 text-[#8BAE5A] hover:text-[#B6C948] underline text-sm"
-            >
-              Handmatig herladen als het te lang duurt
-            </button>
-          </div>
-        </div>
-      </div>
-    );
+    return <PlatformLoading message="Authenticatie controleren..." />;
   }
 
   // Show redirecting state
   if (redirecting) {
-    return (
-      <div className="min-h-screen flex items-center justify-center relative px-4 py-6" style={{ backgroundColor: '#181F17' }}>
-        <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
-        <div className="w-full max-w-md p-6 sm:p-8 rounded-3xl shadow-2xl bg-[#232D1A]/95 border border-[#3A4D23] backdrop-blur-lg relative z-10">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#B6C948] mx-auto mb-4"></div>
-            <p className="text-[#B6C948] text-lg">Doorsturen naar dashboard...</p>
-            <p className="text-[#8BAE5A] text-sm mt-2">Je wordt automatisch doorgestuurd</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="mt-4 text-[#8BAE5A] hover:text-[#B6C948] underline text-sm"
-            >
-              Handmatig herladen als het te lang duurt
-            </button>
-          </div>
-        </div>
-      </div>
-    );
+    return <PlatformLoading message="Doorsturen naar dashboard..." />;
   }
 
   return (

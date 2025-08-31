@@ -23,6 +23,7 @@ import {
 import DebugPanel from '@/components/DebugPanel';
 import ForcedOnboardingModal from '@/components/ForcedOnboardingModal';
 import TestUserVideoModal from '@/components/TestUserVideoModal';
+import PlatformLoading from '@/components/PlatformLoading';
 import TestUserFeedback from '@/components/TestUserFeedback';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 import V2MonitoringDashboard from '@/components/V2MonitoringDashboard';
@@ -409,6 +410,11 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isMobileMenuOpen]);
+
+  // Show loading state for dashboard content
+  if (isLoading) {
+    return <PlatformLoading message="Dashboard laden..." />;
+  }
 
   return (
     <>
