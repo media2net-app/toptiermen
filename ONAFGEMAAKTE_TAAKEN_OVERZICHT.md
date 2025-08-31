@@ -265,4 +265,19 @@
 5. ✅ Fixed admin dashboard flickering
 6. ✅ Fixed login page flickering
 
+---
+
+## 🗑️ **ADMIN DASHBOARD NAVIGATION UPDATED**
+
+### **CHANGES IMPLEMENTED:**
+- ✅ **Planning Lancering verwijderd** uit admin menu navigatie
+- ✅ **Planning Lancering pagina verwijderd** (`/dashboard-admin/planning-lancering`)
+- ✅ **Community Health als default** - Admin dashboard laadt nu direct naar Community Health
+- ✅ **Schone navigatie** - Geen overbodige menu items meer
+
+### **DEPLOYMENT STATUS:**
+- ✅ **Code wijzigingen**: Gecommit en gepusht naar GitHub
+- ⏳ **Live deployment**: Wacht op Vercel cache invalidation
+- 🔄 **Cache**: Vercel serveert nog oude versie, nieuwe versie wordt binnenkort actief
+
 **STATUS**: ✅ **PLATFORM FULLY OPERATIONAL** - Rick kan nu zonder problemen werken!
