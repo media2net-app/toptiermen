@@ -11,13 +11,11 @@ export default function OnboardingBanner() {
   const [isCompleting, setIsCompleting] = useState(false);
 
   useEffect(() => {
-    if (isOnboarding) {
-      setIsVisible(true);
-    } else {
-      setIsVisible(false);
-    }
+    // Always show banner if onboarding is active
+    setIsVisible(isOnboarding);
   }, [isOnboarding]);
 
+  // Don't render if not onboarding
   if (!isOnboarding) return null;
 
   const currentStepData = steps[currentStep];
@@ -79,30 +77,30 @@ export default function OnboardingBanner() {
 
   return (
     <div className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
-      <div className="bg-gradient-to-r from-green-600 to-green-700 text-white shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 py-3">
+      <div className="bg-gradient-to-r from-[#8BAE5A] to-[#3A4D23] text-white shadow-lg border-b-2 border-[#FFD700]">
+        <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             {/* Progress and Step Info */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-6">
               {/* Step Progress */}
-              <div className="flex items-center space-x-2">
-                <span className="text-sm font-medium">
+              <div className="flex items-center space-x-3">
+                <span className="text-sm font-bold text-white">
                   Stap {currentStep + 1} van {steps.length}
                 </span>
-                <div className="w-24 h-2 bg-green-500 rounded-full overflow-hidden">
+                <div className="w-32 h-3 bg-[#181F17] rounded-full overflow-hidden border border-[#FFD700]">
                   <div 
-                    className="h-full bg-white transition-all duration-300 ease-out"
+                    className="h-full bg-[#FFD700] transition-all duration-300 ease-out"
                     style={{ width: `${progress}%` }}
                   />
                 </div>
               </div>
 
               {/* Current Step Info */}
-              <div className="flex items-center space-x-2">
-                <span className="text-lg">{getStepIcon(currentStep)}</span>
+              <div className="flex items-center space-x-3">
+                <span className="text-2xl">{getStepIcon(currentStep)}</span>
                 <div>
-                  <h3 className="font-semibold text-sm">{currentStepData?.title}</h3>
-                  <p className="text-xs text-green-100">{currentStepData?.description}</p>
+                  <h3 className="font-bold text-sm text-white">{currentStepData?.title}</h3>
+                  <p className="text-xs text-[#FFD700]">{currentStepData?.description}</p>
                 </div>
               </div>
             </div>
@@ -110,9 +108,9 @@ export default function OnboardingBanner() {
             {/* Instructions and Actions */}
             <div className="flex items-center space-x-4">
               {/* Instructions */}
-              <div className="flex items-center space-x-2 bg-green-800/50 px-3 py-1 rounded-lg">
-                <InformationCircleIcon className="w-4 h-4" />
-                <span className="text-sm text-green-100">
+              <div className="flex items-center space-x-2 bg-[#181F17]/80 px-4 py-2 rounded-lg border border-[#FFD700]/30">
+                <InformationCircleIcon className="w-4 h-4 text-[#FFD700]" />
+                <span className="text-sm text-white font-medium">
                   {getCurrentStepInstructions()}
                 </span>
               </div>
@@ -122,7 +120,7 @@ export default function OnboardingBanner() {
                 {currentStep === 0 ? (
                   <button
                     onClick={handleSkipToOnboarding}
-                    className="flex items-center space-x-1 px-3 py-1.5 bg-green-800 hover:bg-green-900 rounded-lg text-sm font-medium transition-colors"
+                    className="flex items-center space-x-2 px-4 py-2 bg-[#FFD700] hover:bg-[#FFE55C] text-[#181F17] rounded-lg text-sm font-bold transition-all duration-200 shadow-lg"
                   >
                     <PlayIcon className="w-4 h-4" />
                     <span>Start Onboarding</span>
@@ -131,11 +129,11 @@ export default function OnboardingBanner() {
                   <button
                     onClick={handleCompleteStep}
                     disabled={isCompleting}
-                    className="flex items-center space-x-1 px-4 py-1.5 bg-white text-green-700 hover:bg-green-50 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex items-center space-x-2 px-6 py-2 bg-[#FFD700] hover:bg-[#FFE55C] text-[#181F17] rounded-lg text-sm font-bold transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isCompleting ? (
                       <>
-                        <div className="w-4 h-4 border-2 border-green-700 border-t-transparent rounded-full animate-spin" />
+                        <div className="w-4 h-4 border-2 border-[#181F17] border-t-transparent rounded-full animate-spin" />
                         <span>Bezig...</span>
                       </>
                     ) : (

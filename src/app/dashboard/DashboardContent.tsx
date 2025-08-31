@@ -673,7 +673,7 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
           </AnimatePresence>
 
           {/* Page Content */}
-          <div className="p-3 sm:p-4 md:p-6 lg:p-8">
+          <div className={`p-3 sm:p-4 md:p-6 lg:p-8 ${isOnboarding ? 'pt-20' : ''}`}>
             <div className={`transition-all duration-300 ${isTransitioning ? 'opacity-50 scale-95' : 'opacity-100 scale-100'}`}>
               {children}
             </div>
