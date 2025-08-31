@@ -3,7 +3,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { supabase } from '@/lib/supabase';
 import Link from "next/link";
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useAuth } from '@/auth-systems/optimal/useAuth';
 import Breadcrumb, { createBreadcrumbs } from '@/components/Breadcrumb';
 
 
@@ -36,7 +36,7 @@ interface Lesson {
 export default function ModuleDetailPage() {
   const params = useParams();
   const moduleId = params?.slug as string;
-  const { user } = useSupabaseAuth();
+  const { user } = useAuth();
   
   const [module, setModule] = useState<Module | null>(null);
   const [lessons, setLessons] = useState<Lesson[]>([]);

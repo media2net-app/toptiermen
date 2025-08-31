@@ -1,6 +1,6 @@
 "use client";
 import { useState, useRef, useEffect } from 'react';
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useAuth } from '@/auth-systems/optimal/useAuth';
 import { MicrophoneIcon, SpeakerWaveIcon, StopIcon, PlayIcon, PauseIcon } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
 
@@ -13,7 +13,7 @@ interface VoiceMessage {
 }
 
 export default function AIVoicePage() {
-  const { user } = useSupabaseAuth();
+  const { user } = useAuth();
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);

@@ -12,7 +12,7 @@ import {
   CurrencyEuroIcon
 } from '@heroicons/react/24/outline';
 import FacebookConnectionModal from '@/components/marketing/FacebookConnectionModal';
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useAuth } from '@/auth-systems/optimal/useAuth';
 import { useRouter } from 'next/navigation';
 
 interface FacebookUserInfo {
@@ -30,7 +30,7 @@ interface FacebookAdAccount {
 }
 
 export default function MarketingDashboard() {
-  const { user, loading, signOut } = useSupabaseAuth();
+  const { user, loading, signOut } = useAuth();
   const router = useRouter();
   
   const [isFacebookConnected, setIsFacebookConnected] = useState(false);

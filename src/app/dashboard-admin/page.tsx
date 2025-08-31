@@ -24,7 +24,7 @@ import {
   AcademicCapIcon as AcademicCapIconSolid,
   ArrowPathIcon
 } from '@heroicons/react/24/outline';
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useAuth } from '@/auth-systems/optimal/useAuth';
 import { AdminCard, AdminStatsCard, AdminButton } from '@/components/admin';
 import { SwipeIndicator } from '@/components/ui';
 import MollieFinanceMetrics from '@/components/admin/MollieFinanceMetrics';
@@ -133,7 +133,7 @@ export default function AdminDashboard() {
   const pathname = usePathname();
   const router = useRouter();
   const [selectedPeriod, setSelectedPeriod] = useState<'7d' | '30d' | '90d'>('7d');
-  const { user } = useSupabaseAuth();
+  const { user } = useAuth();
 
   // Add hydration safety
   const [isClient, setIsClient] = useState(false);

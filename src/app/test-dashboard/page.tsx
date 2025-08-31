@@ -1,13 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useAuth } from '@/auth-systems/optimal/useAuth';
 
 export default function TestDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<any>(null);
-  const { user } = useSupabaseAuth();
+  const { user, profile } = useAuth();
 
   useEffect(() => {
     const testDashboard = async () => {
@@ -85,7 +85,7 @@ export default function TestDashboard() {
           <div className="text-gray-300">
             <p>ID: {user?.id}</p>
             <p>Email: {user?.email}</p>
-            <p>Name: {user?.full_name}</p>
+            <p>Name: {profile?.full_name}</p>
           </div>
         </div>
 

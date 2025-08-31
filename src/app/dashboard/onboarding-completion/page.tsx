@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useAuth } from '@/auth-systems/optimal/useAuth';
 import { 
   CheckCircleIcon, 
   TrophyIcon,
@@ -28,7 +28,7 @@ interface OnboardingStatus {
 
 export default function OnboardingCompletion() {
   const router = useRouter();
-  const { user } = useSupabaseAuth();
+  const { user } = useAuth();
   const [onboardingStatus, setOnboardingStatus] = useState<OnboardingStatus | null>(null);
   const [loading, setLoading] = useState(true);
 

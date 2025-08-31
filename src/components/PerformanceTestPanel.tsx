@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useAuth } from '@/auth-systems/optimal/useAuth';
 
 export function PerformanceTestPanel() {
-  const { user } = useSupabaseAuth();
+  const { user } = useAuth();
   const [performanceInfo, setPerformanceInfo] = useState<any>({});
   const [isVisible, setIsVisible] = useState(false);
   const [testResults, setTestResults] = useState<Array<{

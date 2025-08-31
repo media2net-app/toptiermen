@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useSupabaseAuth } from './SupabaseAuthContext';
+import { useAuth } from '../auth-systems/optimal/useAuth';
 
 interface OnboardingStep {
   id: number;
@@ -31,7 +31,7 @@ interface OnboardingContextType {
 const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined);
 
 export function OnboardingProvider({ children }: { children: React.ReactNode }) {
-  const { user } = useSupabaseAuth();
+  const { user } = useAuth();
   const [isOnboarding, setIsOnboarding] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);

@@ -1,6 +1,6 @@
 'use client';
 
-import { SupabaseAuthProvider } from '@/contexts/SupabaseAuthContext';
+import { AuthProvider } from '@/auth-systems/optimal/AuthProvider';
 import { DebugProvider } from '@/contexts/DebugContext';
 // import SessionLogger from '@/components/SessionLogger';
 // import { GlobalSessionMonitor } from '@/components/GlobalSessionMonitor';
@@ -11,11 +11,11 @@ import { DebugProvider } from '@/contexts/DebugContext';
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <SupabaseAuthProvider>
+    <AuthProvider>
       <DebugProvider>
         {/* All monitoring components disabled to prevent infinite loops */}
         {children}
       </DebugProvider>
-    </SupabaseAuthProvider>
+    </AuthProvider>
   );
 } 

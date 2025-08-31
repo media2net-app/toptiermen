@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useAuth } from '@/auth-systems/optimal/useAuth';
 
 export function CacheTestPanel() {
-  const { user } = useSupabaseAuth();
+  const { user } = useAuth();
   const [cacheInfo, setCacheInfo] = useState<any>({});
   const [isVisible, setIsVisible] = useState(false);
 

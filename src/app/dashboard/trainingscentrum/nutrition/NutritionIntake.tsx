@@ -11,7 +11,7 @@ import {
   ArrowRightIcon,
   ArrowLeftIcon
 } from '@heroicons/react/24/outline';
-import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
+import { useAuth } from '@/auth-systems/optimal/useAuth';
 import { toast } from 'react-hot-toast';
 
 interface NutritionProfile {
@@ -92,7 +92,7 @@ const goals = [
 ];
 
 export default function NutritionIntake({ onComplete, onSkip }: NutritionIntakeProps) {
-  const { user } = useSupabaseAuth();
+  const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [calculations, setCalculations] = useState<NutritionCalculations | null>(null);

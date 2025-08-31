@@ -13,7 +13,7 @@ import {
   StarIcon
 } from '@heroicons/react/24/outline';
 import PageLayout from '@/components/PageLayout';
-import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
+import { useAuth } from '@/auth-systems/optimal/useAuth';
 import { supabase } from "@/lib/supabase";
 import Breadcrumb, { createBreadcrumbs } from '@/components/Breadcrumb';
 import BadgeUnlockModal from '@/components/BadgeUnlockModal';
@@ -59,7 +59,7 @@ interface LessonProgress {
 }
 
 export default function AcademyPage() {
-  const { user } = useSupabaseAuth();
+  const { user } = useAuth();
   const [modules, setModules] = useState<Module[]>([]);
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [progressData, setProgressData] = useState<ProgressData>({});

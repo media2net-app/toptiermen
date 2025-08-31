@@ -1,21 +1,21 @@
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useAuth } from '@/auth-systems/optimal/useAuth';
 import { useState, useEffect } from 'react';
 
 export function useTestUser() {
-  const { user } = useSupabaseAuth();
+  const { user, profile } = useAuth();
   const [isTestUser, setIsTestUser] = useState(false);
 
   useEffect(() => {
     if (user) {
       // Check if user has test role, is admin, or has specific test email
-      const isTest = user.role?.toLowerCase() === 'test';
-      const isAdmin = user.role?.toLowerCase() === 'admin';
+      const isTest = profile?.role?.toLowerCase() === 'test';
+      const isAdmin = profile?.role?.toLowerCase() === 'admin';
       const isTestEmail = user.email?.toLowerCase().includes('test');
-      setIsTestUser(isTest || isAdmin || isTestEmail);
+      setIsTestUser(Boolean(isTest || isAdmin || isTestEmail));
     } else {
       setIsTestUser(false);
     }
-  }, [user]);
+  }, [user, profile]);
 
   return isTestUser;
 } 

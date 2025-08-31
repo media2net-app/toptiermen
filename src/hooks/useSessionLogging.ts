@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback } from 'react';
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useAuth } from '@/auth-systems/optimal/useAuth';
 
 interface SessionLogData {
   user_id: string;
@@ -13,7 +13,7 @@ interface SessionLogData {
 }
 
 export function useSessionLogging() {
-  const { user } = useSupabaseAuth();
+  const { user } = useAuth();
   const pageLoadCount = useRef(0);
   const lastPage = useRef<string>('');
   const loopDetectionCount = useRef(0);

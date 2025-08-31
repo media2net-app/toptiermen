@@ -4,7 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { supabase } from '@/lib/supabase';
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useAuth } from '@/auth-systems/optimal/useAuth';
 import PageLayout from '@/components/PageLayout';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -36,7 +36,7 @@ interface Lesson {
 export default function LessonDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { user } = useSupabaseAuth();
+  const { user } = useAuth();
   const moduleId = (params as any).slug as string;
   const lessonId = (params as any).lessonId as string;
   

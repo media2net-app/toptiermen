@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useAuth } from '@/auth-systems/optimal/useAuth';
 import { supabase } from '@/lib/supabase';
 
 export default function DebugLoginPage() {
-  const { user, loading, error } = useSupabaseAuth();
+  const { user, loading, error } = useAuth();
   const [debugInfo, setDebugInfo] = useState<any>({});
   const [isLoading, setIsLoading] = useState(false);
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useAuth } from '@/auth-systems/optimal/useAuth';
 
 export interface DashboardData {
   // User profile data
@@ -38,7 +38,7 @@ export interface DashboardData {
 }
 
 export function useDashboard() {
-  const { user } = useSupabaseAuth();
+  const { user } = useAuth();
   const [data, setData] = useState<DashboardData>({
     profile: null,
     goals: [],

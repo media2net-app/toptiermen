@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { BellIcon, XMarkIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useAuth } from '@/auth-systems/optimal/useAuth';
 import { createClient } from '@supabase/supabase-js';
 import { toast } from 'react-hot-toast';
 
@@ -11,7 +11,7 @@ interface PushNotificationPromptProps {
 }
 
 export default function PushNotificationPrompt({ onClose }: PushNotificationPromptProps) {
-  const { user } = useSupabaseAuth();
+  const { user } = useAuth();
   const [showPrompt, setShowPrompt] = useState(false);
   const [isSubscribing, setIsSubscribing] = useState(false);
   const [hasPermission, setHasPermission] = useState<NotificationPermission>('default');
