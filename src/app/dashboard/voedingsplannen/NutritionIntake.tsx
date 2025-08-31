@@ -145,9 +145,9 @@ export default function NutritionIntake({ onComplete, onSkip }: NutritionIntakeP
       case 1:
         return profile.age > 0 && profile.height > 0 && profile.weight > 0;
       case 2:
-        return profile.activityLevel !== '';
+        return profile.activityLevel === 'sedentary' || profile.activityLevel === 'light' || profile.activityLevel === 'moderate' || profile.activityLevel === 'active' || profile.activityLevel === 'very_active';
       case 3:
-        return profile.goal !== '';
+        return profile.goal === 'cut' || profile.goal === 'maintain' || profile.goal === 'bulk';
       default:
         return true;
     }
