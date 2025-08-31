@@ -755,12 +755,66 @@ export default function TrainingscentrumPage() {
                         });
                         setPageStep(3);
                       }}
-                      className="cursor-pointer rounded-2xl p-8 border-2 transition-all duration-300 border-[#3A4D23] bg-[#232D1A] hover:border-[#8BAE5A]/50"
+                      className="cursor-pointer rounded-2xl p-8 border-2 transition-all duration-300 border-[#3A4D23] bg-[#232D1A] hover:border-[#8BAE5A]/50 hover:shadow-xl hover:shadow-[#8BAE5A]/10"
                     >
-                      <h3 className="text-2xl font-bold text-white mb-4 text-center">{schema.name}</h3>
-                      <p className="text-gray-300 text-center mb-4">{schema.description}</p>
-                      <div className="text-sm text-gray-400 text-center">Categorie: {schema.category}</div>
-                      <div className="text-sm text-gray-400 text-center">Niveau: {schema.difficulty}</div>
+                      {/* Schema Header */}
+                      <div className="text-center mb-6">
+                        <h3 className="text-2xl font-bold text-white mb-3">{schema.name}</h3>
+                        <div className="flex items-center justify-center gap-4 text-sm">
+                          <span className="px-3 py-1 bg-[#3A4D23] text-[#8BAE5A] rounded-full font-medium">
+                            {schema.category}
+                          </span>
+                          <span className="px-3 py-1 bg-[#8BAE5A]/20 text-[#8BAE5A] rounded-full font-medium">
+                            {schema.difficulty}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Schema Description */}
+                      <div className="mb-6">
+                        <p className="text-gray-300 text-center leading-relaxed">
+                          {schema.description}
+                        </p>
+                      </div>
+
+                      {/* Training Details */}
+                      <div className="bg-[#1A2315] rounded-xl p-4 mb-6">
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div className="text-center">
+                            <div className="text-[#8BAE5A] font-semibold mb-1">Rep Range</div>
+                            <div className="text-white">8-12</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-[#8BAE5A] font-semibold mb-1">Rust</div>
+                            <div className="text-white">90s</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Important Notice */}
+                      <div className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/30 rounded-xl p-4 mb-6">
+                        <div className="flex items-start gap-3">
+                          <div className="flex-shrink-0 mt-0.5">
+                            <svg className="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                          <div>
+                            <h4 className="text-yellow-500 font-semibold text-sm mb-1">BELANGRIJK</h4>
+                            <p className="text-yellow-400 text-sm leading-relaxed">
+                              Train tot spierfalen voor optimale resultaten
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Select Button */}
+                      <div className="text-center">
+                        <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-[#8BAE5A] to-[#7A9D4A] text-[#232D1A] font-bold rounded-xl hover:from-[#7A9D4A] hover:to-[#6A8D3A] transition-all duration-200 shadow-lg hover:shadow-xl">
+                          <span>Selecteer Schema</span>
+                          <ArrowRightIcon className="w-5 h-5 ml-2" />
+                        </div>
+                      </div>
                     </motion.div>
                   ))
                 ) : (
@@ -801,20 +855,44 @@ export default function TrainingscentrumPage() {
                   {workoutSchema.description}
                 </p>
                 
+                {/* Training Info Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                  <div className="bg-[#1A2315] border border-[#3A4D23] rounded-xl p-4 text-center">
+                    <CalendarIcon className="w-8 h-8 text-[#8BAE5A] mx-auto mb-2" />
+                    <div className="text-white font-semibold">{workoutSchema.frequency} dagen</div>
+                    <div className="text-gray-400 text-sm">per week</div>
+                  </div>
+                  <div className="bg-[#1A2315] border border-[#3A4D23] rounded-xl p-4 text-center">
+                    <ClockIcon className="w-8 h-8 text-[#8BAE5A] mx-auto mb-2" />
+                    <div className="text-white font-semibold">45-60 min</div>
+                    <div className="text-gray-400 text-sm">per training</div>
+                  </div>
+                  <div className="bg-[#1A2315] border border-[#3A4D23] rounded-xl p-4 text-center">
+                    <FireIcon className="w-8 h-8 text-[#8BAE5A] mx-auto mb-2" />
+                    <div className="text-white font-semibold">Progressief</div>
+                    <div className="text-gray-400 text-sm">overload</div>
+                  </div>
+                </div>
+
                 {/* Muscle Failure Warning */}
-                <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4 mb-6">
-                  <div className="flex items-start">
-                    <div className="flex-shrink-0">
-                      <svg className="w-5 h-5 text-yellow-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <div className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/30 rounded-xl p-6 mb-8">
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0 mt-1">
+                      <svg className="w-6 h-6 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                       </svg>
                     </div>
-                    <div className="ml-3">
-                      <h3 className="text-sm font-medium text-yellow-500">
-                        Belangrijke Training Tip
+                    <div>
+                      <h3 className="text-lg font-bold text-yellow-500 mb-2">
+                        🎯 Belangrijke Training Tip
                       </h3>
-                      <div className="mt-1 text-sm text-yellow-400">
-                        <p>We adviseren ten alle tijden om het aantal herhalingen te doen tot spierfalen moment voor optimale resultaten.</p>
+                      <div className="text-yellow-400 leading-relaxed">
+                        <p className="mb-2">
+                          <strong>Train tot spierfalen</strong> voor optimale resultaten. Dit betekent dat je de laatste herhaling van elke set niet meer kunt voltooien met goede vorm.
+                        </p>
+                        <p className="text-sm">
+                          Dit is essentieel voor maximale spiergroei en krachttoename.
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -838,33 +916,56 @@ export default function TrainingscentrumPage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-6"
+                    className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-6 hover:border-[#8BAE5A]/30 transition-all duration-300"
                   >
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <h3 className="text-xl font-bold text-white">
-                          Dag {day.day}: {day.name}
-                        </h3>
-                        <p className="text-gray-400">{day.focus}</p>
+                    {/* Day Header */}
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-gradient-to-r from-[#8BAE5A] to-[#7A9D4A] rounded-full flex items-center justify-center">
+                          <span className="text-[#232D1A] font-bold text-lg">{day.day}</span>
+                        </div>
+                        <div>
+                          <h3 className="text-xl font-bold text-white mb-1">
+                            {day.name}
+                          </h3>
+                          <p className="text-[#8BAE5A] font-medium">{day.focus}</p>
+                        </div>
                       </div>
-                      <div className="text-sm text-[#8BAE5A] font-medium">
-                        {day.exercises.length} oefeningen
+                      <div className="text-right">
+                        <div className="text-sm text-gray-400 mb-1">Totaal</div>
+                        <div className="text-lg font-bold text-[#8BAE5A]">
+                          {day.exercises.length} oefeningen
+                        </div>
                       </div>
                     </div>
 
-                    <div className="space-y-3">
+                    {/* Exercises */}
+                    <div className="space-y-4">
                       {day.exercises.map((exercise, exerciseIndex) => (
                         <div
                           key={exerciseIndex}
-                          className="flex items-center justify-between p-3 bg-[#1A2315] rounded-lg"
+                          className="bg-[#1A2315] border border-[#3A4D23] rounded-xl p-4 hover:border-[#8BAE5A]/30 transition-all duration-200"
                         >
-                          <div className="flex-1">
-                            <div className="font-medium text-white">{exercise.name}</div>
-                          </div>
-                          <div className="flex items-center space-x-4 text-sm text-gray-400">
-                            <span>{exercise.sets} sets</span>
-                            <span>{exercise.reps === '10' ? '8-12' : exercise.reps} reps</span>
-                            <span>{exercise.rest} rust</span>
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              <div className="font-semibold text-white text-lg mb-1">
+                                {exercise.name}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-6 text-sm">
+                              <div className="text-center">
+                                <div className="text-[#8BAE5A] font-semibold mb-1">Sets</div>
+                                <div className="text-white font-bold">{exercise.sets}</div>
+                              </div>
+                              <div className="text-center">
+                                <div className="text-[#8BAE5A] font-semibold mb-1">Reps</div>
+                                <div className="text-white font-bold">{exercise.reps === '10' ? '8-12' : exercise.reps}</div>
+                              </div>
+                              <div className="text-center">
+                                <div className="text-[#8BAE5A] font-semibold mb-1">Rust</div>
+                                <div className="text-white font-bold">{exercise.rest}</div>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       ))}
