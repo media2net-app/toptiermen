@@ -7,8 +7,10 @@ interface BadgeUnlockModalProps {
   isOpen: boolean;
   onClose: () => void;
   badge: {
-    name: string;
+    name?: string;
+    title?: string;
     icon?: string;
+    icon_name?: string;
     image?: string;
     image_url?: string;
     description?: string;
@@ -153,7 +155,7 @@ export default function BadgeUnlockModal({
                   {(badge.image || badge.image_url) ? (
                     <img 
                       src={badge.image || badge.image_url} 
-                      alt={badge.name}
+                      alt={badge.name || badge.title || 'Badge'}
                       className="max-w-[200px] max-h-[200px] w-auto h-auto object-contain drop-shadow-lg"
                       style={{ 
                         width: 'auto', 
@@ -164,7 +166,7 @@ export default function BadgeUnlockModal({
                     />
                   ) : (
                     <div className="w-24 h-24 bg-gradient-to-br from-[#8BAE5A] to-[#B6C948] rounded-full flex items-center justify-center border-4 border-white/20">
-                      <span className="text-4xl">{badge.icon}</span>
+                      <span className="text-4xl">{badge.icon || badge.icon_name || '🏆'}</span>
                     </div>
                   )}
                 </div>
@@ -182,7 +184,7 @@ export default function BadgeUnlockModal({
                 Gefeliciteerd!
               </h2>
               <p className="text-white text-lg mb-2">
-                Je hebt de badge <span className="font-semibold text-[#B6C948]">'{badge.name}'</span> verdiend!
+                Je hebt de badge <span className="font-semibold text-[#B6C948]">'{badge.name || badge.title || 'Onbekende Badge'}'</span> verdiend!
               </p>
               {badge.description && (
                 <p className="text-gray-400 text-sm">

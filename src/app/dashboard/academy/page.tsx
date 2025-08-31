@@ -261,10 +261,15 @@ export default function AcademyPage() {
         setHasAcademyBadge(!!academyBadge);
         setAcademyBadgeData(academyBadge?.badges || null);
 
-        // If newly completed and has badge, show modal
-        if (allModulesCompleted && academyBadge && !showBadgeModal) {
+        // If newly completed and has badge, show modal (but only once)
+        const hasShownBadge = localStorage.getItem('academyBadgeShown') === 'true';
+        if (allModulesCompleted && academyBadge && !showBadgeModal && !hasShownBadge) {
+          console.log('🎉 Showing Academy Master badge modal');
           setBadgeData(academyBadge.badges);
           setShowBadgeModal(true);
+          
+          // Store in localStorage to prevent showing again
+          localStorage.setItem('academyBadgeShown', 'true');
         }
       } catch (error) {
         console.error('Error checking academy completion:', error);
@@ -287,6 +292,19 @@ export default function AcademyPage() {
         console.error('Error parsing stored badge data:', error);
         localStorage.removeItem('academyBadgeUnlock');
       }
+    }
+  }, []);
+
+  // Debug function to reset badge modal (for testing)
+  const resetBadgeModal = () => {
+    localStorage.removeItem('academyBadgeShown');
+    console.log('🔄 Badge modal reset for testing');
+  };
+
+  // Add reset function to window for debugging
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      (window as any).resetAcademyBadgeModal = resetBadgeModal;
     }
   }, []);
 
