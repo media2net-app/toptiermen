@@ -22,6 +22,7 @@ import {
 } from '@heroicons/react/24/solid';
 import DebugPanel from '@/components/DebugPanel';
 import ForcedOnboardingModal from '@/components/ForcedOnboardingModal';
+import TestUserVideoModal from '@/components/TestUserVideoModal';
 import TestUserFeedback from '@/components/TestUserFeedback';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 import V2MonitoringDashboard from '@/components/V2MonitoringDashboard';
@@ -219,6 +220,7 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [onboardingStatus, setOnboardingStatus] = useState<any>(null);
   const [showForcedOnboarding, setShowForcedOnboarding] = useState(false);
+  const [showTestUserVideo, setShowTestUserVideo] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   // 2.0.1: Cache busting for existing users
@@ -328,15 +330,26 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
   // Show forced onboarding if user hasn't completed onboarding
   useEffect(() => {
     if (onboardingStatus && !onboardingStatus.onboarding_completed) {
-      if (onboardingStatus.current_step <= 1) {
+      // Check if user is a test user (email contains @toptiermen.test)
+      const isTestUser = user?.email?.includes('@toptiermen.test') || false;
+      
+      if (isTestUser && !onboardingStatus.onboarding_completed) {
+        // Show test video first for test users who haven't completed onboarding
+        setShowTestUserVideo(true);
+        setShowForcedOnboarding(false);
+      } else if (onboardingStatus.current_step <= 1) {
+        // Show normal onboarding for regular users or test users who watched the video
         setShowForcedOnboarding(true);
+        setShowTestUserVideo(false);
       } else {
         setShowForcedOnboarding(false);
+        setShowTestUserVideo(false);
       }
     } else if (onboardingStatus?.onboarding_completed) {
       setShowForcedOnboarding(false);
+      setShowTestUserVideo(false);
     }
-  }, [onboardingStatus]);
+  }, [onboardingStatus, user?.role]);
 
   // 2.0.1: Enhanced logout with error recovery
   const handleLogout = async () => {
@@ -668,6 +681,17 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
           isOpen={showForcedOnboarding}
           onComplete={() => {
             setShowForcedOnboarding(false);
+          }}
+        />
+
+        <TestUserVideoModal 
+          isOpen={showTestUserVideo}
+          onComplete={() => {
+            setShowTestUserVideo(false);
+            // After test video is watched, show normal onboarding
+            if (onboardingStatus && !onboardingStatus.onboarding_completed) {
+              setShowForcedOnboarding(true);
+            }
           }}
         />
 
