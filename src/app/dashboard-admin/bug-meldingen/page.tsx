@@ -34,14 +34,23 @@ interface BugReport {
   source?: 'database' | 'localStorage';
 }
 
+interface UserInfo {
+  id: string;
+  full_name: string;
+  email: string;
+  role?: string;
+}
+
 export default function BugMeldingen() {
   const [bugReports, setBugReports] = useState<BugReport[]>([]);
+  const [userInfoMap, setUserInfoMap] = useState<{ [key: string]: UserInfo }>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'open' | 'in_progress' | 'resolved' | 'closed'>('all');
   const [priorityFilter, setPriorityFilter] = useState<'all' | 'low' | 'medium' | 'high' | 'critical'>('all');
   const [typeFilter, setTypeFilter] = useState<'all' | 'bug' | 'improvement' | 'general'>('all');
+  const [userFilter, setUserFilter] = useState<string>('all');
   const [selectedReport, setSelectedReport] = useState<BugReport | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showScreenshot, setShowScreenshot] = useState(false);
@@ -53,6 +62,37 @@ export default function BugMeldingen() {
     console.log('🔍 Bug meldingen component mounted');
     fetchBugReports();
   }, []);
+
+  const fetchUserInfo = async (userIds: string[]) => {
+    try {
+      if (userIds.length === 0) return {};
+      
+      const { data: users, error } = await supabase
+        .from('profiles')
+        .select('id, full_name, email, role')
+        .in('id', userIds);
+
+      if (error) {
+        console.error('Error fetching user info:', error);
+        return {};
+      }
+
+      const userMap: { [key: string]: UserInfo } = {};
+      users?.forEach(user => {
+        userMap[user.id] = {
+          id: user.id,
+          full_name: user.full_name || 'Unknown User',
+          email: user.email || 'No email',
+          role: user.role
+        };
+      });
+
+      return userMap;
+    } catch (error) {
+      console.error('Error in fetchUserInfo:', error);
+      return {};
+    }
+  };
 
   const fetchBugReports = async () => {
     console.log('🔍 Starting fetchBugReports');
@@ -160,6 +200,13 @@ export default function BugMeldingen() {
       console.log('🔍 Final reports:', reports);
       setBugReports(reports);
       
+      // Fetch user information for all unique user IDs
+      const uniqueUserIds = [...new Set(reports.map(report => report.test_user_id))];
+      console.log('🔍 Fetching user info for:', uniqueUserIds);
+      
+      const userInfo = await fetchUserInfo(uniqueUserIds);
+      setUserInfoMap(userInfo);
+      
       if (reports.length === 0) {
         console.log('🔍 No reports found');
       }
@@ -241,8 +288,9 @@ export default function BugMeldingen() {
     const matchesStatus = statusFilter === 'all' || report.status === statusFilter;
     const matchesPriority = priorityFilter === 'all' || report.priority === priorityFilter;
     const matchesType = typeFilter === 'all' || report.type === typeFilter;
+    const matchesUser = userFilter === 'all' || report.test_user_id === userFilter;
 
-    return matchesSearch && matchesStatus && matchesPriority && matchesType;
+    return matchesSearch && matchesStatus && matchesPriority && matchesType && matchesUser;
   });
 
   if (loading) {
@@ -328,13 +376,16 @@ export default function BugMeldingen() {
                       )}
                     </div>
                     <p className="text-gray-300 mb-2">{report.description}</p>
-                    <div className="flex items-center space-x-4 text-sm">
-                      <span className="text-[#B6C948]">📄 {report.page_url}</span>
-                      <span className="text-[#B6C948]">📅 {new Date(report.created_at).toLocaleDateString()}</span>
-                      {report.area_selection && (
-                        <span className="text-[#B6C948]">📍 Area: {report.area_selection.width}x{report.area_selection.height}</span>
-                      )}
-                    </div>
+                                      <div className="flex items-center space-x-4 text-sm">
+                    <span className="text-[#B6C948]">📄 {report.page_url}</span>
+                    <span className="text-[#B6C948]">📅 {new Date(report.created_at).toLocaleDateString()}</span>
+                    {userInfoMap[report.test_user_id] && (
+                      <span className="text-[#B6C948]">👤 {userInfoMap[report.test_user_id].full_name}</span>
+                    )}
+                    {report.area_selection && (
+                      <span className="text-[#B6C948]">📍 Area: {report.area_selection.width}x{report.area_selection.height}</span>
+                    )}
+                  </div>
                   </div>
                   
                   <div className="flex items-center space-x-2">
@@ -437,7 +488,7 @@ export default function BugMeldingen() {
 
       {/* Filters */}
       <div className="bg-[#181F17] border border-[#3A4D23] rounded-lg p-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <div>
             <label className="block text-sm font-medium text-[#8BAE5A] mb-2">Zoeken</label>
             <div className="relative">
@@ -482,19 +533,35 @@ export default function BugMeldingen() {
             </select>
           </div>
           
-          <div>
-            <label className="block text-sm font-medium text-[#8BAE5A] mb-2">Type</label>
-            <select
-              value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value as any)}
-              className="w-full px-4 py-2 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-            >
-              <option value="all">Alle Types</option>
-              <option value="bug">Bug</option>
-              <option value="improvement">Improvement</option>
-              <option value="general">General</option>
-            </select>
-          </div>
+                      <div>
+              <label className="block text-sm font-medium text-[#8BAE5A] mb-2">Type</label>
+              <select
+                value={typeFilter}
+                onChange={(e) => setTypeFilter(e.target.value as any)}
+                className="w-full px-4 py-2 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+              >
+                <option value="all">Alle Types</option>
+                <option value="bug">Bug</option>
+                <option value="improvement">Improvement</option>
+                <option value="general">General</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-[#8BAE5A] mb-2">Gebruiker</label>
+              <select
+                value={userFilter}
+                onChange={(e) => setUserFilter(e.target.value)}
+                className="w-full px-4 py-2 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
+              >
+                <option value="all">Alle Gebruikers</option>
+                {Object.values(userInfoMap).map(user => (
+                  <option key={user.id} value={user.id}>
+                    {user.full_name}
+                  </option>
+                ))}
+              </select>
+            </div>
         </div>
       </div>
 
@@ -536,6 +603,9 @@ export default function BugMeldingen() {
                   <div className="flex items-center space-x-4 text-sm">
                     <span className="text-[#B6C948]">📄 {report.page_url}</span>
                     <span className="text-[#B6C948]">📅 {new Date(report.created_at).toLocaleDateString()}</span>
+                    {userInfoMap[report.test_user_id] && (
+                      <span className="text-[#B6C948]">👤 {userInfoMap[report.test_user_id].full_name}</span>
+                    )}
                     {report.area_selection && (
                       <span className="text-[#B6C948]">📍 Area: {report.area_selection.width}x{report.area_selection.height}</span>
                     )}
@@ -705,6 +775,25 @@ export default function BugMeldingen() {
                 <h3 className="font-semibold text-white mb-2">Pagina</h3>
                 <p className="text-gray-300">{selectedReport.page_url}</p>
               </div>
+              
+              {userInfoMap[selectedReport.test_user_id] && (
+                <div>
+                  <h3 className="font-semibold text-white mb-2">Gemeld door</h3>
+                  <div className="bg-[#232D1A] border border-[#3A4D23] rounded-lg p-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-white font-medium">{userInfoMap[selectedReport.test_user_id].full_name}</p>
+                        <p className="text-gray-400 text-sm">{userInfoMap[selectedReport.test_user_id].email}</p>
+                      </div>
+                      {userInfoMap[selectedReport.test_user_id].role && (
+                        <span className="px-2 py-1 bg-[#8BAE5A]/20 text-[#8BAE5A] rounded-full text-xs font-medium">
+                          {userInfoMap[selectedReport.test_user_id].role}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
               
               {selectedReport.screenshot_url && (
                 <div>
