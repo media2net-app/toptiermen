@@ -49,11 +49,14 @@ export default function EbookDownload({
       }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [downloadStatus]);
+    // Only add listener if we're not in the middle of a download
+    if (!isDownloading) {
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+      return () => {
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+      };
+    }
+  }, [downloadStatus, isDownloading]);
 
   const handleDownload = async (type: 'html' | 'pdf') => {
     if (isDownloading) return;
