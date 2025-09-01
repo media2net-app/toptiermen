@@ -7,7 +7,7 @@ import { supabase } from '@/lib/supabase';
 
 export default function DebugPanel() {
   const { showDebug, toggleDebug } = useDebug();
-  const { user, loading } = useAuth();
+  const { user, profile, loading, isAdmin } = useAuth();
   const [cacheInfo, setCacheInfo] = useState<any>({});
   const [cacheIssues, setCacheIssues] = useState<any>({});
   const [loadingStates, setLoadingStates] = useState<Array<{ key: string; duration: number }>>([]);
@@ -154,10 +154,11 @@ export default function DebugPanel() {
         <div className="mb-4">
           <h4 className="text-[#B6C948] text-sm font-medium mb-2">Auth Status</h4>
           <div className="text-xs text-white space-y-1">
-            <div>Loading: <span className={loading ? "text-yellow-400" : "text-green-400"}>{loading ? "Yes" : "No"}</span></div>
-            <div>User: <span className={user ? "text-green-400" : "text-red-400"}>{user ? "Logged in" : "Not logged in"}</span></div>
+            <div>Loading: <span className={loading ? "text-yellow-400" : "text-green-400"}>{loading ? "⏳" : "✓"}</span></div>
+            <div>User: <span className={user ? "text-green-400" : "text-red-400"}>{user ? "✓" : "✗"}</span></div>
             <div>Email: <span className="text-gray-300">{user?.email || "N/A"}</span></div>
-            <div>Role: <span className="text-gray-300">{user?.role || "N/A"}</span></div>
+            <div>Role: <span className="text-gray-300">{profile?.role || "N/A"}</span></div>
+            <div>Is Admin: <span className={isAdmin ? "text-green-400" : "text-gray-400"}>{isAdmin ? "✓" : "✗"}</span></div>
           </div>
         </div>
 

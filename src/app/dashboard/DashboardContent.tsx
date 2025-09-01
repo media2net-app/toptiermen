@@ -208,7 +208,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
 function DashboardContentInner({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, signOut } = useAuth();
+  const { user, profile, isAdmin, signOut } = useAuth();
   const { showDebug, toggleDebug } = useDebug();
   const { isOnboarding, isTransitioning } = useOnboarding();
   const isTestUser = useTestUser();
@@ -350,14 +350,14 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
       setShowForcedOnboarding(false);
       setShowTestUserVideo(false);
     }
-  }, [onboardingStatus, user?.role]);
+  }, [onboardingStatus, profile?.role]);
 
-  // 2.0.1: Enhanced logout with error recovery
+  // 2.0.3: Enhanced logout with proper redirect to prevent loops
   const handleLogout = async () => {
     if (isLoggingOut) return; // Prevent double click
     
     try {
-      console.log('2.0.1: Dashboard logout initiated...');
+      console.log('2.0.3: Dashboard logout initiated...');
       setIsLoggingOut(true);
       
       // Show loading state
@@ -366,28 +366,27 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
         logoutButton.setAttribute('disabled', 'true');
       }
       
-      // Perform logout
-      await signOut();
-      router.push('/login');
-      
-      // Note: If logout succeeds, it will redirect the page
-      // so we don't need to reset the loading state here
-      
-    } catch (error) {
-      console.error('2.0.1: Dashboard logout error:', error);
-      
-      // Show error message
+      // Clear any cached data
       if (typeof window !== 'undefined') {
-        alert('Er is een fout opgetreden bij het uitloggen. Probeer het opnieuw of ververs de pagina.');
+        localStorage.clear();
+        sessionStorage.clear();
       }
       
-      // Reset loading state only on error
-      setIsLoggingOut(false);
+      // Sign out from Supabase
+      await signOut();
       
-      // Re-enable button
-      const logoutButton = document.querySelector('[data-logout-button]');
-      if (logoutButton) {
-        logoutButton.removeAttribute('disabled');
+      // Force redirect with cache busting to prevent loops
+      if (typeof window !== 'undefined') {
+        const timestamp = Date.now();
+        window.location.href = `/login?t=${timestamp}`;
+      }
+      
+    } catch (error) {
+      console.error('2.0.3: Dashboard logout error:', error);
+      
+      // Emergency fallback - force redirect
+      if (typeof window !== 'undefined') {
+        window.location.href = `/login?t=${Date.now()}`;
       }
     }
   };
@@ -492,8 +491,8 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
                     {user?.email}
                   </p>
                   <p className="text-[#8BAE5A] text-xs">
-                    {user?.role?.toLowerCase() === 'admin' ? 'Admin' : 
-                     user?.role?.toLowerCase() === 'test' ? 'Test' :
+                    {profile?.role?.toLowerCase() === 'admin' ? 'Admin' : 
+                     profile?.role?.toLowerCase() === 'test' ? 'Test' :
                      user?.email?.toLowerCase().includes('test') ? 'Test' : 'Lid'}
                   </p>
                 </div>
@@ -501,7 +500,7 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
             </div>
             
             {/* Debug Toggle for Test Users */}
-            {(isTestUser || user?.role?.toLowerCase() === 'admin' || user?.email?.toLowerCase().includes('test')) && (
+            {(isTestUser || isAdmin || user?.email?.toLowerCase().includes('test')) && (
               <div className="mt-3 pt-3 border-t border-[#3A4D23]">
                 <button
                   onClick={toggleDebug}
@@ -556,7 +555,7 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
 
             <div className="flex items-center gap-2 sm:gap-4">
               {/* Admin Dashboard Button */}
-              {user?.role?.toLowerCase() === 'admin' && (
+              {isAdmin && (
                 <Link
                   href="/dashboard-admin"
                   className="px-2 sm:px-3 md:px-4 py-2 bg-[#8BAE5A] text-[#0A0F0A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold flex items-center gap-1 md:gap-2 text-xs sm:text-sm md:text-base"
@@ -708,7 +707,7 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
         <TestUserFeedback 
           isTestUser={isTestUser}
           currentPage={pathname || '/'}
-          userRole={user?.role}
+          userRole={profile?.role}
           onNoteCreated={(note) => {
             console.log('Test note created:', note);
           }}
