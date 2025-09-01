@@ -221,7 +221,7 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
 export default function AdminLayoutClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, loading, signOut } = useAuth();
+  const { user, profile, loading, signOut, isAdmin } = useAuth();
   const isAuthenticated = !!user;
   const { showDebug, setShowDebug } = useDebug();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -244,15 +244,16 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
 
   // Check admin role with better error handling - IMPROVED TO PREVENT LOOPS
   useEffect(() => {
-    if (!loading && user && user.role?.toLowerCase() !== 'admin') {
+    if (!loading && user && !isAdmin) {
       console.log('Admin: User is not admin, redirecting to dashboard');
-      console.log('User role:', user.role);
+      console.log('User role:', profile?.role);
+      console.log('Is admin:', isAdmin);
       // Use setTimeout to prevent immediate redirect loops
       setTimeout(() => {
         router.push('/dashboard');
       }, 100);
     }
-  }, [loading, user, router]);
+  }, [loading, user, profile, isAdmin, router]);
 
 
 
@@ -261,7 +262,7 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
     
     setIsLoggingOut(true);
     try {
-      console.log('Admin logout initiated...');
+      console.log('2.0.3: Admin logout initiated...');
       
       // Show loading state
       const logoutButton = document.querySelector('[data-admin-logout-button]');
@@ -269,24 +270,27 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
         logoutButton.setAttribute('disabled', 'true');
       }
       
-      // Logout and redirect
-      await signOut();
-      router.push('/login');
-      
-    } catch (error) {
-      console.error('Error logging out:', error);
-      
-      // Show error message
+      // Clear any cached data
       if (typeof window !== 'undefined') {
-        alert('Er is een fout opgetreden bij het uitloggen. Probeer het opnieuw.');
+        localStorage.clear();
+        sessionStorage.clear();
       }
       
-      setIsLoggingOut(false);
+      // Sign out from Supabase
+      await signOut();
       
-      // Re-enable button
-      const logoutButton = document.querySelector('[data-admin-logout-button]');
-      if (logoutButton) {
-        logoutButton.removeAttribute('disabled');
+      // Force redirect with cache busting to prevent loops
+      if (typeof window !== 'undefined') {
+        const timestamp = Date.now();
+        window.location.href = `/login?t=${timestamp}`;
+      }
+      
+    } catch (error) {
+      console.error('2.0.3: Admin logout error:', error);
+      
+      // Emergency fallback - force redirect
+      if (typeof window !== 'undefined') {
+        window.location.href = `/login?t=${Date.now()}`;
       }
     }
   };
@@ -317,14 +321,17 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
   // }
 
   // Show unauthorized message if not authenticated or not admin
-  if (!isAuthenticated || (user && user.role?.toLowerCase() !== 'admin')) {
-    console.log('Admin: Access denied - isAuthenticated:', isAuthenticated, 'user:', user?.email, 'role:', user?.role);
+  if (!isAuthenticated || (user && !isAdmin)) {
+    console.log('Admin: Access denied - isAuthenticated:', isAuthenticated, 'user:', user?.email, 'profile role:', profile?.role, 'isAdmin:', isAdmin);
     return (
       <div className="min-h-screen bg-[#181F17] flex items-center justify-center" suppressHydrationWarning>
         <div className="text-center">
           <div className="text-[#8BAE5A] text-xl mb-4">Toegang geweigerd</div>
           <div className="text-[#B6C948] text-sm mb-4">
             {!isAuthenticated ? 'Je bent niet ingelogd' : 'Je hebt geen admin rechten'}
+          </div>
+          <div className="text-gray-400 text-xs mb-4">
+            Debug: Email: {user?.email}, Role: {profile?.role}, IsAdmin: {isAdmin ? 'Yes' : 'No'}
           </div>
           <button
             onClick={() => window.location.reload()}

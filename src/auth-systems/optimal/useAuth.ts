@@ -44,7 +44,11 @@ export function useAuth(): AuthReturn {
 
   // Fetch user profile from database
   const fetchProfile = useCallback(async (userId: string): Promise<Profile | null> => {
+    console.log('🔍 ========== FETCHING PROFILE ==========');
+    console.log('👤 User ID:', userId);
+    
     try {
+      console.log('🔄 Querying profiles table...');
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -52,13 +56,20 @@ export function useAuth(): AuthReturn {
         .single();
 
       if (error) {
-        console.error('Profile fetch error:', error);
+        console.error('❌ Profile fetch error:', error);
+        console.log('📋 Error details:', error.message, error.code);
         return null;
       }
 
+      console.log('✅ Profile fetched successfully!');
+      console.log('📧 Email:', data?.email);
+      console.log('👨‍💼 Role:', data?.role);
+      console.log('👤 Full name:', data?.full_name);
+      console.log('📅 Created:', data?.created_at);
+      
       return data;
     } catch (err) {
-      console.error('Profile fetch failed:', err);
+      console.error('❌ Profile fetch exception:', err);
       return null;
     }
   }, []);
@@ -93,21 +104,28 @@ export function useAuth(): AuthReturn {
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('🔄 Auth state changed:', event);
+        console.log('🔄 ========== AUTH STATE CHANGE ==========');
+        console.log('📢 Event:', event);
+        console.log('👤 Session user:', !!session?.user, 'Email:', session?.user?.email);
 
         setUser(session?.user ?? null);
         setError(null);
 
         if (session?.user) {
-          console.log('👤 User signed in, fetching profile...');
+          console.log('👤 User signed in, fetching profile for ID:', session.user.id);
           const userProfile = await fetchProfile(session.user.id);
+          console.log('👨‍💼 Profile fetched - Exists:', !!userProfile, 'Role:', userProfile?.role, 'Email:', userProfile?.email);
           setProfile(userProfile);
-          console.log('✅ Profile loaded:', userProfile?.email);
+          
+          // Calculate isAdmin for debug
+          const isAdminCheck = userProfile?.role?.toLowerCase() === 'admin';
+          console.log('🎯 Admin check - Role:', userProfile?.role, '→ IsAdmin:', isAdminCheck);
         } else {
-          console.log('👋 User signed out');
+          console.log('👋 User signed out, clearing profile');
           setProfile(null);
         }
 
+        console.log('✅ Auth state change complete, setting loading to false');
         setLoading(false);
       }
     );
@@ -120,25 +138,33 @@ export function useAuth(): AuthReturn {
 
   // Auth methods
   const signIn = useCallback(async (email: string, password: string) => {
-    console.log('🔐 Optimal Auth: Sign in attempt...');
+    console.log('🔐 ========== SIGN IN ATTEMPT ==========');
+    console.log('📧 Email:', email);
+    console.log('📊 Current state before signIn - User:', !!user, 'Profile:', !!profile, 'Loading:', loading);
+    
     setLoading(true);
     setError(null);
 
     try {
+      console.log('🔄 Calling Supabase signInWithPassword...');
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
-        console.error('❌ Sign in error:', error);
+        console.error('❌ Supabase sign in error:', error);
         setError(error.message);
         setLoading(false);
         return { success: false, error: error.message };
       }
 
-      console.log('✅ Sign in successful');
-      // State will be updated by onAuthStateChange
+      console.log('✅ Supabase sign in successful!');
+      console.log('👤 Auth data user:', !!data.user, 'Email:', data.user?.email);
+      console.log('🔑 Session:', !!data.session);
+      
+      // Note: State will be updated by onAuthStateChange
+      console.log('⏳ Waiting for onAuthStateChange to update state...');
       return { success: true };
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Sign in failed';
@@ -147,7 +173,7 @@ export function useAuth(): AuthReturn {
       setLoading(false);
       return { success: false, error: errorMessage };
     }
-  }, []);
+  }, [user, profile, loading]);
 
   const signUp = useCallback(async (email: string, password: string, fullName: string) => {
     console.log('📝 Optimal Auth: Sign up attempt...');
@@ -240,8 +266,8 @@ export function useAuth(): AuthReturn {
 
   // Computed properties
   const isAuthenticated = !!user;
-  const isAdmin = profile?.role === 'ADMIN';
-  const isLid = profile?.role === 'LID';
+  const isAdmin = profile?.role?.toLowerCase() === 'admin';
+  const isLid = profile?.role?.toLowerCase() === 'lid';
 
   return {
     // State

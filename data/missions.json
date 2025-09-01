@@ -48,21 +48,6 @@
   ],
   "061e43d5-c89a-42bb-8a4c-04be2ce99a7e": [
     {
-      "id": "1753503735970",
-      "title": "20 push-ups",
-      "type": "Dagelijks",
-      "done": false,
-      "category": "Fitness & Gezondheid",
-      "icon": "💪",
-      "badge": "Custom Badge",
-      "progress": 0,
-      "shared": false,
-      "accountabilityPartner": null,
-      "xp_reward": 75,
-      "last_completion_date": "2025-07-28",
-      "created_at": "2025-07-26T04:22:15.970Z"
-    },
-    {
       "id": "1753505340337",
       "title": "Hier kan ik een nieuwe missie toevoegen",
       "type": "Dagelijks",

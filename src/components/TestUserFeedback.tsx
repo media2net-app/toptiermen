@@ -125,9 +125,12 @@ export default function TestUserFeedback({ isTestUser, currentPage, onNoteCreate
   }, [isTestUser]);
 
   const startScreenshotMode = () => {
-    console.log('🎯 Starting macOS-style screenshot mode...');
+    console.log('🎯 Starting mobile-friendly screenshot mode...');
     setIsScreenshotMode(true);
     setIsOpen(false);
+    
+    // Detect if mobile device
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
     
     // Create overlay
     const overlay = document.createElement('div');
@@ -140,12 +143,13 @@ export default function TestUserFeedback({ isTestUser, currentPage, onNoteCreate
       height: 100vh;
       background: rgba(0, 0, 0, 0.3);
       z-index: 9999;
-      cursor: crosshair;
+      cursor: ${isMobile ? 'default' : 'crosshair'};
       user-select: none;
       pointer-events: auto;
+      touch-action: none;
     `;
     
-    // Create instructions
+    // Create mobile-friendly instructions
     const instructions = document.createElement('div');
     instructions.style.cssText = `
       position: fixed;
@@ -157,17 +161,19 @@ export default function TestUserFeedback({ isTestUser, currentPage, onNoteCreate
       padding: 10px 20px;
       border-radius: 8px;
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      font-size: 14px;
+      font-size: ${isMobile ? '16px' : '14px'};
       z-index: 10000;
       pointer-events: none;
+      text-align: center;
+      max-width: 90vw;
     `;
-    instructions.textContent = 'Sleep om een gebied te selecteren';
+    instructions.textContent = isMobile ? 'Raak en sleep om een gebied te selecteren' : 'Sleep om een gebied te selecteren';
     
-    // Create escape hint
+    // Create mobile-friendly escape hint
     const escapeHint = document.createElement('div');
     escapeHint.style.cssText = `
       position: fixed;
-      bottom: 20px;
+      bottom: ${isMobile ? '60px' : '20px'};
       left: 50%;
       transform: translateX(-50%);
       background: rgba(0, 0, 0, 0.8);
@@ -175,34 +181,118 @@ export default function TestUserFeedback({ isTestUser, currentPage, onNoteCreate
       padding: 8px 16px;
       border-radius: 6px;
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      font-size: 12px;
+      font-size: ${isMobile ? '14px' : '12px'};
       z-index: 10000;
       pointer-events: none;
+      text-align: center;
     `;
-    escapeHint.textContent = 'Druk ESC om te annuleren';
+    escapeHint.textContent = isMobile ? 'Tik buiten selectie om te annuleren' : 'Druk ESC om te annuleren';
+    
+    // Create mobile toolbar
+    let mobileToolbar: HTMLDivElement | null = null;
+    if (isMobile) {
+      mobileToolbar = document.createElement('div');
+      mobileToolbar.className = 'screenshot-mobile-toolbar';
+      mobileToolbar.setAttribute('data-screenshot-element', 'true');
+      mobileToolbar.style.cssText = `
+        position: fixed;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.9);
+        color: white;
+        padding: 12px 20px;
+        border-radius: 25px;
+        font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        font-size: 14px;
+        z-index: 10001;
+        pointer-events: auto;
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      `;
+      
+      const cancelBtn = document.createElement('button');
+      cancelBtn.textContent = '✕ Annuleren';
+      cancelBtn.style.cssText = `
+        background: rgba(255,255,255,0.1);
+        border: none;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 15px;
+        font-size: 14px;
+        cursor: pointer;
+      `;
+      
+      const fullScreenBtn = document.createElement('button');
+      fullScreenBtn.textContent = '📱 Volledig scherm';
+      fullScreenBtn.style.cssText = `
+        background: rgba(0,122,255,0.8);
+        border: none;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 15px;
+        font-size: 14px;
+        cursor: pointer;
+      `;
+      
+      const tapModeBtn = document.createElement('button');
+      tapModeBtn.textContent = '👆 Tik element';
+      tapModeBtn.style.cssText = `
+        background: rgba(52,199,89,0.8);
+        border: none;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 15px;
+        font-size: 14px;
+        cursor: pointer;
+      `;
+      
+      mobileToolbar.appendChild(cancelBtn);
+      mobileToolbar.appendChild(fullScreenBtn);
+      mobileToolbar.appendChild(tapModeBtn);
+      
+      // Event listeners for mobile toolbar
+      cancelBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        stopScreenshotMode();
+      });
+      
+      fullScreenBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        captureFullScreenshot();
+      });
+      
+      tapModeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        enableTapToSelectMode();
+      });
+    }
     
     document.body.appendChild(overlay);
     document.body.appendChild(instructions);
     document.body.appendChild(escapeHint);
+    if (mobileToolbar) {
+      document.body.appendChild(mobileToolbar);
+    }
     
     overlayRef.current = overlay;
     
-    // Add event listeners
-    const handleMouseDown = (e: MouseEvent) => {
-      console.log('🎯 Mouse down:', e.clientX, e.clientY);
-      e.preventDefault();
-      e.stopPropagation();
+    // Add event listeners - support both mouse and touch events
+    const handlePointerStart = (clientX: number, clientY: number, eventType: string) => {
+      console.log(`🎯 ${eventType} start:`, clientX, clientY);
       
       isSelectingRef.current = true;
-      startPosRef.current = { x: e.clientX, y: e.clientY };
+      startPosRef.current = { x: clientX, y: clientY };
       
       // Create selection box
       const selectionBox = document.createElement('div');
       selectionBox.className = 'screenshot-selection-box';
       selectionBox.style.cssText = `
         position: fixed;
-        left: ${e.clientX}px;
-        top: ${e.clientY}px;
+        left: ${clientX}px;
+        top: ${clientY}px;
         width: 1px;
         height: 1px;
         border: 2px solid #007AFF;
@@ -218,14 +308,26 @@ export default function TestUserFeedback({ isTestUser, currentPage, onNoteCreate
       
       console.log('✅ Selection box created');
     };
-    
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isSelectingRef.current || !startPosRef.current || !selectionBoxRef.current) return;
-      
+
+    const handleMouseDown = (e: MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
+      handlePointerStart(e.clientX, e.clientY, 'Mouse');
+    };
+
+    const handleTouchStart = (e: TouchEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.touches.length > 0) {
+        const touch = e.touches[0];
+        handlePointerStart(touch.clientX, touch.clientY, 'Touch');
+      }
+    };
+    
+    const handlePointerMove = (clientX: number, clientY: number) => {
+      if (!isSelectingRef.current || !startPosRef.current || !selectionBoxRef.current) return;
       
-      const currentPos = { x: e.clientX, y: e.clientY };
+      const currentPos = { x: clientX, y: clientY };
       const startPos = startPosRef.current;
       
       const minX = Math.min(startPos.x, currentPos.x);
@@ -243,17 +345,31 @@ export default function TestUserFeedback({ isTestUser, currentPage, onNoteCreate
       
       console.log('📐 Selection box updated:', { width, height });
     };
-    
-    const handleMouseUp = (e: MouseEvent) => {
-      console.log('🎯 Mouse up:', e.clientX, e.clientY);
-      if (!isSelectingRef.current || !startPosRef.current) return;
-      
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isSelectingRef.current) return;
       e.preventDefault();
       e.stopPropagation();
+      handlePointerMove(e.clientX, e.clientY);
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!isSelectingRef.current) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.touches.length > 0) {
+        const touch = e.touches[0];
+        handlePointerMove(touch.clientX, touch.clientY);
+      }
+    };
+    
+    const handlePointerEnd = (clientX: number, clientY: number, eventType: string) => {
+      console.log(`🎯 ${eventType} end:`, clientX, clientY);
+      if (!isSelectingRef.current || !startPosRef.current) return;
       
       isSelectingRef.current = false;
       
-      const currentPos = { x: e.clientX, y: e.clientY };
+      const currentPos = { x: clientX, y: clientY };
       const startPos = startPosRef.current;
       
       const minX = Math.min(startPos.x, currentPos.x);
@@ -266,8 +382,12 @@ export default function TestUserFeedback({ isTestUser, currentPage, onNoteCreate
       
       console.log('📐 Final selection:', { width, height });
       
+      // Lower minimum size for mobile devices (finger selection is less precise)
+      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+      const minSize = isMobileDevice ? 10 : 20;
+      
       // Only accept selection if it's large enough
-      if (width > 20 && height > 20) {
+      if (width > minSize && height > minSize) {
         setSelectedArea({ x: minX, y: minY, width, height });
         console.log('✅ Valid selection made, opening form');
         stopScreenshotMode();
@@ -282,6 +402,23 @@ export default function TestUserFeedback({ isTestUser, currentPage, onNoteCreate
       
       startPosRef.current = null;
     };
+
+    const handleMouseUp = (e: MouseEvent) => {
+      if (!isSelectingRef.current) return;
+      e.preventDefault();
+      e.stopPropagation();
+      handlePointerEnd(e.clientX, e.clientY, 'Mouse');
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (!isSelectingRef.current) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.changedTouches.length > 0) {
+        const touch = e.changedTouches[0];
+        handlePointerEnd(touch.clientX, touch.clientY, 'Touch');
+      }
+    };
     
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -290,10 +427,16 @@ export default function TestUserFeedback({ isTestUser, currentPage, onNoteCreate
       }
     };
     
-    // Add event listeners
+    // Add event listeners - both mouse and touch
     overlay.addEventListener('mousedown', handleMouseDown);
     overlay.addEventListener('mousemove', handleMouseMove);
     overlay.addEventListener('mouseup', handleMouseUp);
+    
+    // Touch events for mobile support
+    overlay.addEventListener('touchstart', handleTouchStart, { passive: false });
+    overlay.addEventListener('touchmove', handleTouchMove, { passive: false });
+    overlay.addEventListener('touchend', handleTouchEnd, { passive: false });
+    
     document.addEventListener('keydown', handleKeyDown);
     
     // Store cleanup function
@@ -304,9 +447,89 @@ export default function TestUserFeedback({ isTestUser, currentPage, onNoteCreate
     overlay.dataset.keyDown = handleKeyDown.toString();
   };
 
+  const captureFullScreenshot = async () => {
+    console.log('📱 Capturing full screenshot...');
+    try {
+      // Set full screen area
+      setSelectedArea({ 
+        x: 0, 
+        y: 0, 
+        width: window.innerWidth, 
+        height: window.innerHeight 
+      });
+      
+      // Stop screenshot mode and open form
+      stopScreenshotMode();
+      setIsOpen(true);
+      
+      console.log('✅ Full screenshot area set');
+    } catch (error) {
+      console.error('❌ Error capturing full screenshot:', error);
+    }
+  };
+
+  const enableTapToSelectMode = () => {
+    console.log('👆 Enabling tap-to-select mode...');
+    
+    // Remove current overlay
+    if (overlayRef.current) {
+      overlayRef.current.remove();
+    }
+    
+    // Update instructions
+    const instructions = document.querySelector('.screenshot-overlay') || 
+                        document.createElement('div');
+    instructions.textContent = 'Tik op een element om het te selecteren';
+    
+    // Add element highlighting on hover/touch
+    const highlightElement = (element: HTMLElement) => {
+      element.style.outline = '3px solid #007AFF';
+      element.style.outlineOffset = '2px';
+    };
+    
+    const removeHighlight = (element: HTMLElement) => {
+      element.style.outline = '';
+      element.style.outlineOffset = '';
+    };
+    
+    // Add event listeners to all elements
+    const elements = document.querySelectorAll('*:not([data-screenshot-element])');
+    elements.forEach(el => {
+      const element = el as HTMLElement;
+      
+      const handleTouch = (e: Event) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const rect = element.getBoundingClientRect();
+        setSelectedElement(element);
+        setSelectedArea({
+          x: rect.left,
+          y: rect.top,
+          width: rect.width,
+          height: rect.height
+        });
+        
+        console.log('✅ Element selected via tap:', element.tagName);
+        stopScreenshotMode();
+        setIsOpen(true);
+      };
+      
+      element.addEventListener('click', handleTouch);
+      element.addEventListener('touchend', handleTouch);
+      element.addEventListener('mouseenter', () => highlightElement(element));
+      element.addEventListener('mouseleave', () => removeHighlight(element));
+      element.addEventListener('touchstart', () => highlightElement(element));
+    });
+  };
+
   const stopScreenshotMode = () => {
     console.log('🛑 Stopping screenshot mode...');
     setIsScreenshotMode(false);
+    
+    // Remove overlay and all child elements
+    const screenshotElements = document.querySelectorAll('.screenshot-overlay, .screenshot-selection-box, [data-screenshot-element]');
+    screenshotElements.forEach(el => el.remove());
     
     // Remove overlay
     if (overlayRef.current) {
@@ -333,8 +556,8 @@ export default function TestUserFeedback({ isTestUser, currentPage, onNoteCreate
     });
     
     // Also remove any elements with specific styles that match our screenshot elements
-    const screenshotElements = document.querySelectorAll('div[style*="position: fixed"][style*="z-index: 10000"]');
-    screenshotElements.forEach(element => {
+    const additionalElements = document.querySelectorAll('div[style*="position: fixed"][style*="z-index: 10000"]');
+    additionalElements.forEach(element => {
       if (element.textContent === 'Sleep om een gebied te selecteren' || 
           element.textContent === 'Druk ESC om te annuleren') {
         console.log('🧹 Removing screenshot element by style:', element.textContent);
@@ -574,7 +797,7 @@ export default function TestUserFeedback({ isTestUser, currentPage, onNoteCreate
         }}
         disabled={isScreenshotMode}
         className="fixed right-4 bottom-20 z-50 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        title="Screenshot maken (macOS-style)"
+        title="Bug melden met screenshot (mobiel-vriendelijk)"
       >
         <CameraIcon className="w-6 h-6" />
       </button>

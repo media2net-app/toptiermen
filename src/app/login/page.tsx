@@ -9,7 +9,7 @@ import { EnvelopeIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user, profile, loading, signIn } = useAuth();
+  const { user, profile, loading, signIn, isAdmin } = useAuth();
   // const { bustCache } = useCacheBuster(); - DISABLED TO PREVENT LOGOUT
   
   const [email, setEmail] = useState("");
@@ -18,6 +18,7 @@ function LoginPageContent() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
+  const [isClient, setIsClient] = useState(false);
 
   // Forgot password states
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -26,6 +27,9 @@ function LoginPageContent() {
   const [resetMessage, setResetMessage] = useState("");
 
   useEffect(() => { 
+    // 2.0.3: Client-side hydration safety
+    setIsClient(true);
+    
     // 2.0.1: Simplified initialization
     console.log('🔍 Login page initialized');
     console.log('🌐 Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
@@ -51,31 +55,63 @@ function LoginPageContent() {
 
   // Check if user is already authenticated - IMPROVED TO PREVENT LOOPS
   useEffect(() => {
-    if (loading) return;
+    console.log('🔄 ========== REDIRECT EFFECT TRIGGERED ==========');
+    console.log('📊 Current state - Loading:', loading, 'User:', !!user, 'Profile:', !!profile, 'Redirecting:', redirecting, 'IsAdmin:', isAdmin);
+    console.log('👤 User email:', user?.email);
+    console.log('👨‍💼 Profile role:', profile?.role);
     
-    if (user && !redirecting) {
-      console.log('2.0.1: User already authenticated:', profile?.role);
-      setRedirecting(true);
-      
-      // Check for redirect parameter first
-      const redirectTo = searchParams?.get('redirect');
-      let targetPath = '/dashboard';
-      
-      if (redirectTo && redirectTo !== '/login') {
-        targetPath = redirectTo;
-      } else {
-        // Default redirect based on user role
-        targetPath = profile?.role?.toLowerCase() === 'admin' ? '/dashboard-admin' : '/dashboard';
-      }
-
-      console.log('2.0.1: Redirecting to:', targetPath);
-      
-      // Use setTimeout to prevent immediate redirect loops
-      setTimeout(() => {
-        router.replace(targetPath);
-      }, 100);
+    if (loading) {
+      console.log('⏳ Still loading, skipping redirect check');
+      return;
     }
-  }, [loading, user, profile, router, searchParams, redirecting]);
+    
+    // Redirect when we have user (and optionally profile)
+    if (user && !redirecting) {
+      console.log('✅ User authenticated, checking for redirect...');
+      
+      // If we have both user and profile, use the role-based redirect
+      if (profile) {
+        console.log('🎯 User + profile authenticated - Role:', profile?.role, 'IsAdmin:', isAdmin);
+        setRedirecting(true);
+        
+        // Check for redirect parameter first
+        const redirectTo = searchParams?.get('redirect');
+        let targetPath = '/dashboard';
+        
+        if (redirectTo && redirectTo !== '/login') {
+          targetPath = redirectTo;
+          console.log('🔀 Using redirect parameter:', targetPath);
+        } else {
+          // Default redirect based on user role
+          targetPath = isAdmin ? '/dashboard-admin' : '/dashboard';
+          console.log('🎯 Role-based redirect - IsAdmin:', isAdmin, '→', targetPath);
+        }
+
+        console.log('🚀 REDIRECTING TO:', targetPath);
+        router.replace(targetPath);
+      } 
+      // If we only have user (no profile yet), wait a moment then redirect to default
+      else {
+        console.log('⏳ User authenticated but no profile yet, starting timeout...');
+        setTimeout(() => {
+          console.log('⏰ Profile timeout check - User:', !!user, 'Profile:', !!profile, 'Redirecting:', redirecting);
+          if (user && !profile && !redirecting) {
+            console.log('⚠️ Profile loading timeout, redirecting to default dashboard');
+            setRedirecting(true);
+            
+            const redirectTo = searchParams?.get('redirect');
+            const targetPath = (redirectTo && redirectTo !== '/login') ? redirectTo : '/dashboard';
+            console.log('🚀 TIMEOUT REDIRECT TO:', targetPath);
+            router.replace(targetPath);
+          }
+        }, 2000); // Wait 2 seconds for profile
+      }
+    } else if (!user) {
+      console.log('❌ No user authenticated');
+    } else if (redirecting) {
+      console.log('🔄 Already redirecting, skipping');
+    }
+  }, [loading, user, profile, router, searchParams, redirecting, isAdmin]);
 
   // 2.0.1: Force show login form after 2 seconds if still loading - DISABLED TO FIX FLICKERING
   // useEffect(() => {
@@ -92,13 +128,21 @@ function LoginPageContent() {
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     
-    console.log('🔍 Login attempt started...');
+    console.log('🚀 ========== LOGIN ATTEMPT STARTED ==========');
     console.log('📧 Email:', email);
     console.log('🔑 Password length:', password.length);
     console.log('💾 Remember me:', rememberMe);
+    console.log('📊 Current auth state - User:', !!user, 'Profile:', !!profile, 'Loading:', loading, 'IsAdmin:', isAdmin);
+    console.log('🔄 Current redirecting state:', redirecting);
     
     if (!email || !password) {
+      console.log('❌ Validation failed: Missing email or password');
       setError("Vul alle velden in");
+      return;
+    }
+
+    if (isLoading) {
+      console.log('⚠️ Already loading, ignoring click');
       return;
     }
 
@@ -106,24 +150,45 @@ function LoginPageContent() {
     setError("");
     
     try {
-      console.log('🔄 Calling signIn function...');
+      console.log('🔄 Step 1: Calling signIn function...');
       const result = await signIn(email, password);
-      console.log('📋 SignIn result:', result);
+      console.log('📋 Step 2: SignIn result received:', result);
 
       if (!result.success) {
-        console.error('❌ Sign in error:', result.error);
+        console.error('❌ Step 3: Sign in failed:', result.error);
         setError(result.error || "Ongeldige inloggegevens");
         setIsLoading(false);
         return;
       }
 
-      console.log('✅ Login successful, redirecting...');
-      setRedirecting(true);
+      console.log('✅ Step 3: Login successful! Setting up redirect...');
+      console.log('📊 Auth state after login - User:', !!user, 'Profile:', !!profile, 'IsAdmin:', isAdmin);
       
-      // Wait a moment for auth state to update, then redirect will happen via useEffect
+      setRedirecting(true);
+      setIsLoading(false); // Reset loading state
+      
+      console.log('⏰ Step 4: Starting redirect monitoring...');
+      
+      // Monitor auth state changes for 5 seconds
+      let attempts = 0;
+      const checkInterval = setInterval(() => {
+        attempts++;
+        console.log(`🔍 Redirect check #${attempts} - User:`, !!user, 'Profile:', !!profile, 'IsAdmin:', isAdmin);
+        
+        if (attempts >= 10) { // 5 seconds
+          console.log('⏰ Redirect timeout reached, forcing redirect to dashboard');
+          clearInterval(checkInterval);
+          router.replace('/dashboard');
+        }
+      }, 500);
+      
+      // Clear interval if redirect happens via useEffect
+      setTimeout(() => {
+        clearInterval(checkInterval);
+      }, 5000);
       
     } catch (error: any) {
-      console.error('❌ Login error:', error);
+      console.error('❌ Login error caught:', error);
       setError(error.message || "Er is een fout opgetreden bij het inloggen");
       setIsLoading(false);
     }
@@ -171,6 +236,18 @@ function LoginPageContent() {
     } finally {
       setIsSendingReset(false);
     }
+  }
+
+  // Hydration safety - prevent hydration errors
+  if (!isClient) {
+    return (
+      <div className="min-h-screen flex items-center justify-center relative px-4 py-6" style={{ backgroundColor: '#181F17' }}>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#B6C948] mx-auto mb-4"></div>
+          <p className="text-[#B6C948] text-lg">Laden...</p>
+        </div>
+      </div>
+    );
   }
 
   // Show loading state while checking authentication (with timeout) - DISABLED TO FIX FLICKERING
