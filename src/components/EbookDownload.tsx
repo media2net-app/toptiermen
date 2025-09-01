@@ -15,6 +15,7 @@ interface EbookDownloadProps {
   lessonId: string;
   lessonTitle: string;
   moduleTitle: string;
+  moduleNumber?: string;
   ebookUrl: string;
   isCompleted?: boolean;
 }
@@ -23,6 +24,7 @@ export default function EbookDownload({
   lessonId,
   lessonTitle,
   moduleTitle,
+  moduleNumber,
   ebookUrl,
   isCompleted = false
 }: EbookDownloadProps) {
@@ -139,10 +141,10 @@ export default function EbookDownload({
               )}
             </div>
             
-            <p className="text-sm text-gray-600 mb-4">
-              Download het uitgebreide ebook voor <strong>{lessonTitle}</strong> uit de module <strong>{moduleTitle}</strong>. 
-              Dit ebook bevat extra lesmateriaal, praktische oefeningen en reflectie vragen.
-            </p>
+                                    <p className="text-sm text-gray-600 mb-4">
+                          Download het uitgebreide ebook voor <strong>{lessonTitle}</strong> uit de module <strong>{moduleNumber ? `Module ${moduleNumber}: ` : ''}{moduleTitle}</strong>. 
+                          Dit ebook bevat extra lesmateriaal, praktische oefeningen en reflectie vragen.
+                        </p>
             
             <div className="bg-gray-50 rounded-lg p-4 mb-4">
               <h4 className="text-sm font-medium text-gray-900 mb-2">Wat krijg je in dit ebook?</h4>
