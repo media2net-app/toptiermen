@@ -284,10 +284,15 @@ export default function LessonDetailPage() {
     );
   }
 
+  // Get module number based on order_index
+  const getModuleNumber = (orderIndex: number) => {
+    return orderIndex.toString().padStart(2, '0');
+  };
+
   return (
     <PageLayout 
       title={lesson.title}
-      subtitle={`Module: ${module.title}`}
+      subtitle={`Module ${getModuleNumber(module.order_index)}: ${module.title}`}
     >
       <div className="w-full">
         {/* Navigation */}
@@ -325,7 +330,7 @@ export default function LessonDetailPage() {
           <Breadcrumb 
             items={[
               { label: 'Academy', href: '/dashboard/academy' },
-              { label: module.title, href: `/dashboard/academy/${module.id}` },
+              { label: `Module ${getModuleNumber(module.order_index)}: ${module.title}`, href: `/dashboard/academy/${module.id}` },
               { label: lesson.title, isCurrent: true }
             ]}
           />
@@ -439,6 +444,7 @@ export default function LessonDetailPage() {
             lessonId={lesson.id}
             lessonTitle={lesson.title}
             moduleTitle={module.title}
+            moduleNumber={getModuleNumber(module.order_index)}
             ebookUrl={ebook.file_url}
             isCompleted={completed}
           />
