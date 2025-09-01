@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import { AuthProvider } from '@/auth-systems/optimal/AuthProvider';
+import { SupabaseAuthProvider } from '@/contexts/SupabaseAuthContext';
 // import { V2StateProvider } from '@/contexts/V2StateContext';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 // import { CacheBuster } from '@/components/CacheBuster'; - DISABLED TO PREVENT LOGOUT
@@ -85,9 +85,9 @@ export default function RootLayout({
         <ErrorBoundary>
           {/* <CacheBuster version="3.0.0" forceRefresh={true} /> - DISABLED TO PREVENT LOGOUT */}
           {/* <V2StateProvider> */}
-            <AuthProvider>
+            <SupabaseAuthProvider>
               {children}
-            </AuthProvider>
+            </SupabaseAuthProvider>
           {/* </V2StateProvider> */}
         </ErrorBoundary>
       </body>

@@ -5,7 +5,7 @@ import { CameraIcon, TrashIcon, PlusIcon, UserGroupIcon, TrophyIcon, FireIcon, B
 import CropModal from '../../../components/CropModal';
 import BadgeDisplay from '@/components/BadgeDisplay';
 import { toast } from 'react-hot-toast';
-import { useAuth } from '@/auth-systems/optimal/useAuth';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { supabase } from '@/lib/supabase';
 import { convertHeicToJpeg, isHeicFile } from '@/lib/heic-converter';
 
@@ -54,7 +54,7 @@ const interestOptions = [
 ];
 
 export default function MijnProfiel() {
-  const { user, signOut } = useAuth();
+  const { user, signOut } = useSupabaseAuth();
   const [activeTab, setActiveTab] = useState('publiek');
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);

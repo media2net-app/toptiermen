@@ -8,7 +8,7 @@ import {
   ArrowRightIcon,
   XMarkIcon
 } from '@heroicons/react/24/outline';
-import { useAuth } from '@/auth-systems/optimal/useAuth';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 
@@ -25,7 +25,7 @@ export default function EmailVerificationModal({
   onVerified, 
   onClose 
 }: EmailVerificationModalProps) {
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   const router = useRouter();
   const [isVerified, setIsVerified] = useState(false);
   const [isChecking, setIsChecking] = useState(false);

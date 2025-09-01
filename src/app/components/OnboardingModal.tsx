@@ -13,7 +13,7 @@ import {
   FireIcon,
   HeartIcon
 } from '@heroicons/react/24/outline';
-import { useAuth } from '@/auth-systems/optimal/useAuth';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { toast } from 'react-hot-toast';
 
 interface OnboardingStatus {
@@ -77,7 +77,7 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
     nutritionPlans: [],
     challenges: []
   });
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useSupabaseAuth();
   const [onboardingStatus, setOnboardingStatus] = useState<OnboardingStatus | null>(null);
   const [currentStep, setCurrentStep] = useState(0); // 0 = welcome video, 1-5 = steps
   const [loading, setLoading] = useState(false);

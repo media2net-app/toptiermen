@@ -5,7 +5,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/auth-systems/optimal/useAuth';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
 interface LogoutButtonProps {
   className?: string;
@@ -21,7 +21,7 @@ export function LogoutButton({
   showConfirm = true
 }: LogoutButtonProps) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const { signOut } = useAuth();
+  const { signOut } = useSupabaseAuth();
   const router = useRouter();
 
   const handleLogout = async () => {

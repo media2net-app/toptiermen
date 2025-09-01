@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/auth-systems/optimal/useAuth';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useRouter } from 'next/navigation';
 import { 
   CheckCircleIcon, 
@@ -31,7 +31,7 @@ interface Statistics {
 }
 
 export default function OnboardingOverviewPage() {
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
   const [statistics, setStatistics] = useState<Statistics | null>(null);

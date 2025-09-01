@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/auth-systems/optimal/useAuth';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
 interface AuthDebugPanelProps {
   isVisible?: boolean;
 }
 
 export default function AuthDebugPanel({ isVisible = false }: AuthDebugPanelProps) {
-  const { user, profile, loading, error } = useAuth();
+  const { user, profile, loading, error } = useSupabaseAuth();
   const [debugInfo, setDebugInfo] = useState<any>({});
   const [isExpanded, setIsExpanded] = useState(false);
 

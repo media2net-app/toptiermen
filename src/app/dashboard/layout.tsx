@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/auth-systems/optimal/useAuth';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 // import { useV2State } from '@/contexts/V2StateContext';
 // import { useV2Monitoring } from '@/lib/v2-monitoring';
 // import { useV2ErrorRecovery } from '@/lib/v2-error-recovery';
@@ -16,7 +16,7 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { user, loading, signOut } = useAuth();
+  const { user, loading, signOut } = useSupabaseAuth();
   const router = useRouter();
   const [userProfile, setUserProfile] = useState<any>(null);
 

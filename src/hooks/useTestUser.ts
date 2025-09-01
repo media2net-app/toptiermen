@@ -1,8 +1,8 @@
-import { useAuth } from '@/auth-systems/optimal/useAuth';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useState, useEffect } from 'react';
 
 export function useTestUser() {
-  const { user, profile } = useAuth();
+  const { user, profile } = useSupabaseAuth();
   const [isTestUser, setIsTestUser] = useState(false);
 
   useEffect(() => {

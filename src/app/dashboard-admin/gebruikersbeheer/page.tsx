@@ -13,7 +13,7 @@ import {
   TrophyIcon,
   ClockIcon
 } from '@heroicons/react/24/outline';
-import { useAuth } from '@/auth-systems/optimal/useAuth';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { AdminCard, AdminStatsCard, AdminTable, AdminButton } from '../../../components/admin';
 
 interface User {
@@ -33,7 +33,7 @@ interface User {
 // Users are now loaded from database via fetchUsers()
 
 export default function Gebruikersbeheer() {
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);

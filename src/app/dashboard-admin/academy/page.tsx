@@ -26,7 +26,7 @@ import {
 import { toast } from 'react-hot-toast';
 import { supabase } from '@/lib/supabase';
 import { useDebug } from '@/contexts/DebugContext';
-import { useAuth } from '@/auth-systems/optimal/useAuth';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import dynamic from 'next/dynamic';
 import VideoUpload from '@/components/VideoUpload';
 import AcademyVideoUpload from '@/components/AcademyVideoUpload';
@@ -49,7 +49,7 @@ export default function AcademyManagement() {
   const [modules, setModules] = useState<any[]>([]);
   const [lessons, setLessons] = useState<any[]>([]);
   const { showDebug } = useDebug();
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
 
   // Module form state
   const [moduleForm, setModuleForm] = useState({
