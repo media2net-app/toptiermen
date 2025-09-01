@@ -8,6 +8,7 @@ import Link from 'next/link';
 import BadgeDisplay from '@/components/BadgeDisplay';
 import UserTasksWidget from '@/components/UserTasksWidget';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import DashboardLoadingModal from '@/components/ui/DashboardLoadingModal';
 
 
 // Force dynamic rendering to prevent navigator errors
@@ -82,7 +83,7 @@ const getGreeting = () => {
 
 export default function Dashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [loading, setLoading] = useState(false); // DISABLED TO FIX FLICKERING
+  const [loading, setLoading] = useState(true); // RE-ENABLED WITH LOADING MODAL
   const [fadeIn, setFadeIn] = useState(false);
   const [userBadges, setUserBadges] = useState<Array<{
     id: string;
@@ -103,7 +104,7 @@ export default function Dashboard() {
       if (!user?.id) return;
 
       try {
-        // setLoading(true); // DISABLED TO FIX FLICKERING
+        setLoading(true); // RE-ENABLED WITH LOADING MODAL
         
         const response = await fetch(`/api/dashboard-stats`, {
           method: 'POST',
@@ -157,7 +158,7 @@ export default function Dashboard() {
         });
         setUserBadges([]);
       } finally {
-        // setLoading(false); // DISABLED TO FIX FLICKERING
+        setLoading(false); // RE-ENABLED WITH LOADING MODAL
       }
     };
 
@@ -172,18 +173,15 @@ export default function Dashboard() {
     }
   }, [loading]);
 
-  // if (loading) {
-  //   return (
-  //     <div className="min-h-screen bg-gradient-to-br from-[#0F1411] via-[#181F17] to-[#232D1A] flex items-center justify-center">
-  //       <ClientLayout>
-  //         <div className="text-center w-full">
-  //           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#8BAE5A] mx-auto"></div>
-  //           <p className="text-white mt-4 text-lg">Dashboard laden...</p>
-  //         </div>
-  //       </ClientLayout>
-  //     </div>
-  //   );
-  // }
+  // Show loading modal while data is being fetched
+  if (loading) {
+    return (
+      <DashboardLoadingModal 
+        isOpen={loading} 
+        message="Jouw persoonlijke dashboard wordt geladen..."
+      />
+    );
+  }
 
   return (
     <div className={`min-h-screen bg-gradient-to-br from-[#0F1411] via-[#181F17] to-[#232D1A] transition-opacity duration-1000 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
@@ -205,13 +203,16 @@ export default function Dashboard() {
               maxDisplay={6}
               showTitle={true}
               size="md"
+              loading={loading}
             />
           </div>
 
           {/* User Tasks Widget */}
-          <div className="mb-6 sm:mb-8">
-            <UserTasksWidget userName={profile?.full_name || ''} />
-          </div>
+          {!loading && (
+            <div className="mb-6 sm:mb-8">
+              <UserTasksWidget userName={profile?.full_name || ''} />
+            </div>
+          )}
 
           {/* Dashboard Content */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8 animate-fade-in-up">

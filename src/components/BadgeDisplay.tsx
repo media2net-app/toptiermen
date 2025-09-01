@@ -19,13 +19,15 @@ interface BadgeDisplayProps {
   maxDisplay?: number;
   showTitle?: boolean;
   size?: 'sm' | 'md' | 'lg';
+  loading?: boolean;
 }
 
 export default function BadgeDisplay({ 
   badges, 
   maxDisplay = 6, 
   showTitle = true, 
-  size = 'md' 
+  size = 'md',
+  loading = false
 }: BadgeDisplayProps) {
   const [hoveredBadge, setHoveredBadge] = useState<Badge | null>(null);
 
@@ -58,7 +60,26 @@ export default function BadgeDisplay({
     }
   };
 
-  // Show demo badges if no real badges exist
+  // Show loading state, empty state, or demo badges
+  if (loading) {
+    return (
+      <div className="relative">
+        {showTitle && (
+          <div className="flex items-center gap-2 mb-3">
+            <h3 className="text-lg font-semibold text-[#8BAE5A]">Behaalde Badges</h3>
+            <div className="animate-pulse bg-[#3A4D23]/20 rounded h-5 w-8"></div>
+          </div>
+        )}
+        <div className="flex flex-wrap gap-2">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="w-12 h-12 bg-[#3A4D23]/20 rounded-full animate-pulse"></div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Show demo badges if no real badges exist (only when not loading)
   const displayBadges = badges.length === 0 ? [
     {
       id: 'demo-1',
