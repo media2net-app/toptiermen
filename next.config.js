@@ -2,7 +2,8 @@
 const nextConfig = {
   // Performance optimizations
   experimental: {
-    optimizeCss: true,
+    // optimizeCss disabled to prevent chunk resolution issues during build
+    // optimizeCss: true,
     optimizePackageImports: ['@heroicons/react'],
   },
   

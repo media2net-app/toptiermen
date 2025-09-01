@@ -34,7 +34,21 @@ export async function POST(request: NextRequest) {
       console.log('✅ Verified update:', verifyData);
     }
 
-    console.log('✅ User role updated successfully');
+    console.log('✅ User role updated in profiles');
+
+    // Sync auth.users metadata role for immediate client recognition
+    try {
+      const { error: authUpdateError } = await (supabaseAdmin as any).auth.admin.updateUserById(userId, {
+        user_metadata: { role }
+      });
+      if (authUpdateError) {
+        console.error('⚠️ Failed to sync auth user metadata role:', authUpdateError);
+      } else {
+        console.log('✅ Synced auth.user_metadata.role');
+      }
+    } catch (e) {
+      console.error('⚠️ Exception syncing auth.user_metadata.role:', e);
+    }
     
     return NextResponse.json({
       success: true,
