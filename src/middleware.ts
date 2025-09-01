@@ -4,20 +4,14 @@ import type { NextRequest } from 'next/server';
 export function middleware(request: NextRequest) {
   const response = NextResponse.next();
 
-  // MODERATE cache-busting for login and auth routes - REMOVED Clear-Site-Data to prevent logout
+  // SIMPLIFIED cache-busting for auth routes - preserve sessions
   if (request.nextUrl.pathname === '/login' || 
       request.nextUrl.pathname.startsWith('/auth') ||
       request.nextUrl.pathname === '/logout') {
-    response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0');
-    response.headers.set('Pragma', 'no-cache');
-    response.headers.set('Expires', '0');
-    response.headers.set('Surrogate-Control', 'no-store');
+    response.headers.set('Cache-Control', 'no-cache, must-revalidate');
     response.headers.set('X-TTM-Version', '3.0.0');
-    response.headers.set('X-Cache-Bust', Date.now().toString());
-    response.headers.set('X-Frame-Options', 'DENY');
-    response.headers.set('X-Content-Type-Options', 'nosniff');
-    response.headers.set('X-Session-Preserve', 'true'); 
-    // REMOVED: response.headers.set('Clear-Site-Data', '"cache", "storage"'); - This was causing automatic logout
+    response.headers.set('X-Session-Preserve', 'true');
+    // Removed aggressive cache headers that interfere with auth
   }
 
   // Moderate cache-busting for dashboard routes
