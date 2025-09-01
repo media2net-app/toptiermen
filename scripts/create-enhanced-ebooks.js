@@ -787,6 +787,231 @@ const enhancedDisciplineContent = {
   }
 };
 
+// Enhanced ebook content for Module 3: Fysieke Dominantie (15+ pages)
+const enhancedPhysicalContent = {
+  'Waarom is fysieke dominantie zo belangrijk?': {
+    title: 'Waarom is fysieke dominantie zo belangrijk?',
+    subtitle: 'De Kracht van Fysieke Aanwezigheid',
+    pages: [
+      {
+        title: 'Introductie',
+        content: `
+          <div class="page-header">
+            <h2>Introductie</h2>
+            <p class="lead">Fysieke dominantie is niet alleen over spieren - het is over de energie die je uitstraalt en hoe anderen je waarnemen.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>Wat je gaat leren in dit ebook:</h3>
+            <ul class="learning-objectives">
+              <li>De wetenschap achter fysieke dominantie en status</li>
+              <li>Hoe je lichaamstaal je sociale positie beïnvloedt</li>
+              <li>De psychologie van fysieke aanwezigheid</li>
+              <li>Praktische oefeningen om je dominantie te versterken</li>
+              <li>Een 30-dagen fysieke dominantie transformatie</li>
+            </ul>
+          </div>
+          
+          <div class="info-box">
+            <h4>💡 Wist je dat?</h4>
+            <p>Mensen beoordelen je status binnen 7 seconden van ontmoeting, grotendeels gebaseerd op je fysieke aanwezigheid en lichaamstaal.</p>
+          </div>
+        `
+      },
+      {
+        title: 'De Wetenschap van Dominantie',
+        content: `
+          <div class="page-header">
+            <h2>De Wetenschap van Dominantie</h2>
+            <p class="lead">Begrijp hoe je lichaam en geest samenwerken om dominantie te creëren.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>Hormonale Basis van Dominantie</h3>
+            <div class="hormone-flow">
+              <div class="hormone-step">
+                <div class="step-number">1</div>
+                <p><strong>Testosteron</strong> - Verhoogt dominantie en assertiviteit</p>
+              </div>
+              <div class="hormone-step">
+                <div class="step-number">2</div>
+                <p><strong>Cortisol</strong> - Lage niveaus = minder stress, meer dominantie</p>
+              </div>
+              <div class="hormone-step">
+                <div class="step-number">3</div>
+                <p><strong>Serotonine</strong> - Verhoogt zelfvertrouwen en sociale status</p>
+              </div>
+            </div>
+            
+            <h3>Neurologische Factoren</h3>
+            <div class="neuro-grid">
+              <div class="neuro-card">
+                <h4>🧠 Prefrontale Cortex</h4>
+                <p>Reguleert sociale gedrag en besluitvorming</p>
+              </div>
+              <div class="neuro-card">
+                <h4>⚡ Amygdala</h4>
+                <p>Verwerkt angst en bedreigingen</p>
+              </div>
+              <div class="neuro-card">
+                <h4>🎯 Basale Ganglia</h4>
+                <p>Controleert beweging en houding</p>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        title: 'Lichaamstaal van Dominantie',
+        content: `
+          <div class="page-header">
+            <h2>Lichaamstaal van Dominantie</h2>
+            <p class="lead">Je lichaamstaal communiceert meer dan je woorden. Leer de taal van dominantie.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>Power Poses en Hun Effect</h3>
+            <div class="pose-comparison">
+              <div class="pose-section">
+                <h4>✅ Dominante Poses</h4>
+                <ul>
+                  <li><strong>Wonder Woman Pose:</strong> Handen op heupen, benen gespreid</li>
+                  <li><strong>Victory Pose:</strong> Armen omhoog in V-vorm</li>
+                  <li><strong>Throne Pose:</strong> Armen achter hoofd, benen uitgestrekt</li>
+                  <li><strong>Power Walk:</strong> Grote stappen, rechtop, schouders naar achteren</li>
+                </ul>
+              </div>
+              <div class="pose-section">
+                <h4>❌ Submissieve Poses</h4>
+                <ul>
+                  <li><strong>Kruisarmen:</strong> Gesloten en defensief</li>
+                  <li><strong>Gekruiste benen:</strong> Onzeker en kwetsbaar</li>
+                  <li><strong>Gekromde schouders:</strong> Lage status en weinig energie</li>
+                  <li><strong>Kleine stappen:</strong> Gebrek aan zelfvertrouwen</li>
+                </ul>
+              </div>
+            </div>
+            
+            <h3>Oogcontact en Dominantie</h3>
+            <div class="eye-contact-guide">
+              <div class="eye-tip">
+                <h4>👁️ 80/20 Regel</h4>
+                <p>80% oogcontact tijdens luisteren, 20% tijdens spreken</p>
+              </div>
+              <div class="eye-tip">
+                <h4>🎯 Dominante Blik</h4>
+                <p>Kijk tussen de ogen, niet wegkijken bij ongemak</p>
+              </div>
+              <div class="eye-tip">
+                <h4>⏰ Timing</h4>
+                <p>Houd oogcontact 3-5 seconden per keer</p>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        title: 'Praktische Oefeningen',
+        content: `
+          <div class="page-header">
+            <h2>Praktische Oefeningen</h2>
+            <p class="lead">Implementeer deze oefeningen om je fysieke dominantie te versterken.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>Oefening 1: De Dominantie Dagelijkse Routine</h3>
+            <div class="exercise-box">
+              <h4>🌅 Ochtend (15 minuten):</h4>
+              <ul>
+                <li>Power poses in de spiegel (2 minuten)</li>
+                <li>Diepe ademhaling met rechtopstaande houding (5 minuten)</li>
+                <li>Zelfbevestigingen met dominante lichaamstaal (3 minuten)</li>
+                <li>Power walk naar je auto/OV (5 minuten)</li>
+              </ul>
+              
+              <h4>🎯 Doel:</h4>
+              <p>Start je dag met dominante energie en houding</p>
+            </div>
+            
+            <h3>Oefening 2: Sociale Dominantie Training</h3>
+            <div class="exercise-box">
+              <h4>👥 In sociale situaties:</h4>
+              <ul>
+                <li>Neem meer ruimte in (spreid je benen, armen)</li>
+                <li>Praat langzamer en duidelijker</li>
+                <li>Gebruik gebaren om je woorden te ondersteunen</li>
+                <li>Blijf in je eigen tempo, pas je niet aan anderen aan</li>
+              </ul>
+            </div>
+            
+            <h3>Oefening 3: De Dominantie Dagboek</h3>
+            <div class="exercise-box">
+              <h4>📖 Wat je bijhoudt:</h4>
+              <ul>
+                <li>Wanneer je dominantie voelde en waarom</li>
+                <li>Reacties van anderen op je aanwezigheid</li>
+                <li>Momenten waar je dominantie verloor</li>
+                <li>Je progressie in houding en lichaamstaal</li>
+              </ul>
+            </div>
+          </div>
+        `
+      },
+      {
+        title: '30-Dagen Fysieke Dominantie Challenge',
+        content: `
+          <div class="page-header">
+            <h2>30-Dagen Fysieke Dominantie Challenge</h2>
+            <p class="lead">Transformeer je fysieke aanwezigheid in 30 dagen.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>Week 1: Foundation (Dag 1-7)</h3>
+            <div class="challenge-week">
+              <h4>🎯 Doel: Basis houding en bewustzijn</h4>
+              <ul>
+                <li><strong>Dag 1-3:</strong> Ochtend power poses (2 minuten)</li>
+                <li><strong>Dag 4-5:</strong> Houding correctie elke 30 minuten</li>
+                <li><strong>Dag 6-7:</strong> Dominante wandeling oefenen</li>
+              </ul>
+            </div>
+            
+            <h3>Week 2: Uitbreiding (Dag 8-14)</h3>
+            <div class="challenge-week">
+              <h4>🚀 Doel: Lichaamstaal verfijnen</h4>
+              <ul>
+                <li><strong>Dag 8-10:</strong> Oogcontact oefenen (3-5 seconden)</li>
+                <li><strong>Dag 11-12:</strong> Gebaren toevoegen aan communicatie</li>
+                <li><strong>Dag 13-14:</strong> Ruimte innemen in sociale settings</li>
+              </ul>
+            </div>
+            
+            <h3>Week 3: Consolidatie (Dag 15-21)</h3>
+            <div class="challenge-week">
+              <h4>💪 Doel: Dominantie integreren in dagelijks leven</h4>
+              <ul>
+                <li><strong>Dag 15-17:</strong> Alle technieken combineren</li>
+                <li><strong>Dag 18-19:</strong> Uitdagingen opzoeken</li>
+                <li><strong>Dag 20-21:</strong> Feedback verzamelen van anderen</li>
+              </ul>
+            </div>
+            
+            <h3>Week 4: Optimalisatie (Dag 22-30)</h3>
+            <div class="challenge-week">
+              <h4>🎯 Doel: Systeem optimaliseren en volhouden</h4>
+              <ul>
+                <li><strong>Dag 22-25:</strong> Dominantie in professionele settings</li>
+                <li><strong>Dag 26-28:</strong> Leiderschap rollen opzoeken</li>
+                <li><strong>Dag 29-30:</strong> Evalueren en volgende fase plannen</li>
+              </ul>
+            </div>
+          </div>
+        `
+      }
+    ]
+  }
+};
+
 // Enhanced HTML template with better styling and structure
 function generateEnhancedEbookHTML(lessonData, moduleTitle, moduleNumber) {
   const pagesHTML = lessonData.pages.map((page, index) => `
@@ -1336,6 +1561,112 @@ function generateEnhancedEbookHTML(lessonData, moduleTitle, moduleNumber) {
             font-size: 0.9em;
             color: #666;
         }
+
+        /* Module 3 specific styles */
+        .hormone-flow {
+            display: flex;
+            justify-content: space-between;
+            margin: 30px 0;
+            gap: 20px;
+        }
+        
+        .hormone-step {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .hormone-step .step-number {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #8BAE5A, #B6C948);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin: 0 auto 15px;
+        }
+        
+        .neuro-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .neuro-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .neuro-card:hover {
+            border-color: #8BAE5A;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(139, 174, 90, 0.2);
+        }
+        
+        .neuro-card h4 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .pose-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 30px 0;
+        }
+        
+        .pose-section {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 25px;
+        }
+        
+        .pose-section h4 {
+            color: #8BAE5A;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            text-align: center;
+        }
+        
+        .pose-section ul {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+        
+        .pose-section li {
+            margin-bottom: 12px;
+        }
+        
+        .eye-contact-guide {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .eye-tip {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: 2px solid #B6C948;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        .eye-tip h4 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
         
         .page-footer {
             text-align: center;
@@ -1417,6 +1748,19 @@ function generateEnhancedEbookHTML(lessonData, moduleTitle, moduleNumber) {
             }
             
             .development-plan {
+                grid-template-columns: 1fr;
+            }
+            
+            .hormone-flow {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .pose-comparison {
+                grid-template-columns: 1fr;
+            }
+            
+            .eye-contact-guide {
                 grid-template-columns: 1fr;
             }
         }
@@ -1640,6 +1984,100 @@ async function createEnhancedEbooks() {
       totalCreatedCount += moduleCreatedCount;
       totalErrorCount += moduleErrorCount;
       console.log(`📊 Module 2 Summary: ${moduleCreatedCount} created, ${moduleErrorCount} errors\n`);
+    }
+
+    // Module 3: Fysieke Dominantie
+    console.log('📚 MODULE 03: Fysieke Dominantie');
+    console.log('================================');
+
+    const { data: physicalModule, error: physicalModuleError } = await supabase
+      .from('academy_modules')
+      .select('*')
+      .eq('title', 'Fysieke Dominantie')
+      .single();
+
+    if (physicalModuleError) {
+      console.error('❌ Error finding Physical Dominance module:', physicalModuleError);
+    } else {
+      let moduleCreatedCount = 0;
+      let moduleErrorCount = 0;
+
+      // Process each lesson
+      for (const [lessonTitle, lessonData] of Object.entries(enhancedPhysicalContent)) {
+        try {
+          console.log(`   📖 ${lessonTitle}`);
+          
+          const htmlContent = generateEnhancedEbookHTML(
+            lessonData,
+            physicalModule.title,
+            physicalModule.order_index.toString().padStart(2, '0')
+          );
+          
+          // Create filename
+          const safeTitle = lessonTitle
+            .toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .trim();
+          
+          const filename = `${safeTitle}-enhanced-ebook.html`;
+          const fileUrl = `/books/${filename}`;
+          
+          // Save HTML file to public/books directory
+          const publicDir = path.join(process.cwd(), 'public', 'books');
+          if (!fs.existsSync(publicDir)) {
+            fs.mkdirSync(publicDir, { recursive: true });
+          }
+          
+          const filePath = path.join(publicDir, filename);
+          fs.writeFileSync(filePath, htmlContent, 'utf8');
+          
+          console.log(`      ✅ Created enhanced ebook: ${filename}`);
+          console.log(`         📄 Pages: ${lessonData.pages.length}`);
+          console.log(`         🎨 Enhanced layout with visual elements`);
+          
+          // Update ebook record
+          const { data: existingEbook, error: fetchError } = await supabase
+            .from('academy_ebooks')
+            .select('id')
+            .eq('lesson_id', (await supabase
+              .from('academy_lessons')
+              .select('id')
+              .eq('title', lessonTitle)
+              .eq('module_id', physicalModule.id)
+              .single()).data?.id)
+            .single();
+          
+          if (existingEbook) {
+            const { error: updateError } = await supabase
+              .from('academy_ebooks')
+              .update({
+                file_url: fileUrl,
+                updated_at: new Date().toISOString()
+              })
+              .eq('id', existingEbook.id);
+            
+            if (updateError) {
+              console.error(`         ❌ Error updating ebook:`, updateError);
+              moduleErrorCount++;
+            } else {
+              console.log(`         ✅ Updated ebook record`);
+              moduleCreatedCount++;
+            }
+          }
+          
+        } catch (error) {
+          console.error(`         ❌ Error creating enhanced ebook:`, error.message);
+          moduleErrorCount++;
+        }
+        
+        console.log('');
+      }
+
+      totalCreatedCount += moduleCreatedCount;
+      totalErrorCount += moduleErrorCount;
+      console.log(`📊 Module 3 Summary: ${moduleCreatedCount} created, ${moduleErrorCount} errors\n`);
     }
 
     // Summary

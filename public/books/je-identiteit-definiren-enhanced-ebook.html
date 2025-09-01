@@ -534,6 +534,112 @@
             font-size: 0.9em;
             color: #666;
         }
+
+        /* Module 3 specific styles */
+        .hormone-flow {
+            display: flex;
+            justify-content: space-between;
+            margin: 30px 0;
+            gap: 20px;
+        }
+        
+        .hormone-step {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .hormone-step .step-number {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #8BAE5A, #B6C948);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin: 0 auto 15px;
+        }
+        
+        .neuro-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .neuro-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .neuro-card:hover {
+            border-color: #8BAE5A;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(139, 174, 90, 0.2);
+        }
+        
+        .neuro-card h4 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .pose-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 30px 0;
+        }
+        
+        .pose-section {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 25px;
+        }
+        
+        .pose-section h4 {
+            color: #8BAE5A;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            text-align: center;
+        }
+        
+        .pose-section ul {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+        
+        .pose-section li {
+            margin-bottom: 12px;
+        }
+        
+        .eye-contact-guide {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .eye-tip {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: 2px solid #B6C948;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        .eye-tip h4 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
         
         .page-footer {
             text-align: center;
@@ -615,6 +721,19 @@
             }
             
             .development-plan {
+                grid-template-columns: 1fr;
+            }
+            
+            .hormone-flow {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .pose-comparison {
+                grid-template-columns: 1fr;
+            }
+            
+            .eye-contact-guide {
                 grid-template-columns: 1fr;
             }
         }
