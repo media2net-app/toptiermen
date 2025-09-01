@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/auth-systems/optimal/useAuth';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { Database } from '@/types/database.types';
 
 
@@ -173,7 +173,7 @@ const MemberBadgeDisplay = ({ badges, totalCount }: { badges?: Array<any>, total
 };
 
 export default function LedenOverzicht() {
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   const [members, setMembers] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

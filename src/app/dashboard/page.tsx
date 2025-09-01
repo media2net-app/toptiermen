@@ -7,7 +7,7 @@ import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 import BadgeDisplay from '@/components/BadgeDisplay';
 import UserTasksWidget from '@/components/UserTasksWidget';
-import { useAuth } from '@/auth-systems/optimal/useAuth';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
 
 // Force dynamic rendering to prevent navigator errors
@@ -95,7 +95,7 @@ export default function Dashboard() {
     unlocked_at?: string;
   }>>([]);
 
-  const { user, profile } = useAuth();
+  const { user, profile } = useSupabaseAuth();
 
   // 2.0.1: Fetch real dashboard data from database
   useEffect(() => {

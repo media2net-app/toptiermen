@@ -16,7 +16,7 @@ import {
   FlagIcon,
   StarIcon
 } from '@heroicons/react/24/outline';
-import { useAuth } from '@/auth-systems/optimal/useAuth';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 
@@ -69,7 +69,7 @@ interface ForcedOnboardingModalProps {
 }
 
 export default function ForcedOnboardingModal({ isOpen, onComplete }: ForcedOnboardingModalProps) {
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);

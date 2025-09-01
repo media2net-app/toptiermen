@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { useAuth } from '@/auth-systems/optimal/useAuth';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 // import { useV2Monitoring } from '@/lib/v2-monitoring';
 // import { useV2ErrorRecovery } from '@/lib/v2-error-recovery';
 // import { useV2Cache } from '@/lib/v2-cache-strategy';
@@ -65,7 +65,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
   const [openDashboard, setOpenDashboard] = useState(false);
   const { isOnboarding, highlightedMenu } = useOnboarding();
   // const { trackFeatureUsage } = useV2Monitoring();
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   
   const safePathname = pathname || '';
 
@@ -207,7 +207,7 @@ const SidebarContent = ({ collapsed, onLinkClick, onboardingStatus }: {
 function DashboardContentInner({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, profile, isAdmin, signOut } = useAuth();
+  const { user, profile, isAdmin, signOut } = useSupabaseAuth();
   const { showDebug, toggleDebug } = useDebug();
   const { isOnboarding, isTransitioning } = useOnboarding();
   const isTestUser = useTestUser();

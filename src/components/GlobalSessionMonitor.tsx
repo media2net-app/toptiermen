@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useRef, useCallback } from 'react';
-import { useAuth } from '@/auth-systems/optimal/useAuth';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
 export function GlobalSessionMonitor() {
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   const lastLogTime = useRef<number>(0);
   const lastPage = useRef<string>('');
   const loopDetectionCount = useRef<number>(0);

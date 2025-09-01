@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/auth-systems/optimal/useAuth';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { supabase } from '@/lib/supabase';
 
 interface NotificationSettings {
@@ -10,7 +10,7 @@ interface NotificationSettings {
 }
 
 export default function ChatNotificationSettings() {
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   const [settings, setSettings] = useState<NotificationSettings>({
     push_enabled: false,
     in_app_enabled: true,

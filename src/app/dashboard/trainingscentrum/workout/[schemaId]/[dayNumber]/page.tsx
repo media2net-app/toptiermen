@@ -16,7 +16,7 @@ import {
 } from '@heroicons/react/24/outline';
 import ClientLayout from '../../../../../components/ClientLayout';
 import WorkoutVideoModal from '@/components/WorkoutVideoModal';
-import { useAuth } from '@/auth-systems/optimal/useAuth';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'react-hot-toast';
 
@@ -42,7 +42,7 @@ export default function WorkoutPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   
   const schemaId = params?.schemaId as string;
   const dayNumber = parseInt(params?.dayNumber as string);

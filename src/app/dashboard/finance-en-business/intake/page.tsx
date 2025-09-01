@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/auth-systems/optimal/useAuth';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { CheckIcon, ArrowRightIcon, ArrowLeftIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 import Breadcrumb, { createBreadcrumbs } from '@/components/Breadcrumb';
 
@@ -61,7 +61,7 @@ const Tooltip = ({ children, content }: { children: React.ReactNode; content: st
 
 export default function FinanceIntake() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [profile, setProfile] = useState<FinancialProfile>({

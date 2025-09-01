@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useAuth } from '@/auth-systems/optimal/useAuth';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { EnvelopeIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 // import { useCacheBuster } from '@/components/CacheBuster'; - DISABLED TO PREVENT LOGOUT
 
@@ -17,7 +17,7 @@ const AUTH_CONFIG = {
 function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user, profile, loading, signIn, isAdmin } = useAuth();
+  const { user, profile, loading, signIn, isAdmin } = useSupabaseAuth();
   // const { bustCache } = useCacheBuster(); - DISABLED TO PREVENT LOGOUT
   
   // Consolidated state management
@@ -173,7 +173,7 @@ function LoginPageContent() {
       });
       
       // Let the useEffect handle the redirect based on auth state change
-      // No manual redirect needed here as useAuth will trigger state change
+      // No manual redirect needed here as useSupabaseAuth will trigger state change
       
     } catch (error: any) {
       console.error('❌ Login exception:', error);

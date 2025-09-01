@@ -14,7 +14,7 @@ import {
 } from 'chart.js';
 import BankConnectionModal from '@/app/components/BankConnectionModal';
 import Link from 'next/link';
-import { useAuth } from '@/auth-systems/optimal/useAuth';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { FinanceProvider, useFinance } from './FinanceContext';
 import { ArrowRightIcon, PencilIcon, Cog6ToothIcon, PlusIcon } from '@heroicons/react/24/outline';
 import ZeroBasedBudget from './components/ZeroBasedBudget';
@@ -227,7 +227,7 @@ const chartOptions = {
 
 function FinanceDashboardContent() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   const { finance } = useFinance();
   const [activeTab, setActiveTab] = useState<'overview' | 'planning'>('overview');
   const [financialProfile, setFinancialProfile] = useState<any>(null);

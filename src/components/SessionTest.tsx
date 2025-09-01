@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { useAuth } from '@/auth-systems/optimal/useAuth';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { createClient } from '@supabase/supabase-js';
 
 // Use the same client setup as the auth context
@@ -19,7 +19,7 @@ const getSupabaseClient = () => {
 export default function SessionTest() {
   const [testResult, setTestResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
-  const { user } = useAuth(); // Get user from context
+  const { user } = useSupabaseAuth(); // Get user from context
 
   const testSession = async () => {
     setLoading(true);

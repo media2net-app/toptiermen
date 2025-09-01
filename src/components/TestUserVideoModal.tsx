@@ -8,7 +8,7 @@ import {
   ArrowRightIcon,
   UserIcon
 } from '@heroicons/react/24/outline';
-import { useAuth } from '@/auth-systems/optimal/useAuth';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { toast } from 'react-hot-toast';
 
 interface TestUserVideoModalProps {
@@ -17,7 +17,7 @@ interface TestUserVideoModalProps {
 }
 
 export default function TestUserVideoModal({ isOpen, onComplete }: TestUserVideoModalProps) {
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   const [videoWatched, setVideoWatched] = useState(false);
   const [showVideoOverlay, setShowVideoOverlay] = useState(true);
   const [loading, setLoading] = useState(false);

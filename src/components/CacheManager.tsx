@@ -1,10 +1,10 @@
 // V1.2: Simplified Cache Manager using Unified Cache Strategy
 import { useEffect } from 'react';
-import { useAuth } from '@/auth-systems/optimal/useAuth';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { unifiedCache } from '@/lib/unified-cache-strategy';
 
 export function CacheManager() {
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
 
   useEffect(() => {
     if (!user) return;

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/auth-systems/optimal/useAuth';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
 export interface ChatNotification {
   id: string;
@@ -15,7 +15,7 @@ export function useChatNotifications(
   onNewMessage?: (notification: ChatNotification) => void,
   onConversationUpdate?: (conversationId: string) => void
 ) {
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   const subscriptionRef = useRef<{
     message: any;
     conversation: any;
