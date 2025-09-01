@@ -56,7 +56,6 @@ export default function EbookDownload({
   }, [downloadStatus]);
 
   const handleDownload = async (type: 'html' | 'pdf') => {
-    // Prevent multiple simultaneous downloads
     if (isDownloading) return;
 
     setIsDownloading(true);
@@ -67,42 +66,17 @@ export default function EbookDownload({
       if (type === 'html') {
         // Open de HTML versie van het ebook in een nieuwe tab
         const htmlUrl = ebookUrl.replace('.pdf', '.html');
-        
-        // Use a more reliable method to open new tab
-        const newWindow = window.open(htmlUrl, '_blank', 'noopener,noreferrer');
-        
-        // Check if window opened successfully
-        if (newWindow) {
-          // Add a small delay to ensure the window opens before updating status
-          setTimeout(() => {
-            setDownloadStatus('success');
-          }, 500);
-        } else {
-          // Fallback if popup is blocked
-          const link = document.createElement('a');
-          link.href = htmlUrl;
-          link.target = '_blank';
-          link.rel = 'noopener noreferrer';
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          
-          setTimeout(() => {
-            setDownloadStatus('success');
-          }, 500);
-        }
+        window.open(htmlUrl, '_blank');
+        setDownloadStatus('success');
       } else {
         // Download de PDF versie
         const pdfUrl = ebookUrl.replace('.html', '.pdf');
         const link = document.createElement('a');
         link.href = pdfUrl;
         link.download = `${lessonTitle.replace(/\s+/g, '-').toLowerCase()}-ebook.pdf`;
-        link.target = '_blank';
-        link.rel = 'noopener noreferrer';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        
         setDownloadStatus('success');
       }
       

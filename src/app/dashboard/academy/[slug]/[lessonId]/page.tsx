@@ -348,54 +348,103 @@ export default function LessonDetailPage() {
         </div>
 
         {/* Lesson content */}
-        <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-6 mb-6">
-          {/* Video section */}
+        <div className="bg-[#181F17]/90 rounded-xl p-6 border border-[#3A4D23]">
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-[#8BAE5A] mb-2">{lesson.title}</h1>
+            <p className="text-gray-300">{lesson.description}</p>
+            <div className="flex items-center gap-4 mt-4 text-sm text-gray-400">
+              <span>Duur: {lesson.duration}</span>
+              <span>Type: {lesson.type}</span>
+              {completed && <span className="text-green-400">✓ Voltooid</span>}
+            </div>
+          </div>
+
+          {/* Video content */}
           {lesson.video_url && (
             <div className="mb-6">
-              <div className="relative bg-black rounded-lg overflow-hidden">
+              <div className="aspect-video bg-[#232D1A] rounded-lg overflow-hidden relative border border-[#3A4D23]">
                 <video
                   ref={videoRef}
-                  className="w-full h-auto"
+                  src={lesson.video_url}
                   controls
+                  className="w-full h-full rounded-lg bg-black"
                   preload="metadata"
-                  poster={lesson.video_url.replace('.mp4', '.jpg')}
+                  onError={(e) => {
+                    console.error('❌ Video error:', e);
+                    console.log('🎥 Video URL:', lesson.video_url);
+                  }}
+                  onLoadStart={() => {
+                    console.log('🎥 Loading video:', lesson.video_url);
+                  }}
+                  onCanPlay={() => {
+                    console.log('🎥 Video can start playing');
+                  }}
+                  onPlay={() => {
+                    setShowVideoOverlay(false);
+                  }}
                 >
-                  <source src={lesson.video_url} type="video/mp4" />
-                  Je browser ondersteunt geen video afspelen.
+                  Je browser ondersteunt deze video niet.
                 </video>
+                
+                {/* Video Play Overlay */}
+                {showVideoOverlay && (
+                  <div 
+                    className="absolute inset-0 bg-black/60 flex items-center justify-center cursor-pointer group"
+                    onClick={() => {
+                      if (videoRef.current) {
+                        videoRef.current.play();
+                      }
+                    }}
+                  >
+                    <div className="bg-[#8BAE5A] hover:bg-[#B6C948] text-[#181F17] rounded-full p-4 transition-all duration-200 group-hover:scale-110 shadow-lg">
+                      <PlayIcon className="w-12 h-12" />
+                    </div>
+                    <div className="absolute bottom-4 left-4 right-4 text-center">
+                      <p className="text-white text-sm font-medium">Klik om video af te spelen</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
+         
 
-          {/* Lesson description */}
-          {lesson.description && (
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-3">Over deze les</h2>
-              <p className="text-gray-700 leading-relaxed">{lesson.description}</p>
-            </div>
-          )}
-
-          {/* Lesson content */}
+          {/* Text content */}
           {lesson.content && (
-            <div className="prose prose-lg max-w-none">
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                components={{
-                  h1: ({children}) => <h1 className="text-2xl font-bold text-gray-900 mb-4">{children}</h1>,
-                  h2: ({children}) => <h2 className="text-xl font-bold text-gray-900 mb-3">{children}</h2>,
-                  h3: ({children}) => <h3 className="text-lg font-bold text-gray-900 mb-2">{children}</h3>,
-                  p: ({children}) => <p className="text-gray-700 mb-4 leading-relaxed">{children}</p>,
-                  ul: ({children}) => <ul className="list-disc list-inside mb-4 space-y-1 text-gray-700">{children}</ul>,
-                  ol: ({children}) => <ol className="list-decimal list-inside mb-4 space-y-1 text-gray-700">{children}</ol>,
-                  li: ({children}) => <li className="text-gray-700">{children}</li>,
-                  a: ({href, children}) => <a href={href} className="text-[#8BAE5A] hover:text-[#B6C948] underline" target="_blank" rel="noopener noreferrer">{children}</a>,
-                  code: ({children}) => <code className="bg-gray-100 px-2 py-1 rounded text-sm font-mono text-gray-800">{children}</code>,
-                  pre: ({children}) => <pre className="bg-gray-100 p-4 rounded-lg overflow-x-auto mb-4">{children}</pre>,
-                  blockquote: ({children}) => <blockquote className="border-l-4 border-[#8BAE5A] pl-4 italic text-[#8BAE5A] mb-4">{children}</blockquote>,
-                }}
-              >
-                {lesson.content}
-              </ReactMarkdown>
+            <div className="prose prose-invert max-w-none">
+              <div className="text-gray-300">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    h1: ({children}) => <h1 className="text-2xl font-bold text-[#8BAE5A] mb-4 mt-6">{children}</h1>,
+                    h2: ({children}) => <h2 className="text-xl font-bold text-[#8BAE5A] mb-3 mt-5">{children}</h2>,
+                    h3: ({children}) => <h3 className="text-lg font-semibold text-[#8BAE5A] mb-2 mt-4">{children}</h3>,
+                    p: ({children}) => <p className="mb-3 text-gray-300 leading-relaxed">{children}</p>,
+                    ul: ({children}) => <ul className="list-disc list-inside mb-4 space-y-1 text-gray-300">{children}</ul>,
+                    ol: ({children}) => <ol className="list-decimal list-inside mb-4 space-y-1 text-gray-300">{children}</ol>,
+                    li: ({children, ...props}: any) => {
+                      if (props.checked !== null && props.checked !== undefined) {
+                        return (
+                          <li className="flex items-center gap-2 text-gray-300">
+                            <input 
+                              type="checkbox" 
+                              checked={props.checked} 
+                              readOnly 
+                              className="w-4 h-4 text-[#8BAE5A] bg-[#232D1A] border-[#3A4D23] rounded focus:ring-[#8BAE5A] focus:ring-2"
+                            />
+                            <span>{children}</span>
+                          </li>
+                        );
+                      }
+                      return <li className="text-gray-300">{children}</li>;
+                    },
+                    strong: ({children}) => <strong className="font-semibold text-[#B6C948]">{children}</strong>,
+                    blockquote: ({children}) => <blockquote className="border-l-4 border-[#8BAE5A] pl-4 italic text-[#8BAE5A] mb-4">{children}</blockquote>,
+                  }}
+                >
+                  {lesson.content}
+                </ReactMarkdown>
+              </div>
             </div>
           )}
         </div>
@@ -434,58 +483,38 @@ export default function LessonDetailPage() {
 
       {/* Lesson list */}
       <div className="mt-8">
-        <h3 className="text-xl font-semibold text-white mb-4">Alle lessen in deze module</h3>
-        <div className="space-y-2">
-          {lessons.map((lessonItem, index) => {
-            const isCurrent = lessonItem.id === lessonId;
-            const isCompleted = completedLessonIds.includes(lessonItem.id);
-            const isAccessible = index === 0 || completedLessonIds.includes(lessons[index - 1]?.id);
-
-            return (
+        <h3 className="text-lg font-semibold text-[#8BAE5A] mb-4">Lessen in deze module</h3>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {lessons.map((l, index) => (
               <Link
-                key={lessonItem.id}
-                href={`/dashboard/academy/${module.id}/${lessonItem.id}`}
+                key={l.id}
+                href={`/dashboard/academy/${module.id}/${l.id}`}
                 className={`block p-4 rounded-lg border transition-colors ${
-                  isCurrent
+                  l.id === lessonId
                     ? 'bg-[#8BAE5A] text-[#181F17] border-[#8BAE5A]'
-                    : isCompleted
-                    ? 'bg-[#3A4D23] text-[#B6C948] border-[#3A4D23] hover:bg-[#4A5D33]'
-                    : isAccessible
+                    : completedLessonIds.includes(l.id)
                     ? 'bg-[#232D1A] text-[#8BAE5A] border-[#3A4D23] hover:bg-[#3A4D23]'
-                    : 'bg-[#1A2115] text-gray-500 border-[#2A2A2A] cursor-not-allowed'
+                    : 'bg-[#181F17] text-gray-300 border-[#3A4D23] hover:bg-[#232D1A]'
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="flex-shrink-0">
-                      {isCompleted ? (
-                        <div className="w-6 h-6 bg-[#B6C948] rounded-full flex items-center justify-center">
-                          <span className="text-[#181F17] text-xs font-bold">✓</span>
-                        </div>
-                      ) : isAccessible ? (
-                        <div className="w-6 h-6 bg-[#8BAE5A] rounded-full flex items-center justify-center">
-                          <PlayIcon className="w-3 h-3 text-[#181F17]" />
-                        </div>
-                      ) : (
-                        <div className="w-6 h-6 bg-gray-600 rounded-full flex items-center justify-center">
-                          <span className="text-gray-400 text-xs">🔒</span>
-                        </div>
-                      )}
-                    </div>
-                    <div>
-                      <div className="font-medium">{lessonItem.title}</div>
-                      <div className="text-sm opacity-75">{lessonItem.duration}</div>
-                    </div>
+                  <div className="flex items-center gap-3">
+                    <span className="w-6 h-6 rounded-full border flex items-center justify-center text-sm font-bold">
+                      {index + 1}
+                    </span>
+                    <span>{l.title}</span>
                   </div>
-                  {isCurrent && (
-                    <span className="text-sm font-medium">Huidige les</span>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {completedLessonIds.includes(l.id) && (
+                      <span className="text-green-400">✓</span>
+                    )}
+                    <span className="text-sm opacity-75">{l.duration}</span>
+                  </div>
                 </div>
               </Link>
-            );
-          })}
+            ))}
+          </div>
         </div>
-      </div>
     </PageLayout>
   );
 } 
