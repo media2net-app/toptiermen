@@ -1495,6 +1495,643 @@ const enhancedMentalContent = {
   }
 };
 
+// Enhanced ebook content for Module 5: Business and Finance (15+ pages)
+const enhancedBusinessContent = {
+  'Hoe bouw je een succesvolle business op?': {
+    title: 'Hoe bouw je een succesvolle business op?',
+    subtitle: 'Van Idee naar Empire',
+    pages: [
+      {
+        title: 'Introductie',
+        content: `
+          <div class="page-header">
+            <h2>Introductie</h2>
+            <p class="lead">Een succesvolle business bouwen is niet alleen over geld verdienen - het is over het creëren van waarde en het bouwen van een legacy.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>Wat je gaat leren in dit ebook:</h3>
+            <ul class="learning-objectives">
+              <li>De fundamenten van een succesvolle business</li>
+              <li>Hoe je een winnende business model ontwikkelt</li>
+              <li>Strategieën voor groei en schaalbaarheid</li>
+              <li>Praktische stappen om je business te starten</li>
+              <li>Een 90-dagen business launch plan</li>
+            </ul>
+          </div>
+          
+          <div class="info-box">
+            <h4>💡 Wist je dat?</h4>
+            <p>90% van alle startups faalt, maar de 10% die slaagt creëert 90% van alle waarde. Het verschil zit in de fundamenten.</p>
+          </div>
+        `
+      },
+      {
+        title: 'De 5 Fundamenten van Succesvolle Business',
+        content: `
+          <div class="page-header">
+            <h2>De 5 Fundamenten van Succesvolle Business</h2>
+            <p class="lead">Bouw je business op deze vijf onmisbare principes.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>Fundament 1: Probleem-Oplossing</h3>
+            <div class="foundation-analysis">
+              <div class="foundation-section">
+                <h4>🎯 Wat het is:</h4>
+                <p>Je business lost een echt probleem op dat mensen bereid zijn te betalen om opgelost te krijgen.</p>
+                
+                <h4>🔍 Hoe je het vindt:</h4>
+                <ul>
+                  <li><strong>Customer Interviews:</strong> Praat met 50+ potentiële klanten</li>
+                  <li><strong>Pain Point Mapping:</strong> Identificeer de top 3 problemen</li>
+                  <li><strong>Market Research:</strong> Analyseer bestaande oplossingen</li>
+                  <li><strong>Validation:</strong> Test of mensen bereid zijn te betalen</li>
+                </ul>
+              </div>
+            </div>
+            
+            <h3>Fundament 2: Unieke Waarde Propositie</h3>
+            <div class="foundation-section">
+              <h4>💎 Wat het is:</h4>
+              <p>Een duidelijke, onderscheidende belofte die je klanten maakt en die je concurrenten niet kunnen kopiëren.</p>
+              
+              <h4>🔧 Hoe je het ontwikkelt:</h4>
+              <ul>
+                <li><strong>Differentiation:</strong> Wat maakt jou uniek?</li>
+                <li><strong>Benefit Focus:</strong> Welk voordeel bied je?</li>
+                <li><strong>Target Audience:</strong> Voor wie is dit specifiek?</li>
+                <li><strong>Proof Points:</strong> Hoe bewijs je je belofte?</li>
+              </ul>
+            </div>
+            
+            <h3>Fundament 3: Schaalbaar Business Model</h3>
+            <div class="foundation-section">
+              <h4>📈 Wat het is:</h4>
+              <p>Een model dat groeit zonder proportioneel meer middelen te vereisen.</p>
+              
+              <h4>🔧 Hoe je het bouwt:</h4>
+              <ul>
+                <li><strong>Recurring Revenue:</strong> Abonnementen, licenties, memberships</li>
+                <li><strong>Digital Products:</strong> Software, cursussen, ebooks</li>
+                <li><strong>Network Effects:</strong> Waarde neemt toe met meer gebruikers</li>
+                <li><strong>Automation:</strong> Systemen die zonder jou werken</li>
+              </ul>
+            </div>
+            
+            <h3>Fundament 4: Sterk Team en Cultuur</h3>
+            <div class="foundation-section">
+              <h4>👥 Wat het is:</h4>
+              <p>Mensen die geloven in je visie en de vaardigheden hebben om deze te realiseren.</p>
+              
+              <h4>🔧 Hoe je het bouwt:</h4>
+              <ul>
+                <li><strong>Hiring Strategy:</strong> Focus op cultuur fit en vaardigheden</li>
+                <li><strong>Vision Sharing:</strong> Iedereen begrijpt het grotere doel</li>
+                <li><strong>Empowerment:</strong> Geef mensen autonomie en verantwoordelijkheid</li>
+                <li><strong>Continuous Learning:</strong> Investeer in groei van je team</li>
+              </ul>
+            </div>
+            
+            <h3>Fundament 5: Financiële Discipline</h3>
+            <div class="foundation-section">
+              <h4>💰 Wat het is:</h4>
+              <p>Controle over je cashflow, winstgevendheid en groei-investeringen.</p>
+              
+              <h4>🔧 Hoe je het implementeert:</h4>
+              <ul>
+                <li><strong>Cash Flow Management:</strong> Houd je geld in de gaten</li>
+                <li><strong>Unit Economics:</strong> Begrijp je winst per klant</li>
+                <li><strong>Budgeting:</strong> Plan je uitgaven en investeringen</li>
+                <li><strong>Financial Metrics:</strong> Track de juiste KPI's</li>
+              </ul>
+            </div>
+          </div>
+        `
+      },
+      {
+        title: 'Business Model Canvas',
+        content: `
+          <div class="page-header">
+            <h2>Business Model Canvas</h2>
+            <p class="lead">Visualiseer en valideer je business model met dit krachtige framework.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>De 9 Bouwstenen van je Business Model</h3>
+            <div class="canvas-grid">
+              <div class="canvas-block key-partners">
+                <h4>🤝 Key Partners</h4>
+                <p>Wie zijn je strategische partners en leveranciers?</p>
+                <ul>
+                  <li>Leveranciers</li>
+                  <li>Distributeurs</li>
+                  <li>Technologie partners</li>
+                  <li>Financiële partners</li>
+                </ul>
+              </div>
+              
+              <div class="canvas-block key-activities">
+                <h4>⚡ Key Activities</h4>
+                <p>Welke activiteiten zijn cruciaal voor je business?</p>
+                <ul>
+                  <li>Product ontwikkeling</li>
+                  <li>Marketing en sales</li>
+                  <li>Klantenservice</li>
+                  <li>Operaties</li>
+                </ul>
+              </div>
+              
+              <div class="canvas-block key-resources">
+                <h4>🏗️ Key Resources</h4>
+                <p>Welke middelen heb je nodig?</p>
+                <ul>
+                  <li>Menselijk kapitaal</li>
+                  <li>Financieel kapitaal</li>
+                  <li>Intellectueel eigendom</li>
+                  <li>Fysieke assets</li>
+                </ul>
+              </div>
+              
+              <div class="canvas-block value-proposition">
+                <h4>💎 Value Proposition</h4>
+                <p>Welke waarde bied je je klanten?</p>
+                <ul>
+                  <li>Probleem oplossing</li>
+                  <li>Voordelen en voordelen</li>
+                  <li>Onderscheidende factoren</li>
+                  <li>Klantbeloftes</li>
+                </ul>
+              </div>
+              
+              <div class="canvas-block customer-relationships">
+                <h4>❤️ Customer Relationships</h4>
+                <p>Hoe bouw je relaties met je klanten?</p>
+                <ul>
+                  <li>Persoonlijke assistentie</li>
+                  <li>Self-service</li>
+                  <li>Communities</li>
+                  <li>Co-creation</li>
+                </ul>
+              </div>
+              
+              <div class="canvas-block channels">
+                <h4>📢 Channels</h4>
+                <p>Hoe bereik je je klanten?</p>
+                <ul>
+                  <li>Directe verkoop</li>
+                  <li>Online platforms</li>
+                  <li>Retail partners</li>
+                  <li>Social media</li>
+                </ul>
+              </div>
+              
+              <div class="canvas-block customer-segments">
+                <h4>👥 Customer Segments</h4>
+                <p>Wie zijn je doelklanten?</p>
+                <ul>
+                  <li>Demografische kenmerken</li>
+                  <li>Psychografische profielen</li>
+                  <li>Gedragspatronen</li>
+                  <li>Pijnpunten en behoeften</li>
+                </ul>
+              </div>
+              
+              <div class="canvas-block cost-structure">
+                <h4>💸 Cost Structure</h4>
+                <p>Wat zijn je belangrijkste kosten?</p>
+                <ul>
+                  <li>Vaste kosten</li>
+                  <li>Variabele kosten</li>
+                  <li>Economies of scale</li>
+                  <li>Economies of scope</li>
+                </ul>
+              </div>
+              
+              <div class="canvas-block revenue-streams">
+                <h4>💰 Revenue Streams</h4>
+                <p>Hoe verdien je geld?</p>
+                <ul>
+                  <li>Asset sales</li>
+                  <li>Usage fees</li>
+                  <li>Subscription fees</li>
+                  <li>Licensing</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        title: 'Praktische Oefeningen',
+        content: `
+          <div class="page-header">
+            <h2>Praktische Oefeningen</h2>
+            <p class="lead">Implementeer deze oefeningen om je business idee te valideren en te ontwikkelen.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>Oefening 1: De Business Validatie Checklist</h3>
+            <div class="exercise-box">
+              <h4>✅ Valideer je business idee:</h4>
+              <ul>
+                <li><strong>Probleem Validatie:</strong> Hebben 50+ mensen bevestigd dat dit een probleem is?</li>
+                <li><strong>Oplossing Validatie:</strong> Zijn mensen bereid te betalen voor je oplossing?</li>
+                <li><strong>Markt Validatie:</strong> Is de markt groot genoeg om je doelen te halen?</li>
+                <li><strong>Competitie Analyse:</strong> Kun je je onderscheiden van bestaande oplossingen?</li>
+                <li><strong>Team Validatie:</strong> Heb je de juiste vaardigheden en ervaring?</li>
+              </ul>
+              
+              <h4>🎯 Doel:</h4>
+              <p>Zorg ervoor dat je business idee solide fundamenten heeft</p>
+            </div>
+            
+            <h3>Oefening 2: De Business Model Canvas Invullen</h3>
+            <div class="exercise-box">
+              <h4>📋 Stap-voor-stap:</h4>
+              <ol>
+                <li>Download een Business Model Canvas template</li>
+                <li>Vul elke sectie in met je huidige kennis</li>
+                <li>Identificeer gaten in je kennis</li>
+                <li>Plan onderzoek om gaten te vullen</li>
+                <li>Herhaal elke week naarmate je meer leert</li>
+              </ol>
+              
+              <h4>⏰ Tijdsinvestering:</h4>
+              <p>2-3 uur per week, gedurende 4 weken</p>
+            </div>
+            
+            <h3>Oefening 3: De 90-Dagen Business Launch Plan</h3>
+            <div class="exercise-box">
+              <h4>🚀 Plan je launch:</h4>
+              <ul>
+                <li><strong>Maand 1:</strong> Validatie en planning</li>
+                <li><strong>Maand 2:</strong> Product ontwikkeling en testing</li>
+                <li><strong>Maand 3:</strong> Launch en eerste klanten</li>
+              </ul>
+              
+              <h4>📅 Weekelijkse milestones:</h4>
+              <p>Plan specifieke doelen voor elke week</p>
+            </div>
+          </div>
+        `
+      },
+      {
+        title: '90-Dagen Business Launch Plan',
+        content: `
+          <div class="page-header">
+            <h2>90-Dagen Business Launch Plan</h2>
+            <p class="lead">Van idee naar live business in 90 dagen.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>Maand 1: Validatie en Planning (Dag 1-30)</h3>
+            <div class="launch-phase">
+              <h4>🎯 Doel: Zorg ervoor dat je business idee levensvatbaar is</h4>
+              <ul>
+                <li><strong>Week 1:</strong> Probleem validatie (50+ interviews)</li>
+                <li><strong>Week 2:</strong> Oplossing validatie (MVP concept)</li>
+                <li><strong>Week 3:</strong> Markt en concurrentie analyse</li>
+                <li><strong>Week 4:</strong> Business model canvas en financiële planning</li>
+              </ul>
+            </div>
+            
+            <h3>Maand 2: Product Ontwikkeling en Testing (Dag 31-60)</h3>
+            <div class="launch-phase">
+              <h4>🚀 Doel: Bouw en test je MVP</h4>
+              <ul>
+                <li><strong>Week 5-6:</strong> MVP ontwikkeling</li>
+                <li><strong>Week 7:</strong> Interne testing en iteratie</li>
+                <li><strong>Week 8:</strong> Beta testing met 10-20 klanten</li>
+              </ul>
+            </div>
+            
+            <h3>Maand 3: Launch en Eerste Klanten (Dag 61-90)</h3>
+            <div class="launch-phase">
+              <h4>💥 Doel: Lanceer je business en verwelkom je eerste klanten</h4>
+              <ul>
+                <li><strong>Week 9:</strong> Finale productie en marketing voorbereiding</li>
+                <li><strong>Week 10:</strong> Soft launch en feedback verzameling</li>
+                <li><strong>Week 11-12:</strong> Officiële launch en klantenwerving</li>
+              </ul>
+            </div>
+            
+            <h3>Volgende Stappen</h3>
+            <div class="next-steps">
+              <h4>🎯 Na 90 dagen:</h4>
+              <ul>
+                <li>Evalueer je launch resultaten</li>
+                <li>Plan je groei strategie</li>
+                <li>Bouw je team uit</li>
+                <li>Investeer in marketing en sales</li>
+              </ul>
+            </div>
+          </div>
+        `
+      }
+    ]
+  },
+  
+  'Hoe beheer je je financiën als ondernemer?': {
+    title: 'Hoe beheer je je financiën als ondernemer?',
+    subtitle: 'Van Cash Flow naar Wealth Building',
+    pages: [
+      {
+        title: 'Introductie',
+        content: `
+          <div class="page-header">
+            <h2>Introductie</h2>
+            <p class="lead">Financiële beheersing is de ruggengraat van elke succesvolle business. Leer hoe je je geld beheert voor groei en vrijheid.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>Wat je gaat leren in dit ebook:</h3>
+            <ul class="learning-objectives">
+              <li>De fundamenten van ondernemersfinanciën</li>
+              <li>Hoe je cashflow beheert en optimaliseert</li>
+              <li>Strategieën voor belastingoptimalisatie</li>
+              <li>Investeringsstrategieën voor ondernemers</li>
+              <li>Een financieel beheersplan voor 12 maanden</li>
+            </ul>
+          </div>
+          
+          <div class="info-box">
+            <h4>💡 Wist je dat?</h4>
+            <p>82% van alle faillissementen wordt veroorzaakt door slecht cashflow management, niet door gebrek aan winst.</p>
+          </div>
+        `
+      },
+      {
+        title: 'De 4 Pijlers van Ondernemersfinanciën',
+        content: `
+          <div class="page-header">
+            <h2>De 4 Pijlers van Ondernemersfinanciën</h2>
+            <p class="lead">Bouw je financiële fundament op deze vier essentiële principes.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>Pijler 1: Cash Flow Management</h3>
+            <div class="pillar-analysis">
+              <div class="pillar-section">
+                <h4>💧 Wat het is:</h4>
+                <p>Het beheren van geld dat in en uit je business stroomt om ervoor te zorgen dat je altijd genoeg hebt om je verplichtingen na te komen.</p>
+                
+                <h4>🔧 Praktische Technieken:</h4>
+                <ul>
+                  <li><strong>13-Weekse Cash Flow Forecast:</strong> Plan je geld 3 maanden vooruit</li>
+                  <li><strong>Payment Terms:</strong> Verkort je klant betalingstermijnen</li>
+                  <li><strong>Expense Management:</strong> Controleer elke uitgave</li>
+                  <li><strong>Emergency Fund:</strong> Houd 3-6 maanden uitgaven achter de hand</li>
+                </ul>
+              </div>
+            </div>
+            
+            <h3>Pijler 2: Winstgevendheid en Marges</h3>
+            <div class="pillar-section">
+              <h4>📊 Wat het is:</h4>
+              <p>Het begrijpen en optimaliseren van je winst per klant en per product/service.</p>
+              
+              <h4>🔧 Praktische Technieken:</h4>
+              <ul>
+                <li><strong>Unit Economics:</strong> Bereken winst per klant</li>
+                <li><strong>Pricing Strategy:</strong> Optimaliseer je prijzen voor maximale winst</li>
+                <li><strong>Cost Control:</strong> Verminder onnodige kosten</li>
+                <li><strong>Value-Based Pricing:</strong> Prijs op basis van waarde, niet kosten</li>
+              </ul>
+            </div>
+            
+            <h3>Pijler 3: Belastingoptimalisatie</h3>
+            <div class="pillar-section">
+              <h4>🏛️ Wat het is:</h4>
+              <p>Het legaal minimaliseren van je belastingverplichting door slimme planning en structurering.</p>
+              
+              <h4>🔧 Praktische Technieken:</h4>
+              <ul>
+                <li><strong>Business Structure:</strong> Kies de juiste rechtsvorm</li>
+                <li><strong>Expense Deductions:</strong> Maximaliseer aftrekbare kosten</li>
+                <li><strong>Retirement Planning:</strong> Gebruik belastingvoordelige pensioenplannen</li>
+                <li><strong>Tax Loss Harvesting:</strong> Compenseer winsten met verliezen</li>
+              </ul>
+            </div>
+            
+            <h3>Pijler 4: Investeringen en Wealth Building</h3>
+            <div class="pillar-section">
+              <h4>🚀 Wat het is:</h4>
+              <p>Het laten groeien van je vermogen door slimme investeringen en compound interest.</p>
+              
+              <h4>🔧 Praktische Technieken:</h4>
+              <ul>
+                <li><strong>Diversification:</strong> Spreid je risico over verschillende asset classes</li>
+                <li><strong>Dollar-Cost Averaging:</strong> Investeer regelmatig kleine bedragen</li>
+                <li><strong>Tax-Efficient Investing:</strong> Gebruik belastingvoordelige accounts</li>
+                <li><strong>Real Estate:</strong> Overweeg vastgoed als onderdeel van je portfolio</li>
+              </ul>
+            </div>
+          </div>
+        `
+      },
+      {
+        title: 'Financiële Dashboard en KPI\'s',
+        content: `
+          <div class="page-header">
+            <h2>Financiële Dashboard en KPI's</h2>
+            <p class="lead">Meet wat er toe doet en gebruik data om betere beslissingen te nemen.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>De 10 Belangrijkste Financiële KPI's</h3>
+            <div class="kpi-grid">
+              <div class="kpi-card">
+                <h4>💰 Cash Flow</h4>
+                <p><strong>Wat:</strong> Netto geld dat in/uit je business stroomt</p>
+                <p><strong>Doel:</strong> Positief elke maand</p>
+                <p><strong>Berekening:</strong> Inkomsten - Uitgaven</p>
+              </div>
+              
+              <div class="kpi-card">
+                <h4>📈 Revenue Growth</h4>
+                <p><strong>Wat:</strong> Maandelijkse groei van je omzet</p>
+                <p><strong>Doel:</strong> 10-20% per maand</p>
+                <p><strong>Berekening:</strong> (Huidige - Vorige) / Vorige × 100</p>
+              </div>
+              
+              <div class="kpi-card">
+                <h4>💵 Gross Margin</h4>
+                <p><strong>Wat:</strong> Winst na directe kosten</p>
+                <p><strong>Doel:</strong> 60-80% voor digitale producten</p>
+                <p><strong>Berekening:</strong> (Omzet - Kosten) / Omzet × 100</p>
+              </div>
+              
+              <div class="kpi-card">
+                <h4>🎯 Customer Acquisition Cost (CAC)</h4>
+                <p><strong>Wat:</strong> Kosten om een nieuwe klant te werven</p>
+                <p><strong>Doel:</strong> Zo laag mogelijk</p>
+                <p><strong>Berekening:</strong> Marketing kosten / Nieuwe klanten</p>
+              </div>
+              
+              <div class="kpi-card">
+                <h4>💎 Customer Lifetime Value (CLV)</h4>
+                <p><strong>Wat:</strong> Totale waarde van een klant over tijd</p>
+                <p><strong>Doel:</strong> 3x hoger dan CAC</p>
+                <p><strong>Berekening:</strong> Gemiddelde order × Frequente × Levensduur</p>
+              </div>
+              
+              <div class="kpi-card">
+                <h4>📊 Burn Rate</h4>
+                <p><strong>Wat:</strong> Hoe snel je geld uitgeeft</p>
+                <p><strong>Doel:</strong> Onder controle houden</p>
+                <p><strong>Berekening:</strong> Maandelijkse uitgaven</p>
+              </div>
+              
+              <div class="kpi-card">
+                <h4>⏰ Days Sales Outstanding (DSO)</h4>
+                <p><strong>Wat:</strong> Hoe lang het duurt om betaald te krijgen</p>
+                <p><strong>Doel:</strong> Onder 30 dagen</p>
+                <p><strong>Berekening:</strong> (Vorderingen / Omzet) × 365</p>
+              </div>
+              
+              <div class="kpi-card">
+                <h4>🔄 Inventory Turnover</h4>
+                <p><strong>Wat:</strong> Hoe snel je voorraad verkoopt</p>
+                <p><strong>Doel:</strong> 4-6x per jaar</p>
+                <p><strong>Berekening:</strong> Kosten van verkochte goederen / Gemiddelde voorraad</p>
+              </div>
+              
+              <div class="kpi-card">
+                <h4>📱 Conversion Rate</h4>
+                <p><strong>Wat:</strong> Percentage bezoekers dat klant wordt</p>
+                <p><strong>Doel:</strong> 2-5% voor e-commerce</p>
+                <p><strong>Berekening:</strong> Klanten / Bezoekers × 100</p>
+              </div>
+              
+              <div class="kpi-card">
+                <h4>⭐ Net Promoter Score (NPS)</h4>
+                <p><strong>Wat:</strong> Hoe waarschijnlijk klanten je aanraden</p>
+                <p><strong>Doel:</strong> 50+ (excellent)</p>
+                <p><strong>Berekening:</strong> Promoters - Detractors</p>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        title: 'Praktische Financiële Strategieën',
+        content: `
+          <div class="page-header">
+            <h2>Praktische Financiële Strategieën</h2>
+            <p class="lead>Implementeer deze strategieën om je financiën te optimaliseren.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>Strategie 1: Het 50/30/20 Budget Systeem</h3>
+            <div class="strategy-box">
+              <h4>📊 Budget verdeling:</h4>
+              <ul>
+                <li><strong>50% - Essentiële Uitgaven:</strong> Huur, eten, transport, verzekeringen</li>
+                <li><strong>30% - Lifestyle Uitgaven:</strong> Entertainment, uitgaan, shopping</li>
+                <li><strong>20% - Financiële Doelen:</strong> Sparen, investeren, schulden afbetalen</li>
+              </ul>
+              
+              <h4>🎯 Voor ondernemers:</h4>
+              <ul>
+                <li><strong>40% - Business Operations:</strong> Kosten, salarissen, marketing</li>
+                <li><strong>30% - Persoonlijke Uitgaven:</strong> Salaris, lifestyle, sparen</li>
+                <li><strong>30% - Groei en Investeringen:</strong> Business groei, portfolio, emergency fund</li>
+              </ul>
+            </div>
+            
+            <h3>Strategie 2: De 3-Bank Rekening Methode</h3>
+            <div class="strategy-box">
+              <h4>🏦 Rekening structuur:</h4>
+              <ul>
+                <li><strong>Rekening 1 - Operations:</strong> Dagelijkse business uitgaven</li>
+                <li><strong>Rekening 2 - Taxes:</strong> Belastingen en verzekeringen</li>
+                <li><strong>Rekening 3 - Growth:</strong> Investeringen en emergency fund</li>
+              </ul>
+              
+              <h4>💡 Automatisering:</h4>
+              <p>Zet automatische transfers op voor elke maand</p>
+            </div>
+            
+            <h3>Strategie 3: De 4-Weekse Financiële Review</h3>
+            <div class="strategy-box">
+              <h4>📅 Maandelijkse routine:</h4>
+              <ul>
+                <li><strong>Week 1:</strong> Cash flow analyse en forecasting</li>
+                <li><strong>Week 2:</strong> KPI tracking en analyse</li>
+                <li><strong>Week 3:</strong> Budget review en aanpassingen</li>
+                <li><strong>Week 4:</strong> Lange termijn planning en doelen</li>
+              </ul>
+            </div>
+          </div>
+        `
+      },
+      {
+        title: '12-Maanden Financieel Beheersplan',
+        content: `
+          <div class="page-header">
+            <h2>12-Maanden Financieel Beheersplan</h2>
+            <p class="lead">Een gestructureerd plan om je financiën te transformeren.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>Kwartaal 1: Foundation (Maand 1-3)</h3>
+            <div class="quarter-plan">
+              <h4>🎯 Doel: Basis financiële systemen implementeren</h4>
+              <ul>
+                <li><strong>Maand 1:</strong> Financiële dashboard opzetten</li>
+                <li><strong>Maand 2:</strong> Budget systeem implementeren</li>
+                <li><strong>Maand 3:</strong> KPI tracking starten</li>
+              </ul>
+            </div>
+            
+            <h3>Kwartaal 2: Optimalisatie (Maand 4-6)</h3>
+            <div class="quarter-plan">
+              <h4>🚀 Doel: Financiële efficiëntie verbeteren</h4>
+              <ul>
+                <li><strong>Maand 4:</strong> Cash flow optimaliseren</li>
+                <li><strong>Maand 5:</strong> Kosten reduceren</li>
+                <li><strong>Maand 6:</strong> Pricing strategie optimaliseren</li>
+              </ul>
+            </div>
+            
+            <h3>Kwartaal 3: Groei (Maand 7-9)</h3>
+            <div class="quarter-plan">
+              <h4>📈 Doel: Investeringen en groei versnellen</h4>
+              <ul>
+                <li><strong>Maand 7:</strong> Investeringsstrategie ontwikkelen</li>
+                <li><strong>Maand 8:</strong> Belastingoptimalisatie implementeren</li>
+                <li><strong>Maand 9:</strong> Lange termijn financiële doelen stellen</li>
+              </ul>
+            </div>
+            
+            <h3>Kwartaal 4: Consolidatie (Maand 10-12)</h3>
+            <div class="quarter-plan">
+              <h4>💪 Doel: Systeem versterken en volhouden</h4>
+              <ul>
+                <li><strong>Maand 10:</strong> Alle systemen integreren</li>
+                <li><strong>Maand 11:</strong> Performance evalueren en aanpassen</li>
+                <li><strong>Maand 12:</strong> Volgende 12 maanden plannen</li>
+              </ul>
+            </div>
+            
+            <h3>Volgende Stappen</h3>
+            <div class="next-steps">
+              <h4>🎯 Na 12 maanden:</h4>
+              <ul>
+                <li>Evalueer je financiële transformatie</li>
+                <li>Plan je volgende groei fase</li>
+                <li>Overweeg professionele financiële begeleiding</li>
+                <li>Mentor andere ondernemers</li>
+              </ul>
+            </div>
+          </div>
+        `
+      }
+    ]
+  }
+};
+
 // Enhanced HTML template with better styling and structure
 function generateEnhancedEbookHTML(lessonData, moduleTitle, moduleNumber) {
   const pagesHTML = lessonData.pages.map((page, index) => `
@@ -2433,6 +3070,126 @@ function generateEnhancedEbookHTML(lessonData, moduleTitle, moduleNumber) {
             margin-bottom: 15px;
             font-size: 1.2em;
         }
+
+        /* Module 5 specific styles */
+        .foundation-analysis {
+            margin: 30px 0;
+        }
+        
+        .foundation-section {
+            background: white;
+            border: 2px solid #8BAE5A;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+        
+        .foundation-section h4 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .canvas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .canvas-block {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .canvas-block:hover {
+            border-color: #8BAE5A;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(139, 174, 90, 0.2);
+        }
+        
+        .canvas-block h4 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .canvas-block ul {
+            list-style: none;
+            padding: 0;
+            margin: 15px 0;
+        }
+        
+        .canvas-block li {
+            margin-bottom: 8px;
+            font-size: 0.9em;
+            color: #666;
+        }
+        
+        .launch-phase {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: 2px solid #B6C948;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+        
+        .launch-phase h4 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .kpi-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .kpi-card:hover {
+            border-color: #8BAE5A;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(139, 174, 90, 0.15);
+        }
+        
+        .kpi-card h4 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .kpi-card p {
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+        
+        .quarter-plan {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: 2px solid #B6C948;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+        
+        .quarter-plan h4 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
     }
     </style>
 </head>
@@ -2842,6 +3599,100 @@ async function createEnhancedEbooks() {
       totalCreatedCount += moduleCreatedCount;
       totalErrorCount += moduleErrorCount;
       console.log(`📊 Module 4 Summary: ${moduleCreatedCount} created, ${moduleErrorCount} errors\n`);
+    }
+
+    // Module 5: Business and Finance
+    console.log('📚 MODULE 05: Business and Finance');
+    console.log('==================================');
+
+    const { data: businessModule, error: businessModuleError } = await supabase
+      .from('academy_modules')
+      .select('*')
+      .eq('title', 'Business and Finance ')
+      .single();
+
+    if (businessModuleError) {
+      console.error('❌ Error finding Business and Finance module:', businessModuleError);
+    } else {
+      let moduleCreatedCount = 0;
+      let moduleErrorCount = 0;
+
+      // Process each lesson
+      for (const [lessonTitle, lessonData] of Object.entries(enhancedBusinessContent)) {
+        try {
+          console.log(`   📖 ${lessonTitle}`);
+          
+          const htmlContent = generateEnhancedEbookHTML(
+            lessonData,
+            businessModule.title,
+            businessModule.order_index.toString().padStart(2, '0')
+          );
+          
+          // Create filename
+          const safeTitle = lessonTitle
+            .toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .trim();
+          
+          const filename = `${safeTitle}-enhanced-ebook.html`;
+          const fileUrl = `/books/${filename}`;
+          
+          // Save HTML file to public/books directory
+          const publicDir = path.join(process.cwd(), 'public', 'books');
+          if (!fs.existsSync(publicDir)) {
+            fs.mkdirSync(publicDir, { recursive: true });
+          }
+          
+          const filePath = path.join(publicDir, filename);
+          fs.writeFileSync(filePath, htmlContent, 'utf8');
+          
+          console.log(`      ✅ Created enhanced ebook: ${filename}`);
+          console.log(`         📄 Pages: ${lessonData.pages.length}`);
+          console.log(`         🎨 Enhanced layout with visual elements`);
+          
+          // Update ebook record
+          const { data: existingEbook, error: fetchError } = await supabase
+            .from('academy_ebooks')
+            .select('id')
+            .eq('lesson_id', (await supabase
+              .from('academy_lessons')
+              .select('id')
+              .eq('title', lessonTitle)
+              .eq('module_id', businessModule.id)
+              .single()).data?.id)
+            .single();
+          
+          if (existingEbook) {
+            const { error: updateError } = await supabase
+              .from('academy_ebooks')
+              .update({
+                file_url: fileUrl,
+                updated_at: new Date().toISOString()
+              })
+              .eq('id', existingEbook.id);
+            
+            if (updateError) {
+              console.error(`         ❌ Error updating ebook:`, updateError);
+              moduleErrorCount++;
+            } else {
+              console.log(`         ✅ Updated ebook record`);
+              moduleCreatedCount++;
+            }
+          }
+          
+        } catch (error) {
+          console.error(`         ❌ Error creating enhanced ebook:`, error.message);
+          moduleErrorCount++;
+        }
+        
+        console.log('');
+      }
+
+      totalCreatedCount += moduleCreatedCount;
+      totalErrorCount += moduleErrorCount;
+      console.log(`📊 Module 5 Summary: ${moduleCreatedCount} created, ${moduleErrorCount} errors\n`);
     }
 
     // Summary
