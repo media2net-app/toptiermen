@@ -247,20 +247,28 @@ export default function EbookDownload({
               <p className="text-sm text-gray-600">
                 Je kunt dit ebook ook downloaden als PDF voor offline gebruik.
               </p>
-              <button
-                onClick={() => {
-                  const pdfUrl = ebookUrl.replace('.html', '.pdf');
-                  const link = document.createElement('a');
-                  link.href = pdfUrl;
-                  link.download = `${lessonTitle.replace(/\s+/g, '-').toLowerCase()}-ebook.pdf`;
-                  document.body.appendChild(link);
-                  link.click();
-                  document.body.removeChild(link);
-                }}
-                className="px-4 py-2 bg-[#8BAE5A] text-white rounded-md hover:bg-[#3A4D23] transition-colors"
-              >
-                Download PDF
-              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    const pdfUrl = ebookUrl.replace('.html', '.pdf');
+                    const link = document.createElement('a');
+                    link.href = pdfUrl;
+                    link.download = `${lessonTitle.replace(/\s+/g, '-').toLowerCase()}-ebook.pdf`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                  }}
+                  className="px-4 py-2 bg-[#8BAE5A] text-white rounded-md hover:bg-[#3A4D23] transition-colors"
+                >
+                  Download PDF
+                </button>
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                >
+                  Sluiten
+                </button>
+              </div>
             </div>
           </div>
         </div>
