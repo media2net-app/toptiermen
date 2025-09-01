@@ -5,8 +5,8 @@ require('dotenv').config({ path: '.env.local' });
 
 async function generatePDFEbooks() {
   try {
-    console.log('🚀 GENERATING PDF EBOOKS FOR MODULE 1, 2 & 3');
-    console.log('==============================================\n');
+    console.log('🚀 GENERATING PDF EBOOKS FOR MODULE 1, 2, 3 & 4');
+    console.log('================================================\n');
 
     const booksDir = path.join(process.cwd(), 'public', 'books');
     if (!fs.existsSync(booksDir)) {
@@ -14,10 +14,10 @@ async function generatePDFEbooks() {
       return;
     }
 
-    // Get all HTML files for Module 1, 2 and 3
+    // Get all HTML files for Module 1, 2, 3 and 4
     const htmlFiles = fs.readdirSync(booksDir)
       .filter(file => file.endsWith('.html') && 
-        (file.includes('testosteron') || file.includes('discipline') || file.includes('identiteit') || file.includes('fysieke') || file.includes('dominantie')))
+        (file.includes('testosteron') || file.includes('discipline') || file.includes('identiteit') || file.includes('fysieke') || file.includes('dominantie') || file.includes('mentale') || file.includes('weerbaarheid')))
       .map(file => ({
         filename: file,
         path: path.join(booksDir, file),
@@ -25,11 +25,11 @@ async function generatePDFEbooks() {
       }));
 
     if (htmlFiles.length === 0) {
-      console.error('❌ No HTML ebooks found for Module 1, 2 & 3. Please run create-enhanced-ebooks.js first.');
+      console.error('❌ No HTML ebooks found for Module 1, 2, 3 & 4. Please run create-enhanced-ebooks.js first.');
       return;
     }
 
-    console.log(`📚 Found ${htmlFiles.length} HTML ebooks for Module 1, 2 & 3:`);
+    console.log(`📚 Found ${htmlFiles.length} HTML ebooks for Module 1, 2, 3 & 4:`);
     htmlFiles.forEach(file => console.log(`   - ${file.filename}`));
     console.log('');
 
