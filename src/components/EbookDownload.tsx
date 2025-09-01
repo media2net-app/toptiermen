@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   DocumentArrowDownIcon, 
   BookOpenIcon,
@@ -29,7 +29,36 @@ export default function EbookDownload({
   const [downloadStatus, setDownloadStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [downloadType, setDownloadType] = useState<'html' | 'pdf'>('html');
 
+  // Reset download status when component mounts or when lesson changes
+  useEffect(() => {
+    setDownloadStatus('idle');
+    setIsDownloading(false);
+  }, [lessonId]);
+
+  // Handle page visibility changes to prevent state corruption
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // Page is visible again, ensure clean state
+        if (downloadStatus === 'success') {
+          // Reset success status after a delay to prevent UI issues
+          setTimeout(() => {
+            setDownloadStatus('idle');
+          }, 2000);
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [downloadStatus]);
+
   const handleDownload = async (type: 'html' | 'pdf') => {
+    // Prevent multiple simultaneous downloads
+    if (isDownloading) return;
+
     setIsDownloading(true);
     setDownloadStatus('idle');
     setDownloadType(type);
@@ -38,19 +67,44 @@ export default function EbookDownload({
       if (type === 'html') {
         // Open de HTML versie van het ebook in een nieuwe tab
         const htmlUrl = ebookUrl.replace('.pdf', '.html');
-        window.open(htmlUrl, '_blank');
+        
+        // Use a more reliable method to open new tab
+        const newWindow = window.open(htmlUrl, '_blank', 'noopener,noreferrer');
+        
+        // Check if window opened successfully
+        if (newWindow) {
+          // Add a small delay to ensure the window opens before updating status
+          setTimeout(() => {
+            setDownloadStatus('success');
+          }, 500);
+        } else {
+          // Fallback if popup is blocked
+          const link = document.createElement('a');
+          link.href = htmlUrl;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          
+          setTimeout(() => {
+            setDownloadStatus('success');
+          }, 500);
+        }
       } else {
         // Download de PDF versie
         const pdfUrl = ebookUrl.replace('.html', '.pdf');
         const link = document.createElement('a');
         link.href = pdfUrl;
         link.download = `${lessonTitle.replace(/\s+/g, '-').toLowerCase()}-ebook.pdf`;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        
+        setDownloadStatus('success');
       }
-
-      setDownloadStatus('success');
       
       // Reset status na 3 seconden
       setTimeout(() => {

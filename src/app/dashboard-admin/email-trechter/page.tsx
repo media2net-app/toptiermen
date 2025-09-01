@@ -47,6 +47,7 @@ export default function EmailTrechterPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+  const [showOpensModal, setShowOpensModal] = useState(false);
 
   // Official campaign ID
   const OFFICIAL_CAMPAIGN_ID = '3c599791-0268-4980-914f-a599be42139b';
@@ -222,11 +223,12 @@ export default function EmailTrechterPage() {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-green-600 to-green-700 p-6 rounded-lg">
+          <div className="bg-gradient-to-br from-green-600 to-green-700 p-6 rounded-lg cursor-pointer hover:from-green-700 hover:to-green-800 transition-all duration-200" onClick={() => setShowOpensModal(true)}>
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-3xl font-bold text-white">{openCount}</div>
                 <div className="text-green-100">{openRate}% opening rate</div>
+                <div className="text-green-200 text-sm mt-1">Klik om details te zien</div>
               </div>
               <div className="text-green-200">
                 <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
@@ -422,6 +424,116 @@ export default function EmailTrechterPage() {
           </AdminCard>
         )}
       </div>
+
+      {/* Email Opens Modal */}
+      {showOpensModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
+          <div className="bg-gray-900 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-700">
+              <div>
+                <h2 className="text-2xl font-bold text-white">Email Open Details</h2>
+                <p className="text-gray-400 mt-1">Wie heeft wanneer en hoe vaak emails geopend</p>
+              </div>
+              <button
+                onClick={() => setShowOpensModal(false)}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+              {loadingRecipients ? (
+                <div className="animate-pulse space-y-3">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="h-16 bg-gray-800 rounded"></div>
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Summary Stats */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div className="bg-gray-800 p-4 rounded-lg">
+                      <div className="text-2xl font-bold text-green-400">{openCount}</div>
+                      <div className="text-sm text-gray-400">Totaal geopend</div>
+                    </div>
+                    <div className="bg-gray-800 p-4 rounded-lg">
+                      <div className="text-2xl font-bold text-blue-400">{recipients.filter(r => r.status === 'opened').length}</div>
+                      <div className="text-sm text-gray-400">Unieke ontvangers</div>
+                    </div>
+                    <div className="bg-gray-800 p-4 rounded-lg">
+                      <div className="text-2xl font-bold text-yellow-400">
+                        {openCount > 0 ? Math.round((openCount / recipients.filter(r => r.status === 'opened').length) * 10) / 10 : 0}
+                      </div>
+                      <div className="text-sm text-gray-400">Gemiddeld per persoon</div>
+                    </div>
+                  </div>
+
+                  {/* Detailed Opens Table */}
+                  <div className="bg-gray-800 rounded-lg overflow-hidden">
+                    <div className="px-6 py-4 border-b border-gray-700">
+                      <h3 className="text-lg font-semibold text-white">Gedetailleerde Open Informatie</h3>
+                    </div>
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full">
+                        <thead className="bg-gray-700">
+                          <tr>
+                            <th className="text-left py-3 px-4 text-sm font-medium text-gray-300">Email</th>
+                            <th className="text-left py-3 px-4 text-sm font-medium text-gray-300">Naam</th>
+                            <th className="text-left py-3 px-4 text-sm font-medium text-gray-300">Status</th>
+                            <th className="text-left py-3 px-4 text-sm font-medium text-gray-300">Verzonden</th>
+                            <th className="text-left py-3 px-4 text-sm font-medium text-gray-300">Geopend</th>
+                            <th className="text-left py-3 px-4 text-sm font-medium text-gray-300">Aantal Opens</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-700">
+                          {recipients
+                            .filter(r => r.status === 'opened')
+                            .sort((a, b) => new Date(b.opened_at || 0).getTime() - new Date(a.opened_at || 0).getTime())
+                            .map((recipient) => (
+                              <tr key={recipient.id} className="hover:bg-gray-700 transition-colors">
+                                <td className="py-3 px-4 text-white">{recipient.email}</td>
+                                <td className="py-3 px-4 text-white">{recipient.full_name || 'N/A'}</td>
+                                <td className="py-3 px-4">
+                                  <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
+                                    {recipient.status}
+                                  </span>
+                                </td>
+                                <td className="py-3 px-4 text-gray-400">
+                                  {recipient.sent_at ? new Date(recipient.sent_at).toLocaleString('nl-NL') : 'N/A'}
+                                </td>
+                                <td className="py-3 px-4 text-gray-400">
+                                  {recipient.opened_at ? new Date(recipient.opened_at).toLocaleString('nl-NL') : 'N/A'}
+                                </td>
+                                <td className="py-3 px-4 text-green-400 font-medium">
+                                  1
+                                </td>
+                              </tr>
+                            ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* Additional Info */}
+                  <div className="bg-gray-800 p-4 rounded-lg">
+                    <h4 className="text-sm font-medium text-gray-400 mb-2">Opmerkingen</h4>
+                    <ul className="text-sm text-gray-300 space-y-1">
+                      <li>• Een persoon kan meerdere keren dezelfde email openen</li>
+                      <li>• De tracking pixel registreert elke keer dat de email wordt geladen</li>
+                      <li>• Dit geeft inzicht in engagement en herhaalde interesse</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 
