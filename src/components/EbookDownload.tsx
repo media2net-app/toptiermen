@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { 
-  DocumentArrowDownIcon, 
+import {
+  DocumentArrowDownIcon,
   BookOpenIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
   ComputerDesktopIcon,
-  DocumentTextIcon
+  DocumentTextIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 
 interface EbookDownloadProps {
@@ -18,16 +19,17 @@ interface EbookDownloadProps {
   isCompleted?: boolean;
 }
 
-export default function EbookDownload({ 
-  lessonId, 
-  lessonTitle, 
-  moduleTitle, 
-  ebookUrl, 
-  isCompleted = false 
+export default function EbookDownload({
+  lessonId,
+  lessonTitle,
+  moduleTitle,
+  ebookUrl,
+  isCompleted = false
 }: EbookDownloadProps) {
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadStatus, setDownloadStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [downloadType, setDownloadType] = useState<'html' | 'pdf'>('html');
+  const [showModal, setShowModal] = useState(false);
 
   // Reset download status when component mounts or when lesson changes
   useEffect(() => {
@@ -46,9 +48,8 @@ export default function EbookDownload({
 
     try {
       if (type === 'html') {
-        // Open de HTML versie van het ebook in een nieuwe tab
-        const htmlUrl = ebookUrl.replace('.pdf', '.html');
-        window.open(htmlUrl, '_blank');
+        // Open de HTML versie van het ebook in een modal
+        setShowModal(true);
         setDownloadStatus('success');
       } else {
         // Download de PDF versie
@@ -167,7 +168,7 @@ export default function EbookDownload({
               `}
             >
               <ComputerDesktopIcon className="w-5 h-5 mr-2" />
-              {isDownloading && downloadType === 'html' ? 'Openen...' : 'Open in Browser'}
+              {isDownloading && downloadType === 'html' ? 'Openen...' : 'Bekijk Ebook'}
             </button>
             
             <button
@@ -202,5 +203,55 @@ export default function EbookDownload({
         </div>
       </div>
     </div>
+
+    {/* Ebook Modal */}
+    {showModal && (
+      <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full h-5/6 flex flex-col">
+          {/* Modal Header */}
+          <div className="flex items-center justify-between p-4 border-b border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900">
+              {lessonTitle} - Ebook
+            </h3>
+            <button
+              onClick={() => setShowModal(false)}
+              className="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <XMarkIcon className="w-6 h-6" />
+            </button>
+          </div>
+          
+          {/* Modal Content */}
+          <div className="flex-1 p-4 overflow-hidden">
+            <iframe
+              src={ebookUrl.replace('.pdf', '.html')}
+              className="w-full h-full border-0 rounded"
+              title={`${lessonTitle} Ebook`}
+            />
+          </div>
+          
+          {/* Modal Footer */}
+          <div className="flex items-center justify-between p-4 border-t border-gray-200">
+            <p className="text-sm text-gray-600">
+              Je kunt dit ebook ook downloaden als PDF voor offline gebruik.
+            </p>
+            <button
+              onClick={() => {
+                const pdfUrl = ebookUrl.replace('.html', '.pdf');
+                const link = document.createElement('a');
+                link.href = pdfUrl;
+                link.download = `${lessonTitle.replace(/\s+/g, '-').toLowerCase()}-ebook.pdf`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+              }}
+              className="px-4 py-2 bg-[#8BAE5A] text-white rounded-md hover:bg-[#3A4D23] transition-colors"
+            >
+              Download PDF
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
   );
 }
