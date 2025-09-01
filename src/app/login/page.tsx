@@ -6,29 +6,52 @@ import { useAuth } from '@/auth-systems/optimal/useAuth';
 import { EnvelopeIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 // import { useCacheBuster } from '@/components/CacheBuster'; - DISABLED TO PREVENT LOGOUT
 
+// Auth configuration constants
+const AUTH_CONFIG = {
+  redirectTimeout: 5000,
+  checkInterval: 500,
+  maxRedirectAttempts: 10,
+  defaultRedirect: '/dashboard'
+};
+
 function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, profile, loading, signIn, isAdmin } = useAuth();
   // const { bustCache } = useCacheBuster(); - DISABLED TO PREVENT LOGOUT
   
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [redirecting, setRedirecting] = useState(false);
-  const [isClient, setIsClient] = useState(false);
+  // Consolidated state management
+  const [loginState, setLoginState] = useState({
+    email: "",
+    password: "",
+    rememberMe: false,
+    error: "",
+    isLoading: false,
+    redirecting: false,
+    isClient: false,
+    // Forgot password states
+    showForgotPassword: false,
+    forgotPasswordEmail: "",
+    isSendingReset: false,
+    resetMessage: ""
+  });
 
-  // Forgot password states
-  const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
-  const [isSendingReset, setIsSendingReset] = useState(false);
-  const [resetMessage, setResetMessage] = useState("");
+  // Helper function to update specific state properties
+  const updateLoginState = (updates: Partial<typeof loginState>) => {
+    setLoginState(prev => ({ ...prev, ...updates }));
+  };
+
+  // Helper function to get redirect path
+  const getRedirectPath = (user: any, profile: any, redirectTo?: string) => {
+    if (redirectTo && redirectTo !== '/login') return redirectTo;
+    
+    const role = profile?.role || (user as any)?.user_metadata?.role || '';
+    return role.toLowerCase() === 'admin' ? '/dashboard-admin' : AUTH_CONFIG.defaultRedirect;
+  };
 
   useEffect(() => { 
     // 2.0.3: Client-side hydration safety
-    setIsClient(true);
+    updateLoginState({ isClient: true });
     
     // 2.0.1: Simplified initialization
     console.log('🔍 Login page initialized');
@@ -39,12 +62,10 @@ function LoginPageContent() {
     const logoutStatus = searchParams?.get('logout');
     if (logoutStatus === 'success') {
       console.log('✅ Logout successful, resetting login state');
-      setIsLoading(false);
-      setError('');
+      updateLoginState({ isLoading: false, error: '' });
     } else if (logoutStatus === 'error') {
       console.log('❌ Logout had errors, resetting login state');
-      setIsLoading(false);
-      setError('Er is een fout opgetreden bij het uitloggen. Probeer opnieuw in te loggen.');
+      updateLoginState({ isLoading: false, error: 'Er is een fout opgetreden bij het uitloggen. Probeer opnieuw in te loggen.' });
     }
     
     // Check Supabase status on page load
@@ -67,51 +88,25 @@ function LoginPageContent() {
 
   // Check if user is already authenticated - Redirect immediately when user exists
   useEffect(() => {
-    console.log('🔄 ========== REDIRECT EFFECT TRIGGERED ==========');
-    console.log('📊 Current state - Loading:', loading, 'User:', !!user, 'Profile:', !!profile, 'Redirecting:', redirecting, 'IsAdmin:', isAdmin);
-    console.log('👤 User email:', user?.email);
-    console.log('👨‍💼 Profile role:', profile?.role);
-
-    if (loading) {
-      console.log('⏳ Still loading, skipping redirect check');
-      return;
-    }
+    if (loading) return;
 
     // Redirect as soon as we have a user (don't wait for profile)
-    if (user && !redirecting) {
-      setRedirecting(true);
+    if (user && !loginState.redirecting) {
+      updateLoginState({ redirecting: true });
 
-      const redirectTo = searchParams?.get('redirect');
-      let targetPath = '/dashboard';
+      const redirectTo = searchParams?.get('redirect') || undefined;
+      const targetPath = getRedirectPath(user, profile, redirectTo);
 
-      if (redirectTo && redirectTo !== '/login') {
-        targetPath = redirectTo;
-        console.log('🔀 Using redirect parameter:', targetPath);
-      } else {
-        // Check role from user_metadata first (immediate), then profile
-        const metadataRole = ((user as any)?.user_metadata?.role as string | undefined) || undefined;
-        const effectiveRole = (profile?.role || metadataRole || '').toLowerCase();
-        const isAdminUser = effectiveRole === 'admin';
-        
-        targetPath = isAdminUser ? '/dashboard-admin' : '/dashboard';
-        console.log('🎯 Role-based redirect - Profile role:', profile?.role, 'Metadata role:', metadataRole, 'Effective:', effectiveRole, 'IsAdmin:', isAdminUser, '→', targetPath);
-      }
-
-      console.log('🚀 REDIRECTING TO:', targetPath);
       router.replace(targetPath);
-    } else if (!user) {
-      console.log('❌ No user authenticated');
-    } else if (redirecting) {
-      console.log('🔄 Already redirecting, skipping');
     }
-  }, [loading, user, profile, router, searchParams, redirecting, isAdmin]);
+  }, [loading, user, profile, router, searchParams, loginState.redirecting]);
 
   // 2.0.1: Force show login form after 2 seconds if still loading - DISABLED TO FIX FLICKERING
   // useEffect(() => {
   //   if (loading) {
   //     const timer = setTimeout(() => {
   //       console.log('2.0.1: Force showing login form after timeout');
-  //       setRedirecting(false);
+  //       updateLoginState({ redirecting: false });
   //     }, 2000);
   //     
   //     return () => clearTimeout(timer);
@@ -121,82 +116,53 @@ function LoginPageContent() {
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     
-    console.log('🚀 ========== LOGIN ATTEMPT STARTED ==========');
-    console.log('📧 Email:', email);
-    console.log('🔑 Password length:', password.length);
-    console.log('💾 Remember me:', rememberMe);
-    console.log('📊 Current auth state - User:', !!user, 'Profile:', !!profile, 'Loading:', loading, 'IsAdmin:', isAdmin);
-    console.log('🔄 Current redirecting state:', redirecting);
-    
-    if (!email || !password) {
-      console.log('❌ Validation failed: Missing email or password');
-      setError("Vul alle velden in");
+    if (!loginState.email || !loginState.password) {
+      updateLoginState({ error: "Vul alle velden in" });
       return;
     }
 
-    if (isLoading) {
-      console.log('⚠️ Already loading, ignoring click');
-      return;
-    }
+    if (loginState.isLoading) return;
 
-    setIsLoading(true);
-    setError("");
+    updateLoginState({ isLoading: true, error: "" });
     
     try {
-      console.log('🔄 Step 1: Calling signIn function...');
-      const result = await signIn(email, password);
-      console.log('📋 Step 2: SignIn result received:', result);
+      const result = await signIn(loginState.email, loginState.password);
 
       if (!result.success) {
-        console.error('❌ Step 3: Sign in failed:', result.error);
-        setError(result.error || "Ongeldige inloggegevens");
-        setIsLoading(false);
+        updateLoginState({ 
+          error: result.error || "Ongeldige inloggegevens",
+          isLoading: false 
+        });
         return;
       }
 
-      console.log('✅ Step 3: Login successful! Setting up redirect...');
-      console.log('📊 Auth state after login - User:', !!user, 'Profile:', !!profile, 'IsAdmin:', isAdmin);
+      updateLoginState({ redirecting: true, isLoading: false });
       
-      setRedirecting(true);
-      setIsLoading(false); // Reset loading state
+      // Fallback redirect timeout
+      const redirectTimeout = setTimeout(() => {
+        router.replace(AUTH_CONFIG.defaultRedirect);
+      }, AUTH_CONFIG.redirectTimeout);
       
-      console.log('⏰ Step 4: Starting redirect monitoring...');
-      
-      // Monitor auth state changes for 5 seconds
-      let attempts = 0;
-      const checkInterval = setInterval(() => {
-        attempts++;
-        console.log(`🔍 Redirect check #${attempts} - User:`, !!user, 'Profile:', !!profile, 'IsAdmin:', isAdmin);
-        
-        if (attempts >= 10) { // 5 seconds
-          console.log('⏰ Redirect timeout reached, forcing redirect to dashboard');
-          clearInterval(checkInterval);
-          router.replace('/dashboard');
-        }
-      }, 500);
-      
-      // Clear interval if redirect happens via useEffect
-      setTimeout(() => {
-        clearInterval(checkInterval);
-      }, 5000);
+      return () => clearTimeout(redirectTimeout);
       
     } catch (error: any) {
-      console.error('❌ Login error caught:', error);
-      setError(error.message || "Er is een fout opgetreden bij het inloggen");
-      setIsLoading(false);
+      updateLoginState({ 
+        error: error.message || "Er is een fout opgetreden bij het inloggen",
+        isLoading: false 
+      });
     }
   }
 
   async function handleForgotPassword(e: React.FormEvent) {
     e.preventDefault();
     
-    if (!forgotPasswordEmail) {
-      setResetMessage("Vul een e-mailadres in");
+    if (!loginState.forgotPasswordEmail) {
+      updateLoginState({ resetMessage: "Vul een e-mailadres in" });
       return;
     }
 
-    setIsSendingReset(true);
-    setResetMessage("");
+    updateLoginState({ isSendingReset: true });
+    updateLoginState({ resetMessage: "" });
 
     try {
       const response = await fetch('/api/auth/forgot-password', {
@@ -204,35 +170,35 @@ function LoginPageContent() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email: forgotPasswordEmail }),
+        body: JSON.stringify({ email: loginState.forgotPasswordEmail }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        setResetMessage(data.error || "Fout bij het versturen van reset e-mail");
+        updateLoginState({ resetMessage: data.error || "Fout bij het versturen van reset e-mail" });
         return;
       }
 
-      setResetMessage("Wachtwoord reset e-mail is verstuurd! Controleer je inbox.");
-      setForgotPasswordEmail("");
+      updateLoginState({ resetMessage: "Wachtwoord reset e-mail is verstuurd! Controleer je inbox." });
+      updateLoginState({ forgotPasswordEmail: "" });
       
       // Close modal after 3 seconds
       setTimeout(() => {
-        setShowForgotPassword(false);
-        setResetMessage("");
+        updateLoginState({ showForgotPassword: false });
+        updateLoginState({ resetMessage: "" });
       }, 3000);
 
     } catch (error) {
       console.error('2.0.1: Forgot password error:', error);
-      setResetMessage("Er is een fout opgetreden. Probeer het opnieuw.");
+      updateLoginState({ resetMessage: "Er is een fout opgetreden. Probeer het opnieuw." });
     } finally {
-      setIsSendingReset(false);
+      updateLoginState({ isSendingReset: false });
     }
   }
 
   // Hydration safety - prevent hydration errors
-  if (!isClient) {
+  if (!loginState.isClient) {
     return (
       <div className="min-h-screen flex items-center justify-center relative px-4 py-6" style={{ backgroundColor: '#181F17' }}>
         <div className="text-center">
@@ -244,7 +210,7 @@ function LoginPageContent() {
   }
 
   // Show loading state while checking authentication (with timeout) - DISABLED TO FIX FLICKERING
-  // if (loading && !redirecting) {
+  // if (loading && !loginState.redirecting) {
   //   return (
   //     <div className="min-h-screen flex items-center justify-center relative px-4 py-6" style={{ backgroundColor: '#181F17' }}>
   //       <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
@@ -266,7 +232,7 @@ function LoginPageContent() {
   // }
 
   // Show redirecting state - DISABLED TO FIX FLICKERING
-  // if (redirecting) {
+  // if (loginState.redirecting) {
   //   return (
   //     <div className="min-h-screen flex items-center justify-center relative px-4 py-6" style={{ backgroundColor: '#181F17' }}>
   //       <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
@@ -289,7 +255,7 @@ function LoginPageContent() {
 
   return (
     <div 
-      className={`min-h-screen flex items-center justify-center relative px-4 py-6 ${isLoading ? 'login-loading' : ''}`}
+      className={`min-h-screen flex items-center justify-center relative px-4 py-6 ${loginState.isLoading ? 'login-loading' : ''}`}
       style={{ backgroundColor: '#181F17' }}
     >
       <img src="/pattern.png" alt="pattern" className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none z-0" />
@@ -313,7 +279,7 @@ function LoginPageContent() {
             <p className="text-[#8BAE5A]">Supabase Key: {process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? '✅' : '❌'}</p>
             <p className="text-[#8BAE5A]">Loading: {loading ? '✅' : '❌'}</p>
             <p className="text-[#8BAE5A]">User: {user ? '✅' : '❌'}</p>
-            <p className="text-[#8BAE5A]">Error: {error || 'None'}</p>
+            <p className="text-[#8BAE5A]">Error: {loginState.error || 'None'}</p>
           </div>
         )}
         
@@ -322,26 +288,26 @@ function LoginPageContent() {
             <EnvelopeIcon className="w-5 h-5 text-[#B6C948] absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              className={`w-full pl-10 pr-4 py-3 rounded-xl bg-[#181F17] text-[#B6C948] placeholder-[#B6C948] focus:outline-none focus:ring-2 focus:ring-[#B6C948] transition shadow-inner border border-[#3A4D23] font-figtree ${isLoading ? 'cursor-wait opacity-75' : 'cursor-text'}`}
+              value={loginState.email}
+              onChange={e => updateLoginState({ email: e.target.value })}
+              className={`w-full pl-10 pr-4 py-3 rounded-xl bg-[#181F17] text-[#B6C948] placeholder-[#B6C948] focus:outline-none focus:ring-2 focus:ring-[#B6C948] transition shadow-inner border border-[#3A4D23] font-figtree ${loginState.isLoading ? 'cursor-wait opacity-75' : 'cursor-text'}`}
               placeholder="E-mailadres"
               autoComplete="email"
               required
-              disabled={isLoading}
+              disabled={loginState.isLoading}
             />
           </div>
           <div className="relative">
             <LockClosedIcon className="w-5 h-5 text-[#B6C948] absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              className={`w-full pl-10 pr-4 py-3 rounded-xl bg-[#181F17] text-[#B6C948] placeholder-[#B6C948] focus:outline-none focus:ring-2 focus:ring-[#B6C948] transition shadow-inner border border-[#3A4D23] font-figtree ${isLoading ? 'cursor-wait opacity-75' : 'cursor-text'}`}
+              value={loginState.password}
+              onChange={e => updateLoginState({ password: e.target.value })}
+              className={`w-full pl-10 pr-4 py-3 rounded-xl bg-[#181F17] text-[#B6C948] placeholder-[#B6C948] focus:outline-none focus:ring-2 focus:ring-[#B6C948] transition shadow-inner border border-[#3A4D23] font-figtree ${loginState.isLoading ? 'cursor-wait opacity-75' : 'cursor-text'}`}
               placeholder="Wachtwoord"
               autoComplete="current-password"
               required
-              disabled={isLoading}
+              disabled={loginState.isLoading}
             />
           </div>
           
@@ -350,40 +316,40 @@ function LoginPageContent() {
             <label className="flex items-center cursor-pointer">
               <input
                 type="checkbox"
-                checked={rememberMe}
-                onChange={e => setRememberMe(e.target.checked)}
+                checked={loginState.rememberMe}
+                onChange={e => updateLoginState({ rememberMe: e.target.checked })}
                 className="w-4 h-4 text-[#B6C948] bg-[#181F17] border-[#3A4D23] rounded focus:ring-[#B6C948] focus:ring-2"
-                disabled={isLoading}
+                disabled={loginState.isLoading}
               />
               <span className="ml-2 text-[#B6C948] text-sm font-figtree">Ingelogd blijven</span>
             </label>
             
             <button
               type="button"
-              onClick={() => setShowForgotPassword(true)}
-              className={`text-[#8BAE5A] hover:text-[#B6C948] text-sm underline font-figtree ${isLoading ? 'cursor-wait opacity-75' : 'cursor-pointer'}`}
-              disabled={isLoading}
+              onClick={() => updateLoginState({ showForgotPassword: true })}
+              className={`text-[#8BAE5A] hover:text-[#B6C948] text-sm underline font-figtree ${loginState.isLoading ? 'cursor-wait opacity-75' : 'cursor-pointer'}`}
+              disabled={loginState.isLoading}
             >
               Wachtwoord vergeten?
             </button>
           </div>
-          {error && (
+          {loginState.error && (
             <div className="text-[#B6C948] text-center text-sm -mt-4 border border-[#B6C948] rounded-lg py-2 px-3 bg-[#181F17] font-figtree">
-              {error}
+              {loginState.error}
             </div>
           )}
           <button
             type="submit"
-            disabled={isLoading || !email || !password}
+            disabled={loginState.isLoading || !loginState.email || !loginState.password}
             className={`w-full py-3 sm:py-4 rounded-xl bg-gradient-to-r from-[#B6C948] to-[#3A4D23] text-[#181F17] font-semibold text-base sm:text-lg shadow-lg hover:from-[#B6C948] hover:to-[#B6C948] transition-all duration-200 border border-[#B6C948] font-figtree ${
-              isLoading 
+              loginState.isLoading 
                 ? 'opacity-75 cursor-wait' 
-                : (!email || !password) 
+                : (!loginState.email || !loginState.password) 
                   ? 'opacity-50 cursor-not-allowed' 
                   : 'cursor-pointer'
             }`}
           >
-            {isLoading ? (
+            {loginState.isLoading ? (
               <div className="flex items-center justify-center">
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#181F17] mr-2"></div>
                 <span>Inloggen...</span>
@@ -411,8 +377,8 @@ function LoginPageContent() {
                   console.log('🔄 Manual cache busting: DISABLED to prevent logout issues');
                   // bustCache(); - DISABLED TO PREVENT LOGOUT
                 }}
-                className={`w-full px-3 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded text-sm font-medium hover:bg-[#4A5D33] transition-colors ${isLoading ? 'cursor-wait opacity-75' : 'cursor-pointer'}`}
-                disabled={isLoading}
+                className={`w-full px-3 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded text-sm font-medium hover:bg-[#4A5D33] transition-colors ${loginState.isLoading ? 'cursor-wait opacity-75' : 'cursor-pointer'}`}
+                disabled={loginState.isLoading}
               >
                 🔄 Cache Verversen & Herladen
               </button>
@@ -431,7 +397,7 @@ function LoginPageContent() {
       </div>
 
       {/* Forgot Password Modal */}
-      {showForgotPassword && (
+      {loginState.showForgotPassword && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-[#232D1A] rounded-2xl p-8 max-w-md w-full mx-4 border border-[#3A4D23]">
             <div className="text-center mb-6">
@@ -447,13 +413,13 @@ function LoginPageContent() {
             </div>
             
             <form onSubmit={handleForgotPassword} className="space-y-4 mb-6">
-              {resetMessage && (
+              {loginState.resetMessage && (
                 <div className={`text-center text-sm rounded-lg py-2 px-3 font-figtree ${
-                  resetMessage.includes('verstuurd') 
+                  loginState.resetMessage.includes('verstuurd') 
                     ? 'text-green-400 border border-green-500/20 bg-green-500/10' 
                     : 'text-[#B6C948] border border-[#B6C948] bg-[#181F17]'
                 }`}>
-                  {resetMessage}
+                  {loginState.resetMessage}
                 </div>
               )}
                 
@@ -463,12 +429,12 @@ function LoginPageContent() {
                 </label>
                 <input
                   type="email"
-                  value={forgotPasswordEmail}
-                  onChange={e => setForgotPasswordEmail(e.target.value)}
+                  value={loginState.forgotPasswordEmail}
+                  onChange={e => updateLoginState({ forgotPasswordEmail: e.target.value })}
                   className="w-full bg-[#181F17] text-white px-3 py-2 rounded-lg border border-[#3A4D23] focus:outline-none focus:border-[#8BAE5A]"
                   placeholder="Voer je e-mailadres in"
                   required
-                  disabled={isSendingReset}
+                  disabled={loginState.isSendingReset}
                 />
               </div>
             </form>
@@ -476,21 +442,21 @@ function LoginPageContent() {
             <div className="flex gap-3">
               <button
                 onClick={() => {
-                  setShowForgotPassword(false);
-                  setForgotPasswordEmail("");
-                  setResetMessage("");
+                  updateLoginState({ showForgotPassword: false });
+                  updateLoginState({ forgotPasswordEmail: "" });
+                  updateLoginState({ resetMessage: "" });
                 }}
-                disabled={isSendingReset}
+                disabled={loginState.isSendingReset}
                 className="flex-1 px-4 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded-lg font-semibold hover:bg-[#4A5D33] transition-colors disabled:opacity-50"
               >
                 Annuleren
               </button>
               <button
                 onClick={handleForgotPassword}
-                disabled={isSendingReset || !forgotPasswordEmail}
+                disabled={loginState.isSendingReset || !loginState.forgotPasswordEmail}
                 className="flex-1 px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg font-semibold hover:bg-[#A6C97B] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isSendingReset ? (
+                {loginState.isSendingReset ? (
                   <div className="flex items-center justify-center gap-2">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#181F17]"></div>
                     Versturen...

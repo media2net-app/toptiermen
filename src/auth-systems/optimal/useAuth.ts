@@ -104,28 +104,19 @@ export function useAuth(): AuthReturn {
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('🔄 ========== AUTH STATE CHANGE ==========');
-        console.log('📢 Event:', event);
-        console.log('👤 Session user:', !!session?.user, 'Email:', session?.user?.email);
+        console.log('🔄 Auth state change:', event, session?.user?.email);
 
         setUser(session?.user ?? null);
         setError(null);
 
         if (session?.user) {
-          console.log('👤 User signed in, fetching profile for ID:', session.user.id);
           const userProfile = await fetchProfile(session.user.id);
-          console.log('👨‍💼 Profile fetched - Exists:', !!userProfile, 'Role:', userProfile?.role, 'Email:', userProfile?.email);
           setProfile(userProfile);
-          
-          // Calculate isAdmin for debug
-          const isAdminCheck = userProfile?.role?.toLowerCase() === 'admin';
-          console.log('🎯 Admin check - Role:', userProfile?.role, '→ IsAdmin:', isAdminCheck);
+          console.log('👤 Profile loaded:', userProfile?.role);
         } else {
-          console.log('👋 User signed out, clearing profile');
           setProfile(null);
         }
 
-        console.log('✅ Auth state change complete, setting loading to false');
         setLoading(false);
       }
     );
@@ -138,33 +129,25 @@ export function useAuth(): AuthReturn {
 
   // Auth methods
   const signIn = useCallback(async (email: string, password: string) => {
-    console.log('🔐 ========== SIGN IN ATTEMPT ==========');
-    console.log('📧 Email:', email);
-    console.log('📊 Current state before signIn - User:', !!user, 'Profile:', !!profile, 'Loading:', loading);
+    console.log('🔐 Sign in attempt for:', email);
     
     setLoading(true);
     setError(null);
 
     try {
-      console.log('🔄 Calling Supabase signInWithPassword...');
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
-        console.error('❌ Supabase sign in error:', error);
+        console.error('❌ Sign in error:', error.message);
         setError(error.message);
         setLoading(false);
         return { success: false, error: error.message };
       }
 
-      console.log('✅ Supabase sign in successful!');
-      console.log('👤 Auth data user:', !!data.user, 'Email:', data.user?.email);
-      console.log('🔑 Session:', !!data.session);
-      
-      // Note: State will be updated by onAuthStateChange
-      console.log('⏳ Waiting for onAuthStateChange to update state...');
+      console.log('✅ Sign in successful, waiting for auth state update...');
       return { success: true };
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Sign in failed';
@@ -173,7 +156,7 @@ export function useAuth(): AuthReturn {
       setLoading(false);
       return { success: false, error: errorMessage };
     }
-  }, [user, profile, loading]);
+  }, []);
 
   const signUp = useCallback(async (email: string, password: string, fullName: string) => {
     console.log('📝 Optimal Auth: Sign up attempt...');
