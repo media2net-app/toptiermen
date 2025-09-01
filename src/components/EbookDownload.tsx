@@ -35,28 +35,7 @@ export default function EbookDownload({
     setIsDownloading(false);
   }, [lessonId]);
 
-  // Handle page visibility changes to prevent state corruption
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        // Page is visible again, ensure clean state
-        if (downloadStatus === 'success') {
-          // Reset success status after a delay to prevent UI issues
-          setTimeout(() => {
-            setDownloadStatus('idle');
-          }, 2000);
-        }
-      }
-    };
 
-    // Only add listener if we're not in the middle of a download
-    if (!isDownloading) {
-      document.addEventListener('visibilitychange', handleVisibilityChange);
-      return () => {
-        document.removeEventListener('visibilitychange', handleVisibilityChange);
-      };
-    }
-  }, [downloadStatus, isDownloading]);
 
   const handleDownload = async (type: 'html' | 'pdf') => {
     if (isDownloading) return;

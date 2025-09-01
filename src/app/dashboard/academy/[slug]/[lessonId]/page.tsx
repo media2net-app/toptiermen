@@ -53,25 +53,7 @@ export default function LessonDetailPage() {
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Handle page visibility changes to prevent state corruption
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        // Page is visible again, check if we need to refresh data
-        // Only refresh if data is not loaded AND we're not currently loading
-        // AND we have the required data (user, moduleId, lessonId)
-        if (!isDataLoaded && !loading && user && moduleId && lessonId) {
-          console.log('Page became visible, refreshing data...');
-          fetchData();
-        }
-      }
-    };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [isDataLoaded, loading, user, moduleId, lessonId]);
 
   // Simplified data fetching
   const fetchData = async () => {
