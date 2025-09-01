@@ -2132,6 +2132,635 @@ const enhancedBusinessContent = {
   }
 };
 
+// Enhanced ebook content for Module 6: Brotherhood (15+ pages)
+const enhancedBrotherhoodContent = {
+  'Wat is Brotherhood en waarom is dit zo belangrijk?': {
+    title: 'Wat is Brotherhood en waarom is dit zo belangrijk?',
+    subtitle: 'De Kracht van Echte Verbinding',
+    pages: [
+      {
+        title: 'Introductie',
+        content: `
+          <div class="page-header">
+            <h2>Introductie</h2>
+            <p class="lead">Brotherhood is niet alleen over vriendschap - het is over een diepe, onvoorwaardelijke verbinding die je leven transformeert.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>Wat je gaat leren in dit ebook:</h3>
+            <ul class="learning-objectives">
+              <li>De ware betekenis van Brotherhood en waarom het cruciaal is</li>
+              <li>Hoe Brotherhood verschilt van gewone vriendschap</li>
+              <li>De psychologie van mannelijke verbinding en groei</li>
+              <li>Praktische stappen om Brotherhood te ontwikkelen</li>
+              <li>Een 30-dagen Brotherhood transformatie</li>
+            </ul>
+          </div>
+          
+          <div class="info-box">
+            <h4>💡 Wist je dat?</h4>
+            <p>Mannen met sterke Brotherhood verbindingen leven gemiddeld 7 jaar langer en rapporteren 3x hogere levensvoldoening.</p>
+          </div>
+        `
+      },
+      {
+        title: 'De Wetenschap van Brotherhood',
+        content: `
+          <div class="page-header">
+            <h2>De Wetenschap van Brotherhood</h2>
+            <p class="lead">Begrijp hoe Brotherhood je brein, hormonen en welzijn beïnvloedt.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>Hormonale Basis van Brotherhood</h3>
+            <div class="brotherhood-flow">
+              <div class="brotherhood-step">
+                <div class="step-number">1</div>
+                <p><strong>Oxytocine</strong> - Verhoogt vertrouwen en verbinding</p>
+              </div>
+              <div class="brotherhood-step">
+                <div class="step-number">2</div>
+                <p><strong>Testosteron</strong> - Versterkt competitie en samenwerking</p>
+              </div>
+              <div class="brotherhood-step">
+                <div class="step-number">3</div>
+                <p><strong>Serotonine</strong> - Verhoogt geluk en welzijn</p>
+              </div>
+              <div class="brotherhood-step">
+                <div class="step-number">4</div>
+                <p><strong>Endorfines</strong> - Verlicht pijn en stress</p>
+              </div>
+            </div>
+            
+            <h3>Neurologische Voordelen</h3>
+            <div class="neuro-benefits">
+              <div class="benefit-card">
+                <h4>🧠 Stress Reductie</h4>
+                <p>Brotherhood verlaagt cortisol niveaus met 23%</p>
+              </div>
+              <div class="benefit-card">
+                <h4>💪 Emotionele Regulatie</h4>
+                <p>Betere controle over emoties en reacties</p>
+              </div>
+              <div class="benefit-card">
+                <h4>🎯 Cognitieve Prestaties</h4>
+                <p>Verbeterde focus en besluitvorming</p>
+              </div>
+              <div class="benefit-card">
+                <h4>❤️ Empathie Ontwikkeling</h4>
+                <p>Sterker vermogen om anderen te begrijpen</p>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        title: 'De 5 Niveaus van Brotherhood',
+        content: `
+          <div class="page-header">
+            <h2>De 5 Niveaus van Brotherhood</h2>
+            <p class="lead">Van oppervlakkige kennissen naar onvoorwaardelijke broeders.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>Niveau 1: Acquaintances (Kennissen)</h3>
+            <div class="brotherhood-level level-1">
+              <h4>👋 Wat het is:</h4>
+              <p>Mensen die je kent, maar waarmee je geen diepe verbinding hebt.</p>
+              
+              <h4>🔍 Kenmerken:</h4>
+              <ul>
+                <li>Kleine praatjes en oppervlakkige gesprekken</li>
+                <li>Gedeelde activiteiten zonder persoonlijke uitwisseling</li>
+                <li>Beperkte emotionele investering</li>
+                <li>Geen echte verantwoordelijkheid voor elkaar</li>
+              </ul>
+              
+              <h4>🚀 Volgende Stap:</h4>
+              <p>Begin met het delen van persoonlijke verhalen en ervaringen</p>
+            </div>
+            
+            <h3>Niveau 2: Friends (Vrienden)</h3>
+            <div class="brotherhood-level level-2">
+              <h4>🤝 Wat het is:</h4>
+              <p>Mensen waarmee je plezier hebt en basis steun uitwisselt.</p>
+              
+              <h4>🔍 Kenmerken:</h4>
+              <ul>
+                <li>Gedeelde interesses en activiteiten</li>
+                <li>Emotionele steun bij kleine uitdagingen</li>
+                <li>Regelmatig contact en quality time</li>
+                <li>Basis vertrouwen en betrouwbaarheid</li>
+              </ul>
+              
+              <h4>🚀 Volgende Stap:</h4>
+              <p>Deel je kwetsbaarheden en ondersteun elkaar bij grotere uitdagingen</p>
+            </div>
+            
+            <h3>Niveau 3: Close Friends (Goede Vrienden)</h3>
+            <div class="brotherhood-level level-3">
+              <h4>💪 Wat het is:</h4>
+              <p>Mensen waarmee je diepe gesprekken hebt en elkaar echt kent.</p>
+              
+              <h4>🔍 Kenmerken:</h4>
+              <ul>
+                <li>Persoonlijke verhalen en ervaringen delen</li>
+                <li>Emotionele steun bij grote uitdagingen</li>
+                <li>Wederzijdse verantwoordelijkheid en zorg</li>
+                <li>Diep begrip van elkaars waarden en doelen</li>
+              </ul>
+              
+              <h4>🚀 Volgende Stap:</h4>
+              <p>Begin met het bouwen van gedeelde doelen en missies</p>
+            </div>
+            
+            <h3>Niveau 4: Brothers (Broeders)</h3>
+            <div class="brotherhood-level level-4">
+              <h4>🫂 Wat het is:</h4>
+              <p>Mensen waarmee je een onvoorwaardelijke band hebt en samen groeit.</p>
+              
+              <h4>🔍 Kenmerken:</h4>
+              <ul>
+                <li>Onvoorwaardelijke steun en loyaliteit</li>
+                <li>Gedeelde missie en levensdoelen</li>
+                <li>Wederzijdse groei en ontwikkeling</li>
+                <li>Diep vertrouwen en kwetsbaarheid</li>
+              </ul>
+              
+              <h4>🚀 Volgende Stap:</h4>
+              <p>Word mentors voor anderen en bouw een Brotherhood community</p>
+            </div>
+            
+            <h3>Niveau 5: Brotherhood (Broederschap)</h3>
+            <div class="brotherhood-level level-5">
+              <h4>🌟 Wat het is:</h4>
+              <p>Een collectief van broeders die samen een grotere missie dienen.</p>
+              
+              <h4>🔍 Kenmerken:</h4>
+              <ul>
+                <li>Collectieve impact en verandering</li>
+                <li>Mentoring van nieuwe generaties</li>
+                <li>Gedeelde legacy en betekenis</li>
+                <li>Onverwoestbare eenheid en kracht</li>
+              </ul>
+              
+              <h4>🎯 Doel:</h4>
+              <p>Inspireer en empower anderen om hun eigen Brotherhood te bouwen</p>
+            </div>
+          </div>
+        `
+      },
+      {
+        title: 'Praktische Oefeningen',
+        content: `
+          <div class="page-header">
+            <h2>Praktische Oefeningen</h2>
+            <p class="lead">Implementeer deze oefeningen om Brotherhood te ontwikkelen.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>Oefening 1: De Brotherhood Dagelijkse Routine</h3>
+            <div class="exercise-box">
+              <h4>🌅 Ochtend (10 minuten):</h4>
+              <ul>
+                <li>Gratitude meditatie voor je broeders (3 minuten)</li>
+                <li>Intention setting voor Brotherhood interacties (2 minuten)</li>
+                <li>Plan quality time met een broeder (3 minuten)</li>
+                <li>Positieve affirmaties over verbinding (2 minuten)</li>
+              </ul>
+              
+              <h4>🌙 Avond (10 minuten):</h4>
+              <ul>
+                <li>Reflectie op Brotherhood interacties (5 minuten)</li>
+                <li>Plan voor morgen (3 minuten)</li>
+                <li>Gratitude journaling voor broeders (2 minuten)</li>
+              </ul>
+              
+              <h4>🎯 Doel:</h4>
+              <p>Integreer Brotherhood bewustzijn in je dagelijkse routine</p>
+            </div>
+            
+            <h3>Oefening 2: De Kwetsbaarheid Challenge</h3>
+            <div class="exercise-box">
+              <h4>💪 Wat het is:</h4>
+              <p>Deel iets persoonlijks met een broeder om de band te versterken.</p>
+              
+              <h4>📋 Stap-voor-stap:</h4>
+              <ol>
+                <li>Identificeer een broeder waarmee je dieper wilt verbinden</li>
+                <li>Kies een persoonlijke uitdaging of kwetsbaarheid</li>
+                <li>Deel dit in een 1-op-1 gesprek</li>
+                <li>Luister naar hun reactie en ervaringen</li>
+                <li>Plan follow-up en verdere uitwisseling</li>
+              </ol>
+              
+              <h4>⏰ Tijdsinvestering:</h4>
+              <p>30-60 minuten per week</p>
+            </div>
+            
+            <h3>Oefening 3: De Brotherhood Assessment</h3>
+            <div class="exercise-box">
+              <h4>📊 Evalueer je huidige Brotherhood:</h4>
+              <ul>
+                <li><strong>Kwantiteit:</strong> Hoeveel broeders heb je op elk niveau?</li>
+                <li><strong>Kwaliteit:</strong> Hoe diep zijn je verbindingen?</li>
+                <li><strong>Frequentie:</strong> Hoe vaak zie je je broeders?</li>
+                <li><strong>Impact:</strong> Hoeveel groei en steun ervaar je?</li>
+              </ul>
+              
+              <h4>🔄 Herhaal elke maand om je progressie te zien</h4>
+            </div>
+          </div>
+        `
+      },
+      {
+        title: '30-Dagen Brotherhood Challenge',
+        content: `
+          <div class="page-header">
+            <h2>30-Dagen Brotherhood Challenge</h2>
+            <p class="lead">Transformeer je verbindingen in 30 dagen.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>Week 1: Foundation (Dag 1-7)</h3>
+            <div class="challenge-week">
+              <h4>🎯 Doel: Brotherhood bewustzijn ontwikkelen</h4>
+              <ul>
+                <li><strong>Dag 1-3:</strong> Identificeer je huidige Brotherhood niveau</li>
+                <li><strong>Dag 4-5:</strong> Begin met dagelijkse Brotherhood routine</li>
+                <li><strong>Dag 6-7:</strong> Plan quality time met 3 broeders</li>
+              </ul>
+            </div>
+            
+            <h3>Week 2: Uitbreiding (Dag 8-14)</h3>
+            <div class="challenge-week">
+              <h4>🚀 Doel: Kwetsbaarheid en diepte toevoegen</h4>
+              <ul>
+                <li><strong>Dag 8-10:</strong> Deel persoonlijke uitdagingen met broeders</li>
+                <li><strong>Dag 11-12:</strong> Luister actief naar hun verhalen</li>
+                <li><strong>Dag 13-14:</strong> Plan gedeelde activiteiten en doelen</li>
+              </ul>
+            </div>
+            
+            <h3>Week 3: Consolidatie (Dag 15-21)</h3>
+            <div class="challenge-week">
+              <h4>💪 Doel: Brotherhood integreren in dagelijks leven</h4>
+              <ul>
+                <li><strong>Dag 15-17:</strong> Alle oefeningen combineren</li>
+                <li><strong>Dag 18-19:</strong> Nieuwe broeders ontmoeten</li>
+                <li><strong>Dag 20-21:</strong> Feedback verzamelen van broeders</li>
+              </ul>
+            </div>
+            
+            <h3>Week 4: Optimalisatie (Dag 22-30)</h3>
+            <div class="challenge-week">
+              <h4>🎯 Doel: Systeem optimaliseren en volhouden</h4>
+              <ul>
+                <li><strong>Dag 22-25:</strong> Brotherhood in professionele settings</li>
+                <li><strong>Dag 26-28:</strong> Mentoring rollen opzoeken</li>
+                <li><strong>Dag 29-30:</strong> Evalueren en volgende fase plannen</li>
+              </ul>
+            </div>
+          </div>
+        `
+      }
+    ]
+  },
+  
+  'Hoe bouw je een Brotherhood community op?': {
+    title: 'Hoe bouw je een Brotherhood community op?',
+    subtitle: 'Van Individuele Broeders naar Collectieve Kracht',
+    pages: [
+      {
+        title: 'Introductie',
+        content: `
+          <div class="page-header">
+            <h2>Introductie</h2>
+            <p class="lead">Een Brotherhood community is meer dan een groep vrienden - het is een collectief van mannen die samen groeien en impact maken.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>Wat je gaat leren in dit ebook:</h3>
+            <ul class="learning-objectives">
+              <li>De principes van community building</li>
+              <li>Hoe je een veilige ruimte creëert voor groei</li>
+              <li>Strategieën voor het leiden van een Brotherhood</li>
+              <li>Praktische stappen om je community te starten</li>
+              <li>Een 90-dagen community launch plan</li>
+            </ul>
+          </div>
+          
+          <div class="info-box">
+            <h4>💡 Wist je dat?</h4>
+            <p>Brotherhood communities hebben 5x hogere succespercentages bij het behalen van doelen dan individuen die alleen werken.</p>
+          </div>
+        `
+      },
+      {
+        title: 'De 7 Principes van Brotherhood Community Building',
+        content: `
+          <div class="page-header">
+            <h2>De 7 Principes van Brotherhood Community Building</h2>
+            <p class="lead">Bouw je community op deze fundamentele principes.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>Principe 1: Veilige Ruimte</h3>
+            <div class="principle-analysis">
+              <div class="principle-section">
+                <h4>🛡️ Wat het is:</h4>
+                <p>Een omgeving waar mannen zich veilig voelen om kwetsbaar te zijn en te groeien.</p>
+                
+                <h4>🔧 Hoe je het creëert:</h4>
+                <ul>
+                  <li><strong>Confidentialiteit:</strong> Wat in de groep blijft, blijft in de groep</li>
+                  <li><strong>Non-judgment:</strong> Geen oordelen over elkaars ervaringen</li>
+                  <li><strong>Empathie:</strong> Begrip en steun voor elkaars uitdagingen</li>
+                  <li><strong>Grenzen:</strong> Duidelijke regels en verwachtingen</li>
+                </ul>
+              </div>
+            </div>
+            
+            <h3>Principe 2: Gedeelde Missie</h3>
+            <div class="principle-section">
+              <h4>🎯 Wat het is:</h4>
+              <p>Een gemeenschappelijk doel dat alle leden inspireert en verbindt.</p>
+              
+              <h4>🔧 Hoe je het ontwikkelt:</h4>
+              <ul>
+                <li><strong>Vision Statement:</strong> Schrijf een inspirerende visie</li>
+                <li><strong>Core Values:</strong> Definieer 3-5 kernwaarden</li>
+                <li><strong>Mission Goals:</strong> Stel concrete, meetbare doelen</li>
+                <li><strong>Impact Metrics:</strong> Meet hoe je je missie vervult</li>
+              </ul>
+            </div>
+            
+            <h3>Principe 3: Authenticiteit</h3>
+            <div class="principle-section">
+              <h4>💎 Wat het is:</h4>
+              <p>Echte, onvervalste verbindingen gebaseerd op waarheid en kwetsbaarheid.</p>
+              
+              <h4>🔧 Hoe je het stimuleert:</h4>
+              <ul>
+                <li><strong>Vulnerability Modeling:</strong> Leid door voorbeeld</li>
+                <li><strong>Real Stories:</strong> Deel echte ervaringen en uitdagingen</li>
+                <li><strong>Imperfection Acceptance:</strong> Vier imperfectie en groei</li>
+                <li><strong>Honest Feedback:</strong> Geef en ontvang eerlijke feedback</li>
+              </ul>
+            </div>
+            
+            <h3>Principe 4: Groei en Ontwikkeling</h3>
+            <div class="principle-section">
+              <h4>🚀 Wat het is:</h4>
+              <p>Een omgeving die continue leren en persoonlijke groei stimuleert.</p>
+              
+              <h4>🔧 Hoe je het implementeert:</h4>
+              <ul>
+                <li><strong>Learning Sessions:</strong> Regelmatige educatieve bijeenkomsten</li>
+                <li><strong>Skill Sharing:</strong> Leden delen hun expertise</li>
+                <li><strong>Challenge Groups:</strong> Groepen die samen doelen behalen</li>
+                <li><strong>Mentorship Programs:</strong> Ervaren leden begeleiden nieuwkomers</li>
+              </ul>
+            </div>
+            
+            <h3>Principe 5: Verantwoordelijkheid en Accountability</h3>
+            <div class="principle-section">
+              <h4>⚖️ Wat het is:</h4>
+              <p>Leden houden elkaar verantwoordelijk voor hun doelen en beloftes.</p>
+              
+              <h4>🔧 Hoe je het bouwt:</h4>
+              <ul>
+                <li><strong>Goal Setting:</strong> Individuele en groepsdoelen stellen</li>
+                <li><strong>Progress Tracking:</strong> Regelmatige updates en check-ins</li>
+                <li><strong>Consequence System:</strong> Duidelijke gevolgen voor niet-nakomen</li>
+                <li><strong>Celebration Rituals:</strong> Vier successen en doorbraken</li>
+              </ul>
+            </div>
+            
+            <h3>Principe 6: Inclusiviteit en Diversiteit</h3>
+            <div class="principle-section">
+              <h4>🌍 Wat het is:</h4>
+              <p>Een community die open staat voor verschillende achtergronden en perspectieven.</p>
+              
+              <h4>🔧 Hoe je het bevordert:</h4>
+              <ul>
+                <li><strong>Open Mindset:</strong> Welkom verschillende opvattingen</li>
+                <li><strong>Cultural Awareness:</strong> Leer over verschillende culturen</li>
+                <li><strong>Perspective Sharing:</strong> Deel verschillende levenservaringen</li>
+                <li><strong>Inclusive Language:</strong> Gebruik taal die iedereen welkom heet</li>
+              </ul>
+            </div>
+            
+            <h3>Principe 7: Duurzaamheid en Groei</h3>
+            <div class="principle-section">
+              <h4>🌱 Wat het is:</h4>
+              <p>Een community die kan groeien en bloeien zonder de kern te verliezen.</p>
+              
+              <h4>🔧 Hoe je het waarborgt:</h4>
+              <ul>
+                <li><strong>Scalable Systems:</strong> Bouw systemen die kunnen groeien</li>
+                <li><strong>Leadership Development:</strong> Ontwikkel nieuwe leiders</li>
+                <li><strong>Culture Preservation:</strong> Behoud je kernwaarden bij groei</li>
+                <li><strong>Continuous Improvement:</strong> Evalueer en verbeter regelmatig</li>
+              </ul>
+            </div>
+          </div>
+        `
+      },
+      {
+        title: 'Community Structuur en Rollen',
+        content: `
+          <div class="page-header">
+            <h2>Community Structuur en Rollen</h2>
+            <p class="lead">Bouw een duurzame structuur die groei en impact ondersteunt.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>De 5 Kernrollen in je Brotherhood</h3>
+            <div class="role-grid">
+              <div class="role-card">
+                <h4>👑 Visionary Leader</h4>
+                <p><strong>Verantwoordelijkheden:</strong></p>
+                <ul>
+                  <li>Community visie en richting</li>
+                  <li>Strategische beslissingen</li>
+                  <li>Externe partnerships</li>
+                  <li>Culture en waarden bewaken</li>
+                </ul>
+                
+                <h5>🔧 Vaardigheden:</h5>
+                <p>Strategisch denken, communicatie, inspiratie, besluitvaardigheid</p>
+              </div>
+              
+              <div class="role-card">
+                <h4>⚡ Operations Manager</h4>
+                <p><strong>Verantwoordelijkheden:</strong></p>
+                <ul>
+                  <li>Dagelijkse operaties</li>
+                  <li>Event planning en uitvoering</li>
+                  <li>Communicatie en coördinatie</li>
+                  <li>Systemen en processen</li>
+                </ul>
+                
+                <h5>🔧 Vaardigheden:</h5>
+                <p>Organisatie, project management, communicatie, probleemoplossing</p>
+              </div>
+              
+              <div class="role-card">
+                <h4>💪 Growth Catalyst</h4>
+                <p><strong>Verantwoordelijkheden:</strong></p>
+                <ul>
+                  <li>Ledenwerving en onboarding</li>
+                  <li>Groei strategieën</li>
+                  <li>Community engagement</li>
+                  <li>Feedback en verbetering</li>
+                </ul>
+                
+                <h5>🔧 Vaardigheden:</h5>
+                <p>Netwerken, sales, onboarding, feedback management</p>
+              </div>
+              
+              <div class="role-card">
+                <h4>🎓 Knowledge Curator</h4>
+                <p><strong>Verantwoordelijkheden:</strong></p>
+                <ul>
+                  <li>Content en educatie</li>
+                  <li>Expertise ontwikkeling</li>
+                  <li>Learning resources</li>
+                  <li>Kennis delen en verspreiden</li>
+                </ul>
+                
+                <h5>🔧 Vaardigheden:</h5>
+                <p>Content creatie, educatie, expertise, communicatie</p>
+              </div>
+              
+              <div class="role-card">
+                <h4>❤️ Culture Guardian</h4>
+                <p><strong>Verantwoordelijkheden:</strong></p>
+                <ul>
+                  <li>Community cultuur bewaken</li>
+                  <li>Conflicten oplossen</li>
+                  <li>Leden welzijn</li>
+                  <li>Waarden en normen handhaven</li>
+                </ul>
+                
+                <h5>🔧 Vaardigheden:</h5>
+                <p>Empathie, conflict resolutie, cultuur, welzijn</p>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        title: 'Praktische Community Building Strategieën',
+        content: `
+          <div class="page-header">
+            <h2>Praktische Community Building Strategieën</h2>
+            <p class="lead">Implementeer deze strategieën om je Brotherhood community te laten groeien.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>Strategie 1: De 3-Pijler Community Structuur</h3>
+            <div class="strategy-box">
+              <h4>🏗️ Bouw je community op 3 pijlers:</h4>
+              <ul>
+                <li><strong>Pijler 1 - Regular Meetups:</strong> Wekelijkse of maandelijkse bijeenkomsten</li>
+                <li><strong>Pijler 2 - Special Events:</strong> Kwartaal events en retreats</li>
+                <li><strong>Pijler 3 - Digital Connection:</strong> Online platform en communicatie</li>
+              </ul>
+              
+              <h4>🎯 Voordelen:</h4>
+              <ul>
+                <li>Consistente verbinding en engagement</li>
+                <li>Diepe ervaringen en bonding</li>
+                <li>Continue communicatie en steun</li>
+              </ul>
+            </div>
+            
+            <h3>Strategie 2: De Onboarding Funnel</h3>
+            <div class="strategy-box">
+              <h4>🔄 Stap-voor-stap onboarding:</h4>
+              <ol>
+                <li><strong>Discovery:</strong> Potentiële leden ontdekken je community</li>
+                <li><strong>Interest:</strong> Ze tonen interesse en maken contact</li>
+                <li><strong>Evaluation:</strong> Ze evalueren of het bij hen past</li>
+                <li><strong>Commitment:</strong> Ze besluiten lid te worden</li>
+                <li><strong>Integration:</strong> Ze integreren in de community</li>
+                <li><strong>Engagement:</strong> Ze worden actieve, betrokken leden</li>
+              </ol>
+            </div>
+            
+            <h3>Strategie 3: De Community Engagement Ladder</h3>
+            <div class="strategy-box">
+              <h4>📈 Verhoog engagement stap voor stap:</h4>
+              <ul>
+                <li><strong>Niveau 1 - Observer:</strong> Bekijkt en leest content</li>
+                <li><strong>Niveau 2 - Participant:</strong> Neemt deel aan discussies</li>
+                <li><strong>Niveau 3 - Contributor:</strong> Draagt bij met content en ideeën</li>
+                <li><strong>Niveau 4 - Leader:</strong> Leidt activiteiten en projecten</li>
+                <li><strong>Niveau 5 - Owner:</strong> Eigenaar van community initiatieven</li>
+              </ul>
+            </div>
+          </div>
+        `
+      },
+      {
+        title: '90-Dagen Community Launch Plan',
+        content: `
+          <div class="page-header">
+            <h2>90-Dagen Community Launch Plan</h2>
+            <p class="lead">Van idee naar levende Brotherhood community in 90 dagen.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>Maand 1: Foundation (Dag 1-30)</h3>
+            <div class="launch-phase">
+              <h4>🎯 Doel: Community fundamenten leggen</h4>
+              <ul>
+                <li><strong>Week 1:</strong> Visie, missie en kernwaarden definiëren</li>
+                <li><strong>Week 2:</strong> Kern team samenstellen en rollen verdelen</li>
+                <li><strong>Week 3:</strong> Community structuur en systemen opzetten</li>
+                <li><strong>Week 4:</strong> Eerste content en communicatie materiaal</li>
+              </ul>
+            </div>
+            
+            <h3>Maand 2: Launch (Dag 31-60)</h3>
+            <div class="launch-phase">
+              <h4>🚀 Doel: Community lanceren en eerste leden verwelkomen</h4>
+              <ul>
+                <li><strong>Week 5-6:</strong> Soft launch met 5-10 founding members</li>
+                <li><strong>Week 7:</strong> Eerste community event organiseren</li>
+                <li><strong>Week 8:</strong> Feedback verzamelen en aanpassingen maken</li>
+              </ul>
+            </div>
+            
+            <h3>Maand 3: Growth (Dag 61-90)</h3>
+            <div class="launch-phase">
+              <h4>📈 Doel: Community laten groeien en consolideren</h4>
+              <ul>
+                <li><strong>Week 9:</strong> Officiële launch en ledenwerving</li>
+                <li><strong>Week 10:</strong> Regelmatige events en activiteiten</li>
+                <li><strong>Week 11-12:</strong> Systemen optimaliseren en volgende fase plannen</li>
+              </ul>
+            </div>
+            
+            <h3>Volgende Stappen</h3>
+            <div class="next-steps">
+              <h4>🎯 Na 90 dagen:</h4>
+              <ul>
+                <li>Evalueer je community launch</li>
+                <li>Plan je groei strategie</li>
+                <li>Bouw je team uit</li>
+                <li>Investeer in community ontwikkeling</li>
+              </ul>
+            </div>
+          </div>
+        `
+      }
+    ]
+  }
+};
+
 // Enhanced HTML template with better styling and structure
 function generateEnhancedEbookHTML(lessonData, moduleTitle, moduleNumber) {
   const pagesHTML = lessonData.pages.map((page, index) => `
@@ -3693,6 +4322,100 @@ async function createEnhancedEbooks() {
       totalCreatedCount += moduleCreatedCount;
       totalErrorCount += moduleErrorCount;
       console.log(`📊 Module 5 Summary: ${moduleCreatedCount} created, ${moduleErrorCount} errors\n`);
+    }
+
+    // Module 6: Brotherhood
+    console.log('📚 MODULE 06: Brotherhood');
+    console.log('==========================');
+
+    const { data: brotherhoodModule, error: brotherhoodModuleError } = await supabase
+      .from('academy_modules')
+      .select('*')
+      .eq('title', 'Brotherhood')
+      .single();
+
+    if (brotherhoodModuleError) {
+      console.error('❌ Error finding Brotherhood module:', brotherhoodModuleError);
+    } else {
+      let moduleCreatedCount = 0;
+      let moduleErrorCount = 0;
+
+      // Process each lesson
+      for (const [lessonTitle, lessonData] of Object.entries(enhancedBrotherhoodContent)) {
+        try {
+          console.log(`   📖 ${lessonTitle}`);
+          
+          const htmlContent = generateEnhancedEbookHTML(
+            lessonData,
+            brotherhoodModule.title,
+            brotherhoodModule.order_index.toString().padStart(2, '0')
+          );
+          
+          // Create filename
+          const safeTitle = lessonTitle
+            .toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .trim();
+          
+          const filename = `${safeTitle}-enhanced-ebook.html`;
+          const fileUrl = `/books/${filename}`;
+          
+          // Save HTML file to public/books directory
+          const publicDir = path.join(process.cwd(), 'public', 'books');
+          if (!fs.existsSync(publicDir)) {
+            fs.mkdirSync(publicDir, { recursive: true });
+          }
+          
+          const filePath = path.join(publicDir, filename);
+          fs.writeFileSync(filePath, htmlContent, 'utf8');
+          
+          console.log(`      ✅ Created enhanced ebook: ${filename}`);
+          console.log(`         📄 Pages: ${lessonData.pages.length}`);
+          console.log(`         🎨 Enhanced layout with visual elements`);
+          
+          // Update ebook record
+          const { data: existingEbook, error: fetchError } = await supabase
+            .from('academy_ebooks')
+            .select('id')
+            .eq('lesson_id', (await supabase
+              .from('academy_lessons')
+              .select('id')
+              .eq('title', lessonTitle)
+              .eq('module_id', brotherhoodModule.id)
+              .single()).data?.id)
+            .single();
+          
+          if (existingEbook) {
+            const { error: updateError } = await supabase
+              .from('academy_ebooks')
+              .update({
+                file_url: fileUrl,
+                updated_at: new Date().toISOString()
+              })
+              .eq('id', existingEbook.id);
+            
+            if (updateError) {
+              console.error(`         ❌ Error updating ebook:`, updateError);
+              moduleErrorCount++;
+            } else {
+              console.log(`         ✅ Updated ebook record`);
+              moduleCreatedCount++;
+            }
+          }
+          
+        } catch (error) {
+          console.error(`         ❌ Error creating enhanced ebook:`, error.message);
+          moduleErrorCount++;
+        }
+        
+        console.log('');
+      }
+
+      totalCreatedCount += moduleCreatedCount;
+      totalErrorCount += moduleErrorCount;
+      console.log(`📊 Module 6 Summary: ${moduleCreatedCount} created, ${moduleErrorCount} errors\n`);
     }
 
     // Summary
