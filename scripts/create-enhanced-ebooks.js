@@ -2761,6 +2761,574 @@ const enhancedBrotherhoodContent = {
   }
 };
 
+// Enhanced ebook content for Module 7: Voeding & Gezondheid (15+ pages)
+const enhancedNutritionContent = {
+  'Wat is de basis van gezonde voeding voor mannen?': {
+    title: 'Wat is de basis van gezonde voeding voor mannen?',
+    subtitle: 'Van Voeding naar Vitaliteit',
+    pages: [
+      {
+        title: 'Introductie',
+        content: `
+          <div class="page-header">
+            <h2>Introductie</h2>
+            <p class="lead">Gezonde voeding is de fundering van je fysieke en mentale prestaties. Leer hoe je je lichaam optimaal voedt voor maximale vitaliteit.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>Wat je gaat leren in dit ebook:</h3>
+            <ul class="learning-objectives">
+              <li>De fundamenten van mannelijke voeding en metabolisme</li>
+              <li>Hoe je macronutriënten optimaal inzet voor je doelen</li>
+              <li>De rol van micronutriënten in je gezondheid en prestaties</li>
+              <li>Praktische stappen om je voeding te optimaliseren</li>
+              <li>Een 30-dagen voeding transformatie plan</li>
+            </ul>
+          </div>
+          
+          <div class="info-box">
+            <h4>💡 Wist je dat?</h4>
+            <p>Mannen hebben 15-20% hogere energiebehoeften dan vrouwen en reageren anders op bepaalde voedingsstoffen vanwege hun hormoonprofiel.</p>
+          </div>
+        `
+      },
+      {
+        title: 'De Wetenschap van Mannelijke Voeding',
+        content: `
+          <div class="page-header">
+            <h2>De Wetenschap van Mannelijke Voeding</h2>
+            <p class="lead">Begrijp hoe je lichaam voedingsstoffen verwerkt en gebruikt.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>Hormonale Basis van Mannelijke Voeding</h3>
+            <div class="hormone-nutrition-flow">
+              <div class="hormone-step">
+                <div class="step-number">1</div>
+                <p><strong>Testosteron</strong> - Verhoogt eiwit synthese en spiergroei</p>
+              </div>
+              <div class="hormone-step">
+                <div class="step-number">2</div>
+                <p><strong>Insuline</strong> - Reguleert glucose opname en opslag</p>
+              </div>
+              <div class="hormone-step">
+                <div class="step-number">3</div>
+                <p><strong>Leptine</strong> - Controleert honger en verzadiging</p>
+              </div>
+              <div class="hormone-step">
+                <div class="step-number">4</div>
+                <p><strong>Ghrelin</strong> - Stimuleert eetlust en groei</p>
+              </div>
+            </div>
+            
+            <h3>Metabolische Verschillen bij Mannen</h3>
+            <div class="metabolism-differences">
+              <div class="difference-card">
+                <h4>🔥 Hogere BMR</h4>
+                <p>Mannen hebben 10-15% hogere basale metabolische snelheid</p>
+              </div>
+              <div class="difference-card">
+                <h4>💪 Meer Spiermassa</h4>
+                <p>Hogere eiwitbehoeften voor spieronderhoud en groei</p>
+              </div>
+              <div class="difference-card">
+                <h4>⚡ Snellere Glycogeen Afbraak</h4>
+                <p>Intensievere training vereist meer koolhydraten</p>
+              </div>
+              <div class="difference-card">
+                <h4>🔄 Hogere Testosteron Productie</h4>
+                <p>Vereist optimale vetinname voor hormoonproductie</p>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        title: 'De 3 Macronutriënten voor Mannen',
+        content: `
+          <div class="page-header">
+            <h2>De 3 Macronutriënten voor Mannen</h2>
+            <p class="lead">Bouw je voeding op deze drie essentiële voedingsstoffen.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>Macronutriënt 1: Eiwitten</h3>
+            <div class="macro-analysis">
+              <div class="macro-section">
+                <h4>🥩 Wat het is:</h4>
+                <p>De bouwstenen van je spieren, hormonen en enzymen.</p>
+                
+                <h4>🔧 Hoeveel je nodig hebt:</h4>
+                <ul>
+                  <li><strong>Sedentair:</strong> 1.2-1.4g per kg lichaamsgewicht</li>
+                  <li><strong>Actief:</strong> 1.6-1.8g per kg lichaamsgewicht</li>
+                  <li><strong>Krachtsporter:</strong> 2.0-2.2g per kg lichaamsgewicht</li>
+                  <li><strong>Spieropbouw:</strong> 2.2-2.4g per kg lichaamsgewicht</li>
+                </ul>
+                
+                <h4>🎯 Beste bronnen:</h4>
+                <ul>
+                  <li><strong>Dierlijk:</strong> Kip, vis, rundvlees, eieren, zuivel</li>
+                  <li><strong>Plantaardig:</strong> Bonen, linzen, quinoa, tempeh, noten</li>
+                </ul>
+              </div>
+            </div>
+            
+            <h3>Macronutriënt 2: Koolhydraten</h3>
+            <div class="macro-section">
+              <h4>🍞 Wat het is:</h4>
+              <p>Je primaire energiebron voor training en dagelijkse activiteiten.</p>
+              
+              <h4>🔧 Hoeveel je nodig hebt:</h4>
+              <ul>
+                <li><strong>Sedentair:</strong> 2-3g per kg lichaamsgewicht</li>
+                <li><strong>Actief:</strong> 4-6g per kg lichaamsgewicht</li>
+                <li><strong>Krachtsporter:</strong> 6-8g per kg lichaamsgewicht</li>
+                <li><strong>Duursporter:</strong> 8-10g per kg lichaamsgewicht</li>
+              </ul>
+              
+              <h4>🎯 Beste bronnen:</h4>
+              <ul>
+                <li><strong>Complex:</strong> Havermout, bruine rijst, zoete aardappel, quinoa</li>
+                <li><strong>Fruit:</strong> Banaan, appel, bessen, sinaasappel</li>
+              </ul>
+            </div>
+            
+            <h3>Macronutriënt 3: Vetten</h3>
+            <div class="macro-section">
+              <h4>🥑 Wat het is:</h4>
+              <p>Essentieel voor hormoonproductie, hersenfunctie en vitamine absorptie.</p>
+              
+              <h4>🔧 Hoeveel je nodig hebt:</h4>
+              <ul>
+                <li><strong>Minimaal:</strong> 0.8g per kg lichaamsgewicht</li>
+                <li><strong>Gezond:</strong> 1.0-1.2g per kg lichaamsgewicht</li>
+                <li><strong>Keto/Low-carb:</strong> 1.5-2.0g per kg lichaamsgewicht</li>
+              </ul>
+              
+              <h4>🎯 Beste bronnen:</h4>
+              <ul>
+                <li><strong>Gezonde vetten:</strong> Avocado, noten, olijfolie, vette vis</li>
+                <li><strong>Verzadigde vetten:</strong> Kokosolie, boter, rood vlees (met mate)</li>
+              </ul>
+            </div>
+          </div>
+        `
+      },
+      {
+        title: 'Micronutriënten en Supplementen',
+        content: `
+          <div class="page-header">
+            <h2>Micronutriënten en Supplementen</h2>
+            <p class="lead>De kleine voedingsstoffen die een groot verschil maken.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>De 10 Belangrijkste Micronutriënten voor Mannen</h3>
+            <div class="micronutrient-grid">
+              <div class="nutrient-card">
+                <h4>💊 Vitamine D</h4>
+                <p><strong>Functie:</strong> Testosteron productie, botgezondheid, immuunsysteem</p>
+                <p><strong>Dagelijkse behoefte:</strong> 2000-4000 IU</p>
+                <p><strong>Beste bronnen:</strong> Zonlicht, vette vis, eieren, verrijkte zuivel</p>
+              </div>
+              
+              <div class="nutrient-card">
+                <h4>🔴 Vitamine B12</h4>
+                <p><strong>Functie:</strong> Energie productie, zenuwstelsel, rode bloedcellen</p>
+                <p><strong>Dagelijkse behoefte:</strong> 2.4 mcg</p>
+                <p><strong>Beste bronnen:</strong> Vlees, vis, eieren, zuivel</p>
+              </div>
+              
+              <div class="nutrient-card">
+                <h4>🥩 IJzer</h4>
+                <p><strong>Functie:</strong> Zuurstof transport, energie productie, immuunsysteem</p>
+                <p><strong>Dagelijkse behoefte:</strong> 8-11 mg</p>
+                <p><strong>Beste bronnen:</strong> Rood vlees, spinazie, bonen, verrijkte granen</p>
+              </div>
+              
+              <div class="nutrient-card">
+                <h4>💪 Magnesium</h4>
+                <p><strong>Functie:</strong> Spierfunctie, energie productie, slaap kwaliteit</p>
+                <p><strong>Dagelijkse behoefte:</strong> 400-420 mg</p>
+                <p><strong>Beste bronnen:</strong> Noten, zaden, donkere chocolade, groene bladgroenten</p>
+              </div>
+              
+              <div class="nutrient-card">
+                <h4>🐟 Omega-3</h4>
+                <p><strong>Functie:</strong> Hersenfunctie, ontstekingsremming, hartgezondheid</p>
+                <p><strong>Dagelijkse behoefte:</strong> 1.6g (mannen)</p>
+                <p><strong>Beste bronnen:</strong> Vette vis, walnoten, lijnzaad, chia zaden</p>
+              </div>
+              
+              <div class="nutrient-card">
+                <h4>🥜 Zink</h4>
+                <p><strong>Functie:</strong> Testosteron productie, immuunsysteem, wondgenezing</p>
+                <p><strong>Dagelijkse behoefte:</strong> 11 mg</p>
+                <p><strong>Beste bronnen:</strong> Oesters, rood vlees, noten, zaden</p>
+              </div>
+              
+              <div class="nutrient-card">
+                <h4>🍊 Vitamine C</h4>
+                <p><strong>Functie:</strong> Immuunsysteem, collageen productie, antioxidant</p>
+                <p><strong>Dagelijkse behoefte:</strong> 90 mg</p>
+                <p><strong>Beste bronnen:</strong> Citrusvruchten, paprika, broccoli, aardbeien</p>
+              </div>
+              
+              <div class="nutrient-card">
+                <h4>🥛 Calcium</h4>
+                <p><strong>Functie:</strong> Botgezondheid, spiercontractie, zenuwtransmissie</p>
+                <p><strong>Dagelijkse behoefte:</strong> 1000-1200 mg</p>
+                <p><strong>Beste bronnen:</strong> Zuivel, groene bladgroenten, amandelen, sardines</p>
+              </div>
+              
+              <div class="nutrient-card">
+                <h4>🌿 Foliumzuur</h4>
+                <p><strong>Functie:</strong> DNA synthese, rode bloedcellen, hartgezondheid</p>
+                <p><strong>Dagelijkse behoefte:</strong> 400 mcg</p>
+                <p><strong>Beste bronnen:</strong> Groene bladgroenten, bonen, citrusvruchten, verrijkte granen</p>
+              </div>
+              
+              <div class="nutrient-card">
+                <h4>🔋 Selenium</h4>
+                <p><strong>Functie:</strong> Antioxidant, schildklier functie, immuunsysteem</p>
+                <p><strong>Dagelijkse behoefte:</strong> 55 mcg</p>
+                <p><strong>Beste bronnen:</strong> Paranoten, vis, eieren, kip</p>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        title: '30-Dagen Voeding Transformatie',
+        content: `
+          <div class="page-header">
+            <h2>30-Dagen Voeding Transformatie</h2>
+            <p class="lead">Transformeer je voeding en gezondheid in 30 dagen.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>Week 1: Foundation (Dag 1-7)</h3>
+            <div class="transformation-week">
+              <h4>🎯 Doel: Basis voedingsgewoonten implementeren</h4>
+              <ul>
+                <li><strong>Dag 1-3:</strong> Evalueer je huidige voeding en stel doelen</li>
+                <li><strong>Dag 4-5:</strong> Begin met eiwit tracking (doel: 1.6g/kg)</li>
+                <li><strong>Dag 6-7:</strong> Voeg groenten toe aan elke maaltijd</li>
+              </ul>
+            </div>
+            
+            <h3>Week 2: Optimalisatie (Dag 8-14)</h3>
+            <div class="transformation-week">
+              <h4>🚀 Doel: Macronutriënten balanceren</h4>
+              <ul>
+                <li><strong>Dag 8-10:</strong> Optimaliseer koolhydraat timing rond training</li>
+                <li><strong>Dag 11-12:</strong> Voeg gezonde vetten toe aan je voeding</li>
+                <li><strong>Dag 13-14:</strong> Plan en bereid maaltijden voor</li>
+              </ul>
+            </div>
+            
+            <h3>Week 3: Verfijning (Dag 15-21)</h3>
+            <div class="transformation-week">
+              <h4>💪 Doel: Voeding integreren in je levensstijl</h4>
+              <ul>
+                <li><strong>Dag 15-17:</strong> Alle principes combineren</li>
+                <li><strong>Dag 18-19:</strong> Experimenteer met nieuwe recepten</li>
+                <li><strong>Dag 20-21:</strong> Evalueer je progressie en pas aan</li>
+              </ul>
+            </div>
+            
+            <h3>Week 4: Consolidatie (Dag 22-30)</h3>
+            <div class="transformation-week">
+              <h4>🎯 Doel: Systeem optimaliseren en volhouden</h4>
+              <ul>
+                <li><strong>Dag 22-25:</strong> Voeding in sociale situaties</li>
+                <li><strong>Dag 26-28:</strong> Lange termijn planning en doelen</li>
+                <li><strong>Dag 29-30:</strong> Evalueren en volgende fase plannen</li>
+              </ul>
+            </div>
+          </div>
+        `
+      }
+    ]
+  },
+  
+  'Hoe optimaliseer je je voeding voor specifieke doelen?': {
+    title: 'Hoe optimaliseer je je voeding voor specifieke doelen?',
+    subtitle: 'Van Spieropbouw tot Vetverlies',
+    pages: [
+      {
+        title: 'Introductie',
+        content: `
+          <div class="page-header">
+            <h2>Introductie</h2>
+            <p class="lead">Je voeding aanpassen aan je specifieke doelen is de sleutel tot succes. Leer hoe je je voeding optimaliseert voor spieropbouw, vetverlies, of prestaties.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>Wat je gaat leren in dit ebook:</h3>
+            <ul class="learning-objectives">
+              <li>Voeding voor spieropbouw en krachttoename</li>
+              <li>Strategieën voor effectief vetverlies</li>
+              <li>Voeding voor duursport en prestaties</li>
+              <li>Hoe je je voeding aanpast aan je trainingsschema</li>
+              <li>Een 12-weken voeding optimalisatie plan</li>
+            </ul>
+          </div>
+          
+          <div class="info-box">
+            <h4>💡 Wist je dat?</h4>
+            <p>De timing van je voeding kan je resultaten met 20-30% verbeteren, vooral rond je training.</p>
+          </div>
+        `
+      },
+      {
+        title: 'Voeding voor Spieropbouw en Kracht',
+        content: `
+          <div class="page-header">
+            <h2>Voeding voor Spieropbouw en Kracht</h2>
+            <p class="lead">Maximaliseer je spiergroei en kracht met de juiste voeding.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>De 4 Pijlers van Spieropbouw Voeding</h3>
+            <div class="muscle-building-analysis">
+              <div class="muscle-pillar">
+                <h4>🥩 Pijler 1: Verhoogde Eiwitinname</h4>
+                <p><strong>Doel:</strong> 2.2-2.4g eiwit per kg lichaamsgewicht</p>
+                
+                <h5>🔧 Praktische Implementatie:</h5>
+                <ul>
+                  <li><strong>Timing:</strong> Verdeel over 4-6 maaltijden per dag</li>
+                  <li><strong>Kwaliteit:</strong> Focus op complete eiwitten (alle essentiële aminozuren)</li>
+                  <li><strong>Supplementen:</strong> Whey eiwit na training, caseïne voor het slapen</li>
+                </ul>
+              </div>
+              
+              <div class="muscle-pillar">
+                <h4>🍞 Pijler 2: Koolhydraat Optimalisatie</h4>
+                <p><strong>Doel:</strong> 6-8g koolhydraten per kg lichaamsgewicht</p>
+                
+                <h5>🔧 Praktische Implementatie:</h5>
+                <ul>
+                  <li><strong>Training Dagen:</strong> Hogere koolhydraat inname</li>
+                  <li><strong>Rust Dagen:</strong> Matige koolhydraat inname</li>
+                  <li><strong>Timing:</strong> Koolhydraten rond training (voor, tijdens, na)</li>
+                </ul>
+              </div>
+              
+              <div class="muscle-pillar">
+                <h4>🥑 Pijler 3: Gezonde Vetten</h4>
+                <p><strong>Doel:</strong> 1.0-1.2g vet per kg lichaamsgewicht</p>
+                
+                <h5>🔧 Praktische Implementatie:</h5>
+                <ul>
+                  <li><strong>Omega-3:</strong> 2-3g per dag voor ontstekingsremming</li>
+                  <li><strong>Verzadigde Vetten:</strong> Met mate voor testosteron productie</li>
+                  <li><strong>Timing:</strong> Vetten weg van training (vertraagt absorptie)</li>
+                </ul>
+              </div>
+              
+              <div class="muscle-pillar">
+                <h4>⏰ Pijler 4: Voeding Timing</h4>
+                <p><strong>Doel:</strong> Optimaliseer voedingsstoffen rond training</p>
+                
+                <h5>🔧 Praktische Implementatie:</h5>
+                <ul>
+                  <li><strong>Pre-Workout:</strong> Koolhydraten + eiwit 2-3 uur voor training</li>
+                  <li><strong>Intra-Workout:</strong> Koolhydraten tijdens lange trainingen</li>
+                  <li><strong>Post-Workout:</strong> Eiwit + koolhydraten binnen 30 minuten</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        title: 'Voeding voor Vetverlies en Definitie',
+        content: `
+          <div class="page-header">
+            <h2>Voeding voor Vetverlies en Definitie</h2>
+            <p class="lead">Verlies vet effectief terwijl je je spiermassa behoudt.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>De 5 Strategieën voor Effectief Vetverlies</h3>
+            <div class="fat-loss-strategies">
+              <div class="strategy-card">
+                <h4>📊 Strategie 1: Calorie Deficit</h4>
+                <p><strong>Wat het is:</strong> Minder calorieën eten dan je verbrandt</p>
+                
+                <h5>🔧 Hoe je het implementeert:</h5>
+                <ul>
+                  <li><strong>Bereken je onderhoud:</strong> BMR × activiteitsfactor</li>
+                  <li><strong>Creëer een deficit:</strong> 300-500 calorieën onder onderhoud</li>
+                  <li><strong>Track je progressie:</strong> Weeg jezelf wekelijks</li>
+                  <li><strong>Pas aan:</strong> Verlaag met 100 calorieën als je niet afvalt</li>
+                </ul>
+              </div>
+              
+              <div class="strategy-card">
+                <h4>🥩 Strategie 2: Verhoogde Eiwitinname</h4>
+                <p><strong>Wat het is:</strong> Meer eiwit eten om spiermassa te behouden</p>
+                
+                <h5>🔧 Hoe je het implementeert:</h5>
+                <ul>
+                  <li><strong>Doel:</strong> 2.0-2.2g eiwit per kg lichaamsgewicht</li>
+                  <li><strong>Timing:</strong> Verdeel gelijkmatig over de dag</li>
+                  <li><strong>Kwaliteit:</strong> Focus op magere eiwitbronnen</li>
+                </ul>
+              </div>
+              
+              <div class="strategy-card">
+                <h4>🍞 Strategie 3: Koolhydraat Cycling</h4>
+                <p><strong>Wat het is:</strong> Koolhydraten variëren op basis van activiteit</p>
+                
+                <h5>🔧 Hoe je het implementeert:</h5>
+                <ul>
+                  <li><strong>Training Dagen:</strong> 4-6g koolhydraten per kg</li>
+                  <li><strong>Rust Dagen:</strong> 2-3g koolhydraten per kg</li>
+                  <li><strong>Refeed Dagen:</strong> 1x per week op onderhoud niveau</li>
+                </ul>
+              </div>
+              
+              <div class="strategy-card">
+                <h4>🥬 Strategie 4: Verhoogde Groente Inname</h4>
+                <p><strong>Wat het is:</strong> Meer vezels en micronutriënten eten</p>
+                
+                <h5>🔧 Hoe je het implementeert:</h5>
+                <ul>
+                  <li><strong>Doel:</strong> 5-7 porties groenten per dag</li>
+                  <li><strong>Variatie:</strong> Verschillende kleuren en soorten</li>
+                  <li><strong>Timing:</strong> Bij elke maaltijd</li>
+                </ul>
+              </div>
+              
+              <div class="strategy-card">
+                <h4>💧 Strategie 5: Hydratie Optimalisatie</h4>
+                <p><strong>Wat het is:</strong> Voldoende water drinken voor metabolisme</p>
+                
+                <h5>🔧 Hoe je het implementeert:</h5>
+                <ul>
+                  <li><strong>Basis:</strong> 3-4 liter water per dag</li>
+                  <li><strong>Training:</strong> +500ml per uur training</li>
+                  <li><strong>Timing:</strong> Verspreid over de dag</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        title: 'Voeding voor Duursport en Prestaties',
+        content: `
+          <div class="page-header">
+            <h2>Voeding voor Duursport en Prestaties</h2>
+            <p class="lead>Optimaliseer je voeding voor maximale uithoudingsvermogen en prestaties.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>De 3 Fases van Duursport Voeding</h3>
+            <div class="endurance-phases">
+              <div class="phase-card">
+                <h4>🌅 Fase 1: Pre-Event Voeding (24-48 uur voor)</h4>
+                <p><strong>Doel:</strong> Glycogeen voorraden maximaliseren</p>
+                
+                <h5>🔧 Implementatie:</h5>
+                <ul>
+                  <li><strong>Koolhydraten:</strong> 8-10g per kg lichaamsgewicht</li>
+                  <li><strong>Eiwit:</strong> 1.6-1.8g per kg lichaamsgewicht</li>
+                  <li><strong>Vetten:</strong> 1.0-1.2g per kg lichaamsgewicht</li>
+                  <li><strong>Hydratatie:</strong> 5-7ml per kg lichaamsgewicht</li>
+                </ul>
+              </div>
+              
+              <div class="phase-card">
+                <h4>⚡ Fase 2: Intra-Event Voeding (tijdens)</h4>
+                <p><strong>Doel:</strong> Energie en vocht op peil houden</p>
+                
+                <h5>🔧 Implementatie:</h5>
+                <ul>
+                  <li><strong>Koolhydraten:</strong> 30-60g per uur (afhankelijk van intensiteit)</li>
+                  <li><strong>Hydratatie:</strong> 500-1000ml per uur</li>
+                  <li><strong>Elektrolyten:</strong> Natrium, kalium, magnesium</li>
+                  <li><strong>Timing:</strong> Elke 15-20 minuten</li>
+                </ul>
+              </div>
+              
+              <div class="phase-card">
+                <h4>🔄 Fase 3: Post-Event Herstel (0-24 uur na)</h4>
+                <p><strong>Doel:</strong> Glycogeen aanvullen en spieren herstellen</p>
+                
+                <h5>🔧 Implementatie:</h5>
+                <ul>
+                  <li><strong>Koolhydraten:</strong> 1.2g per kg lichaamsgewicht binnen 30 minuten</li>
+                  <li><strong>Eiwit:</strong> 0.3g per kg lichaamsgewicht binnen 30 minuten</li>
+                  <li><strong>Hydratatie:</strong> 1.5x het verloren vocht</li>
+                  <li><strong>Timing:</strong> Herstel maaltijd binnen 2 uur</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        title: '12-Weken Voeding Optimalisatie Plan',
+        content: `
+          <div class="page-header">
+            <h2>12-Weken Voeding Optimalisatie Plan</h2>
+            <p class="lead">Een gestructureerd plan om je voeding te transformeren.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>Kwartaal 1: Foundation (Week 1-4)</h3>
+            <div class="quarter-plan">
+              <h4>🎯 Doel: Basis voedingsgewoonten implementeren</h4>
+              <ul>
+                <li><strong>Week 1:</strong> Voeding evalueren en doelen stellen</li>
+                <li><strong>Week 2:</strong> Eiwit tracking starten</li>
+                <li><strong>Week 3:</strong> Groente inname verhogen</li>
+                <li><strong>Week 4:</strong> Maaltijd planning implementeren</li>
+              </ul>
+            </div>
+            
+            <h3>Kwartaal 2: Optimalisatie (Week 5-8)</h3>
+            <div class="quarter-plan">
+              <h4>🚀 Doel: Voeding optimaliseren voor je doelen</h4>
+              <ul>
+                <li><strong>Week 5-6:</strong> Macronutriënten balanceren</li>
+                <li><strong>Week 7:</strong> Voeding timing optimaliseren</li>
+                <li><strong>Week 8:</strong> Supplementen evalueren</li>
+              </ul>
+            </div>
+            
+            <h3>Kwartaal 3: Verfijning (Week 9-12)</h3>
+            <div class="quarter-plan">
+              <h4>📈 Doel: Systeem verfijnen en volhouden</h4>
+              <ul>
+                <li><strong>Week 9-10:</strong> Alle principes integreren</li>
+                <li><strong>Week 11:</strong> Lange termijn planning</li>
+                <li><strong>Week 12:</strong> Evalueren en volgende fase plannen</li>
+              </ul>
+            </div>
+            
+            <h3>Volgende Stappen</h3>
+            <div class="next-steps">
+              <h4>🎯 Na 12 weken:</h4>
+              <ul>
+                <li>Evalueer je voeding transformatie</li>
+                <li>Plan je volgende optimalisatie fase</li>
+                <li>Overweeg professionele begeleiding</li>
+                <li>Deel je ervaringen met anderen</li>
+              </ul>
+            </div>
+          </div>
+        `
+      }
+    ]
+  }
+};
+
 // Enhanced HTML template with better styling and structure
 function generateEnhancedEbookHTML(lessonData, moduleTitle, moduleNumber) {
   const pagesHTML = lessonData.pages.map((page, index) => `
@@ -4416,6 +4984,100 @@ async function createEnhancedEbooks() {
       totalCreatedCount += moduleCreatedCount;
       totalErrorCount += moduleErrorCount;
       console.log(`📊 Module 6 Summary: ${moduleCreatedCount} created, ${moduleErrorCount} errors\n`);
+    }
+
+    // Module 7: Voeding & Gezondheid
+    console.log('📚 MODULE 07: Voeding & Gezondheid');
+    console.log('====================================');
+
+    const { data: nutritionModule, error: nutritionModuleError } = await supabase
+      .from('academy_modules')
+      .select('*')
+      .eq('title', 'Voeding & Gezondheid')
+      .single();
+
+    if (nutritionModuleError) {
+      console.error('❌ Error finding Voeding & Gezondheid module:', nutritionModuleError);
+    } else {
+      let moduleCreatedCount = 0;
+      let moduleErrorCount = 0;
+
+      // Process each lesson
+      for (const [lessonTitle, lessonData] of Object.entries(enhancedNutritionContent)) {
+        try {
+          console.log(`   📖 ${lessonTitle}`);
+          
+          const htmlContent = generateEnhancedEbookHTML(
+            lessonData,
+            nutritionModule.title,
+            nutritionModule.order_index.toString().padStart(2, '0')
+          );
+          
+          // Create filename
+          const safeTitle = lessonTitle
+            .toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .trim();
+          
+          const filename = `${safeTitle}-enhanced-ebook.html`;
+          const fileUrl = `/books/${filename}`;
+          
+          // Save HTML file to public/books directory
+          const publicDir = path.join(process.cwd(), 'public', 'books');
+          if (!fs.existsSync(publicDir)) {
+            fs.mkdirSync(publicDir, { recursive: true });
+          }
+          
+          const filePath = path.join(publicDir, filename);
+          fs.writeFileSync(filePath, htmlContent, 'utf8');
+          
+          console.log(`      ✅ Created enhanced ebook: ${filename}`);
+          console.log(`         📄 Pages: ${lessonData.pages.length}`);
+          console.log(`         🎨 Enhanced layout with visual elements`);
+          
+          // Update ebook record
+          const { data: existingEbook, error: fetchError } = await supabase
+            .from('academy_ebooks')
+            .select('id')
+            .eq('lesson_id', (await supabase
+              .from('academy_lessons')
+              .select('id')
+              .eq('title', lessonTitle)
+              .eq('module_id', nutritionModule.id)
+              .single()).data?.id)
+            .single();
+          
+          if (existingEbook) {
+            const { error: updateError } = await supabase
+              .from('academy_ebooks')
+              .update({
+                file_url: fileUrl,
+                updated_at: new Date().toISOString()
+              })
+              .eq('id', existingEbook.id);
+            
+            if (updateError) {
+              console.error(`         ❌ Error updating ebook:`, updateError);
+              moduleErrorCount++;
+            } else {
+              console.log(`         ✅ Updated ebook record`);
+              moduleCreatedCount++;
+            }
+          }
+          
+        } catch (error) {
+          console.error(`         ❌ Error creating enhanced ebook:`, error.message);
+          moduleErrorCount++;
+        }
+        
+        console.log('');
+      }
+
+      totalCreatedCount += moduleCreatedCount;
+      totalErrorCount += moduleErrorCount;
+      console.log(`📊 Module 7 Summary: ${moduleCreatedCount} created, ${moduleErrorCount} errors\n`);
     }
 
     // Summary
