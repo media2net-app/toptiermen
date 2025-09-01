@@ -119,7 +119,8 @@ export default function EbookDownload({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-6 mb-6">
+    <>
+      <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-6 mb-6">
       <div className="flex items-start space-x-4">
         <div className="flex-shrink-0">
           <div className="w-12 h-12 bg-gradient-to-br from-[#8BAE5A] to-[#3A4D23] rounded-lg flex items-center justify-center">
@@ -253,5 +254,6 @@ export default function EbookDownload({
         </div>
       </div>
     )}
+  </>
   );
 }
