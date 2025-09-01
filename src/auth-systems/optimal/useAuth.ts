@@ -266,8 +266,10 @@ export function useAuth(): AuthReturn {
 
   // Computed properties
   const isAuthenticated = !!user;
-  const isAdmin = profile?.role?.toLowerCase() === 'admin';
-  const isLid = profile?.role?.toLowerCase() === 'lid';
+  const metadataRole = ((user as any)?.user_metadata?.role as string | undefined) || undefined;
+  const effectiveRole = (profile?.role || metadataRole || '').toLowerCase();
+  const isAdmin = effectiveRole === 'admin';
+  const isLid = effectiveRole === 'lid';
 
   return {
     // State

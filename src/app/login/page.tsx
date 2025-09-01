@@ -53,59 +53,37 @@ function LoginPageContent() {
     }
   };
 
-  // Check if user is already authenticated - IMPROVED TO PREVENT LOOPS
+  // Check if user is already authenticated - Redirect immediately when user exists
   useEffect(() => {
     console.log('🔄 ========== REDIRECT EFFECT TRIGGERED ==========');
     console.log('📊 Current state - Loading:', loading, 'User:', !!user, 'Profile:', !!profile, 'Redirecting:', redirecting, 'IsAdmin:', isAdmin);
     console.log('👤 User email:', user?.email);
     console.log('👨‍💼 Profile role:', profile?.role);
-    
+
     if (loading) {
       console.log('⏳ Still loading, skipping redirect check');
       return;
     }
-    
-    // Redirect when we have user (and optionally profile)
-    if (user && !redirecting) {
-      console.log('✅ User authenticated, checking for redirect...');
-      
-      // If we have both user and profile, use the role-based redirect
-      if (profile) {
-        console.log('🎯 User + profile authenticated - Role:', profile?.role, 'IsAdmin:', isAdmin);
-        setRedirecting(true);
-        
-        // Check for redirect parameter first
-        const redirectTo = searchParams?.get('redirect');
-        let targetPath = '/dashboard';
-        
-        if (redirectTo && redirectTo !== '/login') {
-          targetPath = redirectTo;
-          console.log('🔀 Using redirect parameter:', targetPath);
-        } else {
-          // Default redirect based on user role
-          targetPath = isAdmin ? '/dashboard-admin' : '/dashboard';
-          console.log('🎯 Role-based redirect - IsAdmin:', isAdmin, '→', targetPath);
-        }
 
-        console.log('🚀 REDIRECTING TO:', targetPath);
-        router.replace(targetPath);
-      } 
-      // If we only have user (no profile yet), wait a moment then redirect to default
-      else {
-        console.log('⏳ User authenticated but no profile yet, starting timeout...');
-        setTimeout(() => {
-          console.log('⏰ Profile timeout check - User:', !!user, 'Profile:', !!profile, 'Redirecting:', redirecting);
-          if (user && !profile && !redirecting) {
-            console.log('⚠️ Profile loading timeout, redirecting to default dashboard');
-            setRedirecting(true);
-            
-            const redirectTo = searchParams?.get('redirect');
-            const targetPath = (redirectTo && redirectTo !== '/login') ? redirectTo : '/dashboard';
-            console.log('🚀 TIMEOUT REDIRECT TO:', targetPath);
-            router.replace(targetPath);
-          }
-        }, 2000); // Wait 2 seconds for profile
+    // Redirect as soon as we have a user (don't wait for profile)
+    if (user && !redirecting) {
+      setRedirecting(true);
+
+      const redirectTo = searchParams?.get('redirect');
+      let targetPath = '/dashboard';
+
+      if (redirectTo && redirectTo !== '/login') {
+        targetPath = redirectTo;
+        console.log('🔀 Using redirect parameter:', targetPath);
+      } else if (profile) {
+        targetPath = isAdmin ? '/dashboard-admin' : '/dashboard';
+        console.log('🎯 Role-based redirect - IsAdmin:', isAdmin, '→', targetPath);
+      } else {
+        console.log('🚀 No profile yet, default redirect to /dashboard');
       }
+
+      console.log('🚀 REDIRECTING TO:', targetPath);
+      router.replace(targetPath);
     } else if (!user) {
       console.log('❌ No user authenticated');
     } else if (redirecting) {
