@@ -9,7 +9,7 @@ import { EnvelopeIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user, loading, signIn } = useAuth();
+  const { user, profile, loading, signIn } = useAuth();
   // const { bustCache } = useCacheBuster(); - DISABLED TO PREVENT LOGOUT
   
   const [email, setEmail] = useState("");
@@ -54,7 +54,7 @@ function LoginPageContent() {
     if (loading) return;
     
     if (user && !redirecting) {
-      console.log('2.0.1: User already authenticated:', user.role);
+      console.log('2.0.1: User already authenticated:', profile?.role);
       setRedirecting(true);
       
       // Check for redirect parameter first
@@ -65,7 +65,7 @@ function LoginPageContent() {
         targetPath = redirectTo;
       } else {
         // Default redirect based on user role
-        targetPath = user.role?.toLowerCase() === 'admin' ? '/dashboard-admin' : '/dashboard';
+        targetPath = profile?.role?.toLowerCase() === 'admin' ? '/dashboard-admin' : '/dashboard';
       }
 
       console.log('2.0.1: Redirecting to:', targetPath);
@@ -75,7 +75,7 @@ function LoginPageContent() {
         router.replace(targetPath);
       }, 100);
     }
-  }, [loading, user, router, searchParams, redirecting]);
+  }, [loading, user, profile, router, searchParams, redirecting]);
 
   // 2.0.1: Force show login form after 2 seconds if still loading - DISABLED TO FIX FLICKERING
   // useEffect(() => {
@@ -119,6 +119,8 @@ function LoginPageContent() {
 
       console.log('✅ Login successful, redirecting...');
       setRedirecting(true);
+      
+      // Wait a moment for auth state to update, then redirect will happen via useEffect
       
     } catch (error: any) {
       console.error('❌ Login error:', error);
