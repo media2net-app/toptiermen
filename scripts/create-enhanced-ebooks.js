@@ -1012,6 +1012,489 @@ const enhancedPhysicalContent = {
   }
 };
 
+// Enhanced ebook content for Module 4: Mentale Kracht/Weerbaarheid (15+ pages)
+const enhancedMentalContent = {
+  'Wat is mentale kracht en hoe ontwikkel je dit?': {
+    title: 'Wat is mentale kracht en hoe ontwikkel je dit?',
+    subtitle: 'De Fundering van Onverwoestbare Weerbaarheid',
+    pages: [
+      {
+        title: 'Introductie',
+        content: `
+          <div class="page-header">
+            <h2>Introductie</h2>
+            <p class="lead">Mentale kracht is niet alleen over doorzettingsvermogen - het is over het vermogen om te gedijen in chaos en te groeien door tegenslag.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>Wat je gaat leren in dit ebook:</h3>
+            <ul class="learning-objectives">
+              <li>De wetenschap achter mentale kracht en veerkracht</li>
+              <li>Hoe je brein omgaat met stress en uitdagingen</li>
+              <li>De psychologie van mentale weerbaarheid</li>
+              <li>Praktische technieken om mentale kracht te versterken</li>
+              <li>Een 30-dagen mentale kracht transformatie</li>
+            </ul>
+          </div>
+          
+          <div class="info-box">
+            <h4>💡 Wist je dat?</h4>
+            <p>Mentale kracht is 40% genetisch en 60% ontwikkelbaar. Dit betekent dat iedereen, ongeacht hun startpunt, significant sterker kan worden.</p>
+          </div>
+        `
+      },
+      {
+        title: 'De Wetenschap van Mentale Kracht',
+        content: `
+          <div class="page-header">
+            <h2>De Wetenschap van Mentale Kracht</h2>
+            <p class="lead">Begrijp hoe je brein veerkracht ontwikkelt en hoe je dit kunt optimaliseren.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>Neuroplasticiteit en Veerkracht</h3>
+            <div class="resilience-flow">
+              <div class="resilience-step">
+                <div class="step-number">1</div>
+                <p><strong>Stress Response</strong> - Je brein detecteert uitdaging</p>
+              </div>
+              <div class="resilience-step">
+                <div class="step-number">2</div>
+                <p><strong>Adaptatie</strong> - Hersenen passen zich aan</p>
+              </div>
+              <div class="resilience-step">
+                <div class="step-number">3</div>
+                <p><strong>Groei</strong> - Nieuwe neurale paden worden gevormd</p>
+              </div>
+              <div class="resilience-step">
+                <div class="step-number">4</div>
+                <p><strong>Weerbaarheid</strong> - Je wordt sterker door de ervaring</p>
+              </div>
+            </div>
+            
+            <h3>De Belangrijkste Hersenregio's</h3>
+            <div class="brain-grid">
+              <div class="brain-card">
+                <h4>🧠 Prefrontale Cortex</h4>
+                <p>Reguleert emoties en besluitvorming</p>
+              </div>
+              <div class="brain-card">
+                <h4>⚡ Amygdala</h4>
+                <p>Verwerkt angst en bedreigingen</p>
+              </div>
+              <div class="brain-card">
+                <h4>🎯 Hippocampus</h4>
+                <p>Leert van ervaringen en trauma</p>
+              </div>
+              <div class="brain-card">
+                <h4>💪 Basale Ganglia</h4>
+                <p>Automatiseert gewoonten en reacties</p>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        title: 'De 4 Pilaren van Mentale Kracht',
+        content: `
+          <div class="page-header">
+            <h2>De 4 Pilaren van Mentale Kracht</h2>
+            <p class="lead">Bouw je mentale fort op deze vier fundamentele principes.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>Pilaar 1: Emotionele Regulatie</h3>
+            <div class="pillar-analysis">
+              <div class="pillar-section">
+                <h4>🎭 Wat het is:</h4>
+                <p>Het vermogen om je emoties te herkennen, begrijpen en beheren zonder overweldigd te raken.</p>
+                
+                <h4>🔧 Praktische Technieken:</h4>
+                <ul>
+                  <li><strong>Ademhalingsoefeningen:</strong> 4-7-8 techniek</li>
+                  <li><strong>Emotie Labeling:</strong> "Ik voel angst" in plaats van "Ik ben angstig"</li>
+                  <li><strong>Gratitude Journaling:</strong> 3 dingen per dag</li>
+                  <li><strong>Mindfulness:</strong> 10 minuten dagelijkse meditatie</li>
+                </ul>
+              </div>
+            </div>
+            
+            <h3>Pilaar 2: Cognitieve Flexibiliteit</h3>
+            <div class="pillar-section">
+              <h4>🧩 Wat het is:</h4>
+              <p>Het vermogen om je denken aan te passen wanneer omstandigheden veranderen.</p>
+              
+              <h4>🔧 Praktische Technieken:</h4>
+              <ul>
+                <li><strong>Perspectief Wisselen:</strong> "Hoe zou een expert dit zien?"</li>
+                <li><strong>Scenario Planning:</strong> Plan voor verschillende uitkomsten</li>
+                <li><strong>Creatief Denken:</strong> Brainstorm 10 alternatieve oplossingen</li>
+                <li><strong>Feedback Zoeken:</strong> Vraag anderen om hun visie</li>
+              </ul>
+            </div>
+            
+            <h3>Pilaar 3: Zelfvertrouwen en Zelfeffectiviteit</h3>
+            <div class="pillar-section">
+              <h4>💪 Wat het is:</h4>
+              <p>Geloof in je vermogen om uitdagingen aan te gaan en doelen te bereiken.</p>
+              
+              <h4>🔧 Praktische Technieken:</h4>
+              <ul>
+                <li><strong>Kleine Overwinningen:</strong> Vier elke kleine stap vooruit</li>
+                <li><strong>Competentie Bouwen:</strong> Focus op vaardigheden die je kunt ontwikkelen</li>
+                <li><strong>Positieve Self-Talk:</strong> Vervang negatieve gedachten</li>
+                <li><strong>Visualisatie:</strong> Zie jezelf slagen</li>
+              </ul>
+            </div>
+            
+            <h3>Pilaar 4: Doelgerichtheid en Doorzettingsvermogen</h3>
+            <div class="pillar-section">
+              <h4>🎯 Wat het is:</h4>
+              <p>Het vermogen om vast te houden aan je doelen ondanks tegenslag en afleiding.</p>
+              
+              <h4>🔧 Praktische Technieken:</h4>
+              <ul>
+                <li><strong>SMART Doelen:</strong> Specifiek, Meetbaar, Achievable, Relevant, Time-bound</li>
+                <li><strong>Milestone Planning:</strong> Verdeel grote doelen in kleine stappen</li>
+                <li><strong>Accountability:</strong> Deel je doelen met anderen</li>
+                <li><strong>Progress Tracking:</strong> Houd je voortgang bij</li>
+              </ul>
+            </div>
+          </div>
+        `
+      },
+      {
+        title: 'Praktische Oefeningen',
+        content: `
+          <div class="page-header">
+            <h2>Praktische Oefeningen</h2>
+            <p class="lead">Implementeer deze oefeningen om je mentale kracht te versterken.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>Oefening 1: De Mentale Kracht Dagelijkse Routine</h3>
+            <div class="exercise-box">
+              <h4>🌅 Ochtend (20 minuten):</h4>
+              <ul>
+                <li>Gratitude meditatie (5 minuten)</li>
+                <li>Intention setting voor de dag (3 minuten)</li>
+                <li>Fysieke activiteit (10 minuten)</li>
+                <li>Positieve affirmaties (2 minuten)</li>
+              </ul>
+              
+              <h4>🎯 Doel:</h4>
+              <p>Start je dag met mentale kracht en focus</p>
+            </div>
+            
+            <h3>Oefening 2: De Uitdaging Dagboek</h3>
+            <div class="exercise-box">
+              <h4>📖 Wat je bijhoudt:</h4>
+              <ul>
+                <li>Welke uitdagingen je tegenkwam</li>
+                <li>Hoe je reageerde (emotioneel en gedrag)</li>
+                <li>Wat je leerde van de ervaring</li>
+                <li>Hoe je volgende keer anders zou reageren</li>
+              </ul>
+              
+              <h4>⏰ Tijdsinvestering:</h4>
+              <p>10 minuten per dag, bij voorkeur 's avonds</p>
+            </div>
+            
+            <h3>Oefening 3: De Mentale Kracht Assessment</h3>
+            <div class="exercise-box">
+              <h4>📊 Evalueer jezelf op een schaal van 1-10:</h4>
+              <ul>
+                <li><strong>Emotionele Regulatie:</strong> Hoe goed beheer je je emoties?</li>
+                <li><strong>Cognitieve Flexibiliteit:</strong> Hoe flexibel is je denken?</li>
+                <li><strong>Zelfvertrouwen:</strong> Hoeveel vertrouwen heb je in jezelf?</li>
+                <li><strong>Doorzettingsvermogen:</strong> Hoe goed houd je vol bij tegenslag?</li>
+              </ul>
+              
+              <h4>🔄 Herhaal elke week om je progressie te zien</h4>
+            </div>
+          </div>
+        `
+      },
+      {
+        title: '30-Dagen Mentale Kracht Challenge',
+        content: `
+          <div class="page-header">
+            <h2>30-Dagen Mentale Kracht Challenge</h2>
+            <p class="lead">Transformeer je mentale kracht in 30 dagen.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>Week 1: Foundation (Dag 1-7)</h3>
+            <div class="challenge-week">
+              <h4>🎯 Doel: Basis mentale kracht gewoonten implementeren</h4>
+              <ul>
+                <li><strong>Dag 1-3:</strong> Ochtend routine (20 minuten)</li>
+                <li><strong>Dag 4-5:</strong> Uitdaging dagboek bijhouden</li>
+                <li><strong>Dag 6-7:</strong> Mentale kracht assessment</li>
+              </ul>
+            </div>
+            
+            <h3>Week 2: Uitbreiding (Dag 8-14)</h3>
+            <div class="challenge-week">
+              <h4>🚀 Doel: Emotionele regulatie versterken</h4>
+              <ul>
+                <li><strong>Dag 8-10:</strong> Ademhalingsoefeningen (3x per dag)</li>
+                <li><strong>Dag 11-12:</strong> Emotie labeling oefenen</li>
+                <li><strong>Dag 13-14:</strong> Gratitude journaling</li>
+              </ul>
+            </div>
+            
+            <h3>Week 3: Consolidatie (Dag 15-21)</h3>
+            <div class="challenge-week">
+              <h4>💪 Doel: Cognitieve flexibiliteit ontwikkelen</h4>
+              <ul>
+                <li><strong>Dag 15-17:</strong> Perspectief wisselen oefenen</li>
+                <li><strong>Dag 18-19:</strong> Creatief denken stimuleren</li>
+                <li><strong>Dag 20-21:</strong> Feedback zoeken van anderen</li>
+              </ul>
+            </div>
+            
+            <h3>Week 4: Optimalisatie (Dag 22-30)</h3>
+            <div class="challenge-week">
+              <h4>🎯 Doel: Alle pilaren integreren en volhouden</h4>
+              <ul>
+                <li><strong>Dag 22-25:</strong> Alle technieken combineren</li>
+                <li><strong>Dag 26-28:</strong> Uitdagingen opzoeken en overwinnen</li>
+                <li><strong>Dag 29-30:</strong> Evalueren en volgende fase plannen</li>
+              </ul>
+            </div>
+          </div>
+        `
+      }
+    ]
+  },
+  
+  'Hoe ontwikkel je mentale weerbaarheid?': {
+    title: 'Hoe ontwikkel je mentale weerbaarheid?',
+    subtitle: 'Van Kwetsbaar naar Onverwoestbaar',
+    pages: [
+      {
+        title: 'Introductie',
+        content: `
+          <div class="page-header">
+            <h2>Introductie</h2>
+            <p class="lead">Mentale weerbaarheid is niet over nooit vallen - het is over elke keer weer opstaan, sterker dan voorheen.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>Wat je gaat leren in dit ebook:</h3>
+            <ul class="learning-objectives">
+              <li>Het verschil tussen veerkracht en weerbaarheid</li>
+              <li>Hoe je brein omgaat met trauma en verlies</li>
+              <li>De psychologie van post-traumatische groei</li>
+              <li>Praktische strategieën om weerbaarheid te ontwikkelen</li>
+              <li>Een 90-dagen weerbaarheid ontwikkelingsplan</li>
+            </ul>
+          </div>
+          
+          <div class="info-box">
+            <h4>💡 Wist je dat?</h4>
+            <p>70% van de mensen ervaart post-traumatische groei na een moeilijke periode. Dit betekent dat tegenslag je sterker kan maken.</p>
+          </div>
+        `
+      },
+      {
+        title: 'Het Weerbaarheids Continuüm',
+        content: `
+          <div class="page-header">
+            <h2>Het Weerbaarheids Continuüm</h2>
+            <p class="lead>Begrijp waar je staat en hoe je verder kunt groeien.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>De 5 Niveaus van Weerbaarheid</h3>
+            <div class="resilience-levels">
+              <div class="level-card level-1">
+                <h4>🔴 Niveau 1: Kwetsbaar</h4>
+                <p><strong>Kenmerken:</strong> Overweldigd door kleine uitdagingen, snel opgeven, negatieve self-talk</p>
+                <p><strong>Focus:</strong> Basis coping mechanismen ontwikkelen</p>
+              </div>
+              
+              <div class="level-card level-2">
+                <h4>🟠 Niveau 2: Overleven</h4>
+                <p><strong>Kenmerken:</strong> Kan omgaan met basis stress, maar raakt overweldigd bij grote uitdagingen</p>
+                <p><strong>Focus:</strong> Stress management technieken</p>
+              </div>
+              
+              <div class="level-card level-3">
+                <h4>🟡 Niveau 3: Stabiliteit</h4>
+                <p><strong>Kenmerken:</strong> Kan omgaan met de meeste uitdagingen, maar heeft nog steeds ups en downs</p>
+                <p><strong>Focus:</strong> Emotionele regulatie versterken</p>
+              </div>
+              
+              <div class="level-card level-4">
+                <h4>🟢 Niveau 4: Weerbaarheid</h4>
+                <p><strong>Kenmerken:</strong> Kan gedijen in chaos, groeit door tegenslag, helpt anderen</p>
+                <p><strong>Focus:</strong> Leiderschap en mentoring</p>
+              </div>
+              
+              <div class="level-card level-5">
+                <h4>🔵 Niveau 5: Onverwoestbaar</h4>
+                <p><strong>Kenmerken:</strong> Kan omgaan met alles wat het leven gooit, inspireert anderen, creëert positieve verandering</p>
+                <p><strong>Focus:</strong> Legacy en impact</p>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        title: 'Post-Traumatische Groei',
+        content: `
+          <div class="page-header">
+            <h2>Post-Traumatische Groei</h2>
+            <p class="lead">Leer hoe tegenslag je sterker kan maken dan ooit tevoren.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>De 5 Domeinen van Groei</h3>
+            <div class="growth-domains">
+              <div class="domain-card">
+                <h4>🌟 Persoonlijke Kracht</h4>
+                <p>Je realiseert dat je sterker bent dan je dacht en kunt omgaan met wat het leven gooit.</p>
+                <h5>🔧 Oefening:</h5>
+                <p>Schrijf 3 momenten op waar je jezelf verraste door je kracht.</p>
+              </div>
+              
+              <div class="domain-card">
+                <h4>❤️ Relaties</h4>
+                <p>Je waardeert je relaties meer en ontwikkelt diepere verbindingen met anderen.</p>
+                <h5>🔧 Oefening:</h5>
+                <p>Bereik uit naar 3 mensen die je wilt bedanken voor hun steun.</p>
+              </div>
+              
+              <div class="domain-card">
+                <h4>🎯 Nieuwe Mogelijkheden</h4>
+                <p>Je ontdekt nieuwe paden en mogelijkheden die je nooit had overwogen.</p>
+                <h5>🔧 Oefening:</h5>
+                <p>Brainstorm 5 nieuwe mogelijkheden die je trauma heeft geopend.</p>
+              </div>
+              
+              <div class="domain-card">
+                <h4>🌍 Spirituele Groei</h4>
+                <p>Je ontwikkelt een dieper begrip van jezelf en je plaats in de wereld.</p>
+                <h5>🔧 Oefening:</h5>
+                <p>Spendeer 20 minuten in stilte en reflecteer op je groei.</p>
+              </div>
+              
+              <div class="domain-card">
+                <h4>💎 Appreciatie van Leven</h4>
+                <p>Je waardeert de kleine dingen meer en leeft bewuster.</p>
+                <h5>🔧 Oefening:</h5>
+                <p>Maak een lijst van 10 dingen die je waardeert in je leven.</p>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        title: 'Praktische Strategieën',
+        content: `
+          <div class="page-header">
+            <h2>Praktische Strategieën</h2>
+            <p class="lead">Implementeer deze strategieën om je weerbaarheid te ontwikkelen.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>Strategie 1: De Weerbaarheids Dagelijkse Routine</h3>
+            <div class="strategy-box">
+              <h4>🌅 Ochtend (15 minuten):</h4>
+              <ul>
+                <li>Gratitude meditatie (5 minuten)</li>
+                <li>Intention setting (3 minuten)</li>
+                <li>Fysieke activiteit (5 minuten)</li>
+                <li>Positieve affirmaties (2 minuten)</li>
+              </ul>
+              
+              <h4>🌙 Avond (10 minuten):</h4>
+              <ul>
+                <li>Reflectie op de dag (5 minuten)</li>
+                <li>Planning voor morgen (3 minuten)</li>
+                <li>Gratitude journaling (2 minuten)</li>
+              </ul>
+            </div>
+            
+            <h3>Strategie 2: De Weerbaarheids Toolkit</h3>
+            <div class="strategy-box">
+              <h4>🛠️ Tools voor moeilijke momenten:</h4>
+              <ul>
+                <li><strong>Ademhaling:</strong> 4-7-8 techniek voor onmiddellijke kalmering</li>
+                <li><strong>Grounded:</strong> 5-4-3-2-1 zintuigen oefening</li>
+                <li><strong>Perspectief:</strong> "Dit is tijdelijk" mantra</li>
+                <li><strong>Actie:</strong> Kleine, beheersbare stappen nemen</li>
+              </ul>
+            </div>
+            
+            <h3>Strategie 3: De Weerbaarheids Community</h3>
+            <div class="strategy-box">
+              <h4>👥 Bouw je support netwerk:</h4>
+              <ul>
+                <li>Identificeer 5 mensen die je kunnen steunen</li>
+                <li>Deel je uitdagingen en successen</li>
+                <li>Bied steun aan anderen</li>
+                <li>Zoek professionele hulp wanneer nodig</li>
+              </ul>
+            </div>
+          </div>
+        `
+      },
+      {
+        title: '90-Dagen Weerbaarheid Ontwikkeling',
+        content: `
+          <div class="page-header">
+            <h2>90-Dagen Weerbaarheid Ontwikkeling</h2>
+            <p class="lead">Een gestructureerd plan om je weerbaarheid te ontwikkelen.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>Fase 1: Foundation (Dag 1-30)</h3>
+            <div class="development-phase">
+              <h4>🎯 Doel: Basis weerbaarheid gewoonten implementeren</h4>
+              <ul>
+                <li><strong>Week 1-2:</strong> Dagelijkse routine implementeren</li>
+                <li><strong>Week 3-4:</strong> Weerbaarheids toolkit oefenen</li>
+              </ul>
+            </div>
+            
+            <h3>Fase 2: Uitbreiding (Dag 31-60)</h3>
+            <div class="development-phase">
+              <h4>🚀 Doel: Weerbaarheid in verschillende levensgebieden</h4>
+              <ul>
+                <li><strong>Week 5-6:</strong> Werk/studie weerbaarheid</li>
+                <li><strong>Week 7-8:</strong> Relatie weerbaarheid</li>
+              </ul>
+            </div>
+            
+            <h3>Fase 3: Consolidatie (Dag 61-90)</h3>
+            <div class="development-phase">
+              <h4>💪 Doel: Weerbaarheid integreren en volhouden</h4>
+              <ul>
+                <li><strong>Week 9-10:</strong> Alle strategieën combineren</li>
+                <li><strong>Week 11-12:</strong> Uitdagingen opzoeken en overwinnen</li>
+              </ul>
+            </div>
+            
+            <h3>Volgende Stappen</h3>
+            <div class="next-steps">
+              <h4>🎯 Na 90 dagen:</h4>
+              <ul>
+                <li>Evalueer je progressie</li>
+                <li>Identificeer gebieden voor verdere groei</li>
+                <li>Plan je volgende 90 dagen</li>
+                <li>Mentor anderen in hun weerbaarheid reis</li>
+              </ul>
+            </div>
+          </div>
+        `
+      }
+    ]
+  }
+};
+
 // Enhanced HTML template with better styling and structure
 function generateEnhancedEbookHTML(lessonData, moduleTitle, moduleNumber) {
   const pagesHTML = lessonData.pages.map((page, index) => `
@@ -1760,10 +2243,197 @@ function generateEnhancedEbookHTML(lessonData, moduleTitle, moduleNumber) {
                 grid-template-columns: 1fr;
             }
             
-            .eye-contact-guide {
-                grid-template-columns: 1fr;
-            }
+                    .eye-contact-guide {
+            grid-template-columns: 1fr;
         }
+
+        /* Module 4 specific styles */
+        .resilience-flow {
+            display: flex;
+            justify-content: space-between;
+            margin: 30px 0;
+            gap: 20px;
+        }
+        
+        .resilience-step {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .resilience-step .step-number {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #8BAE5A, #B6C948);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin: 0 auto 15px;
+        }
+        
+        .brain-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .brain-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .brain-card:hover {
+            border-color: #8BAE5A;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(139, 174, 90, 0.2);
+        }
+        
+        .brain-card h4 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .pillar-analysis {
+            margin: 30px 0;
+        }
+        
+        .pillar-section {
+            background: white;
+            border: 2px solid #8BAE5A;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+        
+        .pillar-section h4 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .pillar-section h5 {
+            color: #B6C948;
+            margin: 20px 0 10px;
+            font-size: 1.1em;
+        }
+        
+        .resilience-levels {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .level-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .level-card.level-1 { border-color: #dc3545; }
+        .level-card.level-2 { border-color: #fd7e14; }
+        .level-card.level-3 { border-color: #ffc107; }
+        .level-card.level-4 { border-color: #28a745; }
+        .level-card.level-5 { border-color: #007bff; }
+        
+        .level-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        
+        .level-card h4 {
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .growth-domains {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .domain-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: 2px solid #B6C948;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .domain-card:hover {
+            border-color: #8BAE5A;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(139, 174, 90, 0.15);
+        }
+        
+        .domain-card h4 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .domain-card h5 {
+            color: #B6C948;
+            margin: 15px 0 10px;
+            font-size: 1.1em;
+        }
+        
+        .strategy-box {
+            background: white;
+            border: 2px solid #8BAE5A;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+        
+        .strategy-box h4 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .development-phase {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: 2px solid #B6C948;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+        
+        .development-phase h4 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .next-steps {
+            background: white;
+            border: 2px solid #8BAE5A;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+        
+        .next-steps h4 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+    }
     </style>
 </head>
 <body>
@@ -2078,6 +2748,100 @@ async function createEnhancedEbooks() {
       totalCreatedCount += moduleCreatedCount;
       totalErrorCount += moduleErrorCount;
       console.log(`📊 Module 3 Summary: ${moduleCreatedCount} created, ${moduleErrorCount} errors\n`);
+    }
+
+    // Module 4: Mentale Kracht/Weerbaarheid
+    console.log('📚 MODULE 04: Mentale Kracht/Weerbaarheid');
+    console.log('=========================================');
+
+    const { data: mentalModule, error: mentalModuleError } = await supabase
+      .from('academy_modules')
+      .select('*')
+      .eq('title', 'Mentale Kracht/Weerbaarheid')
+      .single();
+
+    if (mentalModuleError) {
+      console.error('❌ Error finding Mental Strength module:', mentalModuleError);
+    } else {
+      let moduleCreatedCount = 0;
+      let moduleErrorCount = 0;
+
+      // Process each lesson
+      for (const [lessonTitle, lessonData] of Object.entries(enhancedMentalContent)) {
+        try {
+          console.log(`   📖 ${lessonTitle}`);
+          
+          const htmlContent = generateEnhancedEbookHTML(
+            lessonData,
+            mentalModule.title,
+            mentalModule.order_index.toString().padStart(2, '0')
+          );
+          
+          // Create filename
+          const safeTitle = lessonTitle
+            .toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .trim();
+          
+          const filename = `${safeTitle}-enhanced-ebook.html`;
+          const fileUrl = `/books/${filename}`;
+          
+          // Save HTML file to public/books directory
+          const publicDir = path.join(process.cwd(), 'public', 'books');
+          if (!fs.existsSync(publicDir)) {
+            fs.mkdirSync(publicDir, { recursive: true });
+          }
+          
+          const filePath = path.join(publicDir, filename);
+          fs.writeFileSync(filePath, htmlContent, 'utf8');
+          
+          console.log(`      ✅ Created enhanced ebook: ${filename}`);
+          console.log(`         📄 Pages: ${lessonData.pages.length}`);
+          console.log(`         🎨 Enhanced layout with visual elements`);
+          
+          // Update ebook record
+          const { data: existingEbook, error: fetchError } = await supabase
+            .from('academy_ebooks')
+            .select('id')
+            .eq('lesson_id', (await supabase
+              .from('academy_lessons')
+              .select('id')
+              .eq('title', lessonTitle)
+              .eq('module_id', mentalModule.id)
+              .single()).data?.id)
+            .single();
+          
+          if (existingEbook) {
+            const { error: updateError } = await supabase
+              .from('academy_ebooks')
+              .update({
+                file_url: fileUrl,
+                updated_at: new Date().toISOString()
+              })
+              .eq('id', existingEbook.id);
+            
+            if (updateError) {
+              console.error(`         ❌ Error updating ebook:`, updateError);
+              moduleErrorCount++;
+            } else {
+              console.log(`         ✅ Updated ebook record`);
+              moduleCreatedCount++;
+            }
+          }
+          
+        } catch (error) {
+          console.error(`         ❌ Error creating enhanced ebook:`, error.message);
+          moduleErrorCount++;
+        }
+        
+        console.log('');
+      }
+
+      totalCreatedCount += moduleCreatedCount;
+      totalErrorCount += moduleErrorCount;
+      console.log(`📊 Module 4 Summary: ${moduleCreatedCount} created, ${moduleErrorCount} errors\n`);
     }
 
     // Summary

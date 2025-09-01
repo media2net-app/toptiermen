@@ -733,10 +733,197 @@
                 grid-template-columns: 1fr;
             }
             
-            .eye-contact-guide {
-                grid-template-columns: 1fr;
-            }
+                    .eye-contact-guide {
+            grid-template-columns: 1fr;
         }
+
+        /* Module 4 specific styles */
+        .resilience-flow {
+            display: flex;
+            justify-content: space-between;
+            margin: 30px 0;
+            gap: 20px;
+        }
+        
+        .resilience-step {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .resilience-step .step-number {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #8BAE5A, #B6C948);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin: 0 auto 15px;
+        }
+        
+        .brain-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .brain-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .brain-card:hover {
+            border-color: #8BAE5A;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(139, 174, 90, 0.2);
+        }
+        
+        .brain-card h4 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .pillar-analysis {
+            margin: 30px 0;
+        }
+        
+        .pillar-section {
+            background: white;
+            border: 2px solid #8BAE5A;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+        
+        .pillar-section h4 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .pillar-section h5 {
+            color: #B6C948;
+            margin: 20px 0 10px;
+            font-size: 1.1em;
+        }
+        
+        .resilience-levels {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .level-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .level-card.level-1 { border-color: #dc3545; }
+        .level-card.level-2 { border-color: #fd7e14; }
+        .level-card.level-3 { border-color: #ffc107; }
+        .level-card.level-4 { border-color: #28a745; }
+        .level-card.level-5 { border-color: #007bff; }
+        
+        .level-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        
+        .level-card h4 {
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .growth-domains {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .domain-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: 2px solid #B6C948;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .domain-card:hover {
+            border-color: #8BAE5A;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(139, 174, 90, 0.15);
+        }
+        
+        .domain-card h4 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .domain-card h5 {
+            color: #B6C948;
+            margin: 15px 0 10px;
+            font-size: 1.1em;
+        }
+        
+        .strategy-box {
+            background: white;
+            border: 2px solid #8BAE5A;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+        
+        .strategy-box h4 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .development-phase {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: 2px solid #B6C948;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+        
+        .development-phase h4 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .next-steps {
+            background: white;
+            border: 2px solid #8BAE5A;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+        
+        .next-steps h4 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+    }
     </style>
 </head>
 <body>
