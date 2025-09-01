@@ -77,9 +77,12 @@ export function useAuth(): AuthReturn {
   // Initialize auth state and listen for changes
   useEffect(() => {
     console.log('🚀 Optimal Auth: Initializing...');
+    let mounted = true;
 
     // Get initial session
     supabase.auth.getSession().then(async ({ data: { session }, error }) => {
+      if (!mounted) return;
+      
       if (error) {
         console.error('Session error:', error);
         setError(error.message);
@@ -94,16 +97,20 @@ export function useAuth(): AuthReturn {
       if (session?.user) {
         console.log('👤 Fetching user profile...');
         const userProfile = await fetchProfile(session.user.id);
-        setProfile(userProfile);
-        console.log('✅ Profile loaded:', userProfile?.email);
+        if (mounted) {
+          setProfile(userProfile);
+          console.log('✅ Profile loaded:', userProfile?.email);
+        }
       }
 
-      setLoading(false);
+      if (mounted) setLoading(false);
     });
 
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!mounted) return;
+        
         console.log('🔄 Auth state change:', event, session?.user?.email);
 
         setUser(session?.user ?? null);
@@ -111,17 +118,20 @@ export function useAuth(): AuthReturn {
 
         if (session?.user) {
           const userProfile = await fetchProfile(session.user.id);
-          setProfile(userProfile);
-          console.log('👤 Profile loaded:', userProfile?.role);
+          if (mounted) {
+            setProfile(userProfile);
+            console.log('👤 Profile loaded:', userProfile?.role);
+          }
         } else {
           setProfile(null);
         }
 
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     );
 
     return () => {
+      mounted = false;
       console.log('🧹 Optimal Auth: Cleanup');
       subscription.unsubscribe();
     };
@@ -196,11 +206,20 @@ export function useAuth(): AuthReturn {
     console.log('🚪 Optimal Auth: Sign out...');
     
     try {
-      // Clear storage before signing out
+      // Clear only auth-specific storage keys to prevent conflicts
       if (typeof window !== 'undefined') {
-        localStorage.clear();
-        sessionStorage.clear();
-        console.log('🧹 Browser storage cleared');
+        const authKeys = [
+          'sb-toptiermen-auth-token',
+          'sb-toptiermen-refresh-token', 
+          'toptiermen-auth-token',
+          'toptiermen-remember-me'
+        ];
+        
+        authKeys.forEach(key => {
+          localStorage.removeItem(key);
+          sessionStorage.removeItem(key);
+        });
+        console.log('🧹 Auth storage cleared');
       }
 
       const { error } = await supabase.auth.signOut();

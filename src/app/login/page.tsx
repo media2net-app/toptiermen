@@ -63,9 +63,25 @@ function LoginPageContent() {
     if (logoutStatus === 'success') {
       console.log('✅ Logout successful, resetting login state');
       updateLoginState({ isLoading: false, error: '' });
+      
+      // Clean up URL parameters after processing logout status
+      if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('logout');
+        url.searchParams.delete('t'); // Remove any remaining cache-busting timestamp
+        window.history.replaceState({}, '', url.toString());
+      }
     } else if (logoutStatus === 'error') {
       console.log('❌ Logout had errors, resetting login state');
       updateLoginState({ isLoading: false, error: 'Er is een fout opgetreden bij het uitloggen. Probeer opnieuw in te loggen.' });
+      
+      // Clean up URL parameters after processing logout status
+      if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('logout');
+        url.searchParams.delete('t'); // Remove any remaining cache-busting timestamp
+        window.history.replaceState({}, '', url.toString());
+      }
     }
     
     // Check Supabase status on page load
@@ -92,12 +108,21 @@ function LoginPageContent() {
 
     // Redirect as soon as we have a user (don't wait for profile)
     if (user && !loginState.redirecting) {
+      console.log('🔄 User detected, initiating redirect...');
+      console.log('👤 User object:', user);
+      console.log('📋 Profile object:', profile);
+      
       updateLoginState({ redirecting: true });
 
       const redirectTo = searchParams?.get('redirect') || undefined;
       const targetPath = getRedirectPath(user, profile, redirectTo);
 
-      router.replace(targetPath);
+      console.log('🎯 Redirecting to:', targetPath);
+      
+      // Use a small delay to ensure state updates
+      setTimeout(() => {
+        router.replace(targetPath);
+      }, 100);
     }
   }, [loading, user, profile, router, searchParams, loginState.redirecting]);
 
@@ -121,34 +146,41 @@ function LoginPageContent() {
       return;
     }
 
-    if (loginState.isLoading) return;
+    // Prevent multiple submissions
+    if (loginState.isLoading || loginState.redirecting) return;
 
-    updateLoginState({ isLoading: true, error: "" });
+    updateLoginState({ isLoading: true, error: "", redirecting: false });
     
     try {
+      console.log('🔐 Starting login process...');
       const result = await signIn(loginState.email, loginState.password);
 
       if (!result.success) {
+        console.log('❌ Login failed:', result.error);
         updateLoginState({ 
           error: result.error || "Ongeldige inloggegevens",
-          isLoading: false 
+          isLoading: false,
+          redirecting: false
         });
         return;
       }
 
-      updateLoginState({ redirecting: true, isLoading: false });
+      console.log('✅ Login successful, setting redirect state');
+      updateLoginState({ 
+        redirecting: true, 
+        isLoading: false,
+        error: ""
+      });
       
-      // Fallback redirect timeout
-      const redirectTimeout = setTimeout(() => {
-        router.replace(AUTH_CONFIG.defaultRedirect);
-      }, AUTH_CONFIG.redirectTimeout);
-      
-      return () => clearTimeout(redirectTimeout);
+      // Let the useEffect handle the redirect based on auth state change
+      // No manual redirect needed here as useAuth will trigger state change
       
     } catch (error: any) {
+      console.error('❌ Login exception:', error);
       updateLoginState({ 
         error: error.message || "Er is een fout opgetreden bij het inloggen",
-        isLoading: false 
+        isLoading: false,
+        redirecting: false
       });
     }
   }
@@ -340,9 +372,9 @@ function LoginPageContent() {
           )}
           <button
             type="submit"
-            disabled={loginState.isLoading || !loginState.email || !loginState.password}
+            disabled={loginState.isLoading || loginState.redirecting || !loginState.email || !loginState.password}
             className={`w-full py-3 sm:py-4 rounded-xl bg-gradient-to-r from-[#B6C948] to-[#3A4D23] text-[#181F17] font-semibold text-base sm:text-lg shadow-lg hover:from-[#B6C948] hover:to-[#B6C948] transition-all duration-200 border border-[#B6C948] font-figtree ${
-              loginState.isLoading 
+              (loginState.isLoading || loginState.redirecting)
                 ? 'opacity-75 cursor-wait' 
                 : (!loginState.email || !loginState.password) 
                   ? 'opacity-50 cursor-not-allowed' 
@@ -353,6 +385,11 @@ function LoginPageContent() {
               <div className="flex items-center justify-center">
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#181F17] mr-2"></div>
                 <span>Inloggen...</span>
+              </div>
+            ) : loginState.redirecting ? (
+              <div className="flex items-center justify-center">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#181F17] mr-2"></div>
+                <span>Doorsturen...</span>
               </div>
             ) : (
               "Inloggen"

@@ -275,10 +275,9 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
       
       if (result.success) {
         console.log('✅ Admin logout successful');
-        // Force redirect with cache busting to prevent loops
+        // Force redirect without cache busting to prevent login issues
         if (typeof window !== 'undefined') {
-          const timestamp = Date.now();
-          window.location.href = `/login?t=${timestamp}&logout=success`;
+          window.location.href = `/login?logout=success`;
         }
       } else {
         throw new Error(result.error || 'Admin logout failed');

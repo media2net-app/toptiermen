@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/auth-systems/optimal/useAuth';
-// import { useV2State } from '@/contexts/V2StateContext';
 // import { useV2Monitoring } from '@/lib/v2-monitoring';
 // import { useV2ErrorRecovery } from '@/lib/v2-error-recovery';
 // import { useV2Cache } from '@/lib/v2-cache-strategy';
@@ -371,10 +370,9 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
       
       if (result.success) {
         console.log('✅ Dashboard logout successful');
-        // Force redirect with cache busting to prevent loops
+        // Force redirect without cache busting to prevent login issues
         if (typeof window !== 'undefined') {
-          const timestamp = Date.now();
-          window.location.href = `/login?t=${timestamp}&logout=success`;
+          window.location.href = `/login?logout=success`;
         }
       } else {
         throw new Error(result.error || 'Logout failed');
