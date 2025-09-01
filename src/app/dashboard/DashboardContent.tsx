@@ -366,19 +366,18 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
         logoutButton.setAttribute('disabled', 'true');
       }
       
-      // Clear any cached data
-      if (typeof window !== 'undefined') {
-        localStorage.clear();
-        sessionStorage.clear();
-      }
+      // Use the optimized signOut function (it clears storage internally)
+      const result = await signOut();
       
-      // Sign out from Supabase
-      await signOut();
-      
-      // Force redirect with cache busting to prevent loops
-      if (typeof window !== 'undefined') {
-        const timestamp = Date.now();
-        window.location.href = `/login?t=${timestamp}`;
+      if (result.success) {
+        console.log('✅ Dashboard logout successful');
+        // Force redirect with cache busting to prevent loops
+        if (typeof window !== 'undefined') {
+          const timestamp = Date.now();
+          window.location.href = `/login?t=${timestamp}`;
+        }
+      } else {
+        throw new Error(result.error || 'Logout failed');
       }
       
     } catch (error) {
@@ -491,9 +490,15 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
                     {user?.email}
                   </p>
                   <p className="text-[#8BAE5A] text-xs">
-                    {profile?.role?.toLowerCase() === 'admin' ? 'Admin' : 
-                     profile?.role?.toLowerCase() === 'test' ? 'Test' :
-                     user?.email?.toLowerCase().includes('test') ? 'Test' : 'Lid'}
+                    {(() => {
+                      const metadataRole = ((user as any)?.user_metadata?.role as string | undefined) || undefined;
+                      const effectiveRole = (profile?.role || metadataRole || '').toLowerCase();
+                      
+                      if (effectiveRole === 'admin') return 'Admin';
+                      if (effectiveRole === 'test') return 'Test';
+                      if (user?.email?.toLowerCase().includes('test')) return 'Test';
+                      return 'Lid';
+                    })()}
                   </p>
                 </div>
               )}

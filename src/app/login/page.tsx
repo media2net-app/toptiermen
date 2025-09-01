@@ -75,11 +75,14 @@ function LoginPageContent() {
       if (redirectTo && redirectTo !== '/login') {
         targetPath = redirectTo;
         console.log('🔀 Using redirect parameter:', targetPath);
-      } else if (profile) {
-        targetPath = isAdmin ? '/dashboard-admin' : '/dashboard';
-        console.log('🎯 Role-based redirect - IsAdmin:', isAdmin, '→', targetPath);
       } else {
-        console.log('🚀 No profile yet, default redirect to /dashboard');
+        // Check role from user_metadata first (immediate), then profile
+        const metadataRole = ((user as any)?.user_metadata?.role as string | undefined) || undefined;
+        const effectiveRole = (profile?.role || metadataRole || '').toLowerCase();
+        const isAdminUser = effectiveRole === 'admin';
+        
+        targetPath = isAdminUser ? '/dashboard-admin' : '/dashboard';
+        console.log('🎯 Role-based redirect - Profile role:', profile?.role, 'Metadata role:', metadataRole, 'Effective:', effectiveRole, 'IsAdmin:', isAdminUser, '→', targetPath);
       }
 
       console.log('🚀 REDIRECTING TO:', targetPath);

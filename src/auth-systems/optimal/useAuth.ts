@@ -214,6 +214,13 @@ export function useAuth(): AuthReturn {
     setLoading(true);
 
     try {
+      // Clear storage before signing out
+      if (typeof window !== 'undefined') {
+        localStorage.clear();
+        sessionStorage.clear();
+        console.log('🧹 Browser storage cleared');
+      }
+
       const { error } = await supabase.auth.signOut();
 
       if (error) {
@@ -224,7 +231,13 @@ export function useAuth(): AuthReturn {
       }
 
       console.log('✅ Sign out successful');
-      // State will be updated by onAuthStateChange
+      
+      // Reset internal state immediately
+      setUser(null);
+      setProfile(null);
+      setError(null);
+      setLoading(false);
+      
       return { success: true };
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Sign out failed';
