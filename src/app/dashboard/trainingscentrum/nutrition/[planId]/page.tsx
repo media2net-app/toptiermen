@@ -66,7 +66,7 @@ export default function NutritionPlanPage() {
   };
 
   const handleBack = () => {
-    router.push('/dashboard/voedingsplannen');
+            router.push('/dashboard/trainingscentrum');
   };
 
   if (loading) {

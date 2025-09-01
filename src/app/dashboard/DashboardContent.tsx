@@ -39,7 +39,7 @@ const menu = [
   { label: 'Mijn Missies', icon: FireIcon, parent: 'Dashboard', href: '/dashboard/mijn-missies', isSub: true },
   { label: 'Challenges', icon: TrophyIcon, parent: 'Dashboard', href: '/dashboard/challenges', isSub: true },
   { label: 'Mijn Trainingen', icon: AcademicCapIcon, parent: 'Dashboard', href: '/dashboard/mijn-trainingen', isSub: true },
-  { label: 'Voedingsplannen', icon: BookOpenIcon, href: '/dashboard/voedingsplannen' },
+          { label: 'Voedingsplannen', icon: BookOpenIcon, href: '/dashboard/trainingscentrum' },
   { label: 'Finance & Business', icon: CurrencyDollarIcon, href: '/dashboard/finance-en-business' },
   { label: 'Academy', icon: FireIcon, href: '/dashboard/academy' },
   { label: 'Trainingscentrum', icon: AcademicCapIcon, href: '/dashboard/trainingscentrum' },
