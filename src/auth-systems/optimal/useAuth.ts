@@ -211,8 +211,7 @@ export function useAuth(): AuthReturn {
 
   const signOut = useCallback(async () => {
     console.log('🚪 Optimal Auth: Sign out...');
-    setLoading(true);
-
+    
     try {
       // Clear storage before signing out
       if (typeof window !== 'undefined') {
@@ -226,7 +225,6 @@ export function useAuth(): AuthReturn {
       if (error) {
         console.error('❌ Sign out error:', error);
         setError(error.message);
-        setLoading(false);
         return { success: false, error: error.message };
       }
 
@@ -243,7 +241,6 @@ export function useAuth(): AuthReturn {
       const errorMessage = err instanceof Error ? err.message : 'Sign out failed';
       console.error('❌ Sign out exception:', err);
       setError(errorMessage);
-      setLoading(false);
       return { success: false, error: errorMessage };
     }
   }, []);

@@ -35,9 +35,21 @@ function LoginPageContent() {
     console.log('🌐 Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
     console.log('🔑 Supabase Key present:', !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
     
+    // Check for logout status and reset loading state
+    const logoutStatus = searchParams?.get('logout');
+    if (logoutStatus === 'success') {
+      console.log('✅ Logout successful, resetting login state');
+      setIsLoading(false);
+      setError('');
+    } else if (logoutStatus === 'error') {
+      console.log('❌ Logout had errors, resetting login state');
+      setIsLoading(false);
+      setError('Er is een fout opgetreden bij het uitloggen. Probeer opnieuw in te loggen.');
+    }
+    
     // Check Supabase status on page load
     checkSupabaseStatus();
-  }, []);
+  }, [searchParams]);
 
   const checkSupabaseStatus = async () => {
     try {

@@ -278,7 +278,7 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
         // Force redirect with cache busting to prevent loops
         if (typeof window !== 'undefined') {
           const timestamp = Date.now();
-          window.location.href = `/login?t=${timestamp}`;
+          window.location.href = `/login?t=${timestamp}&logout=success`;
         }
       } else {
         throw new Error(result.error || 'Admin logout failed');
@@ -289,8 +289,11 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
       
       // Emergency fallback - force redirect
       if (typeof window !== 'undefined') {
-        window.location.href = `/login?t=${Date.now()}`;
+        window.location.href = `/login?t=${Date.now()}&logout=error`;
       }
+    } finally {
+      // Always reset loading state
+      setIsLoggingOut(false);
     }
   };
 
