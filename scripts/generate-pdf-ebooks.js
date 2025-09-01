@@ -5,19 +5,19 @@ require('dotenv').config({ path: '.env.local' });
 
 async function generatePDFEbooks() {
   try {
-    console.log('🚀 GENERATING PDF EBOOKS FOR MODULE 1');
-    console.log('=====================================\n');
+    console.log('🚀 GENERATING PDF EBOOKS FOR MODULE 1 & 2');
+    console.log('==========================================\n');
 
-    // Check if public/books directory exists
     const booksDir = path.join(process.cwd(), 'public', 'books');
     if (!fs.existsSync(booksDir)) {
       console.error('❌ Books directory not found. Please run create-enhanced-ebooks.js first.');
       return;
     }
 
-    // Get all HTML files for Module 1
+    // Get all HTML files for Module 1 and Module 2
     const htmlFiles = fs.readdirSync(booksDir)
-      .filter(file => file.endsWith('.html') && file.includes('testosteron'))
+      .filter(file => file.endsWith('.html') && 
+        (file.includes('testosteron') || file.includes('discipline') || file.includes('identiteit')))
       .map(file => ({
         filename: file,
         path: path.join(booksDir, file),
@@ -25,15 +25,14 @@ async function generatePDFEbooks() {
       }));
 
     if (htmlFiles.length === 0) {
-      console.error('❌ No HTML ebooks found for Module 1. Please run create-enhanced-ebooks.js first.');
+      console.error('❌ No HTML ebooks found for Module 1 & 2. Please run create-enhanced-ebooks.js first.');
       return;
     }
 
-    console.log(`📚 Found ${htmlFiles.length} HTML ebooks for Module 1:`);
+    console.log(`📚 Found ${htmlFiles.length} HTML ebooks for Module 1 & 2:`);
     htmlFiles.forEach(file => console.log(`   - ${file.filename}`));
     console.log('');
 
-    // Launch browser
     console.log('🌐 Launching browser...');
     const browser = await puppeteer.launch({
       headless: true,
@@ -43,21 +42,18 @@ async function generatePDFEbooks() {
     let successCount = 0;
     let errorCount = 0;
 
-    // Process each HTML file
     for (const file of htmlFiles) {
       try {
         console.log(`📖 Converting: ${file.filename}`);
         
         const page = await browser.newPage();
         
-        // Set viewport for consistent rendering
         await page.setViewport({
           width: 1200,
           height: 1600,
           deviceScaleFactor: 2
         });
 
-        // Load the HTML file
         const htmlContent = fs.readFileSync(file.path, 'utf8');
         await page.setContent(htmlContent, {
           waitUntil: 'networkidle0'
@@ -66,7 +62,6 @@ async function generatePDFEbooks() {
         // Wait for content to render
         await new Promise(resolve => setTimeout(resolve, 2000));
 
-        // Generate PDF
         const pdfPath = path.join(booksDir, file.pdfName);
         await page.pdf({
           path: pdfPath,
@@ -94,7 +89,6 @@ async function generatePDFEbooks() {
 
     await browser.close();
 
-    // Summary
     console.log('\n📊 PDF GENERATION SUMMARY');
     console.log('==========================');
     console.log(`Total PDFs generated: ${successCount}`);
@@ -118,5 +112,4 @@ async function generatePDFEbooks() {
   }
 }
 
-// Run the script
 generatePDFEbooks();

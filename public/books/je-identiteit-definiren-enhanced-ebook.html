@@ -99,13 +99,11 @@
         .lead {
             font-size: 1.2em;
             color: #666;
-            font-weight: 400;
-            max-width: 600px;
-            margin: 0 auto;
+            margin-bottom: 20px;
         }
         
         .content-section {
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
         
         .content-section h3 {
@@ -113,374 +111,126 @@
             font-size: 1.6em;
             margin-bottom: 20px;
             font-weight: 600;
-            border-bottom: 2px solid #B6C948;
-            padding-bottom: 10px;
         }
         
-        .content-section h4 {
-            color: #1a2115;
-            font-size: 1.3em;
-            margin: 25px 0 15px 0;
-            font-weight: 600;
+        .content-section p {
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            line-height: 1.7;
         }
         
         .learning-objectives {
             list-style: none;
             padding: 0;
+            margin: 20px 0;
         }
         
         .learning-objectives li {
             background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: 2px solid #B6C948;
+            border-radius: 15px;
+            padding: 20px;
             margin-bottom: 15px;
-            padding: 15px 20px;
-            border-radius: 10px;
-            border-left: 4px solid #8BAE5A;
+            font-size: 1.1em;
             font-weight: 500;
+            color: #1a2115;
+            transition: all 0.3s ease;
+        }
+        
+        .learning-objectives li:hover {
+            border-color: #8BAE5A;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(139, 174, 90, 0.2);
         }
         
         .info-box {
-            background: linear-gradient(135deg, #e8f5e8, #d4edda);
-            border: 2px solid #8BAE5A;
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border: 2px solid #2196f3;
             border-radius: 15px;
             padding: 25px;
-            margin: 30px 0;
+            margin: 25px 0;
             text-align: center;
         }
         
         .info-box h4 {
-            color: #1a2115;
+            color: #1976d2;
             margin-bottom: 15px;
-            font-size: 1.4em;
+            font-size: 1.3em;
         }
         
-        .process-flow {
-            display: flex;
-            justify-content: space-between;
-            margin: 30px 0;
-            gap: 20px;
-        }
-        
-        .step {
-            text-align: center;
-            flex: 1;
-        }
-        
-        .step-number {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, #8BAE5A, #B6C948);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5em;
-            font-weight: bold;
-            margin: 0 auto 15px;
-        }
-        
-        .function-grid {
+        .pillar-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
             margin: 30px 0;
         }
         
-        .function-card {
+        .pillar-card {
             background: white;
             border: 2px solid #e0e0e0;
             border-radius: 15px;
             padding: 25px;
-            text-align: center;
             transition: all 0.3s ease;
         }
         
-        .function-card:hover {
+        .pillar-card:hover {
             border-color: #8BAE5A;
             transform: translateY(-5px);
             box-shadow: 0 10px 25px rgba(139, 174, 90, 0.2);
         }
         
-        .function-card h4 {
+        .pillar-card h4 {
             color: #8BAE5A;
             margin-bottom: 15px;
-            font-size: 1.2em;
-        }
-        
-        .timeline {
-            margin: 30px 0;
-        }
-        
-        .timeline-item {
-            display: flex;
-            margin-bottom: 25px;
-            align-items: center;
-        }
-        
-        .time {
-            background: #8BAE5A;
-            color: white;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-weight: bold;
-            min-width: 120px;
+            font-size: 1.3em;
             text-align: center;
         }
         
-        .timeline-item .content {
-            margin-left: 20px;
+        .pillar-card ul {
+            margin: 15px 0;
+            padding-left: 20px;
         }
         
-        .timeline-item .content h4 {
-            color: #1a2115;
-            margin-bottom: 5px;
+        .pillar-card li {
+            margin-bottom: 8px;
+            font-size: 1em;
         }
-        
-        .values-table table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        
-        .values-table th {
-            background: #8BAE5A;
-            color: white;
-            padding: 15px;
-            text-align: left;
-            font-weight: 600;
-        }
-        
-        .values-table td {
-            padding: 15px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        
-        .status {
-            padding: 5px 12px;
-            border-radius: 15px;
-            font-size: 0.9em;
-            font-weight: 600;
-        }
-        
-        .status.good { background: #d4edda; color: #155724; }
-        .status.warning { background: #fff3cd; color: #856404; }
-        .status.alert { background: #f8d7da; color: #721c24; }
         
         .exercise-box {
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            border: 2px solid #B6C948;
+            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+            border: 2px solid #ff9800;
             border-radius: 15px;
             padding: 25px;
             margin: 25px 0;
         }
         
         .exercise-box h4 {
-            color: #8BAE5A;
+            color: #e65100;
             margin-bottom: 15px;
             font-size: 1.2em;
         }
         
-        .exercise-box ul, .exercise-box ol {
+        .steps, .examples {
+            margin: 20px 0;
+        }
+        
+        .steps h5, .examples h5 {
+            color: #8BAE5A;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .steps ol, .examples ul {
             margin: 15px 0;
             padding-left: 25px;
         }
         
-        .exercise-box li {
+        .steps li, .examples li {
             margin-bottom: 10px;
+            font-size: 1em;
         }
         
-        .reflection-questions {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-            margin: 30px 0;
-        }
-        
-        .question-box {
-            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
-            border: 2px solid #fdcb6e;
-            border-radius: 15px;
-            padding: 25px;
-            text-align: center;
-        }
-        
-        .question-box h4 {
-            color: #856404;
-            margin-bottom: 15px;
-            font-size: 1.3em;
-        }
-        
-        .question-box p {
-            margin-bottom: 15px;
-        }
-        
-        .action-plan {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin: 30px 0;
-        }
-        
-        .week {
-            background: white;
-            border: 2px solid #8BAE5A;
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-        }
-        
-        .week h4 {
-            color: #8BAE5A;
-            margin-bottom: 15px;
-            font-size: 1.1em;
-        }
-        
-        .week ul {
-            list-style: none;
-            padding: 0;
-        }
-        
-        .week li {
-            margin-bottom: 8px;
-            font-size: 0.9em;
-            color: #666;
-        }
-
-        /* Module 2 specific styles */
-        .comparison-table table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        
-        .comparison-table th {
-            background: #8BAE5A;
-            color: white;
-            padding: 15px;
-            text-align: center;
-            font-weight: 600;
-        }
-        
-        .comparison-table td {
-            padding: 15px;
-            border-bottom: 1px solid #e0e0e0;
-            text-align: center;
-        }
-        
-        .mindset-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin: 30px 0;
-        }
-        
-        .mindset-card {
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            border: 2px solid #B6C948;
-            border-radius: 15px;
-            padding: 25px;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-        
-        .mindset-card:hover {
-            border-color: #8BAE5A;
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(139, 174, 90, 0.2);
-        }
-        
-        .mindset-card h4 {
-            color: #8BAE5A;
-            margin-bottom: 15px;
-            font-size: 1.2em;
-        }
-        
-        .ego-analysis, .identity-traits {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin: 30px 0;
-        }
-        
-        .ego-trait, .identity-trait {
-            background: white;
-            border: 2px solid #e0e0e0;
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-        
-        .ego-trait:hover, .identity-trait:hover {
-            border-color: #8BAE5A;
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(139, 174, 90, 0.15);
-        }
-        
-        .ego-trait h4, .identity-trait h4 {
-            color: #8BAE5A;
-            margin-bottom: 10px;
-            font-size: 1.1em;
-        }
-        
-        .values-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin: 30px 0;
-        }
-        
-        .value-card {
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            border: 2px solid #B6C948;
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-        
-        .value-card:hover {
-            border-color: #8BAE5A;
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(139, 174, 90, 0.15);
-        }
-        
-        .value-card h4 {
-            color: #8BAE5A;
-            margin-bottom: 10px;
-            font-size: 1.1em;
-        }
-        
-        .discovery-methods {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin: 30px 0;
-        }
-        
-        .method {
-            background: white;
-            border: 2px solid #8BAE5A;
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-        }
-        
-        .method h4 {
-            color: #8BAE5A;
-            margin-bottom: 10px;
-            font-size: 1.1em;
-        }
-        
-        .challenge-week {
+        .week-plan {
             background: linear-gradient(135deg, #f8f9fa, #e9ecef);
             border: 2px solid #B6C948;
             border-radius: 15px;
@@ -488,88 +238,155 @@
             margin: 25px 0;
         }
         
-        .challenge-week h4 {
+        .week-plan h4 {
             color: #8BAE5A;
             margin-bottom: 15px;
             font-size: 1.2em;
         }
         
-        .challenge-week ul {
+        .week-plan ul {
             margin: 15px 0;
             padding-left: 25px;
         }
         
-        .challenge-week li {
-            margin-bottom: 8px;
+        .week-plan li {
+            margin-bottom: 10px;
+            font-size: 1.1em;
         }
         
-        .development-plan {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin: 30px 0;
-        }
-        
-        .phase {
+        .identity-layer {
             background: white;
-            border: 2px solid #8BAE5A;
+            border: 2px solid #e0e0e0;
             border-radius: 15px;
-            padding: 20px;
-            text-align: center;
+            padding: 25px;
+            margin: 25px 0;
+            transition: all 0.3s ease;
         }
         
-        .phase h4 {
+        .identity-layer:hover {
+            border-color: #8BAE5A;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(139, 174, 90, 0.15);
+        }
+        
+        .identity-aspects {
+            margin: 20px 0;
+        }
+        
+        .identity-aspects h4 {
             color: #8BAE5A;
             margin-bottom: 15px;
             font-size: 1.1em;
         }
         
-        .phase ul {
-            list-style: none;
-            padding: 0;
+        .identity-aspects ul {
+            margin: 15px 0;
+            padding-left: 25px;
         }
         
-        .phase li {
+        .identity-aspects li {
             margin-bottom: 8px;
-            font-size: 0.9em;
-            color: #666;
+            font-size: 1em;
         }
-
-        /* Module 3 specific styles */
-        .hormone-flow {
+        
+        .development-step {
+            background: linear-gradient(135deg, #f3e5f5, #e1bee7);
+            border: 2px solid #9c27b0;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+        
+        .development-step h4 {
+            color: #7b1fa2;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .values-example, .statement-template {
+            margin: 20px 0;
+        }
+        
+        .values-example h5, .statement-template h5 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        
+        .values-grid {
             display: flex;
-            justify-content: space-between;
-            margin: 30px 0;
-            gap: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
         }
         
-        .hormone-step {
-            text-align: center;
-            flex: 1;
-        }
-        
-        .hormone-step .step-number {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, #8BAE5A, #B6C948);
+        .value-tag {
+            background: #8BAE5A;
             color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5em;
-            font-weight: bold;
-            margin: 0 auto 15px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 500;
         }
         
-        .neuro-grid {
+        .statement-template p {
+            background: white;
+            border: 2px solid #8BAE5A;
+            border-radius: 10px;
+            padding: 20px;
+            font-style: italic;
+            color: #1a2115;
+        }
+        
+        .phase-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .phase-card:hover {
+            border-color: #8BAE5A;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(139, 174, 90, 0.15);
+        }
+        
+        .phase-card h4 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .phase-indicators {
+            margin: 20px 0;
+        }
+        
+        .phase-indicators h5 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        
+        .phase-indicators ul {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+        
+        .phase-indicators li {
+            margin-bottom: 8px;
+            font-size: 1em;
+        }
+        
+        .flow-conditions {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
             margin: 30px 0;
         }
         
-        .neuro-card {
+        .flow-condition {
             background: white;
             border: 2px solid #e0e0e0;
             border-radius: 15px;
@@ -578,64 +395,13 @@
             transition: all 0.3s ease;
         }
         
-        .neuro-card:hover {
+        .flow-condition:hover {
             border-color: #8BAE5A;
             transform: translateY(-5px);
             box-shadow: 0 10px 25px rgba(139, 174, 90, 0.2);
         }
         
-        .neuro-card h4 {
-            color: #8BAE5A;
-            margin-bottom: 15px;
-            font-size: 1.2em;
-        }
-        
-        .pose-comparison {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin: 30px 0;
-        }
-        
-        .pose-section {
-            background: white;
-            border: 2px solid #e0e0e0;
-            border-radius: 15px;
-            padding: 25px;
-        }
-        
-        .pose-section h4 {
-            color: #8BAE5A;
-            margin-bottom: 20px;
-            font-size: 1.3em;
-            text-align: center;
-        }
-        
-        .pose-section ul {
-            margin: 15px 0;
-            padding-left: 25px;
-        }
-        
-        .pose-section li {
-            margin-bottom: 12px;
-        }
-        
-        .eye-contact-guide {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin: 30px 0;
-        }
-        
-        .eye-tip {
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            border: 2px solid #B6C948;
-            border-radius: 15px;
-            padding: 25px;
-            text-align: center;
-        }
-        
-        .eye-tip h4 {
+        .flow-condition h4 {
             color: #8BAE5A;
             margin-bottom: 15px;
             font-size: 1.2em;
@@ -687,363 +453,14 @@
                 min-height: 500px;
             }
             
-            .process-flow {
-                flex-direction: column;
-                gap: 15px;
-            }
-            
-            .function-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .reflection-questions {
-                grid-template-columns: 1fr;
-            }
-            
-            .action-plan {
-                grid-template-columns: 1fr;
-            }
-            
-            .mindset-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .ego-analysis, .identity-traits {
+            .pillar-grid, .flow-conditions {
                 grid-template-columns: 1fr;
             }
             
             .values-grid {
-                grid-template-columns: 1fr;
+                justify-content: center;
             }
-            
-            .discovery-methods {
-                grid-template-columns: 1fr;
-            }
-            
-            .development-plan {
-                grid-template-columns: 1fr;
-            }
-            
-            .hormone-flow {
-                flex-direction: column;
-                gap: 15px;
-            }
-            
-            .pose-comparison {
-                grid-template-columns: 1fr;
-            }
-            
-                    .eye-contact-guide {
-            grid-template-columns: 1fr;
         }
-
-        /* Module 4 specific styles */
-        .resilience-flow {
-            display: flex;
-            justify-content: space-between;
-            margin: 30px 0;
-            gap: 20px;
-        }
-        
-        .resilience-step {
-            text-align: center;
-            flex: 1;
-        }
-        
-        .resilience-step .step-number {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, #8BAE5A, #B6C948);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5em;
-            font-weight: bold;
-            margin: 0 auto 15px;
-        }
-        
-        .brain-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin: 30px 0;
-        }
-        
-        .brain-card {
-            background: white;
-            border: 2px solid #e0e0e0;
-            border-radius: 15px;
-            padding: 25px;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-        
-        .brain-card:hover {
-            border-color: #8BAE5A;
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(139, 174, 90, 0.2);
-        }
-        
-        .brain-card h4 {
-            color: #8BAE5A;
-            margin-bottom: 15px;
-            font-size: 1.2em;
-        }
-        
-        .pillar-analysis {
-            margin: 30px 0;
-        }
-        
-        .pillar-section {
-            background: white;
-            border: 2px solid #8BAE5A;
-            border-radius: 15px;
-            padding: 25px;
-            margin: 25px 0;
-        }
-        
-        .pillar-section h4 {
-            color: #8BAE5A;
-            margin-bottom: 15px;
-            font-size: 1.2em;
-        }
-        
-        .pillar-section h5 {
-            color: #B6C948;
-            margin: 20px 0 10px;
-            font-size: 1.1em;
-        }
-        
-        .resilience-levels {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-            margin: 30px 0;
-        }
-        
-        .level-card {
-            background: white;
-            border: 2px solid #e0e0e0;
-            border-radius: 15px;
-            padding: 25px;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-        
-        .level-card.level-1 { border-color: #dc3545; }
-        .level-card.level-2 { border-color: #fd7e14; }
-        .level-card.level-3 { border-color: #ffc107; }
-        .level-card.level-4 { border-color: #28a745; }
-        .level-card.level-5 { border-color: #007bff; }
-        
-        .level-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-        }
-        
-        .level-card h4 {
-            margin-bottom: 15px;
-            font-size: 1.2em;
-        }
-        
-        .growth-domains {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin: 30px 0;
-        }
-        
-        .domain-card {
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            border: 2px solid #B6C948;
-            border-radius: 15px;
-            padding: 25px;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-        
-        .domain-card:hover {
-            border-color: #8BAE5A;
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(139, 174, 90, 0.15);
-        }
-        
-        .domain-card h4 {
-            color: #8BAE5A;
-            margin-bottom: 15px;
-            font-size: 1.2em;
-        }
-        
-        .domain-card h5 {
-            color: #B6C948;
-            margin: 15px 0 10px;
-            font-size: 1.1em;
-        }
-        
-        .strategy-box {
-            background: white;
-            border: 2px solid #8BAE5A;
-            border-radius: 15px;
-            padding: 25px;
-            margin: 25px 0;
-        }
-        
-        .strategy-box h4 {
-            color: #8BAE5A;
-            margin-bottom: 15px;
-            font-size: 1.2em;
-        }
-        
-        .development-phase {
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            border: 2px solid #B6C948;
-            border-radius: 15px;
-            padding: 25px;
-            margin: 25px 0;
-        }
-        
-        .development-phase h4 {
-            color: #8BAE5A;
-            margin-bottom: 15px;
-            font-size: 1.2em;
-        }
-        
-        .next-steps {
-            background: white;
-            border: 2px solid #8BAE5A;
-            border-radius: 15px;
-            padding: 25px;
-            margin: 25px 0;
-        }
-        
-        .next-steps h4 {
-            color: #8BAE5A;
-            margin-bottom: 15px;
-            font-size: 1.2em;
-        }
-
-        /* Module 5 specific styles */
-        .foundation-analysis {
-            margin: 30px 0;
-        }
-        
-        .foundation-section {
-            background: white;
-            border: 2px solid #8BAE5A;
-            border-radius: 15px;
-            padding: 25px;
-            margin: 25px 0;
-        }
-        
-        .foundation-section h4 {
-            color: #8BAE5A;
-            margin-bottom: 15px;
-            font-size: 1.2em;
-        }
-        
-        .canvas-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-            margin: 30px 0;
-        }
-        
-        .canvas-block {
-            background: white;
-            border: 2px solid #e0e0e0;
-            border-radius: 15px;
-            padding: 25px;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-        
-        .canvas-block:hover {
-            border-color: #8BAE5A;
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(139, 174, 90, 0.2);
-        }
-        
-        .canvas-block h4 {
-            color: #8BAE5A;
-            margin-bottom: 15px;
-            font-size: 1.2em;
-        }
-        
-        .canvas-block ul {
-            list-style: none;
-            padding: 0;
-            margin: 15px 0;
-        }
-        
-        .canvas-block li {
-            margin-bottom: 8px;
-            font-size: 0.9em;
-            color: #666;
-        }
-        
-        .launch-phase {
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            border: 2px solid #B6C948;
-            border-radius: 15px;
-            padding: 25px;
-            margin: 25px 0;
-        }
-        
-        .launch-phase h4 {
-            color: #8BAE5A;
-            margin-bottom: 15px;
-            font-size: 1.2em;
-        }
-        
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin: 30px 0;
-        }
-        
-        .kpi-card {
-            background: white;
-            border: 2px solid #e0e0e0;
-            border-radius: 15px;
-            padding: 25px;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-        
-        .kpi-card:hover {
-            border-color: #8BAE5A;
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(139, 174, 90, 0.15);
-        }
-        
-        .kpi-card h4 {
-            color: #8BAE5A;
-            margin-bottom: 15px;
-            font-size: 1.2em;
-        }
-        
-        .kpi-card p {
-            margin-bottom: 8px;
-            font-size: 0.9em;
-        }
-        
-        .quarter-plan {
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            border: 2px solid #B6C948;
-            border-radius: 15px;
-            padding: 25px;
-            margin: 25px 0;
-        }
-        
-        .quarter-plan h4 {
-            color: #8BAE5A;
-            margin-bottom: 15px;
-            font-size: 1.2em;
-        }
-    }
     </style>
 </head>
 <body>
@@ -1056,265 +473,88 @@
         
         <div class="ebook-content">
             
-    <div class="page" id="page-1">
+    <div class="page">
       <div class="page-content">
         
           <div class="page-header">
             <h2>Introductie</h2>
-            <p class="lead">Je identiteit is niet wat je doet, maar wie je bent. Het is tijd om dit te ontdekken.</p>
+            <p class="lead">Je identiteit is wie je bent als persoon. Het bepaalt je gedrag, je keuzes en je resultaten.</p>
           </div>
           
           <div class="content-section">
             <h3>Wat je gaat leren in dit ebook:</h3>
             <ul class="learning-objectives">
-              <li>Het verschil tussen je ego en je ware identiteit</li>
-              <li>Hoe je kernwaarden je identiteit vormen</li>
-              <li>De rol van trauma en ervaringen in identiteitsvorming</li>
-              <li>Praktische oefeningen om je ware zelf te ontdekken</li>
-              <li>Een identiteitsontwikkeling roadmap</li>
+              <li>De 4 lagen van identiteit begrijpen</li>
+              <li>Hoe je je waarden kunt identificeren en definiëren</li>
+              <li>Stappen om je identiteit bewust te ontwikkelen</li>
+              <li>Het verband tussen identiteit en gedrag</li>
+              <li>Praktische oefeningen voor zelfontdekking</li>
             </ul>
           </div>
-          
-          <div class="info-box">
-            <h4>💡 Wist je dat?</h4>
-            <p>Je identiteit verandert gemiddeld 3-4 keer in je leven. Dit is normaal en gezond voor persoonlijke groei.</p>
-          </div>
         
       </div>
       <div class="page-footer">
-        <span class="page-number">Pagina 1 van 5</span>
+        <span class="page-number">Pagina 1</span>
       </div>
     </div>
   
-    <div class="page" id="page-2">
+    <div class="page">
       <div class="page-content">
         
           <div class="page-header">
-            <h2>Ego vs Ware Identiteit</h2>
-            <p class="lead">Leer het verschil tussen wie je denkt te zijn en wie je werkelijk bent.</p>
+            <h2>De 4 Lagen van Identiteit</h2>
+            <p class="lead">Verken de verschillende aspecten van wie je bent en hoe ze elkaar beïnvloeden.</p>
           </div>
           
           <div class="content-section">
-            <h3>Wat is het Ego?</h3>
-            <div class="ego-analysis">
-              <div class="ego-trait">
-                <h4>🎭 Masker</h4>
-                <p>Het beeld dat je aan de wereld wilt tonen</p>
-              </div>
-              <div class="ego-trait">
-                <h4>🛡️ Bescherming</h4>
-                <p>Beschermt je tegen pijn en afwijzing</p>
-              </div>
-              <div class="ego-trait">
-                <h4>📊 Vergelijking</h4>
-                <p>Voortdurend vergelijken met anderen</p>
-              </div>
-              <div class="ego-trait">
-                <h4>🎯 Prestatie</h4>
-                <p>Gedefinieerd door wat je bereikt</p>
-              </div>
-            </div>
-            
-            <h3>Wat is Ware Identiteit?</h3>
-            <div class="identity-traits">
-              <div class="identity-trait">
-                <h4>🌟 Essentie</h4>
-                <p>Je ware natuur en potentieel</p>
-              </div>
-              <div class="identity-trait">
-                <h4>💎 Onveranderlijk</h4>
-                <p>Blijft constant ondanks omstandigheden</p>
-              </div>
-              <div class="identity-trait">
-                <h4>❤️ Authentiek</h4>
-                <p>Echt en zonder masker</p>
-              </div>
-              <div class="identity-trait">
-                <h4>🚀 Groei</h4>
-                <p>Ondersteunt je ontwikkeling</p>
-              </div>
-            </div>
-          </div>
-        
-      </div>
-      <div class="page-footer">
-        <span class="page-number">Pagina 2 van 5</span>
-      </div>
-    </div>
-  
-    <div class="page" id="page-3">
-      <div class="page-content">
-        
-          <div class="page-header">
-            <h2>Kernwaarden Ontdekken</h2>
-            <p class="lead">Je kernwaarden zijn de kompas van je leven. Ontdek welke jou leiden.</p>
-          </div>
-          
-          <div class="content-section">
-            <h3>De Top 10 Kernwaarden voor Top Tier Men</h3>
-            <div class="values-grid">
-              <div class="value-card">
-                <h4>💪 Kracht</h4>
-                <p>Fysieke en mentale weerbaarheid</p>
-              </div>
-              <div class="value-card">
-                <h4>🎯 Doelgerichtheid</h4>
-                <p>Focus en doorzettingsvermogen</p>
-              </div>
-              <div class="value-card">
-                <h4>🤝 Integriteit</h4>
-                <p>Eerlijkheid en betrouwbaarheid</p>
-              </div>
-              <div class="value-card">
-                <h4>🚀 Groei</h4>
-                <p>Continue ontwikkeling en leren</p>
-              </div>
-              <div class="value-card">
-                <h4>❤️ Liefde</h4>
-                <p>Compassie en verbinding</p>
-              </div>
-              <div class="value-card">
-                <h4>⚖️ Balans</h4>
-                <p>Harmonie tussen alle levensgebieden</p>
-              </div>
-            </div>
-            
-            <h3>Hoe Je Je Eigen Kernwaarden Ontdekt</h3>
-            <div class="discovery-methods">
-              <div class="method">
-                <h4>🔍 Reflectie</h4>
-                <p>Kijk naar momenten van vreugde en vervulling</p>
-              </div>
-              <div class="method">
-                <h4>📝 Journaling</h4>
-                <p>Schrijf over je dromen en idealen</p>
-              </div>
-              <div class="method">
-                <h4>👥 Feedback</h4>
-                <p>Vraag anderen wat ze in je waarderen</p>
-              </div>
-            </div>
-          </div>
-        
-      </div>
-      <div class="page-footer">
-        <span class="page-number">Pagina 3 van 5</span>
-      </div>
-    </div>
-  
-    <div class="page" id="page-4">
-      <div class="page-content">
-        
-          <div class="page-header">
-            <h2>Praktische Oefeningen</h2>
-            <p class="lead">Deze oefeningen helpen je je ware identiteit te ontdekken.</p>
-          </div>
-          
-          <div class="content-section">
-            <h3>Oefening 1: De Identiteits Audit</h3>
-            <div class="exercise-box">
-              <h4>📋 Stap-voor-stap:</h4>
-              <ol>
-                <li>Maak een lijst van alle rollen die je speelt</li>
-                <li>Identificeer welke je energie geven en welke niet</li>
-                <li>Vraag je af: "Wie zou ik zijn zonder deze rol?"</li>
-                <li>Elimineer rollen die niet bij je passen</li>
-              </ol>
-              
-              <h4>🎯 Doel:</h4>
-              <p>Scheid je ware identiteit van sociale rollen</p>
-            </div>
-            
-            <h3>Oefening 2: De Waarden Hiërarchie</h3>
-            <div class="exercise-box">
-              <h4>📊 Hoe het werkt:</h4>
-              <p>Rangschik je top 10 kernwaarden op belangrijkheid.</p>
-              
-              <h4>🔍 Vraag je af:</h4>
-              <ul>
-                <li>Welke waarde zou ik nooit opgeven?</li>
-                <li>Welke waarde definieert mij het meest?</li>
-                <li>Welke waarde wil ik meer ontwikkelen?</li>
-              </ul>
-            </div>
-            
-            <h3>Oefening 3: De Identiteits Verklaring</h3>
-            <div class="exercise-box">
-              <h4>✍️ Schrijf een verklaring:</h4>
-              <p>"Ik ben een man die..."</p>
-              
-              <h4>📝 Vul aan met:</h4>
-              <ul>
-                <li>Je kernwaarden</li>
-                <li>Je missie in het leven</li>
-                <li>Hoe je anderen wilt dienen</li>
-                <li>Wat je wilt nalaten</li>
-              </ul>
-            </div>
-          </div>
-        
-      </div>
-      <div class="page-footer">
-        <span class="page-number">Pagina 4 van 5</span>
-      </div>
-    </div>
-  
-    <div class="page" id="page-5">
-      <div class="page-content">
-        
-          <div class="page-header">
-            <h2>Integratie & Volgende Stappen</h2>
-            <p class="lead">Integreer je nieuwe inzichten en plan je volgende fase van groei.</p>
-          </div>
-          
-          <div class="content-section">
-            <h3>Reflectie Vragen</h3>
-            <div class="reflection-questions">
-              <div class="question-box">
-                <h4>🤔 Zelfreflectie</h4>
-                <p><strong>Wie ben je werkelijk?</strong></p>
-                <p>Neem 10 minuten om dit op te schrijven. Wees eerlijk en gedetailleerd.</p>
-              </div>
-              
-              <div class="question-box">
-                <h4>🎯 Doelen</h4>
-                <p><strong>Welke identiteit wil je ontwikkelen?</strong></p>
-                <p>Beschrijf de man die je wilt worden in 5 jaar.</p>
-              </div>
-              
-              <div class="question-box">
-                <h4>🚀 Actie</h4>
-                <p><strong>Wat is je eerste stap?</strong></p>
-                <p>Identificeer 3 concrete acties voor de komende week.</p>
-              </div>
-            </div>
-            
-            <h3>90-Dagen Identiteitsontwikkeling Plan</h3>
-            <div class="development-plan">
-              <div class="phase">
-                <h4>Fase 1: Ontdekking (Dag 1-30)</h4>
+            <h3>1. Fysieke Identiteit</h3>
+            <div class="identity-layer">
+              <p>Hoe je eruit ziet, hoe je je lichaam behandelt en je gezondheidsgewoonten.</p>
+              <div class="identity-aspects">
+                <h4>🔍 Reflectievragen:</h4>
                 <ul>
-                  <li>Identiteits audit uitvoeren</li>
-                  <li>Kernwaarden identificeren</li>
-                  <li>Ego patronen herkennen</li>
+                  <li>Hoe zie je jezelf fysiek?</li>
+                  <li>Wat zijn je gezondheidsgewoonten?</li>
+                  <li>Hoe behandel je je lichaam?</li>
                 </ul>
               </div>
-              
-              <div class="phase">
-                <h4>Fase 2: Integratie (Dag 31-60)</h4>
+            </div>
+            
+            <h3>2. Mentale Identiteit</h3>
+            <div class="identity-layer">
+              <p>Je gedachten, overtuigingen, kennis en vaardigheden.</p>
+              <div class="identity-aspects">
+                <h4>🧠 Reflectievragen:</h4>
                 <ul>
-                  <li>Nieuwe identiteit oefenen</li>
-                  <li>Oude patronen doorbreken</li>
-                  <li>Feedback verzamelen</li>
+                  <li>Wat zijn je kernovertuigingen?</li>
+                  <li>Welke vaardigheden wil je ontwikkelen?</li>
+                  <li>Hoe denk je over jezelf en anderen?</li>
                 </ul>
               </div>
-              
-              <div class="phase">
-                <h4>Fase 3: Consolidatie (Dag 61-90)</h4>
+            </div>
+            
+            <h3>3. Emotionele Identiteit</h3>
+            <div class="identity-layer">
+              <p>Hoe je met emoties omgaat, je relaties en je empathie.</p>
+              <div class="identity-aspects">
+                <h4>❤️ Reflectievragen:</h4>
                 <ul>
-                  <li>Nieuwe identiteit versterken</li>
-                  <li>Volgende fase plannen</li>
-                  <li>Mentor anderen</li>
+                  <li>Hoe uit je je emoties?</li>
+                  <li>Hoe ga je om met relaties?</li>
+                  <li>Ben je empathisch naar anderen?</li>
+                </ul>
+              </div>
+            </div>
+            
+            <h3>4. Spirituele Identiteit</h3>
+            <div class="identity-layer">
+              <p>Je waarden, principes, doel en missie in het leven.</p>
+              <div class="identity-aspects">
+                <h4>🌟 Reflectievragen:</h4>
+                <ul>
+                  <li>Wat zijn je kernwaarden?</li>
+                  <li>Wat is je levensdoel?</li>
+                  <li>Waar geloof je in?</li>
                 </ul>
               </div>
             </div>
@@ -1322,7 +562,50 @@
         
       </div>
       <div class="page-footer">
-        <span class="page-number">Pagina 5 van 5</span>
+        <span class="page-number">Pagina 2</span>
+      </div>
+    </div>
+  
+    <div class="page">
+      <div class="page-content">
+        
+          <div class="page-header">
+            <h2>Identiteit Ontwikkelen</h2>
+            <p class="lead">Leer hoe je bewust je identiteit kunt vormen en versterken.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>Stap 1: Waarden Inventarisatie</h3>
+            <div class="development-step">
+              <h4>📝 Oefening:</h4>
+              <p>Schrijf 20 dingen op die belangrijk voor je zijn. Rangschik ze van 1-20. De top 5 zijn je kernwaarden.</p>
+              <div class="values-example">
+                <h5>Voorbeelden van waarden:</h5>
+                <div class="values-grid">
+                  <span class="value-tag">Integriteit</span>
+                  <span class="value-tag">Groeien</span>
+                  <span class="value-tag">Verbinding</span>
+                  <span class="value-tag">Moed</span>
+                  <span class="value-tag">Creativiteit</span>
+                  <span class="value-tag">Balans</span>
+                </div>
+              </div>
+            </div>
+            
+            <h3>Stap 2: Identiteit Statement</h3>
+            <div class="development-step">
+              <h4>✍️ Oefening:</h4>
+              <p>Schrijf een korte paragraaf die beschrijft wie je bent en wat je belangrijk vindt.</p>
+              <div class="statement-template">
+                <h5>Template:</h5>
+                <p>"Ik ben iemand die [kernwaarde] waardeert en [doel] nastreeft. Ik geloof in [principe] en streef ernaar om [actie] te ondernemen in mijn dagelijks leven."</p>
+              </div>
+            </div>
+          </div>
+        
+      </div>
+      <div class="page-footer">
+        <span class="page-number">Pagina 3</span>
       </div>
     </div>
   
