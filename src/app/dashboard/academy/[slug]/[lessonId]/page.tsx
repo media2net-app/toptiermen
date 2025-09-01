@@ -58,7 +58,9 @@ export default function LessonDetailPage() {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         // Page is visible again, check if we need to refresh data
-        if (!isDataLoaded && !loading) {
+        // Only refresh if data is not loaded AND we're not currently loading
+        // AND we have the required data (user, moduleId, lessonId)
+        if (!isDataLoaded && !loading && user && moduleId && lessonId) {
           console.log('Page became visible, refreshing data...');
           fetchData();
         }
@@ -69,7 +71,7 @@ export default function LessonDetailPage() {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [isDataLoaded, loading]);
+  }, [isDataLoaded, loading, user, moduleId, lessonId]);
 
   // Simplified data fetching
   const fetchData = async () => {
