@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Van Werknemer naar eigen Verdienmodellen - Business and Finance | Top Tier Men Academy</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #1a2115 0%, #232d1a 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.4);
+            border-radius: 20px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #8BAE5A, #B6C948);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        
+        .module-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .lesson-title {
+            font-size: 2.8em;
+            margin-bottom: 15px;
+            font-weight: 800;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .lesson-subtitle {
+            font-size: 1.4em;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+        
+        .ebook-content {
+            padding: 0;
+        }
+        
+        .page {
+            padding: 40px 30px;
+            border-bottom: 1px solid #e0e0e0;
+            min-height: 600px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .page:last-child {
+            border-bottom: none;
+        }
+        
+        .page-content {
+            flex: 1;
+        }
+        
+        .page-header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .page-header h2 {
+            color: #1a2115;
+            font-size: 2.2em;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        .lead {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .content-section {
+            margin-bottom: 30px;
+        }
+        
+        .content-section h3 {
+            color: #8BAE5A;
+            font-size: 1.6em;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .content-section p {
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            line-height: 1.7;
+        }
+        
+        .learning-objectives {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+        
+        .learning-objectives li {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: 2px solid #B6C948;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            font-weight: 500;
+            color: #1a2115;
+            transition: all 0.3s ease;
+        }
+        
+        .learning-objectives li:hover {
+            border-color: #8BAE5A;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(139, 174, 90, 0.2);
+        }
+        
+        .info-box {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border: 2px solid #2196f3;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+            text-align: center;
+        }
+        
+        .info-box h4 {
+            color: #1976d2;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        .foundation-analysis {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .foundation-analysis:hover {
+            border-color: #8BAE5A;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(139, 174, 90, 0.15);
+        }
+        
+        .foundation-analysis h4 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .foundation-section {
+            margin: 20px 0;
+        }
+        
+        .foundation-section h5 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        
+        .foundation-section ul {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+        
+        .foundation-section li {
+            margin-bottom: 8px;
+            font-size: 1em;
+        }
+        
+        .roadmap-phase {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: 2px solid #B6C948;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+        
+        .roadmap-phase h4 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .phase-goals {
+            margin: 20px 0;
+        }
+        
+        .goal-item {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .goal-item:hover {
+            border-color: #8BAE5A;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(139, 174, 90, 0.15);
+        }
+        
+        .goal-item h5 {
+            color: #8BAE5A;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .goal-item p {
+            color: #666;
+            font-size: 1em;
+        }
+        
+        .expense-category {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .expense-category:hover {
+            border-color: #8BAE5A;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(139, 174, 90, 0.15);
+        }
+        
+        .expense-category h4 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .expense-examples {
+            margin: 20px 0;
+        }
+        
+        .expense-examples h5 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        
+        .expense-examples ul {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+        
+        .expense-examples li {
+            margin-bottom: 8px;
+            font-size: 1em;
+        }
+        
+        .income-type {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .income-type:hover {
+            border-color: #8BAE5A;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(139, 174, 90, 0.15);
+        }
+        
+        .income-type h4 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .income-examples {
+            margin: 20px 0;
+        }
+        
+        .income-examples h5 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        
+        .income-examples ul {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+        
+        .income-examples li {
+            margin-bottom: 8px;
+            font-size: 1em;
+        }
+        
+        .investment-category {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .investment-category:hover {
+            border-color: #8BAE5A;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(139, 174, 90, 0.15);
+        }
+        
+        .investment-category h4 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .investment-details {
+            margin: 20px 0;
+        }
+        
+        .investment-details h5 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        
+        .investment-details ul {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+        
+        .investment-details li {
+            margin-bottom: 8px;
+            font-size: 1em;
+        }
+        
+        .freedom-levels {
+            margin: 30px 0;
+        }
+        
+        .freedom-level {
+            background: linear-gradient(135deg, #f3e5f5, #e1bee7);
+            border: 2px solid #9c27b0;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+        
+        .freedom-level h4 {
+            color: #7b1fa2;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .level-details {
+            margin: 20px 0;
+        }
+        
+        .level-details h5 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        
+        .level-details ul {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+        
+        .level-details li {
+            margin-bottom: 8px;
+            font-size: 1em;
+        }
+        
+        .page-footer {
+            text-align: center;
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .page-number {
+            color: #999;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+        
+        .footer {
+            background: #1a2115;
+            color: white;
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .footer-logo {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #8BAE5A;
+            margin-bottom: 15px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 30px 20px;
+            }
+            
+            .lesson-title {
+                font-size: 2.2em;
+            }
+            
+            .page {
+                padding: 25px 20px;
+                min-height: 500px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="module-badge">Module 05</div>
+            <h1 class="lesson-title">Van Werknemer naar eigen Verdienmodellen</h1>
+            <div class="lesson-subtitle">Bouw Meerdere Inkomstenbronnen</div>
+        </div>
+        
+        <div class="ebook-content">
+            
+    <div class="page">
+      <div class="page-content">
+        
+          <div class="page-header">
+            <h2>Introductie</h2>
+            <p class="lead">De tijd van één baan voor het leven is voorbij. Leer hoe je meerdere inkomstenbronnen kunt opbouwen.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>Wat je gaat leren in dit ebook:</h3>
+            <ul class="learning-objectives">
+              <li>De verschillende soorten inkomstenbronnen</li>
+              <li>Hoe je een side hustle start</li>
+              <li>Strategieën voor passief inkomen</li>
+              <li>Van werknemer naar ondernemer</li>
+              <li>Een verdienmodel opstellen</li>
+            </ul>
+          </div>
+        
+      </div>
+      <div class="page-footer">
+        <span class="page-number">Pagina 1</span>
+      </div>
+    </div>
+  
+    <div class="page">
+      <div class="page-content">
+        
+          <div class="page-header">
+            <h2>Soorten Inkomstenbronnen</h2>
+            <p class="lead">Begrijp het verschil tussen actief en passief inkomen.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>Actief Inkomen</h3>
+            <div class="income-type">
+              <h4>💼 Wat is actief inkomen?</h4>
+              <p>Geld dat je verdient door direct te werken.</p>
+              <div class="income-examples">
+                <h5>Voorbeelden:</h5>
+                <ul>
+                  <li>Salaris van je baan</li>
+                  <li>Freelance werk</li>
+                  <li>Consultancy</li>
+                  <li>Online diensten</li>
+                  <li>Fysieke producten verkopen</li>
+                </ul>
+              </div>
+            </div>
+            
+            <h3>Passief Inkomen</h3>
+            <div class="income-type">
+              <h4>🔄 Wat is passief inkomen?</h4>
+              <p>Geld dat je verdient zonder direct te werken.</p>
+              <div class="income-examples">
+                <h5>Voorbeelden:</h5>
+                <ul>
+                  <li>Dividend uit aandelen</li>
+                  <li>Huurinkomsten</li>
+                  <li>Royalties van boeken</li>
+                  <li>Online cursussen</li>
+                  <li>Digitale producten</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        
+      </div>
+      <div class="page-footer">
+        <span class="page-number">Pagina 2</span>
+      </div>
+    </div>
+  
+        </div>
+        
+        <div class="footer">
+            <div class="footer-logo">TOP TIER MEN ACADEMY</div>
+            <p>Gemaakt voor mannen die hun potentieel willen maximaliseren</p>
+            <p style="margin-top: 15px; font-size: 12px; opacity: 0.7;">
+                © 2024 Top Tier Men. Alle rechten voorbehouden.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
