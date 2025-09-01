@@ -4,6 +4,7 @@ import './globals.css';
 import { SupabaseAuthProvider } from '@/contexts/SupabaseAuthContext';
 // import { V2StateProvider } from '@/contexts/V2StateContext';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 // import { CacheBuster } from '@/components/CacheBuster'; - DISABLED TO PREVENT LOGOUT
 
 const inter = Inter({ subsets: ['latin'] });
@@ -89,6 +90,7 @@ export default function RootLayout({
               {children}
             </SupabaseAuthProvider>
           {/* </V2StateProvider> */}
+          <SpeedInsights />
         </ErrorBoundary>
       </body>
     </html>

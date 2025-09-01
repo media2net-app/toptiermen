@@ -42,6 +42,7 @@
     "@types/react-beautiful-dnd": "^13.1.8",
     "@types/web-push": "^3.6.4",
     "@vercel/blob": "^1.1.1",
+    "@vercel/speed-insights": "^1.2.0",
     "bcryptjs": "^3.0.2",
     "chart.js": "^4.5.0",
     "clsx": "^2.1.1",
