@@ -48,6 +48,8 @@ export default function EbookDownload({
       if (type === 'html') {
         // Open de HTML versie van het ebook in een modal
         setShowModal(true);
+        // Scroll to top of page when opening modal
+        window.scrollTo(0, 0);
         setDownloadStatus('success');
       } else {
         // Download de PDF versie
@@ -223,9 +225,20 @@ export default function EbookDownload({
             {/* Modal Content */}
             <div className="flex-1 p-4 overflow-hidden">
               <iframe
-                src={ebookUrl.replace('.pdf', '.html')}
+                src={`${ebookUrl.replace('.pdf', '.html')}#top`}
                 className="w-full h-full border-0 rounded"
                 title={`${lessonTitle} Ebook`}
+                onLoad={(e) => {
+                  // Force scroll to top when iframe loads
+                  try {
+                    const iframe = e.target as HTMLIFrameElement;
+                    if (iframe.contentWindow) {
+                      iframe.contentWindow.scrollTo(0, 0);
+                    }
+                  } catch (error) {
+                    console.log('Could not scroll iframe to top');
+                  }
+                }}
               />
             </div>
             
