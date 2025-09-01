@@ -270,19 +270,18 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
         logoutButton.setAttribute('disabled', 'true');
       }
       
-      // Clear any cached data
-      if (typeof window !== 'undefined') {
-        localStorage.clear();
-        sessionStorage.clear();
-      }
+      // Use the optimized signOut function (it clears storage internally)
+      const result = await signOut();
       
-      // Sign out from Supabase
-      await signOut();
-      
-      // Force redirect with cache busting to prevent loops
-      if (typeof window !== 'undefined') {
-        const timestamp = Date.now();
-        window.location.href = `/login?t=${timestamp}`;
+      if (result.success) {
+        console.log('✅ Admin logout successful');
+        // Force redirect with cache busting to prevent loops
+        if (typeof window !== 'undefined') {
+          const timestamp = Date.now();
+          window.location.href = `/login?t=${timestamp}`;
+        }
+      } else {
+        throw new Error(result.error || 'Admin logout failed');
       }
       
     } catch (error) {
