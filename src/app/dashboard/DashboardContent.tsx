@@ -37,6 +37,7 @@ const menu = [
   { label: 'Onboarding', icon: CheckCircleIcon, href: '/dashboard/onboarding' },
   { label: 'Mijn Profiel', icon: UserCircleIcon, parent: 'Dashboard', href: '/dashboard/mijn-profiel', isSub: true },
   { label: 'Inbox', icon: EnvelopeIcon, parent: 'Dashboard', href: '/dashboard/inbox', isSub: true },
+  { label: 'Notificaties', icon: BellIcon, parent: 'Dashboard', href: '/dashboard/notificaties', isSub: true },
   { label: 'Mijn Missies', icon: FireIcon, parent: 'Dashboard', href: '/dashboard/mijn-missies', isSub: true },
   { label: 'Challenges', icon: TrophyIcon, parent: 'Dashboard', href: '/dashboard/challenges', isSub: true },
   { label: 'Mijn Trainingen', icon: AcademicCapIcon, parent: 'Dashboard', href: '/dashboard/mijn-trainingen', isSub: true },

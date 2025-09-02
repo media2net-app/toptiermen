@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Link from 'next/link';
 import { 
   BellIcon, 
   CheckCircleIcon, 
@@ -122,6 +123,8 @@ export default function NotificationBell() {
         return <ClockIcon className="w-5 h-5 text-blue-500" />;
       case 'closed':
         return <ExclamationTriangleIcon className="w-5 h-5 text-gray-500" />;
+      case 'new_bug':
+        return <BugAntIcon className="w-5 h-5 text-purple-500" />;
       default:
         return <BugAntIcon className="w-5 h-5 text-orange-500" />;
     }
@@ -176,14 +179,23 @@ export default function NotificationBell() {
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50">
               <h3 className="text-lg font-semibold text-gray-900">Notificaties</h3>
-              {unreadCount > 0 && (
-                <button
-                  onClick={markAllAsRead}
-                  className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+              <div className="flex items-center gap-2">
+                {unreadCount > 0 && (
+                  <button
+                    onClick={markAllAsRead}
+                    className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                  >
+                    Alles als gelezen
+                  </button>
+                )}
+                <Link
+                  href="/dashboard/notificaties"
+                  className="text-sm text-[#8BAE5A] hover:text-[#3A4D23] font-medium"
+                  onClick={() => setShowNotifications(false)}
                 >
-                  Alles als gelezen markeren
-                </button>
-              )}
+                  Bekijk alles
+                </Link>
+              </div>
             </div>
 
             {/* Notifications List */}

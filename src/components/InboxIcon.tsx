@@ -60,53 +60,118 @@ export default function InboxIcon() {
 
     try {
       setLoading(true);
-      // For now, we'll simulate some inbox messages
-      // In the future, this would fetch from a real inbox API
-      const mockMessages: InboxMessage[] = [
-        {
-          id: '1',
-          type: 'system',
-          title: 'Welkom bij Top Tier Men!',
-          message: 'Bedankt voor je registratie. We zijn blij je te verwelkomen in onze community!',
-          is_read: false,
-          created_at: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
-          sender_name: 'TTM Team'
-        },
-        {
-          id: '2',
-          type: 'bug_update',
-          title: 'Bug Melding Bijgewerkt',
-          message: 'Je bug melding is bijgewerkt naar "In Behandeling". We houden je op de hoogte!',
-          is_read: true,
-          created_at: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
-          sender_name: 'Support Team'
-        }
-      ];
+      
+      // Fetch real conversations from the chat API
+      const response = await fetch(`/api/chat/conversations?userId=${user.id}`);
+      const data = await response.json();
+      
+      if (response.ok && data.conversations) {
+        // Convert conversations to inbox messages format
+        const inboxMessages: InboxMessage[] = data.conversations
+          .filter((conv: any) => conv.lastMessage) // Only show conversations with messages
+          .map((conv: any) => {
+            // Check if the last message is from the other participant (not the current user)
+            const isFromOtherUser = conv.lastMessage.fromMe === false;
+            const shouldShowNotification = isFromOtherUser && conv.unreadCount > 0;
+            
+            return {
+              id: conv.id,
+              type: 'chat',
+              title: `Bericht van ${conv.participant.name}`,
+              message: conv.lastMessage.content,
+              is_read: !shouldShowNotification, // Only show as unread if from other user
+              created_at: conv.lastMessage.time,
+              sender_name: conv.participant.name,
+              conversation_id: conv.id
+            };
+          })
+          .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
-      setMessages(mockMessages);
-      setUnreadCount(mockMessages.filter(m => !m.is_read).length);
+        setMessages(inboxMessages);
+        setUnreadCount(inboxMessages.filter(m => !m.is_read).length);
+      } else {
+        console.log('No conversations found, showing empty inbox');
+        setMessages([]);
+        setUnreadCount(0);
+      }
     } catch (error) {
       console.error('Error fetching messages:', error);
+      // Fallback to empty messages if API fails
+      setMessages([]);
+      setUnreadCount(0);
     } finally {
       setLoading(false);
     }
   };
 
   const markAsRead = async (messageId: string) => {
-    // Update local state
-    setMessages(prev => 
-      prev.map(msg => 
-        msg.id === messageId 
-          ? { ...msg, is_read: true }
-          : msg
-      )
-    );
-    setUnreadCount(prev => Math.max(0, prev - 1));
+    try {
+      // Find the message to get conversation ID
+      const message = messages.find(msg => msg.id === messageId);
+      if (!message?.conversation_id) return;
+
+      // Mark conversation as read via API
+      const response = await fetch('/api/chat/messages/mark-read', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          conversationId: message.conversation_id,
+          userId: user?.id
+        })
+      });
+
+      if (response.ok) {
+        // Update local state
+        setMessages(prev => 
+          prev.map(msg => 
+            msg.id === messageId 
+              ? { ...msg, is_read: true }
+              : msg
+          )
+        );
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      }
+    } catch (error) {
+      console.error('Error marking message as read:', error);
+      // Still update local state for better UX
+      setMessages(prev => 
+        prev.map(msg => 
+          msg.id === messageId 
+            ? { ...msg, is_read: true }
+            : msg
+        )
+      );
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    }
   };
 
   const markAllAsRead = async () => {
-    setMessages(prev => prev.map(msg => ({ ...msg, is_read: true })));
-    setUnreadCount(0);
+    try {
+      // Mark all conversations as read via API
+      const unreadMessages = messages.filter(msg => !msg.is_read);
+      
+      for (const message of unreadMessages) {
+        if (message.conversation_id) {
+          await fetch('/api/chat/messages/mark-read', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              conversationId: message.conversation_id,
+              userId: user?.id
+            })
+          });
+        }
+      }
+
+      // Update local state
+      setMessages(prev => prev.map(msg => ({ ...msg, is_read: true })));
+      setUnreadCount(0);
+    } catch (error) {
+      console.error('Error marking all messages as read:', error);
+      // Still update local state for better UX
+      setMessages(prev => prev.map(msg => ({ ...msg, is_read: true })));
+      setUnreadCount(0);
+    }
   };
 
   const getMessageIcon = (type: string) => {
@@ -213,7 +278,15 @@ export default function InboxIcon() {
                       className={`p-4 hover:bg-gray-50 transition-colors cursor-pointer ${
                         !message.is_read ? 'bg-blue-50' : ''
                       }`}
-                      onClick={() => markAsRead(message.id)}
+                      onClick={() => {
+                        markAsRead(message.id);
+                        // Navigate to inbox page and open the conversation
+                        if (message.conversation_id) {
+                          window.location.href = `/dashboard/inbox?conversation=${message.conversation_id}`;
+                        } else {
+                          window.location.href = '/dashboard/inbox';
+                        }
+                      }}
                     >
                       <div className="flex items-start gap-3">
                         <div className="flex-shrink-0 mt-1">
