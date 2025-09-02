@@ -37,7 +37,7 @@ export default function LoginDebugger({ isVisible, onToggle }: LoginDebuggerProp
 
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // Check Supabase connection - OPTIMIZED for immediate connection with caching
+  // Check Supabase connection - ENHANCED with better error handling and fallbacks
   useEffect(() => {
     const checkSupabase = async () => {
       try {
@@ -60,26 +60,78 @@ export default function LoginDebugger({ isVisible, onToggle }: LoginDebuggerProp
         // Set status to checking immediately
         setDebugInfo(prev => ({ ...prev, supabaseStatus: 'checking' }));
         
-        const supabase = createClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL!,
-          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-        );
+        // Check environment variables first
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
         
-        // Use Promise.race for faster timeout
-        const connectionPromise = supabase.from('academy_modules').select('count').limit(1);
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Connection timeout')), 3000)
-        );
-        
-        const { data, error } = await Promise.race([connectionPromise, timeoutPromise]) as any;
-        
-        if (error) {
+        if (!supabaseUrl || !supabaseKey) {
           setDebugInfo(prev => ({
             ...prev,
             supabaseStatus: 'error',
-            errors: [...prev.errors, `Supabase error: ${error.message}`]
+            errors: [...prev.errors, `Missing env vars: URL=${!!supabaseUrl}, KEY=${!!supabaseKey}`]
           }));
-        } else {
+          return;
+        }
+        
+        console.log('🔍 Checking Supabase connection with URL:', supabaseUrl);
+        
+        const supabase = createClient(supabaseUrl, supabaseKey);
+        
+        // Try multiple connection methods
+        let connectionSuccessful = false;
+        let lastError: any = null;
+        
+        // Method 1: Simple health check
+        try {
+          const { data, error } = await supabase.from('academy_modules').select('id').limit(1);
+          if (!error && data) {
+            connectionSuccessful = true;
+            console.log('✅ Supabase connection successful via modules table');
+          } else {
+            lastError = error;
+          }
+        } catch (err) {
+          lastError = err;
+        }
+        
+        // Method 2: If first fails, try auth status
+        if (!connectionSuccessful) {
+          try {
+            const { data, error } = await supabase.auth.getSession();
+            if (!error) {
+              connectionSuccessful = true;
+              console.log('✅ Supabase connection successful via auth check');
+            } else {
+              lastError = error;
+            }
+          } catch (err) {
+            lastError = err;
+          }
+        }
+        
+        // Method 3: If both fail, try direct fetch to Supabase URL
+        if (!connectionSuccessful) {
+          try {
+            const response = await fetch(`${supabaseUrl}/rest/v1/`, {
+              method: 'GET',
+              headers: {
+                'apikey': supabaseKey,
+                'Authorization': `Bearer ${supabaseKey}`
+              }
+            });
+            
+            if (response.ok) {
+              connectionSuccessful = true;
+              console.log('✅ Supabase connection successful via direct REST API');
+            } else {
+              lastError = new Error(`REST API returned ${response.status}: ${response.statusText}`);
+            }
+          } catch (err) {
+            lastError = err;
+          }
+        }
+        
+        if (connectionSuccessful) {
           setDebugInfo(prev => ({
             ...prev,
             supabaseStatus: 'connected'
@@ -90,7 +142,14 @@ export default function LoginDebugger({ isVisible, onToggle }: LoginDebuggerProp
             sessionStorage.setItem('supabase_connection_status', 'warmed');
             sessionStorage.setItem('supabase_connection_time', Date.now().toString());
           }
+        } else {
+          setDebugInfo(prev => ({
+            ...prev,
+            supabaseStatus: 'error',
+            errors: [...prev.errors, `All connection methods failed. Last error: ${lastError?.message || 'Unknown'}`]
+          }));
         }
+        
       } catch (error) {
         setDebugInfo(prev => ({
           ...prev,
@@ -241,6 +300,14 @@ export default function LoginDebugger({ isVisible, onToggle }: LoginDebuggerProp
           }`}>
             {debugInfo.supabaseStatus === 'checking' ? '⏳ Checking...' : 
              debugInfo.supabaseStatus === 'connected' ? '✅ Connected' : '❌ Error'}
+          </span>
+        </div>
+
+        <div className="flex justify-between">
+          <span>🔑 Env Vars:</span>
+          <span className="text-blue-400 text-xs">
+            URL: {process.env.NEXT_PUBLIC_SUPABASE_URL ? '✅' : '❌'} | 
+            KEY: {process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? '✅' : '❌'}
           </span>
         </div>
 
