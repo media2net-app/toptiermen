@@ -62,6 +62,12 @@ export default function LessonDetailPage() {
       return;
     }
 
+    // Prevent refetching if data is already loaded
+    if (isDataLoaded) {
+      console.log('Data already loaded, skipping fetch');
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -150,8 +156,11 @@ export default function LessonDetailPage() {
   };
 
   useEffect(() => {
-    fetchData();
-  }, [user, moduleId, lessonId]);
+    // Only fetch data if not already loaded and all required data is present
+    if (!isDataLoaded && user && moduleId && lessonId) {
+      fetchData();
+    }
+  }, [moduleId, lessonId]); // Removed 'user' dependency to prevent unnecessary reloads
 
   const handleCompleteLesson = async () => {
     if (!user || !lesson) return;
