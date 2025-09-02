@@ -52,34 +52,94 @@ function LoginPageContent() {
     return role.toLowerCase() === 'admin' ? '/dashboard-admin' : AUTH_CONFIG.defaultRedirect;
   };
 
-  // IMMEDIATE: Initialize Supabase connection for faster login
+  // IMMEDIATE: Initialize Supabase connection for faster login with fallbacks
   const initializeSupabaseConnection = async () => {
     try {
       console.log('🚀 Initializing Supabase connection...');
       
-      // Create Supabase client
-      const { createClient } = await import('@supabase/supabase-js');
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      );
+      // Check environment variables
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
       
-      // Warm up connection with a simple query
-      const { data, error } = await supabase
-        .from('academy_modules')
-        .select('id')
-        .limit(1);
-      
-      if (error) {
-        console.warn('⚠️ Supabase warmup query failed:', error.message);
-      } else {
-        console.log('✅ Supabase connection warmed up successfully');
+      if (!supabaseUrl || !supabaseKey) {
+        console.error('❌ Missing Supabase environment variables');
+        return;
       }
       
-      // Store connection status for faster subsequent access
-      if (typeof window !== 'undefined') {
-        sessionStorage.setItem('supabase_connection_status', 'warmed');
-        sessionStorage.setItem('supabase_connection_time', Date.now().toString());
+      console.log('🔍 Supabase URL:', supabaseUrl);
+      console.log('🔑 Supabase Key present:', !!supabaseKey);
+      
+      // Create Supabase client
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(supabaseUrl, supabaseKey);
+      
+      // Try multiple connection methods
+      let connectionSuccessful = false;
+      
+      // Method 1: Health check via modules table
+      try {
+        const { data, error } = await supabase
+          .from('academy_modules')
+          .select('id')
+          .limit(1);
+        
+        if (!error && data) {
+          connectionSuccessful = true;
+          console.log('✅ Supabase connection successful via modules table');
+        } else {
+          console.warn('⚠️ Modules table query failed:', error?.message);
+        }
+      } catch (err) {
+        console.warn('⚠️ Modules table query error:', err);
+      }
+      
+      // Method 2: Auth status check
+      if (!connectionSuccessful) {
+        try {
+          const { data, error } = await supabase.auth.getSession();
+          if (!error) {
+            connectionSuccessful = true;
+            console.log('✅ Supabase connection successful via auth check');
+          } else {
+            console.warn('⚠️ Auth check failed:', error.message);
+          }
+        } catch (err) {
+          console.warn('⚠️ Auth check error:', err);
+        }
+      }
+      
+      // Method 3: Direct REST API check
+      if (!connectionSuccessful) {
+        try {
+          const response = await fetch(`${supabaseUrl}/rest/v1/`, {
+            method: 'GET',
+            headers: {
+              'apikey': supabaseKey,
+              'Authorization': `Bearer ${supabaseKey}`
+            }
+          });
+          
+          if (response.ok) {
+            connectionSuccessful = true;
+            console.log('✅ Supabase connection successful via direct REST API');
+          } else {
+            console.warn('⚠️ REST API check failed:', response.status, response.statusText);
+          }
+        } catch (err) {
+          console.warn('⚠️ REST API check error:', err);
+        }
+      }
+      
+      if (connectionSuccessful) {
+        console.log('✅ Supabase connection initialized successfully');
+        
+        // Store connection status for faster subsequent access
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('supabase_connection_status', 'warmed');
+          sessionStorage.setItem('supabase_connection_time', Date.now().toString());
+        }
+      } else {
+        console.error('❌ All Supabase connection methods failed');
       }
       
     } catch (error) {
