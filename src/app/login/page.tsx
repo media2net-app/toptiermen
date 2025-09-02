@@ -284,13 +284,21 @@ function LoginPageContent() {
             
             console.log('🧹 All caches cleared, performing hard refresh...');
             
-            // Force hard refresh with cache clearing
-            const currentUrl = window.location.href || '';
-            if (currentUrl) {
-              window.location.href = currentUrl + '?cache-bust=' + Date.now();
-            } else {
-              window.location.reload();
-            }
+                  // SMART timeout functie - alleen uitvoeren als automatische cache-bust niet heeft gewerkt
+      const supabaseStatus = sessionStorage.getItem('supabase_connection_status');
+      if (supabaseStatus === 'warmed') {
+        console.log('✅ Supabase already connected via automatic cache-bust, skipping timeout refresh');
+        return;
+      }
+      console.log('⏰ Login timeout - automatic cache-bust failed, performing aggressive cache clearing and hard refresh');
+      
+      // Force hard refresh with cache clearing
+      const currentUrl = window.location.href || '';
+      if (currentUrl) {
+        window.location.href = currentUrl + '?cache-bust=' + Date.now();
+      } else {
+        window.location.reload();
+      }
             
           } catch (error) {
             console.error('❌ Cache clearing error:', error);
@@ -317,6 +325,30 @@ function LoginPageContent() {
       console.log('2.0.1: Could not check Supabase status:', error);
     }
   };
+
+  // AUTOMATIC CACHE-BUST: Force cache refresh on every login page visit for 100% Supabase connection
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const currentUrl = new URL(window.location.href);
+      const hasCacheBust = currentUrl.searchParams.has('cache-bust');
+      if (!hasCacheBust) {
+        const timestamp = Date.now();
+        currentUrl.searchParams.set('cache-bust', timestamp.toString());
+        console.log('🔄 Auto cache-bust for guaranteed Supabase connection:', currentUrl.toString());
+        window.history.replaceState({}, '', currentUrl.toString());
+      }
+      initializeSupabaseConnection();
+      const handleFocus = () => {
+        const cachedStatus = sessionStorage.getItem('supabase_connection_status');
+        if (cachedStatus !== 'warmed') {
+          console.log('🔄 Page focused, reinitializing Supabase connection...');
+          initializeSupabaseConnection();
+        }
+      };
+      window.addEventListener('focus', handleFocus);
+      return () => window.removeEventListener('focus', handleFocus);
+    }
+  }, []);
 
   // Check if user is already authenticated - Redirect immediately when user exists
   useEffect(() => {
