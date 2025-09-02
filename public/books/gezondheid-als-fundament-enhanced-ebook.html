@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gezondheid als Fundament - Voeding & Gezondheid | Top Tier Men Academy</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #1a2115 0%, #232d1a 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.4);
+            border-radius: 20px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #8BAE5A, #B6C948);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        
+        .module-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .lesson-title {
+            font-size: 2.8em;
+            margin-bottom: 15px;
+            font-weight: 800;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .lesson-subtitle {
+            font-size: 1.4em;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+        
+        .ebook-content {
+            padding: 0;
+        }
+        
+        .page {
+            padding: 40px 30px;
+            border-bottom: 1px solid #e0e0e0;
+            min-height: 600px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .page:last-child {
+            border-bottom: none;
+        }
+        
+        .page-content {
+            flex: 1;
+        }
+        
+        .page-header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .page-header h2 {
+            color: #1a2115;
+            font-size: 2.2em;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        .lead {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .content-section {
+            margin-bottom: 30px;
+        }
+        
+        .content-section h3 {
+            color: #8BAE5A;
+            font-size: 1.6em;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .content-section p {
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            line-height: 1.7;
+        }
+        
+        .learning-objectives {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+        
+        .learning-objectives li {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: 2px solid #B6C948;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            font-weight: 500;
+            color: #1a2115;
+            transition: all 0.3s ease;
+        }
+        
+        .learning-objectives li:hover {
+            border-color: #8BAE5A;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(139, 174, 90, 0.2);
+        }
+        
+        .info-box {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border: 2px solid #2196f3;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+            text-align: center;
+        }
+        
+        .info-box h4 {
+            color: #1976d2;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        .nutrition-benefit {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nutrition-benefit:hover {
+            border-color: #8BAE5A;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(139, 174, 90, 0.15);
+        }
+        
+        .nutrition-benefit h4 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .benefit-details {
+            margin: 20px 0;
+        }
+        
+        .benefit-details h5 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        
+        .benefit-details ul {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+        
+        .benefit-details li {
+            margin-bottom: 8px;
+            font-size: 1em;
+        }
+        
+        .macronutrient {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: 2px solid #B6C948;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+        
+        .macronutrient h4 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .nutrient-details {
+            margin: 20px 0;
+        }
+        
+        .nutrient-details h5 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        
+        .nutrient-details ul {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+        
+        .nutrient-details li {
+            margin-bottom: 8px;
+            font-size: 1em;
+        }
+        
+        .water-functions {
+            margin: 30px 0;
+        }
+        
+        .water-function {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border: 2px solid #2196f3;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+        
+        .water-function h4 {
+            color: #1976d2;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .function-details {
+            margin: 20px 0;
+        }
+        
+        .function-details h5 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        
+        .function-details ul {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+        
+        .function-details li {
+            margin-bottom: 8px;
+            font-size: 1em;
+        }
+        
+        .sleep-phases {
+            margin: 30px 0;
+        }
+        
+        .sleep-phase {
+            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+            border: 2px solid #ff9800;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+        
+        .sleep-phase h4 {
+            color: #e65100;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .phase-details {
+            margin: 20px 0;
+        }
+        
+        .phase-details h5 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        
+        .phase-details ul {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+        
+        .phase-details li {
+            margin-bottom: 8px;
+            font-size: 1em;
+        }
+        
+        .energy-pillar {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .energy-pillar:hover {
+            border-color: #8BAE5A;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(139, 174, 90, 0.15);
+        }
+        
+        .energy-pillar h4 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .pillar-details {
+            margin: 20px 0;
+        }
+        
+        .pillar-details h5 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        
+        .pillar-details ul {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+        
+        .pillar-details li {
+            margin-bottom: 8px;
+            font-size: 1em;
+        }
+        
+        .health-pillar {
+            background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
+            border: 2px solid #4caf50;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+        
+        .health-pillar h4 {
+            color: #2e7d32;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .calculation-formula {
+            background: linear-gradient(135deg, #f3e5f5, #e1bee7);
+            border: 2px solid #9c27b0;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+        
+        .calculation-formula h4 {
+            color: #7b1fa2;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .formula-details {
+            margin: 20px 0;
+        }
+        
+        .formula-details h5 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        
+        .formula-details p {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+        
+        .formula-details ul {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+        
+        .formula-details li {
+            margin-bottom: 8px;
+            font-size: 1em;
+        }
+        
+        .activity-factors {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+        
+        .activity-factors h4 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .activity-factors ul {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+        
+        .activity-factors li {
+            margin-bottom: 8px;
+            font-size: 1em;
+        }
+        
+        .page-footer {
+            text-align: center;
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .page-number {
+            color: #999;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+        
+        .footer {
+            background: #1a2115;
+            color: white;
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .footer-logo {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #8BAE5A;
+            margin-bottom: 15px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 30px 20px;
+            }
+            
+            .lesson-title {
+                font-size: 2.2em;
+            }
+            
+            .page {
+                padding: 25px 20px;
+                min-height: 500px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="module-badge">Module 07</div>
+            <h1 class="lesson-title">Gezondheid als Fundament</h1>
+            <div class="lesson-subtitle">Bouw een Solide Basis voor Je Leven</div>
+        </div>
+        
+        <div class="ebook-content">
+            
+    <div class="page">
+      <div class="page-content">
+        
+          <div class="page-header">
+            <h2>Introductie</h2>
+            <p class="lead">Gezondheid is niet alleen de afwezigheid van ziekte - het is de fundering waarop je hele leven is gebouwd.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>Wat je gaat leren in dit ebook:</h3>
+            <ul class="learning-objectives">
+              <li>Waarom gezondheid je fundament is</li>
+              <li>De 5 pijlers van optimale gezondheid</li>
+              <li>Hoe je je gezondheid kunt meten</li>
+              <li>Strategieën voor preventieve gezondheid</li>
+              <li>Een gezondheidsplan opstellen</li>
+            </ul>
+          </div>
+        
+      </div>
+      <div class="page-footer">
+        <span class="page-number">Pagina 1</span>
+      </div>
+    </div>
+  
+    <div class="page">
+      <div class="page-content">
+        
+          <div class="page-header">
+            <h2>De 5 Pijlers van Gezondheid</h2>
+            <p class="lead">Bouw een solide fundament voor een lang en gezond leven.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>1. Voeding</h3>
+            <div class="health-pillar">
+              <h4>🥗 Wat betekent dit?</h4>
+              <p>Je voeding is de brandstof voor je lichaam en geest.</p>
+              <div class="pillar-details">
+                <h5>Belangrijke principes:</h5>
+                <ul>
+                  <li><strong>Volwaardige voeding:</strong> Onbewerkte ingrediënten</li>
+                  <li><strong>Balans:</strong> Alle macronutriënten</li>
+                  <li><strong>Timing:</strong> Regelmatige maaltijden</li>
+                  <li><strong>Hydratatie:</strong> Voldoende water</li>
+                </ul>
+              </div>
+            </div>
+            
+            <h3>2. Beweging</h3>
+            <div class="health-pillar">
+              <h4>🏃‍♂️ Wat betekent dit?</h4>
+              <p>Regelmatige beweging houdt je lichaam en geest gezond.</p>
+              <div class="pillar-details">
+                <h5>Belangrijke principes:</h5>
+                <ul>
+                  <li><strong>Krachtraining:</strong> Spieropbouw en botdichtheid</li>
+                  <li><strong>Cardio:</strong> Hartgezondheid en uithoudingsvermogen</li>
+                  <li><strong>Flexibiliteit:</strong> Mobiliteit en blessurepreventie</li>
+                  <li><strong>Consistentie:</strong> Regelmatige beweging</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        
+      </div>
+      <div class="page-footer">
+        <span class="page-number">Pagina 2</span>
+      </div>
+    </div>
+  
+        </div>
+        
+        <div class="footer">
+            <div class="footer-logo">TOP TIER MEN ACADEMY</div>
+            <p>Gemaakt voor mannen die hun potentieel willen maximaliseren</p>
+            <p style="margin-top: 15px; font-size: 12px; opacity: 0.7;">
+                © 2024 Top Tier Men. Alle rechten voorbehouden.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

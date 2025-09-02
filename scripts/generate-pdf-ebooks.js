@@ -5,8 +5,8 @@ require('dotenv').config({ path: '.env.local' });
 
 async function generatePDFEbooks() {
   try {
-    console.log('🚀 GENERATING PDF EBOOKS FOR MODULE 1, 2, 3, 4, 5 & 6');
-    console.log('========================================================\n');
+    console.log('🚀 GENERATING PDF EBOOKS FOR ALL 7 MODULES');
+    console.log('==========================================\n');
 
     const booksDir = path.join(process.cwd(), 'public', 'books');
     if (!fs.existsSync(booksDir)) {
@@ -14,10 +14,10 @@ async function generatePDFEbooks() {
       return;
     }
 
-    // Get all HTML files for Module 1, 2, 3, 4, 5 and 6
+    // Get all HTML files for all 7 modules
     const htmlFiles = fs.readdirSync(booksDir)
       .filter(file => file.endsWith('.html') && 
-        (file.includes('testosteron') || file.includes('discipline') || file.includes('identiteit') || file.includes('fysieke') || file.includes('dominantie') || file.includes('mentale') || file.includes('weerbaarheid') || file.includes('financile') || file.includes('business') || file.includes('vermogen') || file.includes('geld') || file.includes('werknemer') || file.includes('vrijheid') || file.includes('brotherhood') || file.includes('broeders') || file.includes('eer') || file.includes('loyaliteit') || file.includes('kring') || file.includes('weak')))
+        (file.includes('testosteron') || file.includes('discipline') || file.includes('identiteit') || file.includes('fysieke') || file.includes('dominantie') || file.includes('mentale') || file.includes('weerbaarheid') || file.includes('financile') || file.includes('business') || file.includes('vermogen') || file.includes('geld') || file.includes('werknemer') || file.includes('vrijheid') || file.includes('brotherhood') || file.includes('broeders') || file.includes('eer') || file.includes('loyaliteit') || file.includes('kring') || file.includes('weak') || file.includes('voeding') || file.includes('gezondheid') || file.includes('slaap') || file.includes('energie') || file.includes('focus') || file.includes('hydratatie') || file.includes('water') || file.includes('praktische') || file.includes('opdracht')))
       .map(file => ({
         filename: file,
         path: path.join(booksDir, file),
@@ -25,11 +25,11 @@ async function generatePDFEbooks() {
       }));
 
     if (htmlFiles.length === 0) {
-      console.error('❌ No HTML ebooks found for Module 1, 2, 3, 4, 5 & 6. Please run create-enhanced-ebooks.js first.');
+      console.error('❌ No HTML ebooks found for all 7 modules. Please run create-enhanced-ebooks.js first.');
       return;
     }
 
-    console.log(`📚 Found ${htmlFiles.length} HTML ebooks for Module 1, 2, 3, 4, 5 & 6:`);
+    console.log(`📚 Found ${htmlFiles.length} HTML ebooks for all 7 modules:`);
     htmlFiles.forEach(file => console.log(`   - ${file.filename}`));
     console.log('');
 
@@ -105,7 +105,7 @@ async function generatePDFEbooks() {
       console.log('✅ Ready for printing and sharing');
     }
 
-    console.log('\n✅ PDF generation completed');
+    console.log('\n✅ PDF generation completed for ALL 7 MODULES!');
 
   } catch (error) {
     console.error('❌ Error:', error.message);
