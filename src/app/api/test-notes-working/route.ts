@@ -123,6 +123,17 @@ export async function POST(request: NextRequest) {
           }
 
           console.log('✅ Note inserted successfully on retry:', retryData);
+          
+          // Send notification to user about new bug report
+          try {
+            const { sendNewBugNotification } = await import('@/lib/notification-utils');
+            await sendNewBugNotification(retryData);
+            console.log('✅ Notification sent for new bug report (retry)');
+          } catch (notificationError) {
+            console.warn('⚠️ Failed to send notification for new bug report (retry):', notificationError);
+            // Don't fail the bug report creation if notification fails
+          }
+          
           return NextResponse.json({ 
             success: true, 
             note: retryData 
@@ -147,6 +158,16 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('✅ Note inserted successfully:', data);
+
+    // Send notification to user about new bug report
+    try {
+      const { sendNewBugNotification } = await import('@/lib/notification-utils');
+      await sendNewBugNotification(data);
+      console.log('✅ Notification sent for new bug report');
+    } catch (notificationError) {
+      console.warn('⚠️ Failed to send notification for new bug report:', notificationError);
+      // Don't fail the bug report creation if notification fails
+    }
 
     return NextResponse.json({ 
       success: true, 

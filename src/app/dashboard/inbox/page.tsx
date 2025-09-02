@@ -102,6 +102,23 @@ export default function Inbox() {
     }
   }, [user]);
 
+  // Check for conversation parameter in URL
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const conversationId = urlParams.get('conversation');
+      
+      if (conversationId && conversations.length > 0) {
+        const conversation = conversations.find(c => c.id === conversationId);
+        if (conversation) {
+          setSelectedConversation(conversation);
+          fetchMessages(conversation.id);
+          setShowChat(true);
+        }
+      }
+    }
+  }, [conversations]);
+
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

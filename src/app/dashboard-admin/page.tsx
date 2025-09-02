@@ -30,6 +30,7 @@ import { SwipeIndicator } from '@/components/ui';
 import MollieFinanceMetrics from '@/components/admin/MollieFinanceMetrics';
 import LoadingModal from '@/components/admin/LoadingModal';
 import TaskNotificationWidget from '@/components/admin/TaskNotificationWidget';
+import VercelAnalyticsWidget from '@/components/admin/VercelAnalyticsWidget';
 
 // Types for session data
 interface SessionLog {
@@ -625,7 +626,7 @@ export default function AdminDashboard() {
           icon={<AcademicCapIcon className="w-6 h-6" />}
           gradient
         >
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             {loading && !dataLoaded ? (
               // Skeleton loading voor content performance
               <>
@@ -709,6 +710,9 @@ export default function AdminDashboard() {
               </>
             )}
           </div>
+
+          {/* Vercel Analytics */}
+          <VercelAnalyticsWidget period={selectedPeriod} type="analytics" />
         </AdminCard>
       )}
 
@@ -986,6 +990,9 @@ export default function AdminDashboard() {
               </div>
             </div>
           </div>
+
+          {/* Vercel Analytics - Real-time */}
+          <VercelAnalyticsWidget period={selectedPeriod} type="analytics" />
         </AdminCard>
       )}
 
@@ -1046,6 +1053,9 @@ export default function AdminDashboard() {
               </div>
             </div>
           </div>
+
+          {/* Vercel Speed Insights */}
+          <VercelAnalyticsWidget period={selectedPeriod} type="speed-insights" />
         </AdminCard>
       )}
 
