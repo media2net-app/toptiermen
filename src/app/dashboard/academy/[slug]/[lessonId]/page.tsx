@@ -75,23 +75,35 @@ export default function LessonDetailPage() {
       console.log('Fetching lesson data for:', { moduleId, lessonId });
 
       // Fetch module
-      const { data: moduleData, error: moduleError } = await supabase
+      let { data: moduleData, error: moduleError } = await supabase
         .from('academy_modules')
         .select('*')
         .eq('id', moduleId)
         .single();
 
       if (moduleError) {
-        console.error('Module error:', moduleError);
-        setError('Module niet gevonden');
-        return;
+        // Try to find by slug if ID lookup fails (backward compatibility)
+        const { data: moduleBySlug, error: slugError } = await supabase
+          .from('academy_modules')
+          .select('*')
+          .eq('slug', moduleId)
+          .single();
+        
+        if (slugError || !moduleBySlug) {
+          console.error('Module error:', moduleError);
+          setError('Module niet gevonden');
+          return;
+        }
+        
+        // Use the module found by slug
+        moduleData = moduleBySlug;
       }
 
       // Fetch lessons
       const { data: lessonsData, error: lessonsError } = await supabase
         .from('academy_lessons')
         .select('*')
-        .eq('module_id', moduleId)
+        .eq('module_id', moduleData.id)
         .eq('status', 'published')
         .order('order_index');
 
@@ -112,12 +124,19 @@ export default function LessonDetailPage() {
         console.error('Progress error:', progressError);
       }
 
-      // Find current lesson
-      const currentLesson = lessonsData?.find(l => l.id === lessonId);
+      // Find current lesson - try by ID first, then by slug (backward compatibility)
+      let currentLesson = lessonsData?.find(l => l.id === lessonId);
       if (!currentLesson) {
-        console.error('Lesson not found:', lessonId);
-        setError('Les niet gevonden');
-        return;
+        // Try to find by slug if ID lookup fails (backward compatibility)
+        const lessonBySlug = lessonsData?.find(l => l.slug === lessonId);
+        if (lessonBySlug) {
+          console.log('✅ Lesson found by slug:', lessonBySlug.title);
+          currentLesson = lessonBySlug;
+        } else {
+          console.error('Lesson not found by ID or slug:', { lessonId, availableSlugs: lessonsData?.map(l => l.slug), availableIds: lessonsData?.map(l => l.id) });
+          setError('Les niet gevonden');
+          return;
+        }
       }
 
       // Check completion
