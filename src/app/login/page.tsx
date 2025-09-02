@@ -88,6 +88,18 @@ function LoginPageContent() {
     checkSupabaseStatus();
   }, [searchParams]);
 
+  // Simpele timeout functie - alleen harde refresh na 10 seconden als redirecting
+  useEffect(() => {
+    if (loginState.redirecting) {
+      const timeoutId = setTimeout(() => {
+        console.log('⏰ Login timeout - performing hard refresh');
+        window.location.reload();
+      }, 10000);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [loginState.redirecting]);
+
   const checkSupabaseStatus = async () => {
     try {
       const response = await fetch('/api/check-supabase-status');
