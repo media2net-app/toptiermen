@@ -88,9 +88,9 @@ function LoginPageContent() {
     checkSupabaseStatus();
   }, [searchParams]);
 
-  // Simpele timeout functie - alleen harde refresh na 10 seconden als redirecting
+  // Simpele timeout functie - harde refresh na 10 seconden als loading of redirecting
   useEffect(() => {
-    if (loginState.redirecting) {
+    if (loginState.isLoading || loginState.redirecting) {
       const timeoutId = setTimeout(() => {
         console.log('⏰ Login timeout - performing hard refresh');
         window.location.reload();
@@ -98,7 +98,7 @@ function LoginPageContent() {
       
       return () => clearTimeout(timeoutId);
     }
-  }, [loginState.redirecting]);
+  }, [loginState.isLoading, loginState.redirecting]);
 
   const checkSupabaseStatus = async () => {
     try {
