@@ -222,23 +222,15 @@ export default function LedenOverzicht() {
       markUserOffline();
     };
 
-    // Mark user as offline when page becomes hidden
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        markUserOffline();
-      } else {
-        markUserOnline();
-      }
-    };
+    // Removed visibilitychange event listener to prevent page reloads when switching tabs
+    // Only keep beforeunload for proper cleanup when leaving the page
 
     window.addEventListener('beforeunload', handleBeforeUnload);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     // Cleanup function
     return () => {
       presenceSubscription.unsubscribe();
       window.removeEventListener('beforeunload', handleBeforeUnload);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
       markUserOffline();
     };
   }, [user]);
