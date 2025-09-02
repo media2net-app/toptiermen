@@ -28,6 +28,8 @@ import V2MonitoringDashboard from '@/components/V2MonitoringDashboard';
 import V2PerformanceAlerts from '@/components/V2PerformanceAlerts';
 import CacheIssueHelper from '@/components/CacheIssueHelper';
 import OnboardingBanner from '@/components/OnboardingBanner';
+import NotificationBell from '@/components/NotificationBell';
+import InboxIcon from '@/components/InboxIcon';
 
 // 2.0.1: Dashboard menu configuration
 const menu = [
@@ -573,14 +575,10 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
               )}
 
               {/* Notifications */}
-              <button className="p-2 bg-[#181F17] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors">
-                <BellIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-              </button>
+              <NotificationBell />
 
               {/* Messages */}
-              <button className="p-2 bg-[#181F17] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors">
-                <EnvelopeIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-              </button>
+              <InboxIcon />
 
               {/* Logout */}
               <button
