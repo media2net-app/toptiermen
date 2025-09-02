@@ -1,14 +1,12 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { supabase } from '@/lib/supabase';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import PageLayout from '@/components/PageLayout';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import Breadcrumb, { createBreadcrumbs } from '@/components/Breadcrumb';
 import EbookDownload from '@/components/EbookDownload';
 import { PlayIcon } from '@heroicons/react/24/solid';
 
@@ -332,12 +330,15 @@ export default function LessonDetailPage() {
           >
             Opnieuw proberen
           </button>
-          <Link
-            href="/dashboard/academy"
+          <button
+            onClick={() => {
+              console.log('🔄 Navigating to academy with hard refresh...');
+              window.location.href = `/dashboard/academy?cache-bust=${Date.now()}`;
+            }}
             className="px-6 py-3 bg-[#232D1A] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors font-semibold"
           >
             Terug naar Academy
-          </Link>
+          </button>
         </div>
       </PageLayout>
     );
@@ -352,12 +353,15 @@ export default function LessonDetailPage() {
       >
         <div className="text-center py-12">
           <div className="text-gray-400 mb-4">Les niet gevonden</div>
-          <Link
-            href="/dashboard/academy"
+          <button
+            onClick={() => {
+              console.log('🔄 Navigating to academy with hard refresh...');
+              window.location.href = `/dashboard/academy?cache-bust=${Date.now()}`;
+            }}
             className="px-6 py-3 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold"
           >
             Terug naar Academy
-          </Link>
+          </button>
         </div>
       </PageLayout>
     );
@@ -376,43 +380,68 @@ export default function LessonDetailPage() {
       <div className="w-full">
         {/* Navigation */}
         <div className="flex items-center justify-between mb-6">
-          <Link
-            href="/dashboard/academy"
+          <button
+            onClick={() => {
+              console.log('🔄 Navigating to module overview with hard refresh...');
+              window.location.href = `/dashboard/academy/${module.id}?cache-bust=${Date.now()}`;
+            }}
             className="flex items-center gap-2 text-[#8BAE5A] hover:text-[#B6C948] transition-colors"
           >
             ← Terug naar module overzicht
-          </Link>
+          </button>
           
           <div className="flex items-center gap-4">
             {prevLesson && (
-              <Link
-                href={`/dashboard/academy/${module.id}/${prevLesson.id}`}
+              <button
+                onClick={() => {
+                  console.log('🔄 Navigating to previous lesson with hard refresh...');
+                  // Force hard refresh before navigation
+                  window.location.href = `/dashboard/academy/${module.id}/${prevLesson.id}?cache-bust=${Date.now()}`;
+                }}
                 className="px-4 py-2 bg-[#232D1A] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors"
               >
                 Vorige les
-              </Link>
+              </button>
             )}
             
             {nextLesson && (
-              <Link
-                href={`/dashboard/academy/${module.id}/${nextLesson.id}`}
+              <button
+                onClick={() => {
+                  console.log('🔄 Navigating to next lesson with hard refresh...');
+                  // Force hard refresh before navigation
+                  window.location.href = `/dashboard/academy/${module.id}/${nextLesson.id}?cache-bust=${Date.now()}`;
+                }}
                 className="px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors"
               >
                 Volgende les
-              </Link>
+              </button>
             )}
           </div>
         </div>
 
-        {/* Breadcrumb */}
-        <div className="mb-6">
-          <Breadcrumb 
-            items={[
-              { label: 'Academy', href: '/dashboard/academy' },
-              { label: `Module ${getModuleNumber(module.order_index)}: ${module.title}`, href: `/dashboard/academy/${module.id}` },
-              { label: lesson.title, isCurrent: true }
-            ]}
-          />
+        {/* Custom Navigation with Hard Refresh */}
+        <div className="mb-6 flex items-center gap-2 text-sm">
+          <button
+            onClick={() => {
+              console.log('🔄 Navigating to academy with hard refresh...');
+              window.location.href = `/dashboard/academy?cache-bust=${Date.now()}`;
+            }}
+            className="text-[#8BAE5A] hover:text-[#B6C948] transition-colors"
+          >
+            Academy
+          </button>
+          <span className="text-gray-400">/</span>
+          <button
+            onClick={() => {
+              console.log('🔄 Navigating to module with hard refresh...');
+              window.location.href = `/dashboard/academy/${module.id}?cache-bust=${Date.now()}`;
+            }}
+            className="text-[#8BAE5A] hover:text-[#B6C948] transition-colors"
+          >
+            Module {getModuleNumber(module.order_index)}: {module.title}
+          </button>
+          <span className="text-gray-400">/</span>
+          <span className="text-gray-300">{lesson.title}</span>
         </div>
 
         {/* Lesson content */}
@@ -555,15 +584,22 @@ export default function LessonDetailPage() {
         <h3 className="text-lg font-semibold text-[#8BAE5A] mb-4">Lessen in deze module</h3>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {lessons.map((l, index) => (
-              <Link
+              <button
                 key={l.id}
-                href={`/dashboard/academy/${module.id}/${l.id}`}
-                className={`block p-4 rounded-lg border transition-colors ${
+                onClick={() => {
+                  if (l.id !== lessonId) {
+                    console.log('🔄 Navigating to lesson with hard refresh...');
+                    // Force hard refresh before navigation
+                    window.location.href = `/dashboard/academy/${module.id}/${l.id}?cache-bust=${Date.now()}`;
+                  }
+                }}
+                disabled={l.id === lessonId}
+                className={`block w-full text-left p-4 rounded-lg border transition-colors ${
                   l.id === lessonId
-                    ? 'bg-[#8BAE5A] text-[#181F17] border-[#8BAE5A]'
+                    ? 'bg-[#8BAE5A] text-[#181F17] border-[#8BAE5A] cursor-default'
                     : completedLessonIds.includes(l.id)
-                    ? 'bg-[#232D1A] text-[#8BAE5A] border-[#3A4D23] hover:bg-[#3A4D23]'
-                    : 'bg-[#181F17] text-gray-300 border-[#3A4D23] hover:bg-[#232D1A]'
+                    ? 'bg-[#232D1A] text-[#8BAE5A] border-[#3A4D23] hover:bg-[#3A4D23] cursor-pointer'
+                    : 'bg-[#181F17] text-gray-300 border-[#3A4D23] hover:bg-[#232D1A] cursor-pointer'
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -580,7 +616,7 @@ export default function LessonDetailPage() {
                     <span className="text-sm opacity-75">{l.duration}</span>
                   </div>
                 </div>
-              </Link>
+              </button>
             ))}
           </div>
         </div>
