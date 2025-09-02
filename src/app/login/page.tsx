@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { EnvelopeIcon, LockClosedIcon } from '@heroicons/react/24/outline';
+import LoginDebugger from '@/components/LoginDebugger';
 // import { useCacheBuster } from '@/components/CacheBuster'; - DISABLED TO PREVENT LOGOUT
 
 // Auth configuration constants
@@ -33,7 +34,9 @@ function LoginPageContent() {
     showForgotPassword: false,
     forgotPasswordEmail: "",
     isSendingReset: false,
-    resetMessage: ""
+    resetMessage: "",
+    // Debug state
+    showDebugger: false
   });
 
   // Helper function to update specific state properties
@@ -491,6 +494,17 @@ function LoginPageContent() {
             )}
           </button>
         </form>
+
+        {/* Live Debug Toggle - Always Visible */}
+        <div className="mt-4 text-center">
+          <button
+            type="button"
+            onClick={() => updateLoginState({ showDebugger: !loginState.showDebugger })}
+            className="px-4 py-2 bg-[#3A4D23] text-[#8BAE5A] rounded-lg text-sm hover:bg-[#4A5D33] transition-colors border border-[#8BAE5A]/30"
+          >
+            {loginState.showDebugger ? '🔒 Verberg Debug' : '🔍 Toon Debug'}
+          </button>
+        </div>
         
         <div className="mt-6 text-center">
           <p className="text-[#B6C948] text-sm font-figtree">
@@ -601,6 +615,12 @@ function LoginPageContent() {
           </div>
         </div>
       )}
+
+      {/* Login Debugger */}
+      <LoginDebugger 
+        isVisible={loginState.showDebugger}
+        onToggle={() => updateLoginState({ showDebugger: !loginState.showDebugger })}
+      />
     </div>
   );
 }
