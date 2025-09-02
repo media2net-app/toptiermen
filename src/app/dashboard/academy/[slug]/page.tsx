@@ -84,14 +84,14 @@ export default function ModuleDetailPage() {
         // Fetch module data with optimized query
         supabase
           .from('academy_modules')
-          .select('id, title, description, order_index, cover_image')
+          .select('*')
           .eq('id', moduleId)
           .single(),
         
         // Fetch lessons for this module with optimized query
         supabase
           .from('academy_lessons')
-          .select('id, title, description, duration, type, order_index')
+          .select('*')
           .eq('module_id', moduleId)
           .eq('status', 'published')
           .order('order_index', { ascending: true }),

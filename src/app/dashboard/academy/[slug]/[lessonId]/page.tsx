@@ -79,7 +79,7 @@ export default function LessonDetailPage() {
         // Fetch module with optimized query
         supabase
           .from('academy_modules')
-          .select('id, title, description, order_index, slug, status')
+          .select('*')
           .or(`id.eq.${moduleId},slug.eq.${moduleId}`)
           .eq('status', 'published')
           .single(),
@@ -87,7 +87,7 @@ export default function LessonDetailPage() {
         // Fetch lessons with optimized query using new indexes
         supabase
           .from('academy_lessons')
-          .select('id, title, description, content, duration, type, video_url, module_id, order_index, status')
+          .select('*')
           .eq('module_id', moduleId)
           .eq('status', 'published')
           .order('order_index'),

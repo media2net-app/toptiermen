@@ -107,34 +107,34 @@ export default function AcademyPage() {
           // Fetch modules with optimized query
           supabase
             .from('academy_modules')
-            .select('id, title, description, order_index, status, cover_image')
+            .select('*')
             .eq('status', 'published')
             .order('order_index'),
           
           // Fetch lessons with optimized query
           supabase
             .from('academy_lessons')
-            .select('id, title, module_id, order_index, status')
+            .select('*')
             .eq('status', 'published')
             .order('order_index'),
           
           // Fetch user progress with optimized query
           supabase
             .from('user_module_progress')
-            .select('module_id, progress_percentage')
+            .select('*')
             .eq('user_id', user.id),
           
           // Fetch lesson progress with optimized query
           supabase
             .from('user_lesson_progress')
-            .select('lesson_id, completed')
+            .select('*')
             .eq('user_id', user.id)
             .eq('completed', true),
           
           // Fetch module unlocks with optimized query
           supabase
             .from('user_module_unlocks')
-            .select('module_id, unlocked_at')
+            .select('*')
             .eq('user_id', user.id)
         ]);
 

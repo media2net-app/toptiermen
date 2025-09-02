@@ -88,12 +88,93 @@ function LoginPageContent() {
     checkSupabaseStatus();
   }, [searchParams]);
 
-  // Simpele timeout functie - harde refresh na 10 seconden als loading of redirecting
+  // AGGRESSIVE timeout functie - uitgebreide cache clearing na 10 seconden
   useEffect(() => {
     if (loginState.isLoading || loginState.redirecting) {
       const timeoutId = setTimeout(() => {
-        console.log('⏰ Login timeout - performing hard refresh');
-        window.location.reload();
+        console.log('⏰ Login timeout - performing aggressive cache clearing and hard refresh');
+        
+        // AGGRESSIVE: Clear all possible caches and storage
+        if (typeof window !== 'undefined') {
+          try {
+            // Clear all localStorage
+            localStorage.clear();
+            console.log('🧹 localStorage cleared');
+            
+            // Clear all sessionStorage
+            sessionStorage.clear();
+            console.log('🧹 sessionStorage cleared');
+            
+            // Clear all cookies
+            document.cookie.split(";").forEach(function(c) { 
+              document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+            });
+            console.log('🧹 cookies cleared');
+            
+            // Clear all caches
+            if ('caches' in window) {
+              caches.keys().then(names => {
+                names.forEach(name => {
+                  caches.delete(name);
+                  console.log('🧹 cache deleted:', name);
+                });
+              });
+            }
+            
+            // Clear service worker cache
+            if ('serviceWorker' in navigator) {
+              navigator.serviceWorker.getRegistrations().then(registrations => {
+                registrations.forEach(registration => {
+                  registration.unregister();
+                  console.log('🧹 service worker unregistered');
+                });
+              });
+            }
+            
+            // Clear IndexedDB
+            if ('indexedDB' in window) {
+              indexedDB.databases().then(databases => {
+                databases.forEach(db => {
+                  indexedDB.deleteDatabase(db.name);
+                  console.log('🧹 IndexedDB deleted:', db.name);
+                });
+              });
+            }
+            
+            // Force clear browser cache headers
+            if ('fetch' in window) {
+              const originalFetch = window.fetch;
+              window.fetch = function(...args) {
+                const [url, options = {}] = args;
+                const newOptions = {
+                  ...options,
+                  headers: {
+                    ...options.headers,
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
+                  }
+                };
+                return originalFetch(url, newOptions);
+              };
+            }
+            
+            console.log('🧹 All caches cleared, performing hard refresh...');
+            
+            // Force hard refresh with cache clearing
+            const currentUrl = window.location.href || '';
+            if (currentUrl) {
+              window.location.href = currentUrl + '?cache-bust=' + Date.now();
+            } else {
+              window.location.reload();
+            }
+            
+          } catch (error) {
+            console.error('❌ Cache clearing error:', error);
+            // Fallback to simple reload
+            window.location.reload();
+          }
+        }
       }, 10000);
       
       return () => clearTimeout(timeoutId);
