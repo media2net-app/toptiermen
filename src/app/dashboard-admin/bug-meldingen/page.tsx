@@ -12,7 +12,8 @@ import {
   EyeIcon,
   DocumentTextIcon,
   ComputerDesktopIcon,
-  CameraIcon
+  CameraIcon,
+  TrashIcon
 } from '@heroicons/react/24/outline';
 import { AdminCard, AdminButton } from '@/components/admin';
 import { toast } from 'react-hot-toast';
@@ -51,9 +52,12 @@ export default function BugMeldingen() {
   const [priorityFilter, setPriorityFilter] = useState<'all' | 'low' | 'medium' | 'high' | 'critical'>('all');
   const [typeFilter, setTypeFilter] = useState<'all' | 'bug' | 'improvement' | 'general'>('all');
   const [userFilter, setUserFilter] = useState<string>('all');
+  const [showTestBugs, setShowTestBugs] = useState(false);
   const [selectedReport, setSelectedReport] = useState<BugReport | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showScreenshot, setShowScreenshot] = useState(false);
+  const [selectedReports, setSelectedReports] = useState<Set<string>>(new Set());
+  const [showBulkActions, setShowBulkActions] = useState(false);
 
   console.log('🔍 BugMeldingen component rendering');
 
@@ -278,6 +282,158 @@ export default function BugMeldingen() {
     }
   };
 
+  const handleDeleteBug = async (reportId: string) => {
+    try {
+      // Get the current report for confirmation
+      const currentReport = bugReports.find(report => report.id === reportId);
+      if (!currentReport) {
+        toast.error('Bug melding niet gevonden');
+        return;
+      }
+
+      // Confirm deletion
+      const isConfirmed = window.confirm(
+        `Weet je zeker dat je deze bug melding wilt verwijderen?\n\n"${currentReport.description.substring(0, 100)}${currentReport.description.length > 100 ? '...' : ''}"\n\nDeze actie kan niet ongedaan worden gemaakt.`
+      );
+
+      if (!isConfirmed) {
+        return;
+      }
+
+      // Try to delete from database first
+      const { error: dbError } = await supabase
+        .from('test_notes')
+        .delete()
+        .eq('id', reportId);
+
+      if (dbError) {
+        console.warn('Database delete failed:', dbError);
+        toast.error('Fout bij verwijderen uit database');
+        return;
+      }
+
+      // Remove from local state
+      setBugReports(prev => prev.filter(report => report.id !== reportId));
+
+      // Remove from localStorage if it was stored there
+      if (typeof window !== 'undefined') {
+        try {
+          const localReports = JSON.parse(localStorage.getItem('test_notes') || '[]');
+          const updatedLocalReports = localReports.filter((report: any) => report.id !== reportId);
+          localStorage.setItem('test_notes', JSON.stringify(updatedLocalReports));
+        } catch (error) {
+          console.warn('localStorage update failed:', error);
+        }
+      }
+
+      toast.success('Bug melding succesvol verwijderd');
+    } catch (error) {
+      console.error('Error deleting bug report:', error);
+      toast.error('Fout bij verwijderen van bug melding');
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedReports.size === 0) {
+      toast.error('Geen bug meldingen geselecteerd');
+      return;
+    }
+
+    const isConfirmed = window.confirm(
+      `Weet je zeker dat je ${selectedReports.size} bug melding(en) wilt verwijderen?\n\nDeze actie kan niet ongedaan worden gemaakt.`
+    );
+
+    if (!isConfirmed) {
+      return;
+    }
+
+    try {
+      let successCount = 0;
+      let errorCount = 0;
+
+      for (const reportId of selectedReports) {
+        try {
+          // Try to delete from database
+          const { error: dbError } = await supabase
+            .from('test_notes')
+            .delete()
+            .eq('id', reportId);
+
+          if (dbError) {
+            console.warn(`Database delete failed for ${reportId}:`, dbError);
+            errorCount++;
+          } else {
+            successCount++;
+          }
+        } catch (error) {
+          console.error(`Error deleting ${reportId}:`, error);
+          errorCount++;
+        }
+      }
+
+      // Remove from local state
+      setBugReports(prev => prev.filter(report => !selectedReports.has(report.id)));
+
+      // Remove from localStorage
+      if (typeof window !== 'undefined') {
+        try {
+          const localReports = JSON.parse(localStorage.getItem('test_notes') || '[]');
+          const updatedLocalReports = localReports.filter((report: any) => !selectedReports.has(report.id));
+          localStorage.setItem('test_notes', JSON.stringify(updatedLocalReports));
+        } catch (error) {
+          console.warn('localStorage update failed:', error);
+        }
+      }
+
+      // Clear selection
+      setSelectedReports(new Set());
+      setShowBulkActions(false);
+
+      if (errorCount > 0) {
+        toast.success(`${successCount} bug meldingen verwijderd, ${errorCount} fouten opgetreden`);
+      } else {
+        toast.success(`${successCount} bug meldingen succesvol verwijderd`);
+      }
+    } catch (error) {
+      console.error('Error in bulk delete:', error);
+      toast.error('Fout bij bulk verwijderen van bug meldingen');
+    }
+  };
+
+  const handleSelectReport = (reportId: string, checked: boolean) => {
+    const newSelection = new Set(selectedReports);
+    if (checked) {
+      newSelection.add(reportId);
+    } else {
+      newSelection.delete(reportId);
+    }
+    setSelectedReports(newSelection);
+    setShowBulkActions(newSelection.size > 0);
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      const allIds = filteredReports.map(report => report.id);
+      setSelectedReports(new Set(allIds));
+      setShowBulkActions(true);
+    } else {
+      setSelectedReports(new Set());
+      setShowBulkActions(false);
+    }
+  };
+
+  const handleSelectTestBugs = () => {
+    const testBugIds = bugReports.filter(report => 
+      report.description?.toLowerCase().includes('test') || 
+      report.description?.toLowerCase().includes('fsdf') ||
+      report.description?.toLowerCase().length < 10
+    ).map(report => report.id);
+    
+    setSelectedReports(new Set(testBugIds));
+    setShowBulkActions(true);
+    toast.success(`${testBugIds.length} test bugs geselecteerd voor verwijdering`);
+  };
+
 
 
   const handleViewDetails = (report: BugReport) => {
@@ -322,8 +478,14 @@ export default function BugMeldingen() {
     const matchesPriority = priorityFilter === 'all' || report.priority === priorityFilter;
     const matchesType = typeFilter === 'all' || report.type === typeFilter;
     const matchesUser = userFilter === 'all' || report.test_user_id === userFilter;
+    
+    // Filter test bugs if enabled
+    const isTestBug = showTestBugs ? 
+      (report.description?.toLowerCase().includes('test') || 
+       report.description?.toLowerCase().includes('fsdf') ||
+       report.description?.toLowerCase().length < 10) : true;
 
-    return matchesSearch && matchesStatus && matchesPriority && matchesType && matchesUser;
+    return matchesSearch && matchesStatus && matchesPriority && matchesType && matchesUser && isTestBug;
   });
 
   if (loading) {
@@ -461,13 +623,23 @@ export default function BugMeldingen() {
           <p className="text-[#B6C948]">Overzicht van alle bug meldingen van test gebruikers</p>
         </div>
         
-        <AdminButton
-          onClick={fetchBugReports}
-          icon={<ArrowPathIcon className="w-4 h-4" />}
-          variant="secondary"
-        >
-          Vernieuwen
-        </AdminButton>
+        <div className="flex items-center space-x-3">
+          <AdminButton
+            onClick={handleSelectTestBugs}
+            icon={<BugAntIcon className="w-4 h-4" />}
+            variant="secondary"
+          >
+            Selecteer Test Bugs
+          </AdminButton>
+          
+          <AdminButton
+            onClick={fetchBugReports}
+            icon={<ArrowPathIcon className="w-4 h-4" />}
+            variant="secondary"
+          >
+            Vernieuwen
+          </AdminButton>
+        </div>
       </div>
 
       {/* Stats */}
@@ -521,7 +693,7 @@ export default function BugMeldingen() {
 
       {/* Filters */}
       <div className="bg-[#181F17] border border-[#3A4D23] rounded-lg p-4">
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
           <div>
             <label className="block text-sm font-medium text-[#8BAE5A] mb-2">Zoeken</label>
             <div className="relative">
@@ -595,8 +767,51 @@ export default function BugMeldingen() {
                 ))}
               </select>
             </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-[#B6C948] mb-2">Test Bugs</label>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  checked={showTestBugs}
+                  onChange={(e) => setShowTestBugs(e.target.checked)}
+                  className="rounded border-[#3A4D23] text-[#8BAE5A] focus:ring-[#8BAE5A]"
+                />
+                <span className="text-[#B6C948] text-sm">Toon alleen test bugs</span>
+              </div>
+            </div>
         </div>
       </div>
+
+      {/* Bulk Actions */}
+      {showBulkActions && (
+        <div className="bg-[#232D1A] border border-[#3A4D23] rounded-lg p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <span className="text-[#B6C948] font-medium">
+                {selectedReports.size} bug melding(en) geselecteerd
+              </span>
+              <label className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  checked={selectedReports.size === filteredReports.length}
+                  onChange={(e) => handleSelectAll(e.target.checked)}
+                  className="rounded border-[#3A4D23] text-[#8BAE5A] focus:ring-[#8BAE5A]"
+                />
+                <span className="text-[#B6C948] text-sm">Selecteer alle</span>
+              </label>
+            </div>
+            <AdminButton
+              onClick={handleBulkDelete}
+              icon={<TrashIcon className="w-4 h-4" />}
+              variant="danger"
+              size="sm"
+            >
+              Verwijder Geselecteerde ({selectedReports.size})
+            </AdminButton>
+          </div>
+        </div>
+      )}
 
       {/* Bug Reports List */}
       <div className="space-y-4">
@@ -609,42 +824,50 @@ export default function BugMeldingen() {
           filteredReports.map((report) => (
             <div key={report.id} className="bg-[#181F17] border border-[#3A4D23] rounded-lg p-6">
               <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-3 mb-2">
-                    <h3 className="text-lg font-semibold text-[#8BAE5A]">
-                      {report.type === 'bug' ? '🐛' : report.type === 'improvement' ? '💡' : '📝'} {(report.description || 'Geen beschrijving').substring(0, 60)}...
-                    </h3>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(report.status || 'open')}`}>
-                      {(report.status || 'open').replace('_', ' ')}
-                    </span>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(report.priority || 'medium')}`}>
-                      {report.priority || 'medium'}
-                    </span>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(report.type || 'bug')}`}>
-                      {report.type || 'bug'}
-                    </span>
-                    {report.source && (
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        report.source === 'database' ? 'text-green-600 bg-green-100' : 'text-orange-600 bg-orange-100'
-                      }`}>
-                        {report.source}
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="checkbox"
+                    checked={selectedReports.has(report.id)}
+                    onChange={(e) => handleSelectReport(report.id, e.target.checked)}
+                    className="rounded border-[#3A4D23] text-[#8BAE5A] focus:ring-[#8BAE5A]"
+                  />
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-3 mb-2">
+                      <h3 className="text-lg font-semibold text-[#8BAE5A]">
+                        {report.type === 'bug' ? '🐛' : report.type === 'improvement' ? '💡' : '📝'} {(report.description || 'Geen beschrijving').substring(0, 60)}...
+                      </h3>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(report.status || 'open')}`}>
+                        {(report.status || 'open').replace('_', ' ')}
                       </span>
-                    )}
-                  </div>
-                  <p className="text-gray-300 mb-2">{report.description || 'Geen beschrijving'}</p>
-                  
-                  <div className="flex items-center space-x-4 text-sm">
-                    <span className="text-[#B6C948]">📄 {report.page_url}</span>
-                    <span className="text-[#B6C948]">📅 {new Date(report.created_at).toLocaleDateString()}</span>
-                    {userInfoMap[report.test_user_id] && (
-                      <span className="text-[#B6C948]">👤 {userInfoMap[report.test_user_id].full_name}</span>
-                    )}
-                    {report.area_selection && (
-                      <span className="text-[#B6C948]">📍 Area: {report.area_selection.width}x{report.area_selection.height}</span>
-                    )}
-                    {report.screenshot_url && (
-                      <span className="text-[#B6C948]">📸 Screenshot beschikbaar</span>
-                    )}
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(report.priority || 'medium')}`}>
+                        {report.priority || 'medium'}
+                      </span>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(report.type || 'bug')}`}>
+                        {report.type || 'bug'}
+                      </span>
+                      {report.source && (
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          report.source === 'database' ? 'text-green-600 bg-green-100' : 'text-orange-600 bg-orange-100'
+                        }`}>
+                          {report.source}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-gray-300 mb-2">{report.description || 'Geen beschrijving'}</p>
+                    
+                    <div className="flex items-center space-x-4 text-sm">
+                      <span className="text-[#B6C948]">📄 {report.page_url}</span>
+                      <span className="text-[#B6C948]">📅 {new Date(report.created_at).toLocaleDateString()}</span>
+                      {userInfoMap[report.test_user_id] && (
+                        <span className="text-[#B6C948]">👤 {userInfoMap[report.test_user_id].full_name}</span>
+                      )}
+                      {report.area_selection && (
+                        <span className="text-[#B6C948]">📍 Area: {report.area_selection.width}x{report.area_selection.height}</span>
+                      )}
+                      {report.screenshot_url && (
+                        <span className="text-[#B6C948]">📸 Screenshot beschikbaar</span>
+                      )}
+                    </div>
                   </div>
                 </div>
                 
@@ -682,6 +905,15 @@ export default function BugMeldingen() {
                     <option value="resolved">Resolved</option>
                     <option value="closed">Closed</option>
                   </select>
+
+                  <AdminButton
+                    onClick={() => handleDeleteBug(report.id)}
+                    icon={<TrashIcon className="w-4 h-4" />}
+                    variant="danger"
+                    size="sm"
+                  >
+                    Verwijderen
+                  </AdminButton>
                 </div>
               </div>
             </div>
