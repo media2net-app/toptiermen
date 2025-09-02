@@ -223,6 +223,16 @@ export default function BugMeldingen() {
 
   const handleStatusChange = async (reportId: string, newStatus: 'open' | 'in_progress' | 'resolved' | 'closed') => {
     try {
+      // Get the current report to get user info and old status
+      const currentReport = bugReports.find(report => report.id === reportId);
+      if (!currentReport) {
+        toast.error('Bug melding niet gevonden');
+        return;
+      }
+
+      const oldStatus = currentReport.status;
+      const userId = currentReport.test_user_id;
+
       // Try to update in database first
       const { error: dbError } = await supabase
         .from('test_notes')
@@ -240,10 +250,78 @@ export default function BugMeldingen() {
           : report
       ));
 
-      toast.success('Status bijgewerkt');
+      // Send notification to user about status change
+      try {
+        const notificationData = {
+          userId,
+          bugReportId: reportId,
+          type: 'status_update',
+          title: getStatusChangeTitle(oldStatus, newStatus),
+          message: getStatusChangeMessage(oldStatus, newStatus, currentReport.description),
+          oldStatus,
+          newStatus,
+          metadata: {
+            page_url: currentReport.page_url,
+            element_selector: currentReport.element_selector,
+            priority: currentReport.priority
+          }
+        };
+
+        const response = await fetch('/api/admin/bug-notifications', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(notificationData),
+        });
+
+        if (response.ok) {
+          console.log('✅ Notification sent successfully');
+        } else {
+          console.warn('⚠️ Failed to send notification');
+        }
+      } catch (notificationError) {
+        console.warn('⚠️ Error sending notification:', notificationError);
+        // Don't fail the status update if notification fails
+      }
+
+      toast.success('Status bijgewerkt en gebruiker op de hoogte gesteld');
     } catch (error) {
       console.error('Error updating status:', error);
       toast.error('Fout bij bijwerken van status');
+    }
+  };
+
+  // Helper functions for notification messages
+  const getStatusChangeTitle = (oldStatus: string, newStatus: string) => {
+    switch (newStatus) {
+      case 'in_progress':
+        return 'Bug Melding In Behandeling';
+      case 'resolved':
+        return 'Bug Melding Opgelost! 🎉';
+      case 'closed':
+        return 'Bug Melding Afgesloten';
+      case 'open':
+        return 'Bug Melding Heropend';
+      default:
+        return 'Bug Melding Status Bijgewerkt';
+    }
+  };
+
+  const getStatusChangeMessage = (oldStatus: string, newStatus: string, description: string) => {
+    const shortDescription = description.length > 100 ? description.substring(0, 100) + '...' : description;
+    
+    switch (newStatus) {
+      case 'in_progress':
+        return `Je bug melding "${shortDescription}" wordt nu behandeld door ons team. We houden je op de hoogte van de voortgang.`;
+      case 'resolved':
+        return `Geweldig nieuws! Je bug melding "${shortDescription}" is opgelost. Bedankt voor je melding en geduld.`;
+      case 'closed':
+        return `Je bug melding "${shortDescription}" is afgesloten. Als je nog vragen hebt, neem dan contact met ons op.`;
+      case 'open':
+        return `Je bug melding "${shortDescription}" is heropend en wordt opnieuw bekeken door ons team.`;
+      default:
+        return `De status van je bug melding "${shortDescription}" is bijgewerkt van "${oldStatus}" naar "${newStatus}".`;
     }
   };
 
