@@ -140,7 +140,7 @@ export default function LeadBatchesPage() {
           <div className="bg-gray-800 p-6 rounded-lg">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-2xl font-bold text-white">{summary.totalLeads}</div>
+                <div className="text-2xl font-bold text-white">{summary.batch1Leads + summary.batch2Leads + summary.batch3Leads}</div>
                 <div className="text-gray-400">Totaal Leads</div>
               </div>
               <div className="text-blue-400">
