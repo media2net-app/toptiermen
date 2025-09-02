@@ -37,16 +37,41 @@ export default function LoginDebugger({ isVisible, onToggle }: LoginDebuggerProp
 
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // Check Supabase connection
+  // Check Supabase connection - OPTIMIZED for immediate connection with caching
   useEffect(() => {
     const checkSupabase = async () => {
       try {
+        // Check if we have a cached connection status
+        if (typeof window !== 'undefined') {
+          const cachedStatus = sessionStorage.getItem('supabase_connection_status');
+          const connectionTime = sessionStorage.getItem('supabase_connection_time');
+          
+          if (cachedStatus === 'warmed' && connectionTime) {
+            const timeSinceConnection = Date.now() - parseInt(connectionTime);
+            // If connection was established less than 30 seconds ago, use cached status
+            if (timeSinceConnection < 30000) {
+              setDebugInfo(prev => ({ ...prev, supabaseStatus: 'connected' }));
+              console.log('✅ Using cached Supabase connection status');
+              return;
+            }
+          }
+        }
+        
+        // Set status to checking immediately
+        setDebugInfo(prev => ({ ...prev, supabaseStatus: 'checking' }));
+        
         const supabase = createClient(
           process.env.NEXT_PUBLIC_SUPABASE_URL!,
           process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
         );
         
-        const { data, error } = await supabase.from('academy_modules').select('count').limit(1);
+        // Use Promise.race for faster timeout
+        const connectionPromise = supabase.from('academy_modules').select('count').limit(1);
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Connection timeout')), 3000)
+        );
+        
+        const { data, error } = await Promise.race([connectionPromise, timeoutPromise]) as any;
         
         if (error) {
           setDebugInfo(prev => ({
@@ -59,6 +84,12 @@ export default function LoginDebugger({ isVisible, onToggle }: LoginDebuggerProp
             ...prev,
             supabaseStatus: 'connected'
           }));
+          
+          // Cache successful connection
+          if (typeof window !== 'undefined') {
+            sessionStorage.setItem('supabase_connection_status', 'warmed');
+            sessionStorage.setItem('supabase_connection_time', Date.now().toString());
+          }
         }
       } catch (error) {
         setDebugInfo(prev => ({
@@ -69,6 +100,7 @@ export default function LoginDebugger({ isVisible, onToggle }: LoginDebuggerProp
       }
     };
 
+    // Check immediately when component becomes visible
     if (isVisible) {
       checkSupabase();
     }

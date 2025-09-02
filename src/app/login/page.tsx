@@ -52,6 +52,61 @@ function LoginPageContent() {
     return role.toLowerCase() === 'admin' ? '/dashboard-admin' : AUTH_CONFIG.defaultRedirect;
   };
 
+  // IMMEDIATE: Initialize Supabase connection for faster login
+  const initializeSupabaseConnection = async () => {
+    try {
+      console.log('🚀 Initializing Supabase connection...');
+      
+      // Create Supabase client
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+      
+      // Warm up connection with a simple query
+      const { data, error } = await supabase
+        .from('academy_modules')
+        .select('id')
+        .limit(1);
+      
+      if (error) {
+        console.warn('⚠️ Supabase warmup query failed:', error.message);
+      } else {
+        console.log('✅ Supabase connection warmed up successfully');
+      }
+      
+      // Store connection status for faster subsequent access
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('supabase_connection_status', 'warmed');
+        sessionStorage.setItem('supabase_connection_time', Date.now().toString());
+      }
+      
+    } catch (error) {
+      console.error('❌ Supabase connection initialization failed:', error);
+    }
+  };
+
+  // PRELOAD: Preload Supabase connection in background
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Preload Supabase connection immediately
+      initializeSupabaseConnection();
+      
+      // Also preload on page focus for better UX
+      const handleFocus = () => {
+        const cachedStatus = sessionStorage.getItem('supabase_connection_status');
+        if (cachedStatus !== 'warmed') {
+          console.log('🔄 Page focused, reinitializing Supabase connection...');
+          initializeSupabaseConnection();
+        }
+      };
+      
+      window.addEventListener('focus', handleFocus);
+      return () => window.removeEventListener('focus', handleFocus);
+    }
+  }, []);
+
   useEffect(() => { 
     // 2.0.3: Client-side hydration safety
     updateLoginState({ isClient: true });
@@ -60,6 +115,9 @@ function LoginPageContent() {
     console.log('🔍 Login page initialized');
     console.log('🌐 Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
     console.log('🔑 Supabase Key present:', !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+    
+    // IMMEDIATE: Initialize Supabase connection for faster login
+    initializeSupabaseConnection();
     
     // Check for logout status and reset loading state
     const logoutStatus = searchParams?.get('logout');
