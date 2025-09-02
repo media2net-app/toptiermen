@@ -139,7 +139,7 @@ export default function AcademyPage() {
         ]);
 
         // Process modules result
-        let modulesData = [];
+        let modulesData: any[] = [];
         if (modulesResult.status === 'fulfilled' && !modulesResult.value.error) {
           modulesData = modulesResult.value.data || [];
           console.log('✅ Academy: Modules loaded:', modulesData.length);
@@ -149,7 +149,7 @@ export default function AcademyPage() {
         }
 
         // Process lessons result
-        let lessonsData = [];
+        let lessonsData: any[] = [];
         if (lessonsResult.status === 'fulfilled' && !lessonsResult.value.error) {
           lessonsData = lessonsResult.value.data || [];
           console.log('✅ Academy: Lessons loaded:', lessonsData.length);
@@ -159,7 +159,7 @@ export default function AcademyPage() {
         }
 
         // Process progress result
-        let progressData = [];
+        let progressData: any[] = [];
         if (progressResult.status === 'fulfilled' && !progressResult.value.error) {
           progressData = progressResult.value.data || [];
           console.log('✅ Academy: Progress loaded:', progressData.length);
@@ -168,7 +168,7 @@ export default function AcademyPage() {
         }
 
         // Process lesson progress result
-        let lessonProgressData = [];
+        let lessonProgressData: any[] = [];
         if (lessonProgressResult.status === 'fulfilled' && !lessonProgressResult.value.error) {
           lessonProgressData = lessonProgressResult.value.data || [];
           console.log('✅ Academy: Lesson progress loaded:', lessonProgressData.length);
@@ -177,7 +177,7 @@ export default function AcademyPage() {
         }
 
         // Process unlocks result
-        let unlocksData = [];
+        let unlocksData: any[] = [];
         if (unlocksResult.status === 'fulfilled' && !unlocksResult.value.error) {
           unlocksData = unlocksResult.value.data || [];
           console.log('✅ Academy: Unlocks loaded:', unlocksData.length);
