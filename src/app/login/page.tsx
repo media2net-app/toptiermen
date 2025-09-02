@@ -135,8 +135,10 @@ function LoginPageContent() {
             if ('indexedDB' in window) {
               indexedDB.databases().then(databases => {
                 databases.forEach(db => {
-                  indexedDB.deleteDatabase(db.name);
-                  console.log('🧹 IndexedDB deleted:', db.name);
+                  if (db.name) {
+                    indexedDB.deleteDatabase(db.name);
+                    console.log('🧹 IndexedDB deleted:', db.name);
+                  }
                 });
               });
             }
