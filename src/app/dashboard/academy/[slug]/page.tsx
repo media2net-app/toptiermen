@@ -77,50 +77,38 @@ export default function ModuleDetailPage() {
     setError(null);
 
     try {
-      // Fetch all data in parallel with timeouts
-      const timeout = 8000;
+      // OPTIMIZED: Fetch all data in parallel with optimized queries
+      console.log('🚀 Module page: Fetching data in parallel...');
       
       const [moduleResult, lessonsResult, progressResult, unlockResult] = await Promise.allSettled([
-        // Fetch module data
-        Promise.race([
-          supabase
-            .from('academy_modules')
-            .select('*')
-            .eq('id', moduleId)
-            .single(),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Module timeout')), timeout))
-        ]),
+        // Fetch module data with optimized query
+        supabase
+          .from('academy_modules')
+          .select('id, title, description, order_index, cover_image')
+          .eq('id', moduleId)
+          .single(),
         
-        // Fetch lessons for this module
-        Promise.race([
-          supabase
-            .from('academy_lessons')
-            .select('*')
-            .eq('module_id', moduleId)
-            .eq('status', 'published')
-            .order('order_index', { ascending: true }),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Lessons timeout')), timeout))
-        ]),
+        // Fetch lessons for this module with optimized query
+        supabase
+          .from('academy_lessons')
+          .select('id, title, description, duration, type, order_index')
+          .eq('module_id', moduleId)
+          .eq('status', 'published')
+          .order('order_index', { ascending: true }),
         
-        // Fetch user progress for this module
-        Promise.race([
-          supabase
-            .from('user_lesson_progress')
-            .select('lesson_id')
-            .eq('user_id', user.id)
-            .eq('completed', true),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Progress timeout')), timeout))
-        ]),
+        // Fetch user progress for this module with optimized query
+        supabase
+          .from('user_lesson_progress')
+          .select('lesson_id')
+          .eq('user_id', user.id)
+          .eq('completed', true),
         
         // Update module unlock opened_at
-        Promise.race([
-          supabase
-            .from('user_module_unlocks')
-            .update({ opened_at: new Date().toISOString() })
-            .eq('user_id', user.id)
-            .eq('module_id', moduleId),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Unlock timeout')), timeout))
-        ])
+        supabase
+          .from('user_module_unlocks')
+          .update({ opened_at: new Date().toISOString() })
+          .eq('user_id', user.id)
+          .eq('module_id', moduleId)
       ]);
 
       if (!mountedRef.current) return;

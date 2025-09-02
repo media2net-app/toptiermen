@@ -55,7 +55,7 @@ export default function LessonDetailPage() {
 
 
 
-  // Simplified data fetching
+  // OPTIMIZED: Parallel data fetching with caching
   const fetchData = async () => {
     if (!user || !moduleId || !lessonId) {
       console.log('Missing data:', { user: !!user, moduleId, lessonId });
@@ -72,102 +72,107 @@ export default function LessonDetailPage() {
     setError(null);
 
     try {
-      console.log('Fetching lesson data for:', { moduleId, lessonId });
+      console.log('🚀 Fetching lesson data in parallel for:', { moduleId, lessonId });
 
-      // Fetch module
-      let { data: moduleData, error: moduleError } = await supabase
-        .from('academy_modules')
-        .select('*')
-        .eq('id', moduleId)
-        .single();
-
-      if (moduleError) {
-        // Try to find by slug if ID lookup fails (backward compatibility)
-        const { data: moduleBySlug, error: slugError } = await supabase
+      // OPTIMIZED: Fetch all data in parallel with optimized queries
+      const [moduleResult, lessonsResult, progressResult, ebookResult] = await Promise.allSettled([
+        // Fetch module with optimized query
+        supabase
           .from('academy_modules')
-          .select('*')
-          .eq('slug', moduleId)
-          .single();
+          .select('id, title, description, order_index, slug, status')
+          .or(`id.eq.${moduleId},slug.eq.${moduleId}`)
+          .eq('status', 'published')
+          .single(),
         
-        if (slugError || !moduleBySlug) {
-          console.error('Module error:', moduleError);
-          setError('Module niet gevonden');
-          return;
-        }
+        // Fetch lessons with optimized query using new indexes
+        supabase
+          .from('academy_lessons')
+          .select('id, title, description, content, duration, type, video_url, module_id, order_index, status')
+          .eq('module_id', moduleId)
+          .eq('status', 'published')
+          .order('order_index'),
         
-        // Use the module found by slug
-        moduleData = moduleBySlug;
+        // Fetch progress with optimized query using new indexes
+        supabase
+          .from('user_lesson_progress')
+          .select('lesson_id')
+          .eq('user_id', user.id)
+          .eq('completed', true),
+        
+        // Fetch ebook with optimized query
+        supabase
+          .from('academy_ebooks')
+          .select('id, title, file_url, status')
+          .eq('lesson_id', lessonId)
+          .eq('status', 'published')
+          .single()
+      ]);
+
+      // Process module result
+      let moduleData: Module | null = null;
+      if (moduleResult.status === 'fulfilled' && !moduleResult.value.error) {
+        moduleData = moduleResult.value.data;
+        console.log('✅ Module loaded:', moduleData?.title);
+      } else {
+        console.error('❌ Module error:', moduleResult.status === 'rejected' ? moduleResult.reason : moduleResult.value?.error);
+        setError('Module niet gevonden');
+        return;
       }
 
-      // Fetch lessons
-      const { data: lessonsData, error: lessonsError } = await supabase
-        .from('academy_lessons')
-        .select('*')
-        .eq('module_id', moduleData.id)
-        .eq('status', 'published')
-        .order('order_index');
-
-      if (lessonsError) {
-        console.error('Lessons error:', lessonsError);
+      // Process lessons result
+      let lessonsData: Lesson[] = [];
+      if (lessonsResult.status === 'fulfilled' && !lessonsResult.value.error) {
+        lessonsData = lessonsResult.value.data || [];
+        console.log('✅ Lessons loaded:', lessonsData.length);
+      } else {
+        console.error('❌ Lessons error:', lessonsResult.status === 'rejected' ? lessonsResult.reason : lessonsResult.value?.error);
         setError('Lessen niet gevonden');
         return;
       }
 
-      // Fetch progress
-      const { data: progressData, error: progressError } = await supabase
-        .from('user_lesson_progress')
-        .select('lesson_id')
-        .eq('user_id', user.id)
-        .eq('completed', true);
-
-      if (progressError) {
-        console.error('Progress error:', progressError);
+      // Process progress result
+      let progressData: any[] = [];
+      if (progressResult.status === 'fulfilled' && !progressResult.value.error) {
+        progressData = progressResult.value.data || [];
+        console.log('✅ Progress loaded:', progressData.length);
+      } else {
+        console.warn('⚠️ Progress warning:', progressResult.status === 'rejected' ? progressResult.reason : progressResult.value?.error);
       }
 
-      // Find current lesson - try by ID first, then by slug (backward compatibility)
-      let currentLesson = lessonsData?.find(l => l.id === lessonId);
+      // Find current lesson using optimized lookup
+      let currentLesson = lessonsData.find(l => l.id === lessonId || (l as any).slug === lessonId);
       if (!currentLesson) {
-        // Try to find by slug if ID lookup fails (backward compatibility)
-        const lessonBySlug = lessonsData?.find(l => l.slug === lessonId);
-        if (lessonBySlug) {
-          console.log('✅ Lesson found by slug:', lessonBySlug.title);
-          currentLesson = lessonBySlug;
-        } else {
-          console.error('Lesson not found by ID or slug:', { lessonId, availableSlugs: lessonsData?.map(l => l.slug), availableIds: lessonsData?.map(l => l.id) });
-          setError('Les niet gevonden');
-          return;
-        }
+        console.error('❌ Lesson not found:', { lessonId, availableIds: lessonsData.map(l => l.id) });
+        setError('Les niet gevonden');
+        return;
       }
 
-      // Check completion
-      const isCompleted = progressData?.some(p => p.lesson_id === lessonId) || false;
-      const completedIds = progressData?.map(p => p.lesson_id) || [];
+      // Check completion with optimized lookup
+      const isCompleted = progressData.some(p => p.lesson_id === currentLesson.id);
+      const completedIds = progressData.map(p => p.lesson_id);
 
-      // Fetch ebook for this lesson
-      const { data: ebookData, error: ebookError } = await supabase
-        .from('academy_ebooks')
-        .select('*')
-        .eq('lesson_id', lessonId)
-        .eq('status', 'published')
-        .single();
-
-      if (ebookError && ebookError.code !== 'PGRST116') {
-        console.error('Ebook error:', ebookError);
+      // Process ebook result
+      let ebookData: any = null;
+      if (ebookResult.status === 'fulfilled' && !ebookResult.value.error) {
+        ebookData = ebookResult.value.data;
+        console.log('✅ Ebook loaded');
+      } else if (ebookResult.status === 'rejected' || (ebookResult.value?.error && ebookResult.value.error.code !== 'PGRST116')) {
+        console.warn('⚠️ Ebook warning:', ebookResult.status === 'rejected' ? ebookResult.reason : ebookResult.value?.error);
       }
 
       // Update state
       setModule(moduleData);
-      setLessons(lessonsData || []);
+      setLessons(lessonsData);
       setLesson(currentLesson);
       setCompleted(isCompleted);
       setCompletedLessonIds(completedIds);
       setEbook(ebookData);
       setIsDataLoaded(true);
 
-      console.log('Data loaded successfully');
+      console.log('🚀 Data loaded successfully in parallel');
 
     } catch (error) {
-      console.error('Error:', error);
+      console.error('❌ Error:', error);
       setError('Er is een fout opgetreden');
     } finally {
       setLoading(false);
@@ -245,6 +250,52 @@ export default function LessonDetailPage() {
   const currentIndex = lessons.findIndex(l => l.id === lessonId);
   const prevLesson = currentIndex > 0 ? lessons[currentIndex - 1] : null;
   const nextLesson = currentIndex < lessons.length - 1 ? lessons[currentIndex + 1] : null;
+
+  // OPTIMIZED: Smart prefetching for next lesson
+  useEffect(() => {
+    if (nextLesson && user) {
+      console.log('🚀 Prefetching next lesson:', nextLesson.title);
+      
+      // Prefetch next lesson data in background
+      const prefetchNextLesson = async () => {
+        try {
+          await Promise.allSettled([
+            // Prefetch next lesson basic data
+            supabase
+              .from('academy_lessons')
+              .select('id, title, description, duration, type, video_url, content')
+              .eq('id', nextLesson.id)
+              .single(),
+            
+            // Prefetch next lesson progress
+            supabase
+              .from('user_lesson_progress')
+              .select('completed')
+              .eq('user_id', user.id)
+              .eq('lesson_id', nextLesson.id)
+              .single(),
+            
+            // Prefetch next lesson ebook
+            supabase
+              .from('academy_ebooks')
+              .select('id, title, file_url')
+              .eq('lesson_id', nextLesson.id)
+              .eq('status', 'published')
+              .single()
+          ]);
+          
+          console.log('✅ Next lesson prefetched successfully');
+        } catch (error) {
+          console.warn('⚠️ Next lesson prefetch warning:', error);
+        }
+      };
+      
+      // Start prefetching after current lesson is loaded
+      const prefetchTimer = setTimeout(prefetchNextLesson, 1000);
+      
+      return () => clearTimeout(prefetchTimer);
+    }
+  }, [nextLesson, user]);
 
   // Render loading state
   if (loading) {

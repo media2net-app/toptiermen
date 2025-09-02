@@ -100,66 +100,89 @@ export default function AcademyPage() {
       }, 10000); // 10 second timeout
 
       try {
-        // Fetch modules
-        console.log('📚 Academy: Fetching modules...');
-        const { data: modulesData, error: modulesError } = await supabase
-          .from('academy_modules')
-          .select('*')
-          .eq('status', 'published')
-          .order('order_index');
+        // OPTIMIZED: Fetch all data in parallel with optimized queries
+        console.log('🚀 Academy: Fetching all data in parallel...');
+        
+        const [modulesResult, lessonsResult, progressResult, lessonProgressResult, unlocksResult] = await Promise.allSettled([
+          // Fetch modules with optimized query
+          supabase
+            .from('academy_modules')
+            .select('id, title, description, order_index, status, cover_image')
+            .eq('status', 'published')
+            .order('order_index'),
+          
+          // Fetch lessons with optimized query
+          supabase
+            .from('academy_lessons')
+            .select('id, title, module_id, order_index, status')
+            .eq('status', 'published')
+            .order('order_index'),
+          
+          // Fetch user progress with optimized query
+          supabase
+            .from('user_module_progress')
+            .select('module_id, progress_percentage')
+            .eq('user_id', user.id),
+          
+          // Fetch lesson progress with optimized query
+          supabase
+            .from('user_lesson_progress')
+            .select('lesson_id, completed')
+            .eq('user_id', user.id)
+            .eq('completed', true),
+          
+          // Fetch module unlocks with optimized query
+          supabase
+            .from('user_module_unlocks')
+            .select('module_id, unlocked_at')
+            .eq('user_id', user.id)
+        ]);
 
-        if (modulesError) {
-          console.error('❌ Academy: Error fetching modules:', modulesError);
-          throw modulesError; // This is critical, so we throw
+        // Process modules result
+        let modulesData = [];
+        if (modulesResult.status === 'fulfilled' && !modulesResult.value.error) {
+          modulesData = modulesResult.value.data || [];
+          console.log('✅ Academy: Modules loaded:', modulesData.length);
+        } else {
+          console.error('❌ Academy: Modules error:', modulesResult.status === 'rejected' ? modulesResult.reason : modulesResult.value?.error);
+          throw new Error('Modules niet geladen');
         }
 
-        // Fetch lessons
-        console.log('📖 Academy: Fetching lessons...');
-        const { data: lessonsData, error: lessonsError } = await supabase
-          .from('academy_lessons')
-          .select('*')
-          .eq('status', 'published')
-          .order('order_index');
-
-        if (lessonsError) {
-          console.error('❌ Academy: Error fetching lessons:', lessonsError);
-          throw lessonsError; // This is critical, so we throw
+        // Process lessons result
+        let lessonsData = [];
+        if (lessonsResult.status === 'fulfilled' && !lessonsResult.value.error) {
+          lessonsData = lessonsResult.value.data || [];
+          console.log('✅ Academy: Lessons loaded:', lessonsData.length);
+        } else {
+          console.error('❌ Academy: Lessons error:', lessonsResult.status === 'rejected' ? lessonsResult.reason : lessonsResult.value?.error);
+          throw new Error('Lessen niet geladen');
         }
 
-        // Fetch user progress
-        console.log('📊 Academy: Fetching user progress...');
-        const { data: progressData, error: progressError } = await supabase
-          .from('user_module_progress')
-          .select('*')
-          .eq('user_id', user.id);
-
-        if (progressError) {
-          console.warn('⚠️ Academy: Warning fetching user progress:', progressError);
-          // Don't throw, continue with empty data
+        // Process progress result
+        let progressData = [];
+        if (progressResult.status === 'fulfilled' && !progressResult.value.error) {
+          progressData = progressResult.value.data || [];
+          console.log('✅ Academy: Progress loaded:', progressData.length);
+        } else {
+          console.warn('⚠️ Academy: Progress warning:', progressResult.status === 'rejected' ? progressResult.reason : progressResult.value?.error);
         }
 
-        // Fetch lesson progress
-        console.log('📝 Academy: Fetching lesson progress...');
-        const { data: lessonProgressData, error: lessonProgressError } = await supabase
-          .from('user_lesson_progress')
-          .select('*')
-          .eq('user_id', user.id);
-
-        if (lessonProgressError) {
-          console.warn('⚠️ Academy: Warning fetching lesson progress:', lessonProgressError);
-          // Don't throw, continue with empty data
+        // Process lesson progress result
+        let lessonProgressData = [];
+        if (lessonProgressResult.status === 'fulfilled' && !lessonProgressResult.value.error) {
+          lessonProgressData = lessonProgressResult.value.data || [];
+          console.log('✅ Academy: Lesson progress loaded:', lessonProgressData.length);
+        } else {
+          console.warn('⚠️ Academy: Lesson progress warning:', lessonProgressResult.status === 'rejected' ? lessonProgressResult.reason : lessonProgressResult.value?.error);
         }
 
-        // Fetch module unlocks
-        console.log('🔓 Academy: Fetching module unlocks...');
-        const { data: unlocksData, error: unlocksError } = await supabase
-          .from('user_module_unlocks')
-          .select('*')
-          .eq('user_id', user.id);
-
-        if (unlocksError) {
-          console.warn('⚠️ Academy: Warning fetching module unlocks:', unlocksError);
-          // Don't throw, continue with empty data
+        // Process unlocks result
+        let unlocksData = [];
+        if (unlocksResult.status === 'fulfilled' && !unlocksResult.value.error) {
+          unlocksData = unlocksResult.value.data || [];
+          console.log('✅ Academy: Unlocks loaded:', unlocksData.length);
+        } else {
+          console.warn('⚠️ Academy: Unlocks warning:', unlocksResult.status === 'rejected' ? unlocksResult.reason : unlocksResult.value?.error);
         }
 
         if (isMounted) {
