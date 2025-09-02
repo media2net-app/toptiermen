@@ -9,6 +9,7 @@ import BadgeDisplay from '@/components/BadgeDisplay';
 import UserTasksWidget from '@/components/UserTasksWidget';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import DashboardLoadingModal from '@/components/ui/DashboardLoadingModal';
+import DashboardDebugger from '@/components/DashboardDebugger';
 
 
 // Force dynamic rendering to prevent navigator errors
@@ -95,6 +96,8 @@ export default function Dashboard() {
     xp_reward: number;
     unlocked_at?: string;
   }>>([]);
+
+  const [showDebugger, setShowDebugger] = useState(false);
 
   const { user, profile } = useSupabaseAuth();
 
@@ -447,8 +450,50 @@ export default function Dashboard() {
               </div>
             </div>
           )}
+
+          {/* Admin Debug Section */}
+          {profile?.role === 'admin' && (
+            <div className="bg-gradient-to-br from-red-900/20 to-red-800/20 border border-red-500/30 rounded-xl p-6 mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold text-red-400">🔧 Admin Debug Tools</h3>
+                <button
+                  onClick={() => setShowDebugger(!showDebugger)}
+                  className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                    showDebugger 
+                      ? 'bg-red-600 text-white hover:bg-red-700' 
+                      : 'bg-red-500 text-white hover:bg-red-600'
+                  }`}
+                >
+                  {showDebugger ? 'Verberg Debug' : 'Toon Debug'}
+                </button>
+              </div>
+              <p className="text-red-300 text-sm mb-4">
+                Debug tools voor het diagnosticeren van dashboard loading problemen en performance issues.
+              </p>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="text-red-300">
+                  <div className="font-semibold">Status:</div>
+                  <div className={showDebugger ? 'text-green-400' : 'text-red-400'}>
+                    {showDebugger ? '✅ Actief' : '❌ Inactief'}
+                  </div>
+                </div>
+                <div className="text-red-300">
+                  <div className="font-semibold">Monitoring:</div>
+                  <div>Performance, Errors, Network</div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </ClientLayout>
+
+      {/* Dashboard Debugger for Admin Users */}
+      {profile?.role === 'admin' && (
+        <DashboardDebugger 
+          isVisible={showDebugger}
+          onToggle={() => setShowDebugger(!showDebugger)}
+        />
+      )}
     </div>
   );
 } 
