@@ -48,141 +48,114 @@ export default function LessonDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [ebook, setEbook] = useState<any>(null);
   const [showVideoOverlay, setShowVideoOverlay] = useState(true);
-  const [isDataLoaded, setIsDataLoaded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-
-
-  // OPTIMIZED: Parallel data fetching with caching
+  // SIMPLIFIED: Reliable data fetching with proper error handling
   const fetchData = async () => {
     if (!user || !moduleId || !lessonId) {
       console.log('Missing data:', { user: !!user, moduleId, lessonId });
       return;
     }
 
-    // Prevent refetching if data is already loaded
-    if (isDataLoaded) {
-      console.log('Data already loaded, skipping fetch');
-      return;
-    }
-
+    console.log('🚀 Fetching lesson data for:', { moduleId, lessonId });
     setLoading(true);
     setError(null);
 
     try {
-      console.log('🚀 Fetching lesson data in parallel for:', { moduleId, lessonId });
+      // Fetch module data
+      const { data: moduleData, error: moduleError } = await supabase
+        .from('academy_modules')
+        .select('*')
+        .or(`id.eq.${moduleId},slug.eq.${moduleId}`)
+        .eq('status', 'published')
+        .single();
 
-      // OPTIMIZED: Fetch all data in parallel with optimized queries
-      const [moduleResult, lessonsResult, progressResult, ebookResult] = await Promise.allSettled([
-        // Fetch module with optimized query
-        supabase
-          .from('academy_modules')
-          .select('*')
-          .or(`id.eq.${moduleId},slug.eq.${moduleId}`)
-          .eq('status', 'published')
-          .single(),
-        
-        // Fetch lessons with optimized query using new indexes
-        supabase
-          .from('academy_lessons')
-          .select('*')
-          .eq('module_id', moduleId)
-          .eq('status', 'published')
-          .order('order_index'),
-        
-        // Fetch progress with optimized query using new indexes
-        supabase
-          .from('user_lesson_progress')
-          .select('lesson_id')
-          .eq('user_id', user.id)
-          .eq('completed', true),
-        
-        // Fetch ebook with optimized query
-        supabase
-          .from('academy_ebooks')
-          .select('id, title, file_url, status')
-          .eq('lesson_id', lessonId)
-          .eq('status', 'published')
-          .single()
-      ]);
-
-      // Process module result
-      let moduleData: Module | null = null;
-      if (moduleResult.status === 'fulfilled' && !moduleResult.value.error) {
-        moduleData = moduleResult.value.data;
-        console.log('✅ Module loaded:', moduleData?.title);
-      } else {
-        console.error('❌ Module error:', moduleResult.status === 'rejected' ? moduleResult.reason : moduleResult.value?.error);
+      if (moduleError || !moduleData) {
+        console.error('❌ Module error:', moduleError);
         setError('Module niet gevonden');
+        setLoading(false);
         return;
       }
 
-      // Process lessons result
-      let lessonsData: Lesson[] = [];
-      if (lessonsResult.status === 'fulfilled' && !lessonsResult.value.error) {
-        lessonsData = lessonsResult.value.data || [];
-        console.log('✅ Lessons loaded:', lessonsData.length);
-      } else {
-        console.error('❌ Lessons error:', lessonsResult.status === 'rejected' ? lessonsResult.reason : lessonsResult.value?.error);
+      // Fetch lessons data
+      const { data: lessonsData, error: lessonsError } = await supabase
+        .from('academy_lessons')
+        .select('*')
+        .eq('module_id', moduleData.id)
+        .eq('status', 'published')
+        .order('order_index');
+
+      if (lessonsError || !lessonsData) {
+        console.error('❌ Lessons error:', lessonsError);
         setError('Lessen niet gevonden');
+        setLoading(false);
         return;
       }
 
-      // Process progress result
-      let progressData: any[] = [];
-      if (progressResult.status === 'fulfilled' && !progressResult.value.error) {
-        progressData = progressResult.value.data || [];
-        console.log('✅ Progress loaded:', progressData.length);
-      } else {
-        console.warn('⚠️ Progress warning:', progressResult.status === 'rejected' ? progressResult.reason : progressResult.value?.error);
-      }
-
-      // Find current lesson using optimized lookup
-      let currentLesson = lessonsData.find(l => l.id === lessonId || (l as any).slug === lessonId);
+      // Find current lesson
+      const currentLesson = lessonsData.find(l => l.id === lessonId);
       if (!currentLesson) {
         console.error('❌ Lesson not found:', { lessonId, availableIds: lessonsData.map(l => l.id) });
         setError('Les niet gevonden');
+        setLoading(false);
         return;
       }
 
-      // Check completion with optimized lookup
-      const isCompleted = progressData.some(p => p.lesson_id === currentLesson.id);
-      const completedIds = progressData.map(p => p.lesson_id);
+      // Fetch user progress
+      const { data: progressData } = await supabase
+        .from('user_lesson_progress')
+        .select('lesson_id')
+        .eq('user_id', user.id)
+        .eq('completed', true);
 
-      // Process ebook result
-      let ebookData: any = null;
-      if (ebookResult.status === 'fulfilled' && !ebookResult.value.error) {
-        ebookData = ebookResult.value.data;
-        console.log('✅ Ebook loaded');
-      } else if (ebookResult.status === 'rejected' || (ebookResult.value?.error && ebookResult.value.error.code !== 'PGRST116')) {
-        console.warn('⚠️ Ebook warning:', ebookResult.status === 'rejected' ? ebookResult.reason : ebookResult.value?.error);
-      }
+      // Fetch ebook data
+      const { data: ebookData } = await supabase
+        .from('academy_ebooks')
+        .select('id, title, file_url, status')
+        .eq('lesson_id', lessonId)
+        .eq('status', 'published')
+        .single();
 
-      // Update state
+      // Update all state
       setModule(moduleData);
       setLessons(lessonsData);
       setLesson(currentLesson);
-      setCompleted(isCompleted);
-      setCompletedLessonIds(completedIds);
+      setCompleted(progressData?.some(p => p.lesson_id === currentLesson.id) || false);
+      setCompletedLessonIds(progressData?.map(p => p.lesson_id) || []);
       setEbook(ebookData);
-      setIsDataLoaded(true);
 
-      console.log('🚀 Data loaded successfully in parallel');
+      console.log('✅ Data loaded successfully:', {
+        module: moduleData.title,
+        lesson: currentLesson.title,
+        lessonsCount: lessonsData.length,
+        hasEbook: !!ebookData
+      });
 
     } catch (error) {
-      console.error('❌ Error:', error);
-      setError('Er is een fout opgetreden');
+      console.error('❌ Fetch error:', error);
+      setError('Er is een fout opgetreden bij het laden van de les');
     } finally {
       setLoading(false);
     }
   };
 
+  // Reset data when lessonId changes
   useEffect(() => {
-    // Only fetch data if not already loaded and all required data is present
-    if (!isDataLoaded && user && moduleId && lessonId) {
+    if (user && moduleId && lessonId) {
+      // Reset all state for new lesson
+      setModule(null);
+      setLesson(null);
+      setLessons([]);
+      setCompleted(false);
+      setCompletedLessonIds([]);
+      setEbook(null);
+      setError(null);
+      setLoading(true);
+      
+      // Fetch new data
       fetchData();
     }
-  }, [moduleId, lessonId]); // Removed 'user' dependency to prevent unnecessary reloads
+  }, [moduleId, lessonId, user]);
 
   const handleCompleteLesson = async () => {
     if (!user || !lesson) return;
@@ -249,51 +222,10 @@ export default function LessonDetailPage() {
   const prevLesson = currentIndex > 0 ? lessons[currentIndex - 1] : null;
   const nextLesson = currentIndex < lessons.length - 1 ? lessons[currentIndex + 1] : null;
 
-  // OPTIMIZED: Smart prefetching for next lesson
-  useEffect(() => {
-    if (nextLesson && user) {
-      console.log('🚀 Prefetching next lesson:', nextLesson.title);
-      
-      // Prefetch next lesson data in background
-      const prefetchNextLesson = async () => {
-        try {
-          await Promise.allSettled([
-            // Prefetch next lesson basic data
-            supabase
-              .from('academy_lessons')
-              .select('id, title, description, duration, type, video_url, content')
-              .eq('id', nextLesson.id)
-              .single(),
-            
-            // Prefetch next lesson progress
-            supabase
-              .from('user_lesson_progress')
-              .select('completed')
-              .eq('user_id', user.id)
-              .eq('lesson_id', nextLesson.id)
-              .single(),
-            
-            // Prefetch next lesson ebook
-            supabase
-              .from('academy_ebooks')
-              .select('id, title, file_url')
-              .eq('lesson_id', nextLesson.id)
-              .eq('status', 'published')
-              .single()
-          ]);
-          
-          console.log('✅ Next lesson prefetched successfully');
-        } catch (error) {
-          console.warn('⚠️ Next lesson prefetch warning:', error);
-        }
-      };
-      
-      // Start prefetching after current lesson is loaded
-      const prefetchTimer = setTimeout(prefetchNextLesson, 1000);
-      
-      return () => clearTimeout(prefetchTimer);
-    }
-  }, [nextLesson, user]);
+  // Get module number based on order_index
+  const getModuleNumber = (orderIndex: number) => {
+    return orderIndex.toString().padStart(2, '0');
+  };
 
   // Render loading state
   if (loading) {
@@ -366,11 +298,6 @@ export default function LessonDetailPage() {
       </PageLayout>
     );
   }
-
-  // Get module number based on order_index
-  const getModuleNumber = (orderIndex: number) => {
-    return orderIndex.toString().padStart(2, '0');
-  };
 
   return (
     <PageLayout 
