@@ -224,16 +224,7 @@ export default function AcademyManagement() {
     fetchStats();
   }, [moduleCompletion]);
 
-  useEffect(() => {
-    const handleVisibility = () => {
-      if (document.visibilityState === 'visible') {
-        fetchModules();
-        fetchLessons();
-      }
-    };
-    document.addEventListener('visibilitychange', handleVisibility);
-    return () => document.removeEventListener('visibilitychange', handleVisibility);
-  }, []);
+  // Removed visibilitychange event listener to prevent page reloads when switching tabs
 
   // Helper om het eerstvolgende vrije positie-nummer te bepalen
   function getNextModulePositie() {

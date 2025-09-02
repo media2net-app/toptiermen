@@ -122,18 +122,7 @@ export default function MarketingDashboard() {
     return () => clearInterval(interval);
   }, []);
 
-  // Refresh data when page becomes visible again
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        console.log('👁️ Page visible - refreshing Facebook data...');
-        loadFacebookData();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, []);
+  // Removed visibilitychange event listener to prevent page reloads when switching tabs
 
   // Separate function for Facebook connection check (runs in background)
   const checkFacebookConnection = async () => {
