@@ -182,6 +182,7 @@ export default function ForcedOnboardingModal({ isOpen, onComplete }: ForcedOnbo
 
     const updatedStatus = await updateOnboardingStatus(1, 'complete_step', { mainGoal });
     if (updatedStatus) {
+      setCurrentStep(2); // Update step before closing modal
       // Close modal first
       onComplete();
       // Then navigate to missions page
@@ -199,6 +200,7 @@ export default function ForcedOnboardingModal({ isOpen, onComplete }: ForcedOnbo
 
     const updatedStatus = await updateOnboardingStatus(2, 'complete_step', { selectedMissions });
     if (updatedStatus) {
+      setCurrentStep(3); // Update step before closing modal
       // Close modal first
       onComplete();
       // Then navigate to training center
@@ -237,6 +239,7 @@ export default function ForcedOnboardingModal({ isOpen, onComplete }: ForcedOnbo
       selectedChallenges 
     });
     if (updatedStatus) {
+      setCurrentStep(5); // Update step before closing modal
       // Close modal first
       onComplete();
       // Then navigate to forum
@@ -254,6 +257,7 @@ export default function ForcedOnboardingModal({ isOpen, onComplete }: ForcedOnbo
 
     const updatedStatus = await updateOnboardingStatus(5, 'complete_step', { forumIntroduction });
     if (updatedStatus) {
+      setCurrentStep(6); // Update step before closing modal
       // Close modal first
       onComplete();
       // Then navigate to onboarding completion page
@@ -290,19 +294,18 @@ export default function ForcedOnboardingModal({ isOpen, onComplete }: ForcedOnbo
             <h2 className="text-xl font-semibold text-white">
               {currentStep === 0 ? 'Welkom bij Toptiermen' : `Stap ${currentStep + 1} van 6`}
             </h2>
-            {currentStep > 0 && (
-              <div className="flex items-center gap-2">
-                <div className="w-32 bg-[#181F17] rounded-full h-2">
-                  <div 
-                    className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${((currentStep + 1) / 6) * 100}%` }}
-                  ></div>
-                </div>
-                <span className="text-sm text-[#8BAE5A]">
-                  {currentStep + 1}/6
-                </span>
+            {/* Always show progress bar for all steps */}
+            <div className="flex items-center gap-2">
+              <div className="w-32 bg-[#181F17] rounded-full h-2">
+                <div 
+                  className="bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${((currentStep + 1) / 6) * 100}%` }}
+                ></div>
               </div>
-            )}
+              <span className="text-sm text-[#8BAE5A]">
+                {currentStep + 1}/6
+              </span>
+            </div>
           </div>
         </div>
 
