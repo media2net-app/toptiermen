@@ -249,7 +249,7 @@ export default function ModuleDetailPage() {
               
               <div className="flex items-center justify-between text-sm">
                 <span className="text-[#8BAE5A]">Duur: {lesson.duration}</span>
-                <span className="text-gray-500">Type: {lesson.type}</span>
+                <span className="text-gray-500">Duur: {lesson.duration}</span>
               </div>
             </button>
           ))}
