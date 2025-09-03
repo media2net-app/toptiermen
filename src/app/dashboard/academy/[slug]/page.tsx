@@ -40,17 +40,10 @@ export default function ModuleDetailPage() {
   const [loading, setLoading] = useState(true);
   const [completedLessonIds, setCompletedLessonIds] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [isDataLoaded, setIsDataLoaded] = useState(false);
 
   const fetchModuleData = async () => {
     if (!user || !moduleId) {
       console.log('Module page: Missing required data', { user: !!user, moduleId });
-      return;
-    }
-
-    // Prevent refetching if data is already loaded for this module
-    if (isDataLoaded && module && module.id === moduleId) {
-      console.log('✅ Module data already loaded for this module, skipping fetch');
       return;
     }
 
@@ -106,8 +99,7 @@ export default function ModuleDetailPage() {
         completedCount: progressData?.length || 0
       });
 
-      // Mark data as loaded to prevent unnecessary refetching
-      setIsDataLoaded(true);
+
 
     } catch (error) {
       console.error('❌ Fetch error:', error);
@@ -119,35 +111,12 @@ export default function ModuleDetailPage() {
 
   useEffect(() => {
     if (user && moduleId) {
-      // Only reset and fetch if this is a new module or initial load
-      const hasExistingData = module && lessons.length > 0;
+      console.log('🔄 Module page useEffect triggered:', { moduleId, user: user.email });
       
-      if (hasExistingData && module.id !== moduleId) {
-        console.log('🔄 Module changed, resetting data...');
-        // Reset state for new module
-        setModule(null);
-        setLessons([]);
-        setCompletedLessonIds([]);
-        setError(null);
-        setLoading(true);
-        setIsDataLoaded(false);
-        
-        // Fetch new data
-        fetchModuleData();
-      } else if (!hasExistingData) {
-        // Initial load - fetch data
-        fetchModuleData();
-      }
+      // Always fetch data when moduleId or user changes
+      fetchModuleData();
     }
   }, [moduleId, user]);
-
-  // Cleanup effect to reset isDataLoaded on unmount
-  useEffect(() => {
-    return () => {
-      console.log('🧹 Module component unmounting, resetting isDataLoaded');
-      setIsDataLoaded(false);
-    };
-  }, []);
 
   // Get module number based on order_index
   const getModuleNumber = (orderIndex: number) => {
