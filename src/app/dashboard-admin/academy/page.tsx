@@ -33,6 +33,7 @@ import AcademyVideoUpload from '@/components/AcademyVideoUpload';
 import PDFUpload from '@/components/PDFUpload';
 import ImageUpload from '@/components/ImageUpload';
 import { AdminCard, AdminStatsCard, AdminButton, AdminActionButton } from '@/components/admin';
+import VideoDurationExtractor from '@/components/admin/VideoDurationExtractor';
 import 'react-quill/dist/quill.snow.css';
 
 const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
@@ -601,6 +602,14 @@ export default function AcademyManagement() {
           color="orange"
         />
       </div>
+
+      {/* Video Duration Extractor Tool */}
+      {selectedModule && (
+        <VideoDurationExtractor 
+          lessons={lessons.filter(l => l.module_id === selectedModule)}
+          onUpdate={fetchLessons}
+        />
+      )}
 
       {/* Modules Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
