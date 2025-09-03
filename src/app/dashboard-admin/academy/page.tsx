@@ -347,43 +347,72 @@ export default function AcademyManagement() {
 
   // Lesson Modal Functions
   const openLessonModal = (lesson?: any) => {
-    if (lesson) {
-      setEditingLesson(lesson.id);
-      setLessonForm({
-        title: lesson.title || '',
-        type: lesson.type || 'video',
-        videoUrl: lesson.video_url || '',
-        content: lesson.content || '',
-        status: lesson.status || 'published',
-        attachments: lesson.attachments || [],
-        examQuestions: lesson.exam_questions || [],
-        duration: lesson.duration || '',
-        worksheetUrl: lesson.worksheet_url || null
-      });
-    } else {
-      setEditingLesson(null);
-      setLessonForm({
-        title: '',
-        type: 'video',
-        videoUrl: '',
-        content: '',
-        status: 'published',
-        attachments: [],
-        examQuestions: [],
-        duration: '',
-        worksheetUrl: null
-      });
+    console.log('🔍 openLessonModal called with:', lesson);
+    
+    try {
+      if (lesson) {
+        console.log('📝 Editing existing lesson:', {
+          id: lesson.id,
+          title: lesson.title,
+          type: lesson.type,
+          video_url: lesson.video_url,
+          content: lesson.content,
+          status: lesson.status,
+          duration: lesson.duration
+        });
+        
+        setEditingLesson(lesson.id);
+        setLessonForm({
+          title: lesson.title || '',
+          type: lesson.type || 'video',
+          videoUrl: lesson.video_url || '',
+          content: lesson.content || '',
+          status: lesson.status || 'published',
+          attachments: lesson.attachments || [],
+          examQuestions: lesson.exam_questions || [],
+          duration: lesson.duration || '',
+          worksheetUrl: lesson.worksheet_url || null
+        });
+      } else {
+        console.log('📝 Creating new lesson');
+        setEditingLesson(null);
+        setLessonForm({
+          title: '',
+          type: 'video',
+          videoUrl: '',
+          content: '',
+          status: 'published',
+          attachments: [],
+          examQuestions: [],
+          duration: '',
+          worksheetUrl: null
+        });
+      }
+      
+      console.log('✅ Setting showLessonModal to true');
+      setShowLessonModal(true);
+      
+    } catch (error) {
+      console.error('❌ Error in openLessonModal:', error);
+      toast.error('Fout bij openen van lesson modal: ' + error.message);
     }
-    setShowLessonModal(true);
   };
 
   const handleLessonSave = async () => {
+    console.log('💾 handleLessonSave called');
+    console.log('📝 Current lessonForm:', lessonForm);
+    console.log('🔧 editingLesson:', editingLesson);
+    console.log('📚 selectedModule:', selectedModule);
+    
     setIsLoading(true);
     try {
       // Use default duration if empty
       const duration = lessonForm.duration.trim() || '10m';
+      console.log('⏱️ Duration to save:', duration);
       
       if (editingLesson) {
+        console.log('🔄 Updating existing lesson with ID:', editingLesson);
+        
         // Update bestaande les
         const { error } = await supabase
           .from('academy_lessons')
@@ -400,10 +429,17 @@ export default function AcademyManagement() {
             updated_at: new Date().toISOString(),
           })
           .eq('id', editingLesson);
-        if (error) throw error;
+          
+        if (error) {
+          console.error('❌ Supabase update error:', error);
+          throw error;
+        }
         
+        console.log('✅ Lesson updated successfully');
         toast.success(`Les "${lessonForm.title}" succesvol bijgewerkt`);
       } else {
+        console.log('🆕 Creating new lesson');
+        
         // Nieuwe les aanmaken
         const { data, error } = await supabase
           .from('academy_lessons')
@@ -421,15 +457,27 @@ export default function AcademyManagement() {
           })
           .select()
           .single();
-        if (error) throw error;
+          
+        if (error) {
+          console.error('❌ Supabase insert error:', error);
+          throw error;
+        }
         
+        console.log('✅ New lesson created successfully:', data);
         toast.success(`Les "${lessonForm.title}" succesvol aangemaakt`);
       }
+      
+      console.log('🔄 Refreshing lessons...');
       await fetchLessons();
+      
+      console.log('🚪 Closing modal...');
       closeLessonModal();
+      
     } catch (error: any) {
+      console.error('❌ Error in handleLessonSave:', error);
       toast.error('Fout bij opslaan: ' + error.message);
     } finally {
+      console.log('🏁 Setting isLoading to false');
       setIsLoading(false);
     }
   };
@@ -784,7 +832,10 @@ export default function AcademyManagement() {
                     <div className="admin-action-buttons">
                       <AdminActionButton 
                         variant="edit"
-                        onClick={() => openLessonModal(lesson)}
+                        onClick={() => {
+                          console.log('🖱️ Edit button clicked for lesson:', lesson);
+                          openLessonModal(lesson);
+                        }}
                         title="Bewerk les"
                       />
                       <AdminActionButton 
