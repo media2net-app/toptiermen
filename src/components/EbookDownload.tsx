@@ -46,17 +46,12 @@ export default function EbookDownload({
 
     try {
       if (type === 'html') {
-        // Open de HTML versie van het ebook via de beveiligde API route
-        const filename = ebookUrl.split('/').pop()?.replace('.pdf', '.html');
-        if (filename) {
-          const secureUrl = `/api/ebooks/${filename}`;
-          window.open(secureUrl, '_blank');
-          setDownloadStatus('success');
-        } else {
-          throw new Error('Invalid filename');
-        }
+        // Open de HTML versie van het ebook in een nieuw tabblad
+        const htmlUrl = ebookUrl.replace('.pdf', '.html');
+        window.open(htmlUrl, '_blank');
+        setDownloadStatus('success');
       } else {
-        // Download de PDF versie (PDFs kunnen in public blijven)
+        // Download de PDF versie
         const pdfUrl = ebookUrl.replace('.html', '.pdf');
         const link = document.createElement('a');
         link.href = pdfUrl;
