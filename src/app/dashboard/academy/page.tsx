@@ -73,7 +73,7 @@ export default function AcademyPage() {
   const [hasAcademyBadge, setHasAcademyBadge] = useState(false);
   const [academyBadgeData, setAcademyBadgeData] = useState<any>(null);
 
-  // Fetch academy data
+  // Fetch academy data with performance optimizations
   useEffect(() => {
     const fetchAcademyData = async () => {
       if (!user) {
@@ -91,65 +91,80 @@ export default function AcademyPage() {
       setLoading(true);
       setError(null);
 
-      try {
-        // Fetch modules
-        const { data: modulesData, error: modulesError } = await supabase
-          .from('academy_modules')
-          .select('*')
-          .eq('status', 'published')
-          .order('order_index');
+      // Add timeout to prevent infinite loading
+      const timeoutId = setTimeout(() => {
+        console.warn('⚠️ Academy data fetch timeout, showing error...');
+        setError('Data laden duurde te lang. Probeer de pagina te verversen.');
+        setLoading(false);
+      }, 10000); // 10 second timeout
 
-        if (modulesError || !modulesData) {
-          console.error('❌ Modules error:', modulesError);
+      try {
+        // PARALLEL DATA FETCHING for better performance
+        console.log('🚀 Starting parallel data fetch...');
+        
+        const [modulesResult, lessonsResult, progressResult, unlockResult] = await Promise.all([
+          supabase
+            .from('academy_modules')
+            .select('*')
+            .eq('status', 'published')
+            .order('order_index'),
+          
+          supabase
+            .from('academy_lessons')
+            .select('*')
+            .eq('status', 'published')
+            .order('order_index'),
+          
+          supabase
+            .from('user_lesson_progress')
+            .select('lesson_id, completed')
+            .eq('user_id', user.id)
+            .eq('completed', true),
+          
+          supabase
+            .from('user_module_unlocks')
+            .select('module_id, unlocked_at, opened_at')
+            .eq('user_id', user.id)
+        ]);
+
+        // Check for errors
+        if (modulesResult.error || !modulesResult.data) {
+          console.error('❌ Modules error:', modulesResult.error);
           setError('Modules niet gevonden');
           setLoading(false);
           return;
         }
 
-        // Fetch lessons
-        const { data: lessonsData, error: lessonsError } = await supabase
-          .from('academy_lessons')
-          .select('*')
-          .eq('status', 'published')
-          .order('order_index');
-
-        if (lessonsError || !lessonsData) {
-          console.error('❌ Lessons error:', lessonsError);
+        if (lessonsResult.error || !lessonsResult.data) {
+          console.error('❌ Lessons error:', lessonsResult.error);
           setError('Lessen niet gevonden');
           setLoading(false);
           return;
         }
 
-        // Fetch user progress
-        const { data: progressData } = await supabase
-          .from('user_lesson_progress')
-          .select('lesson_id, completed')
-          .eq('user_id', user.id)
-          .eq('completed', true);
+        const modulesData = modulesResult.data;
+        const lessonsData = lessonsResult.data;
+        const progressData = progressResult.data;
+        const unlockData = unlockResult.data;
 
-        // Fetch module unlocks
-        const { data: unlockData } = await supabase
-          .from('user_module_unlocks')
-          .select('module_id, unlocked_at, opened_at')
-          .eq('user_id', user.id);
-
-        // Process data
+        // OPTIMIZED DATA PROCESSING for better performance
+        console.log('⚡ Processing data...');
+        
+        // Create lookup maps for O(1) access
+        const lessonProgressSet = new Set(progressData?.map(p => p.lesson_id) || []);
+        const unlockMap: UnlockData = {};
         const progressMap: ProgressData = {};
         const lessonProgressMap: LessonProgress = {};
-        const unlockMap: UnlockData = {};
 
-        // Calculate progress per module
-        modulesData.forEach(module => {
-          const moduleLessons = lessonsData.filter(l => l.module_id === module.id);
-          const completedLessons = progressData?.filter(p => 
-            moduleLessons.some(l => l.id === p.lesson_id)
-          ).length || 0;
-          
-          progressMap[module.id] = moduleLessons.length > 0 ? 
-            Math.round((completedLessons / moduleLessons.length) * 100) : 0;
+        // Process unlocks (O(n))
+        unlockData?.forEach(unlock => {
+          unlockMap[unlock.module_id] = {
+            unlocked_at: unlock.unlocked_at,
+            opened_at: unlock.opened_at
+          };
         });
 
-        // Create lesson progress map
+        // Process lesson progress (O(n))
         progressData?.forEach(progress => {
           lessonProgressMap[progress.lesson_id] = {
             completed: progress.completed,
@@ -157,13 +172,17 @@ export default function AcademyPage() {
           };
         });
 
-        // Create unlock map
-        unlockData?.forEach(unlock => {
-          unlockMap[unlock.module_id] = {
-            unlocked_at: unlock.unlocked_at,
-            opened_at: unlock.opened_at
-          };
+        // Calculate module progress efficiently (O(n))
+        modulesData.forEach(module => {
+          const moduleLessons = lessonsData.filter(l => l.module_id === module.id);
+          const completedCount = moduleLessons.filter(lesson => lessonProgressSet.has(lesson.id)).length;
+          
+          progressMap[module.id] = moduleLessons.length > 0 ? 
+            Math.round((completedCount / moduleLessons.length) * 100) : 0;
         });
+
+        // Clear timeout since data loaded successfully
+        clearTimeout(timeoutId);
 
         // Update state
         setModules(modulesData);
@@ -181,6 +200,7 @@ export default function AcademyPage() {
 
       } catch (error) {
         console.error('❌ Academy fetch error:', error);
+        clearTimeout(timeoutId);
         setError('Er is een fout opgetreden bij het laden van de Academy');
       } finally {
         setLoading(false);
