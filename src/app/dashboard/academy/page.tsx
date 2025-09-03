@@ -146,7 +146,7 @@ export default function AcademyPage() {
         progressData?.forEach(progress => {
           lessonProgressMap[progress.lesson_id] = {
             completed: progress.completed,
-            completed_at: progress.completed
+            completed_at: progress.completed_at
           };
         });
 
@@ -351,7 +351,6 @@ export default function AcademyPage() {
       {/* Badge Unlock Modal */}
       {showBadgeModal && badgeData && (
         <BadgeUnlockModal
-          isOpen={showBadgeModal}
           badge={badgeData}
           onClose={() => {
             setShowBadgeModal(false);
