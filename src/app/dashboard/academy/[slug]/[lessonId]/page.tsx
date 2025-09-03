@@ -48,12 +48,19 @@ export default function LessonDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [ebook, setEbook] = useState<any>(null);
   const [showVideoOverlay, setShowVideoOverlay] = useState(true);
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   // SIMPLIFIED: Reliable data fetching with proper error handling
   const fetchData = async () => {
     if (!user || !moduleId || !lessonId) {
       console.log('Missing data:', { user: !!user, moduleId, lessonId });
+      return;
+    }
+
+    // Prevent refetching if data is already loaded
+    if (isDataLoaded) {
+      console.log('Data already loaded, skipping fetch');
       return;
     }
 
@@ -123,6 +130,7 @@ export default function LessonDetailPage() {
       setCompleted(progressData?.some(p => p.lesson_id === currentLesson.id) || false);
       setCompletedLessonIds(progressData?.map(p => p.lesson_id) || []);
       setEbook(ebookData);
+      setIsDataLoaded(true);
 
       console.log('✅ Data loaded successfully:', {
         module: moduleData.title,
@@ -151,6 +159,7 @@ export default function LessonDetailPage() {
       setEbook(null);
       setError(null);
       setLoading(true);
+      setIsDataLoaded(false);
       
       // Fetch new data
       fetchData();
@@ -504,6 +513,37 @@ export default function LessonDetailPage() {
             <p className="text-gray-400">Ga door naar de volgende les om je voortgang te behouden.</p>
           </div>
         )}
+
+        {/* Navigation buttons */}
+        <div className="flex justify-between items-center mt-8">
+          {prevLesson ? (
+            <button
+              onClick={() => {
+                console.log('🔄 Navigating to previous lesson with hard refresh...');
+                window.location.href = `/dashboard/academy/${module.id}/${prevLesson.id}?cache-bust=${Date.now()}`;
+              }}
+              className="px-6 py-3 bg-[#232D1A] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors font-semibold"
+            >
+              ← Vorige les: {prevLesson.title}
+            </button>
+          ) : (
+            <div></div>
+          )}
+          
+          {nextLesson ? (
+            <button
+              onClick={() => {
+                console.log('🔄 Navigating to next lesson with hard refresh...');
+                window.location.href = `/dashboard/academy/${module.id}/${nextLesson.id}?cache-bust=${Date.now()}`;
+              }}
+              className="px-6 py-3 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold"
+            >
+              Volgende les: {nextLesson.title} →
+            </button>
+          ) : (
+            <div></div>
+          )}
+        </div>
       </div>
 
       {/* Lesson list */}
