@@ -92,7 +92,7 @@ export default function ModuleDetailPage() {
       }
 
       // Fetch user progress for this module (only if user is available)
-      let progressData = null;
+      let progressData: { lesson_id: string }[] | null = null;
       if (user) {
         const { data: userProgress } = await supabase
           .from('user_lesson_progress')
