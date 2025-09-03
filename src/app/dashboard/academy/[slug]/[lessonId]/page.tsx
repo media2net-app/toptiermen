@@ -207,12 +207,15 @@ export default function LessonDetailPage() {
 
     try {
       // Fetch module data
+      console.log('🔍 Fetching module data for:', moduleId);
       const { data: moduleData, error: moduleError } = await supabase
         .from('academy_modules')
         .select('*')
         .or(`id.eq.${moduleId},slug.eq.${moduleId}`)
         .eq('status', 'published')
         .single();
+
+      console.log('📦 Module query result:', { moduleData, moduleError });
 
       if (moduleError || !moduleData) {
         console.error('❌ Module error:', moduleError);
@@ -221,13 +224,18 @@ export default function LessonDetailPage() {
         return;
       }
 
+      console.log('✅ Module data found:', moduleData.title);
+
       // Fetch lessons data
+      console.log('🔍 Fetching lessons for module ID:', moduleData.id);
       const { data: lessonsData, error: lessonsError } = await supabase
         .from('academy_lessons')
         .select('*')
         .eq('module_id', moduleData.id)
         .eq('status', 'published')
         .order('order_index');
+
+      console.log('📚 Lessons query result:', { lessonsCount: lessonsData?.length, lessonsError });
 
       if (lessonsError || !lessonsData) {
         console.error('❌ Lessons error:', lessonsError);
@@ -236,7 +244,12 @@ export default function LessonDetailPage() {
         return;
       }
 
+      console.log('✅ Lessons found:', lessonsData.length);
+
       // Find current lesson
+      console.log('🔍 Looking for lesson ID:', lessonId);
+      console.log('📝 Available lesson IDs:', lessonsData.map(l => ({ id: l.id, title: l.title })));
+      
       const currentLesson = lessonsData.find(l => l.id === lessonId);
       if (!currentLesson) {
         console.error('❌ Lesson not found:', { lessonId, availableIds: lessonsData.map(l => l.id) });
@@ -245,20 +258,28 @@ export default function LessonDetailPage() {
         return;
       }
 
+      console.log('✅ Current lesson found:', currentLesson.title);
+
       // Fetch user progress
+      console.log('🔍 Fetching progress for user:', user.id);
       const { data: progressData } = await supabase
         .from('user_lesson_progress')
         .select('lesson_id')
         .eq('user_id', user.id)
         .eq('completed', true);
 
+      console.log('📈 Progress data:', progressData?.length, 'completed lessons');
+
       // Fetch ebook data
+      console.log('🔍 Fetching ebook for lesson:', lessonId);
       const { data: ebookData } = await supabase
         .from('academy_ebooks')
         .select('id, title, file_url, status')
         .eq('lesson_id', lessonId)
         .eq('status', 'published')
         .single();
+
+      console.log('📖 Ebook data:', ebookData ? 'Found' : 'Not found');
 
       // Update all state
       setModule(moduleData);
@@ -277,12 +298,15 @@ export default function LessonDetailPage() {
         timestamp: new Date().toISOString()
       });
 
+      console.log('🎯 All state updated, fetch complete!');
+
     } catch (error) {
       console.error('❌ Fetch error:', error);
+      console.error('❌ Error details:', error?.message, error?.code, error?.hint);
       setError('Er is een fout opgetreden bij het laden van de les');
       setIsDataLoaded(false); // Reset on error
     } finally {
-      console.log('🏁 Fetch completed, setting loading to false');
+      console.log('🏁 Fetch finally block - setting loading to false');
       setLoading(false);
     }
   };
