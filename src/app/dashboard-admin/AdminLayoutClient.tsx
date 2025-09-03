@@ -246,13 +246,21 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
   // Check admin role with better error handling - IMPROVED TO PREVENT LOOPS
   useEffect(() => {
     if (!loading && user && !isAdmin) {
-      console.log('Admin: User is not admin, redirecting to dashboard');
-      console.log('User role:', profile?.role);
-      console.log('Is admin:', isAdmin);
-      // Use setTimeout to prevent immediate redirect loops
-      setTimeout(() => {
-        router.push('/dashboard');
-      }, 100);
+      const knownAdminEmails = ['chiel@media2net.nl', 'rick@toptiermen.eu', 'admin@toptiermen.com'];
+      const isKnownAdmin = user.email && knownAdminEmails.includes(user.email);
+      
+      // Don't redirect known admin emails, even if metadata is corrupted
+      if (!isKnownAdmin) {
+        console.log('Admin: User is not admin, redirecting to dashboard');
+        console.log('User role:', profile?.role);
+        console.log('Is admin:', isAdmin);
+        // Use setTimeout to prevent immediate redirect loops
+        setTimeout(() => {
+          router.push('/dashboard');
+        }, 100);
+      } else {
+        console.log('Admin: Known admin email detected, allowing access despite metadata issues');
+      }
     }
   }, [loading, user, profile, isAdmin, router]);
 
@@ -323,8 +331,13 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
   // }
 
   // Show unauthorized message if not authenticated or not admin
-  if (!isAuthenticated || (user && !isAdmin)) {
-    console.log('Admin: Access denied - isAuthenticated:', isAuthenticated, 'user:', user?.email, 'profile role:', profile?.role, 'isAdmin:', isAdmin);
+  // Allow known admin emails even if metadata is corrupted
+  const knownAdminEmails = ['chiel@media2net.nl', 'rick@toptiermen.eu', 'admin@toptiermen.com'];
+  const isKnownAdmin = user?.email && knownAdminEmails.includes(user.email);
+  const shouldAllowAccess = isAuthenticated && (isAdmin || isKnownAdmin);
+  
+  if (!shouldAllowAccess) {
+    console.log('Admin: Access denied - isAuthenticated:', isAuthenticated, 'user:', user?.email, 'profile role:', profile?.role, 'isAdmin:', isAdmin, 'isKnownAdmin:', isKnownAdmin);
     return (
       <div className="min-h-screen bg-[#181F17] flex items-center justify-center" suppressHydrationWarning>
         <div className="text-center">
