@@ -185,7 +185,7 @@ async function updateFysiekeKrachtModule() {
     })
     .eq('id', module.id);
 
-  // Update the first lesson with detailed content
+  // Update the first lesson with focused content about WHY physical dominance matters
   const lesson1Content = `Welkom bij de module Fysieke Dominantie! In deze les leer je waarom fysieke kracht cruciaal is voor je algehele succes en welzijn.
 
 ## Waarom fysieke dominantie belangrijk is:
@@ -194,85 +194,77 @@ async function updateFysiekeKrachtModule() {
 - Krachttraining verhoogt je zelfvertrouwen
 - Het leert je doorzetten bij uitdagingen
 - Het verbetert je focus en discipline
+- Je ontwikkelt een "can-do" mentaliteit
 
 ### 2. **Fysieke Gezondheid**
 - Sterkere botten en gewrichten
-- Betere stofwisseling
-- Verhoogde energie levels
+- Betere stofwisseling en hormoonbalans
+- Verhoogde energie levels gedurende de dag
+- Verbeterde slaapkwaliteit
 
 ### 3. **Functionele Kracht**
 - Dagelijkse activiteiten worden makkelijker
 - Betere houding en balans
 - Verminderde kans op blessures
+- Meer energie voor je gezin en werk
 
 ### 4. **Status en Aantrekkingskracht**
 - Fysieke aanwezigheid creëert respect
 - Gezond lichaam straalt vitaliteit uit
 - Zelfvertrouwen door fysieke prestaties
+- Anderen nemen je serieuzer
 
-## De 5 basis principes van fysieke dominantie:
+### 5. **Emotionele Stabiliteit**
+- Training helpt bij stress management
+- Endorfines verbeteren je stemming
+- Je wordt mentaal veerkrachtiger
+- Betere controle over je emoties
 
-### 1. **Progressive Overload**
-- Verhoog geleidelijk de weerstand
-- Focus op techniek, niet alleen gewicht
-- Houd je voortgang bij
+## De wetenschap achter fysieke dominantie:
 
-### 2. **Compound Movements**
-- Squats, deadlifts, bench press
-- Pull-ups, rows, overhead press
-- Deze oefeningen trainen meerdere spiergroepen
+### **Hormonale Voordelen**
+- Verhoogde testosteron productie
+- Betere insuline gevoeligheid
+- Verlaagde cortisol levels (stress hormoon)
+- Verbeterde groeihormoon afgifte
 
-### 3. **Consistentie**
-- Train 3-4x per week
-- Houd je schema aan
-- Rust is net zo belangrijk als training
+### **Neurologische Voordelen**
+- Betere hersenfunctie en geheugen
+- Verhoogde neuroplasticiteit
+- Verbeterde focus en concentratie
+- Snellere reactietijden
 
-### 4. **Proper Form**
-- Leer de juiste techniek
-- Start met lichte gewichten
-- Vraag om feedback van een trainer
+### **Sociale Voordelen**
+- Mensen respecteren fysiek sterke mannen
+- Je straalt betrouwbaarheid uit
+- Betere lichaamstaal en houding
+- Verhoogde sociale status
 
-### 5. **Recovery**
-- Slaap 7-9 uur per nacht
-- Eet voldoende eiwitten
-- Neem rustdagen serieus
+## Wat dit betekent voor jouw leven:
 
-## Je eerste trainingsweek:
+Fysieke dominantie is niet alleen over spieren - het is over de energie die je uitstraalt en hoe anderen je waarnemen. Een sterk lichaam geeft je:
 
-### Dag 1: Push (Borst, Schouders, Triceps)
-- Bench Press: 3x8
-- Overhead Press: 3x8
-- Dips: 3x10
-- Push-ups: 3x15
+- **Meer zelfvertrouwen** in sociale situaties
+- **Betere prestaties** op het werk
+- **Sterkere relaties** door je verbeterde stemming
+- **Meer energie** voor je passies en hobby's
+- **Een voorbeeld** voor je kinderen en anderen
 
-### Dag 2: Pull (Rug, Biceps)
-- Deadlifts: 3x5
-- Pull-ups: 3x8
-- Rows: 3x10
-- Bicep curls: 3x12
+## De psychologie van dominantie:
 
-### Dag 3: Legs (Benen)
-- Squats: 3x8
-- Lunges: 3x10 per been
-- Calf raises: 3x15
-- Planks: 3x30 seconden
+Wanneer je fysiek sterk bent, verandert dit je hele mindset. Je begint anders te denken, anders te handelen, en anderen behandelen je anders. Dit is geen ego trip - het is simpelweg hoe de natuur werkt.
 
-## Belangrijke tips:
-
-- **Warm altijd op** met 5-10 minuten cardio
-- **Stretch na je training** voor flexibiliteit
-- **Drink voldoende water** tijdens en na training
-- **Luister naar je lichaam** en neem rust als nodig
+Sterke mannen worden gezien als:
+- Betrouwbare leiders
+- Beschermers van hun gezin
+- Mensen die hun woord nakomen
+- Individuen die doorzetten bij tegenslag
 
 ## Volgende stappen:
 
-1. Plan je trainingsschema
-2. Koop basis apparatuur of ga naar een gym
-3. Leer de basis oefeningen
-4. Start met lichte gewichten
-5. Houd je voortgang bij
+Nu je begrijpt waarom fysieke dominantie zo belangrijk is, kun je in de volgende lessen leren hoe je dit kunt implementeren. De focus ligt op het bouwen van een sterke fundering die je helpt om je doelen te bereiken.
 
-Door consistent te trainen en deze principes toe te passen, bouw je niet alleen fysieke kracht op, maar ontwikkel je ook mentale discipline en zelfvertrouwen.`;
+Onthoud: fysieke kracht is de basis van alle andere vormen van kracht. Zonder een sterk lichaam, wordt het veel moeilijker om mentaal, emotioneel en spiritueel sterk te zijn.`;
 
   await supabase
     .from('academy_lessons')
