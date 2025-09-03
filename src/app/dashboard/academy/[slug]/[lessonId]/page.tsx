@@ -72,7 +72,7 @@ export default function LessonDetailPage() {
   // Handle page visibility changes to prevent loading issues when returning from other tabs
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
         console.log('👀 Page became visible, resetting navigation state');
         setNavigating(false);
         setIsVideoLoading(false);
@@ -91,13 +91,17 @@ export default function LessonDetailPage() {
     };
 
     // Add event listeners for page visibility and focus
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('focus', handlePageFocus);
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+      window.addEventListener('focus', handlePageFocus);
+    }
 
     // Cleanup
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('focus', handlePageFocus);
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+        window.removeEventListener('focus', handlePageFocus);
+      }
     };
   }, [loading, isDataLoaded]);
 
@@ -152,10 +156,14 @@ export default function LessonDetailPage() {
       }
     };
 
-    document.addEventListener('click', handleGlobalClick);
+    if (typeof document !== 'undefined') {
+      document.addEventListener('click', handleGlobalClick);
+    }
     
     return () => {
-      document.removeEventListener('click', handleGlobalClick);
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('click', handleGlobalClick);
+      }
     };
   }, [navigating]);
 
@@ -172,7 +180,7 @@ export default function LessonDetailPage() {
       navigating,
       hasLesson: !!lesson,
       lessonIdMatch: lesson?.id === lessonId,
-      pageVisibility: document.visibilityState
+      pageVisibility: typeof document !== 'undefined' ? document.visibilityState : 'server'
     });
 
     if (!user || !moduleId || !lessonId) {
@@ -191,8 +199,8 @@ export default function LessonDetailPage() {
 
     console.log('🚀 Starting data fetch for:', { moduleId, lessonId });
     console.log('   - Current loading state:', loading);
-    console.log('   - Document visibility:', document.visibilityState);
-    console.log('   - Page focus:', document.hasFocus());
+    console.log('   - Document visibility:', typeof document !== 'undefined' ? document.visibilityState : 'server');
+    console.log('   - Page focus:', typeof document !== 'undefined' ? document.hasFocus() : 'server');
     
     setLoading(true);
     setError(null);
@@ -288,8 +296,8 @@ export default function LessonDetailPage() {
       hasCorrectLesson: lesson?.id === lessonId,
       isDataLoaded,
       loading,
-      pageVisible: document.visibilityState === 'visible',
-      pageFocus: document.hasFocus()
+      pageVisible: typeof document !== 'undefined' ? document.visibilityState === 'visible' : 'unknown',
+      pageFocus: typeof document !== 'undefined' ? document.hasFocus() : 'unknown'
     });
 
     if (user && moduleId && lessonId) {
@@ -298,7 +306,7 @@ export default function LessonDetailPage() {
         console.log('🚀 Need to fetch data');
         
         // Check if page is hidden - if so, wait for it to become visible
-        if (document.visibilityState === 'hidden') {
+        if (typeof document !== 'undefined' && document.visibilityState === 'hidden') {
           console.log('⏳ Page is hidden, waiting for visibility before fetching');
           return;
         }
@@ -314,6 +322,8 @@ export default function LessonDetailPage() {
 
   // Separate effect to handle page becoming visible
   useEffect(() => {
+    if (typeof document === 'undefined') return;
+    
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         console.log('👀 Page became visible, checking if we need to fetch data');
@@ -445,8 +455,8 @@ export default function LessonDetailPage() {
   };
 
   // Render loading state
-  if (loading || (user && moduleId && lessonId && !isDataLoaded && document.visibilityState === 'hidden')) {
-    const isWaitingForVisibility = document.visibilityState === 'hidden';
+  if (loading || (user && moduleId && lessonId && !isDataLoaded && typeof document !== 'undefined' && document.visibilityState === 'hidden')) {
+    const isWaitingForVisibility = typeof document !== 'undefined' && document.visibilityState === 'hidden';
     
     return (
       <PageLayout 
@@ -474,8 +484,8 @@ export default function LessonDetailPage() {
                   <div>Navigating: {navigating ? '✅' : '❌'}</div>
                   <div>Has Lesson: {lesson ? '✅' : '❌'}</div>
                   <div>Lesson Match: {lesson?.id === lessonId ? '✅' : '❌'}</div>
-                  <div>Page Visible: {document.visibilityState}</div>
-                  <div>Page Focus: {document.hasFocus() ? '✅' : '❌'}</div>
+                  <div>Page Visible: {typeof document !== 'undefined' ? document.visibilityState : 'server'}</div>
+                  <div>Page Focus: {typeof document !== 'undefined' ? (document.hasFocus() ? '✅' : '❌') : 'server'}</div>
                 </div>
               </details>
               
@@ -782,7 +792,7 @@ export default function LessonDetailPage() {
                                 setIsVideoLoading(false);
                                 // Fallback: probeer opnieuw na een korte vertraging
                                 setTimeout(() => {
-                                  if (videoRef.current) {
+                      if (videoRef.current) {
                                     setIsVideoLoading(true);
                                     videoRef.current.play()
                                       .then(() => {
@@ -808,7 +818,7 @@ export default function LessonDetailPage() {
                       {isVideoLoading ? (
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#181F17]"></div>
                       ) : (
-                        <PlayIcon className="w-12 h-12" />
+                      <PlayIcon className="w-12 h-12" />
                       )}
                     </div>
                     <div className="absolute bottom-4 left-4 right-4 text-center">
