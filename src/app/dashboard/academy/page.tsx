@@ -282,14 +282,31 @@ export default function AcademyPage() {
           return (
             <div
               key={module.id}
-              className={`p-6 rounded-xl border transition-all duration-200 hover:scale-105 ${
+              className={`p-6 rounded-xl border transition-all duration-200 hover:scale-105 relative overflow-hidden ${
                 isCompleted
-                  ? 'bg-[#232D1A] border-[#3A4D23]'
+                  ? 'border-[#3A4D23]'
                   : isUnlocked
-                  ? 'bg-[#181F17] border-[#3A4D23] hover:bg-[#232D1A]'
-                  : 'bg-[#181F17] border-[#3A4D23] opacity-60'
+                  ? 'border-[#3A4D23]'
+                  : 'border-[#3A4D23] opacity-60'
               }`}
+              style={{
+                backgroundImage: 'url(/wallpaper-academy.jpg)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat'
+              }}
             >
+              {/* Dark overlay for readability */}
+              <div className={`absolute inset-0 ${
+                isCompleted
+                  ? 'bg-[#232D1A]/90'
+                  : isUnlocked
+                  ? 'bg-[#181F17]/90'
+                  : 'bg-[#181F17]/90'
+              }`}></div>
+              
+              {/* Content */}
+              <div className="relative z-10">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <span className="w-10 h-10 rounded-full border-2 border-[#8BAE5A] flex items-center justify-center text-sm font-bold text-[#8BAE5A]">
@@ -351,6 +368,7 @@ export default function AcademyPage() {
                   <span className="text-gray-500 text-sm">Module vergrendeld</span>
                 )}
               </div>
+            </div>
             </div>
           );
         })}
