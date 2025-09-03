@@ -46,6 +46,7 @@ export default function EbookControlePage() {
   const [ebooks, setEbooks] = useState<EbookRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [openingEbook, setOpeningEbook] = useState<string | null>(null);
   const [selectedStyle, setSelectedStyle] = useState<string>('all');
   const [selectedModule, setSelectedModule] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -68,6 +69,17 @@ export default function EbookControlePage() {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Test ebook accessibility function
+  const testEbookAccess = async (path: string): Promise<boolean> => {
+    try {
+      const response = await fetch(path, { method: 'HEAD' });
+      return response.ok;
+    } catch (error) {
+      console.error('Error testing ebook access:', error);
+      return false;
     }
   };
 
@@ -396,16 +408,53 @@ export default function EbookControlePage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <div className="flex space-x-3">
-                        <a
-                          href={ebook.path}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center px-3 py-1.5 bg-[#8BAE5A] text-[#181F17] rounded-md hover:bg-[#B6C948] transition-colors font-medium"
+                        <button
+                          onClick={async () => {
+                            setOpeningEbook(ebook.id);
+                            console.log('🔗 Opening ebook:', ebook.path);
+                            const fullUrl = window.location.origin + ebook.path;
+                            console.log('🌐 Full URL:', fullUrl);
+                            
+                            try {
+                              // Test eerst of de file toegankelijk is
+                              const isAccessible = await testEbookAccess(ebook.path);
+                              if (!isAccessible) {
+                                alert(`⚠️ Ebook niet toegankelijk op pad: ${ebook.path}\n\nControleer of het bestand bestaat in de public/books/ directory.`);
+                                return;
+                              }
+
+                              const newWindow = window.open(ebook.path, '_blank', 'noopener,noreferrer');
+                              if (!newWindow) {
+                                // Fallback als popup wordt geblokkeerd
+                                console.warn('⚠️ Popup blocked, trying alternative method');
+                                alert('Popup geblokkeerd! Open de browser instellingen om popups toe te staan voor deze site, of kopieer de URL handmatig: ' + fullUrl);
+                              } else {
+                                console.log('✅ Ebook opened successfully');
+                              }
+                            } catch (error) {
+                              console.error('❌ Error opening ebook:', error);
+                              alert('Fout bij openen van ebook. Probeer de link handmatig: ' + fullUrl);
+                            } finally {
+                              // Reset loading state na korte delay
+                              setTimeout(() => setOpeningEbook(null), 1000);
+                            }
+                          }}
+                          disabled={openingEbook === ebook.id}
+                          className="inline-flex items-center px-3 py-1.5 bg-[#8BAE5A] text-[#181F17] rounded-md hover:bg-[#B6C948] transition-colors font-medium focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] focus:ring-offset-2 focus:ring-offset-[#232D1A] disabled:opacity-50"
                           title={`Open ${ebook.title} in nieuw tabblad`}
                         >
-                          <EyeIcon className="h-4 w-4 mr-1.5" />
-                          Bekijk
-                        </a>
+                          {openingEbook === ebook.id ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#181F17] mr-1.5"></div>
+                              Openen...
+                            </>
+                          ) : (
+                            <>
+                              <EyeIcon className="h-4 w-4 mr-1.5" />
+                              Bekijk
+                            </>
+                          )}
+                        </button>
                         <button 
                           className="inline-flex items-center px-3 py-1.5 border border-[#3A4D23] text-[#B6C948] rounded-md hover:bg-[#3A4D23] hover:text-[#8BAE5A] transition-colors font-medium"
                           title="Bewerk ebook eigenschappen"
