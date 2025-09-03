@@ -58,9 +58,9 @@ export default function LessonDetailPage() {
       return;
     }
 
-    // Prevent refetching if data is already loaded
-    if (isDataLoaded) {
-      console.log('Data already loaded, skipping fetch');
+    // Prevent refetching if data is already loaded for this specific lesson
+    if (isDataLoaded && lesson && lesson.id === lessonId) {
+      console.log('✅ Data already loaded for this lesson, skipping fetch');
       return;
     }
 
@@ -147,24 +147,46 @@ export default function LessonDetailPage() {
     }
   };
 
-  // Reset data when lessonId changes
+  // Initial data fetch on mount
   useEffect(() => {
-    if (user && moduleId && lessonId) {
-      // Reset all state for new lesson
-      setModule(null);
-      setLesson(null);
-      setLessons([]);
-      setCompleted(false);
-      setCompletedLessonIds([]);
-      setEbook(null);
-      setError(null);
-      setLoading(true);
-      setIsDataLoaded(false);
-      
-      // Fetch new data
+    if (user && moduleId && lessonId && !isDataLoaded) {
+      console.log('🎯 Initial data fetch on mount');
       fetchData();
     }
-  }, [moduleId, lessonId, user]);
+  }, [user, moduleId, lessonId]); // Remove isDataLoaded from dependencies
+
+  // Reset data when lessonId changes (but not on mount)
+  useEffect(() => {
+    if (user && moduleId && lessonId) {
+      // Only reset if we're actually changing lessons, not on initial mount
+      const hasExistingData = module && lesson && lessons.length > 0;
+      
+      if (hasExistingData) {
+        console.log('🔄 Lesson changed, resetting data...');
+        // Reset all state for new lesson
+        setModule(null);
+        setLesson(null);
+        setLessons([]);
+        setCompleted(false);
+        setCompletedLessonIds([]);
+        setEbook(null);
+        setError(null);
+        setLoading(true);
+        setIsDataLoaded(false);
+        
+        // Fetch new data
+        fetchData();
+      }
+    }
+  }, [lessonId]); // Only depend on lessonId, not user or moduleId
+
+  // Reset isDataLoaded when component unmounts
+  useEffect(() => {
+    return () => {
+      console.log('🧹 Component unmounting, resetting isDataLoaded');
+      setIsDataLoaded(false);
+    };
+  }, []);
 
   const handleCompleteLesson = async () => {
     if (!user || !lesson) return;
