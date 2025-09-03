@@ -42,6 +42,8 @@ export default function ModuleDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   const [navigating, setNavigating] = useState(false);
+  const [allModules, setAllModules] = useState<Module[]>([]);
+  const [nextModule, setNextModule] = useState<Module | null>(null);
   const router = useRouter();
 
   // Reset navigating state when navigation completes
@@ -69,7 +71,20 @@ export default function ModuleDetailPage() {
     }, 10000); // 10 second timeout
 
     try {
-      // Fetch module data
+      // Fetch all modules first to determine next module
+      const { data: allModulesData, error: allModulesError } = await supabase
+        .from('academy_modules')
+        .select('*')
+        .eq('status', 'published')
+        .order('order_index', { ascending: true });
+
+      if (allModulesError) {
+        console.error('❌ All modules error:', allModulesError);
+      } else {
+        setAllModules(allModulesData || []);
+      }
+
+      // Fetch current module data
       const { data: moduleData, error: moduleError } = await supabase
         .from('academy_modules')
         .select('*')
@@ -81,6 +96,16 @@ export default function ModuleDetailPage() {
         setError('Module niet gevonden');
         setLoading(false);
         return;
+      }
+
+      // Find next module based on order_index
+      if (allModulesData) {
+        const currentModuleIndex = allModulesData.findIndex(m => m.id === moduleId);
+        if (currentModuleIndex >= 0 && currentModuleIndex < allModulesData.length - 1) {
+          setNextModule(allModulesData[currentModuleIndex + 1]);
+        } else {
+          setNextModule(null); // This is the last module
+        }
       }
 
       // Fetch lessons for this module
@@ -227,7 +252,8 @@ export default function ModuleDetailPage() {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center gap-4 mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
+            {/* Left: Back to Academy */}
             <button
               onClick={() => {
                 console.log('🔄 Navigating to academy...');
@@ -244,6 +270,31 @@ export default function ModuleDetailPage() {
               )}
               Terug naar Academy
             </button>
+
+            {/* Right: Next Module */}
+            {nextModule && (
+              <button
+                onClick={() => {
+                  console.log('🔄 Navigating to next module...');
+                  setNavigating(true);
+                  router.push(`/dashboard/academy/${nextModule.id}`);
+                }}
+                disabled={navigating}
+                className="text-[#8BAE5A] hover:text-[#B6C948] transition-colors disabled:opacity-50 flex items-center gap-3 group bg-[#181F17] hover:bg-[#232D1A] px-4 py-2 rounded-xl border border-[#3A4D23] hover:border-[#8BAE5A] self-start sm:self-auto"
+              >
+                <div className="text-right">
+                  <div className="text-xs text-gray-400 uppercase tracking-wide">Volgende Module</div>
+                  <div className="font-semibold text-sm md:text-base">
+                    Module {getModuleNumber(nextModule.order_index)}: {nextModule.title}
+                  </div>
+                </div>
+                {navigating ? (
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#8BAE5A]"></div>
+                ) : (
+                  <span className="group-hover:translate-x-1 transition-transform text-lg">→</span>
+                )}
+              </button>
+            )}
           </div>
           
           <h1 className="text-3xl font-bold text-[#8BAE5A] mb-2">
