@@ -52,6 +52,7 @@ export default function LessonDetailPage() {
   const [isVideoLoading, setIsVideoLoading] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [navigating, setNavigating] = useState(false);
+  const [showForceButton, setShowForceButton] = useState(false);
 
   // Reset navigating state when navigation completes
   useEffect(() => {
@@ -100,6 +101,64 @@ export default function LessonDetailPage() {
     };
   }, [loading, isDataLoaded]);
 
+  // Add a safety timeout to reset stuck navigation states
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    let forceButtonTimeoutId: NodeJS.Timeout;
+    
+    if (navigating) {
+      console.log('⏰ Starting navigation timeout (5 seconds)');
+      
+      // Show force button after 3 seconds
+      forceButtonTimeoutId = setTimeout(() => {
+        console.log('⚠️ Showing force continue button');
+        setShowForceButton(true);
+      }, 3000);
+      
+      // Auto-reset after 5 seconds
+      timeoutId = setTimeout(() => {
+        console.log('🚨 Navigation timeout reached, resetting states');
+        setNavigating(false);
+        setIsVideoLoading(false);
+        setShowForceButton(false);
+        // Force a page refresh if we're still stuck
+        if (loading && isDataLoaded) {
+          console.log('🔄 Force resetting loading state due to timeout');
+          setLoading(false);
+        }
+      }, 5000); // 5 second timeout
+    } else {
+      setShowForceButton(false);
+    }
+
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+      if (forceButtonTimeoutId) {
+        clearTimeout(forceButtonTimeoutId);
+      }
+    };
+  }, [navigating, loading, isDataLoaded]);
+
+  // Add global click handler to reset states when user interacts with page
+  useEffect(() => {
+    const handleGlobalClick = () => {
+      // Reset states if user clicks anything while stuck
+      if (navigating) {
+        console.log('🖱️ Global click detected while navigating, resetting states');
+        setNavigating(false);
+        setIsVideoLoading(false);
+      }
+    };
+
+    document.addEventListener('click', handleGlobalClick);
+    
+    return () => {
+      document.removeEventListener('click', handleGlobalClick);
+    };
+  }, [navigating]);
+
   const videoRef = useRef<HTMLVideoElement>(null);
 
   // SIMPLIFIED: Reliable data fetching with proper error handling
@@ -110,9 +169,16 @@ export default function LessonDetailPage() {
     }
 
     // Prevent refetching if data is already loaded for this specific lesson
-    if (isDataLoaded && lesson && lesson.id === lessonId) {
+    // BUT allow refetch if we've been navigating for too long (stuck state)
+    if (isDataLoaded && lesson && lesson.id === lessonId && !navigating) {
       console.log('✅ Data already loaded for this lesson, skipping fetch');
       return;
+    }
+    
+    // Reset navigation state if we're actually fetching new data
+    if (navigating) {
+      console.log('🔄 Resetting navigation state before fetch');
+      setNavigating(false);
     }
 
     console.log('🚀 Fetching lesson data for:', { moduleId, lessonId });
@@ -309,6 +375,18 @@ export default function LessonDetailPage() {
     return orderIndex.toString().padStart(2, '0');
   };
 
+  // Force continue function
+  const handleForceContinue = () => {
+    console.log('🚀 Force continue triggered');
+    setNavigating(false);
+    setLoading(false);
+    setIsVideoLoading(false);
+    setShowForceButton(false);
+    setIsDataLoaded(false);
+    // Trigger a page refresh as last resort
+    window.location.reload();
+  };
+
   // Render loading state
   if (loading) {
     return (
@@ -320,6 +398,19 @@ export default function LessonDetailPage() {
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
             <p className="text-gray-300">Les laden...</p>
+            
+            {/* Force continue button for stuck states */}
+            {showForceButton && (
+              <div className="mt-6">
+                <p className="text-yellow-400 text-sm mb-3">Laden duurt langer dan verwacht...</p>
+                <button
+                  onClick={handleForceContinue}
+                  className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
+                >
+                  🔄 Forceer doorgaan
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </PageLayout>
@@ -411,6 +502,14 @@ export default function LessonDetailPage() {
               <button
                 onClick={() => {
                   console.log('🔄 Navigating to previous lesson...');
+                  // If already navigating, force reset and continue
+                  if (navigating) {
+                    console.log('⚠️ Already navigating, forcing reset...');
+                    setNavigating(false);
+                    setLoading(false);
+                    setIsDataLoaded(false);
+                  }
+                  
                   // Reset any stuck states before navigation
                   setIsVideoLoading(false);
                   setShowVideoOverlay(true);
@@ -435,6 +534,14 @@ export default function LessonDetailPage() {
               <button
                 onClick={() => {
                   console.log('🔄 Navigating to next lesson...');
+                  // If already navigating, force reset and continue
+                  if (navigating) {
+                    console.log('⚠️ Already navigating, forcing reset...');
+                    setNavigating(false);
+                    setLoading(false);
+                    setIsDataLoaded(false);
+                  }
+                  
                   // Reset any stuck states before navigation
                   setIsVideoLoading(false);
                   setShowVideoOverlay(true);
@@ -811,6 +918,20 @@ export default function LessonDetailPage() {
             ))}
           </div>
         </div>
+        
+        {/* Emergency navigation reset button */}
+        {navigating && showForceButton && (
+          <div className="fixed top-4 right-4 z-50">
+            <button
+              onClick={handleForceContinue}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-lg border border-red-500 flex items-center gap-2"
+              title="Klik hier als de pagina vast blijft laden"
+            >
+              <span className="text-xl">🚨</span>
+              Reset Navigatie
+            </button>
+          </div>
+        )}
     </PageLayout>
   );
 } 
