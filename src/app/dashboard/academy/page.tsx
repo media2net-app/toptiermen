@@ -146,7 +146,7 @@ export default function AcademyPage() {
         progressData?.forEach(progress => {
           lessonProgressMap[progress.lesson_id] = {
             completed: progress.completed,
-            completed_at: progress.completed_at
+            completed_at: progress.completed
           };
         });
 
@@ -242,8 +242,21 @@ export default function AcademyPage() {
 
   return (
     <PageLayout title="Academy" subtitle="Leer en groei met onze uitgebreide cursussen">
-      {/* Overall Progress */}
-      <div className="mb-8 p-6 bg-[#181F17]/90 rounded-xl border border-[#3A4D23]">
+      {/* Background Image */}
+      <div 
+        className="fixed inset-0 z-0 opacity-20"
+        style={{
+          backgroundImage: 'url(/wallpaper-academy.jpg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}
+      />
+      
+      {/* Content Container */}
+      <div className="relative z-10">
+        {/* Overall Progress */}
+        <div className="mb-8 p-6 bg-[#181F17]/90 rounded-xl border border-[#3A4D23] backdrop-blur-sm">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold text-[#8BAE5A]">Algemene Voortgang</h2>
           <span className="text-[#8BAE5A] font-bold">{overallProgress}%</span>
@@ -274,12 +287,12 @@ export default function AcademyPage() {
           return (
             <div
               key={module.id}
-              className={`p-6 rounded-xl border transition-all duration-200 hover:scale-105 ${
+              className={`p-6 rounded-xl border transition-all duration-200 hover:scale-105 backdrop-blur-sm ${
                 isCompleted
-                  ? 'bg-[#232D1A] border-[#3A4D23]'
+                  ? 'bg-[#232D1A]/80 border-[#3A4D23]'
                   : isUnlocked
-                  ? 'bg-[#181F17] border-[#3A4D23] hover:bg-[#232D1A]'
-                  : 'bg-[#181F17] border-[#3A4D23] opacity-60'
+                  ? 'bg-[#181F17]/80 border-[#3A4D23] hover:bg-[#232D1A]/90'
+                  : 'bg-[#181F17]/80 border-[#3A4D23] opacity-60'
               }`}
             >
               <div className="flex items-start justify-between mb-4">
@@ -347,10 +360,12 @@ export default function AcademyPage() {
           );
         })}
       </div>
+      </div>
 
       {/* Badge Unlock Modal */}
       {showBadgeModal && badgeData && (
         <BadgeUnlockModal
+          isOpen={showBadgeModal}
           badge={badgeData}
           onClose={() => {
             setShowBadgeModal(false);
