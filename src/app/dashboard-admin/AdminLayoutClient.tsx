@@ -108,6 +108,7 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
       type: 'section',
       items: [
         { label: 'Academy', icon: AcademicCapIcon, href: '/dashboard-admin/academy' },
+        { label: 'E-book Controle', icon: BookOpenIcon, href: '/dashboard-admin/ebook-controle', badge: 'NEW' },
         { label: 'Ebooks Setup', icon: BookOpenIcon, href: '/dashboard-admin/ebooks-setup', badge: 'NEW' },
         { label: 'Trainingscentrum', icon: FireIcon, href: '/dashboard-admin/trainingscentrum' },
         { label: 'Voedingsplannen', icon: BookOpenIcon, href: '/dashboard-admin/voedingsplannen' },

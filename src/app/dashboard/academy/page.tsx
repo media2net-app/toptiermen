@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { 
   LockClosedIcon, 
   CheckCircleIcon, 
@@ -58,6 +59,7 @@ interface LessonProgress {
 
 export default function AcademyPage() {
   const { user } = useSupabaseAuth();
+  const router = useRouter();
   const [modules, setModules] = useState<Module[]>([]);
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [progressData, setProgressData] = useState<ProgressData>({});
@@ -72,6 +74,12 @@ export default function AcademyPage() {
   const [academyCompleted, setAcademyCompleted] = useState(false);
   const [hasAcademyBadge, setHasAcademyBadge] = useState(false);
   const [academyBadgeData, setAcademyBadgeData] = useState<any>(null);
+  const [navigating, setNavigating] = useState(false);
+
+  // Reset navigating state when navigation completes
+  useEffect(() => {
+    setNavigating(false);
+  }, []);
 
   // Fetch academy data with performance optimizations
   useEffect(() => {
@@ -376,13 +384,19 @@ export default function AcademyPage() {
                 {isUnlocked ? (
                   <button
                     onClick={() => {
-                      console.log('🔄 Navigating to module with hard refresh...');
-                      window.location.href = `/dashboard/academy/${module.id}?cache-bust=${Date.now()}`;
+                      console.log('🔄 Navigating to module...');
+                      setNavigating(true);
+                      router.push(`/dashboard/academy/${module.id}`);
                     }}
-                    className="px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold flex items-center gap-2"
+                    disabled={navigating}
+                    className="px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold flex items-center gap-2 disabled:opacity-50"
                   >
                     {isCompleted ? 'Bekijk Module' : 'Start Module'}
-                    <ArrowRightIcon className="w-4 h-4" />
+                    {navigating ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#181F17]"></div>
+                    ) : (
+                      <ArrowRightIcon className="w-4 h-4" />
+                    )}
                   </button>
                 ) : (
                   <span className="text-gray-500 text-sm">Module vergrendeld</span>

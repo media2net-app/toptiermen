@@ -9,6 +9,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import EbookDownload from '@/components/EbookDownload';
 import { PlayIcon } from '@heroicons/react/24/solid';
+import { academyNav } from '@/utils/academyNavigation';
 
 interface Module {
   id: string;
@@ -49,6 +50,12 @@ export default function LessonDetailPage() {
   const [ebook, setEbook] = useState<any>(null);
   const [showVideoOverlay, setShowVideoOverlay] = useState(true);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
+  const [navigating, setNavigating] = useState(false);
+
+  // Reset navigating state when navigation completes
+  useEffect(() => {
+    setNavigating(false);
+  }, [moduleId, lessonId]);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   // SIMPLIFIED: Reliable data fetching with proper error handling
@@ -295,8 +302,8 @@ export default function LessonDetailPage() {
           </button>
           <button
             onClick={() => {
-              console.log('🔄 Navigating to academy with hard refresh...');
-              window.location.href = `/dashboard/academy?cache-bust=${Date.now()}`;
+              console.log('🔄 Navigating to academy...');
+              router.push('/dashboard/academy');
             }}
             className="px-6 py-3 bg-[#232D1A] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors font-semibold"
           >
@@ -318,8 +325,8 @@ export default function LessonDetailPage() {
           <div className="text-gray-400 mb-4">Les niet gevonden</div>
           <button
             onClick={() => {
-              console.log('🔄 Navigating to academy with hard refresh...');
-              window.location.href = `/dashboard/academy?cache-bust=${Date.now()}`;
+              console.log('🔄 Navigating to academy...');
+              router.push('/dashboard/academy');
             }}
             className="px-6 py-3 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold"
           >
@@ -340,24 +347,35 @@ export default function LessonDetailPage() {
         <div className="flex items-center justify-between mb-6">
           <button
             onClick={() => {
-              console.log('🔄 Navigating to module overview with hard refresh...');
-              window.location.href = `/dashboard/academy/${module.id}?cache-bust=${Date.now()}`;
+              console.log('🔄 Navigating to module overview...');
+              setNavigating(true);
+              router.push(`/dashboard/academy/${module.id}`);
             }}
-            className="flex items-center gap-2 text-[#8BAE5A] hover:text-[#B6C948] transition-colors"
+            disabled={navigating}
+            className="flex items-center gap-2 text-[#8BAE5A] hover:text-[#B6C948] transition-colors disabled:opacity-50"
           >
-            ← Terug naar module overzicht
+            {navigating ? (
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#8BAE5A]"></div>
+            ) : (
+              "←"
+            )}
+            Terug naar module overzicht
           </button>
           
           <div className="flex items-center gap-4">
             {prevLesson && (
               <button
                 onClick={() => {
-                  console.log('🔄 Navigating to previous lesson with hard refresh...');
-                  // Force hard refresh before navigation
-                  window.location.href = `/dashboard/academy/${module.id}/${prevLesson.id}?cache-bust=${Date.now()}`;
+                  console.log('🔄 Navigating to previous lesson...');
+                  setNavigating(true);
+                  router.push(`/dashboard/academy/${module.id}/${prevLesson.id}`);
                 }}
-                className="px-4 py-2 bg-[#232D1A] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors"
+                disabled={navigating}
+                className="px-4 py-2 bg-[#232D1A] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors disabled:opacity-50 flex items-center gap-2"
               >
+                {navigating ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#8BAE5A]"></div>
+                ) : null}
                 Vorige les
               </button>
             )}
@@ -365,12 +383,16 @@ export default function LessonDetailPage() {
             {nextLesson && (
               <button
                 onClick={() => {
-                  console.log('🔄 Navigating to next lesson with hard refresh...');
-                  // Force hard refresh before navigation
-                  window.location.href = `/dashboard/academy/${module.id}/${nextLesson.id}?cache-bust=${Date.now()}`;
+                  console.log('🔄 Navigating to next lesson...');
+                  setNavigating(true);
+                  router.push(`/dashboard/academy/${module.id}/${nextLesson.id}`);
                 }}
-                className="px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors"
+                disabled={navigating}
+                className="px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors disabled:opacity-50 flex items-center gap-2"
               >
+                {navigating ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#181F17]"></div>
+                ) : null}
                 Volgende les
               </button>
             )}
@@ -381,20 +403,24 @@ export default function LessonDetailPage() {
         <div className="mb-6 flex items-center gap-2 text-sm">
           <button
             onClick={() => {
-              console.log('🔄 Navigating to academy with hard refresh...');
-              window.location.href = `/dashboard/academy?cache-bust=${Date.now()}`;
+              console.log('🔄 Navigating to academy...');
+              setNavigating(true);
+              router.push('/dashboard/academy');
             }}
-            className="text-[#8BAE5A] hover:text-[#B6C948] transition-colors"
+            disabled={navigating}
+            className="text-[#8BAE5A] hover:text-[#B6C948] transition-colors disabled:opacity-50"
           >
             Academy
           </button>
           <span className="text-gray-400">/</span>
           <button
             onClick={() => {
-              console.log('🔄 Navigating to module with hard refresh...');
-              window.location.href = `/dashboard/academy/${module.id}?cache-bust=${Date.now()}`;
+              console.log('🔄 Navigating to module...');
+              setNavigating(true);
+              router.push(`/dashboard/academy/${module.id}`);
             }}
-            className="text-[#8BAE5A] hover:text-[#B6C948] transition-colors"
+            disabled={navigating}
+            className="text-[#8BAE5A] hover:text-[#B6C948] transition-colors disabled:opacity-50"
           >
             Module {getModuleNumber(module.order_index)}: {module.title}
           </button>
@@ -541,12 +567,19 @@ export default function LessonDetailPage() {
           {prevLesson ? (
             <button
               onClick={() => {
-                console.log('🔄 Navigating to previous lesson with hard refresh...');
-                window.location.href = `/dashboard/academy/${module.id}/${prevLesson.id}?cache-bust=${Date.now()}`;
+                console.log('🔄 Navigating to previous lesson...');
+                setNavigating(true);
+                router.push(`/dashboard/academy/${module.id}/${prevLesson.id}`);
               }}
-              className="px-6 py-3 bg-[#232D1A] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors font-semibold"
+              disabled={navigating}
+              className="px-6 py-3 bg-[#232D1A] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors font-semibold disabled:opacity-50 flex items-center gap-2"
             >
-              ← Vorige les: {prevLesson.title}
+              {navigating ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#8BAE5A]"></div>
+              ) : (
+                "←"
+              )}
+              Vorige les: {prevLesson.title}
             </button>
           ) : (
             <div></div>
@@ -555,12 +588,19 @@ export default function LessonDetailPage() {
           {nextLesson ? (
             <button
               onClick={() => {
-                console.log('🔄 Navigating to next lesson with hard refresh...');
-                window.location.href = `/dashboard/academy/${module.id}/${nextLesson.id}?cache-bust=${Date.now()}`;
+                console.log('🔄 Navigating to next lesson...');
+                setNavigating(true);
+                router.push(`/dashboard/academy/${module.id}/${nextLesson.id}`);
               }}
-              className="px-6 py-3 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold"
+              disabled={navigating}
+              className="px-6 py-3 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold disabled:opacity-50 flex items-center gap-2"
             >
-              Volgende les: {nextLesson.title} →
+              Volgende les: {nextLesson.title}
+              {navigating ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#181F17]"></div>
+              ) : (
+                "→"
+              )}
             </button>
           ) : (
             <div></div>
@@ -577,12 +617,12 @@ export default function LessonDetailPage() {
                 key={l.id}
                 onClick={() => {
                   if (l.id !== lessonId) {
-                    console.log('🔄 Navigating to lesson with hard refresh...');
-                    // Force hard refresh before navigation
-                    window.location.href = `/dashboard/academy/${module.id}/${l.id}?cache-bust=${Date.now()}`;
+                    console.log('🔄 Navigating to lesson...');
+                    setNavigating(true);
+                    router.push(`/dashboard/academy/${module.id}/${l.id}`);
                   }
                 }}
-                disabled={l.id === lessonId}
+                disabled={l.id === lessonId || navigating}
                 className={`block w-full text-left p-4 rounded-lg border transition-colors ${
                   l.id === lessonId
                     ? 'bg-[#8BAE5A] text-[#181F17] border-[#8BAE5A] cursor-default'
