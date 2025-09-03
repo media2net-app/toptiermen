@@ -1,5 +1,5 @@
 "use client";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from '@/lib/supabase';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
@@ -41,6 +41,13 @@ export default function ModuleDetailPage() {
   const [completedLessonIds, setCompletedLessonIds] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
+  const [navigating, setNavigating] = useState(false);
+  const router = useRouter();
+
+  // Reset navigating state when navigation completes
+  useEffect(() => {
+    setNavigating(false);
+  }, [moduleId]);
 
   const fetchModuleData = async () => {
     if (!moduleId) {
@@ -180,8 +187,8 @@ export default function ModuleDetailPage() {
             </button>
             <button
               onClick={() => {
-                console.log('🔄 Navigating to academy with hard refresh...');
-                window.location.href = `/dashboard/academy?cache-bust=${Date.now()}`;
+                console.log('🔄 Navigating to academy...');
+                router.push('/dashboard/academy');
               }}
               className="px-6 py-3 bg-[#232D1A] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors font-semibold"
             >
@@ -202,8 +209,8 @@ export default function ModuleDetailPage() {
             <div className="text-gray-400 mb-4">Module niet gevonden</div>
             <button
               onClick={() => {
-                console.log('🔄 Navigating to academy with hard refresh...');
-                window.location.href = `/dashboard/academy?cache-bust=${Date.now()}`;
+                console.log('🔄 Navigating to academy...');
+                router.push('/dashboard/academy');
               }}
               className="px-6 py-3 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold"
             >
@@ -223,12 +230,19 @@ export default function ModuleDetailPage() {
           <div className="flex items-center gap-4 mb-4">
             <button
               onClick={() => {
-                console.log('🔄 Navigating to academy with hard refresh...');
-                window.location.href = `/dashboard/academy?cache-bust=${Date.now()}`;
+                console.log('🔄 Navigating to academy...');
+                setNavigating(true);
+                router.push('/dashboard/academy');
               }}
-              className="text-[#8BAE5A] hover:text-[#B6C948] transition-colors"
+              disabled={navigating}
+              className="text-[#8BAE5A] hover:text-[#B6C948] transition-colors disabled:opacity-50 flex items-center gap-2"
             >
-              ← Terug naar Academy
+              {navigating ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#8BAE5A]"></div>
+              ) : (
+                "←"
+              )}
+              Terug naar Academy
             </button>
           </div>
           
@@ -244,10 +258,12 @@ export default function ModuleDetailPage() {
             <button
               key={lesson.id}
               onClick={() => {
-                console.log('🔄 Navigating to lesson with hard refresh...');
-                window.location.href = `/dashboard/academy/${module.id}/${lesson.id}?cache-bust=${Date.now()}`;
+                console.log('🔄 Navigating to lesson...');
+                setNavigating(true);
+                router.push(`/dashboard/academy/${module.id}/${lesson.id}`);
               }}
-              className="block w-full text-left p-6 rounded-xl border transition-all duration-200 hover:scale-105 ${
+              disabled={navigating}
+              className="block w-full text-left p-6 rounded-xl border transition-all duration-200 hover:scale-105 disabled:opacity-50 ${
                 completedLessonIds.includes(lesson.id)
                   ? 'bg-[#232D1A] text-[#8BAE5A] border-[#3A4D23] hover:bg-[#3A4D23]'
                   : 'bg-[#181F17] text-gray-300 border-[#3A4D23] hover:bg-[#232D1A]'
@@ -269,6 +285,9 @@ export default function ModuleDetailPage() {
               
               <div className="flex items-center justify-between text-sm">
                 <span className="text-[#8BAE5A]">Duur: {lesson.duration}</span>
+                {navigating && (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#8BAE5A]"></div>
+                )}
               </div>
             </button>
           ))}
