@@ -279,7 +279,7 @@ export default function LessonDetailPage() {
     }
   };
 
-  // SUPER SIMPLE: Just fetch data when needed, period.
+  // ENHANCED: Check for page visibility before fetching
   useEffect(() => {
     console.log('🔍 Checking if we need to fetch data:', {
       user: !!user,
@@ -288,13 +288,22 @@ export default function LessonDetailPage() {
       hasCorrectLesson: lesson?.id === lessonId,
       isDataLoaded,
       loading,
-      pageVisible: document.visibilityState === 'visible'
+      pageVisible: document.visibilityState === 'visible',
+      pageFocus: document.hasFocus()
     });
 
     if (user && moduleId && lessonId) {
       // Always fetch if we don't have the right lesson data
       if (!lesson || lesson.id !== lessonId || !isDataLoaded) {
-        console.log('🚀 Need to fetch data, doing it now');
+        console.log('🚀 Need to fetch data');
+        
+        // Check if page is hidden - if so, wait for it to become visible
+        if (document.visibilityState === 'hidden') {
+          console.log('⏳ Page is hidden, waiting for visibility before fetching');
+          return;
+        }
+        
+        console.log('✅ Page is visible, fetching now');
         setIsDataLoaded(false);
         fetchData();
       } else {
@@ -302,6 +311,30 @@ export default function LessonDetailPage() {
       }
     }
   }, [user, moduleId, lessonId]);
+
+  // Separate effect to handle page becoming visible
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('👀 Page became visible, checking if we need to fetch data');
+        
+        // If we need data and page just became visible, fetch it
+        if (user && moduleId && lessonId && (!lesson || lesson.id !== lessonId || !isDataLoaded)) {
+          console.log('🚀 Page visible + need data = fetching now');
+          setIsDataLoaded(false);
+          setTimeout(() => {
+            fetchData();
+          }, 100); // Small delay to ensure page is fully visible
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [user, moduleId, lessonId, lesson, isDataLoaded]);
 
   // Clean up on unmount
   useEffect(() => {
@@ -412,16 +445,20 @@ export default function LessonDetailPage() {
   };
 
   // Render loading state
-  if (loading) {
+  if (loading || (user && moduleId && lessonId && !isDataLoaded && document.visibilityState === 'hidden')) {
+    const isWaitingForVisibility = document.visibilityState === 'hidden';
+    
     return (
       <PageLayout 
-        title="Les laden..."
-        subtitle="Even geduld..."
+        title={isWaitingForVisibility ? "Wachten op tab focus..." : "Les laden..."}
+        subtitle={isWaitingForVisibility ? "Klik op dit tabblad om door te gaan" : "Even geduld..."}
       >
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
-            <p className="text-gray-300">Les laden...</p>
+            <p className="text-gray-300">
+              {isWaitingForVisibility ? "Tabblad is niet actief - klik hier om door te gaan" : "Les laden..."}
+            </p>
             
             {/* Debug info and force continue button */}
             <div className="mt-6 space-y-3">
@@ -455,6 +492,23 @@ export default function LessonDetailPage() {
                 </div>
               )}
               
+              {/* Force fetch button if waiting for visibility */}
+              {isWaitingForVisibility && (
+                <div>
+                  <p className="text-blue-400 text-sm mb-3">Tabblad is niet actief</p>
+                  <button
+                    onClick={() => {
+                      console.log('🚀 Force fetch despite hidden state');
+                      setIsDataLoaded(false);
+                      fetchData();
+                    }}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors mr-2"
+                  >
+                    ⚡ Forceer laden
+                  </button>
+                </div>
+              )}
+
               {/* Manual refresh button - always available */}
               <div>
                 <button
