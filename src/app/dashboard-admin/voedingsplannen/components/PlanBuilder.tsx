@@ -813,8 +813,6 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
               mealType={editingMealType}
               onSave={handleSaveMeal}
               onDelete={handleDeleteMeal}
-              baseCalories={formData.target_calories}
-              planType={plan?.name}
             />
     </div>
   );
