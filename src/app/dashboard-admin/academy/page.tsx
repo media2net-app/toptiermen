@@ -1051,7 +1051,7 @@ Na deze les kun je verder met de volgende les in de module.`;
                       />
                       {!lesson.content && (
                         <AdminActionButton 
-                          variant="secondary"
+                          variant="custom"
                           onClick={() => {
                             console.log('📝 Add content button clicked for lesson:', lesson);
                             openLessonModal(lesson);
