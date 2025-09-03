@@ -379,6 +379,9 @@ export default function AcademyManagement() {
   const handleLessonSave = async () => {
     setIsLoading(true);
     try {
+      // Use default duration if empty
+      const duration = lessonForm.duration.trim() || '10m';
+      
       if (editingLesson) {
         // Update bestaande les
         const { error } = await supabase
@@ -391,7 +394,7 @@ export default function AcademyManagement() {
             status: lessonForm.status,
             attachments: lessonForm.attachments,
             exam_questions: lessonForm.examQuestions,
-            duration: lessonForm.duration,
+            duration: duration,
             worksheet_url: lessonForm.worksheetUrl,
             updated_at: new Date().toISOString(),
           })
@@ -411,7 +414,7 @@ export default function AcademyManagement() {
             status: lessonForm.status,
             attachments: lessonForm.attachments,
             exam_questions: lessonForm.examQuestions,
-            duration: lessonForm.duration,
+            duration: duration,
             worksheet_url: lessonForm.worksheetUrl,
             module_id: selectedModule,
           })
@@ -1015,14 +1018,13 @@ export default function AcademyManagement() {
 
               {/* Les Duur */}
               <div>
-                <label className="block text-[#8BAE5A] font-semibold mb-2">Duur (bijv. 10m, 1u 15m) <span className="text-red-400">*</span></label>
+                <label className="block text-[#8BAE5A] font-semibold mb-2">Duur (bijv. 10m, 1u 15m)</label>
                 <input
                   type="text"
                   value={lessonForm.duration}
                   onChange={(e) => setLessonForm({...lessonForm, duration: e.target.value})}
                   placeholder="bijv. 10m, 1u 15m"
                   className="w-full px-4 py-3 rounded-xl bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] placeholder-[#B6C948]"
-                  required
                 />
               </div>
 
@@ -1050,7 +1052,7 @@ export default function AcademyManagement() {
                 </AdminButton>
                 <AdminButton
                   onClick={handleLessonSave}
-                  disabled={isLoading || !lessonForm.title || !lessonForm.duration}
+                  disabled={isLoading || !lessonForm.title}
                   variant="primary"
                 >
                   {isLoading ? (
