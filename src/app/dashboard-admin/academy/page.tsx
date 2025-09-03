@@ -36,9 +36,30 @@ import { AdminCard, AdminStatsCard, AdminButton, AdminActionButton } from '@/com
 import VideoDurationExtractor from '@/components/admin/VideoDurationExtractor';
 import 'react-quill/dist/quill.snow.css';
 
+// Custom CSS for line clamping
+const customStyles = `
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+`;
+
 const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
 
 export default function AcademyManagement() {
+  // Inject custom styles
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = customStyles;
+    document.head.appendChild(style);
+    
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+
   const [selectedModule, setSelectedModule] = useState<number | null>(null);
   const [showModuleModal, setShowModuleModal] = useState(false);
   const [showLessonModal, setShowLessonModal] = useState(false);
@@ -551,6 +572,41 @@ export default function AcademyManagement() {
     }
   };
 
+  // Functie om snel content toe te voegen aan lessen zonder content
+  const addQuickContent = async (lessonId: string, lessonTitle: string) => {
+    const quickContent = `# ${lessonTitle}
+
+Welkom bij deze les! Hier leer je alles over ${lessonTitle.toLowerCase()}.
+
+## Wat je gaat leren:
+- De fundamenten van ${lessonTitle.toLowerCase()}
+- Praktische toepassingen
+- Stap-voor-stap begeleiding
+
+## Belangrijke punten:
+Dit is een essentiële les die je helpt om je kennis en vaardigheden te ontwikkelen.
+
+## Volgende stappen:
+Na deze les kun je verder met de volgende les in de module.`;
+
+    try {
+      const { error } = await supabase
+        .from('academy_lessons')
+        .update({
+          content: quickContent,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', lessonId);
+
+      if (error) throw error;
+      
+      toast.success(`Content toegevoegd aan "${lessonTitle}"`);
+      await fetchLessons();
+    } catch (error: any) {
+      toast.error('Fout bij toevoegen content: ' + error.message);
+    }
+  };
+
   const getTotalModuleDuration = () => {
     // Som van alle durations van lessen in deze module
     const moduleLessons = lessons.filter(l => l.module_id === selectedModule);
@@ -762,15 +818,59 @@ export default function AcademyManagement() {
               <div>
                 <h2 className="text-2xl font-bold text-[#8BAE5A]">Lessen voor Module: {selectedModuleData.title}</h2>
                 <p className="text-[#B6C948] mt-1">{selectedModuleData.description}</p>
+                <div className="flex items-center gap-4 mt-2 text-sm">
+                  <span className="text-[#B6C948]">
+                    📚 {moduleLessons.length} lessen
+                  </span>
+                  <span className="text-[#B6C948]">
+                    📝 {moduleLessons.filter(l => l.content).length} met content
+                  </span>
+                  <span className="text-[#B6C948]">
+                    ⏱️ {getTotalModuleDuration()}
+                  </span>
+                </div>
               </div>
             </div>
-            <AdminButton
-              onClick={() => openLessonModal()}
-              variant="primary"
-            >
-              <PlusIcon className="w-4 h-4 mr-2" />
-              Nieuwe Les Toevoegen
-            </AdminButton>
+            <div className="flex items-center gap-3">
+              {moduleLessons.filter(l => !l.content).length > 0 && (
+                <div className="flex items-center gap-2">
+                  <AdminButton
+                    onClick={() => {
+                      const lessonWithoutContent = moduleLessons.find(l => !l.content);
+                      if (lessonWithoutContent) {
+                        openLessonModal(lessonWithoutContent);
+                      }
+                    }}
+                    variant="secondary"
+                    size="sm"
+                  >
+                    <DocumentTextIcon className="w-4 h-4 mr-2" />
+                    Content Toevoegen ({moduleLessons.filter(l => !l.content).length})
+                  </AdminButton>
+                  <AdminButton
+                    onClick={async () => {
+                      if (window.confirm(`Wil je alle ${moduleLessons.filter(l => !l.content).length} lessen zonder content van basis content voorzien?`)) {
+                        for (const lesson of moduleLessons.filter(l => !l.content)) {
+                          await addQuickContent(lesson.id, lesson.title);
+                        }
+                      }
+                    }}
+                    variant="secondary"
+                    size="sm"
+                  >
+                    <DocumentTextIcon className="w-4 h-4 mr-2" />
+                    Alle Content Toevoegen
+                  </AdminButton>
+                </div>
+              )}
+              <AdminButton
+                onClick={() => openLessonModal()}
+                variant="primary"
+              >
+                <PlusIcon className="w-4 h-4 mr-2" />
+                Nieuwe Les Toevoegen
+              </AdminButton>
+            </div>
           </div>
 
           {/* Lessons List with Drag & Drop */}
@@ -826,6 +926,117 @@ export default function AcademyManagement() {
                           <span className="text-[#B6C948]">{lesson.duration}</span>
                         </div>
                       </div>
+                      
+                      {/* Lesson Content Preview */}
+                      {lesson.content ? (
+                        <div className="mt-3 p-3 bg-[#232D1A] rounded-lg border border-[#3A4D23]">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="text-xs text-[#B6C948] font-medium">Lesbeschrijving:</div>
+                            <div className="text-xs text-[#B6C948]">
+                              {lesson.content.length} karakters
+                            </div>
+                          </div>
+                          <div className="text-sm text-[#8BAE5A] line-clamp-3">
+                            {lesson.content
+                              .replace(/^#+\s*/g, '') // Remove all markdown headers
+                              .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold formatting
+                              .replace(/\*(.*?)\*/g, '$1') // Remove italic formatting
+                              .replace(/\n+/g, ' ') // Replace newlines with spaces
+                              .trim()
+                              .substring(0, 200)}
+                            {lesson.content.length > 200 && '...'}
+                          </div>
+                          {/* Content Structure Preview */}
+                          {lesson.content.includes('##') && (
+                            <div className="mt-2 text-xs text-[#B6C948]">
+                              <span className="font-medium">Secties:</span> {
+                                lesson.content
+                                  .match(/##\s*(.+)/g)
+                                  ?.map(section => section.replace('## ', ''))
+                                  .slice(0, 3)
+                                  .join(', ')
+                              }
+                              {lesson.content.match(/##\s*(.+)/g)?.length > 3 && '...'}
+                            </div>
+                          )}
+                          {/* Content Stats */}
+                          <div className="mt-2 text-xs text-[#B6C948]">
+                            <span className="font-medium">Stats:</span> {
+                              lesson.content.includes('##') ? `${lesson.content.match(/##/g)?.length || 0} secties` :
+                              lesson.content.includes('*') ? `${lesson.content.match(/\*/g)?.length || 0} opmaak elementen` :
+                              lesson.content.includes('\n\n') ? `${lesson.content.split('\n\n').length} paragraven` :
+                              'Geen structuur'
+                            }
+                          </div>
+                          {/* Content Type Indicator */}
+                          <div className="flex items-center gap-4 text-xs text-[#B6C948]">
+                            <div>
+                              <span className="font-medium">Type:</span> {
+                                lesson.content.includes('##') ? 'Gestructureerd' :
+                                lesson.content.includes('*') ? 'Met opmaak' :
+                                lesson.content.includes('\n\n') ? 'Paragraven' :
+                                'Eenvoudig'
+                              }
+                            </div>
+                            <div>
+                              <span className="font-medium">Kwaliteit:</span> {
+                                lesson.content.length > 1000 ? 'Uitgebreid' :
+                                lesson.content.length > 500 ? 'Gemiddeld' :
+                                lesson.content.length > 200 ? 'Basis' :
+                                'Minimaal'
+                              }
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 mt-2">
+                            {lesson.content.length > 200 && (
+                              <button
+                                onClick={() => {
+                                  const cleanContent = lesson.content
+                                    .replace(/^#+\s*/g, '')
+                                    .replace(/\*\*(.*?)\*\*/g, '$1')
+                                    .replace(/\*(.*?)\*/g, '$1')
+                                    .replace(/\n+/g, '\n');
+                                  alert(`Volledige lesbeschrijving:\n\n${cleanContent}`);
+                                }}
+                                className="text-xs text-[#B6C948] hover:text-[#8BAE5A] underline"
+                                title="Bekijk de volledige lesbeschrijving"
+                              >
+                                Volledige beschrijving bekijken
+                              </button>
+                            )}
+                            <button
+                              onClick={() => openLessonModal(lesson)}
+                              className="text-xs text-[#B6C948] hover:text-[#8BAE5A] underline"
+                              title="Bewerk de lesbeschrijving"
+                            >
+                              Bewerken
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="mt-3 p-3 bg-[#232D1A]/50 rounded-lg border border-[#3A4D23] border-dashed">
+                          <div className="text-xs text-[#B6C948] font-medium mb-2">Lesbeschrijving:</div>
+                          <div className="text-sm text-[#B6C948] italic mb-3">
+                            Geen beschrijving toegevoegd
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => addQuickContent(lesson.id, lesson.title)}
+                              className="text-xs text-[#B6C948] hover:text-[#8BAE5A] underline"
+                              title="Voeg basis content toe aan deze les"
+                            >
+                              Snel content toevoegen
+                            </button>
+                            <button
+                              onClick={() => openLessonModal(lesson)}
+                              className="text-xs text-[#B6C948] hover:text-[#8BAE5A] underline"
+                              title="Bewerk de les"
+                            >
+                              Bewerken
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                     
                     {/* Actions */}
@@ -838,6 +1049,16 @@ export default function AcademyManagement() {
                         }}
                         title="Bewerk les"
                       />
+                      {!lesson.content && (
+                        <AdminActionButton 
+                          variant="secondary"
+                          onClick={() => {
+                            console.log('📝 Add content button clicked for lesson:', lesson);
+                            openLessonModal(lesson);
+                          }}
+                          title="Content toevoegen"
+                        />
+                      )}
                       <AdminActionButton 
                         variant="delete"
                         onClick={() => handleLessonDelete(lesson.id)}

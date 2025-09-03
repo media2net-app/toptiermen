@@ -49,6 +49,7 @@ export default function LessonDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [ebook, setEbook] = useState<any>(null);
   const [showVideoOverlay, setShowVideoOverlay] = useState(true);
+  const [isVideoLoading, setIsVideoLoading] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [navigating, setNavigating] = useState(false);
 
@@ -56,6 +57,17 @@ export default function LessonDetailPage() {
   useEffect(() => {
     setNavigating(false);
   }, [moduleId, lessonId]);
+
+  // Reset video state when lesson changes
+  useEffect(() => {
+    setShowVideoOverlay(true);
+    setIsVideoLoading(false);
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
+  }, [lessonId]);
+
   const videoRef = useRef<HTMLVideoElement>(null);
 
   // SIMPLIFIED: Reliable data fetching with proper error handling
@@ -445,6 +457,7 @@ export default function LessonDetailPage() {
             <div className="mb-6">
               <div className="aspect-video bg-[#232D1A] rounded-lg overflow-hidden relative border border-[#3A4D23]">
                 <video
+                  key={lesson.id} // Unieke key om video te behouden bij les wissel
                   ref={videoRef}
                   src={lesson.video_url}
                   controls
@@ -453,15 +466,35 @@ export default function LessonDetailPage() {
                   onError={(e) => {
                     console.error('❌ Video error:', e);
                     console.log('🎥 Video URL:', lesson.video_url);
+                    // Toon een fallback bericht
+                    setShowVideoOverlay(true);
                   }}
                   onLoadStart={() => {
                     console.log('🎥 Loading video:', lesson.video_url);
+                    setIsVideoLoading(true);
                   }}
                   onCanPlay={() => {
                     console.log('🎥 Video can start playing');
+                    setIsVideoLoading(false);
                   }}
                   onPlay={() => {
                     setShowVideoOverlay(false);
+                    setIsVideoLoading(false);
+                  }}
+                  onPause={() => {
+                    setShowVideoOverlay(true);
+                  }}
+                  onEnded={() => {
+                    setShowVideoOverlay(true);
+                  }}
+                  onAbort={() => {
+                    console.log('🎥 Video loading aborted');
+                    setShowVideoOverlay(true);
+                    setIsVideoLoading(false);
+                  }}
+                  onSuspend={() => {
+                    console.log('🎥 Video loading suspended');
+                    setIsVideoLoading(false);
                   }}
                 >
                   Je browser ondersteunt deze video niet.
@@ -472,16 +505,76 @@ export default function LessonDetailPage() {
                   <div 
                     className="absolute inset-0 bg-black/60 flex items-center justify-center cursor-pointer group"
                     onClick={() => {
-                      if (videoRef.current) {
-                        videoRef.current.play();
+                      if (videoRef.current && !isVideoLoading) {
+                        try {
+                          setIsVideoLoading(true);
+                          const playPromise = videoRef.current.play();
+                          if (playPromise !== undefined) {
+                            playPromise
+                              .then(() => {
+                                console.log('🎥 Video started playing successfully');
+                                setShowVideoOverlay(false);
+                                setIsVideoLoading(false);
+                              })
+                              .catch((error) => {
+                                console.error('❌ Video play error:', error);
+                                setIsVideoLoading(false);
+                                // Fallback: probeer opnieuw na een korte vertraging
+                                setTimeout(() => {
+                                  if (videoRef.current) {
+                                    setIsVideoLoading(true);
+                                    videoRef.current.play()
+                                      .then(() => {
+                                        setShowVideoOverlay(false);
+                                        setIsVideoLoading(false);
+                                      })
+                                      .catch(e => {
+                                        console.error('❌ Retry video play failed:', e);
+                                        setIsVideoLoading(false);
+                                      });
+                                  }
+                                }, 100);
+                              });
+                          }
+                        } catch (error) {
+                          console.error('❌ Video play error:', error);
+                          setIsVideoLoading(false);
+                        }
                       }
                     }}
                   >
                     <div className="bg-[#8BAE5A] hover:bg-[#B6C948] text-[#181F17] rounded-full p-4 transition-all duration-200 group-hover:scale-110 shadow-lg">
-                      <PlayIcon className="w-12 h-12" />
+                      {isVideoLoading ? (
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#181F17]"></div>
+                      ) : (
+                        <PlayIcon className="w-12 h-12" />
+                      )}
                     </div>
                     <div className="absolute bottom-4 left-4 right-4 text-center">
-                      <p className="text-white text-sm font-medium">Klik om video af te spelen</p>
+                      <p className="text-white text-sm font-medium">
+                        {isVideoLoading ? 'Video laden...' : 'Klik om video af te spelen'}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Video Error Fallback */}
+                {!showVideoOverlay && videoRef.current?.error && (
+                  <div className="absolute inset-0 bg-black/80 flex items-center justify-center">
+                    <div className="text-center text-white p-6">
+                      <div className="text-red-400 mb-2 text-lg">❌ Video kan niet worden afgespeeld</div>
+                      <p className="text-sm mb-4">Er is een probleem met het laden van de video</p>
+                      <button
+                        onClick={() => {
+                          if (videoRef.current) {
+                            videoRef.current.load();
+                            setShowVideoOverlay(true);
+                          }
+                        }}
+                        className="px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors"
+                      >
+                        Opnieuw proberen
+                      </button>
                     </div>
                   </div>
                 )}
@@ -530,17 +623,7 @@ export default function LessonDetailPage() {
           )}
         </div>
 
-        {/* Ebook Download */}
-        {ebook && (
-          <EbookDownload
-            lessonId={lesson.id}
-            lessonTitle={lesson.title}
-            moduleTitle={module.title}
-            moduleNumber={getModuleNumber(module.order_index)}
-            ebookUrl={ebook.file_url}
-            isCompleted={completed}
-          />
-        )}
+
 
         {/* Complete button */}
         {!completed && (
@@ -561,6 +644,18 @@ export default function LessonDetailPage() {
             <p className="text-gray-400">Ga door naar de volgende les om je voortgang te behouden.</p>
           </div>
         )}
+
+        {/* Ebook Download Section */}
+        <div className="mt-8">
+          <EbookDownload
+            lessonId={lesson.id}
+            lessonTitle={lesson.title}
+            moduleTitle={module.title}
+            moduleNumber={module.order_index.toString()}
+            ebookData={ebook}
+            isCompleted={completed}
+          />
+        </div>
 
         {/* Navigation buttons */}
         <div className="flex justify-between items-center mt-8">

@@ -44,6 +44,7 @@ export default function ModuleDetailPage() {
   const [navigating, setNavigating] = useState(false);
   const [allModules, setAllModules] = useState<Module[]>([]);
   const [nextModule, setNextModule] = useState<Module | null>(null);
+  const [previousModule, setPreviousModule] = useState<Module | null>(null);
   const router = useRouter();
 
   // Reset navigating state when navigation completes
@@ -98,15 +99,18 @@ export default function ModuleDetailPage() {
         return;
       }
 
-      // Find next module based on order_index
-      if (allModulesData) {
-        const currentModuleIndex = allModulesData.findIndex(m => m.id === moduleId);
-        if (currentModuleIndex >= 0 && currentModuleIndex < allModulesData.length - 1) {
-          setNextModule(allModulesData[currentModuleIndex + 1]);
-        } else {
-          setNextModule(null); // This is the last module
+      // Determine previous and next modules
+      if (allModulesData && allModulesData.length > 0) {
+        const currentIndex = allModulesData.findIndex(m => m.id === moduleData.id);
+        if (currentIndex > 0) {
+          setPreviousModule(allModulesData[currentIndex - 1]);
+        }
+        if (currentIndex < allModulesData.length - 1) {
+          setNextModule(allModulesData[currentIndex + 1]);
         }
       }
+
+
 
       // Fetch lessons for this module
       const { data: lessonsData, error: lessonsError } = await supabase
@@ -253,23 +257,50 @@ export default function ModuleDetailPage() {
         {/* Header */}
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
-            {/* Left: Back to Academy */}
-            <button
-              onClick={() => {
-                console.log('🔄 Navigating to academy...');
-                setNavigating(true);
-                router.push('/dashboard/academy');
-              }}
-              disabled={navigating}
-              className="text-[#8BAE5A] hover:text-[#B6C948] transition-colors disabled:opacity-50 flex items-center gap-2"
-            >
-              {navigating ? (
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#8BAE5A]"></div>
-              ) : (
-                "←"
+            {/* Left: Back to Academy + Previous Module */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+              <button
+                onClick={() => {
+                  console.log('🔄 Navigating to academy...');
+                  setNavigating(true);
+                  router.push('/dashboard/academy');
+                }}
+                disabled={navigating}
+                className="text-[#8BAE5A] hover:text-[#B6C948] transition-colors disabled:opacity-50 flex items-center gap-2"
+              >
+                {navigating ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#8BAE5A]"></div>
+                ) : (
+                  "←"
+                )}
+                Terug naar Academy
+              </button>
+
+              {/* Previous Module Button */}
+              {previousModule && (
+                <button
+                  onClick={() => {
+                    console.log('🔄 Navigating to previous module...');
+                    setNavigating(true);
+                    router.push(`/dashboard/academy/${previousModule.id}`);
+                  }}
+                  disabled={navigating}
+                  className="text-[#8BAE5A] hover:text-[#B6C948] transition-colors disabled:opacity-50 flex items-center gap-3 group bg-[#181F17] hover:bg-[#232D1A] px-4 py-2 rounded-xl border border-[#3A4D23] hover:border-[#8BAE5A] self-start sm:self-auto"
+                >
+                  <div className="text-left">
+                    <div className="text-xs text-gray-400 uppercase tracking-wide">Vorige Module</div>
+                    <div className="font-semibold text-sm md:text-base">
+                      Module {getModuleNumber(previousModule.order_index)}: {previousModule.title}
+                    </div>
+                  </div>
+                  {navigating ? (
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#8BAE5A]"></div>
+                  ) : (
+                    <span className="group-hover:-translate-x-1 transition-transform text-lg">←</span>
+                  )}
+                </button>
               )}
-              Terug naar Academy
-            </button>
+            </div>
 
             {/* Right: Next Module */}
             {nextModule && (
