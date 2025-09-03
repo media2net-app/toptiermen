@@ -6,10 +6,10 @@ export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
   const supabase = createMiddlewareClient({ req, res });
 
-  // Block direct access to /books/ directory
-  if (req.nextUrl.pathname.startsWith('/books/')) {
-    return NextResponse.redirect(new URL('/dashboard/academy', req.url));
-  }
+  // Allow access to /books/ directory (ebooks are public)
+  // if (req.nextUrl.pathname.startsWith('/books/')) {
+  //   return NextResponse.redirect(new URL('/dashboard/academy', req.url));
+  // }
 
   // Refresh session if expired - required for Server Components
   const {
