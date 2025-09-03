@@ -64,6 +64,7 @@ export default function AcademyPage() {
   const [lessonProgress, setLessonProgress] = useState<LessonProgress>({});
   const [unlocks, setUnlocks] = useState<UnlockData>({});
   const [loading, setLoading] = useState(true);
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedModule, setSelectedModule] = useState<string | null>(null);
   const [showBadgeModal, setShowBadgeModal] = useState(false);
@@ -77,6 +78,12 @@ export default function AcademyPage() {
     const fetchAcademyData = async () => {
       if (!user) {
         console.log('🎓 Academy: No user, skipping data fetch...');
+        return;
+      }
+
+      // Prevent refetching if data is already loaded
+      if (isDataLoaded) {
+        console.log('🎓 Academy: Data already loaded, skipping fetch...');
         return;
       }
 
@@ -164,6 +171,7 @@ export default function AcademyPage() {
         setProgressData(progressMap);
         setLessonProgress(lessonProgressMap);
         setUnlocks(unlockMap);
+        setIsDataLoaded(true);
 
         console.log('✅ Academy data loaded successfully:', {
           modulesCount: modulesData.length,
@@ -180,7 +188,7 @@ export default function AcademyPage() {
     };
 
     fetchAcademyData();
-  }, [user]);
+  }, [user, isDataLoaded]);
 
   // Check for badge unlock on mount
   useEffect(() => {
@@ -242,21 +250,8 @@ export default function AcademyPage() {
 
   return (
     <PageLayout title="Academy" subtitle="Leer en groei met onze uitgebreide cursussen">
-      {/* Background Image */}
-      <div 
-        className="fixed inset-0 z-0 opacity-20"
-        style={{
-          backgroundImage: 'url(/wallpaper-academy.jpg)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
-        }}
-      />
-      
-      {/* Content Container */}
-      <div className="relative z-10">
-        {/* Overall Progress */}
-        <div className="mb-8 p-6 bg-[#181F17]/90 rounded-xl border border-[#3A4D23] backdrop-blur-sm">
+      {/* Overall Progress */}
+      <div className="mb-8 p-6 bg-[#181F17]/90 rounded-xl border border-[#3A4D23]">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold text-[#8BAE5A]">Algemene Voortgang</h2>
           <span className="text-[#8BAE5A] font-bold">{overallProgress}%</span>
@@ -287,12 +282,12 @@ export default function AcademyPage() {
           return (
             <div
               key={module.id}
-              className={`p-6 rounded-xl border transition-all duration-200 hover:scale-105 backdrop-blur-sm ${
+              className={`p-6 rounded-xl border transition-all duration-200 hover:scale-105 ${
                 isCompleted
-                  ? 'bg-[#232D1A]/80 border-[#3A4D23]'
+                  ? 'bg-[#232D1A] border-[#3A4D23]'
                   : isUnlocked
-                  ? 'bg-[#181F17]/80 border-[#3A4D23] hover:bg-[#232D1A]/90'
-                  : 'bg-[#181F17]/80 border-[#3A4D23] opacity-60'
+                  ? 'bg-[#181F17] border-[#3A4D23] hover:bg-[#232D1A]'
+                  : 'bg-[#181F17] border-[#3A4D23] opacity-60'
               }`}
             >
               <div className="flex items-start justify-between mb-4">
@@ -359,7 +354,6 @@ export default function AcademyPage() {
             </div>
           );
         })}
-      </div>
       </div>
 
       {/* Badge Unlock Modal */}
