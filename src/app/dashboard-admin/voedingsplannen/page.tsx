@@ -412,31 +412,24 @@ export default function AdminVoedingsplannenPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-32 bg-gray-200 rounded"></div>
-              ))}
-            </div>
-            <div className="h-64 bg-gray-200 rounded"></div>
-          </div>
+      <div className="min-h-screen bg-[#181F17] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
+          <p className="text-[#8BAE5A]">Admin Voedingsplannen laden...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-[#181F17] text-white">
+      <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl font-bold text-[#8BAE5A] mb-2">
             Admin Voedingsplannen Beheer
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-300">
             Beheer voedingsplannen, ingrediënten en maaltijden voor het platform
           </p>
         </div>
@@ -469,66 +462,38 @@ export default function AdminVoedingsplannenPage() {
           />
         </div>
 
-        {/* Tabs */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
-          <div className="border-b border-gray-200">
-            <nav className="-mb-px flex space-x-8 px-6">
-              <button
-                onClick={() => setActiveTab('voeding')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'voeding'
-                    ? 'border-green-500 text-green-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                Voedingsplannen
-              </button>
-              <button
-                onClick={() => setActiveTab('ingredienten')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'ingredienten'
-                    ? 'border-green-500 text-green-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                Ingrediënten
-              </button>
-              <button
-                onClick={() => setActiveTab('maaltijden')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'maaltijden'
-                    ? 'border-green-500 text-green-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                Maaltijden
-              </button>
-              <button
-                onClick={() => setActiveTab('weekplannen')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'weekplannen'
-                    ? 'border-green-500 text-green-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                Weekplannen
-              </button>
-            </nav>
-          </div>
+        {/* Navigation Tabs */}
+        <div className="flex space-x-1 mb-8">
+          {[
+            { id: 'voeding', label: 'Voedingsplannen' },
+            { id: 'ingredienten', label: 'Ingrediënten' },
+            { id: 'maaltijden', label: 'Maaltijden' },
+            { id: 'weekplannen', label: 'Weekplannen' }
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-4 py-2 rounded-lg transition-colors ${
+                activeTab === tab.id
+                  ? 'bg-[#8BAE5A] text-[#181F17] font-semibold'
+                  : 'bg-[#232D1A] text-gray-300 hover:bg-[#2A3420]'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
 
         {/* Search Bar */}
         <div className="mb-6">
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
-            </div>
+            <MagnifyingGlassIcon className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
             <input
               type="text"
               placeholder="Zoeken..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
+              className="w-full pl-10 pr-4 py-2 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white placeholder-gray-400 focus:border-[#8BAE5A] focus:outline-none"
             />
           </div>
         </div>
@@ -537,7 +502,7 @@ export default function AdminVoedingsplannenPage() {
         {activeTab === 'voeding' && (
           <div>
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold text-gray-900">Voedingsplannen</h2>
+              <h2 className="text-xl font-semibold">Voedingsplannen</h2>
               <AdminButton
                 onClick={() => {
                   setSelectedPlan(null);
@@ -553,64 +518,67 @@ export default function AdminVoedingsplannenPage() {
             {filteredPlans.length === 0 ? (
               <div className="text-center py-12">
                 <ChartBarIcon className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-900">Geen voedingsplannen</h3>
-                <p className="mt-1 text-sm text-gray-500">
+                <h3 className="mt-2 text-sm font-medium text-gray-300">Geen voedingsplannen</h3>
+                <p className="mt-1 text-sm text-gray-400">
                   Maak je eerste voedingsplan aan om te beginnen.
                 </p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredPlans.map((plan) => (
-                  <AdminCard key={plan.id} className="p-6">
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <h3 className="text-lg font-medium text-gray-900">{plan.name}</h3>
-                        <p className="text-sm text-gray-500 mt-1">{plan.description}</p>
-                      </div>
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => handleEditPlan(plan)}
-                          className="text-gray-400 hover:text-gray-600"
-                        >
-                          <PencilIcon className="h-5 w-5" />
-                        </button>
-                        <button
-                          onClick={() => handleDeletePlan(plan.id)}
-                          className="text-gray-400 hover:text-red-600"
-                        >
-                          <TrashIcon className="h-5 w-5" />
-                        </button>
-                      </div>
-                    </div>
-                    
-                    {plan.target_calories && (
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <span className="text-gray-500">Calorieën:</span>
-                          <span className="ml-2 font-medium">{plan.target_calories} kcal</span>
-                        </div>
-                        {plan.target_protein && (
-                          <div>
-                            <span className="text-gray-500">Eiwit:</span>
-                            <span className="ml-2 font-medium">{plan.target_protein}g</span>
-                          </div>
-                        )}
-                        {plan.target_carbs && (
-                          <div>
-                            <span className="text-gray-500">Koolhydraten:</span>
-                            <span className="ml-2 font-medium">{plan.target_carbs}g</span>
-                          </div>
-                        )}
-                        {plan.target_fat && (
-                          <div>
-                            <span className="text-gray-500">Vet:</span>
-                            <span className="ml-2 font-medium">{plan.target_fat}g</span>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </AdminCard>
-                ))}
+                                 {filteredPlans.map((plan) => (
+                   <AdminCard key={plan.id} className="p-6">
+                     <h3 className="text-lg font-semibold text-[#8BAE5A] mb-2">{plan.name}</h3>
+                     <p className="text-gray-300 text-sm mb-4">{plan.description}</p>
+                     
+                     {plan.target_calories && (
+                       <div className="grid grid-cols-2 gap-4 text-sm mb-4">
+                         <div>
+                           <span className="text-gray-400">Calorieën:</span>
+                           <span className="ml-2 font-medium text-white">{plan.target_calories} kcal</span>
+                         </div>
+                         {plan.target_protein && (
+                           <div>
+                             <span className="text-gray-400">Eiwit:</span>
+                             <span className="ml-2 font-medium text-white">{plan.target_protein}g</span>
+                           </div>
+                         )}
+                         {plan.target_carbs && (
+                           <div>
+                             <span className="text-gray-400">Koolhydraten:</span>
+                             <span className="ml-2 font-medium text-white">{plan.target_carbs}g</span>
+                           </div>
+                         )}
+                         {plan.target_fat && (
+                           <div>
+                             <span className="text-gray-400">Vet:</span>
+                             <span className="ml-2 font-medium text-white">{plan.target_fat}g</span>
+                           </div>
+                         )}
+                       </div>
+                     )}
+                     
+                     <div className="flex justify-between items-center">
+                       <div className="flex space-x-2">
+                         <AdminButton
+                           onClick={() => handleEditPlan(plan)}
+                           variant="secondary"
+                           size="sm"
+                           icon={<PencilIcon className="w-4 h-4" />}
+                         >
+                           Bewerken
+                         </AdminButton>
+                         <AdminButton
+                           onClick={() => handleDeletePlan(plan.id)}
+                           variant="danger"
+                           size="sm"
+                           icon={<TrashIcon className="w-4 h-4" />}
+                         >
+                           Verwijderen
+                         </AdminButton>
+                       </div>
+                     </div>
+                   </AdminCard>
+                 ))}
               </div>
             )}
           </div>
@@ -619,7 +587,7 @@ export default function AdminVoedingsplannenPage() {
         {activeTab === 'ingredienten' && (
           <div>
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold text-gray-900">Ingrediënten</h2>
+              <h2 className="text-xl font-semibold">Ingrediënten</h2>
               <AdminButton
                 onClick={() => {
                   setSelectedFoodItem(null);
@@ -635,56 +603,56 @@ export default function AdminVoedingsplannenPage() {
             {filteredFoodItems.length === 0 ? (
               <div className="text-center py-12">
                 <BoltIcon className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-900">Geen ingrediënten</h3>
-                <p className="mt-1 text-sm text-gray-500">
+                <h3 className="mt-2 text-sm font-medium text-gray-300">Geen ingrediënten</h3>
+                <p className="mt-1 text-sm text-gray-400">
                   Voeg je eerste ingrediënt toe om te beginnen.
                 </p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredFoodItems.map((item) => (
-                  <AdminCard key={item.id} className="p-6">
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <h3 className="text-lg font-medium text-gray-900">{item.name}</h3>
-                        <p className="text-sm text-gray-500 mt-1">{item.category}</p>
-                      </div>
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => handleEditFoodItem(item)}
-                          className="text-gray-400 hover:text-gray-600"
-                        >
-                          <PencilIcon className="h-5 w-5" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteFoodItem(item.id)}
-                          className="text-gray-400 hover:text-red-600"
-                        >
-                          <TrashIcon className="h-5 w-5" />
-                        </button>
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <span className="text-gray-500">Calorieën:</span>
-                        <span className="ml-2 font-medium">{item.calories_per_100g} kcal</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-500">Eiwit:</span>
-                        <span className="ml-2 font-medium">{item.protein_per_100g}g</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-500">Koolhydraten:</span>
-                        <span className="ml-2 font-medium">{item.carbs_per_100g}g</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-500">Vet:</span>
-                        <span className="ml-2 font-medium">{item.fat_per_100g}g</span>
-                      </div>
-                    </div>
-                  </AdminCard>
-                ))}
+                                 {filteredFoodItems.map((item) => (
+                   <AdminCard key={item.id} className="p-6">
+                     <h3 className="text-lg font-semibold text-[#8BAE5A] mb-2">{item.name}</h3>
+                     <p className="text-gray-300 text-sm mb-2">Categorie: {item.category}</p>
+                     <p className="text-gray-300 text-sm mb-4">
+                       {item.calories_per_100g} kcal per 100g
+                     </p>
+                     
+                     <div className="grid grid-cols-2 gap-4 text-sm mb-4">
+                       <div>
+                         <span className="text-gray-400">Eiwit:</span>
+                         <span className="ml-2 font-medium text-white">{item.protein_per_100g}g</span>
+                       </div>
+                       <div>
+                         <span className="text-gray-400">Koolhydraten:</span>
+                         <span className="ml-2 font-medium text-white">{item.carbs_per_100g}g</span>
+                       </div>
+                       <div>
+                         <span className="text-gray-400">Vet:</span>
+                         <span className="ml-2 font-medium text-white">{item.fat_per_100g}g</span>
+                       </div>
+                     </div>
+                     
+                     <div className="flex space-x-2">
+                       <AdminButton
+                         onClick={() => handleEditFoodItem(item)}
+                         variant="secondary"
+                         size="sm"
+                         icon={<PencilIcon className="w-4 h-4" />}
+                       >
+                         Bewerken
+                       </AdminButton>
+                       <AdminButton
+                         onClick={() => handleDeleteFoodItem(item.id)}
+                         variant="danger"
+                         size="sm"
+                         icon={<TrashIcon className="w-4 h-4" />}
+                       >
+                         Verwijderen
+                       </AdminButton>
+                     </div>
+                   </AdminCard>
+                 ))}
               </div>
             )}
           </div>
@@ -693,7 +661,7 @@ export default function AdminVoedingsplannenPage() {
         {activeTab === 'maaltijden' && (
           <div>
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold text-gray-900">Maaltijden</h2>
+              <h2 className="text-xl font-semibold">Maaltijden</h2>
               <AdminButton
                 onClick={() => {
                   setSelectedMeal(null);
@@ -709,37 +677,39 @@ export default function AdminVoedingsplannenPage() {
             {filteredMeals.length === 0 ? (
               <div className="text-center py-12">
                 <LightBulbIcon className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-900">Geen maaltijden</h3>
-                <p className="mt-1 text-sm text-gray-500">
+                <h3 className="mt-2 text-sm font-medium text-gray-300">Geen maaltijden</h3>
+                <p className="mt-1 text-sm text-gray-400">
                   Maak je eerste maaltijd aan om te beginnen.
                 </p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredMeals.map((meal) => (
-                  <AdminCard key={meal.id} className="p-6">
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <h3 className="text-lg font-medium text-gray-900">{meal.name}</h3>
-                        <p className="text-sm text-gray-500 mt-1">{meal.description}</p>
-                      </div>
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => handleEditMeal(meal)}
-                          className="text-gray-400 hover:text-gray-600"
-                        >
-                          <PencilIcon className="h-5 w-5" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteMeal(meal.id)}
-                          className="text-gray-400 hover:text-red-600"
-                        >
-                          <TrashIcon className="h-5 w-5" />
-                        </button>
-                      </div>
-                    </div>
-                  </AdminCard>
-                ))}
+                                 {filteredMeals.map((meal) => (
+                   <AdminCard key={meal.id} className="p-6">
+                     <h3 className="text-lg font-semibold text-[#8BAE5A] mb-2">{meal.name}</h3>
+                     <p className="text-gray-300 text-sm mb-2">Type: {meal.meal_type}</p>
+                     <p className="text-gray-300 text-sm mb-4">{meal.description}</p>
+                     
+                     <div className="flex space-x-2">
+                       <AdminButton
+                         onClick={() => handleEditMeal(meal)}
+                         variant="secondary"
+                         size="sm"
+                         icon={<PencilIcon className="w-4 h-4" />}
+                       >
+                         Bewerken
+                       </AdminButton>
+                       <AdminButton
+                         onClick={() => handleDeleteMeal(meal.id)}
+                         variant="danger"
+                         size="sm"
+                         icon={<TrashIcon className="w-4 h-4" />}
+                       >
+                         Verwijderen
+                       </AdminButton>
+                     </div>
+                   </AdminCard>
+                 ))}
               </div>
             )}
           </div>
@@ -748,29 +718,25 @@ export default function AdminVoedingsplannenPage() {
         {activeTab === 'weekplannen' && (
           <div>
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold text-gray-900">Weekplannen</h2>
+              <h2 className="text-xl font-semibold">Weekplannen</h2>
             </div>
 
             {filteredWeekplans.length === 0 ? (
               <div className="text-center py-12">
                 <UserGroupIcon className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-900">Geen weekplannen</h3>
-                <p className="mt-1 text-sm text-gray-500">
+                <h3 className="mt-2 text-sm font-medium text-gray-300">Geen weekplannen</h3>
+                <p className="mt-1 text-sm text-gray-400">
                   Er zijn nog geen weekplannen beschikbaar.
                 </p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredWeekplans.map((weekplan) => (
-                  <AdminCard key={weekplan.id} className="p-6">
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <h3 className="text-lg font-medium text-gray-900">{weekplan.name}</h3>
-                        <p className="text-sm text-gray-500 mt-1">{weekplan.description}</p>
-                      </div>
-                    </div>
-                  </AdminCard>
-                ))}
+                                 {filteredWeekplans.map((weekplan) => (
+                   <AdminCard key={weekplan.id} className="p-6">
+                     <h3 className="text-lg font-semibold text-[#8BAE5A] mb-2">{weekplan.name}</h3>
+                     <p className="text-gray-300 text-sm mb-4">{weekplan.description}</p>
+                   </AdminCard>
+                 ))}
               </div>
             )}
           </div>
