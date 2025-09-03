@@ -402,16 +402,16 @@ export async function populateEbooksDatabase(): Promise<{ success: boolean, coun
     for (let i = 0; i < ebooksData.length; i += batchSize) {
       const batch = ebooksData.slice(i, i + batchSize);
       
-      const { error: insertError, count } = await supabase
+      const { error: insertError, data } = await supabase
         .from('academy_ebook_files')
         .insert(batch)
-        .select('id', { count: 'exact' });
+        .select('id');
       
       if (insertError) {
         throw new Error(`Fout bij inserting batch ${i}: ${insertError.message}`);
       }
       
-      totalInserted += count || batch.length;
+      totalInserted += data?.length || batch.length;
       console.log(`✅ Batch ${Math.floor(i/batchSize) + 1} van ${Math.ceil(ebooksData.length/batchSize)} voltooid`);
     }
 
