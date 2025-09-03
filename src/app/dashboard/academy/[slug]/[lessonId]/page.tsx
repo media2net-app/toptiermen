@@ -161,19 +161,27 @@ export default function LessonDetailPage() {
 
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // SIMPLIFIED: Reliable data fetching with proper error handling
+  // ENHANCED: Debug data fetching with detailed logging
   const fetchData = async () => {
+    console.log('🔍 fetchData called with:', { 
+      user: !!user, 
+      moduleId, 
+      lessonId, 
+      loading, 
+      isDataLoaded, 
+      navigating,
+      hasLesson: !!lesson,
+      lessonIdMatch: lesson?.id === lessonId,
+      pageVisibility: document.visibilityState
+    });
+
     if (!user || !moduleId || !lessonId) {
-      console.log('Missing data:', { user: !!user, moduleId, lessonId });
+      console.log('❌ Missing required data:', { user: !!user, moduleId, lessonId });
       return;
     }
 
-    // Prevent refetching if data is already loaded for this specific lesson
-    // BUT allow refetch if we've been navigating for too long (stuck state)
-    if (isDataLoaded && lesson && lesson.id === lessonId && !navigating) {
-      console.log('✅ Data already loaded for this lesson, skipping fetch');
-      return;
-    }
+    // Don't skip fetch anymore - let the useEffect handle this logic
+    console.log('📥 Proceeding with fetch - no skipping logic');
     
     // Reset navigation state if we're actually fetching new data
     if (navigating) {
@@ -181,7 +189,11 @@ export default function LessonDetailPage() {
       setNavigating(false);
     }
 
-    console.log('🚀 Fetching lesson data for:', { moduleId, lessonId });
+    console.log('🚀 Starting data fetch for:', { moduleId, lessonId });
+    console.log('   - Current loading state:', loading);
+    console.log('   - Document visibility:', document.visibilityState);
+    console.log('   - Page focus:', document.hasFocus());
+    
     setLoading(true);
     setError(null);
 
@@ -253,54 +265,48 @@ export default function LessonDetailPage() {
         module: moduleData.title,
         lesson: currentLesson.title,
         lessonsCount: lessonsData.length,
-        hasEbook: !!ebookData
+        hasEbook: !!ebookData,
+        timestamp: new Date().toISOString()
       });
 
     } catch (error) {
       console.error('❌ Fetch error:', error);
       setError('Er is een fout opgetreden bij het laden van de les');
+      setIsDataLoaded(false); // Reset on error
     } finally {
+      console.log('🏁 Fetch completed, setting loading to false');
       setLoading(false);
     }
   };
 
-  // Initial data fetch on mount
+  // SUPER SIMPLE: Just fetch data when needed, period.
   useEffect(() => {
-    if (user && moduleId && lessonId && !isDataLoaded) {
-      console.log('🎯 Initial data fetch on mount');
-      fetchData();
-    }
-  }, [user, moduleId, lessonId]); // Remove isDataLoaded from dependencies
+    console.log('🔍 Checking if we need to fetch data:', {
+      user: !!user,
+      moduleId,
+      lessonId,
+      hasCorrectLesson: lesson?.id === lessonId,
+      isDataLoaded,
+      loading,
+      pageVisible: document.visibilityState === 'visible'
+    });
 
-  // Reset data when lessonId changes (but not on mount)
-  useEffect(() => {
     if (user && moduleId && lessonId) {
-      // Only reset if we're actually changing lessons, not on initial mount
-      const hasExistingData = module && lesson && lessons.length > 0;
-      
-      if (hasExistingData) {
-        console.log('🔄 Lesson changed, resetting data...');
-        // Reset all state for new lesson
-        setModule(null);
-        setLesson(null);
-        setLessons([]);
-        setCompleted(false);
-        setCompletedLessonIds([]);
-        setEbook(null);
-        setError(null);
-        setLoading(true);
+      // Always fetch if we don't have the right lesson data
+      if (!lesson || lesson.id !== lessonId || !isDataLoaded) {
+        console.log('🚀 Need to fetch data, doing it now');
         setIsDataLoaded(false);
-        
-        // Fetch new data
         fetchData();
+      } else {
+        console.log('✅ Already have correct data, no need to fetch');
       }
     }
-  }, [lessonId]); // Only depend on lessonId, not user or moduleId
+  }, [user, moduleId, lessonId]);
 
-  // Reset isDataLoaded when component unmounts
+  // Clean up on unmount
   useEffect(() => {
     return () => {
-      console.log('🧹 Component unmounting, resetting isDataLoaded');
+      console.log('🧹 Component unmounting');
       setIsDataLoaded(false);
     };
   }, []);
@@ -375,16 +381,34 @@ export default function LessonDetailPage() {
     return orderIndex.toString().padStart(2, '0');
   };
 
-  // Force continue function
+  // Force continue function with multiple strategies
   const handleForceContinue = () => {
-    console.log('🚀 Force continue triggered');
+    console.log('🚀 Force continue triggered - trying multiple strategies');
+    
+    // Strategy 1: Reset all states
     setNavigating(false);
     setLoading(false);
     setIsVideoLoading(false);
     setShowForceButton(false);
     setIsDataLoaded(false);
-    // Trigger a page refresh as last resort
-    window.location.reload();
+    setError(null);
+    
+    // Strategy 2: Clear any cached data
+    setModule(null);
+    setLesson(null);
+    setLessons([]);
+    setEbook(null);
+    
+    // Strategy 3: Force a new fetch
+    setTimeout(() => {
+      console.log('🔄 Force fetching new data');
+      if (user && moduleId && lessonId) {
+        fetchData();
+      } else {
+        console.log('🚨 Missing data for fetch, refreshing page');
+        window.location.reload();
+      }
+    }, 100);
   };
 
   // Render loading state
@@ -399,18 +423,48 @@ export default function LessonDetailPage() {
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
             <p className="text-gray-300">Les laden...</p>
             
-            {/* Force continue button for stuck states */}
-            {showForceButton && (
-              <div className="mt-6">
-                <p className="text-yellow-400 text-sm mb-3">Laden duurt langer dan verwacht...</p>
+            {/* Debug info and force continue button */}
+            <div className="mt-6 space-y-3">
+              {/* Debug info */}
+              <details className="text-left bg-gray-800 p-4 rounded-lg text-xs">
+                <summary className="cursor-pointer text-yellow-400">🔍 Debug Info (klik om uit te klappen)</summary>
+                <div className="mt-2 space-y-1 text-gray-300">
+                  <div>User: {user ? '✅' : '❌'}</div>
+                  <div>Module ID: {moduleId || 'undefined'}</div>
+                  <div>Lesson ID: {lessonId || 'undefined'}</div>
+                  <div>Loading: {loading ? '✅' : '❌'}</div>
+                  <div>Data Loaded: {isDataLoaded ? '✅' : '❌'}</div>
+                  <div>Navigating: {navigating ? '✅' : '❌'}</div>
+                  <div>Has Lesson: {lesson ? '✅' : '❌'}</div>
+                  <div>Lesson Match: {lesson?.id === lessonId ? '✅' : '❌'}</div>
+                  <div>Page Visible: {document.visibilityState}</div>
+                  <div>Page Focus: {document.hasFocus() ? '✅' : '❌'}</div>
+                </div>
+              </details>
+              
+              {/* Force continue button */}
+              {showForceButton && (
+                <div>
+                  <p className="text-yellow-400 text-sm mb-3">Laden duurt langer dan verwacht...</p>
+                  <button
+                    onClick={handleForceContinue}
+                    className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
+                  >
+                    🔄 Forceer doorgaan
+                  </button>
+                </div>
+              )}
+              
+              {/* Manual refresh button - always available */}
+              <div>
                 <button
-                  onClick={handleForceContinue}
-                  className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
+                  onClick={() => window.location.reload()}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                 >
-                  🔄 Forceer doorgaan
+                  🔄 Pagina verversen
                 </button>
               </div>
-            )}
+            </div>
           </div>
         </div>
       </PageLayout>
