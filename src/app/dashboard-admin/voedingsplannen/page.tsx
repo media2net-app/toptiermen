@@ -102,143 +102,86 @@ export default function AdminVoedingsplannenPage() {
     }
   };
 
-  const fetchPlans = async () => {
-    try {
-      const response = await fetch('/api/admin/nutrition-plans');
-      const result = await response.json();
-      
-      if (!response.ok) {
-        console.error('❌ Error fetching plans:', result.error);
-        setPlans([]);
-      } else {
-        setPlans(result.plans || []);
-      }
-    } catch (error) {
-      console.error('❌ Error fetching plans:', error);
-      setPlans([]);
-    }
-  };
-
   const fetchMeals = async () => {
     try {
+      console.log('🍽️ Fetching meals from database...');
+      
       const response = await fetch('/api/admin/meals');
       const result = await response.json();
       
       if (!response.ok) {
         console.error('❌ Error fetching meals:', result.error);
-        setMeals([]);
-      } else {
-        setMeals(result.meals || []);
+        return;
       }
-    } catch (error) {
-      console.error('❌ Error fetching meals:', error);
-      setMeals([]);
+      
+      setMeals(result.meals || []);
+      console.log('✅ Meals loaded:', result.meals?.length || 0);
+    } catch (err) {
+      console.error('❌ Exception fetching meals:', err);
     }
   };
 
   const fetchWeekplans = async () => {
     try {
+      console.log('📊 Fetching nutrition weekplans from database...');
+      
       const response = await fetch('/api/admin/nutrition-weekplans');
       const result = await response.json();
       
       if (!response.ok) {
         console.error('❌ Error fetching weekplans:', result.error);
-        setWeekplans([]);
-      } else {
-        setWeekplans(result.weekplans || []);
+        return;
       }
-    } catch (error) {
-      console.error('❌ Error fetching weekplans:', error);
-      setWeekplans([]);
+      
+      setWeekplans(result.weekplans || []);
+      console.log('✅ Weekplans loaded:', result.weekplans?.length || 0);
+    } catch (err) {
+      console.error('❌ Exception fetching weekplans:', err);
+    }
+  };
+
+  const fetchPlans = async () => {
+    try {
+      console.log('📊 Fetching nutrition plans from database...');
+      
+      const response = await fetch('/api/admin/nutrition-plans');
+      const result = await response.json();
+      
+      if (!response.ok) {
+        console.error('❌ Error fetching plans:', result.error);
+        return;
+      }
+      
+      setPlans(result.plans || []);
+      console.log('✅ Plans loaded:', result.plans?.length || 0);
+    } catch (err) {
+      console.error('❌ Exception fetching plans:', err);
     }
   };
 
   const fetchAllData = async () => {
     setIsLoading(true);
     await Promise.all([
-      fetchFoodItems(),
       fetchPlans(),
+      fetchWeekplans(),
       fetchMeals(),
-      fetchWeekplans()
+      fetchFoodItems()
     ]);
     setIsLoading(false);
   };
 
-  // Load all data on component mount
   useEffect(() => {
     fetchAllData();
   }, []);
 
-  // Handlers
-  const handleAddFoodItem = () => {
-    setSelectedFoodItem(null);
-    setShowFoodItemModal(true);
-  };
-
-  const handleEditFoodItem = (foodItem: FoodItem) => {
-    setSelectedFoodItem(foodItem);
-    setShowFoodItemModal(true);
-  };
-
-  const handleSaveFoodItem = async () => {
+  const handleSaveMeal = async (mealData: any) => {
     try {
-      console.log('💾 Food item saved successfully');
-      await fetchAllData();
-      setShowFoodItemModal(false);
-      setSelectedFoodItem(null);
-    } catch (error) {
-      console.error('❌ Error saving food item:', error);
-      alert('Fout bij opslaan van voedingsitem');
-    }
-  };
-
-  const handleDeleteFoodItem = async (foodItemId: string) => {
-    if (!confirm('Weet je zeker dat je dit voedingsitem wilt verwijderen?')) {
-      return;
-    }
-
-    try {
-      console.log('🗑️ Deleting food item:', foodItemId);
+      const method = selectedMeal ? 'PUT' : 'POST';
+      const url = '/api/admin/meals';
       
-      const response = await fetch(`/api/admin/nutrition-ingredients?id=${foodItemId}`, {
-        method: 'DELETE',
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        console.error('❌ Error deleting food item:', result.error);
-        alert(`Fout bij verwijderen: ${result.error}`);
-        return;
-      }
-
-      console.log('✅ Food item deleted successfully:', result);
-      await fetchAllData();
-      
-    } catch (error) {
-      console.error('❌ Error deleting food item:', error);
-      alert('Fout bij verwijderen van voedingsitem');
-    }
-  };
-
-  const handleAddPlan = () => {
-    setSelectedPlan(null);
-    setShowPlanBuilder(true);
-  };
-
-  const handleEditPlan = (plan: NutritionPlan) => {
-    setSelectedPlan(plan);
-    setShowPlanBuilder(true);
-  };
-
-  const handleSavePlan = async (planData: any) => {
-    try {
-      const method = selectedPlan ? 'PUT' : 'POST';
-      const url = '/api/admin/nutrition-plans';
-      
-      const payload = selectedPlan 
-        ? { ...planData, id: selectedPlan.id }
-        : planData;
+      const payload = selectedMeal 
+        ? { ...mealData, id: selectedMeal.id }
+        : mealData;
 
       const response = await fetch(url, {
         method,
@@ -251,83 +194,8 @@ export default function AdminVoedingsplannenPage() {
       const result = await response.json();
       
       if (!response.ok) {
-        console.error('❌ Error saving plan:', result.error);
-        alert('Fout bij opslaan van plan: ' + (result.error || 'Onbekende fout'));
-        return;
-      }
-
-      console.log('✅ Plan saved successfully:', result);
-      await fetchAllData();
-      setShowPlanBuilder(false);
-      setSelectedPlan(null);
-      
-    } catch (error) {
-      console.error('❌ Error saving plan:', error);
-      alert('Fout bij opslaan van plan');
-    }
-  };
-
-  const handleDeletePlan = async (planId: string) => {
-    if (!confirm('Weet je zeker dat je dit plan wilt verwijderen?')) {
-      return;
-    }
-
-    try {
-      const response = await fetch('/api/admin/nutrition-plans', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ id: planId })
-      });
-
-      const result = await response.json();
-      
-      if (!response.ok) {
-        console.error('❌ Error deleting plan:', result.error);
-        alert('Fout bij verwijderen van plan: ' + (result.error || 'Onbekende fout'));
-        return;
-      }
-
-      console.log('✅ Plan deleted successfully:', result);
-      await fetchAllData();
-      
-    } catch (error) {
-      console.error('❌ Error deleting plan:', error);
-      alert('Fout bij verwijderen van plan');
-    }
-  };
-
-  const handleAddMeal = () => {
-    setSelectedMeal(null);
-    setShowMealModal(true);
-  };
-
-  const handleEditMeal = (meal: any) => {
-    setSelectedMeal(meal);
-    setShowMealModal(true);
-  };
-
-  const handleSaveMeal = async (meal: any) => {
-    try {
-      console.log('💾 Saving meal:', meal);
-      
-      const url = '/api/admin/meals';
-      const method = meal.id ? 'PUT' : 'POST';
-      
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(meal),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
         console.error('❌ Error saving meal:', result.error);
-        alert(`Fout bij opslaan: ${result.error}`);
+        alert('Fout bij opslaan van maaltijd: ' + (result.error || 'Onbekende fout'));
         return;
       }
 
@@ -373,45 +241,202 @@ export default function AdminVoedingsplannenPage() {
     }
   };
 
-  // Filter functions
-  const filteredFoodItems = foodItems.filter(item =>
-    item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.category.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleSavePlan = async (planData: any) => {
+    try {
+      const method = selectedPlan ? 'PUT' : 'POST';
+      const url = '/api/admin/nutrition-plans';
+      
+      const payload = selectedPlan 
+        ? { ...planData, id: selectedPlan.id }
+        : planData;
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const result = await response.json();
+      
+      if (!response.ok) {
+        console.error('❌ Error saving plan:', result.error);
+        alert('Fout bij opslaan van plan: ' + (result.error || 'Onbekende fout'));
+        return;
+      }
+
+      console.log('✅ Plan saved successfully:', result);
+      await fetchAllData();
+      setShowPlanBuilder(false);
+      setSelectedPlan(null);
+      
+    } catch (error) {
+      console.error('❌ Error saving plan:', error);
+      alert('Fout bij opslaan van plan');
+    }
+  };
+
+  const handleDeletePlan = async (planId: string) => {
+    if (!confirm('Weet je zeker dat je dit voedingsplan wilt verwijderen?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/admin/nutrition-plans', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id: planId })
+      });
+
+      const result = await response.json();
+      
+      if (!response.ok) {
+        console.error('❌ Error deleting plan:', result.error);
+        alert('Fout bij verwijderen van plan: ' + (result.error || 'Onbekende fout'));
+        return;
+      }
+
+      console.log('✅ Plan deleted successfully:', result);
+      await fetchAllData();
+      
+    } catch (error) {
+      console.error('❌ Error deleting plan:', error);
+      alert('Fout bij verwijderen van plan');
+    }
+  };
+
+  const handleEditPlan = (plan: NutritionPlan) => {
+    setSelectedPlan(plan);
+    setShowPlanBuilder(true);
+  };
+
+  const handleEditMeal = (meal: any) => {
+    setSelectedMeal(meal);
+    setShowMealModal(true);
+  };
+
+  const handleEditFoodItem = (foodItem: FoodItem) => {
+    setSelectedFoodItem(foodItem);
+    setShowFoodItemModal(true);
+  };
+
+  const handleSaveFoodItem = async (foodItemData: any) => {
+    try {
+      const method = selectedFoodItem ? 'PUT' : 'POST';
+      const url = '/api/admin/nutrition-ingredients';
+      
+      const payload = selectedFoodItem 
+        ? { ...foodItemData, id: selectedFoodItem.id }
+        : foodItemData;
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const result = await response.json();
+      
+      if (!response.ok) {
+        console.error('❌ Error saving food item:', result.error);
+        alert('Fout bij opslaan van ingrediënt: ' + (result.error || 'Onbekende fout'));
+        return;
+      }
+
+      console.log('✅ Food item saved successfully:', result);
+      await fetchAllData();
+      setShowFoodItemModal(false);
+      setSelectedFoodItem(null);
+      
+    } catch (error) {
+      console.error('❌ Error saving food item:', error);
+      alert('Fout bij opslaan van ingrediënt');
+    }
+  };
+
+  const handleDeleteFoodItem = async (foodItemId: string) => {
+    if (!confirm('Weet je zeker dat je dit ingrediënt wilt verwijderen?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/admin/nutrition-ingredients', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id: foodItemId })
+      });
+
+      const result = await response.json();
+      
+      if (!response.ok) {
+        console.error('❌ Error deleting food item:', result.error);
+        alert('Fout bij verwijderen van ingrediënt: ' + (result.error || 'Onbekende fout'));
+        return;
+      }
+
+      console.log('✅ Food item deleted successfully:', result);
+      await fetchAllData();
+      
+    } catch (error) {
+      console.error('❌ Error deleting food item:', error);
+      alert('Fout bij verwijderen van ingrediënt');
+    }
+  };
 
   const filteredPlans = plans.filter(plan =>
     plan.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     plan.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const filteredMeals = meals.filter(meal => {
-    const matchesSearch = meal.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         meal.description?.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    if (mealsFilter === 'alle') return matchesSearch;
-    return matchesSearch && meal.meal_type === mealsFilter;
-  });
+  const filteredFoodItems = foodItems.filter(item =>
+    item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.category.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const filteredMeals = meals.filter(meal =>
+    meal.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    meal.description.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const filteredWeekplans = weekplans.filter(weekplan =>
+    weekplan.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    weekplan.description.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#181F17] flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
-          <p className="text-[#8BAE5A]">Admin Voedingsplannen laden...</p>
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="h-32 bg-gray-200 rounded"></div>
+              ))}
+            </div>
+            <div className="h-64 bg-gray-200 rounded"></div>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#181F17] text-white">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[#8BAE5A] mb-2">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Admin Voedingsplannen Beheer
           </h1>
-          <p className="text-gray-300">
+          <p className="text-gray-600">
             Beheer voedingsplannen, ingrediënten en maaltijden voor het platform
           </p>
         </div>
@@ -420,62 +445,90 @@ export default function AdminVoedingsplannenPage() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <AdminStatsCard
             title="Voedingsplannen"
-            value={plans.length}
+            value={plans.length.toString()}
             icon={<ChartBarIcon className="w-6 h-6" />}
             color="blue"
           />
           <AdminStatsCard
             title="Ingrediënten"
-            value={foodItems.length}
+            value={foodItems.length.toString()}
             icon={<BoltIcon className="w-6 h-6" />}
             color="green"
           />
           <AdminStatsCard
             title="Maaltijden"
-            value={meals.length}
+            value={meals.length.toString()}
             icon={<LightBulbIcon className="w-6 h-6" />}
             color="orange"
           />
           <AdminStatsCard
             title="Weekplannen"
-            value={weekplans.length}
+            value={weekplans.length.toString()}
             icon={<UserGroupIcon className="w-6 h-6" />}
             color="purple"
           />
         </div>
 
-        {/* Navigation Tabs */}
-        <div className="flex space-x-1 mb-8">
-          {[
-            { id: 'voeding', label: 'Voedingsplannen' },
-            { id: 'ingredienten', label: 'Ingrediënten' },
-            { id: 'maaltijden', label: 'Maaltijden' },
-            { id: 'weekplannen', label: 'Weekplannen' }
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2 rounded-lg transition-colors ${
-                activeTab === tab.id
-                  ? 'bg-[#8BAE5A] text-[#181F17] font-semibold'
-                  : 'bg-[#232D1A] text-gray-300 hover:bg-[#2A3420]'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+        {/* Tabs */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+          <div className="border-b border-gray-200">
+            <nav className="-mb-px flex space-x-8 px-6">
+              <button
+                onClick={() => setActiveTab('voeding')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'voeding'
+                    ? 'border-green-500 text-green-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Voedingsplannen
+              </button>
+              <button
+                onClick={() => setActiveTab('ingredienten')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'ingredienten'
+                    ? 'border-green-500 text-green-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Ingrediënten
+              </button>
+              <button
+                onClick={() => setActiveTab('maaltijden')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'maaltijden'
+                    ? 'border-green-500 text-green-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Maaltijden
+              </button>
+              <button
+                onClick={() => setActiveTab('weekplannen')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'weekplannen'
+                    ? 'border-green-500 text-green-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Weekplannen
+              </button>
+            </nav>
+          </div>
         </div>
 
         {/* Search Bar */}
         <div className="mb-6">
           <div className="relative">
-            <MagnifyingGlassIcon className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+            </div>
             <input
               type="text"
               placeholder="Zoeken..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white placeholder-gray-400 focus:border-[#8BAE5A] focus:outline-none"
+              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
             />
           </div>
         </div>
@@ -484,228 +537,286 @@ export default function AdminVoedingsplannenPage() {
         {activeTab === 'voeding' && (
           <div>
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold">Voedingsplannen</h2>
+              <h2 className="text-xl font-semibold text-gray-900">Voedingsplannen</h2>
               <AdminButton
-                onClick={handleAddPlan}
-                variant="primary"
+                onClick={() => {
+                  setSelectedPlan(null);
+                  setShowPlanBuilder(true);
+                }}
                 icon={<PlusIcon className="w-4 h-4" />}
+                variant="primary"
               >
-                Nieuw Plan
+                + Nieuw Plan
               </AdminButton>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredPlans.map((plan) => (
-                <AdminCard key={plan.id} className="p-6">
-                  <h3 className="text-lg font-semibold text-[#8BAE5A] mb-2">{plan.name}</h3>
-                  <p className="text-gray-300 text-sm mb-4">{plan.description}</p>
-                  
-                  <div className="flex justify-between items-center">
-                    <div className="flex space-x-2">
-                      <AdminButton
-                        onClick={() => handleEditPlan(plan)}
-                        variant="secondary"
-                        size="sm"
-                        icon={<PencilIcon className="w-4 h-4" />}
-                      >
-                        Bewerken
-                      </AdminButton>
-                      <AdminButton
-                        onClick={() => handleDeletePlan(plan.id)}
-                        variant="danger"
-                        size="sm"
-                        icon={<TrashIcon className="w-4 h-4" />}
-                      >
-                        Verwijderen
-                      </AdminButton>
+            {filteredPlans.length === 0 ? (
+              <div className="text-center py-12">
+                <ChartBarIcon className="mx-auto h-12 w-12 text-gray-400" />
+                <h3 className="mt-2 text-sm font-medium text-gray-900">Geen voedingsplannen</h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  Maak je eerste voedingsplan aan om te beginnen.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredPlans.map((plan) => (
+                  <AdminCard key={plan.id} className="p-6">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <h3 className="text-lg font-medium text-gray-900">{plan.name}</h3>
+                        <p className="text-sm text-gray-500 mt-1">{plan.description}</p>
+                      </div>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleEditPlan(plan)}
+                          className="text-gray-400 hover:text-gray-600"
+                        >
+                          <PencilIcon className="h-5 w-5" />
+                        </button>
+                        <button
+                          onClick={() => handleDeletePlan(plan.id)}
+                          className="text-gray-400 hover:text-red-600"
+                        >
+                          <TrashIcon className="h-5 w-5" />
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                </AdminCard>
-              ))}
-            </div>
+                    
+                    {plan.target_calories && (
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <span className="text-gray-500">Calorieën:</span>
+                          <span className="ml-2 font-medium">{plan.target_calories} kcal</span>
+                        </div>
+                        {plan.target_protein && (
+                          <div>
+                            <span className="text-gray-500">Eiwit:</span>
+                            <span className="ml-2 font-medium">{plan.target_protein}g</span>
+                          </div>
+                        )}
+                        {plan.target_carbs && (
+                          <div>
+                            <span className="text-gray-500">Koolhydraten:</span>
+                            <span className="ml-2 font-medium">{plan.target_carbs}g</span>
+                          </div>
+                        )}
+                        {plan.target_fat && (
+                          <div>
+                            <span className="text-gray-500">Vet:</span>
+                            <span className="ml-2 font-medium">{plan.target_fat}g</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </AdminCard>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
         {activeTab === 'ingredienten' && (
           <div>
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold">Ingrediënten</h2>
+              <h2 className="text-xl font-semibold text-gray-900">Ingrediënten</h2>
               <AdminButton
-                onClick={handleAddFoodItem}
-                variant="primary"
+                onClick={() => {
+                  setSelectedFoodItem(null);
+                  setShowFoodItemModal(true);
+                }}
                 icon={<PlusIcon className="w-4 h-4" />}
+                variant="primary"
               >
-                Nieuw Ingrediënt
+                + Nieuw Ingrediënt
               </AdminButton>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredFoodItems.map((item) => (
-                <AdminCard key={item.id} className="p-6">
-                  <h3 className="text-lg font-semibold text-[#8BAE5A] mb-2">{item.name}</h3>
-                  <p className="text-gray-300 text-sm mb-2">Categorie: {item.category}</p>
-                  <p className="text-gray-300 text-sm mb-4">
-                    {item.calories_per_100g} kcal per 100g
-                  </p>
-                  
-                  <div className="flex space-x-2">
-                    <AdminButton
-                      onClick={() => handleEditFoodItem(item)}
-                      variant="secondary"
-                      size="sm"
-                      icon={<PencilIcon className="w-4 h-4" />}
-                    >
-                      Bewerken
-                    </AdminButton>
-                    <AdminButton
-                      onClick={() => handleDeleteFoodItem(item.id)}
-                      variant="danger"
-                      size="sm"
-                      icon={<TrashIcon className="w-4 h-4" />}
-                    >
-                      Verwijderen
-                    </AdminButton>
-                  </div>
-                </AdminCard>
-              ))}
-            </div>
+            {filteredFoodItems.length === 0 ? (
+              <div className="text-center py-12">
+                <BoltIcon className="mx-auto h-12 w-12 text-gray-400" />
+                <h3 className="mt-2 text-sm font-medium text-gray-900">Geen ingrediënten</h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  Voeg je eerste ingrediënt toe om te beginnen.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredFoodItems.map((item) => (
+                  <AdminCard key={item.id} className="p-6">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <h3 className="text-lg font-medium text-gray-900">{item.name}</h3>
+                        <p className="text-sm text-gray-500 mt-1">{item.category}</p>
+                      </div>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleEditFoodItem(item)}
+                          className="text-gray-400 hover:text-gray-600"
+                        >
+                          <PencilIcon className="h-5 w-5" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteFoodItem(item.id)}
+                          className="text-gray-400 hover:text-red-600"
+                        >
+                          <TrashIcon className="h-5 w-5" />
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="text-gray-500">Calorieën:</span>
+                        <span className="ml-2 font-medium">{item.calories_per_100g} kcal</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Eiwit:</span>
+                        <span className="ml-2 font-medium">{item.protein_per_100g}g</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Koolhydraten:</span>
+                        <span className="ml-2 font-medium">{item.carbs_per_100g}g</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Vet:</span>
+                        <span className="ml-2 font-medium">{item.fat_per_100g}g</span>
+                      </div>
+                    </div>
+                  </AdminCard>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
         {activeTab === 'maaltijden' && (
           <div>
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold">Maaltijden</h2>
-              <div className="flex space-x-4">
-                <select
-                  value={mealsFilter}
-                  onChange={(e) => setMealsFilter(e.target.value)}
-                  className="px-3 py-2 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
-                >
-                  <option value="alle">Alle maaltijden</option>
-                  <option value="ontbijt">Ontbijt</option>
-                  <option value="lunch">Lunch</option>
-                  <option value="diner">Diner</option>
-                  <option value="snack">Snack</option>
-                </select>
-                <AdminButton
-                  onClick={handleAddMeal}
-                  variant="primary"
-                  icon={<PlusIcon className="w-4 h-4" />}
-                >
-                  Nieuwe Maaltijd
-                </AdminButton>
-              </div>
+              <h2 className="text-xl font-semibold text-gray-900">Maaltijden</h2>
+              <AdminButton
+                onClick={() => {
+                  setSelectedMeal(null);
+                  setShowMealModal(true);
+                }}
+                icon={<PlusIcon className="w-4 h-4" />}
+                variant="primary"
+              >
+                + Nieuwe Maaltijd
+              </AdminButton>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredMeals.map((meal) => (
-                <AdminCard key={meal.id} className="p-6">
-                  <h3 className="text-lg font-semibold text-[#8BAE5A] mb-2">{meal.name}</h3>
-                  <p className="text-gray-300 text-sm mb-2">Type: {meal.meal_type}</p>
-                  <p className="text-gray-300 text-sm mb-4">{meal.description}</p>
-                  
-                  <div className="flex space-x-2">
-                    <AdminButton
-                      onClick={() => handleEditMeal(meal)}
-                      variant="secondary"
-                      size="sm"
-                      icon={<PencilIcon className="w-4 h-4" />}
-                    >
-                      Bewerken
-                    </AdminButton>
-                    <AdminButton
-                      onClick={() => handleDeleteMeal(meal.id)}
-                      variant="danger"
-                      size="sm"
-                      icon={<TrashIcon className="w-4 h-4" />}
-                    >
-                      Verwijderen
-                    </AdminButton>
-                  </div>
-                </AdminCard>
-              ))}
-            </div>
+            {filteredMeals.length === 0 ? (
+              <div className="text-center py-12">
+                <LightBulbIcon className="mx-auto h-12 w-12 text-gray-400" />
+                <h3 className="mt-2 text-sm font-medium text-gray-900">Geen maaltijden</h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  Maak je eerste maaltijd aan om te beginnen.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredMeals.map((meal) => (
+                  <AdminCard key={meal.id} className="p-6">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <h3 className="text-lg font-medium text-gray-900">{meal.name}</h3>
+                        <p className="text-sm text-gray-500 mt-1">{meal.description}</p>
+                      </div>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleEditMeal(meal)}
+                          className="text-gray-400 hover:text-gray-600"
+                        >
+                          <PencilIcon className="h-5 w-5" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteMeal(meal.id)}
+                          className="text-gray-400 hover:text-red-600"
+                        >
+                          <TrashIcon className="h-5 w-5" />
+                        </button>
+                      </div>
+                    </div>
+                  </AdminCard>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
         {activeTab === 'weekplannen' && (
           <div>
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold">Weekplannen</h2>
-              <AdminButton
-                variant="primary"
-                icon={<PlusIcon className="w-4 h-4" />}
-              >
-                Nieuw Weekplan
-              </AdminButton>
+              <h2 className="text-xl font-semibold text-gray-900">Weekplannen</h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {weekplans.map((weekplan) => (
-                <AdminCard key={weekplan.id} className="p-6">
-                  <h3 className="text-lg font-semibold text-[#8BAE5A] mb-2">{weekplan.name}</h3>
-                  <p className="text-gray-300 text-sm mb-4">{weekplan.description}</p>
-                  
-                  <div className="flex space-x-2">
-                    <AdminButton
-                      variant="secondary"
-                      size="sm"
-                      icon={<PencilIcon className="w-4 h-4" />}
-                    >
-                      Bewerken
-                    </AdminButton>
-                    <AdminButton
-                      variant="danger"
-                      size="sm"
-                      icon={<TrashIcon className="w-4 h-4" />}
-                    >
-                      Verwijderen
-                    </AdminButton>
-                  </div>
-                </AdminCard>
-              ))}
-            </div>
+            {filteredWeekplans.length === 0 ? (
+              <div className="text-center py-12">
+                <UserGroupIcon className="mx-auto h-12 w-12 text-gray-400" />
+                <h3 className="mt-2 text-sm font-medium text-gray-900">Geen weekplannen</h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  Er zijn nog geen weekplannen beschikbaar.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredWeekplans.map((weekplan) => (
+                  <AdminCard key={weekplan.id} className="p-6">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <h3 className="text-lg font-medium text-gray-900">{weekplan.name}</h3>
+                        <p className="text-sm text-gray-500 mt-1">{weekplan.description}</p>
+                      </div>
+                    </div>
+                  </AdminCard>
+                ))}
+              </div>
+            )}
           </div>
         )}
+
+        {/* Modals */}
+        {showPlanBuilder && (
+          <PlanBuilder
+            isOpen={showPlanBuilder}
+            plan={selectedPlan}
+            onSave={handleSavePlan}
+            onClose={() => {
+              setShowPlanBuilder(false);
+              setSelectedPlan(null);
+            }}
+          />
+        )}
+
+        {showFoodItemModal && (
+          <FoodItemModal
+            isOpen={showFoodItemModal}
+            foodItem={selectedFoodItem}
+            onSave={() => {
+              fetchAllData();
+              setShowFoodItemModal(false);
+              setSelectedFoodItem(null);
+            }}
+            onClose={() => {
+              setShowFoodItemModal(false);
+              setSelectedFoodItem(null);
+            }}
+          />
+        )}
+
+        {showMealModal && (
+          <MealModal
+            isOpen={showMealModal}
+            meal={selectedMeal}
+            onSave={handleSaveMeal}
+            onClose={() => {
+              setShowMealModal(false);
+              setSelectedMeal(null);
+            }}
+          />
+        )}
       </div>
-
-      {/* Modals */}
-      {showPlanBuilder && (
-        <PlanBuilder
-          isOpen={showPlanBuilder}
-          onClose={() => {
-            setShowPlanBuilder(false);
-            setSelectedPlan(null);
-          }}
-          plan={selectedPlan}
-          onSave={handleSavePlan}
-        />
-      )}
-
-      {showFoodItemModal && (
-        <FoodItemModal
-          isOpen={showFoodItemModal}
-          onClose={() => {
-            setShowFoodItemModal(false);
-            setSelectedFoodItem(null);
-          }}
-          foodItem={selectedFoodItem}
-          onSave={handleSaveFoodItem}
-        />
-      )}
-
-      {showMealModal && (
-        <MealModal
-          isOpen={showMealModal}
-          onClose={() => {
-            setShowMealModal(false);
-            setSelectedMeal(null);
-          }}
-          meal={selectedMeal}
-          onSave={handleSaveMeal}
-        />
-      )}
     </div>
   );
 }
