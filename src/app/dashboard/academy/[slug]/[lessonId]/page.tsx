@@ -68,6 +68,38 @@ export default function LessonDetailPage() {
     }
   }, [lessonId]);
 
+  // Handle page visibility changes to prevent loading issues when returning from other tabs
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('👀 Page became visible, resetting navigation state');
+        setNavigating(false);
+        setIsVideoLoading(false);
+        // Reset any stuck loading states when returning to the page
+        if (loading && isDataLoaded) {
+          console.log('🔄 Resetting stuck loading state');
+          setLoading(false);
+        }
+      }
+    };
+
+    const handlePageFocus = () => {
+      console.log('🎯 Page gained focus, ensuring clean state');
+      setNavigating(false);
+      setIsVideoLoading(false);
+    };
+
+    // Add event listeners for page visibility and focus
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handlePageFocus);
+
+    // Cleanup
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handlePageFocus);
+    };
+  }, [loading, isDataLoaded]);
+
   const videoRef = useRef<HTMLVideoElement>(null);
 
   // SIMPLIFIED: Reliable data fetching with proper error handling
@@ -379,8 +411,15 @@ export default function LessonDetailPage() {
               <button
                 onClick={() => {
                   console.log('🔄 Navigating to previous lesson...');
+                  // Reset any stuck states before navigation
+                  setIsVideoLoading(false);
+                  setShowVideoOverlay(true);
                   setNavigating(true);
-                  router.push(`/dashboard/academy/${module.id}/${prevLesson.id}`);
+                  
+                  // Use a small delay to ensure state updates
+                  setTimeout(() => {
+                    router.push(`/dashboard/academy/${module.id}/${prevLesson.id}`);
+                  }, 50);
                 }}
                 disabled={navigating}
                 className="px-4 py-2 bg-[#232D1A] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors disabled:opacity-50 flex items-center gap-2"
@@ -396,8 +435,15 @@ export default function LessonDetailPage() {
               <button
                 onClick={() => {
                   console.log('🔄 Navigating to next lesson...');
+                  // Reset any stuck states before navigation
+                  setIsVideoLoading(false);
+                  setShowVideoOverlay(true);
                   setNavigating(true);
-                  router.push(`/dashboard/academy/${module.id}/${nextLesson.id}`);
+                  
+                  // Use a small delay to ensure state updates
+                  setTimeout(() => {
+                    router.push(`/dashboard/academy/${module.id}/${nextLesson.id}`);
+                  }, 50);
                 }}
                 disabled={navigating}
                 className="px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors disabled:opacity-50 flex items-center gap-2"
@@ -663,8 +709,15 @@ export default function LessonDetailPage() {
             <button
               onClick={() => {
                 console.log('🔄 Navigating to previous lesson...');
+                // Reset any stuck states before navigation
+                setIsVideoLoading(false);
+                setShowVideoOverlay(true);
                 setNavigating(true);
-                router.push(`/dashboard/academy/${module.id}/${prevLesson.id}`);
+                
+                // Use a small delay to ensure state updates
+                setTimeout(() => {
+                  router.push(`/dashboard/academy/${module.id}/${prevLesson.id}`);
+                }, 50);
               }}
               disabled={navigating}
               className="px-6 py-3 bg-[#232D1A] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors font-semibold disabled:opacity-50 flex items-center gap-2"
@@ -684,8 +737,15 @@ export default function LessonDetailPage() {
             <button
               onClick={() => {
                 console.log('🔄 Navigating to next lesson...');
+                // Reset any stuck states before navigation
+                setIsVideoLoading(false);
+                setShowVideoOverlay(true);
                 setNavigating(true);
-                router.push(`/dashboard/academy/${module.id}/${nextLesson.id}`);
+                
+                // Use a small delay to ensure state updates
+                setTimeout(() => {
+                  router.push(`/dashboard/academy/${module.id}/${nextLesson.id}`);
+                }, 50);
               }}
               disabled={navigating}
               className="px-6 py-3 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold disabled:opacity-50 flex items-center gap-2"
@@ -713,8 +773,15 @@ export default function LessonDetailPage() {
                 onClick={() => {
                   if (l.id !== lessonId) {
                     console.log('🔄 Navigating to lesson...');
+                    // Reset any stuck states before navigation
+                    setIsVideoLoading(false);
+                    setShowVideoOverlay(true);
                     setNavigating(true);
-                    router.push(`/dashboard/academy/${module.id}/${l.id}`);
+                    
+                    // Use a small delay to ensure state updates
+                    setTimeout(() => {
+                      router.push(`/dashboard/academy/${module.id}/${l.id}`);
+                    }, 50);
                   }
                 }}
                 disabled={l.id === lessonId || navigating}
