@@ -33,8 +33,6 @@ interface MealEditModalProps {
   mealType: string; // 'ontbijt', 'lunch', 'diner', 'snack'
   onSave: (meal: Meal) => void;
   onDelete: (mealId: string) => void;
-  baseCalories?: number; // Basis calorieën van het plan (bijv. 1870)
-  planType?: string; // 'Carnivoor' of 'Voedingsplan op Maat'
 }
 
 interface DatabaseMeal {
@@ -55,7 +53,7 @@ interface DatabaseMeal {
   difficulty: string;
 }
 
-export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave, onDelete, baseCalories, planType }: MealEditModalProps) {
+export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave, onDelete }: MealEditModalProps) {
   const [formData, setFormData] = useState<Meal>({
     id: '',
     name: '',
@@ -98,26 +96,13 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
 
   const loadAvailableMeals = async () => {
     try {
-      console.log('🔍 Loading available ingredients from database...');
-      console.log('📋 Plan type:', planType);
-      
-      let query = supabase
-        .from('nutrition_ingredients')
+      const { data, error } = await supabase
+        .from('meals')
         .select('*')
-        .eq('is_active', true);
-      
-      // Filter by diet type if planType is specified
-      if (planType) {
-        if (planType.includes('Carnivoor')) {
-          query = query.eq('diet_type', 'Carnivoor');
-          console.log('🥩 Filtering for Carnivore ingredients only');
-        } else {
-          query = query.eq('diet_type', 'Voedingsplan op Maat');
-          console.log('🥗 Filtering for Custom Plan ingredients only');
-        }
-      }
-      
-      const { data, error } = await query.order('name');
+        .eq('meal_type', mealType)
+        .eq('category', 'carnivoor')
+        .eq('is_active', true)
+        .order('name');
 
       if (error) {
         console.error('Error loading meals:', error);
