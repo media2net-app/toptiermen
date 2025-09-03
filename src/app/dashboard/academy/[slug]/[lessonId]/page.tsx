@@ -1,14 +1,12 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { supabase } from '@/lib/supabase';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import PageLayout from '@/components/PageLayout';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import Breadcrumb, { createBreadcrumbs } from '@/components/Breadcrumb';
 import EbookDownload from '@/components/EbookDownload';
 import { PlayIcon } from '@heroicons/react/24/solid';
 
@@ -53,9 +51,7 @@ export default function LessonDetailPage() {
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-
-
-  // Simplified data fetching
+  // SIMPLIFIED: Reliable data fetching with proper error handling
   const fetchData = async () => {
     if (!user || !moduleId || !lessonId) {
       console.log('Missing data:', { user: !!user, moduleId, lessonId });
@@ -68,99 +64,107 @@ export default function LessonDetailPage() {
       return;
     }
 
+    console.log('🚀 Fetching lesson data for:', { moduleId, lessonId });
     setLoading(true);
     setError(null);
 
     try {
-      console.log('Fetching lesson data for:', { moduleId, lessonId });
-
-      // Fetch module
+      // Fetch module data
       const { data: moduleData, error: moduleError } = await supabase
         .from('academy_modules')
         .select('*')
-        .eq('id', moduleId)
+        .or(`id.eq.${moduleId},slug.eq.${moduleId}`)
+        .eq('status', 'published')
         .single();
 
-      if (moduleError) {
-        console.error('Module error:', moduleError);
+      if (moduleError || !moduleData) {
+        console.error('❌ Module error:', moduleError);
         setError('Module niet gevonden');
+        setLoading(false);
         return;
       }
 
-      // Fetch lessons
+      // Fetch lessons data
       const { data: lessonsData, error: lessonsError } = await supabase
         .from('academy_lessons')
         .select('*')
-        .eq('module_id', moduleId)
+        .eq('module_id', moduleData.id)
         .eq('status', 'published')
         .order('order_index');
 
-      if (lessonsError) {
-        console.error('Lessons error:', lessonsError);
+      if (lessonsError || !lessonsData) {
+        console.error('❌ Lessons error:', lessonsError);
         setError('Lessen niet gevonden');
+        setLoading(false);
         return;
       }
 
-      // Fetch progress
-      const { data: progressData, error: progressError } = await supabase
+      // Find current lesson
+      const currentLesson = lessonsData.find(l => l.id === lessonId);
+      if (!currentLesson) {
+        console.error('❌ Lesson not found:', { lessonId, availableIds: lessonsData.map(l => l.id) });
+        setError('Les niet gevonden');
+        setLoading(false);
+        return;
+      }
+
+      // Fetch user progress
+      const { data: progressData } = await supabase
         .from('user_lesson_progress')
         .select('lesson_id')
         .eq('user_id', user.id)
         .eq('completed', true);
 
-      if (progressError) {
-        console.error('Progress error:', progressError);
-      }
-
-      // Find current lesson
-      const currentLesson = lessonsData?.find(l => l.id === lessonId);
-      if (!currentLesson) {
-        console.error('Lesson not found:', lessonId);
-        setError('Les niet gevonden');
-        return;
-      }
-
-      // Check completion
-      const isCompleted = progressData?.some(p => p.lesson_id === lessonId) || false;
-      const completedIds = progressData?.map(p => p.lesson_id) || [];
-
-      // Fetch ebook for this lesson
-      const { data: ebookData, error: ebookError } = await supabase
+      // Fetch ebook data
+      const { data: ebookData } = await supabase
         .from('academy_ebooks')
-        .select('*')
+        .select('id, title, file_url, status')
         .eq('lesson_id', lessonId)
         .eq('status', 'published')
         .single();
 
-      if (ebookError && ebookError.code !== 'PGRST116') {
-        console.error('Ebook error:', ebookError);
-      }
-
-      // Update state
+      // Update all state
       setModule(moduleData);
-      setLessons(lessonsData || []);
+      setLessons(lessonsData);
       setLesson(currentLesson);
-      setCompleted(isCompleted);
-      setCompletedLessonIds(completedIds);
+      setCompleted(progressData?.some(p => p.lesson_id === currentLesson.id) || false);
+      setCompletedLessonIds(progressData?.map(p => p.lesson_id) || []);
       setEbook(ebookData);
       setIsDataLoaded(true);
 
-      console.log('Data loaded successfully');
+      console.log('✅ Data loaded successfully:', {
+        module: moduleData.title,
+        lesson: currentLesson.title,
+        lessonsCount: lessonsData.length,
+        hasEbook: !!ebookData
+      });
 
     } catch (error) {
-      console.error('Error:', error);
-      setError('Er is een fout opgetreden');
+      console.error('❌ Fetch error:', error);
+      setError('Er is een fout opgetreden bij het laden van de les');
     } finally {
       setLoading(false);
     }
   };
 
+  // Reset data when lessonId changes
   useEffect(() => {
-    // Only fetch data if not already loaded and all required data is present
-    if (!isDataLoaded && user && moduleId && lessonId) {
+    if (user && moduleId && lessonId) {
+      // Reset all state for new lesson
+      setModule(null);
+      setLesson(null);
+      setLessons([]);
+      setCompleted(false);
+      setCompletedLessonIds([]);
+      setEbook(null);
+      setError(null);
+      setLoading(true);
+      setIsDataLoaded(false);
+      
+      // Fetch new data
       fetchData();
     }
-  }, [moduleId, lessonId]); // Removed 'user' dependency to prevent unnecessary reloads
+  }, [moduleId, lessonId, user]);
 
   const handleCompleteLesson = async () => {
     if (!user || !lesson) return;
@@ -227,6 +231,11 @@ export default function LessonDetailPage() {
   const prevLesson = currentIndex > 0 ? lessons[currentIndex - 1] : null;
   const nextLesson = currentIndex < lessons.length - 1 ? lessons[currentIndex + 1] : null;
 
+  // Get module number based on order_index
+  const getModuleNumber = (orderIndex: number) => {
+    return orderIndex.toString().padStart(2, '0');
+  };
+
   // Render loading state
   if (loading) {
     return (
@@ -262,12 +271,15 @@ export default function LessonDetailPage() {
           >
             Opnieuw proberen
           </button>
-          <Link
-            href="/dashboard/academy"
+          <button
+            onClick={() => {
+              console.log('🔄 Navigating to academy with hard refresh...');
+              window.location.href = `/dashboard/academy?cache-bust=${Date.now()}`;
+            }}
             className="px-6 py-3 bg-[#232D1A] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors font-semibold"
           >
             Terug naar Academy
-          </Link>
+          </button>
         </div>
       </PageLayout>
     );
@@ -282,21 +294,19 @@ export default function LessonDetailPage() {
       >
         <div className="text-center py-12">
           <div className="text-gray-400 mb-4">Les niet gevonden</div>
-          <Link
-            href="/dashboard/academy"
+          <button
+            onClick={() => {
+              console.log('🔄 Navigating to academy with hard refresh...');
+              window.location.href = `/dashboard/academy?cache-bust=${Date.now()}`;
+            }}
             className="px-6 py-3 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold"
           >
             Terug naar Academy
-          </Link>
+          </button>
         </div>
       </PageLayout>
     );
   }
-
-  // Get module number based on order_index
-  const getModuleNumber = (orderIndex: number) => {
-    return orderIndex.toString().padStart(2, '0');
-  };
 
   return (
     <PageLayout 
@@ -306,43 +316,68 @@ export default function LessonDetailPage() {
       <div className="w-full">
         {/* Navigation */}
         <div className="flex items-center justify-between mb-6">
-          <Link
-            href="/dashboard/academy"
+          <button
+            onClick={() => {
+              console.log('🔄 Navigating to module overview with hard refresh...');
+              window.location.href = `/dashboard/academy/${module.id}?cache-bust=${Date.now()}`;
+            }}
             className="flex items-center gap-2 text-[#8BAE5A] hover:text-[#B6C948] transition-colors"
           >
             ← Terug naar module overzicht
-          </Link>
+          </button>
           
           <div className="flex items-center gap-4">
             {prevLesson && (
-              <Link
-                href={`/dashboard/academy/${module.id}/${prevLesson.id}`}
+              <button
+                onClick={() => {
+                  console.log('🔄 Navigating to previous lesson with hard refresh...');
+                  // Force hard refresh before navigation
+                  window.location.href = `/dashboard/academy/${module.id}/${prevLesson.id}?cache-bust=${Date.now()}`;
+                }}
                 className="px-4 py-2 bg-[#232D1A] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors"
               >
                 Vorige les
-              </Link>
+              </button>
             )}
             
             {nextLesson && (
-              <Link
-                href={`/dashboard/academy/${module.id}/${nextLesson.id}`}
+              <button
+                onClick={() => {
+                  console.log('🔄 Navigating to next lesson with hard refresh...');
+                  // Force hard refresh before navigation
+                  window.location.href = `/dashboard/academy/${module.id}/${nextLesson.id}?cache-bust=${Date.now()}`;
+                }}
                 className="px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors"
               >
                 Volgende les
-              </Link>
+              </button>
             )}
           </div>
         </div>
 
-        {/* Breadcrumb */}
-        <div className="mb-6">
-          <Breadcrumb 
-            items={[
-              { label: 'Academy', href: '/dashboard/academy' },
-              { label: `Module ${getModuleNumber(module.order_index)}: ${module.title}`, href: `/dashboard/academy/${module.id}` },
-              { label: lesson.title, isCurrent: true }
-            ]}
-          />
+        {/* Custom Navigation with Hard Refresh */}
+        <div className="mb-6 flex items-center gap-2 text-sm">
+          <button
+            onClick={() => {
+              console.log('🔄 Navigating to academy with hard refresh...');
+              window.location.href = `/dashboard/academy?cache-bust=${Date.now()}`;
+            }}
+            className="text-[#8BAE5A] hover:text-[#B6C948] transition-colors"
+          >
+            Academy
+          </button>
+          <span className="text-gray-400">/</span>
+          <button
+            onClick={() => {
+              console.log('🔄 Navigating to module with hard refresh...');
+              window.location.href = `/dashboard/academy/${module.id}?cache-bust=${Date.now()}`;
+            }}
+            className="text-[#8BAE5A] hover:text-[#B6C948] transition-colors"
+          >
+            Module {getModuleNumber(module.order_index)}: {module.title}
+          </button>
+          <span className="text-gray-400">/</span>
+          <span className="text-gray-300">{lesson.title}</span>
         </div>
 
         {/* Lesson content */}
@@ -478,6 +513,37 @@ export default function LessonDetailPage() {
             <p className="text-gray-400">Ga door naar de volgende les om je voortgang te behouden.</p>
           </div>
         )}
+
+        {/* Navigation buttons */}
+        <div className="flex justify-between items-center mt-8">
+          {prevLesson ? (
+            <button
+              onClick={() => {
+                console.log('🔄 Navigating to previous lesson with hard refresh...');
+                window.location.href = `/dashboard/academy/${module.id}/${prevLesson.id}?cache-bust=${Date.now()}`;
+              }}
+              className="px-6 py-3 bg-[#232D1A] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors font-semibold"
+            >
+              ← Vorige les: {prevLesson.title}
+            </button>
+          ) : (
+            <div></div>
+          )}
+          
+          {nextLesson ? (
+            <button
+              onClick={() => {
+                console.log('🔄 Navigating to next lesson with hard refresh...');
+                window.location.href = `/dashboard/academy/${module.id}/${nextLesson.id}?cache-bust=${Date.now()}`;
+              }}
+              className="px-6 py-3 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold"
+            >
+              Volgende les: {nextLesson.title} →
+            </button>
+          ) : (
+            <div></div>
+          )}
+        </div>
       </div>
 
       {/* Lesson list */}
@@ -485,15 +551,22 @@ export default function LessonDetailPage() {
         <h3 className="text-lg font-semibold text-[#8BAE5A] mb-4">Lessen in deze module</h3>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {lessons.map((l, index) => (
-              <Link
+              <button
                 key={l.id}
-                href={`/dashboard/academy/${module.id}/${l.id}`}
-                className={`block p-4 rounded-lg border transition-colors ${
+                onClick={() => {
+                  if (l.id !== lessonId) {
+                    console.log('🔄 Navigating to lesson with hard refresh...');
+                    // Force hard refresh before navigation
+                    window.location.href = `/dashboard/academy/${module.id}/${l.id}?cache-bust=${Date.now()}`;
+                  }
+                }}
+                disabled={l.id === lessonId}
+                className={`block w-full text-left p-4 rounded-lg border transition-colors ${
                   l.id === lessonId
-                    ? 'bg-[#8BAE5A] text-[#181F17] border-[#8BAE5A]'
+                    ? 'bg-[#8BAE5A] text-[#181F17] border-[#8BAE5A] cursor-default'
                     : completedLessonIds.includes(l.id)
-                    ? 'bg-[#232D1A] text-[#8BAE5A] border-[#3A4D23] hover:bg-[#3A4D23]'
-                    : 'bg-[#181F17] text-gray-300 border-[#3A4D23] hover:bg-[#232D1A]'
+                    ? 'bg-[#232D1A] text-[#8BAE5A] border-[#3A4D23] hover:bg-[#3A4D23] cursor-pointer'
+                    : 'bg-[#181F17] text-gray-300 border-[#3A4D23] hover:bg-[#232D1A] cursor-pointer'
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -510,7 +583,7 @@ export default function LessonDetailPage() {
                     <span className="text-sm opacity-75">{l.duration}</span>
                   </div>
                 </div>
-              </Link>
+              </button>
             ))}
           </div>
         </div>
