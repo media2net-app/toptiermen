@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { getVideoDuration, formatDuration } from '@/utils/videoDurationExtractor';
 import { CheckCircleIcon, ClockIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
-import AdminButton from '@/components/ui/AdminButton';
+import { AdminButton } from '@/components/admin';
 
 interface Lesson {
   id: string;
