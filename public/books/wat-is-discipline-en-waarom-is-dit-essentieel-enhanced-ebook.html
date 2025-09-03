@@ -99,11 +99,13 @@
         .lead {
             font-size: 1.2em;
             color: #666;
-            margin-bottom: 20px;
+            font-weight: 400;
+            max-width: 600px;
+            margin: 0 auto;
         }
         
         .content-section {
-            margin-bottom: 30px;
+            margin-bottom: 40px;
         }
         
         .content-section h3 {
@@ -111,282 +113,80 @@
             font-size: 1.6em;
             margin-bottom: 20px;
             font-weight: 600;
+            border-bottom: 2px solid #B6C948;
+            padding-bottom: 10px;
         }
         
-        .content-section p {
-            margin-bottom: 15px;
-            font-size: 1.1em;
-            line-height: 1.7;
+        .content-section h4 {
+            color: #1a2115;
+            font-size: 1.3em;
+            margin: 25px 0 15px 0;
+            font-weight: 600;
         }
         
         .learning-objectives {
             list-style: none;
             padding: 0;
-            margin: 20px 0;
         }
         
         .learning-objectives li {
             background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            border: 2px solid #B6C948;
-            border-radius: 15px;
-            padding: 20px;
             margin-bottom: 15px;
-            font-size: 1.1em;
+            padding: 15px 20px;
+            border-radius: 10px;
+            border-left: 4px solid #8BAE5A;
             font-weight: 500;
-            color: #1a2115;
-            transition: all 0.3s ease;
-        }
-        
-        .learning-objectives li:hover {
-            border-color: #8BAE5A;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(139, 174, 90, 0.2);
         }
         
         .info-box {
-            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
-            border: 2px solid #2196f3;
+            background: linear-gradient(135deg, #e8f5e8, #d4edda);
+            border: 2px solid #8BAE5A;
             border-radius: 15px;
             padding: 25px;
-            margin: 25px 0;
+            margin: 30px 0;
             text-align: center;
         }
         
         .info-box h4 {
-            color: #1976d2;
-            margin-bottom: 15px;
-            font-size: 1.3em;
-        }
-        
-        .pillar-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
-            margin: 30px 0;
-        }
-        
-        .pillar-card {
-            background: white;
-            border: 2px solid #e0e0e0;
-            border-radius: 15px;
-            padding: 25px;
-            transition: all 0.3s ease;
-        }
-        
-        .pillar-card:hover {
-            border-color: #8BAE5A;
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(139, 174, 90, 0.2);
-        }
-        
-        .pillar-card h4 {
-            color: #8BAE5A;
-            margin-bottom: 15px;
-            font-size: 1.3em;
-            text-align: center;
-        }
-        
-        .pillar-card ul {
-            margin: 15px 0;
-            padding-left: 20px;
-        }
-        
-        .pillar-card li {
-            margin-bottom: 8px;
-            font-size: 1em;
-        }
-        
-        .exercise-box {
-            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
-            border: 2px solid #ff9800;
-            border-radius: 15px;
-            padding: 25px;
-            margin: 25px 0;
-        }
-        
-        .exercise-box h4 {
-            color: #e65100;
-            margin-bottom: 15px;
-            font-size: 1.2em;
-        }
-        
-        .steps, .examples {
-            margin: 20px 0;
-        }
-        
-        .steps h5, .examples h5 {
-            color: #8BAE5A;
-            margin-bottom: 10px;
-            font-size: 1.1em;
-        }
-        
-        .steps ol, .examples ul {
-            margin: 15px 0;
-            padding-left: 25px;
-        }
-        
-        .steps li, .examples li {
-            margin-bottom: 10px;
-            font-size: 1em;
-        }
-        
-        .week-plan {
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            border: 2px solid #B6C948;
-            border-radius: 15px;
-            padding: 25px;
-            margin: 25px 0;
-        }
-        
-        .week-plan h4 {
-            color: #8BAE5A;
-            margin-bottom: 15px;
-            font-size: 1.2em;
-        }
-        
-        .week-plan ul {
-            margin: 15px 0;
-            padding-left: 25px;
-        }
-        
-        .week-plan li {
-            margin-bottom: 10px;
-            font-size: 1.1em;
-        }
-        
-        .identity-layer {
-            background: white;
-            border: 2px solid #e0e0e0;
-            border-radius: 15px;
-            padding: 25px;
-            margin: 25px 0;
-            transition: all 0.3s ease;
-        }
-        
-        .identity-layer:hover {
-            border-color: #8BAE5A;
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(139, 174, 90, 0.15);
-        }
-        
-        .identity-aspects {
-            margin: 20px 0;
-        }
-        
-        .identity-aspects h4 {
-            color: #8BAE5A;
-            margin-bottom: 15px;
-            font-size: 1.1em;
-        }
-        
-        .identity-aspects ul {
-            margin: 15px 0;
-            padding-left: 25px;
-        }
-        
-        .identity-aspects li {
-            margin-bottom: 8px;
-            font-size: 1em;
-        }
-        
-        .development-step {
-            background: linear-gradient(135deg, #f3e5f5, #e1bee7);
-            border: 2px solid #9c27b0;
-            border-radius: 15px;
-            padding: 25px;
-            margin: 25px 0;
-        }
-        
-        .development-step h4 {
-            color: #7b1fa2;
-            margin-bottom: 15px;
-            font-size: 1.2em;
-        }
-        
-        .values-example, .statement-template {
-            margin: 20px 0;
-        }
-        
-        .values-example h5, .statement-template h5 {
-            color: #8BAE5A;
-            margin-bottom: 15px;
-            font-size: 1.1em;
-        }
-        
-        .values-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin: 15px 0;
-        }
-        
-        .value-tag {
-            background: #8BAE5A;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.9em;
-            font-weight: 500;
-        }
-        
-        .statement-template p {
-            background: white;
-            border: 2px solid #8BAE5A;
-            border-radius: 10px;
-            padding: 20px;
-            font-style: italic;
             color: #1a2115;
-        }
-        
-        .phase-card {
-            background: white;
-            border: 2px solid #e0e0e0;
-            border-radius: 15px;
-            padding: 25px;
-            margin: 25px 0;
-            transition: all 0.3s ease;
-        }
-        
-        .phase-card:hover {
-            border-color: #8BAE5A;
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(139, 174, 90, 0.15);
-        }
-        
-        .phase-card h4 {
-            color: #8BAE5A;
             margin-bottom: 15px;
-            font-size: 1.2em;
+            font-size: 1.4em;
         }
         
-        .phase-indicators {
-            margin: 20px 0;
+        .process-flow {
+            display: flex;
+            justify-content: space-between;
+            margin: 30px 0;
+            gap: 20px;
         }
         
-        .phase-indicators h5 {
-            color: #8BAE5A;
-            margin-bottom: 15px;
-            font-size: 1.1em;
+        .step {
+            text-align: center;
+            flex: 1;
         }
         
-        .phase-indicators ul {
-            margin: 15px 0;
-            padding-left: 25px;
+        .step-number {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #8BAE5A, #B6C948);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin: 0 auto 15px;
         }
         
-        .phase-indicators li {
-            margin-bottom: 8px;
-            font-size: 1em;
-        }
-        
-        .flow-conditions {
+        .function-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
             margin: 30px 0;
         }
         
-        .flow-condition {
+        .function-card {
             background: white;
             border: 2px solid #e0e0e0;
             border-radius: 15px;
@@ -395,16 +195,344 @@
             transition: all 0.3s ease;
         }
         
-        .flow-condition:hover {
+        .function-card:hover {
             border-color: #8BAE5A;
             transform: translateY(-5px);
             box-shadow: 0 10px 25px rgba(139, 174, 90, 0.2);
         }
         
-        .flow-condition h4 {
+        .function-card h4 {
             color: #8BAE5A;
             margin-bottom: 15px;
             font-size: 1.2em;
+        }
+        
+        .timeline {
+            margin: 30px 0;
+        }
+        
+        .timeline-item {
+            display: flex;
+            margin-bottom: 25px;
+            align-items: center;
+        }
+        
+        .time {
+            background: #8BAE5A;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            min-width: 120px;
+            text-align: center;
+        }
+        
+        .timeline-item .content {
+            margin-left: 20px;
+        }
+        
+        .timeline-item .content h4 {
+            color: #1a2115;
+            margin-bottom: 5px;
+        }
+        
+        .values-table table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .values-table th {
+            background: #8BAE5A;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .values-table td {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .status {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+        
+        .status.good { background: #d4edda; color: #155724; }
+        .status.warning { background: #fff3cd; color: #856404; }
+        .status.alert { background: #f8d7da; color: #721c24; }
+        
+        .exercise-box {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: 2px solid #B6C948;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+        
+        .exercise-box h4 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .exercise-box ul, .exercise-box ol {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+        
+        .exercise-box li {
+            margin-bottom: 10px;
+        }
+        
+        .reflection-questions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+        
+        .question-box {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            border: 2px solid #fdcb6e;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        .question-box h4 {
+            color: #856404;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        .question-box p {
+            margin-bottom: 15px;
+        }
+        
+        .action-plan {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .week {
+            background: white;
+            border: 2px solid #8BAE5A;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .week h4 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        
+        .week ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .week li {
+            margin-bottom: 8px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        /* Module 2 specific styles */
+        .comparison-table table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .comparison-table th {
+            background: #8BAE5A;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .comparison-table td {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            text-align: center;
+        }
+        
+        .mindset-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .mindset-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: 2px solid #B6C948;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .mindset-card:hover {
+            border-color: #8BAE5A;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(139, 174, 90, 0.2);
+        }
+        
+        .mindset-card h4 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .ego-analysis, .identity-traits {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .ego-trait, .identity-trait {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .ego-trait:hover, .identity-trait:hover {
+            border-color: #8BAE5A;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(139, 174, 90, 0.15);
+        }
+        
+        .ego-trait h4, .identity-trait h4 {
+            color: #8BAE5A;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .value-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: 2px solid #B6C948;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .value-card:hover {
+            border-color: #8BAE5A;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(139, 174, 90, 0.15);
+        }
+        
+        .value-card h4 {
+            color: #8BAE5A;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .discovery-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .method {
+            background: white;
+            border: 2px solid #8BAE5A;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .method h4 {
+            color: #8BAE5A;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .challenge-week {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: 2px solid #B6C948;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+        
+        .challenge-week h4 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .challenge-week ul {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+        
+        .challenge-week li {
+            margin-bottom: 8px;
+        }
+        
+        .development-plan {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .phase {
+            background: white;
+            border: 2px solid #8BAE5A;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .phase h4 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        
+        .phase ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .phase li {
+            margin-bottom: 8px;
+            font-size: 0.9em;
+            color: #666;
         }
         
         .page-footer {
@@ -453,12 +581,41 @@
                 min-height: 500px;
             }
             
-            .pillar-grid, .flow-conditions {
+            .process-flow {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .function-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .reflection-questions {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-plan {
+                grid-template-columns: 1fr;
+            }
+            
+            .mindset-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .ego-analysis, .identity-traits {
                 grid-template-columns: 1fr;
             }
             
             .values-grid {
-                justify-content: center;
+                grid-template-columns: 1fr;
+            }
+            
+            .discovery-methods {
+                grid-template-columns: 1fr;
+            }
+            
+            .development-plan {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -468,179 +625,270 @@
         <div class="header">
             <div class="module-badge">Module 02</div>
             <h1 class="lesson-title">Wat is Discipline en waarom is dit Essentieel</h1>
-            <div class="lesson-subtitle">De Fundering van Alle Succes</div>
+            <div class="lesson-subtitle">De Fundering van Je Succes</div>
         </div>
         
         <div class="ebook-content">
             
-    <div class="page">
+    <div class="page" id="page-1">
       <div class="page-content">
         
           <div class="page-header">
             <h2>Introductie</h2>
-            <p class="lead">Discipline is niet alleen over hard werken - het is de fundering van alle succes en persoonlijke groei.</p>
+            <p class="lead">Discipline is niet alleen een eigenschap - het is de fundering waarop alle succes wordt gebouwd.</p>
           </div>
           
           <div class="content-section">
             <h3>Wat je gaat leren in dit ebook:</h3>
             <ul class="learning-objectives">
-              <li>De ware betekenis van discipline en waarom het essentieel is</li>
-              <li>De 3 pijlers van discipline: Consistentie, Focus en Doelgerichtheid</li>
-              <li>Praktische oefeningen om discipline te ontwikkelen</li>
-              <li>Hoe je discipline kunt integreren in je dagelijks leven</li>
-              <li>Een 30-dagen discipline transformatie plan</li>
+              <li>De ware betekenis van discipline en waarom het cruciaal is</li>
+              <li>Hoe discipline verschilt van motivatie en wilskracht</li>
+              <li>De wetenschap achter gewoontevorming en consistentie</li>
+              <li>Praktische strategieën om discipline te ontwikkelen</li>
+              <li>Een 30-dagen discipline challenge voor echte resultaten</li>
             </ul>
           </div>
           
           <div class="info-box">
             <h4>💡 Wist je dat?</h4>
-            <p>Discipline is een spier die je kunt trainen. Hoe meer je het gebruikt, hoe sterker het wordt.</p>
+            <p>Discipline is 40% genetisch en 60% ontwikkelbaar. Dit betekent dat iedereen discipline kan leren, ongeacht je startpunt.</p>
           </div>
         
       </div>
       <div class="page-footer">
-        <span class="page-number">Pagina 1</span>
+        <span class="page-number">Pagina 1 van 5</span>
       </div>
     </div>
   
-    <div class="page">
+    <div class="page" id="page-2">
       <div class="page-content">
         
           <div class="page-header">
             <h2>De Wetenschap van Discipline</h2>
-            <p class="lead">Begrijp hoe discipline werkt in je hersenen en waarom het zo krachtig is.</p>
+            <p class="lead">Begrijp hoe je brein gewoonten vormt en hoe je dit kunt gebruiken.</p>
           </div>
           
           <div class="content-section">
-            <h3>Wat is Discipline?</h3>
-            <p>Discipline is niet alleen over hard werken of jezelf dwingen om dingen te doen die je niet leuk vindt. Het is over consistentie, focus en de bereidheid om korte-termijn plezier op te offeren voor lange-termijn doelen.</p>
+            <h3>Hoe Gewoonten Worden Gevormd</h3>
+            <div class="process-flow">
+              <div class="step">
+                <div class="step-number">1</div>
+                <p><strong>Cue</strong> - Trigger voor de gewoonte</p>
+              </div>
+              <div class="step">
+                <div class="step-number">2</div>
+                <p><strong>Craving</strong> - Verlangen naar beloning</p>
+              </div>
+              <div class="step">
+                <div class="step-number">3</div>
+                <p><strong>Response</strong> - De gewoonte uitvoeren</p>
+              </div>
+              <div class="step">
+                <div class="step-number">4</div>
+                <p><strong>Reward</strong> - Beloning ontvangen</p>
+              </div>
+            </div>
             
-            <h3>De 3 Pijlers van Discipline</h3>
-            <div class="pillar-grid">
-              <div class="pillar-card">
-                <h4>🎯 Consistentie</h4>
-                <p>Doe elke dag iets, hoe klein ook. Bouw routines op die je kunt volhouden.</p>
-                <ul>
-                  <li>Focus op progressie, niet perfectie</li>
-                  <li>Kleine dagelijkse acties leiden tot grote veranderingen</li>
-                  <li>Consistentie is belangrijker dan intensiteit</li>
-                </ul>
+            <h3>De Belangrijkste Principes</h3>
+            <div class="function-grid">
+              <div class="function-card">
+                <h4>🧠 Neuroplasticiteit</h4>
+                <p>Je brein past zich aan door herhaling</p>
               </div>
-              <div class="pillar-card">
-                <h4>🔍 Focus</h4>
-                <p>Elimineer afleidingen en werk in tijdsblokken voor maximale productiviteit.</p>
-                <ul>
-                  <li>Leer nee zeggen tegen onnodige verplichtingen</li>
-                  <li>Werk in gefocuste tijdsblokken</li>
-                  <li>Creëer een omgeving die focus ondersteunt</li>
-                </ul>
+              <div class="function-card">
+                <h4>⏰ Consistentie</h4>
+                <p>Kleine dagelijkse acties bouwen momentum</p>
               </div>
-              <div class="pillar-card">
-                <h4>🎯 Doelgerichtheid</h4>
-                <p>Ken je waarom en visualiseer je doelen voor blijvende motivatie.</p>
-                <ul>
-                  <li>Definieer je doelen duidelijk</li>
-                  <li>Meet je voortgang regelmatig</li>
-                  <li>Pas je strategie aan op basis van resultaten</li>
-                </ul>
+              <div class="function-card">
+                <h4>🎯 Focus</h4>
+                <p>Eén gewoonte tegelijk is effectiever</p>
+              </div>
+              <div class="function-card">
+                <h4>🔄 Herhaling</h4>
+                <p>21-66 dagen voor een nieuwe gewoonte</p>
               </div>
             </div>
           </div>
         
       </div>
       <div class="page-footer">
-        <span class="page-number">Pagina 2</span>
+        <span class="page-number">Pagina 2 van 5</span>
       </div>
     </div>
   
-    <div class="page">
+    <div class="page" id="page-3">
+      <div class="page-content">
+        
+          <div class="page-header">
+            <h2>Discipline vs Motivatie</h2>
+            <p class="lead">Leer waarom discipline altijd wint van motivatie op de lange termijn.</p>
+          </div>
+          
+          <div class="content-section">
+            <h3>Waarom Motivatie Faalt</h3>
+            <div class="comparison-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Motivatie</th>
+                    <th>Discipline</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Emotioneel en onvoorspelbaar</td>
+                    <td>Logisch en betrouwbaar</td>
+                  </tr>
+                  <tr>
+                    <td>Afhankelijk van externe factoren</td>
+                    <td>Controleerbaar en intern</td>
+                  </tr>
+                  <tr>
+                    <td>Korte termijn energie boost</td>
+                    <td>Lange termijn consistentie</td>
+                  </tr>
+                  <tr>
+                    <td>Kan verdwijnen bij tegenslag</td>
+                    <td>Blijft bestaan bij uitdagingen</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <h3>De Discipline Mindset</h3>
+            <div class="mindset-grid">
+              <div class="mindset-card">
+                <h4>🎯 Doelgerichtheid</h4>
+                <p>Focus op het proces, niet alleen het resultaat</p>
+              </div>
+              <div class="mindset-card">
+                <h4>⏰ Tijdsbesef</h4>
+                <p>Begrijp dat succes tijd kost</p>
+              </div>
+              <div class="mindset-card">
+                <h4>🔄 Consistentie</h4>
+                <p>Kleine stappen elke dag</p>
+              </div>
+            </div>
+          </div>
+        
+      </div>
+      <div class="page-footer">
+        <span class="page-number">Pagina 3 van 5</span>
+      </div>
+    </div>
+  
+    <div class="page" id="page-4">
       <div class="page-content">
         
           <div class="page-header">
             <h2>Praktische Oefeningen</h2>
-            <p class="lead">Implementeer deze bewezen strategieën om discipline te ontwikkelen.</p>
+            <p class="lead">Implementeer deze oefeningen om je discipline te versterken.</p>
           </div>
           
           <div class="content-section">
-            <h3>De 5-Minuten Regel</h3>
+            <h3>Oefening 1: De 2-Minuten Regel</h3>
             <div class="exercise-box">
-              <h4>🎯 Hoe het werkt:</h4>
-              <p>Begin elke dag met 5 minuten van je belangrijkste taak. Dit breekt de weerstand en maakt het makkelijker om door te gaan.</p>
-              <div class="steps">
-                <h5>Stappen:</h5>
-                <ol>
-                  <li>Kies je belangrijkste taak voor de dag</li>
-                  <li>Zet een timer op 5 minuten</li>
-                  <li>Begin met de taak en stop na 5 minuten</li>
-                  <li>Als je wilt doorgaan, prima! Zo niet, dan heb je nog steeds 5 minuten gewerkt</li>
-                </ol>
-              </div>
+              <h4>📝 Wat het is:</h4>
+              <p>Als iets minder dan 2 minuten duurt, doe het direct. Dit breekt uitstelgedrag.</p>
+              
+              <h4>🎯 Voorbeelden:</h4>
+              <ul>
+                <li>Doe 10 push-ups</li>
+                <li>Maak je bed op</li>
+                <li>Schrijf 3 dankbaarheid punten</li>
+                <li>Plan je dag</li>
+              </ul>
+              
+              <h4>⏰ Tijdsinvestering:</h4>
+              <p>2 minuten per keer, meerdere keren per dag</p>
             </div>
             
-            <h3>Habit Stacking</h3>
+            <h3>Oefening 2: Gewoonte Stacking</h3>
             <div class="exercise-box">
               <h4>🔗 Hoe het werkt:</h4>
-              <p>Koppel nieuwe gewoonten aan bestaande routines om ze makkelijker te implementeren.</p>
-              <div class="examples">
-                <h5>Voorbeelden:</h5>
-                <ul>
-                  <li>Na het tandenpoetsen → 10 push-ups</li>
-                  <li>Na het ontbijt → 10 minuten lezen</li>
-                  <li>Na het avondeten → 5 minuten plannen</li>
-                </ul>
-              </div>
+              <p>Koppel een nieuwe gewoonte aan een bestaande gewoonte.</p>
+              
+              <h4>📋 Voorbeelden:</h4>
+              <ul>
+                <li>Na het tandenpoetsen → 10 squats</li>
+                <li>Na het ontbijt → 5 minuten meditatie</li>
+                <li>Voor het slapen → Dagboek bijhouden</li>
+                <li>Na het opstaan → 1 glas water drinken</li>
+              </ul>
+            </div>
+            
+            <h3>Oefening 3: De Discipline Dagboek</h3>
+            <div class="exercise-box">
+              <h4>📖 Wat je bijhoudt:</h4>
+              <ul>
+                <li>Welke gewoonten je hebt uitgevoerd</li>
+                <li>Hoe je je voelde voor en na</li>
+                <li>Wat je heeft gestopt of geholpen</li>
+                <li>Je progressie over tijd</li>
+              </ul>
             </div>
           </div>
         
       </div>
       <div class="page-footer">
-        <span class="page-number">Pagina 3</span>
+        <span class="page-number">Pagina 4 van 5</span>
       </div>
     </div>
   
-    <div class="page">
+    <div class="page" id="page-5">
       <div class="page-content">
         
           <div class="page-header">
-            <h2>30-Dagen Discipline Plan</h2>
-            <p class="lead">Een gestructureerd plan om discipline te ontwikkelen en te versterken.</p>
+            <h2>30-Dagen Discipline Challenge</h2>
+            <p class="lead">Transformeer je leven in 30 dagen door deze gestructureerde aanpak.</p>
           </div>
           
           <div class="content-section">
-            <h3>Week 1: Foundation</h3>
-            <div class="week-plan">
+            <h3>Week 1: Foundation (Dag 1-7)</h3>
+            <div class="challenge-week">
               <h4>🎯 Doel: Basis gewoonten implementeren</h4>
               <ul>
-                <li>Dag 1-3: Sta op tijd op (5:30 AM)</li>
-                <li>Dag 4-5: Drink water (500ml bij het opstaan)</li>
-                <li>Dag 6-7: Mediteer (10 minuten)</li>
+                <li><strong>Dag 1-3:</strong> Maak je bed op elke ochtend</li>
+                <li><strong>Dag 4-5:</strong> Drink 2L water per dag</li>
+                <li><strong>Dag 6-7:</strong> 10 minuten beweging per dag</li>
               </ul>
             </div>
             
-            <h3>Week 2-3: Bouwen</h3>
-            <div class="week-plan">
+            <h3>Week 2: Uitbreiding (Dag 8-14)</h3>
+            <div class="challenge-week">
               <h4>🚀 Doel: Gewoonten uitbreiden en versterken</h4>
               <ul>
-                <li>Voeg 30 minuten lezen toe</li>
-                <li>Implementeer dagelijkse planning</li>
-                <li>Start met 15 minuten training</li>
+                <li><strong>Dag 8-10:</strong> 15 minuten lezen per dag</li>
+                <li><strong>Dag 11-12:</strong> Plan je dag de avond ervoor</li>
+                <li><strong>Dag 13-14:</strong> Elimineer 1 slechte gewoonte</li>
               </ul>
             </div>
             
-            <h3>Week 4: Integratie</h3>
-            <div class="week-plan">
-              <h4>🎯 Doel: Alle gewoonten integreren</h4>
+            <h3>Week 3: Consolidatie (Dag 15-21)</h3>
+            <div class="challenge-week">
+              <h4>💪 Doel: Gewoonten consolideren en nieuwe toevoegen</h4>
               <ul>
-                <li>Combineer alle gewoonten in één routine</li>
-                <li>Evalueer en pas aan waar nodig</li>
-                <li>Plan je volgende 30 dagen</li>
+                <li><strong>Dag 15-17:</strong> 20 minuten training per dag</li>
+                <li><strong>Dag 18-19:</strong> Meditatie toevoegen</li>
+                <li><strong>Dag 20-21:</strong> Reflectie en aanpassingen</li>
+              </ul>
+            </div>
+            
+            <h3>Week 4: Optimalisatie (Dag 22-30)</h3>
+            <div class="challenge-week">
+              <h4>🎯 Doel: Systeem optimaliseren en volhouden</h4>
+              <ul>
+                <li><strong>Dag 22-25:</strong> Alle gewoonten combineren</li>
+                <li><strong>Dag 26-28:</strong> Uitdagingen toevoegen</li>
+                <li><strong>Dag 29-30:</strong> Evalueren en volgende fase plannen</li>
               </ul>
             </div>
           </div>
         
       </div>
       <div class="page-footer">
-        <span class="page-number">Pagina 4</span>
+        <span class="page-number">Pagina 5 van 5</span>
       </div>
     </div>
   
