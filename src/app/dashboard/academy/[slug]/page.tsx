@@ -40,16 +40,26 @@ export default function ModuleDetailPage() {
   const [loading, setLoading] = useState(true);
   const [completedLessonIds, setCompletedLessonIds] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
 
   const fetchModuleData = async () => {
-    if (!user || !moduleId) {
-      console.log('Module page: Missing required data', { user: !!user, moduleId });
+    if (!moduleId) {
+      console.log('Module page: Missing moduleId');
+      setError('Module ID ontbreekt');
+      setLoading(false);
       return;
     }
 
-    console.log('Module page: Starting data fetch for:', { moduleId, user: user.email });
+    console.log('Module page: Starting data fetch for:', { moduleId, user: user?.email || 'no user' });
     setLoading(true);
     setError(null);
+
+    // Add timeout to prevent infinite loading
+    const timeoutId = setTimeout(() => {
+      console.log('⏰ Module data fetch timeout - setting error');
+      setError('Timeout bij het laden van module data');
+      setLoading(false);
+    }, 10000); // 10 second timeout
 
     try {
       // Fetch module data
@@ -81,12 +91,16 @@ export default function ModuleDetailPage() {
         return;
       }
 
-      // Fetch user progress for this module
-      const { data: progressData } = await supabase
-        .from('user_lesson_progress')
-        .select('lesson_id')
-        .eq('user_id', user.id)
-        .eq('completed', true);
+      // Fetch user progress for this module (only if user is available)
+      let progressData = null;
+      if (user) {
+        const { data: userProgress } = await supabase
+          .from('user_lesson_progress')
+          .select('lesson_id')
+          .eq('user_id', user.id)
+          .eq('completed', true);
+        progressData = userProgress;
+      }
 
       // Update state
       setModule(moduleData);
@@ -105,18 +119,27 @@ export default function ModuleDetailPage() {
       console.error('❌ Fetch error:', error);
       setError('Er is een fout opgetreden bij het laden van de module');
     } finally {
+      clearTimeout(timeoutId);
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (user && moduleId) {
-      console.log('🔄 Module page useEffect triggered:', { moduleId, user: user.email });
+    if (moduleId) {
+      console.log('🔄 Module page useEffect triggered:', { moduleId, user: user?.email || 'no user' });
       
-      // Always fetch data when moduleId or user changes
+      // Always fetch data when moduleId changes
       fetchModuleData();
     }
-  }, [moduleId, user]);
+  }, [moduleId]);
+
+  // Retry function for failed data fetches
+  const handleRetry = () => {
+    console.log('🔄 Retrying module data fetch...');
+    setRetryCount(prev => prev + 1);
+    setError(null);
+    fetchModuleData();
+  };
 
   // Get module number based on order_index
   const getModuleNumber = (orderIndex: number) => {
@@ -246,7 +269,6 @@ export default function ModuleDetailPage() {
               
               <div className="flex items-center justify-between text-sm">
                 <span className="text-[#8BAE5A]">Duur: {lesson.duration}</span>
-                <span className="text-gray-500">Duur: {lesson.duration}</span>
               </div>
             </button>
           ))}
