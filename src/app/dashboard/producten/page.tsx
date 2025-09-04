@@ -117,7 +117,7 @@ export default function ProductenPage() {
       id: 'testosteron-kit',
       name: 'Testosteron Test Kit',
       description: 'Professionele testosteron test die je thuis kunt afnemen via vingerprik. Ontvang binnen 6 werkdagen een gedetailleerd rapport met persoonlijk advies van een arts.',
-      price: 45.00,
+      price: 39.00,
       image: '/testosteron_packshot.png',
       category: 'diagnostiek',
       inStock: true,
@@ -209,7 +209,7 @@ export default function ProductenPage() {
                   <img 
                     src={product.image} 
                     alt={product.name}
-                    className="w-full h-full object-cover"
+                    className="max-w-full max-h-full object-contain"
                   />
                 ) : (
                   <div className="text-[#8BAE5A] text-4xl font-bold">
@@ -331,7 +331,7 @@ export default function ProductenPage() {
                       <img 
                         src={selectedProduct.image} 
                         alt={selectedProduct.name}
-                        className="w-full h-full object-cover rounded-xl"
+                        className="max-w-full max-h-full object-contain rounded-xl"
                       />
                     ) : (
                       <div className="text-[#8BAE5A] text-6xl font-bold">
