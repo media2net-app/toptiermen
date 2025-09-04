@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eer en Loyaliteit - Top Tier Men Academy</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background: #f9fafb;
+        }
+        
+        .ebook-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #8BAE5A 0%, #3A4D23 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -0.025em;
+        }
+        
+        .header .subtitle {
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: white;
+            opacity: 1;
+        }
+        
+        .content {
+            padding: 50px;
+        }
+        
+        .toc {
+            background: #f8fafc;
+            border-left: 4px solid #8BAE5A;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 8px;
+        }
+        
+        .toc h2 {
+            color: #8BAE5A;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .toc ol {
+            list-style: none;
+            counter-reset: toc-counter;
+        }
+        
+        .toc li {
+            counter-increment: toc-counter;
+            margin-bottom: 8px;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        .toc li::before {
+            content: counter(toc-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #8BAE5A;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .chapter {
+            margin: 50px 0;
+        }
+        
+        .chapter h2 {
+            color: #8BAE5A;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .chapter h3 {
+            color: #374151;
+            font-size: 1.3rem;
+            margin: 30px 0 15px;
+            font-weight: 600;
+        }
+        
+        .chapter p {
+            margin-bottom: 16px;
+            text-align: justify;
+            font-size: 1.05rem;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+            color: white;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(139, 174, 90, 0.3);
+        }
+        
+        .highlight-box h3 {
+            color: white;
+            margin-bottom: 15px;
+        }
+        
+        .quote-box {
+            background: #f8fafc;
+            border-left: 4px solid #8BAE5A;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+        }
+        
+        .action-steps {
+            background: #f0f9ff;
+            border: 1px solid #8BAE5A;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 8px;
+        }
+        
+        .action-steps h3 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+        }
+        
+        .action-steps ul {
+            padding-left: 20px;
+        }
+        
+        .action-steps li {
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        
+        .reflection-questions {
+            background: #fef7e0;
+            border: 1px solid #f59e0b;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 8px;
+        }
+        
+        .reflection-questions h3 {
+            color: #d97706;
+            margin-bottom: 15px;
+        }
+        
+        .reflection-questions ul {
+            padding-left: 20px;
+        }
+        
+        .reflection-questions li {
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+        
+        .footer {
+            background: #1f2937;
+            color: white;
+            padding: 40px;
+            text-align: center;
+            margin-top: 50px;
+        }
+        
+        .footer p {
+            margin-bottom: 10px;
+        }
+        
+        .page-break {
+            page-break-before: always;
+            margin-top: 60px;
+            border-top: 2px solid #e5e7eb;
+            padding-top: 40px;
+        }
+        
+        .mantra-box {
+            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+            color: white;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .mantra-box h3 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .mantra-box p {
+            font-size: 1.3rem;
+            font-weight: 600;
+            font-style: italic;
+            text-align: center;
+        }
+        
+        @media print {
+            .ebook-container {
+                box-shadow: none;
+            }
+            
+            .page-break {
+                page-break-before: always;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ebook-container">
+        <div class="header">
+            <h1>Eer en Loyaliteit</h1>
+            <p class="subtitle">Module 6, Les 2 • Brotherhood</p>
+        </div>
+        
+        <div class="content">
+            <div class="toc">
+                <h2>Inhoudsopgave</h2>
+                <ol>
+                    <li>Inleiding</li>
+                    <li>Hoofdinhoud</li>
+                    <li>Praktische Tips</li>
+                    <li>Reflectie Vragen</li>
+                    <li>Volgende Stappen</li>
+                </ol>
+            </div>
+
+            <!-- Pagina 1: Inleiding -->
+            <div class="chapter">
+                <h2>1. Inleiding</h2>
+                
+                <p>Eer en loyaliteit vormen de ruggengraat van elke echte brotherhood. Deze eeuwenoude waarden zijn niet verouderd, maar essentiëler dan ooit in een wereld waar oppervlakkigheid en eigenbelang de norm lijken te zijn. Als Top Tier Man begrijp je dat ware kracht niet komt van wat je bezit, maar van wie je bent en hoe je je aan je principes houdt.</p>
+                
+                <div class="highlight-box">
+                    <h3>Waarom Eer en Loyaliteit Ononderhandelbaar Zijn</h3>
+                    <p>In een brotherhood is vertrouwen alles. Zonder eer heb je geen integriteit. Zonder loyaliteit heb je geen betrouwbaarheid. Samen vormen ze het fundament waarop alle sterke relaties en partnership gebouwd zijn.</p>
+                </div>
+                
+                <p>Eer betekent dat je doet wat juist is, zelfs wanneer niemand kijkt. Het betekent dat je woord je bond is, dat je verantwoordelijkheid neemt voor je acties, en dat je anderen met respect behandelt - ongeacht wat je ervoor terugkrijgt.</p>
+                
+                <p>Loyaliteit betekent dat je standhoudt voor degenen die jou vertrouwen hebben gegeven. Het betekent dat je niet de eerste bent om weg te lopen wanneer het moeilijk wordt, en dat je bereid bent persoonlijke offers te brengen voor het grotere geheel.</p>
+                
+                <div class="quote-box">
+                    <p>"Eer is niet het ontbreken van angst, maar de overtuiging dat iets belangrijker is dan angst." - Marcus Aurelius</p>
+                </div>
+                
+                <p>In deze les leer je hoe je deze fundamentele waarden integreert in elke aspecten van je leven, en hoe je een man wordt op wie anderen onvoorwaardelijk kunnen rekenen.</p>
+            </div>
+            
+            <div class="page-break"></div>
+
+            <!-- Pagina 2-7: Hoofdinhoud -->
+            <div class="chapter">
+                <h2>2. Hoofdinhoud</h2>
+                
+                <h3>De Anatomie van Eer</h3>
+                
+                <p>Eer is geen abstract concept, maar een dagelijkse keuze die zich manifesteert in concrete acties. Het gaat over integriteit - de harmonie tussen je waarden, woorden en daden. Een man met eer heeft een interne kompas dat hem leidt, ongeacht externe druk of verleiding.</p>
+                
+                <div class="highlight-box">
+                    <h3>De 5 Pijlers van Eer</h3>
+                    <p><strong>1. Integriteit:</strong> Consistentie tussen je waarden en acties<br>
+                    <strong>2. Verantwoordelijkheid:</strong> Eigenaarschap van je keuzes en consequenties<br>
+                    <strong>3. Respect:</strong> Anderen behandelen met waardigheid<br>
+                    <strong>4. Moed:</strong> Het juiste doen ondanks moeilijkheden<br>
+                    <strong>5. Discipline:</strong> Je aan je principes houden onder druk</p>
+                </div>
+                
+                <h3>Praktische Toepassingen van Eer</h3>
+                
+                <p><strong>In Business:</strong> Je woord houden, eerlijk zijn in onderhandelingen, verantwoordelijkheid nemen voor fouten, en transparant zijn in je handelen. Eer in business betekent dat je langetermijnrelaties bouwt op basis van vertrouwen, niet korte termijnwinst.</p>
+                
+                <p><strong>In Relaties:</strong> Loyaal zijn aan je partner, eerlijk communiceren over je behoeften en verwachtingen, verantwoordelijkheid nemen voor je emoties, en consistent zijn in je liefde en steun.</p>
+                
+                <p><strong>In Vriendschap:</strong> Er zijn wanneer je vrienden je nodig hebben, geen roddels verspreiden, beloftes nakomen, en loyaal blijven ook wanneer het inconveniënt is.</p>
+                
+                <div class="action-steps">
+                    <h3>Eer in Actie</h3>
+                    <ul>
+                        <li>Houd je beloftes na, hoe klein ook</li>
+                        <li>Neem verantwoordelijkheid voor je fouten zonder excuses</li>
+                        <li>Behandel iedereen met respect, ongeacht hun status</li>
+                        <li>Spreek voor degenen die zichzelf niet kunnen verdedigen</li>
+                        <li>Kies het moeilijke juiste pad boven de gemakkelijke verkeerde</li>
+                    </ul>
+                </div>
+                
+                <h3>De Diepte van Loyaliteit</h3>
+                
+                <p>Loyaliteit is geen blinde gehorzaamheid, maar een bewuste keuze om standvastig te zijn in je toewijding aan mensen, principes en doelen die je waardevol vindt. Echte loyaliteit vereist moed, want het betekent dat je soms tegen de stroom in moet gaan.</p>
+                
+                <p><strong>Loyaliteit aan Jezelf:</strong> Voor je loyaal kunt zijn aan anderen, moet je eerst loyaal zijn aan je eigen waarden en principes. Dit betekent dat je consistent bent in wie je bent, ongeacht de omstandigheden.</p>
+                
+                <p><strong>Loyaliteit aan je Brotherhood:</strong> Dit betekent dat je er bent voor je broeders in goede en slechte tijden. Het betekent dat je hun vertrouwen nooit schaadt en dat je bereid bent persoonlijke offers te brengen voor het welzijn van de groep.</p>
+                
+                <div class="quote-box">
+                    <p>"Loyaliteit en vriendschap, die dieper zijn dan liefde, vormen de basis van eer." - Gabriel García Márquez</p>
+                </div>
+                
+                <h3>De Balans: Loyaliteit vs. Waarheid</h3>
+                
+                <p>Een van de moeilijkste aspecten van loyaliteit is wat je doet wanneer loyaliteit botst met waarheid. Een echte broeder zal je confronteren wanneer je fout bent, niet je gedrag goedpraten. Loyaliteit betekent niet dat je blind bent voor fouten, maar dat je bereid bent moeilijke gesprekken te voeren om elkaar te helpen groeien.</p>
+                
+                <div class="action-steps">
+                    <h3>Loyaliteit Principes</h3>
+                    <ul>
+                        <li>Spreek privé met broeders over concerns voordat je naar anderen gaat</li>
+                        <li>Verdedig je broeders in openbare settings, corrigeer ze in private</li>
+                        <li>Houd vertrouwelijke informatie vertrouwelijk</li>
+                        <li>Steun elkaars dromen en ambities actief</li>
+                        <li>Wees bereid moeilijke waardheden te spreken uit liefde</li>
+                    </ul>
+                </div>
+                
+                <h3>Eer en Loyaliteit in Conflict</h3>
+                
+                <p>Soms lijken eer en loyaliteit met elkaar in conflict te zijn. Wat doe je wanneer een vriend je vraagt iets te doen dat tegen je principes ingaat? In dergelijke momenten toont zich je ware karakter.</p>
+                
+                <p>De oplossing ligt in het begrijpen dat echte loyaliteit nooit vraagt om je eer op te offeren. Een echte broeder zal je nooit vragen je integriteit te compromitteren. En echte eer zal je nooit vragen ontrouw te zijn aan degenen die je vertrouwen verdienen.</p>
+                
+                <div class="mantra-box">
+                    <h3>Brotherhood Mantra</h3>
+                    <p>"Mijn woord is mijn bond, mijn loyaliteit is onwrikbaar, mijn eer is ononderhandelbaar."</p>
+                </div>
+            </div>
+            
+            <div class="page-break"></div>
+
+            <!-- Pagina 8: Praktische Tips -->
+            <div class="chapter">
+                <h2>3. Praktische Tips</h2>
+                
+                <div class="action-steps">
+                    <h3>Dagelijkse Eer Praktijken</h3>
+                    <ul>
+                        <li><strong>De 24-Uur Regel:</strong> Wacht 24 uur voordat je reageert op emotioneel geladen situaties</li>
+                        <li><strong>Woord Accountability:</strong> Houd een dagboek bij van beloftes die je maakt en houdt</li>
+                        <li><strong>Integriteit Check:</strong> Vraag jezelf dagelijks: "Ben ik vandaag de man geweest die ik wil zijn?"</li>
+                        <li><strong>Respect Ritual:</strong> Behandel elke persoon die je ontmoet alsof ze iets waardevols te bieden hebben</li>
+                    </ul>
+                </div>
+                
+                <h3>Loyaliteit in de Praktijk</h3>
+                
+                <p><strong>De Cirkel van Vertrouwen:</strong> Creëer duidelijke grenzen rond wie toegang heeft tot jouw vertrouwelijke informatie. Hoe dichter iemand bij je kern staat, hoe meer loyaliteit je elkaar verschuldigd bent.</p>
+                
+                <p><strong>Proactieve Steun:</strong> Wacht niet tot je vrienden om hulp vragen. Let op signalen dat ze steun nodig hebben en bied proactief aan.</p>
+                
+                <p><strong>Conflictoplossing:</strong> Wanneer er conflict ontstaat binnen je brotherhood, word de bemiddelaar die naar een oplossing zoekt, niet de persoon die kanten kiest.</p>
+                
+                <div class="highlight-box">
+                    <h3>De Brotherhood Code</h3>
+                    <p><strong>1.</strong> Wat in de cirkel besproken wordt, blijft in de cirkel<br>
+                    <strong>2.</strong> We confronteren elkaar uit liefde, niet uit ego<br>
+                    <strong>3.</strong> We steunen elkaars groei, zelfs als het ongemakkelijk is<br>
+                    <strong>4.</strong> We zijn er voor elkaar in crisis en in overwinning<br>
+                    <strong>5.</strong> Onze loyaliteit aan elkaar komt na loyaliteit aan onze principes</p>
+                </div>
+                
+                <h3>Grenzen van Loyaliteit</h3>
+                
+                <p>Gezonde loyaliteit heeft grenzen. Je loyaliteit strekt zich niet uit tot:</p>
+                <p>• Het ondersteunen van destructief gedrag</p>
+                <p>• Het liegen of bedriegen namens iemand anders</p>
+                <p>• Het negeren van je eigen waarden en welzijn</p>
+                <p>• Het toelaten van misbruik van je goedheid</p>
+                
+                <div class="quote-box">
+                    <p>"Echte vriendschap kan de waarheid verdragen. Valse vriendschap houdt de waarheid verborgen." - Ancient Proverb</p>
+                </div>
+                
+                <h3>Eer Herstellen</h3>
+                
+                <p>Wanneer je je eer hebt geschaad - en dat overkomt iedereen - is het belangrijkste wat je doet daarna. Eer wordt niet hersteld door excuses, maar door consistente acties die je commitment aan je waarden bewijzen.</p>
+                
+                <p><strong>Stappen voor Eer Herstel:</strong></p>
+                <p>1. Erken volledig wat er gebeurd is</p>
+                <p>2. Neem volledige verantwoordelijkheid</p>
+                <p>3. Maak concrete amends waar mogelijk</p>
+                <p>4. Verander je gedrag om herhaling te voorkomen</p>
+                <p>5. Wees geduldig - vertrouwen wordt langzaam herbouwd</p>
+            </div>
+            
+            <div class="page-break"></div>
+
+            <!-- Pagina 9: Reflectie Vragen -->
+            <div class="chapter">
+                <h2>4. Reflectie Vragen</h2>
+                
+                <div class="reflection-questions">
+                    <h3>Diepgaande Zelfreflectie</h3>
+                    <ul>
+                        <li>In welke situaties vind ik het moeilijk om eerlijk te zijn? Wat vertelt dit over mijn angsten?</li>
+                        <li>Aan wie ben ik het meest loyaal in mijn leven? Verdienen deze mensen die loyaliteit?</li>
+                        <li>Wanneer heb ik voor het laatst mijn eer gecompromitteerd? Wat kan ik leren van die ervaring?</li>
+                        <li>Hoe reageer ik wanneer loyaliteit en waarheid met elkaar botsen?</li>
+                        <li>Welke van mijn vriendschappen zijn gebaseerd op echte loyaliteit vs. gemak?</li>
+                        <li>In welke gebieden van mijn leven ben ik niet consistent met mijn waarden?</li>
+                        <li>Hoe kunnen mijn broeders mij helpen accountable te blijven aan mijn principes?</li>
+                        <li>Wat zijn mijn non-negotiable waarden waar ik nooit van zal afwijken?</li>
+                    </ul>
+                </div>
+                
+                <div class="action-steps">
+                    <h3>Reflectie Opdrachten</h3>
+                    <ul>
+                        <li>Schrijf een "Eer Manifest" waarin je je kernprincipes definieert</li>
+                        <li>Identificeer 3 mensen in je leven die je onvoorwaardelijke loyaliteit verdienen</li>
+                        <li>Bedenk een specifieke situatie waar je je eer kunt herstellen of versterken</li>
+                        <li>Plan een gesprek met een broeder over jullie wederzijdse verwachtingen</li>
+                    </ul>
+                </div>
+                
+                <div class="highlight-box">
+                    <h3>De Eer Test</h3>
+                    <p>Stel jezelf voor in een situatie waarin je groot persoonlijk voordeel kunt behalen door je integriteit te compromitteren, en niemand zou het ooit weten. Wat zou je doen? Je antwoord onthult de echte staat van je eer.</p>
+                </div>
+                
+                <div class="mantra-box">
+                    <h3>Persoonlijke Eed</h3>
+                    <p>"Ik zweer dat ik een man van eer zal zijn, loyaal aan degenen die mijn vertrouwen verdienen, en standvastig in mijn principes, ongeacht de kosten."</p>
+                </div>
+            </div>
+            
+            <div class="page-break"></div>
+
+            <!-- Pagina 10: Volgende Stappen -->
+            <div class="chapter">
+                <h2>5. Volgende Stappen</h2>
+                
+                <h3>30-Dagen Eer & Loyaliteit Challenge</h3>
+                
+                <div class="action-steps">
+                    <h3>Week 1: Foundation Building</h3>
+                    <ul>
+                        <li>Definieer je persoonlijke erencode in schrijven</li>
+                        <li>Identificeer je loyaliteit-cirkel (wie verdient je loyaliteit?)</li>
+                        <li>Maak een lijst van recente beloftes en check of je ze nakomt</li>
+                        <li>Begin elke dag met de vraag: "Hoe kan ik vandaag een man van eer zijn?"</li>
+                    </ul>
+                </div>
+                
+                <div class="action-steps">
+                    <h3>Week 2: Practice & Accountability</h3>
+                    <ul>
+                        <li>Deel je erencode met een vertrouwde broeder</li>
+                        <li>Voer een moeilijk maar noodzakelijk gesprek met iemand</li>
+                        <li>Doe iets dat persoonlijk offer vereist voor een vriend</li>
+                        <li>Houd je aan een commitment ook wanneer het inconveniënt wordt</li>
+                    </ul>
+                </div>
+                
+                <div class="action-steps">
+                    <h3>Week 3: Testing & Refinement</h3>
+                    <ul>
+                        <li>Zoek feedback van je brotherhood over je integriteit</li>
+                        <li>Confronteer een situatie waar je eerder zou hebben weggelopen</li>
+                        <li>Herstel een relatie waar je eer geschaad is</li>
+                        <li>Help een broeder standvastig te blijven in zijn principes</li>
+                    </ul>
+                </div>
+                
+                <div class="action-steps">
+                    <h3>Week 4: Integration & Leadership</h3>
+                    <ul>
+                        <li>Word een voorbeeld van eer voor anderen in je omgeving</li>
+                        <li>Leid een belangrijk gesprek over waarden binnen je groep</li>
+                        <li>Evalueer en verfijn je persoonlijke erencode</li>
+                        <li>Commitment maken voor doorlopende groei in eer en loyaliteit</li>
+                    </ul>
+                </div>
+                
+                <h3>Lange Termijn Ontwikkeling</h3>
+                
+                <p>Eer en loyaliteit zijn geen bestemmingen, maar levenslange praktijken. Elke dag biedt nieuwe kansen om deze waarden te verdiepen en te verfijnen. De mannen die history herinnert als groot, zijn degenen die consistent hebben gekozen voor eer boven gemak, en loyaliteit boven eigenbelang.</p>
+                
+                <div class="highlight-box">
+                    <h3>Brotherhood Accountability System</h3>
+                    <p>Stel een systeem op waarin je broeders je maandelijks feedback geven over je integriteit en loyaliteit. Ware growth gebeurt alleen wanneer we bereid zijn om onze blinde vlekken te zien en eraan te werken.</p>
+                </div>
+                
+                <div class="quote-box">
+                    <p>"De mate waarin een man vertrouwd kan worden, is de mate waarin hij waardevol is." - Henry Ward Beecher</p>
+                </div>
+                
+                <p>Onthoud: In een wereld vol oppervlakkigheid en verraad, is een man van eer en loyaliteit een zeldzame en waardevolle schatten. Word die man. Be de man op wie anderen kunnen rekenen, ongeacht de omstandigheden.</p>
+                
+                <div class="mantra-box">
+                    <h3>Jouw Legacy van Eer</h3>
+                    <p>"Mijn leven zal getuigen van een man die zijn woord hield, zijn vrienden steunde, en zijn principes nooit verried. Dit is mijn legacy."</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>Top Tier Men Academy</strong></p>
+            <p>Module 6: Brotherhood • Les 2: Eer en Loyaliteit</p>
+            <p>&copy; 2025 Top Tier Men. Alle rechten voorbehouden.</p>
+        </div>
+    </div>
+</body>
+</html>

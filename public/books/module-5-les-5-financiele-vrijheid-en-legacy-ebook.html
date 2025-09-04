@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financiële Vrijheid en Legacy - Top Tier Men Academy</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background: #f9fafb;
+        }
+        
+        .ebook-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #8BAE5A 0%, #3A4D23 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -0.025em;
+        }
+        
+        .header .subtitle {
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: white;
+            opacity: 1;
+        }
+        
+        .content {
+            padding: 50px;
+        }
+        
+        .toc {
+            background: #f8fafc;
+            border-left: 4px solid #8BAE5A;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 8px;
+        }
+        
+        .toc h2 {
+            color: #8BAE5A;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .toc ol {
+            list-style: none;
+            counter-reset: toc-counter;
+        }
+        
+        .toc li {
+            counter-increment: toc-counter;
+            margin-bottom: 8px;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        .toc li::before {
+            content: counter(toc-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #8BAE5A;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .chapter {
+            margin: 50px 0;
+        }
+        
+        .chapter h2 {
+            color: #8BAE5A;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .chapter h3 {
+            color: #374151;
+            font-size: 1.3rem;
+            margin: 30px 0 15px;
+            font-weight: 600;
+        }
+        
+        .chapter p {
+            margin-bottom: 16px;
+            text-align: justify;
+            font-size: 1.05rem;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+            color: white;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(139, 174, 90, 0.3);
+        }
+        
+        .highlight-box h3 {
+            color: white;
+            margin-bottom: 15px;
+        }
+        
+        .quote-box {
+            background: #f8fafc;
+            border-left: 4px solid #8BAE5A;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+        }
+        
+        .action-steps {
+            background: #f0f9ff;
+            border: 1px solid #8BAE5A;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 8px;
+        }
+        
+        .action-steps h3 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+        }
+        
+        .action-steps ul {
+            padding-left: 20px;
+        }
+        
+        .action-steps li {
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        
+        .reflection-questions {
+            background: #fef7e0;
+            border: 1px solid #f59e0b;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 8px;
+        }
+        
+        .reflection-questions h3 {
+            color: #d97706;
+            margin-bottom: 15px;
+        }
+        
+        .reflection-questions ul {
+            padding-left: 20px;
+        }
+        
+        .reflection-questions li {
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+        
+        .footer {
+            background: #1f2937;
+            color: white;
+            padding: 40px;
+            text-align: center;
+            margin-top: 50px;
+        }
+        
+        .footer p {
+            margin-bottom: 10px;
+        }
+        
+        .page-break {
+            page-break-before: always;
+            margin-top: 60px;
+            border-top: 2px solid #e5e7eb;
+            padding-top: 40px;
+        }
+        
+        .mantra-box {
+            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+            color: white;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .mantra-box h3 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .mantra-box p {
+            font-size: 1.3rem;
+            font-weight: 600;
+            font-style: italic;
+            text-align: center;
+        }
+        
+        @media print {
+            .ebook-container {
+                box-shadow: none;
+            }
+            
+            .page-break {
+                page-break-before: always;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ebook-container">
+        <div class="header">
+            <h1>Financiële Vrijheid en Legacy</h1>
+            <p class="subtitle">Module 5, Les 5 • Business en Finance</p>
+        </div>
+        
+        <div class="content">
+            <div class="toc">
+                <h2>Inhoudsopgave</h2>
+                <ol>
+                    <li>Inleiding</li>
+                    <li>Hoofdinhoud</li>
+                    <li>Praktische Tips</li>
+                    <li>Reflectie Vragen</li>
+                    <li>Volgende Stappen</li>
+                </ol>
+            </div>
+
+            <!-- Pagina 1: Inleiding -->
+            <div class="chapter">
+                <h2>1. Inleiding</h2>
+                
+                <p>Financiële vrijheid is meer dan alleen geld hebben - het is de ultieme vorm van mannelijke autonomie. Als Top Tier Man creëer je niet alleen welvaart voor jezelf, maar bouw je een legacy die generaties zal overleven. Deze les gaat over het transformeren van je financiële mindset van overleven naar floreren, van werken voor geld naar geld laten werken voor jou.</p>
+                
+                <div class="highlight-box">
+                    <h3>Waarom Legacy Belangrijk Is</h3>
+                    <p>Een echte man denkt niet alleen aan vandaag, maar aan de impact die hij zal hebben lang nadat hij er niet meer is. Financiële vrijheid geeft je de middelen om die impact te maximaliseren.</p>
+                </div>
+                
+                <p>Financiële onafhankelijkheid betekent dat je beslissingen kunt nemen vanuit kracht, niet vanuit angst. Het betekent dat je 'nee' kunt zeggen tegen dingen die niet bij je waarden passen, en 'ja' tegen kansen die je leven en dat van anderen verrijken.</p>
+                
+                <div class="quote-box">
+                    <p>"Rijkdom bestaat niet uit grote bezittingen, maar uit weinig behoeften." - Epictetus</p>
+                </div>
+                
+                <p>In deze les leer je hoe je een financiële strategie ontwikkelt die verder gaat dan simpel sparen. Je leert hoe je passieve inkomensstromen creëert, hoe je slim investeert, en hoe je een legacy opbouwt die impact heeft.</p>
+            </div>
+            
+            <div class="page-break"></div>
+
+            <!-- Pagina 2-7: Hoofdinhoud -->
+            <div class="chapter">
+                <h2>2. Hoofdinhoud</h2>
+                
+                <h3>De Fundamenten van Financiële Vrijheid</h3>
+                
+                <p>Financiële vrijheid begint met het begrijpen van de fundamentele principes die rijke mannen anders maken dan de massa. Het gaat niet om hoeveel je verdient, maar om hoeveel je behoudt, laat groeien, en strategisch inzet.</p>
+                
+                <div class="highlight-box">
+                    <h3>De 4 Pijlers van Financiële Vrijheid</h3>
+                    <p><strong>1. Inkomen Optimalisatie:</strong> Maximaliseer je verdiencapaciteit<br>
+                    <strong>2. Slimme Uitgaven:</strong> Investeer in wat groeit, niet in wat verdwijnt<br>
+                    <strong>3. Passieve Inkomsten:</strong> Laat geld voor je werken<br>
+                    <strong>4. Legacy Planning:</strong> Bouw iets dat blijft bestaan</p>
+                </div>
+                
+                <h3>Passieve Inkomensstromen Ontwikkelen</h3>
+                
+                <p>De overgang van actief naar passief inkomen is de sleutel tot echte financiële vrijheid. Terwijl actief inkomen je tijd vereist, genereert passief inkomen geld terwijl je slaapt, reist, of andere dingen doet die je waardevol vindt.</p>
+                
+                <p><strong>Bewezen Passieve Inkomensstromen:</strong></p>
+                <p>• <strong>Vastgoed Investeringen:</strong> Huurinkomsten en waardestijging bieden dubbele voordelen</p>
+                <p>• <strong>Dividend Aandelen:</strong> Laat bedrijven hun winst met je delen</p>
+                <p>• <strong>Online Business:</strong> Creëer digitale producten die automatisch verkopen</p>
+                <p>• <strong>Intellectueel Eigendom:</strong> Ontwikkel iets eenmalig dat continu inkomsten genereert</p>
+                
+                <div class="action-steps">
+                    <h3>Passief Inkomen Actieplan</h3>
+                    <ul>
+                        <li>Evalueer je huidige financiële positie en doelen</li>
+                        <li>Kies 1-2 passieve inkomensstromen om mee te beginnen</li>
+                        <li>Stel 20% van je maandinkomen opzij voor investeringen</li>
+                        <li>Educeer jezelf continu over je gekozen investeringsmethoden</li>
+                        <li>Begin klein en schaal op naarmate je ervaring opdoet</li>
+                    </ul>
+                </div>
+                
+                <h3>Slimme Investeringsstrategieën</h3>
+                
+                <p>Investeren is niet gokken - het is het strategisch inzetten van kapitaal om toekomstige groei te realiseren. Een slimme investeerder denkt in jaren en decennia, niet in dagen of maanden.</p>
+                
+                <p><strong>De Top Tier Men Investeringsfilosofie:</strong></p>
+                <p>Diversifiëer je portefeuille over verschillende activaklassen, maar focus op wat je begrijpt. Investeer in bedrijven en sectoren waar je kennis van hebt, en bouw langzaam een gevarieerde portefeuille op.</p>
+                
+                <div class="quote-box">
+                    <p>"Het beste moment om te investeren was 20 jaar geleden. Het op een na beste moment is nu." - Chinese Spreekwoord</p>
+                </div>
+                
+                <h3>Legacy Vermogensopbouw</h3>
+                
+                <p>Een legacy gaat verder dan geld - het gaat om de waarden, kennis en mogelijkheden die je doorgeeft aan de volgende generatie. Financial legacy planning vereist een holistische benadering die zowel vermogensopbouw als vermogensoverdracht omvat.</p>
+                
+                <p><strong>Components van een Sterke Financial Legacy:</strong></p>
+                <p>• <strong>Vermogensopbouw:</strong> Systematisch kapitaal accumuleren</p>
+                <p>• <strong>Vermogensbescherming:</strong> Risico's minimaliseren en verzekeringsstrategieën</p>
+                <p>• <strong>Vermogensoverdracht:</strong> Efficiënte planning voor toekomstige generaties</p>
+                <p>• <strong>Waarden Overdracht:</strong> Financiële educatie en verantwoordelijkheid leren</p>
+                
+                <div class="mantra-box">
+                    <h3>Top Tier Men Mantra</h3>
+                    <p>"Ik bouw niet alleen voor mezelf, maar voor de generaties die komen."</p>
+                </div>
+            </div>
+            
+            <div class="page-break"></div>
+
+            <!-- Pagina 8: Praktische Tips -->
+            <div class="chapter">
+                <h2>3. Praktische Tips</h2>
+                
+                <div class="action-steps">
+                    <h3>Onmiddellijke Actie Items</h3>
+                    <ul>
+                        <li><strong>Analyseer je Uitgavenpatroon:</strong> Track je uitgaven 30 dagen lang en identificeer waar geld 'weglekt'</li>
+                        <li><strong>Automatiseer je Besparingen:</strong> Stel automatische overboekingen in naar investeringsrekeningen</li>
+                        <li><strong>Educatie Budget:</strong> Investeer maandelijks in boeken, cursussen of coaching over financiën</li>
+                        <li><strong>Netwerk met Succesvol Mensen:</strong> Omring jezelf met financieel succesvolle mentoren</li>
+                    </ul>
+                </div>
+                
+                <h3>De 50/30/20 Regel voor Top Tier Men</h3>
+                
+                <p><strong>50% Noodzakelijke Uitgaven:</strong> Huisvesting, voedsel, transport, verzekeringen</p>
+                <p><strong>30% Lifestyle en Groei:</strong> Entertainment, sport, educatie, sociale activiteiten</p>
+                <p><strong>20% Investeringen en Legacy:</strong> Aandelen, vastgoed, business investeringen</p>
+                
+                <div class="highlight-box">
+                    <h3>Pro Tip: De 10% Legacy Regel</h3>
+                    <p>Van je 20% investeringsbudget, reserveer 10% specifiek voor legacy projecten - dingen die je naam en waarden zullen dragen lang nadat je er niet meer bent.</p>
+                </div>
+                
+                <h3>Tax Optimization Strategieën</h3>
+                
+                <p>Rijke mannen begrijpen dat het niet gaat om hoeveel je verdient, maar om hoeveel je behoudt na belastingen. Leer de spelregels en speel ze legaal tot je voordeel.</p>
+                
+                <p>• Gebruik beschikbare belastingvoordelige rekeningen maximaal</p>
+                <p>• Overweeg een eigen bedrijf voor extra belastingvoordelen</p>
+                <p>• Investeer in activiteiten met gunstige belastingbehandeling</p>
+                <p>• Raadpleeg professionele belastingadviseurs voor complexe situaties</p>
+                
+                <div class="quote-box">
+                    <p>"In deze wereld is niets zeker, behalve de dood en belastingen. Maar slimme mannen minimaliseren beide risico's." - Aangepast van Benjamin Franklin</p>
+                </div>
+            </div>
+            
+            <div class="page-break"></div>
+
+            <!-- Pagina 9: Reflectie Vragen -->
+            <div class="chapter">
+                <h2>4. Reflectie Vragen</h2>
+                
+                <div class="reflection-questions">
+                    <h3>Diepgaande Zelfreflectie</h3>
+                    <ul>
+                        <li>Wat betekent financiële vrijheid concreet voor mij? Welk bedrag aan passief inkomen zou mijn leven fundamenteel veranderen?</li>
+                        <li>Welke legacy wil ik achterlaten? Hoe ziet mijn ideale financiële nalatenschap eruit?</li>
+                        <li>Wat zijn mijn grootste financiële angsten en hoe beperken deze mijn groei?</li>
+                        <li>In welke gebieden kan ik mijn financiële kennis het meest verbeteren?</li>
+                        <li>Hoe kan ik mijn huidige inkomen verhogen zonder mijn tijd lineair in te ruilen?</li>
+                        <li>Welke investeringen passen het beste bij mijn risicoprofiel en doelen?</li>
+                        <li>Hoe leer ik mijn toekomstige kinderen verantwoordelijk omgaan met geld?</li>
+                        <li>Wat zijn mijn top 3 financiële prioriteiten voor de komende 5 jaar?</li>
+                    </ul>
+                </div>
+                
+                <div class="action-steps">
+                    <h3>Reflectie Opdracht</h3>
+                    <ul>
+                        <li>Schrijf een brief aan jezelf over 10 jaar waarin je beschrijft hoe je financiële leven er dan uitziet</li>
+                        <li>Maak een lijst van 10 dingen waar je geld aan uitgeeft die geen waarde toevoegen aan je toekomst</li>
+                        <li>Identificeer 3 succesvolle mensen in je netwerk en plan een gesprek over hun financiële strategieën</li>
+                    </ul>
+                </div>
+                
+                <div class="highlight-box">
+                    <h3>Legacy Visualisatie</h3>
+                    <p>Sluit je ogen en visualiseer je ideale financiële legacy. Zie voor je hoe je investeringen en business ventures impact hebben op toekomstige generaties. Wat voelt het sterkst?</p>
+                </div>
+            </div>
+            
+            <div class="page-break"></div>
+
+            <!-- Pagina 10: Volgende Stappen -->
+            <div class="chapter">
+                <h2>5. Volgende Stappen</h2>
+                
+                <h3>Jouw 90-Dagen Legacy Plan</h3>
+                
+                <div class="action-steps">
+                    <h3>Week 1-2: Foundation</h3>
+                    <ul>
+                        <li>Complete financiële audit: inkomsten, uitgaven, schulden, bezittingen</li>
+                        <li>Open investeringsrekeningen bij betrouwbare brokers</li>
+                        <li>Stel automatische spaar- en investeringsoverboekingen in</li>
+                        <li>Begin met lezen van minimaal 1 financieel boek per maand</li>
+                    </ul>
+                </div>
+                
+                <div class="action-steps">
+                    <h3>Week 3-6: Implementation</h3>
+                    <ul>
+                        <li>Start je eerste passieve inkomensstroom (kies 1 focus gebied)</li>
+                        <li>Investeer je eerste €1000 in een gediversifieerde portefeuille</li>
+                        <li>Netwerk met 3 financieel succesvolle mensen</li>
+                        <li>Optimaliseer je belastingstrategie voor het komende jaar</li>
+                    </ul>
+                </div>
+                
+                <div class="action-steps">
+                    <h3>Week 7-12: Acceleration</h3>
+                    <ul>
+                        <li>Verhoog je maandelijkse investeringsbedrag met 25%</li>
+                        <li>Lanceer je tweede passieve inkomensstroom</li>
+                        <li>Maak een 10-jaar legacy plan inclusief estate planning</li>
+                        <li>Evalueer en optimaliseer je financiële strategieën</li>
+                    </ul>
+                </div>
+                
+                <h3>Lange Termijn Visie</h3>
+                
+                <p>Financiële vrijheid is geen bestemming, maar een voortdurende reis van groei, leren en optimalisatie. Elke beslissing die je vandaag neemt, bepaalt je financiële realiteit van morgen.</p>
+                
+                <div class="mantra-box">
+                    <h3>Jouw Legacy Commitment</h3>
+                    <p>"Ik commit mezelf aan financiële excellentie, niet voor persoonlijke luxe, maar voor de vrijheid om mijn volledige potentieel te realiseren en een legacy achter te laten die generaties zal inspireren."</p>
+                </div>
+                
+                <div class="highlight-box">
+                    <h3>Continue Educatie</h3>
+                    <p><strong>Aanbevolen Boeken:</strong><br>
+                    • "Rich Dad Poor Dad" - Robert Kiyosaki<br>
+                    • "The Millionaire Next Door" - Thomas Stanley<br>
+                    • "A Random Walk Down Wall Street" - Burton Malkiel<br>
+                    • "The Intelligent Investor" - Benjamin Graham</p>
+                </div>
+                
+                <p>Onthoud: Financiële vrijheid is niet alleen een persoonlijk doel, maar een verantwoordelijkheid naar jezelf, je familie, en je gemeenschap. Wanneer je financieel vrij bent, heb je de macht om positieve verandering te creëren in de wereld.</p>
+                
+                <div class="quote-box">
+                    <p>"Het doel van rijkdom is niet om een rijke man te zijn, maar om een man te zijn die rijk is aan mogelijkheden om goed te doen." - Andrew Carnegie</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>Top Tier Men Academy</strong></p>
+            <p>Module 5: Business and Finance • Les 5: Financiële Vrijheid en Legacy</p>
+            <p>&copy; 2025 Top Tier Men. Alle rechten voorbehouden.</p>
+        </div>
+    </div>
+</body>
+</html>

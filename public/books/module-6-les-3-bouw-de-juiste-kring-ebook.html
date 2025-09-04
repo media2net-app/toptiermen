@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bouw de juiste Kring - Top Tier Men Academy</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background: #f9fafb;
+        }
+        
+        .ebook-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #8BAE5A 0%, #3A4D23 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -0.025em;
+        }
+        
+        .header .subtitle {
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: white;
+            opacity: 1;
+        }
+        
+        .content {
+            padding: 50px;
+        }
+        
+        .toc {
+            background: #f8fafc;
+            border-left: 4px solid #8BAE5A;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 8px;
+        }
+        
+        .toc h2 {
+            color: #8BAE5A;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .toc ol {
+            list-style: none;
+            counter-reset: toc-counter;
+        }
+        
+        .toc li {
+            counter-increment: toc-counter;
+            margin-bottom: 8px;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        .toc li::before {
+            content: counter(toc-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #8BAE5A;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .chapter {
+            margin: 50px 0;
+        }
+        
+        .chapter h2 {
+            color: #8BAE5A;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .chapter h3 {
+            color: #374151;
+            font-size: 1.3rem;
+            margin: 30px 0 15px;
+            font-weight: 600;
+        }
+        
+        .chapter p {
+            margin-bottom: 16px;
+            text-align: justify;
+            font-size: 1.05rem;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+            color: white;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(139, 174, 90, 0.3);
+        }
+        
+        .highlight-box h3 {
+            color: white;
+            margin-bottom: 15px;
+        }
+        
+        .quote-box {
+            background: #f8fafc;
+            border-left: 4px solid #8BAE5A;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+        }
+        
+        .action-steps {
+            background: #f0f9ff;
+            border: 1px solid #8BAE5A;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 8px;
+        }
+        
+        .action-steps h3 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+        }
+        
+        .action-steps ul {
+            padding-left: 20px;
+        }
+        
+        .action-steps li {
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        
+        .reflection-questions {
+            background: #fef7e0;
+            border: 1px solid #f59e0b;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 8px;
+        }
+        
+        .reflection-questions h3 {
+            color: #d97706;
+            margin-bottom: 15px;
+        }
+        
+        .reflection-questions ul {
+            padding-left: 20px;
+        }
+        
+        .reflection-questions li {
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+        
+        .footer {
+            background: #1f2937;
+            color: white;
+            padding: 40px;
+            text-align: center;
+            margin-top: 50px;
+        }
+        
+        .footer p {
+            margin-bottom: 10px;
+        }
+        
+        .page-break {
+            page-break-before: always;
+            margin-top: 60px;
+            border-top: 2px solid #e5e7eb;
+            padding-top: 40px;
+        }
+        
+        .mantra-box {
+            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+            color: white;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .mantra-box h3 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .mantra-box p {
+            font-size: 1.3rem;
+            font-weight: 600;
+            font-style: italic;
+            text-align: center;
+        }
+        
+        @media print {
+            .ebook-container {
+                box-shadow: none;
+            }
+            
+            .page-break {
+                page-break-before: always;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ebook-container">
+        <div class="header">
+            <h1>Bouw de juiste Kring</h1>
+            <p class="subtitle">Module 6, Les 3 • Brotherhood</p>
+        </div>
+        
+        <div class="content">
+            <div class="toc">
+                <h2>Inhoudsopgave</h2>
+                <ol>
+                    <li>Inleiding</li>
+                    <li>Hoofdinhoud</li>
+                    <li>Praktische Tips</li>
+                    <li>Reflectie Vragen</li>
+                    <li>Volgende Stappen</li>
+                </ol>
+            </div>
+
+            <!-- Pagina 1: Inleiding -->
+            <div class="chapter">
+                <h2>1. Inleiding</h2>
+                
+                <p>Je netwerk bepaalt je netto waarde - niet alleen financieel, maar in elke aspecten van je leven. Als Top Tier Man begrijp je dat je omgeving je vormgeeft, je uitdaagt, en je potentieel vrijmaakt of beperkt. Het bouwen van de juiste kring is geen toeval, maar een strategische discipline die je leven kan transformeren.</p>
+                
+                <div class="highlight-box">
+                    <h3>De Kracht van Intentionele Connecties</h3>
+                    <p>Succesvolle mannen omringen zich niet met willekeurige mensen, maar maken bewuste keuzes over wie toegang krijgt tot hun tijd, energie en vertrouwen. Kwaliteit over kwantiteit is altijd de regel.</p>
+                </div>
+                
+                <p>Een sterke kring is meer dan een groep vrienden - het is een ecosysteem van wederzijdse groei, accountabiliteit en ondersteuning. Het zijn de mannen die je eerlijk feedback geven, je aansporen tot excellentie, en er zijn wanneer het leven moeilijk wordt.</p>
+                
+                <p>Maar het bouwen van zo'n kring vereist intentionaliteit, geduld en de moed om soms moeilijke beslissingen te nemen over wie wel en niet past in je leven. Het betekent ook dat je zelf de kwaliteiten moet embodieren die je in anderen zoekt.</p>
+                
+                <div class="quote-box">
+                    <p>"Je bent het gemiddelde van de vijf mensen met wie je het meeste tijd doorbrengt." - Jim Rohn</p>
+                </div>
+                
+                <p>In deze les leer je hoe je strategisch hoogwaardige relaties bouwt, hoe je mensen aantrekt die je laten groeien, en hoe je zelf het type man wordt dat anderen willen in hun kring.</p>
+            </div>
+            
+            <div class="page-break"></div>
+
+            <!-- Pagina 2-7: Hoofdinhoud -->
+            <div class="chapter">
+                <h2>2. Hoofdinhoud</h2>
+                
+                <h3>De Anatomie van een Krachtige Kring</h3>
+                
+                <p>Een sterke kring is geen homogene groep, maar een diverse collectie van individuen die elk unieke waarde toevoegen. Het gaat niet om het hebben van veel vrienden, maar om het hebben van de juiste vrienden - mannen die je respecteren, uitdagen, en supporten in je groei.</p>
+                
+                <div class="highlight-box">
+                    <h3>De 5 Typen Mannen in je Kring</h3>
+                    <p><strong>1. De Mentor:</strong> Een oudere, wijzere man die je de weg wijst<br>
+                    <strong>2. De Gelijkgestemde:</strong> Een peer die vergelijkbare doelen nastreeft<br>
+                    <strong>3. De Challenger:</strong> Iemand die je uit je comfort zone trekt<br>
+                    <strong>4. De Supporter:</strong> Een loyale broeder die er altijd is<br>
+                    <strong>5. De Protégé:</strong> Iemand aan wie je mentorschap geeft</p>
+                </div>
+                
+                <h3>Kwaliteiten van Hoogwaardige Mannen</h3>
+                
+                <p>De mannen die je in je kring wilt hebben, delen bepaalde fundamentele eigenschappen. Ze hebben integriteit, ambitie, en een groeimindset. Ze zijn betrouwbaar in hun woorden en consequent in hun acties.</p>
+                
+                <p><strong>Eigenschappen om te Zoeken:</strong></p>
+                <p>• <strong>Integriteit:</strong> Hun acties stemmen overeen met hun waarden</p>
+                <p>• <strong>Ambitie:</strong> Ze zijn altijd aan het werken aan hun groei</p>
+                <p>• <strong>Loyaliteit:</strong> Ze zijn er voor de mensen die hen vertrouwen</p>
+                <p>• <strong>Positieve Houding:</strong> Ze zoeken oplossingen, niet problemen</p>
+                <p>• <strong>Emotionele Maturiteit:</strong> Ze kunnen moeilijke gesprekken voeren</p>
+                
+                <div class="action-steps">
+                    <h3>Red Flags om te Vermijden</h3>
+                    <ul>
+                        <li>Mannen die constant klagen zonder actie te ondernemen</li>
+                        <li>Personen die altijd nemen maar nooit geven</li>
+                        <li>Mensen die roddelen over anderen achter hun rug</li>
+                        <li>Individuen die je dromen en ambities kleineren</li>
+                        <li>Personen die inconsistent zijn in hun woorden en daden</li>
+                    </ul>
+                </div>
+                
+                <h3>De Strategie van Netwerk Building</h3>
+                
+                <p>Het bouwen van een sterke kring is een strategisch proces dat tijd en intentionaliteit vereist. Het begint met clarity over wat je zoekt en eindigt met consistency in hoe je relaties onderhoudt.</p>
+                
+                <p><strong>Fase 1: Attractie</strong> - Word de persoon die hoogwaardige mannen willen kennen. Excellentie trekt excellentie aan.</p>
+                
+                <p><strong>Fase 2: Selectie</strong> - Wees selectief over wie je je tijd en energie geeft. Niet iedereen verdient toegang tot je leven.</p>
+                
+                <p><strong>Fase 3: Investering</strong> - Investeer consistent in de relaties die waarde hebben. Relaties vereisen onderhoud en aandacht.</p>
+                
+                <p><strong>Fase 4: Evolutie</strong> - Laat je kring evolueren met je groei. Sommige mensen zijn voor een season, anderen voor een lifetime.</p>
+                
+                <div class="quote-box">
+                    <p>"Een man's netwerk is zijn kapitaal - investeer er wijs in." - Reid Hoffman</p>
+                </div>
+                
+                <h3>Waar Kwaliteitsmannen te Vinden</h3>
+                
+                <p>Hoogwaardige mannen bevinden zich in hoogwaardige omgevingen. Ze zijn niet random op plekken te vinden, maar op specifieke locaties waar groei, excellentie en prestatie gewaardeerd worden.</p>
+                
+                <p><strong>Strategische Locaties:</strong></p>
+                <p>• <strong>Professional Events:</strong> Conferences, workshops, industry meetups</p>
+                <p>• <strong>Fitness Faciliteiten:</strong> Hoogwaardige gyms, martial arts clubs</p>
+                <p>• <strong>Educational Settings:</strong> Cursussen, seminars, university programs</p>
+                <p>• <strong>Business Environments:</strong> Coworking spaces, networking events</p>
+                <p>• <strong>Hobby Communities:</strong> Gedeelde interesses op hoog niveau</p>
+                
+                <div class="mantra-box">
+                    <h3>Netwerk Mantra</h3>
+                    <p>"Ik trek mensen aan die mij uitdagen, ik steun mensen die mij vertrouwen, ik word de man die anderen willen kennen."</p>
+                </div>
+                
+                <h3>De Kunst van het Geven</h3>
+                
+                <p>De sterkste relaties worden gebouwd op reciprociteit, maar de beste netwerkbuilders beginnen altijd met geven. Ze vragen zich niet af wat zij kunnen krijgen, maar wat zij kunnen bijdragen aan andermans succes.</p>
+                
+                <p><strong>Manieren om Waarde toe te Voegen:</strong></p>
+                <p>• Deel waardevolle informatie en resources</p>
+                <p>• Maak strategische introducties tussen mensen</p>
+                <p>• Bied je expertise aan voor andermans projecten</p>
+                <p>• Geef eerlijke, constructieve feedback</p>
+                <p>• Wees een soundingboard voor belangrijke beslissingen</p>
+            </div>
+            
+            <div class="page-break"></div>
+
+            <!-- Pagina 8: Praktische Tips -->
+            <div class="chapter">
+                <h2>3. Praktische Tips</h2>
+                
+                <div class="action-steps">
+                    <h3>De 90-Dagen Kring Audit</h3>
+                    <ul>
+                        <li><strong>Week 1-2:</strong> Analyseer je huidige kring - wie voegt waarde toe, wie niet?</li>
+                        <li><strong>Week 3-4:</strong> Identificeer gaten in je netwerk - welke typen mensen mis je?</li>
+                        <li><strong>Week 5-8:</strong> Begin strategisch nieuwe connecties te maken</li>
+                        <li><strong>Week 9-12:</strong> Evalueer en optimaliseer je relatie-onderhoud</li>
+                    </ul>
+                </div>
+                
+                <h3>De Kring Assessment Tool</h3>
+                
+                <p>Evalueer elke belangrijke persoon in je leven op deze criteria (schaal 1-10):</p>
+                <p>• <strong>Positieve Invloed:</strong> Maken ze je een betere man?</p>
+                <p>• <strong>Betrouwbaarheid:</strong> Kunnen ze vertrouwd worden?</p>
+                <p>• <strong>Reciprociteit:</strong> Is het geven en nemen in balans?</p>
+                <p>• <strong>Groei Mindset:</strong> Zijn ze altijd aan het leren en groeien?</p>
+                <p>• <strong>Loyaliteit:</strong> Staan ze voor je wanneer het moeilijk wordt?</p>
+                
+                <div class="highlight-box">
+                    <h3>De 5-4-3-2-1 Regel</h3>
+                    <p><strong>5</strong> mensen met wie je dagelijks contact hebt<br>
+                    <strong>4</strong> mentors die je regelmatig raadpleegt<br>
+                    <strong>3</strong> beste vrienden op wie je altijd kunt rekenen<br>
+                    <strong>2</strong> business partners die je vertrouwt<br>
+                    <strong>1</strong> persoon die je onvoorwaardelijk steunt</p>
+                </div>
+                
+                <h3>Conversation Starters voor Networking</h3>
+                
+                <p>De kunst van networking ligt in authentieke gesprekken, niet in oppervlakkige small talk. Hier zijn gespreksopeners die diepte creëren:</p>
+                
+                <p>• "Wat is het beste advies dat je recent hebt gekregen?"</p>
+                <p>• "Aan welk project werk je momenteel dat je het meest enthousiast maakt?"</p>
+                <p>• "Wat is de grootste uitdaging in jouw industrie momenteel?"</p>
+                <p>• "Wie heeft de grootste impact gehad op je professionele ontwikkeling?"</p>
+                <p>• "Wat leer je momenteel dat je leven verandert?"</p>
+                
+                <div class="action-steps">
+                    <h3>Follow-up Strategieën</h3>
+                    <ul>
+                        <li>Stuur binnen 24 uur een gepersonaliseerd bericht</li>
+                        <li>Deel een relevante resource of artikel</li>
+                        <li>Stel een specifieke opvolg meeting voor</li>
+                        <li>Maak een introduktie met iemand anders in je netwerk</li>
+                        <li>Bied concrete hulp aan voor iets waar ze mee bezig zijn</li>
+                    </ul>
+                </div>
+                
+                <h3>Relationship Maintenance System</h3>
+                
+                <p>Sterke relaties vereisen systematisch onderhoud. Maak een systeem om consistent te blijven investeren in je belangrijkste connecties.</p>
+                
+                <p><strong>Maandelijks:</strong> Diep gesprek met je top 5</p>
+                <p><strong>Wekelijks:</strong> Check-in met je dagelijkse kring</p>
+                <p><strong>Dagelijks:</strong> Waarde toevoegen via social media/messaging</p>
+                
+                <div class="quote-box">
+                    <p>"Relaties zijn als spieren - gebruik ze of verlies ze." - Anonymous</p>
+                </div>
+                
+                <h3>Boundaries en Standards</h3>
+                
+                <p>Kwaliteit vereist standards. Wees niet bang om grenzen te stellen en te handhaven. Respecteer je eigen tijd en energie door selectief te zijn over wie er toegang toe krijgt.</p>
+                
+                <p><strong>Gezonde Boundaries:</strong></p>
+                <p>• Zeg nee tegen events die niet align met je doelen</p>
+                <p>• Limiteer tijd met energy vampires</p>
+                <p>• Communiceer duidelijk over je beschikbaarheid</p>
+                <p>• Prioriteer kwaliteit interactions over kwantiteit</p>
+            </div>
+            
+            <div class="page-break"></div>
+
+            <!-- Pagina 9: Reflectie Vragen -->
+            <div class="chapter">
+                <h2>4. Reflectie Vragen</h2>
+                
+                <div class="reflection-questions">
+                    <h3>Diepe Kring Analyse</h3>
+                    <ul>
+                        <li>Wie zijn de 5 mensen met wie ik het meeste tijd doorbreng? Hoe beïnvloeden zij mijn groei?</li>
+                        <li>Welke persoon in mijn leven daagt mij het meest uit om beter te worden?</li>
+                        <li>Bij wie kan ik terecht wanneer ik echt in de problemen zit?</li>
+                        <li>Wie in mijn netwerk heeft skills of kennis die ik wil ontwikkelen?</li>
+                        <li>Welke relaties kosten mij energie zonder iets positiefs terug te geven?</li>
+                        <li>Wat voor type vriend ben ik voor anderen? Voeg ik waarde toe?</li>
+                        <li>Welke gaps zitten er in mijn netwerk? Wat voor mensen mis ik?</li>
+                        <li>Hoe kan ik systematischer worden in het onderhouden van mijn relaties?</li>
+                    </ul>
+                </div>
+                
+                <div class="action-steps">
+                    <h3>Kring Mapping Exercise</h3>
+                    <ul>
+                        <li>Teken je huidige kring visueel - wie staat waar?</li>
+                        <li>Kleur-codeer gebaseerd op hun impact op jouw leven</li>
+                        <li>Identificeer wie je vaker moet spreken</li>
+                        <li>Markeer relaties die aandacht nodig hebben</li>
+                        <li>Plan concrete acties voor elke belangrijke connectie</li>
+                    </ul>
+                </div>
+                
+                <div class="highlight-box">
+                    <h3>De Mirror Test</h3>
+                    <p>Kijk naar de mensen die jij het meest respecteert en bewondert. Welke eigenschappen hebben zij die jij wilt ontwikkelen? Ben je voor hen het type persoon dat zij zouden willen in hun kring?</p>
+                </div>
+                
+                <div class="reflection-questions">
+                    <h3>Toekomst Visie</h3>
+                    <ul>
+                        <li>Hoe ziet mijn ideale kring er over 5 jaar uit?</li>
+                        <li>Welke connecties kan ik nu maken die mijn toekomst kunnen veranderen?</li>
+                        <li>Wat moet ik veranderen aan mezelf om het type mensen aan te trekken dat ik wil?</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="page-break"></div>
+
+            <!-- Pagina 10: Volgende Stappen -->
+            <div class="chapter">
+                <h2>5. Volgende Stappen</h2>
+                
+                <h3>30-Dagen Kring Transformatie Challenge</h3>
+                
+                <div class="action-steps">
+                    <h3>Week 1: Assessment & Planning</h3>
+                    <ul>
+                        <li>Complete kring audit - wie voegt waarde toe, wie niet?</li>
+                        <li>Identificeer 3 mensen die je minder wilt zien</li>
+                        <li>Bepaal 3 types mensen die je mist in je leven</li>
+                        <li>Maak een plan voor waar je deze kwaliteitsmensen kunt ontmoeten</li>
+                    </ul>
+                </div>
+                
+                <div class="action-steps">
+                    <h3>Week 2: Strategic Networking</h3>
+                    <ul>
+                        <li>Ga naar minimaal 2 networking events of meetups</li>
+                        <li>Start betekenisvolle gesprekken met 5 nieuwe mensen</li>
+                        <li>Follow up met elke nieuwe connectie binnen 24 uur</li>
+                        <li>Bied waarde aan zonder iets terug te vragen</li>
+                    </ul>
+                </div>
+                
+                <div class="action-steps">
+                    <h3>Week 3: Relationship Deepening</h3>
+                    <ul>
+                        <li>Plan diepere gesprekken met je top 5 mensen</li>
+                        <li>Deel je doelen en vraag om accountability</li>
+                        <li>Bied concrete hulp aan een broeder die het nodig heeft</li>
+                        <li>Organiseer een group activity voor je beste mannen</li>
+                    </ul>
+                </div>
+                
+                <div class="action-steps">
+                    <h3>Week 4: System & Maintenance</h3>
+                    <ul>
+                        <li>Implementeer een systeem voor relationship onderhoud</li>
+                        <li>Evalueer de nieuwe connecties van de afgelopen weken</li>
+                        <li>Maak beslissingen over welke relaties je wilt investeren</li>
+                        <li>Plan je networking strategie voor de komende maanden</li>
+                    </ul>
+                </div>
+                
+                <h3>Lange Termijn Kring Strategie</h3>
+                
+                <p>Het bouwen van een wereldklasse kring is een levenslange discipline. Het vereist intentionaliteit, geduld, en de bereidheid om zelf de kwaliteiten te embodieren die je in anderen zoekt.</p>
+                
+                <div class="highlight-box">
+                    <h3>De Kring Leadership Mindset</h3>
+                    <p>Uiteindelijk word je niet alleen een lid van een sterke kring, maar word je de persoon die anderen bindt. Je wordt de connector, de facilitator, de man die waarde creëert voor zijn netwerk.</p>
+                </div>
+                
+                <div class="quote-box">
+                    <p>"Je kring is je castle. Bouw het met zorg, bescherm het met moed, en deel het met wijsheid." - Top Tier Men Filosofie</p>
+                </div>
+                
+                <p>Onthoud: Een sterke kring is geen luxury maar een noodzaak. In een wereld die steeds competitiever wordt, zijn het de relaties die je hebt gebouwd die het verschil maken tussen mediocrity en greatness.</p>
+                
+                <div class="mantra-box">
+                    <h3>Jouw Kring Commitment</h3>
+                    <p>"Ik commit mezelf ertoe strategisch de juiste mensen in mijn leven te brengen, consistent waarde toe te voegen aan mijn relaties, en de soort man te worden die anderen willen in hun kring."</p>
+                </div>
+                
+                <div class="action-steps">
+                    <h3>Continuous Improvement</h3>
+                    <ul>
+                        <li>Evalueer maandelijks de kwaliteit van je kring</li>
+                        <li>Investeer consistent in networking en relationship building</li>
+                        <li>Blijf groeien zodat je waardevoller wordt voor anderen</li>
+                        <li>Help anderen hun eigen kring te bouwen</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>Top Tier Men Academy</strong></p>
+            <p>Module 6: Brotherhood • Les 3: Bouw de juiste Kring</p>
+            <p>&copy; 2025 Top Tier Men. Alle rechten voorbehouden.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -362,12 +362,13 @@ export default function LessonDetailPage() {
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
-        console.log('👀 Page became visible, resetting navigation state');
+        console.log('👀 Page became visible, resetting stuck states');
         setNavigating(false);
         setIsVideoLoading(false);
-        // Reset any stuck loading states when returning to the page
-        if (loading && isDataLoaded) {
-          console.log('🔄 Resetting stuck loading state');
+        
+        // Only reset loading if we have data but are stuck loading
+        if (loading && lesson && lesson.id === lessonId) {
+          console.log('🔄 Resetting stuck loading state - we have the right data');
           setLoading(false);
         }
       }
@@ -377,6 +378,12 @@ export default function LessonDetailPage() {
       console.log('🎯 Page gained focus, ensuring clean state');
       setNavigating(false);
       setIsVideoLoading(false);
+      
+      // Reset loading if we're stuck but have the right data
+      if (loading && lesson && lesson.id === lessonId) {
+        console.log('🔄 Page focus: resetting stuck loading with correct data');
+        setLoading(false);
+      }
     };
 
     // Add event listeners for page visibility and focus
@@ -392,9 +399,56 @@ export default function LessonDetailPage() {
         window.removeEventListener('focus', handlePageFocus);
       }
     };
-  }, [loading, isDataLoaded]);
+  }, [loading, lesson, lessonId]); // Added lesson and lessonId to dependencies
 
-  // Add a safety timeout to reset stuck navigation states
+  // CRITICAL: Safety mechanism to prevent stuck loading states
+  useEffect(() => {
+    if (loading) {
+      // Shorter timeout for quicker recovery
+      const timeoutId = setTimeout(() => {
+        console.log('⚠️ Loading timeout reached (5s), forcing reset');
+        if (lesson && lesson.id === lessonId) {
+          console.log('🔄 FORCE: We have correct data, resetting loading state');
+          setLoading(false);
+          setIsDataLoaded(true);
+        } else {
+          console.log('🔄 FORCE: No correct data, retrying fetch');
+          fetchData();
+        }
+      }, 5000); // Reduced from 10s to 5s
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [loading, lesson, lessonId]);
+
+  // CRITICAL: Emergency reset when user returns from external tab
+  useEffect(() => {
+    const handlePageShow = (event: PageTransitionEvent) => {
+      // This fires when user returns from back/forward or external tab
+      if (event.persisted || performance.navigation?.type === 2) {
+        console.log('🚨 EMERGENCY: Page show event detected - user returned from external source');
+        if (loading) {
+          console.log('🔄 EMERGENCY: Force resetting all stuck states');
+          setLoading(false);
+          setNavigating(false);
+          setIsVideoLoading(false);
+          setShowForceButton(false);
+          
+          // If we have correct data, mark as loaded
+          if (lesson && lesson.id === lessonId) {
+            setIsDataLoaded(true);
+          }
+        }
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('pageshow', handlePageShow);
+      return () => window.removeEventListener('pageshow', handlePageShow);
+    }
+  }, [loading, lesson, lessonId]);
+
+  // Add a safety timeout to reset stuck navigation states  
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
     let forceButtonTimeoutId: NodeJS.Timeout;
@@ -438,10 +492,16 @@ export default function LessonDetailPage() {
   useEffect(() => {
     const handleGlobalClick = () => {
       // Reset states if user clicks anything while stuck
-      if (navigating) {
-        console.log('🖱️ Global click detected while navigating, resetting states');
+      if (navigating || (loading && isDataLoaded)) {
+        console.log('🖱️ Global click detected while stuck, resetting states');
         setNavigating(false);
         setIsVideoLoading(false);
+        
+        // If we have data but are stuck loading, reset
+        if (loading && lesson && lesson.id === lessonId) {
+          console.log('🔄 Global click: Force resetting stuck loading');
+          setLoading(false);
+        }
       }
     };
 
@@ -454,7 +514,25 @@ export default function LessonDetailPage() {
         document.removeEventListener('click', handleGlobalClick);
       }
     };
-  }, [navigating]);
+  }, [navigating, loading, lesson, lessonId, isDataLoaded]);
+
+  // CRITICAL: Emergency force button for stuck states
+  const handleEmergencyReset = () => {
+    console.log('🚨 EMERGENCY RESET: User manually triggered');
+    setLoading(false);
+    setNavigating(false);
+    setIsVideoLoading(false);
+    setShowForceButton(false);
+    setError(null);
+    
+    if (lesson && lesson.id === lessonId) {
+      setIsDataLoaded(true);
+      console.log('✅ Emergency reset complete - data preserved');
+    } else {
+      console.log('🔄 Emergency reset - fetching fresh data');
+      fetchData();
+    }
+  };
 
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -600,54 +678,40 @@ export default function LessonDetailPage() {
     }
   };
 
-  // ENHANCED: Check for page visibility before fetching
+  // Main data fetching effect - simplified and more reliable
   useEffect(() => {
-    console.log('🔍 Checking if we need to fetch data:', {
+    console.log('🔍 Main fetch effect triggered:', {
       user: !!user,
       moduleId,
       lessonId,
       hasCorrectLesson: lesson?.id === lessonId,
-      isDataLoaded,
       loading,
-      pageVisible: typeof document !== 'undefined' ? document.visibilityState === 'visible' : 'unknown',
-      pageFocus: typeof document !== 'undefined' ? document.hasFocus() : 'unknown'
+      pageVisible: typeof document !== 'undefined' ? document.visibilityState === 'visible' : 'unknown'
     });
 
-    if (user && moduleId && lessonId) {
-      // Always fetch if we don't have the right lesson data
-      if (!lesson || lesson.id !== lessonId || !isDataLoaded) {
-        console.log('🚀 Need to fetch data');
-        
-        // Check if page is hidden - if so, wait for it to become visible
-        if (typeof document !== 'undefined' && document.visibilityState === 'hidden') {
-          console.log('⏳ Page is hidden, waiting for visibility before fetching');
-          return;
-        }
-        
-        console.log('✅ Page is visible, fetching now');
-        setIsDataLoaded(false);
-        fetchData();
-      } else {
-        console.log('✅ Already have correct data, no need to fetch');
-      }
+    // Only fetch if we have required params and don't have the right data
+    if (user && moduleId && lessonId && (!lesson || lesson.id !== lessonId)) {
+      console.log('🚀 Need to fetch data for lesson:', lessonId);
+      setIsDataLoaded(false);
+      fetchData();
+    } else if (lesson && lesson.id === lessonId && loading) {
+      console.log('✅ Already have correct data, ensuring loading is false');
+      setLoading(false);
     }
   }, [user, moduleId, lessonId]);
 
-  // Separate effect to handle page becoming visible
+  // Separate effect to handle page becoming visible - only reset stuck states
   useEffect(() => {
     if (typeof document === 'undefined') return;
     
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        console.log('👀 Page became visible, checking if we need to fetch data');
+        console.log('👀 Page became visible - checking for stuck states');
         
-        // If we need data and page just became visible, fetch it
-        if (user && moduleId && lessonId && (!lesson || lesson.id !== lessonId || !isDataLoaded)) {
-          console.log('🚀 Page visible + need data = fetching now');
-          setIsDataLoaded(false);
-          setTimeout(() => {
-            fetchData();
-          }, 100); // Small delay to ensure page is fully visible
+        // If we have the right data but are stuck loading, reset it
+        if (lesson && lesson.id === lessonId && loading && isDataLoaded) {
+          console.log('🔄 Page visible: resetting stuck loading state');
+          setLoading(false);
         }
       }
     };
@@ -657,7 +721,7 @@ export default function LessonDetailPage() {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [user, moduleId, lessonId, lesson, isDataLoaded]);
+  }, [lesson, lessonId, loading, isDataLoaded]);
 
   // Clean up on unmount
   useEffect(() => {
@@ -831,6 +895,17 @@ export default function LessonDetailPage() {
                   </button>
                 </div>
               )}
+
+              {/* Emergency reset button - always available */}
+              <div>
+                <p className="text-orange-400 text-sm mb-3">Problemen met laden?</p>
+                <button
+                  onClick={handleEmergencyReset}
+                  className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+                >
+                  🚨 Emergency Reset
+                </button>
+              </div>
 
               {/* Manual refresh button - always available */}
               <div>

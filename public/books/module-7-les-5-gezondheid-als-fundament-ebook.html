@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gezondheid als Fundament - Top Tier Men Academy</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background: #f9fafb;
+        }
+        
+        .ebook-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #8BAE5A 0%, #3A4D23 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -0.025em;
+        }
+        
+        .header .subtitle {
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: white;
+            opacity: 1;
+        }
+        
+        .content {
+            padding: 50px;
+        }
+        
+        .toc {
+            background: #f8fafc;
+            border-left: 4px solid #8BAE5A;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 8px;
+        }
+        
+        .toc h2 {
+            color: #8BAE5A;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .toc ol {
+            list-style: none;
+            counter-reset: toc-counter;
+        }
+        
+        .toc li {
+            counter-increment: toc-counter;
+            margin-bottom: 8px;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        .toc li::before {
+            content: counter(toc-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #8BAE5A;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .chapter {
+            margin: 50px 0;
+        }
+        
+        .chapter h2 {
+            color: #8BAE5A;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .chapter h3 {
+            color: #374151;
+            font-size: 1.3rem;
+            margin: 30px 0 15px;
+            font-weight: 600;
+        }
+        
+        .chapter p {
+            margin-bottom: 16px;
+            text-align: justify;
+            font-size: 1.05rem;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+            color: white;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(139, 174, 90, 0.3);
+        }
+        
+        .highlight-box h3 {
+            color: white;
+            margin-bottom: 15px;
+        }
+        
+        .quote-box {
+            background: #f8fafc;
+            border-left: 4px solid #8BAE5A;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+        }
+        
+        .action-steps {
+            background: #f0f9ff;
+            border: 1px solid #8BAE5A;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 8px;
+        }
+        
+        .action-steps h3 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+        }
+        
+        .action-steps ul {
+            padding-left: 20px;
+        }
+        
+        .action-steps li {
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        
+        .reflection-questions {
+            background: #fef7e0;
+            border: 1px solid #f59e0b;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 8px;
+        }
+        
+        .reflection-questions h3 {
+            color: #d97706;
+            margin-bottom: 15px;
+        }
+        
+        .reflection-questions ul {
+            padding-left: 20px;
+        }
+        
+        .reflection-questions li {
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+        
+        .footer {
+            background: #1f2937;
+            color: white;
+            padding: 40px;
+            text-align: center;
+            margin-top: 50px;
+        }
+        
+        .footer p {
+            margin-bottom: 10px;
+        }
+        
+        .page-break {
+            page-break-before: always;
+            margin-top: 60px;
+            border-top: 2px solid #e5e7eb;
+            padding-top: 40px;
+        }
+        
+        .mantra-box {
+            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+            color: white;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .mantra-box h3 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .mantra-box p {
+            font-size: 1.3rem;
+            font-weight: 600;
+            font-style: italic;
+            text-align: center;
+        }
+        
+        .health-box {
+            background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+            color: white;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 8px;
+        }
+        
+        .health-box h3 {
+            color: white;
+            margin-bottom: 15px;
+        }
+        
+        @media print {
+            .ebook-container {
+                box-shadow: none;
+            }
+            
+            .page-break {
+                page-break-before: always;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ebook-container">
+        <div class="header">
+            <h1>Gezondheid als Fundament</h1>
+            <p class="subtitle">Module 7, Les 5 • Voeding & Gezondheid</p>
+        </div>
+        
+        <div class="content">
+            <div class="toc">
+                <h2>Inhoudsopgave</h2>
+                <ol>
+                    <li>Inleiding</li>
+                    <li>Hoofdinhoud</li>
+                    <li>Praktische Tips</li>
+                    <li>Reflectie Vragen</li>
+                    <li>Volgende Stappen</li>
+                </ol>
+            </div>
+
+            <!-- Pagina 1: Inleiding -->
+            <div class="chapter">
+                <h2>1. Inleiding</h2>
+                
+                <p>Gezondheid is niet alleen de afwezigheid van ziekte - het is de foundation waarop alles anders in je leven rust. Als Top Tier Man begrijp je dat zonder solid health, alle andere achievements hollow worden. Je kunt de meest succesvolle man ter wereld zijn, maar zonder gezondheid heb je niets om van te genieten.</p>
+                
+                <div class="highlight-box">
+                    <h3>Waarom Gezondheid Non-Negotiable is</h3>
+                    <p>Gezondheid is je greatest wealth. Het enables alle andere aspects van excellence - mental clarity, physical performance, emotional stability, en longevity om je legacy te enjoyeren. Investeren in health is investeren in everything else.</p>
+                </div>
+                
+                <p>In onze moderne wereld is true health geen given meer. Processed foods, sedentary lifestyles, chronic stress, environmental toxins, en poor sleep hebben een epidemic van health issues gecreëerd. De meeste mannen accepteren declining energy, increasing weight, en chronic fatigue als "normal aging" - maar dit is niet true.</p>
+                
+                <p>Optimal health is een strategic advantage. Het geeft je energy om langer te werken, mental clarity om betere beslissingen te maken, physical vitality om te genieten van life's pleasures, en longevity om je impact te maximaliseren. Het is niet vanity - het is strategic life optimization.</p>
+                
+                <div class="quote-box">
+                    <p>"De grootste investering die je kunt maken is in jezelf, en de greatest component daarvan is je health. Without it, everything else is meaningless." - Warren Buffett</p>
+                </div>
+                
+                <p>In deze final les van de Voeding & Gezondheid module creëren we een comprehensive blueprint voor lifelong health excellence. Van preventive care tot performance optimization, van stress management tot longevity planning - je ontwikkelt een master plan voor health als je competitive advantage.</p>
+            </div>
+            
+            <div class="page-break"></div>
+
+            <!-- Pagina 2-7: Hoofdinhoud -->
+            <div class="chapter">
+                <h2>2. Hoofdinhoud</h2>
+                
+                <h3>De 4 Pillars van Total Health</h3>
+                
+                <p>True health is multidimensional. Het gaat verder dan just physical wellness en encompasses mental, emotional, en spiritual wellbeing. All four pillars moeten addressed worden voor optimal human performance.</p>
+                
+                <div class="health-box">
+                    <h3>Complete Health Framework</h3>
+                    <p><strong>1. Physical Health:</strong> Body composition, cardiovascular health, strength<br>
+                    <strong>2. Mental Health:</strong> Cognitive function, emotional regulation, stress management<br>
+                    <strong>3. Social Health:</strong> Relationships, community, connection<br>
+                    <strong>4. Spiritual Health:</strong> Purpose, meaning, inner peace</p>
+                </div>
+                
+                <h3>Preventive Health Strategies</h3>
+                
+                <p>De best cure is prevention. By implementing strategic preventive measures nu, je kunt avoid most common health issues en maintain peak performance throughout je life.</p>
+                
+                <p><strong>Cardiovascular Health:</strong></p>
+                <p>• Regular aerobic exercise (150+ minutes per week)</p>
+                <p>• Maintain healthy blood pressure (<120/80)</p>
+                <p>• Manage cholesterol through diet en exercise</p>
+                <p>• Avoid smoking en limit alcohol</p>
+                <p>• Manage stress levels consistently</p>
+                
+                <p><strong>Metabolic Health:</strong></p>
+                <p>• Maintain stable blood sugar levels</p>
+                <p>• Optimize insulin sensitivity through diet en exercise</p>
+                <p>• Maintain healthy body composition (10-15% body fat)</p>
+                <p>• Regular fasting or time-restricted eating</p>
+                <p>• Monitor key biomarkers annually</p>
+                
+                <p><strong>Hormonal Health:</strong></p>
+                <p>• Optimize testosterone levels naturally</p>
+                <p>• Manage cortisol through stress reduction</p>
+                <p>• Support thyroid function</p>
+                <p>• Maintain healthy growth hormone levels</p>
+                <p>• Balance blood sugar for hormonal stability</p>
+                
+                <div class="action-steps">
+                    <h3>Essential Health Biomarkers to Monitor</h3>
+                    <ul>
+                        <li><strong>Lipid Panel:</strong> Total cholesterol, HDL, LDL, triglycerides</li>
+                        <li><strong>Metabolic Panel:</strong> Glucose, HbA1c, insulin</li>
+                        <li><strong>Hormone Panel:</strong> Testosterone, cortisol, thyroid</li>
+                        <li><strong>Inflammation:</strong> CRP, ESR</li>
+                        <li><strong>Vitamins:</strong> D3, B12, folate</li>
+                        <li><strong>Minerals:</strong> Iron, magnesium, zinc</li>
+                    </ul>
+                </div>
+                
+                <h3>Stress Management & Mental Health</h3>
+                
+                <p>Chronic stress is een silent killer dat undermines alle other health efforts. Learning effective stress management is essential voor long-term health en performance.</p>
+                
+                <p><strong>Stress Reduction Strategies:</strong></p>
+                <p>• <strong>Daily Meditation:</strong> 10-20 minutes mindfulness practice</p>
+                <p>• <strong>Regular Exercise:</strong> Physical activity as stress outlet</p>
+                <p>• <strong>Quality Sleep:</strong> 7-9 hours restorative sleep</p>
+                <p>• <strong>Social Connection:</strong> Strong relationships en community</p>
+                <p>• <strong>Time in Nature:</strong> Regular outdoor exposure</p>
+                <p>• <strong>Boundaries:</strong> Work-life balance en saying no</p>
+                
+                <div class="quote-box">
+                    <p>"Mental health is not een destination, but een process. Het is about how je drive, not where je going." - Noam Shpancer</p>
+                </div>
+                
+                <h3>Longevity & Anti-Aging</h3>
+                
+                <p>Optimizing voor longevity betekent niet just living longer, maar living better voor longer. Het gaat om maintaining vitality, energy, en cognitive function throughout je entire lifespan.</p>
+                
+                <p><strong>Longevity Factors:</strong></p>
+                <p>• <strong>Caloric Restriction:</strong> Moderate caloric intake for cellular health</p>
+                <p>• <strong>Intermittent Fasting:</strong> Autophagy en cellular renewal</p>
+                <p>• <strong>Regular Exercise:</strong> Both aerobic en resistance training</p>
+                <p>• <strong>Social Connections:</strong> Strong relationships reduce mortality risk</p>
+                <p>• <strong>Purpose & Meaning:</strong> Clear life purpose extends lifespan</p>
+                <p>• <strong>Continuous Learning:</strong> Mental stimulation preserves cognitive function</p>
+                
+                <div class="highlight-box">
+                    <h3>Blue Zone Principles</h3>
+                    <p>People in Blue Zones live exceptionally long, healthy lives. Key principles:<br>
+                    <strong>• Move Naturally:</strong> Daily physical activity<br>
+                    <strong>• Purpose:</strong> Clear reason for being<br>
+                    <strong>• Stress Management:</strong> Regular stress relief<br>
+                    <strong>• 80% Rule:</strong> Stop eating when 80% full<br>
+                    <strong>• Plant-Based:</strong> Predominantly plant-forward diet<br>
+                    <strong>• Community:</strong> Strong social connections</p>
+                </div>
+                
+                <h3>Environmental Health</h3>
+                
+                <p>Je environment has profound impact op je health. From air quality tot water purity, from EMF exposure tot toxic chemicals - optimizing je environmental exposure supports long-term wellness.</p>
+                
+                <p><strong>Environmental Optimization:</strong></p>
+                <p>• <strong>Air Quality:</strong> HEPA filters, plants, ventilation</p>
+                <p>• <strong>Water Quality:</strong> Filtration systems, pure water sources</p>
+                <p>• <strong>Toxin Reduction:</strong> Natural cleaning products, organic foods</p>
+                <p>• <strong>EMF Mitigation:</strong> Distance from wifi, phone airplane mode</p>
+                <p>• <strong>Light Optimization:</strong> Natural light exposure, blue light management</p>
+                
+                <div class="mantra-box">
+                    <h3>Health Excellence Mantra</h3>
+                    <p>"Mijn health is mijn greatest asset. Ik invest daily in physical vitality, mental clarity, en spiritual wellbeing for lifelong excellence."</p>
+                </div>
+            </div>
+            
+            <div class="page-break"></div>
+
+            <!-- Pagina 8: Praktische Tips -->
+            <div class="chapter">
+                <h2>3. Praktische Tips</h2>
+                
+                <div class="action-steps">
+                    <h3>Daily Health Optimization Routine</h3>
+                    <ul>
+                        <li><strong>Morning:</strong> Hydration, movement, sunlight exposure</li>
+                        <li><strong>Nutrition:</strong> Whole foods, proper timing, mindful eating</li>
+                        <li><strong>Movement:</strong> Exercise, walking, stretching</li>
+                        <li><strong>Stress:</strong> Meditation, breathing, boundaries</li>
+                        <li><strong>Recovery:</strong> Quality sleep, relaxation, restoration</li>
+                        <li><strong>Connection:</strong> Social time, meaningful relationships</li>
+                    </ul>
+                </div>
+                
+                <h3>Health Monitoring Systems</h3>
+                
+                <p><strong>Daily Metrics:</strong></p>
+                <p>• Energy levels (1-10 scale)</p>
+                <p>• Sleep quality en duration</p>
+                <p>• Mood en mental clarity</p>
+                <p>• Physical performance</p>
+                <p>• Stress levels</p>
+                
+                <p><strong>Weekly Metrics:</strong></p>
+                <p>• Body weight en composition</p>
+                <p>• Exercise performance</p>
+                <p>• Nutrition adherence</p>
+                <p>• Recovery quality</p>
+                
+                <p><strong>Annual Metrics:</strong></p>
+                <p>• Complete health panel bloodwork</p>
+                <p>• Body composition scan</p>
+                <p>• Cardiovascular health assessment</p>
+                <p>• Vision en hearing tests</p>
+                
+                <div class="health-box">
+                    <h3>Health Emergency Protocols</h3>
+                    <p><strong>Illness Prevention:</strong> Vitamin D, zinc, adequate sleep<br>
+                    <strong>Energy Crash:</strong> Protein snack, hydration, brief walk<br>
+                    <strong>Stress Overload:</strong> 10-minute meditation, remove stressor<br>
+                    <strong>Sleep Issues:</strong> Cool room, no screens, relaxation routine</p>
+                </div>
+                
+                <h3>Supplements voor Optimal Health</h3>
+                
+                <p>While whole foods should be de primary source van nutrition, strategic supplementation can fill gaps en optimize performance.</p>
+                
+                <p><strong>Foundation Supplements:</strong></p>
+                <p>• <strong>Vitamin D3:</strong> 2000-4000 IU daily</p>
+                <p>• <strong>Omega-3:</strong> 1-2g EPA/DHA daily</p>
+                <p>• <strong>Magnesium:</strong> 200-400mg before bed</p>
+                <p>• <strong>Zinc:</strong> 10-15mg daily</p>
+                <p>• <strong>Vitamin B-Complex:</strong> For energy en nervous system</p>
+                
+                <p><strong>Performance Supplements:</strong></p>
+                <p>• <strong>Creatine:</strong> 3-5g daily voor strength en cognition</p>
+                <p>• <strong>Adaptogens:</strong> Ashwagandha, rhodiola voor stress</p>
+                <p>• <strong>Probiotics:</strong> Voor gut health en immunity</p>
+                <p>• <strong>CoQ10:</strong> Voor mitochondrial health</p>
+                
+                <div class="action-steps">
+                    <h3>Health Investment Priorities</h3>
+                    <ul>
+                        <li><strong>1. Quality Sleep Setup:</strong> Mattress, blackout, temperature control</li>
+                        <li><strong>2. Nutrition Foundation:</strong> Whole foods, meal prep system</li>
+                        <li><strong>3. Exercise Equipment:</strong> Home gym basics, gym membership</li>
+                        <li><strong>4. Stress Management:</strong> Meditation app, therapy, massage</li>
+                        <li><strong>5. Health Monitoring:</strong> Regular checkups, tracking devices</li>
+                    </ul>
+                </div>
+                
+                <h3>Building Health Habits</h3>
+                
+                <p>Sustainable health comes from consistent daily habits rather than extreme short-term efforts. Focus op building systems dat make healthy choices automatic.</p>
+                
+                <p><strong>Habit Stacking for Health:</strong></p>
+                <p>• After I wake up, I will drink 500ml water</p>
+                <p>• After I have coffee, I will take my vitamins</p>
+                <p>• After I finish work, I will go voor een walk</p>
+                <p>• After I eat dinner, I will prepare voor tomorrow's meals</p>
+                <p>• After I brush my teeth, I will do 5 minutes stretching</p>
+                
+                <div class="quote-box">
+                    <p>"Je bent not obligated om te blijven wie je was 5 minutes ago. Health transformation starts met de next choice je makes." - Atomic Habits (adapted)</p>
+                </div>
+                
+                <h3>Social Health & Community</h3>
+                
+                <p>Health is not een solo journey. Building een supportive community around healthy choices accelerates progress en provides accountability.</p>
+                
+                <p><strong>Building Health Community:</strong></p>
+                <p>• Find workout partners of gym buddies</p>
+                <p>• Join healthy cooking groups of meal prep communities</p>
+                <p>• Connect met people who share health goals</p>
+                <p>• Share je health journey met close friends</p>
+                <p>• Seek professional support when needed</p>
+            </div>
+            
+            <div class="page-break"></div>
+
+            <!-- Pagina 9: Reflectie Vragen -->
+            <div class="chapter">
+                <h2>4. Reflectie Vragen</h2>
+                
+                <div class="reflection-questions">
+                    <h3>Current Health Assessment</h3>
+                    <ul>
+                        <li>Hoe zou ik mijn current overall health rate op een schaal van 1-10? Wat zijn de specific areas voor improvement?</li>
+                        <li>Welke health habits heb ik dat me energy geven vs. die me drain?</li>
+                        <li>Wat zijn mijn family health history risk factors, en hoe kan ik these proactively address?</li>
+                        <li>Hoe manage ik currently stress, en wat is de impact op mijn physical health?</li>
+                        <li>Welke symptoms of health issues ignore ik of treat als "normal"?</li>
+                        <li>Hoe consistent ben ik met healthy routines, en wat causes mij om af te wijken?</li>
+                        <li>Wat is mijn relationship met food, exercise, en self-care?</li>
+                        <li>Hoe zou improved health mijn other life goals en achievements påverken?</li>
+                    </ul>
+                </div>
+                
+                <div class="action-steps">
+                    <h3>Health Audit Exercise</h3>
+                    <ul>
+                        <li>Complete comprehensive health assessment (physical, mental, social)</li>
+                        <li>Identify top 3 health priorities based op current state</li>
+                        <li>Review last 2 years van health habits en outcomes</li>
+                        <li>Schedule necessary health checkups en tests</li>
+                        <li>Assess current environment for health optimization</li>
+                    </ul>
+                </div>
+                
+                <div class="highlight-box">
+                    <h3>10-Year Health Vision</h3>
+                    <p>Visualiseer hoe je jezelf wilt voelen en functioneren over 10 jaar. Welke health investments moeten je nu maken om die vision te achieve? Wat zijn de consequences van inaction?</p>
+                </div>
+                
+                <div class="reflection-questions">
+                    <h3>Health Philosophy & Values</h3>
+                    <ul>
+                        <li>Wat is mijn personal philosophy about health en aging?</li>
+                        <li>Hoe prioritise ik health versus other demands op mijn time?</li>
+                        <li>Welke health goals zijn aligned met mijn broader life vision?</li>
+                        <li>Wat legacy wil ik laten around health en vitality?</li>
+                        <li>Hoe kan ik model excellent health voor important people in mijn life?</li>
+                    </ul>
+                </div>
+                
+                <div class="mantra-box">
+                    <h3>Health Mastery Commitment</h3>
+                    <p>"Ik honor mijn body als de vehicle voor mijn life's work. Door excellent health te pursue, unlock ik mijn highest potential en model excellence voor others."</p>
+                </div>
+            </div>
+            
+            <div class="page-break"></div>
+
+            <!-- Pagina 10: Volgende Stappen -->
+            <div class="chapter">
+                <h2>5. Volgende Stappen</h2>
+                
+                <h3>90-Dagen Health Foundation Program</h3>
+                
+                <div class="action-steps">
+                    <h3>Maand 1: Assessment & Foundation</h3>
+                    <ul>
+                        <li>Complete health assessment (bloodwork, body composition, fitness test)</li>
+                        <li>Establish sleep optimization routine</li>
+                        <li>Implement daily movement en exercise schedule</li>
+                        <li>Upgrade nutrition basics (whole foods, meal timing)</li>
+                        <li>Begin stress management practices (meditation, boundaries)</li>
+                    </ul>
+                </div>
+                
+                <div class="action-steps">
+                    <h3>Maand 2: Optimization & Systems</h3>
+                    <ul>
+                        <li>Fine-tune nutrition based op energy en performance</li>
+                        <li>Escalate exercise intensity en add strength training</li>
+                        <li>Implement advanced sleep optimization</li>
+                        <li>Add strategic supplementation</li>
+                        <li>Build social health en accountability systems</li>
+                    </ul>
+                </div>
+                
+                <div class="action-steps">
+                    <h3>Maand 3: Integration & Mastery</h3>
+                    <ul>
+                        <li>Review en adjust based op tracking data</li>
+                        <li>Implement longevity en preventive care strategies</li>
+                        <li>Optimize environment voor health support</li>
+                        <li>Create contingency plans voor challenging periods</li>
+                        <li>Develop long-term health maintenance system</li>
+                    </ul>
+                </div>
+                
+                <h3>Lifelong Health Excellence</h3>
+                
+                <p>True health mastery is een lifelong commitment dat evolves met changing circumstances, age, en goals. Het key is om flexibility te maintainen while staying consistent met fundamental principles.</p>
+                
+                <div class="health-box">
+                    <h3>Health Mastery Principles</h3>
+                    <p><strong>Prevention First:</strong> Proactive rather than reactive approach<br>
+                    <strong>Consistency:</strong> Small daily actions compound over time<br>
+                    <strong>Balance:</strong> All areas of health equally important<br>
+                    <strong>Adaptation:</strong> Adjust strategies as life changes<br>
+                    <strong>Community:</strong> Surround jezelf met health-conscious people</p>
+                </div>
+                
+                <div class="quote-box">
+                    <p>"Health is een state of complete physical, mental en social well-being en not merely de absence of disease or infirmity." - World Health Organization</p>
+                </div>
+                
+                <p>Als je comprehensive health optimization implements, zul je discover dat improved health niet alleen individual benefits brengt, maar enhances je capacity om valuable contribution te maken to je family, career, en community. Je becomes een example van what's possible met dedicated attention to wellness.</p>
+                
+                <div class="mantra-box">
+                    <h3>Jouw Health Legacy</h3>
+                    <p>"Ik am een steward van excellent health. Through consistent care van mijn body, mind, en spirit, create ik een foundation voor lifelong excellence en meaningful contribution."</p>
+                </div>
+                
+                <div class="action-steps">
+                    <h3>Continuous Health Excellence</h3>
+                    <ul>
+                        <li>Annual comprehensive health assessment en planning</li>
+                        <li>Quarterly review en adjustment van health systems</li>
+                        <li>Monthly analysis van health metrics en habits</li>
+                        <li>Weekly meal planning en exercise scheduling</li>
+                        <li>Daily commitment to health-supporting choices</li>
+                    </ul>
+                </div>
+                
+                <p>Onthoud: In een world dat often prioritizes short-term gains over long-term wellness, choosing excellent health is een act van wisdom en self-respect. Het is recognition dat everything else in life flows from de foundation van physical, mental, en emotional wellbeing.</p>
+                
+                <p><strong>Je journey naar Top Tier Men status is nu complete met deze comprehensive understanding van health als foundation.</strong> Use deze knowledge not just voor personal benefit, maar to elevate anderen en create positive impact in je community. True excellence spreads door example, en jouw commitment to health will inspire others to pursue their own optimization journey.</p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>Top Tier Men Academy</strong></p>
+            <p>Module 7: Voeding & Gezondheid • Les 5: Gezondheid als Fundament</p>
+            <p>&copy; 2025 Top Tier Men. Alle rechten voorbehouden.</p>
+        </div>
+    </div>
+</body>
+</html>

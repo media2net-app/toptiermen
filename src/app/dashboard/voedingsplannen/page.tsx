@@ -6,13 +6,15 @@ import {
   BookOpenIcon,
   CalculatorIcon,
   ChartBarIcon,
-  CheckIcon
+  CheckIcon,
+  EyeIcon
 } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
 import PageLayout from '@/components/PageLayout';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useOnboarding } from "@/contexts/OnboardingContext";
 import { useRouter } from 'next/navigation';
+import DynamicPlanView from './components/DynamicPlanView';
 
 interface NutritionPlan {
   id: number;
@@ -63,15 +65,23 @@ export default function VoedingsplannenPage() {
   const { user } = useSupabaseAuth();
   const { isOnboarding, currentStep: onboardingStep, completeStep } = useOnboarding();
   const router = useRouter();
-  
+
   // Nutrition plans state
   const [nutritionPlans, setNutritionPlans] = useState<NutritionPlan[]>([]);
   const [nutritionLoading, setNutritionLoading] = useState(true);
   const [nutritionError, setNutritionError] = useState<string | null>(null);
-  const [showNutritionIntake, setShowNutritionIntake] = useState(false);
   const [userNutritionProfile, setUserNutritionProfile] = useState<any>(null);
-  const [activeNutritionTab, setActiveNutritionTab] = useState<'plans' | 'intake' | 'profile'>('plans');
   const [selectedNutritionPlan, setSelectedNutritionPlan] = useState<string | null>(null);
+  const [showRequiredIntake, setShowRequiredIntake] = useState(false);
+  const [viewingDynamicPlan, setViewingDynamicPlan] = useState<{planId: string, planName: string} | null>(null);
+  
+  // Nutrition calculator state
+  const [calculatorData, setCalculatorData] = useState({
+    age: '',
+    weight: '',
+    height: '',
+    goal: '' // droogtrainen, behoud, spiermassa
+  });
 
   // Nutrition functions
   const fetchNutritionPlans = async () => {
@@ -87,7 +97,37 @@ export default function VoedingsplannenPage() {
       const data = await response.json();
       
       if (data.success) {
-        setNutritionPlans(data.plans);
+        // Filter plans based on user's goal if they have a nutrition profile
+        let filteredPlans = data.plans;
+        
+        if (userNutritionProfile?.goal) {
+          const userGoal = userNutritionProfile.goal.toLowerCase();
+          console.log('🎯 Filtering plans for user goal:', userGoal);
+          
+          // Map user goals to plan goals
+          const goalMapping = {
+            'cut': 'droogtrainen',
+            'bulk': 'spiermassa', 
+            'maintenance': 'balans',
+            'droogtrainen': 'droogtrainen',
+            'spiermassa': 'spiermassa',
+            'balans': 'balans'
+          };
+          
+          const mappedGoal = goalMapping[userGoal] || userGoal;
+          console.log(`🗺️ Mapping user goal "${userGoal}" to plan goal "${mappedGoal}"`);
+          
+          filteredPlans = data.plans.filter(plan => {
+            const planGoal = plan.goal?.toLowerCase() || plan.fitness_goal?.toLowerCase();
+            const matches = planGoal === mappedGoal;
+            console.log(`Plan "${plan.name}" (${planGoal}) matches mapped goal (${mappedGoal}):`, matches);
+            return matches;
+          });
+          
+          console.log(`✅ Filtered from ${data.plans.length} to ${filteredPlans.length} plans`);
+        }
+        
+        setNutritionPlans(filteredPlans);
       } else {
         throw new Error(data.error || 'Failed to fetch nutrition plans');
       }
@@ -104,30 +144,177 @@ export default function VoedingsplannenPage() {
     if (!user?.id) return;
     
     try {
+      console.log('📡 Fetching nutrition profile for user:', user.id);
       const response = await fetch(`/api/nutrition-profile?userId=${user.id}`);
       const data = await response.json();
       
+      console.log('📊 API Response:', data);
+      
       if (data.success && data.profile) {
-        setUserNutritionProfile(data.profile);
+        // Convert API profile to frontend format
+        const profile = {
+          dailyCalories: data.profile.target_calories,
+          protein: data.profile.target_protein,
+          carbs: data.profile.target_carbs,
+          fats: data.profile.target_fat,
+          age: data.profile.age,
+          weight: data.profile.weight,
+          height: data.profile.height,
+          goal: data.profile.goal === 'cut' ? 'droogtrainen' : data.profile.goal === 'bulk' ? 'spiermassa' : 'behoud'
+        };
+        console.log('✅ Profile found, setting user profile:', profile);
+        setUserNutritionProfile(profile);
+        setShowRequiredIntake(false);
+      } else {
+        // No profile found, show required intake calculator
+        console.log('❌ No profile found, showing calculator');
+        setShowRequiredIntake(true);
       }
     } catch (error) {
-      console.error('Error checking user nutrition profile:', error);
+      console.error('❌ Error checking user nutrition profile:', error);
+      setShowRequiredIntake(true);
     }
   };
 
   const handleNutritionPlanClick = (planId: string) => {
-    router.push(`/dashboard/trainingscentrum/nutrition/${planId}`);
+    // Mark plan as selected
+    setSelectedNutritionPlan(planId);
+    // Navigate to plan details (you can uncomment this if you want navigation)
+    // router.push(`/dashboard/trainingscentrum/nutrition/${planId}`);
   };
 
-  const handleNutritionIntakeComplete = (calculations: any) => {
-    setUserNutritionProfile(calculations);
-    setShowNutritionIntake(false);
-    checkUserNutritionProfile();
+  const handleViewDynamicPlan = (planId: string, planName: string) => {
+    if (!userNutritionProfile) {
+      toast.error('Vul eerst je dagelijkse behoefte in om het plan te kunnen bekijken');
+      setShowRequiredIntake(true);
+      return;
+    }
+    
+    // All plans with meals data support dynamic viewing
+    console.log('✅ Setting viewingDynamicPlan to:', { planId, planName });
+    setViewingDynamicPlan({ planId, planName });
   };
 
-  const handleNutritionIntakeSkip = () => {
-    setShowNutritionIntake(false);
+  const handleBackFromDynamicPlan = () => {
+    setViewingDynamicPlan(null);
   };
+
+  const calculateNutrition = () => {
+    const { age, weight, height, goal } = calculatorData;
+    
+    console.log('🧮 Calculating nutrition with data:', calculatorData);
+    
+    if (!age || !weight || !height || !goal) {
+      toast.error('Vul alle velden in om je dagelijkse behoefte te berekenen');
+      return;
+    }
+
+    // Calculate BMR using Mifflin-St Jeor equation (for men)
+    const bmr = 10 * parseFloat(weight) + 6.25 * parseFloat(height) - 5 * parseFloat(age) + 5;
+    
+    // Activity factor (assuming moderate activity)
+    const activityFactor = 1.55;
+    const tdee = bmr * activityFactor;
+
+    // Adjust based on goal
+    let calories = tdee;
+    let protein, carbs, fats;
+
+    switch (goal) {
+      case 'droogtrainen':
+        calories = tdee * 0.8; // 20% deficit
+        protein = parseFloat(weight) * 2.2; // High protein for cutting
+        fats = parseFloat(weight) * 0.8;
+        carbs = (calories - (protein * 4) - (fats * 9)) / 4;
+        break;
+      case 'behoud':
+        calories = tdee; // Maintenance
+        protein = parseFloat(weight) * 1.8;
+        fats = parseFloat(weight) * 1.0;
+        carbs = (calories - (protein * 4) - (fats * 9)) / 4;
+        break;
+      case 'spiermassa':
+        calories = tdee * 1.1; // 10% surplus
+        protein = parseFloat(weight) * 2.0;
+        fats = parseFloat(weight) * 1.2;
+        carbs = (calories - (protein * 4) - (fats * 9)) / 4;
+        break;
+      default:
+        return;
+    }
+
+    const profile = {
+      dailyCalories: Math.round(calories),
+      protein: Math.round(protein),
+      carbs: Math.round(Math.max(0, carbs)),
+      fats: Math.round(fats),
+      age: parseInt(age),
+      weight: parseFloat(weight),
+      height: parseFloat(height),
+      goal
+    };
+
+    console.log('💾 Saving profile locally and to API:', profile);
+    setUserNutritionProfile(profile);
+    setShowRequiredIntake(false);
+    // Reset calculator data
+    setCalculatorData({ age: '', weight: '', height: '', goal: '' });
+    saveNutritionProfile(profile);
+  };
+
+  const saveNutritionProfile = async (profile: any) => {
+    if (!user?.id) return;
+    
+    try {
+      const apiPayload = {
+        userId: user.id,
+        age: profile.age,
+        weight: profile.weight,
+        height: profile.height,
+        gender: 'male', // Assuming male for Top Tier Men
+        activityLevel: 'moderate', // Default moderate activity
+        goal: profile.goal === 'droogtrainen' ? 'cut' : profile.goal === 'spiermassa' ? 'bulk' : 'maintain'
+      };
+      
+      console.log('📤 Sending to API:', apiPayload);
+      
+      const response = await fetch('/api/nutrition-profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(apiPayload),
+      });
+
+      const data = await response.json();
+      
+      console.log('📥 API Response:', data);
+      
+      if (response.ok && data.success) {
+        console.log('✅ Profile saved successfully');
+        toast.success('Je voedingsprofiel is opgeslagen!');
+        // Update local state with API response
+        if (data.profile) {
+          setUserNutritionProfile({
+            dailyCalories: data.profile.target_calories,
+            protein: data.profile.target_protein,
+            carbs: data.profile.target_carbs,
+            fats: data.profile.target_fat,
+            age: data.profile.age,
+            weight: data.profile.weight,
+            height: data.profile.height,
+            goal: profile.goal
+          });
+        }
+      } else {
+        throw new Error(data.error || 'Failed to save profile');
+      }
+    } catch (error) {
+      console.error('Error saving nutrition profile:', error);
+      toast.error('Er is een fout opgetreden bij het opslaan');
+    }
+  };
+
 
   const getNutritionPlanIcon = (plan: NutritionPlan) => {
     if (plan.icon) {
@@ -149,10 +336,17 @@ export default function VoedingsplannenPage() {
 
   useEffect(() => {
     if (user?.id) {
-      fetchNutritionPlans();
+      console.log('🔍 Checking user nutrition profile for user:', user.id);
       checkUserNutritionProfile();
     }
   }, [user?.id]);
+
+  // Fetch plans when user profile changes or initially
+  useEffect(() => {
+    if (user?.id) {
+      fetchNutritionPlans();
+    }
+  }, [user?.id, userNutritionProfile]);
 
   return (
     <PageLayout 
@@ -162,16 +356,107 @@ export default function VoedingsplannenPage() {
         { label: 'Voedingsplannen', isCurrent: true }
       ]}
     >
-      <div className="max-w-4xl mx-auto">
+      <div className="w-full">
         <AnimatePresence mode="wait">
-          {/* Main Nutrition Plans Interface */}
-          <motion.div
-            key="nutrition-full"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="w-full"
-          >
+          {/* Dynamic Plan View */}
+          {viewingDynamicPlan ? (
+            <motion.div
+              key="dynamic-plan"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="w-full"
+            >
+              <DynamicPlanView
+                planId={viewingDynamicPlan.planId}
+                planName={viewingDynamicPlan.planName}
+                userId={user?.id || ''}
+                onBack={handleBackFromDynamicPlan}
+              />
+            </motion.div>
+          ) : showRequiredIntake ? (
+            <motion.div
+              key="required-calculator"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="w-full max-w-2xl mx-auto"
+            >
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold text-white mb-4">
+                  Bereken je Dagelijkse Behoefte
+                </h2>
+                <p className="text-gray-300 text-lg">
+                  Voor we je voedingsplannen kunnen tonen, moeten we eerst je dagelijkse voedingsbehoeften berekenen.
+                </p>
+              </div>
+
+              <div className="bg-[#232D1A] rounded-2xl p-8 border border-[#3A4D23]">
+                <div className="grid md:grid-cols-2 gap-6 mb-6">
+                  <div>
+                    <label className="block text-white font-semibold mb-2">Leeftijd</label>
+                    <input
+                      type="number"
+                      placeholder="bijv. 30"
+                      value={calculatorData.age}
+                      onChange={(e) => setCalculatorData(prev => ({ ...prev, age: e.target.value }))}
+                      className="w-full px-4 py-3 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#8BAE5A]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-white font-semibold mb-2">Gewicht (kg)</label>
+                    <input
+                      type="number"
+                      placeholder="bijv. 80"
+                      value={calculatorData.weight}
+                      onChange={(e) => setCalculatorData(prev => ({ ...prev, weight: e.target.value }))}
+                      className="w-full px-4 py-3 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#8BAE5A]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-white font-semibold mb-2">Lengte (cm)</label>
+                    <input
+                      type="number"
+                      placeholder="bijv. 180"
+                      value={calculatorData.height}
+                      onChange={(e) => setCalculatorData(prev => ({ ...prev, height: e.target.value }))}
+                      className="w-full px-4 py-3 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#8BAE5A]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-white font-semibold mb-2">Doel</label>
+                    <select
+                      value={calculatorData.goal}
+                      onChange={(e) => setCalculatorData(prev => ({ ...prev, goal: e.target.value }))}
+                      className="w-full px-4 py-3 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A]"
+                    >
+                      <option value="">Selecteer je doel</option>
+                      <option value="droogtrainen">Droogtrainen (Vetverbranding)</option>
+                      <option value="behoud">Behoud (Onderhoud)</option>
+                      <option value="spiermassa">Spiermassa (Opbouw)</option>
+                    </select>
+                  </div>
+                </div>
+
+      <div className="text-center">
+                  <button
+                    onClick={calculateNutrition}
+                    className="px-8 py-4 bg-[#8BAE5A] text-[#232D1A] rounded-xl hover:bg-[#B6C948] transition-colors font-bold text-lg"
+                  >
+                    Bereken Mijn Dagelijkse Behoefte
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          ) : (
+            /* Main Nutrition Plans Interface */
+            <motion.div
+              key="nutrition-full"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="w-full"
+            >
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold text-white mb-4">
                 Voedingsplannen
@@ -181,51 +466,59 @@ export default function VoedingsplannenPage() {
               </p>
             </div>
 
-            {/* Navigation Tabs */}
-            <div className="flex justify-center mb-8">
-              <div className="bg-[#232D1A] rounded-xl p-1 border border-[#3A4D23]">
-                <button
-                  onClick={() => setActiveNutritionTab('plans')}
-                  className={`px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
-                    activeNutritionTab === 'plans'
-                      ? 'bg-[#8BAE5A] text-[#232D1A]'
-                      : 'text-[#8BAE5A] hover:text-white'
-                  }`}
-                >
-                  <BookOpenIcon className="w-5 h-5 inline mr-2" />
-                  Voedingsplannen
-                </button>
-                <button
-                  onClick={() => setActiveNutritionTab('intake')}
-                  className={`px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
-                    activeNutritionTab === 'intake'
-                      ? 'bg-[#8BAE5A] text-[#232D1A]'
-                      : 'text-[#8BAE5A] hover:text-white'
-                  }`}
-                >
-                  <CalculatorIcon className="w-5 h-5 inline mr-2" />
-                  Dagelijkse Behoefte
-                </button>
-                <button
-                  onClick={() => setActiveNutritionTab('profile')}
-                  className={`px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
-                    activeNutritionTab === 'profile'
-                      ? 'bg-[#8BAE5A] text-[#232D1A]'
-                      : 'text-[#8BAE5A] hover:text-white'
-                  }`}
-                >
-                  <ChartBarIcon className="w-5 h-5 inline mr-2" />
-                  Mijn Profiel
-                </button>
+            {/* Nutrition Profile Notice */}
+            {userNutritionProfile && (
+              <div className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23] mb-8">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-white flex items-center">
+                    <ChartBarIcon className="w-6 h-6 text-[#8BAE5A] mr-2" />
+                    Jouw Dagelijkse Behoefte
+                  </h3>
+                  <button
+                    onClick={() => setShowRequiredIntake(true)}
+                    className="text-[#8BAE5A] hover:text-[#B6C948] text-sm font-semibold transition-colors"
+                  >
+                    ✏️ Bewerken
+                  </button>
+                </div>
+                <div className="grid md:grid-cols-4 gap-4">
+                  <div className="bg-[#181F17] rounded-lg p-4 text-center">
+                    <h4 className="text-[#8BAE5A] font-semibold mb-1 text-sm">Calorieën</h4>
+                    <p className="text-2xl font-bold text-white">{userNutritionProfile.dailyCalories}</p>
+                    <p className="text-xs text-gray-400">per dag</p>
+                  </div>
+                  <div className="bg-[#181F17] rounded-lg p-4 text-center">
+                    <h4 className="text-[#8BAE5A] font-semibold mb-1 text-sm">Eiwitten</h4>
+                    <p className="text-2xl font-bold text-white">{userNutritionProfile.protein}g</p>
+                    <p className="text-xs text-gray-400">per dag</p>
+                  </div>
+                  <div className="bg-[#181F17] rounded-lg p-4 text-center">
+                    <h4 className="text-[#8BAE5A] font-semibold mb-1 text-sm">Koolhydraten</h4>
+                    <p className="text-2xl font-bold text-white">{userNutritionProfile.carbs}g</p>
+                    <p className="text-xs text-gray-400">per dag</p>
+                  </div>
+                  <div className="bg-[#181F17] rounded-lg p-4 text-center">
+                    <h4 className="text-[#8BAE5A] font-semibold mb-1 text-sm">Vetten</h4>
+                    <p className="text-2xl font-bold text-white">{userNutritionProfile.fats}g</p>
+                    <p className="text-xs text-gray-400">per dag</p>
+                  </div>
+                </div>
+                <div className="mt-4 text-center">
+                  <span className="text-sm text-gray-400">
+                    Doel: <span className="text-[#8BAE5A] font-semibold capitalize">{userNutritionProfile.goal}</span>
+                    {userNutritionProfile.weight && userNutritionProfile.age && (
+                      <> • {userNutritionProfile.weight}kg • {userNutritionProfile.age} jaar</>
+                    )}
+                  </span>
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* Nutrition Plans Tab */}
-            {activeNutritionTab === 'plans' && (
-              <div className="space-y-6">
+            {/* Nutrition Plans */}
+            <div className="space-y-6">
                 {nutritionLoading ? (
                   <div className="text-center py-12">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
                     <p className="text-gray-300">Voedingsplannen laden...</p>
                   </div>
                 ) : nutritionError ? (
@@ -257,14 +550,30 @@ export default function VoedingsplannenPage() {
                         )}
                         <p className="text-gray-300 text-center text-sm mb-4">{plan.description}</p>
                         
-                        {plan.is_active && (
-                          <div className="flex justify-center">
-                            <div className="inline-flex items-center px-3 py-1 bg-[#8BAE5A]/20 border border-[#8BAE5A] text-[#8BAE5A] rounded-lg text-sm">
-                              <CheckIcon className="w-4 h-4 mr-1" />
-                              Actief
+                        <div className="space-y-3">
+                          {selectedNutritionPlan === plan.plan_id && (
+                            <div className="flex justify-center">
+                              <div className="inline-flex items-center px-3 py-1 bg-[#8BAE5A]/20 border border-[#8BAE5A] text-[#8BAE5A] rounded-lg text-sm">
+                                <CheckIcon className="w-4 h-4 mr-1" />
+                                Actief
+                              </div>
                             </div>
-                          </div>
-                        )}
+                          )}
+                          
+                          {/* Dynamic Plan View Button (only for carnivoor-droogtrainen) */}
+                                                {/* Dynamische plan knop voor alle plannen met maaltijden */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          console.log('🔍 Clicking plan:', plan.plan_id, plan.name);
+                          handleViewDynamicPlan(plan.plan_id, plan.name);
+                        }}
+                        className="w-full px-4 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold flex items-center justify-center gap-2"
+                      >
+                        <EyeIcon className="w-4 h-4" />
+                        Bekijk Gepersonaliseerd Plan
+                      </button>
+                        </div>
                       </motion.div>
                     ))}
                   </div>
@@ -280,110 +589,8 @@ export default function VoedingsplannenPage() {
                   </div>
                 )}
               </div>
-            )}
-
-            {/* Nutrition Intake Tab */}
-            {activeNutritionTab === 'intake' && (
-              <div className="space-y-6">
-                {showNutritionIntake ? (
-                  <div className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23]">
-                    <h3 className="text-xl font-bold text-white mb-4">Bereken je Dagelijkse Behoefte</h3>
-                    <p className="text-gray-300 mb-4">
-                      Vul je gegevens in om je persoonlijke voedingsbehoeften te berekenen.
-                    </p>
-                    {/* NutritionIntake component would go here */}
-                    <div className="text-center py-8">
-                      <p className="text-[#8BAE5A] mb-4">Nutrition Intake Calculator</p>
-                      <div className="flex justify-center gap-4">
-                        <button
-                          onClick={() => handleNutritionIntakeComplete({})}
-                          className="px-6 py-3 bg-[#8BAE5A] text-[#232D1A] font-semibold rounded-lg hover:bg-[#7A9D4A] transition-colors duration-200"
-                        >
-                          Opslaan
-                        </button>
-                        <button
-                          onClick={handleNutritionIntakeSkip}
-                          className="px-6 py-3 bg-[#3A4D23] text-[#8BAE5A] font-semibold rounded-lg hover:bg-[#4A5D33] transition-colors duration-200"
-                        >
-                          Overslaan
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <CalculatorIcon className="w-16 h-16 text-[#8BAE5A] mx-auto mb-4" />
-                    <h3 className="text-xl font-bold text-white mb-4">Bereken je Dagelijkse Behoefte</h3>
-                    <p className="text-gray-300 mb-6">
-                      Vul je gegevens in om je persoonlijke voedingsbehoeften te berekenen.
-                    </p>
-                    <button
-                      onClick={() => setShowNutritionIntake(true)}
-                      className="px-6 py-3 bg-[#8BAE5A] text-[#232D1A] font-semibold rounded-lg hover:bg-[#7A9D4A] transition-colors duration-200"
-                    >
-                      Start Berekenen
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Nutrition Profile Tab */}
-            {activeNutritionTab === 'profile' && (
-              <div className="space-y-6">
-                {userNutritionProfile ? (
-                  <div className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23]">
-                    <h3 className="text-xl font-bold text-white mb-4">Mijn Voedingsprofiel</h3>
-                    <div className="grid md:grid-cols-2 gap-6">
-                      <div className="space-y-4">
-                        <div className="bg-[#181F17] rounded-lg p-4">
-                          <h4 className="text-[#8BAE5A] font-semibold mb-2">Dagelijkse Calorieën</h4>
-                          <p className="text-2xl font-bold text-white">{userNutritionProfile.dailyCalories || 'N/A'}</p>
-                        </div>
-                        <div className="bg-[#181F17] rounded-lg p-4">
-                          <h4 className="text-[#8BAE5A] font-semibold mb-2">Eiwitten</h4>
-                          <p className="text-2xl font-bold text-white">{userNutritionProfile.protein || 'N/A'}g</p>
-                        </div>
-                      </div>
-                      <div className="space-y-4">
-                        <div className="bg-[#181F17] rounded-lg p-4">
-                          <h4 className="text-[#8BAE5A] font-semibold mb-2">Koolhydraten</h4>
-                          <p className="text-2xl font-bold text-white">{userNutritionProfile.carbs || 'N/A'}g</p>
-                        </div>
-                        <div className="bg-[#181F17] rounded-lg p-4">
-                          <h4 className="text-[#8BAE5A] font-semibold mb-2">Vetten</h4>
-                          <p className="text-2xl font-bold text-white">{userNutritionProfile.fats || 'N/A'}g</p>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="mt-6 text-center">
-                      <button
-                        onClick={() => setActiveNutritionTab('intake')}
-                        className="px-6 py-3 bg-[#8BAE5A] text-[#232D1A] font-semibold rounded-lg hover:bg-[#7A9D4A] transition-colors duration-200"
-                      >
-                        Profiel Bijwerken
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <ChartBarIcon className="w-16 h-16 text-[#8BAE5A] mx-auto mb-4" />
-                    <h3 className="text-xl font-bold text-white mb-4">Geen Voedingsprofiel</h3>
-                    <p className="text-gray-300 mb-6">
-                      Je hebt nog geen voedingsprofiel aangemaakt. Bereken je dagelijkse behoefte om te beginnen.
-                    </p>
-                    <button
-                      onClick={() => setActiveNutritionTab('intake')}
-                      className="px-6 py-3 bg-[#8BAE5A] text-[#232D1A] font-semibold rounded-lg hover:bg-[#7A9D4A] transition-colors duration-200"
-                    >
-                      Bereken Behoefte
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
           </motion.div>
+          )}
         </AnimatePresence>
       </div>
     </PageLayout>

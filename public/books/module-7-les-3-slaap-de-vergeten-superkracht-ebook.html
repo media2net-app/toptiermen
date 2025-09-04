@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slaap de vergeten superkracht - Top Tier Men Academy</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background: #f9fafb;
+        }
+        
+        .ebook-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #8BAE5A 0%, #3A4D23 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -0.025em;
+        }
+        
+        .header .subtitle {
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: white;
+            opacity: 1;
+        }
+        
+        .content {
+            padding: 50px;
+        }
+        
+        .toc {
+            background: #f8fafc;
+            border-left: 4px solid #8BAE5A;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 8px;
+        }
+        
+        .toc h2 {
+            color: #8BAE5A;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .toc ol {
+            list-style: none;
+            counter-reset: toc-counter;
+        }
+        
+        .toc li {
+            counter-increment: toc-counter;
+            margin-bottom: 8px;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        .toc li::before {
+            content: counter(toc-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #8BAE5A;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .chapter {
+            margin: 50px 0;
+        }
+        
+        .chapter h2 {
+            color: #8BAE5A;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .chapter h3 {
+            color: #374151;
+            font-size: 1.3rem;
+            margin: 30px 0 15px;
+            font-weight: 600;
+        }
+        
+        .chapter p {
+            margin-bottom: 16px;
+            text-align: justify;
+            font-size: 1.05rem;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+            color: white;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(139, 174, 90, 0.3);
+        }
+        
+        .highlight-box h3 {
+            color: white;
+            margin-bottom: 15px;
+        }
+        
+        .quote-box {
+            background: #f8fafc;
+            border-left: 4px solid #8BAE5A;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+        }
+        
+        .action-steps {
+            background: #f0f9ff;
+            border: 1px solid #8BAE5A;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 8px;
+        }
+        
+        .action-steps h3 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+        }
+        
+        .action-steps ul {
+            padding-left: 20px;
+        }
+        
+        .action-steps li {
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        
+        .reflection-questions {
+            background: #fef7e0;
+            border: 1px solid #f59e0b;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 8px;
+        }
+        
+        .reflection-questions h3 {
+            color: #d97706;
+            margin-bottom: 15px;
+        }
+        
+        .reflection-questions ul {
+            padding-left: 20px;
+        }
+        
+        .reflection-questions li {
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+        
+        .footer {
+            background: #1f2937;
+            color: white;
+            padding: 40px;
+            text-align: center;
+            margin-top: 50px;
+        }
+        
+        .footer p {
+            margin-bottom: 10px;
+        }
+        
+        .page-break {
+            page-break-before: always;
+            margin-top: 60px;
+            border-top: 2px solid #e5e7eb;
+            padding-top: 40px;
+        }
+        
+        .mantra-box {
+            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+            color: white;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .mantra-box h3 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .mantra-box p {
+            font-size: 1.3rem;
+            font-weight: 600;
+            font-style: italic;
+            text-align: center;
+        }
+        
+        .sleep-box {
+            background: #1e1b4b;
+            color: white;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 8px;
+            border: 2px solid #4c1d95;
+        }
+        
+        .sleep-box h3 {
+            color: #a855f7;
+            margin-bottom: 15px;
+        }
+        
+        @media print {
+            .ebook-container {
+                box-shadow: none;
+            }
+            
+            .page-break {
+                page-break-before: always;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ebook-container">
+        <div class="header">
+            <h1>Slaap de vergeten superkracht</h1>
+            <p class="subtitle">Module 7, Les 3 • Voeding & Gezondheid</p>
+        </div>
+        
+        <div class="content">
+            <div class="toc">
+                <h2>Inhoudsopgave</h2>
+                <ol>
+                    <li>Inleiding</li>
+                    <li>Hoofdinhoud</li>
+                    <li>Praktische Tips</li>
+                    <li>Reflectie Vragen</li>
+                    <li>Volgende Stappen</li>
+                </ol>
+            </div>
+
+            <!-- Pagina 1: Inleiding -->
+            <div class="chapter">
+                <h2>1. Inleiding</h2>
+                
+                <p>In een wereld die 24/7 productivity verheerlijkt, is slaap de meest ondergewaardeerde superkracht geworden. Als Top Tier Man begrijp je dat kwalitatieve rust niet zwakte is, maar de ultimate performance enhancer. Elke elite atleet, succesvolle CEO, en high performer heeft één ding gemeen: ze hebben respect voor de transformative power van optimale slaap.</p>
+                
+                <div class="highlight-box">
+                    <h3>Waarom Slaap jouw Secret Weapon is</h3>
+                    <p>Tijdens slaap herstelt je lichaam, consolideert je brein memories, optimaliseert hormonale functie, en bereidt je voor op peak performance. Het is niet alleen recovery - het is upgrade time voor je entire system.</p>
+                </div>
+                
+                <p>Toch behandelen veel mannen slaap als luxury in plaats van necessity. Ze blijven tot laat werken, scrollen door social media in bed, en verwonderen zich waarom ze zich tired, unfocused, en emotionally unstable voelen. De waarheid is dat chronic sleep deprivation je sabotage in elke gebied van je leven.</p>
+                
+                <p>Optimale slaap draait niet alleen om kwantiteit, maar ook om kwaliteit. Het gaat om het begrijpen van je circadiaanse ritmes, het creëren van optimal sleep environment, en het ontwikkelen van rituals die deep, restorative rest promoten.</p>
+                
+                <div class="quote-box">
+                    <p>"Slaap is de best performance enhancing drug die legaal en gratis beschikbaar is." - Dr. Matthew Walker, slaaponderzoeker</p>
+                </div>
+                
+                <p>In deze les ontdek je hoe je slaap kunt weaponiseren voor extraordinary performance. Van de wetenschap van sleep cycles tot praktische implementation van elite sleep hygiene - je transformeert van iemand die sleep onderbenut naar iemand die het strategic gebruikt voor life optimization.</p>
+            </div>
+            
+            <div class="page-break"></div>
+
+            <!-- Pagina 2-7: Hoofdinhoud -->
+            <div class="chapter">
+                <h2>2. Hoofdinhoud</h2>
+                
+                <h3>De Wetenschap van Restorative Sleep</h3>
+                
+                <p>Slaap is geen passieve state maar een active process waarin je lichaam en brein critical restoration en optimization functies uitvoeren. Het begrijpen van wat er gebeurt tijdens sleep cycles helpt je appreciëren waarom kwaliteit zo essential is.</p>
+                
+                <div class="sleep-box">
+                    <h3>De 4 Stages van Sleep</h3>
+                    <p><strong>Stage 1 (Light Sleep):</strong> Transitie van wakker naar slaap<br>
+                    <strong>Stage 2 (Moderate Sleep):</strong> Hartslag vertraagt, temperatuur daalt<br>
+                    <strong>Stage 3 (Deep Sleep):</strong> Fysiek herstel, groeihormoon release<br>
+                    <strong>REM Sleep:</strong> Cognitieve processing, geheugen consolidatie</p>
+                </div>
+                
+                <h3>Performance Impact van Sleep Quality</h3>
+                
+                <p>Sleep deprivation heeft devastating effects op elke aspect van human performance. Zelfs één nacht van poor sleep kan je cognitive abilities en physical capabilities significantly diminishen.</p>
+                
+                <p><strong>Cognitive Performance:</strong></p>
+                <p>• 40% reduction in nieuwe memory formation</p>
+                <p>• Verminderde attention span en focus</p>
+                <p>• Slechtere decision making en emotional regulation</p>
+                <p>• Reduced creativity en problem-solving abilities</p>
+                
+                <p><strong>Physical Performance:</strong></p>
+                <p>• 10-30% decrease in time to exhaustion</p>
+                <p>• Slower reaction times en reduced accuracy</p>
+                <p>• Increased injury risk en impaired recovery</p>
+                <p>• Compromised immune function</p>
+                
+                <p><strong>Hormonal Impact:</strong></p>
+                <p>• Reduced testosterone production (20-30% after één week)</p>
+                <p>• Increased cortisol levels (chronic stress)</p>
+                <p>• Impaired growth hormone release</p>
+                <p>• Disrupted hunger hormones (ghrelin/leptin)</p>
+                
+                <div class="action-steps">
+                    <h3>Sleep Deprivation Warning Signs</h3>
+                    <ul>
+                        <li>Needing alarm clock om wakker te worden</li>
+                        <li>Afternoon energy crashes</li>
+                        <li>Increased irritability en mood swings</li>
+                        <li>Craving voor sugar en caffeine</li>
+                        <li>Difficulty concentreren op tasks</li>
+                        <li>Getting sick meer dan 2x per jaar</li>
+                        <li>Slow recovery van workouts</li>
+                    </ul>
+                </div>
+                
+                <h3>Circadiaanse Ritme Optimalisatie</h3>
+                
+                <p>Je circadiaanse ritme is je internal biological clock die regulates wanneer je alert bent en wanneer je sleepy wordt. Aligning met dit natuurlijke ritme is essential voor optimal sleep quality.</p>
+                
+                <p><strong>Light Exposure Protocol:</strong></p>
+                <p>• <strong>Morning:</strong> 10-30 minuten bright light binnen 1 uur na ontwaken</p>
+                <p>• <strong>Middag:</strong> Natural light exposure gedurende de dag</p>
+                <p>• <strong>Evening:</strong> Dim lights 2-3 uur voor bedtijd</p>
+                <p>• <strong>Night:</strong> Complete darkness tijdens sleep</p>
+                
+                <p><strong>Temperature Regulation:</strong></p>
+                <p>Je core body temperature naturally drops in de evening als preparation voor sleep. Je kunt dit process optimaliseren door:</p>
+                <p>• Hot shower/bath 90 minuten voor bedtijd</p>
+                <p>• Cool bedroom temperature (16-19°C)</p>
+                <p>• Breathable, moisture-wicking sleepwear</p>
+                <p>• Temperature-regulating mattress en bedding</p>
+                
+                <div class="quote-box">
+                    <p>"Je circadiaanse ritme is de director van je biological orchestra. Alle other systems follow its lead." - Dr. Satchin Panda</p>
+                </div>
+                
+                <h3>Elite Sleep Environment Design</h3>
+                
+                <p>Je bedroom should be a temple dedicated tot restorative sleep. Environmental factors hebben enormous impact op sleep quality, en investing in optimal sleep environment pays dividends in every gebied van je leven.</p>
+                
+                <p><strong>Optimal Sleep Environment:</strong></p>
+                <p>• <strong>Darkness:</strong> Blackout curtains, eye mask, remove alle light sources</p>
+                <p>• <strong>Silence:</strong> Minimize noise or use consistent white/brown noise</p>
+                <p>• <strong>Temperature:</strong> Cool environment tussen 16-19°C</p>
+                <p>• <strong>Air Quality:</strong> Good ventilation, mogelijk air purifier</p>
+                <p>• <strong>Comfortable Bedding:</strong> Quality mattress, pillows, en breathable sheets</p>
+                
+                <div class="highlight-box">
+                    <h3>Sleep Sanctuary Investment Priorities</h3>
+                    <p><strong>1. Quality Mattress:</strong> Supportive for je sleep position<br>
+                    <strong>2. Blackout Solutions:</strong> Complete light elimination<br>
+                    <strong>3. Temperature Control:</strong> Cooling fan, AC, of smart thermostat<br>
+                    <strong>4. Noise Management:</strong> Earplugs, white noise, of sound dampening<br>
+                    <strong>5. Blue Light Blockers:</strong> Glasses, screen filters, red lights</p>
+                </div>
+                
+                <h3>Pre-Sleep Ritual en Wind-Down</h3>
+                
+                <p>Elite performers hebben ritualistic approaches tot sleep preparation. Een consistent pre-sleep routine signals to je body en mind dat het tijd is om naar restorative mode te shiften.</p>
+                
+                <p><strong>90-Minute Wind-Down Protocol:</strong></p>
+                <p>• <strong>90 min voor bed:</strong> Stop met werk, intense mental activity</p>
+                <p>• <strong>60 min voor bed:</strong> Begin dimming lights, hot shower/bath</p>
+                <p>• <strong>30 min voor bed:</strong> Reading, meditation, gentle stretching</p>
+                <p>• <strong>Bedtime:</strong> Complete stillness, mogelijk sleepy-time tea</p>
+                
+                <div class="mantra-box">
+                    <h3>Sleep Excellence Mantra</h3>
+                    <p>"Mijn sleep is sacred time waarin ik mijn body en mind upgrade voor tomorrow's excellence. Ik honor dit met perfect preparation."</p>
+                </div>
+            </div>
+            
+            <div class="page-break"></div>
+
+            <!-- Pagina 8: Praktische Tips -->
+            <div class="chapter">
+                <h2>3. Praktische Tips</h2>
+                
+                <div class="action-steps">
+                    <h3>De Ultimate Sleep Schedule</h3>
+                    <ul>
+                        <li><strong>21:30:</strong> Begin wind-down routine, dim alle lights</li>
+                        <li><strong>22:00:</strong> Hot shower/bath (vasodilation voor cooling)</li>
+                        <li><strong>22:30:</strong> Reading, meditation, journaling</li>
+                        <li><strong>23:00:</strong> Lights out, consistent bedtime</li>
+                        <li><strong>7:00:</strong> Wake up natuurlijk, morning light exposure</li>
+                        <li><strong>Weekend:</strong> Max 1 uur verschil in sleep/wake times</li>
+                    </ul>
+                </div>
+                
+                <h3>Sleep Tracking en Optimization</h3>
+                
+                <p><strong>Key Metrics om te Tracken:</strong></p>
+                <p>• <strong>Sleep Duration:</strong> Aim voor 7-9 uur per nacht</p>
+                <p>• <strong>Sleep Efficiency:</strong> Time asleep / time in bed (>85%)</p>
+                <p>• <strong>Deep Sleep:</strong> Should be 15-20% van total sleep time</p>
+                <p>• <strong>REM Sleep:</strong> Should be 20-25% van total sleep time</p>
+                <p>• <strong>Morning Alertness:</strong> Rate 1-10 how rested je voelt</p>
+                
+                <div class="sleep-box">
+                    <h3>Sleep Quality Assessment</h3>
+                    <p><strong>Great Sleep Indicators:</strong><br>
+                    • Fall asleep binnen 10-20 minuten<br>
+                    • Wake up naturally binnen 30 min van target time<br>
+                    • Feel refreshed en alert in morning<br>
+                    • Consistent energy throughout day</p>
+                </div>
+                
+                <h3>Advanced Sleep Hacking Strategies</h3>
+                
+                <p><strong>Strategic Napping:</strong> 10-20 minuten power naps tussen 13:00-15:00 kunnen afternoon alertness boosten zonder affecting nighttime sleep.</p>
+                
+                <p><strong>Temperature Manipulation:</strong> Hot sauna of bath 1-2 uur voor bedtijd creates vasodilation, helping core temperature drop faster.</p>
+                
+                <p><strong>Breathing Techniques:</strong> 4-7-8 breathing (inhale 4, hold 7, exhale 8) activates parasympathetic nervous system.</p>
+                
+                <p><strong>Supplement Support:</strong></p>
+                <p>• <strong>Magnesium Glycinate:</strong> 200-400mg 1 uur voor bed</p>
+                <p>• <strong>Melatonin:</strong> 0.5-3mg 30 min voor bed (start low)</p>
+                <p>• <strong>L-Theanine:</strong> 100-200mg voor relaxation zonder sedation</p>
+                <p>• <strong>Glycine:</strong> 3g voor improved sleep quality</p>
+                
+                <div class="action-steps">
+                    <h3>Travel Sleep Protocol</h3>
+                    <ul>
+                        <li>Adjust sleep schedule 3 dagen voor travel</li>
+                        <li>Hydrate well maar avoid alcohol on planes</li>
+                        <li>Use eye mask, earplugs, neck pillow</li>
+                        <li>Get morning light exposure at destination immediately</li>
+                        <li>Avoid heavy meals 3 uur voor destination bedtime</li>
+                    </ul>
+                </div>
+                
+                <h3>Sleep Disruption Recovery</h3>
+                
+                <p>Voor unavoidable late nights of sleep disruptions:</p>
+                
+                <p><strong>Next Day Protocol:</strong></p>
+                <p>• Wake up at normal time (don't sleep in)</p>
+                <p>• Get immediate bright light exposure</p>
+                <p>• Strategic caffeine timing (avoid na 14:00)</p>
+                <p>• Light exercise om energy te boosten</p>
+                <p>• Extra attention aan evening wind-down</p>
+                
+                <p><strong>Week Recovery Plan:</strong></p>
+                <p>• Go to bed 15-30 min earlier dan normal</p>
+                <p>• Focus on sleep hygiene consistency</p>
+                <p>• Prioritize recovery nutrition en hydration</p>
+                <p>• Reduce stressors where possible</p>
+                
+                <div class="quote-box">
+                    <p>"Je kunt niet out-perform poor sleep. It's the foundation all other performance rests on." - Dr. Kirk Parsley</p>
+                </div>
+                
+                <h3>Technology en Sleep</h3>
+                
+                <p><strong>Helpful Technology:</strong></p>
+                <p>• Sleep tracking devices voor data-driven optimization</p>
+                <p>• Blue light blocking glasses na 19:00</p>
+                <p>• White noise apps of machines</p>
+                <p>• Smart thermostats voor temperature control</p>
+                <p>• Morning light therapy lamps</p>
+                
+                <p><strong>Technology Boundaries:</strong></p>
+                <p>• No screens 1 uur voor bedtijd</p>
+                <p>• Phone in airplane mode or andere kamer</p>
+                <p>• Use physical alarm clock in plaats van phone</p>
+                <p>• Red light settings na zonsondergang</p>
+            </div>
+            
+            <div class="page-break"></div>
+
+            <!-- Pagina 9: Reflectie Vragen -->
+            <div class="chapter">
+                <h2>4. Reflectie Vragen</h2>
+                
+                <div class="reflection-questions">
+                    <h3>Sleep Quality Assessment</h3>
+                    <ul>
+                        <li>Hoe zou ik mijn current sleep quality rate op schaal 1-10? Wat are the specific areas voor improvement?</li>
+                        <li>Op welke tijden van de dag voel ik me het meest alert vs. tired? Hoe correleert dit met mijn sleep schedule?</li>
+                        <li>Wat zijn mijn biggest obstacles voor consistent, quality sleep?</li>
+                        <li>Hoe ziet mijn bedroom environment er uit? Is het optimal voor restorative sleep?</li>
+                        <li>Welke technology habits interfere with mijn sleep quality?</li>
+                        <li>Hoe verschillen mijn sleep patterns tussen weekdays en weekends?</li>
+                        <li>Wanneer ben ik het productivst en most creative? Hoe relate dit aan mijn sleep cycles?</li>
+                        <li>Welke stressors houden mij wakker of verstoren mijn sleep?</li>
+                    </ul>
+                </div>
+                
+                <div class="action-steps">
+                    <h3>14-Dagen Sleep Experiment</h3>
+                    <ul>
+                        <li>Track sleep en wake times elke dag</li>
+                        <li>Rate morning alertness en energy levels</li>
+                        <li>Note evening routine en screen time</li>
+                        <li>Monitor caffeine intake en timing</li>
+                        <li>Track workout performance en recovery</li>
+                        <li>Document mood en emotional regulation</li>
+                    </ul>
+                </div>
+                
+                <div class="highlight-box">
+                    <h3>Performance Correlation Analysis</h3>
+                    <p>Voor 2 weken, correleer je sleep quality (duration, efficiency, feeling rested) met je performance metrics: workout intensity, work productivity, mood stability, creative output. Identify patterns en optimization opportunities.</p>
+                </div>
+                
+                <div class="reflection-questions">
+                    <h3>Lifestyle Integration</h3>
+                    <ul>
+                        <li>Wat zou veranderen in mijn leven als ik consistent 8 uur kwaliteitsslaap kreeg?</li>
+                        <li>Welke evening activities of habits moet ik elimineren voor better sleep?</li>
+                        <li>Hoe kan ik mijn bedroom transformeren in een sleep sanctuary?</li>
+                        <li>Wat zijn mijn non-negotiable sleep standards?</li>
+                        <li>Hoe moet ik mijn schedule adjusten om sleep priority te maken?</li>
+                    </ul>
+                </div>
+                
+                <div class="mantra-box">
+                    <h3>Sleep Priority Commitment</h3>
+                    <p>"Ik treat sleep als de foundation van mijn excellence. Elke nacht invest ik in tomorrow's peak performance door quality rest te prioritiseren."</p>
+                </div>
+            </div>
+            
+            <div class="page-break"></div>
+
+            <!-- Pagina 10: Volgende Stappen -->
+            <div class="chapter">
+                <h2>5. Volgende Stappen</h2>
+                
+                <h3>30-Dagen Sleep Optimization Challenge</h3>
+                
+                <div class="action-steps">
+                    <h3>Week 1: Foundation & Consistency</h3>
+                    <ul>
+                        <li>Establish consistent bedtime en wake time (including weekends)</li>
+                        <li>Implement 90-minute wind-down routine</li>
+                        <li>Eliminate screens 1 uur voor bedtijd</li>
+                        <li>Begin tracking sleep duration en quality</li>
+                    </ul>
+                </div>
+                
+                <div class="action-steps">
+                    <h3>Week 2: Environment Optimization</h3>
+                    <ul>
+                        <li>Create completely dark sleep environment</li>
+                        <li>Optimize bedroom temperature (16-19°C)</li>
+                        <li>Minimize noise disruptions</li>
+                        <li>Upgrade bedding indien necessary</li>
+                    </ul>
+                </div>
+                
+                <div class="action-steps">
+                    <h3>Week 3: Circadian Rhythm Alignment</h3>
+                    <ul>
+                        <li>Morning bright light exposure routine</li>
+                        <li>Strategic caffeine timing (stop na 14:00)</li>
+                        <li>Evening light dimming protocol</li>
+                        <li>Temperature manipulation strategies</li>
+                    </ul>
+                </div>
+                
+                <div class="action-steps">
+                    <h3>Week 4: Advanced Optimization</h3>
+                    <ul>
+                        <li>Fine-tune based op tracking data</li>
+                        <li>Experiment with natural sleep aids</li>
+                        <li>Develop travel sleep protocol</li>
+                        <li>Create emergency sleep recovery plan</li>
+                    </ul>
+                </div>
+                
+                <h3>Long-term Sleep Mastery</h3>
+                
+                <p>Sleep optimization is een lifelong practice die adapts met changing life circumstances, age, en goals. Het key is om sleep als non-negotiable foundation te behandelen voor alle andere performance areas.</p>
+                
+                <div class="sleep-box">
+                    <h3>Elite Sleep Standards</h3>
+                    <p><strong>Consistency:</strong> Same bedtime/wake time ±30 min daily<br>
+                    <strong>Duration:</strong> 7-9 uur based op individual needs<br>
+                    <strong>Quality:</strong> >85% sleep efficiency, feel rested<br>
+                    <strong>Environment:</strong> Dark, cool, quiet sleep sanctuary<br>
+                    <strong>Recovery:</strong> Quick adaptation na disruptions</p>
+                </div>
+                
+                <div class="quote-box">
+                    <p>"The best bridge tussen today's effort en tomorrow's excellence is a night of quality sleep." - Anonymous</p>
+                </div>
+                
+                <p>Als je consistent invest in sleep optimization, zul je discover dat deze foundation alle andere areas van performance elevates. Je workouts worden intensiever, je thinking wordt clearer, je relationships improve, en je capacity voor stress en challenges expands dramatically.</p>
+                
+                <div class="mantra-box">
+                    <h3>Jouw Sleep Legacy</h3>
+                    <p>"Ik honor de power van restorative sleep. Door consistent excellence in rest te pursuen, unlock ik mijn highest potential in alle areas van life."</p>
+                </div>
+                
+                <div class="action-steps">
+                    <h3>Continuous Sleep Excellence</h3>
+                    <ul>
+                        <li>Monthly sleep quality reviews en adjustments</li>
+                        <li>Seasonal adaptation van sleep routines</li>
+                        <li>Investment in sleep technology en environment upgrades</li>
+                        <li>Share sleep knowledge met je brotherhood</li>
+                        <li>Model excellent sleep hygiene voor others</li>
+                    </ul>
+                </div>
+                
+                <p>Onthoud: In een culture die hustle over health promotes, choosing excellent sleep is een act van wisdom en self-respect. Het is recognition dat sustainable excellence requires solid foundations, en dat sleep is de most fundamental foundation van all.</p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>Top Tier Men Academy</strong></p>
+            <p>Module 7: Voeding & Gezondheid • Les 3: Slaap de vergeten superkracht</p>
+            <p>&copy; 2025 Top Tier Men. Alle rechten voorbehouden.</p>
+        </div>
+    </div>
+</body>
+</html>
