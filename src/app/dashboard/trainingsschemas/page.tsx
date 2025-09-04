@@ -96,12 +96,57 @@ export default function TrainingschemasPage() {
   // Training Profile State
   const [userTrainingProfile, setUserTrainingProfile] = useState<TrainingProfile | null>(null);
   const [showCalculator, setShowCalculator] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
   const [calculatorData, setCalculatorData] = useState({
     training_goal: 'spiermassa' as 'spiermassa' | 'kracht_uithouding' | 'power_kracht',
     training_frequency: 3 as 3 | 4 | 5 | 6,
     experience_level: 'beginner' as 'beginner' | 'intermediate' | 'advanced',
     equipment_type: 'gym' as 'gym' | 'home' | 'outdoor'
   });
+
+  const steps = [
+    {
+      id: 'training_goal',
+      title: 'Wat is je trainingsdoel?',
+      subtitle: 'Kies het doel dat het beste bij jou past',
+      options: [
+        { value: 'spiermassa', label: 'Spiermassa', description: '8-12 reps, 4 sets, 90s rust', icon: '💪' },
+        { value: 'kracht_uithouding', label: 'Kracht & Uithouding', description: '15-20 reps, 4 sets, 40-60s rust', icon: '🏃' },
+        { value: 'power_kracht', label: 'Power & Kracht', description: '3-6 reps, 4 sets, 150-180s rust', icon: '⚡' }
+      ]
+    },
+    {
+      id: 'training_frequency',
+      title: 'Hoe vaak wil je per week trainen?',
+      subtitle: 'Selecteer je gewenste trainingsfrequentie',
+      options: [
+        { value: 3, label: '3x per week', description: 'Perfect voor beginners', icon: '📅' },
+        { value: 4, label: '4x per week', description: 'Ideaal voor consistentie', icon: '📅' },
+        { value: 5, label: '5x per week', description: 'Voor gevorderden', icon: '📅' },
+        { value: 6, label: '6x per week', description: 'Maximale intensiteit', icon: '📅' }
+      ]
+    },
+    {
+      id: 'experience_level',
+      title: 'Wat is je ervaringsniveau?',
+      subtitle: 'Help ons je het juiste schema te vinden',
+      options: [
+        { value: 'beginner', label: 'Beginner', description: 'Minder dan 1 jaar ervaring', icon: '🌱' },
+        { value: 'intermediate', label: 'Gemiddeld', description: '1-3 jaar ervaring', icon: '📈' },
+        { value: 'advanced', label: 'Gevorderd', description: 'Meer dan 3 jaar ervaring', icon: '🏆' }
+      ]
+    },
+    {
+      id: 'equipment_type',
+      title: 'Waar ga je trainen?',
+      subtitle: 'Kies je trainingsomgeving',
+      options: [
+        { value: 'gym', label: 'Gym', description: 'Volledige gym met alle apparaten', icon: '🏋️' },
+        { value: 'home', label: 'Thuis', description: 'Beperkte apparaten of bodyweight', icon: '🏠' },
+        { value: 'outdoor', label: 'Buiten', description: 'Outdoor training en bootcamp', icon: '🌳' }
+      ]
+    }
+  ];
 
   // Training Profile functions
   const fetchUserTrainingProfile = async () => {
@@ -156,6 +201,7 @@ export default function TrainingschemasPage() {
 
       setUserTrainingProfile(data);
       setShowCalculator(false);
+      setCurrentStep(0);
       toast.success('Trainingsprofiel opgeslagen!');
       
       // Refresh available schemas based on new profile
@@ -165,6 +211,42 @@ export default function TrainingschemasPage() {
       console.error('Error in saveTrainingProfile:', error);
       toast.error('Er is een fout opgetreden');
     }
+  };
+
+  const handleStepAnswer = (stepId: string, value: any) => {
+    setCalculatorData(prev => ({
+      ...prev,
+      [stepId]: value
+    }));
+
+    // Move to next step
+    if (currentStep < steps.length - 1) {
+      setTimeout(() => {
+        setCurrentStep(prev => prev + 1);
+      }, 300);
+    } else {
+      // Last step - save profile
+      setTimeout(() => {
+        saveTrainingProfile();
+      }, 300);
+    }
+  };
+
+  const goToPreviousStep = () => {
+    if (currentStep > 0) {
+      setCurrentStep(prev => prev - 1);
+    }
+  };
+
+  const startCalculator = () => {
+    setShowCalculator(true);
+    setCurrentStep(0);
+    setCalculatorData({
+      training_goal: 'spiermassa',
+      training_frequency: 3,
+      experience_level: 'beginner',
+      equipment_type: 'gym'
+    });
   };
 
   // Training functions
@@ -512,7 +594,7 @@ export default function TrainingschemasPage() {
                   </div>
                   <div className="mt-4 flex justify-end">
                     <button
-                      onClick={() => setShowCalculator(true)}
+                      onClick={startCalculator}
                       className="px-4 py-2 bg-[#3A4D23] text-white rounded-lg hover:bg-[#4A5D33] transition-colors text-sm"
                     >
                       Bewerken
@@ -521,156 +603,9 @@ export default function TrainingschemasPage() {
                 </div>
               )}
 
-              {/* Training Calculator Modal */}
-              {showCalculator && (
-                <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-                  <div className="bg-[#232D1A] rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-                    <div className="flex justify-between items-center mb-6">
-                      <h3 className="text-2xl font-bold text-white">
-                        {userTrainingProfile ? 'Update Mijn Trainingsprofiel' : 'Bereken Mijn Trainingsprofiel'}
-                      </h3>
-                      <button
-                        onClick={() => setShowCalculator(false)}
-                        className="text-gray-400 hover:text-white transition-colors"
-                      >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </div>
-
-                    <div className="space-y-6">
-                      {/* Training Goal */}
-                      <div>
-                        <label className="block text-white font-semibold mb-3">
-                          Wat is je trainingsdoel?
-                        </label>
-                        <div className="grid grid-cols-1 gap-3">
-                          {[
-                            { value: 'spiermassa', label: 'Spiermassa', description: '8-12 reps, 4 sets, 90s rust' },
-                            { value: 'kracht_uithouding', label: 'Kracht & Uithouding', description: '15-20 reps, 4 sets, 40-60s rust' },
-                            { value: 'power_kracht', label: 'Power & Kracht', description: '3-6 reps, 4 sets, 150-180s rust' }
-                          ].map((goal) => (
-                            <label key={goal.value} className="flex items-start space-x-3 cursor-pointer">
-                              <input
-                                type="radio"
-                                name="training_goal"
-                                value={goal.value}
-                                checked={calculatorData.training_goal === goal.value}
-                                onChange={(e) => setCalculatorData({...calculatorData, training_goal: e.target.value as any})}
-                                className="mt-1 w-4 h-4 text-[#8BAE5A] bg-[#3A4D23] border-[#3A4D23] focus:ring-[#8BAE5A]"
-                              />
-                              <div>
-                                <div className="text-white font-medium">{goal.label}</div>
-                                <div className="text-gray-400 text-sm">{goal.description}</div>
-                              </div>
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Training Frequency */}
-                      <div>
-                        <label className="block text-white font-semibold mb-3">
-                          Hoe vaak wil je per week trainen?
-                        </label>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                          {[3, 4, 5, 6].map((frequency) => (
-                            <label key={frequency} className="flex items-center space-x-2 cursor-pointer">
-                              <input
-                                type="radio"
-                                name="training_frequency"
-                                value={frequency}
-                                checked={calculatorData.training_frequency === frequency}
-                                onChange={(e) => setCalculatorData({...calculatorData, training_frequency: parseInt(e.target.value) as any})}
-                                className="w-4 h-4 text-[#8BAE5A] bg-[#3A4D23] border-[#3A4D23] focus:ring-[#8BAE5A]"
-                              />
-                              <span className="text-white">{frequency}x per week</span>
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Experience Level */}
-                      <div>
-                        <label className="block text-white font-semibold mb-3">
-                          Wat is je ervaringsniveau?
-                        </label>
-                        <div className="grid grid-cols-1 gap-3">
-                          {[
-                            { value: 'beginner', label: 'Beginner', description: 'Minder dan 1 jaar ervaring' },
-                            { value: 'intermediate', label: 'Gemiddeld', description: '1-3 jaar ervaring' },
-                            { value: 'advanced', label: 'Gevorderd', description: 'Meer dan 3 jaar ervaring' }
-                          ].map((level) => (
-                            <label key={level.value} className="flex items-start space-x-3 cursor-pointer">
-                              <input
-                                type="radio"
-                                name="experience_level"
-                                value={level.value}
-                                checked={calculatorData.experience_level === level.value}
-                                onChange={(e) => setCalculatorData({...calculatorData, experience_level: e.target.value as any})}
-                                className="mt-1 w-4 h-4 text-[#8BAE5A] bg-[#3A4D23] border-[#3A4D23] focus:ring-[#8BAE5A]"
-                              />
-                              <div>
-                                <div className="text-white font-medium">{level.label}</div>
-                                <div className="text-gray-400 text-sm">{level.description}</div>
-                              </div>
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Equipment Type */}
-                      <div>
-                        <label className="block text-white font-semibold mb-3">
-                          Waar ga je trainen?
-                        </label>
-                        <div className="grid grid-cols-1 gap-3">
-                          {[
-                            { value: 'gym', label: 'Gym', description: 'Volledige gym met alle apparaten' },
-                            { value: 'home', label: 'Thuis', description: 'Beperkte apparaten of bodyweight' },
-                            { value: 'outdoor', label: 'Buiten', description: 'Outdoor training en bootcamp' }
-                          ].map((equipment) => (
-                            <label key={equipment.value} className="flex items-start space-x-3 cursor-pointer">
-                              <input
-                                type="radio"
-                                name="equipment_type"
-                                value={equipment.value}
-                                checked={calculatorData.equipment_type === equipment.value}
-                                onChange={(e) => setCalculatorData({...calculatorData, equipment_type: e.target.value as any})}
-                                className="mt-1 w-4 h-4 text-[#8BAE5A] bg-[#3A4D23] border-[#3A4D23] focus:ring-[#8BAE5A]"
-                              />
-                              <div>
-                                <div className="text-white font-medium">{equipment.label}</div>
-                                <div className="text-gray-400 text-sm">{equipment.description}</div>
-                              </div>
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Save Button */}
-                      <div className="flex justify-end space-x-4 pt-6">
-                        <button
-                          onClick={() => setShowCalculator(false)}
-                          className="px-6 py-3 bg-[#3A4D23] text-white rounded-lg hover:bg-[#4A5D33] transition-colors"
-                        >
-                          Annuleren
-                        </button>
-                        <button
-                          onClick={saveTrainingProfile}
-                          className="px-6 py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold"
-                        >
-                          {userTrainingProfile ? 'Update Mijn Trainingsprofiel' : 'Bereken Mijn Trainingsprofiel'}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
 
               {/* No Profile - Show Calculator Button */}
-              {!userTrainingProfile && (
+              {!userTrainingProfile && !showCalculator && (
                 <div className="mb-8 p-6 bg-[#232D1A] rounded-xl border border-[#3A4D23] text-center">
                   <h3 className="text-xl font-bold text-white mb-4 flex items-center justify-center">
                     <FireIcon className="w-6 h-6 text-[#8BAE5A] mr-2" />
@@ -680,11 +615,97 @@ export default function TrainingschemasPage() {
                     Vul je trainingsvoorkeuren in om gepersonaliseerde trainingsschemas te krijgen die perfect bij jou passen.
                   </p>
                   <button
-                    onClick={() => setShowCalculator(true)}
+                    onClick={startCalculator}
                     className="px-8 py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold"
                   >
-                    Bereken Mijn Trainingsprofiel
+                    Start Trainingsprofiel
                   </button>
+                </div>
+              )}
+
+              {/* Step-by-Step Calculator Flow */}
+              {showCalculator && (
+                <div className="mb-8 min-h-[600px] flex flex-col">
+                  {/* Progress Bar */}
+                  <div className="mb-8">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm text-gray-400">
+                        Stap {currentStep + 1} van {steps.length}
+                      </span>
+                      <span className="text-sm text-gray-400">
+                        {Math.round(((currentStep + 1) / steps.length) * 100)}%
+                      </span>
+                    </div>
+                    <div className="w-full bg-[#3A4D23] rounded-full h-2">
+                      <div 
+                        className="bg-[#8BAE5A] h-2 rounded-full transition-all duration-500 ease-out"
+                        style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Step Content */}
+                  <div className="flex-1 flex items-center justify-center">
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={currentStep}
+                        initial={{ opacity: 0, x: 50 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -50 }}
+                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                        className="w-full max-w-2xl"
+                      >
+                        <div className="text-center mb-8">
+                          <h2 className="text-3xl font-bold text-white mb-4">
+                            {steps[currentStep].title}
+                          </h2>
+                          <p className="text-gray-300 text-lg">
+                            {steps[currentStep].subtitle}
+                          </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-4">
+                          {steps[currentStep].options.map((option, index) => (
+                            <motion.button
+                              key={option.value}
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: index * 0.1 }}
+                              onClick={() => handleStepAnswer(steps[currentStep].id, option.value)}
+                              className="p-6 bg-[#232D1A] rounded-xl border-2 border-[#3A4D23] hover:border-[#8BAE5A]/50 transition-all duration-200 text-left group"
+                            >
+                              <div className="flex items-center space-x-4">
+                                <div className="text-3xl">{option.icon}</div>
+                                <div className="flex-1">
+                                  <h3 className="text-xl font-semibold text-white mb-1">
+                                    {option.label}
+                                  </h3>
+                                  <p className="text-gray-400">
+                                    {option.description}
+                                  </p>
+                                </div>
+                                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <ArrowRightIcon className="w-6 h-6 text-[#8BAE5A]" />
+                                </div>
+                              </div>
+                            </motion.button>
+                          ))}
+                        </div>
+
+                        {/* Back Button */}
+                        {currentStep > 0 && (
+                          <div className="mt-8 text-center">
+                            <button
+                              onClick={goToPreviousStep}
+                              className="px-6 py-2 text-gray-400 hover:text-white transition-colors"
+                            >
+                              ← Vorige stap
+                            </button>
+                          </div>
+                        )}
+                      </motion.div>
+                    </AnimatePresence>
+                  </div>
                 </div>
               )}
 
