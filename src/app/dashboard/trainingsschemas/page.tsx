@@ -177,57 +177,73 @@ export default function TrainingschemasPage() {
 
   const saveTrainingProfile = async () => {
     try {
+      console.log('💾 Saving training profile with data:', calculatorData);
+      
       if (!user?.id) {
         toast.error('Je moet ingelogd zijn');
         return;
       }
 
+      const profileData = {
+        user_id: user.id,
+        training_goal: calculatorData.training_goal,
+        training_frequency: calculatorData.training_frequency,
+        experience_level: calculatorData.experience_level,
+        equipment_type: calculatorData.equipment_type,
+        updated_at: new Date().toISOString()
+      };
+      
+      console.log('📤 Sending profile data to database:', profileData);
+
       const { data, error } = await supabase
         .from('training_profiles')
-        .upsert({
-          user_id: user.id,
-          training_goal: calculatorData.training_goal,
-          training_frequency: calculatorData.training_frequency,
-          experience_level: calculatorData.experience_level,
-          equipment_type: calculatorData.equipment_type,
-          updated_at: new Date().toISOString()
-        })
+        .upsert(profileData)
         .select()
         .single();
 
       if (error) {
-        console.error('Error saving training profile:', error);
+        console.error('❌ Error saving training profile:', error);
         toast.error('Fout bij opslaan van trainingsprofiel');
         return;
       }
 
+      console.log('✅ Training profile saved successfully:', data);
       setUserTrainingProfile(data);
       setShowCalculator(false);
       setCurrentStep(0);
       toast.success('Trainingsprofiel opgeslagen!');
       
-      // Refresh available schemas based on new profile
-      await fetchTrainingSchemas();
+      // Fetch training schemas with the new profile data
+      console.log('🔍 Fetching training schemas with new profile...');
+      await fetchTrainingSchemasWithProfile(data);
       
     } catch (error) {
-      console.error('Error in saveTrainingProfile:', error);
+      console.error('❌ Error in saveTrainingProfile:', error);
       toast.error('Er is een fout opgetreden');
     }
   };
 
   const handleStepAnswer = (stepId: string, value: any) => {
-    setCalculatorData(prev => ({
-      ...prev,
-      [stepId]: value
-    }));
+    console.log('🎯 Step answer:', { stepId, value, currentStep, totalSteps: steps.length });
+    
+    setCalculatorData(prev => {
+      const newData = {
+        ...prev,
+        [stepId]: value
+      };
+      console.log('📊 Updated calculator data:', newData);
+      return newData;
+    });
 
     // Move to next step
     if (currentStep < steps.length - 1) {
+      console.log('➡️ Moving to next step:', currentStep + 1);
       setTimeout(() => {
         setCurrentStep(prev => prev + 1);
       }, 300);
     } else {
       // Last step - save profile
+      console.log('💾 Last step reached, saving profile...');
       setTimeout(() => {
         saveTrainingProfile();
       }, 300);
@@ -382,6 +398,74 @@ export default function TrainingschemasPage() {
       setAvailableSchemas(filteredSchemas);
     } catch (error) {
       console.error('Error in fetchTrainingSchemas:', error);
+    }
+  };
+
+  const fetchTrainingSchemasWithProfile = async (profile: TrainingProfile) => {
+    try {
+      let query = supabase
+        .from('training_schemas')
+        .select('*')
+        .eq('status', 'active');
+      
+      // Map user profile to database fields
+      const goalMapping = {
+        'spiermassa': 'spiermassa',
+        'kracht_uithouding': 'kracht_uithouding', 
+        'power_kracht': 'power_kracht'
+      };
+      
+      const equipmentMapping = {
+        'gym': 'Gym',
+        'home': 'Home',
+        'outdoor': 'Outdoor'
+      };
+      
+      const difficultyMapping = {
+        'beginner': 'Beginner',
+        'intermediate': 'Intermediate', 
+        'advanced': 'Advanced'
+      };
+      
+      // Filter by training goal
+      if (profile.training_goal) {
+        query = query.eq('training_goal', goalMapping[profile.training_goal]);
+      }
+      
+      // Filter by equipment type
+      if (profile.equipment_type) {
+        query = query.eq('category', equipmentMapping[profile.equipment_type]);
+      }
+      
+      // Filter by difficulty level
+      if (profile.experience_level) {
+        query = query.eq('difficulty', difficultyMapping[profile.experience_level]);
+      }
+      
+      const { data, error } = await query;
+      
+      if (error) {
+        console.error('Error fetching training schemas:', error);
+        return;
+      }
+      
+      let filteredSchemas = data || [];
+      
+      // Client-side filtering for frequency
+      filteredSchemas = filteredSchemas.filter(schema => {
+        // Extract frequency from schema name (e.g., "3x Split Training")
+        const frequencyMatch = schema.name.match(/(\d+)x/);
+        if (frequencyMatch) {
+          const schemaFrequency = parseInt(frequencyMatch[1]);
+          return schemaFrequency === profile.training_frequency;
+        }
+        return true;
+      });
+      
+      setAvailableSchemas(filteredSchemas);
+      console.log('✅ Training schemas loaded:', filteredSchemas.length, 'schemas found');
+    } catch (error) {
+      console.error('Error in fetchTrainingSchemasWithProfile:', error);
     }
   };
 
