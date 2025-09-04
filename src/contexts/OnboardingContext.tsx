@@ -92,11 +92,11 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       id: 5,
       title: 'Forum introductie',
       description: 'Stel je voor aan de community',
-      targetPage: '/dashboard/brotherhood/forum',
+      targetPage: '/dashboard/brotherhood/forum/nieuwe-leden',
       targetMenuLabel: 'Forum',
       completed: false,
       icon: '💬',
-      instructions: 'Maak je eerste forum post om je voor te stellen aan de community'
+      instructions: 'Ga naar het "Nieuwe Leden" topic en maak je eerste forum post om je voor te stellen aan de community'
     }
   ];
 
@@ -267,7 +267,8 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       case '/dashboard/voedingsplannen':
         return 'Vul je dagelijkse behoefte in en selecteer een voedingsplan dat bij je doel past';
       case '/dashboard/brotherhood/forum':
-        return 'Maak je eerste forum post om je voor te stellen aan de community';
+      case '/dashboard/brotherhood/forum/nieuwe-leden':
+        return 'Ga naar het "Nieuwe Leden" topic en maak je eerste forum post om je voor te stellen aan de community';
       default:
         return steps[currentStep]?.instructions || 'Voltooi de huidige stap om door te gaan';
     }
