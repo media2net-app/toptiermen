@@ -1209,8 +1209,8 @@ export default function LessonDetailPage() {
 
 
 
-        {/* Complete button */}
-        {!completed && (
+        {/* Complete button - Only show for non-exam lessons */}
+        {!completed && lesson.type !== 'exam' && (
           <div className="flex justify-center">
             <button
               onClick={handleCompleteLesson}
@@ -1237,8 +1237,7 @@ export default function LessonDetailPage() {
             userId={user?.id}
             onCompletion={(passed) => {
               console.log('🎯 Exam completed:', passed);
-              // Refresh data to update completion status
-              fetchData();
+              // Don't refresh page, just show results in ExamComponent
             }}
           />
         )}
