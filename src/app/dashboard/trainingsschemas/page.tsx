@@ -331,15 +331,15 @@ export default function TrainingschemasPage() {
       let query = supabase
         .from('training_schemas')
         .select('*')
-        .eq('status', 'active');
+        .eq('status', 'published');
       
       // Filter based on user training profile if available
       if (userTrainingProfile) {
-        // Map user profile to database fields
+                // Map user profile to database fields
         const goalMapping = {
           'spiermassa': 'spiermassa',
-          'kracht_uithouding': 'kracht_uithouding', 
-          'power_kracht': 'power_kracht'
+          'kracht_uithouding': 'uithouding',
+          'power_kracht': 'kracht'
         };
         
         const equipmentMapping = {
@@ -406,13 +406,13 @@ export default function TrainingschemasPage() {
       let query = supabase
         .from('training_schemas')
         .select('*')
-        .eq('status', 'active');
+        .eq('status', 'published');
       
       // Map user profile to database fields
       const goalMapping = {
         'spiermassa': 'spiermassa',
-        'kracht_uithouding': 'kracht_uithouding', 
-        'power_kracht': 'power_kracht'
+        'kracht_uithouding': 'uithouding', 
+        'power_kracht': 'kracht'
       };
       
       const equipmentMapping = {
