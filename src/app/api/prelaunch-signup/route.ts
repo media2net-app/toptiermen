@@ -70,7 +70,13 @@ export async function POST(request: NextRequest) {
         status: 'active',
         package: 'BASIC',
         notes: `Signed up via pre-launch landing page${utm_campaign ? ` | Campaign: ${utm_campaign}` : ''}${utm_content ? ` | Ad Set: ${utm_content}` : ''}`,
-        subscribed_at: new Date().toISOString()
+        subscribed_at: new Date().toISOString(),
+        // Store UTM parameters in dedicated columns
+        utm_source: utm_source || null,
+        utm_medium: utm_medium || null,
+        utm_campaign: utm_campaign || null,
+        utm_content: utm_content || null,
+        utm_term: utm_term || null
       })
       .select()
       .single();

@@ -63,6 +63,7 @@ export default function PreLaunchEmails() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterSource, setFilterSource] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [filterCampaign, setFilterCampaign] = useState('all');
   
   const [newLead, setNewLead] = useState<NewLeadForm>({
     email: '',
@@ -281,6 +282,8 @@ export default function PreLaunchEmails() {
   const active = emails.filter(e => e.status === 'active').length;
   const pending = emails.filter(e => e.status === 'pending').length;
   const unsubscribed = emails.filter(e => e.status === 'unsubscribed').length;
+  const facebookLeads = emails.filter(e => e.utm_campaign || (e.notes && e.notes.includes('Campaign:') && !e.notes.includes('Campaign: test'))).length;
+  const organicLeads = emails.filter(e => !e.utm_campaign && !e.utm_source && !(e.notes && e.notes.includes('Campaign:'))).length;
   
   // Get unique sources for filtering
   const sources = [...new Set(emails.map(e => e.source).filter(Boolean))];
@@ -298,7 +301,21 @@ export default function PreLaunchEmails() {
     const matchesSource = filterSource === 'all' || email.source === filterSource;
     const matchesStatus = filterStatus === 'all' || email.status === filterStatus;
     
-    return matchesSearch && matchesSource && matchesStatus;
+    // Campaign filter logic (same as marketing dashboard)
+    let matchesCampaign = true;
+    if (filterCampaign !== 'all') {
+      const hasFacebookCampaign = !!email.utm_campaign || (email.notes && email.notes.includes('Campaign:') && !email.notes.includes('Campaign: test'));
+      
+      if (filterCampaign === 'facebook') {
+        matchesCampaign = !!hasFacebookCampaign;
+      } else if (filterCampaign === 'other-utm') {
+        matchesCampaign = !!email.utm_source && !email.utm_campaign && !hasFacebookCampaign;
+      } else if (filterCampaign === 'organic') {
+        matchesCampaign = !hasFacebookCampaign && !email.utm_source;
+      }
+    }
+    
+    return matchesSearch && matchesSource && matchesStatus && matchesCampaign;
   });
   
   // Get campaign statistics
@@ -352,7 +369,7 @@ export default function PreLaunchEmails() {
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
         <div className="bg-gradient-to-br from-[#8BAE5A]/10 to-[#FFD700]/10 border border-[#8BAE5A] rounded-xl p-6">
           <div className="flex items-center justify-between">
             <div>
@@ -386,10 +403,22 @@ export default function PreLaunchEmails() {
         <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-500 rounded-xl p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-blue-500">Campagnes</p>
-              <p className="text-2xl font-bold text-blue-500">{campaigns.length}</p>
+              <p className="text-sm text-blue-500">Facebook Leads</p>
+              <p className="text-2xl font-bold text-blue-500">{facebookLeads}</p>
+              <p className="text-xs text-blue-400 mt-1">{campaigns.length} campagnes</p>
             </div>
             <ChartBarIcon className="w-6 h-6 text-blue-500" />
+          </div>
+        </div>
+        
+        <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500 rounded-xl p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-green-500">Organische Leads</p>
+              <p className="text-2xl font-bold text-green-500">{organicLeads}</p>
+              <p className="text-xs text-green-400 mt-1">Geen UTM tracking</p>
+            </div>
+            <UserGroupIcon className="w-6 h-6 text-green-500" />
           </div>
         </div>
       </div>
@@ -422,7 +451,7 @@ export default function PreLaunchEmails() {
 
       {/* Search and Filters */}
       <div className="bg-[#232D1A] border border-[#3A4D23] rounded-xl p-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <div className="relative">
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#8BAE5A]" />
             <input
@@ -443,6 +472,17 @@ export default function PreLaunchEmails() {
             {sources.map(source => (
               <option key={source} value={source}>{source}</option>
             ))}
+          </select>
+          
+          <select
+            value={filterCampaign}
+            onChange={(e) => setFilterCampaign(e.target.value)}
+            className="px-4 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-[#B6C948] focus:outline-none focus:border-[#8BAE5A]"
+          >
+            <option value="all">Alle Campagnes</option>
+            <option value="facebook">Facebook</option>
+            <option value="other-utm">Andere UTM</option>
+            <option value="organic">Organisch</option>
           </select>
           
           <select
@@ -519,11 +559,31 @@ export default function PreLaunchEmails() {
                     onClick={() => handleEmailClick(email)}
                   >
                     {email.utm_campaign ? (
-                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-500/20 text-blue-400">
-                        {email.utm_campaign}
+                      <div className="flex flex-col gap-1">
+                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-500/20 text-blue-400">
+                          Facebook
+                        </span>
+                        <span className="text-xs text-gray-400">
+                          {email.utm_campaign}
+                        </span>
+                      </div>
+                    ) : email.utm_source ? (
+                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-500/20 text-purple-400">
+                        {email.utm_source}
                       </span>
+                    ) : email.notes && email.notes.includes('Campaign:') && !email.notes.includes('Campaign: test') ? (
+                      <div className="flex flex-col gap-1">
+                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-500/20 text-blue-400">
+                          Facebook
+                        </span>
+                        <span className="text-xs text-gray-400">
+                          Legacy (in notes)
+                        </span>
+                      </div>
                     ) : (
-                      <span className="text-gray-500">-</span>
+                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-400">
+                        Organisch
+                      </span>
                     )}
                   </td>
                   <td 

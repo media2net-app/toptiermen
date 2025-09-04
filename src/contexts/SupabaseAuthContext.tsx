@@ -198,8 +198,8 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
   
   // Enhanced admin check that ignores suspension metadata for known admin emails
   const knownAdminEmails = ['chiel@media2net.nl', 'rick@toptiermen.eu', 'admin@toptiermen.com'];
-  const isAdmin = profile?.role === 'admin' || 
-    (user?.email && knownAdminEmails.includes(user.email) && profile?.role !== 'user');
+  const isAdmin = !!(profile?.role === 'admin' || 
+    (user?.email && knownAdminEmails.includes(user.email) && profile?.role !== 'user'));
   
   const isLid = profile?.role === 'lid';
 
