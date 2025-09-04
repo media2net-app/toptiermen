@@ -177,8 +177,10 @@ export default function TrainingschemasPage() {
 
   const saveTrainingProfile = async () => {
     try {
-      console.log('💾 Saving training profile with data:', calculatorData);
-      
+            console.log('💾 Saving training profile with data:', calculatorData);
+      console.log('👤 Current user:', user);
+      console.log('🆔 User ID:', user?.id, 'Type:', typeof user?.id);
+
       if (!user?.id) {
         toast.error('Je moet ingelogd zijn');
         return;
