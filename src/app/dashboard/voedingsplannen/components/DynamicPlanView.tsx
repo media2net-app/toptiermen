@@ -43,6 +43,7 @@ interface DayPlan {
   ontbijt: Meal;
   lunch: Meal;
   diner: Meal;
+  snack?: Meal; // Optional snack
   dailyTotals: MealNutrition;
 }
 
@@ -82,7 +83,8 @@ const DAYS_NL = {
 const MEAL_TYPES_NL = {
   ontbijt: 'Ontbijt',
   lunch: 'Lunch',
-  diner: 'Diner'
+  diner: 'Diner',
+  snack: 'Snack'
 };
 
 export default function DynamicPlanView({ planId, planName, userId, onBack }: DynamicPlanViewProps) {
@@ -200,7 +202,7 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
       let dailyCarbs = 0;
       let dailyFat = 0;
       
-      ['ontbijt', 'lunch', 'diner'].forEach(mealType => {
+      ['ontbijt', 'lunch', 'diner', 'snack'].forEach(mealType => {
         const meal = dayPlan[mealType];
         if (meal) {
           dailyCalories += meal.nutrition.calories;
@@ -759,6 +761,11 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
           {Object.entries(MEAL_TYPES_NL).map(([mealType, mealName]) => {
             const meal = selectedDayPlan[mealType];
             
+            // Skip snack if it doesn't exist and is empty
+            if (mealType === 'snack' && (!meal || meal.ingredients.length === 0)) {
+              return null;
+            }
+            
             return (
               <div key={mealType} className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23]">
                 <div className="flex items-center justify-between mb-4">
@@ -812,6 +819,41 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
               </div>
             );
           })}
+
+          {/* Add Snack Button */}
+          {(!selectedDayPlan.snack || selectedDayPlan.snack.ingredients.length === 0) && (
+            <div className="bg-[#232D1A] rounded-2xl p-6 border-2 border-dashed border-[#3A4D23] hover:border-[#8BAE5A]/50 transition-colors">
+              <div className="text-center">
+                <h4 className="text-lg font-bold text-white mb-2 flex items-center justify-center">
+                  <ClockIcon className="w-5 h-5 text-[#8BAE5A] mr-2" />
+                  Snack
+                </h4>
+                <p className="text-gray-400 text-sm mb-4">
+                  Voeg een optionele snack toe aan je dag
+                </p>
+                <button
+                  onClick={() => {
+                    // Create empty snack meal
+                    const emptySnack = {
+                      ingredients: [],
+                      nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0 }
+                    };
+                    
+                    // Update plan data
+                    const updatedPlanData = { ...planData };
+                    updatedPlanData.weekPlan[selectedDay].snack = emptySnack;
+                    setPlanData(updatedPlanData);
+                    
+                    // Open meal editor
+                    handleEditMeal(selectedDay, 'snack');
+                  }}
+                  className="px-4 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold"
+                >
+                  + Snack toevoegen
+                </button>
+              </div>
+            </div>
+          )}
         </motion.div>
       </AnimatePresence>
 
