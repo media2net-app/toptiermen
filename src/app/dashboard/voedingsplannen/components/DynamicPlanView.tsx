@@ -471,7 +471,16 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
   };
 
   const handleSelectPlan = async () => {
-    if (!planData) return;
+    console.log('🔍 handleSelectPlan called');
+    console.log('🔍 planData:', planData);
+    console.log('🔍 userId:', userId);
+    console.log('🔍 planId:', planId);
+    
+    if (!planData) {
+      console.error('❌ No planData available');
+      toast.error('Geen plan data beschikbaar');
+      return;
+    }
     
     try {
       console.log('🎯 Selecting plan for user:', userId, 'plan:', planId);
@@ -491,11 +500,17 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
         }),
       });
 
+      console.log('💾 Save response status:', saveResponse.status);
+      console.log('💾 Save response ok:', saveResponse.ok);
+
       if (!saveResponse.ok) {
-        throw new Error('Failed to save plan data');
+        const errorText = await saveResponse.text();
+        console.error('❌ Save response error:', errorText);
+        throw new Error(`Failed to save plan data: ${saveResponse.status}`);
       }
 
       const saveResult = await saveResponse.json();
+      console.log('💾 Save result:', saveResult);
       
       if (!saveResult.success) {
         throw new Error(saveResult.error || 'Failed to save plan data');
@@ -504,6 +519,7 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
       console.log('✅ Plan data saved successfully');
       
       // Then, select the plan as active
+      console.log('🎯 Selecting plan as active...');
       const selectResponse = await fetch('/api/nutrition-plan-select', {
         method: 'POST',
         headers: {
@@ -515,11 +531,17 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
         }),
       });
 
+      console.log('🎯 Select response status:', selectResponse.status);
+      console.log('🎯 Select response ok:', selectResponse.ok);
+
       if (!selectResponse.ok) {
-        throw new Error('Failed to select plan');
+        const errorText = await selectResponse.text();
+        console.error('❌ Select response error:', errorText);
+        throw new Error(`Failed to select plan: ${selectResponse.status}`);
       }
 
       const selectResult = await selectResponse.json();
+      console.log('🎯 Select result:', selectResult);
       
       if (selectResult.success) {
         toast.success(`🎉 ${planData.planName} is nu je actieve voedingsplan!`);
@@ -531,8 +553,8 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
       }
       
     } catch (error) {
-      console.error('Error selecting plan:', error);
-      toast.error('Fout bij selecteren van plan');
+      console.error('❌ Error selecting plan:', error);
+      toast.error(`Fout bij selecteren van plan: ${error.message}`);
     }
   };
 
@@ -684,8 +706,18 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
           
           {/* Select Plan Button */}
           <button
-            onClick={handleSelectPlan}
-            className="flex items-center gap-2 px-6 py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              console.log('🔍 Button clicked!');
+              handleSelectPlan();
+            }}
+            disabled={!planData}
+            className={`flex items-center gap-2 px-6 py-3 rounded-lg transition-colors font-semibold ${
+              planData 
+                ? 'bg-[#8BAE5A] text-[#232D1A] hover:bg-[#B6C948] cursor-pointer' 
+                : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+            }`}
           >
             🎯 Selecteer dit plan
           </button>
