@@ -274,7 +274,8 @@ export default function MealEditor({
       if (quickAddIngredient) {
         nutritionData = quickAddIngredient;
       } else {
-        nutritionData = CARNIVOOR_INGREDIENTS[ingredient.name] || INGREDIENT_DATABASE[ingredient.name];
+        // Check INGREDIENT_DATABASE first (most comprehensive), then CARNIVOOR_INGREDIENTS
+        nutritionData = INGREDIENT_DATABASE[ingredient.name] || CARNIVOOR_INGREDIENTS[ingredient.name];
       }
       
       if (nutritionData) {
@@ -291,12 +292,27 @@ export default function MealEditor({
           multiplier = ingredient.amount / 100;
         }
         
+        console.log(`🍽️ Calculating nutrition for ${ingredient.name}:`, {
+          amount: ingredient.amount,
+          unit: ingredient.unit,
+          multiplier,
+          baseNutrition: nutritionData,
+          calculated: {
+            calories: nutritionData.calories * multiplier,
+            protein: nutritionData.protein * multiplier,
+            carbs: nutritionData.carbs * multiplier,
+            fat: nutritionData.fat * multiplier
+          }
+        });
+        
         totalCalories += nutritionData.calories * multiplier;
         totalProtein += nutritionData.protein * multiplier;
         totalCarbs += nutritionData.carbs * multiplier;
         totalFat += nutritionData.fat * multiplier;
       } else {
         console.warn(`⚠️ Nutrition data not found for ingredient: ${ingredient.name}`);
+        console.log('Available ingredients in INGREDIENT_DATABASE:', Object.keys(INGREDIENT_DATABASE).slice(0, 10));
+        console.log('Available ingredients in CARNIVOOR_INGREDIENTS:', Object.keys(CARNIVOOR_INGREDIENTS).slice(0, 10));
       }
     });
     
@@ -327,8 +343,8 @@ export default function MealEditor({
     if (quickAddIngredient) {
       nutritionData = quickAddIngredient;
     } else {
-      // Fallback to CARNIVOOR_INGREDIENTS or INGREDIENT_DATABASE
-      nutritionData = CARNIVOOR_INGREDIENTS[ingredientName] || INGREDIENT_DATABASE[ingredientName];
+      // Check INGREDIENT_DATABASE first (most comprehensive), then CARNIVOOR_INGREDIENTS
+      nutritionData = INGREDIENT_DATABASE[ingredientName] || CARNIVOOR_INGREDIENTS[ingredientName];
     }
     
     if (!nutritionData) return;
