@@ -96,7 +96,7 @@ export default function VoedingsplannenPage() {
       
       const data = await response.json();
       
-      if (data.success) {
+              if (data.success) {
         // Filter plans based on user's goal if they have a nutrition profile
         let filteredPlans = data.plans;
         
@@ -126,6 +126,17 @@ export default function VoedingsplannenPage() {
           
           console.log(`✅ Filtered from ${data.plans.length} to ${filteredPlans.length} plans`);
         }
+        
+        // Sort plans: Carnivoor always first, then by name
+        filteredPlans.sort((a, b) => {
+          const aIsCarnivore = a.name.toLowerCase().includes('carnivoor');
+          const bIsCarnivore = b.name.toLowerCase().includes('carnivoor');
+          
+          if (aIsCarnivore && !bIsCarnivore) return -1;
+          if (!aIsCarnivore && bIsCarnivore) return 1;
+          
+          return a.name.localeCompare(b.name);
+        });
         
         setNutritionPlans(filteredPlans);
       } else {
@@ -165,14 +176,33 @@ export default function VoedingsplannenPage() {
         console.log('✅ Profile found, setting user profile:', profile);
         setUserNutritionProfile(profile);
         setShowRequiredIntake(false);
+        
+        // Also fetch the active nutrition plan
+        try {
+          const activePlanResponse = await fetch(`/api/nutrition-plan-active?userId=${user.id}`);
+          const activePlanData = await activePlanResponse.json();
+          
+          if (activePlanData.success && activePlanData.hasActivePlan) {
+            console.log('✅ Active plan found:', activePlanData.activePlanId);
+            setSelectedNutritionPlan(activePlanData.activePlanId);
+          } else {
+            console.log('ℹ️ No active plan found');
+            setSelectedNutritionPlan(null);
+          }
+        } catch (activePlanError) {
+          console.error('❌ Error fetching active plan:', activePlanError);
+          setSelectedNutritionPlan(null);
+        }
       } else {
         // No profile found, show required intake calculator
         console.log('❌ No profile found, showing calculator');
         setShowRequiredIntake(true);
+        setSelectedNutritionPlan(null);
       }
     } catch (error) {
       console.error('❌ Error checking user nutrition profile:', error);
       setShowRequiredIntake(true);
+      setSelectedNutritionPlan(null);
     }
   };
 
@@ -588,6 +618,22 @@ export default function VoedingsplannenPage() {
                         <div className="text-center mb-4">
                           {getNutritionPlanIcon(plan)}
                         </div>
+                        
+                        {/* Plan Labels */}
+                        <div className="flex justify-center gap-2 mb-3">
+                          {plan.name.toLowerCase().includes('carnivoor') && (
+                            <div className="inline-flex items-center px-2 py-1 bg-orange-500/20 border border-orange-500 text-orange-400 rounded-md text-xs font-semibold">
+                              🔥 Populair
+                            </div>
+                          )}
+                          {selectedNutritionPlan === plan.plan_id && (
+                            <div className="inline-flex items-center px-2 py-1 bg-[#8BAE5A]/20 border border-[#8BAE5A] text-[#8BAE5A] rounded-md text-xs font-semibold">
+                              <CheckIcon className="w-3 h-3 mr-1" />
+                              Actief
+                            </div>
+                          )}
+                        </div>
+                        
                         <h3 className="text-xl font-bold text-white mb-2 text-center">{plan.name}</h3>
                         {plan.subtitle && (
                           <p className="text-[#8BAE5A] text-sm text-center mb-3">{plan.subtitle}</p>
@@ -595,14 +641,6 @@ export default function VoedingsplannenPage() {
                         <p className="text-gray-300 text-center text-sm mb-4">{plan.description}</p>
                         
                         <div className="space-y-3">
-                          {selectedNutritionPlan === plan.plan_id && (
-                            <div className="flex justify-center">
-                              <div className="inline-flex items-center px-3 py-1 bg-[#8BAE5A]/20 border border-[#8BAE5A] text-[#8BAE5A] rounded-lg text-sm font-semibold">
-                                <CheckIcon className="w-4 h-4 mr-1" />
-                                Geselecteerd plan
-                              </div>
-                            </div>
-                          )}
                           
                           {/* Dynamic Plan View Button (only for carnivoor-droogtrainen) */}
                                                 {/* Dynamische plan knop voor alle plannen met maaltijden */}
