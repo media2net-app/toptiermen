@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
       .from('user_nutrition_plans')
       .update({ is_active: true })
       .eq('user_id', userId)
-      .eq('plan_id', planId);
+      .eq('plan_type', planId);
 
     if (activateError) {
       console.error('Error activating plan:', activateError);

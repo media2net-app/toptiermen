@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     // Get the active plan for this user
     const { data, error } = await supabase
       .from('user_nutrition_plans')
-      .select('plan_id')
+      .select('plan_type')
       .eq('user_id', userId)
       .eq('is_active', true)
       .single();
@@ -44,12 +44,12 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    console.log('✅ Active plan found:', data.plan_id);
+    console.log('✅ Active plan found:', data.plan_type);
 
     return NextResponse.json({
       success: true,
       hasActivePlan: true,
-      activePlanId: data.plan_id
+      activePlanId: data.plan_type
     });
 
   } catch (error) {

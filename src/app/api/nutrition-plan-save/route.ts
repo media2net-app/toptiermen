@@ -20,15 +20,16 @@ export async function POST(request: NextRequest) {
     console.log('💾 Saving customized nutrition plan:', { userId, planId });
 
     // Save or update the customized plan in user_nutrition_plans table
+    // Use week_plan column to store the customized plan data
     const { data, error } = await supabase
       .from('user_nutrition_plans')
       .upsert({
         user_id: userId,
-        plan_id: planId,
-        customized_data: customizedPlan,
+        plan_type: planId, // Use plan_type instead of plan_id
+        week_plan: customizedPlan, // Store customized plan in week_plan column
         updated_at: new Date().toISOString()
       }, { 
-        onConflict: 'user_id,plan_id' 
+        onConflict: 'user_id,plan_type' 
       })
       .select();
 
@@ -77,7 +78,7 @@ export async function GET(request: NextRequest) {
       .from('user_nutrition_plans')
       .select('*')
       .eq('user_id', userId)
-      .eq('plan_id', planId)
+      .eq('plan_type', planId)
       .single();
 
     if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
@@ -101,7 +102,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       hasCustomizedPlan: true,
-      customizedPlan: data.customized_data,
+      customizedPlan: data.week_plan, // Use week_plan instead of customized_data
       lastUpdated: data.updated_at
     });
 
@@ -132,7 +133,7 @@ export async function DELETE(request: NextRequest) {
       .from('user_nutrition_plans')
       .delete()
       .eq('user_id', userId)
-      .eq('plan_id', planId);
+      .eq('plan_type', planId);
 
     if (error) {
       console.error('❌ Error deleting customized plan:', error);
