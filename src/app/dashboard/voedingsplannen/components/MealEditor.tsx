@@ -217,7 +217,29 @@ export default function MealEditor({
           { name: 'Runderlever', calories: 135, protein: 20, carbs: 4, fat: 4 },
           { name: 'Boter', calories: 717, protein: 0.9, carbs: 0.1, fat: 81 }
         ];
-      } else if (mealType === 'snack') {
+      } else if (mealType === 'ontbijt_snack') {
+        availableIngredients = [
+          { name: '1 Handje Walnoten', calories: 26, protein: 0.6, carbs: 0.5, fat: 2.6 },
+          { name: '1 Handje Amandelen', calories: 23, protein: 0.8, carbs: 0.9, fat: 2.0 },
+          { name: '1 Ei (Gekookt)', calories: 155, protein: 13, carbs: 1, fat: 11 },
+          { name: 'Ham (Plakjes)', calories: 145, protein: 21, carbs: 0, fat: 6 },
+          { name: 'Salami (Plakjes)', calories: 336, protein: 20, carbs: 0, fat: 28 },
+          { name: 'Tonijn (Blikje)', calories: 144, protein: 30, carbs: 0, fat: 1 },
+          { name: 'Kipfilet (Stukjes)', calories: 165, protein: 31, carbs: 0, fat: 4 },
+          { name: 'Boter (Klontje)', calories: 717, protein: 0.9, carbs: 0.1, fat: 81 }
+        ];
+      } else if (mealType === 'lunch_snack') {
+        availableIngredients = [
+          { name: '1 Handje Walnoten', calories: 26, protein: 0.6, carbs: 0.5, fat: 2.6 },
+          { name: '1 Handje Amandelen', calories: 23, protein: 0.8, carbs: 0.9, fat: 2.0 },
+          { name: '1 Ei (Gekookt)', calories: 155, protein: 13, carbs: 1, fat: 11 },
+          { name: 'Ham (Plakjes)', calories: 145, protein: 21, carbs: 0, fat: 6 },
+          { name: 'Salami (Plakjes)', calories: 336, protein: 20, carbs: 0, fat: 28 },
+          { name: 'Tonijn (Blikje)', calories: 144, protein: 30, carbs: 0, fat: 1 },
+          { name: 'Kipfilet (Stukjes)', calories: 165, protein: 31, carbs: 0, fat: 4 },
+          { name: 'Boter (Klontje)', calories: 717, protein: 0.9, carbs: 0.1, fat: 81 }
+        ];
+      } else if (mealType === 'diner_snack') {
         availableIngredients = [
           { name: '1 Handje Walnoten', calories: 26, protein: 0.6, carbs: 0.5, fat: 2.6 },
           { name: '1 Handje Amandelen', calories: 23, protein: 0.8, carbs: 0.9, fat: 2.0 },
@@ -264,7 +286,29 @@ export default function MealEditor({
           { name: 'Olijfolie', calories: 884, protein: 0, carbs: 0, fat: 100 },
           { name: 'Tomaat', calories: 18, protein: 0.9, carbs: 3.9, fat: 0.2 }
         ];
-      } else if (mealType === 'snack') {
+      } else if (mealType === 'ontbijt_snack') {
+        availableIngredients = [
+          { name: '1 Handje Amandelen', calories: 23, protein: 0.8, carbs: 0.9, fat: 2.0 },
+          { name: '1 Handje Walnoten', calories: 26, protein: 0.6, carbs: 0.5, fat: 2.6 },
+          { name: 'Banaan', calories: 89, protein: 1.1, carbs: 23, fat: 0.3 },
+          { name: 'Blauwe bessen', calories: 57, protein: 0.7, carbs: 14, fat: 0.3 },
+          { name: 'Griekse yoghurt', calories: 59, protein: 10, carbs: 3.6, fat: 0.4 },
+          { name: 'Avocado (Halve)', calories: 80, protein: 1, carbs: 4.5, fat: 7.5 },
+          { name: 'Honing (Theelepel)', calories: 20, protein: 0.03, carbs: 5.4, fat: 0 },
+          { name: 'Komkommer', calories: 16, protein: 0.7, carbs: 4, fat: 0.1 }
+        ];
+      } else if (mealType === 'lunch_snack') {
+        availableIngredients = [
+          { name: '1 Handje Amandelen', calories: 23, protein: 0.8, carbs: 0.9, fat: 2.0 },
+          { name: '1 Handje Walnoten', calories: 26, protein: 0.6, carbs: 0.5, fat: 2.6 },
+          { name: 'Banaan', calories: 89, protein: 1.1, carbs: 23, fat: 0.3 },
+          { name: 'Blauwe bessen', calories: 57, protein: 0.7, carbs: 14, fat: 0.3 },
+          { name: 'Griekse yoghurt', calories: 59, protein: 10, carbs: 3.6, fat: 0.4 },
+          { name: 'Avocado (Halve)', calories: 80, protein: 1, carbs: 4.5, fat: 7.5 },
+          { name: 'Honing (Theelepel)', calories: 20, protein: 0.03, carbs: 5.4, fat: 0 },
+          { name: 'Komkommer', calories: 16, protein: 0.7, carbs: 4, fat: 0.1 }
+        ];
+      } else if (mealType === 'diner_snack') {
         availableIngredients = [
           { name: '1 Handje Amandelen', calories: 23, protein: 0.8, carbs: 0.9, fat: 2.0 },
           { name: '1 Handje Walnoten', calories: 26, protein: 0.6, carbs: 0.5, fat: 2.6 },
