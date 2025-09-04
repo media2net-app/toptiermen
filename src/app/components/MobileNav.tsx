@@ -6,7 +6,7 @@ import { useState } from 'react';
 const mobileMenu = [
   { label: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { label: 'Academy', href: '/dashboard/academy', icon: FireIcon },
-  { label: 'Trainingscentrum', href: '/dashboard/trainingscentrum', icon: AcademicCapIcon },
+  { label: 'Trainingsschemas', href: '/dashboard/trainingsschemas', icon: AcademicCapIcon },
   { label: 'Mijn Profiel', href: '/dashboard/mijn-profiel', icon: UserCircleIcon },
 ];
 
@@ -14,7 +14,8 @@ const fullMenu = [
   { label: 'Dashboard', href: '/dashboard' },
   { label: 'Mijn Missies', href: '/dashboard/mijn-missies' },
   { label: 'Mijn Challenges', href: '/dashboard/mijn-challenges' },
-  { label: 'Trainingscentrum', href: '/dashboard/trainingscentrum' },
+  { label: 'Trainingsschemas', href: '/dashboard/trainingsschemas' },
+  { label: 'Voedingsplannen', href: '/dashboard/voedingsplannen' },
   { label: 'Mind & Focus', href: '/dashboard/mind-en-focus' },
   { label: 'Finance & Business', href: '/dashboard/finance-en-business' },
   {

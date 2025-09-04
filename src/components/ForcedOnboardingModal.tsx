@@ -203,9 +203,9 @@ export default function ForcedOnboardingModal({ isOpen, onComplete }: ForcedOnbo
       setCurrentStep(3); // Update step before closing modal
       // Close modal first
       onComplete();
-      // Then navigate to training center
+      // Then navigate to training schemas
       setTimeout(() => {
-        router.push('/dashboard/trainingscentrum');
+        router.push('/dashboard/trainingsschemas');
       }, 100);
     }
   };
