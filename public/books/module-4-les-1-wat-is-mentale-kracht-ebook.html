@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wat is mentale kracht - Top Tier Men Academy</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background: #f9fafb;
+        }
+        
+        .ebook-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #8BAE5A 0%, #3A4D23 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -0.025em;
+        }
+        
+        .header .subtitle {
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: white;
+            opacity: 1;
+        }
+        
+        .content {
+            padding: 50px;
+        }
+        
+        .toc {
+            background: #f8fafc;
+            border-left: 4px solid #8BAE5A;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 8px;
+        }
+        
+        .toc h2 {
+            color: #8BAE5A;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .toc ol {
+            list-style: none;
+            counter-reset: toc-counter;
+        }
+        
+        .toc li {
+            counter-increment: toc-counter;
+            margin-bottom: 8px;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        .toc li::before {
+            content: counter(toc-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #8BAE5A;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .toc a {
+            color: #374151;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .toc a:hover {
+            color: #8BAE5A;
+        }
+        
+        .chapter {
+            margin: 40px 0;
+        }
+        
+        .chapter h2 {
+            color: #8BAE5A;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 10px;
+        }
+        
+        .chapter h3 {
+            color: #374151;
+            font-size: 1.4rem;
+            margin: 25px 0 15px 0;
+        }
+        
+        .chapter p {
+            margin-bottom: 15px;
+            color: #4b5563;
+        }
+        
+        .chapter ul, .chapter ol {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+        
+        .chapter li {
+            margin-bottom: 8px;
+            color: #4b5563;
+        }
+        
+        .highlight-box {
+            background: #f0f9ff;
+            border-left: 4px solid #0ea5e9;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .highlight-box h4 {
+            color: #0c4a6e;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .action-item {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .action-item h4 {
+            color: #92400e;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .reflection-box {
+            background: #f3e8ff;
+            border-left: 4px solid #8b5cf6;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .reflection-box h4 {
+            color: #5b21b6;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .next-steps-box {
+            background: #ecfdf5;
+            border-left: 4px solid #10b981;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .next-steps-box h4 {
+            color: #047857;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .footer {
+            background: #f8fafc;
+            padding: 30px;
+            text-align: center;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .footer p {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                padding: 40px 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .content {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ebook-container">
+        <div class="header">
+            <h1>Wat is mentale kracht</h1>
+            <div class="subtitle">Module 4: Mentale Kracht/Weerbaarheid - Top Tier Men Academy</div>
+        </div>
+        
+        <div class="content">
+            <div class="toc">
+                <h2>Inhoudsopgave</h2>
+                <ol>
+                    <li><a href="#intro">Inleiding</a></li>
+                    <li><a href="#main-content">Hoofdinhoud</a></li>
+                    <li><a href="#practical-tips">Praktische Tips</a></li>
+                    <li><a href="#reflection">Reflectie Vragen</a></li>
+                    <li><a href="#next-steps">Volgende Stappen</a></li>
+                </ol>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="intro">Inleiding</h2>
+                <p>Welkom bij Module 4: Mentale Kracht/Weerbaarheid, en de fundamentele eerste les over wat mentale kracht werkelijk betekent. In een wereld vol van stress, onzekerheid en constante uitdagingen, is mentale kracht niet alleen een voordeel - het is een absolute noodzaak voor elke Top Tier Man.</p>
+                
+                <div class="highlight-box">
+                    <h4>🎯 Wat je gaat leren</h4>
+                    <ul>
+                        <li>De wetenschappelijke definitie en componenten van mentale kracht</li>
+                        <li>Waarom mentale kracht de foundation is van alle andere excellentie</li>
+                        <li>Het verschil tussen natuurlijke veerkracht en ontwikkelde mentale kracht</li>
+                        <li>De neurowetenschappelijke basis van mental toughness</li>
+                        <li>Hoe mentale kracht zich manifesteert in verschillende levensdomeinen</li>
+                        <li>De building blocks voor het ontwikkelen van onbreekbare mentale kracht</li>
+                    </ul>
+                </div>
+                
+                <p>Deze les vormt de foundation voor alles wat volgt in deze module. Mentale kracht is niet iets dat je hebt of niet hebt - het is een skill die kan worden ontwikkeld, getraind en geoptimaliseerd. Door deze les te voltooien, krijg je een complete roadmap voor het bouwen van unshakeable inner strength.</p>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="main-content">Hoofdinhoud</h2>
+                
+                <h3>Defining Mentale Kracht: Meer dan Doorzettingsvermogen</h3>
+                <p>Mentale kracht wordt vaak verward met simpele doorzettingsvermogen of hardnekkigheid. Maar true mental strength is veel complexer en veelzijdiger:</p>
+                
+                <div class="highlight-box">
+                    <h4>🧠 Complete Definitie van Mentale Kracht</h4>
+                    <p><strong>Mentale kracht is de psychological edge dat consistente peak prestaties mogelijk maakt, ondanks pressure, adversity of challenging circumstances. Het omvat vier core componenten:</strong></p>
+                    <ul>
+                        <li><strong>Control:</strong> Belief in je ability om events en outcomes te beïnvloeden</li>
+                        <li><strong>Commitment:</strong> Deep engagement met goals en waarden</li>
+                        <li><strong>Challenge:</strong> Viewing setbacks als opportunities voor growth</li>
+                        <li><strong>Confidence:</strong> Unshakeable belief in je capabilities</li>
+                    </ul>
+                </div>
+                
+                <h3>De Four Pillars van Mentale Kracht</h3>
+                
+                <h4>Pillar 1: CONTROL - Owning Your Response</h4>
+                <p>Control is niet over external circumstances, maar over je internal response to die circumstances:</p>
+                
+                <p><strong>Internal Locus of Control:</strong></p>
+                <ul>
+                    <li><strong>Response Choice:</strong> Je kunt altijd kiezen hoe je reageert</li>
+                    <li><strong>Effort Control:</strong> Je bepaalt hoeveel energie je investeert</li>
+                    <li><strong>Attention Management:</strong> Je kiest waar je focus op ligt</li>
+                    <li><strong>Interpretation Power:</strong> Je geeft meaning aan events</li>
+                    <li><strong>Beslissing Authority:</strong> Je maakt bewuste keuzes</li>
+                </ul>
+                
+                <p><strong>Vs. External Helplessness:</strong></p>
+                <ul>
+                    <li>Blaming circumstances voor outcomes</li>
+                    <li>Feeling victimized by events</li>
+                    <li>Waiting voor external changes</li>
+                    <li>Making excuses instead van taking action</li>
+                    <li>Letting emotions control behavior</li>
+                </ul>
+                
+                <h4>Pillar 2: COMMITMENT - Deep Purpose Alignment</h4>
+                <p>True commitment gaat beyond surface-level motivation naar deep value alignment:</p>
+                
+                <p><strong>Value-Based Commitment:</strong></p>
+                <ul>
+                    <li><strong>Clear Purpose:</strong> Knowing WHY je doet wat je doet</li>
+                    <li><strong>Long-term Vision:</strong> Seeing beyond immediate discomfort</li>
+                    <li><strong>Identity Integration:</strong> Goals aligned met who je bent</li>
+                    <li><strong>Non-negotiable Standards:</strong> Lines je niet zult cross</li>
+                    <li><strong>Sacrifice Willingness:</strong> Ready to give up lesser things</li>
+                </ul>
+                
+                <p><strong>Commitment Manifestations:</strong></p>
+                <ul>
+                    <li>Continuing when motivation disappears</li>
+                    <li>Maintaining standards when nobody is watching</li>
+                    <li>Choosing long-term benefits over short-term pleasure</li>
+                    <li>Persisting through setbacks en failures</li>
+                    <li>Staying true to values under pressure</li>
+                </ul>
+                
+                <h4>Pillar 3: CHALLENGE - Growth Through Adversity</h4>
+                <p>Mentally strong people don't just tolerate challenges - they use them:</p>
+                
+                <p><strong>Challenge Reframing:</strong></p>
+                <ul>
+                    <li><strong>Growth Opportunities:</strong> Setbacks as learning experiences</li>
+                    <li><strong>Strength Bouwen:</strong> Difficulties as training voor resilience</li>
+                    <li><strong>Character Development:</strong> Adversity revealing en building character</li>
+                    <li><strong>Skill Acquisition:</strong> Problems requiring new capabilities</li>
+                    <li><strong>Advantage Creation:</strong> Using challenges anderen avoid</li>
+                </ul>
+                
+                <p><strong>Challenge Response Patterns:</strong></p>
+                <ul>
+                    <li><strong>Curious Investigation:</strong> "What can I learn from this?"</li>
+                    <li><strong>Strategic Problem-Solving:</strong> "How can I overcome this?"</li>
+                    <li><strong>Future Preparation:</strong> "How will this help me later?"</li>
+                    <li><strong>Character Bouwen:</strong> "Who do I become by handling this?"</li>
+                    <li><strong>Competitive Advantage:</strong> "How does this separate me from others?"</li>
+                </ul>
+                
+                <h4>Pillar 4: CONFIDENCE - Unshakeable Self-Belief</h4>
+                <p>True confidence is not arrogance, maar earned self-assurance based on preparation en past prestaties:</p>
+                
+                <p><strong>Evidence-Based Confidence:</strong></p>
+                <ul>
+                    <li><strong>Preparation:</strong> Confidence through thorough preparation</li>
+                    <li><strong>Past Success:</strong> Track record van overcoming obstacles</li>
+                    <li><strong>Skill Development:</strong> Proven ability to learn en adapt</li>
+                    <li><strong>Value Delivery:</strong> History van creating results</li>
+                    <li><strong>Character Integrity:</strong> Knowing je keeps commitments</li>
+                </ul>
+                
+                <p><strong>Confidence in Action:</strong></p>
+                <ul>
+                    <li>Making decisions without perfect information</li>
+                    <li>Taking calculated risks</li>
+                    <li>Leading others through uncertainty</li>
+                    <li>Handling criticism en setbacks</li>
+                    <li>Maintaining standards under pressure</li>
+                </ul>
+                
+                <h3>De Neuroscience van Mentale Kracht</h3>
+                
+                <h4>Brain Structures Involved</h4>
+                <p>Mentale kracht is niet just "mindset" - het involves specific brain regions en neural pathways:</p>
+                
+                <p><strong>Prefrontal Cortex (Executive Control):</strong></p>
+                <ul>
+                    <li><strong>Beslissing Making:</strong> Weighing options under pressure</li>
+                    <li><strong>Impulse Control:</strong> Resisting immediate gratification</li>
+                    <li><strong>Working Memory:</strong> Keeping goals active during challenges</li>
+                    <li><strong>Cognitive Flexibility:</strong> Adapting strategies when needed</li>
+                    <li><strong>Emotional Regulation:</strong> Managing stress responses</li>
+                </ul>
+                
+                <p><strong>Anterior Cingulate Cortex (Effort & Attention):</strong></p>
+                <ul>
+                    <li><strong>Effort Allocation:</strong> Determining energy investment</li>
+                    <li><strong>Conflict Monitoring:</strong> Detecting competing demands</li>
+                    <li><strong>Attention Control:</strong> Focusing on relevant information</li>
+                    <li><strong>Pain Management:</strong> Coping with discomfort</li>
+                </ul>
+                
+                <p><strong>Amygdala & Stress Response:</strong></p>
+                <ul>
+                    <li><strong>Threat Detection:</strong> Identifying potential dangers</li>
+                    <li><strong>Fear Processing:</strong> Managing anxiety responses</li>
+                    <li><strong>Emotional Memory:</strong> Learning from past experiences</li>
+                    <li><strong>Fight/Flight Activation:</strong> Mobilizing resources</li>
+                </ul>
+                
+                <h4>Neuroplasticity & Mental Strength Training</h4>
+                <p>De brain's ability to change means mental strength can be developed:</p>
+                
+                <p><strong>Neural Adaptation Mechanisms:</strong></p>
+                <ul>
+                    <li><strong>Synaptic Strengthening:</strong> Repeated patterns become stronger</li>
+                    <li><strong>Myelination:</strong> Faster signal transmission in practiced pathways</li>
+                    <li><strong>Neurogenesis:</strong> New neurons in areas like hippocampus</li>
+                    <li><strong>Network Integration:</strong> Better communication between brain regions</li>
+                </ul>
+                
+                <h3>Mentale Kracht vs. Common Misconceptions</h3>
+                
+                <h4>What Mental Strength IS NOT:</h4>
+                
+                <p><strong>NOT Emotional Suppression:</strong></p>
+                <ul>
+                    <li>Mental strength involves acknowledging emotions</li>
+                    <li>Using emotions as information, not being controlled by them</li>
+                    <li>Expressing emotions appropriately, not bottling them up</li>
+                    <li>Begrijpen emotional triggers en patterns</li>
+                </ul>
+                
+                <p><strong>NOT Stubbornness:</strong></p>
+                <ul>
+                    <li>Mental strength includes flexibility en adaptation</li>
+                    <li>Knowing when to pivot strategies</li>
+                    <li>Being open to feedback en new information</li>
+                    <li>Changing tactics while maintaining core values</li>
+                </ul>
+                
+                <p><strong>NOT Independence at All Costs:</strong></p>
+                <ul>
+                    <li>Mentally strong people know when to ask voor help</li>
+                    <li>They build strong support networks</li>
+                    <li>They delegate en collaborate effectively</li>
+                    <li>They understand interdependence</li>
+                </ul>
+                
+                <p><strong>NOT Risk-Taking Foolishness:</strong></p>
+                <ul>
+                    <li>Mental strength involves calculated risk assessment</li>
+                    <li>Begrijpen consequences before acting</li>
+                    <li>Preparing voor multiple scenarios</li>
+                    <li>Taking smart risks, not reckless ones</li>
+                </ul>
+                
+                <h3>Mentale Kracht Across Life Domains</h3>
+                
+                <h4>Professional Mental Strength</h4>
+                <p><strong>Leadership Under Pressure:</strong></p>
+                <ul>
+                    <li><strong>Beslissing Making:</strong> Clear thinking during crises</li>
+                    <li><strong>Team Stability:</strong> Providing calm leadership</li>
+                    <li><strong>Strategic Thinking:</strong> Long-term planning despite short-term pressures</li>
+                    <li><strong>Communication:</strong> Clear, confident messaging</li>
+                    <li><strong>Adaptability:</strong> Pivoting when circumstances change</li>
+                </ul>
+                
+                <p><strong>Performance Excellence:</strong></p>
+                <ul>
+                    <li><strong>Consistency:</strong> High prestaties regardless van conditions</li>
+                    <li><strong>Focus:</strong> Concentration despite distractions</li>
+                    <li><strong>Persistence:</strong> Continuing through setbacks</li>
+                    <li><strong>Innovation:</strong> Creative problem-solving under pressure</li>
+                    <li><strong>Standards:</strong> Maintaining quality when rushed</li>
+                </ul>
+                
+                <h4>Personal Relationship Mental Strength</h4>
+                <p><strong>Emotional Regulation:</strong></p>
+                <ul>
+                    <li><strong>Conflict Management:</strong> Staying calm during arguments</li>
+                    <li><strong>Boundary Setting:</strong> Maintaining healthy limits</li>
+                    <li><strong>Vulnerability:</strong> Being open when appropriate</li>
+                    <li><strong>Support Providing:</strong> Being strong when others need support</li>
+                    <li><strong>Forgiveness:</strong> Letting go van resentments</li>
+                </ul>
+                
+                <h4>Physical Challenge Mental Strength</h4>
+                <p><strong>Training & Competition:</strong></p>
+                <ul>
+                    <li><strong>Pain Tolerance:</strong> Pushing through discomfort</li>
+                    <li><strong>Consistency:</strong> Training when motivation is low</li>
+                    <li><strong>Recovery:</strong> Coming back from injuries</li>
+                    <li><strong>Performance:</strong> Executing under pressure</li>
+                    <li><strong>Improvement:</strong> Persisting through plateaus</li>
+                </ul>
+                
+                <h3>Levels van Mental Strength Development</h3>
+                
+                <h4>Level 1: Reactive (Most People)</h4>
+                <ul>
+                    <li><strong>Emotional:</strong> Beslissings driven by feelings</li>
+                    <li><strong>External:</strong> Controlled by circumstances</li>
+                    <li><strong>Short-term:</strong> Focused on immediate comfort</li>
+                    <li><strong>Avoidant:</strong> Steering clear van difficulty</li>
+                    <li><strong>Victim:</strong> Blaming external factors</li>
+                </ul>
+                
+                <h4>Level 2: Responsive (Developing)</h4>
+                <ul>
+                    <li><strong>Thoughtful:</strong> Pausing before reacting</li>
+                    <li><strong>Internal:</strong> Taking some responsibility</li>
+                    <li><strong>Goal-oriented:</strong> Considering longer-term consequences</li>
+                    <li><strong>Tolerant:</strong> Handling some discomfort</li>
+                    <li><strong>Learning:</strong> Growing from experiences</li>
+                </ul>
+                
+                <h4>Level 3: Proactive (Strong)</h4>
+                <ul>
+                    <li><strong>Strategic:</strong> Planning responses in advance</li>
+                    <li><strong>Ownership:</strong> Taking full responsibility</li>
+                    <li><strong>Vision-driven:</strong> Guided by long-term purpose</li>
+                    <li><strong>Challenge-seeking:</strong> Using difficulty voor growth</li>
+                    <li><strong>Teaching:</strong> Helping others develop strength</li>
+                </ul>
+                
+                <h4>Level 4: Antifragile (Elite)</h4>
+                <ul>
+                    <li><strong>Adaptive:</strong> Getting stronger from stress</li>
+                    <li><strong>Creative:</strong> Finding opportunity in chaos</li>
+                    <li><strong>Inspiring:</strong> Elevating others through example</li>
+                    <li><strong>Systematic:</strong> Bouwen antifragile systems</li>
+                    <li><strong>Legacy:</strong> Creëren lasting positive impact</li>
+                </ul>
+                
+                <h3>The Mental Strength Beoordeling</h3>
+                
+                <h4>Warning Signs van Mental Weakness</h4>
+                <ul>
+                    <li><strong>Avoiding difficult conversations</strong></li>
+                    <li><strong>Making excuses when things go wrong</strong></li>
+                    <li><strong>Quitting when progress slows</strong></li>
+                    <li><strong>Seeking comfort over growth</strong></li>
+                    <li><strong>Blaming others voor your problems</strong></li>
+                    <li><strong>Needing constant external validation</strong></li>
+                    <li><strong>Breaking promises to yourself</strong></li>
+                    <li><strong>Procrastinating on important tasks</strong></li>
+                </ul>
+                
+                <h4>Indicators van Developing Mental Strength</h4>
+                <ul>
+                    <li><strong>Staying calm under pressure</strong></li>
+                    <li><strong>Learning from failures en setbacks</strong></li>
+                    <li><strong>Maintaining standards when nobody is watching</strong></li>
+                    <li><strong>Taking responsibility voor outcomes</strong></li>
+                    <li><strong>Pushing through when motivation is low</strong></li>
+                    <li><strong>Helping others during their difficult times</strong></li>
+                    <li><strong>Making decisions based on values, not emotions</strong></li>
+                    <li><strong>Continuing to grow despite success</strong></li>
+                </ul>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="practical-tips">Praktische Tips</h2>
+                <div class="action-item">
+                    <h4>💪 Mental Strength Foundation Bouwen</h4>
+                    
+                    <h5>1. Daily Control Practice</h5>
+                    <p><strong>Locus van Control Training:</strong></p>
+                    <ul>
+                        <li><strong>Morning Intention:</strong> Set daily intentions instead van expectations</li>
+                        <li><strong>Response Choice:</strong> Pause 3 seconds before reacting to stimuli</li>
+                        <li><strong>Focus Management:</strong> Choose what deserves your attention</li>
+                        <li><strong>Effort Allocation:</strong> Decide how much energy to invest</li>
+                        <li><strong>Evening Review:</strong> Reflect on wat je controlled vs. what controlled you</li>
+                    </ul>
+                    
+                    <h5>2. Commitment Strengthening</h5>
+                    <p><strong>Value Alignment Exercises:</strong></p>
+                    <ul>
+                        <li><strong>Values Clarification:</strong> Write your top 5 core values</li>
+                        <li><strong>Purpose Statement:</strong> Create your personal mission statement</li>
+                        <li><strong>Goal Alignment:</strong> Ensure goals reflect your values</li>
+                        <li><strong>Beslissing Filter:</strong> Use values to guide difficult choices</li>
+                        <li><strong>Commitment Tracking:</strong> Monitor consistency with stated values</li>
+                    </ul>
+                    
+                    <h5>3. Challenge Reframing</h5>
+                    <p><strong>Adversity Response Training:</strong></p>
+                    <ul>
+                        <li><strong>Growth Questions:</strong> "What can this teach me?"</li>
+                        <li><strong>Opportunity Seeking:</strong> "How can I benefit from this?"</li>
+                        <li><strong>Strength Bouwen:</strong> "How will this make me stronger?"</li>
+                        <li><strong>Character Development:</strong> "Who do I become by handling this?"</li>
+                        <li><strong>Future Application:</strong> "How will this help me later?"</li>
+                    </ul>
+                    
+                    <h5>4. Confidence Bouwen</h5>
+                    <p><strong>Self-Efficacy Development:</strong></p>
+                    <ul>
+                        <li><strong>Small Wins:</strong> Complete small challenges daily</li>
+                        <li><strong>Skill Bouwen:</strong> Continuously develop new capabilities</li>
+                        <li><strong>Preparation:</strong> Over-prepare voor important events</li>
+                        <li><strong>Success Tracking:</strong> Document wins en progress</li>
+                        <li><strong>Evidence Collection:</strong> Build a track record van achievement</li>
+                    </ul>
+                </div>
+                
+                <div class="action-item">
+                    <h4>🧠 Daily Mental Strength Training</h4>
+                    
+                    <h5>Morning Mental Strength Routine (15-20 minutes)</h5>
+                    <ul>
+                        <li><strong>Intention Setting (5 min):</strong> Define wat je will control today</li>
+                        <li><strong>Visualization (5 min):</strong> See yourself handling challenges well</li>
+                        <li><strong>Affirmation (3 min):</strong> Repeat strength-building statements</li>
+                        <li><strong>Challenge Planning (5 min):</strong> Anticipate en prepare voor difficulties</li>
+                        <li><strong>Value Reminder (2 min):</strong> Connect to your deeper purpose</li>
+                    </ul>
+                    
+                    <h5>Throughout Day Practices</h5>
+                    <ul>
+                        <li><strong>Pause Protocol:</strong> 3-second pause before emotional reactions</li>
+                        <li><strong>Control Check:</strong> Hourly assessment van wat je're controlling</li>
+                        <li><strong>Challenge Welcome:</strong> Reframe difficulties as opportunities</li>
+                        <li><strong>Value Beslissings:</strong> Make choices based on values, not convenience</li>
+                        <li><strong>Effort Excellence:</strong> Give full effort regardless van circumstances</li>
+                    </ul>
+                    
+                    <h5>Evening Mental Strength Review (10 minutes)</h5>
+                    <ul>
+                        <li><strong>Control Analysis:</strong> What did you control vs. what controlled you?</li>
+                        <li><strong>Challenge Growth:</strong> What did difficulties teach you?</li>
+                        <li><strong>Value Consistency:</strong> Did actions align with stated values?</li>
+                        <li><strong>Strength Moments:</strong> When did you demonstrate mental strength?</li>
+                        <li><strong>Tomorrow Preparation:</strong> How will you be stronger tomorrow?</li>
+                    </ul>
+                </div>
+                
+                <div class="action-item">
+                    <h4>📊 Mental Strength Beoordeling Tools</h4>
+                    
+                    <h5>Weekly Self-Evaluation (Rate 1-10)</h5>
+                    <ul>
+                        <li>☐ <strong>Control:</strong> How well did I manage my responses this week?</li>
+                        <li>☐ <strong>Commitment:</strong> Did I stay true to my values en goals?</li>
+                        <li>☐ <strong>Challenge:</strong> How did I handle setbacks en difficulties?</li>
+                        <li>☐ <strong>Confidence:</strong> Did I act with self-assurance en courage?</li>
+                        <li>☐ <strong>Consistency:</strong> Was my prestaties stable regardless van conditions?</li>
+                        <li>☐ <strong>Growth:</strong> Did I learn en improve from experiences?</li>
+                        <li>☐ <strong>Leadership:</strong> Did I inspire strength in others?</li>
+                        <li>☐ <strong>Resilience:</strong> How quickly did I recover from setbacks?</li>
+                    </ul>
+                    
+                    <h5>Monthly Strength Indicators</h5>
+                    <ul>
+                        <li>☐ Completed difficult tasks without procrastinating</li>
+                        <li>☐ Maintained standards when nobody was watching</li>
+                        <li>☐ Stayed calm during high-pressure situations</li>
+                        <li>☐ Learned from failures instead van making excuses</li>
+                        <li>☐ Helped others during their difficult times</li>
+                        <li>☐ Made decisions based on values, not emotions</li>
+                        <li>☐ Persisted through challenges that made others quit</li>
+                        <li>☐ Took responsibility voor outcomes, good en bad</li>
+                    </ul>
+                    
+                    <h5>Strength Bouwen Challenges</h5>
+                    <p><strong>Weekly Challenges to Build Mental Muscle:</strong></p>
+                    <ul>
+                        <li><strong>Week 1:</strong> Do one difficult task daily without procrastinating</li>
+                        <li><strong>Week 2:</strong> Practice saying "no" to requests that don't align with values</li>
+                        <li><strong>Week 3:</strong> Handle one criticism or setback with grace</li>
+                        <li><strong>Week 4:</strong> Take on a leadership role in a challenging situation</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="reflection">Reflectie Vragen</h2>
+                <div class="reflection-box">
+                    <h4>🤔 Mental Strength Self-Beoordeling</h4>
+                    
+                    <p><strong>1. Current Mental Strength Evaluation:</strong></p>
+                    <ul>
+                        <li>How do you typically respond when things don't go according to plan?</li>
+                        <li>What situations consistently challenge your mental strength?</li>
+                        <li>When was the last time you pushed through something really difficult?</li>
+                        <li>How do others view your ability to handle pressure en adversity?</li>
+                    </ul>
+                    
+                    <p><strong>2. Control & Responsibility Beoordeling:</strong></p>
+                    <ul>
+                        <li>Do you typically blame circumstances or take responsibility voor outcomes?</li>
+                        <li>What aspects van je leven do you feel you have no control over?</li>
+                        <li>How often do you make excuses versus finding solutions?</li>
+                        <li>Where do je hebt nodig to take more ownership in je leven?</li>
+                    </ul>
+                    
+                    <p><strong>3. Values & Commitment Analysis:</strong></p>
+                    <ul>
+                        <li>What are your core values en how consistently do you live them?</li>
+                        <li>When have you compromised your values voor short-term gain?</li>
+                        <li>What commitments have you made but not followed through on?</li>
+                        <li>How aligned are your daily actions with your stated goals?</li>
+                    </ul>
+                    
+                    <p><strong>4. Growth & Challenge Perspectief:</strong></p>
+                    <ul>
+                        <li>Do you see challenges as threats or opportunities?</li>
+                        <li>What failures have taught you the most valuable lessons?</li>
+                        <li>How do you typically respond to feedback or criticism?</li>
+                        <li>Where do je hebt nodig to develop more resilience in je leven?</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="next-steps">Volgende Stappen</h2>
+                <div class="next-steps-box">
+                    <h4>🚀 Mental Strength Development Plan</h4>
+                    
+                    <p><strong>Phase 1: Foundation Beoordeling (Week 1-2)</strong></p>
+                    <ol>
+                        <li><strong>Baseline Evaluation</strong> - Complete mental strength assessment</li>
+                        <li><strong>Pattern Recognition</strong> - Identify current mental strength patterns</li>
+                        <li><strong>Weakness Identification</strong> - Pinpoint areas needing development</li>
+                        <li><strong>Value Clarification</strong> - Define your core values en purpose</li>
+                        <li><strong>Goal Alignment</strong> - Ensure goals reflect your values</li>
+                    </ol>
+                    
+                    <p><strong>Phase 2: Skill Bouwen (Week 3-8)</strong></p>
+                    <ol>
+                        <li><strong>Daily Practice</strong> - Implement morning en evening routines</li>
+                        <li><strong>Control Training</strong> - Focus on response choice development</li>
+                        <li><strong>Challenge Reframing</strong> - Practice seeing difficulties as opportunities</li>
+                        <li><strong>Commitment Strengthening</strong> - Align actions with values daily</li>
+                        <li><strong>Confidence Bouwen</strong> - Complete small challenges consistently</li>
+                    </ol>
+                    
+                    <p><strong>Phase 3: Integration & Mastery (Month 3+)</strong></p>
+                    <ol>
+                        <li><strong>Advanced Challenges</strong> - Take on bigger mental strength tests</li>
+                        <li><strong>Leadership Development</strong> - Help others build mental strength</li>
+                        <li><strong>System Bouwen</strong> - Create environments dat support strength</li>
+                        <li><strong>Continuous Growth</strong> - Regular assessment en adjustment</li>
+                        <li><strong>Legacy Creation</strong> - Become known as mentally strong</li>
+                    </ol>
+                    
+                    <p><strong>Immediate Actions (Starting Today):</strong></p>
+                    <ol>
+                        <li><strong>Values Writing</strong> - List your top 5 core values</li>
+                        <li><strong>Control Inventory</strong> - Identify wat je can en cannot control</li>
+                        <li><strong>Challenge Reframe</strong> - Find one opportunity in a current difficulty</li>
+                        <li><strong>Commitment Check</strong> - Align one action today with your values</li>
+                        <li><strong>Strength Declaration</strong> - State your intention to develop mental strength</li>
+                    </ol>
+                    
+                    <p><strong>Long-term Mental Strength Indicators (6-12 months):</strong></p>
+                    <ul>
+                        <li><strong>Emotional Regulation:</strong> Consistent calm under pressure</li>
+                        <li><strong>Beslissing Kwaliteit:</strong> Values-based choices regardless van circumstances</li>
+                        <li><strong>Resilience:</strong> Quick recovery from setbacks</li>
+                        <li><strong>Leadership:</strong> Others looking to you during difficult times</li>
+                        <li><strong>Growth Mindset:</strong> Seeing challenges as development opportunities</li>
+                        <li><strong>Consistency:</strong> Reliable prestaties regardless van conditions</li>
+                        <li><strong>Influence:</strong> Inspiring mental strength in others</li>
+                        <li><strong>Antifragility:</strong> Getting stronger from stress en difficulty</li>
+                    </ul>
+                </div>
+                
+                <div class="highlight-box">
+                    <h4>🧠 Mental Strength Mastery Mantra</h4>
+                    <p><em>"My mind is my greatest weapon en my strongest asset. I choose my responses, align my actions with my values, welcome challenges as growth opportunities, en maintain unshakeable confidence in my ability to handle whatever comes. I am not a victim van circumstances - I am de creator van my reality through mental strength."</em></p>
+                    
+                    <p>Remember: Mental strength is not about being tough all the time - het is about being intentional, aligned, en resilient. Het is about having de inner resources to handle whatever life throws at you while staying true to who you are en wat je stand voor.</p>
+                    
+                    <p><strong>Your mental strength determines not just how you handle challenges, maar how you create opportunities, lead others, en build the life you truly want.</strong></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2025 Top Tier Men Academy. Alle rechten voorbehouden.</p>
+            <p>Voor meer informatie bezoek <strong>platform.toptiermen.eu</strong></p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>De Basis van Discipline - Top Tier Men Academy</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background: #f9fafb;
+        }
+        
+        .ebook-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #8BAE5A 0%, #3A4D23 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -0.025em;
+        }
+        
+        .header .subtitle {
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: white;
+            opacity: 1;
+        }
+        
+        .content {
+            padding: 50px;
+        }
+        
+        .toc {
+            background: #f8fafc;
+            border-left: 4px solid #8BAE5A;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 8px;
+        }
+        
+        .toc h2 {
+            color: #8BAE5A;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .toc ol {
+            list-style: none;
+            counter-reset: toc-counter;
+        }
+        
+        .toc li {
+            counter-increment: toc-counter;
+            margin-bottom: 8px;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        .toc li::before {
+            content: counter(toc-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #8BAE5A;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .toc a {
+            color: #374151;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .toc a:hover {
+            color: #8BAE5A;
+        }
+        
+        .chapter {
+            margin: 40px 0;
+        }
+        
+        .chapter h2 {
+            color: #8BAE5A;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 10px;
+        }
+        
+        .chapter h3 {
+            color: #374151;
+            font-size: 1.4rem;
+            margin: 25px 0 15px 0;
+        }
+        
+        .chapter p {
+            margin-bottom: 15px;
+            color: #4b5563;
+        }
+        
+        .chapter ul, .chapter ol {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+        
+        .chapter li {
+            margin-bottom: 8px;
+            color: #4b5563;
+        }
+        
+        .highlight-box {
+            background: #f0f9ff;
+            border-left: 4px solid #0ea5e9;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .highlight-box h4 {
+            color: #0c4a6e;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .action-item {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .action-item h4 {
+            color: #92400e;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .reflection-box {
+            background: #f3e8ff;
+            border-left: 4px solid #8b5cf6;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .reflection-box h4 {
+            color: #5b21b6;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .next-steps-box {
+            background: #ecfdf5;
+            border-left: 4px solid #10b981;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .next-steps-box h4 {
+            color: #047857;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .footer {
+            background: #f8fafc;
+            padding: 30px;
+            text-align: center;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .footer p {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                padding: 40px 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .content {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ebook-container">
+        <div class="header">
+            <h1>De Basis van Discipline</h1>
+            <div class="subtitle">Module 2: Discipline & Identiteit - Top Tier Men Academy</div>
+        </div>
+        
+        <div class="content">
+            <div class="toc">
+                <h2>Inhoudsopgave</h2>
+                <ol>
+                    <li><a href="#intro">Inleiding</a></li>
+                    <li><a href="#main-content">Hoofdinhoud</a></li>
+                    <li><a href="#practical-tips">Praktische Tips</a></li>
+                    <li><a href="#reflection">Reflectie Vragen</a></li>
+                    <li><a href="#next-steps">Volgende Stappen</a></li>
+                </ol>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="intro">Inleiding</h2>
+                <p>Welkom bij de eerste les van Module 2: Discipline & Identiteit. In deze fundamentele les leer je wat discipline echt betekent en hoe je het kunt ontwikkelen als de basis voor alle andere successen in je leven als Top Tier Man.</p>
+                
+                <div class="highlight-box">
+                    <h4>🎯 Wat je gaat leren</h4>
+                    <ul>
+                        <li>De echte definitie van discipline en waarom het cruciaal is</li>
+                        <li>De 3 pijlers van discipline: Consistentie, Focus en Doelgerichtheid</li>
+                        <li>Praktische strategieën om discipline te ontwikkelen en te behouden</li>
+                        <li>Een dagelijkse discipline checklist voor onmiddellijke implementatie</li>
+                        <li>Hoe discipline een spier is die je kunt trainen en versterken</li>
+                    </ul>
+                </div>
+                
+                <p>Discipline is niet een talent waar je mee geboren wordt - het is een vaardigheid die elke man kan leren en perfectioneren. Door deze les te voltooien, leg je de fundering voor transformatie in alle gebieden van je leven.</p>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="main-content">Hoofdinhoud</h2>
+                
+                <h3>Wat is discipline?</h3>
+                <p>Discipline is veel meer dan alleen hard werken of jezelf dwingen om dingen te doen die je niet leuk vindt. <strong>Echte discipline is de kunst van consistentie, focus en de bereidheid om korte-termijn plezier op te offeren voor lange-termijn doelen.</strong></p>
+                
+                <p>Het is de brug tussen je dromen en je realiteit. Zonder discipline blijven je ambities slechts fantasieën. Met discipline transformeer je je visie in tastbare resultaten.</p>
+                
+                <h3>De 3 Fundamentele Pijlers van Discipline</h3>
+                
+                <h4>Pijler 1: Consistentie</h4>
+                <p>Consistentie is de motor van alle groei. Het gaat niet om perfectie, maar om betrouwbaarheid.</p>
+                <ul>
+                    <li><strong>Doe elke dag iets, hoe klein ook:</strong> Een dagelijkse actie van 1% verbetering leidt tot 37x groei per jaar</li>
+                    <li><strong>Bouw routines op die je kunt volhouden:</strong> Start klein en bouw geleidelijk op</li>
+                    <li><strong>Focus op progressie, niet perfectie:</strong> Vooruitgang verslaat perfectie elke keer</li>
+                </ul>
+                
+                <h4>Pijler 2: Focus</h4>
+                <p>In een wereld vol afleidingen is focus je geheime wapen. Het vermogen om je aandacht te richten op wat er echt toe doet.</p>
+                <ul>
+                    <li><strong>Elimineer afleidingen:</strong> Identificeer en verwijder energie-vampieren uit je leven</li>
+                    <li><strong>Werk in tijdsblokken:</strong> Deep work sessies van 90-120 minuten maximaliseren je productiviteit</li>
+                    <li><strong>Leer nee zeggen:</strong> Elke ja tegen het verkeerde is een nee tegen het juiste</li>
+                </ul>
+                
+                <h4>Pijler 3: Doelgerichtheid</h4>
+                <p>Zonder een duidelijke richting is discipline zinloos. Je moet weten waarheen je gaat en waarom.</p>
+                <ul>
+                    <li><strong>Ken je waarom:</strong> Je waarom moet sterker zijn dan je excuses</li>
+                    <li><strong>Visualiseer je doelen:</strong> Zie je succes voor je het bereikt</li>
+                    <li><strong>Meet je voortgang:</strong> Wat gemeten wordt, wordt bereikt</li>
+                </ul>
+                
+                <h3>De Psychologie van Discipline</h3>
+                <p>Discipline is een mentale spier. Net zoals je je fysieke spieren traint, kun je je discipline trainen. Hoe meer je het gebruikt, hoe sterker het wordt. Hoe minder je het gebruikt, hoe zwakker het wordt.</p>
+                
+                <p>Het geheim is om te beginnen met kleine, beheersbare acties en geleidelijk de intensiteit op te voeren. Dit voorkomt 'discipline burnout' en zorgt voor duurzame groei.</p>
+                
+                <h3>Environment Design: Maak Discipline Makkelijk</h3>
+                <p>Een van de krachtigste strategieën is het ontwerpen van je omgeving zodat goede keuzes automatisch en makkelijk worden, terwijl slechte keuzes moeilijk worden.</p>
+                
+                <p>Voorbeelden:</p>
+                <ul>
+                    <li>Leg je sportkleren naast je bed voor vroeg sporten</li>
+                    <li>Verwijder junk food uit je huis</li>
+                    <li>Zet je telefoon in een andere kamer tijdens focuswerk</li>
+                    <li>Prepareer gezonde maaltijden op zondag</li>
+                </ul>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="practical-tips">Praktische Tips</h2>
+                <div class="action-item">
+                    <h4>💪 Direct Toepasbare Strategieën</h4>
+                    
+                    <h5>1. De 5-Minuten Regel</h5>
+                    <p>Begin elke dag met 5 minuten van je belangrijkste taak. Dit doorbreekt weerstand en creëert momentum. Vaak ga je door na die 5 minuten.</p>
+                    
+                    <h5>2. Habit Stacking</h5>
+                    <p>Koppel nieuwe gewoonten aan bestaande routines: "Na mijn koffie, mediteer ik 10 minuten." Dit gebruikt bestaande neurale paden.</p>
+                    
+                    <h5>3. De 2-Dag Regel</h5>
+                    <p>Breek nooit een keten van gewoonten twee dagen achter elkaar. Perfectie is niet het doel, consistentie wel.</p>
+                    
+                    <h5>4. Accountability Partner</h5>
+                    <p>Vind iemand die je verantwoordelijk houdt. Sociale druk is een krachtige motivator voor discipline.</p>
+                    
+                    <h5>5. Reward System</h5>
+                    <p>Beloon jezelf voor consistentie, niet alleen voor resultaten. Vier je discipline streak.</p>
+                    
+                    <h5>6. Morning Routine</h5>
+                    <p>Start je dag met een vaste routine die je in controle zet. Win het eerste uur, win de dag.</p>
+                </div>
+                
+                <div class="action-item">
+                    <h4>📋 Dagelijkse Discipline Checklist</h4>
+                    <ul>
+                        <li>☐ Sta op tijd op (5:30 AM) - Discipline begint bij het eerste geluid van je wekker</li>
+                        <li>☐ Drink 500ml water - Hydratatie activeert je systeem</li>
+                        <li>☐ Mediteer 10 minuten - Train je mentale spier</li>
+                        <li>☐ Lees 30 minuten - Voer je mind met kwaliteit</li>
+                        <li>☐ Train 45 minuten - Versterk je fysieke fundament</li>
+                        <li>☐ Plan morgen 10 minuten - Discipline is voorbereiding</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="reflection">Reflectie Vragen</h2>
+                <div class="reflection-box">
+                    <h4>🤔 Neem even de tijd om diep na te denken over deze vragen</h4>
+                    
+                    <p><strong>1. Discipline Inventarisatie:</strong></p>
+                    <ul>
+                        <li>Op welke gebieden van je leven ben je al gedisciplineerd?</li>
+                        <li>Waar laat je discipline het meest afweten en wat zijn de gevolgen daarvan?</li>
+                        <li>Wat zijn je grootste uitvluchten als het moeilijk wordt?</li>
+                    </ul>
+                    
+                    <p><strong>2. Waarom Analyse:</strong></p>
+                    <ul>
+                        <li>Waarom wil je meer gedisciplineerd worden?</li>
+                        <li>Wat zou er in je leven veranderen als je 100% gedisciplineerd was?</li>
+                        <li>Welke pijn voel je nu door gebrek aan discipline?</li>
+                    </ul>
+                    
+                    <p><strong>3. Omgeving Beoordeling:</strong></p>
+                    <ul>
+                        <li>Hoe is je omgeving momenteel ingericht?</li>
+                        <li>Welke elementen in je omgeving maken goede keuzes moeilijk?</li>
+                        <li>Wat kun je vandaag nog veranderen aan je omgeving?</li>
+                    </ul>
+                    
+                    <p><strong>4. Toekomstvisie:</strong></p>
+                    <ul>
+                        <li>Hoe zie je jezelf over een jaar als je deze discipline principes toepast?</li>
+                        <li>Wat zou de gedisciplineerde versie van jezelf vandaag doen?</li>
+                        <li>Welke legacy wil je achterlaten door je discipline?</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="next-steps">Volgende Stappen</h2>
+                <div class="next-steps-box">
+                    <h4>🚀 Jouw 30-Dagen Discipline Transformatie Plan</h4>
+                    
+                    <p><strong>Week 1-2: Foundation Bouwen</strong></p>
+                    <ol>
+                        <li><strong>Kies 1 discipline gewoonte</strong> en doe deze 14 dagen perfect</li>
+                        <li><strong>Ontwerp je omgeving</strong> voor succes in dit ene gebied</li>
+                        <li><strong>Track je progress</strong> daily in een journal of app</li>
+                        <li><strong>Elimineer 1 grote afleiding</strong> uit je leven</li>
+                    </ol>
+                    
+                    <p><strong>Week 3-4: Expansion</strong></p>
+                    <ol>
+                        <li><strong>Voeg 1 nieuwe discipline gewoonte toe</strong> aan je routine</li>
+                        <li><strong>Implementeer de 5-minuten regel</strong> voor moeilijke taken</li>
+                        <li><strong>Vind een accountability partner</strong> of join een discipline groep</li>
+                        <li><strong>Review en optimaliseer</strong> je systemen wekelijks</li>
+                    </ol>
+                    
+                    <p><strong>Onmiddellijke Acties (Vandaag):</strong></p>
+                    <ol>
+                        <li>Stel je wekker 30 minuten vroeger voor morgen</li>
+                        <li>Schrijf je top 3 prioriteiten voor morgen op</li>
+                        <li>Verwijder 1 afleiding uit je primaire werkruimte</li>
+                        <li>Plan je eerste 90-minuten focus blok voor morgen</li>
+                        <li>Kies je eerste discipline streak en commit voor 7 dagen</li>
+                    </ol>
+                    
+                    <p><strong>Success Metrics:</strong></p>
+                    <ul>
+                        <li>Daily discipline score (1-10)</li>
+                        <li>Streak lengths voor gewoonten</li>
+                        <li>Energieniveaus gedurende de dag</li>
+                        <li>Progress naar je grote doelen</li>
+                        <li>Sense of control en confidence</li>
+                    </ul>
+                </div>
+                
+                <div class="highlight-box">
+                    <h4>💡 Onthoud Dit</h4>
+                    <p><em>"Discipline gaat niet over straf, het gaat over zelfrespect. Elke gedisciplineerde actie is een stem voor de persoon die je wordt."</em></p>
+                    
+                    <p>Je staat nu aan het begin van een transformatie. Discipline is niet een bestemming, maar een manier van leven. Elke kleine keuze die je vandaag maakt, bepaalt wie je morgen bent.</p>
+                    
+                    <p><strong>Start klein. Blijf consistent. Vertrouw het proces.</strong></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2025 Top Tier Men Academy. Alle rechten voorbehouden.</p>
+            <p>Voor meer informatie bezoek <strong>platform.toptiermen.eu</strong></p>
+        </div>
+    </div>
+</body>
+</html>

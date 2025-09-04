@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discipline van Korte Termijn naar een Levensstijl - Top Tier Men Academy</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background: #f9fafb;
+        }
+        
+        .ebook-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #8BAE5A 0%, #3A4D23 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -0.025em;
+        }
+        
+        .header .subtitle {
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: white;
+            opacity: 1;
+        }
+        
+        .content {
+            padding: 50px;
+        }
+        
+        .toc {
+            background: #f8fafc;
+            border-left: 4px solid #8BAE5A;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 8px;
+        }
+        
+        .toc h2 {
+            color: #8BAE5A;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .toc ol {
+            list-style: none;
+            counter-reset: toc-counter;
+        }
+        
+        .toc li {
+            counter-increment: toc-counter;
+            margin-bottom: 8px;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        .toc li::before {
+            content: counter(toc-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #8BAE5A;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .toc a {
+            color: #374151;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .toc a:hover {
+            color: #8BAE5A;
+        }
+        
+        .chapter {
+            margin: 40px 0;
+        }
+        
+        .chapter h2 {
+            color: #8BAE5A;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 10px;
+        }
+        
+        .chapter h3 {
+            color: #374151;
+            font-size: 1.4rem;
+            margin: 25px 0 15px 0;
+        }
+        
+        .chapter p {
+            margin-bottom: 15px;
+            color: #4b5563;
+        }
+        
+        .chapter ul, .chapter ol {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+        
+        .chapter li {
+            margin-bottom: 8px;
+            color: #4b5563;
+        }
+        
+        .highlight-box {
+            background: #f0f9ff;
+            border-left: 4px solid #0ea5e9;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .highlight-box h4 {
+            color: #0c4a6e;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .action-item {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .action-item h4 {
+            color: #92400e;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .reflection-box {
+            background: #f3e8ff;
+            border-left: 4px solid #8b5cf6;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .reflection-box h4 {
+            color: #5b21b6;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .next-steps-box {
+            background: #ecfdf5;
+            border-left: 4px solid #10b981;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .next-steps-box h4 {
+            color: #047857;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .footer {
+            background: #f8fafc;
+            padding: 30px;
+            text-align: center;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .footer p {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                padding: 40px 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .content {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ebook-container">
+        <div class="header">
+            <h1>Discipline van Korte Termijn naar een Levensstijl</h1>
+            <div class="subtitle">Module 2: Discipline & Identiteit - Top Tier Men Academy</div>
+        </div>
+        
+        <div class="content">
+            <div class="toc">
+                <h2>Inhoudsopgave</h2>
+                <ol>
+                    <li><a href="#intro">Inleiding</a></li>
+                    <li><a href="#main-content">Hoofdinhoud</a></li>
+                    <li><a href="#practical-tips">Praktische Tips</a></li>
+                    <li><a href="#reflection">Reflectie Vragen</a></li>
+                    <li><a href="#next-steps">Volgende Stappen</a></li>
+                </ol>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="intro">Inleiding</h2>
+                <p>Welkom bij les 3 van Module 2: Discipline & Identiteit. In deze cruciale les leer je hoe je discipline transformeert van een tijdelijke inspanning naar een permanente levensstijl die automatisch top-prestaties genereert.</p>
+                
+                <div class="highlight-box">
+                    <h4>🎯 Wat je gaat leren</h4>
+                    <ul>
+                        <li>Het verschil tussen korte termijn motivatie en lange termijn discipline</li>
+                        <li>De 4 fases van discipline transformatie: Sprint, Struggle, Systems, Lifestyle</li>
+                        <li>Hoe je habit loops creëert die zich self-reinforcen</li>
+                        <li>Strategieën voor het overwinnen van motivation dips en plateau's</li>
+                        <li>Het bouwen van een discipline ecosystem dat automatisch excellence produceert</li>
+                    </ul>
+                </div>
+                
+                <p>De meeste mannen falen niet door gebrek aan motivatie, maar door gebrek aan systemen. In deze les bouw je een unbreakable discipline framework dat werkt zelfs wanneer je je slecht voelt, stress hebt, of geen motivatie voelt.</p>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="main-content">Hoofdinhoud</h2>
+                
+                <h3>Korte Termijn vs. Lange Termijn Discipline</h3>
+                <p><strong>Korte termijn discipline</strong> is gebaseerd op motivatie, willpower en emotional highs. Het voelt krachtig maar is inherently unstable en uitputtend.</p>
+                
+                <p><strong>Lange termijn discipline</strong> is gebaseerd op systemen, habits en identity. Het voelt naturel en wordt sterker over tijd in plaats van zwakker.</p>
+                
+                <div class="highlight-box">
+                    <h4>🔥 Key Insight</h4>
+                    <p><em>"Motivation gets you started, but habits keep you going. Discipline becomes a levensstijl when it stops feeling like discipline."</em></p>
+                </div>
+                
+                <h3>De 4 Fases van Discipline Transformatie</h3>
+                
+                <h4>Fase 1: Sprint (Dagen 1-30)</h4>
+                <p><strong>Karakteristieken:</strong> Hoge motivatie, veel energy, alles voelt mogelijk</p>
+                <ul>
+                    <li><strong>Focus:</strong> Momentum building en quick wins</li>
+                    <li><strong>Gevaar:</strong> Overcommitment en burnout</li>
+                    <li><strong>Strategie:</strong> Start klein, build consistency boven intensiteit</li>
+                    <li><strong>Mindset:</strong> "Ik ga dit perfect doen"</li>
+                </ul>
+                
+                <h4>Fase 2: Struggle (Dagen 31-90)</h4>
+                <p><strong>Karakteristieken:</strong> Motivatie daalt, resistance komt op, reality kicks in</p>
+                <ul>
+                    <li><strong>Focus:</strong> Persistence en system building</li>
+                    <li><strong>Gevaar:</strong> Giving up wanneer het moeilijk wordt</li>
+                    <li><strong>Strategie:</strong> Focus op process, niet op feelings</li>
+                    <li><strong>Mindset:</strong> "Ik doe dit ook al voel ik het niet"</li>
+                </ul>
+                
+                <h4>Fase 3: Systems (Dagen 91-365)</h4>
+                <p><strong>Karakteristieken:</strong> Habits beginnen automatic te voelen, less mental energy needed</p>
+                <ul>
+                    <li><strong>Focus:</strong> Optimization en refinement</li>
+                    <li><strong>Gevaar:</strong> Complacency en gradual decline</li>
+                    <li><strong>Strategie:</strong> Continuous improvement en new challenges</li>
+                    <li><strong>Mindset:</strong> "Dit is gewoon wat ik doe"</li>
+                </ul>
+                
+                <h4>Fase 4: Lifestyle (1+ jaar)</h4>
+                <p><strong>Karakteristieken:</strong> Discipline is completely integrated, feels unnatural NOT to do it</p>
+                <ul>
+                    <li><strong>Focus:</strong> Mastery en teaching others</li>
+                    <li><strong>Gevaar:</strong> Taking it for granted</li>
+                    <li><strong>Strategie:</strong> Raising standards en expanding to new areas</li>
+                    <li><strong>Mindset:</strong> "Dit is wie ik ben"</li>
+                </ul>
+                
+                <h3>De Anatomie van een Self-Reinforcing Habit Loop</h3>
+                <p>Voor discipline om een levensstijl te worden, moet elke habit een positive feedback loop creëren die het makkelijker maakt om te herhalen.</p>
+                
+                <h4>De 4 Components van een Bulletproof Habit:</h4>
+                
+                <p><strong>1. Cue (Trigger)</strong></p>
+                <ul>
+                    <li>Environmental cue (tijd, plaats, object)</li>
+                    <li>Emotional cue (gevoel, stemming)</li>
+                    <li>Social cue (andere mensen, accountability)</li>
+                </ul>
+                
+                <p><strong>2. Routine (Actie)</strong></p>
+                <ul>
+                    <li>De actual behavior die je wilt automatiseren</li>
+                    <li>Must be specific en meetbare</li>
+                    <li>Should be challenging but achievable</li>
+                </ul>
+                
+                <p><strong>3. Reward (Beloning)</strong></p>
+                <ul>
+                    <li>Immediate reward (dopamine hit)</li>
+                    <li>Progress reward (seeing improvement)</li>
+                    <li>Identity reward (becoming someone who...)</li>
+                </ul>
+                
+                <p><strong>4. Tracking (Measurement)</strong></p>
+                <ul>
+                    <li>Visual progress indicators</li>
+                    <li>Streak counters</li>
+                    <li>Performance metrics</li>
+                </ul>
+                
+                <h3>The Discipline Ecosystem</h3>
+                <p>Een true discipline levensstijl bestaat uit meerdere interconnected habits die elkaar versterken en supporten.</p>
+                
+                <h4>Core Discipline Habits (Foundation):</h4>
+                <ul>
+                    <li><strong>Sleep Discipline:</strong> Consistent bedtime en wake time</li>
+                    <li><strong>Morning Discipline:</strong> Structured morning routine</li>
+                    <li><strong>Physical Discipline:</strong> Daily movement en exercise</li>
+                    <li><strong>Mental Discipline:</strong> Daily learning en reflection</li>
+                </ul>
+                
+                <h4>Supporting Habits (Amplifiers):</h4>
+                <ul>
+                    <li><strong>Environment Design:</strong> Optimized spaces for success</li>
+                    <li><strong>Social Discipline:</strong> Surrounding yourself met high performers</li>
+                    <li><strong>Digital Discipline:</strong> Controlled use of technology</li>
+                    <li><strong>Nutrition Discipline:</strong> Consistent eating patterns</li>
+                </ul>
+                
+                <h3>Overcoming Common Discipline Killers</h3>
+                
+                <h4>1. The Motivation Trap</h4>
+                <p><strong>Problem:</strong> Wachten tot je je motivated voelt</p>
+                <p><strong>Solution:</strong> Action creates motivation, niet andersom</p>
+                
+                <h4>2. The Perfection Paradox</h4>
+                <p><strong>Problem:</strong> All-or-nothing thinking</p>
+                <p><strong>Solution:</strong> "Never miss twice" rule</p>
+                
+                <h4>3. The Complexity Curse</h4>
+                <p><strong>Problem:</strong> Te veel habits tegelijk starten</p>
+                <p><strong>Solution:</strong> Master one habit at a time</p>
+                
+                <h4>4. The Environment Enemy</h4>
+                <p><strong>Problem:</strong> Omgeving saboteert je efforts</p>
+                <p><strong>Solution:</strong> Design je environment voor automatic success</p>
+                
+                <h4>5. The Social Sabotage</h4>
+                <p><strong>Problem:</strong> Negative influences van anderen</p>
+                <p><strong>Solution:</strong> Curate je social circle deliberately</p>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="practical-tips">Praktische Tips</h2>
+                <div class="action-item">
+                    <h4>💪 Lifestyle Discipline Implementation Framework</h4>
+                    
+                    <h5>1. The 1% Rule</h5>
+                    <p>Verbeter dagelijks met 1% in plaats van drastic changes:</p>
+                    <ul>
+                        <li><strong>Week 1:</strong> 5 minuten van nieuwe habit</li>
+                        <li><strong>Week 2:</strong> 7 minuten (40% increase)</li>
+                        <li><strong>Week 3:</strong> 10 minuten (43% increase)</li>
+                        <li><strong>Week 4:</strong> 15 minuten (50% increase)</li>
+                    </ul>
+                    
+                    <h5>2. Habit Stacking Protocol</h5>
+                    <p>Link nieuwe habits aan existing strong routines:</p>
+                    <ul>
+                        <li><strong>Formula:</strong> "Na [BESTAANDE HABIT], ga ik [NIEUWE HABIT] doen"</li>
+                        <li><strong>Voorbeeld:</strong> "Na mijn koffie, ga ik 10 minuten mediteren"</li>
+                        <li><strong>Voorbeeld:</strong> "Na het tandenpoetsen, ga ik mijn doelen reviewen"</li>
+                    </ul>
+                    
+                    <h5>3. The 2-Day Rule</h5>
+                    <p>Never break a habit chain two days in a row:</p>
+                    <ul>
+                        <li>Miss één dag? Happens to everyone</li>
+                        <li>Miss twee dagen? Pattern van failure begint</li>
+                        <li>Miss drie dagen? Habit is effectively broken</li>
+                    </ul>
+                    
+                    <h5>4. Environment Design Checklist</h5>
+                    <p><strong>Make Good Habits Obvious:</strong></p>
+                    <ul>
+                        <li>Zet visual cues voor gewenste behaviors</li>
+                        <li>Make tools easily accessible</li>
+                        <li>Create designated spaces voor specific activities</li>
+                    </ul>
+                    
+                    <p><strong>Make Bad Habits Invisible:</strong></p>
+                    <ul>
+                        <li>Remove temptations uit direct sight</li>
+                        <li>Add friction to unwanted behaviors</li>
+                        <li>Create barriers tussen jou en bad habits</li>
+                    </ul>
+                    
+                    <h5>5. Identity-Based Habit Formation</h5>
+                    <p>Focus op becoming, niet op achieving:</p>
+                    <ul>
+                        <li><strong>Don't say:</strong> "I want to lose 20 pounds"</li>
+                        <li><strong>Say:</strong> "I am someone who prioritizes health"</li>
+                        <li><strong>Don't say:</strong> "I want to read more"</li>
+                        <li><strong>Say:</strong> "I am a lifelong learner"</li>
+                    </ul>
+                    
+                    <h5>6. The Weekly Review System</h5>
+                    <p>Elke zondag:</p>
+                    <ul>
+                        <li><strong>Assess:</strong> Welke habits liepen goed/slecht?</li>
+                        <li><strong>Analyze:</strong> Wat waren de patterns en triggers?</li>
+                        <li><strong>Adjust:</strong> Wat ga je next week anders doen?</li>
+                        <li><strong>Appreciate:</strong> Celebrate je wins, however small</li>
+                    </ul>
+                </div>
+                
+                <div class="action-item">
+                    <h4>📊 Lifestyle Discipline Tracking System</h4>
+                    
+                    <h5>Daily Scorecard (Rate 1-10):</h5>
+                    <ul>
+                        <li>☐ Morning routine executed</li>
+                        <li>☐ Physical activity completed</li>
+                        <li>☐ Learning/reading done</li>
+                        <li>☐ Healthy eating maintained</li>
+                        <li>☐ Evening routine followed</li>
+                        <li>☐ Phone/digital discipline</li>
+                        <li>☐ Stress management practiced</li>
+                    </ul>
+                    
+                    <h5>Weekly Metrics:</h5>
+                    <ul>
+                        <li>Total discipline score (out of 70)</li>
+                        <li>Longest streak maintained</li>
+                        <li>Number of "perfect" days (7+ score)</li>
+                        <li>Biggest challenge overcome</li>
+                        <li>New habit progress</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="reflection">Reflectie Vragen</h2>
+                <div class="reflection-box">
+                    <h4>🤔 Lifestyle Transformation Beoordeling</h4>
+                    
+                    <p><strong>1. Current Phase Analysis:</strong></p>
+                    <ul>
+                        <li>In welke fase van discipline transformatie ben je momenteel? (Sprint/Struggle/Systems/Lifestyle)</li>
+                        <li>Welke habits voelen al automatic en welke require nog willpower?</li>
+                        <li>Wat zijn de biggest obstacles die je ervaart in je current phase?</li>
+                        <li>Hoe lang ben je al bezig met je current discipline journey?</li>
+                    </ul>
+                    
+                    <p><strong>2. System Evaluation:</strong></p>
+                    <ul>
+                        <li>Welke van je habits hebben strong cue-routine-reward loops?</li>
+                        <li>Waar verlies je discipline omdat je systems weak zijn?</li>
+                        <li>Hoe supportive is je current environment voor discipline?</li>
+                        <li>Welke habits reinforce elkaar en welke conflict met elkaar?</li>
+                    </ul>
+                    
+                    <p><strong>3. Identity Shift Beoordeling:</strong></p>
+                    <ul>
+                        <li>Hoe zie je jezelf: als iemand die discipline "doet" of als iemand die disciplined "is"?</li>
+                        <li>Welke identity statements gebruik je over jezelf?</li>
+                        <li>Hoe zou someone in je social circle jouw discipline level beschrijven?</li>
+                        <li>Wat voor type person wil je over 5 jaar zijn geworden?</li>
+                    </ul>
+                    
+                    <p><strong>4. Long-term Vision:</strong></p>
+                    <ul>
+                        <li>Hoe zou je leven eruitzien als discipline completely automatic was?</li>
+                        <li>Welke new possibilities zouden openen als je zero willpower nodig had voor basics?</li>
+                        <li>Hoe zou je confidence en self-respect veranderen met bulletproof discipline?</li>
+                        <li>Wat zou je kunnen accomplishen als consistency gegarandeerd was?</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="next-steps">Volgende Stappen</h2>
+                <div class="next-steps-box">
+                    <h4>🚀 90-Dag Lifestyle Discipline Transformatie</h4>
+                    
+                    <p><strong>Dagen 1-30: Foundation Bouwen</strong></p>
+                    <ol>
+                        <li><strong>Kies 1 Core Habit</strong> - Focus op sleep, morning routine, of exercise</li>
+                        <li><strong>Design Perfect Environment</strong> - Remove obstacles, add positive cues</li>
+                        <li><strong>Track Daily</strong> - Simple yes/no tracking in visible location</li>
+                        <li><strong>Apply 2-Day Rule</strong> - Never miss twice in a row</li>
+                        <li><strong>Weekly Reviews</strong> - 10 minuten reflection elke zondag</li>
+                    </ol>
+                    
+                    <p><strong>Dagen 31-60: System Optimization</strong></p>
+                    <ol>
+                        <li><strong>Add Second Habit</strong> - Stack onto existing successful habit</li>
+                        <li><strong>Optimize Timing</strong> - Find perfect timing for maximum success</li>
+                        <li><strong>Strengthen Rewards</strong> - Add immediate positive reinforcement</li>
+                        <li><strong>Address Weak Points</strong> - Identify en fix breakdown patterns</li>
+                        <li><strong>Social Integration</strong> - Share progress, find accountability partner</li>
+                    </ol>
+                    
+                    <p><strong>Dagen 61-90: Lifestyle Integration</strong></p>
+                    <ol>
+                        <li><strong>Expand Ecosystem</strong> - Add supporting habits that reinforce core habits</li>
+                        <li><strong>Identity Reinforcement</strong> - Start using identity-based language</li>
+                        <li><strong>Stress Testing</strong> - Maintain habits during challenging periods</li>
+                        <li><strong>Teach Others</strong> - Share your system to solidify your own practice</li>
+                        <li><strong>Plan Next Level</strong> - Prepare for next 90-day cycle</li>
+                    </ol>
+                    
+                    <p><strong>Immediate Actions (Today):</strong></p>
+                    <ol>
+                        <li><strong>Identify Current Phase</strong> - Sprint, Struggle, Systems, or Lifestyle?</li>
+                        <li><strong>Choose One Habit</strong> - Pick THE most important habit to focus on</li>
+                        <li><strong>Design Environment</strong> - Make one environmental change today</li>
+                        <li><strong>Set Up Tracking</strong> - Create simple system to monitor progress</li>
+                        <li><strong>Plan Tomorrow</strong> - Specific time, place, and method for your habit</li>
+                    </ol>
+                    
+                    <p><strong>Success Indicators:</strong></p>
+                    <ul>
+                        <li>Habit feels automatic (mental effort decreases over time)</li>
+                        <li>Missing the habit feels unnatural</li>
+                        <li>Others comment on your consistency</li>
+                        <li>New challenges seem manageable</li>
+                        <li>You start teaching others your methods</li>
+                        <li>Identity language shifts ("I am" vs "I want to")</li>
+                    </ul>
+                </div>
+                
+                <div class="highlight-box">
+                    <h4>🏆 Lifestyle Discipline Mantra</h4>
+                    <p><em>"I don't do discipline - I am disciplined. My habits are not what I do - they are who I am. Consistency is not a goal - it's my identity. Excellence is not an act - it's my levensstijl."</em></p>
+                    
+                    <p>Remember: De goal is niet om motivated te blijven - de goal is om systemen te bouwen die werken zelfs wanneer motivation absent is. True freedom komt van discipline die zo natural voelt dat het effort-less wordt.</p>
+                    
+                    <p><strong>Vandaag plant je seeds. Over 90 dagen harveste je een completely new levensstijl.</strong></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2025 Top Tier Men Academy. Alle rechten voorbehouden.</p>
+            <p>Voor meer informatie bezoek <strong>platform.toptiermen.eu</strong></p>
+        </div>
+    </div>
+</body>
+</html>

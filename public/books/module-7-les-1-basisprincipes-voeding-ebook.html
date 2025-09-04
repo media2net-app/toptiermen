@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>De Basisprincipes van Voeding - Top Tier Men Academy</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background: #f9fafb;
+        }
+        
+        .ebook-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #8BAE5A 0%, #3A4D23 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -0.025em;
+        }
+        
+        .header .subtitle {
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: white;
+            opacity: 1;
+        }
+        
+        .content {
+            padding: 50px;
+        }
+        
+        .toc {
+            background: #f8fafc;
+            border-left: 4px solid #8BAE5A;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 8px;
+        }
+        
+        .toc h2 {
+            color: #8BAE5A;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .toc ol {
+            list-style: none;
+            counter-reset: toc-counter;
+        }
+        
+        .toc li {
+            counter-increment: toc-counter;
+            margin-bottom: 8px;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        .toc li::before {
+            content: counter(toc-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #8BAE5A;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .toc a {
+            color: #374151;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .toc a:hover {
+            color: #8BAE5A;
+        }
+        
+        .chapter {
+            margin: 40px 0;
+        }
+        
+        .chapter h2 {
+            color: #8BAE5A;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 10px;
+        }
+        
+        .chapter h3 {
+            color: #374151;
+            font-size: 1.4rem;
+            margin: 25px 0 15px 0;
+        }
+        
+        .chapter p {
+            margin-bottom: 15px;
+            color: #4b5563;
+        }
+        
+        .chapter ul, .chapter ol {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+        
+        .chapter li {
+            margin-bottom: 8px;
+            color: #4b5563;
+        }
+        
+        .highlight-box {
+            background: #f0f9ff;
+            border-left: 4px solid #0ea5e9;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .highlight-box h4 {
+            color: #0c4a6e;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .action-item {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .action-item h4 {
+            color: #92400e;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .reflection-box {
+            background: #f3e8ff;
+            border-left: 4px solid #8b5cf6;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .reflection-box h4 {
+            color: #5b21b6;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .next-steps-box {
+            background: #ecfdf5;
+            border-left: 4px solid #10b981;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .next-steps-box h4 {
+            color: #047857;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .nutrition-box {
+            background: #fefbf2;
+            border-left: 4px solid #f59e0b;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .nutrition-box h4 {
+            color: #92400e;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .footer {
+            background: #f8fafc;
+            padding: 30px;
+            text-align: center;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .footer p {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                padding: 40px 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .content {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ebook-container">
+        <div class="header">
+            <h1>De Basisprincipes van Voeding</h1>
+            <div class="subtitle">Module 7: Voeding & Gezondheid - Top Tier Men Academy</div>
+        </div>
+        
+        <div class="content">
+            <div class="toc">
+                <h2>Inhoudsopgave</h2>
+                <ol>
+                    <li><a href="#intro">Inleiding</a></li>
+                    <li><a href="#main-content">Hoofdinhoud</a></li>
+                    <li><a href="#practical-tips">Praktische Tips</a></li>
+                    <li><a href="#reflection">Reflectie Vragen</a></li>
+                    <li><a href="#next-steps">Volgende Stappen</a></li>
+                </ol>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="intro">Inleiding</h2>
+                <p>Welkom bij Module 7: Voeding & Gezondheid, en de fundamentele eerste les over de basisprincipes van voeding. Als Top Tier Man is je lichaam je meest waardevolle bezit - het is de machine waarmee je al je doelen realiseert, je energie opwekt, en je prestaties levert.</p>
+                
+                <div class="nutrition-box">
+                    <h4>🍎 Voeding als Fundament</h4>
+                    <p>Voeding is niet alleen brandstof voor je lichaam. Het is informatie, medicijn, en de basis voor elk aspect van je fysieke en mentale prestaties. Wat je eet bepaalt hoe je je voelt, hoe helder je denkt, en hoe krachtig je opereert.</p>
+                </div>
+                
+                <div class="highlight-box">
+                    <h4>🎯 Wat je gaat leren</h4>
+                    <ul>
+                        <li>De fundamentele macronutriënten en hun functies in het mannelijke lichaam</li>
+                        <li>Hoe voeding directe impact heeft op testosteron, energie en prestaties</li>
+                        <li>De waarheid over moderne voedselverwerking en industriële voeding</li>
+                        <li>Optimale voedingsstrategieën voor verschillende doelen en levensfasen</li>
+                        <li>Praktische implementatie van gezonde voedingspatronen</li>
+                        <li>Hoe voeding je mentale helderheid en focus beïnvloedt</li>
+                    </ul>
+                </div>
+                
+                <p>Deze les legt de wetenschappelijke en praktische basis voor optimale voeding als Top Tier Man. Je leert niet alleen wat je moet eten, maar waarom, wanneer, en hoe je voeding kunt gebruiken als een krachtig instrument voor succes.</p>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="main-content">Hoofdinhoud</h2>
+                
+                <h3>De Wetenschappelijke Basis van Voeding</h3>
+                <p>Voeding werkt op cellulair niveau. Elke hap voedsel die je neemt, wordt omgezet in de bouwstenen en energie die je lichaam nodig heeft om te functioneren, te herstellen, en te groeien.</p>
+                
+                <div class="highlight-box">
+                    <h4>🧬 Cellulair Niveau Voeding</h4>
+                    <p>Je lichaam bestaat uit triljoenen cellen die allemaal specifieke nutriënten nodig hebben. Kwaliteitsvoeding betekent dat elke cel de juiste bouwstenen krijgt voor optimale functie. Slechte voeding betekent dat cellen moeten werken met inferieure materialen.</p>
+                </div>
+                
+                <h3>De Drie Macronutriënten: Diepgaand Begrip</h3>
+                
+                <h4>Eiwitten: De Bouwstenen van de Alpha Man</h4>
+                <p>Eiwitten zijn veel meer dan alleen spieropbouw. Ze zijn essentieel voor elk aspect van mannelijke gezondheid en prestaties.</p>
+                
+                <p><strong>Functies van Eiwitten:</strong></p>
+                <ul>
+                    <li><strong>Spieropbouw en -herstel:</strong> Direct betrokken bij alle spiergroei en recovery</li>
+                    <li><strong>Hormoonproductie:</strong> Testosteron, groeihormoon, en insuline hebben eiwitten nodig</li>
+                    <li><strong>Immuunsysteem:</strong> Antilichamen zijn eiwitten</li>
+                    <li><strong>Enzymen:</strong> Alle metabolische processen zijn afhankelijk van eiwitten</li>
+                    <li><strong>Neurotransmitters:</strong> Dopamine, serotonine worden gemaakt van aminozuren</li>
+                    <li><strong>Verzadiging:</strong> Eiwitten houden je vol en voorkomen overeten</li>
+                </ul>
+                
+                <p><strong>Optimale Eiwitinname voor Top Tier Men:</strong></p>
+                <ul>
+                    <li><strong>Minimum:</strong> 1.6 gram per kg lichaamsgewicht per dag</li>
+                    <li><strong>Actieve Mannen:</strong> 2.0-2.4 gram per kg lichaamsgewicht</li>
+                    <li><strong>Spiermassa Opbouw:</strong> 2.4-3.0 gram per kg lichaamsgewicht</li>
+                    <li><strong>Ouder dan 40:</strong> 2.0-2.5 gram per kg voor behoud van spiermassa</li>
+                </ul>
+                
+                <p><strong>Beste Eiwitbronnen:</strong></p>
+                <ul>
+                    <li><strong>Dierlijke Eiwitten (Complete):</strong> Vlees, vis, gevogelte, eieren, zuivel</li>
+                    <li><strong>Hoogwaardige Plantaardige:</strong> Quinoa, boekweit, hennepzaad</li>
+                    <li><strong>Combinaties:</strong> Rijst + bonen, noten + granen</li>
+                    <li><strong>Supplementen:</strong> Whey, caseïne, plantaardige proteïnen</li>
+                </ul>
+                
+                <h4>Vetten: Essentieel voor Mannelijke Hormonen</h4>
+                <p>Vetten zijn cruciaal voor de Top Tier Man, vooral voor hormonale gezondheid en cognitieve functie.</p>
+                
+                <p><strong>Cruciale Functies van Vetten:</strong></p>
+                <ul>
+                    <li><strong>Testosteronproductie:</strong> Cholesterol is de basis voor alle steroidhormonen</li>
+                    <li><strong>Hersenondersteuning:</strong> 60% van je hersenen bestaat uit vet</li>
+                    <li><strong>Celwanden:</strong> Elk celmembraan heeft vetten nodig</li>
+                    <li><strong>Vitamine Absorptie:</strong> Vitamines A, D, E, K hebben vet nodig</li>
+                    <li><strong>Ontstekingsregulatie:</strong> Omega-3 vetten verminderen ontsteking</li>
+                    <li><strong>Energie:</strong> Stabiele, langdurige energiebron</li>
+                </ul>
+                
+                <p><strong>Types Vetten en Hun Impact:</strong></p>
+                
+                <p><strong>Verzadigde Vetten (25-30% van totale vetinname):</strong></p>
+                <ul>
+                    <li><strong>Bronnen:</strong> Vlees, boter, kokosolie, volle zuivel</li>
+                    <li><strong>Voordelen:</strong> Testosteronondersteuning, stabiele energie</li>
+                    <li><strong>Mythes:</strong> Niet slecht voor het hart bij gezonde mannen</li>
+                </ul>
+                
+                <p><strong>Enkelvoudig Onverzadigde Vetten (40-50%):</strong></p>
+                <ul>
+                    <li><strong>Bronnen:</strong> Olijfolie, avocado's, noten, olijven</li>
+                    <li><strong>Voordelen:</strong> Hartgezondheid, ontstekingsremmend</li>
+                    <li><strong>Stabiliteit:</strong> Meer stabiel dan meervoudig onverzadigde vetten</li>
+                </ul>
+                
+                <p><strong>Meervoudig Onverzadigde Vetten (20-25%):</strong></p>
+                <ul>
+                    <li><strong>Omega-3 (Anti-inflammatoir):</strong> Vette vis, lijnzaad, walnoten</li>
+                    <li><strong>Omega-6 (Pro-inflammatoir):</strong> Meeste plantaardige oliën</li>
+                    <li><strong>Balans Cruciaal:</strong> Verhoudingen 1:1 tot 1:4 omega-6 tot omega-3</li>
+                </ul>
+                
+                <p><strong>Te Vermijden Vetten:</strong></p>
+                <ul>
+                    <li><strong>Trans Vetten:</strong> Industrieel geproduceerde vetten in verwerkte voeding</li>
+                    <li><strong>Excessieve Omega-6:</strong> Te veel plantaardige oliën</li>
+                    <li><strong>Geoxideerde Vetten:</strong> Ranzige oliën en noten</li>
+                </ul>
+                
+                <h4>Koolhydraten: Brandstof voor Prestaties</h4>
+                <p>Koolhydraten zijn niet essentieel zoals eiwitten en vetten, maar zijn krachtige tools voor prestaties en herstel.</p>
+                
+                <p><strong>Functies van Koolhydraten:</strong></p>
+                <ul>
+                    <li><strong>Primaire Energiebron:</strong> Voor hoge intensiteit activiteiten</li>
+                    <li><strong>Glycogeenaanvulling:</strong> Herstel van spierglycogeen</li>
+                    <li><strong>Hersenvoeding:</strong> Glucose is de voorkeur brandstof voor hersenen</li>
+                    <li><strong>Anabole Ondersteuning:</strong> Insuline helpt bij spieropbouw</li>
+                    <li><strong>Serotonineproductie:</strong> Complexe koolhydraten ondersteunen stemming</li>
+                </ul>
+                
+                <p><strong>Types Koolhydraten:</strong></p>
+                
+                <p><strong>Complexe Koolhydraten (Voorkeur):</strong></p>
+                <ul>
+                    <li><strong>Bronnen:</strong> Zoete aardappelen, rijst, havermout, quinoa</li>
+                    <li><strong>Voordelen:</strong> Stabiele energie, vezels, micronutriënten</li>
+                    <li><strong>Timing:</strong> Rond trainingen en in de ochtend</li>
+                </ul>
+                
+                <p><strong>Eenvoudige Koolhydraten (Strategisch):</strong></p>
+                <ul>
+                    <li><strong>Bronnen:</strong> Fruit, honing, dadels</li>
+                    <li><strong>Timing:</strong> Direct na training voor snelle glycogeenaanvulling</li>
+                    <li><strong>Beperkt gebruik:</strong> Niet als basis van voeding</li>
+                </ul>
+                
+                <p><strong>Te Vermijden:</strong></p>
+                <ul>
+                    <li><strong>Geraffineerde Suikers:</strong> Tafelsuiker, siropen, snoep</li>
+                    <li><strong>Verwerkte Granen:</strong> Wit brood, witte rijst, gebak</li>
+                    <li><strong>Frisdranken:</strong> Pure suiker zonder voedingswaarde</li>
+                </ul>
+                
+                <h3>Micronutriënten: De Performance Enhancers</h3>
+                
+                <h4>Vitamines en Mineralen voor de Alpha Man</h4>
+                <p>Micronutriënten zijn de katalysatoren die alle lichaamsprocessen mogelijk maken. Deficiënties leiden tot suboptimale prestaties.</p>
+                
+                <p><strong>Cruciale Vitamines voor Mannen:</strong></p>
+                
+                <p><strong>Vitamine D (Het Testosteron Vitamine):</strong></p>
+                <ul>
+                    <li><strong>Functies:</strong> Testosteronproductie, immuunsysteem, botgezondheid</li>
+                    <li><strong>Bronnen:</strong> Zonlicht, vette vis, supplementen</li>
+                    <li><strong>Dosering:</strong> 2000-5000 IU per dag</li>
+                    <li><strong>Test:</strong> Streef naar 25(OH)D niveau van 30-50 ng/ml</li>
+                </ul>
+                
+                <p><strong>B-Vitamines (Energie Complex):</strong></p>
+                <ul>
+                    <li><strong>B1 (Thiamine):</strong> Energiemetabolisme, zenuwfunctie</li>
+                    <li><strong>B6 (Pyridoxine):</strong> Testosteronproductie, neurotransmitters</li>
+                    <li><strong>B12 (Cobalamine):</strong> Energie, cognitieve functie, DNA-synthese</li>
+                    <li><strong>Folaat:</strong> DNA-reparatie, methylering</li>
+                </ul>
+                
+                <p><strong>Antioxidant Vitamines:</strong></p>
+                <ul>
+                    <li><strong>Vitamine C:</strong> Immuunsysteem, collageen, stress recovery</li>
+                    <li><strong>Vitamine E:</strong> Celbescherming, cardiovasculaire gezondheid</li>
+                    <li><strong>Vitamine A:</strong> Gezichtsscherpte, immuunsysteem</li>
+                </ul>
+                
+                <p><strong>Essentiële Mineralen voor Mannen:</strong></p>
+                
+                <p><strong>Zink (Testosteron Mineraal):</strong></p>
+                <ul>
+                    <li><strong>Functies:</strong> Testosteronproductie, immuunsysteem, wondgenezing</li>
+                    <li><strong>Bronnen:</strong> Oesters, vlees, pompoenzaden</li>
+                    <li><strong>Dosering:</strong> 15-30 mg per dag</li>
+                    <li><strong>Belangrijk:</strong> Balans met koper (8:1 ratio)</li>
+                </ul>
+                
+                <p><strong>Magnesium (Relaxatie Mineraal):</strong></p>
+                <ul>
+                    <li><strong>Functies:</strong> 300+ enzymatische reacties, slaap, spierontspanning</li>
+                    <li><strong>Bronnen:</strong> Donkere bladgroenten, noten, donkere chocolade</li>
+                    <li><strong>Dosering:</strong> 400-600 mg per dag</li>
+                    <li><strong>Types:</strong> Glycinaat, threnonaat, citraat</li>
+                </ul>
+                
+                <p><strong>IJzer (Zuurstoftransport):</strong></p>
+                <ul>
+                    <li><strong>Functies:</strong> Hemoglobine, zuurstoftransport, energie</li>
+                    <li><strong>Bronnen:</strong> Rood vlees, orgaanvlees, donkere bladgroenten</li>
+                    <li><strong>Voorzichtig:</strong> Te veel ijzer kan oxidatie veroorzaken</li>
+                    <li><strong>Test eerst:</strong> Ferritine-niveaus controleren</li>
+                </ul>
+                
+                <h3>Voedingstiming en Frequentie</h3>
+                
+                <h4>Maaltijdtiming voor Optimale Prestaties</h4>
+                
+                <p><strong>Circadiaans Ritme en Voeding:</strong></p>
+                <ul>
+                    <li><strong>Ochtend:</strong> Cortisol hoog, insulinegevoeligheid hoog</li>
+                    <li><strong>Middag:</strong> Piek metabolisme, beste tijd voor grootste maaltijd</li>
+                    <li><strong>Avond:</strong> Melatonine stijgt, lichtere maaltijden</li>
+                </ul>
+                
+                <p><strong>Pre-Workout Voeding (1-2 uur voor training):</strong></p>
+                <ul>
+                    <li><strong>Koolhydraten:</strong> 30-60g voor energie</li>
+                    <li><strong>Eiwit:</strong> 20-30g voor spierondersteuning</li>
+                    <li><strong>Beperkt vet:</strong> Vertraagt vertering</li>
+                    <li><strong>Voorbeeld:</strong> Banaan met whey protein</li>
+                </ul>
+                
+                <p><strong>Post-Workout Voeding (binnen 30-60 min):</strong></p>
+                <ul>
+                    <li><strong>Eiwit:</strong> 30-50g voor herstel</li>
+                    <li><strong>Koolhydraten:</strong> 50-100g voor glycogeenaanvulling</li>
+                    <li><strong>Leucine:</strong> 2.5-3g voor spiereiwitssynthese</li>
+                    <li><strong>Voorbeeld:</strong> Whey shake met banaan</li>
+                </ul>
+                
+                <h4>Intermittent Fasting voor Mannen</h4>
+                
+                <p><strong>Voordelen van Intermittent Fasting:</strong></p>
+                <ul>
+                    <li><strong>Hormoonoptimalisatie:</strong> Verhoogde groeihormoon en testosteron</li>
+                    <li><strong>Metabole Flexibiliteit:</strong> Beter vetverbranding</li>
+                    <li><strong>Autophagie:</strong> Cellulair opruimproces</li>
+                    <li><strong>Mentale Helderheid:</strong> Stabiele bloedsuiker</li>
+                    <li><strong>Eenvoud:</strong> Minder maaltijdplanning</li>
+                </ul>
+                
+                <p><strong>Populaire IF Protocollen:</strong></p>
+                <ul>
+                    <li><strong>16:8:</strong> 16 uur vasten, 8 uur eten</li>
+                    <li><strong>18:6:</strong> 18 uur vasten, 6 uur eten</li>
+                    <li><strong>OMAD:</strong> Een maaltijd per dag</li>
+                    <li><strong>5:2:</strong> 5 dagen normaal, 2 dagen beperkt</li>
+                </ul>
+                
+                <h3>Voedselkwaliteit en Sourcing</h3>
+                
+                <h4>De Impact van Voedselkwaliteit</h4>
+                
+                <p><strong>Biologisch vs. Conventioneel:</strong></p>
+                <ul>
+                    <li><strong>Pesticiden:</strong> Conventionele producten bevatten residuen</li>
+                    <li><strong>Nutriëntdichtheid:</strong> Biologisch vaak hoger in antioxidanten</li>
+                    <li><strong>Bodemkwaliteit:</strong> Biologische landbouw behoudt bodemgezondheid</li>
+                    <li><strong>Prioritering:</strong> "Dirty Dozen" altijd biologisch</li>
+                </ul>
+                
+                <p><strong>Vlees- en Viskwaliteit:</strong></p>
+                <ul>
+                    <li><strong>Grasgevoed Vlees:</strong> Hoger omega-3, CLA, vitamines</li>
+                    <li><strong>Vrije Uitloop:</strong> Betere dierenwelzijn, nutriëntprofiel</li>
+                    <li><strong>Wild Gevangen Vis:</strong> Minder vervuiling dan gekweekte vis</li>
+                    <li><strong>Orgaanvlees:</strong> Meest nutriëntdichte voedingsmiddelen</li>
+                </ul>
+                
+                <h4>Voedselverwerking en Additieven</h4>
+                
+                <p><strong>Te Vermijden Additieven:</strong></p>
+                <ul>
+                    <li><strong>Kunstmatige Zoetstoffen:</strong> Mogelijk negatieve impact op darmmicrobioom</li>
+                    <li><strong>Conserveermiddelen:</strong> BHA, BHT, sulfaten</li>
+                    <li><strong>Kunstmatige Kleurstoffen:</strong> Mogelijke hyperactiviteit en allergieën</li>
+                    <li><strong>MSG:</strong> Kan hoofdpijn en overgevoeligheid veroorzaken</li>
+                    <li><strong>Trans Vetten:</strong> Verhogen inflammatie en hartziekte risico</li>
+                </ul>
+                
+                <p><strong>Voedselverwerkingsregels:</strong></p>
+                <ol>
+                    <li><strong>Minder dan 5 ingrediënten:</strong> Hoe korter de lijst, hoe beter</li>
+                    <li><strong>Herkenbare ingrediënten:</strong> Als je het niet kunt uitspreken, vermijd het</li>
+                    <li><strong>Geen suiker in de eerste 3:</strong> Ingrediënten zijn op gewicht geordend</li>
+                    <li><strong>Minimale verwerking:</strong> Hoe dichter bij natuurlijk, hoe beter</li>
+                </ol>
+                
+                <h3>Hydratatie en Elektrolyten</h3>
+                
+                <h4>Water: De Basis van Prestaties</h4>
+                
+                <p><strong>Functies van Water:</strong></p>
+                <ul>
+                    <li><strong>Temperatuurregulatie:</strong> Zweten en vasculaire controle</li>
+                    <li><strong>Nutriënttransport:</strong> Alle metabolisme vereist water</li>
+                    <li><strong>Gewrichtssmering:</strong> Gewrichtsvloeistof is watergebaseerd</li>
+                    <li><strong>Afvalverwijdering:</strong> Urine en ontlasting</li>
+                    <li><strong>Cognitieve Functie:</strong> Dehydratatie vermindert hersenprestar</li>
+                </ul>
+                
+                <p><strong>Optimale Hydratatie:</strong></p>
+                <ul>
+                    <li><strong>Basis:</strong> 35ml per kg lichaamsgewicht per dag</li>
+                    <li><strong>Actief:</strong> Plus 500-750ml per uur intensieve training</li>
+                    <li><strong>Klimaat:</strong> Meer in warm/droog klimaat</li>
+                    <li><strong>Kwaliteit:</strong> Gefilterd water zonder fluoride/chloride</li>
+                </ul>
+                
+                <h4>Elektrolyten voor Prestaties</h4>
+                
+                <p><strong>Cruciale Elektrolyten:</strong></p>
+                <ul>
+                    <li><strong>Natrium:</strong> Vochtbalans, zenuwfunctie</li>
+                    <li><strong>Kalium:</strong> Spiersamentrekking, bloeddruk</li>
+                    <li><strong>Magnesium:</strong> Enzymatische reacties, relaxatie</li>
+                    <li><strong>Calcium:</strong> Botstofwisseling, spierfunctie</li>
+                </ul>
+                
+                <h3>Supplementen: Wanneer en Wat</h3>
+                
+                <h4>Basis Supplementen voor Elke Man</h4>
+                
+                <p><strong>Tier 1 (Essentieel):</strong></p>
+                <ul>
+                    <li><strong>Multivitamine:</strong> Hoogwaardige basis voor micronutriënten</li>
+                    <li><strong>Vitamine D3:</strong> 2000-5000 IU dagelijks</li>
+                    <li><strong>Omega-3:</strong> 2-3g EPA/DHA dagelijks</li>
+                    <li><strong>Magnesium:</strong> 400-600mg voor de slaap</li>
+                </ul>
+                
+                <p><strong>Tier 2 (Performance):</strong></p>
+                <ul>
+                    <li><strong>Whey Protein:</strong> Post-workout en convenience</li>
+                    <li><strong>Creatine Monohydraat:</strong> 5g dagelijks voor kracht</li>
+                    <li><strong>Zink:</strong> 15-25mg als deficiënt</li>
+                    <li><strong>Probiotica:</strong> Voor darmmicrobioom</li>
+                </ul>
+                
+                <p><strong>Tier 3 (Gespecialiseerd):</strong></p>
+                <ul>
+                    <li><strong>Ashwagandha:</strong> Stressvermindering, testosteron</li>
+                    <li><strong>Rhodiola:</strong> Adaptogeen voor energie</li>
+                    <li><strong>CoQ10:</strong> Cellulair energie, hartgezondheid</li>
+                    <li><strong>Curcumine:</strong> Anti-inflammatoire effecten</li>
+                </ul>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="practical-tips">Praktische Tips</h2>
+                <div class="action-item">
+                    <h4>🍎 Voedingsoptimalisatie Implementatie</h4>
+                    
+                    <h5>1. Macronutriënt Calculatie</h5>
+                    <p><strong>Stap-voor-Stap Macro Berekening:</strong></p>
+                    <ol>
+                        <li><strong>Bepaal je doel:</strong> Afvallen, onderhouden, spieropbouw</li>
+                        <li><strong>Bereken BMR:</strong> Harris-Benedict formule</li>
+                        <li><strong>Vermenigvuldig activiteitsfactor:</strong> 1.4-1.9</li>
+                        <li><strong>Pas aan voor doel:</strong> -500 kcal (afvallen), +300 kcal (opbouw)</li>
+                        <li><strong>Verdeel macro's:</strong> Eiwit eerst, dan vet, rest koolhydraten</li>
+                    </ol>
+                    
+                    <h5>2. Maaltijdplanning Systeem</h5>
+                    <p><strong>Wekelijkse Meal Prep:</strong></p>
+                    <ul>
+                        <li><strong>Zondag Voorbereiding:</strong> 2-3 uur voor de hele week</li>
+                        <li><strong>Batch Cooking:</strong> Grote hoeveelheden basis ingrediënten</li>
+                        <li><strong>Portionering:</strong> Verdeel direct in maaltijdcontainers</li>
+                        <li><strong>Variatie:</strong> Verschillende sauzen en kruiden</li>
+                        <li><strong>Backup Plan:</strong> Noodmaaltijden in vriezer</li>
+                    </ul>
+                    
+                    <h5>3. Shopping en Inkoop Strategie</h5>
+                    <p><strong>Smart Shopping Protocol:</strong></p>
+                    <ul>
+                        <li><strong>Lijst Maken:</strong> Gebaseerd op maaltijdplan</li>
+                        <li><strong>Perimeter Shopping:</strong> Begin bij vers, vlees, zuivel</li>
+                        <li><strong>Bulk Inkoop:</strong> Niet-bederfelijke basis ingrediënten</li>
+                        <li><strong>Kwaliteitscheck:</strong> Ingrediëntenlijsten lezen</li>
+                        <li><strong>Seizoensgebonden:</strong> Koop wat in seizoen is</li>
+                    </ul>
+                    
+                    <h5>4. Kook Technieken voor Optimale Voeding</h5>
+                    <p><strong>Nutriënt-Behoudende Bereiding:</strong></p>
+                    <ul>
+                        <li><strong>Stomen:</strong> Behoudt meeste vitamines en mineralen</li>
+                        <li><strong>Lage Temperatuur:</strong> Langzaam garen behoudt nutriënten</li>
+                        <li><strong>Minimaal Water:</strong> Voorkom uitlekken van mineralen</li>
+                        <li><strong>Verse Kruiden:</strong> Laatste minuut toevoegen</li>
+                        <li><strong>Gezonde Vetten:</strong> Koken met stabiele vetten zoals kokosolie</li>
+                    </ul>
+                </div>
+                
+                <div class="nutrition-box">
+                    <h4>📊 Voedingstracking en Monitoring</h4>
+                    
+                    <h5>Tracking Tools en Apps</h5>
+                    <p><strong>Aanbevolen Tracking Apps:</strong></p>
+                    <ul>
+                        <li><strong>MyFitnessPal:</strong> Grootste voedingsdatabase</li>
+                        <li><strong>Cronometer:</strong> Meest accurate micronutriënt tracking</li>
+                        <li><strong>Carb Manager:</strong> Speciaal voor low-carb diëten</li>
+                        <li><strong>Yazio:</strong> Gebruiksvriendelijke Nederlandse interface</li>
+                    </ul>
+                    
+                    <h5>Biomarkers om te Monitoren</h5>
+                    <p><strong>Essentiële Bloedwaardes (3-6 maanden):</strong></p>
+                    <ul>
+                        <li><strong>Basis Panel:</strong> Glucose, HbA1c, lipiden profiel</li>
+                        <li><strong>Inflammatie:</strong> CRP, ESR</li>
+                        <li><strong>Vitamines:</strong> D3, B12, folaat</li>
+                        <li><strong>Mineralen:</strong> IJzer, ferritine, magnesium</li>
+                        <li><strong>Hormonen:</strong> Testosteron, thyroid panel</li>
+                    </ul>
+                    
+                    <h5>Dagelijkse Monitoring Metrics</h5>
+                    <p><strong>Zelf-Assessment Protocol:</strong></p>
+                    <ul>
+                        <li><strong>Energie Level (1-10):</strong> Dagelijkse rating</li>
+                        <li><strong>Slaap Kwaliteit:</strong> Uren en herstel gevoel</li>
+                        <li><strong>Digestie:</strong> Regelmatigheid en comfort</li>
+                        <li><strong>Mood en Focus:</strong> Mentale helderheid tracking</li>
+                        <li><strong>Training Performance:</strong> Kracht en uithoudingsvermogen</li>
+                    </ul>
+                </div>
+                
+                <div class="action-item">
+                    <h4>🥗 Praktische Maaltijd Templates</h4>
+                    
+                    <h5>Ontbijt Templates</h5>
+                    <p><strong>High-Protein Opties:</strong></p>
+                    <ul>
+                        <li><strong>Power Omelet:</strong> 3 eieren + groenten + kaas + avocado</li>
+                        <li><strong>Greek Yogurt Bowl:</strong> Greek yogurt + noten + bessen + honing</li>
+                        <li><strong>Protein Smoothie:</strong> Whey + banaan + spinazie + amandelmelk</li>
+                        <li><strong>Overnight Oats:</strong> Havermout + chiazaad + protein powder</li>
+                    </ul>
+                    
+                    <h5>Lunch Templates</h5>
+                    <p><strong>Balanced Power Meals:</strong></p>
+                    <ul>
+                        <li><strong>Power Bowl:</strong> Quinoa + gegrilde kip + groenten + dressing</li>
+                        <li><strong>Salad Plus:</strong> Grote salade + vlees/vis + noten + olijfolie</li>
+                        <li><strong>Wrap Complete:</strong> Volkoren wrap + eiwit + groenten + hummus</li>
+                        <li><strong>Soup & Protein:</strong> Groenten soep + extra eiwit</li>
+                    </ul>
+                    
+                    <h5>Diner Templates</h5>
+                    <p><strong>Recovery Focused:</strong></p>
+                    <ul>
+                        <li><strong>Classic Combo:</strong> Vlees/vis + groenten + gezonde koolhydraten</li>
+                        <li><strong>One-Pan Meals:</strong> Alles samen in de oven</li>
+                        <li><strong>Stir-Fry Style:</strong> Quick groenten + eiwit + rijst</li>
+                        <li><strong>Mediterranean:</strong> Vis + groenten + olijfolie + quinoa</li>
+                    </ul>
+                    
+                    <h5>Snack Templates</h5>
+                    <p><strong>Strategic Snacking:</strong></p>
+                    <ul>
+                        <li><strong>Pre-Workout:</strong> Banaan + amandelboter</li>
+                        <li><strong>Post-Workout:</strong> Whey shake + fruit</li>
+                        <li><strong>Evening:</strong> Greek yogurt + noten</li>
+                        <li><strong>Emergency:</strong> Protein bar + water</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="reflection">Reflectie Vragen</h2>
+                <div class="reflection-box">
+                    <h4>🤔 Voeding Self-Assessment</h4>
+                    
+                    <p><strong>1. Huidige Voedingspatronen:</strong></p>
+                    <ul>
+                        <li>Hoe zou je je huidige voedingspatroon beoordelen op een schaal van 1-10?</li>
+                        <li>Welke maaltijd van de dag is je sterkste/zwakste qua voeding?</li>
+                        <li>Hoeveel verwerkte voeding eet je dagelijks?</li>
+                        <li>Hoe vaak eet je buiten de deur en wat kies je dan?</li>
+                    </ul>
+                    
+                    <p><strong>2. Energie en Prestaties:</strong></p>
+                    <ul>
+                        <li>Op welke momenten van de dag voel je je het meest energiek?</li>
+                        <li>Heb je regelmatig energiedips gedurende de dag?</li>
+                        <li>Hoe beïnvloedt je voeding je workout prestaties?</li>
+                        <li>Voel je je helder en gefocust na de maaltijden?</li>
+                    </ul>
+                    
+                    <p><strong>3. Voedingskennis en Bewustzijn:</strong></p>
+                    <ul>
+                        <li>Hoe goed begrijp je de rol van macronutriënten in je lichaam?</li>
+                        <li>Lees je voedingslabels en ingrediëntenlijsten?</li>
+                        <li>Weet je hoeveel eiwit je dagelijks nodig hebt?</li>
+                        <li>Hoe bewust ben je van de kwaliteit van je voedingsbronnen?</li>
+                    </ul>
+                    
+                    <p><strong>4. Implementatie Uitdagingen:</strong></p>
+                    <ul>
+                        <li>Wat zijn je grootste obstakels voor gezonde voeding?</li>
+                        <li>Hoe ga je om met sociale situaties en voeding?</li>
+                        <li>Wat zijn je trigger foods die je moeilijk kunt weerstaan?</li>
+                        <li>Hoe zou betere voeding je leven kunnen verbeteren?</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="next-steps">Volgende Stappen</h2>
+                <div class="next-steps-box">
+                    <h4>🚀 Voeding Optimalisatie Plan</h4>
+                    
+                    <p><strong>Phase 1: Foundation (Week 1-2)</strong></p>
+                    <ol>
+                        <li><strong>Huidige Voeding Assessment</strong> - Track alles wat je eet voor 1 week</li>
+                        <li><strong>Macro Berekening</strong> - Bepaal je optimale eiwit, vet, koolhydraat ratio</li>
+                        <li><strong>Pantry Audit</strong> - Verwijder verwerkte voeding, vul aan met kwaliteit</li>
+                        <li><strong>Basis Supplementen</strong> - Start met multivitamine, D3, omega-3</li>
+                        <li><strong>Hydratatie Protocol</strong> - Implementeer optimale waterinname</li>
+                    </ol>
+                    
+                    <p><strong>Phase 2: Implementation (Week 3-8)</strong></p>
+                    <ol>
+                        <li><strong>Meal Planning</strong> - Ontwikkel wekelijkse maaltijdplanning routine</li>
+                        <li><strong>Meal Prep</strong> - Implementeer weekend voorbereiding systeem</li>
+                        <li><strong>Timing Optimization</strong> - Pas maaltijdtiming aan rond training</li>
+                        <li><strong>Quality Upgrade</strong> - Focus op biologische en grasgevoed producten</li>
+                        <li><strong>Habit Stacking</strong> - Koppel nieuwe voedingsgewoonten aan bestaande</li>
+                    </ol>
+                    
+                    <p><strong>Phase 3: Optimization (Month 3-6)</strong></p>
+                    <ol>
+                        <li><strong>Advanced Strategies</strong> - Experimenteer met intermittent fasting</li>
+                        <li><strong>Performance Tuning</strong> - Optimaliseer voeding voor specifieke doelen</li>
+                        <li><strong>Biomarker Monitoring</strong> - Laat bloedwaardes checken</li>
+                        <li><strong>Supplement Fine-tuning</strong> - Pas supplementen aan op basis van resultaten</li>
+                        <li><strong>Long-term Sustainability</strong> - Ontwikkel levenslange voedingsgewoonten</li>
+                    </ol>
+                    
+                    <p><strong>Immediate Actions (Starting Today):</strong></p>
+                    <ol>
+                        <li><strong>Water Intake</strong> - Drink 500ml water bij het opstaan</li>
+                        <li><strong>Protein Priority</strong> - Zorg voor eiwit bij elke maaltijd</li>
+                        <li><strong>Elimination</strong> - Verwijder één verwerkt voedingsitem uit je keuken</li>
+                        <li><strong>Tracking Start</strong> - Download een voedingstracking app</li>
+                        <li><strong>Quality Purchase</strong> - Koop één biologisch product bij je volgende boodschappen</li>
+                    </ol>
+                    
+                    <p><strong>Voeding Mastery Indicators (6 months):</strong></p>
+                    <ul>
+                        <li><strong>Stable Energy:</strong> Consistent energieniveau gedurende de dag</li>
+                        <li><strong>Optimal Body Composition:</strong> Gezond vetpercentage en spiermassa</li>
+                        <li><strong>Enhanced Performance:</strong> Betere workout prestaties en recovery</li>
+                        <li><strong>Mental Clarity:</strong> Scherpe focus en mentale helderheid</li>
+                        <li><strong>Digestive Health:</strong> Gezonde spijsvertering en geen problemen</li>
+                        <li><strong>Biomarker Optimization:</strong> Alle bloedwaardes in optimale ranges</li>
+                        <li><strong>Effortless Habits:</strong> Gezonde voeding als automatisme</li>
+                        <li><strong>Flexible Implementation:</strong> Handhaven van voeding in alle situaties</li>
+                    </ul>
+                </div>
+                
+                <div class="nutrition-box">
+                    <h4>🍎 Voeding Mastery Mantra</h4>
+                    <p><em>"Mijn lichaam is mijn meest waardevolle bezit en ik voed het met de hoogste kwaliteit brandstof. Elke maaltijd is een kans om sterker, scherper en energieker te worden. Ik kies bewust voor voeding die mijn prestaties, gezondheid en levensduur optimaliseert. Voeding is mijn medicijn, mijn energie en mijn kracht."</em></p>
+                    
+                    <p>Remember: Je bent wat je eet - letterlijk. Elke cel in je lichaam wordt herbouwd uit de voeding die je consumeert. Kies voor excellentie in je voeding en je kiest voor excellentie in elk aspect van je leven.</p>
+                    
+                    <p><strong>Eet als een Top Tier Man. Voed je lichaam, voed je prestaties, voed je succes.</strong></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2025 Top Tier Men Academy. Alle rechten voorbehouden.</p>
+            <p>Voor meer informatie bezoek <strong>platform.toptiermen.eu</strong></p>
+        </div>
+    </div>
+</body>
+</html>

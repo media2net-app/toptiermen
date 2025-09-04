@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>De Waarheid over Testosteron Doping - Top Tier Men Academy</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background: #f9fafb;
+        }
+        
+        .ebook-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #8BAE5A 0%, #3A4D23 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -0.025em;
+        }
+        
+        .header .subtitle {
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: white;
+            opacity: 1;
+        }
+        
+        .content {
+            padding: 50px;
+        }
+        
+        .toc {
+            background: #f8fafc;
+            border-left: 4px solid #8BAE5A;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 8px;
+        }
+        
+        .toc h2 {
+            color: #8BAE5A;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .toc ol {
+            list-style: none;
+            counter-reset: toc-counter;
+        }
+        
+        .toc li {
+            counter-increment: toc-counter;
+            margin-bottom: 8px;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        .toc li::before {
+            content: counter(toc-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #8BAE5A;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .toc a {
+            color: #374151;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .toc a:hover {
+            color: #8BAE5A;
+        }
+        
+        .chapter {
+            margin: 40px 0;
+        }
+        
+        .chapter h2 {
+            color: #8BAE5A;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 10px;
+        }
+        
+        .chapter h3 {
+            color: #374151;
+            font-size: 1.4rem;
+            margin: 25px 0 15px 0;
+        }
+        
+        .chapter p {
+            margin-bottom: 15px;
+            color: #4b5563;
+        }
+        
+        .chapter ul, .chapter ol {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+        
+        .chapter li {
+            margin-bottom: 8px;
+            color: #4b5563;
+        }
+        
+        .highlight-box {
+            background: #f0f9ff;
+            border-left: 4px solid #0ea5e9;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .highlight-box h4 {
+            color: #0c4a6e;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .action-item {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .action-item h4 {
+            color: #92400e;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .reflection-box {
+            background: #f3e8ff;
+            border-left: 4px solid #8b5cf6;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .reflection-box h4 {
+            color: #5b21b6;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .next-steps-box {
+            background: #ecfdf5;
+            border-left: 4px solid #10b981;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .next-steps-box h4 {
+            color: #047857;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .danger-box {
+            background: #fef2f2;
+            border-left: 4px solid #ef4444;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .danger-box h4 {
+            color: #dc2626;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .footer {
+            background: #f8fafc;
+            padding: 30px;
+            text-align: center;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .footer p {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                padding: 40px 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .content {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ebook-container">
+        <div class="header">
+            <h1>De Waarheid over Testosteron Doping</h1>
+            <div class="subtitle">Module 1: Testosteron - Top Tier Men Academy</div>
+        </div>
+        
+        <div class="content">
+            <div class="toc">
+                <h2>Inhoudsopgave</h2>
+                <ol>
+                    <li><a href="#intro">Inleiding</a></li>
+                    <li><a href="#main-content">Hoofdinhoud</a></li>
+                    <li><a href="#practical-tips">Praktische Tips</a></li>
+                    <li><a href="#reflection">Reflectie Vragen</a></li>
+                    <li><a href="#next-steps">Volgende Stappen</a></li>
+                </ol>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="intro">Inleiding</h2>
+                <p>Welkom bij les 4 van Module 1: Testosteron. Dit is waarschijnlijk de most controversial en misunderstood topic in men's health. In deze les gaan we brutally honest zijn over testosteron "doping" - wat het is, hoe het werkt, de risks, de benefits, en most importantly: of het right is voor jou.</p>
+                
+                <div class="danger-box">
+                    <h4>⚠️ Belangrijke Disclaimer</h4>
+                    <p>Deze informatie is puur educational. We promoten of raden GEEN illegal drug use aan. Alle hormone interventions moeten gebeuren onder proper medical supervision. Deze les is bedoeld om je te educaten, niet om medical advice te geven.</p>
+                </div>
+                
+                <div class="highlight-box">
+                    <h4>🎯 Wat je gaat leren</h4>
+                    <ul>
+                        <li>De complete truth over anabolic steroids en testosterone supplementation</li>
+                        <li>Verschillende types van testosteron compounds en hun effects</li>
+                        <li>Real risks vs. hyped fears van testosterone use</li>
+                        <li>Hoe steroid cycles werk en wat de consequences zijn</li>
+                        <li>De difference tussen medical TRT en prestaties enhancement</li>
+                        <li>Ethical considerations en legal implications</li>
+                    </ul>
+                </div>
+                
+                <p>Door deze les te voltooien, zul je een complete, unbiased understanding hebben van testosterone enhancement - allowing je to make informed decisions about your health en future, whatever path je kiest.</p>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="main-content">Hoofdinhoud</h2>
+                
+                <h3>Defining "Testosteron Doping"</h3>
+                <p>Het term "doping" implies cheating, maar de reality is much more nuanced. We moeten onderscheid maken tussen verschillende applications:</p>
+                
+                <h4>Medisch Testosterone Replacement (TRT)</h4>
+                <ul>
+                    <li><strong>Purpose:</strong> Restore normal physiological levels</li>
+                    <li><strong>Dosage:</strong> 100-200mg testosterone per week</li>
+                    <li><strong>Target:</strong> 700-1000 ng/dL blood levels</li>
+                    <li><strong>Legality:</strong> Legal with prescription</li>
+                    <li><strong>Goal:</strong> Health restoration, not enhancement</li>
+                </ul>
+                
+                <h4>Performance Enhancement (Supraphysiological)</h4>
+                <ul>
+                    <li><strong>Purpose:</strong> Exceed natural human limits</li>
+                    <li><strong>Dosage:</strong> 300-1000mg+ testosterone per week</li>
+                    <li><strong>Target:</strong> 1500-5000+ ng/dL blood levels</li>
+                    <li><strong>Legality:</strong> Illegal without prescription</li>
+                    <li><strong>Goal:</strong> Superhuman prestaties en physique</li>
+                </ul>
+                
+                <h3>Types of Testosterone Compounds</h3>
+                
+                <h4>Testosterone Esters</h4>
+                <p><strong>Testosterone Cypionate:</strong></p>
+                <ul>
+                    <li><strong>Half-life:</strong> 8-12 dagen</li>
+                    <li><strong>Injection frequency:</strong> 1-2x per week</li>
+                    <li><strong>Onset:</strong> 2-4 weeks voor full effect</li>
+                    <li><strong>Most common:</strong> Used in TRT en cycles</li>
+                </ul>
+                
+                <p><strong>Testosterone Enanthate:</strong></p>
+                <ul>
+                    <li><strong>Half-life:</strong> 7-10 dagen</li>
+                    <li><strong>Injection frequency:</strong> 1-2x per week</li>
+                    <li><strong>Similarity:</strong> Nearly identical to cypionate</li>
+                </ul>
+                
+                <p><strong>Testosterone Propionate:</strong></p>
+                <ul>
+                    <li><strong>Half-life:</strong> 2-3 dagen</li>
+                    <li><strong>Injection frequency:</strong> Every other day</li>
+                    <li><strong>Advantage:</strong> Faster onset, easier to control</li>
+                    <li><strong>Disadvantage:</strong> More frequent injections</li>
+                </ul>
+                
+                <h4>Synthetic Anabolic Steroids (Non-Testosterone)</h4>
+                <p><strong>Common compounds used with testosterone:</strong></p>
+                <ul>
+                    <li><strong>Dianabol (Methandrostenolone):</strong> Oral, rapid mass gain</li>
+                    <li><strong>Deca-Durabolin (Nandrolone):</strong> Joint health, steady gains</li>
+                    <li><strong>Trenbolone:</strong> Extreme potency, significante side effects</li>
+                    <li><strong>Anavar (Oxandrolone):</strong> "Mild" oral, cutting compound</li>
+                </ul>
+                
+                <h3>How Steroid Cycles Work</h3>
+                
+                <h4>Basic Testosterone Cycle (Beginner)</h4>
+                <p><strong>Duration:</strong> 12-16 weeks</p>
+                <p><strong>Dosage:</strong> 300-500mg testosterone per week</p>
+                <p><strong>Expected results:</strong></p>
+                <ul>
+                    <li>10-20 lbs muscle gain</li>
+                    <li>Significant strength increase</li>
+                    <li>Enhanced recovery</li>
+                    <li>Improved mood en energy</li>
+                    <li>Increased libido</li>
+                </ul>
+                
+                <p><strong>Timeline:</strong></p>
+                <ul>
+                    <li><strong>Week 1-3:</strong> Bouwen up blood levels</li>
+                    <li><strong>Week 4-8:</strong> Peak effects, rapid gains</li>
+                    <li><strong>Week 9-12:</strong> Continued progress</li>
+                    <li><strong>Week 13-16:</strong> Cycle completion</li>
+                </ul>
+                
+                <h4>Post Cycle Therapy (PCT)</h4>
+                <p>After stopping exogenous testosterone, natural production is suppressed:</p>
+                <ul>
+                    <li><strong>Duration:</strong> 4-6 weeks after cycle</li>
+                    <li><strong>Purpose:</strong> Restore natural testosterone production</li>
+                    <li><strong>Common drugs:</strong> Clomid, Nolvadex, HCG</li>
+                    <li><strong>Critical:</strong> Without PCT, testosterone may remain suppressed</li>
+                </ul>
+                
+                <h3>Real Benefits of Testosterone Enhancement</h3>
+                
+                <h4>Physical Benefits</h4>
+                <ul>
+                    <li><strong>Muscle Growth:</strong> 2-3x faster than natural training</li>
+                    <li><strong>Strength Gains:</strong> 30-50% increases common</li>
+                    <li><strong>Fat Loss:</strong> Enhanced metabolism, better body composition</li>
+                    <li><strong>Recovery:</strong> Train harder, more frequently</li>
+                    <li><strong>Bone Density:</strong> Significant improvements</li>
+                </ul>
+                
+                <h4>Mental/Cognitive Benefits</h4>
+                <ul>
+                    <li><strong>Confidence:</strong> Dramatic increase in self-assurance</li>
+                    <li><strong>Mood:</strong> Enhanced well-being, reduced depression</li>
+                    <li><strong>Energy:</strong> Sustained high energy levels</li>
+                    <li><strong>Focus:</strong> Improved concentration en drive</li>
+                    <li><strong>Aggression:</strong> Increased assertiveness (controllable)</li>
+                </ul>
+                
+                <h4>Sexual Benefits</h4>
+                <ul>
+                    <li><strong>Libido:</strong> Dramatic increase in sexual desire</li>
+                    <li><strong>Performance:</strong> Enhanced erectile function</li>
+                    <li><strong>Stamina:</strong> Increased sexual endurance</li>
+                    <li><strong>Recovery:</strong> Shorter refractory periods</li>
+                </ul>
+                
+                <h3>Real Risks & Side Effects</h3>
+                
+                <h4>Short-term Risks (During Use)</h4>
+                <p><strong>Common Side Effects:</strong></p>
+                <ul>
+                    <li><strong>Acne:</strong> Increased oil production, back/shoulder acne</li>
+                    <li><strong>Hair Loss:</strong> Accelerated male pattern baldness (if genetically predisposed)</li>
+                    <li><strong>Mood Changes:</strong> Increased aggression, mood swings</li>
+                    <li><strong>Sleep Issues:</strong> Insomnia, restless sleep</li>
+                    <li><strong>Water Retention:</strong> Bloating, elevated blood pressure</li>
+                </ul>
+                
+                <p><strong>Serious Side Effects:</strong></p>
+                <ul>
+                    <li><strong>Cardiovascular:</strong> Elevated blood pressure, cholesterol changes</li>
+                    <li><strong>Liver Stress:</strong> Especially with oral steroids</li>
+                    <li><strong>Gynecomastia:</strong> Male breast tissue development</li>
+                    <li><strong>Testicular Atrophy:</strong> Shrinkage due to suppression</li>
+                </ul>
+                
+                <h4>Long-term Risks</h4>
+                <p><strong>Hormonal Disruption:</strong></p>
+                <ul>
+                    <li><strong>HPTA Suppression:</strong> Natural testosterone production shutdown</li>
+                    <li><strong>Recovery Issues:</strong> Possible permanent suppression</li>
+                    <li><strong>Fertility:</strong> Reduced sperm production</li>
+                </ul>
+                
+                <p><strong>Cardiovascular Risks:</strong></p>
+                <ul>
+                    <li><strong>Heart Disease:</strong> Increased risk with long-term use</li>
+                    <li><strong>Stroke:</strong> Elevated risk due to blood pressure/clotting</li>
+                    <li><strong>Cholesterol:</strong> Altered lipid profiles</li>
+                </ul>
+                
+                <p><strong>Psychological Risks:</strong></p>
+                <ul>
+                    <li><strong>Dependency:</strong> Psychological reliance on enhanced prestaties</li>
+                    <li><strong>Body Dysmorphia:</strong> Never feeling "big enough"</li>
+                    <li><strong>Depression:</strong> When coming off cycles</li>
+                </ul>
+                
+                <h3>The Enhancement vs. Health Dilemma</h3>
+                
+                <h4>Arguments For Testosterone Enhancement</h4>
+                <ul>
+                    <li><strong>Personal Freedom:</strong> Autonomous choice over one's body</li>
+                    <li><strong>Kwaliteit of Life:</strong> Dramatic improvement in well-being</li>
+                    <li><strong>Competitive Equity:</strong> Level playing field in competitive environments</li>
+                    <li><strong>Medisch Precedent:</strong> We enhance other aspects of health</li>
+                    <li><strong>Risk Management:</strong> When done properly, risks are manageable</li>
+                </ul>
+                
+                <h4>Arguments Against Enhancement</h4>
+                <ul>
+                    <li><strong>Health Risks:</strong> Potential for serious long-term consequences</li>
+                    <li><strong>Legal Issues:</strong> Criminal penalties in many jurisdictions</li>
+                    <li><strong>Fairness:</strong> Creates unequal advantages</li>
+                    <li><strong>Dependency:</strong> Psychological en physical reliance</li>
+                    <li><strong>Unknown Factors:</strong> Long-term effects still being studied</li>
+                </ul>
+                
+                <h3>Safer Use Principles (If Choosing Enhancement)</h3>
+                
+                <div class="danger-box">
+                    <h4>🚨 Harm Reduction Only</h4>
+                    <p>The following information is for educational purposes en harm reduction only. It is NOT medical advice or encouragement to use illegal substances.</p>
+                </div>
+                
+                <h4>Essential Safer Use Guidelines</h4>
+                <ul>
+                    <li><strong>Medisch Supervision:</strong> Always work with knowledgeable doctor</li>
+                    <li><strong>Blood Work:</strong> Comprehensive testing before, during, after</li>
+                    <li><strong>Start Conservative:</strong> Lowest effective dose</li>
+                    <li><strong>Kwaliteit Sources:</strong> Pharmaceutical grade only</li>
+                    <li><strong>Proper PCT:</strong> Never skip post-cycle therapy</li>
+                    <li><strong>Time On = Time Off:</strong> Equal recovery periods</li>
+                    <li><strong>Age Consideration:</strong> Never before 25 years old</li>
+                </ul>
+                
+                <h3>Legal & Ethical Considerations</h3>
+                
+                <h4>Legal Status Worldwide</h4>
+                <ul>
+                    <li><strong>USA:</strong> Controlled substances, prescription required</li>
+                    <li><strong>Europe:</strong> Varies by country, mostly prescription-only</li>
+                    <li><strong>Australia:</strong> Prescription required, strict enforcement</li>
+                    <li><strong>Canada:</strong> Controlled substances</li>
+                </ul>
+                
+                <h4>Professional/Competitive Implications</h4>
+                <ul>
+                    <li><strong>Sports:</strong> Banned by most organizations</li>
+                    <li><strong>Military:</strong> Against regulations</li>
+                    <li><strong>Employment:</strong> Possible drug testing implications</li>
+                    <li><strong>Insurance:</strong> Potential coverage issues</li>
+                </ul>
+                
+                <h3>Alternatives to Enhancement</h3>
+                
+                <h4>Natural Optimization (Covered in Previous Lessons)</h4>
+                <ul>
+                    <li>Lifestyle optimalisatie</li>
+                    <li>Eliminating testosterone killers</li>
+                    <li>Strategic supplementation</li>
+                    <li>Advanced training protocols</li>
+                </ul>
+                
+                <h4>Legal TRT (If Clinically Indicated)</h4>
+                <ul>
+                    <li>Proper medical evaluation</li>
+                    <li>Consistent low testosterone readings</li>
+                    <li>Symptoms affecting quality of life</li>
+                    <li>Ongoing medical monitoring</li>
+                </ul>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="practical-tips">Praktische Tips</h2>
+                <div class="action-item">
+                    <h4>💪 Making Informed Beslissings About Enhancement</h4>
+                    
+                    <h5>1. Honest Self-Beoordeling</h5>
+                    <p><strong>Before Considering Any Enhancement:</strong></p>
+                    <ul>
+                        <li><strong>Natural Potential:</strong> Have je maximized natural optimalisatie?</li>
+                        <li><strong>Training Ervaring:</strong> Minimum 3-5 years serious training</li>
+                        <li><strong>Age Factor:</strong> 25+ years old (brain development complete)</li>
+                        <li><strong>Goals Clarity:</strong> Specific, realistic expectations</li>
+                        <li><strong>Risk Tolerance:</strong> Honest assessment of acceptable risks</li>
+                    </ul>
+                    
+                    <h5>2. Medisch Preparation</h5>
+                    <p><strong>Essential Health Screening:</strong></p>
+                    <ul>
+                        <li><strong>Complete Blood Panel:</strong> Hormones, lipids, liver, kidney function</li>
+                        <li><strong>Cardiovascular Check:</strong> EKG, blood pressure, family history</li>
+                        <li><strong>Psychological Beoordeling:</strong> Mental health stability</li>
+                        <li><strong>Doctor Consultation:</strong> Find knowledgeable, non-judgmental physician</li>
+                    </ul>
+                    
+                    <h5>3. Onderzoek & Education</h5>
+                    <p><strong>Essential Knowledge Areas:</strong></p>
+                    <ul>
+                        <li><strong>Pharmacology:</strong> How different compounds work</li>
+                        <li><strong>Dosing Protocols:</strong> Conservative, effective approaches</li>
+                        <li><strong>Side Effect Management:</strong> Prevention en treatment</li>
+                        <li><strong>PCT Protocols:</strong> Recovery strategies</li>
+                        <li><strong>Blood Work Interpretation:</strong> Begrijpen your biomarkers</li>
+                    </ul>
+                    
+                    <h5>4. Support System</h5>
+                    <p><strong>Essential Support Network:</strong></p>
+                    <ul>
+                        <li><strong>Medisch Team:</strong> Doctor, possibly endocrinologist</li>
+                        <li><strong>Informed Friends:</strong> Others with experience (not beginners)</li>
+                        <li><strong>Mental Health:</strong> Therapist familiar with enhancement</li>
+                        <li><strong>Emergency Plan:</strong> Know what to do if problems arise</li>
+                    </ul>
+                    
+                    <h5>5. Natural Maximization First</h5>
+                    <p><strong>Exhaust All Natural Options:</strong></p>
+                    <ul>
+                        <li><strong>Training:</strong> Progressive overload, proper programming</li>
+                        <li><strong>Nutrition:</strong> Optimal protein, fats, micronutrients</li>
+                        <li><strong>Recovery:</strong> Sleep, stress management, rest days</li>
+                        <li><strong>Supplements:</strong> Evidence-based natural options</li>
+                        <li><strong>Lifestyle:</strong> Complete optimalisatie of all factors</li>
+                    </ul>
+                </div>
+                
+                <div class="danger-box">
+                    <h4>🚨 Red Flags - When NOT to Consider Enhancement</h4>
+                    <ul>
+                        <li><strong>Under 25 years old</strong> - Brain development incomplete</li>
+                        <li><strong>Less than 3 years training</strong> - Haven't maximized natural potential</li>
+                        <li><strong>Mental health issues</strong> - Depression, anxiety, body dysmorphia</li>
+                        <li><strong>Relationship problems</strong> - Using enhancement to solve other issues</li>
+                        <li><strong>Financial stress</strong> - Can't afford proper medical monitoring</li>
+                        <li><strong>Legal concerns</strong> - Career/legal risks outweigh benefits</li>
+                        <li><strong>Peer pressure</strong> - Doing it because others are</li>
+                        <li><strong>Quick fix mentality</strong> - Expecting steroids to solve poor habits</li>
+                    </ul>
+                </div>
+                
+                <div class="action-item">
+                    <h4>📊 Beslissing Framework for Enhancement</h4>
+                    
+                    <h5>Phase 1: Natural Optimization (6-12 months)</h5>
+                    <ol>
+                        <li>Implement all natural testosterone optimalisatie strategies</li>
+                        <li>Eliminate all testosterone killers completely</li>
+                        <li>Perfect training, nutrition, recovery protocols</li>
+                        <li>Get comprehensive blood work</li>
+                        <li>Document progress meticulously</li>
+                    </ol>
+                    
+                    <h5>Phase 2: Beoordeling (1-3 months)</h5>
+                    <ol>
+                        <li>Evaluate natural progress honestly</li>
+                        <li>Reassess goals en expectations</li>
+                        <li>Consider TRT if clinically appropriate</li>
+                        <li>Onderzoek enhancement thoroughly</li>
+                        <li>Find qualified medical support</li>
+                    </ol>
+                    
+                    <h5>Phase 3: Beslissing & Implementation (If Proceeding)</h5>
+                    <ol>
+                        <li>Final medical clearance</li>
+                        <li>Conservative protocol design</li>
+                        <li>Source pharmaceutical grade compounds</li>
+                        <li>Implement strict monitoring</li>
+                        <li>Begin with lowest effective dose</li>
+                    </ol>
+                </div>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="reflection">Reflectie Vragen</h2>
+                <div class="reflection-box">
+                    <h4>🤔 Enhancement Consideration Beoordeling</h4>
+                    
+                    <p><strong>1. Natural Potential Evaluation:</strong></p>
+                    <ul>
+                        <li>Heb je truly maximized your natural testosterone production potential?</li>
+                        <li>Hoeveel years heb je consistent trained en optimized je levensstijl?</li>
+                        <li>Wat zijn your current testosterone levels en overall health markers?</li>
+                        <li>Hoe much progress kun je still maken naturally?</li>
+                    </ul>
+                    
+                    <p><strong>2. Goals & Motivations:</strong></p>
+                    <ul>
+                        <li>Waarom ben je considering testosterone enhancement?</li>
+                        <li>Zijn your goals realistic en achievable with enhancement?</li>
+                        <li>Is this about health, prestaties, appearance, or something else?</li>
+                        <li>Hoe zou je leven change if je achieved those goals?</li>
+                    </ul>
+                    
+                    <p><strong>3. Risk Beoordeling:</strong></p>
+                    <ul>
+                        <li>Welke health risks ben je willing to accept?</li>
+                        <li>Hoe zou potential side effects impact your quality of life?</li>
+                        <li>Kun je afford proper medical monitoring en healthcare?</li>
+                        <li>Wat zijn the legal/professional consequences for jou?</li>
+                    </ul>
+                    
+                    <p><strong>4. Long-term Perspectief:</strong></p>
+                    <ul>
+                        <li>Hoe zie je yourself using/not using enhancement in 10-20 years?</li>
+                        <li>Welke legacy wil je leave en how does this fit?</li>
+                        <li>Ben je prepared voor potential long-term commitments (TRT)?</li>
+                        <li>Hoe zou je handle potential dependency or complications?</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="next-steps">Volgende Stappen</h2>
+                <div class="next-steps-box">
+                    <h4>🚀 Informed Beslissing Making Process</h4>
+                    
+                    <p><strong>Phase 1: Complete Natural Optimization (3-6 months)</strong></p>
+                    <ol>
+                        <li><strong>Implement All Previous Lessons</strong> - Maximize natural testosterone first</li>
+                        <li><strong>Perfect Training Protocol</strong> - Optimize for natural hormone production</li>
+                        <li><strong>Complete Lifestyle Overhaul</strong> - Sleep, stress, nutrition, recovery</li>
+                        <li><strong>Comprehensive Blood Work</strong> - Establish true baseline</li>
+                        <li><strong>Document Everything</strong> - Progress photos, strength gains, energy levels</li>
+                    </ol>
+                    
+                    <p><strong>Phase 2: Education & Onderzoek (1-3 months)</strong></p>
+                    <ol>
+                        <li><strong>Deep Onderzoek</strong> - Read scientific literature, not forum posts</li>
+                        <li><strong>Find Medisch Support</strong> - Locate knowledgeable, supportive physician</li>
+                        <li><strong>Network Beoordeling</strong> - Connect with experienced, responsible users</li>
+                        <li><strong>Risk Analysis</strong> - Comprehensive assessment of personal risks</li>
+                        <li><strong>Goal Refinement</strong> - Clarify specific, meetbare objectives</li>
+                    </ol>
+                    
+                    <p><strong>Phase 3: Medisch Evaluation (1 month)</strong></p>
+                    <ol>
+                        <li><strong>Comprehensive Health Screen</strong> - Full physical, cardiovasculair assessment</li>
+                        <li><strong>Hormone Panel</strong> - Complete baseline establishment</li>
+                        <li><strong>Psychological Beoordeling</strong> - Mental health evaluation</li>
+                        <li><strong>Family History Review</strong> - Genetic risk factors</li>
+                        <li><strong>Doctor Consultation</strong> - Discuss options, including TRT</li>
+                    </ol>
+                    
+                    <p><strong>Beslissing Criteria (Green Light Factors):</strong></p>
+                    <ul>
+                        <li>✅ 25+ years old with complete brain development</li>
+                        <li>✅ 3+ years serious training with plateaued progress</li>
+                        <li>✅ Maximized natural testosterone optimalisatie</li>
+                        <li>✅ Excellent health with no contraindications</li>
+                        <li>✅ Qualified medical supervision available</li>
+                        <li>✅ Stable mental health en strong support system</li>
+                        <li>✅ Clear goals with realistic expectations</li>
+                        <li>✅ Financial ability for proper monitoring</li>
+                        <li>✅ Acceptable legal/professional risk profile</li>
+                        <li>✅ Long-term commitment understanding</li>
+                    </ul>
+                    
+                    <p><strong>If Choosing Natural Path:</strong></p>
+                    <ol>
+                        <li><strong>Celebrate the Beslissing</strong> - Choosing health en longevity</li>
+                        <li><strong>Maximize Natural Methods</strong> - Push natural optimalisatie to limits</li>
+                        <li><strong>Consider TRT if Appropriate</strong> - Medisch testosterone if clinically indicated</li>
+                        <li><strong>Focus on Process</strong> - Enjoy the journey of natural development</li>
+                        <li><strong>Help Others</strong> - Share your natural optimalisatie knowledge</li>
+                    </ol>
+                    
+                    <p><strong>If Considering Enhancement:</strong></p>
+                    <ol>
+                        <li><strong>Start Conservative</strong> - Minimum effective dose always</li>
+                        <li><strong>Comprehensive Monitoring</strong> - Regular blood work en health checks</li>
+                        <li><strong>Have Exit Strategy</strong> - Know hoe je stop safely</li>
+                        <li><strong>Prepare for PCT</strong> - Have recovery protocol ready</li>
+                        <li><strong>Stay Educated</strong> - Continue learning throughout process</li>
+                    </ol>
+                </div>
+                
+                <div class="highlight-box">
+                    <h4>⚖️ Enhancement Wisdom Mantra</h4>
+                    <p><em>"I make decisions about my body based on complete information, not emotion or peer pressure. I understand that true strength comes from wisdom, not just enhanced physiology. Whether I choose natural optimalisatie or enhancement, I do so with full awareness of consequences and complete responsibility for my choices."</em></p>
+                    
+                    <p>Remember: There is no universal right answer about testosterone enhancement. De right decision is highly individual en depends on your unique circumstances, goals, risk tolerance, en values. What matters most is that whatever je kiest, je doet het met complete information en medical guidance.</p>
+                    
+                    <p><strong>Your manhood is not defined by your testosterone levels or enhancement choices - it's defined by your wisdom, integrity, en responsibility in whatever path je kiest.</strong></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2025 Top Tier Men Academy. Alle rechten voorbehouden.</p>
+            <p>Voor meer informatie bezoek <strong>platform.toptiermen.eu</strong></p>
+        </div>
+    </div>
+</body>
+</html>

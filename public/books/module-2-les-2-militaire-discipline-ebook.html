@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Militaire Discipline - Top Tier Men Academy</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background: #f9fafb;
+        }
+        
+        .ebook-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #8BAE5A 0%, #3A4D23 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -0.025em;
+        }
+        
+        .header .subtitle {
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: white;
+            opacity: 1;
+        }
+        
+        .content {
+            padding: 50px;
+        }
+        
+        .toc {
+            background: #f8fafc;
+            border-left: 4px solid #8BAE5A;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 8px;
+        }
+        
+        .toc h2 {
+            color: #8BAE5A;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .toc ol {
+            list-style: none;
+            counter-reset: toc-counter;
+        }
+        
+        .toc li {
+            counter-increment: toc-counter;
+            margin-bottom: 8px;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        .toc li::before {
+            content: counter(toc-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #8BAE5A;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .toc a {
+            color: #374151;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .toc a:hover {
+            color: #8BAE5A;
+        }
+        
+        .chapter {
+            margin: 40px 0;
+        }
+        
+        .chapter h2 {
+            color: #8BAE5A;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 10px;
+        }
+        
+        .chapter h3 {
+            color: #374151;
+            font-size: 1.4rem;
+            margin: 25px 0 15px 0;
+        }
+        
+        .chapter p {
+            margin-bottom: 15px;
+            color: #4b5563;
+        }
+        
+        .chapter ul, .chapter ol {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+        
+        .chapter li {
+            margin-bottom: 8px;
+            color: #4b5563;
+        }
+        
+        .highlight-box {
+            background: #f0f9ff;
+            border-left: 4px solid #0ea5e9;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .highlight-box h4 {
+            color: #0c4a6e;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .action-item {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .action-item h4 {
+            color: #92400e;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .reflection-box {
+            background: #f3e8ff;
+            border-left: 4px solid #8b5cf6;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .reflection-box h4 {
+            color: #5b21b6;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .next-steps-box {
+            background: #ecfdf5;
+            border-left: 4px solid #10b981;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .next-steps-box h4 {
+            color: #047857;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .footer {
+            background: #f8fafc;
+            padding: 30px;
+            text-align: center;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .footer p {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                padding: 40px 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .content {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ebook-container">
+        <div class="header">
+            <h1>Militaire Discipline</h1>
+            <div class="subtitle">Module 2: Discipline & Identiteit - Top Tier Men Academy</div>
+        </div>
+        
+        <div class="content">
+            <div class="toc">
+                <h2>Inhoudsopgave</h2>
+                <ol>
+                    <li><a href="#intro">Inleiding</a></li>
+                    <li><a href="#main-content">Hoofdinhoud</a></li>
+                    <li><a href="#practical-tips">Praktische Tips</a></li>
+                    <li><a href="#reflection">Reflectie Vragen</a></li>
+                    <li><a href="#next-steps">Volgende Stappen</a></li>
+                </ol>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="intro">Inleiding</h2>
+                <p>Welkom bij les 2 van Module 2: Discipline & Identiteit. In deze les ontdek je de kracht van militaire discipline en hoe je deze gevechtsharde principes kunt toepassen in je dagelijks leven als Top Tier Man.</p>
+                
+                <div class="highlight-box">
+                    <h4>🎯 Wat je gaat leren</h4>
+                    <ul>
+                        <li>De fundamenten van militaire discipline en waarom het zo effectief is</li>
+                        <li>De 4 pijlers van militaire mindset: Order, Hiërarchie, Missie en Excellence</li>
+                        <li>Hoe militaire routines en protocollen je leven kunnen transformeren</li>
+                        <li>Strategieën om mentale weerbaarheid te ontwikkelen zoals elite soldaten</li>
+                        <li>Praktische implementatie van militaire discipline in civilian life</li>
+                    </ul>
+                </div>
+                
+                <p>Militaire discipline is niet alleen voor soldaten - het is een bewezen systeem voor het creëren van uitzonderlijke prestaties onder druk. Door deze principes te beheersen, ontwikkel je een unbreakable mindset die je helpt elk doel te bereiken.</p>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="main-content">Hoofdinhoud</h2>
+                
+                <h3>Wat is Militaire Discipline?</h3>
+                <p>Militaire discipline is een systematische aanpak voor het ontwikkelen van mentale en fysieke veerkracht door middel van strikte routines, duidelijke hiërarchie en onwrikbare focus op de missie. Het is een geest van excellence die geen ruimte laat voor excuses.</p>
+                
+                <p><strong>Het gaat niet om blinde gehoorzaamheid, maar om het ontwikkelen van een mentality waarbij je automatisch de juiste keuzes maakt, zelfs wanneer niemand kijkt.</strong></p>
+                
+                <h3>De 4 Fundamentele Pijlers van Militaire Mindset</h3>
+                
+                <h4>Pijler 1: Order (Orde)</h4>
+                <p>Orde creëert vrijheid. Een georganiseerde omgeving en systematische aanpak elimineren chaos en decision fatigue.</p>
+                <ul>
+                    <li><strong>Morning Inspection:</strong> Begin elke dag met het 'inspecteren' van je ruimte en jezelf</li>
+                    <li><strong>Standard Operating Procedures:</strong> Ontwikkel standaard procedures voor terugkerende taken</li>
+                    <li><strong>Equipment Maintenance:</strong> Houd je tools, workspace en lichaam in perfecte staat</li>
+                    <li><strong>Time Discipline:</strong> Wees altijd 15 minuten vroeg - "If you're on time, you're late"</li>
+                </ul>
+                
+                <h4>Pijler 2: Hiërarchie (Chain of Command)</h4>
+                <p>Duidelijke structuur en accountability zorgen voor effectieve decision making en execute.</p>
+                <ul>
+                    <li><strong>Self-Leadership:</strong> Jij bent de commanding officer van je eigen leven</li>
+                    <li><strong>Clear Objectives:</strong> Elke dag heeft een commander's intent</li>
+                    <li><strong>Delegation:</strong> Verdeel complexe doelen in duidelijke sub-missions</li>
+                    <li><strong>Accountability:</strong> Rapporteer aan jezelf zoals een soldaat rapporteert aan zijn superior</li>
+                </ul>
+                
+                <h4>Pijler 3: Missie (Mission First)</h4>
+                <p>De missie komt altijd eerst. Personal comfort en convenience zijn ondergeschikt aan het bereiken van de objectives.</p>
+                <ul>
+                    <li><strong>Mission Clarity:</strong> Ken je primary objective voor elke dag, week, maand</li>
+                    <li><strong>Resource Allocation:</strong> Verdeel je tijd en energie op basis van mission priority</li>
+                    <li><strong>Obstacle Overcoming:</strong> Obstacles zijn niet excuses, maar tactical challenges</li>
+                    <li><strong>Mission Completion:</strong> "Mission accomplished" is de enige acceptabele uitkomst</li>
+                </ul>
+                
+                <h4>Pijler 4: Excellence (Standards)</h4>
+                <p>Militaire standards zijn niet negotiable. Excellence wordt een habit, niet een exception.</p>
+                <ul>
+                    <li><strong>Attention to Detail:</strong> Perfect execution van small tasks leidt tot success in big missions</li>
+                    <li><strong>Continuous Improvement:</strong> After Action Reviews van elke belangrijke activiteit</li>
+                    <li><strong>Physical Standards:</strong> Je lichaam is je primary weapon - houd het mission-ready</li>
+                    <li><strong>Mental Toughness:</strong> Train je mind om te presteren onder stress en pressure</li>
+                </ul>
+                
+                <h3>De Psychologie van Military Mindset</h3>
+                <p>Militaire training werkt omdat het je brain rewires om automatisch excellence te kiezen. Door constant te trainen onder stress, worden de juiste responses automatic.</p>
+                
+                <p>Key principes:</p>
+                <ul>
+                    <li><strong>Stress Inoculation:</strong> Train bewust in moeilijke omstandigheden</li>
+                    <li><strong>Muscle Memory:</strong> Herhaal correcte procedures tot ze automatic zijn</li>
+                    <li><strong>Battle Rhythm:</strong> Ontwikkel een consistent rhythm dat zelfs onder pressure standhouden</li>
+                    <li><strong>Unit Cohesion:</strong> Omring jezelf met anderen die ook high standards nastreven</li>
+                </ul>
+                
+                <h3>Military Time Management</h3>
+                <p>In het leger is tijd een weapon. Elke minuut wordt strategic ingezet voor maximum effect.</p>
+                
+                <h4>The Military Day Structure:</h4>
+                <ul>
+                    <li><strong>0500:</strong> Reveille - Begin elke dag op hetzelfde moment</li>
+                    <li><strong>0530:</strong> Physical Training - Train je body wanneer je mind nog weak is</li>
+                    <li><strong>0700:</strong> Personal Hygiene - Respecteer jezelf en anderen</li>
+                    <li><strong>0800:</strong> Mission Planning - Plan je dag zoals een military operation</li>
+                    <li><strong>0830:</strong> Execute Primary Mission - Belangrijkste task first</li>
+                    <li><strong>2100:</strong> After Action Review - Evalueer prestaties</li>
+                    <li><strong>2200:</strong> Lights Out - Rest is strategic preparation voor tomorrow</li>
+                </ul>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="practical-tips">Praktische Tips</h2>
+                <div class="action-item">
+                    <h4>💪 Military-Grade Implementation Strategies</h4>
+                    
+                    <h5>1. De Military Morning Routine</h5>
+                    <p><strong>0500-0600: Power Hour</strong></p>
+                    <ul>
+                        <li>Make your bed (eerste victory van de dag)</li>
+                        <li>5 minuten meditation (mental preparation)</li>
+                        <li>Review daily mission objectives</li>
+                        <li>30 minuten physical training</li>
+                        <li>Cold shower (mental toughness training)</li>
+                    </ul>
+                    
+                    <h5>2. Standard Operating Procedures (SOPs)</h5>
+                    <p>Creëer SOPs voor alle recurring activities:</p>
+                    <ul>
+                        <li><strong>Workspace Setup:</strong> Exact procedure voor het prepareren van je werkplek</li>
+                        <li><strong>Beslissing Making:</strong> Protocol voor het maken van belangrijke decisions</li>
+                        <li><strong>Problem Solving:</strong> Standaard approach voor het tacklen van obstacles</li>
+                        <li><strong>End of Day:</strong> Checklist voor het afsluiten van elke dag</li>
+                    </ul>
+                    
+                    <h5>3. After Action Reviews (AARs)</h5>
+                    <p>Na elke belangrijke activiteit:</p>
+                    <ul>
+                        <li>What was supposed to happen?</li>
+                        <li>What actually happened?</li>
+                        <li>Why were there differences?</li>
+                        <li>What can we learn from this?</li>
+                    </ul>
+                    
+                    <h5>4. Equipment Maintenance Protocol</h5>
+                    <ul>
+                        <li><strong>Daily:</strong> Check en clean je primary tools</li>
+                        <li><strong>Weekly:</strong> Deep maintenance van equipment en workspace</li>
+                        <li><strong>Monthly:</strong> Inventory en upgrade van je gear</li>
+                        <li><strong>Quarterly:</strong> Complete system review en optimalisatie</li>
+                    </ul>
+                    
+                    <h5>5. Mission Command Philosophy</h5>
+                    <p>Voor elke belangrijke task:</p>
+                    <ul>
+                        <li><strong>Commander's Intent:</strong> Wat is het ultimate doel?</li>
+                        <li><strong>Mission Analysis:</strong> Wat zijn de key factors voor success?</li>
+                        <li><strong>Resource Beoordeling:</strong> Wat heb je nodig om te succeeden?</li>
+                        <li><strong>Risk Mitigation:</strong> Wat kan fout gaan en hoe voorkom je dat?</li>
+                        <li><strong>Execute:</strong> Voer uit volgens plan, adapt waar nodig</li>
+                    </ul>
+                </div>
+                
+                <div class="action-item">
+                    <h4>🎖️ Daily Military Discipline Checklist</h4>
+                    <ul>
+                        <li>☐ 0500 Reveille - Op tijd opstaan zonder snooze</li>
+                        <li>☐ Bed perfectly made binnen 2 minuten</li>
+                        <li>☐ Physical training completed (minimum 30 min)</li>
+                        <li>☐ Daily mission objectives geschreven en prioritized</li>
+                        <li>☐ Primary mission executed met focus en precision</li>
+                        <li>☐ Workspace maintained in perfect order</li>
+                        <li>☐ Evening After Action Review completed</li>
+                        <li>☐ Tomorrow's mission briefing prepared</li>
+                        <li>☐ Lights out op tijd voor adequate rest</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="reflection">Reflectie Vragen</h2>
+                <div class="reflection-box">
+                    <h4>🤔 Military-Style Self Beoordeling</h4>
+                    
+                    <p><strong>1. Current State Analysis:</strong></p>
+                    <ul>
+                        <li>Hoe zou een drill sergeant jouw current daily routine beoordelen?</li>
+                        <li>Welke areas van je leven missen military-level discipline?</li>
+                        <li>Waar gebruik je momenteel excuses in plaats van solutions?</li>
+                        <li>Hoe realistisch zijn je current standards vergeleken met military standards?</li>
+                    </ul>
+                    
+                    <p><strong>2. Mission Analysis:</strong></p>
+                    <ul>
+                        <li>Wat is je overarching life mission als Top Tier Man?</li>
+                        <li>Hoe zouden je daily actions eruit zien als ze mission-critical waren?</li>
+                        <li>Welke personal 'wars' moet je winnen om je mission te accomplishen?</li>
+                        <li>Wat zijn de non-negotiable standards die je moet maintainen?</li>
+                    </ul>
+                    
+                    <p><strong>3. Unit Beoordeling:</strong></p>
+                    <ul>
+                        <li>Zijn de mensen around you asset of liability voor je mission?</li>
+                        <li>Hoe zou je je current "unit" (friends, family, colleagues) raten op discipline?</li>
+                        <li>Welke toxic influences zou een military commander onmiddellijk elimineren?</li>
+                        <li>Wie in je life houdt jou accountable zoals een superior officer zou doen?</li>
+                    </ul>
+                    
+                    <p><strong>4. Future State Vision:</strong></p>
+                    <ul>
+                        <li>Hoe zou je leven eruitzien met military-level discipline in alle areas?</li>
+                        <li>Welke battles zou je automatisch winnen met superior discipline?</li>
+                        <li>Hoe zou je confidence en self-respect veranderen?</li>
+                        <li>Wat zou mogelijk worden als failure geen optie meer was?</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="next-steps">Volgende Stappen</h2>
+                <div class="next-steps-box">
+                    <h4>🚀 Military Discipline Implementation Campaign</h4>
+                    
+                    <p><strong>Week 1-2: Basic Training</strong></p>
+                    <ol>
+                        <li><strong>Establish Battle Rhythm</strong> - Implement military wake-up time (0500)</li>
+                        <li><strong>Master Bed Making</strong> - Perfect je morning routine starter</li>
+                        <li><strong>Create SOPs</strong> voor je 3 most important daily activities</li>
+                        <li><strong>Eliminate Excuses</strong> - Iedere excuse wordt een tactical problem to solve</li>
+                        <li><strong>Daily AARs</strong> - 10 minuten reflection elke avond</li>
+                    </ol>
+                    
+                    <p><strong>Week 3-4: Advanced Operations</strong></p>
+                    <ol>
+                        <li><strong>Stress Training</strong> - Voeg moeilijkheid toe aan routine activiteiten</li>
+                        <li><strong>Mission Planning</strong> - Weekly mission briefings voor grote doelen</li>
+                        <li><strong>Equipment Optimization</strong> - Upgrade en organize je tools en environment</li>
+                        <li><strong>Unit Bouwen</strong> - Vind of create accountability partners met high standards</li>
+                        <li><strong>Standards Elevation</strong> - Raise je standards in één key life area</li>
+                    </ol>
+                    
+                    <p><strong>Immediate Actions (Today - 0800 Hours):</strong></p>
+                    <ol>
+                        <li><strong>Set Alarm for 0500</strong> - Tomorrow begint je military transformation</li>
+                        <li><strong>Write Mission Statement</strong> - What is je overarching objective?</li>
+                        <li><strong>Identify Enemy Forces</strong> - Welke habits/people/environments sabotage je mission?</li>
+                        <li><strong>Create Battle Space</strong> - Organize één area van je life to military standards</li>
+                        <li><strong>Establish Command Post</strong> - Designate een area voor daily planning en AARs</li>
+                    </ol>
+                    
+                    <p><strong>Success Metrics (Weekly Beoordeling):</strong></p>
+                    <ul>
+                        <li>Wake-up time consistency (target: 100%)</li>
+                        <li>SOP compliance rate per activity</li>
+                        <li>Number of excuses made (target: 0)</li>
+                        <li>Mission objective completion rate</li>
+                        <li>Physical readiness assessment score</li>
+                        <li>Mental toughness incidents passed</li>
+                    </ul>
+                </div>
+                
+                <div class="highlight-box">
+                    <h4>⚔️ Military Mindset Mantra</h4>
+                    <p><em>"Discipline equals freedom. Standards are non-negotiable. Mission first, excuses never. Excellence is not an act, but a habit. Adapt, overcome, and accomplish the mission."</em></p>
+                    
+                    <p>Remember: Je bent niet alleen aan het spelen om te winnen - je bent aan het trainen om onbeatable te worden. Militaire discipline is niet punishment, het is preparation voor victory in alle areas van het leven.</p>
+                    
+                    <p><strong>Hoorah! Mission success starts now.</strong></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2025 Top Tier Men Academy. Alle rechten voorbehouden.</p>
+            <p>Voor meer informatie bezoek <strong>platform.toptiermen.eu</strong></p>
+        </div>
+    </div>
+</body>
+</html>
