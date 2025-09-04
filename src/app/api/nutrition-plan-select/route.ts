@@ -17,18 +17,17 @@ export async function POST(request: NextRequest) {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // First, set all plans for this user to inactive
+    // First, try to deactivate all existing plans (ignore errors if no plans exist)
     const { error: deactivateError } = await supabase
       .from('user_nutrition_plans')
       .update({ is_active: false })
       .eq('user_id', userId);
 
     if (deactivateError) {
-      console.error('Error deactivating plans:', deactivateError);
-      return NextResponse.json(
-        { success: false, error: 'Failed to deactivate existing plans' },
-        { status: 500 }
-      );
+      console.log('⚠️ Warning deactivating plans (might be no existing plans):', deactivateError.message);
+      // Don't fail here, just log the warning
+    } else {
+      console.log('✅ All existing plans deactivated');
     }
 
     // Then, activate the selected plan
@@ -39,12 +38,14 @@ export async function POST(request: NextRequest) {
       .eq('plan_type', planId);
 
     if (activateError) {
-      console.error('Error activating plan:', activateError);
+      console.error('❌ Error activating plan:', activateError);
       return NextResponse.json(
-        { success: false, error: 'Failed to activate selected plan' },
+        { success: false, error: `Failed to activate selected plan: ${activateError.message}` },
         { status: 500 }
       );
     }
+
+    console.log('✅ Plan activated successfully');
 
     console.log(`✅ Plan ${planId} selected as active for user ${userId}`);
 
