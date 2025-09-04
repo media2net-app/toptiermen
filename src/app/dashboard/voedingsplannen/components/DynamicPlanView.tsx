@@ -200,6 +200,9 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
         nutrition: newNutrition
       };
       
+      // Update the local state immediately
+      setPlanData(updatedPlanData);
+      
       // Recalculate daily totals
       let dailyCalories = 0;
       let dailyProtein = 0;
