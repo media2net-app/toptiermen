@@ -20,17 +20,40 @@ export async function POST(request: Request) {
     
     console.log('🎯 Selecting training schema:', { userId, schemaId });
     
+    // Check if userId is an email and convert to UUID if needed
+    let actualUserId = userId;
+    if (userId.includes('@')) {
+      try {
+        const { data: userData, error: userError } = await supabase.auth.admin.getUserByEmail(userId);
+        if (userError || !userData.user) {
+          console.log('❌ User not found by email:', userId);
+          return NextResponse.json({ 
+            success: false, 
+            error: 'User not found' 
+          }, { status: 404 });
+        }
+        actualUserId = userData.user.id;
+        console.log('✅ Converted email to UUID for schema selection:', actualUserId);
+      } catch (error) {
+        console.log('❌ Error converting email to UUID for schema selection:', error);
+        return NextResponse.json({ 
+          success: false, 
+          error: 'Invalid user ID' 
+        }, { status: 400 });
+      }
+    }
+    
     // First, deactivate any existing active schema for this user
     await supabase
       .from('user_training_schemas')
       .update({ is_active: false })
-      .eq('user_id', userId);
+      .eq('user_id', actualUserId);
     
     // Then, activate the new schema
     const { data, error } = await supabase
       .from('user_training_schemas')
       .upsert({
-        user_id: userId,
+        user_id: actualUserId,
         schema_id: schemaId,
         is_active: true,
         selected_at: new Date().toISOString(),
