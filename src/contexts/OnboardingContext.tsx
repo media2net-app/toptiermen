@@ -151,7 +151,11 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
         setOnboardingStatus(data);
         
         // Check if user is in onboarding
-        if (!data.onboarding_completed) {
+        // Temporary fix: Mark Chiel as completed since he's an admin
+        const isChiel = user?.email === 'chiel@media2net.nl';
+        const shouldBeInOnboarding = !data.onboarding_completed && !isChiel;
+        
+        if (shouldBeInOnboarding) {
           setIsOnboarding(true);
           
           // Determine current step based on completion status
@@ -174,6 +178,15 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
         } else {
           setIsOnboarding(false);
         }
+        
+        // Log the onboarding status for debugging
+        console.log('🔍 Onboarding status:', {
+          user: user?.email,
+          isChiel,
+          shouldBeInOnboarding,
+          isOnboarding: shouldBeInOnboarding ? true : false,
+          onboarding_completed: data.onboarding_completed
+        });
       }
     } catch (error) {
       console.error('Error fetching onboarding status:', error);
