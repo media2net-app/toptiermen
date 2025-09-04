@@ -176,8 +176,15 @@ function scaleIngredientAmounts(ingredients: any[], scaleFactor: number) {
     let scaledAmount;
     
     if (ingredient.unit === 'stuks' || ingredient.unit === 'portie' || ingredient.unit === 'sneden') {
-      // Voor discrete items: rond af naar hele nummers, minimum 1
-      scaledAmount = Math.max(1, Math.round(ingredient.amount * scaleFactor));
+      // Voor discrete items: gebruik meer flexibele afronding voor betere scaling
+      const rawAmount = ingredient.amount * scaleFactor;
+      if (rawAmount < 1.5) {
+        scaledAmount = 1; // Minimum 1 stuk
+      } else if (rawAmount < 2.5) {
+        scaledAmount = 2; // 1.5-2.4 wordt 2
+      } else {
+        scaledAmount = Math.round(rawAmount); // 2.5+ wordt afgerond
+      }
     } else if (ingredient.unit === 'ml') {
       // Voor vloeistoffen: rond af naar 5ml nauwkeurig
       scaledAmount = Math.round((ingredient.amount * scaleFactor) / 5) * 5;
@@ -261,12 +268,12 @@ export async function GET(request: NextRequest) {
     const basePlanCalories = calculatePlanTotalCalories(planData.meals);
     console.log('📊 Base plan average daily calories:', basePlanCalories);
 
-    // Calculate scale factor with maximum limits to prevent extreme portions
+    // Calculate scale factor with more flexible limits for better calorie matching
     let scaleFactor = userProfile.target_calories / basePlanCalories;
     
-    // Limit scale factor to prevent unrealistic portions
-    const minScaleFactor = 0.7; // Minimum 70% of base plan
-    const maxScaleFactor = 1.3; // Maximum 130% of base plan
+    // More flexible limits to better match user's calorie needs
+    const minScaleFactor = 0.6; // Minimum 60% of base plan
+    const maxScaleFactor = 2.0; // Maximum 200% of base plan (doubled portions)
     
     if (scaleFactor < minScaleFactor) {
       console.log(`⚠️ Scale factor ${scaleFactor.toFixed(2)} too low, capping at ${minScaleFactor}`);
@@ -277,6 +284,9 @@ export async function GET(request: NextRequest) {
     }
     
     console.log('⚖️ Final scale factor:', scaleFactor.toFixed(2));
+    console.log('🎯 Target calories:', userProfile.target_calories);
+    console.log('📊 Base plan calories:', basePlanCalories);
+    console.log('📈 Expected scaled calories:', Math.round(basePlanCalories * scaleFactor));
 
     // Generate scaled meal plan
     const scaledPlan = {};
@@ -344,6 +354,14 @@ export async function GET(request: NextRequest) {
       carbs: Math.round((weeklyCarbs / days.length) * 10) / 10,
       fat: Math.round((weeklyFat / days.length) * 10) / 10
     };
+
+    console.log('📊 Final weekly averages:', weeklyAverages);
+    console.log('🎯 Target vs Actual calories:', {
+      target: userProfile.target_calories,
+      actual: weeklyAverages.calories,
+      difference: weeklyAverages.calories - userProfile.target_calories,
+      percentage: Math.round(((weeklyAverages.calories / userProfile.target_calories) - 1) * 100)
+    });
 
     return NextResponse.json({
       success: true,
