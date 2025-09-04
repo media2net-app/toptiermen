@@ -176,7 +176,8 @@ export default function TrainingschemasPage() {
     setIsGenerating(true);
     
     setTimeout(() => {
-      const filteredSchemas = workoutData.schemas.filter(schema => 
+      const allSchemas = Object.values(workoutData);
+      const filteredSchemas = allSchemas.filter(schema => 
         schema.frequency === trainingPreferences.frequency && 
         schema.style === trainingPreferences.style
       );
