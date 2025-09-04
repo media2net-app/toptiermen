@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Energie en Focus - Top Tier Men Academy</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background: #f9fafb;
+        }
+        
+        .ebook-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #8BAE5A 0%, #3A4D23 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -0.025em;
+        }
+        
+        .header .subtitle {
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: white;
+            opacity: 1;
+        }
+        
+        .content {
+            padding: 50px;
+        }
+        
+        .toc {
+            background: #f8fafc;
+            border-left: 4px solid #8BAE5A;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 8px;
+        }
+        
+        .toc h2 {
+            color: #8BAE5A;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .toc ol {
+            list-style: none;
+            counter-reset: toc-counter;
+        }
+        
+        .toc li {
+            counter-increment: toc-counter;
+            margin-bottom: 8px;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        .toc li::before {
+            content: counter(toc-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #8BAE5A;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .chapter {
+            margin: 50px 0;
+        }
+        
+        .chapter h2 {
+            color: #8BAE5A;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .chapter h3 {
+            color: #374151;
+            font-size: 1.3rem;
+            margin: 30px 0 15px;
+            font-weight: 600;
+        }
+        
+        .chapter p {
+            margin-bottom: 16px;
+            text-align: justify;
+            font-size: 1.05rem;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+            color: white;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(139, 174, 90, 0.3);
+        }
+        
+        .highlight-box h3 {
+            color: white;
+            margin-bottom: 15px;
+        }
+        
+        .quote-box {
+            background: #f8fafc;
+            border-left: 4px solid #8BAE5A;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+        }
+        
+        .action-steps {
+            background: #f0f9ff;
+            border: 1px solid #8BAE5A;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 8px;
+        }
+        
+        .action-steps h3 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+        }
+        
+        .action-steps ul {
+            padding-left: 20px;
+        }
+        
+        .action-steps li {
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        
+        .reflection-questions {
+            background: #fef7e0;
+            border: 1px solid #f59e0b;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 8px;
+        }
+        
+        .reflection-questions h3 {
+            color: #d97706;
+            margin-bottom: 15px;
+        }
+        
+        .reflection-questions ul {
+            padding-left: 20px;
+        }
+        
+        .reflection-questions li {
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+        
+        .footer {
+            background: #1f2937;
+            color: white;
+            padding: 40px;
+            text-align: center;
+            margin-top: 50px;
+        }
+        
+        .footer p {
+            margin-bottom: 10px;
+        }
+        
+        .page-break {
+            page-break-before: always;
+            margin-top: 60px;
+            border-top: 2px solid #e5e7eb;
+            padding-top: 40px;
+        }
+        
+        .mantra-box {
+            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+            color: white;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .mantra-box h3 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .mantra-box p {
+            font-size: 1.3rem;
+            font-weight: 600;
+            font-style: italic;
+            text-align: center;
+        }
+        
+        .energy-box {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 8px;
+        }
+        
+        .energy-box h3 {
+            color: white;
+            margin-bottom: 15px;
+        }
+        
+        @media print {
+            .ebook-container {
+                box-shadow: none;
+            }
+            
+            .page-break {
+                page-break-before: always;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ebook-container">
+        <div class="header">
+            <h1>Energie en Focus</h1>
+            <p class="subtitle">Module 7, Les 4 • Voeding & Gezondheid</p>
+        </div>
+        
+        <div class="content">
+            <div class="toc">
+                <h2>Inhoudsopgave</h2>
+                <ol>
+                    <li>Inleiding</li>
+                    <li>Hoofdinhoud</li>
+                    <li>Praktische Tips</li>
+                    <li>Reflectie Vragen</li>
+                    <li>Volgende Stappen</li>
+                </ol>
+            </div>
+
+            <!-- Pagina 1: Inleiding -->
+            <div class="chapter">
+                <h2>1. Inleiding</h2>
+                
+                <p>Energie en focus zijn de currency van achievement. Als Top Tier Man begrijp je dat alle ambities, doelen en dromen uiteindelijk afhankelijk zijn van je vermogen om sustained mental en physical energy te genereren en te richten. In een wereld vol distractions en energy drains, is het masteren van these fundamentals je competitive edge.</p>
+                
+                <div class="highlight-box">
+                    <h3>Waarom Energie Management Critical is</h3>
+                    <p>Je hebt unlimited potential, maar limited energy. Hoe je deze kostbare resource managed en directed bepaalt de trajectory van je entire life. Elite performers zijn niet noodzakelijkerwijs geniuses - ze zijn masters van energy optimization.</p>
+                </div>
+                
+                <p>De meeste mannen leven in een constant state van suboptimal energy. Ze voelen zich tired in de morning, rely op caffeine crashes door de dag, experience afternoon slumps, en hebben difficultly maintaining focus op belangrijke tasks. Dit is niet normal - het is een sign dat fundamental systems niet optimized zijn.</p>
+                
+                <p>True energy optimization gaat verder dan simply more coffee of energy drinks. Het vereist een holistic understanding van hoe je body produces en utilizes energy, wat drains je mental bandwidth, en hoe je sustainable systems creëert voor peak performance.</p>
+                
+                <div class="quote-box">
+                    <p>"Energy en persistence conquer all things. Maar eerst moet je learn hoe je beide sustainable kunt maintainen." - Benjamin Franklin (adapted)</p>
+                </div>
+                
+                <p>In deze les ontdek je de secrets van elite energy management. Van biological optimization tot cognitive enhancement, van nutrition timing tot focus disciplines - je transformeert van iemand die constant tired en distracted voelt naar een man die consistent operates op peak energy levels.</p>
+            </div>
+            
+            <div class="page-break"></div>
+
+            <!-- Pagina 2-7: Hoofdinhoud -->
+            <div class="chapter">
+                <h2>2. Hoofdinhoud</h2>
+                
+                <h3>De Science van Energy Production</h3>
+                
+                <p>Energy production in het human body is een complex process waarbij multiple systems samenwerken om cellular ATP (adenosine triphosphate) te genereren. Understanding deze fundamentals helpt je optimize je energy van de source.</p>
+                
+                <div class="energy-box">
+                    <h3>De 3 Energy Systems</h3>
+                    <p><strong>1. Phosphocreatine System:</strong> Immediate energy (0-10 seconden)<br>
+                    <strong>2. Glycolytic System:</strong> Short-term energy (10 seconden - 2 minuten)<br>
+                    <strong>3. Oxidative System:</strong> Long-term energy (2+ minuten)</p>
+                </div>
+                
+                <h3>Mitochondrial Optimization</h3>
+                
+                <p>Je mitochondria zijn de powerhouses van je cells. Optimizing mitochondrial function is de key tot sustained, high-level energy production throughout de dag.</p>
+                
+                <p><strong>Mitochondrial Enhancement Strategies:</strong></p>
+                <p>• <strong>Aerobic Exercise:</strong> Builds new mitochondria en improves efficiency</p>
+                <p>• <strong>Intermittent Fasting:</strong> Stimulates mitochondrial biogenesis</p>
+                <p>• <strong>Cold Exposure:</strong> Activates brown fat en mitochondrial production</p>
+                <p>• <strong>Heat Therapy:</strong> Sauna use promotes mitochondrial adaptation</p>
+                <p>• <strong>Quality Sleep:</strong> Essential voor mitochondrial repair en regeneration</p>
+                
+                <h3>Nutritional Energy Optimization</h3>
+                
+                <p>Wat je eet en wanneer je eet has profound impact op je energy levels throughout de dag. Strategic nutrition timing kan eliminate energy crashes en sustain peak performance.</p>
+                
+                <p><strong>Energy-Stable Nutrition Principles:</strong></p>
+                <p>• <strong>Stable Blood Sugar:</strong> Avoid glucose spikes en crashes</p>
+                <p>• <strong>Proper Macrobalance:</strong> Optimize protein, fats, en complex carbs</p>
+                <p>• <strong>Meal Timing:</strong> Align eating met natural energy rhythms</p>
+                <p>• <strong>Micronutrient Density:</strong> Support cellular energy production</p>
+                
+                <div class="action-steps">
+                    <h3>Energy-Boosting Foods</h3>
+                    <ul>
+                        <li><strong>Complex Carbs:</strong> Oats, quinoa, sweet potatoes</li>
+                        <li><strong>Healthy Fats:</strong> Avocados, nuts, olive oil</li>
+                        <li><strong>Lean Proteins:</strong> Fish, chicken, eggs</li>
+                        <li><strong>Iron-Rich Foods:</strong> Spinach, lean beef, lentils</li>
+                        <li><strong>B-Vitamin Sources:</strong> Leafy greens, salmon, eggs</li>
+                        <li><strong>Magnesium Sources:</strong> Dark chocolate, almonds, spinach</li>
+                    </ul>
+                </div>
+                
+                <h3>Cognitive Focus Optimization</h3>
+                
+                <p>Mental focus is like een muscle - het can be trained, fatigued, en recovered. Understanding hoe attention works enables je om strategic systems te ontwikkelen voor sustained cognitive performance.</p>
+                
+                <p><strong>The Science of Attention:</strong></p>
+                <p>• <strong>Focused Attention:</strong> Deep concentration op één task</p>
+                <p>• <strong>Sustained Attention:</strong> Maintaining focus over time</p>
+                <p>• <strong>Selective Attention:</strong> Filtering relevant van irrelevant information</p>
+                <p>• <strong>Divided Attention:</strong> Multitasking (generally inefficient)</p>
+                
+                <p><strong>Focus Depletion Factors:</strong></p>
+                <p>• Constant notifications en interruptions</p>
+                <p>• Decision fatigue van too many choices</p>
+                <p>• Glucose depletion in de brain</p>
+                <p>• Stress en anxiety hormones</p>
+                <p>• Poor sleep en circadian rhythm disruption</p>
+                
+                <div class="quote-box">
+                    <p>"Where attention goes, energy flows en results show. Master je attention en master je life." - Tony Robbins</p>
+                </div>
+                
+                <h3>Energy Rhythm Management</h3>
+                
+                <p>Je body heeft natural energy rhythms throughout de dag. Working with these rhythms in plaats van tegen them kan drastically improve je productivity en reduce fatigue.</p>
+                
+                <p><strong>Typical Energy Patterns:</strong></p>
+                <p>• <strong>6-9 AM:</strong> Cortisol peak, high alertness</p>
+                <p>• <strong>9 AM-12 PM:</strong> Peak cognitive performance</p>
+                <p>• <strong>1-3 PM:</strong> Natural afternoon dip</p>
+                <p>• <strong>3-6 PM:</strong> Secondary energy peak</p>
+                <p>• <strong>6-9 PM:</strong> Gradual energy decline</p>
+                <p>• <strong>9 PM+:</strong> Melatonin production begins</p>
+                
+                <div class="highlight-box">
+                    <h3>Ultradian Rhythm Optimization</h3>
+                    <p>Work in 90-120 minute focused blocks followed by 15-20 minute breaks. This aligns met je natural biological rhythms en prevents mental fatigue while maximizing productivity.</p>
+                </div>
+                
+                <h3>Strategic Caffeine Usage</h3>
+                
+                <p>Caffeine is een powerful tool when used strategically, but can become een crutch when misused. Understanding optimal timing en dosage maximizes benefits while minimizing crashes.</p>
+                
+                <p><strong>Optimal Caffeine Protocol:</strong></p>
+                <p>• <strong>Timing:</strong> 90-120 minutes na awakening (allow natural cortisol)</p>
+                <p>• <strong>Dosage:</strong> 100-200mg per serving (about 1-2 cups coffee)</p>
+                <p>• <strong>Cutoff:</strong> No caffeine na 2 PM (avoid sleep disruption)</p>
+                <p>• <strong>Cycling:</strong> Take periodic breaks om tolerance te prevent</p>
+                
+                <div class="mantra-box">
+                    <h3>Energy Excellence Mantra</h3>
+                    <p>"Mijn energy is mijn most valuable resource. Ik manage het strategically, protect het fiercely, en direct het purposefully."</p>
+                </div>
+            </div>
+            
+            <div class="page-break"></div>
+
+            <!-- Pagina 8: Praktische Tips -->
+            <div class="chapter">
+                <h2>3. Praktische Tips</h2>
+                
+                <div class="action-steps">
+                    <h3>Perfect Energy Day Protocol</h3>
+                    <ul>
+                        <li><strong>6:00 AM:</strong> Natural awakening, immediate light exposure</li>
+                        <li><strong>6:30 AM:</strong> Hydration (500ml water) + light movement</li>
+                        <li><strong>7:30 AM:</strong> Protein-rich breakfast</li>
+                        <li><strong>9:00 AM:</strong> First caffeine, begin deep work block</li>
+                        <li><strong>12:00 PM:</strong> Balanced lunch, brief walk</li>
+                        <li><strong>2:00 PM:</strong> Optional second caffeine, creativity tasks</li>
+                        <li><strong>6:00 PM:</strong> Light dinner, wind-down activities</li>
+                    </ul>
+                </div>
+                
+                <h3>Focus Enhancement Techniques</h3>
+                
+                <p><strong>The Pomodoro Technique:</strong> 25 minutes focused work + 5 minute break. Na 4 cycles, take een longer 15-30 minute break.</p>
+                
+                <p><strong>Time Blocking:</strong> Assign specific time slots voor specific types van work. Batch similar tasks together voor efficiency.</p>
+                
+                <p><strong>Monotasking Mastery:</strong> One task at een time, full attention. Turn off notifications tijdens deep work sessions.</p>
+                
+                <p><strong>Environment Design:</strong> Create physical spaces optimized voor different types van work - deep focus, creative thinking, administrative tasks.</p>
+                
+                <div class="energy-box">
+                    <h3>Emergency Energy Protocols</h3>
+                    <p><strong>Mental Fog:</strong> 10 deep breaths + cold water on face<br>
+                    <strong>Afternoon Crash:</strong> 10-minute walk outside<br>
+                    <strong>Pre-Important Task:</strong> 2 minutes meditation<br>
+                    <strong>Energy Dip:</strong> Protein snack + hydration</p>
+                </div>
+                
+                <h3>Advanced Energy Hacking</h3>
+                
+                <p><strong>Cold Therapy:</strong> Cold showers of ice baths stimulate norepinephrine release, improving alertness en energy voor hours.</p>
+                
+                <p><strong>Breathing Techniques:</strong></p>
+                <p>• <strong>Energizing:</strong> Wim Hof method (30 deep breaths, hold, repeat)</p>
+                <p>• <strong>Focusing:</strong> Box breathing (4-4-4-4 count)</p>
+                <p>• <strong>Calming:</strong> 4-7-8 breathing voor evening wind-down</p>
+                
+                <p><strong>Strategic Napping:</strong> 10-20 minute power naps tussen 1-3 PM kunnen energy restore zonder affecting nighttime sleep.</p>
+                
+                <div class="action-steps">
+                    <h3>Supplement Stack voor Energy & Focus</h3>
+                    <ul>
+                        <li><strong>B-Complex:</strong> Supports cellular energy production</li>
+                        <li><strong>Magnesium:</strong> 200-400mg voor muscle en nerve function</li>
+                        <li><strong>Omega-3:</strong> Brain health en cognitive function</li>
+                        <li><strong>Adaptogenic Herbs:</strong> Rhodiola, Ashwagandha voor stress resilience</li>
+                        <li><strong>CoQ10:</strong> Mitochondrial support</li>
+                        <li><strong>L-Theanine:</strong> Calm focus, pairs well met caffeine</li>
+                    </ul>
+                </div>
+                
+                <h3>Digital Energy Management</h3>
+                
+                <p>Technology can be either een massive energy drain of een powerful enhancement tool. Strategic digital habits maken het verschil.</p>
+                
+                <p><strong>Energy-Draining Digital Habits:</strong></p>
+                <p>• Constant notification checking</p>
+                <p>• Mindless social media scrolling</p>
+                <p>• Email reactive mode</p>
+                <p>• Multitasking tussen apps</p>
+                <p>• Blue light exposure late evening</p>
+                
+                <p><strong>Energy-Enhancing Digital Protocols:</strong></p>
+                <p>• Designated check times voor email/messages</p>
+                <p>• Phone airplane mode during deep work</p>
+                <p>• Blue light blockers na sunset</p>
+                <p>• Productivity apps voor time tracking</p>
+                <p>• Digital sabbaths of detox periods</p>
+                
+                <div class="quote-box">
+                    <p>"Technology should amplify je capabilities, not hijack je attention. Use it as een tool, not een crutch." - Cal Newport</p>
+                </div>
+                
+                <h3>Stress & Energy Relationship</h3>
+                
+                <p>Chronic stress is een massive energy vampire. Learning om stress levels te manage directly impacts je available energy voor productive activities.</p>
+                
+                <p><strong>Stress Reduction Techniques:</strong></p>
+                <p>• Daily meditation of mindfulness practice</p>
+                <p>• Regular physical exercise</p>
+                <p>• Adequate social connection</p>
+                <p>• Boundaries around work en personal time</p>
+                <p>• Time in nature</p>
+                <p>• Journaling voor emotional processing</p>
+            </div>
+            
+            <div class="page-break"></div>
+
+            <!-- Pagina 9: Reflectie Vragen -->
+            <div class="chapter">
+                <h2>4. Reflectie Vragen</h2>
+                
+                <div class="reflection-questions">
+                    <h3>Energy Pattern Analysis</h3>
+                    <ul>
+                        <li>Op welke tijden van de dag voel ik me het meest energiek en focused? Wanneer experience ik energy dips?</li>
+                        <li>Wat zijn mijn biggest energy drains - physical, mental, en emotional?</li>
+                        <li>Hoe ziet mijn current nutrition timing eruit? Cause ik energy crashes door poor meal choices?</li>
+                        <li>Welke digital habits drain mijn mental energy en focus?</li>
+                        <li>Hoe good ben ik in sustained attention op challenging tasks?</li>
+                        <li>Wat zijn mijn current caffeine habits? Zijn ze strategic of reactive?</li>
+                        <li>Hoe manage ik stress, en hoe impacts dit mijn energy levels?</li>
+                        <li>In welke environment kan ik het best focussen en productive zijn?</li>
+                    </ul>
+                </div>
+                
+                <div class="action-steps">
+                    <h3>7-Dagen Energy Tracking</h3>
+                    <ul>
+                        <li>Rate energy levels elk uur op 1-10 scale</li>
+                        <li>Note meal timing, content, en post-meal energy</li>
+                        <li>Track caffeine intake en effects</li>
+                        <li>Monitor sleep quality en morning alertness</li>
+                        <li>Document focus quality during work sessions</li>
+                        <li>Identify energy drains en energy boosters</li>
+                    </ul>
+                </div>
+                
+                <div class="highlight-box">
+                    <h3>Peak Performance Audit</h3>
+                    <p>Denk aan je last period van exceptional productivity en energy. Wat waren de circumstances? Wat deed je differently? Hoe kan je die conditions recreate more consistently?</p>
+                </div>
+                
+                <div class="reflection-questions">
+                    <h3>Focus & Attention Assessment</h3>
+                    <ul>
+                        <li>Hoe lang kan ik continuous focus maintainen op een challenging task?</li>
+                        <li>Wat zijn mijn biggest distractions en attention hijackers?</li>
+                        <li>Wanneer ben ik het most creative en innovatief?</li>
+                        <li>Hoe kan ik mijn environment optimaliseren voor different types van work?</li>
+                        <li>Welke systems kan ik implementeren om consistent high-energy performance te achieve?</li>
+                    </ul>
+                </div>
+                
+                <div class="mantra-box">
+                    <h3>Energy Mastery Commitment</h3>
+                    <p>"Ik treat mijn energy als sacred resource. Ik optimize het daily, protect het carefully, en invest het in what matters most."</p>
+                </div>
+            </div>
+            
+            <div class="page-break"></div>
+
+            <!-- Pagina 10: Volgende Stappen -->
+            <div class="chapter">
+                <h2>5. Volgende Stappen</h2>
+                
+                <h3>30-Dagen Energy & Focus Optimization</h3>
+                
+                <div class="action-steps">
+                    <h3>Week 1: Foundation & Awareness</h3>
+                    <ul>
+                        <li>Begin energy tracking om patterns te identificeren</li>
+                        <li>Implement morning hydration en light exposure routine</li>
+                        <li>Optimize breakfast timing en composition</li>
+                        <li>Establish consistent sleep en wake times</li>
+                    </ul>
+                </div>
+                
+                <div class="action-steps">
+                    <h3>Week 2: Nutrition & Timing Optimization</h3>
+                    <ul>
+                        <li>Strategic caffeine timing (90-120 min na awakening)</li>
+                        <li>Eliminate refined sugars en energy-crashing foods</li>
+                        <li>Implement proper meal spacing en timing</li>
+                        <li>Add energy-supporting micronutrients</li>
+                    </ul>
+                </div>
+                
+                <div class="action-steps">
+                    <h3>Week 3: Focus & Productivity Systems</h3>
+                    <ul>
+                        <li>Implement time blocking en monotasking</li>
+                        <li>Create distraction-free work environment</li>
+                        <li>Practice focus enhancement techniques daily</li>
+                        <li>Establish digital boundaries en phone-free zones</li>
+                    </ul>
+                </div>
+                
+                <div class="action-steps">
+                    <h3>Week 4: Advanced Optimization</h3>
+                    <ul>
+                        <li>Fine-tune based op tracking data</li>
+                        <li>Implement advanced techniques (cold therapy, breathing)</li>
+                        <li>Optimize work schedule volgens natural rhythms</li>
+                        <li>Create sustainable long-term energy management system</li>
+                    </ul>
+                </div>
+                
+                <h3>Long-term Energy Excellence</h3>
+                
+                <p>Sustainable energy optimization is about creating systems that work met je natural biology en lifestyle, rather than fighting against them. Het goal is effortless energy dat consistently supports je highest performance.</p>
+                
+                <div class="energy-box">
+                    <h3>Elite Energy Management Principles</h3>
+                    <p><strong>Consistency:</strong> Regular sleep, meal, en exercise timing<br>
+                    <strong>Quality:</strong> High-nutrient foods, deep sleep, focused work<br>
+                    <strong>Strategic Use:</strong> Right energy for right task at right time<br>
+                    <strong>Recovery:</strong> Built-in rest en regeneration periods<br>
+                    <strong>Adaptation:</strong> Flexibility based op changing demands</p>
+                </div>
+                
+                <div class="quote-box">
+                    <p>"Energy management, not time management, is de real key to personal productivity en achievement." - Tony Schwartz</p>
+                </div>
+                
+                <p>Als je mastery in energy en focus develops, zul je discover dat je not only more productive wordt, maar dat je capacity voor challenge, stress, en opportunity exponentially expands. Je becomes de man who can sustain peak performance wanneer others burn out.</p>
+                
+                <div class="mantra-box">
+                    <h3>Jouw Energy Legacy</h3>
+                    <p>"Ik am een master of mijn energy. Door consistent optimization en strategic direction, unlock ik unlimited potential en sustained excellence."</p>
+                </div>
+                
+                <div class="action-steps">
+                    <h3>Continuous Energy Mastery</h3>
+                    <ul>
+                        <li>Weekly energy audit en adjustment</li>
+                        <li>Seasonal adaptation van energy strategies</li>
+                        <li>Ongoing education over energy optimization</li>
+                        <li>Share energy knowledge met je brotherhood</li>
+                        <li>Model sustainable high performance voor others</li>
+                    </ul>
+                </div>
+                
+                <p>Onthoud: In een world dat often promotes unsustainable hustle culture, true energy mastery is about building systems dat enable you om perform at your highest level consistently over time. Het is not about burning brighter, but burning smarter en longer.</p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>Top Tier Men Academy</strong></p>
+            <p>Module 7: Voeding & Gezondheid • Les 4: Energie en Focus</p>
+            <p>&copy; 2025 Top Tier Men. Alle rechten voorbehouden.</p>
+        </div>
+    </div>
+</body>
+</html>

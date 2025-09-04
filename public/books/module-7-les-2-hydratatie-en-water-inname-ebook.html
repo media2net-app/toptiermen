@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hydratatie en Water inname - Top Tier Men Academy</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background: #f9fafb;
+        }
+        
+        .ebook-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #8BAE5A 0%, #3A4D23 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -0.025em;
+        }
+        
+        .header .subtitle {
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: white;
+            opacity: 1;
+        }
+        
+        .content {
+            padding: 50px;
+        }
+        
+        .toc {
+            background: #f8fafc;
+            border-left: 4px solid #8BAE5A;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 8px;
+        }
+        
+        .toc h2 {
+            color: #8BAE5A;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .toc ol {
+            list-style: none;
+            counter-reset: toc-counter;
+        }
+        
+        .toc li {
+            counter-increment: toc-counter;
+            margin-bottom: 8px;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        .toc li::before {
+            content: counter(toc-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #8BAE5A;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .chapter {
+            margin: 50px 0;
+        }
+        
+        .chapter h2 {
+            color: #8BAE5A;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .chapter h3 {
+            color: #374151;
+            font-size: 1.3rem;
+            margin: 30px 0 15px;
+            font-weight: 600;
+        }
+        
+        .chapter p {
+            margin-bottom: 16px;
+            text-align: justify;
+            font-size: 1.05rem;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+            color: white;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(139, 174, 90, 0.3);
+        }
+        
+        .highlight-box h3 {
+            color: white;
+            margin-bottom: 15px;
+        }
+        
+        .quote-box {
+            background: #f8fafc;
+            border-left: 4px solid #8BAE5A;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+        }
+        
+        .action-steps {
+            background: #f0f9ff;
+            border: 1px solid #8BAE5A;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 8px;
+        }
+        
+        .action-steps h3 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+        }
+        
+        .action-steps ul {
+            padding-left: 20px;
+        }
+        
+        .action-steps li {
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        
+        .reflection-questions {
+            background: #fef7e0;
+            border: 1px solid #f59e0b;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 8px;
+        }
+        
+        .reflection-questions h3 {
+            color: #d97706;
+            margin-bottom: 15px;
+        }
+        
+        .reflection-questions ul {
+            padding-left: 20px;
+        }
+        
+        .reflection-questions li {
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+        
+        .footer {
+            background: #1f2937;
+            color: white;
+            padding: 40px;
+            text-align: center;
+            margin-top: 50px;
+        }
+        
+        .footer p {
+            margin-bottom: 10px;
+        }
+        
+        .page-break {
+            page-break-before: always;
+            margin-top: 60px;
+            border-top: 2px solid #e5e7eb;
+            padding-top: 40px;
+        }
+        
+        .mantra-box {
+            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+            color: white;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .mantra-box h3 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .mantra-box p {
+            font-size: 1.3rem;
+            font-weight: 600;
+            font-style: italic;
+            text-align: center;
+        }
+        
+        .info-box {
+            background: #e6f3ff;
+            border: 1px solid #0ea5e9;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 8px;
+        }
+        
+        .info-box h3 {
+            color: #0369a1;
+            margin-bottom: 15px;
+        }
+        
+        @media print {
+            .ebook-container {
+                box-shadow: none;
+            }
+            
+            .page-break {
+                page-break-before: always;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ebook-container">
+        <div class="header">
+            <h1>Hydratatie en Water inname</h1>
+            <p class="subtitle">Module 7, Les 2 • Voeding & Gezondheid</p>
+        </div>
+        
+        <div class="content">
+            <div class="toc">
+                <h2>Inhoudsopgave</h2>
+                <ol>
+                    <li>Inleiding</li>
+                    <li>Hoofdinhoud</li>
+                    <li>Praktische Tips</li>
+                    <li>Reflectie Vragen</li>
+                    <li>Volgende Stappen</li>
+                </ol>
+            </div>
+
+            <!-- Pagina 1: Inleiding -->
+            <div class="chapter">
+                <h2>1. Inleiding</h2>
+                
+                <p>Water is leven - letterlijk. Als Top Tier Man begrijp je dat optimale hydratatie het fundament is voor peak performance in alle aspecten van je leven. Van cognitieve functie tot fysieke kracht, van hormonale balans tot emotionele stabiliteit - alles wordt beïnvloed door hoe goed je lichaam gehydrateerd is.</p>
+                
+                <div class="highlight-box">
+                    <h3>Waarom Hydratatie Critical is voor Excellence</h3>
+                    <p>Je lichaam bestaat voor ongeveer 60% uit water. Elke cel, elk orgaan, elk systeem is afhankelijk van adequaat waterpeil. Een dehydratatie van slechts 2% kan je prestaties al met 10-15% verminderen.</p>
+                </div>
+                
+                <p>Toch behandelen de meeste mannen hydratatie als bijzaak. Ze drinken wanneer ze dorst hebben, grijpen naar koffie als ze moe zijn, en verwonderen zich waarom ze zich niet optimaal voelen. De waarheid is dat dorst al een teken van dehydratatie is - je lichaam waarschuwt je dat je al achterloopt.</p>
+                
+                <p>Optimale hydratatie gaat verder dan alleen water drinken. Het gaat om het begrijpen van je individuele behoeften, het timing van je vloeistofintake, en het creëren van systemen die ervoor zorgen dat je lichaam altijd optimaal functioneert.</p>
+                
+                <div class="quote-box">
+                    <p>"Je kunt weken zonder eten, maar slechts dagen zonder water. Behandel hydratatie met het respect dat het verdient." - Navy SEAL Training Manual</p>
+                </div>
+                
+                <p>In deze les leer je hoe je een strategische approach naar hydratatie ontwikkelt die je energie, focus, en prestaties maximaliseert. Van de wetenschap achter hydratatie tot praktische implementatie - je wordt een master in het optimaliseren van dit fundamentele aspect van gezondheid.</p>
+            </div>
+            
+            <div class="page-break"></div>
+
+            <!-- Pagina 2-7: Hoofdinhoud -->
+            <div class="chapter">
+                <h2>2. Hoofdinhoud</h2>
+                
+                <h3>De Wetenschap van Optimale Hydratatie</h3>
+                
+                <p>Hydratatie is veel complexer dan alleen water drinken. Het gaat om de balans van vloeistoffen en elektrolyten in je lichaam, de timing van intake, en het begrijpen van je individuele behoeften gebaseerd op activiteit, klimaat, en lichaamsamenstelling.</p>
+                
+                <div class="info-box">
+                    <h3>Hydratatie Fundamentals</h3>
+                    <p><strong>Basis Behoefte:</strong> 35ml per kg lichaamsgewicht per dag<br>
+                    <strong>Bij Training:</strong> Extra 500-750ml per uur intensieve activiteit<br>
+                    <strong>Bij Warmte:</strong> 10-15% extra bij temperaturen boven 25°C<br>
+                    <strong>Kwaliteit:</strong> Gefilterd water met natuurlijke mineralen</p>
+                </div>
+                
+                <h3>De Impact van Dehydratatie op Performance</h3>
+                
+                <p>Zelfs milde dehydratatie heeft significante gevolgen voor je prestaties en welzijn. Het is essentieel om deze signalen te herkennen en proactief te handelen.</p>
+                
+                <p><strong>Fysieke Impact:</strong></p>
+                <p>• Verminderde kracht en uithoudingsvermogen</p>
+                <p>• Tragere recovery na training</p>
+                <p>• Verhoogd risico op blessures</p>
+                <p>• Verminderde thermoregulatie (overkoeling/oververhitting)</p>
+                
+                <p><strong>Cognitieve Impact:</strong></p>
+                <p>• Verminderde concentratie en focus</p>
+                <p>• Slechtere geheugen en decision making</p>
+                <p>• Verhoogde mentale vermoeidheid</p>
+                <p>• Slower reaction times</p>
+                
+                <p><strong>Emotionele Impact:</strong></p>
+                <p>• Verhoogde stress en irritabiliteit</p>
+                <p>• Verminderde mood stability</p>
+                <p>• Slechtere slaapkwaliteit</p>
+                <p>• Lagere motivatie en energy</p>
+                
+                <div class="action-steps">
+                    <h3>Dehydratatie Warning Signs</h3>
+                    <ul>
+                        <li>Donkere urine (moet licht geel zijn)</li>
+                        <li>Droge mond of sticky speeksel</li>
+                        <li>Hoofdpijn of duizeligheid</li>
+                        <li>Vermoeidheid zonder duidelijke oorzaak</li>
+                        <li>Verminderde urineproductie</li>
+                        <li>Constipatie</li>
+                        <li>Droge huid die langzaam terugveert</li>
+                    </ul>
+                </div>
+                
+                <h3>Strategische Hydratatie Timing</h3>
+                
+                <p>Wanneer je drinkt is net zo belangrijk als hoeveel je drinkt. Strategic timing maximaliseert absorption en voorkomt digestive discomfort tijdens belangrijke activiteiten.</p>
+                
+                <p><strong>Morning Protocol:</strong> Start je dag met 500-750ml water om je lichaam te rehydreren na de nacht. Voeg een snufje zeezout toe voor elektrolyten.</p>
+                
+                <p><strong>Pre-Workout:</strong> 400-500ml water 2-3 uur voor training, plus 200-300ml 15-20 minuten ervoor.</p>
+                
+                <p><strong>During Workout:</strong> 150-250ml elke 15-20 minuten tijdens training langer dan 60 minuten.</p>
+                
+                <p><strong>Post-Workout:</strong> 150% van het gewichtsverlies tijdens training (wiegen voor en na).</p>
+                
+                <p><strong>Evening Tapering:</strong> Verminder intake 2-3 uur voor bedtijd om slaaponderbreking te minimaliseren.</p>
+                
+                <div class="quote-box">
+                    <p>"Proper hydration is like having high-octane fuel in your tank - everything runs smoother and more efficiently." - Dr. James DiNicolantonio</p>
+                </div>
+                
+                <h3>Water Quality en Optimalisatie</h3>
+                
+                <p>Niet al het water is gelijk. De kwaliteit van je water kan een significant impact hebben op je gezondheid en prestaties. Investeren in goede waterkwaliteit is investeren in je optimale functie.</p>
+                
+                <p><strong>Optimale Water Eigenschappen:</strong></p>
+                <p>• <strong>Gefilterd:</strong> Vrij van chloor, fluoride, en andere chemicaliën</p>
+                <p>• <strong>Mineralenrijk:</strong> Natuurlijke elektrolyten voor optimale absorptie</p>
+                <p>• <strong>Alkalisch:</strong> pH tussen 7.5-8.5 voor optimale cellulaire functie</p>
+                <p>• <strong>Structured:</strong> Hexagonale moleculaire structuur voor betere hydratatie</p>
+                
+                <div class="highlight-box">
+                    <h3>Hydratatie Enhancers</h3>
+                    <p><strong>Natuurlijke Elektrolyten:</strong> Zeezout, roze Himalayazout<br>
+                    <strong>Mineralen:</strong> Magnesium, kalium, calcium<br>
+                    <strong>Natuurlijke Smaak:</strong> Verse citroen, komkommer, mint<br>
+                    <strong>Superhydratie:</strong> Kokosnootwater voor intensive training</p>
+                </div>
+                
+                <h3>Hydratatie en Andere Dranken</h3>
+                
+                <p>Terwijl water de basis is, consumeren de meeste mannen ook koffie, thee, en andere dranken. Het begrijpen van hoe deze je hydratatiestatus beïnvloeden is crucial voor optimale balans.</p>
+                
+                <p><strong>Koffie en Cafeïne:</strong> Matige hoeveelheden (1-3 kopjes) hebben een net positive hydratatie-effect, ondanks mild diuretisch effect. Drink een glas water per kop koffie.</p>
+                
+                <p><strong>Alcohol:</strong> Significant dehydraterende effecten. Drink minimaal 1:1 ratio water:alcohol, bij voorkeur 2:1.</p>
+                
+                <p><strong>Sports Drinks:</strong> Nuttig bij intensive training langer dan 60 minuten, maar vaak onnodige suiker bij normale activiteit.</p>
+                
+                <div class="mantra-box">
+                    <h3>Hydratatie Mantra</h3>
+                    <p>"Mijn lichaam is een high-performance machine. Ik fuel het met de purest water en optimale timing voor peak excellence."</p>
+                </div>
+            </div>
+            
+            <div class="page-break"></div>
+
+            <!-- Pagina 8: Praktische Tips -->
+            <div class="chapter">
+                <h2>3. Praktische Tips</h2>
+                
+                <div class="action-steps">
+                    <h3>De Top Tier Hydratatie Routine</h3>
+                    <ul>
+                        <li><strong>6:00:</strong> 500-750ml water met snufje zeezout (rehydratie na nacht)</li>
+                        <li><strong>9:00:</strong> 250ml water vóór koffie (voorkom dehydratatie)</li>
+                        <li><strong>12:00:</strong> 500ml water met lunch (ondersteuning digestie)</li>
+                        <li><strong>15:00:</strong> 250ml water (middag energy boost)</li>
+                        <li><strong>18:00:</strong> 500ml water met/na avondeten</li>
+                        <li><strong>21:00:</strong> Stop met drinken (ongestoorde slaap)</li>
+                    </ul>
+                </div>
+                
+                <h3>Hydratatie Tracking Systems</h3>
+                
+                <p><strong>De Waterfles Methode:</strong> Gebruik een 1-liter fles. Vul hem 's ochtends en zorg dat hij leeg is tegen 15:00. Vul opnieuw en drink 75% op tegen 20:00.</p>
+                
+                <p><strong>De Phone Reminder Methode:</strong> Zet alarms elke 2 uur gedurende de dag als reminder om water te drinken.</p>
+                
+                <p><strong>De Urine Monitor:</strong> Check je urine kleur bij elke toiletbezoek. Streven naar licht geel zoals limonade, niet donker als appelsap.</p>
+                
+                <div class="info-box">
+                    <h3>Hydratatie Calculatie Formula</h3>
+                    <p><strong>Basis:</strong> Lichaamsgewicht (kg) × 35ml = dagelijkse basis behoefte<br>
+                    <strong>Training:</strong> + 500-750ml per uur intensive activiteit<br>
+                    <strong>Warmte:</strong> + 10-15% bij temperaturen >25°C<br>
+                    <strong>Hoogte:</strong> + 20% bij >2500m hoogte</p>
+                </div>
+                
+                <h3>Travel en Business Hydratatie</h3>
+                
+                <p>Reizen en zakelijke settings brengen unique challenges voor hydratatie. Airplane cabins, climate-controlled offices, en onregelmatige schema's vereisen aangepaste strategieën.</p>
+                
+                <p><strong>Vliegen:</strong> Drink 250ml water per vlieguur. Vermijd alcohol en limiteer cafeïne. Neem een lege waterfles door security en vul deze na controle.</p>
+                
+                <p><strong>Vergaderingen:</strong> Drink water vóór belangrijke meetings voor optimale cognitive performance. Heb altijd een waterfles zichtbaar op je bureau.</p>
+                
+                <p><strong>Lange Werkdagen:</strong> Stel reminders in elke 90 minuten. Gebruik bathroom breaks als natuurlijke drinking cues.</p>
+                
+                <div class="action-steps">
+                    <h3>Hydratatie Emergency Protocol</h3>
+                    <ul>
+                        <li>Bij hoofdpijn: 500ml water met pinch salt, wacht 20 minuten</li>
+                        <li>Bij afternoon crash: 250ml water, wacht 15 min voor koffie</li>
+                        <li>Pre-belangrijke prestatie: 200ml water 30 min van tevoren</li>
+                        <li>Na alcohol: 1L water met elektrolyten voor bed</li>
+                        <li>Bij ziekte: Verhoog intake met 20-30%</li>
+                    </ul>
+                </div>
+                
+                <h3>Optimale Water Setup</h3>
+                
+                <p>Maak optimale hydratatie inevitable door je environment te optimaliseren:</p>
+                
+                <p><strong>Thuis:</strong> Plaats waterflessen in elke kamer. Investeer in een goede waterfilter. Heb backup water sources.</p>
+                
+                <p><strong>Kantoor:</strong> Grote waterfles op je bureau. Electrolyte packets in je tas. Water drinking app op je telefoon.</p>
+                
+                <p><strong>Gym:</strong> Pre-filled waterfles met elektrolyten. Extra fles in auto voor post-workout.</p>
+                
+                <div class="quote-box">
+                    <p>"Excellence is habitual. Maak optimale hydratatie zo automatic dat je er niet meer over hoeft na te denken." - James Clear</p>
+                </div>
+                
+                <h3>Advanced Hydratatie Strategieën</h3>
+                
+                <p><strong>Electrolyte Loading:</strong> Op dagen met intensive training of heat exposure, begin 2-3 dagen van tevoren met extra elektrolyten.</p>
+                
+                <p><strong>Hydrogen Water:</strong> Overweeg hydrogen-enriched water voor anti-inflammatory benefits tijdens heavy training periods.</p>
+                
+                <p><strong>Temperature Optimization:</strong> Room temperature water wordt het snelst geabsorbeerd. Ijskoud water kan gut function temporaryly slow down.</p>
+            </div>
+            
+            <div class="page-break"></div>
+
+            <!-- Pagina 9: Reflectie Vragen -->
+            <div class="chapter">
+                <h2>4. Reflectie Vragen</h2>
+                
+                <div class="reflection-questions">
+                    <h3>Hydratatie Self-Assessment</h3>
+                    <ul>
+                        <li>Hoe ziet mijn huidige hydratatie routine eruit? Drink ik strategisch of reactively?</li>
+                        <li>Wat zijn de tekenen dat ik goed gehydrateerd ben vs. gedehydrateerd?</li>
+                        <li>Op welke momenten van de dag voel ik me het meest energiek vs. moe? Hoe correleert dit met mijn water intake?</li>
+                        <li>Welke situaties (reizen, stress, intensive training) beïnvloeden mijn hydratatie het meest?</li>
+                        <li>Hoe is de kwaliteit van het water dat ik dagelijks drink?</li>
+                        <li>Wat voor obstacles houden mij tegen van optimale hydratatie?</li>
+                        <li>Hoe zou mijn performance (fysiek en mentaal) kunnen verbeteren met betere hydratatie?</li>
+                        <li>Welke systemen kan ik implementeren om consistent optimaal gehydrateerd te blijven?</li>
+                    </ul>
+                </div>
+                
+                <div class="action-steps">
+                    <h3>7-Dagen Hydratatie Experiment</h3>
+                    <ul>
+                        <li>Track je water intake en urine kleur elke dag</li>
+                        <li>Noteer energy levels en cognitive performance elk uur</li>
+                        <li>Test verschillende timing strategieën</li>
+                        <li>Experimenteer met water temperature en additives</li>
+                        <li>Monitor sleep quality en morning alertness</li>
+                    </ul>
+                </div>
+                
+                <div class="highlight-box">
+                    <h3>Performance Correlation Test</h3>
+                    <p>Voor 2 weken, track je hydratatie level (1-10 scale) elke ochtend en avond. Correleer dit met je workout performance, mental clarity, mood, en energy. Zoek naar patterns en optimalisatie mogelijkheden.</p>
+                </div>
+                
+                <div class="reflection-questions">
+                    <h3>Lifestyle Integration</h3>
+                    <ul>
+                        <li>Hoe kan ik mijn omgeving optimaliseren voor automatic hydratatie?</li>
+                        <li>Welke triggers kan ik gebruiken om regelmatig water te drinken?</li>
+                        <li>Hoe verander ik mijn travel routine om optimal gehydrateerd te blijven?</li>
+                        <li>Wat zijn mijn backup plannen voor situaties waarin optimale hydratatie challenged is?</li>
+                    </ul>
+                </div>
+                
+                <div class="mantra-box">
+                    <h3>Hydratatie Commitment</h3>
+                    <p>"Ik treat hydratatie als de foundation van mijn performance. Elke dag fuel ik mijn lichaam strategisch met optimal water voor peak function."</p>
+                </div>
+            </div>
+            
+            <div class="page-break"></div>
+
+            <!-- Pagina 10: Volgende Stappen -->
+            <div class="chapter">
+                <h2>5. Volgende Stappen</h2>
+                
+                <h3>30-Dagen Optimal Hydratatie Protocol</h3>
+                
+                <div class="action-steps">
+                    <h3>Week 1: Foundation Building</h3>
+                    <ul>
+                        <li>Bereken je personal hydratatie needs gebaseerd op gewicht en activiteit</li>
+                        <li>Implementeer morning hydratatie ritual (500ml water bij wakker worden)</li>
+                        <li>Set hourly reminders voor water intake</li>
+                        <li>Begin urine color monitoring voor feedback</li>
+                    </ul>
+                </div>
+                
+                <div class="action-steps">
+                    <h3>Week 2: Timing Optimization</h3>
+                    <ul>
+                        <li>Implementeer strategic pre/post workout hydratatie</li>
+                        <li>Optimaliseer timing rondom maaltijden</li>
+                        <li>Test evening tapering voor betere slaap</li>
+                        <li>Experiment met elektrolyte timing en dosering</li>
+                    </ul>
+                </div>
+                
+                <div class="action-steps">
+                    <h3>Week 3: Quality Upgrade</h3>
+                    <ul>
+                        <li>Investeer in water filtration of high-quality water</li>
+                        <li>Test verschillende water temperatures en additives</li>
+                        <li>Optimaliseer je hydratatie setup thuis en op werk</li>
+                        <li>Ontwikkel travel hydratatie protocol</li>
+                    </ul>
+                </div>
+                
+                <div class="action-steps">
+                    <h3>Week 4: Advanced Integration</h3>
+                    <ul>
+                        <li>Fine-tune je personal optimal intake based op tracking</li>
+                        <li>Implementeer performance-specific hydratatie strategieën</li>
+                        <li>Develop backup systems voor challenging situations</li>
+                        <li>Create long-term maintenance routine</li>
+                    </ul>
+                </div>
+                
+                <h3>Long-term Hydratatie Excellence</h3>
+                
+                <p>Optimale hydratatie is geen destination maar een lifestyle. Het vereist consistent attention en willingness om je approach te verfijnen based op changing circumstances en goals.</p>
+                
+                <div class="info-box">
+                    <h3>Monthly Hydratatie Review</h3>
+                    <p><strong>Performance Metrics:</strong> Energy levels, workout performance, sleep quality<br>
+                    <strong>Health Markers:</strong> Urine color, skin elasticity, algemeen welzijn<br>
+                    <strong>Lifestyle Factors:</strong> Travel, stress levels, seasonal changes<br>
+                    <strong>Optimization:</strong> Timing adjustments, quality upgrades, system improvements</p>
+                </div>
+                
+                <div class="quote-box">
+                    <p>"Water is the driver of nature. Voor de human body, optimal hydratatie is the driver of peak performance." - Leonardo da Vinci (adapted)</p>
+                </div>
+                
+                <p>Als je consistent optimal hydratatie practices implementeert, zul je merken dat deze "simple" verandering profound effects heeft op elke aspect van je leven - van je morning alertness tot je evening recovery, van je workout intensity tot je cognitive sharpness.</p>
+                
+                <div class="mantra-box">
+                    <h3>Jouw Hydratatie Legacy</h3>
+                    <p>"Ik honor mijn lichaam door het consistent te fuelen met pure, strategic hydratatie. Dit is de foundation waarop ik mijn excellence bouw."</p>
+                </div>
+                
+                <div class="action-steps">
+                    <h3>Continuous Hydratatie Mastery</h3>
+                    <ul>
+                        <li>Monitor seasonal changes en adjust accordingly</li>
+                        <li>Upgrade je water quality systematically</li>
+                        <li>Share hydratatie knowledge met je brotherhood</li>
+                        <li>Blijf experimenten met new optimization strategies</li>
+                        <li>Use hydratatie als gateway naar andere health optimizations</li>
+                    </ul>
+                </div>
+                
+                <p>Onthoud: In een wereld van complex supplements en biohacking devices, is optimale hydratatie misschien de most accessible en impactful intervention je kunt maken. Master this foundation en watch every other aspect van je performance improve.</p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>Top Tier Men Academy</strong></p>
+            <p>Module 7: Voeding & Gezondheid • Les 2: Hydratatie en Water inname</p>
+            <p>&copy; 2025 Top Tier Men. Alle rechten voorbehouden.</p>
+        </div>
+    </div>
+</body>
+</html>

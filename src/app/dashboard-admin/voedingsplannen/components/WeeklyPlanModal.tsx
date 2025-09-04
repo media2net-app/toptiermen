@@ -73,6 +73,175 @@ export default function WeeklyPlanModal({ isOpen, onClose, plan }: WeeklyPlanMod
     { key: 'sunday', name: 'Zondag', short: 'Zo' }
   ];
 
+  // Convert meals data from database to DayPlan format
+  const convertMealsDataToDayPlan = (mealsData: any): DayPlan[] => {
+    const nutritionDB: Record<string, { calories: number; protein: number; carbs: number; fat: number }> = {
+      'Ribeye Steak': { calories: 250, protein: 26, carbs: 0, fat: 15 },
+      'Biefstuk': { calories: 250, protein: 26, carbs: 0, fat: 15 },
+      'T-Bone Steak': { calories: 247, protein: 24, carbs: 0, fat: 16 },
+      'Rundergehakt (15% vet)': { calories: 254, protein: 20, carbs: 0, fat: 18 },
+      'Rundergehakt (20% vet)': { calories: 272, protein: 19, carbs: 0, fat: 21 },
+      'Mager Rundergehakt': { calories: 220, protein: 22, carbs: 0, fat: 14 },
+      'Eendenborst': { calories: 337, protein: 19, carbs: 0, fat: 28 },
+      'Zalm (Wild)': { calories: 208, protein: 25, carbs: 0, fat: 12 },
+      'Haring': { calories: 158, protein: 18, carbs: 0, fat: 9 },
+      'Makreel': { calories: 205, protein: 19, carbs: 0, fat: 14 },
+      'Sardines': { calories: 208, protein: 25, carbs: 0, fat: 11 },
+      'Tonijn in Olijfolie': { calories: 189, protein: 25, carbs: 0, fat: 9 },
+      'Witvis': { calories: 82, protein: 18, carbs: 0, fat: 1 },
+      'Kipfilet (Gegrild)': { calories: 165, protein: 31, carbs: 0, fat: 4 },
+      'Kalkoenfilet (Gegrild)': { calories: 135, protein: 30, carbs: 0, fat: 1 },
+      'Kippendijen': { calories: 250, protein: 26, carbs: 0, fat: 15 },
+      'Gans': { calories: 259, protein: 25, carbs: 0, fat: 17 },
+      'Varkenshaas': { calories: 143, protein: 26, carbs: 0, fat: 4 },
+      'Spek': { calories: 541, protein: 37, carbs: 0, fat: 42 },
+      'Ham': { calories: 145, protein: 21, carbs: 0, fat: 6 },
+      'Worst': { calories: 300, protein: 20, carbs: 0, fat: 25 },
+      'Duitse Biefstuk': { calories: 250, protein: 16, carbs: 0, fat: 20 },
+      'Salami': { calories: 336, protein: 20, carbs: 0, fat: 28 },
+      'Lamsvlees': { calories: 294, protein: 25, carbs: 0, fat: 21 },
+      'Lamskotelet': { calories: 294, protein: 25, carbs: 0, fat: 21 },
+      'Orgaanvlees (Lever)': { calories: 135, protein: 20, carbs: 4, fat: 4 },
+      'Orgaanvlees (Hart)': { calories: 112, protein: 17, carbs: 0, fat: 4 },
+      'Runderlever': { calories: 135, protein: 20, carbs: 4, fat: 4 },
+      'Runderhart': { calories: 112, protein: 17, carbs: 0, fat: 4 },
+      'Tartaar': { calories: 220, protein: 22, carbs: 0, fat: 14 },
+      'Carpaccio': { calories: 120, protein: 21, carbs: 0, fat: 4 },
+      '1 Ei': { calories: 155, protein: 13, carbs: 1, fat: 11 },
+      '1 Handje Walnoten': { calories: 26, protein: 0.6, carbs: 0.5, fat: 2.6 },
+      '1 Handje Amandelen': { calories: 23, protein: 0.8, carbs: 0.9, fat: 2.0 },
+      '1 Handje Cashewnoten': { calories: 22, protein: 0.7, carbs: 1.2, fat: 1.8 },
+      '1 Handje Hazelnoten': { calories: 25, protein: 0.6, carbs: 0.7, fat: 2.4 },
+      '1 Handje Pecannoten': { calories: 28, protein: 0.4, carbs: 0.6, fat: 2.8 },
+      '1 Handje Pistachenoten': { calories: 23, protein: 0.8, carbs: 1.1, fat: 1.8 },
+      '1 Handje Macadamia Noten': { calories: 30, protein: 0.3, carbs: 0.6, fat: 3.0 }
+    };
+
+    const calculateMealNutrition = (ingredients: any[]) => {
+      let totalCalories = 0;
+      let totalProtein = 0;
+      let totalCarbs = 0;
+      let totalFat = 0;
+      
+      ingredients.forEach(ingredient => {
+        const nutritionData = nutritionDB[ingredient.name];
+        if (nutritionData) {
+          let multiplier = 0;
+          
+          if (ingredient.unit === 'stuks' && ingredient.name === '1 Ei') {
+            multiplier = ingredient.amount;
+          } else if (ingredient.unit === 'handje') {
+            multiplier = ingredient.amount;
+          } else {
+            multiplier = ingredient.amount / 100;
+          }
+          
+          totalCalories += nutritionData.calories * multiplier;
+          totalProtein += nutritionData.protein * multiplier;
+          totalCarbs += nutritionData.carbs * multiplier;
+          totalFat += nutritionData.fat * multiplier;
+        }
+      });
+      
+      return {
+        calories: Math.round(totalCalories),
+        protein: Math.round(totalProtein * 10) / 10,
+        carbs: Math.round(totalCarbs * 10) / 10,
+        fat: Math.round(totalFat * 10) / 10
+      };
+    };
+
+    return daysOfWeek.map(day => {
+      const dayData = mealsData[day.key];
+      if (!dayData) {
+        // Return empty day if no data
+        return {
+          day: day.key,
+          dayName: day.name,
+          meals: {
+            ontbijt: { name: 'Geen ontbijt', time: '08:00', ingredients: [], calories: 0, protein: 0, carbs: 0, fat: 0 },
+            snack1: { name: 'Geen snack', time: '10:00', ingredients: [], calories: 0, protein: 0, carbs: 0, fat: 0 },
+            lunch: { name: 'Geen lunch', time: '13:00', ingredients: [], calories: 0, protein: 0, carbs: 0, fat: 0 },
+            snack2: { name: 'Geen snack', time: '16:00', ingredients: [], calories: 0, protein: 0, carbs: 0, fat: 0 },
+            diner: { name: 'Geen diner', time: '19:00', ingredients: [], calories: 0, protein: 0, carbs: 0, fat: 0 }
+          },
+          totalCalories: 0,
+          totalProtein: 0,
+          totalCarbs: 0,
+          totalFat: 0
+        };
+      }
+
+      // Convert ingredients format
+      const convertIngredients = (ingredients: any[]) => {
+        return ingredients.map(ing => ({
+          name: ing.name,
+          amount: ing.amount,
+          unit: ing.unit,
+          calories: 0, // Will be calculated
+          protein: 0,
+          carbs: 0,
+          fat: 0
+        }));
+      };
+
+      const ontbijtIngredients = convertIngredients(dayData.ontbijt || []);
+      const lunchIngredients = convertIngredients(dayData.lunch || []);
+      const dinerIngredients = convertIngredients(dayData.diner || []);
+
+      const ontbijtNutrition = calculateMealNutrition(dayData.ontbijt || []);
+      const lunchNutrition = calculateMealNutrition(dayData.lunch || []);
+      const dinerNutrition = calculateMealNutrition(dayData.diner || []);
+
+      return {
+        day: day.key,
+        dayName: day.name,
+        meals: {
+          ontbijt: {
+            name: 'Carnivoor Ontbijt',
+            time: '08:00',
+            ingredients: ontbijtIngredients,
+            ...ontbijtNutrition
+          },
+          snack1: {
+            name: 'Geen snack',
+            time: '10:00',
+            ingredients: [],
+            calories: 0,
+            protein: 0,
+            carbs: 0,
+            fat: 0
+          },
+          lunch: {
+            name: 'Carnivoor Lunch',
+            time: '13:00',
+            ingredients: lunchIngredients,
+            ...lunchNutrition
+          },
+          snack2: {
+            name: 'Geen snack',
+            time: '16:00',
+            ingredients: [],
+            calories: 0,
+            protein: 0,
+            carbs: 0,
+            fat: 0
+          },
+          diner: {
+            name: 'Carnivoor Diner',
+            time: '19:00',
+            ingredients: dinerIngredients,
+            ...dinerNutrition
+          }
+        },
+        totalCalories: ontbijtNutrition.calories + lunchNutrition.calories + dinerNutrition.calories,
+        totalProtein: Math.round((ontbijtNutrition.protein + lunchNutrition.protein + dinerNutrition.protein) * 10) / 10,
+        totalCarbs: Math.round((ontbijtNutrition.carbs + lunchNutrition.carbs + dinerNutrition.carbs) * 10) / 10,
+        totalFat: Math.round((ontbijtNutrition.fat + lunchNutrition.fat + dinerNutrition.fat) * 10) / 10
+      };
+    });
+  };
+
   useEffect(() => {
     if (isOpen && plan) {
       generateWeeklyPlan();
@@ -84,7 +253,20 @@ export default function WeeklyPlanModal({ isOpen, onClose, plan }: WeeklyPlanMod
     
     setIsLoading(true);
     try {
-      console.log('🗓️ Generating weekly plan for:', plan.name);
+      console.log('🗓️ Loading weekly plan for:', plan.name);
+      
+      // Check if plan has meals data (new format)
+      if ((plan as any).meals) {
+        console.log('📊 Using plan meals data from database');
+        const mealsData = (plan as any).meals;
+        const convertedPlan = convertMealsDataToDayPlan(mealsData);
+        setWeeklyPlan(convertedPlan);
+        setIsLoading(false);
+        return;
+      }
+      
+      // Fallback: Generate plan if no meals data
+      console.log('🔄 No meals data found, generating default plan');
       
       // Fetch carnivore ingredients
       const response = await fetch('/api/admin/nutrition-ingredients');

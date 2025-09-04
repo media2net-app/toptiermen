@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cut The Weak - Top Tier Men Academy</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background: #f9fafb;
+        }
+        
+        .ebook-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #8BAE5A 0%, #3A4D23 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -0.025em;
+        }
+        
+        .header .subtitle {
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: white;
+            opacity: 1;
+        }
+        
+        .content {
+            padding: 50px;
+        }
+        
+        .toc {
+            background: #f8fafc;
+            border-left: 4px solid #8BAE5A;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 8px;
+        }
+        
+        .toc h2 {
+            color: #8BAE5A;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .toc ol {
+            list-style: none;
+            counter-reset: toc-counter;
+        }
+        
+        .toc li {
+            counter-increment: toc-counter;
+            margin-bottom: 8px;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        .toc li::before {
+            content: counter(toc-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #8BAE5A;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .chapter {
+            margin: 50px 0;
+        }
+        
+        .chapter h2 {
+            color: #8BAE5A;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .chapter h3 {
+            color: #374151;
+            font-size: 1.3rem;
+            margin: 30px 0 15px;
+            font-weight: 600;
+        }
+        
+        .chapter p {
+            margin-bottom: 16px;
+            text-align: justify;
+            font-size: 1.05rem;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+            color: white;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(139, 174, 90, 0.3);
+        }
+        
+        .highlight-box h3 {
+            color: white;
+            margin-bottom: 15px;
+        }
+        
+        .quote-box {
+            background: #f8fafc;
+            border-left: 4px solid #8BAE5A;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+        }
+        
+        .action-steps {
+            background: #f0f9ff;
+            border: 1px solid #8BAE5A;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 8px;
+        }
+        
+        .action-steps h3 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+        }
+        
+        .action-steps ul {
+            padding-left: 20px;
+        }
+        
+        .action-steps li {
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        
+        .reflection-questions {
+            background: #fef7e0;
+            border: 1px solid #f59e0b;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 8px;
+        }
+        
+        .reflection-questions h3 {
+            color: #d97706;
+            margin-bottom: 15px;
+        }
+        
+        .reflection-questions ul {
+            padding-left: 20px;
+        }
+        
+        .reflection-questions li {
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+        
+        .footer {
+            background: #1f2937;
+            color: white;
+            padding: 40px;
+            text-align: center;
+            margin-top: 50px;
+        }
+        
+        .footer p {
+            margin-bottom: 10px;
+        }
+        
+        .page-break {
+            page-break-before: always;
+            margin-top: 60px;
+            border-top: 2px solid #e5e7eb;
+            padding-top: 40px;
+        }
+        
+        .mantra-box {
+            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+            color: white;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .mantra-box h3 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .mantra-box p {
+            font-size: 1.3rem;
+            font-weight: 600;
+            font-style: italic;
+            text-align: center;
+        }
+        
+        .warning-box {
+            background: #fef2f2;
+            border: 2px solid #dc2626;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 8px;
+        }
+        
+        .warning-box h3 {
+            color: #dc2626;
+            margin-bottom: 15px;
+        }
+        
+        @media print {
+            .ebook-container {
+                box-shadow: none;
+            }
+            
+            .page-break {
+                page-break-before: always;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ebook-container">
+        <div class="header">
+            <h1>Cut The Weak</h1>
+            <p class="subtitle">Module 6, Les 4 • Brotherhood</p>
+        </div>
+        
+        <div class="content">
+            <div class="toc">
+                <h2>Inhoudsopgave</h2>
+                <ol>
+                    <li>Inleiding</li>
+                    <li>Hoofdinhoud</li>
+                    <li>Praktische Tips</li>
+                    <li>Reflectie Vragen</li>
+                    <li>Volgende Stappen</li>
+                </ol>
+            </div>
+
+            <!-- Pagina 1: Inleiding -->
+            <div class="chapter">
+                <h2>1. Inleiding</h2>
+                
+                <p>Een van de moeilijkste maar meest cruciale aspecten van het bouwen van een sterke brotherhood is het leren wegsnijden van relaties die je down trekken. "Cut the weak" betekent niet dat je hart- of meedogenloos bent, maar dat je strategisch en principieel bent over wie toegang krijgt tot je energie, tijd en vertrouwen.</p>
+                
+                <div class="warning-box">
+                    <h3>Belangrijke Disclaimer</h3>
+                    <p>Deze les gaat over het herkennen en beëindigen van toxische relaties, niet over het afschrijven van mensen die tijdelijk struggles hebben. Echte broeders steunen elkaar door moeilijke tijden. Het gaat om het onderscheid maken tussen tijdelijke zwakte en karakterzwakte.</p>
+                </div>
+                
+                <p>Als Top Tier Man begrijp je dat je kwaliteit van leven direct gecorreleerd is met de kwaliteit van je relationele kring. Je kunt niet naar het volgende level als je wordt omringd door mensen die constant negatief zijn, geen groei willen, of actief je progress saboteren.</p>
+                
+                <div class="highlight-box">
+                    <h3>De Kosten van Zwakke Relaties</h3>
+                    <p>Toxische mensen kosten je meer dan je denkt: emotionele energie, mentale focus, tijd die je had kunnen investeren in groei, en vaak zelfs je eigen standaarden en ambities die langzaam worden geërodeerd.</p>
+                </div>
+                
+                <p>Het wegsnijden van zwakke relaties is geen act van grauwen, maar van zelfrespect en bescherming van je missie. Het gaat over het creëren van ruimte voor mensen die wel bijdragen aan je growth en succes.</p>
+                
+                <div class="quote-box">
+                    <p>"Je bent niet verplicht om jezelf in brand te steken om anderen warm te houden." - Unknown</p>
+                </div>
+                
+                <p>In deze les leer je hoe je toxic patronen herkent, hoe je gezonde grenzen stelt, en hoe je moeilijke maar noodzakelijke beslissingen maakt over wie wel en niet in je leven past.</p>
+            </div>
+            
+            <div class="page-break"></div>
+
+            <!-- Pagina 2-7: Hoofdinhoud -->
+            <div class="chapter">
+                <h2>2. Hoofdinhoud</h2>
+                
+                <h3>Herkennen van Zwakke/Toxische Patronen</h3>
+                
+                <p>Niet elke negatieve persoon is toxic, en niet elke challenge is een red flag. Het gaat om consistente patronen van gedrag die jouw welzijn en groei ondermijnen zonder bereidheid tot verandering of verantwoordelijkheid.</p>
+                
+                <div class="highlight-box">
+                    <h3>De 7 Tekenen van Relationele Toxiciteit</h3>
+                    <p><strong>1. Energy Vampires:</strong> Ze zuigen consistentie je energie op zonder iets terug te geven<br>
+                    <strong>2. Dream Killers:</strong> Ze kleineren je ambities en proberen je "realistisch" te houden<br>
+                    <strong>3. Drama Magneten:</strong> Ze creëren constant chaos en conflict<br>
+                    <strong>4. Responsibility Dodgers:</strong> Ze nemen nooit verantwoordelijkheid voor hun acties<br>
+                    <strong>5. Growth Resistors:</strong> Ze willen niet veranderen en sabotage jouw groei<br>
+                    <strong>6. Loyalty Abusers:</strong> Ze misbruiken je goedheid en loyaliteit<br>
+                    <strong>7. Boundary Violators:</strong> Ze respecteren je grenzen niet ondanks herhaalde communicatie</p>
+                </div>
+                
+                <h3>Het Verschil: Tijdelijke Zwakte vs. Karakterzwakte</h3>
+                
+                <p><strong>Tijdelijke Zwakte:</strong> Iemand gaat door een moeilijke periode, heeft setbacks, maar toont bereidheid tot groei, neemt verantwoordelijkheid, en respecteert jouw grenzen en welzijn.</p>
+                
+                <p><strong>Karakterzwakte:</strong> Consistente patronen van negativiteit, slachtoffermentaliteit, het afwijzen van verantwoordelijkheid, en geen interesse in persoonlijke ontwikkeling.</p>
+                
+                <div class="action-steps">
+                    <h3>Assessment Questions</h3>
+                    <ul>
+                        <li>Voel ik me gedraineerd na tijd met deze persoon?</li>
+                        <li>Ondersteunt deze persoon mijn groei en ambities?</li>
+                        <li>Neemt deze persoon verantwoordelijkheid voor hun acties?</li>
+                        <li>Respecteert deze persoon mijn grenzen?</li>
+                        <li>Is er reciprociteit in onze relatie?</li>
+                        <li>Toont deze persoon bereidheid tot verandering en groei?</li>
+                    </ul>
+                </div>
+                
+                <h3>De Psychologie van Toxic Attachments</h3>
+                
+                <p>Vaak blijven we vast hangen in toxic relaties om redenen die dieper gaan dan we realiseren. Het kan zijn uit gewoonte, schuldgevoel, misplaced loyaliteit, of angst voor confrontatie.</p>
+                
+                <p><strong>Veelvoorkomende Redenen voor Aanhangen:</strong></p>
+                <p>• <strong>Geschiedenis:</strong> "We kennen elkaar al zo lang"</p>
+                <p>• <strong>Schuld:</strong> "Ik kan hem niet in de steek laten"</p>
+                <p>• <strong>Conflict Vermijding:</strong> "Ik wil geen drama"</p>
+                <p>• <strong>False Loyalty:</strong> "Echte vrienden geven niet op"</p>
+                <p>• <strong>Codependency:</strong> "Hij heeft me nodig"</p>
+                
+                <div class="quote-box">
+                    <p>"Soms moet je people loslaten, niet omdat je niet meer om ze geeft, maar omdat ze niet meer om jou geven." - Paulo Coelho</p>
+                </div>
+                
+                <h3>Strategieën voor het Wegsnijden</h3>
+                
+                <p>Het beëindigen of downgraden van relaties vereist strategie, niet emotie. Het doel is om clean en respectvol weg te komen zonder onnodige drama of schade.</p>
+                
+                <p><strong>De Graduated Approach:</strong></p>
+                
+                <p><strong>Level 1: Boundary Setting</strong> - Start met duidelijke grenzen en communicatie over wat wel en niet acceptabel is.</p>
+                
+                <p><strong>Level 2: Limited Contact</strong> - Reduce de frequentie en intimiteit van contact. Wordt minder beschikbaar.</p>
+                
+                <p><strong>Level 3: Strategic Fade</strong> - Geleidelijk uitfaseren zonder dramatische confrontaties.</p>
+                
+                <p><strong>Level 4: Direct Cut</strong> - Voor severe toxic cases waar gradueel niet werkt of veilig is.</p>
+                
+                <div class="action-steps">
+                    <h3>Implementation Steps</h3>
+                    <ul>
+                        <li>Documenteer specifieke toxic gedragingen en patronen</li>
+                        <li>Communiceer duidelijke boundaries een keer</li>
+                        <li>Consequent handhaven zonder herhaalde uitleg</li>
+                        <li>Reduce contact geleidelijk en strategisch</li>
+                        <li>Investeer de vrijgekomen tijd en energie in positieve relaties</li>
+                    </ul>
+                </div>
+                
+                <h3>Handling Pushback en Manipulation</h3>
+                
+                <p>Toxic mensen geven zelden makkelijk op. Ze zullen je boundaries testen, guilt trips proberen, mutual vrienden inschakelen, of dramatic gestures maken. Bereid je voor en blijf standvastig.</p>
+                
+                <p><strong>Veelvoorkomende Manipulatie Tactieken:</strong></p>
+                <p>• <strong>Guilt Tripping:</strong> "Na alles wat ik voor je gedaan heb..."</p>
+                <p>• <strong>Gaslighting:</strong> "Je bent te gevoelig/overgevoelig"</p>
+                <p>• <strong>False Promises:</strong> "Ik zal veranderen, geef me nog een kans"</p>
+                <p>• <strong>Social Pressure:</strong> Vrienden inschakelen om druk uit te oefenen</p>
+                <p>• <strong>Drama Escalation:</strong> Crisis situaties creëren voor aandacht</p>
+                
+                <div class="mantra-box">
+                    <h3>Boundary Mantra</h3>
+                    <p>"Mijn tijd en energie zijn heilig. Ik geef ze alleen aan mensen die ze respecteren en waardevolle teruggave bieden."</p>
+                </div>
+            </div>
+            
+            <div class="page-break"></div>
+
+            <!-- Pagina 8: Praktische Tips -->
+            <div class="chapter">
+                <h2>3. Praktische Tips</h2>
+                
+                <div class="action-steps">
+                    <h3>De 30-Dagen Relationship Audit</h3>
+                    <ul>
+                        <li><strong>Week 1:</strong> Track hoe je je voelt na tijd met elke belangrijke persoon</li>
+                        <li><strong>Week 2:</strong> Noteer wie je energie geeft vs. neemt</li>
+                        <li><strong>Week 3:</strong> Evalueer reciprociteit in je relaties</li>
+                        <li><strong>Week 4:</strong> Maak beslissingen en begin implementatie</li>
+                    </ul>
+                </div>
+                
+                <h3>De Energy Return Formula</h3>
+                
+                <p>Voor elke significante relatie, bereken de Return on Energy Investment (ROEI):</p>
+                
+                <p><strong>ROEI = (Emotional Support + Growth Contribution + Positive Energy) / (Time Invested + Emotional Energy Spent + Stress Caused)</strong></p>
+                
+                <p>Relaties met een consistent lage ROEI zijn kandidaten voor downgrades of cuts.</p>
+                
+                <div class="highlight-box">
+                    <h3>De 3-Strike Rule</h3>
+                    <p>Voor boundary violations: Eerste keer - duidelijke communicatie. Tweede keer - herhaalde warning met consequenties. Derde keer - immediate action zonder verder discussie.</p>
+                </div>
+                
+                <h3>Exit Strategieën per Relatie Type</h3>
+                
+                <p><strong>Casual Vrienden:</strong> Gentle fade - minder beschikbaar worden, niet initiëren contact.</p>
+                
+                <p><strong>Close Vrienden:</strong> Honest conversation over je behoeften en boundaries, dan strategisch distance als geen verbetering.</p>
+                
+                <p><strong>Familie:</strong> Boundaries met limited contact, focus op civil but distant relaties.</p>
+                
+                <p><strong>Collega's:</strong> Professional boundaries, minimal personal sharing, focus op werk-gerelateerde interacties.</p>
+                
+                <p><strong>Romantic Partners:</strong> Direct, honest communication followed by clean break als geen fundamentele verandering.</p>
+                
+                <div class="action-steps">
+                    <h3>Practical Exit Lines</h3>
+                    <ul>
+                        <li>"Ik ben momenteel focus op andere prioriteiten"</li>
+                        <li>"Ik heb besloten mijn sociale kring kleiner te houden"</li>
+                        <li>"Ik denk dat we verschillende richtingen opgaan"</li>
+                        <li>"Ik heb niet de bandwidth voor deze dynamic"</li>
+                        <li>"Ik wens je het beste, maar dit werkt niet voor mij"</li>
+                    </ul>
+                </div>
+                
+                <h3>Building Immunity to Manipulation</h3>
+                
+                <p>Ontwikkel mental immunity tegen veelvoorkomende manipulatie tactieken:</p>
+                
+                <p><strong>Anticipated Responses:</strong> Bereid je antwoorden voor op guilt trips en manipulatie</p>
+                <p><strong>Support System:</strong> Heb vrienden die je beslissing steunen en reminders geven</p>
+                <p><strong>Document Patterns:</strong> Houd een log bij van toxic gedrag voor clarity</p>
+                <p><strong>Professional Help:</strong> Voor severe cases, overweeg therapie of coaching</p>
+                
+                <div class="quote-box">
+                    <p>"Je hebt niet iedereen's goedkeuring nodig om een leven te leiden dat goed voor jou is." - Mel Robbins</p>
+                </div>
+                
+                <h3>Replacement Strategy</h3>
+                
+                <p>Natuur abhors een vacuum. Als je toxic relaties wegsnijdt, vervang ze actief met positieve, groei-gerichte connecties.</p>
+                
+                <p><strong>Proactive Replacement:</strong></p>
+                <p>• Join communities die aligned zijn met je waarden</p>
+                <p>• Investeer meer tijd in je top-tier relaties</p>
+                <p>• Zoek mentors en accountability partners</p>
+                <p>• Focus op mensen die je vision supporten</p>
+            </div>
+            
+            <div class="page-break"></div>
+
+            <!-- Pagina 9: Reflectie Vragen -->
+            <div class="chapter">
+                <h2>4. Reflectie Vragen</h2>
+                
+                <div class="reflection-questions">
+                    <h3>Relationship Inventory</h3>
+                    <ul>
+                        <li>Welke personen in mijn leven drain consistent mijn energie zonder veel terug te geven?</li>
+                        <li>Met wie voel ik me altijd worse nadat ik tijd met hen heb doorgebracht?</li>
+                        <li>Wie in mijn kring ondersteunt mijn dromen en ambities niet?</li>
+                        <li>Welke relaties baseer ik op geschiedenis in plaats van current value?</li>
+                        <li>Van welke personen heb ik boundaries moeten stellen die herhaaldelijk worden overtreden?</li>
+                        <li>Wie gebruikt mijn loyaliteit en goedheid tegen mij?</li>
+                        <li>Welke relaties houd ik uit schuldgevoel in plaats van authentic connection?</li>
+                        <li>Waar ben ik bang voor confrontatie en laat ik toxic gedrag toe?</li>
+                    </ul>
+                </div>
+                
+                <div class="action-steps">
+                    <h3>Deep Evaluation Exercise</h3>
+                    <ul>
+                        <li>Maak een lijst van je top 10 meest frequente social contacts</li>
+                        <li>Rate elke relatie op energy, support, growth contribution en reciprociteit</li>
+                        <li>Identificeer de bottom 3 en evalueer waarom je ze houdt</li>
+                        <li>Plan specifieke actions voor problematic relaties</li>
+                    </ul>
+                </div>
+                
+                <div class="warning-box">
+                    <h3>Self-Reflection Check</h3>
+                    <p>Voordat je anderen cut, vraag jezelf af: Ben ik misschien ook toxic in some relaties? Waar ben ik de persoon die anderen misschien moeten limiteren? Self-awareness eerst.</p>
+                </div>
+                
+                <div class="reflection-questions">
+                    <h3>Future Vision</h3>
+                    <ul>
+                        <li>Hoe zou mijn leven veranderen als ik alleen omringd was door mensen die mij elevaten?</li>
+                        <li>Welke nieuwe personen zou ik kunnen ontmoeten als ik tijd vrijmaak van toxic relaties?</li>
+                        <li>Wat houdt mij tegen van het maken van deze necessary changes?</li>
+                    </ul>
+                </div>
+                
+                <div class="mantra-box">
+                    <h3>Commitment Declaration</h3>
+                    <p>"Ik commit mezelf ertoe mijn relationele kring te beschermen en te optimaliseren. Ik geef mijn tijd en energie alleen aan mensen die mijn groei respecteren en ondersteunen."</p>
+                </div>
+            </div>
+            
+            <div class="page-break"></div>
+
+            <!-- Pagina 10: Volgende Stappen -->
+            <div class="chapter">
+                <h2>5. Volgende Stappen</h2>
+                
+                <h3>30-Dagen "Cut The Weak" Implementation</h3>
+                
+                <div class="action-steps">
+                    <h3>Week 1: Assessment & Planning</h3>
+                    <ul>
+                        <li>Complete relationship audit - wie voegt value toe, wie niet?</li>
+                        <li>Identificeer top 3 most toxic/draining relationships</li>
+                        <li>Documenteer specifieke problematic patterns en behaviors</li>
+                        <li>Plan je approach voor elk problematic relationship</li>
+                    </ul>
+                </div>
+                
+                <div class="action-steps">
+                    <h3>Week 2: Boundary Implementation</h3>
+                    <ul>
+                        <li>Communiceer duidelijke boundaries met problematic people</li>
+                        <li>Start met reducing availability en responsiveness</li>
+                        <li>Stop initiating contact met identified toxic people</li>
+                        <li>Documenteer hun reactions en respect voor boundaries</li>
+                    </ul>
+                </div>
+                
+                <div class="action-steps">
+                    <h3>Week 3: Enforcement & Reduction</h3>
+                    <ul>
+                        <li>Handhaven boundaries zonder negotiation</li>
+                        <li>Begin strategic fade voor mensen die boundaries niet respecteren</li>
+                        <li>Investeer de vrijgekomen tijd in positive relationships</li>
+                        <li>Resist guilt trips en manipulation attempts</li>
+                    </ul>
+                </div>
+                
+                <div class="action-steps">
+                    <h3>Week 4: Clean Cuts & Replacement</h3>
+                    <ul>
+                        <li>Maak definitive cuts waar necessary</li>
+                        <li>Focus volledig op building new, positive connections</li>
+                        <li>Evalueer de impact op je energy en mental state</li>
+                        <li>Plan continued optimization van je social circle</li>
+                    </ul>
+                </div>
+                
+                <h3>Lange Termijn Relationship Management</h3>
+                
+                <p>Het wegsnijden van zwakke relaties is niet een eenmalige actie, maar een ongoing discipline. Je social circle zal constant evolueren met je eigen groei en veranderende prioriteiten.</p>
+                
+                <div class="highlight-box">
+                    <h3>Maintenance Principles</h3>
+                    <p><strong>Regular Audits:</strong> Evalueer quarterly de kwaliteit van je relaties<br>
+                    <strong>Proactive Standards:</strong> Heb duidelijke criteria voor wie in je leven past<br>
+                    <strong>Quick Action:</strong> Address problems early before ze escalate<br>
+                    <strong>Positive Focus:</strong> Spend majority tijd op building great relaties</p>
+                </div>
+                
+                <div class="quote-box">
+                    <p>"Je leven wordt niet beter door chance, het wordt beter door change. En sometimes that change means changing the people around you." - Jim Rohn</p>
+                </div>
+                
+                <p>Onthoud: Het wegsnijden van zwakke relaties is geen act van cruelty, maar van self-respect en strategic life management. Je hebt maar één leven - spendeer het met mensen die je waarde begrijpen en je potential ondersteunen.</p>
+                
+                <div class="mantra-box">
+                    <h3>Jouw Relationship Standard</h3>
+                    <p>"Ik omring mezelf alleen met mensen die mijn groei celebreren, mijn boundaries respecteren, en mijn vision ondersteunen. Alles anders krijgt geen toegang tot mijn leven."</p>
+                </div>
+                
+                <div class="action-steps">
+                    <h3>Ongoing Excellence</h3>
+                    <ul>
+                        <li>Maintain high standards voor new people in je life</li>
+                        <li>Reguliere check-ins met je inner circle</li>
+                        <li>Continuous investment in top-tier relationships</li>
+                        <li>Model the behavior je wilt zien in others</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>Top Tier Men Academy</strong></p>
+            <p>Module 6: Brotherhood • Les 4: Cut The Weak</p>
+            <p>&copy; 2025 Top Tier Men. Alle rechten voorbehouden.</p>
+        </div>
+    </div>
+</body>
+</html>

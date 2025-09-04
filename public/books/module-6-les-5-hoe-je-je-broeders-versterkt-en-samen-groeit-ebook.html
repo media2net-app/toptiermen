@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hoe je je Broeders versterkt en samen groeit - Top Tier Men Academy</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background: #f9fafb;
+        }
+        
+        .ebook-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #8BAE5A 0%, #3A4D23 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -0.025em;
+        }
+        
+        .header .subtitle {
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: white;
+            opacity: 1;
+        }
+        
+        .content {
+            padding: 50px;
+        }
+        
+        .toc {
+            background: #f8fafc;
+            border-left: 4px solid #8BAE5A;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 8px;
+        }
+        
+        .toc h2 {
+            color: #8BAE5A;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .toc ol {
+            list-style: none;
+            counter-reset: toc-counter;
+        }
+        
+        .toc li {
+            counter-increment: toc-counter;
+            margin-bottom: 8px;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        .toc li::before {
+            content: counter(toc-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #8BAE5A;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .chapter {
+            margin: 50px 0;
+        }
+        
+        .chapter h2 {
+            color: #8BAE5A;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .chapter h3 {
+            color: #374151;
+            font-size: 1.3rem;
+            margin: 30px 0 15px;
+            font-weight: 600;
+        }
+        
+        .chapter p {
+            margin-bottom: 16px;
+            text-align: justify;
+            font-size: 1.05rem;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%);
+            color: white;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(139, 174, 90, 0.3);
+        }
+        
+        .highlight-box h3 {
+            color: white;
+            margin-bottom: 15px;
+        }
+        
+        .quote-box {
+            background: #f8fafc;
+            border-left: 4px solid #8BAE5A;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+        }
+        
+        .action-steps {
+            background: #f0f9ff;
+            border: 1px solid #8BAE5A;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 8px;
+        }
+        
+        .action-steps h3 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+        }
+        
+        .action-steps ul {
+            padding-left: 20px;
+        }
+        
+        .action-steps li {
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        
+        .reflection-questions {
+            background: #fef7e0;
+            border: 1px solid #f59e0b;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 8px;
+        }
+        
+        .reflection-questions h3 {
+            color: #d97706;
+            margin-bottom: 15px;
+        }
+        
+        .reflection-questions ul {
+            padding-left: 20px;
+        }
+        
+        .reflection-questions li {
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+        
+        .footer {
+            background: #1f2937;
+            color: white;
+            padding: 40px;
+            text-align: center;
+            margin-top: 50px;
+        }
+        
+        .footer p {
+            margin-bottom: 10px;
+        }
+        
+        .page-break {
+            page-break-before: always;
+            margin-top: 60px;
+            border-top: 2px solid #e5e7eb;
+            padding-top: 40px;
+        }
+        
+        .mantra-box {
+            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+            color: white;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .mantra-box h3 {
+            color: #8BAE5A;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .mantra-box p {
+            font-size: 1.3rem;
+            font-weight: 600;
+            font-style: italic;
+            text-align: center;
+        }
+        
+        @media print {
+            .ebook-container {
+                box-shadow: none;
+            }
+            
+            .page-break {
+                page-break-before: always;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ebook-container">
+        <div class="header">
+            <h1>Hoe je je Broeders versterkt en samen groeit</h1>
+            <p class="subtitle">Module 6, Les 5 • Brotherhood</p>
+        </div>
+        
+        <div class="content">
+            <div class="toc">
+                <h2>Inhoudsopgave</h2>
+                <ol>
+                    <li>Inleiding</li>
+                    <li>Hoofdinhoud</li>
+                    <li>Praktische Tips</li>
+                    <li>Reflectie Vragen</li>
+                    <li>Volgende Stappen</li>
+                </ol>
+            </div>
+
+            <!-- Pagina 1: Inleiding -->
+            <div class="chapter">
+                <h2>1. Inleiding</h2>
+                
+                <p>Een echte brotherhood draait niet alleen om wat je voor jezelf kunt krijgen, maar om hoe je anderen kunt laten groeien en samen naar nieuwe hoogtes kunt stijgen. Als Top Tier Man begrijp je dat jouw succes en dat van je broeders onlosmakelijk met elkaar verbonden zijn - wanneer zij groeien, groei jij ook.</p>
+                
+                <div class="highlight-box">
+                    <h3>De Kracht van Wederzijdse Groei</h3>
+                    <p>De sterkste brotherhoods zijn die waarin elke man committed is aan niet alleen zijn eigen ontwikkeling, maar actief investeert in het succes van zijn broeders. Dit creëert een positive feedback loop van groei en excellence.</p>
+                </div>
+                
+                <p>Het ondersteunen van je broeders is geen altruïsme - het is strategisch investment in je eigen toekomst. Wanneer je omringd bent door succesvolle, groeiende mannen, word je automatisch naar een hoger niveau getrokken. Hun wins worden jouw wins, en jouw groei inspireert de hunne.</p>
+                
+                <p>Maar dit vereist een shift van competitie naar collaboration, van scarcity naar abundance denken. Het betekent dat je bereid bent je kennis te delen, je netwerk te openen, en soms je eigen comfort zone te verlaten om anderen te helpen groeien.</p>
+                
+                <div class="quote-box">
+                    <p>"Een kaars verliest niets door een andere kaars aan te steken." - James Keller</p>
+                </div>
+                
+                <p>In deze les leer je hoe je een brotherhood leader wordt die anderen inspireert en elevates, hoe je praktische support biedt die echte impact heeft, en hoe je samen met je broeders een unstoppable force voor groei en succes wordt.</p>
+            </div>
+            
+            <div class="page-break"></div>
+
+            <!-- Pagina 2-7: Hoofdinhoud -->
+            <div class="chapter">
+                <h2>2. Hoofdinhoud</h2>
+                
+                <h3>De Mindset van Brotherhood Leadership</h3>
+                
+                <p>Echte brotherhood leadership draait om service en empowerment. Het gaat niet om dominantie of controle, maar om het creëren van een omgeving waarin elke man zijn volledige potentiaal kan realiseren. Een brotherhood leader denkt in abundance, niet in scarcity.</p>
+                
+                <div class="highlight-box">
+                    <h3>De 5 Kenmerken van een Brotherhood Leader</h3>
+                    <p><strong>1. Abundance Mindset:</strong> Gelooft dat er genoeg succes is voor iedereen<br>
+                    <strong>2. Authentic Care:</strong> Geeft oprecht om de groei van anderen<br>
+                    <strong>3. Proactive Support:</strong> Biedt hulp aan voordat erom gevraagd wordt<br>
+                    <strong>4. Knowledge Sharing:</strong> Deelt generously zijn expertise en resources<br>
+                    <strong>5. Accountability Leadership:</strong> Houdt broeders liebevol accountable</p>
+                </div>
+                
+                <h3>Manieren om je Broeders te Versterken</h3>
+                
+                <p>Er zijn talloze manieren om je broeders te ondersteunen in hun groei. Het gaat erom strategic en intentional te zijn over hoe je je tijd, kennis en resources inzet voor hun succes.</p>
+                
+                <p><strong>Intellectuele Ondersteuning:</strong></p>
+                <p>• Deel boeken, artikelen en resources die hun groei kunnen accelereren</p>
+                <p>• Introduceer nieuwe concepten en frameworks die je hebt geleerd</p>
+                <p>• Stimuleer critical thinking door thoughtful vragen te stellen</p>
+                <p>• Organiseer groepsdiscussies over personal development topics</p>
+                
+                <p><strong>Emotionele Ondersteuning:</strong></p>
+                <p>• Luister actively zonder direct te adviseren</p>
+                <p>• Bied een safe space voor vulnerability en struggle</p>
+                <p>• Celebreer hun wins enthusiast en oprecht</p>
+                <p>• Help hen door low moments zonder judgement</p>
+                
+                <p><strong>Praktische Ondersteuning:</strong></p>
+                <p>• Maak strategic introductions binnen je netwerk</p>
+                <p>• Deel business kansen en collaboration mogelijkheden</p>
+                <p>• Bied concrete hulp bij projecten en challenges</p>
+                <p>• Teach skills die je hebt en zij willen ontwikkelen</p>
+                
+                <div class="action-steps">
+                    <h3>Weekly Brotherhood Actions</h3>
+                    <ul>
+                        <li>Check in with minimaal 2 broeders over hun goals en progress</li>
+                        <li>Deel één waardevolle resource met de groep</li>
+                        <li>Bied concrete hulp aan iemand die struggles heeft</li>
+                        <li>Celebreer publically een broeder's achievement</li>
+                        <li>Initieer een group activity die groei promotes</li>
+                    </ul>
+                </div>
+                
+                <h3>Het Creëren van Accountability Partnerships</h3>
+                
+                <p>Een van de krachtigste manieren om elkaar te versterken is door structured accountability partnerships te creëren. Dit gaat verder dan casual check-ins - het is een systematic approach voor wederzijdse groei.</p>
+                
+                <p><strong>Components van Effectieve Accountability:</strong></p>
+                <p>• <strong>Clear Goals:</strong> Specifieke, measurable doelen die regularly reviewed worden</p>
+                <p>• <strong>Regular Check-ins:</strong> Consistent meetings of calls om progress te bespreken</p>
+                <p>• <strong>Honest Feedback:</strong> Bereidheid om difficult conversations te hebben</p>
+                <p>• <strong>Mutual Investment:</strong> Beide parties zijn equally committed</p>
+                <p>• <strong>Growth Focus:</strong> Focus op learning en improvement, niet perfection</p>
+                
+                <div class="quote-box">
+                    <p>"Iron sharpens iron, en zo scherpt de ene man de ander." - Proverbs 27:17</p>
+                </div>
+                
+                <h3>Group Dynamics en Collective Growth</h3>
+                
+                <p>Individuele support is powerful, maar het creëren van group dynamics waarin iedereen elkaar elevates is transformational. Dit vereist intentional leadership en structure.</p>
+                
+                <p><strong>Strategieën voor Group Growth:</strong></p>
+                <p>• <strong>Mastermind Sessions:</strong> Regular meetings waarin challenges worden besproken en solutions gevonden</p>
+                <p>• <strong>Skill Sharing Workshops:</strong> Elke broeder teaches something waarin hij excellent is</p>
+                <p>• <strong>Goal Setting Ceremonies:</strong> Collective commitment making en celebration</p>
+                <p>• <strong>Success Rituals:</strong> Group celebrations van individual en collective achievements</p>
+                <p>• <strong>Challenge Partnerships:</strong> Samen nieuwe goals nastreven en elkaar ondersteunen</p>
+                
+                <div class="mantra-box">
+                    <h3>Brotherhood Growth Mantra</h3>
+                    <p>"Mijn succes is compleet alleen wanneer mijn broeders ook succesvol zijn. Samen stijgen we naar onze highest potential."</p>
+                </div>
+                
+                <h3>Navigating Challenges en Conflicts</h3>
+                
+                <p>In elke groep van ambitieuze mannen zullen er conflicts en challenges zijn. Hoe je deze navigeert bepaalt of ze destructive zijn of catalysts voor deeper connection en growth.</p>
+                
+                <p><strong>Conflict Resolution Principles:</strong></p>
+                <p>• Address issues direct en private voordat ze escalate</p>
+                <p>• Focus op behavior en impact, niet character assassination</p>
+                <p>• Seek to understand before seeking to be understood</p>
+                <p>• Look for win-win solutions die de relationship versterken</p>
+                <p>• Use conflicts als opportunities voor deeper understanding</p>
+                
+                <p><strong>Supporting Broeders Through Failure:</strong></p>
+                <p>Hoe je reageert wanneer een broeder fails of struggles, toont je true character. Dit zijn momenten waarin echte brotherhood wordt bewezen en verdiept.</p>
+            </div>
+            
+            <div class="page-break"></div>
+
+            <!-- Pagina 8: Praktische Tips -->
+            <div class="chapter">
+                <h2>3. Praktische Tips</h2>
+                
+                <div class="action-steps">
+                    <h3>De Brotherhood Support System</h3>
+                    <ul>
+                        <li><strong>Resource Library:</strong> Creëer een shared library van boeken, courses en tools</li>
+                        <li><strong>Expertise Map:</strong> Documenteer wie welke skills heeft en kan teachen</li>
+                        <li><strong>Opportunity Sharing:</strong> Alert elkaar bij relevante jobs, deals, of kansen</li>
+                        <li><strong>Mentorship Circles:</strong> Pair experienced leden met beginners</li>
+                    </ul>
+                </div>
+                
+                <h3>Monthly Brotherhood Rituals</h3>
+                
+                <p><strong>Success Celebration Meeting:</strong> Een dedicated sessie waarin alle wins van de maand worden gevierd, van groot tot klein. Iedereen deelt minimaal één achievement.</p>
+                
+                <p><strong>Challenge Workshop:</strong> Een meeting waarin één persoon zijn grootste current challenge presenteert en de groep collective brainstormt solutions.</p>
+                
+                <p><strong>Skill Exchange:</strong> Elke maand teach een broeder een skill die anderen kunnen gebruiken - van practical skills tot mental frameworks.</p>
+                
+                <div class="highlight-box">
+                    <h3>The 3-2-1 Weekly Check-in Formula</h3>
+                    <p><strong>3 Wins:</strong> Wat ging er goed deze week?<br>
+                    <strong>2 Challenges:</strong> Waar heb je mee gestruggled?<br>
+                    <strong>1 Focus:</strong> Wat is je hoofdprioriteit voor volgende week?</p>
+                </div>
+                
+                <h3>Digital Tools voor Brotherhood Support</h3>
+                
+                <p>Gebruik technology om je support system te versterken:</p>
+                
+                <p><strong>Group Chat Protocols:</strong></p>
+                <p>• Daily check-ins en wins sharing</p>
+                <p>• Resource sharing channel</p>
+                <p>• Opportunity alerts</p>
+                <p>• Emergency support requests</p>
+                
+                <p><strong>Shared Documents:</strong></p>
+                <p>• Goal tracking spreadsheets</p>
+                <p>• Resource library</p>
+                <p>• Meeting notes en action items</p>
+                <p>• Contact lists en expertise directory</p>
+                
+                <div class="action-steps">
+                    <h3>The Brotherhood Investment Plan</h3>
+                    <ul>
+                        <li>Investeer wekelijks minimaal 2 uur in supporting broeders</li>
+                        <li>Make één meaningful introduction per maand</li>
+                        <li>Share één valuable resource per week</li>
+                        <li>Offer concrete hulp bij minimaal één project per maand</li>
+                        <li>Initiate één group learning activity per kwartaal</li>
+                    </ul>
+                </div>
+                
+                <h3>Feedback en Growth Conversations</h3>
+                
+                <p>Leer hoe je effectieve growth conversations voert die challenging maar supportive zijn:</p>
+                
+                <p><strong>De GROW Model:</strong></p>
+                <p>• <strong>Goal:</strong> Wat wil je bereiken?</p>
+                <p>• <strong>Reality:</strong> Waar sta je nu exactly?</p>
+                <p>• <strong>Options:</strong> Welke mogelijkheden heb je?</p>
+                <p>• <strong>Way Forward:</strong> Wat ga je concrete doen?</p>
+                
+                <div class="quote-box">
+                    <p>"De greatest gift je aan iemand kunt geven is niet je wealth, maar je attention, time, en genuine interest in hun growth." - Robin Sharma</p>
+                </div>
+                
+                <h3>Creating Legacy Together</h3>
+                
+                <p>Denk beyond individual success naar collective impact en legacy. Hoe kan jullie brotherhood iets meaningful achterlaten?</p>
+                
+                <p><strong>Legacy Projects:</strong></p>
+                <p>• Mentorship programs voor younger men</p>
+                <p>• Community service initiatives</p>
+                <p>• Knowledge sharing platforms</p>
+                <p>• Business ventures die positive impact hebben</p>
+                <p>• Educational content creation</p>
+            </div>
+            
+            <div class="page-break"></div>
+
+            <!-- Pagina 9: Reflectie Vragen -->
+            <div class="chapter">
+                <h2>4. Reflectie Vragen</h2>
+                
+                <div class="reflection-questions">
+                    <h3>Leadership Self-Assessment</h3>
+                    <ul>
+                        <li>Hoe draag ik momenteel bij aan de groei van mijn broeders? Waar kan ik meer doen?</li>
+                        <li>Welke unique skills of knowledge heb ik die waardevol zouden zijn voor anderen?</li>
+                        <li>Wanneer heb ik voor het laatst actief geholpen een broeder een goal te bereiken?</li>
+                        <li>Hoe reageer ik wanneer mijn broeders succesvol zijn? Voel ik oprechte vreugde of is er competition?</li>
+                        <li>Wat zijn de grootste challenges van mijn broeders waarin ik zou kunnen helpen?</li>
+                        <li>Hoe kan ik beter worden in het geven van honest, constructive feedback?</li>
+                        <li>Welke resources (netwerk, kennis, tools) kan ik meer delen met mijn brotherhood?</li>
+                        <li>Waar zou onze groep collective kunnen groeien of impact kunnen maken?</li>
+                    </ul>
+                </div>
+                
+                <div class="action-steps">
+                    <h3>Brotherhood Impact Analysis</h3>
+                    <ul>
+                        <li>Map de strengths en growth areas van elke broeder</li>
+                        <li>Identificeer waar je skills overlap en complement elkaar</li>
+                        <li>Plan concrete ways om elkaar te ondersteunen</li>
+                        <li>Brainstorm group projects die iedereen zou elevaten</li>
+                    </ul>
+                </div>
+                
+                <div class="highlight-box">
+                    <h3>The Legacy Question</h3>
+                    <p>Over 10 jaar, hoe wil je dat je broeders over jouw impact op hun leven praten? Wat legacy wil je achterlaten in hun growth en success?</p>
+                </div>
+                
+                <div class="reflection-questions">
+                    <h3>Vision for Collective Growth</h3>
+                    <ul>
+                        <li>Hoe zou onze brotherhood eruitzien als iedereen zijn full potential realiseerde?</li>
+                        <li>Welke collective goals zouden we kunnen nastreven die bigger zijn dan individual ambitions?</li>
+                        <li>Hoe kunnen we samen een positive force for change worden in onze community?</li>
+                    </ul>
+                </div>
+                
+                <div class="mantra-box">
+                    <h3>Service Commitment</h3>
+                    <p>"Ik commit mezelf ertoe een katalysator te zijn voor de groei van mijn broeders. Hun succes is mijn succes, hun growth is mijn purpose."</p>
+                </div>
+            </div>
+            
+            <div class="page-break"></div>
+
+            <!-- Pagina 10: Volgende Stappen -->
+            <div class="chapter">
+                <h2>5. Volgende Stappen</h2>
+                
+                <h3>30-Dagen Brotherhood Leadership Challenge</h3>
+                
+                <div class="action-steps">
+                    <h3>Week 1: Assessment & Planning</h3>
+                    <ul>
+                        <li>Analyze de strengths en needs van elke broeder in je kring</li>
+                        <li>Identificeer je unique value proposition voor de groep</li>
+                        <li>Plan concrete ways om elke broeder te ondersteunen</li>
+                        <li>Set up systems voor regular communication en check-ins</li>
+                    </ul>
+                </div>
+                
+                <div class="action-steps">
+                    <h3>Week 2: Active Support Implementation</h3>
+                    <ul>
+                        <li>Start weekly individual check-ins met je closest broeders</li>
+                        <li>Share één valuable resource met de groep</li>
+                        <li>Offer concrete hulp aan iemand die een challenge heeft</li>
+                        <li>Organize een group activity focused op collective learning</li>
+                    </ul>
+                </div>
+                
+                <div class="action-steps">
+                    <h3>Week 3: Deepening Connections</h3>
+                    <ul>
+                        <li>Have één deep conversation over goals en struggles met elke broeder</li>
+                        <li>Initiate een mastermind-style problem solving session</li>
+                        <li>Make strategic introductions binnen je netwerk</li>
+                        <li>Plan en execute één group challenge of project</li>
+                    </ul>
+                </div>
+                
+                <div class="action-steps">
+                    <h3>Week 4: Systems & Legacy</h3>
+                    <ul>
+                        <li>Implement structural systems voor ongoing support</li>
+                        <li>Evaluate de impact van je efforts en gather feedback</li>
+                        <li>Plan long-term initiatives voor collective growth</li>
+                        <li>Commit to ongoing leadership in brotherhood development</li>
+                    </ul>
+                </div>
+                
+                <h3>Long-term Brotherhood Leadership</h3>
+                
+                <p>Brotherhood leadership is niet een destination maar een journey. Het vereist consistent commitment, continuous learning, en de bereidheid om jezelf altijd opnieuw uit te vinden als leader.</p>
+                
+                <div class="highlight-box">
+                    <h3>The Brotherhood Leader's Creed</h3>
+                    <p>Ik zal zijn:<br>
+                    • Een katalysator voor andermans groei<br>
+                    • Een safe harbor in tijden van struggle<br>
+                    • Een celebrant van andermans successen<br>
+                    • Een challenger die anderen naar excellence duwt<br>
+                    • Een bridge die kansen en mensen connected</p>
+                </div>
+                
+                <div class="quote-box">
+                    <p>"Het niveau van uw success wordt determined door het niveau van service die je biedt aan anderen." - Zig Ziglar</p>
+                </div>
+                
+                <p>Als je consistent investeert in de groei van je broeders, zul je ontdekken dat je eigen growth exponentieel versnelt. Hun insights, hun networks, hun skills, en hun success komen allemaal ten goede aan de collective power van jullie brotherhood.</p>
+                
+                <div class="mantra-box">
+                    <h3>Jouw Brotherhood Legacy</h3>
+                    <p>"Ik ben niet alleen successful voor mezelf, maar ik til anderen mee naar hun highest potential. Samen bouwen we een legacy van excellence, growth, en positive impact."</p>
+                </div>
+                
+                <div class="action-steps">
+                    <h3>Continuous Brotherhood Excellence</h3>
+                    <ul>
+                        <li>Evalueer maandelijks je impact op je broeders' growth</li>
+                        <li>Seek consistent feedback over je leadership style</li>
+                        <li>Blijf leren over leadership, coaching, en human development</li>
+                        <li>Model de excellence die je in anderen wilt zien</li>
+                        <li>Always look voor new ways om value toe te voegen</li>
+                    </ul>
+                </div>
+                
+                <p>Onthoud: Een echte Top Tier Man meet zijn success niet alleen door wat hij achieved heeft, maar door hoeveel anderen hij heeft geholpen hun dromen te realiseren. Dit is de essence van brotherhood leadership.</p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>Top Tier Men Academy</strong></p>
+            <p>Module 6: Brotherhood • Les 5: Hoe je je Broeders versterkt en samen groeit</p>
+            <p>&copy; 2025 Top Tier Men. Alle rechten voorbehouden.</p>
+        </div>
+    </div>
+</body>
+</html>
