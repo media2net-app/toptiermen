@@ -1,7 +1,7 @@
 'use client';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import { useRouter } from 'next/navigation';
-import { CheckCircleIcon, ArrowRightIcon, PlayIcon, InformationCircleIcon } from '@heroicons/react/24/solid';
+import { CheckCircleIcon, ArrowRightIcon, InformationCircleIcon } from '@heroicons/react/24/solid';
 import { useState, useEffect } from 'react';
 
 export default function OnboardingBanner() {
@@ -53,9 +53,6 @@ export default function OnboardingBanner() {
     setIsCompleting(false);
   };
 
-  const handleSkipToOnboarding = () => {
-    router.push('/dashboard/onboarding');
-  };
 
   const getStepIcon = (step: number) => {
     switch (step) {
@@ -125,34 +122,24 @@ export default function OnboardingBanner() {
 
               {/* Action Buttons */}
               <div className="flex items-center space-x-2">
-                {currentStep === 0 ? (
-                  <button
-                    onClick={handleSkipToOnboarding}
-                    className="flex items-center space-x-2 px-4 py-2 bg-[#FFD700] hover:bg-[#FFE55C] text-[#181F17] rounded-lg text-sm font-bold transition-all duration-200 shadow-lg"
-                  >
-                    <PlayIcon className="w-4 h-4" />
-                    <span>Start Onboarding</span>
-                  </button>
-                ) : (
-                  <button
-                    onClick={handleCompleteStep}
-                    disabled={isCompleting}
-                    className="flex items-center space-x-2 px-6 py-2 bg-[#FFD700] hover:bg-[#FFE55C] text-[#181F17] rounded-lg text-sm font-bold transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isCompleting ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-[#181F17] border-t-transparent rounded-full animate-spin" />
-                        <span>Bezig...</span>
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircleIcon className="w-4 h-4" />
-                        <span>Stap Voltooien</span>
-                        <ArrowRightIcon className="w-4 h-4" />
-                      </>
-                    )}
-                  </button>
-                )}
+                <button
+                  onClick={handleCompleteStep}
+                  disabled={isCompleting}
+                  className="flex items-center space-x-2 px-6 py-2 bg-[#FFD700] hover:bg-[#FFE55C] text-[#181F17] rounded-lg text-sm font-bold transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isCompleting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-[#181F17] border-t-transparent rounded-full animate-spin" />
+                      <span>Bezig...</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircleIcon className="w-4 h-4" />
+                      <span>Stap Voltooien</span>
+                      <ArrowRightIcon className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
               </div>
             </div>
           </div>
