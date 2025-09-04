@@ -332,6 +332,9 @@ export default function MealEditor({
       updated[index] = { ...updated[index], [field]: value };
     }
     setEditingIngredients(updated);
+    
+    // Auto-save immediately when amount or unit changes
+    onSave(updated);
   };
 
   const addIngredient = (ingredientName: string) => {
@@ -370,14 +373,23 @@ export default function MealEditor({
       baseAmount: amount
     };
 
-    setEditingIngredients([...editingIngredients, newIngredient]);
+    const updatedIngredients = [...editingIngredients, newIngredient];
+    setEditingIngredients(updatedIngredients);
     setShowIngredientSearch(false);
     setSearchTerm('');
+    
+    // Auto-save immediately
+    onSave(updatedIngredients);
+    toast.success('Ingrediënt toegevoegd en opgeslagen!');
   };
 
   const removeIngredient = (index: number) => {
     const updated = editingIngredients.filter((_, i) => i !== index);
     setEditingIngredients(updated);
+    
+    // Auto-save immediately
+    onSave(updated);
+    toast.success('Ingrediënt verwijderd en opgeslagen!');
   };
 
   const handleSave = () => {

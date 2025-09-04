@@ -243,7 +243,10 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
       setEditingMeal(null);
       setHasUnsavedChanges(true);
       
-      toast.success('Maaltijd aangepast! Vergeet niet op te slaan.');
+      // Auto-save the plan immediately
+      await savePlanToDatabase(updatedPlanData);
+      
+      toast.success('Maaltijd aangepast en automatisch opgeslagen!');
       
     } catch (error) {
       console.error('Error saving meal:', error);
@@ -404,12 +407,9 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
     };
   };
 
-  const handleSavePlan = async () => {
-    if (!planData || !hasUnsavedChanges) return;
-
-    setIsSaving(true);
+  const savePlanToDatabase = async (planDataToSave: any) => {
     try {
-      console.log('💾 Saving customized plan for user:', userId);
+      console.log('💾 Auto-saving customized plan for user:', userId);
       
       const response = await fetch('/api/nutrition-plan-save', {
         method: 'POST',
@@ -419,7 +419,7 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
         body: JSON.stringify({
           userId,
           planId,
-          customizedPlan: planData
+          customizedPlan: planDataToSave
         }),
       });
 
@@ -431,14 +431,27 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
       
       if (data.success) {
         setHasUnsavedChanges(false);
-        toast.success('🎉 Je aangepaste voedingsplan is opgeslagen!');
+        return true;
       } else {
         throw new Error(data.error || 'Failed to save plan');
       }
-      
-    } catch (error) {
-      console.error('Error saving plan:', error);
-      toast.error('Fout bij opslaan van voedingsplan');
+    } catch (error: any) {
+      console.error('Error auto-saving plan:', error);
+      return false;
+    }
+  };
+
+  const handleSavePlan = async () => {
+    if (!planData || !hasUnsavedChanges) return;
+
+    setIsSaving(true);
+    try {
+      const success = await savePlanToDatabase(planData);
+      if (success) {
+        toast.success('🎉 Je aangepaste voedingsplan is opgeslagen!');
+      } else {
+        toast.error('Fout bij opslaan van voedingsplan');
+      }
     } finally {
       setIsSaving(false);
     }
@@ -590,25 +603,6 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
             🎯 Selecteer dit plan
           </button>
           
-          {/* Save Button */}
-          {hasUnsavedChanges && (
-            <button
-              onClick={handleSavePlan}
-              disabled={isSaving}
-              className="flex items-center gap-2 px-6 py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isSaving ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#232D1A]"></div>
-                  Opslaan...
-                </>
-              ) : (
-                <>
-                  💾 Plan Opslaan
-                </>
-              )}
-            </button>
-          )}
         </div>
       </div>
 
