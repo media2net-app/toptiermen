@@ -1078,14 +1078,12 @@ export default function TrainingschemasPage() {
                 </div>
               )}
 
-              {/* Continue to Voedingsplannen Button */}
-              {availableSchemas.length > 0 && (
+              {/* Continue to Voedingsplannen Button - Only show during onboarding */}
+              {availableSchemas.length > 0 && isOnboarding && (
                 <div className="mt-8 text-center">
                   <button
                     onClick={() => {
-                      if (isOnboarding) {
-                        completeStep(3);
-                      }
+                      completeStep(3);
                       window.location.href = '/dashboard/voedingsplannen';
                     }}
                     className="px-8 py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold"
