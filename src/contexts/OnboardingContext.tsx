@@ -107,6 +107,39 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     }
   }, [user]);
 
+  // Update current step when navigating to different pages
+  useEffect(() => {
+    if (isOnboarding) {
+      const currentPage = window.location.pathname;
+      let pageBasedStep = currentStep;
+      
+      switch (currentPage) {
+        case '/dashboard/onboarding':
+          pageBasedStep = 1; // Step 1: Main goal
+          break;
+        case '/dashboard/mijn-missies':
+          pageBasedStep = 2; // Step 2: Add missions
+          break;
+        case '/dashboard/trainingsschemas':
+          pageBasedStep = 3; // Step 3: Select training schema
+          break;
+        case '/dashboard/voedingsplannen':
+          pageBasedStep = 4; // Step 4: Select nutrition plan
+          break;
+        case '/dashboard/brotherhood/forum':
+          pageBasedStep = 5; // Step 5: Forum introduction
+          break;
+        default:
+          pageBasedStep = currentStep; // Keep current step if page doesn't match
+      }
+      
+      if (pageBasedStep !== currentStep) {
+        console.log('🔄 Updating current step based on page:', pageBasedStep);
+        setCurrentStep(pageBasedStep);
+      }
+    }
+  }, [isOnboarding]); // Removed currentStep from dependencies to avoid infinite loop
+
   const fetchOnboardingStatus = async () => {
     if (!user) return;
 
@@ -226,6 +259,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
         return steps[currentStep]?.instructions || 'Voltooi de huidige stap om door te gaan';
     }
   };
+
 
   // Get the highlighted menu item for the current step
   const highlightedMenu = isOnboarding ? steps[currentStep]?.targetMenuLabel || null : null;
