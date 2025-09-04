@@ -43,6 +43,7 @@ declare global {
 
 const navigation = [
   { name: 'Overzicht', href: '/dashboard-marketing', icon: ChartBarIcon },
+  { name: 'FINAL SPRINT', href: '/dashboard-marketing/final-sprint', icon: RocketLaunchIcon, badge: 'SPRINT' },
   { name: 'Advertentie materiaal', href: '/dashboard-marketing/advertentie-materiaal', icon: VideoCameraIcon },
   { name: 'Advertenties', href: '/dashboard-marketing/advertenties', icon: MegaphoneIcon },
   { name: 'Advertentiesets', href: '/dashboard-marketing/advertentiesets', icon: PresentationChartLineIcon },
