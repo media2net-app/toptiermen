@@ -493,14 +493,18 @@ export default function TrainingschemasPage() {
                   <label className="block text-sm font-medium text-gray-300 mb-3">Wat is je trainingsdoel?</label>
                   <div className="space-y-2">
                     {trainingGoals.map((goal) => (
-                      <label key={goal.id} className="flex items-center p-3 border border-gray-600 rounded-lg hover:border-[#8BAE5A] cursor-pointer transition-colors">
+                      <label key={goal.id} className={`flex items-center p-3 border rounded-lg cursor-pointer transition-colors ${
+                        calculatorData.training_goal === goal.id 
+                          ? 'border-[#8BAE5A] bg-[#8BAE5A]/10' 
+                          : 'border-gray-600 hover:border-[#8BAE5A]'
+                      }`}>
                         <input
                           type="radio"
                           name="training_goal"
                           value={goal.id}
                           checked={calculatorData.training_goal === goal.id}
                           onChange={(e) => setCalculatorData(prev => ({ ...prev, training_goal: e.target.value }))}
-                          className="sr-only"
+                          className="mr-3 h-4 w-4 text-[#8BAE5A] border-gray-300 focus:ring-[#8BAE5A]"
                         />
                         <div className="flex items-center space-x-3">
                           <span className="text-2xl">{goal.icon}</span>
@@ -520,14 +524,18 @@ export default function TrainingschemasPage() {
                   <label className="block text-sm font-medium text-gray-300 mb-3">Hoe vaak wil je per week trainen?</label>
                   <div className="space-y-2">
                     {trainingFrequencies.map((freq) => (
-                      <label key={freq.id} className="flex items-center p-3 border border-gray-600 rounded-lg hover:border-[#8BAE5A] cursor-pointer transition-colors">
+                      <label key={freq.id} className={`flex items-center p-3 border rounded-lg cursor-pointer transition-colors ${
+                        calculatorData.training_frequency === freq.id.toString() 
+                          ? 'border-[#8BAE5A] bg-[#8BAE5A]/10' 
+                          : 'border-gray-600 hover:border-[#8BAE5A]'
+                      }`}>
                         <input
                           type="radio"
                           name="training_frequency"
                           value={freq.id}
                           checked={calculatorData.training_frequency === freq.id.toString()}
                           onChange={(e) => setCalculatorData(prev => ({ ...prev, training_frequency: e.target.value }))}
-                          className="sr-only"
+                          className="mr-3 h-4 w-4 text-[#8BAE5A] border-gray-300 focus:ring-[#8BAE5A]"
                         />
                         <div className="flex items-center space-x-3">
                           <span className="text-2xl">📅</span>
@@ -546,14 +554,18 @@ export default function TrainingschemasPage() {
                   <label className="block text-sm font-medium text-gray-300 mb-3">Wat is je ervaringsniveau?</label>
                   <div className="space-y-2">
                     {experienceLevels.map((level) => (
-                      <label key={level.id} className="flex items-center p-3 border border-gray-600 rounded-lg hover:border-[#8BAE5A] cursor-pointer transition-colors">
+                      <label key={level.id} className={`flex items-center p-3 border rounded-lg cursor-pointer transition-colors ${
+                        calculatorData.experience_level === level.id 
+                          ? 'border-[#8BAE5A] bg-[#8BAE5A]/10' 
+                          : 'border-gray-600 hover:border-[#8BAE5A]'
+                      }`}>
                         <input
                           type="radio"
                           name="experience_level"
                           value={level.id}
                           checked={calculatorData.experience_level === level.id}
                           onChange={(e) => setCalculatorData(prev => ({ ...prev, experience_level: e.target.value }))}
-                          className="sr-only"
+                          className="mr-3 h-4 w-4 text-[#8BAE5A] border-gray-300 focus:ring-[#8BAE5A]"
                         />
                         <div className="flex items-center space-x-3">
                           <span className="text-2xl">{level.icon}</span>
@@ -573,14 +585,18 @@ export default function TrainingschemasPage() {
                   <label className="block text-sm font-medium text-gray-300 mb-3">Waar ga je trainen?</label>
                   <div className="space-y-2">
                     {equipmentTypes.map((type) => (
-                      <label key={type.id} className="flex items-center p-3 border border-gray-600 rounded-lg hover:border-[#8BAE5A] cursor-pointer transition-colors">
+                      <label key={type.id} className={`flex items-center p-3 border rounded-lg cursor-pointer transition-colors ${
+                        calculatorData.equipment_type === type.id 
+                          ? 'border-[#8BAE5A] bg-[#8BAE5A]/10' 
+                          : 'border-gray-600 hover:border-[#8BAE5A]'
+                      }`}>
                         <input
                           type="radio"
                           name="equipment_type"
                           value={type.id}
                           checked={calculatorData.equipment_type === type.id}
                           onChange={(e) => setCalculatorData(prev => ({ ...prev, equipment_type: e.target.value }))}
-                          className="sr-only"
+                          className="mr-3 h-4 w-4 text-[#8BAE5A] border-gray-300 focus:ring-[#8BAE5A]"
                         />
                         <div className="flex items-center space-x-3">
                           <span className="text-2xl">{type.icon}</span>
