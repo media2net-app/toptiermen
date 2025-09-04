@@ -352,9 +352,6 @@ export default function VoedingsplannenPage() {
     <PageLayout 
       title="Voedingsplannen" 
       subtitle="Beheer je voedingsplannen en bereken je dagelijkse behoeften"
-      breadcrumbItems={[
-        { label: 'Voedingsplannen', isCurrent: true }
-      ]}
     >
       <div className="w-full">
         <AnimatePresence mode="wait">
