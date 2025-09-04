@@ -178,6 +178,87 @@ export default function MealEditor({
     );
   };
 
+  const getQuickAddIngredients = () => {
+    // Get ingredients based on plan type and meal type
+    let availableIngredients = [];
+    
+    if (planType === 'carnivoor') {
+      // Carnivoor quick add ingredients
+      if (mealType === 'ontbijt') {
+        availableIngredients = [
+          { name: '1 Ei', calories: 155, protein: 13, carbs: 1, fat: 11 },
+          { name: 'Spek', calories: 541, protein: 37, carbs: 0, fat: 42 },
+          { name: 'Ham', calories: 145, protein: 21, carbs: 0, fat: 6 },
+          { name: 'Salami', calories: 336, protein: 20, carbs: 0, fat: 28 },
+          { name: 'Kipfilet (Gegrild)', calories: 165, protein: 31, carbs: 0, fat: 4 },
+          { name: '1 Handje Walnoten', calories: 26, protein: 0.6, carbs: 0.5, fat: 2.6 },
+          { name: '1 Handje Amandelen', calories: 23, protein: 0.8, carbs: 0.9, fat: 2.0 },
+          { name: 'Boter', calories: 717, protein: 0.9, carbs: 0.1, fat: 81 }
+        ];
+      } else if (mealType === 'lunch') {
+        availableIngredients = [
+          { name: 'Ribeye Steak', calories: 250, protein: 26, carbs: 0, fat: 15 },
+          { name: 'Zalm (Wild)', calories: 208, protein: 25, carbs: 0, fat: 12 },
+          { name: 'Kipfilet (Gegrild)', calories: 165, protein: 31, carbs: 0, fat: 4 },
+          { name: 'Rundergehakt (15% vet)', calories: 254, protein: 20, carbs: 0, fat: 18 },
+          { name: 'Tonijn in Olijfolie', calories: 189, protein: 25, carbs: 0, fat: 9 },
+          { name: 'Varkenshaas', calories: 143, protein: 26, carbs: 0, fat: 4 },
+          { name: 'Lamsvlees', calories: 294, protein: 25, carbs: 0, fat: 21 },
+          { name: 'Olijfolie', calories: 884, protein: 0, carbs: 0, fat: 100 }
+        ];
+      } else if (mealType === 'diner') {
+        availableIngredients = [
+          { name: 'Biefstuk', calories: 250, protein: 26, carbs: 0, fat: 15 },
+          { name: 'Zalm (Wild)', calories: 208, protein: 25, carbs: 0, fat: 12 },
+          { name: 'Rundergehakt (20% vet)', calories: 272, protein: 19, carbs: 0, fat: 21 },
+          { name: 'Kippendijen', calories: 250, protein: 26, carbs: 0, fat: 15 },
+          { name: 'Makreel', calories: 205, protein: 19, carbs: 0, fat: 14 },
+          { name: 'Lamskotelet', calories: 294, protein: 25, carbs: 0, fat: 21 },
+          { name: 'Runderlever', calories: 135, protein: 20, carbs: 4, fat: 4 },
+          { name: 'Boter', calories: 717, protein: 0.9, carbs: 0.1, fat: 81 }
+        ];
+      }
+    } else {
+      // Voedingsplan op maat quick add ingredients
+      if (mealType === 'ontbijt') {
+        availableIngredients = [
+          { name: 'Havermout', calories: 68, protein: 2.4, carbs: 12, fat: 1.4 },
+          { name: 'Banaan', calories: 89, protein: 1.1, carbs: 23, fat: 0.3 },
+          { name: 'Amandelen', calories: 579, protein: 21, carbs: 22, fat: 50 },
+          { name: 'Melk', calories: 42, protein: 3.4, carbs: 5, fat: 1 },
+          { name: 'Volkoren brood', calories: 247, protein: 13, carbs: 41, fat: 4 },
+          { name: 'Griekse yoghurt', calories: 59, protein: 10, carbs: 3.6, fat: 0.4 },
+          { name: 'Blauwe bessen', calories: 57, protein: 0.7, carbs: 14, fat: 0.3 },
+          { name: 'Honing', calories: 304, protein: 0.3, carbs: 82, fat: 0 }
+        ];
+      } else if (mealType === 'lunch') {
+        availableIngredients = [
+          { name: 'Bruine rijst', calories: 111, protein: 2.6, carbs: 23, fat: 0.9 },
+          { name: 'Kipfilet', calories: 165, protein: 31, carbs: 0, fat: 4 },
+          { name: 'Avocado', calories: 160, protein: 2, carbs: 9, fat: 15 },
+          { name: 'Tomaat', calories: 18, protein: 0.9, carbs: 3.9, fat: 0.2 },
+          { name: 'Broccoli', calories: 34, protein: 2.8, carbs: 7, fat: 0.4 },
+          { name: 'Quinoa', calories: 120, protein: 4.4, carbs: 22, fat: 1.9 },
+          { name: 'Zoete aardappel', calories: 86, protein: 1.6, carbs: 20, fat: 0.1 },
+          { name: 'Spinazie', calories: 23, protein: 2.9, carbs: 3.6, fat: 0.4 }
+        ];
+      } else if (mealType === 'diner') {
+        availableIngredients = [
+          { name: 'Zalm', calories: 208, protein: 25, carbs: 0, fat: 12 },
+          { name: 'Bruine rijst', calories: 111, protein: 2.6, carbs: 23, fat: 0.9 },
+          { name: 'Broccoli', calories: 34, protein: 2.8, carbs: 7, fat: 0.4 },
+          { name: 'Kikkererwten', calories: 164, protein: 8, carbs: 27, fat: 2.6 },
+          { name: 'Komkommer', calories: 16, protein: 0.7, carbs: 4, fat: 0.1 },
+          { name: 'Walnoten', calories: 654, protein: 15, carbs: 14, fat: 65 },
+          { name: 'Olijfolie', calories: 884, protein: 0, carbs: 0, fat: 100 },
+          { name: 'Tomaat', calories: 18, protein: 0.9, carbs: 3.9, fat: 0.2 }
+        ];
+      }
+    }
+    
+    return availableIngredients;
+  };
+
   const calculateNutrition = (ingredients: MealIngredient[]) => {
     let totalCalories = 0;
     let totalProtein = 0;
@@ -185,8 +266,17 @@ export default function MealEditor({
     let totalFat = 0;
     
     ingredients.forEach(ingredient => {
-      // Use the same database as the API for consistency
-      const nutritionData = INGREDIENT_DATABASE[ingredient.name];
+      // Check quick add ingredients first, then fallback to databases
+      const quickAddIngredients = getQuickAddIngredients();
+      const quickAddIngredient = quickAddIngredients.find(ing => ing.name === ingredient.name);
+      
+      let nutritionData;
+      if (quickAddIngredient) {
+        nutritionData = quickAddIngredient;
+      } else {
+        nutritionData = CARNIVOOR_INGREDIENTS[ingredient.name] || INGREDIENT_DATABASE[ingredient.name];
+      }
+      
       if (nutritionData) {
         let multiplier = 0;
         
@@ -229,7 +319,18 @@ export default function MealEditor({
   };
 
   const addIngredient = (ingredientName: string) => {
-    const nutritionData = CARNIVOOR_INGREDIENTS[ingredientName];
+    // Check if it's from quick add ingredients first
+    const quickAddIngredients = getQuickAddIngredients();
+    const quickAddIngredient = quickAddIngredients.find(ing => ing.name === ingredientName);
+    
+    let nutritionData;
+    if (quickAddIngredient) {
+      nutritionData = quickAddIngredient;
+    } else {
+      // Fallback to CARNIVOOR_INGREDIENTS or INGREDIENT_DATABASE
+      nutritionData = CARNIVOOR_INGREDIENTS[ingredientName] || INGREDIENT_DATABASE[ingredientName];
+    }
+    
     if (!nutritionData) return;
 
     let unit = 'gram';
@@ -241,6 +342,9 @@ export default function MealEditor({
     } else if (ingredientName.includes('Handje')) {
       unit = 'handje';
       amount = 1;
+    } else if (ingredientName.includes('Honing') || ingredientName.includes('Olijfolie') || ingredientName.includes('Boter')) {
+      unit = 'gram';
+      amount = 10; // Smaller amounts for condiments
     }
 
     const newIngredient: MealIngredient = {
@@ -323,6 +427,22 @@ export default function MealEditor({
           </div>
         </div>
 
+        {/* Quick Add Section */}
+        <div className="bg-[#181F17] rounded-lg p-4 mb-6">
+          <h3 className="text-white font-semibold mb-3">Snelle Toevoeging</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            {getQuickAddIngredients().map((ingredient) => (
+              <button
+                key={ingredient.name}
+                onClick={() => addIngredient(ingredient.name)}
+                className="px-3 py-2 bg-[#3A4D23] hover:bg-[#8BAE5A] hover:text-[#232D1A] rounded-lg text-white text-sm transition-colors font-medium"
+              >
+                {ingredient.name}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Ingredients */}
         <div className="space-y-4 mb-6">
           <div className="flex items-center justify-between">
@@ -332,7 +452,7 @@ export default function MealEditor({
               className="flex items-center gap-2 px-4 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold"
             >
               <PlusIcon className="w-4 h-4" />
-              Ingredient toevoegen
+              Alle ingrediënten
             </button>
           </div>
 
