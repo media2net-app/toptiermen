@@ -37,12 +37,56 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Database connection failed' }, { status: 500 });
     }
 
+    // Check if userId is an email (contains @) or UUID
+    let actualUserId = userId;
+    if (userId.includes('@')) {
+      console.log('🔍 User ID is email, looking up UUID...');
+      try {
+        const { data: userData, error: userError } = await supabase.auth.admin.getUserByEmail(userId);
+        if (userError || !userData.user) {
+          console.log('❌ User not found for email:', userId);
+          // Return mock data for unknown users
+          return NextResponse.json({
+            user_id: actualUserId,
+            welcome_video_watched: false,
+            step_1_completed: false,
+            step_2_completed: false,
+            step_3_completed: false,
+            step_4_completed: false,
+            step_5_completed: false,
+            onboarding_completed: false,
+            current_step: 1,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          });
+        }
+        actualUserId = userData.user.id;
+        console.log('✅ Found UUID for email:', actualUserId);
+      } catch (error) {
+        console.log('❌ Error looking up user by email:', error);
+        // Return mock data on error
+        return NextResponse.json({
+          user_id: actualUserId,
+          welcome_video_watched: false,
+          step_1_completed: false,
+          step_2_completed: false,
+          step_3_completed: false,
+          step_4_completed: false,
+          step_5_completed: false,
+          onboarding_completed: false,
+          current_step: 1,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        });
+      }
+    }
+
     // First, get all records for this user
-    console.log('🔍 Querying onboarding_status table...');
+    console.log('🔍 Querying onboarding_status table for user:', actualUserId);
     const { data: allRecords, error: fetchError } = await supabase
       .from('onboarding_status')
       .select('*')
-      .eq('user_id', userId);
+      .eq('user_id', actualUserId);
 
     console.log('🔍 Query result:', { data: allRecords, error: fetchError });
 
@@ -50,7 +94,7 @@ export async function GET(request: Request) {
       console.log('❌ Error fetching onboarding status:', fetchError.message);
       // Return mock data instead of error to prevent dashboard crashes
       return NextResponse.json({
-        user_id: userId,
+        user_id: actualUserId,
         welcome_video_watched: false,
         step_1_completed: false,
         step_2_completed: false,
@@ -94,7 +138,7 @@ export async function GET(request: Request) {
       const { data: newRecord, error: createError } = await supabase
         .from('onboarding_status')
         .insert({
-          user_id: userId,
+          user_id: actualUserId,
           welcome_video_watched: false,
           step_1_completed: false,
           step_2_completed: false,
@@ -156,6 +200,24 @@ export async function POST(request: Request) {
     // Initialize Supabase client
     const supabase = getSupabaseClient();
 
+    // Check if userId is an email (contains @) or UUID
+    let actualUserId = userId;
+    if (userId.includes('@')) {
+      console.log('🔍 User ID is email, looking up UUID...');
+      try {
+        const { data: userData, error: userError } = await supabase.auth.admin.getUserByEmail(userId);
+        if (userError || !userData.user) {
+          console.log('❌ User not found for email:', userId);
+          return NextResponse.json({ error: 'User not found' }, { status: 404 });
+        }
+        actualUserId = userData.user.id;
+        console.log('✅ Found UUID for email:', actualUserId);
+      } catch (error) {
+        console.log('❌ Error looking up user by email:', error);
+        return NextResponse.json({ error: 'Failed to find user' }, { status: 500 });
+      }
+    }
+
     let updateData: any = {
       updated_at: new Date().toISOString()
     };
@@ -171,7 +233,7 @@ export async function POST(request: Request) {
       const stepCompletionCheck = await supabase
         .from('onboarding_status')
         .select('*')
-        .eq('user_id', userId)
+        .eq('user_id', actualUserId)
         .single();
 
       if (stepCompletionCheck.data) {
@@ -197,14 +259,14 @@ export async function POST(request: Request) {
         await supabase
           .from('profiles')
           .update({ main_goal: mainGoal })
-          .eq('id', userId);
+          .eq('id', actualUserId);
         console.log('✅ Main goal saved to profile:', mainGoal);
       }
       
       if (step === 2 && selectedMissions && selectedMissions.length > 0) {
         // Create user missions
         const missionData = selectedMissions.map((missionId: string) => ({
-          user_id: userId,
+          user_id: actualUserId,
           mission_id: missionId,
           is_active: true,
           created_at: new Date().toISOString()
@@ -226,7 +288,7 @@ export async function POST(request: Request) {
         await supabase
           .from('user_training_progress')
           .upsert({
-            user_id: userId,
+            user_id: actualUserId,
             selected_schema_id: selectedTrainingSchema,
             updated_at: new Date().toISOString()
           });
@@ -239,7 +301,7 @@ export async function POST(request: Request) {
           await supabase
             .from('user_preferences')
             .upsert({
-              user_id: userId,
+              user_id: actualUserId,
               selected_nutrition_plan: selectedNutritionPlan,
               updated_at: new Date().toISOString()
             });
@@ -250,7 +312,7 @@ export async function POST(request: Request) {
           await supabase
             .from('user_preferences')
             .upsert({
-              user_id: userId,
+              user_id: actualUserId,
               selected_challenge: selectedChallenge,
               updated_at: new Date().toISOString()
             });
@@ -263,7 +325,7 @@ export async function POST(request: Request) {
         const { error: forumError } = await supabase
           .from('forum_posts')
           .insert({
-            author_id: userId,
+            author_id: actualUserId,
             title: 'Nieuwe member introductie',
             content: forumIntroduction,
             category: 'introductions',
@@ -281,7 +343,7 @@ export async function POST(request: Request) {
       const { data: currentStatusRecords } = await supabase
         .from('onboarding_status')
         .select('*')
-        .eq('user_id', userId);
+        .eq('user_id', actualUserId);
 
       const currentStatus = currentStatusRecords && currentStatusRecords.length > 0 
         ? currentStatusRecords[0] 
@@ -339,7 +401,7 @@ export async function POST(request: Request) {
       const { data: newRecord, error } = await supabase
         .from('onboarding_status')
         .insert({
-          user_id: userId,
+          user_id: actualUserId,
           ...updateData
         })
         .select()
