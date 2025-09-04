@@ -106,7 +106,10 @@ export async function POST(request: Request) {
     
     const { data, error } = await supabase
       .from('training_profiles')
-      .upsert(profileData)
+      .upsert(profileData, { 
+        onConflict: 'user_id',
+        ignoreDuplicates: false 
+      })
       .select()
       .single();
     
