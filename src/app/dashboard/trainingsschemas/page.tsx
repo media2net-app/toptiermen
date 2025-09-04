@@ -62,7 +62,7 @@ interface TrainingSchemaDb {
 }
 
 export default function TrainingschemasPage() {
-  const { user } = useSupabaseAuth();
+  const { user, loading: authLoading } = useSupabaseAuth();
   const { isOnboarding, currentStep: onboardingStep, completeStep } = useOnboarding();
   const router = useRouter();
   const [selectedOption, setSelectedOption] = useState<'training' | null>('training');
@@ -253,7 +253,7 @@ export default function TrainingschemasPage() {
     setWorkoutSchema(null);
   };
 
-  if (isLoading) {
+  if (isLoading || authLoading) {
     return (
       <PageLayout 
         title="Trainingsschemas" 
@@ -266,6 +266,41 @@ export default function TrainingschemasPage() {
           </div>
         </div>
       </PageLayout>
+    );
+  }
+
+  // Show fallback if no user is logged in
+  if (!user && !authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#0F1411] via-[#181F17] to-[#232D1A] flex items-center justify-center">
+        <div className="bg-[#232D1A] p-8 rounded-lg border border-[#3A4D23] max-w-md w-full mx-4">
+          <h1 className="text-2xl font-bold text-white mb-6 text-center">
+            Trainingsschemas
+          </h1>
+          
+          <div className="space-y-4">
+            <p className="text-gray-300 text-center">
+              Je bent niet ingelogd. Log in om je trainingsschemas te bekijken.
+            </p>
+            
+            <div className="space-y-3">
+              <a 
+                href="/test-login"
+                className="w-full bg-[#8BAE5A] text-[#232D1A] font-semibold py-3 px-4 rounded-lg hover:bg-[#7A9D4A] transition-colors block text-center"
+              >
+                Test Login (Localhost)
+              </a>
+              
+              <a 
+                href="/login"
+                className="w-full bg-[#3A4D23] text-white font-semibold py-3 px-4 rounded-lg hover:bg-[#4A5D33] transition-colors block text-center"
+              >
+                Normale Login
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
     );
   }
 

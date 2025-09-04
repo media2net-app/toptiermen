@@ -99,12 +99,18 @@ export default function Dashboard() {
 
   const [showDebugger, setShowDebugger] = useState(false);
 
-  const { user, profile } = useSupabaseAuth();
+  const { user, profile, loading: authLoading } = useSupabaseAuth();
 
   // 2.0.1: Fetch real dashboard data from database
   useEffect(() => {
     const fetchDashboardData = async () => {
-      if (!user?.id) return;
+      if (!user?.id) {
+        // If no user after auth loading is complete, show fallback
+        if (!authLoading) {
+          setLoading(false);
+        }
+        return;
+      }
 
       try {
         setLoading(true); // RE-ENABLED WITH LOADING MODAL
@@ -166,7 +172,7 @@ export default function Dashboard() {
     };
 
     fetchDashboardData();
-  }, [user?.id]);
+  }, [user?.id, authLoading]);
 
   // Simple fade in effect
   useEffect(() => {
@@ -177,12 +183,47 @@ export default function Dashboard() {
   }, [loading]);
 
   // Show loading modal while data is being fetched
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <DashboardLoadingModal 
-        isOpen={loading} 
+        isOpen={loading || authLoading} 
         message="Jouw persoonlijke dashboard wordt geladen..."
       />
+    );
+  }
+
+  // Show fallback if no user is logged in
+  if (!user && !authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#0F1411] via-[#181F17] to-[#232D1A] flex items-center justify-center">
+        <div className="bg-[#232D1A] p-8 rounded-lg border border-[#3A4D23] max-w-md w-full mx-4">
+          <h1 className="text-2xl font-bold text-white mb-6 text-center">
+            Dashboard
+          </h1>
+          
+          <div className="space-y-4">
+            <p className="text-gray-300 text-center">
+              Je bent niet ingelogd. Log in om je dashboard te bekijken.
+            </p>
+            
+            <div className="space-y-3">
+              <a 
+                href="/test-login"
+                className="w-full bg-[#8BAE5A] text-[#232D1A] font-semibold py-3 px-4 rounded-lg hover:bg-[#7A9D4A] transition-colors block text-center"
+              >
+                Test Login (Localhost)
+              </a>
+              
+              <a 
+                href="/login"
+                className="w-full bg-[#3A4D23] text-white font-semibold py-3 px-4 rounded-lg hover:bg-[#4A5D33] transition-colors block text-center"
+              >
+                Normale Login
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
     );
   }
 
