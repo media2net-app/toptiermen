@@ -251,6 +251,12 @@ export default function TrainingschemasPage() {
       console.log('🔍 Fetching training schemas with new profile...');
       await fetchTrainingSchemasWithProfile(data);
       
+      // Redirect to voedingsplannen page after successful save
+      console.log('🔄 Redirecting to voedingsplannen...');
+      setTimeout(() => {
+        window.location.href = '/dashboard/voedingsplannen';
+      }, 1000); // Small delay to show the success message
+      
     } catch (error) {
       console.error('❌ Error in saveTrainingProfile:', error);
       console.error('❌ Error stack:', error instanceof Error ? error.stack : 'No stack trace');
