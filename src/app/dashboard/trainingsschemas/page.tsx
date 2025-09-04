@@ -28,6 +28,17 @@ interface TrainingPreferences {
   style: 'gym' | 'bodyweight';
 }
 
+interface TrainingProfile {
+  id?: string;
+  user_id: string;
+  training_goal: 'spiermassa' | 'kracht_uithouding' | 'power_kracht';
+  training_frequency: 3 | 4 | 5 | 6;
+  experience_level: 'beginner' | 'intermediate' | 'advanced';
+  equipment_type: 'gym' | 'home' | 'outdoor';
+  created_at?: string;
+  updated_at?: string;
+}
+
 interface WorkoutSchema {
   id: string;
   name: string;
@@ -81,21 +92,152 @@ export default function TrainingschemasPage() {
   const [availableSchemas, setAvailableSchemas] = useState<TrainingSchemaDb[]>([]);
   const [selectedSchema, setSelectedSchema] = useState<TrainingSchemaDb | null>(null);
   const [currentWorkoutData, setCurrentWorkoutData] = useState<any>(null);
+  
+  // Training Profile State
+  const [userTrainingProfile, setUserTrainingProfile] = useState<TrainingProfile | null>(null);
+  const [showCalculator, setShowCalculator] = useState(false);
+  const [calculatorData, setCalculatorData] = useState({
+    training_goal: 'spiermassa' as 'spiermassa' | 'kracht_uithouding' | 'power_kracht',
+    training_frequency: 3 as 3 | 4 | 5 | 6,
+    experience_level: 'beginner' as 'beginner' | 'intermediate' | 'advanced',
+    equipment_type: 'gym' as 'gym' | 'home' | 'outdoor'
+  });
+
+  // Training Profile functions
+  const fetchUserTrainingProfile = async () => {
+    try {
+      if (!user?.id) return;
+      
+      const { data, error } = await supabase
+        .from('training_profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+      
+      if (!error && data) {
+        setUserTrainingProfile(data);
+        setCalculatorData({
+          training_goal: data.training_goal,
+          training_frequency: data.training_frequency,
+          experience_level: data.experience_level,
+          equipment_type: data.equipment_type
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching training profile:', error);
+    }
+  };
+
+  const saveTrainingProfile = async () => {
+    try {
+      if (!user?.id) {
+        toast.error('Je moet ingelogd zijn');
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('training_profiles')
+        .upsert({
+          user_id: user.id,
+          training_goal: calculatorData.training_goal,
+          training_frequency: calculatorData.training_frequency,
+          experience_level: calculatorData.experience_level,
+          equipment_type: calculatorData.equipment_type,
+          updated_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error saving training profile:', error);
+        toast.error('Fout bij opslaan van trainingsprofiel');
+        return;
+      }
+
+      setUserTrainingProfile(data);
+      setShowCalculator(false);
+      toast.success('Trainingsprofiel opgeslagen!');
+      
+      // Refresh available schemas based on new profile
+      await fetchTrainingSchemas();
+      
+    } catch (error) {
+      console.error('Error in saveTrainingProfile:', error);
+      toast.error('Er is een fout opgetreden');
+    }
+  };
 
   // Training functions
   const fetchTrainingSchemas = async () => {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('training_schemas')
         .select('*')
         .eq('status', 'active');
+      
+      // Filter based on user training profile if available
+      if (userTrainingProfile) {
+        // Map user profile to database fields
+        const goalMapping = {
+          'spiermassa': 'spiermassa',
+          'kracht_uithouding': 'kracht_uithouding', 
+          'power_kracht': 'power_kracht'
+        };
+        
+        const equipmentMapping = {
+          'gym': 'Gym',
+          'home': 'Home',
+          'outdoor': 'Outdoor'
+        };
+        
+        const difficultyMapping = {
+          'beginner': 'Beginner',
+          'intermediate': 'Intermediate', 
+          'advanced': 'Advanced'
+        };
+        
+        // Filter by training goal
+        if (userTrainingProfile.training_goal) {
+          query = query.eq('training_goal', goalMapping[userTrainingProfile.training_goal]);
+        }
+        
+        // Filter by equipment type
+        if (userTrainingProfile.equipment_type) {
+          query = query.eq('category', equipmentMapping[userTrainingProfile.equipment_type]);
+        }
+        
+        // Filter by difficulty level
+        if (userTrainingProfile.experience_level) {
+          query = query.eq('difficulty', difficultyMapping[userTrainingProfile.experience_level]);
+        }
+        
+        // Filter by frequency (this would need to be added to the database schema)
+        // For now, we'll filter client-side
+      }
+      
+      const { data, error } = await query;
       
       if (error) {
         console.error('Error fetching training schemas:', error);
         return;
       }
       
-      setAvailableSchemas(data || []);
+      let filteredSchemas = data || [];
+      
+      // Client-side filtering for frequency if user profile exists
+      if (userTrainingProfile) {
+        filteredSchemas = filteredSchemas.filter(schema => {
+          // Extract frequency from schema name (e.g., "3x Split Training")
+          const frequencyMatch = schema.name.match(/(\d+)x/);
+          if (frequencyMatch) {
+            const schemaFrequency = parseInt(frequencyMatch[1]);
+            return schemaFrequency === userTrainingProfile.training_frequency;
+          }
+          return true;
+        });
+      }
+      
+      setAvailableSchemas(filteredSchemas);
     } catch (error) {
       console.error('Error in fetchTrainingSchemas:', error);
     }
@@ -148,10 +290,16 @@ export default function TrainingschemasPage() {
 
   useEffect(() => {
     if (user?.id) {
-      fetchTrainingSchemas();
+      fetchUserTrainingProfile();
       fetchUserActiveSchema();
     }
   }, [user?.id]);
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchTrainingSchemas();
+    }
+  }, [user?.id, userTrainingProfile]);
 
   useEffect(() => {
     if (user?.id && selectedSchemaId) {
@@ -328,6 +476,217 @@ export default function TrainingschemasPage() {
                   Kies een trainingsschema dat past bij jouw doelen en niveau.
                 </p>
               </div>
+
+              {/* Training Profile Notice */}
+              {userTrainingProfile && (
+                <div className="mb-8 p-6 bg-[#232D1A] rounded-xl border border-[#3A4D23]">
+                  <h3 className="text-xl font-bold text-white mb-4 flex items-center">
+                    <FireIcon className="w-6 h-6 text-[#8BAE5A] mr-2" />
+                    Jouw Trainingsprofiel
+                  </h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div>
+                      <span className="text-gray-400">Doel:</span>
+                      <p className="text-white font-semibold capitalize">
+                        {userTrainingProfile.training_goal.replace('_', ' ')}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-gray-400">Frequentie:</span>
+                      <p className="text-white font-semibold">
+                        {userTrainingProfile.training_frequency}x per week
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-gray-400">Niveau:</span>
+                      <p className="text-white font-semibold capitalize">
+                        {userTrainingProfile.experience_level}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-gray-400">Equipment:</span>
+                      <p className="text-white font-semibold capitalize">
+                        {userTrainingProfile.equipment_type}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-4 flex justify-end">
+                    <button
+                      onClick={() => setShowCalculator(true)}
+                      className="px-4 py-2 bg-[#3A4D23] text-white rounded-lg hover:bg-[#4A5D33] transition-colors text-sm"
+                    >
+                      Bewerken
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Training Calculator Modal */}
+              {showCalculator && (
+                <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+                  <div className="bg-[#232D1A] rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                    <div className="flex justify-between items-center mb-6">
+                      <h3 className="text-2xl font-bold text-white">
+                        {userTrainingProfile ? 'Update Mijn Trainingsprofiel' : 'Bereken Mijn Trainingsprofiel'}
+                      </h3>
+                      <button
+                        onClick={() => setShowCalculator(false)}
+                        className="text-gray-400 hover:text-white transition-colors"
+                      >
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+
+                    <div className="space-y-6">
+                      {/* Training Goal */}
+                      <div>
+                        <label className="block text-white font-semibold mb-3">
+                          Wat is je trainingsdoel?
+                        </label>
+                        <div className="grid grid-cols-1 gap-3">
+                          {[
+                            { value: 'spiermassa', label: 'Spiermassa', description: '8-12 reps, 4 sets, 90s rust' },
+                            { value: 'kracht_uithouding', label: 'Kracht & Uithouding', description: '15-20 reps, 4 sets, 40-60s rust' },
+                            { value: 'power_kracht', label: 'Power & Kracht', description: '3-6 reps, 4 sets, 150-180s rust' }
+                          ].map((goal) => (
+                            <label key={goal.value} className="flex items-start space-x-3 cursor-pointer">
+                              <input
+                                type="radio"
+                                name="training_goal"
+                                value={goal.value}
+                                checked={calculatorData.training_goal === goal.value}
+                                onChange={(e) => setCalculatorData({...calculatorData, training_goal: e.target.value as any})}
+                                className="mt-1 w-4 h-4 text-[#8BAE5A] bg-[#3A4D23] border-[#3A4D23] focus:ring-[#8BAE5A]"
+                              />
+                              <div>
+                                <div className="text-white font-medium">{goal.label}</div>
+                                <div className="text-gray-400 text-sm">{goal.description}</div>
+                              </div>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Training Frequency */}
+                      <div>
+                        <label className="block text-white font-semibold mb-3">
+                          Hoe vaak wil je per week trainen?
+                        </label>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                          {[3, 4, 5, 6].map((frequency) => (
+                            <label key={frequency} className="flex items-center space-x-2 cursor-pointer">
+                              <input
+                                type="radio"
+                                name="training_frequency"
+                                value={frequency}
+                                checked={calculatorData.training_frequency === frequency}
+                                onChange={(e) => setCalculatorData({...calculatorData, training_frequency: parseInt(e.target.value) as any})}
+                                className="w-4 h-4 text-[#8BAE5A] bg-[#3A4D23] border-[#3A4D23] focus:ring-[#8BAE5A]"
+                              />
+                              <span className="text-white">{frequency}x per week</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Experience Level */}
+                      <div>
+                        <label className="block text-white font-semibold mb-3">
+                          Wat is je ervaringsniveau?
+                        </label>
+                        <div className="grid grid-cols-1 gap-3">
+                          {[
+                            { value: 'beginner', label: 'Beginner', description: 'Minder dan 1 jaar ervaring' },
+                            { value: 'intermediate', label: 'Gemiddeld', description: '1-3 jaar ervaring' },
+                            { value: 'advanced', label: 'Gevorderd', description: 'Meer dan 3 jaar ervaring' }
+                          ].map((level) => (
+                            <label key={level.value} className="flex items-start space-x-3 cursor-pointer">
+                              <input
+                                type="radio"
+                                name="experience_level"
+                                value={level.value}
+                                checked={calculatorData.experience_level === level.value}
+                                onChange={(e) => setCalculatorData({...calculatorData, experience_level: e.target.value as any})}
+                                className="mt-1 w-4 h-4 text-[#8BAE5A] bg-[#3A4D23] border-[#3A4D23] focus:ring-[#8BAE5A]"
+                              />
+                              <div>
+                                <div className="text-white font-medium">{level.label}</div>
+                                <div className="text-gray-400 text-sm">{level.description}</div>
+                              </div>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Equipment Type */}
+                      <div>
+                        <label className="block text-white font-semibold mb-3">
+                          Waar ga je trainen?
+                        </label>
+                        <div className="grid grid-cols-1 gap-3">
+                          {[
+                            { value: 'gym', label: 'Gym', description: 'Volledige gym met alle apparaten' },
+                            { value: 'home', label: 'Thuis', description: 'Beperkte apparaten of bodyweight' },
+                            { value: 'outdoor', label: 'Buiten', description: 'Outdoor training en bootcamp' }
+                          ].map((equipment) => (
+                            <label key={equipment.value} className="flex items-start space-x-3 cursor-pointer">
+                              <input
+                                type="radio"
+                                name="equipment_type"
+                                value={equipment.value}
+                                checked={calculatorData.equipment_type === equipment.value}
+                                onChange={(e) => setCalculatorData({...calculatorData, equipment_type: e.target.value as any})}
+                                className="mt-1 w-4 h-4 text-[#8BAE5A] bg-[#3A4D23] border-[#3A4D23] focus:ring-[#8BAE5A]"
+                              />
+                              <div>
+                                <div className="text-white font-medium">{equipment.label}</div>
+                                <div className="text-gray-400 text-sm">{equipment.description}</div>
+                              </div>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Save Button */}
+                      <div className="flex justify-end space-x-4 pt-6">
+                        <button
+                          onClick={() => setShowCalculator(false)}
+                          className="px-6 py-3 bg-[#3A4D23] text-white rounded-lg hover:bg-[#4A5D33] transition-colors"
+                        >
+                          Annuleren
+                        </button>
+                        <button
+                          onClick={saveTrainingProfile}
+                          className="px-6 py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold"
+                        >
+                          {userTrainingProfile ? 'Update Mijn Trainingsprofiel' : 'Bereken Mijn Trainingsprofiel'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* No Profile - Show Calculator Button */}
+              {!userTrainingProfile && (
+                <div className="mb-8 p-6 bg-[#232D1A] rounded-xl border border-[#3A4D23] text-center">
+                  <h3 className="text-xl font-bold text-white mb-4 flex items-center justify-center">
+                    <FireIcon className="w-6 h-6 text-[#8BAE5A] mr-2" />
+                    Persoonlijk Trainingsprofiel
+                  </h3>
+                  <p className="text-gray-300 mb-6">
+                    Vul je trainingsvoorkeuren in om gepersonaliseerde trainingsschemas te krijgen die perfect bij jou passen.
+                  </p>
+                  <button
+                    onClick={() => setShowCalculator(true)}
+                    className="px-8 py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold"
+                  >
+                    Bereken Mijn Trainingsprofiel
+                  </button>
+                </div>
+              )}
 
               {/* Current Schema Display */}
               {selectedSchema && (
