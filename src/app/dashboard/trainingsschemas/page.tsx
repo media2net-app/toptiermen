@@ -180,37 +180,38 @@ export default function TrainingschemasPage() {
   };
 
   const filterSchemasByProfile = (schemas: TrainingSchema[], profile: TrainingProfile) => {
-    return schemas.filter(schema => {
+    console.log('🔍 Filtering schemas for profile:', profile);
+    console.log('📊 Total schemas before filtering:', schemas.length);
+    
+    const filtered = schemas.filter(schema => {
       // Map user profile to database fields
       const goalMapping = {
-        'spiermassa': 'spiermassa',
-        'kracht_uithouding': 'uithouding',
-        'power_kracht': 'kracht'
+        'spiermassa': ['spiermassa'],
+        'kracht_uithouding': ['kracht', 'uithouding', 'spiermassa'], // Show multiple goal types
+        'power_kracht': ['kracht', 'spiermassa'] // Show power and strength related
       };
       
       const equipmentMapping = {
         'gym': 'Gym',
-        'home': 'Home',
+        'home': 'Gym', // Home users can also use gym schemas
         'outdoor': 'Outdoor'
       };
       
-      const difficultyMapping = {
-        'beginner': 'Beginner',
-        'intermediate': 'Intermediate',
-        'advanced': 'Advanced'
-      };
-      
-      // Filter by training goal
-      const mappedGoal = goalMapping[profile.training_goal];
-      if (schema.training_goal !== mappedGoal) return false;
+      // Filter by training goal (more flexible)
+      const allowedGoals = goalMapping[profile.training_goal] || ['spiermassa'];
+      const goalMatch = allowedGoals.includes(schema.training_goal);
       
       // Filter by equipment type
       const mappedEquipment = equipmentMapping[profile.equipment_type];
-      if (schema.category !== mappedEquipment) return false;
+      const equipmentMatch = schema.category === mappedEquipment;
       
-      // Don't filter by difficulty - show all levels for the goal/equipment
-      return true;
+      console.log(`📋 Schema "${schema.name}": goal=${schema.training_goal} (${goalMatch}), category=${schema.category} (${equipmentMatch})`);
+      
+      return goalMatch && equipmentMatch;
     });
+    
+    console.log('✅ Filtered schemas:', filtered.length);
+    return filtered;
   };
 
   const fetchUserTrainingProfile = async () => {
