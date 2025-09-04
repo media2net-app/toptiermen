@@ -71,7 +71,7 @@ interface MealEditorProps {
   day: string; // monday, tuesday, etc
   ingredients: MealIngredient[];
   nutrition: MealNutrition;
-  onSave: (ingredients: MealIngredient[]) => void;
+  onSave: (ingredients: MealIngredient[], closeModal?: boolean) => void;
   planType: string; // carnivoor, etc
 }
 
@@ -333,8 +333,8 @@ export default function MealEditor({
     }
     setEditingIngredients(updated);
     
-    // Auto-save immediately when amount or unit changes
-    onSave(updated);
+    // Auto-save immediately when amount or unit changes (don't close modal)
+    onSave(updated, false);
   };
 
   const addIngredient = (ingredientName: string) => {
@@ -378,18 +378,16 @@ export default function MealEditor({
     setShowIngredientSearch(false);
     setSearchTerm('');
     
-    // Auto-save immediately
-    onSave(updatedIngredients);
-    toast.success('Ingrediënt toegevoegd en opgeslagen!');
+    // Auto-save immediately (don't close modal)
+    onSave(updatedIngredients, false);
   };
 
   const removeIngredient = (index: number) => {
     const updated = editingIngredients.filter((_, i) => i !== index);
     setEditingIngredients(updated);
     
-    // Auto-save immediately
-    onSave(updated);
-    toast.success('Ingrediënt verwijderd en opgeslagen!');
+    // Auto-save immediately (don't close modal)
+    onSave(updated, false);
   };
 
   const handleSave = () => {
@@ -398,8 +396,8 @@ export default function MealEditor({
       return;
     }
 
-    onSave(editingIngredients);
-    toast.success('Maaltijd opgeslagen!');
+    // Manual save - close modal
+    onSave(editingIngredients, true);
     onClose();
   };
 

@@ -177,7 +177,7 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
     });
   };
 
-  const handleSaveMeal = async (ingredients: MealIngredient[]) => {
+  const handleSaveMeal = async (ingredients: MealIngredient[], closeModal: boolean = false) => {
     if (!editingMeal || !planData) return;
 
     try {
@@ -240,13 +240,18 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
       };
       
       setPlanData(updatedPlanData);
-      setEditingMeal(null);
       setHasUnsavedChanges(true);
       
       // Auto-save the plan immediately
       await savePlanToDatabase(updatedPlanData);
       
-      toast.success('Maaltijd aangepast en automatisch opgeslagen!');
+      // Only close modal if explicitly requested (manual save button)
+      if (closeModal) {
+        setEditingMeal(null);
+        toast.success('Maaltijd aangepast en opgeslagen!');
+      } else {
+        toast.success('Wijzigingen automatisch opgeslagen!');
+      }
       
     } catch (error) {
       console.error('Error saving meal:', error);
