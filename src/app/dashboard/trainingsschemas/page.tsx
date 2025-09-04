@@ -92,6 +92,8 @@ export default function TrainingschemasPage() {
   const [availableSchemas, setAvailableSchemas] = useState<TrainingSchemaDb[]>([]);
   const [selectedSchema, setSelectedSchema] = useState<TrainingSchemaDb | null>(null);
   const [currentWorkoutData, setCurrentWorkoutData] = useState<any>(null);
+  const [customSchemas, setCustomSchemas] = useState<{[key: string]: any}>({});
+  const [editingSchema, setEditingSchema] = useState<string | null>(null);
   
   // Training Profile State
   const [userTrainingProfile, setUserTrainingProfile] = useState<TrainingProfile | null>(null);
@@ -247,6 +249,64 @@ export default function TrainingschemasPage() {
       experience_level: 'beginner',
       equipment_type: 'gym'
     });
+  };
+
+  const loadCustomSchema = async (schemaId: string) => {
+    try {
+      if (!user?.id) return null;
+
+      const response = await fetch(`/api/training-schema-load?userId=${user.id}&schemaId=${schemaId}`);
+      const data = await response.json();
+
+      if (data.success && data.data) {
+        return data.data.custom_data;
+      }
+      return null;
+    } catch (error) {
+      console.error('Error loading custom schema:', error);
+      return null;
+    }
+  };
+
+  const saveCustomSchema = async (schemaId: string, customData: any, customName?: string, customDescription?: string) => {
+    try {
+      if (!user?.id) {
+        toast.error('Je moet ingelogd zijn');
+        return false;
+      }
+
+      const response = await fetch('/api/training-schema-save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          schemaId,
+          customData,
+          customName,
+          customDescription
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setCustomSchemas(prev => ({
+          ...prev,
+          [schemaId]: customData
+        }));
+        toast.success('Aangepast schema opgeslagen!');
+        return true;
+      } else {
+        toast.error('Fout bij opslaan van aangepast schema');
+        return false;
+      }
+    } catch (error) {
+      console.error('Error saving custom schema:', error);
+      toast.error('Er is een fout opgetreden');
+      return false;
+    }
   };
 
   // Training functions
@@ -431,33 +491,24 @@ export default function TrainingschemasPage() {
         return;
       }
 
-      // Deactivate current schema
-      await supabase
-        .from('user_training_schemas')
-        .update({ is_active: false })
-        .eq('user_id', user.id);
-
-      // Activate new schema
-      const { error } = await supabase
-        .from('user_training_schemas')
-        .upsert({
-          user_id: user.id,
-          schema_id: schemaId,
-          is_active: true,
-          started_at: new Date().toISOString()
-        });
-
-      if (error) {
-        console.error('Error selecting schema:', error);
-        toast.error('Er is een fout opgetreden bij het selecteren van het schema');
-        return;
+      // Check if there's a custom version of this schema
+      const customData = await loadCustomSchema(schemaId);
+      
+      if (customData) {
+        // Use custom schema data
+        setCustomSchemas(prev => ({
+          ...prev,
+          [schemaId]: customData
+        }));
+        toast.success('Aangepast trainingsschema geladen!');
+      } else {
+        // Use default schema
+        toast.success('Trainingsschema geselecteerd!');
       }
 
       setSelectedSchemaId(schemaId);
       const selected = availableSchemas.find(s => s.id === schemaId);
       setSelectedSchema(selected || null);
-      
-      toast.success('Trainingsschema geselecteerd!');
       
       // Complete onboarding step if needed
       if (isOnboarding && onboardingStep === 3) {
@@ -745,12 +796,11 @@ export default function TrainingschemasPage() {
                   <motion.div
                     key={schema.id}
                     whileHover={{ scale: 1.02 }}
-                    className={`p-6 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
+                    className={`p-6 rounded-xl border-2 transition-all duration-200 ${
                       selectedSchemaId === schema.id
                         ? 'bg-[#8BAE5A]/10 border-[#8BAE5A]'
                         : 'bg-[#232D1A] border-[#3A4D23] hover:border-[#8BAE5A]/50'
                     }`}
-                    onClick={() => handleSchemaSelection(schema.id)}
                   >
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
@@ -790,14 +840,37 @@ export default function TrainingschemasPage() {
                       </div>
                     </div>
                     
-                    <div className="flex justify-between items-center">
+                    <div className="flex justify-between items-center mb-4">
                       <span className="text-sm text-gray-400 capitalize">
                         {schema.category}
                       </span>
                       {selectedSchemaId === schema.id && (
                         <span className="text-sm text-[#8BAE5A] font-semibold">
-                          Actief Schema
+                          Geselecteerd plan
                         </span>
+                      )}
+                    </div>
+
+                    {/* Select Plan Button */}
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleSchemaSelection(schema.id)}
+                        className={`flex-1 px-4 py-2 rounded-lg transition-colors font-semibold ${
+                          selectedSchemaId === schema.id
+                            ? 'bg-[#8BAE5A] text-[#232D1A]'
+                            : 'bg-[#3A4D23] text-white hover:bg-[#4A5D33]'
+                        }`}
+                      >
+                        {selectedSchemaId === schema.id ? 'Geselecteerd' : '🎯 Selecteer dit plan'}
+                      </button>
+                      
+                      {selectedSchemaId === schema.id && (
+                        <button
+                          onClick={() => setEditingSchema(schema.id)}
+                          className="px-4 py-2 bg-[#8BAE5A]/20 text-[#8BAE5A] border border-[#8BAE5A] rounded-lg hover:bg-[#8BAE5A]/30 transition-colors"
+                        >
+                          Bewerken
+                        </button>
                       )}
                     </div>
                   </motion.div>
@@ -838,8 +911,7 @@ export default function TrainingschemasPage() {
                   <motion.div
                     key={schema.id}
                     whileHover={{ scale: 1.02 }}
-                    className="p-6 bg-[#232D1A] rounded-xl border-2 border-[#3A4D23] hover:border-[#8BAE5A]/50 cursor-pointer transition-all duration-200"
-                    onClick={() => handleSchemaSelection(schema.id)}
+                    className="p-6 bg-[#232D1A] rounded-xl border-2 border-[#3A4D23] hover:border-[#8BAE5A]/50 transition-all duration-200"
                   >
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
@@ -864,8 +936,11 @@ export default function TrainingschemasPage() {
                     </div>
                     
                     <div className="text-center">
-                      <button className="w-full px-4 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold">
-                        Selecteer Schema
+                      <button 
+                        onClick={() => handleSchemaSelection(schema.id)}
+                        className="w-full px-4 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold"
+                      >
+                        🎯 Selecteer dit plan
                       </button>
                     </div>
                   </motion.div>
@@ -874,6 +949,89 @@ export default function TrainingschemasPage() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Schema Edit Modal */}
+        {editingSchema && (
+          <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+            <div className="bg-[#232D1A] rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-2xl font-bold text-white">
+                  Schema Bewerken
+                </h3>
+                <button
+                  onClick={() => setEditingSchema(null)}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-white font-semibold mb-3">
+                    Aangepaste naam (optioneel)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Bijv. Mijn Personalisatie Schema"
+                    className="w-full px-4 py-3 bg-[#3A4D23] border border-[#4A5D33] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#8BAE5A]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-white font-semibold mb-3">
+                    Aangepaste beschrijving (optioneel)
+                  </label>
+                  <textarea
+                    placeholder="Beschrijf je aanpassingen..."
+                    rows={3}
+                    className="w-full px-4 py-3 bg-[#3A4D23] border border-[#4A5D33] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#8BAE5A] resize-none"
+                  />
+                </div>
+
+                <div className="bg-[#3A4D23] p-4 rounded-lg">
+                  <h4 className="text-white font-semibold mb-2">Schema Details</h4>
+                  <p className="text-gray-300 text-sm">
+                    Hier kun je in de toekomst specifieke oefeningen, sets, reps en andere details aanpassen.
+                    Deze functionaliteit wordt binnenkort toegevoegd.
+                  </p>
+                </div>
+
+                <div className="flex justify-end space-x-4 pt-6">
+                  <button
+                    onClick={() => setEditingSchema(null)}
+                    className="px-6 py-3 bg-[#3A4D23] text-white rounded-lg hover:bg-[#4A5D33] transition-colors"
+                  >
+                    Annuleren
+                  </button>
+                  <button
+                    onClick={async () => {
+                      // For now, just save a basic custom schema
+                      const success = await saveCustomSchema(
+                        editingSchema, 
+                        { 
+                          customizations: 'Basic customizations applied',
+                          lastModified: new Date().toISOString()
+                        },
+                        'Aangepast Schema',
+                        'Dit schema is aangepast door de gebruiker'
+                      );
+                      
+                      if (success) {
+                        setEditingSchema(null);
+                      }
+                    }}
+                    className="px-6 py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold"
+                  >
+                    Opslaan
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </PageLayout>
   );
