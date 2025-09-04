@@ -273,9 +273,6 @@ export default function TrainingschemasPage() {
     <PageLayout 
       title="Trainingsschemas" 
       subtitle="Kies en beheer je trainingsschemas voor optimale resultaten"
-      breadcrumbItems={[
-        { label: 'Trainingsschemas', isCurrent: true }
-      ]}
     >
       <div className="max-w-4xl mx-auto">
         <AnimatePresence mode="wait">
