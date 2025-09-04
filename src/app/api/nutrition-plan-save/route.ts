@@ -19,19 +19,47 @@ export async function POST(request: NextRequest) {
 
     console.log('💾 Saving customized nutrition plan:', { userId, planId });
 
-    // Save or update the customized plan in user_nutrition_plans table
-    // Use week_plan column to store the customized plan data
-    const { data, error } = await supabase
+    // First, check if a record already exists for this user and plan
+    const { data: existingRecord, error: checkError } = await supabase
       .from('user_nutrition_plans')
-      .upsert({
-        user_id: userId,
-        plan_type: planId, // Use plan_type instead of plan_id
-        week_plan: customizedPlan, // Store customized plan in week_plan column
-        updated_at: new Date().toISOString()
-      }, { 
-        onConflict: 'user_id,plan_type' 
-      })
-      .select();
+      .select('id')
+      .eq('user_id', userId)
+      .eq('plan_type', planId)
+      .single();
+
+    let data, error;
+
+    if (existingRecord) {
+      // Update existing record
+      console.log('📝 Updating existing record for user:', userId, 'plan:', planId);
+      const result = await supabase
+        .from('user_nutrition_plans')
+        .update({
+          week_plan: customizedPlan, // Store customized plan in week_plan column
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', userId)
+        .eq('plan_type', planId)
+        .select();
+      
+      data = result.data;
+      error = result.error;
+    } else {
+      // Insert new record
+      console.log('➕ Creating new record for user:', userId, 'plan:', planId);
+      const result = await supabase
+        .from('user_nutrition_plans')
+        .insert({
+          user_id: userId,
+          plan_type: planId, // Use plan_type instead of plan_id
+          week_plan: customizedPlan, // Store customized plan in week_plan column
+          updated_at: new Date().toISOString()
+        })
+        .select();
+      
+      data = result.data;
+      error = result.error;
+    }
 
     if (error) {
       console.error('❌ Error saving customized plan:', error);
