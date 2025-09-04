@@ -113,3 +113,47 @@ export async function GET(request: NextRequest) {
     }, { status: 500 });
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { userId, planId } = await request.json();
+
+    if (!userId || !planId) {
+      return NextResponse.json({
+        success: false,
+        error: 'userId and planId are required'
+      }, { status: 400 });
+    }
+
+    console.log('🗑️ Deleting customized nutrition plan:', { userId, planId });
+
+    // Delete the customized plan from user_nutrition_plans table
+    const { error } = await supabase
+      .from('user_nutrition_plans')
+      .delete()
+      .eq('user_id', userId)
+      .eq('plan_id', planId);
+
+    if (error) {
+      console.error('❌ Error deleting customized plan:', error);
+      return NextResponse.json({
+        success: false,
+        error: error.message
+      }, { status: 500 });
+    }
+
+    console.log('✅ Customized plan deleted successfully');
+
+    return NextResponse.json({
+      success: true,
+      message: 'Customized nutrition plan deleted successfully'
+    });
+
+  } catch (error) {
+    console.error('❌ Error in nutrition-plan-save DELETE API:', error);
+    return NextResponse.json({
+      success: false,
+      error: 'Internal server error'
+    }, { status: 500 });
+  }
+}
