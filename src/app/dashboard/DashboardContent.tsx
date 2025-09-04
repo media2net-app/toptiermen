@@ -685,8 +685,8 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
           </div>
         </div>
 
-        {/* Onboarding Banner */}
-        <OnboardingBanner />
+        {/* Onboarding Banner - Hide during test user video */}
+        {!showTestUserVideo && <OnboardingBanner />}
 
         {/* Modals and Components */}
         <ForcedOnboardingModal 
