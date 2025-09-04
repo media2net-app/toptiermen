@@ -19,7 +19,20 @@ export async function POST(request: NextRequest) {
 
     console.log('💾 Saving customized nutrition plan:', { userId, planId });
 
-    // First, check if a record already exists for this user and plan
+    // First, deactivate all existing plans for this user to avoid unique constraint violation
+    const { error: deactivateError } = await supabase
+      .from('user_nutrition_plans')
+      .update({ is_active: false })
+      .eq('user_id', userId);
+
+    if (deactivateError) {
+      console.log('⚠️ Warning deactivating existing plans:', deactivateError.message);
+      // Don't fail here, just log the warning
+    } else {
+      console.log('✅ All existing plans deactivated');
+    }
+
+    // Then, check if a record already exists for this user and plan
     const { data: existingRecord, error: checkError } = await supabase
       .from('user_nutrition_plans')
       .select('id')
@@ -66,6 +79,7 @@ export async function POST(request: NextRequest) {
           week_plan: customizedPlan, // Store customized plan in week_plan column
           nutrition_goals: nutritionGoals, // Add required nutrition_goals
           user_data: userData, // Add required user_data
+          is_active: true, // Set as active plan
           updated_at: new Date().toISOString()
         })
         .eq('user_id', userId)
@@ -85,6 +99,7 @@ export async function POST(request: NextRequest) {
           week_plan: customizedPlan, // Store customized plan in week_plan column
           nutrition_goals: nutritionGoals, // Add required nutrition_goals
           user_data: userData, // Add required user_data
+          is_active: true, // Set as active plan
           updated_at: new Date().toISOString()
         })
         .select();
