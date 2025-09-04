@@ -71,29 +71,50 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     // Get initial session
     const getInitialSession = async () => {
       try {
+        console.log('🔍 Initializing auth session...');
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
           console.error('Session error:', error);
           setError(error.message);
         } else if (session?.user) {
+          console.log('✅ Found existing session for user:', session.user.email);
           setUser(session.user);
           const userProfile = await fetchProfile(session.user.id);
           setProfile(userProfile);
+        } else {
+          console.log('ℹ️ No existing session found');
+          // Important: Clear user state when no session exists
+          setUser(null);
+          setProfile(null);
         }
       } catch (err) {
         console.error('Initial session error:', err);
         setError('Failed to initialize auth');
+        // Still clear user state on error
+        setUser(null);
+        setProfile(null);
       } finally {
+        console.log('🔄 Auth initialization complete');
         setLoading(false);
       }
     };
 
-    getInitialSession();
+    // Add a timeout to prevent infinite loading
+    const initTimeout = setTimeout(() => {
+      console.log('⚠️ Auth initialization timeout - forcing completion');
+      setLoading(false);
+    }, 5000);
+
+    getInitialSession().then(() => {
+      clearTimeout(initTimeout);
+    });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('🔔 Auth state change:', event, session?.user?.email);
+        
         if (event === 'SIGNED_IN' && session?.user) {
           setUser(session.user);
           const userProfile = await fetchProfile(session.user.id);
@@ -108,7 +129,10 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      clearTimeout(initTimeout);
+      subscription.unsubscribe();
+    };
   }, []);
 
   // Sign in method
