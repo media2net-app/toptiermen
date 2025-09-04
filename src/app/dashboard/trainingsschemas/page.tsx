@@ -155,13 +155,37 @@ export default function TrainingschemasPage() {
     try {
       if (!user?.id) return;
       
+      // Check if user.id is an email and convert to UUID if needed
+      let actualUserId = user.id;
+      if (user.id.includes('@')) {
+        console.log('🔍 User ID is email, looking up UUID for training profile...');
+        try {
+          const response = await fetch('/api/auth/get-user-uuid', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: user.id })
+          });
+          
+          if (response.ok) {
+            const { uuid } = await response.json();
+            actualUserId = uuid;
+            console.log('✅ Found UUID for training profile:', actualUserId);
+          } else {
+            console.log('❌ Failed to get UUID for training profile, using email as fallback');
+          }
+        } catch (error) {
+          console.log('❌ Error getting UUID for training profile:', error);
+        }
+      }
+      
       const { data, error } = await supabase
         .from('training_profiles')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', actualUserId)
         .single();
       
       if (!error && data) {
+        console.log('✅ Training profile loaded:', data);
         setUserTrainingProfile(data);
         setCalculatorData({
           training_goal: data.training_goal,
@@ -169,6 +193,8 @@ export default function TrainingschemasPage() {
           experience_level: data.experience_level,
           equipment_type: data.equipment_type
         });
+      } else {
+        console.log('ℹ️ No training profile found for user');
       }
     } catch (error) {
       console.error('Error fetching training profile:', error);
@@ -300,12 +326,26 @@ export default function TrainingschemasPage() {
   const startCalculator = () => {
     setShowCalculator(true);
     setCurrentStep(0);
-    setCalculatorData({
-      training_goal: 'spiermassa',
-      training_frequency: 3,
-      experience_level: 'beginner',
-      equipment_type: 'gym'
-    });
+    
+    // If user has existing profile, load their data
+    if (userTrainingProfile) {
+      setCalculatorData({
+        training_goal: userTrainingProfile.training_goal,
+        training_frequency: userTrainingProfile.training_frequency,
+        experience_level: userTrainingProfile.experience_level,
+        equipment_type: userTrainingProfile.equipment_type
+      });
+      console.log('🔄 Loading existing profile data:', userTrainingProfile);
+    } else {
+      // Default values for new users
+      setCalculatorData({
+        training_goal: 'spiermassa',
+        training_frequency: 3,
+        experience_level: 'beginner',
+        equipment_type: 'gym'
+      });
+      console.log('🆕 Using default values for new user');
+    }
   };
 
   const loadCustomSchema = async (schemaId: string) => {
