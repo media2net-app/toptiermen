@@ -270,15 +270,17 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
     const INGREDIENT_DATABASE = {
       // Carnivoor ingrediënten
       'Eieren': { calories: 155, protein: 13, carbs: 1, fat: 11 },
+      'Ei': { calories: 155, protein: 13, carbs: 1, fat: 11 },
       'Spek': { calories: 541, protein: 37, carbs: 0, fat: 42 },
       'Rundvlees': { calories: 250, protein: 26, carbs: 0, fat: 15 },
       'Boter': { calories: 717, protein: 0.9, carbs: 0.1, fat: 81 },
       'Zalm': { calories: 208, protein: 25, carbs: 0, fat: 12 },
-      'Ei': { calories: 155, protein: 13, carbs: 1, fat: 11 },
       'Ham': { calories: 145, protein: 21, carbs: 0, fat: 6 },
       'Kipfilet': { calories: 165, protein: 31, carbs: 0, fat: 4 },
+      'Kipfilet (Stukjes)': { calories: 165, protein: 31, carbs: 0, fat: 4 },
       'Varkensvlees': { calories: 242, protein: 27, carbs: 0, fat: 14 },
       'Tonijn': { calories: 144, protein: 30, carbs: 0, fat: 1 },
+      'Tonijn (Blikje)': { calories: 144, protein: 30, carbs: 0, fat: 1 },
       'Olijfolie': { calories: 884, protein: 0, carbs: 0, fat: 100 },
       'Biefstuk': { calories: 250, protein: 26, carbs: 0, fat: 15 },
       'Salami': { calories: 336, protein: 20, carbs: 0, fat: 28 },
