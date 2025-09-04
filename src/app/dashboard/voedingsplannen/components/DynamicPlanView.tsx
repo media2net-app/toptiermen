@@ -8,8 +8,7 @@ import {
   ChartBarIcon,
   ClockIcon,
   FireIcon,
-  PencilIcon,
-  ScaleIcon
+  PencilIcon
 } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
 import MealEditor from './MealEditor';
@@ -487,25 +486,41 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
         )}
       </div>
 
-      {/* Scaling Info */}
+      {/* User Daily Needs */}
       <div className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23] mb-8">
         <h3 className="text-xl font-bold text-white mb-4 flex items-center">
-          <ScaleIcon className="w-6 h-6 text-[#8BAE5A] mr-2" />
-          Persoonlijke Aanpassingen
+          <ChartBarIcon className="w-6 h-6 text-[#8BAE5A] mr-2" />
+          Jouw Dagelijkse Behoefte
         </h3>
-        <div className="grid md:grid-cols-3 gap-4 text-sm">
-          <div className="bg-[#181F17] rounded-lg p-4">
-            <h4 className="text-[#8BAE5A] font-semibold mb-2">Basis Plan</h4>
-            <p className="text-white">{planData.scalingInfo.basePlanCalories} kcal/dag</p>
+        <div className="grid md:grid-cols-4 gap-4">
+          <div className="bg-[#181F17] rounded-lg p-4 text-center">
+            <h4 className="text-[#8BAE5A] font-semibold mb-1 text-sm">Calorieën</h4>
+            <p className="text-2xl font-bold text-white">{planData.userProfile.targetCalories}</p>
+            <p className="text-xs text-gray-400">per dag</p>
           </div>
-          <div className="bg-[#181F17] rounded-lg p-4">
-            <h4 className="text-[#8BAE5A] font-semibold mb-2">Jouw Doel</h4>
-            <p className="text-white">{planData.scalingInfo.targetCalories} kcal/dag</p>
+          <div className="bg-[#181F17] rounded-lg p-4 text-center">
+            <h4 className="text-[#8BAE5A] font-semibold mb-1 text-sm">Eiwitten</h4>
+            <p className="text-2xl font-bold text-white">{planData.userProfile.targetProtein}g</p>
+            <p className="text-xs text-gray-400">per dag</p>
           </div>
-          <div className="bg-[#181F17] rounded-lg p-4">
-            <h4 className="text-[#8BAE5A] font-semibold mb-2">Schaalfactor</h4>
-            <p className="text-white">{planData.scalingInfo.scaleFactor}x</p>
+          <div className="bg-[#181F17] rounded-lg p-4 text-center">
+            <h4 className="text-[#8BAE5A] font-semibold mb-1 text-sm">Koolhydraten</h4>
+            <p className="text-2xl font-bold text-white">{planData.userProfile.targetCarbs}g</p>
+            <p className="text-xs text-gray-400">per dag</p>
           </div>
+          <div className="bg-[#181F17] rounded-lg p-4 text-center">
+            <h4 className="text-[#8BAE5A] font-semibold mb-1 text-sm">Vetten</h4>
+            <p className="text-2xl font-bold text-white">{planData.userProfile.targetFat}g</p>
+            <p className="text-xs text-gray-400">per dag</p>
+          </div>
+        </div>
+        <div className="mt-4 text-center">
+          <span className="text-sm text-gray-400">
+            Doel: <span className="text-[#8BAE5A] font-semibold capitalize">{planData.userProfile.goal}</span>
+            {planData.userProfile.weight && planData.userProfile.age && (
+              <> • {planData.userProfile.weight}kg • {planData.userProfile.age} jaar</>
+            )}
+          </span>
         </div>
       </div>
 
