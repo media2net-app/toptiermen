@@ -101,21 +101,33 @@ export async function POST(request: Request) {
     let actualUserId = userId;
     if (userId.includes('@')) {
       try {
+        console.log('🔍 Looking up user by email:', userId);
         const { data: userData, error: userError } = await supabase.auth.admin.getUserByEmail(userId);
-        if (userError || !userData.user) {
+        console.log('📥 User lookup result:', { userData, userError });
+        
+        if (userError) {
+          console.log('❌ User lookup error:', userError);
+          return NextResponse.json({ 
+            success: false, 
+            error: `User lookup failed: ${userError.message}` 
+          }, { status: 404 });
+        }
+        
+        if (!userData.user) {
           console.log('❌ User not found by email:', userId);
           return NextResponse.json({ 
             success: false, 
             error: 'User not found' 
           }, { status: 404 });
         }
+        
         actualUserId = userData.user.id;
         console.log('✅ Converted email to UUID for saving:', actualUserId);
       } catch (error) {
         console.log('❌ Error converting email to UUID for saving:', error);
         return NextResponse.json({ 
           success: false, 
-          error: 'Invalid user ID' 
+          error: `Email conversion failed: ${error}` 
         }, { status: 400 });
       }
     }
