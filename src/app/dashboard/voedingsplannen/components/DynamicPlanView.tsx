@@ -474,7 +474,35 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
     try {
       console.log('🎯 Selecting plan for user:', userId, 'plan:', planId);
       
-      const response = await fetch('/api/nutrition-plan-select', {
+      // First, save the current plan data (including any modifications) to the database
+      console.log('💾 Saving current plan data before selection...');
+      
+      const saveResponse = await fetch('/api/nutrition-plan-save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+          planId: planData.planId,
+          customizedPlan: planData // Save the entire current plan data
+        }),
+      });
+
+      if (!saveResponse.ok) {
+        throw new Error('Failed to save plan data');
+      }
+
+      const saveResult = await saveResponse.json();
+      
+      if (!saveResult.success) {
+        throw new Error(saveResult.error || 'Failed to save plan data');
+      }
+      
+      console.log('✅ Plan data saved successfully');
+      
+      // Then, select the plan as active
+      const selectResponse = await fetch('/api/nutrition-plan-select', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -485,20 +513,21 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
         }),
       });
 
-      if (!response.ok) {
+      if (!selectResponse.ok) {
         throw new Error('Failed to select plan');
       }
 
-      const data = await response.json();
+      const selectResult = await selectResponse.json();
       
-      if (data.success) {
+      if (selectResult.success) {
         toast.success(`🎉 ${planData.planName} is nu je actieve voedingsplan!`);
+        setHasUnsavedChanges(false); // Mark as saved
         // Optionally go back to overview to show the updated selection
         setTimeout(() => {
           onBack();
         }, 1500);
       } else {
-        throw new Error(data.error || 'Failed to select plan');
+        throw new Error(selectResult.error || 'Failed to select plan');
       }
       
     } catch (error) {
