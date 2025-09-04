@@ -4,6 +4,15 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
+const getSupabaseAdminClient = () => {
+  return createClient(supabaseUrl, supabaseKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
+};
+
 export async function POST(request: Request) {
   try {
     const { email } = await request.json();
@@ -12,11 +21,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 });
     }
     
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const supabaseAdmin = getSupabaseAdminClient();
     
     console.log('🔍 Looking up UUID for email:', email);
     
-    const { data: userData, error } = await supabase.auth.admin.getUserByEmail(email);
+    const { data: userData, error } = await supabaseAdmin.auth.admin.getUserByEmail(email);
     
     if (error) {
       console.error('❌ Error fetching user:', error);
