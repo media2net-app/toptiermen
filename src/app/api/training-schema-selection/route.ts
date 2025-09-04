@@ -4,6 +4,15 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
+const getSupabaseAdminClient = () => {
+  return createClient(supabaseUrl, supabaseKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
+};
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -24,7 +33,8 @@ export async function POST(request: Request) {
     let actualUserId = userId;
     if (userId.includes('@')) {
       try {
-        const { data: userData, error: userError } = await supabase.auth.admin.getUserByEmail(userId);
+        const supabaseAdmin = getSupabaseAdminClient();
+        const { data: userData, error: userError } = await supabaseAdmin.auth.admin.getUserByEmail(userId);
         if (userError || !userData.user) {
           console.log('❌ User not found by email:', userId);
           return NextResponse.json({ 
