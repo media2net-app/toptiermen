@@ -22,6 +22,7 @@ interface Product {
   benefits: string[];
   dosage?: string;
   ingredients?: string[];
+  affiliateLink?: string;
 }
 
 
@@ -111,6 +112,36 @@ export default function ProductenPage() {
       ],
       dosage: '1 scoop per 500ml water tijdens/na training',
       ingredients: ['Natriumcitraat', 'Kaliumcitraat', 'Magnesiumcitraat', 'Calciumcitraat', 'Natuurlijke aroma\'s', 'Stevia']
+    },
+    {
+      id: 'testosteron-kit',
+      name: 'Testosteron Test Kit',
+      description: 'Professionele testosteron test die je thuis kunt afnemen via vingerprik. Ontvang binnen 6 werkdagen een gedetailleerd rapport met persoonlijk advies van een arts.',
+      price: 45.00,
+      image: '/testosteron_packshot.png',
+      category: 'diagnostiek',
+      inStock: true,
+      rating: 4.9,
+      reviews: 234,
+      features: [
+        'Zelftest via vingerprik thuis',
+        'ISO15189-gecertificeerd Europees laboratorium',
+        'Gevalideerd door biochemicus en arts',
+        'Resultaten binnen 6 werkdagen',
+        'Beveiligd rapport met uitleg',
+        'Persoonlijk advies inbegrepen'
+      ],
+      benefits: [
+        'Inzicht in je testosteron niveau',
+        'Identificeer hormonale onevenwichtigheden',
+        'Optimaliseer je hormoonbalans',
+        'Meetbare verbeteringen in prestaties',
+        'Professionele begeleiding van arts',
+        'Privacy en gemak van thuis testen'
+      ],
+      dosage: 'Eenmalige test - volg instructies in testkit',
+      ingredients: ['Testkit met alle benodigde materialen', 'Retourenvelop', 'Gedetailleerde instructies'],
+      affiliateLink: 'https://mijnlabtest.nl/testosteron-test.html?aw_affiliate=eyJjYW1wYWlnbl9pZCI6IjU3IiwidHJhZmZpY19zb3VyY2UiOiJub19zb3VyY2UiLCJhY2NvdW50X2lkIjo3NTF9'
     }
   ]);
 
@@ -173,10 +204,18 @@ export default function ProductenPage() {
           {products.map((product) => (
             <div key={product.id} className="bg-[#232D1A] border border-[#3A4D23] rounded-xl overflow-hidden hover:border-[#8BAE5A] hover:shadow-xl transition-all duration-300 shadow-lg">
               {/* Product Image */}
-              <div className="relative h-48 bg-gradient-to-br from-[#8BAE5A]/10 to-[#FFD700]/10 flex items-center justify-center">
-                <div className="text-[#8BAE5A] text-4xl font-bold">
-                  {product.name.split(' ')[0]}
-                </div>
+              <div className="relative h-48 bg-gradient-to-br from-[#8BAE5A]/10 to-[#FFD700]/10 flex items-center justify-center overflow-hidden">
+                {product.image && product.image !== '/images/products/omega3.jpg' && product.image !== '/images/products/bloedtest.jpg' && product.image !== '/images/products/electrolyte.jpg' ? (
+                  <img 
+                    src={product.image} 
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="text-[#8BAE5A] text-4xl font-bold">
+                    {product.name.split(' ')[0]}
+                  </div>
+                )}
                 {product.originalPrice && (
                   <div className="absolute top-4 left-4 bg-red-500 text-white px-2 py-1 rounded-lg text-sm font-semibold shadow-md">
                     -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
@@ -232,13 +271,25 @@ export default function ProductenPage() {
 
                 {/* Action Button */}
                 <div className="flex gap-3">
-                  <button
-                    onClick={() => openProductModal(product)}
-                    className="w-full bg-transparent border border-[#8BAE5A] text-[#8BAE5A] hover:bg-[#8BAE5A] hover:text-[#0A0F0A] px-4 py-2 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2"
-                  >
-                    <EyeIcon className="w-4 h-4" />
-                    Bekijk Details
-                  </button>
+                  {product.affiliateLink ? (
+                    <a
+                      href={product.affiliateLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full bg-transparent border border-[#8BAE5A] text-[#8BAE5A] hover:bg-[#8BAE5A] hover:text-[#0A0F0A] px-4 py-2 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2"
+                    >
+                      <EyeIcon className="w-4 h-4" />
+                      Meer Info
+                    </a>
+                  ) : (
+                    <button
+                      onClick={() => openProductModal(product)}
+                      className="w-full bg-transparent border border-[#8BAE5A] text-[#8BAE5A] hover:bg-[#8BAE5A] hover:text-[#0A0F0A] px-4 py-2 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2"
+                    >
+                      <EyeIcon className="w-4 h-4" />
+                      Bekijk Details
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -275,10 +326,18 @@ export default function ProductenPage() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   {/* Product Image */}
-                  <div className="bg-gradient-to-br from-[#8BAE5A]/10 to-[#FFD700]/10 rounded-xl h-64 flex items-center justify-center">
-                    <div className="text-[#8BAE5A] text-6xl font-bold">
-                      {selectedProduct.name.split(' ')[0]}
-                    </div>
+                  <div className="bg-gradient-to-br from-[#8BAE5A]/10 to-[#FFD700]/10 rounded-xl h-64 flex items-center justify-center overflow-hidden">
+                    {selectedProduct.image && selectedProduct.image !== '/images/products/omega3.jpg' && selectedProduct.image !== '/images/products/bloedtest.jpg' && selectedProduct.image !== '/images/products/electrolyte.jpg' ? (
+                      <img 
+                        src={selectedProduct.image} 
+                        alt={selectedProduct.name}
+                        className="w-full h-full object-cover rounded-xl"
+                      />
+                    ) : (
+                      <div className="text-[#8BAE5A] text-6xl font-bold">
+                        {selectedProduct.name.split(' ')[0]}
+                      </div>
+                    )}
                   </div>
 
                   {/* Product Details */}
