@@ -20,10 +20,33 @@ export async function GET(request: Request) {
     
     console.log('🔍 Fetching training profile for user:', userId);
     
+    // Check if userId is an email and convert to UUID if needed
+    let actualUserId = userId;
+    if (userId.includes('@')) {
+      try {
+        const { data: userData, error: userError } = await supabase.auth.admin.getUserByEmail(userId);
+        if (userError || !userData.user) {
+          console.log('❌ User not found by email:', userId);
+          return NextResponse.json({
+            success: true,
+            profile: null
+          });
+        }
+        actualUserId = userData.user.id;
+        console.log('✅ Converted email to UUID:', actualUserId);
+      } catch (error) {
+        console.log('❌ Error converting email to UUID:', error);
+        return NextResponse.json({
+          success: true,
+          profile: null
+        });
+      }
+    }
+    
     const { data, error } = await supabase
       .from('training_profiles')
       .select('*')
-      .eq('user_id', userId)
+      .eq('user_id', actualUserId)
       .single();
     
     if (error) {
@@ -74,8 +97,31 @@ export async function POST(request: Request) {
     
     console.log('💾 Saving training profile:', body);
     
+    // Check if userId is an email and convert to UUID if needed
+    let actualUserId = userId;
+    if (userId.includes('@')) {
+      try {
+        const { data: userData, error: userError } = await supabase.auth.admin.getUserByEmail(userId);
+        if (userError || !userData.user) {
+          console.log('❌ User not found by email:', userId);
+          return NextResponse.json({ 
+            success: false, 
+            error: 'User not found' 
+          }, { status: 404 });
+        }
+        actualUserId = userData.user.id;
+        console.log('✅ Converted email to UUID for saving:', actualUserId);
+      } catch (error) {
+        console.log('❌ Error converting email to UUID for saving:', error);
+        return NextResponse.json({ 
+          success: false, 
+          error: 'Invalid user ID' 
+        }, { status: 400 });
+      }
+    }
+    
     const profileData = {
-      user_id: userId,
+      user_id: actualUserId,
       training_goal,
       training_frequency,
       experience_level,
