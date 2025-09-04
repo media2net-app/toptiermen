@@ -277,11 +277,11 @@ export default function TrainingschemasPage() {
       console.log('🔍 Fetching training schemas with new profile...');
       await fetchTrainingSchemasWithProfile(data);
       
-      // Redirect to voedingsplannen page after successful save
-      console.log('🔄 Redirecting to voedingsplannen...');
-      setTimeout(() => {
-        window.location.href = '/dashboard/voedingsplannen';
-      }, 1000); // Small delay to show the success message
+      // Show schemas first, then allow user to continue to voedingsplannen
+      console.log('✅ Training profile saved and schemas loaded');
+      
+      // Don't auto-redirect, let user see the schemas first
+      // They can manually continue to voedingsplannen when ready
       
     } catch (error) {
       console.error('❌ Error in saveTrainingProfile:', error);
@@ -416,7 +416,9 @@ export default function TrainingschemasPage() {
       
       // Filter based on user training profile if available
       if (userTrainingProfile) {
-                // Map user profile to database fields
+        console.log('🔍 Filtering schemas for profile:', userTrainingProfile);
+        
+        // Map user profile to database fields
         const goalMapping = {
           'spiermassa': 'spiermassa',
           'kracht_uithouding': 'uithouding',
@@ -435,23 +437,23 @@ export default function TrainingschemasPage() {
           'advanced': 'Advanced'
         };
         
-        // Filter by training goal
+        // Filter by training goal (primary filter)
         if (userTrainingProfile.training_goal) {
-          query = query.eq('training_goal', goalMapping[userTrainingProfile.training_goal]);
+          const mappedGoal = goalMapping[userTrainingProfile.training_goal];
+          console.log('🎯 Filtering by goal:', userTrainingProfile.training_goal, '->', mappedGoal);
+          query = query.eq('training_goal', mappedGoal);
         }
         
-        // Filter by equipment type
+        // Filter by equipment type (secondary filter)
         if (userTrainingProfile.equipment_type) {
-          query = query.eq('category', equipmentMapping[userTrainingProfile.equipment_type]);
+          const mappedEquipment = equipmentMapping[userTrainingProfile.equipment_type];
+          console.log('🏋️ Filtering by equipment:', userTrainingProfile.equipment_type, '->', mappedEquipment);
+          query = query.eq('category', mappedEquipment);
         }
         
-        // Filter by difficulty level
-        if (userTrainingProfile.experience_level) {
-          query = query.eq('difficulty', difficultyMapping[userTrainingProfile.experience_level]);
-        }
-        
-        // Filter by frequency (this would need to be added to the database schema)
-        // For now, we'll filter client-side
+        // Don't filter by difficulty level initially - show all levels for the goal/equipment
+        // Users can choose a more advanced schema if they want
+        console.log('📊 Not filtering by difficulty to show more options');
       }
       
       const { data, error } = await query;
@@ -465,15 +467,22 @@ export default function TrainingschemasPage() {
       
       // Client-side filtering for frequency if user profile exists
       if (userTrainingProfile) {
+        console.log('🔄 Client-side filtering for frequency:', userTrainingProfile.training_frequency);
+        
+        // Show schemas that match the user's frequency OR are close to it
         filteredSchemas = filteredSchemas.filter(schema => {
           // Extract frequency from schema name (e.g., "3x Split Training")
           const frequencyMatch = schema.name.match(/(\d+)x/);
           if (frequencyMatch) {
             const schemaFrequency = parseInt(frequencyMatch[1]);
-            return schemaFrequency === userTrainingProfile.training_frequency;
+            // Allow exact match or close frequencies (±1)
+            const frequencyDiff = Math.abs(schemaFrequency - userTrainingProfile.training_frequency);
+            return frequencyDiff <= 1;
           }
-          return true;
+          return true; // Include schemas without frequency in name
         });
+        
+        console.log('📊 Filtered schemas count:', filteredSchemas.length);
       }
       
       setAvailableSchemas(filteredSchemas);
@@ -508,20 +517,22 @@ export default function TrainingschemasPage() {
         'advanced': 'Advanced'
       };
       
-      // Filter by training goal
+      // Filter by training goal (primary filter)
       if (profile.training_goal) {
-        query = query.eq('training_goal', goalMapping[profile.training_goal]);
+        const mappedGoal = goalMapping[profile.training_goal];
+        console.log('🎯 Filtering by goal:', profile.training_goal, '->', mappedGoal);
+        query = query.eq('training_goal', mappedGoal);
       }
       
-      // Filter by equipment type
+      // Filter by equipment type (secondary filter)
       if (profile.equipment_type) {
-        query = query.eq('category', equipmentMapping[profile.equipment_type]);
+        const mappedEquipment = equipmentMapping[profile.equipment_type];
+        console.log('🏋️ Filtering by equipment:', profile.equipment_type, '->', mappedEquipment);
+        query = query.eq('category', mappedEquipment);
       }
       
-      // Filter by difficulty level
-      if (profile.experience_level) {
-        query = query.eq('difficulty', difficultyMapping[profile.experience_level]);
-      }
+      // Don't filter by difficulty level initially - show all levels for the goal/equipment
+      console.log('📊 Not filtering by difficulty to show more options');
       
       const { data, error } = await query;
       
@@ -532,16 +543,21 @@ export default function TrainingschemasPage() {
       
       let filteredSchemas = data || [];
       
-      // Client-side filtering for frequency
+      // Client-side filtering for frequency (less strict)
+      console.log('🔄 Client-side filtering for frequency:', profile.training_frequency);
       filteredSchemas = filteredSchemas.filter(schema => {
         // Extract frequency from schema name (e.g., "3x Split Training")
         const frequencyMatch = schema.name.match(/(\d+)x/);
         if (frequencyMatch) {
           const schemaFrequency = parseInt(frequencyMatch[1]);
-          return schemaFrequency === profile.training_frequency;
+          // Allow exact match or close frequencies (±1)
+          const frequencyDiff = Math.abs(schemaFrequency - profile.training_frequency);
+          return frequencyDiff <= 1;
         }
-        return true;
+        return true; // Include schemas without frequency in name
       });
+      
+      console.log('📊 Filtered schemas count:', filteredSchemas.length);
       
       setAvailableSchemas(filteredSchemas);
       console.log('✅ Training schemas loaded:', filteredSchemas.length, 'schemas found');
@@ -1048,6 +1064,26 @@ export default function TrainingschemasPage() {
                   <h3 className="mt-2 text-sm font-medium text-gray-300">Geen trainingsschemas beschikbaar</h3>
                   <p className="mt-1 text-sm text-gray-400">
                     Er zijn momenteel geen actieve trainingsschemas beschikbaar.
+                  </p>
+                </div>
+              )}
+
+              {/* Continue to Voedingsplannen Button */}
+              {availableSchemas.length > 0 && (
+                <div className="mt-8 text-center">
+                  <button
+                    onClick={() => {
+                      if (isOnboarding) {
+                        completeStep(3);
+                      }
+                      window.location.href = '/dashboard/voedingsplannen';
+                    }}
+                    className="px-8 py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold"
+                  >
+                    Doorgaan naar Voedingsplannen →
+                  </button>
+                  <p className="mt-2 text-sm text-gray-400">
+                    Je kunt later altijd terugkomen om je trainingsschema te wijzigen
                   </p>
                 </div>
               )}
