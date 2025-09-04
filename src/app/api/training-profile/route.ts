@@ -4,6 +4,15 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
+const getSupabaseAdminClient = () => {
+  return createClient(supabaseUrl, supabaseKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
+};
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -24,7 +33,8 @@ export async function GET(request: Request) {
     let actualUserId = userId;
     if (userId.includes('@')) {
       try {
-        const { data: userData, error: userError } = await supabase.auth.admin.getUserByEmail(userId);
+        const supabaseAdmin = getSupabaseAdminClient();
+        const { data: userData, error: userError } = await supabaseAdmin.auth.admin.getUserByEmail(userId);
         if (userError || !userData.user) {
           console.log('❌ User not found by email:', userId);
           return NextResponse.json({
@@ -102,7 +112,8 @@ export async function POST(request: Request) {
     if (userId.includes('@')) {
       try {
         console.log('🔍 Looking up user by email:', userId);
-        const { data: userData, error: userError } = await supabase.auth.admin.getUserByEmail(userId);
+        const supabaseAdmin = getSupabaseAdminClient();
+        const { data: userData, error: userError } = await supabaseAdmin.auth.admin.getUserByEmail(userId);
         console.log('📥 User lookup result:', { userData, userError });
         
         if (userError) {
