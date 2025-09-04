@@ -416,10 +416,13 @@ export default function VoedingsplannenPage() {
             >
               <div className="text-center mb-8">
                 <h2 className="text-3xl font-bold text-white mb-4">
-                  Bereken je Dagelijkse Behoefte
+                  {userNutritionProfile ? 'Update je Dagelijkse Behoefte' : 'Bereken je Dagelijkse Behoefte'}
                 </h2>
                 <p className="text-gray-300 text-lg">
-                  Voor we je voedingsplannen kunnen tonen, moeten we eerst je dagelijkse voedingsbehoeften berekenen.
+                  {userNutritionProfile 
+                    ? 'Pas je gegevens aan om je dagelijkse voedingsbehoeften opnieuw te berekenen.'
+                    : 'Voor we je voedingsplannen kunnen tonen, moeten we eerst je dagelijkse voedingsbehoeften berekenen.'
+                  }
                 </p>
               </div>
 
@@ -475,7 +478,7 @@ export default function VoedingsplannenPage() {
                     onClick={calculateNutrition}
                     className="px-8 py-4 bg-[#8BAE5A] text-[#232D1A] rounded-xl hover:bg-[#B6C948] transition-colors font-bold text-lg"
                   >
-                    Bereken Mijn Dagelijkse Behoefte
+                    {userNutritionProfile ? 'Update Mijn Dagelijkse Behoefte' : 'Bereken Mijn Dagelijkse Behoefte'}
                   </button>
                 </div>
               </div>
@@ -507,7 +510,16 @@ export default function VoedingsplannenPage() {
                     Jouw Dagelijkse Behoefte
                   </h3>
                   <button
-                    onClick={() => setShowRequiredIntake(true)}
+                    onClick={() => {
+                      // Pre-fill calculator with existing data
+                      setCalculatorData({
+                        age: userNutritionProfile.age?.toString() || '',
+                        weight: userNutritionProfile.weight?.toString() || '',
+                        height: userNutritionProfile.height?.toString() || '',
+                        goal: userNutritionProfile.goal || ''
+                      });
+                      setShowRequiredIntake(true);
+                    }}
                     className="text-[#8BAE5A] hover:text-[#B6C948] text-sm font-semibold transition-colors"
                   >
                     ✏️ Bewerken
