@@ -43,7 +43,9 @@ interface DayPlan {
   ontbijt: Meal;
   lunch: Meal;
   diner: Meal;
-  snack?: Meal; // Optional snack
+  ontbijt_snack?: Meal; // Optional morning snack
+  lunch_snack?: Meal; // Optional lunch snack
+  diner_snack?: Meal; // Optional evening snack
   dailyTotals: MealNutrition;
 }
 
@@ -84,7 +86,9 @@ const MEAL_TYPES_NL = {
   ontbijt: 'Ontbijt',
   lunch: 'Lunch',
   diner: 'Diner',
-  snack: 'Snack'
+  ontbijt_snack: 'Ochtend Snack',
+  lunch_snack: 'Lunch Snack',
+  diner_snack: 'Avond Snack'
 };
 
 export default function DynamicPlanView({ planId, planName, userId, onBack }: DynamicPlanViewProps) {
@@ -202,7 +206,7 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
       let dailyCarbs = 0;
       let dailyFat = 0;
       
-      ['ontbijt', 'lunch', 'diner', 'snack'].forEach(mealType => {
+      ['ontbijt', 'lunch', 'diner', 'ontbijt_snack', 'lunch_snack', 'diner_snack'].forEach(mealType => {
         const meal = dayPlan[mealType];
         if (meal) {
           dailyCalories += meal.nutrition.calories;
@@ -758,102 +762,147 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
           </div>
 
           {/* Meals */}
-          {Object.entries(MEAL_TYPES_NL).map(([mealType, mealName]) => {
+          {['ontbijt', 'lunch', 'diner'].map((mealType) => {
             const meal = selectedDayPlan[mealType];
-            
-            // Skip snack if it doesn't exist and is empty
-            if (mealType === 'snack' && (!meal || meal.ingredients.length === 0)) {
-              return null;
-            }
+            const snackType = `${mealType}_snack` as keyof DayPlan;
+            const snack = selectedDayPlan[snackType];
             
             return (
-              <div key={mealType} className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23]">
-                <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-lg font-bold text-white flex items-center">
-                    <ClockIcon className="w-5 h-5 text-[#8BAE5A] mr-2" />
-                    {mealName}
-                    <span className="ml-4 text-sm text-gray-400">
-                      {meal.nutrition.calories} kcal
-                    </span>
-                  </h4>
-                  <button
-                    onClick={() => handleEditMeal(selectedDay, mealType)}
-                    className="flex items-center gap-2 px-3 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors text-sm font-semibold"
-                  >
-                    <PencilIcon className="w-4 h-4" />
-                    Bewerken
-                  </button>
-                </div>
-                
-                {/* Ingredients */}
-                <div className="space-y-3 mb-4">
-                  {meal.ingredients.map((ingredient, index) => (
-                    <div key={index} className="flex items-center justify-between bg-[#181F17] rounded-lg p-3">
-                      <span className="text-white font-medium">{ingredient.name}</span>
-                      <span className="text-[#8BAE5A] font-semibold">
-                        {formatAmount(ingredient.amount, ingredient.unit)}
+              <div key={mealType} className="space-y-4">
+                {/* Main Meal */}
+                <div className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23]">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-lg font-bold text-white flex items-center">
+                      <ClockIcon className="w-5 h-5 text-[#8BAE5A] mr-2" />
+                      {MEAL_TYPES_NL[mealType as keyof typeof MEAL_TYPES_NL]}
+                      <span className="ml-4 text-sm text-gray-400">
+                        {meal.nutrition.calories} kcal
                       </span>
+                    </h4>
+                    <button
+                      onClick={() => handleEditMeal(selectedDay, mealType)}
+                      className="flex items-center gap-2 px-3 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors text-sm font-semibold"
+                    >
+                      <PencilIcon className="w-4 h-4" />
+                      Bewerken
+                    </button>
+                  </div>
+                  
+                  {/* Ingredients */}
+                  <div className="space-y-3 mb-4">
+                    {meal.ingredients.map((ingredient, index) => (
+                      <div key={index} className="flex items-center justify-between bg-[#181F17] rounded-lg p-3">
+                        <span className="text-white font-medium">{ingredient.name}</span>
+                        <span className="text-[#8BAE5A] font-semibold">
+                          {formatAmount(ingredient.amount, ingredient.unit)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* Meal nutrition */}
+                  <div className="grid grid-cols-4 gap-3 text-sm">
+                    <div className="text-center">
+                      <p className="text-gray-400">Kcal</p>
+                      <p className="text-white font-semibold">{meal.nutrition.calories}</p>
                     </div>
-                  ))}
-                </div>
-                
-                {/* Meal nutrition */}
-                <div className="grid grid-cols-4 gap-3 text-sm">
-                  <div className="text-center">
-                    <p className="text-gray-400">Kcal</p>
-                    <p className="text-white font-semibold">{meal.nutrition.calories}</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-gray-400">Eiwit</p>
-                    <p className="text-white font-semibold">{meal.nutrition.protein}g</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-gray-400">KH</p>
-                    <p className="text-white font-semibold">{meal.nutrition.carbs}g</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-gray-400">Vet</p>
-                    <p className="text-white font-semibold">{meal.nutrition.fat}g</p>
+                    <div className="text-center">
+                      <p className="text-gray-400">Eiwit</p>
+                      <p className="text-white font-semibold">{meal.nutrition.protein}g</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-gray-400">KH</p>
+                      <p className="text-white font-semibold">{meal.nutrition.carbs}g</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-gray-400">Vet</p>
+                      <p className="text-white font-semibold">{meal.nutrition.fat}g</p>
+                    </div>
                   </div>
                 </div>
+
+                {/* Snack for this meal */}
+                {snack && snack.ingredients.length > 0 ? (
+                  <div className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23] ml-4">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-lg font-bold text-white flex items-center">
+                        <ClockIcon className="w-5 h-5 text-[#8BAE5A] mr-2" />
+                        {MEAL_TYPES_NL[snackType as keyof typeof MEAL_TYPES_NL]}
+                        <span className="ml-4 text-sm text-gray-400">
+                          {snack.nutrition.calories} kcal
+                        </span>
+                      </h4>
+                      <button
+                        onClick={() => handleEditMeal(selectedDay, snackType)}
+                        className="flex items-center gap-2 px-3 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors text-sm font-semibold"
+                      >
+                        <PencilIcon className="w-4 h-4" />
+                        Bewerken
+                      </button>
+                    </div>
+                    
+                    {/* Snack Ingredients */}
+                    <div className="space-y-3 mb-4">
+                      {snack.ingredients.map((ingredient, index) => (
+                        <div key={index} className="flex items-center justify-between bg-[#181F17] rounded-lg p-3">
+                          <span className="text-white font-medium">{ingredient.name}</span>
+                          <span className="text-[#8BAE5A] font-semibold">
+                            {formatAmount(ingredient.amount, ingredient.unit)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {/* Snack nutrition */}
+                    <div className="grid grid-cols-4 gap-3 text-sm">
+                      <div className="text-center">
+                        <p className="text-gray-400">Kcal</p>
+                        <p className="text-white font-semibold">{snack.nutrition.calories}</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-gray-400">Eiwit</p>
+                        <p className="text-white font-semibold">{snack.nutrition.protein}g</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-gray-400">KH</p>
+                        <p className="text-white font-semibold">{snack.nutrition.carbs}g</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-gray-400">Vet</p>
+                        <p className="text-white font-semibold">{snack.nutrition.fat}g</p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  /* Add Snack Button */
+                  <div className="bg-[#232D1A] rounded-2xl p-4 border-2 border-dashed border-[#3A4D23] hover:border-[#8BAE5A]/50 transition-colors ml-4">
+                    <div className="text-center">
+                      <button
+                        onClick={() => {
+                          // Create empty snack meal
+                          const emptySnack = {
+                            ingredients: [],
+                            nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0 }
+                          };
+                          
+                          // Update plan data
+                          const updatedPlanData = { ...planData };
+                          updatedPlanData.weekPlan[selectedDay][snackType] = emptySnack;
+                          setPlanData(updatedPlanData);
+                          
+                          // Open meal editor
+                          handleEditMeal(selectedDay, snackType);
+                        }}
+                        className="px-4 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold text-sm"
+                      >
+                        + {MEAL_TYPES_NL[snackType as keyof typeof MEAL_TYPES_NL]} toevoegen
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })}
-
-          {/* Add Snack Button */}
-          {(!selectedDayPlan.snack || selectedDayPlan.snack.ingredients.length === 0) && (
-            <div className="bg-[#232D1A] rounded-2xl p-6 border-2 border-dashed border-[#3A4D23] hover:border-[#8BAE5A]/50 transition-colors">
-              <div className="text-center">
-                <h4 className="text-lg font-bold text-white mb-2 flex items-center justify-center">
-                  <ClockIcon className="w-5 h-5 text-[#8BAE5A] mr-2" />
-                  Snack
-                </h4>
-                <p className="text-gray-400 text-sm mb-4">
-                  Voeg een optionele snack toe aan je dag
-                </p>
-                <button
-                  onClick={() => {
-                    // Create empty snack meal
-                    const emptySnack = {
-                      ingredients: [],
-                      nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0 }
-                    };
-                    
-                    // Update plan data
-                    const updatedPlanData = { ...planData };
-                    updatedPlanData.weekPlan[selectedDay].snack = emptySnack;
-                    setPlanData(updatedPlanData);
-                    
-                    // Open meal editor
-                    handleEditMeal(selectedDay, 'snack');
-                  }}
-                  className="px-4 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold"
-                >
-                  + Snack toevoegen
-                </button>
-              </div>
-            </div>
-          )}
         </motion.div>
       </AnimatePresence>
 
