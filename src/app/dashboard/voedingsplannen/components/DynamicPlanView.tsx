@@ -368,6 +368,45 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
     }
   };
 
+  const handleSelectPlan = async () => {
+    if (!planData) return;
+    
+    try {
+      console.log('🎯 Selecting plan for user:', userId, 'plan:', planId);
+      
+      const response = await fetch('/api/nutrition-plan-select', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+          planId: planData.planId
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to select plan');
+      }
+
+      const data = await response.json();
+      
+      if (data.success) {
+        toast.success(`🎉 ${planData.planName} is nu je actieve voedingsplan!`);
+        // Optionally go back to overview to show the updated selection
+        setTimeout(() => {
+          onBack();
+        }, 1500);
+      } else {
+        throw new Error(data.error || 'Failed to select plan');
+      }
+      
+    } catch (error) {
+      console.error('Error selecting plan:', error);
+      toast.error('Fout bij selecteren van plan');
+    }
+  };
+
   const getCalorieWarning = (dailyCalories: number, targetCalories: number) => {
     const difference = dailyCalories - targetCalories;
     const absoDifference = Math.abs(difference);
@@ -465,25 +504,36 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
           </div>
         </div>
         
-        {/* Save Button */}
-        {hasUnsavedChanges && (
+        {/* Action Buttons */}
+        <div className="flex items-center gap-3">
+          {/* Select Plan Button */}
           <button
-            onClick={handleSavePlan}
-            disabled={isSaving}
-            className="flex items-center gap-2 px-6 py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={handleSelectPlan}
+            className="flex items-center gap-2 px-6 py-3 bg-[#3A4D23] text-white rounded-lg hover:bg-[#4A5D33] transition-colors font-semibold"
           >
-            {isSaving ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#232D1A]"></div>
-                Opslaan...
-              </>
-            ) : (
-              <>
-                💾 Plan Opslaan
-              </>
-            )}
+            🎯 Selecteer dit plan
           </button>
-        )}
+          
+          {/* Save Button */}
+          {hasUnsavedChanges && (
+            <button
+              onClick={handleSavePlan}
+              disabled={isSaving}
+              className="flex items-center gap-2 px-6 py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSaving ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#232D1A]"></div>
+                  Opslaan...
+                </>
+              ) : (
+                <>
+                  💾 Plan Opslaan
+                </>
+              )}
+            </button>
+          )}
+        </div>
       </div>
 
       {/* User Daily Needs */}
