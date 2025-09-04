@@ -187,7 +187,7 @@ export default function TrainingschemasPage() {
       }
 
       const profileData = {
-        user_id: user.id,
+        user_id: user.id, // This should be a valid UUID string
         training_goal: calculatorData.training_goal,
         training_frequency: calculatorData.training_frequency,
         experience_level: calculatorData.experience_level,
@@ -197,15 +197,24 @@ export default function TrainingschemasPage() {
       
       console.log('📤 Sending profile data to database:', profileData);
 
+      console.log('🔄 Attempting database upsert...');
       const { data, error } = await supabase
         .from('training_profiles')
         .upsert(profileData)
         .select()
         .single();
 
+      console.log('📊 Database response:', { data, error });
+
       if (error) {
         console.error('❌ Error saving training profile:', error);
-        toast.error('Fout bij opslaan van trainingsprofiel');
+        console.error('❌ Error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        toast.error(`Fout bij opslaan van trainingsprofiel: ${error.message}`);
         return;
       }
 
@@ -221,7 +230,8 @@ export default function TrainingschemasPage() {
       
     } catch (error) {
       console.error('❌ Error in saveTrainingProfile:', error);
-      toast.error('Er is een fout opgetreden');
+      console.error('❌ Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+      toast.error(`Er is een fout opgetreden: ${error instanceof Error ? error.message : 'Onbekende fout'}`);
     }
   };
 
