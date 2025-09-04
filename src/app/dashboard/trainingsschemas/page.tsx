@@ -175,9 +175,9 @@ export default function TrainingschemasPage() {
     }
   };
 
-  const saveTrainingProfile = async () => {
+    const saveTrainingProfile = async () => {
     try {
-            console.log('💾 Saving training profile with data:', calculatorData);
+      console.log('💾 Saving training profile with data:', calculatorData);
       console.log('👤 Current user:', user);
       console.log('🆔 User ID:', user?.id, 'Type:', typeof user?.id);
 
@@ -186,8 +186,31 @@ export default function TrainingschemasPage() {
         return;
       }
 
+      // Check if user.id is an email and convert to UUID if needed
+      let actualUserId = user.id;
+      if (user.id.includes('@')) {
+        console.log('🔍 User ID is email, looking up UUID...');
+        try {
+          const response = await fetch('/api/auth/get-user-uuid', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: user.id })
+          });
+          
+          if (response.ok) {
+            const { uuid } = await response.json();
+            actualUserId = uuid;
+            console.log('✅ Found UUID for email:', actualUserId);
+          } else {
+            console.log('❌ Failed to get UUID for email, using email as fallback');
+          }
+        } catch (error) {
+          console.log('❌ Error getting UUID for email:', error);
+        }
+      }
+
       const profileData = {
-        user_id: user.id, // This should be a valid UUID string
+        user_id: actualUserId,
         training_goal: calculatorData.training_goal,
         training_frequency: calculatorData.training_frequency,
         experience_level: calculatorData.experience_level,
