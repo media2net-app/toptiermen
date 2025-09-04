@@ -32,7 +32,7 @@ interface WorkoutSchema {
   id: string;
   name: string;
   frequency: number;
-  style: 'gym' | 'bodyweight';
+  style: string;
   description: string;
   days: {
     day: number;
@@ -231,7 +231,7 @@ export default function TrainingschemasPage() {
       
       // Complete onboarding step if needed
       if (isOnboarding && onboardingStep === 3) {
-        await completeStep(3, { selectedTrainingSchema: schemaId });
+        await completeStep(3);
       }
       
     } catch (error) {
@@ -258,9 +258,6 @@ export default function TrainingschemasPage() {
       <PageLayout 
         title="Trainingsschemas" 
         subtitle="Kies en beheer je trainingsschemas"
-        breadcrumbItems={[
-          { label: 'Trainingsschemas', isCurrent: true }
-        ]}
       >
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
