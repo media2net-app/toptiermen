@@ -522,10 +522,8 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
       if (selectResult.success) {
         toast.success(`🎉 ${planData.planName} is nu je actieve voedingsplan!`);
         setHasUnsavedChanges(false); // Mark as saved
-        // Optionally go back to overview to show the updated selection
-        setTimeout(() => {
-          onBack();
-        }, 1500);
+        // Go back to overview immediately to show the updated selection
+        onBack();
       } else {
         throw new Error(selectResult.error || 'Failed to select plan');
       }
@@ -533,6 +531,45 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
     } catch (error) {
       console.error('Error selecting plan:', error);
       toast.error('Fout bij selecteren van plan');
+    }
+  };
+
+  const handleRestorePlan = async () => {
+    if (!planData) return;
+    
+    try {
+      console.log('🔄 Restoring original plan for user:', userId, 'plan:', planId);
+      
+      // Delete the customized plan data to restore to original
+      const deleteResponse = await fetch('/api/nutrition-plan-save', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+          planId: planData.planId
+        }),
+      });
+
+      if (!deleteResponse.ok) {
+        throw new Error('Failed to restore plan');
+      }
+
+      const deleteResult = await deleteResponse.json();
+      
+      if (deleteResult.success) {
+        toast.success('Plan hersteld naar originele versie!');
+        // Reload the plan to show the original version
+        await fetchDynamicPlan();
+        setHasUnsavedChanges(false);
+      } else {
+        throw new Error(deleteResult.error || 'Failed to restore plan');
+      }
+      
+    } catch (error) {
+      console.error('Error restoring plan:', error);
+      toast.error('Fout bij herstellen van plan');
     }
   };
 
@@ -635,10 +672,18 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
         
         {/* Action Buttons */}
         <div className="flex items-center gap-3">
+          {/* Restore Plan Button */}
+          <button
+            onClick={handleRestorePlan}
+            className="flex items-center gap-2 px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-semibold"
+          >
+            🔄 Herstel plan
+          </button>
+          
           {/* Select Plan Button */}
           <button
             onClick={handleSelectPlan}
-            className="flex items-center gap-2 px-6 py-3 bg-[#3A4D23] text-white rounded-lg hover:bg-[#4A5D33] transition-colors font-semibold"
+            className="flex items-center gap-2 px-6 py-3 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold"
           >
             🎯 Selecteer dit plan
           </button>
