@@ -33,17 +33,24 @@ export async function POST(request: Request) {
     let actualUserId = userId;
     if (userId.includes('@')) {
       try {
-        const supabaseAdmin = getSupabaseAdminClient();
-        const { data: userData, error: userError } = await supabaseAdmin.auth.admin.getUserByEmail(userId);
-        if (userError || !userData.user) {
-          console.log('❌ User not found by email:', userId);
+        // Use the existing get-user-uuid API endpoint
+        const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/auth/get-user-uuid`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: userId })
+        });
+        
+        if (response.ok) {
+          const { uuid } = await response.json();
+          actualUserId = uuid;
+          console.log('✅ Converted email to UUID for schema selection:', actualUserId);
+        } else {
+          console.log('❌ Failed to convert email to UUID');
           return NextResponse.json({ 
             success: false, 
             error: 'User not found' 
           }, { status: 404 });
         }
-        actualUserId = userData.user.id;
-        console.log('✅ Converted email to UUID for schema selection:', actualUserId);
       } catch (error) {
         console.log('❌ Error converting email to UUID for schema selection:', error);
         return NextResponse.json({ 
