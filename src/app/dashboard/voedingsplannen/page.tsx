@@ -226,7 +226,10 @@ export default function VoedingsplannenPage() {
   };
 
   const handleBackFromDynamicPlan = () => {
+    console.log('🔄 Going back from dynamic plan view');
     setViewingDynamicPlan(null);
+    // Refresh the active plan selection to show the updated selection
+    checkUserNutritionProfile();
   };
 
   const calculateNutrition = () => {

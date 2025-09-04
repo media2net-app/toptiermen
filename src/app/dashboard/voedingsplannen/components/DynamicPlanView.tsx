@@ -547,6 +547,7 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
         toast.success(`🎉 ${planData.planName} is nu je actieve voedingsplan!`);
         setHasUnsavedChanges(false); // Mark as saved
         // Go back to overview immediately to show the updated selection
+        console.log('✅ Plan selected successfully, calling onBack() to return to overview');
         onBack();
       } else {
         throw new Error(selectResult.error || 'Failed to select plan');
