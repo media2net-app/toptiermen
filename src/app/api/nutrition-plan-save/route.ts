@@ -29,6 +29,34 @@ export async function POST(request: NextRequest) {
 
     let data, error;
 
+    // Extract nutrition goals from the customized plan
+    const nutritionGoals = customizedPlan?.userProfile ? {
+      calories: customizedPlan.userProfile.targetCalories || 2000,
+      protein: customizedPlan.userProfile.targetProtein || 150,
+      carbs: customizedPlan.userProfile.targetCarbs || 200,
+      fat: customizedPlan.userProfile.targetFat || 70
+    } : {
+      calories: 2000,
+      protein: 150,
+      carbs: 200,
+      fat: 70
+    };
+
+    // Extract user data from the customized plan
+    const userData = customizedPlan?.userProfile ? {
+      age: customizedPlan.userProfile.age || 30,
+      weight: customizedPlan.userProfile.weight || 70,
+      height: customizedPlan.userProfile.height || 175,
+      goal: customizedPlan.userProfile.goal || 'maintenance',
+      activityLevel: 'moderate'
+    } : {
+      age: 30,
+      weight: 70,
+      height: 175,
+      goal: 'maintenance',
+      activityLevel: 'moderate'
+    };
+
     if (existingRecord) {
       // Update existing record
       console.log('📝 Updating existing record for user:', userId, 'plan:', planId);
@@ -36,6 +64,8 @@ export async function POST(request: NextRequest) {
         .from('user_nutrition_plans')
         .update({
           week_plan: customizedPlan, // Store customized plan in week_plan column
+          nutrition_goals: nutritionGoals, // Add required nutrition_goals
+          user_data: userData, // Add required user_data
           updated_at: new Date().toISOString()
         })
         .eq('user_id', userId)
@@ -53,6 +83,8 @@ export async function POST(request: NextRequest) {
           user_id: userId,
           plan_type: planId, // Use plan_type instead of plan_id
           week_plan: customizedPlan, // Store customized plan in week_plan column
+          nutrition_goals: nutritionGoals, // Add required nutrition_goals
+          user_data: userData, // Add required user_data
           updated_at: new Date().toISOString()
         })
         .select();
