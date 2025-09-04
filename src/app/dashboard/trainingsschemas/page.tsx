@@ -239,36 +239,27 @@ export default function TrainingschemasPage() {
       
       console.log('🔍 Fetching training profile for user:', user.email);
       
-      // Check if user.id is an email and convert to UUID if needed
-      let actualUserId = user.id;
-      if (user.id.includes('@')) {
-        try {
-          const response = await fetch('/api/auth/get-user-uuid', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: user.id })
-          });
-          
-          if (response.ok) {
-            const { uuid } = await response.json();
-            actualUserId = uuid;
-            console.log('✅ Found UUID for training profile:', actualUserId);
-          }
-        } catch (error) {
-          console.log('❌ Error getting UUID for training profile:', error);
-        }
-      }
-      
-      const response = await fetch(`/api/training-profile?userId=${actualUserId}`);
+      // Use user.email directly since our API now handles email as user_id
+      const response = await fetch(`/api/training-profile?userId=${user.email}`);
       
       if (response.ok) {
         const data = await response.json();
         if (data.success && data.profile) {
           setUserTrainingProfile(data.profile);
           console.log('✅ Training profile loaded:', data.profile);
+          
+          // Also update calculator data to show the profile
+          setCalculatorData({
+            training_goal: data.profile.training_goal,
+            training_frequency: data.profile.training_frequency.toString(),
+            experience_level: data.profile.experience_level,
+            equipment_type: data.profile.equipment_type
+          });
         } else {
           console.log('ℹ️ No training profile found');
         }
+      } else {
+        console.log('❌ Failed to fetch training profile:', response.status);
       }
     } catch (error) {
       console.error('Error fetching training profile:', error);
@@ -400,11 +391,13 @@ export default function TrainingschemasPage() {
   // Effects
   useEffect(() => {
     if (user?.id) {
+      console.log('🔄 User changed, fetching training profile for:', user.email);
       fetchUserTrainingProfile();
     }
   }, [user?.id]);
 
   useEffect(() => {
+    console.log('🔄 UserTrainingProfile changed:', userTrainingProfile);
     fetchTrainingSchemas();
   }, [userTrainingProfile]);
 
