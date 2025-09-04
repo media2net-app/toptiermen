@@ -29,36 +29,8 @@ export async function GET(request: Request) {
     
     console.log('🔍 Fetching training profile for user:', userId);
     
-    // Check if userId is an email and convert to UUID if needed
-    let actualUserId = userId;
-    if (userId.includes('@')) {
-      try {
-        // Use the existing get-user-uuid API endpoint
-        const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/auth/get-user-uuid`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: userId })
-        });
-        
-        if (response.ok) {
-          const { uuid } = await response.json();
-          actualUserId = uuid;
-          console.log('✅ Converted email to UUID:', actualUserId);
-        } else {
-          console.log('❌ Failed to convert email to UUID');
-          return NextResponse.json({
-            success: true,
-            profile: null
-          });
-        }
-      } catch (error) {
-        console.log('❌ Error converting email to UUID:', error);
-        return NextResponse.json({
-          success: true,
-          profile: null
-        });
-      }
-    }
+    // Use userId directly (now supports email as TEXT)
+    const actualUserId = userId;
     
     const { data, error } = await supabase
       .from('training_profiles')
@@ -124,7 +96,7 @@ export async function POST(request: Request) {
     console.log('💾 Using user identifier:', actualUserId);
     
     const profileData = {
-      user_id: actualUserId,
+      user_id: emailToLookup, // Store email directly as user_id (TEXT field)
       training_goal,
       training_frequency,
       experience_level,
