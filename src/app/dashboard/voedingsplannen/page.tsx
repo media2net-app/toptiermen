@@ -597,9 +597,9 @@ export default function VoedingsplannenPage() {
                         <div className="space-y-3">
                           {selectedNutritionPlan === plan.plan_id && (
                             <div className="flex justify-center">
-                              <div className="inline-flex items-center px-3 py-1 bg-[#8BAE5A]/20 border border-[#8BAE5A] text-[#8BAE5A] rounded-lg text-sm">
+                              <div className="inline-flex items-center px-3 py-1 bg-[#8BAE5A]/20 border border-[#8BAE5A] text-[#8BAE5A] rounded-lg text-sm font-semibold">
                                 <CheckIcon className="w-4 h-4 mr-1" />
-                                Actief
+                                Geselecteerd plan
                               </div>
                             </div>
                           )}
