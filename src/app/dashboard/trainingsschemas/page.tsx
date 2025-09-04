@@ -205,29 +205,28 @@ export default function TrainingschemasPage() {
       const mappedEquipment = equipmentMapping[profile.equipment_type];
       const equipmentMatch = schema.category === mappedEquipment;
       
-      // Filter by training frequency - only show schemas that match or are compatible
+      // Filter by training frequency - EXACT match only
       let frequencyMatch = true;
       if (schema.training_frequency) {
         const schemaFreq = parseInt(schema.training_frequency);
         const userFreq = profile.training_frequency;
         
-        // Allow schemas that match exactly or are within ±1 day
-        frequencyMatch = Math.abs(schemaFreq - userFreq) <= 1;
-        
-        // Special case: if user wants 6x per week, don't show 2x per week schemas
-        if (userFreq === 6 && schemaFreq <= 2) {
-          frequencyMatch = false;
-        }
-        
-        // Special case: if user wants 3x per week, don't show 6x per week schemas
-        if (userFreq === 3 && schemaFreq >= 5) {
-          frequencyMatch = false;
-        }
+        // Only show schemas that match EXACTLY
+        frequencyMatch = schemaFreq === userFreq;
       }
       
-      console.log(`📋 Schema "${schema.name}": goal=${schema.training_goal} (${goalMatch}), category=${schema.category} (${equipmentMatch}), frequency=${schema.training_frequency} (${frequencyMatch})`);
+      // Filter by difficulty level - EXACT match only
+      const difficultyMapping = {
+        'beginner': 'Beginner',
+        'intermediate': 'Intermediate', 
+        'advanced': 'Advanced'
+      };
+      const mappedDifficulty = difficultyMapping[profile.experience_level];
+      const difficultyMatch = schema.difficulty === mappedDifficulty;
       
-      return goalMatch && equipmentMatch && frequencyMatch;
+      console.log(`📋 Schema "${schema.name}": goal=${schema.training_goal} (${goalMatch}), category=${schema.category} (${equipmentMatch}), frequency=${schema.training_frequency} (${frequencyMatch}), difficulty=${schema.difficulty} (${difficultyMatch})`);
+      
+      return goalMatch && equipmentMatch && frequencyMatch && difficultyMatch;
     });
     
     console.log('✅ Filtered schemas:', filtered.length);
