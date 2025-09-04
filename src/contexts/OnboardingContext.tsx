@@ -72,21 +72,21 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       id: 3,
       title: 'Trainingsschema kiezen',
       description: 'Selecteer je workout plan',
-      targetPage: '/dashboard/trainingscentrum',
-      targetMenuLabel: 'Trainingscentrum',
+      targetPage: '/dashboard/trainingsschemas',
+      targetMenuLabel: 'Trainingsschemas',
       completed: false,
       icon: '💪',
       instructions: 'Bekijk de beschikbare trainingsschema\'s en selecteer er één die bij je past'
     },
     {
       id: 4,
-      title: 'Voeding & Challenge',
-      description: 'Voedingsplan en uitdaging',
-      targetPage: '/dashboard/trainingscentrum',
-      targetMenuLabel: 'Trainingscentrum',
+      title: 'Voedingsplan kiezen',
+      description: 'Selecteer je voedingsplan',
+      targetPage: '/dashboard/voedingsplannen',
+      targetMenuLabel: 'Voedingsplannen',
       completed: false,
       icon: '🥗',
-      instructions: 'Selecteer je voedingsplan en een challenge'
+      instructions: 'Vul je dagelijkse behoefte in en selecteer een voedingsplan dat bij je doel past'
     },
     {
       id: 5,
@@ -216,8 +216,10 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     switch (currentPage) {
       case '/dashboard/mijn-missies':
         return 'Voeg je eerste missies toe door op "Nieuwe Missie Toevoegen" te klikken of gebruik de "Missie Bibliotheek"';
-      case '/dashboard/trainingscentrum':
+      case '/dashboard/trainingsschemas':
         return 'Bekijk de beschikbare trainingsschema\'s en selecteer er één die bij je past';
+      case '/dashboard/voedingsplannen':
+        return 'Vul je dagelijkse behoefte in en selecteer een voedingsplan dat bij je doel past';
       case '/dashboard/brotherhood/forum':
         return 'Maak je eerste forum post om je voor te stellen aan de community';
       default:

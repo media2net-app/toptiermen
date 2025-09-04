@@ -94,9 +94,13 @@ export const BREADCRUMB_CONFIGS = {
     parent: 'Finance & Business',
     parentHref: '/dashboard/finance-en-business',
   },
-  trainingscentrum: {
-    parent: 'Trainingscentrum',
-    parentHref: '/dashboard/trainingscentrum',
+  trainingsschemas: {
+    parent: 'Trainingsschemas',
+    parentHref: '/dashboard/trainingsschemas',
+  },
+  voedingsplannen: {
+    parent: 'Voedingsplannen',
+    parentHref: '/dashboard/voedingsplannen',
   },
   brotherhood: {
     parent: 'Brotherhood',

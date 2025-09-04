@@ -42,14 +42,14 @@ export default function OnboardingWidget({ isVisible, onComplete }: OnboardingWi
       title: 'Kies je Trainingsschema',
       description: 'Selecteer een trainingsschema dat bij je past',
       completed: false,
-      action: () => router.push('/dashboard/trainingscentrum'),
+      action: () => router.push('/dashboard/trainingsschemas'),
     },
     {
       id: 'nutrition',
       title: 'Kies je Voedingsplan',
       description: 'Selecteer een voedingsplan voor optimale prestaties',
       completed: false,
-      action: () => router.push('/dashboard/trainingscentrum'),
+      action: () => router.push('/dashboard/voedingsplannen'),
     },
     {
       id: 'challenge',
