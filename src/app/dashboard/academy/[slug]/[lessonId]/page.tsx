@@ -30,6 +30,295 @@ interface Lesson {
   module_id: string;
   order_index: number;
   status: string;
+  exam_questions?: ExamQuestion[];
+}
+
+interface ExamQuestion {
+  question: string;
+  options: string[];
+  correct_answer: number;
+  explanation: string;
+}
+
+// Exam Component
+function ExamComponent({ 
+  questions, 
+  lessonId, 
+  userId,
+  onCompletion 
+}: { 
+  questions: ExamQuestion[];
+  lessonId: string;
+  userId?: string;
+  onCompletion: (passed: boolean) => void;
+}) {
+  const [answers, setAnswers] = useState<(number | null)[]>(Array(questions.length).fill(null));
+  const [submitted, setSubmitted] = useState(false);
+  const [showResults, setShowResults] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const correctAnswers = answers.filter((answer, index) => 
+    answer === questions[index].correct_answer
+  ).length;
+  
+  const totalQuestions = questions.length;
+  const scorePercentage = Math.round((correctAnswers / totalQuestions) * 100);
+  const passed = scorePercentage >= 70; // 7/10 requirement
+  const allAnswered = !answers.includes(null);
+
+  const handleSubmit = async () => {
+    if (!allAnswered || !userId) return;
+    
+    setIsSubmitting(true);
+    try {
+      // Save exam result (create table if needed)
+      const { error } = await supabase
+        .from('user_exam_results')
+        .upsert({
+          user_id: userId,
+          lesson_id: lessonId,
+          answers: answers,
+          score: correctAnswers,
+          total_questions: totalQuestions,
+          passed: passed,
+          submitted_at: new Date().toISOString()
+        });
+
+      if (error) {
+        console.error('Error saving exam result:', error);
+      }
+
+      setSubmitted(true);
+      setShowResults(true);
+      onCompletion(passed);
+    } catch (error) {
+      console.error('Error submitting exam:', error);
+      // Still show results even if saving fails
+      setSubmitted(true);
+      setShowResults(true);
+      onCompletion(passed);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleRetake = () => {
+    setAnswers(Array(questions.length).fill(null));
+    setSubmitted(false);
+    setShowResults(false);
+  };
+
+  return (
+    <div className="mt-8 bg-[#181F17] rounded-xl p-6 border border-[#3A4D23]">
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-2xl font-bold text-[#8BAE5A]">Examen: Test je kennis</h3>
+        <div className="text-sm text-gray-400">
+          Slagingseis: 7/10 (70%)
+        </div>
+      </div>
+
+      <div className="mb-6 text-gray-300">
+        <p className="mb-2">📝 Je hebt {totalQuestions} vragen die je kennis testen.</p>
+        <p className="mb-2">🎯 Je moet minimaal 7 van de 10 vragen goed hebben om te slagen.</p>
+        <p className="mb-4">⏰ Je hebt onbeperkt tijd en kunt het examen opnieuw maken.</p>
+      </div>
+
+      {!showResults ? (
+        <>
+          {questions.map((question, index) => (
+            <div key={index} className="mb-6 p-4 bg-[#232D1A] rounded-lg border border-[#3A4D23]">
+              <h4 className="text-lg font-semibold text-white mb-4">
+                {index + 1}. {question.question}
+              </h4>
+              
+              <div className="space-y-2">
+                {question.options.map((option, optionIndex) => (
+                  <label
+                    key={optionIndex}
+                    className={`flex items-center p-3 rounded-lg cursor-pointer transition-all ${
+                      answers[index] === optionIndex
+                        ? 'bg-[#8BAE5A] text-[#181F17] border-[#8BAE5A]'
+                        : 'bg-[#181F17] text-gray-300 border-[#3A4D23] hover:bg-[#8BAE5A]/20'
+                    } border`}
+                  >
+                    <input
+                      type="radio"
+                      name={`question-${index}`}
+                      value={optionIndex}
+                      checked={answers[index] === optionIndex}
+                      onChange={() => {
+                        if (!submitted) {
+                          const newAnswers = [...answers];
+                          newAnswers[index] = optionIndex;
+                          setAnswers(newAnswers);
+                        }
+                      }}
+                      disabled={submitted}
+                      className="mr-3 w-4 h-4 text-[#8BAE5A] bg-[#232D1A] border-[#3A4D23] focus:ring-[#8BAE5A] focus:ring-2"
+                    />
+                    {option}
+                  </label>
+                ))}
+              </div>
+            </div>
+          ))}
+
+          <div className="flex justify-center mt-8">
+            <button
+              onClick={handleSubmit}
+              disabled={!allAnswered || isSubmitting}
+              className={`px-8 py-3 rounded-lg font-semibold transition-all ${
+                allAnswered && !isSubmitting
+                  ? 'bg-[#8BAE5A] text-[#181F17] hover:bg-[#B6C948]'
+                  : 'bg-[#3A4D23] text-[#8BAE5A]/50 cursor-not-allowed'
+              }`}
+            >
+              {isSubmitting ? (
+                <div className="flex items-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#181F17]"></div>
+                  Examen indienen...
+                </div>
+              ) : (
+                'Examen indienen'
+              )}
+            </button>
+          </div>
+
+          <div className="mt-4 text-center text-sm text-gray-400">
+            Beantwoord: {answers.filter(a => a !== null).length}/{totalQuestions} vragen
+          </div>
+        </>
+      ) : (
+        <div className="text-center">
+          <div className={`p-8 rounded-2xl border-2 mb-8 ${
+            passed 
+              ? 'bg-green-900/30 border-green-500/50' 
+              : 'bg-red-900/30 border-red-500/50'
+          }`}>
+            <div className={`text-8xl mb-4 ${passed ? 'text-green-400' : 'text-red-400'}`}>
+              {passed ? '🎉' : '😞'}
+            </div>
+            
+            <h4 className={`text-3xl font-bold mb-6 ${passed ? 'text-green-400' : 'text-red-400'}`}>
+              {passed ? '✅ GESLAAGD!' : '❌ NIET GESLAAGD'}
+            </h4>
+            
+            <div className="mb-6">
+              <div className={`text-5xl font-black mb-4 ${passed ? 'text-green-400' : 'text-red-400'}`}>
+                {correctAnswers}/{totalQuestions}
+              </div>
+              <div className={`text-2xl font-bold mb-4 ${passed ? 'text-green-300' : 'text-red-300'}`}>
+                ({scorePercentage}%)
+              </div>
+              <div className="text-lg text-gray-300 max-w-md mx-auto">
+                {passed 
+                  ? '🎯 Uitstekend! Je hebt het examen succesvol afgerond met meer dan 70% goed!' 
+                  : '📚 Je hebt minimaal 7 van de 10 vragen (70%) correct nodig om te slagen. Probeer het nog een keer!'}
+              </div>
+            </div>
+            
+            <div className="flex justify-center gap-4 text-sm text-gray-400">
+              <div className="flex items-center gap-2">
+                <span className="text-green-400">✅</span>
+                <span>{correctAnswers} correct</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-red-400">❌</span>
+                <span>{totalQuestions - correctAnswers} fout</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[#8BAE5A]">🎯</span>
+                <span>Minimaal: 7/10</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Show answers with explanations */}
+          <div className="mt-8 text-left">
+            <h5 className="text-xl font-bold text-[#8BAE5A] mb-6 text-center">📋 Gedetailleerde uitslag per vraag</h5>
+            <div className="grid gap-4">
+              {questions.map((question, index) => {
+                const userAnswer = answers[index];
+                const isCorrect = userAnswer === question.correct_answer;
+                
+                return (
+                  <div key={index} className={`p-5 rounded-xl border-2 ${
+                    isCorrect 
+                      ? 'bg-green-900/20 border-green-500/30' 
+                      : 'bg-red-900/20 border-red-500/30'
+                  }`}>
+                    <div className="flex items-start gap-4 mb-4">
+                      <div className={`text-3xl ${isCorrect ? 'text-green-400' : 'text-red-400'}`}>
+                        {isCorrect ? '✅' : '❌'}
+                      </div>
+                      <div className="flex-1">
+                        <h6 className="text-lg font-bold text-white mb-3">
+                          Vraag {index + 1}: {question.question}
+                        </h6>
+                        
+                        <div className="space-y-3">
+                          <div className={`p-3 rounded-lg ${
+                            isCorrect ? 'bg-green-800/30' : 'bg-red-800/30'
+                          }`}>
+                            <span className="font-semibold text-white">Jouw antwoord: </span>
+                            <span className={isCorrect ? 'text-green-300' : 'text-red-300'}>
+                              {question.options[userAnswer || 0]}
+                            </span>
+                          </div>
+                          
+                          {!isCorrect && (
+                            <div className="p-3 rounded-lg bg-green-800/30">
+                              <span className="font-semibold text-white">Juiste antwoord: </span>
+                              <span className="text-green-300">
+                                {question.options[question.correct_answer]}
+                              </span>
+                            </div>
+                          )}
+                          
+                          <div className="p-4 bg-[#181F17] rounded-lg border border-[#3A4D23]">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-[#8BAE5A] text-lg">💡</span>
+                              <span className="font-semibold text-[#8BAE5A]">Uitleg:</span>
+                            </div>
+                            <p className="text-gray-300 leading-relaxed">{question.explanation}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="flex justify-center gap-4 mt-8">
+            {passed ? (
+              <div className="text-center">
+                <div className="mb-4 p-4 bg-green-900/20 rounded-lg border border-green-500/30">
+                  <p className="text-green-300 font-semibold">
+                    🎓 Examen voltooid! Je kunt nu verder naar de volgende module.
+                  </p>
+                </div>
+                <button
+                  onClick={handleRetake}
+                  className="px-4 py-2 bg-[#232D1A] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] font-medium transition-colors border border-[#3A4D23]"
+                >
+                  🔄 Examen opnieuw maken (optioneel)
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={handleRetake}
+                className="px-8 py-4 bg-[#8BAE5A] text-[#181F17] rounded-xl hover:bg-[#B6C948] font-bold transition-colors text-lg"
+              >
+                🔄 Examen opnieuw maken
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function LessonDetailPage() {
@@ -940,6 +1229,20 @@ export default function LessonDetailPage() {
           </div>
         )}
 
+        {/* Exam Section */}
+        {lesson.type === 'exam' && lesson.exam_questions && (
+          <ExamComponent 
+            questions={lesson.exam_questions}
+            lessonId={lesson.id}
+            userId={user?.id}
+            onCompletion={(passed) => {
+              console.log('🎯 Exam completed:', passed);
+              // Refresh data to update completion status
+              fetchData();
+            }}
+          />
+        )}
+
         {/* Ebook Download Section */}
         <div className="mt-8">
           <EbookDownload
@@ -952,64 +1255,66 @@ export default function LessonDetailPage() {
           />
         </div>
 
-        {/* Navigation buttons */}
-        <div className="flex justify-between items-center mt-8">
-          {prevLesson ? (
-            <button
-              onClick={() => {
-                console.log('🔄 Navigating to previous lesson...');
-                // Reset any stuck states before navigation
-                setIsVideoLoading(false);
-                setShowVideoOverlay(true);
-                setNavigating(true);
-                
-                // Use a small delay to ensure state updates
-                setTimeout(() => {
-                  router.push(`/dashboard/academy/${module.id}/${prevLesson.id}`);
-                }, 50);
-              }}
-              disabled={navigating}
-              className="px-6 py-3 bg-[#232D1A] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors font-semibold disabled:opacity-50 flex items-center gap-2"
-            >
-              {navigating ? (
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#8BAE5A]"></div>
-              ) : (
-                "←"
-              )}
-              Vorige les: {prevLesson.title}
-            </button>
-          ) : (
-            <div></div>
-          )}
-          
-          {nextLesson ? (
-            <button
-              onClick={() => {
-                console.log('🔄 Navigating to next lesson...');
-                // Reset any stuck states before navigation
-                setIsVideoLoading(false);
-                setShowVideoOverlay(true);
-                setNavigating(true);
-                
-                // Use a small delay to ensure state updates
-                setTimeout(() => {
-                  router.push(`/dashboard/academy/${module.id}/${nextLesson.id}`);
-                }, 50);
-              }}
-              disabled={navigating}
-              className="px-6 py-3 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold disabled:opacity-50 flex items-center gap-2"
-            >
-              Volgende les: {nextLesson.title}
-              {navigating ? (
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#181F17]"></div>
-              ) : (
-                "→"
-              )}
-            </button>
-          ) : (
-            <div></div>
-          )}
-        </div>
+        {/* Navigation buttons - Only show for non-exam lessons */}
+        {lesson.type !== 'exam' && (
+          <div className="flex justify-between items-center mt-8">
+            {prevLesson ? (
+              <button
+                onClick={() => {
+                  console.log('🔄 Navigating to previous lesson...');
+                  // Reset any stuck states before navigation
+                  setIsVideoLoading(false);
+                  setShowVideoOverlay(true);
+                  setNavigating(true);
+                  
+                  // Use a small delay to ensure state updates
+                  setTimeout(() => {
+                    router.push(`/dashboard/academy/${module.id}/${prevLesson.id}`);
+                  }, 50);
+                }}
+                disabled={navigating}
+                className="px-6 py-3 bg-[#232D1A] text-[#8BAE5A] rounded-lg hover:bg-[#3A4D23] transition-colors font-semibold disabled:opacity-50 flex items-center gap-2"
+              >
+                {navigating ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#8BAE5A]"></div>
+                ) : (
+                  "←"
+                )}
+                Vorige les: {prevLesson.title}
+              </button>
+            ) : (
+              <div></div>
+            )}
+            
+            {nextLesson ? (
+              <button
+                onClick={() => {
+                  console.log('🔄 Navigating to next lesson...');
+                  // Reset any stuck states before navigation
+                  setIsVideoLoading(false);
+                  setShowVideoOverlay(true);
+                  setNavigating(true);
+                  
+                  // Use a small delay to ensure state updates
+                  setTimeout(() => {
+                    router.push(`/dashboard/academy/${module.id}/${nextLesson.id}`);
+                  }, 50);
+                }}
+                disabled={navigating}
+                className="px-6 py-3 bg-[#8BAE5A] text-[#181F17] rounded-lg hover:bg-[#B6C948] transition-colors font-semibold disabled:opacity-50 flex items-center gap-2"
+              >
+                Volgende les: {nextLesson.title}
+                {navigating ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#181F17]"></div>
+                ) : (
+                  "→"
+                )}
+              </button>
+            ) : (
+              <div></div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Lesson list */}

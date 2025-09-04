@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Het belang van kracht, spiermassa en conditie - Top Tier Men Academy</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background: #f9fafb;
+        }
+        
+        .ebook-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #8BAE5A 0%, #3A4D23 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -0.025em;
+        }
+        
+        .header .subtitle {
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: white;
+            opacity: 1;
+        }
+        
+        .content {
+            padding: 50px;
+        }
+        
+        .toc {
+            background: #f8fafc;
+            border-left: 4px solid #8BAE5A;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 8px;
+        }
+        
+        .toc h2 {
+            color: #8BAE5A;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .toc ol {
+            list-style: none;
+            counter-reset: toc-counter;
+        }
+        
+        .toc li {
+            counter-increment: toc-counter;
+            margin-bottom: 8px;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        .toc li::before {
+            content: counter(toc-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #8BAE5A;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .toc a {
+            color: #374151;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .toc a:hover {
+            color: #8BAE5A;
+        }
+        
+        .chapter {
+            margin: 40px 0;
+        }
+        
+        .chapter h2 {
+            color: #8BAE5A;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 10px;
+        }
+        
+        .chapter h3 {
+            color: #374151;
+            font-size: 1.4rem;
+            margin: 25px 0 15px 0;
+        }
+        
+        .chapter p {
+            margin-bottom: 15px;
+            color: #4b5563;
+        }
+        
+        .chapter ul, .chapter ol {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+        
+        .chapter li {
+            margin-bottom: 8px;
+            color: #4b5563;
+        }
+        
+        .highlight-box {
+            background: #f0f9ff;
+            border-left: 4px solid #0ea5e9;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .highlight-box h4 {
+            color: #0c4a6e;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .action-item {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .action-item h4 {
+            color: #92400e;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .reflection-box {
+            background: #f3e8ff;
+            border-left: 4px solid #8b5cf6;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .reflection-box h4 {
+            color: #5b21b6;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .next-steps-box {
+            background: #ecfdf5;
+            border-left: 4px solid #10b981;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .next-steps-box h4 {
+            color: #047857;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .footer {
+            background: #f8fafc;
+            padding: 30px;
+            text-align: center;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .footer p {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                padding: 40px 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .content {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ebook-container">
+        <div class="header">
+            <h1>Het belang van kracht, spiermassa en conditie</h1>
+            <div class="subtitle">Module 3: Fysieke Dominantie - Top Tier Men Academy</div>
+        </div>
+        
+        <div class="content">
+            <div class="toc">
+                <h2>Inhoudsopgave</h2>
+                <ol>
+                    <li><a href="#intro">Inleiding</a></li>
+                    <li><a href="#main-content">Hoofdinhoud</a></li>
+                    <li><a href="#practical-tips">Praktische Tips</a></li>
+                    <li><a href="#reflection">Reflectie Vragen</a></li>
+                    <li><a href="#next-steps">Volgende Stappen</a></li>
+                </ol>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="intro">Inleiding</h2>
+                <p>Welkom bij les 2 van Module 3: Fysieke Dominantie. Nu je begrijpt WAAROM fysieke dominantie zo cruciaal is, duiken we diep in de drie pillars die deze dominantie possible maken: <strong>Kracht, Spiermassa, en Conditie</strong>. Deze trinity forms de foundation van elite physical prestaties en commanding presence.</p>
+                
+                <div class="highlight-box">
+                    <h4>🎯 Wat je gaat leren</h4>
+                    <ul>
+                        <li>De wetenschappelijke basis van kracht, spiermassa en conditie</li>
+                        <li>Waarom elk van deze componenten essential is voor Top Tier Men</li>
+                        <li>Hoe deze drie elements synergistically samenwerken</li>
+                        <li>Praktische methoden voor development van elk area</li>
+                        <li>Common mistakes die men maken in their approach</li>
+                        <li>Evidence-based training principles voor maximum results</li>
+                    </ul>
+                </div>
+                
+                <p>Door deze les te voltooien, zul je een crystal-clear understanding hebben van wat true physical excellence requires en exactly hoe je elk component moet develop voor maximum impact op je leven en career.</p>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="main-content">Hoofdinhoud</h2>
+                
+                <h3>De Trinity van Physical Excellence</h3>
+                <p>Fysieke dominantie is niet built on één factor alone. Het requires de perfect integration van three fundamental components, each serving unique en critical functions:</p>
+                
+                <div class="highlight-box">
+                    <h4>🏋️ De Three Pillars</h4>
+                    <ul>
+                        <li><strong>KRACHT:</strong> Raw power - de ability to move heavy loads</li>
+                        <li><strong>SPIERMASSA:</strong> Muscle size - visible evidence of physical capability</li>
+                        <li><strong>CONDITIE:</strong> Cardiovascular endurance - sustained prestaties capacity</li>
+                    </ul>
+                    
+                    <p>Each pillar supports de others. Weakness in één area limits your total potential. Excellence in all three creates exponential returns.</p>
+                </div>
+                
+                <h3>PILLAR 1: KRACHT - De Foundation van Power</h3>
+                
+                <h4>What is True Strength?</h4>
+                <p>Kracht is not just about lifting heavy gewichten in de gym. It's about <strong>functional power</strong> - de ability to generate force when it matters most. True strength manifests in:</p>
+                
+                <ul>
+                    <li><strong>Absolute Strength:</strong> Maximum force production in single effort</li>
+                    <li><strong>Relative Strength:</strong> Power-to-bodyweight ratio</li>
+                    <li><strong>Explosive Strength:</strong> Rapid force development</li>
+                    <li><strong>Strength Endurance:</strong> Sustained force production</li>
+                    <li><strong>Functional Strength:</strong> Real-world movement patterns</li>
+                </ul>
+                
+                <h4>Why Kracht Matters Most</h4>
+                <p><strong>Neurological Superiority:</strong></p>
+                <ul>
+                    <li><strong>Motor Unit Recruitment:</strong> Strong men activate more muscle fibers</li>
+                    <li><strong>Neural Drive:</strong> Enhanced mind-muscle connection</li>
+                    <li><strong>Coordination:</strong> Better movement efficiency</li>
+                    <li><strong>Power Transfer:</strong> Strength transfers to all activities</li>
+                    <li><strong>Injury Prevention:</strong> Strong muscles protect joints</li>
+                </ul>
+                
+                <p><strong>Psychological Benefits:</strong></p>
+                <ul>
+                    <li><strong>Confidence Foundation:</strong> Knowing je can handle physical challenges</li>
+                    <li><strong>Mental Toughness:</strong> Strength training builds resilience</li>
+                    <li><strong>Goal Achievement:</strong> Progressive overload teaches persistence</li>
+                    <li><strong>Control Sense:</strong> Physical power creates sense of agency</li>
+                    <li><strong>Stress Relief:</strong> Heavy lifting provides emotional outlet</li>
+                </ul>
+                
+                <p><strong>Social Impact:</strong></p>
+                <ul>
+                    <li><strong>Presence Command:</strong> Strong men naturally command respect</li>
+                    <li><strong>Reliability Perception:</strong> Others view strong men as dependable</li>
+                    <li><strong>Leadership Assumption:</strong> Groups expect strong men to lead</li>
+                    <li><strong>Protection Provider:</strong> Family feels secure with strong protector</li>
+                    <li><strong>Competence Halo:</strong> Strength implies overall capability</li>
+                </ul>
+                
+                <h4>Key Strength Movements</h4>
+                <p><strong>The Big 4 Compound Movements:</strong></p>
+                
+                <p><strong>1. Deadlift - The King of Strength</strong></p>
+                <ul>
+                    <li><strong>Muscle Groups:</strong> Posterior chain dominance - glutes, hamstrings, back</li>
+                    <li><strong>Functional Transfer:</strong> Picking up objects, posture improvement</li>
+                    <li><strong>Hormonal Response:</strong> Massive testosterone en growth hormone release</li>
+                    <li><strong>Mental Benefits:</strong> Ultimate confidence builder</li>
+                    <li><strong>Target Numbers:</strong> 1.5x bodyweight (minimum), 2x bodyweight (strong)</li>
+                </ul>
+                
+                <p><strong>2. Squat - Lower Body Foundation</strong></p>
+                <ul>
+                    <li><strong>Muscle Groups:</strong> Quadriceps, glutes, core stabilization</li>
+                    <li><strong>Functional Transfer:</strong> Standing, jumping, athletic prestaties</li>
+                    <li><strong>Daily Application:</strong> Getting up from chairs, stairs, general mobility</li>
+                    <li><strong>Posture Benefits:</strong> Core strength, hip mobility</li>
+                    <li><strong>Target Numbers:</strong> 1.2x bodyweight (minimum), 1.8x bodyweight (strong)</li>
+                </ul>
+                
+                <p><strong>3. Bench Press - Upper Body Power</strong></p>
+                <ul>
+                    <li><strong>Muscle Groups:</strong> Chest, shoulders, triceps</li>
+                    <li><strong>Functional Transfer:</strong> Pushing movements, protective reflexes</li>
+                    <li><strong>Visual Impact:</strong> Builds impressive chest en shoulder development</li>
+                    <li><strong>Confidence Factor:</strong> Classic strength benchmark</li>
+                    <li><strong>Target Numbers:</strong> 1x bodyweight (minimum), 1.5x bodyweight (strong)</li>
+                </ul>
+                
+                <p><strong>4. Overhead Press - True Upper Body Strength</strong></p>
+                <ul>
+                    <li><strong>Muscle Groups:</strong> Shoulders, triceps, core stabilization</li>
+                    <li><strong>Functional Transfer:</strong> Lifting objects overhead, shoulder health</li>
+                    <li><strong>Postural Benefits:</strong> Strengthens upper back, improves posture</li>
+                    <li><strong>Athletic Transfer:</strong> Throwing, swimming, general athletics</li>
+                    <li><strong>Target Numbers:</strong> 0.7x bodyweight (minimum), 1x bodyweight (strong)</li>
+                </ul>
+                
+                <h3>PILLAR 2: SPIERMASSA - Visual Command Presence</h3>
+                
+                <h4>Why Muscle Size Matters</h4>
+                <p>While strength is functional, spiermassa is immediately visible. Het provides instant social signaling en psychological advantages:</p>
+                
+                <p><strong>First Impression Dominance:</strong></p>
+                <ul>
+                    <li><strong>Immediate Recognition:</strong> Muscle is visible through clothing</li>
+                    <li><strong>Competence Assumption:</strong> Muscular men perceived as more capable</li>
+                    <li><strong>Authority Projection:</strong> Size commands automatic respect</li>
+                    <li><strong>Threat Deterrence:</strong> Muscular physique deters confrontation</li>
+                    <li><strong>Attraction Factor:</strong> Women prefer muscular men for relationships</li>
+                </ul>
+                
+                <p><strong>Professional Advantages:</strong></p>
+                <ul>
+                    <li><strong>Executive Presence:</strong> Muscular men more likely promoted to leadership</li>
+                    <li><strong>Salary Premium:</strong> Muscular men earn more across industries</li>
+                    <li><strong>Client Confidence:</strong> People prefer to work with impressive individuals</li>
+                    <li><strong>Negotiation Power:</strong> Physical presence improves bargaining position</li>
+                    <li><strong>Network Access:</strong> Others want to associate with successful-looking people</li>
+                </ul>
+                
+                <h4>The Science van Muscle Growth</h4>
+                <p><strong>Hypertrophy Mechanisms:</strong></p>
+                
+                <p><strong>1. Mechanical Tension</strong></p>
+                <ul>
+                    <li><strong>Progressive Overload:</strong> Gradually increasing training demands</li>
+                    <li><strong>Time Under Tension:</strong> Controlled movement tempo</li>
+                    <li><strong>Full Range of Motion:</strong> Complete muscle stretch en contraction</li>
+                    <li><strong>Load Management:</strong> 65-85% 1RM voor optimal hypertrophy</li>
+                </ul>
+                
+                <p><strong>2. Metabolic Stress</strong></p>
+                <ul>
+                    <li><strong>Muscle Fatigue:</strong> Training to near failure</li>
+                    <li><strong>Lactate Accumulation:</strong> "The burn" sensation</li>
+                    <li><strong>Blood Flow Restriction:</strong> Pumping sensation</li>
+                    <li><strong>Higher Rep Ranges:</strong> 8-15 reps voor metabolic stress</li>
+                </ul>
+                
+                <p><strong>3. Muscle Damage</strong></p>
+                <ul>
+                    <li><strong>Eccentric Focus:</strong> Controlled lowering phases</li>
+                    <li><strong>Novel Stimuli:</strong> New exercises en movement patterns</li>
+                    <li><strong>Stretch Positions:</strong> Exercises with muscles in stretched position</li>
+                    <li><strong>Volume Progression:</strong> Gradually increasing training volume</li>
+                </ul>
+                
+                <h4>Muscle Bouwen Priorities</h4>
+                <p><strong>Visual Impact Hierarchy:</strong></p>
+                
+                <p><strong>1. Shoulders (Delts)</strong></p>
+                <ul>
+                    <li><strong>Visual Impact:</strong> Creates V-taper, broad appearance</li>
+                    <li><strong>Functional Benefit:</strong> Shoulder health, pressing power</li>
+                    <li><strong>Key Exercises:</strong> Overhead press, lateral raises, rear delt flyes</li>
+                    <li><strong>Training Frequency:</strong> 2-3x per week</li>
+                </ul>
+                
+                <p><strong>2. Lats (Latissimus Dorsi)</strong></p>
+                <ul>
+                    <li><strong>Visual Impact:</strong> Width, V-taper, imposing back</li>
+                    <li><strong>Functional Benefit:</strong> Pulling strength, posture improvement</li>
+                    <li><strong>Key Exercises:</strong> Pull-ups, rows, lat pulldowns</li>
+                    <li><strong>Training Focus:</strong> Width en thickness development</li>
+                </ul>
+                
+                <p><strong>3. Chest (Pectorals)</strong></p>
+                <ul>
+                    <li><strong>Visual Impact:</strong> Fills out shirts, masculine silhouette</li>
+                    <li><strong>Functional Benefit:</strong> Pushing power, upper body stability</li>
+                    <li><strong>Key Exercises:</strong> Bench press, dips, push-ups</li>
+                    <li><strong>Development Focus:</strong> Upper, middle, en lower chest</li>
+                </ul>
+                
+                <p><strong>4. Arms (Biceps & Triceps)</strong></p>
+                <ul>
+                    <li><strong>Visual Impact:</strong> Most noticeable muscle group</li>
+                    <li><strong>Functional Benefit:</strong> Pulling en pushing assistance</li>
+                    <li><strong>Key Exercises:</strong> Curls, close-grip press, dips</li>
+                    <li><strong>Training Approach:</strong> Higher frequency, moderate volume</li>
+                </ul>
+                
+                <h3>PILLAR 3: CONDITIE - Sustained Performance Power</h3>
+                
+                <h4>Why Cardiovascular Fitness is Non-Negotiable</h4>
+                <p>Many strong, muscular men neglect cardiovasculair conditioning, creating een critical weakness. True dominance requires sustained prestaties across all domains:</p>
+                
+                <p><strong>Professional Performance:</strong></p>
+                <ul>
+                    <li><strong>Energy Endurance:</strong> Sustained focus through long work days</li>
+                    <li><strong>Stress Resilience:</strong> Better physiological stress response</li>
+                    <li><strong>Mental Clarity:</strong> Improved brain blood flow</li>
+                    <li><strong>Recovery Ability:</strong> Faster bounce-back from challenges</li>
+                    <li><strong>Presentation Power:</strong> No breathlessness during important moments</li>
+                </ul>
+                
+                <p><strong>Personal Life Benefits:</strong></p>
+                <ul>
+                    <li><strong>Family Activities:</strong> Keep up with children en spouse</li>
+                    <li><strong>Sexual Performance:</strong> Endurance en stamina</li>
+                    <li><strong>Adventure Capability:</strong> Hiking, sports, physical activities</li>
+                    <li><strong>Emergency Response:</strong> Physical capacity in crisis situations</li>
+                    <li><strong>Aging Gracefully:</strong> Maintained vitality through decades</li>
+                </ul>
+                
+                <h4>Types van Cardiovascular Training</h4>
+                
+                <p><strong>1. HIIT (High-Intensity Interval Training)</strong></p>
+                <ul>
+                    <li><strong>Protocol:</strong> Short bursts van high intensiteit with rest periods</li>
+                    <li><strong>Benefits:</strong> Time-efficient, preserves muscle mass</li>
+                    <li><strong>Examples:</strong> Sprint intervals, bike intervals, rowing intervals</li>
+                    <li><strong>Frequency:</strong> 2-3x per week, 15-20 minutes</li>
+                    <li><strong>Intensity:</strong> 85-95% max heart rate during work periods</li>
+                </ul>
+                
+                <p><strong>2. LISS (Low-Intensity Steady State)</strong></p>
+                <ul>
+                    <li><strong>Protocol:</strong> Sustained moderate intensiteit effort</li>
+                    <li><strong>Benefits:</strong> Active recovery, fat burning, aerobic base</li>
+                    <li><strong>Examples:</strong> Brisk walking, light jogging, cycling</li>
+                    <li><strong>Frequency:</strong> 3-5x per week, 30-45 minutes</li>
+                    <li><strong>Intensity:</strong> 60-70% max heart rate</li>
+                </ul>
+                
+                <p><strong>3. Circuit Training</strong></p>
+                <ul>
+                    <li><strong>Protocol:</strong> Resistance exercises with minimal rest</li>
+                    <li><strong>Benefits:</strong> Combines strength en conditioning</li>
+                    <li><strong>Examples:</strong> Kettlebell circuits, bodyweight circuits</li>
+                    <li><strong>Frequency:</strong> 2-3x per week</li>
+                    <li><strong>Duration:</strong> 20-30 minutes</li>
+                </ul>
+                
+                <h3>Integration: How de Three Pillars Work Together</h3>
+                
+                <h4>Synergistic Effects</h4>
+                <p>When developed together, kracht, spiermassa, en conditie create compounding benefits:</p>
+                
+                <p><strong>Strength + Muscle = Power</strong></p>
+                <ul>
+                    <li>Strong muscles look impressive en function optimally</li>
+                    <li>Muscle mass provides foundation for strength development</li>
+                    <li>Combined effect creates commanding physical presence</li>
+                </ul>
+                
+                <p><strong>Strength + Conditioning = Endurance</strong></p>
+                <ul>
+                    <li>Strong muscles resist fatigue longer</li>
+                    <li>Good conditioning allows for more training volume</li>
+                    <li>Recovery between sets en sessions improves dramatically</li>
+                </ul>
+                
+                <p><strong>Muscle + Conditioning = Functionality</strong></p>
+                <ul>
+                    <li>Large muscles with good blood flow function optimally</li>
+                    <li>Cardiovascular fitness supports muscle growth en recovery</li>
+                    <li>Balanced development prevents imbalances en injuries</li>
+                </ul>
+                
+                <h4>Training Periodization</h4>
+                <p>Smart integration requires strategic planning:</p>
+                
+                <p><strong>Weekly Structure Example:</strong></p>
+                <ul>
+                    <li><strong>Monday:</strong> Heavy Strength (Squat focus) + Light cardio</li>
+                    <li><strong>Tuesday:</strong> Hypertrophy Upper Body + HIIT</li>
+                    <li><strong>Wednesday:</strong> Active Recovery (LISS cardio)</li>
+                    <li><strong>Thursday:</strong> Heavy Strength (Deadlift focus) + Light cardio</li>
+                    <li><strong>Friday:</strong> Hypertrophy Full Body + HIIT</li>
+                    <li><strong>Saturday:</strong> Conditioning Focus or Sports</li>
+                    <li><strong>Sunday:</strong> Complete Rest or Light Activity</li>
+                </ul>
+                
+                <h3>Common Mistakes in Trinity Development</h3>
+                
+                <h4>Mistake 1: Single Pillar Focus</h4>
+                <ul>
+                    <li><strong>Strength Only:</strong> Strong maar look average, poor endurance</li>
+                    <li><strong>Muscle Only:</strong> Look good maar weak en out of breath</li>
+                    <li><strong>Cardio Only:</strong> Skinny, weak, no commanding presence</li>
+                </ul>
+                
+                <h4>Mistake 2: Poor Integration</h4>
+                <ul>
+                    <li><strong>Excessive Cardio:</strong> Interferes with strength en muscle gains</li>
+                    <li><strong>No Conditioning:</strong> Poor recovery, limited training capacity</li>
+                    <li><strong>Random Programming:</strong> No systematic progression</li>
+                </ul>
+                
+                <h4>Mistake 3: Impatience</h4>
+                <ul>
+                    <li><strong>Expectation Reality:</strong> True development takes 2-5 years</li>
+                    <li><strong>Program Hopping:</strong> Changing too frequently</li>
+                    <li><strong>All-or-Nothing:</strong> Perfectionist approach leading to burnout</li>
+                </ul>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="practical-tips">Praktische Tips</h2>
+                <div class="action-item">
+                    <h4>💪 Trinity Development System</h4>
+                    
+                    <h5>1. Strength Development Protocol</h5>
+                    <p><strong>Programming Essentials:</strong></p>
+                    <ul>
+                        <li><strong>Frequency:</strong> 3-4 strength sessions per week</li>
+                        <li><strong>Rep Ranges:</strong> 1-6 reps voor max strength</li>
+                        <li><strong>Rest Periods:</strong> 3-5 minutes between sets</li>
+                        <li><strong>Progression:</strong> Add weight weekly (2.5-5 lbs)</li>
+                        <li><strong>Focus Lifts:</strong> Squat, deadlift, bench, overhead press</li>
+                    </ul>
+                    
+                    <p><strong>Monthly Progression Example:</strong></p>
+                    <ul>
+                        <li><strong>Week 1:</strong> 3 sets x 5 reps at 80% 1RM</li>
+                        <li><strong>Week 2:</strong> 3 sets x 3 reps at 85% 1RM</li>
+                        <li><strong>Week 3:</strong> 3 sets x 1 rep at 90% 1RM</li>
+                        <li><strong>Week 4:</strong> Deload - 3 sets x 5 reps at 70% 1RM</li>
+                    </ul>
+                    
+                    <h5>2. Muscle Bouwen Protocol</h5>
+                    <p><strong>Hypertrophy Essentials:</strong></p>
+                    <ul>
+                        <li><strong>Frequency:</strong> Each muscle group 2-3x per week</li>
+                        <li><strong>Rep Ranges:</strong> 6-15 reps voor muscle growth</li>
+                        <li><strong>Rest Periods:</strong> 60-90 seconds between sets</li>
+                        <li><strong>Volume:</strong> 10-20 sets per muscle group per week</li>
+                        <li><strong>Progression:</strong> Add reps, then weight</li>
+                    </ul>
+                    
+                    <p><strong>Weekly Split Example:</strong></p>
+                    <ul>
+                        <li><strong>Day 1:</strong> Chest, Shoulders, Triceps</li>
+                        <li><strong>Day 2:</strong> Back, Biceps</li>
+                        <li><strong>Day 3:</strong> Legs (Quads, Glutes, Calves)</li>
+                        <li><strong>Day 4:</strong> Rest or Light Cardio</li>
+                        <li><strong>Day 5:</strong> Upper Body (Compound focus)</li>
+                        <li><strong>Day 6:</strong> Legs (Hamstrings, Glutes)</li>
+                    </ul>
+                    
+                    <h5>3. Conditioning Protocol</h5>
+                    <p><strong>HIIT Session Structure:</strong></p>
+                    <ul>
+                        <li><strong>Warm-up:</strong> 5 minutes easy pace</li>
+                        <li><strong>Work Period:</strong> 30 seconds all-out effort</li>
+                        <li><strong>Rest Period:</strong> 90 seconds easy recovery</li>
+                        <li><strong>Repeat:</strong> 8-12 intervals</li>
+                        <li><strong>Cool-down:</strong> 5 minutes easy pace</li>
+                    </ul>
+                    
+                    <p><strong>LISS Guidelines:</strong></p>
+                    <ul>
+                        <li><strong>Target Heart Rate:</strong> 120-140 BPM</li>
+                        <li><strong>Duration:</strong> 30-45 minutes</li>
+                        <li><strong>Perceived Exertion:</strong> 6-7 out of 10</li>
+                        <li><strong>Frequency:</strong> 3-5x per week</li>
+                        <li><strong>Activities:</strong> Walking, cycling, swimming</li>
+                    </ul>
+                </div>
+                
+                <div class="action-item">
+                    <h4>📊 Trinity Beoordeling & Benchmarks</h4>
+                    
+                    <h5>Strength Benchmarks (Bodyweight Multiples)</h5>
+                    <p><strong>Beginner Level:</strong></p>
+                    <ul>
+                        <li>Deadlift: 1.25x bodyweight</li>
+                        <li>Squat: 1x bodyweight</li>
+                        <li>Bench Press: 0.8x bodyweight</li>
+                        <li>Overhead Press: 0.5x bodyweight</li>
+                    </ul>
+                    
+                    <p><strong>Intermediate Level:</strong></p>
+                    <ul>
+                        <li>Deadlift: 1.75x bodyweight</li>
+                        <li>Squat: 1.5x bodyweight</li>
+                        <li>Bench Press: 1.25x bodyweight</li>
+                        <li>Overhead Press: 0.75x bodyweight</li>
+                    </ul>
+                    
+                    <p><strong>Advanced Level:</strong></p>
+                    <ul>
+                        <li>Deadlift: 2.25x bodyweight</li>
+                        <li>Squat: 2x bodyweight</li>
+                        <li>Bench Press: 1.5x bodyweight</li>
+                        <li>Overhead Press: 1x bodyweight</li>
+                    </ul>
+                    
+                    <h5>Muscle Mass Targets</h5>
+                    <p><strong>Body Composition Goals:</strong></p>
+                    <ul>
+                        <li><strong>Body Fat:</strong> 10-15% (visible abs)</li>
+                        <li><strong>FFMI:</strong> 20-25 (Fat-Free Mass Index)</li>
+                        <li><strong>Arm Size:</strong> Height in inches - 10 = target arm circumference</li>
+                        <li><strong>Chest Size:</strong> Height in inches + 10-15 = target chest</li>
+                    </ul>
+                    
+                    <h5>Conditioning Standards</h5>
+                    <p><strong>Cardiovascular Benchmarks:</strong></p>
+                    <ul>
+                        <li><strong>Resting Heart Rate:</strong> Under 60 BPM</li>
+                        <li><strong>VO2 Max:</strong> 45+ ml/kg/min</li>
+                        <li><strong>5K Run Time:</strong> Under 25 minutes</li>
+                        <li><strong>Recovery Heart Rate:</strong> Drop 50+ BPM in 2 minutes</li>
+                    </ul>
+                </div>
+                
+                <div class="action-item">
+                    <h4>📅 4-Week Trinity Transformation</h4>
+                    
+                    <h5>Week 1-2: Foundation Bouwen</h5>
+                    <ul>
+                        <li><strong>Strength:</strong> Learn proper form on big 4 lifts</li>
+                        <li><strong>Muscle:</strong> Establish training split en consistency</li>
+                        <li><strong>Conditioning:</strong> Build aerobic base with LISS</li>
+                        <li><strong>Recovery:</strong> Prioritize sleep en nutrition</li>
+                    </ul>
+                    
+                    <h5>Week 3-4: Intensity Introduction</h5>
+                    <ul>
+                        <li><strong>Strength:</strong> Add progressive overload</li>
+                        <li><strong>Muscle:</strong> Increase training volume</li>
+                        <li><strong>Conditioning:</strong> Introduce HIIT sessions</li>
+                        <li><strong>Beoordeling:</strong> Test baselines en adjust programming</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="reflection">Reflectie Vragen</h2>
+                <div class="reflection-box">
+                    <h4>🤔 Trinity Development Self-Beoordeling</h4>
+                    
+                    <p><strong>1. Current Trinity State:</strong></p>
+                    <ul>
+                        <li>Rate your current strength level (1-10) en identify biggest weaknesses</li>
+                        <li>How satisfied ben je met your current muscle mass en physique?</li>
+                        <li>What's your honest assessment van your cardiovasculair conditioning?</li>
+                        <li>Which van de three pillars needs most urgent attention?</li>
+                    </ul>
+                    
+                    <p><strong>2. Training History Analysis:</strong></p>
+                    <ul>
+                        <li>What training approaches have je tried in de past?</li>
+                        <li>Which methods produced de best results voor jou?</li>
+                        <li>What common mistakes have je made in previous programs?</li>
+                        <li>How consistent ben je typically met training programs?</li>
+                    </ul>
+                    
+                    <p><strong>3. Lifestyle Integration:</strong></p>
+                    <ul>
+                        <li>How much time kun je realistically commit to training?</li>
+                        <li>What are your biggest obstacles to consistent training?</li>
+                        <li>How will je balance strength, muscle, en conditioning work?</li>
+                        <li>What support do je need to succeed long-term?</li>
+                    </ul>
+                    
+                    <p><strong>4. Doelen Stellen & Vision:</strong></p>
+                    <ul>
+                        <li>What specific strength numbers wil je achieve?</li>
+                        <li>How do je want your physique to look en feel?</li>
+                        <li>What level van conditioning wil je maintain?</li>
+                        <li>How will achieving these goals impact other areas van je life?</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="next-steps">Volgende Stappen</h2>
+                <div class="next-steps-box">
+                    <h4>🚀 Trinity Mastery Implementation Plan</h4>
+                    
+                    <p><strong>Phase 1: Beoordeling & Foundation (Week 1-2)</strong></p>
+                    <ol>
+                        <li><strong>Complete Trinity Testing</strong> - Baseline strength, body composition, conditioning</li>
+                        <li><strong>Set Specific Goals</strong> - Numerical doelen voor each pillar</li>
+                        <li><strong>Design Integrated Program</strong> - Balance strength, hypertrophy, conditioning</li>
+                        <li><strong>Establish Routine</strong> - Consistent training schedule</li>
+                        <li><strong>Optimize Nutrition</strong> - Support all three training goals</li>
+                    </ol>
+                    
+                    <p><strong>Phase 2: Skill Development (Week 3-6)</strong></p>
+                    <ol>
+                        <li><strong>Movement Mastery</strong> - Perfect form on compound lifts</li>
+                        <li><strong>Volume Progression</strong> - Gradually increase training volume</li>
+                        <li><strong>Conditioning Base</strong> - Build aerobic capacity</li>
+                        <li><strong>Recovery Optimization</strong> - Sleep, stress management, nutrition timing</li>
+                        <li><strong>Habit Reinforcement</strong> - Make training non-negotiable</li>
+                    </ol>
+                    
+                    <p><strong>Phase 3: Intensity & Specialization (Month 2-3)</strong></p>
+                    <ol>
+                        <li><strong>Progressive Overload</strong> - Systematic strength progression</li>
+                        <li><strong>Hypertrophy Focus</strong> - Targeted spieropbouw phases</li>
+                        <li><strong>Conditioning Advancement</strong> - HIIT integration, sport-specific training</li>
+                        <li><strong>Weak Point Address</strong> - Focus extra attention on lagging areas</li>
+                        <li><strong>Performance Testing</strong> - Regular assessments en program adjustments</li>
+                    </ol>
+                    
+                    <p><strong>Immediate Actions (This Week):</strong></p>
+                    <ol>
+                        <li><strong>Strength Test</strong> - Find current 1RM or 5RM on major lifts</li>
+                        <li><strong>Body Composition</strong> - Take measurements, photos, body fat test</li>
+                        <li><strong>Conditioning Test</strong> - 5K run, resting heart rate, recovery test</li>
+                        <li><strong>Program Design</strong> - Create balanced weekly training schedule</li>
+                        <li><strong>Facility Setup</strong> - Secure gym membership or equipment access</li>
+                    </ol>
+                    
+                    <p><strong>Trinity Success Metrics (90-day doelen):</strong></p>
+                    <ul>
+                        <li><strong>Strength Gains:</strong> 15-25% improvement in major lifts</li>
+                        <li><strong>Muscle Growth:</strong> 5-10 lbs lean mass gain</li>
+                        <li><strong>Conditioning:</strong> 20% improvement in cardiovasculair benchmarks</li>
+                        <li><strong>Body Composition:</strong> Visible muscle definition increase</li>
+                        <li><strong>Energy Levels:</strong> Sustained high energy throughout day</li>
+                        <li><strong>Performance:</strong> Better recovery between sessions</li>
+                        <li><strong>Confidence:</strong> Increased physical self-assurance</li>
+                        <li><strong>Social Impact:</strong> Others noticing en commenting on changes</li>
+                    </ul>
+                </div>
+                
+                <div class="highlight-box">
+                    <h4>🏆 Trinity Excellence Mantra</h4>
+                    <p><em>"I build my body as een integrated system of power, presence, en prestaties. My strength gives me confidence, my muscle commands respect, en my conditioning ensures sustained excellence. I train not just individual body parts, maar de complete warrior package. Every rep, every set, every session builds the trinity van physical dominance."</em></p>
+                    
+                    <p>Remember: True physical excellence is not about maximizing één aspect at de expense van others. Het is about creating een balanced, powerful, impressive physique dat functions optimally in all situations.</p>
+                    
+                    <p><strong>Strong enough to handle anything, muscular enough to command respect, conditioned enough to sustain excellence - dit is de trinity van Top Tier physical dominance.</strong></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2025 Top Tier Men Academy. Alle rechten voorbehouden.</p>
+            <p>Voor meer informatie bezoek <strong>platform.toptiermen.eu</strong></p>
+        </div>
+    </div>
+</body>
+</html>

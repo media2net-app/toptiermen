@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wat is Testosteron - Top Tier Men Academy</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background: #f9fafb;
+        }
+        
+        .ebook-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #8BAE5A 0%, #3A4D23 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -0.025em;
+        }
+        
+        .header .subtitle {
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: white;
+            opacity: 1;
+        }
+        
+        .content {
+            padding: 50px;
+        }
+        
+        .toc {
+            background: #f8fafc;
+            border-left: 4px solid #8BAE5A;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 8px;
+        }
+        
+        .toc h2 {
+            color: #8BAE5A;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .toc ol {
+            list-style: none;
+            counter-reset: toc-counter;
+        }
+        
+        .toc li {
+            counter-increment: toc-counter;
+            margin-bottom: 8px;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        .toc li::before {
+            content: counter(toc-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #8BAE5A;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .toc a {
+            color: #374151;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .toc a:hover {
+            color: #8BAE5A;
+        }
+        
+        .chapter {
+            margin: 40px 0;
+        }
+        
+        .chapter h2 {
+            color: #8BAE5A;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 10px;
+        }
+        
+        .chapter h3 {
+            color: #374151;
+            font-size: 1.4rem;
+            margin: 25px 0 15px 0;
+        }
+        
+        .chapter p {
+            margin-bottom: 15px;
+            color: #4b5563;
+        }
+        
+        .chapter ul, .chapter ol {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+        
+        .chapter li {
+            margin-bottom: 8px;
+            color: #4b5563;
+        }
+        
+        .highlight-box {
+            background: #f0f9ff;
+            border-left: 4px solid #0ea5e9;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .highlight-box h4 {
+            color: #0c4a6e;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .action-item {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .action-item h4 {
+            color: #92400e;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .reflection-box {
+            background: #f3e8ff;
+            border-left: 4px solid #8b5cf6;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .reflection-box h4 {
+            color: #5b21b6;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .next-steps-box {
+            background: #ecfdf5;
+            border-left: 4px solid #10b981;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .next-steps-box h4 {
+            color: #047857;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .footer {
+            background: #f8fafc;
+            padding: 30px;
+            text-align: center;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .footer p {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                padding: 40px 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .content {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ebook-container">
+        <div class="header">
+            <h1>Wat is Testosteron</h1>
+            <div class="subtitle">Module 1: Testosteron - Top Tier Men Academy</div>
+        </div>
+        
+        <div class="content">
+            <div class="toc">
+                <h2>Inhoudsopgave</h2>
+                <ol>
+                    <li><a href="#intro">Inleiding</a></li>
+                    <li><a href="#main-content">Hoofdinhoud</a></li>
+                    <li><a href="#practical-tips">Praktische Tips</a></li>
+                    <li><a href="#reflection">Reflectie Vragen</a></li>
+                    <li><a href="#next-steps">Volgende Stappen</a></li>
+                </ol>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="intro">Inleiding</h2>
+                <p>Welkom bij de eerste les van Module 1: Testosteron. In deze fundamentele les duiken we diep in wat testosteron werkelijk is, waarom het de meest essentiële hormoon voor mannen wordt genoemd, en hoe het letterlijk elke aspect van je leven als Top Tier Man beïnvloedt.</p>
+                
+                <div class="highlight-box">
+                    <h4>🎯 Wat je gaat leren</h4>
+                    <ul>
+                        <li>De volledige wetenschappelijke definitie van testosteron en zijn functies</li>
+                        <li>Waarom testosteron het "master hormoon" voor mannen is</li>
+                        <li>De verschillende soorten testosteron en hun specifieke rollen</li>
+                        <li>Hoe testosteron levels je fysieke, mentale en emotionele welzijn bepalen</li>
+                        <li>De connectie tussen testosteron en masculiniteit, dominantie en leiderschap</li>
+                        <li>Normaalwaarden vs. optimale waarden en wat dit betekent voor jouw potentieel</li>
+                    </ul>
+                </div>
+                
+                <p>Testosteron is niet zomaar een hormoon - het is de biochemische basis van mannelijke vitaliteit, kracht, drive en succes. Door deze les te voltooien, krijg je een volledig begrip van waarom testosteron optimalisatie de foundation is voor alles wat we doen bij Top Tier Men.</p>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="main-content">Hoofdinhoud</h2>
+                
+                <h3>Wat is Testosteron Precies?</h3>
+                <p><strong>Testosteron</strong> is een steroid hormoon dat behoort tot de androgeengroep. Het wordt voornamelijk geproduceerd in de testes (Leydig cellen), met kleine hoeveelheden in de bijnierschors en bij vrouwen in de ovaria. Voor mannen is testosteron het primary sex hormoon en anabolic steroid.</p>
+                
+                <div class="highlight-box">
+                    <h4>💡 Wetenschappelijke Definitie</h4>
+                    <p><em>Testosteron (C₁₉H₂₈O₂) is een 19-carbon steroid hormoon dat wordt gesynthetiseerd uit cholesterol en functioneert als de primaire androgeen bij mannelijke zoogdieren. Het reguleert de ontwikkeling en het behoud van mannelijke geslachtskarakteristieken en speelt een cruciale rol in anabole processen zoals spiermassa, botdichtheid en rode bloedcelproductie.</em></p>
+                </div>
+                
+                <h3>De Drie Vormen van Testosteron in je Lichaam</h3>
+                
+                <h4>1. Totaal Testosteron</h4>
+                <p>Dit is alle testosteron in je bloed, gebonden en ongebonden samen. Normale waarden liggen tussen 300-1000 ng/dL, maar optimaal is 700-1200 ng/dL.</p>
+                
+                <h4>2. Vrij Testosteron (1-3%)</h4>
+                <p>Dit is het biologisch actieve testosteron dat direct beschikbaar is voor gebruik door je lichaam. Deze vorm is het meest belangrijk voor je gevoel van vitaliteit, libido en energie.</p>
+                <ul>
+                    <li><strong>Normale range:</strong> 7-25 pg/mL</li>
+                    <li><strong>Optimale range:</strong> 20-35 pg/mL</li>
+                    <li><strong>Elite range:</strong> 30-50 pg/mL</li>
+                </ul>
+                
+                <h4>3. Bioavailable Testosteron (30-50%)</h4>
+                <p>Dit omvat vrij testosteron plus testosteron dat loosely gebonden is aan albumin. Het is makkelijk beschikbaar voor gebruik door je lichaam.</p>
+                
+                <h3>Waarom Testosteron het "Master Hormoon" is</h3>
+                <p>Testosteron wordt het master hormoon genoemd omdat het een cascade effect heeft op bijna alle andere hormonale systemen in je lichaam:</p>
+                
+                <h4>Fysieke Effecten:</h4>
+                <ul>
+                    <li><strong>Spiergroei en -behoud:</strong> Stimuleert protein synthesis en verhoogt muscle mass</li>
+                    <li><strong>Vetverbranding:</strong> Verhoogt metabolisme en promotes lean body composition</li>
+                    <li><strong>Botdichtheid:</strong> Essential voor sterke, dense botten</li>
+                    <li><strong>Cardiovasculaire gezondheid:</strong> Ondersteunt hartfunctie en circulation</li>
+                    <li><strong>Energieproductie:</strong> Optimizes mitochondrial function</li>
+                </ul>
+                
+                <h4>Mentale & Cognitieve Effecten:</h4>
+                <ul>
+                    <li><strong>Confidence & Assertiviteit:</strong> Verhoogt zelfvertrouwen en decisiveness</li>
+                    <li><strong>Cognitieve functie:</strong> Verbetert memory, focus en mental clarity</li>
+                    <li><strong>Mood regulation:</strong> Beschermt tegen depressie en anxiety</li>
+                    <li><strong>Drive & Ambitie:</strong> Verhoogt motivation en goal-oriented behavior</li>
+                    <li><strong>Risk tolerance:</strong> Enables calculated risk-taking en entrepreneurship</li>
+                </ul>
+                
+                <h4>Sociale & Seksuele Effecten:</h4>
+                <ul>
+                    <li><strong>Libido & Sexual function:</strong> Primary driver van sexual desire en prestaties</li>
+                    <li><strong>Dominantie & Leiderschap:</strong> Verhoogt natuurlijke leiderschapseigenschappen</li>
+                    <li><strong>Attractiveness:</strong> Affects pheromones, voice depth, facial structure</li>
+                    <li><strong>Competitiveness:</strong> Drives competitive spirit en winning mentality</li>
+                </ul>
+                
+                <h3>De Testosteron Productie Cyclus</h3>
+                <p>Begrijpen hoe je lichaam testosteron produceert is crucial voor optimalisatie:</p>
+                
+                <h4>De HPA-Axis (Hypothalamic-Pituitary-Adrenal)</h4>
+                <ol>
+                    <li><strong>Hypothalamus:</strong> Releases GnRH (Gonadotropin-Releasing Hormone)</li>
+                    <li><strong>Pituitary Gland:</strong> Produces LH (Luteinizing Hormone) en FSH (Follicle-Stimulating Hormone)</li>
+                    <li><strong>Testes:</strong> LH stimulates Leydig cells to produce testosterone</li>
+                    <li><strong>Feedback Loop:</strong> High testosterone signals body to reduce production</li>
+                </ol>
+                
+                <h3>Leeftijd en Testosteron Decline</h3>
+                <p>Na je 30e jaar daalt testosteron gemiddeld 1-2% per jaar. Dit is NIET normaal of onvermijdelijk - het is het resultaat van moderne levensstijlfactoren:</p>
+                
+                <h4>Natural vs. Modern Decline:</h4>
+                <ul>
+                    <li><strong>Natural aging:</strong> 0.5-1% per jaar na 40</li>
+                    <li><strong>Moderne levensstijl:</strong> 2-3% per jaar na 30</li>
+                    <li><strong>Slechte levensstijl:</strong> 5-10% per jaar</li>
+                </ul>
+                
+                <h3>Symptomen van Lage Testosteron</h3>
+                
+                <h4>Fysieke Symptomen:</h4>
+                <ul>
+                    <li>Verminderde spiermassa en kracht</li>
+                    <li>Toegenomen buikvet</li>
+                    <li>Chronische vermoeidheid</li>
+                    <li>Verminderde botdichtheid</li>
+                    <li>Poor recovery na training</li>
+                    <li>Trage metabolisme</li>
+                </ul>
+                
+                <h4>Mentale & Emotionele Symptomen:</h4>
+                <ul>
+                    <li>Verminderd zelfvertrouwen</li>
+                    <li>Gebrek aan drive en ambitie</li>
+                    <li>Mood swings en irritability</li>
+                    <li>Brain fog en poor concentration</li>
+                    <li>Increased anxiety en risk aversion</li>
+                    <li>Depressive tendencies</li>
+                </ul>
+                
+                <h4>Seksuele & Sociale Symptomen:</h4>
+                <ul>
+                    <li>Verminderde libido</li>
+                    <li>Erectile dysfunction</li>
+                    <li>Reduced morning erections</li>
+                    <li>Less assertive in social situations</li>
+                    <li>Avoiding leadership opportunities</li>
+                    <li>Decreased competitive spirit</li>
+                </ul>
+                
+                <h3>Optimale Testosteron Levels voor Top Tier Men</h3>
+                <p>De meeste artsen focussen op "normal" ranges, maar Top Tier Men streven naar OPTIMAL ranges:</p>
+                
+                <div class="action-item">
+                    <h4>🎯 Top Tier Testosteron Targets</h4>
+                    <ul>
+                        <li><strong>Total Testosterone:</strong> 800-1200 ng/dL</li>
+                        <li><strong>Free Testosterone:</strong> 25-35 pg/mL</li>
+                        <li><strong>SHBG:</strong> 15-25 nmol/L</li>
+                        <li><strong>Estradiol (E2):</strong> 20-30 pg/mL</li>
+                        <li><strong>DHT:</strong> 50-75 ng/dL</li>
+                    </ul>
+                    
+                    <p><strong>Belangrijk:</strong> Deze ranges representeren wat hoogpresterende mannen typisch hebben, niet medische minimums voor overleving.</p>
+                </div>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="practical-tips">Praktische Tips</h2>
+                <div class="action-item">
+                    <h4>💪 Testosteron Beoordeling & Optimization Basics</h4>
+                    
+                    <h5>1. Essential Blood Tests</h5>
+                    <p><strong>Comprehensive Hormone Panel:</strong></p>
+                    <ul>
+                        <li><strong>Total Testosterone</strong> (morning fasted)</li>
+                        <li><strong>Free Testosterone</strong> (direct measurement preferred)</li>
+                        <li><strong>SHBG</strong> (Sex Hormone Binding Globulin)</li>
+                        <li><strong>Estradiol (E2)</strong> (sensitive assay)</li>
+                        <li><strong>LH</strong> (Luteinizing Hormone)</li>
+                        <li><strong>FSH</strong> (Follicle Stimulating Hormone)</li>
+                        <li><strong>DHT</strong> (Dihydrotestosterone)</li>
+                        <li><strong>Prolactin</strong></li>
+                    </ul>
+                    
+                    <h5>2. Supporting Biomarkers</h5>
+                    <ul>
+                        <li><strong>Thyroid Panel:</strong> TSH, T3, T4, Reverse T3</li>
+                        <li><strong>Metabolic Panel:</strong> Glucose, HbA1c, Insulin</li>
+                        <li><strong>Lipid Panel:</strong> Total cholesterol, HDL, LDL, Triglycerides</li>
+                        <li><strong>Inflammatory Markers:</strong> CRP, IL-6</li>
+                        <li><strong>Vitamins & Minerals:</strong> Vitamin D, B12, Zinc, Magnesium</li>
+                    </ul>
+                    
+                    <h5>3. Optimal Testing Protocol</h5>
+                    <ul>
+                        <li><strong>Timing:</strong> 7-9 AM (peak natural production)</li>
+                        <li><strong>Fasting:</strong> 12+ uur voor accurate readings</li>
+                        <li><strong>Frequency:</strong> Quarterly voor optimalisatie, monthly tijdens interventions</li>
+                        <li><strong>Consistency:</strong> Same time, same lab, same conditions</li>
+                    </ul>
+                    
+                    <h5>4. Lifestyle Foundations (Before Any Intervention)</h5>
+                    <p><strong>Sleep Optimization:</strong></p>
+                    <ul>
+                        <li>7-9 uur kwaliteitslaap nightly</li>
+                        <li>Consistent sleep/wake schedule</li>
+                        <li>Dark, cool, quiet environment</li>
+                        <li>No screens 1 hour before bed</li>
+                    </ul>
+                    
+                    <p><strong>Nutrition Fundamentals:</strong></p>
+                    <ul>
+                        <li>Adequate protein (1g per lb bodyweight)</li>
+                        <li>Sufficient healthy fats (0.3-0.5g per lb)</li>
+                        <li>Strategic carbohydrate timing</li>
+                        <li>Micronutrient dense whole foods</li>
+                    </ul>
+                    
+                    <p><strong>Training Protocol:</strong></p>
+                    <ul>
+                        <li>Compound movements (squats, deadlifts, presses)</li>
+                        <li>Progressive overload</li>
+                        <li>Adequate recovery periods</li>
+                        <li>Avoid chronic cardio excess</li>
+                    </ul>
+                    
+                    <h5>5. Environmental Factors</h5>
+                    <ul>
+                        <li><strong>Avoid Endocrine Disruptors:</strong> Plastic containers, BPA, phthalates</li>
+                        <li><strong>Optimize Sunlight:</strong> Morning sun exposure, Vitamin D optimalisatie</li>
+                        <li><strong>Manage Stress:</strong> Meditation, nature time, stress reduction techniques</li>
+                        <li><strong>Cold Exposure:</strong> Cold showers, ice baths voor hormonal benefits</li>
+                    </ul>
+                </div>
+                
+                <div class="action-item">
+                    <h4>📊 Daily Testosteron Optimization Checklist</h4>
+                    <ul>
+                        <li>☐ 7+ uur kwaliteitslaap (10 PM - 6 AM schedule)</li>
+                        <li>☐ Morning sunlight exposure (15-30 minutes)</li>
+                        <li>☐ High protein breakfast with healthy fats</li>
+                        <li>☐ Resistance training or physical activity</li>
+                        <li>☐ Stress management practice (meditation, breathing)</li>
+                        <li>☐ Adequate water intake (half bodyweight in oz)</li>
+                        <li>☐ No endocrine disruptors (plastic food containers)</li>
+                        <li>☐ Evening wind-down routine</li>
+                        <li>☐ Cold exposure (cold shower/ice bath)</li>
+                        <li>☐ Avoid late night eating (3+ uur before bed)</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="reflection">Reflectie Vragen</h2>
+                <div class="reflection-box">
+                    <h4>🤔 Testosteron Self-Beoordeling</h4>
+                    
+                    <p><strong>1. Current State Analysis:</strong></p>
+                    <ul>
+                        <li>Welke physical symptoms van lage testosteron herken je in jezelf?</li>
+                        <li>Hoe zou je je energy levels en drive beoordelen op een schaal van 1-10?</li>
+                        <li>Wanneer heb je voor het laatst je hormoon levels laten testen?</li>
+                        <li>Welke levensstijlfactoren dragen waarschijnlijk bij aan suboptimale testosteron?</li>
+                    </ul>
+                    
+                    <p><strong>2. Performance Impact:</strong></p>
+                    <ul>
+                        <li>Hoe beïnvloedt je current energy level je prestaties at work?</li>
+                        <li>In welke areas van je leven zou higher testosteron immediate impact hebben?</li>
+                        <li>Welke goals zijn difficult to achieve met je current energy en drive?</li>
+                        <li>Hoe zou optimale testosteron je confidence en leadership veranderen?</li>
+                    </ul>
+                    
+                    <p><strong>3. Lifestyle Audit:</strong></p>
+                    <ul>
+                        <li>Hoeveel uur slaap je gemiddeld per nacht en wat is de kwaliteit?</li>
+                        <li>Hoe consistent is je sleep schedule?</li>
+                        <li>Welke stress factors in je leven zijn moeilijk to control?</li>
+                        <li>Hoe vaak train je met gewichten en wat is de intensiteit?</li>
+                    </ul>
+                    
+                    <p><strong>4. Optimization Readiness:</strong></p>
+                    <ul>
+                        <li>Hoe toegewijd ben je aan het maken van significantee levensstijlveranderingen?</li>
+                        <li>Welke obstacles zie je voor consistent implementation?</li>
+                        <li>What would motivate je most to optimize je hormonal health?</li>
+                        <li>Hoe zou je success measuren na 3-6 maanden optimalisatie?</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="next-steps">Volgende Stappen</h2>
+                <div class="next-steps-box">
+                    <h4>🚀 Testosteron Optimization Action Plan</h4>
+                    
+                    <p><strong>Week 1-2: Foundation Beoordeling</strong></p>
+                    <ol>
+                        <li><strong>Get Comprehensive Blood Work</strong> - Schedule comprehensive hormone panel</li>
+                        <li><strong>Establish Baseline Metrics</strong> - Energy, mood, prestaties tracking</li>
+                        <li><strong>Lifestyle Audit</strong> - Detailed analysis van sleep, nutrition, training, stress</li>
+                        <li><strong>Environment Beoordeling</strong> - Identify en eliminate endocrine disruptors</li>
+                        <li><strong>Doelen Stellen</strong> - Definieer specifieke, meetbare optimalisatiedoelen</li>
+                    </ol>
+                    
+                    <p><strong>Week 3-4: Implementation Start</strong></p>
+                    <ol>
+                        <li><strong>Sleep Protocol</strong> - Implement consistent 7-9 hour sleep schedule</li>
+                        <li><strong>Morning Routine</strong> - Add sunlight exposure en cold shower</li>
+                        <li><strong>Nutrition Optimization</strong> - High protein, adequate fats, nutrient timing</li>
+                        <li><strong>Training Program</strong> - Focus on compound movements, progressive overload</li>
+                        <li><strong>Stress Management</strong> - Daily meditation or stress reduction practice</li>
+                    </ol>
+                    
+                    <p><strong>Month 2-3: Advanced Optimization</strong></p>
+                    <ol>
+                        <li><strong>Fine-tune Protocol</strong> - Adjust based on biofeedback en energy levels</li>
+                        <li><strong>Add Strategic Interventions</strong> - Targeted supplements if needed</li>
+                        <li><strong>Monitor Progress</strong> - Weekly energy/mood assessments</li>
+                        <li><strong>Social Environment</strong> - Surround yourself met high-energy, driven men</li>
+                        <li><strong>Advanced Techniques</strong> - Heat/cold therapy, intermittent fasting</li>
+                    </ol>
+                    
+                    <p><strong>Immediate Actions (Today):</strong></p>
+                    <ol>
+                        <li><strong>Schedule Blood Work</strong> - Book comprehensive hormone panel for this week</li>
+                        <li><strong>Set Sleep Schedule</strong> - Choose consistent bedtime en wake time</li>
+                        <li><strong>Eliminate One Disruptor</strong> - Stop using plastic food containers</li>
+                        <li><strong>Plan Tomorrow's Routine</strong> - Morning sunlight, cold shower, high-protein breakfast</li>
+                        <li><strong>Find Accountability Partner</strong> - Share je optimalisatie goals met trusted friend</li>
+                    </ol>
+                    
+                    <p><strong>Success Metrics (3-month evaluation):</strong></p>
+                    <ul>
+                        <li>Total testosterone: 800+ ng/dL</li>
+                        <li>Free testosterone: 25+ pg/mL</li>
+                        <li>Energy levels: 8-10/10 daily</li>
+                        <li>Sleep quality: 7+ hours, deep restorative sleep</li>
+                        <li>Fysieke prestaties: 20%+ improvement in strength</li>
+                        <li>Mental clarity: Improved focus en decision-making</li>
+                        <li>Confidence: Increased assertiveness en leadership</li>
+                    </ul>
+                </div>
+                
+                <div class="highlight-box">
+                    <h4>⚡ Testosteron Mastery Mantra</h4>
+                    <p><em>"Testosteron is niet zomaar een hormoon - het is de biochemische basis van mannelijke kracht. Ik optimaliseer mijn lichaam, geest, en omgeving om mijn volledige potentieel te ontgrendelen. Ik accepteer geen "normaal" wanneer "optimaal" haalbaar is. Mijn testosteron is mijn concurrentievoordeel."</em></p>
+                    
+                    <p>Onthoud: Testosteron optimaliseren gaat niet over snelle oplossingen - het gaat over het creëren van een levensstijl die van nature je lichaams vermogen ondersteunt om piekwaarden van dit meesterhormoon te produceren. Elke keuze die je maakt ondersteunt of saboteert je hormonale optimalisatie.</p>
+                    
+                    <p><strong>Je testosteronniveaus weerspiegelen je toewijding aan excellentie. Laat ze je Top Tier normen weerspiegelen.</strong></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2025 Top Tier Men Academy. Alle rechten voorbehouden.</p>
+            <p>Voor meer informatie bezoek <strong>platform.toptiermen.eu</strong></p>
+        </div>
+    </div>
+</body>
+</html>

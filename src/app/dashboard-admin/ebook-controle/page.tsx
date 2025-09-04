@@ -59,6 +59,8 @@ export default function EbookControlePage() {
       const { data, error } = await supabase
         .from('academy_ebook_files')
         .select('*')
+        .eq('status', 'active')
+        .neq('style_type', 'legacy') // Hide old ebooks
         .order('priority', { ascending: false })
         .order('module')
         .order('title');
@@ -72,16 +74,7 @@ export default function EbookControlePage() {
     }
   };
 
-  // Test ebook accessibility function
-  const testEbookAccess = async (path: string): Promise<boolean> => {
-    try {
-      const response = await fetch(path, { method: 'HEAD' });
-      return response.ok;
-    } catch (error) {
-      console.error('Error testing ebook access:', error);
-      return false;
-    }
-  };
+  // Removed testEbookAccess function - direct links are more reliable
 
   useEffect(() => {
     fetchEbooks();
@@ -409,35 +402,28 @@ export default function EbookControlePage() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <div className="flex space-x-3">
                         <button
-                          onClick={async () => {
+                          onClick={() => {
                             setOpeningEbook(ebook.id);
-                            console.log('🔗 Opening ebook:', ebook.path);
                             const fullUrl = window.location.origin + ebook.path;
-                            console.log('🌐 Full URL:', fullUrl);
+                            console.log('🔗 Opening ebook:', fullUrl);
                             
-                            try {
-                              // Test eerst of de file toegankelijk is
-                              const isAccessible = await testEbookAccess(ebook.path);
-                              if (!isAccessible) {
-                                alert(`⚠️ Ebook niet toegankelijk op pad: ${ebook.path}\n\nControleer of het bestand bestaat in de public/books/ directory.`);
-                                return;
-                              }
-
-                              const newWindow = window.open(ebook.path, '_blank', 'noopener,noreferrer');
-                              if (!newWindow) {
-                                // Fallback als popup wordt geblokkeerd
-                                console.warn('⚠️ Popup blocked, trying alternative method');
-                                alert('Popup geblokkeerd! Open de browser instellingen om popups toe te staan voor deze site, of kopieer de URL handmatig: ' + fullUrl);
-                              } else {
-                                console.log('✅ Ebook opened successfully');
-                              }
-                            } catch (error) {
-                              console.error('❌ Error opening ebook:', error);
-                              alert('Fout bij openen van ebook. Probeer de link handmatig: ' + fullUrl);
-                            } finally {
-                              // Reset loading state na korte delay
-                              setTimeout(() => setOpeningEbook(null), 1000);
+                            // Direct open without testing - more reliable
+                            const newWindow = window.open(ebook.path, '_blank', 'noopener,noreferrer');
+                            
+                            if (!newWindow) {
+                              // Copy URL to clipboard as fallback
+                              navigator.clipboard.writeText(fullUrl).then(() => {
+                                alert(`🔗 URL gekopieerd naar klembord!\n\n${fullUrl}\n\nPlak deze URL in een nieuw browser tabblad.`);
+                              }).catch(() => {
+                                // Final fallback - show URL
+                                prompt('Kopieer deze URL en plak in nieuw tabblad:', fullUrl);
+                              });
+                            } else {
+                              console.log('✅ Ebook opened successfully');
                             }
+                            
+                            // Reset loading state
+                            setTimeout(() => setOpeningEbook(null), 500);
                           }}
                           disabled={openingEbook === ebook.id}
                           className="inline-flex items-center px-3 py-1.5 bg-[#8BAE5A] text-[#181F17] rounded-md hover:bg-[#B6C948] transition-colors font-medium focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] focus:ring-offset-2 focus:ring-offset-[#232D1A] disabled:opacity-50"
@@ -455,6 +441,21 @@ export default function EbookControlePage() {
                             </>
                           )}
                         </button>
+                        
+                        {/* Direct link knop als backup */}
+                        <a
+                          href={ebook.path}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center px-3 py-1.5 bg-[#3A4D23] text-[#B6C948] rounded-md hover:bg-[#8BAE5A] hover:text-[#181F17] transition-colors font-medium"
+                          title={`Direct link naar ${ebook.title}`}
+                        >
+                          <svg className="h-4 w-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                          Link
+                        </a>
+                        
                         <button 
                           className="inline-flex items-center px-3 py-1.5 border border-[#3A4D23] text-[#B6C948] rounded-md hover:bg-[#3A4D23] hover:text-[#8BAE5A] transition-colors font-medium"
                           title="Bewerk ebook eigenschappen"

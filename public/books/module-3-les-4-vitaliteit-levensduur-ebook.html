@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vitaliteit en Levensduur - Top Tier Men Academy</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background: #f9fafb;
+        }
+        
+        .ebook-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #8BAE5A 0%, #3A4D23 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -0.025em;
+        }
+        
+        .header .subtitle {
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: white;
+            opacity: 1;
+        }
+        
+        .content {
+            padding: 50px;
+        }
+        
+        .toc {
+            background: #f8fafc;
+            border-left: 4px solid #8BAE5A;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 8px;
+        }
+        
+        .toc h2 {
+            color: #8BAE5A;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .toc ol {
+            list-style: none;
+            counter-reset: toc-counter;
+        }
+        
+        .toc li {
+            counter-increment: toc-counter;
+            margin-bottom: 8px;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        .toc li::before {
+            content: counter(toc-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #8BAE5A;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .toc a {
+            color: #374151;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .toc a:hover {
+            color: #8BAE5A;
+        }
+        
+        .chapter {
+            margin: 40px 0;
+        }
+        
+        .chapter h2 {
+            color: #8BAE5A;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 10px;
+        }
+        
+        .chapter h3 {
+            color: #374151;
+            font-size: 1.4rem;
+            margin: 25px 0 15px 0;
+        }
+        
+        .chapter p {
+            margin-bottom: 15px;
+            color: #4b5563;
+        }
+        
+        .chapter ul, .chapter ol {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+        
+        .chapter li {
+            margin-bottom: 8px;
+            color: #4b5563;
+        }
+        
+        .highlight-box {
+            background: #f0f9ff;
+            border-left: 4px solid #0ea5e9;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .highlight-box h4 {
+            color: #0c4a6e;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .action-item {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .action-item h4 {
+            color: #92400e;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .reflection-box {
+            background: #f3e8ff;
+            border-left: 4px solid #8b5cf6;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .reflection-box h4 {
+            color: #5b21b6;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .next-steps-box {
+            background: #ecfdf5;
+            border-left: 4px solid #10b981;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .next-steps-box h4 {
+            color: #047857;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .footer {
+            background: #f8fafc;
+            padding: 30px;
+            text-align: center;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .footer p {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                padding: 40px 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .content {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ebook-container">
+        <div class="header">
+            <h1>Vitaliteit en Levensduur</h1>
+            <div class="subtitle">Module 3: Fysieke Dominantie - Top Tier Men Academy</div>
+        </div>
+        
+        <div class="content">
+            <div class="toc">
+                <h2>Inhoudsopgave</h2>
+                <ol>
+                    <li><a href="#intro">Inleiding</a></li>
+                    <li><a href="#main-content">Hoofdinhoud</a></li>
+                    <li><a href="#practical-tips">Praktische Tips</a></li>
+                    <li><a href="#reflection">Reflectie Vragen</a></li>
+                    <li><a href="#next-steps">Volgende Stappen</a></li>
+                </ol>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="intro">Inleiding</h2>
+                <p>Welkom bij les 4 van Module 3: Fysieke Dominantie. While previous lessons focused on immediate benefits van physical excellence, deze les explores de long-term impact: <strong>Vitaliteit en Levensduur</strong>. This is about niet just looking good nu, maar maintaining excellence en vitality voor decades to come.</p>
+                
+                <div class="highlight-box">
+                    <h4>🎯 Wat je gaat leren</h4>
+                    <ul>
+                        <li>Hoe physical fitness dramatically extends both lifespan en healthspan</li>
+                        <li>De science van vitality: energy, vigor, en sustained prestaties</li>
+                        <li>Anti-aging benefits van krachttraining en cardiovasculair fitness</li>
+                        <li>Cognitive protection en mental sharpness through physical activity</li>
+                        <li>Strategic approaches to aging gracefully as een Top Tier Man</li>
+                        <li>Creëren een sustainable fitness levensstijl voor lifelong results</li>
+                    </ul>
+                </div>
+                
+                <p>This lesson is about playing de long game - building en maintaining een body dat serves you powerfully not just in your 30s en 40s, maar well into your 60s, 70s, en beyond. True Top Tier Men don't just peak early; they sustain excellence gedurende deir entire lives.</p>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="main-content">Hoofdinhoud</h2>
+                
+                <h3>De Vitality Crisis in Modern Men</h3>
+                <p>Most men experience een dramatic decline in vitality starting in their 30s. This is NOT normal or inevitable - het is de result van poor levensstijl choices:</p>
+                
+                <div class="highlight-box">
+                    <h4>📉 Typical Male Decline Pattern</h4>
+                    <ul>
+                        <li><strong>Age 30-35:</strong> Energy starts declining, recovery slows</li>
+                        <li><strong>Age 35-40:</strong> Muscle mass begins decreasing, fat increases</li>
+                        <li><strong>Age 40-45:</strong> Testosterone drops, libido decreases</li>
+                        <li><strong>Age 45-50:</strong> Chronic health issues emerge</li>
+                        <li><strong>Age 50+:</strong> Significant physical en mental decline</li>
+                    </ul>
+                    
+                    <p><strong>The Reality:</strong> By age 50, de average man has lost 30% van his muscle mass, gained 40+ pounds van fat, en accepts "feeling old" as normal.</p>
+                </div>
+                
+                <p><strong>But this decline is OPTIONAL.</strong> With proper physical conditioning, je kunt maintain - en even improve - your vitality well into your later decades.</p>
+                
+                <h3>VITALITEIT: De Energy Advantage</h3>
+                
+                <h4>What is True Vitality?</h4>
+                <p>Vitality is not just having energy - het is having <strong>sustained high-quality energy</strong> that allows you to perform at your peak across all life domains:</p>
+                
+                <p><strong>Physical Vitality:</strong></p>
+                <ul>
+                    <li><strong>Energy Endurance:</strong> High energy from morning to night</li>
+                    <li><strong>Physical Capability:</strong> Strength en endurance for any task</li>
+                    <li><strong>Quick Recovery:</strong> Bounce back rapidly from exertion</li>
+                    <li><strong>Movement Kwaliteit:</strong> Fluid, pain-free movement</li>
+                    <li><strong>Resilience:</strong> Resistance to illness en injury</li>
+                </ul>
+                
+                <p><strong>Mental Vitality:</strong></p>
+                <ul>
+                    <li><strong>Cognitive Sharpness:</strong> Clear thinking en quick processing</li>
+                    <li><strong>Focus Endurance:</strong> Sustained concentration ability</li>
+                    <li><strong>Memory Function:</strong> Excellent recall en learning</li>
+                    <li><strong>Emotional Stability:</strong> Consistent mood en optimism</li>
+                    <li><strong>Stress Resilience:</strong> Handling pressure with ease</li>
+                </ul>
+                
+                <p><strong>Sexual Vitality:</strong></p>
+                <ul>
+                    <li><strong>High Libido:</strong> Strong, consistent sexual desire</li>
+                    <li><strong>Performance Kwaliteit:</strong> Reliable sexual function</li>
+                    <li><strong>Stamina:</strong> Extended sexual endurance</li>
+                    <li><strong>Recovery Speed:</strong> Short refractory periods</li>
+                    <li><strong>Confidence:</strong> Sexual self-assurance</li>
+                </ul>
+                
+                <h4>De Science van Vitality Through Fitness</h4>
+                
+                <p><strong>Mitochondrial Health:</strong></p>
+                <ul>
+                    <li><strong>Energy Production:</strong> Exercise increases mitochondrial density</li>
+                    <li><strong>Cellular Efficiency:</strong> Better oxygen utilization</li>
+                    <li><strong>Waste Removal:</strong> Enhanced cellular detoxification</li>
+                    <li><strong>Longevity Signaling:</strong> Activates anti-aging pathways</li>
+                    <li><strong>Metabolic Flexibility:</strong> Efficient fuel utilization</li>
+                </ul>
+                
+                <p><strong>Hormonal Optimization:</strong></p>
+                <ul>
+                    <li><strong>Testosterone Maintenance:</strong> Resistance training preserves hormone levels</li>
+                    <li><strong>Growth Hormone:</strong> Exercise stimulates natural HGH production</li>
+                    <li><strong>Insulin Sensitivity:</strong> Better glucose metabolism</li>
+                    <li><strong>Cortisol Management:</strong> Improved stress hormone regulation</li>
+                    <li><strong>Thyroid Function:</strong> Enhanced metabolic rate</li>
+                </ul>
+                
+                <p><strong>Cardiovascular Efficiency:</strong></p>
+                <ul>
+                    <li><strong>Heart Strength:</strong> More powerful, efficient pumping</li>
+                    <li><strong>Circulation:</strong> Better blood flow to all organs</li>
+                    <li><strong>Oxygen Delivery:</strong> Enhanced tissue oxygenation</li>
+                    <li><strong>Blood Pressure:</strong> Optimal cardiovasculair pressure</li>
+                    <li><strong>Endothelial Function:</strong> Healthy blood vessel lining</li>
+                </ul>
+                
+                <h3>LEVENSDUUR: Adding Years to Your Life</h3>
+                
+                <h4>Lifespan vs. Healthspan</h4>
+                <p>There's een critical difference between simply living longer en living well longer:</p>
+                
+                <p><strong>Lifespan:</strong> Total years lived</p>
+                <p><strong>Healthspan:</strong> Years lived in good health with vitality</p>
+                
+                <p>Most people have een 10-20 year gap where they're alive maar declining. Top Tier Men minimize this gap through strategic fitness.</p>
+                
+                <div class="highlight-box">
+                    <h4>🧬 Fitness Impact on Longevity</h4>
+                    <p><strong>Onderzoek Findings:</strong></p>
+                    <ul>
+                        <li><strong>Cardiovascular Fitness:</strong> +3-7 years lifespan</li>
+                        <li><strong>Strength Training:</strong> +1.5-3 years lifespan</li>
+                        <li><strong>Combined Training:</strong> Up to 10 years additional life</li>
+                        <li><strong>Elite Fitness:</strong> 15-20 year healthspan extension</li>
+                    </ul>
+                    
+                    <p><strong>The Power of Fitness:</strong> Being in de top 20% van fitness voor your age group can give you de physiology van someone 20-30 years younger.</p>
+                </div>
+                
+                <h4>Mechanisms van Fitness-Induced Longevity</h4>
+                
+                <p><strong>Cellular Protection:</strong></p>
+                <ul>
+                    <li><strong>Telomere Preservation:</strong> Exercise protects DNA from aging</li>
+                    <li><strong>Antioxidant Production:</strong> Natural free radical defense</li>
+                    <li><strong>Protein Synthesis:</strong> Maintained cellular repair</li>
+                    <li><strong>Autophagy:</strong> Cellular cleanup en renewal</li>
+                    <li><strong>Inflammation Reduction:</strong> Lower chronic inflammation</li>
+                </ul>
+                
+                <p><strong>Disease Prevention:</strong></p>
+                <ul>
+                    <li><strong>Cardiovascular Disease:</strong> 50-70% risk reduction</li>
+                    <li><strong>Type 2 Diabetes:</strong> 40-60% risk reduction</li>
+                    <li><strong>Cancer:</strong> 20-30% risk reduction</li>
+                    <li><strong>Alzheimer's:</strong> 30-40% risk reduction</li>
+                    <li><strong>Osteoporosis:</strong> 50-80% risk reduction</li>
+                </ul>
+                
+                <p><strong>Physical Preservation:</strong></p>
+                <ul>
+                    <li><strong>Muscle Mass:</strong> Maintained strength en mobility</li>
+                    <li><strong>Bone Density:</strong> Prevented osteoporosis</li>
+                    <li><strong>Joint Health:</strong> Preserved range van motion</li>
+                    <li><strong>Balance:</strong> Reduced fall risk</li>
+                    <li><strong>Coordination:</strong> Maintained motor skills</li>
+                </ul>
+                
+                <h3>Cognitive Protection en Mental Sharpness</h3>
+                
+                <h4>Exercise as Brain Medicine</h4>
+                <p>Physical fitness provides powerful protection against cognitive decline:</p>
+                
+                <p><strong>Neuroplasticity Enhancement:</strong></p>
+                <ul>
+                    <li><strong>BDNF Production:</strong> Brain-derived neurotrophic factor growth</li>
+                    <li><strong>New Neuron Growth:</strong> Neurogenesis in hippocampus</li>
+                    <li><strong>Synaptic Connections:</strong> Enhanced neural communication</li>
+                    <li><strong>Brain Volume:</strong> Preserved gray en white matter</li>
+                    <li><strong>Cognitive Reserve:</strong> Protection against dementia</li>
+                </ul>
+                
+                <p><strong>Blood Flow Benefits:</strong></p>
+                <ul>
+                    <li><strong>Cerebral Circulation:</strong> Increased blood flow to brain</li>
+                    <li><strong>Oxygen Delivery:</strong> Enhanced brain oxygenation</li>
+                    <li><strong>Nutrient Transport:</strong> Better brain nutrition</li>
+                    <li><strong>Waste Removal:</strong> Cleared metabolic toxins</li>
+                    <li><strong>Vascular Health:</strong> Reduced stroke risk</li>
+                </ul>
+                
+                <p><strong>Neurotransmitter Optimization:</strong></p>
+                <ul>
+                    <li><strong>Dopamine:</strong> Enhanced motivation en reward</li>
+                    <li><strong>Serotonin:</strong> Improved mood en well-being</li>
+                    <li><strong>Norepinephrine:</strong> Better focus en attention</li>
+                    <li><strong>GABA:</strong> Reduced anxiety en stress</li>
+                    <li><strong>Endorphins:</strong> Natural mood elevation</li>
+                </ul>
+                
+                <h4>Age-Related Cognitive Benefits</h4>
+                <p>Specific cognitive advantages voor older adults who maintain fitness:</p>
+                
+                <p><strong>Executive Function:</strong></p>
+                <ul>
+                    <li><strong>Processing Speed:</strong> Faster information processing</li>
+                    <li><strong>Working Memory:</strong> Better short-term memory</li>
+                    <li><strong>Cognitive Flexibility:</strong> Adaptability to new situations</li>
+                    <li><strong>Inhibitory Control:</strong> Better impulse control</li>
+                    <li><strong>Task Switching:</strong> Multitasking ability</li>
+                </ul>
+                
+                <p><strong>Memory Protection:</strong></p>
+                <ul>
+                    <li><strong>Long-term Memory:</strong> Preserved life experiences</li>
+                    <li><strong>Learning Ability:</strong> Continued skill acquisition</li>
+                    <li><strong>Recall Speed:</strong> Quick information retrieval</li>
+                    <li><strong>Memory Consolidation:</strong> Better sleep-dependent memory</li>
+                    <li><strong>Spatial Memory:</strong> Navigation en location memory</li>
+                </ul>
+                
+                <h3>Strategic Aging: De Top Tier Approach</h3>
+                
+                <h4>The 4 Phases van Strategic Aging</h4>
+                
+                <p><strong>Phase 1: Foundation Bouwen (20s-30s)</strong></p>
+                <ul>
+                    <li><strong>Goal:</strong> Build maximum muscle mass en cardiovasculair base</li>
+                    <li><strong>Focus:</strong> Strength, size, en conditioning development</li>
+                    <li><strong>Strategy:</strong> High volume, progressive overload</li>
+                    <li><strong>Outcome:</strong> Peak physical capabilities</li>
+                </ul>
+                
+                <p><strong>Phase 2: Optimization (30s-40s)</strong></p>
+                <ul>
+                    <li><strong>Goal:</strong> Maintain peak prestaties en address early decline</li>
+                    <li><strong>Focus:</strong> Recovery, flexibility, en injury prevention</li>
+                    <li><strong>Strategy:</strong> Smart programming, recovery emphasis</li>
+                    <li><strong>Outcome:</strong> Sustained excellence with longevity focus</li>
+                </ul>
+                
+                <p><strong>Phase 3: Preservation (40s-50s)</strong></p>
+                <ul>
+                    <li><strong>Goal:</strong> Prevent age-related decline</li>
+                    <li><strong>Focus:</strong> Strength maintenance, mobility, balance</li>
+                    <li><strong>Strategy:</strong> Functional training, injury prevention</li>
+                    <li><strong>Outcome:</strong> Maintained capabilities against peers</li>
+                </ul>
+                
+                <p><strong>Phase 4: Longevity (50s+)</strong></p>
+                <ul>
+                    <li><strong>Goal:</strong> Maximize healthspan en quality van life</li>
+                    <li><strong>Focus:</strong> Independence, cognitive health, vitality</li>
+                    <li><strong>Strategy:</strong> Sustainable, joint-friendly exercise</li>
+                    <li><strong>Outcome:</strong> Vibrant aging with maintained function</li>
+                </ul>
+                
+                <h4>Age-Specific Training Adaptations</h4>
+                
+                <p><strong>30s Adjustments:</strong></p>
+                <ul>
+                    <li><strong>Recovery Focus:</strong> More emphasis on sleep en recovery</li>
+                    <li><strong>Mobility Work:</strong> Daily stretching en movement quality</li>
+                    <li><strong>Injury Prevention:</strong> Warm-up en cool-down protocols</li>
+                    <li><strong>Periodization:</strong> Planned deload weeks</li>
+                </ul>
+                
+                <p><strong>40s Modifications:</strong></p>
+                <ul>
+                    <li><strong>Joint Health:</strong> Lower impact exercises</li>
+                    <li><strong>Strength Maintenance:</strong> Focus on preserving muscle mass</li>
+                    <li><strong>Functional Movement:</strong> Real-world movement patterns</li>
+                    <li><strong>Balance Training:</strong> Stability en coordination work</li>
+                </ul>
+                
+                <p><strong>50s+ Priorities:</strong></p>
+                <ul>
+                    <li><strong>Fall Prevention:</strong> Balance en stability training</li>
+                    <li><strong>Bone Health:</strong> Weight-bearing exercises</li>
+                    <li><strong>Cognitive Training:</strong> Complex movement patterns</li>
+                    <li><strong>Social Exercise:</strong> Group activities en sports</li>
+                </ul>
+                
+                <h3>Vitality Preservation Strategies</h3>
+                
+                <h4>Daily Energy Management</h4>
+                <p>Maintaining high vitality requires strategic energy management:</p>
+                
+                <p><strong>Morning Vitality Protocol:</strong></p>
+                <ul>
+                    <li><strong>Wake Time Consistency:</strong> Same time daily voor circadian rhythm</li>
+                    <li><strong>Morning Movement:</strong> 10-15 minutes activation</li>
+                    <li><strong>Sunlight Exposure:</strong> Natural light to wake system</li>
+                    <li><strong>Hydration Priority:</strong> Water before coffee</li>
+                    <li><strong>High-Protein Breakfast:</strong> Sustained energy release</li>
+                </ul>
+                
+                <p><strong>Midday Energy Maintenance:</strong></p>
+                <ul>
+                    <li><strong>Movement Breaks:</strong> Every 60-90 minutes</li>
+                    <li><strong>Breathing Exercises:</strong> Stress reset techniques</li>
+                    <li><strong>Nutrition Timing:</strong> Balanced meals en snacks</li>
+                    <li><strong>Hydration Tracking:</strong> Consistent water intake</li>
+                    <li><strong>Power Naps:</strong> 15-20 minutes if needed</li>
+                </ul>
+                
+                <p><strong>Evening Recovery:</strong></p>
+                <ul>
+                    <li><strong>Training Completion:</strong> Exercise before 7 PM</li>
+                    <li><strong>Screen Limitation:</strong> Blue light reduction</li>
+                    <li><strong>Temperature Drop:</strong> Cool environment voor sleep</li>
+                    <li><strong>Stress Processing:</strong> Journaling or meditation</li>
+                    <li><strong>Sleep Preparation:</strong> Consistent bedtime routine</li>
+                </ul>
+                
+                <h4>Longevity-Focused Nutrition</h4>
+                <p>Nutrition strategies voor sustained vitality en longevity:</p>
+                
+                <p><strong>Anti-Aging Nutrition Principles:</strong></p>
+                <ul>
+                    <li><strong>Protein Priority:</strong> 1.2-1.6g per kg bodyweight</li>
+                    <li><strong>Omega-3 Focus:</strong> Anti-inflammatory fats</li>
+                    <li><strong>Antioxidant Rich:</strong> Colorful vegetables en fruits</li>
+                    <li><strong>Mineral Dense:</strong> Micronutrient optimalisatie</li>
+                    <li><strong>Caloric Moderation:</strong> Avoid excess calories</li>
+                </ul>
+                
+                <p><strong>Longevity Supplements:</strong></p>
+                <ul>
+                    <li><strong>Vitamin D3:</strong> 2000-4000 IU daily</li>
+                    <li><strong>Omega-3:</strong> High-quality fish oil</li>
+                    <li><strong>Magnesium:</strong> 400-600mg daily</li>
+                    <li><strong>Vitamin K2:</strong> Bone en cardiovasculair health</li>
+                    <li><strong>CoQ10:</strong> Mitochondrial support</li>
+                </ul>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="practical-tips">Praktische Tips</h2>
+                <div class="action-item">
+                    <h4>💪 Vitality Enhancement Protocol</h4>
+                    
+                    <h5>1. Daily Energy Optimization</h5>
+                    <p><strong>Morning Power Routine (15-20 minutes):</strong></p>
+                    <ul>
+                        <li><strong>Wake Consistency:</strong> Same time daily, even weekends</li>
+                        <li><strong>Sunlight First:</strong> 10 minutes natural light exposure</li>
+                        <li><strong>Movement Activation:</strong> Dynamic stretching or yoga flow</li>
+                        <li><strong>Cold Exposure:</strong> Cold shower voor 2-3 minutes</li>
+                        <li><strong>Breathing Practice:</strong> 5 minutes diaphragmatic breathing</li>
+                    </ul>
+                    
+                    <h5>2. Workday Vitality Maintenance</h5>
+                    <p><strong>Energy Sustaining Strategies:</strong></p>
+                    <ul>
+                        <li><strong>Movement Breaks:</strong> 2-3 minutes every hour</li>
+                        <li><strong>Hydration Protocol:</strong> 8oz water every 2 hours</li>
+                        <li><strong>Nutritional Timing:</strong> Balanced meals every 3-4 hours</li>
+                        <li><strong>Stress Breaks:</strong> 5-minute breathing or meditation</li>
+                        <li><strong>Posture Reset:</strong> Hourly posture check</li>
+                    </ul>
+                    
+                    <h5>3. Evening Recovery Protocol</h5>
+                    <p><strong>Vitality Restoration Routine:</strong></p>
+                    <ul>
+                        <li><strong>Training Window:</strong> Exercise completed by 7 PM</li>
+                        <li><strong>Digital Sunset:</strong> Screens off 1 hour before bed</li>
+                        <li><strong>Temperature Control:</strong> Cool bedroom (65-68°F)</li>
+                        <li><strong>Stress Processing:</strong> Journal or meditate 10 minutes</li>
+                        <li><strong>Sleep Preparation:</strong> Same bedtime routine nightly</li>
+                    </ul>
+                </div>
+                
+                <div class="action-item">
+                    <h4>🧬 Longevity Training System</h4>
+                    
+                    <h5>1. Strength Preservation Protocol</h5>
+                    <p><strong>Muscle Mass Maintenance (3x per week):</strong></p>
+                    <ul>
+                        <li><strong>Compound Focus:</strong> Squats, deadlifts, presses, rows</li>
+                        <li><strong>Rep Range:</strong> 6-12 reps voor hypertrophy</li>
+                        <li><strong>Progressive Overload:</strong> Gradual weight increases</li>
+                        <li><strong>Full Body:</strong> All major muscle groups 2x weekly</li>
+                        <li><strong>Recovery Time:</strong> 48-72 uur between sessions</li>
+                    </ul>
+                    
+                    <h5>2. Cardiovascular Longevity Training</h5>
+                    <p><strong>Heart Health Protocol:</strong></p>
+                    <ul>
+                        <li><strong>Zone 2 Training:</strong> 2-3x per week, 45-60 minutes</li>
+                        <li><strong>HIIT Sessions:</strong> 1-2x per week, 15-20 minutes</li>
+                        <li><strong>Daily Movement:</strong> 30+ minutes moderate activity</li>
+                        <li><strong>Heart Rate Zones:</strong> Training across different intensities</li>
+                        <li><strong>Recovery Monitoring:</strong> HRV tracking</li>
+                    </ul>
+                    
+                    <h5>3. Mobility en Balance Training</h5>
+                    <p><strong>Movement Kwaliteit Protocol:</strong></p>
+                    <ul>
+                        <li><strong>Daily Stretching:</strong> 15-20 minutes morning or evening</li>
+                        <li><strong>Balance Challenges:</strong> Single-leg stands, yoga poses</li>
+                        <li><strong>Coordination Work:</strong> Complex movement patterns</li>
+                        <li><strong>Joint Mobility:</strong> Full range van motion exercises</li>
+                        <li><strong>Functional Movement:</strong> Real-world movement patterns</li>
+                    </ul>
+                </div>
+                
+                <div class="action-item">
+                    <h4>🧠 Cognitive Protection Strategy</h4>
+                    
+                    <h5>1. Brain-Boosting Exercise</h5>
+                    <p><strong>Neuroplasticity Enhancement:</strong></p>
+                    <ul>
+                        <li><strong>Aerobic Exercise:</strong> 150+ minutes per week</li>
+                        <li><strong>Strength Training:</strong> 2-3x per week</li>
+                        <li><strong>Complex Movements:</strong> Dancing, martial arts, sports</li>
+                        <li><strong>Coordination Challenges:</strong> New motor skills</li>
+                        <li><strong>Mind-Body Practices:</strong> Yoga, tai chi, qigong</li>
+                    </ul>
+                    
+                    <h5>2. Cognitive Training Integration</h5>
+                    <p><strong>Mental Sharpness Protocol:</strong></p>
+                    <ul>
+                        <li><strong>Learning Challenges:</strong> New skills or languages</li>
+                        <li><strong>Memory Exercises:</strong> Deliberate recall practice</li>
+                        <li><strong>Problem Solving:</strong> Puzzles, strategy games</li>
+                        <li><strong>Social Engagement:</strong> Complex social interactions</li>
+                        <li><strong>Novelty Seeking:</strong> New experiences en challenges</li>
+                    </ul>
+                    
+                    <h5>3. Brain Health Nutrition</h5>
+                    <p><strong>Cognitive Support Foods:</strong></p>
+                    <ul>
+                        <li><strong>Omega-3 Rich:</strong> Fatty fish, walnuts, flaxseeds</li>
+                        <li><strong>Antioxidant Dense:</strong> Berries, dark leafy greens</li>
+                        <li><strong>Anti-inflammatory:</strong> Turmeric, ginger, green tea</li>
+                        <li><strong>Brain Fats:</strong> Avocados, olive oil, nuts</li>
+                        <li><strong>Hydration:</strong> Adequate water voor brain function</li>
+                    </ul>
+                </div>
+                
+                <div class="action-item">
+                    <h4>📊 Vitality & Longevity Tracking</h4>
+                    
+                    <h5>Daily Vitality Metrics</h5>
+                    <ul>
+                        <li>☐ <strong>Energy Level (1-10):</strong> Morning, afternoon, evening ratings</li>
+                        <li>☐ <strong>Sleep Kwaliteit:</strong> Hours slept, feeling upon waking</li>
+                        <li>☐ <strong>Movement Minutes:</strong> Total daily activity time</li>
+                        <li>☐ <strong>Hydration:</strong> Glasses van water consumed</li>
+                        <li>☐ <strong>Stress Level:</strong> Subjective stress rating</li>
+                    </ul>
+                    
+                    <h5>Weekly Performance Indicators</h5>
+                    <ul>
+                        <li>☐ <strong>Training Consistency:</strong> Planned vs. completed sessions</li>
+                        <li>☐ <strong>Recovery Kwaliteit:</strong> HRV, resting heart rate</li>
+                        <li>☐ <strong>Strength Metrics:</strong> Key lift prestaties</li>
+                        <li>☐ <strong>Cardiovascular:</strong> Endurance benchmarks</li>
+                        <li>☐ <strong>Body Composition:</strong> Weight, measurements</li>
+                    </ul>
+                    
+                    <h5>Monthly Longevity Beoordelings</h5>
+                    <ul>
+                        <li>☐ <strong>Cognitive Function:</strong> Memory, processing speed tests</li>
+                        <li>☐ <strong>Physical Capabilities:</strong> Strength, endurance benchmarks</li>
+                        <li>☐ <strong>Health Markers:</strong> Blood pressure, resting HR</li>
+                        <li>☐ <strong>Mobility Beoordeling:</strong> Flexibility, balance tests</li>
+                        <li>☐ <strong>Life Satisfaction:</strong> Overall well-being rating</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="reflection">Reflectie Vragen</h2>
+                <div class="reflection-box">
+                    <h4>🤔 Vitality & Longevity Self-Beoordeling</h4>
+                    
+                    <p><strong>1. Current Vitality Evaluation:</strong></p>
+                    <ul>
+                        <li>How would je rate your current energy levels throughout de day (1-10)?</li>
+                        <li>Do you wake up feeling refreshed en energized?</li>
+                        <li>How quickly do you recover from physical or mental exertion?</li>
+                        <li>Are you maintaining de same energy levels as 5 years ago?</li>
+                    </ul>
+                    
+                    <p><strong>2. Aging Perspectief:</strong></p>
+                    <ul>
+                        <li>How do you view aging - as inevitable decline or opportunity voor growth?</li>
+                        <li>What physical capabilities do you want to maintain as you age?</li>
+                        <li>How important is it to you to age gracefully en powerfully?</li>
+                        <li>What would your ideal 60-year-old self look en feel like?</li>
+                    </ul>
+                    
+                    <p><strong>3. Health Priorities:</strong></p>
+                    <ul>
+                        <li>What health concerns worry you most about aging?</li>
+                        <li>How much are je zulting to invest in longevity en vitality?</li>
+                        <li>What levensstijl changes would have de biggest impact on your healthspan?</li>
+                        <li>How do you want to be able to serve others as you age?</li>
+                    </ul>
+                    
+                    <p><strong>4. Legacy Considerations:</strong></p>
+                    <ul>
+                        <li>What example do you want to set voor younger men en your children?</li>
+                        <li>How long do you want to remain an active, contributing member van society?</li>
+                        <li>What activities do you want to be doing in your 70s en 80s?</li>
+                        <li>How does maintaining vitality align met je leven purpose?</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="next-steps">Volgende Stappen</h2>
+                <div class="next-steps-box">
+                    <h4>🚀 Vitality & Longevity Optimization Plan</h4>
+                    
+                    <p><strong>Phase 1: Current State Beoordeling (Week 1-2)</strong></p>
+                    <ol>
+                        <li><strong>Vitality Baseline</strong> - Track energy, sleep, recovery vor 1 week</li>
+                        <li><strong>Health Screening</strong> - Comprehensive physical en biomarker testing</li>
+                        <li><strong>Fitness Testing</strong> - Strength, cardiovasculair, mobility assessment</li>
+                        <li><strong>Cognitive Baseline</strong> - Memory, processing speed evaluation</li>
+                        <li><strong>Lifestyle Audit</strong> - Current habits affecting vitality</li>
+                    </ol>
+                    
+                    <p><strong>Phase 2: Optimization Protocol (Week 3-8)</strong></p>
+                    <ol>
+                        <li><strong>Training Design</strong> - Longevity-focused exercise program</li>
+                        <li><strong>Recovery Enhancement</strong> - Sleep en stress management</li>
+                        <li><strong>Nutrition Upgrade</strong> - Anti-aging nutrition protocol</li>
+                        <li><strong>Cognitive Training</strong> - Brain-challenging activities</li>
+                        <li><strong>Habit Integration</strong> - Daily vitality practices</li>
+                    </ol>
+                    
+                    <p><strong>Phase 3: Long-term Sustainability (Month 3+)</strong></p>
+                    <ol>
+                        <li><strong>Program Refinement</strong> - Adjust based on response</li>
+                        <li><strong>Advanced Strategies</strong> - Periodization, specialization</li>
+                        <li><strong>Monitoring Systems</strong> - Regular health en fitness tracking</li>
+                        <li><strong>Community Bouwen</strong> - Connect with like-minded individuals</li>
+                        <li><strong>Legacy Planning</strong> - Teaching en mentoring others</li>
+                    </ol>
+                    
+                    <p><strong>Immediate Actions (This Week):</strong></p>
+                    <ol>
+                        <li><strong>Energy Tracking</strong> - Log vitality levels voor 7 days</li>
+                        <li><strong>Sleep Optimization</strong> - Consistent bedtime starting tonight</li>
+                        <li><strong>Morning Routine</strong> - Implement power morning protocol</li>
+                        <li><strong>Movement Integration</strong> - Add hourly movement breaks</li>
+                        <li><strong>Health Appointment</strong> - Schedule comprehensive physical</li>
+                    </ol>
+                    
+                    <p><strong>Long-term Success Metrics (1-5 years):</strong></p>
+                    <ul>
+                        <li><strong>Sustained Energy:</strong> Consistent high vitality throughout days</li>
+                        <li><strong>Physical Capability:</strong> Maintained or improved strength/endurance</li>
+                        <li><strong>Cognitive Sharpness:</strong> Clear thinking en memory retention</li>
+                        <li><strong>Health Markers:</strong> Optimal biomarkers voor age group</li>
+                        <li><strong>Recovery Ability:</strong> Quick bounce-back from challenges</li>
+                        <li><strong>Life Satisfaction:</strong> High quality van life as you age</li>
+                        <li><strong>Functional Independence:</strong> Self-reliance in daily activities</li>
+                        <li><strong>Inspiring Others:</strong> Positive example voor younger men</li>
+                    </ul>
+                </div>
+                
+                <div class="highlight-box">
+                    <h4>⏰ Vitality & Longevity Mastery Mantra</h4>
+                    <p><em>"I invest in my body today so it serves me powerfully voor decades to come. My vitality is not an accident - it's de result van deliberate daily choices. I choose to age like fine wine, getting better en more valuable with time. My physical excellence today creates my freedom en capability tomorrow."</em></p>
+                    
+                    <p>Remember: Aging is mandatory, maar decline is optional. Every workout, every meal, every recovery choice is an investment in your future self. De habits you build now determine not just how long you live, maar how well you live.</p>
+                    
+                    <p><strong>Your 80-year-old self is counting on de choices your current self makes today. Make him proud.</strong></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2025 Top Tier Men Academy. Alle rechten voorbehouden.</p>
+            <p>Voor meer informatie bezoek <strong>platform.toptiermen.eu</strong></p>
+        </div>
+    </div>
+</body>
+</html>

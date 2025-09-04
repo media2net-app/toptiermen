@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Testosteron Killers: Wat moet je Elimineren - Top Tier Men Academy</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background: #f9fafb;
+        }
+        
+        .ebook-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #8BAE5A 0%, #3A4D23 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -0.025em;
+        }
+        
+        .header .subtitle {
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: white;
+            opacity: 1;
+        }
+        
+        .content {
+            padding: 50px;
+        }
+        
+        .toc {
+            background: #f8fafc;
+            border-left: 4px solid #8BAE5A;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 8px;
+        }
+        
+        .toc h2 {
+            color: #8BAE5A;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .toc ol {
+            list-style: none;
+            counter-reset: toc-counter;
+        }
+        
+        .toc li {
+            counter-increment: toc-counter;
+            margin-bottom: 8px;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        .toc li::before {
+            content: counter(toc-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #8BAE5A;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .toc a {
+            color: #374151;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .toc a:hover {
+            color: #8BAE5A;
+        }
+        
+        .chapter {
+            margin: 40px 0;
+        }
+        
+        .chapter h2 {
+            color: #8BAE5A;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 10px;
+        }
+        
+        .chapter h3 {
+            color: #374151;
+            font-size: 1.4rem;
+            margin: 25px 0 15px 0;
+        }
+        
+        .chapter p {
+            margin-bottom: 15px;
+            color: #4b5563;
+        }
+        
+        .chapter ul, .chapter ol {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+        
+        .chapter li {
+            margin-bottom: 8px;
+            color: #4b5563;
+        }
+        
+        .highlight-box {
+            background: #f0f9ff;
+            border-left: 4px solid #0ea5e9;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .highlight-box h4 {
+            color: #0c4a6e;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .action-item {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .action-item h4 {
+            color: #92400e;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .reflection-box {
+            background: #f3e8ff;
+            border-left: 4px solid #8b5cf6;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .reflection-box h4 {
+            color: #5b21b6;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .next-steps-box {
+            background: #ecfdf5;
+            border-left: 4px solid #10b981;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .next-steps-box h4 {
+            color: #047857;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .danger-box {
+            background: #fef2f2;
+            border-left: 4px solid #ef4444;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .danger-box h4 {
+            color: #dc2626;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .footer {
+            background: #f8fafc;
+            padding: 30px;
+            text-align: center;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .footer p {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                padding: 40px 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .content {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ebook-container">
+        <div class="header">
+            <h1>Testosteron Killers: Wat moet je Elimineren</h1>
+            <div class="subtitle">Module 1: Testosteron - Top Tier Men Academy</div>
+        </div>
+        
+        <div class="content">
+            <div class="toc">
+                <h2>Inhoudsopgave</h2>
+                <ol>
+                    <li><a href="#intro">Inleiding</a></li>
+                    <li><a href="#main-content">Hoofdinhoud</a></li>
+                    <li><a href="#practical-tips">Praktische Tips</a></li>
+                    <li><a href="#reflection">Reflectie Vragen</a></li>
+                    <li><a href="#next-steps">Volgende Stappen</a></li>
+                </ol>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="intro">Inleiding</h2>
+                <p>Welkom bij les 3 van Module 1: Testosteron. Nu je de power van hoge testosteron kent, is het tijd voor de most critical lesson: het identificeren en elimineren van de silent killers die je masculine potential systematically destroy. Deze les kan letterlijk years toevoegen aan je life en decades aan je vitality.</p>
+                
+                <div class="danger-box">
+                    <h4>⚠️ Critical Warning</h4>
+                    <p>De gemiddelde man wordt daily geëxposeerd aan meer testosteron-destroying compounds dan our ancestors encountered in een lifetime. Deze les is niet optioneel - het is essential voor overleving als masculine man in de modern world.</p>
+                </div>
+                
+                <div class="highlight-box">
+                    <h4>🎯 Wat je gaat leren</h4>
+                    <ul>
+                        <li>De 20+ most dangerous testosteron killers in je daily environment</li>
+                        <li>Hidden sources van endocrine disruption die je niet verwacht</li>
+                        <li>Hoe modern levensstijl systematically destroys masculine hormones</li>
+                        <li>Immediate elimination strategies voor elk type testosteron killer</li>
+                        <li>Cost-effective alternatives voor alles wat je moet elimineeren</li>
+                        <li>Recovery timeline: hoe snel je testosteron herstelt na elimination</li>
+                    </ul>
+                </div>
+                
+                <p>This is war against your biological masculinity, en most men don't even know they're under attack. Door deze les te voltooien, wordt je een warrior equipped met de knowledge to protect en optimize your hormonal health in een hostile environment.</p>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="main-content">Hoofdinhoud</h2>
+                
+                <h3>The Modern Testosteron Crisis</h3>
+                <p>Men's testosteron levels hebben catastrophically declined:</p>
+                <ul>
+                    <li><strong>1970s average:</strong> 700-900 ng/dL</li>
+                    <li><strong>2024 average:</strong> 300-400 ng/dL</li>
+                    <li><strong>Decline rate:</strong> 1-2% per year (not age-related)</li>
+                    <li><strong>Fertility impact:</strong> 50% sperm count decrease</li>
+                </ul>
+                
+                <div class="danger-box">
+                    <h4>🚨 The Alarming Truth</h4>
+                    <p>A 25-year-old man today has lower testosteron dan a 65-year-old man in 1987. This is not natural aging - dit is chemical warfare against masculinity.</p>
+                </div>
+                
+                <h3>Category 1: Endocrine Disrupting Chemicals (EDCs)</h3>
+                
+                <h4>Plastic-Based Killers</h4>
+                <p><strong>BPA (Bisphenol A) & BPS:</strong></p>
+                <ul>
+                    <li><strong>Sources:</strong> Plastic bottles, food containers, receipts, canned foods</li>
+                    <li><strong>Mechanism:</strong> Mimics estrogen, directly lowers testosterone</li>
+                    <li><strong>Impact:</strong> 10-20% testosterone reduction with regular exposure</li>
+                    <li><strong>Hidden sources:</strong> Thermal receipts, dental sealings, some water bottles</li>
+                </ul>
+                
+                <p><strong>Phthalates:</strong></p>
+                <ul>
+                    <li><strong>Sources:</strong> Fragrances, lotions, shampoos, vinyl, plastic wrap</li>
+                    <li><strong>Mechanism:</strong> Disrupts testosterone synthesis at cellular level</li>
+                    <li><strong>Impact:</strong> 15-25% reduction in free testosterone</li>
+                    <li><strong>Accumulation:</strong> Builds up in body fat over time</li>
+                </ul>
+                
+                <h4>Personal Care Product Killers</h4>
+                <p><strong>Parabens:</strong></p>
+                <ul>
+                    <li><strong>Sources:</strong> Shampoos, deodorants, lotions, cosmetics</li>
+                    <li><strong>Mechanism:</strong> Estrogen-like activity, testosterone suppression</li>
+                    <li><strong>Detection:</strong> Look for methylparaben, propylparaben, etc.</li>
+                </ul>
+                
+                <p><strong>Triclosan:</strong></p>
+                <ul>
+                    <li><strong>Sources:</strong> Antibacterial soaps, toothpaste, hand sanitizers</li>
+                    <li><strong>Mechanism:</strong> Thyroid disruption, indirect testosterone impact</li>
+                    <li><strong>Bonus damage:</strong> Destroys beneficial gut bacteria</li>
+                </ul>
+                
+                <h3>Category 2: Dietary Testosteron Destroyers</h3>
+                
+                <h4>Soy & Phytoestrogens</h4>
+                <p><strong>High-Risk Soy Products:</strong></p>
+                <ul>
+                    <li><strong>Soy protein isolate:</strong> Concentrated estrogen-like compounds</li>
+                    <li><strong>Processed soy:</strong> Soy milk, tofu, tempeh, edamame</li>
+                    <li><strong>Hidden soy:</strong> Lecithin, vegetable protein, many processed foods</li>
+                    <li><strong>Mechanism:</strong> Isoflavones mimic estrogen, suppress testosterone</li>
+                </ul>
+                
+                <p><strong>Other Phytoestrogen Sources:</strong></p>
+                <ul>
+                    <li><strong>Flax seeds:</strong> Extremely high in lignans</li>
+                    <li><strong>Hops (beer):</strong> One of strongest phytoestrogens</li>
+                    <li><strong>Licorice root:</strong> Direct testosterone synthesis inhibition</li>
+                </ul>
+                
+                <h4>Processed Food Killers</h4>
+                <p><strong>Vegetable & Seed Oils:</strong></p>
+                <ul>
+                    <li><strong>Sources:</strong> Canola, soybean, sunflower, safflower, corn oil</li>
+                    <li><strong>Mechanism:</strong> High omega-6, inflammatory, SHBG increase</li>
+                    <li><strong>Ubiquity:</strong> In 95% of restaurant food, packaged foods</li>
+                    <li><strong>Alternative:</strong> Coconut oil, olive oil, animal fats</li>
+                </ul>
+                
+                <p><strong>High Sugar & Refined Carbs:</strong></p>
+                <ul>
+                    <li><strong>Mechanism:</strong> Insulin spikes suppress testosterone production</li>
+                    <li><strong>Chronic impact:</strong> Insulin resistance = chronic low testosterone</li>
+                    <li><strong>Sources:</strong> Bread, pasta, candy, sodas, processed snacks</li>
+                </ul>
+                
+                <h3>Category 3: Lifestyle Testosteron Killers</h3>
+                
+                <h4>Sleep Destroyers</h4>
+                <p><strong>Chronic Sleep Deprivation:</strong></p>
+                <ul>
+                    <li><strong>Impact:</strong> 15% testosterone drop per hour of lost sleep</li>
+                    <li><strong>Mechanism:</strong> Disrupts nighttime testosterone production</li>
+                    <li><strong>Blue light exposure:</strong> Suppresses melatonin, disrupts sleep</li>
+                    <li><strong>Irregular schedule:</strong> Confuses circadian testosterone rhythm</li>
+                </ul>
+                
+                <h4>Chronic Stress & Cortisol</h4>
+                <p><strong>Physical Stress:</strong></p>
+                <ul>
+                    <li><strong>Overtraining:</strong> Excessive cardio or lifting volume</li>
+                    <li><strong>Under-recovery:</strong> Insufficient rest between sessions</li>
+                    <li><strong>Chronic caloric restriction:</strong> Extreme dieting</li>
+                </ul>
+                
+                <p><strong>Mental/Emotional Stress:</strong></p>
+                <ul>
+                    <li><strong>Work stress:</strong> High-pressure jobs without recovery</li>
+                    <li><strong>Relationship conflict:</strong> Chronic arguing, instability</li>
+                    <li><strong>Financial pressure:</strong> Money worries, debt stress</li>
+                    <li><strong>Social anxiety:</strong> Constant fight-or-flight activation</li>
+                </ul>
+                
+                <h3>Category 4: Environmental Toxins</h3>
+                
+                <h4>Heavy Metals</h4>
+                <p><strong>Lead:</strong></p>
+                <ul>
+                    <li><strong>Sources:</strong> Old paint, contaminated water, some imported products</li>
+                    <li><strong>Impact:</strong> Direct damage to Leydig cells (testosterone producers)</li>
+                </ul>
+                
+                <p><strong>Mercury:</strong></p>
+                <ul>
+                    <li><strong>Sources:</strong> Large fish, dental fillings, some vaccines</li>
+                    <li><strong>Impact:</strong> Disrupts hypothalamic-pituitary axis</li>
+                </ul>
+                
+                <p><strong>Aluminum:</strong></p>
+                <ul>
+                    <li><strong>Sources:</strong> Deodorants, cookware, some processed foods</li>
+                    <li><strong>Impact:</strong> Accumulates in brain, disrupts hormone signaling</li>
+                </ul>
+                
+                <h4>Household Chemical Killers</h4>
+                <p><strong>Cleaning Products:</strong></p>
+                <ul>
+                    <li><strong>Sources:</strong> Conventional cleaners, air fresheners, fabric softeners</li>
+                    <li><strong>Chemicals:</strong> Glycol ethers, phthalates, synthetic fragrances</li>
+                    <li><strong>Exposure:</strong> Inhalation en skin absorption</li>
+                </ul>
+                
+                <h3>Category 5: Medications & Substances</h3>
+                
+                <h4>Prescription Medications</h4>
+                <p><strong>High-Impact Medications:</strong></p>
+                <ul>
+                    <li><strong>Statins:</strong> Lower cholesterol = lower testosterone (made from cholesterol)</li>
+                    <li><strong>Opioids:</strong> Direct suppression of testosterone production</li>
+                    <li><strong>Antidepressants (SSRIs):</strong> Alter neurotransmitters affecting hormones</li>
+                    <li><strong>Beta-blockers:</strong> Reduce testosterone synthesis</li>
+                    <li><strong>Proton pump inhibitors:</strong> Affect mineral absorption needed for T</li>
+                </ul>
+                
+                <h4>Recreational Substances</h4>
+                <p><strong>Alcohol:</strong></p>
+                <ul>
+                    <li><strong>Mechanism:</strong> Direct toxicity to Leydig cells</li>
+                    <li><strong>Chronic impact:</strong> Permanent testosterone suppression</li>
+                    <li><strong>Threshold:</strong> Even moderate drinking (3+ drinks/week) affects T</li>
+                </ul>
+                
+                <p><strong>Marijuana:</strong></p>
+                <ul>
+                    <li><strong>THC impact:</strong> Suppresses LH, reducing testosterone production</li>
+                    <li><strong>Duration:</strong> Effects last weeks after cessation</li>
+                    <li><strong>Frequency matters:</strong> Daily use = significante suppression</li>
+                </ul>
+                
+                <h3>Category 6: Heat & Radiation Killers</h3>
+                
+                <h4>Testicular Heat Exposure</h4>
+                <p><strong>High-Risk Activities:</strong></p>
+                <ul>
+                    <li><strong>Hot tubs/saunas:</strong> Frequent use damages sperm production</li>
+                    <li><strong>Laptop use:</strong> Heat directly on lap affects testosterone</li>
+                    <li><strong>Tight clothing:</strong> Restricts airflow, increases temperature</li>
+                    <li><strong>Cycling:</strong> Prolonged pressure en heat</li>
+                </ul>
+                
+                <h4>EMF & Blue Light</h4>
+                <p><strong>Electromagnetic Fields:</strong></p>
+                <ul>
+                    <li><strong>Cell phones:</strong> Keep away from reproductive organs</li>
+                    <li><strong>WiFi exposure:</strong> Chronic exposure may affect hormones</li>
+                    <li><strong>Blue light:</strong> Evening exposure disrupts melatonin/testosterone</li>
+                </ul>
+                
+                <h3>Recovery Timeline After Elimination</h3>
+                <div class="action-item">
+                    <h4>📈 Testosteron Recovery Phases</h4>
+                    
+                    <p><strong>Week 1-2: Acute Phase</strong></p>
+                    <ul>
+                        <li>Elimination of daily exposures</li>
+                        <li>Minimal testosterone improvement</li>
+                        <li>Body begins clearing accumulated toxins</li>
+                    </ul>
+                    
+                    <p><strong>Week 3-8: Early Recovery</strong></p>
+                    <ul>
+                        <li>10-20% testosterone improvement</li>
+                        <li>Energy levels begin improving</li>
+                        <li>Sleep quality enhancement</li>
+                    </ul>
+                    
+                    <p><strong>Month 3-6: Significant Recovery</strong></p>
+                    <ul>
+                        <li>20-50% testosterone improvement</li>
+                        <li>Noticeable physical changes</li>
+                        <li>Mental clarity en mood improvement</li>
+                    </ul>
+                    
+                    <p><strong>Month 6-12: Complete Recovery</strong></p>
+                    <ul>
+                        <li>50-100% testosterone recovery possible</li>
+                        <li>Full energy en vitality restoration</li>
+                        <li>Optimized body composition</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="practical-tips">Praktische Tips</h2>
+                <div class="action-item">
+                    <h4>💪 Complete Testosteron Killer Elimination Protocol</h4>
+                    
+                    <h5>Phase 1: Immediate Eliminations (Week 1)</h5>
+                    <p><strong>Plastic & Chemical Elimination:</strong></p>
+                    <ul>
+                        <li><strong>Water:</strong> Glass bottles only, stainless steel for gym</li>
+                        <li><strong>Food storage:</strong> Glass containers, no plastic wrap</li>
+                        <li><strong>Receipts:</strong> Decline or wash hands immediately after</li>
+                        <li><strong>Personal care:</strong> Switch to paraben-free, natural products</li>
+                        <li><strong>Cleaning:</strong> Replace with vinegar, baking soda, castile soap</li>
+                    </ul>
+                    
+                    <h5>Phase 2: Dietary Overhaul (Week 2-3)</h5>
+                    <p><strong>Food Eliminations:</strong></p>
+                    <ul>
+                        <li><strong>Soy products:</strong> Read labels, avoid soy protein, lecithin</li>
+                        <li><strong>Vegetable oils:</strong> Cook only with coconut oil, ghee, olive oil</li>
+                        <li><strong>Processed foods:</strong> Eliminate packaged/restaurant foods voor 30 days</li>
+                        <li><strong>Sugar:</strong> No added sugars, limit fruit to 1-2 servings</li>
+                        <li><strong>Alcohol:</strong> Complete elimination voor 60 days minimum</li>
+                    </ul>
+                    
+                    <h5>Phase 3: Lifestyle Optimization (Week 4+)</h5>
+                    <p><strong>Environmental Controls:</strong></p>
+                    <ul>
+                        <li><strong>Sleep hygiene:</strong> Dark room, cool temperature, no devices</li>
+                        <li><strong>Stress management:</strong> Daily meditation, breathing exercises</li>
+                        <li><strong>Heat avoidance:</strong> Loose clothing, limit hot baths</li>
+                        <li><strong>EMF reduction:</strong> Phone in airplane mode at night</li>
+                    </ul>
+                    
+                    <h5>Safe Alternatives Guide</h5>
+                    <p><strong>Personal Care Swaps:</strong></p>
+                    <ul>
+                        <li><strong>Shampoo:</strong> Castile soap or sulfate-free options</li>
+                        <li><strong>Deodorant:</strong> Aluminum-free, crystal deodorants</li>
+                        <li><strong>Toothpaste:</strong> Fluoride-free, natural options</li>
+                        <li><strong>Soap:</strong> Pure castile or glycerin-based</li>
+                    </ul>
+                    
+                    <p><strong>Cooking & Storage:</strong></p>
+                    <ul>
+                        <li><strong>Cookware:</strong> Stainless steel, cast iron, ceramic</li>
+                        <li><strong>Storage:</strong> Glass containers, mason jars</li>
+                        <li><strong>Water filtration:</strong> High-quality carbon or reverse osmosis</li>
+                    </ul>
+                </div>
+                
+                <div class="danger-box">
+                    <h4>🚨 Priority Elimination List</h4>
+                    <p><strong>Eliminate IMMEDIATELY (Today):</strong></p>
+                    <ol>
+                        <li>Plastic water bottles</li>
+                        <li>Microwave plastic containers</li>
+                        <li>Conventional deodorant (aluminum-based)</li>
+                        <li>Soy protein supplements</li>
+                        <li>Vegetable oil cooking</li>
+                    </ol>
+                    
+                    <p><strong>Eliminate This Week:</strong></p>
+                    <ol>
+                        <li>All plastic food storage</li>
+                        <li>Conventional cleaning products</li>
+                        <li>Processed foods with soy</li>
+                        <li>Regular alcohol consumption</li>
+                        <li>Late-night blue light exposure</li>
+                    </ol>
+                </div>
+                
+                <div class="action-item">
+                    <h4>📋 Daily Testosteron Protection Checklist</h4>
+                    <ul>
+                        <li>☐ Drink only from glass or stainless steel</li>
+                        <li>☐ Eat no processed foods today</li>
+                        <li>☐ Use only natural personal care products</li>
+                        <li>☐ Cook with safe oils (coconut, olive, animal fats)</li>
+                        <li>☐ Avoid plastic food contact</li>
+                        <li>☐ No alcohol consumption</li>
+                        <li>☐ Manage stress with breathing/meditation</li>
+                        <li>☐ Blue light blocking glasses after sunset</li>
+                        <li>☐ Phone in airplane mode while sleeping</li>
+                        <li>☐ Sleep in cool, dark environment</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="reflection">Reflectie Vragen</h2>
+                <div class="reflection-box">
+                    <h4>🤔 Testosteron Killer Beoordeling</h4>
+                    
+                    <p><strong>1. Current Exposure Audit:</strong></p>
+                    <ul>
+                        <li>Welke testosteron killers ben je daily geëxposeerd aan zonder het te beseffen?</li>
+                        <li>Hoeveel plastic bottles gebruik je per week?</li>
+                        <li>Welke personal care products gebruik je die possibly harmful zijn?</li>
+                        <li>Hoe vaak eet je processed foods or restaurant meals?</li>
+                    </ul>
+                    
+                    <p><strong>2. Lifestyle Evaluation:</strong></p>
+                    <ul>
+                        <li>Hoeveel alcohol consumeer je weekly en wat's the pattern?</li>
+                        <li>Hoe is je sleep quality en consistency?</li>
+                        <li>Welke chronic stress sources zijn present in je life?</li>
+                        <li>Hoe vaak ben je exposed to heat round je genital area?</li>
+                    </ul>
+                    
+                    <p><strong>3. Elimination Readiness:</strong></p>
+                    <ul>
+                        <li>Welke eliminations zou je most difficult vinden?</li>
+                        <li>What's stopping je from making immediate changes?</li>
+                        <li>Hoe toegewijd ben je to complete elimination voor 90 days?</li>
+                        <li>Welke support do je need to succeed?</li>
+                    </ul>
+                    
+                    <p><strong>4. Recovery Expectations:</strong></p>
+                    <ul>
+                        <li>Hoe dramatic verwacht je de changes to be?</li>
+                        <li>What would motivate je most during the difficult transition period?</li>
+                        <li>Hoe zou je measure success during elimination?</li>
+                        <li>What's your backup plan if je struggle with consistency?</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="next-steps">Volgende Stappen</h2>
+                <div class="next-steps-box">
+                    <h4>🚀 Complete Testosteron Killer Elimination Plan</h4>
+                    
+                    <p><strong>Week 1: Emergency Elimination</strong></p>
+                    <ol>
+                        <li><strong>Plastic Audit</strong> - Remove all plastic food/water containers</li>
+                        <li><strong>Personal Care Replacement</strong> - Buy natural alternatives</li>
+                        <li><strong>Kitchen Overhaul</strong> - Eliminate vegetable oils, processed foods</li>
+                        <li><strong>Alcohol Cessation</strong> - Complete elimination for 60+ days</li>
+                        <li><strong>Sleep Optimization</strong> - Dark room, blue light blockers</li>
+                    </ol>
+                    
+                    <p><strong>Week 2-3: Deep Cleaning</strong></p>
+                    <ol>
+                        <li><strong>Home Environment</strong> - Replace cleaning products, air fresheners</li>
+                        <li><strong>Dietary Purification</strong> - 100% whole foods, no processed</li>
+                        <li><strong>Stress Audit</strong> - Identify en address major stressors</li>
+                        <li><strong>EMF Reduction</strong> - Phone/WiFi protocols</li>
+                        <li><strong>Medisch Review</strong> - Discuss testosterone-affecting meds with doctor</li>
+                    </ol>
+                    
+                    <p><strong>Week 4-12: Maintenance & Monitoring</strong></p>
+                    <ol>
+                        <li><strong>Consistency Tracking</strong> - Daily compliance with elimination protocol</li>
+                        <li><strong>Biofeedback Monitoring</strong> - Energy, mood, physical changes</li>
+                        <li><strong>Blood Work</strong> - 60-day testosterone retest</li>
+                        <li><strong>Protocol Refinement</strong> - Adjust based on results</li>
+                        <li><strong>Education Continuation</strong> - Stay informed on new research</li>
+                    </ol>
+                    
+                    <p><strong>Emergency Actions (Within 24 Hours):</strong></p>
+                    <ol>
+                        <li><strong>Water Switch</strong> - Only glass/steel containers from now</li>
+                        <li><strong>Food Storage</strong> - Transfer all food to glass containers</li>
+                        <li><strong>Deodorant Change</strong> - Buy aluminum-free alternative</li>
+                        <li><strong>Alcohol Dump</strong> - Pour out all alcohol in house</li>
+                        <li><strong>Phone Protocol</strong> - Set airplane mode for sleep tonight</li>
+                    </ol>
+                    
+                    <p><strong>Success Metrics (30-60-90 day checkpoints):</strong></p>
+                    <ul>
+                        <li>Zero daily plastic food/water contact</li>
+                        <li>100% natural personal care products</li>
+                        <li>Zero processed food consumption</li>
+                        <li>Complete alcohol elimination</li>
+                        <li>Consistent 7+ hour sleep schedule</li>
+                        <li>Daily stress management practice</li>
+                        <li>Noticeable energy en mood improvements</li>
+                        <li>Blood work showing testosterone improvement</li>
+                    </ul>
+                </div>
+                
+                <div class="highlight-box">
+                    <h4>⚔️ Testosteron Protection Warrior Mantra</h4>
+                    <p><em>"I am a guardian of my masculine vitality. Every choice I make either protects or destroys my testosterone. I choose to eliminate all threats to my hormonal health. I am vigilant, disciplined, and uncompromising in defending my biological potential. My masculinity is not negotiable."</em></p>
+                    
+                    <p>Remember: This is not just about improving your testosterone - dit is about reclaiming your biological birthright as a man. Every testosteron killer you eliminate is een victory in de war voor your masculine vitality.</p>
+                    
+                    <p><strong>Your ancestors were warriors who protected their tribes. You are a warrior protecting your testosterone. Fight like your manhood depends on it - because it does.</strong></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2025 Top Tier Men Academy. Alle rechten voorbehouden.</p>
+            <p>Voor meer informatie bezoek <strong>platform.toptiermen.eu</strong></p>
+        </div>
+    </div>
+</body>
+</html>

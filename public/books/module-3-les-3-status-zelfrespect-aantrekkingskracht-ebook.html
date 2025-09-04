@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Status, Zelfrespect en Aantrekkingskracht - Top Tier Men Academy</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background: #f9fafb;
+        }
+        
+        .ebook-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #8BAE5A 0%, #3A4D23 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -0.025em;
+        }
+        
+        .header .subtitle {
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: white;
+            opacity: 1;
+        }
+        
+        .content {
+            padding: 50px;
+        }
+        
+        .toc {
+            background: #f8fafc;
+            border-left: 4px solid #8BAE5A;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 8px;
+        }
+        
+        .toc h2 {
+            color: #8BAE5A;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .toc ol {
+            list-style: none;
+            counter-reset: toc-counter;
+        }
+        
+        .toc li {
+            counter-increment: toc-counter;
+            margin-bottom: 8px;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        .toc li::before {
+            content: counter(toc-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #8BAE5A;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .toc a {
+            color: #374151;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .toc a:hover {
+            color: #8BAE5A;
+        }
+        
+        .chapter {
+            margin: 40px 0;
+        }
+        
+        .chapter h2 {
+            color: #8BAE5A;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 10px;
+        }
+        
+        .chapter h3 {
+            color: #374151;
+            font-size: 1.4rem;
+            margin: 25px 0 15px 0;
+        }
+        
+        .chapter p {
+            margin-bottom: 15px;
+            color: #4b5563;
+        }
+        
+        .chapter ul, .chapter ol {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+        
+        .chapter li {
+            margin-bottom: 8px;
+            color: #4b5563;
+        }
+        
+        .highlight-box {
+            background: #f0f9ff;
+            border-left: 4px solid #0ea5e9;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .highlight-box h4 {
+            color: #0c4a6e;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .action-item {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .action-item h4 {
+            color: #92400e;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .reflection-box {
+            background: #f3e8ff;
+            border-left: 4px solid #8b5cf6;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .reflection-box h4 {
+            color: #5b21b6;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .next-steps-box {
+            background: #ecfdf5;
+            border-left: 4px solid #10b981;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .next-steps-box h4 {
+            color: #047857;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .footer {
+            background: #f8fafc;
+            padding: 30px;
+            text-align: center;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .footer p {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                padding: 40px 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .content {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ebook-container">
+        <div class="header">
+            <h1>Status, Zelfrespect en Aantrekkingskracht</h1>
+            <div class="subtitle">Module 3: Fysieke Dominantie - Top Tier Men Academy</div>
+        </div>
+        
+        <div class="content">
+            <div class="toc">
+                <h2>Inhoudsopgave</h2>
+                <ol>
+                    <li><a href="#intro">Inleiding</a></li>
+                    <li><a href="#main-content">Hoofdinhoud</a></li>
+                    <li><a href="#practical-tips">Praktische Tips</a></li>
+                    <li><a href="#reflection">Reflectie Vragen</a></li>
+                    <li><a href="#next-steps">Volgende Stappen</a></li>
+                </ol>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="intro">Inleiding</h2>
+                <p>Welkom bij les 3 van Module 3: Fysieke Dominantie. Nu je de fundamentals van kracht, spiermassa en conditie begrijpt, gaan we diep in op de social and psychological benefits van physical excellence. Deze les exploreert hoe your physique direct impacts your status, self-respect, en attraction power.</p>
+                
+                <div class="highlight-box">
+                    <h4>🎯 Wat je gaat leren</h4>
+                    <ul>
+                        <li>Hoe fysieke dominantie automatic social status creates</li>
+                        <li>De psychological mechanics van self-respect through physical achievement</li>
+                        <li>Why attraction is primarily physical en hoe je leverage this</li>
+                        <li>De compound effects van improved physique on all life areas</li>
+                        <li>Scientific research behind physique-based social dynamics</li>
+                        <li>Practical strategies voor maximizing social impact van physical development</li>
+                    </ul>
+                </div>
+                
+                <p>This is about understanding the profound ripple effects dat physical excellence has on every aspect van your social en personal life. When you look impressive, others treat you impressively.</p>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="main-content">Hoofdinhoud</h2>
+                
+                <h3>De Realiteit van Physical Status</h3>
+                <p>Let's start with uncomfortable truths: <strong>Society judges you primarily on appearance first, everything else second.</strong> Within seconds van meeting someone, they've made decisions about your:</p>
+                
+                <ul>
+                    <li><strong>Competence level</strong></li>
+                    <li><strong>Leadership potential</strong></li>
+                    <li><strong>Trustworthiness</strong></li>
+                    <li><strong>Social value</strong></li>
+                    <li><strong>Genetic quality</strong></li>
+                    <li><strong>Mate worthiness</strong></li>
+                </ul>
+                
+                <div class="highlight-box">
+                    <h4>🧠 The Halo Effect of Physical Excellence</h4>
+                    <p>Onderzoek consistently shows dat physically impressive individuals are assumed to be:</p>
+                    <ul>
+                        <li><strong>More intelligent</strong> dan they actually are</li>
+                        <li><strong>More competent</strong> at unrelated tasks</li>
+                        <li><strong>More trustworthy</strong> en honest</li>
+                        <li><strong>Better leaders</strong> en decision makers</li>
+                        <li><strong>More successful</strong> en accomplished</li>
+                        <li><strong>Better romantic partners</strong> en providers</li>
+                    </ul>
+                    
+                    <p>This is not fair, maar het is reality. You can either accept en leverage this, or ignore it en suffer de consequences.</p>
+                </div>
+                
+                <h3>STATUS: De Social Hierarchy Impact</h3>
+                
+                <h4>Automatic Status Elevation</h4>
+                <p>Physical dominance provides instant status elevation across all social contexts:</p>
+                
+                <p><strong>Professional Status Benefits:</strong></p>
+                <ul>
+                    <li><strong>Executive Presence:</strong> 89% van Fortune 500 CEOs are above average height en physique</li>
+                    <li><strong>Salary Premium:</strong> Fit men earn 5-10% more dan unfit men</li>
+                    <li><strong>Promotion Acceleration:</strong> Physically impressive men advance 23% faster</li>
+                    <li><strong>Client Preference:</strong> Customers prefer to work with impressive-looking professionals</li>
+                    <li><strong>Team Leadership:</strong> Groups naturally defer to physically dominant members</li>
+                </ul>
+                
+                <p><strong>Social Status Markers:</strong></p>
+                <ul>
+                    <li><strong>Conversation Dominance:</strong> Others seek your opinion en input</li>
+                    <li><strong>Group Center:</strong> People position themselves around you</li>
+                    <li><strong>Beslissing Deference:</strong> Group looks to you voor choices</li>
+                    <li><strong>Conflict Avoidance:</strong> Others avoid confronting you</li>
+                    <li><strong>Resource Priority:</strong> First served, best treatment</li>
+                </ul>
+                
+                <p><strong>Network Access:</strong></p>
+                <ul>
+                    <li><strong>High-Value Connections:</strong> Successful people want to associate with winners</li>
+                    <li><strong>Exclusive Invitations:</strong> Access to elite social circles</li>
+                    <li><strong>Partnership Opportunities:</strong> Others want to do business with you</li>
+                    <li><strong>Mentorship Attraction:</strong> High-status individuals offer guidance</li>
+                    <li><strong>Opportunity Flow:</strong> People think van you first voor good opportunities</li>
+                </ul>
+                
+                <h4>Status Signaling Through Physique</h4>
+                <p>Your body is een constant status signal dat communicates:</p>
+                
+                <p><strong>Discipline Signal:</strong></p>
+                <ul>
+                    <li><strong>Self-Control:</strong> Ability to delay gratification</li>
+                    <li><strong>Consistency:</strong> Long-term commitment capability</li>
+                    <li><strong>Goal Achievement:</strong> Track record van success</li>
+                    <li><strong>Time Management:</strong> Efficient priority management</li>
+                    <li><strong>Resource Management:</strong> Investment in valuable assets</li>
+                </ul>
+                
+                <p><strong>Competence Signal:</strong></p>
+                <ul>
+                    <li><strong>Problem Solving:</strong> Figured out hoe je transform body</li>
+                    <li><strong>Learning Ability:</strong> Acquired complex knowledge</li>
+                    <li><strong>Implementation Skills:</strong> Turned knowledge into results</li>
+                    <li><strong>Persistence:</strong> Overcame obstacles en plateaus</li>
+                    <li><strong>Excellence Standard:</strong> High personal standards</li>
+                </ul>
+                
+                <h3>ZELFRESPECT: De Internal Transformation</h3>
+                
+                <h4>Physical Achievement = Mental Strength</h4>
+                <p>Bouwen een impressive physique creates profound internal changes dat extend far beyond appearance:</p>
+                
+                <p><strong>Confidence Multiplication:</strong></p>
+                <ul>
+                    <li><strong>Capability Proof:</strong> Concrete evidence van your ability to achieve difficult goals</li>
+                    <li><strong>Challenge Confidence:</strong> Knowing je kunt handle physical adversity</li>
+                    <li><strong>Appearance Security:</strong> Comfort with how you look en move</li>
+                    <li><strong>Strength Awareness:</strong> Knowledge van your physical capabilities</li>
+                    <li><strong>Control Sense:</strong> Mastery over je lichaam en health</li>
+                </ul>
+                
+                <p><strong>Mental Resilience Bouwen:</strong></p>
+                <ul>
+                    <li><strong>Pain Tolerance:</strong> Increased ability to handle discomfort</li>
+                    <li><strong>Stress Management:</strong> Better physiological stress response</li>
+                    <li><strong>Persistence Training:</strong> Ervaring pushing through resistance</li>
+                    <li><strong>Failure Recovery:</strong> Learning to bounce back from setbacks</li>
+                    <li><strong>Growth Mindset:</strong> Belief in ability to improve through effort</li>
+                </ul>
+                
+                <p><strong>Identity Transformation:</strong></p>
+                <ul>
+                    <li><strong>Warrior Identity:</strong> Seeing yourself as strong en capable</li>
+                    <li><strong>Winner Mentality:</strong> Expectation van success en achievement</li>
+                    <li><strong>High Standards:</strong> Refusing to accept mediocrity</li>
+                    <li><strong>Leadership Readiness:</strong> Prepared to take charge</li>
+                    <li><strong>Provider Confidence:</strong> Ability to protect en provide</li>
+                </ul>
+                
+                <h4>Self-Respect Through Physical Mastery</h4>
+                <p>True self-respect comes from earning your own admiration. Physical transformation provides this through:</p>
+                
+                <p><strong>Achievement Validation:</strong></p>
+                <ul>
+                    <li><strong>Measurable Progress:</strong> Concrete numbers en visual proof</li>
+                    <li><strong>Difficulty Recognition:</strong> Knowing you accomplished something hard</li>
+                    <li><strong>Consistency Proof:</strong> Demonstrating reliable commitment</li>
+                    <li><strong>Excellence Evidence:</strong> Visible results van dedication</li>
+                    <li><strong>Character Development:</strong> Bouwen admirable qualities</li>
+                </ul>
+                
+                <p><strong>Mirror Confidence:</strong></p>
+                <ul>
+                    <li><strong>Visual Satisfaction:</strong> Liking wat je see</li>
+                    <li><strong>Posture Pride:</strong> Standing tall with confidence</li>
+                    <li><strong>Clothing Confidence:</strong> Looking good in anything</li>
+                    <li><strong>Movement Kwaliteit:</strong> Athletic, coordinated movement</li>
+                    <li><strong>Presence Power:</strong> Commanding physical presence</li>
+                </ul>
+                
+                <h3>AANTREKKINGSKRACHT: De Magnetic Power of Physical Excellence</h3>
+                
+                <h4>Attraction Science: What Really Matters</h4>
+                <p>Despite what society tells us, attraction is primarily physical. Onderzoek consistently shows:</p>
+                
+                <div class="highlight-box">
+                    <h4>📊 Attraction Onderzoek Findings</h4>
+                    <ul>
+                        <li><strong>Visual Priority:</strong> 55% van attraction is based on appearance</li>
+                        <li><strong>First Impression Impact:</strong> Physical appearance determines 93% van initial interest</li>
+                        <li><strong>Dating App Reality:</strong> Physical attractiveness predicts 85% van swipe decisions</li>
+                        <li><strong>Relationship Selection:</strong> Partners generally match in physical attractiveness</li>
+                        <li><strong>Long-term Satisfaction:</strong> Physical attraction remains important throughout relationships</li>
+                    </ul>
+                </div>
+                
+                <h4>Male Attractiveness Hierarchy</h4>
+                <p>Voor men, attraction is primarily based on:</p>
+                
+                <p><strong>1. Physique (40% van total attraction):</strong></p>
+                <ul>
+                    <li><strong>Muscle Mass:</strong> Visible strength en capability</li>
+                    <li><strong>Body Fat:</strong> Leanness indicates health en discipline</li>
+                    <li><strong>V-Taper:</strong> Wide shoulders, narrow waist</li>
+                    <li><strong>Height Advantage:</strong> Taller men preferred</li>
+                    <li><strong>Symmetry:</strong> Balanced, proportional development</li>
+                </ul>
+                
+                <p><strong>2. Facial Attractiveness (25%):</strong></p>
+                <ul>
+                    <li><strong>Jawline Definition:</strong> Strong, masculine jaw</li>
+                    <li><strong>Facial Hair:</strong> Well-groomed beard or clean shave</li>
+                    <li><strong>Eye Contact:</strong> Confident, direct gaze</li>
+                    <li><strong>Skin Kwaliteit:</strong> Clear, healthy skin</li>
+                    <li><strong>Symmetry:</strong> Balanced facial features</li>
+                </ul>
+                
+                <p><strong>3. Status Indicators (20%):</strong></p>
+                <ul>
+                    <li><strong>Clothing Kwaliteit:</strong> Well-fitted, expensive clothes</li>
+                    <li><strong>Grooming Standard:</strong> Attention to detail</li>
+                    <li><strong>Posture:</strong> Confident body language</li>
+                    <li><strong>Accessories:</strong> Watch, car, levensstijl indicators</li>
+                    <li><strong>Social Proof:</strong> Others treating you with respect</li>
+                </ul>
+                
+                <p><strong>4. Personality (15%):</strong></p>
+                <ul>
+                    <li><strong>Confidence:</strong> Self-assured behavior</li>
+                    <li><strong>Charisma:</strong> Magnetic personality</li>
+                    <li><strong>Humor:</strong> Ability to create positive emotions</li>
+                    <li><strong>Intelligence:</strong> Quick wit en conversation ability</li>
+                    <li><strong>Ambition:</strong> Drive en future orientation</li>
+                </ul>
+                
+                <h4>Physique Impact on Attraction</h4>
+                <p>Specific physical attributes that multiply attraction:</p>
+                
+                <p><strong>Upper Body Dominance:</strong></p>
+                <ul>
+                    <li><strong>Broad Shoulders:</strong> Creates impressive silhouette</li>
+                    <li><strong>Developed Chest:</strong> Fills out shirts, masculine appearance</li>
+                    <li><strong>Defined Arms:</strong> Most noticeable muscle group</li>
+                    <li><strong>V-Taper Back:</strong> Wide lats creating tapered look</li>
+                    <li><strong>Strong Neck:</strong> Masculine, powerful appearance</li>
+                </ul>
+                
+                <p><strong>Lower Body Foundation:</strong></p>
+                <ul>
+                    <li><strong>Developed Glutes:</strong> Power en athletic capability</li>
+                    <li><strong>Thick Thighs:</strong> Strength en masculinity</li>
+                    <li><strong>Defined Calves:</strong> Completeness en attention to detail</li>
+                    <li><strong>Athletic Proportions:</strong> Balanced development</li>
+                </ul>
+                
+                <p><strong>Core Definition:</strong></p>
+                <ul>
+                    <li><strong>Visible Abs:</strong> Ultimate discipline indicator</li>
+                    <li><strong>Oblique Definition:</strong> Complete core development</li>
+                    <li><strong>Low Body Fat:</strong> Health en genetic quality</li>
+                    <li><strong>Muscle Separation:</strong> Elite conditioning</li>
+                </ul>
+                
+                <h4>Attraction Multiplication Effects</h4>
+                <p>Physical excellence creates compounding attraction benefits:</p>
+                
+                <p><strong>Confidence Feedback Loop:</strong></p>
+                <ul>
+                    <li><strong>Better Physique</strong> → More Attention → Higher Confidence → Better Interactions → More Success</li>
+                    <li><strong>Positive Reinforcement:</strong> Success breeds more success</li>
+                    <li><strong>Expectation Shift:</strong> Others expect impressive things from impressive people</li>
+                    <li><strong>Opportunity Increase:</strong> More romantic options become available</li>
+                </ul>
+                
+                <p><strong>Social Proof Amplification:</strong></p>
+                <ul>
+                    <li><strong>Others Notice:</strong> People see you getting attention</li>
+                    <li><strong>Desirability Increase:</strong> Popularity creates more popularity</li>
+                    <li><strong>Competition Emergence:</strong> Others try to win your attention</li>
+                    <li><strong>Value Perception:</strong> Scarcity increases perceived worth</li>
+                </ul>
+                
+                <h3>De Compound Effect: Status + Self-Respect + Attraction</h3>
+                <p>When all three elements combine, they create exponential life improvements:</p>
+                
+                <h4>Professional Synergy</h4>
+                <ul>
+                    <li><strong>Status</strong> opens doors + <strong>Self-Respect</strong> gives courage to walk through them + <strong>Attraction</strong> makes people want to help you</li>
+                    <li><strong>Result:</strong> Career acceleration, leadership opportunities, business success</li>
+                </ul>
+                
+                <h4>Social Synergy</h4>
+                <ul>
+                    <li><strong>Status</strong> grants social access + <strong>Self-Respect</strong> provides authentic confidence + <strong>Attraction</strong> makes others enjoy your company</li>
+                    <li><strong>Result:</strong> Expanded social circles, better friendships, influential connections</li>
+                </ul>
+                
+                <h4>Romantic Synergy</h4>
+                <ul>
+                    <li><strong>Status</strong> attracts high-quality partners + <strong>Self-Respect</strong> prevents settling + <strong>Attraction</strong> creates abundant options</li>
+                    <li><strong>Result:</strong> Better relationships, stronger marriages, satisfying romantic life</li>
+                </ul>
+                
+                <h4>Personal Synergy</h4>
+                <ul>
+                    <li><strong>Status</strong> provides external validation + <strong>Self-Respect</strong> creates internal satisfaction + <strong>Attraction</strong> confirms your value</li>
+                    <li><strong>Result:</strong> Complete confidence, unshakeable self-worth, authentic masculine identity</li>
+                </ul>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="practical-tips">Praktische Tips</h2>
+                <div class="action-item">
+                    <h4>💪 Status Maximization Through Physical Excellence</h4>
+                    
+                    <h5>1. Visual Impact Optimization</h5>
+                    <p><strong>Prioritize High-Impact Muscles:</strong></p>
+                    <ul>
+                        <li><strong>Shoulders:</strong> Wide shoulders create instant presence</li>
+                        <li><strong>Lats:</strong> V-taper is immediately noticeable</li>
+                        <li><strong>Arms:</strong> Most visible muscle group</li>
+                        <li><strong>Chest:</strong> Fills out shirts impressively</li>
+                        <li><strong>Abs:</strong> Ultimate discipline indicator</li>
+                    </ul>
+                    
+                    <h5>2. Clothing Strategy</h5>
+                    <p><strong>Physique Enhancement Through Fashion:</strong></p>
+                    <ul>
+                        <li><strong>Fitted Shirts:</strong> Show your muscle development</li>
+                        <li><strong>Structured Jackets:</strong> Enhance shoulder width</li>
+                        <li><strong>Kwaliteit Fabrics:</strong> Look expensive en refined</li>
+                        <li><strong>Color Coordination:</strong> Dark colors are slimming, light colors highlight</li>
+                        <li><strong>Proper Fit:</strong> Tailor everything to your physique</li>
+                    </ul>
+                    
+                    <h5>3. Presence Amplification</h5>
+                    <p><strong>Body Language Mastery:</strong></p>
+                    <ul>
+                        <li><strong>Posture:</strong> Shoulders back, chest up, head high</li>
+                        <li><strong>Space Occupation:</strong> Take up appropriate space</li>
+                        <li><strong>Movement Kwaliteit:</strong> Deliberate, confident movements</li>
+                        <li><strong>Eye Contact:</strong> Direct, sustained gaze</li>
+                        <li><strong>Handshake:</strong> Firm, confident grip</li>
+                    </ul>
+                </div>
+                
+                <div class="action-item">
+                    <h4>🧠 Self-Respect Bouwen Protocol</h4>
+                    
+                    <h5>1. Achievement Tracking</h5>
+                    <p><strong>Document Your Progress:</strong></p>
+                    <ul>
+                        <li><strong>Progress Photos:</strong> Monthly visual documentation</li>
+                        <li><strong>Strength Logs:</strong> Track all personal records</li>
+                        <li><strong>Measurement Records:</strong> Body composition changes</li>
+                        <li><strong>Performance Milestones:</strong> Celebrate achievements</li>
+                        <li><strong>Habit Consistency:</strong> Track workout attendance</li>
+                    </ul>
+                    
+                    <h5>2. Standard Setting</h5>
+                    <p><strong>Raise Your Personal Standards:</strong></p>
+                    <ul>
+                        <li><strong>Physical Excellence:</strong> Never accept "good enough"</li>
+                        <li><strong>Consistency Standards:</strong> Make training non-negotiable</li>
+                        <li><strong>Effort Standards:</strong> Give maximum effort in each session</li>
+                        <li><strong>Recovery Standards:</strong> Prioritize sleep en nutrition</li>
+                        <li><strong>Character Standards:</strong> Align actions with values</li>
+                    </ul>
+                    
+                    <h5>3. Identity Reinforcement</h5>
+                    <p><strong>Strengthen Your Warrior Identity:</strong></p>
+                    <ul>
+                        <li><strong>Morning Affirmations:</strong> "I am strong, disciplined, en capable"</li>
+                        <li><strong>Challenge Seeking:</strong> Actively pursue difficult goals</li>
+                        <li><strong>Comfort Zone Expansion:</strong> Regular discomfort practice</li>
+                        <li><strong>Leadership Opportunities:</strong> Take charge in group situations</li>
+                        <li><strong>Service Orientation:</strong> Use strength to help others</li>
+                    </ul>
+                </div>
+                
+                <div class="action-item">
+                    <h4>💖 Attraction Maximization Strategy</h4>
+                    
+                    <h5>1. Physique Optimization Priorities</h5>
+                    <p><strong>Focus on High-Attraction Muscles:</strong></p>
+                    <ul>
+                        <li><strong>Upper Body Width:</strong> Shoulders, lats, chest development</li>
+                        <li><strong>Arm Development:</strong> Biceps, triceps, forearms</li>
+                        <li><strong>Core Definition:</strong> Visible abs, obliques</li>
+                        <li><strong>Postural Muscles:</strong> Upper back, rear delts</li>
+                        <li><strong>Leg Foundation:</strong> Glutes, quads, calves</li>
+                    </ul>
+                    
+                    <h5>2. Body Fat Optimization</h5>
+                    <p><strong>Leanness for Maximum Definition:</strong></p>
+                    <ul>
+                        <li><strong>Target Range:</strong> 10-15% body fat voor visible abs</li>
+                        <li><strong>Cutting Phases:</strong> Strategic vetverbranding periods</li>
+                        <li><strong>Maintenance Phases:</strong> Hold low body fat levels</li>
+                        <li><strong>Nutritional Precision:</strong> Track macros for results</li>
+                        <li><strong>Consistency:</strong> Daily adherence to plan</li>
+                    </ul>
+                    
+                    <h5>3. Grooming Enhancement</h5>
+                    <p><strong>Complete Package Optimization:</strong></p>
+                    <ul>
+                        <li><strong>Skin Care:</strong> Clear, healthy skin routine</li>
+                        <li><strong>Hair Style:</strong> Professional, well-maintained cut</li>
+                        <li><strong>Facial Hair:</strong> Clean shave or well-groomed beard</li>
+                        <li><strong>Nail Care:</strong> Clean, trimmed nails</li>
+                        <li><strong>Scent Strategy:</strong> Kwaliteit cologne, appropriate application</li>
+                    </ul>
+                    
+                    <h5>4. Social Proof Bouwen</h5>
+                    <p><strong>Create Attraction Through Status:</strong></p>
+                    <ul>
+                        <li><strong>Social Circle:</strong> Surround yourself with high-value people</li>
+                        <li><strong>Activity Leadership:</strong> Organize en lead group activities</li>
+                        <li><strong>Skill Display:</strong> Demonstrate competence en expertise</li>
+                        <li><strong>Confidence Projection:</strong> Act like someone worth knowing</li>
+                        <li><strong>Value Addition:</strong> Contribute meaningfully to others' lives</li>
+                    </ul>
+                </div>
+                
+                <div class="action-item">
+                    <h4>📊 Status, Self-Respect & Attraction Beoordeling</h4>
+                    
+                    <h5>Status Indicators Checklist</h5>
+                    <ul>
+                        <li>☐ Others seek my opinion in group discussions</li>
+                        <li>☐ People naturally defer to my judgment</li>
+                        <li>☐ I'm invited to exclusive events/opportunities</li>
+                        <li>☐ Others want to be associated with me</li>
+                        <li>☐ I receive preferential treatment in service situations</li>
+                        <li>☐ People avoid confronting me directly</li>
+                        <li>☐ Groups expect me to take leadership roles</li>
+                        <li>☐ My physical presence commands immediate respect</li>
+                    </ul>
+                    
+                    <h5>Self-Respect Indicators</h5>
+                    <ul>
+                        <li>☐ I feel proud when I look in the mirror</li>
+                        <li>☐ I have high confidence in my physical capabilities</li>
+                        <li>☐ I maintain high personal standards consistently</li>
+                        <li>☐ I feel comfortable in any social situation</li>
+                        <li>☐ I don't need external validation to feel good</li>
+                        <li>☐ I face challenges with confidence</li>
+                        <li>☐ I feel like I've earned my success</li>
+                        <li>☐ I project authentic confidence</li>
+                    </ul>
+                    
+                    <h5>Attraction Indicators</h5>
+                    <ul>
+                        <li>☐ I receive frequent compliments on my appearance</li>
+                        <li>☐ People show romantic interest regularly</li>
+                        <li>☐ Others go out of their way to spend time with me</li>
+                        <li>☐ I have abundant romantic options</li>
+                        <li>☐ People are nervous around me initially</li>
+                        <li>☐ I notice others checking me out</li>
+                        <li>☐ My presence changes group dynamics</li>
+                        <li>☐ People want to touch/be physical with me</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="reflection">Reflectie Vragen</h2>
+                <div class="reflection-box">
+                    <h4>🤔 Status, Self-Respect & Attraction Beoordeling</h4>
+                    
+                    <p><strong>1. Current Status Analysis:</strong></p>
+                    <ul>
+                        <li>How do others currently treat you in professional en social settings?</li>
+                        <li>Do people naturally look to you for leadership en guidance?</li>
+                        <li>What status signals does your current physique send?</li>
+                        <li>How has your physical appearance affected your career trajectory?</li>
+                    </ul>
+                    
+                    <p><strong>2. Self-Respect Evaluation:</strong></p>
+                    <ul>
+                        <li>How much do you genuinely respect yourself right now?</li>
+                        <li>What physical achievements would make you proud van yourself?</li>
+                        <li>How does your current physique affect your daily confidence?</li>
+                        <li>What standards have you been accepting dat you shouldn't?</li>
+                    </ul>
+                    
+                    <p><strong>3. Attraction Reality Check:</strong></p>
+                    <ul>
+                        <li>How satisfied ben je met your current level van romantic attention?</li>
+                        <li>Do you have abundant options or do you settle for less?</li>
+                        <li>How does your physique affect your dating success?</li>
+                        <li>What physical changes would most improve your attractiveness?</li>
+                    </ul>
+                    
+                    <p><strong>4. Transformation Motivation:</strong></p>
+                    <ul>
+                        <li>How would je leven change with higher status, self-respect, en attraction?</li>
+                        <li>What opportunities are you missing due to current limitations?</li>
+                        <li>How important is physical excellence to your identity as een man?</li>
+                        <li>What would you be willing to sacrifice to achieve physical dominance?</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="next-steps">Volgende Stappen</h2>
+                <div class="next-steps-box">
+                    <h4>🚀 Status, Self-Respect & Attraction Enhancement Plan</h4>
+                    
+                    <p><strong>Phase 1: Current State Beoordeling (Week 1)</strong></p>
+                    <ol>
+                        <li><strong>Status Audit</strong> - Document how others currently treat you</li>
+                        <li><strong>Self-Respect Evaluation</strong> - Rate current confidence en self-image</li>
+                        <li><strong>Attraction Beoordeling</strong> - Honest evaluation van romantic success</li>
+                        <li><strong>Physical Inventory</strong> - Photos, measurements, strength levels</li>
+                        <li><strong>Doelen Stellen</strong> - Definieer specifieke doelen voor each area</li>
+                    </ol>
+                    
+                    <p><strong>Phase 2: Foundation Bouwen (Week 2-4)</strong></p>
+                    <ol>
+                        <li><strong>Training Optimization</strong> - Focus on high-impact muscle groups</li>
+                        <li><strong>Nutrition Precision</strong> - Body fat reduction protocol</li>
+                        <li><strong>Grooming Upgrade</strong> - Enhance appearance quality</li>
+                        <li><strong>Wardrobe Beoordeling</strong> - Upgrade clothing to enhance physique</li>
+                        <li><strong>Posture Training</strong> - Develop commanding presence</li>
+                    </ol>
+                    
+                    <p><strong>Phase 3: Social Implementation (Month 2-3)</strong></p>
+                    <ol>
+                        <li><strong>Status Practice</strong> - Take leadership in group situations</li>
+                        <li><strong>Confidence Bouwen</strong> - Challenge comfort zone regularly</li>
+                        <li><strong>Social Proof</strong> - Build high-value social connections</li>
+                        <li><strong>Attraction Testing</strong> - Measure improvements in romantic attention</li>
+                        <li><strong>Identity Integration</strong> - Align self-image with new reality</li>
+                    </ol>
+                    
+                    <p><strong>Immediate Actions (This Week):</strong></p>
+                    <ol>
+                        <li><strong>Mirror Beoordeling</strong> - Honest evaluation van current appearance</li>
+                        <li><strong>Social Observation</strong> - Notice how others treat you currently</li>
+                        <li><strong>Status Challenge</strong> - Take leadership in one situation today</li>
+                        <li><strong>Confidence Practice</strong> - Stand tall en take up space</li>
+                        <li><strong>High-Impact Training</strong> - Focus on shoulders, arms, en chest</li>
+                    </ol>
+                    
+                    <p><strong>Success Metrics (90-day doelen):</strong></p>
+                    <ul>
+                        <li><strong>Status Elevation:</strong> Others seeking your leadership en opinion</li>
+                        <li><strong>Self-Respect Growth:</strong> Genuine pride in physical achievements</li>
+                        <li><strong>Attraction Increase:</strong> Measurable improvement in romantic attention</li>
+                        <li><strong>Physical Transformation:</strong> Visible muscle growth en vetverbranding</li>
+                        <li><strong>Confidence Boost:</strong> Comfortable in any social situation</li>
+                        <li><strong>Presence Power:</strong> Commanding rooms without effort</li>
+                        <li><strong>Social Proof:</strong> High-value people wanting your association</li>
+                        <li><strong>Opportunity Flow:</strong> Better professional en personal opportunities</li>
+                    </ul>
+                </div>
+                
+                <div class="highlight-box">
+                    <h4>👑 Status, Self-Respect & Attraction Mastery Mantra</h4>
+                    <p><em>"I build my body not just for health, maar for the power it gives me in every interaction. My physique is my silent introduction, my confidence foundation, en my competitive advantage. I earn respect through strength, build self-worth through achievement, en attract others through excellence. My physical dominance creates social dominance."</em></p>
+                    
+                    <p>Remember: Status, self-respect, en attraction are not about arrogance or superficiality. They are about maximizing your potential en creating the best possible version van yourself. When you look impressive, you have more power to make een positive impact.</p>
+                    
+                    <p><strong>Your physical excellence is not vanity - it's een investment in every relationship, opportunity, en experience you'll have voor de rest van je leven.</strong></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2025 Top Tier Men Academy. Alle rechten voorbehouden.</p>
+            <p>Voor meer informatie bezoek <strong>platform.toptiermen.eu</strong></p>
+        </div>
+    </div>
+</body>
+</html>

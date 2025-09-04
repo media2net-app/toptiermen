@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wat is Identiteit en Waarom zijn Kernwaarden Essentieel? - Top Tier Men Academy</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background: #f9fafb;
+        }
+        
+        .ebook-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #8BAE5A 0%, #3A4D23 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -0.025em;
+        }
+        
+        .header .subtitle {
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: white;
+            opacity: 1;
+        }
+        
+        .content {
+            padding: 50px;
+        }
+        
+        .toc {
+            background: #f8fafc;
+            border-left: 4px solid #8BAE5A;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 8px;
+        }
+        
+        .toc h2 {
+            color: #8BAE5A;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .toc ol {
+            list-style: none;
+            counter-reset: toc-counter;
+        }
+        
+        .toc li {
+            counter-increment: toc-counter;
+            margin-bottom: 8px;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        .toc li::before {
+            content: counter(toc-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #8BAE5A;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .toc a {
+            color: #374151;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .toc a:hover {
+            color: #8BAE5A;
+        }
+        
+        .chapter {
+            margin: 40px 0;
+        }
+        
+        .chapter h2 {
+            color: #8BAE5A;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 10px;
+        }
+        
+        .chapter h3 {
+            color: #374151;
+            font-size: 1.4rem;
+            margin: 25px 0 15px 0;
+        }
+        
+        .chapter p {
+            margin-bottom: 15px;
+            color: #4b5563;
+        }
+        
+        .chapter ul, .chapter ol {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+        
+        .chapter li {
+            margin-bottom: 8px;
+            color: #4b5563;
+        }
+        
+        .highlight-box {
+            background: #f0f9ff;
+            border-left: 4px solid #0ea5e9;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .highlight-box h4 {
+            color: #0c4a6e;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .action-item {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .action-item h4 {
+            color: #92400e;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .reflection-box {
+            background: #f3e8ff;
+            border-left: 4px solid #8b5cf6;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .reflection-box h4 {
+            color: #5b21b6;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .next-steps-box {
+            background: #ecfdf5;
+            border-left: 4px solid #10b981;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .next-steps-box h4 {
+            color: #047857;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .footer {
+            background: #f8fafc;
+            padding: 30px;
+            text-align: center;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .footer p {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                padding: 40px 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .content {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ebook-container">
+        <div class="header">
+            <h1>Wat is Identiteit en Waarom zijn Kernwaarden Essentieel?</h1>
+            <div class="subtitle">Module 2: Discipline & Identiteit - Top Tier Men Academy</div>
+        </div>
+        
+        <div class="content">
+            <div class="toc">
+                <h2>Inhoudsopgave</h2>
+                <ol>
+                    <li><a href="#intro">Inleiding</a></li>
+                    <li><a href="#main-content">Hoofdinhoud</a></li>
+                    <li><a href="#practical-tips">Praktische Tips</a></li>
+                    <li><a href="#reflection">Reflectie Vragen</a></li>
+                    <li><a href="#next-steps">Volgende Stappen</a></li>
+                </ol>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="intro">Inleiding</h2>
+                <p>Welkom bij les 4 van Module 2: Discipline & Identiteit. In deze fundamentele les duiken we diep in de concepten van identiteit en kernwaarden - de invisible foundation die alle andere aspecten van je leven als Top Tier Man bepaalt.</p>
+                
+                <div class="highlight-box">
+                    <h4>🎯 Wat je gaat leren</h4>
+                    <ul>
+                        <li>De wetenschappelijke definitie van identiteit en hoe het je gedrag stuurt</li>
+                        <li>De 4 lagen van identiteit: Surface, Social, Personal en Core</li>
+                        <li>Wat kernwaarden zijn en waarom ze als internal compass functioneren</li>
+                        <li>Het verschil tussen inherited values en chosen values</li>
+                        <li>Hoe values conflicts leiden tot internal stress en poor decisions</li>
+                        <li>Praktische methoden voor het identificeren van je authentieke kernwaarden</li>
+                    </ul>
+                </div>
+                
+                <p>Je identiteit is niet iets dat je krijgt - het is iets dat je bewust construeert. Door je kernwaarden to clarify en align, creëer je een unshakeable foundation voor consistent high-prestaties decision making in alle areas van je leven.</p>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="main-content">Hoofdinhoud</h2>
+                
+                <h3>Wat is Identiteit?</h3>
+                <p><strong>Identiteit</strong> is het comprehensive internal framework van beliefs, values, en characteristics dat definieert wie je bent en hoe je jezelf ziet in relation tot de wereld. Het is je internal operating system dat automatisch decisions maakt en behaviors stuurt.</p>
+                
+                <div class="highlight-box">
+                    <h4>💡 Key Concept</h4>
+                    <p><em>"Identity is the stories we tell ourselves about who we are. These stories become self-fulfilling prophecies that shape our entire reality."</em></p>
+                </div>
+                
+                <p>Je identiteit werkt als een psychological filter die bepaalt:</p>
+                <ul>
+                    <li>Welke opportunities je ziet of mist</li>
+                    <li>Welke decisions je maakt in pressure situations</li>
+                    <li>Hoe je reageert op challenges en setbacks</li>
+                    <li>Welke goals je stelt en welke je avoids</li>
+                    <li>Hoe anderen je perceiven en met je interacteren</li>
+                </ul>
+                
+                <h3>De 4 Lagen van Identiteit</h3>
+                
+                <h4>Laag 1: Surface Identity (What You Do)</h4>
+                <p><strong>Karakteristieken:</strong> Rollen, titles, external labels</p>
+                <ul>
+                    <li>Job title, relationship status, hobbies</li>
+                    <li>Social media profiles, external achievements</li>
+                    <li>Most changeable en least authentic</li>
+                    <li><strong>Voorbeeld:</strong> "Ik ben een manager, getrouwde man, voetbalfan"</li>
+                </ul>
+                
+                <h4>Laag 2: Social Identity (How Others See You)</h4>
+                <p><strong>Karakteristieken:</strong> Social roles, group memberships, reputation</p>
+                <ul>
+                    <li>Family role, social status, professional reputation</li>
+                    <li>Cultural background, community involvement</li>
+                    <li>Important maar kan limiting zijn</li>
+                    <li><strong>Voorbeeld:</strong> "Ik ben de reliable one in mijn friend group"</li>
+                </ul>
+                
+                <h4>Laag 3: Personal Identity (Who You Think You Are)</h4>
+                <p><strong>Karakteristieken:</strong> Personal characteristics, beliefs, self-concept</p>
+                <ul>
+                    <li>Personality traits, strengths en weaknesses</li>
+                    <li>Personal beliefs over jezelf en de wereld</li>
+                    <li>More stable dan surface, maar still changeable</li>
+                    <li><strong>Voorbeeld:</strong> "Ik ben een introspective, analytical, ambitious person"</li>
+                </ul>
+                
+                <h4>Laag 4: Core Identity (Who You Really Are)</h4>
+                <p><strong>Karakteristieken:</strong> Fundamental values, deepest purpose, essential nature</p>
+                <ul>
+                    <li>Core values, life purpose, spiritual beliefs</li>
+                    <li>Essential characteristics die never change</li>
+                    <li>Most authentic en powerful level</li>
+                    <li><strong>Voorbeeld:</strong> "Ik ben fundamentally toegewijd to growth, integrity, en service"</li>
+                </ul>
+                
+                <h3>Wat Zijn Kernwaarden?</h3>
+                <p><strong>Kernwaarden</strong> zijn de fundamental beliefs en principles die als jouw internal compass dienen. Ze representeren wat most important is voor jou at the deepest level en guide je decisions, behaviors, en life direction.</p>
+                
+                <h4>Eigenschappen van Authentieke Kernwaarden:</h4>
+                <ul>
+                    <li><strong>Intrinsic:</strong> Valuable in zichzelf, niet as means to an end</li>
+                    <li><strong>Enduring:</strong> Consistent over time en circumstances</li>
+                    <li><strong>Personal:</strong> Authentiekally yours, niet inherited van anderen</li>
+                    <li><strong>Motivating:</strong> Inspire action en create emotional energy</li>
+                    <li><strong>Guiding:</strong> Provide direction in complex decisions</li>
+                </ul>
+                
+                <h3>Inherited vs. Chosen Values</h3>
+                
+                <h4>Inherited Values</h4>
+                <p><strong>Source:</strong> Family, culture, society, religion, education</p>
+                <ul>
+                    <li>Automatically absorbed during childhood</li>
+                    <li>Often unconscious en unexamined</li>
+                    <li>May niet align met je authentic self</li>
+                    <li>Can create internal conflict en stress</li>
+                    <li><strong>Voorbeeld:</strong> "Success means financial wealth" (van family/society)</li>
+                </ul>
+                
+                <h4>Chosen Values</h4>
+                <p><strong>Source:</strong> Personal reflection, life experience, conscious choice</p>
+                <ul>
+                    <li>Deliberately selected through self-discovery</li>
+                    <li>Aligned met je authentic nature</li>
+                    <li>Create internal harmony en clarity</li>
+                    <li>Enable authentic decision making</li>
+                    <li><strong>Voorbeeld:</strong> "Success means making meaningful impact" (personal choice)</li>
+                </ul>
+                
+                <h3>De Psychology van Values Conflicts</h3>
+                <p>Wanneer je actions inconsistent zijn met je core values, experience je psychological stress bekend als <strong>cognitive dissonance</strong>. Dit manifests als:</p>
+                
+                <ul>
+                    <li><strong>Internal Stress:</strong> Feeling van unease, anxiety, guilt</li>
+                    <li><strong>Beslissing Paralysis:</strong> Difficulty making choices</li>
+                    <li><strong>Inconsistent Behavior:</strong> Acting differently in different situations</li>
+                    <li><strong>Low Self-Respect:</strong> Feeling dat je jezelf betrays</li>
+                    <li><strong>Energy Drain:</strong> Constant mental effort to reconcile conflicts</li>
+                </ul>
+                
+                <h3>Common Core Values Categories</h3>
+                
+                <h4>Achievement Values:</h4>
+                <ul>
+                    <li>Excellence, Success, Recognition, Competition, Accomplishment</li>
+                </ul>
+                
+                <h4>Relationship Values:</h4>
+                <ul>
+                    <li>Love, Family, Friendship, Community, Loyalty, Service</li>
+                </ul>
+                
+                <h4>Growth Values:</h4>
+                <ul>
+                    <li>Learning, Wisdom, Personal Development, Spirituality, Self-Actualization</li>
+                </ul>
+                
+                <h4>Security Values:</h4>
+                <ul>
+                    <li>Stability, Financial Security, Health, Safety, Predictability</li>
+                </ul>
+                
+                <h4>Freedom Values:</h4>
+                <ul>
+                    <li>Independence, Autonomy, Creativity, Adventure, Flexibility</li>
+                </ul>
+                
+                <h4>Character Values:</h4>
+                <ul>
+                    <li>Integrity, Honesty, Authentiekity, Courage, Responsibility</li>
+                </ul>
+                
+                <h3>Values Hierarchies en Trade-offs</h3>
+                <p>Je core values bestaan niet in isolation - ze form een hierarchy. Begrijpen deze hierarchy is crucial voor effective decision making wanneer values conflict.</p>
+                
+                <p><strong>Voorbeeld van Values Conflict:</strong></p>
+                <ul>
+                    <li><strong>Scenario:</strong> Job promotion requires relocating, away van family</li>
+                    <li><strong>Value 1:</strong> Career Achievement</li>
+                    <li><strong>Value 2:</strong> Family Connection</li>
+                    <li><strong>Resolution:</strong> Depends on je personal values hierarchy</li>
+                </ul>
+                
+                <h3>Identity-Driven vs. Goal-Driven Living</h3>
+                
+                <p><strong>Goal-Driven Approach:</strong></p>
+                <ul>
+                    <li>Focus op external outcomes</li>
+                    <li>Motivation fluctuates met progress</li>
+                    <li>Success depends on external validation</li>
+                    <li>Temporary satisfaction</li>
+                </ul>
+                
+                <p><strong>Identity-Driven Approach:</strong></p>
+                <ul>
+                    <li>Focus op being authentic to values</li>
+                    <li>Intrinsic motivation remains stable</li>
+                    <li>Success defined by internal alignment</li>
+                    <li>Lasting fulfillment</li>
+                </ul>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="practical-tips">Praktische Tips</h2>
+                <div class="action-item">
+                    <h4>💪 Core Values Discovery Framework</h4>
+                    
+                    <h5>1. Peak Ervaring Analysis</h5>
+                    <p>Identificeer momenten wanneer je felt most alive en fulfilled:</p>
+                    <ul>
+                        <li>Write down 5 peak experiences from je life</li>
+                        <li>Voor each experience, ask: "What values were being honored?"</li>
+                        <li>Look for patterns across alle experiences</li>
+                        <li>These recurring themes zijn likely core values</li>
+                    </ul>
+                    
+                    <h5>2. Values Violation Beoordeling</h5>
+                    <p>Identify values through what bothers je most:</p>
+                    <ul>
+                        <li>Write down situations die make je angry/frustrated</li>
+                        <li>Ask: "What value is being violated hier?"</li>
+                        <li>Strong emotional reactions often indicate core values</li>
+                        <li>Example: Dishonesty bothers je → Integrity is een core value</li>
+                    </ul>
+                    
+                    <h5>3. Role Model Analysis</h5>
+                    <p>Examine people je most admire:</p>
+                    <ul>
+                        <li>List 3-5 people je deeply respect</li>
+                        <li>Voor each person: "What exactly do I admire about them?"</li>
+                        <li>The qualities je admire reflect je own values</li>
+                        <li>This helps identify wat je want to embody</li>
+                    </ul>
+                    
+                    <h5>4. Life Review Exercise</h5>
+                    <p>Look at patterns in je major life decisions:</p>
+                    <ul>
+                        <li>Career choices, relationship decisions, major moves</li>
+                        <li>Ask: "What was I optimizing for in each decision?"</li>
+                        <li>Identify underlying values dat drove these choices</li>
+                        <li>Both good en regretful decisions reveal values</li>
+                    </ul>
+                    
+                    <h5>5. The Deathbed Test</h5>
+                    <p>Ultimate perspective on wat really matters:</p>
+                    <ul>
+                        <li>Imagine je are 90 years old, reflecting on je life</li>
+                        <li>What would make je feel proud en fulfilled?</li>
+                        <li>What would je regret not prioritizing?</li>
+                        <li>This reveals je deepest values</li>
+                    </ul>
+                    
+                    <h5>6. Values Prioritization Matrix</h5>
+                    <p>Once je hebben identified potential values:</p>
+                    <ul>
+                        <li>Create een list van top 10-15 values</li>
+                        <li>Force-rank them from most to least important</li>
+                        <li>Consider trade-off scenarios voor each pair</li>
+                        <li>Je top 5-7 zijn likely je core values</li>
+                    </ul>
+                </div>
+                
+                <div class="action-item">
+                    <h4>📋 Daily Values Alignment Check</h4>
+                    
+                    <h5>Morning Values Intention:</h5>
+                    <ul>
+                        <li>Review je top 3 core values</li>
+                        <li>Ask: "How kan I honor these values today?"</li>
+                        <li>Set één specific intention voor each value</li>
+                        <li>Schedule time voor values-aligned activities</li>
+                    </ul>
+                    
+                    <h5>Evening Values Review:</h5>
+                    <ul>
+                        <li>Rate each core value: "How well did I live this today?" (1-10)</li>
+                        <li>Identify één moment when je honored each value</li>
+                        <li>Note any values violations en why they occurred</li>
+                        <li>Plan tomorrow's values intentions</li>
+                    </ul>
+                    
+                    <h5>Weekly Values Beoordeling:</h5>
+                    <ul>
+                        <li>Overall alignment score voor de week</li>
+                        <li>Biggest values wins en violations</li>
+                        <li>Patterns in when values alignment breaks down</li>
+                        <li>Adjustments needed voor better alignment</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="reflection">Reflectie Vragen</h2>
+                <div class="reflection-box">
+                    <h4>🤔 Deep Identity & Values Exploration</h4>
+                    
+                    <p><strong>1. Identity Layer Analysis:</strong></p>
+                    <ul>
+                        <li>How zou je jezelf beschrijven in each van de 4 identity layers?</li>
+                        <li>Welke layer defines je most strongly right now?</li>
+                        <li>Welke layer zou je willen als je primary source van identity?</li>
+                        <li>How aligned zijn je different identity layers met elkaar?</li>
+                    </ul>
+                    
+                    <p><strong>2. Values Clarity Beoordeling:</strong></p>
+                    <ul>
+                        <li>Kun je je top 5 core values confidently list without thinking?</li>
+                        <li>Welke van je current values zijn inherited vs. consciously chosen?</li>
+                        <li>Where do je experience most values conflicts in je life?</li>
+                        <li>How do je currently make decisions when values conflict?</li>
+                    </ul>
+                    
+                    <p><strong>3. Authentiekity Evaluation:</strong></p>
+                    <ul>
+                        <li>In welke areas van je life ben je most authentic to je values?</li>
+                        <li>Where do je compromise je values voor external approval/success?</li>
+                        <li>What masks or personas do je wear in different situations?</li>
+                        <li>When do je feel most like je "true self"?</li>
+                    </ul>
+                    
+                    <p><strong>4. Legacy Perspectief:</strong></p>
+                    <ul>
+                        <li>What legacy zou je willen leave in terms van character en values?</li>
+                        <li>How zou je want others to remember je core identity?</li>
+                        <li>What values zou je want to pass on to future generations?</li>
+                        <li>How would je ideal identity impact de world around je?</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="chapter">
+                <h2 id="next-steps">Volgende Stappen</h2>
+                <div class="next-steps-box">
+                    <h4>🚀 Identity & Values Clarification Action Plan</h4>
+                    
+                    <p><strong>Week 1: Values Discovery</strong></p>
+                    <ol>
+                        <li><strong>Complete All 6 Values Exercises</strong> - Peak experiences, violations, role models, life review, deathbed test, prioritization</li>
+                        <li><strong>Create Values List</strong> - Compile een comprehensive list van potential core values</li>
+                        <li><strong>Initial Ranking</strong> - Force-rank je values from most to least important</li>
+                        <li><strong>Share with Trusted Friend</strong> - Get external perspective on je identified values</li>
+                    </ol>
+                    
+                    <p><strong>Week 2: Values Testing</strong></p>
+                    <ol>
+                        <li><strong>Daily Values Check-ins</strong> - Rate alignment with each core value daily</li>
+                        <li><strong>Beslissing Analysis</strong> - Use values to make één important decision</li>
+                        <li><strong>Values Violations Review</strong> - Identify when en why je compromise values</li>
+                        <li><strong>Environmental Alignment</strong> - Assess how je environment supports/hinders values</li>
+                    </ol>
+                    
+                    <p><strong>Week 3: Identity Integration</strong></p>
+                    <ol>
+                        <li><strong>Identity Statement Writing</strong> - Craft clear statements voor each identity layer</li>
+                        <li><strong>Core Identity Definition</strong> - Define je core identity based on je values</li>
+                        <li><strong>Identity-Behavior Alignment</strong> - Identify gaps tussen identity en current behaviors</li>
+                        <li><strong>Identity Experiments</strong> - Try acting from je core identity in different situations</li>
+                    </ol>
+                    
+                    <p><strong>Week 4: Lifestyle Integration</strong></p>
+                    <ol>
+                        <li><strong>Values-Based Goals</strong> - Set goals dat are aligned met je core values</li>
+                        <li><strong>Beslissing Framework</strong> - Create systematic approach voor values-based decisions</li>
+                        <li><strong>Social Integration</strong> - Share je values met important people in je life</li>
+                        <li><strong>Values Defense Strategy</strong> - Plan hoe je maintain values under pressure</li>
+                    </ol>
+                    
+                    <p><strong>Immediate Actions (Today):</strong></p>
+                    <ol>
+                        <li><strong>Peak Ervaring Analysis</strong> - Write down je top 5 peak life experiences</li>
+                        <li><strong>Values Violations List</strong> - Identify what bothers je most about others' behavior</li>
+                        <li><strong>Role Model Selection</strong> - Choose 3 people je most admire en why</li>
+                        <li><strong>Start Daily Values Check</strong> - Begin tracking daily values alignment</li>
+                        <li><strong>Values Declaration</strong> - Share één core value met someone close to je</li>
+                    </ol>
+                    
+                    <p><strong>Success Indicators:</strong></p>
+                    <ul>
+                        <li>Kun je je top 5 values instantly recall</li>
+                        <li>Beslissings become easier en more confident</li>
+                        <li>Internal conflicts decrease significantely</li>
+                        <li>Others comment on je authenticity en consistency</li>
+                        <li>Je feel more energized door daily activities</li>
+                        <li>Regret about past decisions decreases</li>
+                    </ul>
+                </div>
+                
+                <div class="highlight-box">
+                    <h4>🏆 Identity & Values Mastery Mantra</h4>
+                    <p><em>"I am not what I do - I am who I choose to be. My values are my compass, my identity is my destination. I choose authenticity over approval, alignment over achievement, integrity over image."</em></p>
+                    
+                    <p>Remember: Je true power ligt niet in trying to be someone anders, maar in being completely authentic to who je really are. Wanneer je values clear zijn en je identity aligned is, every decision becomes obvious en every action becomes powerful.</p>
+                    
+                    <p><strong>Je ben niet finding jezelf - je ben creating jezelf, één value-aligned choice at a time.</strong></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2025 Top Tier Men Academy. Alle rechten voorbehouden.</p>
+            <p>Voor meer informatie bezoek <strong>platform.toptiermen.eu</strong></p>
+        </div>
+    </div>
+</body>
+</html>
