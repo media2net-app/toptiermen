@@ -259,34 +259,17 @@ export default function TrainingschemasPage() {
     if (!user?.id) return;
     
     try {
-      // Check if user.id is an email and convert to UUID if needed
-      let actualUserId = user.id;
-      if (user.id.includes('@')) {
-        try {
-          const response = await fetch('/api/auth/get-user-uuid', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: user.id })
-          });
-          
-          if (response.ok) {
-            const { uuid } = await response.json();
-            actualUserId = uuid;
-          }
-        } catch (error) {
-          console.log('❌ Error getting UUID for training profile:', error);
-        }
-      }
+      console.log('📤 Saving training profile for user:', user.email);
       
       const apiPayload = {
-        userId: actualUserId,
+        userEmail: user.email, // Send email instead of trying to convert
         training_goal: profileData.training_goal,
         training_frequency: parseInt(profileData.training_frequency),
         experience_level: profileData.experience_level,
         equipment_type: profileData.equipment_type
       };
       
-      console.log('📤 Saving training profile:', apiPayload);
+      console.log('📤 API payload:', apiPayload);
       
       const response = await fetch('/api/training-profile', {
         method: 'POST',
@@ -297,6 +280,8 @@ export default function TrainingschemasPage() {
       });
 
       const data = await response.json();
+      
+      console.log('📥 API response:', data);
       
       if (response.ok && data.success) {
         console.log('✅ Training profile saved successfully');
@@ -309,6 +294,7 @@ export default function TrainingschemasPage() {
         // Fetch updated training schemas
         await fetchTrainingSchemas();
       } else {
+        console.error('❌ Failed to save training profile:', data);
         toast.error(data.error || 'Failed to save training profile');
       }
     } catch (error) {

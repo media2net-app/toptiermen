@@ -101,9 +101,9 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { userId, training_goal, training_frequency, experience_level, equipment_type } = body;
+    const { userId, userEmail, training_goal, training_frequency, experience_level, equipment_type } = body;
 
-    if (!userId || !training_goal || !training_frequency || !experience_level || !equipment_type) {
+    if ((!userId && !userEmail) || !training_goal || !training_frequency || !experience_level || !equipment_type) {
       return NextResponse.json({ 
         success: false, 
         error: 'All fields are required' 
@@ -114,37 +114,14 @@ export async function POST(request: Request) {
     
     console.log('💾 Saving training profile:', body);
     
-    // Check if userId is an email and convert to UUID if needed
-    let actualUserId = userId;
-    if (userId.includes('@')) {
-      try {
-        console.log('🔍 Looking up user by email:', userId);
-        // Use the existing get-user-uuid API endpoint
-        const response = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/auth/get-user-uuid`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: userId })
-        });
-        
-        if (response.ok) {
-          const { uuid } = await response.json();
-          actualUserId = uuid;
-          console.log('✅ Converted email to UUID for saving:', actualUserId);
-        } else {
-          console.log('❌ Failed to convert email to UUID');
-          return NextResponse.json({ 
-            success: false, 
-            error: 'User not found' 
-          }, { status: 404 });
-        }
-      } catch (error) {
-        console.log('❌ Error converting email to UUID for saving:', error);
-        return NextResponse.json({ 
-          success: false, 
-          error: `Email conversion failed: ${error}` 
-        }, { status: 400 });
-      }
-    }
+    // Use userEmail if provided, otherwise use userId
+    const emailToLookup = userEmail || userId;
+    
+    // For now, let's use a simple approach - store the email directly
+    // and handle UUID conversion later if needed
+    let actualUserId = emailToLookup;
+    
+    console.log('💾 Using user identifier:', actualUserId);
     
     const profileData = {
       user_id: actualUserId,

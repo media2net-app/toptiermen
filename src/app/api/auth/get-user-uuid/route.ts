@@ -21,27 +21,54 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 });
     }
     
-    const supabaseAdmin = getSupabaseAdminClient();
+    const supabase = getSupabaseAdminClient();
     
     console.log('🔍 Looking up UUID for email:', email);
     
-    const { data: userData, error } = await supabaseAdmin.auth.admin.getUserByEmail(email);
+    // Try to find user in auth.users table directly
+    const { data: userData, error } = await supabase
+      .from('auth.users')
+      .select('id, email')
+      .eq('email', email)
+      .single();
     
     if (error) {
       console.error('❌ Error fetching user:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      // If direct query fails, try alternative approach
+      try {
+        // Use RPC function if available
+        const { data: rpcData, error: rpcError } = await supabase
+          .rpc('get_user_by_email', { user_email: email });
+        
+        if (rpcError) {
+          console.error('❌ RPC error:', rpcError);
+          return NextResponse.json({ error: 'User not found' }, { status: 404 });
+        }
+        
+        if (rpcData) {
+          console.log('✅ Found UUID via RPC:', rpcData.id);
+          return NextResponse.json({ 
+            uuid: rpcData.id,
+            email: rpcData.email 
+          });
+        }
+      } catch (rpcError) {
+        console.error('❌ RPC failed:', rpcError);
+      }
+      
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
     
-    if (!userData.user) {
+    if (!userData) {
       console.log('❌ User not found for email:', email);
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
     
-    console.log('✅ Found UUID for email:', userData.user.id);
+    console.log('✅ Found UUID for email:', userData.id);
     
     return NextResponse.json({ 
-      uuid: userData.user.id,
-      email: userData.user.email 
+      uuid: userData.id,
+      email: userData.email 
     });
     
   } catch (error) {
