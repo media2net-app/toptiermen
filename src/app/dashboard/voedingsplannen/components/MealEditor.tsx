@@ -427,22 +427,6 @@ export default function MealEditor({
           </div>
         </div>
 
-        {/* Quick Add Section */}
-        <div className="bg-[#181F17] rounded-lg p-4 mb-6">
-          <h3 className="text-white font-semibold mb-3">Snelle Toevoeging</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-            {getQuickAddIngredients().map((ingredient) => (
-              <button
-                key={ingredient.name}
-                onClick={() => addIngredient(ingredient.name)}
-                className="px-3 py-2 bg-[#3A4D23] hover:bg-[#8BAE5A] hover:text-[#232D1A] rounded-lg text-white text-sm transition-colors font-medium"
-              >
-                {ingredient.name}
-              </button>
-            ))}
-          </div>
-        </div>
-
         {/* Ingredients */}
         <div className="space-y-4 mb-6">
           <div className="flex items-center justify-between">
@@ -495,6 +479,22 @@ export default function MealEditor({
               <p className="text-sm">Klik op "Ingredient toevoegen" om te beginnen</p>
             </div>
           )}
+        </div>
+
+        {/* Quick Add Section */}
+        <div className="bg-[#181F17] rounded-lg p-4 mb-6">
+          <h3 className="text-white font-semibold mb-3">Snelle Toevoeging</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            {getQuickAddIngredients().map((ingredient) => (
+              <button
+                key={ingredient.name}
+                onClick={() => addIngredient(ingredient.name)}
+                className="px-3 py-2 bg-[#3A4D23] hover:bg-[#8BAE5A] hover:text-[#232D1A] rounded-lg text-white text-sm transition-colors font-medium"
+              >
+                {ingredient.name}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Ingredient Search Modal */}
