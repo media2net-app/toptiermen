@@ -99,6 +99,7 @@ export default function TrainingschemasPage() {
   const [userTrainingProfile, setUserTrainingProfile] = useState<TrainingProfile | null>(null);
   const [showCalculator, setShowCalculator] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
+  const [debugMode, setDebugMode] = useState(true); // Debug mode enabled by default
   const [calculatorData, setCalculatorData] = useState({
     training_goal: 'spiermassa' as 'spiermassa' | 'kracht_uithouding' | 'power_kracht',
     training_frequency: 3 as 3 | 4 | 5 | 6,
@@ -153,7 +154,12 @@ export default function TrainingschemasPage() {
   // Training Profile functions
   const fetchUserTrainingProfile = async () => {
     try {
-      if (!user?.id) return;
+      if (!user?.id) {
+        console.log('❌ No user ID available for training profile fetch');
+        return;
+      }
+      
+      console.log('🔍 Fetching training profile for user:', user.email, 'ID:', user.id);
       
       // Check if user.id is an email and convert to UUID if needed
       let actualUserId = user.id;
@@ -178,14 +184,17 @@ export default function TrainingschemasPage() {
         }
       }
       
+      console.log('🔍 Querying training_profiles table with user_id:', actualUserId);
       const { data, error } = await supabase
         .from('training_profiles')
         .select('*')
         .eq('user_id', actualUserId)
         .single();
       
+      console.log('📊 Training profile query result:', { data, error });
+      
       if (!error && data) {
-        console.log('✅ Training profile loaded:', data);
+        console.log('✅ Training profile loaded successfully:', data);
         setUserTrainingProfile(data);
         setCalculatorData({
           training_goal: data.training_goal,
@@ -193,11 +202,12 @@ export default function TrainingschemasPage() {
           experience_level: data.experience_level,
           equipment_type: data.equipment_type
         });
+        console.log('🔄 Calculator data updated with profile data');
       } else {
-        console.log('ℹ️ No training profile found for user');
+        console.log('ℹ️ No training profile found for user:', error?.message || 'No data');
       }
     } catch (error) {
-      console.error('Error fetching training profile:', error);
+      console.error('❌ Error fetching training profile:', error);
     }
   };
 
@@ -1228,6 +1238,52 @@ export default function TrainingschemasPage() {
                   >
                     Opslaan
                   </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Debug Panel */}
+        {debugMode && (
+          <div className="fixed bottom-4 right-4 bg-[#232D1A] border border-[#8BAE5A] rounded-lg p-4 max-w-md max-h-96 overflow-y-auto z-50">
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="text-[#8BAE5A] font-semibold text-sm">Debug Mode</h3>
+              <button
+                onClick={() => setDebugMode(false)}
+                className="text-gray-400 hover:text-white text-xs"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="text-xs text-gray-300 space-y-1">
+              <div><strong>User:</strong> {user?.email || 'Not logged in'}</div>
+              <div><strong>User ID:</strong> {user?.id || 'N/A'}</div>
+              <div><strong>Onboarding:</strong> {isOnboarding ? 'Yes' : 'No'}</div>
+              <div><strong>Onboarding Step:</strong> {onboardingStep}</div>
+              <div><strong>Show Calculator:</strong> {showCalculator ? 'Yes' : 'No'}</div>
+              <div><strong>Current Step:</strong> {currentStep}</div>
+              <div><strong>User Profile:</strong> {userTrainingProfile ? 'Loaded' : 'None'}</div>
+              <div><strong>Available Schemas:</strong> {availableSchemas.length}</div>
+              <div><strong>Selected Schema:</strong> {selectedSchemaId || 'None'}</div>
+              
+              {userTrainingProfile && (
+                <div className="mt-2 pt-2 border-t border-gray-600">
+                  <div><strong>Profile Goal:</strong> {userTrainingProfile.training_goal}</div>
+                  <div><strong>Profile Frequency:</strong> {userTrainingProfile.training_frequency}x</div>
+                  <div><strong>Profile Level:</strong> {userTrainingProfile.experience_level}</div>
+                  <div><strong>Profile Equipment:</strong> {userTrainingProfile.equipment_type}</div>
+                </div>
+              )}
+              
+              <div className="mt-2 pt-2 border-t border-gray-600">
+                <div><strong>Calculator Data:</strong></div>
+                <div className="ml-2">
+                  <div>Goal: {calculatorData.training_goal}</div>
+                  <div>Frequency: {calculatorData.training_frequency}x</div>
+                  <div>Level: {calculatorData.experience_level}</div>
+                  <div>Equipment: {calculatorData.equipment_type}</div>
                 </div>
               </div>
             </div>
