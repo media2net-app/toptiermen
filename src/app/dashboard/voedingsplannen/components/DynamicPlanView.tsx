@@ -252,47 +252,105 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
   };
 
   const calculateMealNutrition = (ingredients: MealIngredient[]) => {
-    // Same logic as in the API
-    const CARNIVOOR_INGREDIENTS = {
-      'Ribeye Steak': { calories: 250, protein: 26, carbs: 0, fat: 15 },
-      'Biefstuk': { calories: 250, protein: 26, carbs: 0, fat: 15 },
-      'T-Bone Steak': { calories: 247, protein: 24, carbs: 0, fat: 16 },
-      'Rundergehakt (15% vet)': { calories: 254, protein: 20, carbs: 0, fat: 18 },
-      'Rundergehakt (20% vet)': { calories: 272, protein: 19, carbs: 0, fat: 21 },
-      'Mager Rundergehakt': { calories: 220, protein: 22, carbs: 0, fat: 14 },
-      'Eendenborst': { calories: 337, protein: 19, carbs: 0, fat: 28 },
-      'Zalm (Wild)': { calories: 208, protein: 25, carbs: 0, fat: 12 },
-      'Haring': { calories: 158, protein: 18, carbs: 0, fat: 9 },
-      'Makreel': { calories: 205, protein: 19, carbs: 0, fat: 14 },
-      'Sardines': { calories: 208, protein: 25, carbs: 0, fat: 11 },
-      'Tonijn in Olijfolie': { calories: 189, protein: 25, carbs: 0, fat: 9 },
-      'Witvis': { calories: 82, protein: 18, carbs: 0, fat: 1 },
-      'Kipfilet (Gegrild)': { calories: 165, protein: 31, carbs: 0, fat: 4 },
-      'Kalkoenfilet (Gegrild)': { calories: 135, protein: 30, carbs: 0, fat: 1 },
-      'Kippendijen': { calories: 250, protein: 26, carbs: 0, fat: 15 },
-      'Gans': { calories: 259, protein: 25, carbs: 0, fat: 17 },
-      'Varkenshaas': { calories: 143, protein: 26, carbs: 0, fat: 4 },
+    // Use the same comprehensive ingredient database as MealEditor
+    const INGREDIENT_DATABASE = {
+      // Carnivoor ingrediënten
+      'Eieren': { calories: 155, protein: 13, carbs: 1, fat: 11 },
       'Spek': { calories: 541, protein: 37, carbs: 0, fat: 42 },
+      'Rundvlees': { calories: 250, protein: 26, carbs: 0, fat: 15 },
+      'Boter': { calories: 717, protein: 0.9, carbs: 0.1, fat: 81 },
+      'Zalm': { calories: 208, protein: 25, carbs: 0, fat: 12 },
+      'Ei': { calories: 155, protein: 13, carbs: 1, fat: 11 },
       'Ham': { calories: 145, protein: 21, carbs: 0, fat: 6 },
-      'Worst': { calories: 300, protein: 20, carbs: 0, fat: 25 },
-      'Duitse Biefstuk': { calories: 250, protein: 16, carbs: 0, fat: 20 },
+      'Kipfilet': { calories: 165, protein: 31, carbs: 0, fat: 4 },
+      'Varkensvlees': { calories: 242, protein: 27, carbs: 0, fat: 14 },
+      'Tonijn': { calories: 144, protein: 30, carbs: 0, fat: 1 },
+      'Olijfolie': { calories: 884, protein: 0, carbs: 0, fat: 100 },
+      'Biefstuk': { calories: 250, protein: 26, carbs: 0, fat: 15 },
       'Salami': { calories: 336, protein: 20, carbs: 0, fat: 28 },
+      'Makreel': { calories: 205, protein: 19, carbs: 0, fat: 14 },
       'Lamsvlees': { calories: 294, protein: 25, carbs: 0, fat: 21 },
-      'Lamskotelet': { calories: 294, protein: 25, carbs: 0, fat: 21 },
-      'Orgaanvlees (Lever)': { calories: 135, protein: 20, carbs: 4, fat: 4 },
-      'Orgaanvlees (Hart)': { calories: 112, protein: 17, carbs: 0, fat: 4 },
-      'Runderlever': { calories: 135, protein: 20, carbs: 4, fat: 4 },
-      'Runderhart': { calories: 112, protein: 17, carbs: 0, fat: 4 },
-      'Tartaar': { calories: 220, protein: 22, carbs: 0, fat: 14 },
-      'Carpaccio': { calories: 120, protein: 21, carbs: 0, fat: 4 },
-      '1 Ei': { calories: 155, protein: 13, carbs: 1, fat: 11 },
-      '1 Handje Walnoten': { calories: 26, protein: 0.6, carbs: 0.5, fat: 2.6 },
-      '1 Handje Amandelen': { calories: 23, protein: 0.8, carbs: 0.9, fat: 2.0 },
-      '1 Handje Cashewnoten': { calories: 22, protein: 0.7, carbs: 1.2, fat: 1.8 },
-      '1 Handje Hazelnoten': { calories: 25, protein: 0.6, carbs: 0.7, fat: 2.4 },
-      '1 Handje Pecannoten': { calories: 28, protein: 0.4, carbs: 0.6, fat: 2.8 },
-      '1 Handje Pistachenoten': { calories: 23, protein: 0.8, carbs: 1.1, fat: 1.8 },
-      '1 Handje Macadamia Noten': { calories: 30, protein: 0.3, carbs: 0.6, fat: 3.0 }
+      'Bacon': { calories: 541, protein: 37, carbs: 0, fat: 42 },
+      'Chorizo': { calories: 455, protein: 24, carbs: 2, fat: 38 },
+      'Sardines': { calories: 208, protein: 25, carbs: 0, fat: 11 },
+      'Ossenhaas': { calories: 258, protein: 26, carbs: 0, fat: 16 },
+      'Kabeljauw': { calories: 82, protein: 18, carbs: 0, fat: 1 },
+      'Entrecote': { calories: 250, protein: 26, carbs: 0, fat: 15 },
+      'Rookworst': { calories: 300, protein: 20, carbs: 0, fat: 25 },
+      'Garnalen': { calories: 106, protein: 20, carbs: 1, fat: 2 },
+      'Ribeye': { calories: 250, protein: 26, carbs: 0, fat: 15 },
+
+      // Voedingsplan op maat ingrediënten
+      'Havermout': { calories: 68, protein: 2.4, carbs: 12, fat: 1.4 },
+      'Banaan': { calories: 89, protein: 1.1, carbs: 23, fat: 0.3 },
+      'Amandelen': { calories: 579, protein: 21, carbs: 22, fat: 50 },
+      'Melk': { calories: 42, protein: 3.4, carbs: 5, fat: 1 },
+      'Volkoren brood': { calories: 247, protein: 13, carbs: 41, fat: 4 },
+      'Avocado': { calories: 160, protein: 2, carbs: 9, fat: 15 },
+      'Tomaat': { calories: 18, protein: 0.9, carbs: 3.9, fat: 0.2 },
+      'Bruine rijst': { calories: 111, protein: 2.6, carbs: 23, fat: 0.9 },
+      'Broccoli': { calories: 34, protein: 2.8, carbs: 7, fat: 0.4 },
+      'Griekse yoghurt': { calories: 59, protein: 10, carbs: 3.6, fat: 0.4 },
+      'Blauwe bessen': { calories: 57, protein: 0.7, carbs: 14, fat: 0.3 },
+      'Walnoten': { calories: 654, protein: 15, carbs: 14, fat: 65 },
+      'Honing': { calories: 304, protein: 0.3, carbs: 82, fat: 0 },
+      'Quinoa': { calories: 120, protein: 4.4, carbs: 22, fat: 1.9 },
+      'Kikkererwten': { calories: 164, protein: 8, carbs: 27, fat: 2.6 },
+      'Komkommer': { calories: 16, protein: 0.7, carbs: 4, fat: 0.1 },
+      'Zoete aardappel': { calories: 86, protein: 1.6, carbs: 20, fat: 0.1 },
+      'Spinazie': { calories: 23, protein: 2.9, carbs: 3.6, fat: 0.4 },
+      'Volkoren toast': { calories: 247, protein: 13, carbs: 41, fat: 4 },
+      'Feta kaas': { calories: 264, protein: 14, carbs: 4, fat: 21 },
+      'Wraptortilla': { calories: 218, protein: 6, carbs: 36, fat: 6 },
+      'Kalkoen': { calories: 135, protein: 30, carbs: 0, fat: 1 },
+      'Hummus': { calories: 166, protein: 8, carbs: 14, fat: 10 },
+      'Paprika': { calories: 31, protein: 1, carbs: 7, fat: 0.3 },
+      'Aardappel': { calories: 77, protein: 2, carbs: 17, fat: 0.1 },
+      'Courgette': { calories: 17, protein: 1.2, carbs: 3.1, fat: 0.3 },
+      'Kruidenolie': { calories: 884, protein: 0, carbs: 0, fat: 100 },
+      'Smoothie bowl': { calories: 150, protein: 4, carbs: 30, fat: 3 },
+      'Mango': { calories: 60, protein: 0.8, carbs: 15, fat: 0.4 },
+      'Chiazaad': { calories: 486, protein: 17, carbs: 42, fat: 31 },
+      'Kokosmelk': { calories: 230, protein: 2.3, carbs: 6, fat: 24 },
+      'Volkoren pasta': { calories: 124, protein: 5, carbs: 25, fat: 1.1 },
+      'Cherrytomaatjes': { calories: 18, protein: 0.9, carbs: 3.9, fat: 0.2 },
+      'Basilicum pesto': { calories: 263, protein: 5, carbs: 4, fat: 25 },
+      'Bulgur': { calories: 83, protein: 3, carbs: 19, fat: 0.2 },
+      'Aubergine': { calories: 25, protein: 1, carbs: 6, fat: 0.2 },
+      'Tahini': { calories: 595, protein: 17, carbs: 21, fat: 54 },
+      'Pannenkoek': { calories: 227, protein: 6, carbs: 28, fat: 10 },
+      'Aardbeien': { calories: 32, protein: 0.7, carbs: 8, fat: 0.3 },
+      'Ricotta': { calories: 174, protein: 11, carbs: 3, fat: 13 },
+      'Ahornstroop': { calories: 260, protein: 0, carbs: 67, fat: 0.2 },
+      'Salade bowl': { calories: 50, protein: 2, carbs: 10, fat: 1 },
+      'Gegrilde kip': { calories: 165, protein: 31, carbs: 0, fat: 4 },
+      'Rode bonen': { calories: 127, protein: 9, carbs: 23, fat: 0.5 },
+      'Avocado dressing': { calories: 160, protein: 1, carbs: 3, fat: 16 },
+      'Geroosterde groenten': { calories: 35, protein: 1.5, carbs: 7, fat: 0.5 },
+      'Volkoren couscous': { calories: 112, protein: 3.8, carbs: 23, fat: 0.2 },
+      'Rozemarijn olie': { calories: 884, protein: 0, carbs: 0, fat: 100 },
+      'French toast': { calories: 200, protein: 6, carbs: 25, fat: 8 },
+      'Kiwi': { calories: 61, protein: 1.1, carbs: 15, fat: 0.5 },
+      'Gebroken lijnzaad': { calories: 534, protein: 18, carbs: 29, fat: 42 },
+      'Sushi bowl': { calories: 250, protein: 12, carbs: 40, fat: 5 },
+      'Zalm sashimi': { calories: 208, protein: 25, carbs: 0, fat: 12 },
+      'Sushi rijst': { calories: 130, protein: 2.4, carbs: 29, fat: 0.2 },
+      'Edamame': { calories: 121, protein: 11, carbs: 8, fat: 5 },
+      'Lamsbout': { calories: 294, protein: 25, carbs: 0, fat: 21 },
+      'Mediterrane groenten': { calories: 35, protein: 1.5, carbs: 7, fat: 0.5 },
+      'Wilde rijst': { calories: 101, protein: 4, carbs: 21, fat: 0.3 },
+      'Harissa': { calories: 70, protein: 3, carbs: 14, fat: 1 },
+      'Weekend omelet': { calories: 200, protein: 15, carbs: 2, fat: 15 },
+      'Champignons': { calories: 22, protein: 3.1, carbs: 3.3, fat: 0.3 },
+      'Geitenkaas': { calories: 364, protein: 22, carbs: 0.1, fat: 30 },
+      'Burger': { calories: 250, protein: 20, carbs: 20, fat: 12 },
+      'Volkoren broodje': { calories: 247, protein: 13, carbs: 41, fat: 4 },
+      'Lentils burger': { calories: 180, protein: 15, carbs: 20, fat: 6 },
+      'Zoete aardappel friet': { calories: 86, protein: 1.6, carbs: 20, fat: 0.1 },
+      'Zeebaars': { calories: 97, protein: 18, carbs: 0, fat: 2.5 },
+      'Risotto': { calories: 130, protein: 2.4, carbs: 29, fat: 0.2 },
+      'Asperges': { calories: 20, protein: 2.2, carbs: 3.9, fat: 0.1 },
+      'Truffelolie': { calories: 884, protein: 0, carbs: 0, fat: 100 }
     };
 
     let totalCalories = 0;
@@ -301,22 +359,40 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
     let totalFat = 0;
     
     ingredients.forEach(ingredient => {
-      const nutritionData = CARNIVOOR_INGREDIENTS[ingredient.name];
+      const nutritionData = INGREDIENT_DATABASE[ingredient.name];
       if (nutritionData) {
         let multiplier = 0;
         
-        if (ingredient.unit === 'stuks' && ingredient.name === '1 Ei') {
+        if (ingredient.unit === 'stuks' || ingredient.unit === 'portie' || ingredient.unit === 'sneden') {
           multiplier = ingredient.amount;
         } else if (ingredient.unit === 'handje') {
           multiplier = ingredient.amount;
+        } else if (ingredient.unit === 'ml') {
+          multiplier = ingredient.amount / 100;
         } else {
+          // gram
           multiplier = ingredient.amount / 100;
         }
+        
+        console.log(`🍽️ DynamicPlanView calculating nutrition for ${ingredient.name}:`, {
+          amount: ingredient.amount,
+          unit: ingredient.unit,
+          multiplier,
+          baseNutrition: nutritionData,
+          calculated: {
+            calories: nutritionData.calories * multiplier,
+            protein: nutritionData.protein * multiplier,
+            carbs: nutritionData.carbs * multiplier,
+            fat: nutritionData.fat * multiplier
+          }
+        });
         
         totalCalories += nutritionData.calories * multiplier;
         totalProtein += nutritionData.protein * multiplier;
         totalCarbs += nutritionData.carbs * multiplier;
         totalFat += nutritionData.fat * multiplier;
+      } else {
+        console.warn(`⚠️ DynamicPlanView: Nutrition data not found for ingredient: ${ingredient.name}`);
       }
     });
     
