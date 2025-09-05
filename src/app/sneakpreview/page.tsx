@@ -1,193 +1,176 @@
 'use client';
 
 import { useState } from 'react';
-import { PlayIcon } from '@heroicons/react/24/solid';
+import { PlayIcon } from '@heroicons/react/24/outline';
 
-export default function SneakPreviewPage() {
+interface VideoPlayerProps {
+  src: string;
+  poster?: string;
+}
+
+function VideoPlayer({ src, poster }: VideoPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [videoLoaded, setVideoLoaded] = useState(false);
 
-  const handlePlayVideo = () => {
+  const handlePlay = () => {
     setIsPlaying(true);
-    const video = document.getElementById('preview-video') as HTMLVideoElement;
-    if (video) {
-      video.play();
-    }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-green-900">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-        }} />
-      </div>
-
-      <div className="relative z-10">
-        {/* Header */}
-        <div className="pt-12 pb-8 text-center">
-          <div className="max-w-4xl mx-auto px-6">
-            {/* Logo/Brand */}
-            <div className="mb-8">
-              <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-green-500 to-green-600 rounded-full mb-4">
-                <span className="text-2xl font-bold text-white">TTM</span>
-              </div>
-              <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-                Top Tier Men
-              </h1>
-              <div className="inline-flex items-center px-4 py-2 bg-green-600/20 border border-green-500/30 rounded-full">
-                <div className="w-2 h-2 bg-green-400 rounded-full mr-3 animate-pulse"></div>
-                <span className="text-green-300 font-medium">EXCLUSIEVE SNEAK PREVIEW</span>
-              </div>
-            </div>
-
-            {/* Exclusive Access Message */}
-            <div className="mb-12">
-              <h2 className="text-2xl md:text-3xl font-bold text-white mb-6">
-                🎬 Eerste Blik op het Platform
-              </h2>
-              <div className="bg-gradient-to-r from-green-600/10 to-transparent border border-green-500/30 rounded-lg p-6 text-left max-w-2xl mx-auto">
-                <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0">
-                    <div className="w-12 h-12 bg-green-600/20 rounded-full flex items-center justify-center">
-                      <span className="text-2xl">🔒</span>
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-white mb-2">Exclusieve Pre-Launch Toegang</h3>
-                    <p className="text-gray-300 leading-relaxed">
-                      Je behoort tot een <strong className="text-green-400">selectieve groep</strong> van pre-launch leden die als eerste een kijkje mogen nemen achter de schermen van het Top Tier Men platform. Deze sneak preview is alleen beschikbaar voor uitgenodigde leden.
-                    </p>
-                  </div>
-                </div>
-              </div>
+    <div className="relative w-full max-w-4xl mx-auto group">
+      {!isPlaying && (
+        <div className="relative cursor-pointer" onClick={handlePlay}>
+          <img 
+            src={poster} 
+            alt="Video Preview" 
+            className="w-full h-auto rounded-xl shadow-2xl"
+          />
+          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded-xl group-hover:bg-opacity-40 transition-all duration-300">
+            <div className="w-20 h-20 bg-gradient-to-br from-[#8BAE5A] to-[#B6C948] rounded-full flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-300">
+              <PlayIcon className="w-8 h-8 text-white ml-1" />
             </div>
           </div>
         </div>
+      )}
+      
+      {isPlaying && (
+        <video
+          controls
+          autoPlay
+          className="w-full h-auto rounded-xl shadow-2xl"
+          poster={poster}
+          preload="metadata"
+        >
+          <source src={src} type="video/mp4" />
+          Je browser ondersteunt het video element niet.
+        </video>
+      )}
+    </div>
+  );
+}
 
-        {/* Video Section */}
-        <div className="max-w-5xl mx-auto px-6 pb-16">
-          <div className="relative">
-            {/* Video Container */}
-            <div className="relative bg-black rounded-2xl overflow-hidden shadow-2xl">
-              <video
-                id="preview-video"
-                className="w-full aspect-video"
-                controls={isPlaying}
-                poster="/platform-preview-poster.jpg"
-                onLoadedData={() => setVideoLoaded(true)}
-                onPlay={() => setIsPlaying(true)}
-                preload="metadata"
-              >
-                <source src="/platform-preview.mp4" type="video/mp4" />
-                <p className="text-white p-8 text-center">
-                  Je browser ondersteunt geen video afspelen. 
-                  <a href="/platform-preview.mp4" className="text-green-400 underline ml-1">
-                    Download de video hier.
-                  </a>
-                </p>
-              </video>
+export default function SneakPreviewPage() {
+  return (
+    <div className="sneakpreview-page min-h-screen">
+      {/* Header */}
+      <header className="relative z-10">
+        <div className="w-full px-4 sm:px-8 md:px-12 lg:px-20 py-4 sm:py-6">
+          <div className="flex items-center justify-center">
+            <div className="flex items-center space-x-3">
+              <img 
+                src="/logo_white-full.svg" 
+                alt="Top Tier Men Logo" 
+                className="h-8 sm:h-12 md:h-16 w-auto"
+              />
+            </div>
+          </div>
+        </div>
+      </header>
 
-              {/* Custom Play Button Overlay */}
-              {!isPlaying && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm">
-                  <button
-                    onClick={handlePlayVideo}
-                    className="group relative"
-                  >
-                    {/* Glow Effect */}
-                    <div className="absolute inset-0 bg-green-500/30 rounded-full blur-xl scale-150 group-hover:scale-175 transition-transform duration-300"></div>
-                    
-                    {/* Play Button */}
-                    <div className="relative w-24 h-24 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center shadow-2xl group-hover:scale-105 transition-all duration-300">
-                      <PlayIcon className="w-10 h-10 text-white ml-1" />
-                    </div>
-                  </button>
+      {/* Hero Section */}
+      <section className="sneakpreview-section py-8 sm:py-12 md:py-16 lg:py-20 px-4 sm:px-8 md:px-12 lg:px-20">
+        <div className="w-full text-center">
+          <div className="max-w-6xl mx-auto">
+            {/* Exclusive Badge */}
+            <div className="inline-flex items-center px-4 py-2 bg-[#8BAE5A]/20 border border-[#8BAE5A]/30 rounded-full text-[#8BAE5A] text-sm font-medium mb-8">
+              <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+              </svg>
+              Exclusieve Pre-Launch Preview
+            </div>
+
+            {/* Title */}
+            <h1 className="sneakpreview-title">
+              <span>SNEAK PREVIEW</span>
+              <span className="block text-[#8BAE5A]">TOP TIER MEN</span>
+            </h1>
+
+            {/* Subtitle */}
+            <p className="sneakpreview-subtitle">
+              Je behoort tot een <span className="text-[#8BAE5A] font-semibold">selectieve groep</span> van pre-launch leden. 
+              Krijg als eerste een exclusieve blik achter de schermen van het Top Tier Men platform.
+            </p>
+
+            {/* Video Section */}
+            <div className="mb-16">
+              <VideoPlayer 
+                src="/platform-preview.mp4"
+                poster="/platform-preview.png"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Platform Features */}
+      <section className="sneakpreview-section py-8 sm:py-12 md:py-16 lg:py-20 px-4 sm:px-8 md:px-12 lg:px-20">
+        <div className="w-full">
+          <div className="max-w-6xl mx-auto">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 hover:bg-white/10 transition-all duration-300">
+                <div className="w-12 h-12 bg-gradient-to-br from-[#8BAE5A] to-[#B6C948] rounded-lg flex items-center justify-center mb-4 mx-auto">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                  </svg>
                 </div>
-              )}
+                <h3 className="text-xl font-bold text-white mb-3">Academy</h3>
+                <p className="text-[#D1D5DB]">Complete trainings voor persoonlijke ontwikkeling</p>
+              </div>
 
-              {/* Video Info Overlay */}
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-white font-semibold text-lg mb-1">
-                      Platform Preview - Top Tier Men
-                    </h3>
-                    <p className="text-gray-300 text-sm">
-                      Korte inzage in Academy, Voedingsplannen, Trainingen & Brotherhood
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-green-400 text-sm font-medium">EXCLUSIEF</div>
-                    <div className="text-gray-400 text-xs">Pre-Launch Preview</div>
-                  </div>
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 hover:bg-white/10 transition-all duration-300">
+                <div className="w-12 h-12 bg-gradient-to-br from-[#8BAE5A] to-[#B6C948] rounded-lg flex items-center justify-center mb-4 mx-auto">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
                 </div>
+                <h3 className="text-xl font-bold text-white mb-3">Voedingsplannen</h3>
+                <p className="text-[#D1D5DB]">Gepersonaliseerde voeding voor jouw doelen</p>
+              </div>
+
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 hover:bg-white/10 transition-all duration-300">
+                <div className="w-12 h-12 bg-gradient-to-br from-[#8BAE5A] to-[#B6C948] rounded-lg flex items-center justify-center mb-4 mx-auto">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-white mb-3">Brotherhood</h3>
+                <p className="text-[#D1D5DB]">Community van gelijkgestemde top performers</p>
               </div>
             </div>
 
-            {/* Video Loading State */}
-            {!videoLoaded && (
-              <div className="absolute inset-0 flex items-center justify-center bg-gray-900 rounded-2xl">
-                <div className="text-center">
-                  <div className="w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                  <p className="text-gray-400">Video wordt geladen...</p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Additional Info */}
-          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-6 text-center">
-              <div className="text-3xl mb-3">📚</div>
-              <h4 className="text-white font-semibold mb-2">Academy</h4>
-              <p className="text-gray-400 text-sm">Complete trainings voor persoonlijke ontwikkeling en succes</p>
-            </div>
-            
-            <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-6 text-center">
-              <div className="text-3xl mb-3">🍽️</div>
-              <h4 className="text-white font-semibold mb-2">Voedingsplannen</h4>
-              <p className="text-gray-400 text-sm">Gepersonaliseerde voeding afgestemd op jouw doelen</p>
-            </div>
-            
-            <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-6 text-center">
-              <div className="text-3xl mb-3">🤝</div>
-              <h4 className="text-white font-semibold mb-2">Brotherhood</h4>
-              <p className="text-gray-400 text-sm">Exclusieve community van gelijkgestemde top performers</p>
-            </div>
-          </div>
-
-          {/* Call to Action */}
-          <div className="mt-12 text-center">
-            <div className="bg-gradient-to-r from-gray-800/50 to-gray-700/50 backdrop-blur-sm border border-gray-600 rounded-xl p-8">
-              <h3 className="text-2xl font-bold text-white mb-4">
+            {/* Coming Soon */}
+            <div className="bg-gradient-to-r from-[#8BAE5A]/10 to-[#B6C948]/10 border border-[#8BAE5A]/20 rounded-2xl p-8 text-center">
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
                 Binnenkort Beschikbaar
-              </h3>
-              <p className="text-gray-300 mb-6 max-w-2xl mx-auto">
-                Als pre-launch lid krijg je als eerste toegang tot het volledige platform. 
-                Houd je email in de gaten voor exclusieve updates en je persoonlijke toegangscode.
+              </h2>
+              <p className="text-lg text-[#D1D5DB] mb-6">
+                Het volledige Top Tier Men platform wordt gelanceerd op <span className="text-[#8BAE5A] font-semibold">10 september 2025</span>
               </p>
-              <div className="inline-flex items-center space-x-2 text-green-400">
-                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                <span className="font-medium">Je bent op de VIP lijst</span>
+              <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] text-white rounded-lg font-medium">
+                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+                Je staat op de VIP lijst
               </div>
             </div>
           </div>
         </div>
+      </section>
 
-        {/* Footer */}
-        <div className="border-t border-gray-800 bg-gray-900/50 backdrop-blur-sm">
-          <div className="max-w-4xl mx-auto px-6 py-8 text-center">
-            <p className="text-gray-400 text-sm mb-4">
-              © 2024 Top Tier Men - Exclusieve Broederschap voor Top Performers
-            </p>
-            <p className="text-gray-500 text-xs">
-              Deze preview is vertrouwelijk en alleen bedoeld voor uitgenodigde pre-launch leden.
-            </p>
+      {/* Footer */}
+      <footer className="py-12 px-4 sm:px-8 md:px-12 lg:px-20 border-t border-white/10">
+        <div className="w-full text-center">
+          <div className="flex items-center justify-center space-x-3 mb-4">
+            <img 
+              src="/logo_white-full.svg" 
+              alt="Top Tier Men Logo" 
+              className="h-8 sm:h-10 w-auto"
+            />
           </div>
+          <p className="text-[#D1D5DB]">
+            © 2025 Top Tier Men. Exclusieve toegang voor pre-launch leden.
+          </p>
         </div>
-      </div>
+      </footer>
     </div>
   );
 }

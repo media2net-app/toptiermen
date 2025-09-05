@@ -261,14 +261,17 @@ export const getSneakPreviewEmailTemplate = (name: string, videoUrl: string): Em
               🎥 PLATFORM SNEAK PREVIEW VIDEO
             </h3>
             
-            <div class="video-thumbnail">
-              <div class="play-button">
-                <div class="play-icon"></div>
-              </div>
+            <div class="video-thumbnail" style="position: relative; overflow: hidden;">
+              <a href="${videoUrl}" style="display: block; position: relative; text-decoration: none;">
+                <img src="https://platform.toptiermen.eu/platform-preview.png" alt="Top Tier Men Platform Preview" style="width: 100%; height: auto; display: block; border-radius: 8px;" />
+                <div class="play-button" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                  <div class="play-icon"></div>
+                </div>
+              </a>
             </div>
             
             <a href="${videoUrl}" class="cta-button" style="margin: 20px 0; display: inline-block;">
-              🎬 BEKIJK SNEAK PREVIEW VIDEO
+              🎬 BEKIJK SNEAK PREVIEW NU
             </a>
             
             <p style="color: #B6C948; font-size: 14px; margin: 15px 0 0 0;">
