@@ -1076,12 +1076,12 @@ class EmailService {
         text: `
 🎬 EXCLUSIEVE SNEAK PREVIEW - Eerste blik op het Top Tier Men Platform
 
-Beste \${variables.name && variables.name.trim() !== '' ? variables.name : ''},
+Beste \${name},
 
 Als onderdeel van onze exclusieve pre-launch community ben je een van de eerste die een kijkje mag nemen achter de schermen van het Top Tier Men platform. Deze sneak preview is alleen beschikbaar voor een selecte groep leden - jij bent een van hen.
 
 🎥 PLATFORM SNEAK PREVIEW VIDEO
-Bekijk de video hier: \${variables.videoUrl || 'https://platform.toptiermen.eu/sneakpreview'}
+Bekijk de video hier: \${videoUrl}
 
 WAT JE IN DE VIDEO ZIET:
 📚 Academy Modules - Complete trainings voor persoonlijke ontwikkeling

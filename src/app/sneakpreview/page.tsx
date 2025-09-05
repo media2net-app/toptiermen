@@ -101,10 +101,20 @@ export default function SneakPreviewPage() {
         </div>
       </section>
 
-      {/* Platform Features */}
+      {/* Platform Features Overview */}
       <section className="sneakpreview-section py-8 sm:py-12 md:py-16 lg:py-20 px-4 sm:px-8 md:px-12 lg:px-20">
         <div className="w-full">
           <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                Wat je in de video ziet
+              </h2>
+              <p className="text-lg text-[#D1D5DB] max-w-3xl mx-auto">
+                Een complete kijk op alle platform functies die je helpen om je volledige potentieel te bereiken
+              </p>
+            </div>
+
+            {/* Main Features Grid */}
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
               <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 hover:bg-white/10 transition-all duration-300">
                 <div className="w-12 h-12 bg-gradient-to-br from-[#8BAE5A] to-[#B6C948] rounded-lg flex items-center justify-center mb-4 mx-auto">
@@ -113,7 +123,13 @@ export default function SneakPreviewPage() {
                   </svg>
                 </div>
                 <h3 className="text-xl font-bold text-white mb-3">Academy</h3>
-                <p className="text-[#D1D5DB]">Complete trainings voor persoonlijke ontwikkeling</p>
+                <p className="text-[#D1D5DB] mb-4">Complete trainings voor persoonlijke ontwikkeling</p>
+                <ul className="text-sm text-[#8BAE5A] space-y-1">
+                  <li>• Video academy modules</li>
+                  <li>• Expert interviews</li>
+                  <li>• E-books en guides</li>
+                  <li>• Case studies</li>
+                </ul>
               </div>
 
               <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 hover:bg-white/10 transition-all duration-300">
@@ -123,7 +139,45 @@ export default function SneakPreviewPage() {
                   </svg>
                 </div>
                 <h3 className="text-xl font-bold text-white mb-3">Voedingsplannen</h3>
-                <p className="text-[#D1D5DB]">Gepersonaliseerde voeding voor jouw doelen</p>
+                <p className="text-[#D1D5DB] mb-4">Gepersonaliseerde voeding voor jouw doelen</p>
+                <ul className="text-sm text-[#8BAE5A] space-y-1">
+                  <li>• Persoonlijke plannen</li>
+                  <li>• Macro berekeningen</li>
+                  <li>• Recepten database</li>
+                  <li>• Voortgang tracking</li>
+                </ul>
+              </div>
+
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 hover:bg-white/10 transition-all duration-300">
+                <div className="w-12 h-12 bg-gradient-to-br from-[#8BAE5A] to-[#B6C948] rounded-lg flex items-center justify-center mb-4 mx-auto">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-white mb-3">Fitness & Training</h3>
+                <p className="text-[#D1D5DB] mb-4">Complete workout systemen</p>
+                <ul className="text-sm text-[#8BAE5A] space-y-1">
+                  <li>• Trainingsschema's</li>
+                  <li>• Video oefeningen</li>
+                  <li>• Workout logging</li>
+                  <li>• Progressie tracking</li>
+                </ul>
+              </div>
+
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 hover:bg-white/10 transition-all duration-300">
+                <div className="w-12 h-12 bg-gradient-to-br from-[#8BAE5A] to-[#B6C948] rounded-lg flex items-center justify-center mb-4 mx-auto">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-white mb-3">Mindset & Focus</h3>
+                <p className="text-[#D1D5DB] mb-4">Mentale kracht ontwikkeling</p>
+                <ul className="text-sm text-[#8BAE5A] space-y-1">
+                  <li>• Meditatie oefeningen</li>
+                  <li>• Goal setting tools</li>
+                  <li>• Habit building</li>
+                  <li>• Productiviteit systemen</li>
+                </ul>
               </div>
 
               <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 hover:bg-white/10 transition-all duration-300">
@@ -133,7 +187,67 @@ export default function SneakPreviewPage() {
                   </svg>
                 </div>
                 <h3 className="text-xl font-bold text-white mb-3">Brotherhood</h3>
-                <p className="text-[#D1D5DB]">Community van gelijkgestemde top performers</p>
+                <p className="text-[#D1D5DB] mb-4">Exclusieve community</p>
+                <ul className="text-sm text-[#8BAE5A] space-y-1">
+                  <li>• Brotherhood forum</li>
+                  <li>• Accountability groups</li>
+                  <li>• Mentorship programma</li>
+                  <li>• Networking events</li>
+                </ul>
+              </div>
+
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 hover:bg-white/10 transition-all duration-300">
+                <div className="w-12 h-12 bg-gradient-to-br from-[#8BAE5A] to-[#B6C948] rounded-lg flex items-center justify-center mb-4 mx-auto">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-white mb-3">Business & Finance</h3>
+                <p className="text-[#D1D5DB] mb-4">Financiële groei strategieën</p>
+                <ul className="text-sm text-[#8BAE5A] space-y-1">
+                  <li>• Business coaching</li>
+                  <li>• Investment strategieën</li>
+                  <li>• Financiële planning</li>
+                  <li>• Side hustle guides</li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Gamification Section */}
+            <div className="bg-gradient-to-r from-[#8BAE5A]/10 to-[#B6C948]/10 border border-[#8BAE5A]/20 rounded-2xl p-8 mb-16">
+              <div className="text-center mb-8">
+                <h3 className="text-2xl font-bold text-white mb-4">
+                  🎯 Gamification & Motivatie
+                </h3>
+                <p className="text-[#D1D5DB]">
+                  Blijf gemotiveerd met ons unieke achievement systeem
+                </p>
+              </div>
+              
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-gradient-to-br from-[#8BAE5A] to-[#B6C948] rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl">🏆</span>
+                  </div>
+                  <h4 className="text-lg font-bold text-white mb-2">Achievement Badges</h4>
+                  <p className="text-sm text-[#D1D5DB]">Verdien badges door doelen te behalen</p>
+                </div>
+                
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-gradient-to-br from-[#8BAE5A] to-[#B6C948] rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl">📊</span>
+                  </div>
+                  <h4 className="text-lg font-bold text-white mb-2">Level System</h4>
+                  <p className="text-sm text-[#D1D5DB]">Klim op in rang binnen de community</p>
+                </div>
+                
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-gradient-to-br from-[#8BAE5A] to-[#B6C948] rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl">🎖️</span>
+                  </div>
+                  <h4 className="text-lg font-bold text-white mb-2">Daily Challenges</h4>
+                  <p className="text-sm text-[#D1D5DB]">Dagelijkse uitdagingen voor groei</p>
+                </div>
               </div>
             </div>
 
