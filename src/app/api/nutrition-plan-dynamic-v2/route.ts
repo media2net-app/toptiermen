@@ -224,8 +224,8 @@ export async function GET(request: NextRequest) {
       .eq('user_id', userId)
       .single();
 
-    // Use fallback profile if no user profile found
-    const profile = userProfile || {
+    // Always use fallback profile for plan display (no user profile required)
+    const profile = {
       age: 30,
       weight: 70,
       height: 175,
@@ -237,9 +237,7 @@ export async function GET(request: NextRequest) {
       target_fat: 70
     };
 
-    if (profileError && !userProfile) {
-      console.log('⚠️ No user profile found, using fallback profile for plan display', new Date().toISOString());
-    }
+    console.log('✅ Using fallback profile for plan display - no user profile required');
 
     // Get the nutrition plan from database
     const { data: planData, error: planError } = await supabase
