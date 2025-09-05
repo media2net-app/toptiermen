@@ -20,52 +20,23 @@ export class EmailService {
   async getConfig(): Promise<EmailConfig> {
     if (this.config) return this.config;
     
-    console.log('📧 Loading email configuration from database...');
+    console.log('📧 Using direct email configuration...');
     
-    try {
-      const { data: settings, error } = await supabaseAdmin
-        .from('site_settings')
-        .select('*')
-        .eq('category', 'email')
-        .order('key');
-
-      if (error) {
-        console.error('❌ Error loading email settings:', error);
-        throw new Error('Failed to load email configuration');
-      }
-
-      // Convert array of settings to config object
-      const config: any = {};
-      settings?.forEach(setting => {
-        config[setting.key] = setting.value;
-      });
-
-      // Parse boolean values
-      config.useManualSmtp = config.useManualSmtp === 'true';
-      config.smtpSecure = config.smtpSecure === 'true';
-
-      this.config = config as EmailConfig;
-      console.log('✅ Email configuration loaded from database');
-      
-      return this.config;
-    } catch (error) {
-      console.error('❌ Failed to load email configuration:', error);
-      // Fallback to environment variables
-      this.config = {
-        provider: 'smtp',
-        useManualSmtp: true,
-        smtpHost: process.env.SMTP_HOST || 'toptiermen.eu',
-        smtpPort: process.env.SMTP_PORT || '465',
-        smtpSecure: process.env.SMTP_SECURE === 'true' || true,
-        smtpUsername: process.env.SMTP_USERNAME || 'platform@toptiermen.eu',
-        smtpPassword: process.env.SMTP_PASSWORD,
-        fromEmail: process.env.FROM_EMAIL || 'platform@toptiermen.eu',
-        fromName: process.env.FROM_NAME || 'Top Tier Men'
-      };
-      
-      console.log('⚠️ Using fallback email configuration from environment');
-      return this.config;
-    }
+    // Use direct configuration instead of database lookup
+    this.config = {
+      provider: 'smtp',
+      useManualSmtp: true,
+      smtpHost: process.env.SMTP_HOST || 'toptiermen.eu',
+      smtpPort: process.env.SMTP_PORT || '465',
+      smtpSecure: process.env.SMTP_SECURE === 'true' || true,
+      smtpUsername: process.env.SMTP_USERNAME || 'platform@toptiermen.eu',
+      smtpPassword: process.env.SMTP_PASSWORD,
+      fromEmail: process.env.FROM_EMAIL || 'platform@toptiermen.eu',
+      fromName: process.env.FROM_NAME || 'Top Tier Men'
+    };
+    
+    console.log('✅ Email configuration loaded from environment');
+    return this.config;
   }
 
   async sendEmail(to: string, subject: string, template: string, variables: Record<string, string>, options: { tracking?: boolean } = {}): Promise<boolean> {
@@ -83,29 +54,8 @@ export class EmailService {
     });
 
     try {
-      // Create tracking record first (if enabled)
-      if (options.tracking) {
-        try {
-          const { error: trackingError } = await supabaseAdmin
-            .from('email_tracking')
-            .insert({
-              recipient_email: to,
-              subject: emailTemplate.subject,
-              campaign_id: template === 'sneak_preview' ? 'sneak-preview-campaign' : 'welcome-campaign',
-              sent_at: new Date().toISOString(),
-              status: 'sent'
-            });
-
-          if (trackingError) {
-            console.log('Error creating tracking record:', trackingError);
-            console.log('⚠️ Email tracking failed, sending without tracking:', trackingError);
-          } else {
-            console.log('✅ Email tracking record created');
-          }
-        } catch (trackingErr) {
-          console.log('⚠️ Email tracking failed, sending without tracking:', trackingErr);
-        }
-      }
+      // Skip tracking for now to avoid database issues
+      console.log('📧 Skipping email tracking to avoid database dependencies');
 
       // Send email
       if (config.provider === 'smtp' && config.useManualSmtp) {
@@ -392,7 +342,7 @@ Het Top Tier Men Team
         from: config.fromName + ' <' + config.fromEmail + '>'
       });
 
-      const transporter = nodemailer.createTransporter({
+      const transporter = nodemailer.createTransport({
         host: config.smtpHost,
         port: parseInt(config.smtpPort || '465'),
         secure: config.smtpSecure,
@@ -428,19 +378,8 @@ Het Top Tier Men Team
   }
 
   private async logEmail(to: string, method: string, subject: string): Promise<void> {
-    try {
-      await supabaseAdmin
-        .from('email_logs')
-        .insert({
-          recipient: to,
-          subject,
-          method,
-          sent_at: new Date().toISOString(),
-          status: 'sent'
-        });
-    } catch (error) {
-      console.log('⚠️ Failed to log email to database:', error);
-    }
+    // Skip database logging for now to avoid dependency issues
+    console.log('📧 Email sent:', { to, method, subject, timestamp: new Date().toISOString() });
   }
 }
 
