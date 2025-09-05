@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
       }, { status: 400 });
     }
 
-    console.log('🥗 Getting nutrition plan data for:', { planId });
+    console.log('🥗 Getting nutrition plan data for:', { planId, timestamp: new Date().toISOString() });
 
     // Get the nutrition plan from database
     const { data: planData, error: planError } = await supabase
