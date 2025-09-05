@@ -46,7 +46,7 @@ interface DayPlan {
   ontbijt_snack?: Meal; // Optional morning snack
   lunch_snack?: Meal; // Optional lunch snack
   diner_snack?: Meal; // Optional evening snack
-  dailyTotals: MealNutrition;
+  dailyTotals?: MealNutrition; // Optional - will be calculated if not present
 }
 
 interface PlanData {
@@ -89,6 +89,80 @@ const MEAL_TYPES_NL = {
   ontbijt_snack: 'Ochtend Snack',
   lunch_snack: 'Lunch Snack',
   diner_snack: 'Avond Snack'
+};
+
+// Function to calculate daily totals from meals
+const calculateDailyTotals = (dayPlan: DayPlan): MealNutrition => {
+  const meals = [
+    dayPlan.ontbijt,
+    dayPlan.lunch,
+    dayPlan.diner,
+    dayPlan.ontbijt_snack,
+    dayPlan.lunch_snack,
+    dayPlan.diner_snack
+  ].filter(Boolean); // Remove undefined meals
+
+  return meals.reduce((totals, meal) => {
+    if (meal && meal.nutrition) {
+      totals.calories += meal.nutrition.calories;
+      totals.protein += meal.nutrition.protein;
+      totals.carbs += meal.nutrition.carbs;
+      totals.fat += meal.nutrition.fat;
+    }
+    return totals;
+  }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
+};
+
+// Function to transform new 6-meal structure to component format
+const transformMealData = (mealData: any): Meal => {
+  if (!mealData || !Array.isArray(mealData)) {
+    return { ingredients: [], nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0 } };
+  }
+
+  const ingredients: MealIngredient[] = mealData.map((item: any) => ({
+    name: item.name,
+    amount: item.amount,
+    unit: item.unit,
+    baseAmount: item.amount
+  }));
+
+  const nutrition: MealNutrition = mealData.reduce((totals: any, item: any) => {
+    totals.calories += item.calories || 0;
+    totals.protein += item.protein || 0;
+    totals.carbs += item.carbs || 0;
+    totals.fat += item.fat || 0;
+    return totals;
+  }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
+
+  return { ingredients, nutrition };
+};
+
+// Function to transform plan data to support new 6-meal structure
+const transformPlanData = (data: any): PlanData => {
+  if (!data || !data.weekPlan) {
+    return data; // Return as-is if no transformation needed
+  }
+
+  const transformedWeekPlan: Record<string, DayPlan> = {};
+  
+  // Transform each day's meal data
+  Object.keys(data.weekPlan).forEach(day => {
+    const dayData = data.weekPlan[day];
+    
+    transformedWeekPlan[day] = {
+      ontbijt: transformMealData(dayData.ontbijt),
+      lunch: transformMealData(dayData.lunch),
+      diner: transformMealData(dayData.diner),
+      ontbijt_snack: transformMealData(dayData.ochtend_snack),
+      lunch_snack: transformMealData(dayData.lunch_snack),
+      diner_snack: transformMealData(dayData.avond_snack)
+    };
+  });
+
+  return {
+    ...data,
+    weekPlan: transformedWeekPlan
+  };
 };
 
 export default function DynamicPlanView({ planId, planName, userId, onBack }: DynamicPlanViewProps) {
@@ -145,9 +219,11 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
       const data = await response.json();
       
       if (data.success) {
-        setPlanData(data.data);
+        // Transform the data to support new 6-meal structure
+        const transformedData = transformPlanData(data.data);
+        setPlanData(transformedData);
         setHasUnsavedChanges(false); // Fresh plan, no changes yet
-        console.log('✅ Dynamic plan loaded:', data.data);
+        console.log('✅ Dynamic plan loaded and transformed:', transformedData);
       } else {
         throw new Error(data.error || 'Failed to load dynamic plan');
       }
@@ -838,13 +914,14 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
             
             {/* Calorie Warning */}
             {(() => {
-              const warning = getCalorieWarning(selectedDayPlan.dailyTotals.calories, planData.userProfile.targetCalories);
+              const dailyTotals = selectedDayPlan.dailyTotals || calculateDailyTotals(selectedDayPlan);
+              const warning = getCalorieWarning(dailyTotals.calories, planData.userProfile.targetCalories);
               if (warning) {
                 return (
                   <div className={`mb-4 p-4 rounded-lg border-2 ${warning.color}`}>
                     <p className="font-semibold text-sm">{warning.message}</p>
                     <p className="text-xs mt-1 opacity-80">
-                      Doel: {planData.userProfile.targetCalories} kcal • Huidig: {selectedDayPlan.dailyTotals.calories} kcal
+                      Doel: {planData.userProfile.targetCalories} kcal • Huidig: {dailyTotals.calories} kcal
                     </p>
                   </div>
                 );
@@ -853,31 +930,41 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
             })()}
             
             <div className="grid md:grid-cols-4 gap-4">
-              <div className="bg-[#181F17] rounded-lg p-4 text-center">
-                <h4 className="text-[#8BAE5A] font-semibold mb-1 text-sm">Calorieën</h4>
-                <p className="text-xl font-bold text-white">{selectedDayPlan.dailyTotals.calories}</p>
-                <p className="text-xs text-gray-400">Doel: {planData.userProfile.targetCalories}</p>
-              </div>
-              <div className="bg-[#181F17] rounded-lg p-4 text-center">
-                <h4 className="text-[#8BAE5A] font-semibold mb-1 text-sm">Eiwitten</h4>
-                <p className="text-xl font-bold text-white">{selectedDayPlan.dailyTotals.protein}g</p>
-              </div>
-              <div className="bg-[#181F17] rounded-lg p-4 text-center">
-                <h4 className="text-[#8BAE5A] font-semibold mb-1 text-sm">Koolhydraten</h4>
-                <p className="text-xl font-bold text-white">{selectedDayPlan.dailyTotals.carbs}g</p>
-              </div>
-              <div className="bg-[#181F17] rounded-lg p-4 text-center">
-                <h4 className="text-[#8BAE5A] font-semibold mb-1 text-sm">Vetten</h4>
-                <p className="text-xl font-bold text-white">{selectedDayPlan.dailyTotals.fat}g</p>
-              </div>
+              {(() => {
+                const dailyTotals = selectedDayPlan.dailyTotals || calculateDailyTotals(selectedDayPlan);
+                return (
+                  <>
+                    <div className="bg-[#181F17] rounded-lg p-4 text-center">
+                      <h4 className="text-[#8BAE5A] font-semibold mb-1 text-sm">Calorieën</h4>
+                      <p className="text-xl font-bold text-white">{dailyTotals.calories}</p>
+                      <p className="text-xs text-gray-400">Doel: {planData.userProfile.targetCalories}</p>
+                    </div>
+                    <div className="bg-[#181F17] rounded-lg p-4 text-center">
+                      <h4 className="text-[#8BAE5A] font-semibold mb-1 text-sm">Eiwitten</h4>
+                      <p className="text-xl font-bold text-white">{dailyTotals.protein}g</p>
+                    </div>
+                    <div className="bg-[#181F17] rounded-lg p-4 text-center">
+                      <h4 className="text-[#8BAE5A] font-semibold mb-1 text-sm">Koolhydraten</h4>
+                      <p className="text-xl font-bold text-white">{dailyTotals.carbs}g</p>
+                    </div>
+                    <div className="bg-[#181F17] rounded-lg p-4 text-center">
+                      <h4 className="text-[#8BAE5A] font-semibold mb-1 text-sm">Vetten</h4>
+                      <p className="text-xl font-bold text-white">{dailyTotals.fat}g</p>
+                    </div>
+                  </>
+                );
+              })()}
             </div>
           </div>
 
           {/* Meals */}
-          {['ontbijt', 'lunch', 'diner'].map((mealType) => {
-            const meal = selectedDayPlan[mealType];
-            const snackType = `${mealType}_snack` as keyof DayPlan;
-            const snack = selectedDayPlan[snackType];
+          {[
+            { type: 'ontbijt', snackType: 'ontbijt_snack' },
+            { type: 'lunch', snackType: 'lunch_snack' },
+            { type: 'diner', snackType: 'diner_snack' }
+          ].map(({ type: mealType, snackType }) => {
+            const meal = selectedDayPlan[mealType as keyof DayPlan];
+            const snack = selectedDayPlan[snackType as keyof DayPlan];
             
             return (
               <div key={mealType} className="space-y-4">
