@@ -1,5 +1,5 @@
 "use client";
-import { Fragment, useState } from "react";
+import { Fragment, useState, useEffect } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { ArrowPathIcon, LightBulbIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 
@@ -52,9 +52,11 @@ type WorkoutPlayerModalProps = {
   onClose: () => void;
   onComplete: (data: any) => void;
   trainingData?: typeof mockTraining;
+  schemaId?: string;
+  dayNumber?: number;
 };
 
-export default function WorkoutPlayerModal({ isOpen, onClose, onComplete, trainingData = mockTraining }: WorkoutPlayerModalProps) {
+export default function WorkoutPlayerModal({ isOpen, onClose, onComplete, trainingData = mockTraining, schemaId, dayNumber }: WorkoutPlayerModalProps) {
   const [activeIdx, setActiveIdx] = useState(0);
   const [exercises, setExercises] = useState(trainingData.exercises);
   const [resting, setResting] = useState(false);
@@ -63,6 +65,42 @@ export default function WorkoutPlayerModal({ isOpen, onClose, onComplete, traini
   const [showFeedback, setShowFeedback] = useState(false);
   const [currentFeedback, setCurrentFeedback] = useState("");
   const [workoutStartTime] = useState(Date.now());
+  const [loading, setLoading] = useState(false);
+  const [workoutName, setWorkoutName] = useState(trainingData.name);
+
+  // Load real workout data when schemaId and dayNumber are provided
+  useEffect(() => {
+    if (isOpen && schemaId && dayNumber) {
+      loadWorkoutData();
+    }
+  }, [isOpen, schemaId, dayNumber]);
+
+  const loadWorkoutData = async () => {
+    if (!schemaId || !dayNumber) return;
+    
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/training/workout-data?schemaId=${schemaId}&dayNumber=${dayNumber}`);
+      const result = await response.json();
+      
+      if (result.success && result.data) {
+        setWorkoutName(result.data.name);
+        setExercises(result.data.exercises);
+        // Set rest time from schema if available
+        if (result.data.schemaInfo?.rest_time_seconds) {
+          setRestTime(result.data.schemaInfo.rest_time_seconds);
+        }
+      } else {
+        console.error('Failed to load workout data:', result.error);
+        // Keep using mock data as fallback
+      }
+    } catch (error) {
+      console.error('Error loading workout data:', error);
+      // Keep using mock data as fallback
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Mock rest-timer
   function handleSetDone(exIdx: number, setIdx: number) {
