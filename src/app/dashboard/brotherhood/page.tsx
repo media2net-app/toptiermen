@@ -107,54 +107,86 @@ export default function Brotherhood() {
         setMyConnections(formattedConnections);
       }
 
-      // Generate mock groups based on user interests
-      const mockGroups: Group[] = [
-        { 
-          id: '1', 
-          name: "Crypto & DeFi Pioniers", 
-          logo: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=150&h=150&fit=crop&crop=face",
-          member_count: 8
-        },
-        { 
-          id: '2', 
-          name: "Mindset Masters", 
-          logo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-          member_count: 12
-        },
-        { 
-          id: '3', 
-          name: "Fitness Tribe", 
-          logo: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=150&h=150&fit=crop&crop=face",
-          member_count: 15
-        }
-      ];
-      setMyGroups(mockGroups);
+      // Fetch real brotherhood groups from database
+      const groupsResponse = await fetch('/api/brotherhood/groups?is_public=true');
+      const groupsResult = await groupsResponse.json();
+      
+      if (groupsResult.success) {
+        const formattedGroups: Group[] = groupsResult.groups.map((group: any) => ({
+          id: group.id,
+          name: group.name,
+          logo: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=150&h=150&fit=crop&crop=face", // Default logo
+          member_count: group.member_count || 0
+        }));
+        setMyGroups(formattedGroups);
+      } else {
+        // Fallback to mock data
+        const mockGroups: Group[] = [
+          { 
+            id: '1', 
+            name: "Crypto & DeFi Pioniers", 
+            logo: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=150&h=150&fit=crop&crop=face",
+            member_count: 8
+          },
+          { 
+            id: '2', 
+            name: "Mindset Masters", 
+            logo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+            member_count: 12
+          },
+          { 
+            id: '3', 
+            name: "Fitness Tribe", 
+            logo: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=150&h=150&fit=crop&crop=face",
+            member_count: 15
+          }
+        ];
+        setMyGroups(mockGroups);
+      }
 
-      // Generate mock events
-      const mockEvents: Event[] = [
-        { 
-          id: '1', 
-          title: "Finance Mastermind Call", 
-          date: "Morgen 20:00", 
-          type: "Online Workshop", 
-          attendees: 12 
-        },
-        { 
-          id: '2', 
-          title: "Mindset Workshop", 
-          date: "Overmorgen 19:00", 
-          type: "Fysieke Meetup (Amsterdam)", 
-          attendees: 8 
-        },
-        { 
-          id: '3', 
-          title: "Crypto Meetup", 
-          date: "Volgende week", 
-          type: "Online Workshop", 
-          attendees: 15 
-        }
-      ];
-      setUpcomingEvents(mockEvents);
+      // Fetch real brotherhood events from database
+      const eventsResponse = await fetch('/api/brotherhood/events?status=upcoming');
+      const eventsResult = await eventsResponse.json();
+      
+      if (eventsResult.success) {
+        const formattedEvents: Event[] = eventsResult.events.map((event: any) => ({
+          id: event.id,
+          title: event.title,
+          date: new Date(event.date).toLocaleDateString('nl-NL', { 
+            day: 'numeric', 
+            month: 'long' 
+          }),
+          type: event.type,
+          attendees: event.current_attendees || 0
+        }));
+        setUpcomingEvents(formattedEvents);
+      } else {
+        // Fallback to mock data
+        const mockEvents: Event[] = [
+          { 
+            id: '1', 
+            title: "Finance Mastermind Call", 
+            date: "Morgen 20:00", 
+            type: "Online Workshop", 
+            attendees: 12 
+          },
+          { 
+            id: '2', 
+            title: "Mindset Workshop", 
+            date: "Overmorgen 19:00", 
+            type: "Fysieke Meetup (Amsterdam)", 
+            attendees: 8 
+          },
+          { 
+            id: '3', 
+            title: "Crypto Meetup", 
+            date: "Volgende week", 
+            type: "Online Workshop", 
+            attendees: 15 
+          }
+        ];
+        setUpcomingEvents(mockEvents);
+      }
 
     } catch (error) {
       console.error('Error fetching brotherhood data:', error);
