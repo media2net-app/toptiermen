@@ -76,6 +76,72 @@ const mockEvents = [
 export default function MijnGroepenEnEvenementen() {
   const [tab, setTab] = useState<'groepen' | 'evenementen'>('groepen');
   const [eventView, setEventView] = useState<'aankomend' | 'voorbij'>('aankomend');
+  const [groups, setGroups] = useState(mockGroups);
+  const [events, setEvents] = useState(mockEvents);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadBrotherhoodData();
+  }, []);
+
+  const loadBrotherhoodData = async () => {
+    try {
+      setLoading(true);
+      
+      // Load groups
+      const groupsResponse = await fetch('/api/brotherhood/groups?is_public=true');
+      const groupsResult = await groupsResponse.json();
+      
+      if (groupsResult.success) {
+        // Transform database groups to match frontend format
+        const formattedGroups = groupsResult.groups.map((group: any) => ({
+          id: group.id,
+          name: group.name,
+          members: [
+            { name: 'Rick', avatar: 'https://randomuser.me/api/portraits/men/31.jpg' },
+            { name: 'Mark', avatar: 'https://randomuser.me/api/portraits/men/32.jpg' },
+            { name: 'Jeroen', avatar: 'https://randomuser.me/api/portraits/men/33.jpg' },
+            { name: 'Sven', avatar: 'https://randomuser.me/api/portraits/men/34.jpg' },
+            { name: 'Teun', avatar: 'https://randomuser.me/api/portraits/men/35.jpg' },
+            { name: 'Pieter', avatar: 'https://randomuser.me/api/portraits/men/36.jpg' },
+            { name: 'Daan', avatar: 'https://randomuser.me/api/portraits/men/37.jpg' },
+            { name: 'Jij', avatar: 'https://randomuser.me/api/portraits/men/38.jpg' },
+          ],
+          activity: [
+            { type: 'forum', content: "Mark V. startte de discussie: 'Analyse van de laatste Bitcoin halving'.", date: '2u geleden' },
+            { type: 'member', content: 'Welkom bij de groep, Jeroen D.!', date: '1 dag geleden' },
+            { type: 'event', content: 'Volgende call: Wekelijkse Portfolio Review - morgen om 20:00.', date: 'Morgen' },
+          ],
+        }));
+        setGroups(formattedGroups);
+      }
+
+      // Load events
+      const eventsResponse = await fetch('/api/brotherhood/events?status=upcoming');
+      const eventsResult = await eventsResponse.json();
+      
+      if (eventsResult.success) {
+        const formattedEvents = eventsResult.events.map((event: any) => ({
+          id: event.id,
+          title: event.title,
+          type: event.type,
+          date: new Date(event.date).toLocaleDateString('nl-NL', { 
+            day: 'numeric', 
+            month: 'long' 
+          }),
+          time: event.time || '20:00',
+          status: 'aangemeld',
+          upcoming: true,
+        }));
+        setEvents(formattedEvents);
+      }
+    } catch (error) {
+      console.error('Error loading brotherhood data:', error);
+      // Keep using mock data as fallback
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="w-full max-w-7xl mx-auto">
@@ -106,7 +172,7 @@ export default function MijnGroepenEnEvenementen() {
             </Link>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {mockGroups.map(group => (
+            {groups.map(group => (
               <div key={group.id} className="bg-[#232D1A]/90 rounded-2xl shadow-xl border border-[#3A4D23]/40 p-6 flex flex-col gap-4">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-lg font-bold text-white">{group.name}</h3>
@@ -167,7 +233,7 @@ export default function MijnGroepenEnEvenementen() {
             </div>
           </div>
           <div className="space-y-4">
-            {mockEvents.filter(e => e.upcoming === (eventView === 'aankomend')).map(event => (
+            {events.filter(e => e.upcoming === (eventView === 'aankomend')).map(event => (
               <div key={event.id} className="bg-[#232D1A]/90 rounded-2xl shadow-xl border border-[#3A4D23]/40 p-5 flex flex-col md:flex-row md:items-center gap-4">
                 <div className="flex flex-col items-start min-w-[120px] mb-2 md:mb-0">
                   <div className="text-lg font-bold text-[#FFD700]">{event.date}, {event.time}</div>
