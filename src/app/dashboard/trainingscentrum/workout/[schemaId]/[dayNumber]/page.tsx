@@ -16,6 +16,7 @@ import {
 } from '@heroicons/react/24/outline';
 import ClientLayout from '../../../../../components/ClientLayout';
 import WorkoutVideoModal from '@/components/WorkoutVideoModal';
+import WorkoutPlayerModal from '../../WorkoutPlayerModal';
 import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'react-hot-toast';
@@ -58,6 +59,7 @@ export default function WorkoutPage() {
   const [isRestTimerRunning, setIsRestTimerRunning] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showVideoModal, setShowVideoModal] = useState(false);
+  const [showWorkoutPlayerModal, setShowWorkoutPlayerModal] = useState(false);
 
   // Sample exercises - in real app, fetch from API
   const sampleExercises: Exercise[] = [
@@ -417,6 +419,12 @@ export default function WorkoutPage() {
             <div className="text-center">
               <h1 className="text-3xl font-bold text-white">Dag {dayNumber} Training</h1>
               <p className="text-[#8BAE5A]">Interactive Workout</p>
+              <button
+                onClick={() => setShowWorkoutPlayerModal(true)}
+                className="mt-2 px-4 py-2 bg-gradient-to-r from-[#8BAE5A] to-[#FFD700] text-[#0A0F0A] font-semibold rounded-lg hover:from-[#FFD700] hover:to-[#8BAE5A] transition-all duration-300 text-sm"
+              >
+                🎮 Workout Player
+              </button>
             </div>
 
             <div className="text-right">
@@ -637,6 +645,19 @@ export default function WorkoutPage() {
           rest: currentExercise.rest,
           notes: currentExercise.notes
         } : undefined}
+      />
+
+      {/* Workout Player Modal */}
+      <WorkoutPlayerModal
+        isOpen={showWorkoutPlayerModal}
+        onClose={() => setShowWorkoutPlayerModal(false)}
+        onComplete={(data) => {
+          console.log('Workout completed:', data);
+          setShowWorkoutPlayerModal(false);
+          toast.success('Workout voltooid! 🎉');
+        }}
+        schemaId={schemaId}
+        dayNumber={dayNumber}
       />
     </ClientLayout>
   );
