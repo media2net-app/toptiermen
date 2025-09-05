@@ -115,10 +115,7 @@ const calculateDailyTotals = (dayPlan: DayPlan): MealNutrition => {
 
 // Function to transform new 6-meal structure to component format
 const transformMealData = (mealData: any): Meal => {
-  console.log('🔍 transformMealData input:', mealData);
-  
   if (!mealData || !Array.isArray(mealData)) {
-    console.log('⚠️ No meal data or not array, returning empty meal');
     return { ingredients: [], nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0 } };
   }
 
@@ -137,16 +134,12 @@ const transformMealData = (mealData: any): Meal => {
     return totals;
   }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
 
-  console.log('✅ transformMealData output:', { ingredients, nutrition });
   return { ingredients, nutrition };
 };
 
 // Function to transform plan data to support new 6-meal structure
 const transformPlanData = (data: any): PlanData => {
-  console.log('🔍 transformPlanData input:', data);
-  
   if (!data || !data.weekPlan) {
-    console.log('⚠️ No data or weekPlan, returning as-is');
     return data; // Return as-is if no transformation needed
   }
 
@@ -155,7 +148,6 @@ const transformPlanData = (data: any): PlanData => {
   // Transform each day's meal data
   Object.keys(data.weekPlan).forEach(day => {
     const dayData = data.weekPlan[day];
-    console.log(`🔍 Transforming day ${day}:`, dayData);
     
     if (dayData) {
       transformedWeekPlan[day] = {
@@ -173,7 +165,6 @@ const transformPlanData = (data: any): PlanData => {
   const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
   days.forEach(day => {
     if (!transformedWeekPlan[day]) {
-      console.log(`⚠️ Missing day ${day}, adding default empty meals`);
       transformedWeekPlan[day] = {
         ontbijt: { ingredients: [], nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0 } },
         lunch: { ingredients: [], nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0 } },
@@ -182,13 +173,10 @@ const transformPlanData = (data: any): PlanData => {
     }
   });
 
-  const result = {
+  return {
     ...data,
     weekPlan: transformedWeekPlan
   };
-  
-  console.log('✅ transformPlanData output:', result);
-  return result;
 };
 
 export default function DynamicPlanView({ planId, planName, userId, onBack }: DynamicPlanViewProps) {
