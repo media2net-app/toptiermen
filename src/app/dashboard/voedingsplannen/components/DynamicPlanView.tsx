@@ -225,7 +225,7 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
       // If no customized plan, load the default plan data
       console.log('🆕 No customized plan found, loading default plan data');
       
-      const response = await fetch(`/api/nutrition-plan-dynamic-v2?planId=${planId}&userId=${userId}`);
+      const response = await fetch(`/api/nutrition-plan-simple?planId=${planId}`);
       
       if (!response.ok) {
         const errorData = await response.json();
