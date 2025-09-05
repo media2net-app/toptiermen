@@ -217,14 +217,9 @@ export async function GET(request: NextRequest) {
 
     console.log('🥗 Generating dynamic nutrition plan for:', { userId, planId });
 
-    // Get user's nutrition profile
-    const { data: userProfile, error: profileError } = await supabase
-      .from('nutrition_profiles')
-      .select('*')
-      .eq('user_id', userId)
-      .single();
-
-    // Always use fallback profile for plan display (no user profile required)
+    // Skip user profile lookup entirely - use fallback profile for plan display
+    console.log('🚀 NEW DEPLOYMENT: Using fallback profile - no user profile required');
+    
     const profile = {
       age: 30,
       weight: 70,
@@ -236,8 +231,6 @@ export async function GET(request: NextRequest) {
       target_carbs: 200,
       target_fat: 70
     };
-
-    console.log('✅ Using fallback profile for plan display - no user profile required');
 
     // Get the nutrition plan from database
     const { data: planData, error: planError } = await supabase
