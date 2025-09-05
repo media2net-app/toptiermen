@@ -73,8 +73,55 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
+    console.log('🍽️ MealEditModal: Loading meal data:', meal);
+    console.log('🔍 MealEditModal: Meal type:', mealType);
+    
     if (meal) {
-      setFormData(meal);
+      // If meal has suggestions (from daily_plans conversion), convert them to ingredients
+      if (meal.suggestions && Array.isArray(meal.suggestions) && meal.suggestions.length > 0) {
+        console.log('📋 Converting suggestions to ingredients:', meal.suggestions);
+        
+        const convertedIngredients = meal.suggestions.map((suggestion: string, index: number) => {
+          // Parse suggestion format: "Runderlever (43.35g)"
+          const match = suggestion.match(/^(.+)\s*\((.+)\)$/);
+          if (match) {
+            const [, name, amountWithUnit] = match;
+            const amountMatch = amountWithUnit.match(/^([\d.,]+)(\w+)$/);
+            if (amountMatch) {
+              const [, amount, unit] = amountMatch;
+              return {
+                id: `ingredient-${index}`,
+                name: name.trim(),
+                amount: parseFloat(amount.replace(',', '.')),
+                unit: unit,
+                calories: 0, // Will be calculated
+                protein: 0,
+                carbs: 0,
+                fat: 0
+              };
+            }
+          }
+          
+          // Fallback for malformed suggestions
+          return {
+            id: `ingredient-${index}`,
+            name: suggestion,
+            amount: 100,
+            unit: 'g',
+            calories: 0,
+            protein: 0,
+            carbs: 0,
+            fat: 0
+          };
+        });
+        
+        setFormData({
+          ...meal,
+          ingredients: convertedIngredients
+        });
+      } else {
+        setFormData(meal);
+      }
     } else {
       setFormData({
         id: `meal-${Date.now()}`,
@@ -87,7 +134,7 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
         ingredients: []
       });
     }
-  }, [meal]);
+  }, [meal, mealType]);
 
   // Load available meals from database
   useEffect(() => {
@@ -101,32 +148,55 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
       console.log('🔍 Loading available ingredients from database...');
       console.log('📋 Plan type:', planType);
       
-      let query = supabase
-        .from('nutrition_ingredients')
-        .select('*')
-        .eq('is_active', true);
+      // Fetch nutrition ingredients instead of meals
+      const response = await fetch('/api/admin/nutrition-ingredients');
+      const result = await response.json();
       
-      // Filter by diet type if planType is specified
-      if (planType) {
-        if (planType.includes('Carnivoor')) {
-          query = query.eq('diet_type', 'Carnivoor');
-          console.log('🥩 Filtering for Carnivore ingredients only');
-        } else {
-          query = query.eq('diet_type', 'Voedingsplan op Maat');
-          console.log('🥗 Filtering for Custom Plan ingredients only');
-        }
-      }
-      
-      const { data, error } = await query.order('name');
-
-      if (error) {
-        console.error('Error loading meals:', error);
+      if (!response.ok) {
+        console.error('❌ Error fetching nutrition ingredients:', result.error);
         return;
       }
-
-      setAvailableMeals(data || []);
+      
+      let ingredients = result.ingredients || [];
+      
+      // Filter by diet type if planType is specified
+      if (planType && planType.includes('Carnivoor')) {
+        ingredients = ingredients.filter((ing: any) => 
+          ing.diet_type === 'Carnivoor' || 
+          ['vlees', 'vis', 'eieren', 'zuivel'].includes(ing.category?.toLowerCase())
+        );
+        console.log('🥩 Filtering for Carnivore ingredients:', ingredients.length);
+      }
+      
+      // Convert ingredients to meal format for compatibility
+      const convertedMeals = ingredients.map((ingredient: any) => ({
+        id: ingredient.id,
+        name: ingredient.name,
+        description: ingredient.description || `${ingredient.name} ingredient`,
+        nutrition_info: {
+          calories: ingredient.calories || 0,
+          protein: ingredient.protein || 0,
+          carbs: ingredient.carbs || 0,
+          fat: ingredient.fat || 0
+        },
+        ingredients: [{
+          id: ingredient.id,
+          name: ingredient.name,
+          amount: 100,
+          unit: ingredient.unit || 'g',
+          calories: ingredient.calories || 0,
+          protein: ingredient.protein || 0,
+          carbs: ingredient.carbs || 0,
+          fat: ingredient.fat || 0
+        }],
+        prep_time: 5,
+        difficulty: 'easy'
+      }));
+      
+      setAvailableMeals(convertedMeals);
+      console.log('✅ Available ingredients loaded:', convertedMeals.length);
     } catch (error) {
-      console.error('Error loading meals:', error);
+      console.error('❌ Error loading ingredients:', error);
     }
   };
 
@@ -228,16 +298,57 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
   };
 
   const addIngredient = () => {
-    const newIngredients = [...formData.ingredients, { name: '', amount: 0, unit: 'g' }];
-    const nutrition = calculateNutritionFromIngredients(newIngredients);
+    const newIngredient = { 
+      id: `ingredient-${Date.now()}`, 
+      name: '', 
+      amount: 100, 
+      unit: 'g', 
+      calories: 0, 
+      protein: 0, 
+      carbs: 0, 
+      fat: 0 
+    };
+    
+    const updatedIngredients = [...formData.ingredients, newIngredient];
+    const nutrition = calculateNutritionFromIngredients(updatedIngredients);
+    
     setFormData(prev => ({
       ...prev,
-      ingredients: newIngredients,
+      ingredients: updatedIngredients,
       calories: nutrition.calories,
       protein: nutrition.protein,
       carbs: nutrition.carbs,
       fat: nutrition.fat
     }));
+    
+    console.log('➕ Added new ingredient to meal');
+  };
+
+  const addIngredientFromDatabase = (dbIngredient: any) => {
+    const newIngredient = {
+      id: `ingredient-${Date.now()}`,
+      name: dbIngredient.name,
+      amount: 100,
+      unit: dbIngredient.unit || 'g',
+      calories: dbIngredient.calories || 0,
+      protein: dbIngredient.protein || 0,
+      carbs: dbIngredient.carbs || 0,
+      fat: dbIngredient.fat || 0
+    };
+    
+    const updatedIngredients = [...formData.ingredients, newIngredient];
+    const nutrition = calculateNutritionFromIngredients(updatedIngredients);
+    
+    setFormData(prev => ({
+      ...prev,
+      ingredients: updatedIngredients,
+      calories: nutrition.calories,
+      protein: nutrition.protein,
+      carbs: nutrition.carbs,
+      fat: nutrition.fat
+    }));
+    
+    console.log('✅ Added ingredient from database:', dbIngredient.name);
   };
 
   const removeIngredient = (index: number) => {
@@ -504,9 +615,57 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
             </div>
           </div>
 
+          {/* Database Ingredients Selector */}
+          <div className="bg-[#232D1A] rounded-lg p-4 border border-[#3A4D23]">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-[#8BAE5A] font-semibold">Ingrediënten uit Database</h3>
+              <button
+                onClick={() => setShowMealSelector(!showMealSelector)}
+                className="text-[#8BAE5A] hover:text-[#7A9D4B] text-sm"
+              >
+                {showMealSelector ? 'Verbergen' : 'Tonen'}
+              </button>
+            </div>
+            
+            {showMealSelector && (
+              <>
+                <div className="mb-3">
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full px-3 py-2 rounded bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-1 focus:ring-[#8BAE5A]"
+                    placeholder="Zoek ingrediënten..."
+                  />
+                </div>
+                
+                <div className="max-h-40 overflow-y-auto space-y-2">
+                  {filteredMeals.slice(0, 20).map((dbMeal, index) => (
+                    <button
+                      key={index}
+                      onClick={() => addIngredientFromDatabase(dbMeal.ingredients[0])}
+                      className="w-full text-left px-3 py-2 text-sm bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] rounded hover:bg-[#3A4D23] transition-colors"
+                    >
+                      <div className="font-medium">{dbMeal.name}</div>
+                      <div className="text-xs text-[#B6C948]">
+                        {dbMeal.nutrition_info.calories} cal • {dbMeal.nutrition_info.protein}g protein
+                      </div>
+                    </button>
+                  ))}
+                  
+                  {filteredMeals.length === 0 && (
+                    <div className="text-[#B6C948] text-sm text-center py-4">
+                      Geen ingrediënten gevonden
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+
           {/* Quick Add Carnivor Ingredients */}
           <div className="bg-[#232D1A] rounded-lg p-4 border border-[#3A4D23]">
-            <h3 className="text-[#8BAE5A] font-semibold mb-3">Snelle Toevoeging - Carnivor Ingrediënten</h3>
+            <h3 className="text-[#8BAE5A] font-semibold mb-3">Snelle Toevoeging - Populaire Ingrediënten</h3>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                              {[
                  { name: 'Ribeye Steak', amount: 200, unit: 'g' },
@@ -521,18 +680,7 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
                ].map((quickIngredient, index) => (
                  <button
                    key={index}
-                   onClick={() => {
-                     const newIngredients = [...formData.ingredients, quickIngredient];
-                     const nutrition = calculateNutritionFromIngredients(newIngredients);
-                     setFormData(prev => ({
-                       ...prev,
-                       ingredients: newIngredients,
-                       calories: nutrition.calories,
-                       protein: nutrition.protein,
-                       carbs: nutrition.carbs,
-                       fat: nutrition.fat
-                     }));
-                   }}
+                   onClick={() => addIngredientFromDatabase(quickIngredient)}
                    className="px-3 py-2 text-sm bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] rounded hover:bg-[#3A4D23] transition-colors"
                  >
                    {quickIngredient.name} ({quickIngredient.amount}{quickIngredient.unit})

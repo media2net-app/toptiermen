@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
       'brotherhood_group_feed'
     ];
 
-    const createdTables = [];
+    const createdTables: string[] = [];
     for (const tableName of tableNames) {
       try {
         const { error } = await supabaseAdmin

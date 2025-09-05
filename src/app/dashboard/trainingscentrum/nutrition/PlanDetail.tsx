@@ -11,64 +11,61 @@ interface PlanDetailProps {
 const planData: Record<string, { title: string; meals: { time: string; name: string; main: string; options: string[]; ingredients: { name: string; amount: number; unit: string }[] }[] }> = {
   // CARNIVOOR PLANNEN
   carnivoor_droogtrainen: {
-    title: "Carnivoor Droogtrainen",
+    title: "Carnivoor Droogtrainen (Beginner)",
     meals: [
       { 
         time: "08:00", 
         name: "Ontbijt", 
-        main: "Orgaanvlees & Eieren Ontbijt", 
-        options: ["Gebakken eieren met spek", "Ribeye steak"],
+        main: "Eieren met Spek", 
+        options: ["Gebakken eieren met ham", "Omelet met kaas"],
         ingredients: [
-          { name: "Runderlever", amount: 80, unit: "g" },
-          { name: "Runderhart", amount: 40, unit: "g" },
           { name: "Eieren", amount: 3, unit: "stuks" },
-          { name: "Roomboter", amount: 20, unit: "g" },
-          { name: "Zout", amount: 5, unit: "g" }
+          { name: "Spek", amount: 40, unit: "g" },
+          { name: "Roomboter", amount: 15, unit: "g" },
+          { name: "Zout", amount: 2, unit: "g" }
         ]
       },
       { 
         time: "10:30", 
         name: "Snack 1", 
-        main: "Gerookte Zalm", 
-        options: ["Droge worst", "Goudse kaas"],
+        main: "Ham of Kaas", 
+        options: ["Droge worst", "Gerookte zalm"],
         ingredients: [
-          { name: "Gerookte Zalm", amount: 100, unit: "g" },
-          { name: "Roomboter", amount: 10, unit: "g" },
-          { name: "Zout", amount: 2, unit: "g" }
+          { name: "Ham", amount: 60, unit: "g" },
+          { name: "Goudse kaas", amount: 25, unit: "g" }
         ]
       },
       { 
         time: "13:00", 
         name: "Lunch", 
         main: "Ribeye Steak", 
-        options: ["T-Bone Steak", "Entrecote"],
+        options: ["Biefstuk", "T-Bone Steak"],
         ingredients: [
-          { name: "Ribeye Steak", amount: 200, unit: "g" },
-          { name: "Roomboter", amount: 25, unit: "g" },
-          { name: "Zout", amount: 5, unit: "g" }
+          { name: "Ribeye Steak", amount: 150, unit: "g" },
+          { name: "Roomboter", amount: 15, unit: "g" },
+          { name: "Zout", amount: 3, unit: "g" }
         ]
       },
       { 
         time: "15:30", 
         name: "Snack 2", 
-        main: "Eieren met Spek", 
-        options: ["Griekse yoghurt", "Droge worst"],
+        main: "Worst of Salami", 
+        options: ["Ham", "Goudse kaas"],
         ingredients: [
-          { name: "Eieren", amount: 2, unit: "stuks" },
-          { name: "Spek", amount: 30, unit: "g" },
-          { name: "Roomboter", amount: 8, unit: "g" }
+          { name: "Droge worst", amount: 30, unit: "g" },
+          { name: "Salami", amount: 25, unit: "g" }
         ]
       },
       { 
         time: "19:00", 
         name: "Diner", 
-        main: "Lamskotelet", 
-        options: ["Gans", "T-Bone Steak"],
+        main: "Rundergehakt", 
+        options: ["Kipfilet", "Zalm"],
         ingredients: [
-          { name: "Lamskotelet", amount: 180, unit: "g" },
-          { name: "Kippenlever", amount: 40, unit: "g" },
+          { name: "Mager Rundergehakt", amount: 200, unit: "g" },
+          { name: "Goudse kaas", amount: 25, unit: "g" },
           { name: "Roomboter", amount: 15, unit: "g" },
-          { name: "Zout", amount: 5, unit: "g" }
+          { name: "Zout", amount: 3, unit: "g" }
         ]
       },
     ],

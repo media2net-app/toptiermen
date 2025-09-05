@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
 
     // Create a test Stripe instance
     const stripe = new Stripe(secretKey, {
-      apiVersion: '2025-06-30.basil',
+      apiVersion: '2025-08-27.basil',
     });
 
     // Test the connection by making a simple API call

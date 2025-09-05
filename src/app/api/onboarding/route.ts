@@ -42,8 +42,8 @@ export async function GET(request: Request) {
     if (userId.includes('@')) {
       console.log('🔍 User ID is email, looking up UUID...');
       try {
-        const { data: userData, error: userError } = await supabase.auth.admin.getUserByEmail(userId);
-        if (userError || !userData.user) {
+        const { data: userData, error: userError } = await supabase.auth.admin.listUsers();
+        if (userError || !userData.users || userData.users.length === 0) {
           console.log('❌ User not found for email:', userId);
           // Return mock data for unknown users
           return NextResponse.json({
@@ -60,7 +60,7 @@ export async function GET(request: Request) {
             updated_at: new Date().toISOString()
           });
         }
-        actualUserId = userData.user.id;
+        actualUserId = userData.users[0].id;
         console.log('✅ Found UUID for email:', actualUserId);
       } catch (error) {
         console.log('❌ Error looking up user by email:', error);
@@ -205,12 +205,17 @@ export async function POST(request: Request) {
     if (userId.includes('@')) {
       console.log('🔍 User ID is email, looking up UUID...');
       try {
-        const { data: userData, error: userError } = await supabase.auth.admin.getUserByEmail(userId);
-        if (userError || !userData.user) {
+        const { data: userData, error: userError } = await supabase.auth.admin.listUsers();
+        if (userError || !userData.users || userData.users.length === 0) {
           console.log('❌ User not found for email:', userId);
           return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
-        actualUserId = userData.user.id;
+        const user = userData.users.find(u => u.email === userId);
+        if (!user) {
+          console.log('❌ User not found for email:', userId);
+          return NextResponse.json({ error: 'User not found' }, { status: 404 });
+        }
+        actualUserId = user.id;
         console.log('✅ Found UUID for email:', actualUserId);
       } catch (error) {
         console.log('❌ Error looking up user by email:', error);

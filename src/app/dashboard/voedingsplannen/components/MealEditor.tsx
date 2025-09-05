@@ -180,7 +180,7 @@ export default function MealEditor({
 
   const getQuickAddIngredients = () => {
     // Get ingredients based on plan type and meal type
-    let availableIngredients = [];
+    let availableIngredients: any[] = [];
     
     if (planType === 'carnivoor') {
       // Carnivoor quick add ingredients

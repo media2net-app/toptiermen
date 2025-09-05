@@ -115,26 +115,65 @@ const calculateDailyTotals = (dayPlan: DayPlan): MealNutrition => {
 
 // Function to transform new 6-meal structure to component format
 const transformMealData = (mealData: any): Meal => {
-  if (!mealData || !Array.isArray(mealData)) {
-    return { ingredients: [], nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0 } };
+  // Handle different data structures
+  let ingredientsArray: any[] = [];
+  let nutritionData: MealNutrition = { calories: 0, protein: 0, carbs: 0, fat: 0 };
+
+  if (!mealData) {
+    return { ingredients: [], nutrition: nutritionData };
   }
 
-  const ingredients: MealIngredient[] = mealData.map((item: any) => ({
+  if (Array.isArray(mealData)) {
+    // Direct array of ingredients
+    console.log('🔄 Processing array format meal data');
+    ingredientsArray = mealData;
+  } else if (mealData.ingredients && Array.isArray(mealData.ingredients)) {
+    // Object with ingredients array and possibly nutrition data
+    console.log('🔄 Processing object format meal data with ingredients array');
+    ingredientsArray = mealData.ingredients;
+    
+    // Use provided nutrition if available
+    if (mealData.nutrition) {
+      nutritionData = {
+        calories: mealData.nutrition.calories || 0,
+        protein: mealData.nutrition.protein || 0,
+        carbs: mealData.nutrition.carbs || 0,
+        fat: mealData.nutrition.fat || 0
+      };
+    }
+  } else if (typeof mealData === 'object' && mealData.name) {
+    // Single ingredient object
+    console.log('🔄 Processing single ingredient object');
+    ingredientsArray = [mealData];
+  } else {
+    console.log('⚠️ Unknown meal data format, using empty meal');
+    return { ingredients: [], nutrition: nutritionData };
+  }
+
+  // Transform ingredients
+  const ingredients: MealIngredient[] = ingredientsArray.map((item: any) => ({
     name: item.name,
     amount: item.amount,
     unit: item.unit,
-    baseAmount: item.amount
+    baseAmount: item.baseAmount || item.amount,
+    calories: item.calories,
+    protein: item.protein,
+    carbs: item.carbs,
+    fat: item.fat
   }));
 
-  const nutrition: MealNutrition = mealData.reduce((totals: any, item: any) => {
-    totals.calories += item.calories || 0;
-    totals.protein += item.protein || 0;
-    totals.carbs += item.carbs || 0;
-    totals.fat += item.fat || 0;
-    return totals;
-  }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
+  // Calculate nutrition if not already provided
+  if (nutritionData.calories === 0) {
+    nutritionData = ingredientsArray.reduce((totals: any, item: any) => {
+      totals.calories += item.calories || 0;
+      totals.protein += item.protein || 0;
+      totals.carbs += item.carbs || 0;
+      totals.fat += item.fat || 0;
+      return totals;
+    }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
+  }
 
-  return { ingredients, nutrition };
+  return { ingredients, nutrition: nutritionData };
 };
 
 // Function to transform plan data to support new 6-meal structure
@@ -192,6 +231,125 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
   } | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isCustomPlan, setIsCustomPlan] = useState(false);
+  const [showProfileChangeWarning, setShowProfileChangeWarning] = useState(false);
+
+  // Function to check if user profile has changed significantly since plan was created
+  const checkForProfileChanges = async (planData: PlanData) => {
+    try {
+      // Get current user profile
+      const response = await fetch(`/api/nutrition-profile?userId=${userId}`);
+      if (!response.ok) return;
+      
+      const data = await response.json();
+      if (!data.success || !data.profile) return;
+      
+      const currentProfile = data.profile;
+      const planProfile = planData.userProfile;
+      
+      if (!planProfile) return;
+      
+      // Check for significant changes (weight difference of 5kg+ or goal change)
+      const weightDiff = Math.abs(currentProfile.weight - planProfile.weight);
+      const goalChanged = currentProfile.goal !== planProfile.goal;
+      
+      if (weightDiff >= 5 || goalChanged) {
+        console.log('⚠️ Significant profile changes detected:', {
+          weightDiff,
+          goalChanged,
+          currentWeight: currentProfile.weight,
+          planWeight: planProfile.weight,
+          currentGoal: currentProfile.goal,
+          planGoal: planProfile.goal
+        });
+        setShowProfileChangeWarning(true);
+      }
+    } catch (error) {
+      console.error('Error checking profile changes:', error);
+    }
+  };
+  
+  // Function to restore plan to auto-generated version with current profile
+  const handleRestorePlan = async () => {
+    try {
+      console.log('🔄 Restoring plan to auto-generated version...');
+      
+      // Delete the custom plan
+      const deleteResponse = await fetch('/api/nutrition-plan-save', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId, planId }),
+      });
+      
+      if (!deleteResponse.ok) {
+        throw new Error('Failed to delete custom plan');
+      }
+      
+      // Reload the page to get fresh auto-generated plan
+      window.location.reload();
+      
+    } catch (error) {
+      console.error('Error restoring plan:', error);
+      toast.error('Fout bij herstellen van plan');
+    }
+  };
+
+  // Function to recalculate weekly averages from current plan data
+  const recalculateWeeklyAverages = (planData: PlanData): PlanData => {
+    const days = Object.keys(planData.weekPlan);
+    let weeklyCalories = 0;
+    let weeklyProtein = 0;
+    let weeklyCarbs = 0;
+    let weeklyFat = 0;
+    let validDays = 0;
+    
+    days.forEach(day => {
+      const dayPlan = planData.weekPlan[day];
+      
+      if (dayPlan) {
+        // Recalculate daily totals for each day
+        const dailyTotals = calculateDailyTotals(dayPlan);
+        
+        // Update the daily totals in the plan
+        dayPlan.dailyTotals = dailyTotals;
+        
+        // Only count days with actual calories
+        if (dailyTotals && dailyTotals.calories > 0) {
+          weeklyCalories += dailyTotals.calories;
+          weeklyProtein += dailyTotals.protein;
+          weeklyCarbs += dailyTotals.carbs;
+          weeklyFat += dailyTotals.fat;
+          validDays++;
+        }
+      }
+    });
+    
+    console.log('🔄 Recalculating weekly averages:', {
+      weeklyCalories,
+      weeklyProtein,
+      weeklyCarbs,
+      weeklyFat,
+      validDays
+    });
+    
+    // Calculate averages based on valid days only
+    const dayCount = Math.max(validDays, 1);
+    const updatedWeeklyAverages = {
+      calories: Math.round(weeklyCalories / dayCount),
+      protein: Math.round((weeklyProtein / dayCount) * 10) / 10,
+      carbs: Math.round((weeklyCarbs / dayCount) * 10) / 10,
+      fat: Math.round((weeklyFat / dayCount) * 10) / 10
+    };
+    
+    console.log('✅ New weekly averages:', updatedWeeklyAverages);
+    
+    return {
+      ...planData,
+      weeklyAverages: updatedWeeklyAverages
+    };
+  };
 
   useEffect(() => {
     fetchDynamicPlan();
@@ -214,9 +372,16 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
           console.log('📋 Found customized plan, loading...');
           // Transform the customized plan data as well
           const transformedCustomizedData = transformPlanData(customizedData.customizedPlan);
-          setPlanData(transformedCustomizedData);
+          // Recalculate weekly averages to ensure they are accurate
+          const recalculatedData = recalculateWeeklyAverages(transformedCustomizedData);
+          setPlanData(recalculatedData);
+          setIsCustomPlan(true); // Mark as custom plan
           setHasUnsavedChanges(false); // It's saved
-          console.log('✅ Customized plan loaded and transformed');
+          
+          // Check if user profile has changed significantly since plan was created
+          checkForProfileChanges(recalculatedData);
+          
+          console.log('✅ Customized plan loaded, transformed, and weekly averages recalculated');
           setLoading(false);
           return;
         }
@@ -237,9 +402,11 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
       if (data.success) {
         // Transform the data to support new 6-meal structure
         const transformedData = transformPlanData(data.data);
-        setPlanData(transformedData);
+        // Recalculate weekly averages to ensure they are accurate
+        const recalculatedData = recalculateWeeklyAverages(transformedData);
+        setPlanData(recalculatedData);
         setHasUnsavedChanges(false); // Fresh plan, no changes yet
-        console.log('✅ Dynamic plan loaded and transformed:', transformedData);
+        console.log('✅ Dynamic plan loaded, transformed, and weekly averages recalculated:', recalculatedData);
       } else {
         throw new Error(data.error || 'Failed to load dynamic plan');
       }
@@ -324,21 +491,45 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
       let weeklyProtein = 0;
       let weeklyCarbs = 0;
       let weeklyFat = 0;
+      let validDays = 0;
       
       days.forEach(day => {
-        const dailyTotals = updatedPlanData.weekPlan[day].dailyTotals;
-        weeklyCalories += dailyTotals.calories;
-        weeklyProtein += dailyTotals.protein;
-        weeklyCarbs += dailyTotals.carbs;
-        weeklyFat += dailyTotals.fat;
+        const dayPlan = updatedPlanData.weekPlan[day];
+        
+        // Recalculate daily totals for each day to ensure accuracy
+        const dailyTotals = calculateDailyTotals(dayPlan);
+        
+        // Update the daily totals in the plan
+        dayPlan.dailyTotals = dailyTotals;
+        
+        // Only count days with actual calories
+        if (dailyTotals && dailyTotals.calories > 0) {
+          weeklyCalories += dailyTotals.calories;
+          weeklyProtein += dailyTotals.protein;
+          weeklyCarbs += dailyTotals.carbs;
+          weeklyFat += dailyTotals.fat;
+          validDays++;
+        }
       });
       
+      console.log('🔢 Weekly totals calculation:', {
+        weeklyCalories,
+        weeklyProtein,
+        weeklyCarbs,
+        weeklyFat,
+        validDays
+      });
+      
+      // Calculate averages based on valid days only
+      const dayCount = Math.max(validDays, 1); // Prevent division by zero
       updatedPlanData.weeklyAverages = {
-        calories: Math.round(weeklyCalories / 7),
-        protein: Math.round((weeklyProtein / 7) * 10) / 10,
-        carbs: Math.round((weeklyCarbs / 7) * 10) / 10,
-        fat: Math.round((weeklyFat / 7) * 10) / 10
+        calories: Math.round(weeklyCalories / dayCount),
+        protein: Math.round((weeklyProtein / dayCount) * 10) / 10,
+        carbs: Math.round((weeklyCarbs / dayCount) * 10) / 10,
+        fat: Math.round((weeklyFat / dayCount) * 10) / 10
       };
+      
+      console.log('📊 Updated weekly averages:', updatedPlanData.weeklyAverages);
       
       setPlanData(updatedPlanData);
       setHasUnsavedChanges(true);
@@ -807,20 +998,63 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">{planData.planName}</h1>
             <p className="text-gray-300">
-              Gepersonaliseerd voor {planData.userProfile.weight}kg, {planData.userProfile.age} jaar - {planData.userProfile.goal}
+              Gepersonaliseerd voor {planData.userProfile.weight}kg, {planData.userProfile.age} jaar - {
+                planData.userProfile.goal === 'cut' ? 'Droogtrainen' :
+                planData.userProfile.goal === 'bulk' ? 'Spiermassa' :
+                planData.userProfile.goal === 'maintenance' ? 'Onderhoud' :
+                planData.userProfile.goal === 'droogtrainen' ? 'Droogtrainen' :
+                planData.userProfile.goal === 'spiermassa' ? 'Spiermassa' :
+                planData.userProfile.goal === 'onderhoud' ? 'Onderhoud' :
+                'Droogtrainen'
+              }
             </p>
           </div>
         </div>
         
+        {/* Profile Change Warning */}
+        {showProfileChangeWarning && isCustomPlan && (
+          <div className="mt-4 bg-yellow-900/30 border border-yellow-700/50 rounded-lg p-4">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-yellow-400 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3 flex-1">
+                <h3 className="text-sm font-medium text-yellow-200">
+                  Profiel wijzigingen gedetecteerd
+                </h3>
+                <div className="mt-2 text-sm text-yellow-100">
+                  <p>
+                    Je hebt significante wijzigingen gemaakt in je gewicht of doel. Dit aangepaste plan 
+                    behoudt zijn huidige instellingen. Voor een automatisch herberekend plan op basis 
+                    van je nieuwe gegevens, klik op "Herstel Plan".
+                  </p>
+                </div>
+                <div className="mt-3 flex space-x-2">
+                  <button
+                    onClick={() => setShowProfileChangeWarning(false)}
+                    className="text-xs px-2 py-1 border border-yellow-700/50 rounded text-yellow-200 hover:bg-yellow-900/20 transition-colors"
+                  >
+                    Sluiten
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        
         {/* Action Buttons */}
         <div className="flex items-center gap-3">
-          {/* Restore Plan Button */}
-          <button
-            onClick={handleRestorePlan}
-            className="flex items-center gap-2 px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-semibold"
-          >
+          {/* Restore Plan Button - only show for custom plans */}
+          {isCustomPlan && (
+            <button
+              onClick={handleRestorePlan}
+              className="flex items-center gap-2 px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-semibold"
+            >
             🔄 Herstel plan
-          </button>
+            </button>
+          )}
           
           {/* Select Plan Button */}
           <button
@@ -1013,7 +1247,7 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
                       <ClockIcon className="w-5 h-5 text-[#8BAE5A] mr-2" />
                       {MEAL_TYPES_NL[mealType as keyof typeof MEAL_TYPES_NL]}
                       <span className="ml-4 text-sm text-gray-400">
-                        {meal.nutrition.calories} kcal
+                        {typeof meal === 'object' && 'calories' in meal ? meal.calories : 0} kcal
                       </span>
                     </h4>
                     <button
@@ -1027,46 +1261,54 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
                   
                   {/* Ingredients */}
                   <div className="space-y-3 mb-4">
-                    {meal.ingredients.map((ingredient, index) => (
+                    {(meal as any)?.ingredients?.map((ingredient, index) => (
                       <div key={index} className="flex items-center justify-between bg-[#181F17] rounded-lg p-3">
                         <span className="text-white font-medium">{ingredient.name}</span>
                         <span className="text-[#8BAE5A] font-semibold">
                           {formatAmount(ingredient.amount, ingredient.unit)}
                         </span>
                       </div>
-                    ))}
+                    )) || null}
                   </div>
                   
                   {/* Meal nutrition */}
                   <div className="grid grid-cols-4 gap-3 text-sm">
                     <div className="text-center">
                       <p className="text-gray-400">Kcal</p>
-                      <p className="text-white font-semibold">{meal.nutrition.calories}</p>
+                      <p className="text-white font-semibold">
+                        {(meal as any)?.nutrition?.calories || (meal as any)?.calories || 0}
+                      </p>
                     </div>
                     <div className="text-center">
                       <p className="text-gray-400">Eiwit</p>
-                      <p className="text-white font-semibold">{meal.nutrition.protein}g</p>
+                      <p className="text-white font-semibold">
+                        {(meal as any)?.nutrition?.protein || (meal as any)?.protein || 0}g
+                      </p>
                     </div>
                     <div className="text-center">
                       <p className="text-gray-400">KH</p>
-                      <p className="text-white font-semibold">{meal.nutrition.carbs}g</p>
+                      <p className="text-white font-semibold">
+                        {(meal as any)?.nutrition?.carbs || (meal as any)?.carbs || 0}g
+                      </p>
                     </div>
                     <div className="text-center">
                       <p className="text-gray-400">Vet</p>
-                      <p className="text-white font-semibold">{meal.nutrition.fat}g</p>
+                      <p className="text-white font-semibold">
+                        {(meal as any)?.nutrition?.fat || (meal as any)?.fat || 0}g
+                      </p>
                     </div>
                   </div>
                 </div>
 
                 {/* Snack for this meal */}
-                {snack && snack.ingredients.length > 0 ? (
+                {snack && (snack as any)?.ingredients?.length > 0 ? (
                   <div className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23] ml-4">
                     <div className="flex items-center justify-between mb-4">
                       <h4 className="text-lg font-bold text-white flex items-center">
                         <ClockIcon className="w-5 h-5 text-[#8BAE5A] mr-2" />
                         {MEAL_TYPES_NL[snackType as keyof typeof MEAL_TYPES_NL]}
                         <span className="ml-4 text-sm text-gray-400">
-                          {snack.nutrition.calories} kcal
+                          {(snack as any)?.nutrition?.calories || (snack as any)?.calories || 0} kcal
                         </span>
                       </h4>
                       <button
@@ -1080,33 +1322,41 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
                     
                     {/* Snack Ingredients */}
                     <div className="space-y-3 mb-4">
-                      {snack.ingredients.map((ingredient, index) => (
+                      {(snack as any)?.ingredients?.map((ingredient, index) => (
                         <div key={index} className="flex items-center justify-between bg-[#181F17] rounded-lg p-3">
                           <span className="text-white font-medium">{ingredient.name}</span>
                           <span className="text-[#8BAE5A] font-semibold">
                             {formatAmount(ingredient.amount, ingredient.unit)}
                           </span>
                         </div>
-                      ))}
+                      )) || null}
                     </div>
                     
                     {/* Snack nutrition */}
                     <div className="grid grid-cols-4 gap-3 text-sm">
                       <div className="text-center">
                         <p className="text-gray-400">Kcal</p>
-                        <p className="text-white font-semibold">{snack.nutrition.calories}</p>
+                        <p className="text-white font-semibold">
+                          {(snack as any)?.nutrition?.calories || (snack as any)?.calories || 0}
+                        </p>
                       </div>
                       <div className="text-center">
                         <p className="text-gray-400">Eiwit</p>
-                        <p className="text-white font-semibold">{snack.nutrition.protein}g</p>
+                        <p className="text-white font-semibold">
+                          {(snack as any)?.nutrition?.protein || (snack as any)?.protein || 0}g
+                        </p>
                       </div>
                       <div className="text-center">
                         <p className="text-gray-400">KH</p>
-                        <p className="text-white font-semibold">{snack.nutrition.carbs}g</p>
+                        <p className="text-white font-semibold">
+                          {(snack as any)?.nutrition?.carbs || (snack as any)?.carbs || 0}g
+                        </p>
                       </div>
                       <div className="text-center">
                         <p className="text-gray-400">Vet</p>
-                        <p className="text-white font-semibold">{snack.nutrition.fat}g</p>
+                        <p className="text-white font-semibold">
+                          {(snack as any)?.nutrition?.fat || (snack as any)?.fat || 0}g
+                        </p>
                       </div>
                     </div>
                   </div>
