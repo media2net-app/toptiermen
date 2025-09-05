@@ -78,10 +78,10 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
     
     if (meal) {
       // If meal has suggestions (from daily_plans conversion), convert them to ingredients
-      if (meal.suggestions && Array.isArray(meal.suggestions) && meal.suggestions.length > 0) {
-        console.log('📋 Converting suggestions to ingredients:', meal.suggestions);
+      if ((meal as any).suggestions && Array.isArray((meal as any).suggestions) && (meal as any).suggestions.length > 0) {
+        console.log('📋 Converting suggestions to ingredients:', (meal as any).suggestions);
         
-        const convertedIngredients = meal.suggestions.map((suggestion: string, index: number) => {
+        const convertedIngredients = (meal as any).suggestions.map((suggestion: string, index: number) => {
           // Parse suggestion format: "Runderlever (43.35g)"
           const match = suggestion.match(/^(.+)\s*\((.+)\)$/);
           if (match) {

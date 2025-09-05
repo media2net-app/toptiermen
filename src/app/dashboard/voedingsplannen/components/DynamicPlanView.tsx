@@ -845,44 +845,6 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
     }
   };
 
-  const handleRestorePlan = async () => {
-    if (!planData) return;
-    
-    try {
-      console.log('🔄 Restoring original plan for user:', userId, 'plan:', planId);
-      
-      // Delete the customized plan data to restore to original
-      const deleteResponse = await fetch('/api/nutrition-plan-save', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId,
-          planId: planData.planId
-        }),
-      });
-
-      if (!deleteResponse.ok) {
-        throw new Error('Failed to restore plan');
-      }
-
-      const deleteResult = await deleteResponse.json();
-      
-      if (deleteResult.success) {
-        toast.success('Plan hersteld naar originele versie!');
-        // Reload the plan to show the original version
-        await fetchDynamicPlan();
-        setHasUnsavedChanges(false);
-      } else {
-        throw new Error(deleteResult.error || 'Failed to restore plan');
-      }
-      
-    } catch (error) {
-      console.error('Error restoring plan:', error);
-      toast.error('Fout bij herstellen van plan');
-    }
-  };
 
   const getCalorieWarning = (dailyCalories: number, targetCalories: number) => {
     const difference = dailyCalories - targetCalories;
