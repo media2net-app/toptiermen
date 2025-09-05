@@ -299,6 +299,29 @@ export default function VoedingsplannenPage() {
     if (!user?.id) return;
     
     try {
+      // Check if this is an update (if user already has a profile)
+      const isUpdate = userNutritionProfile !== null;
+      let hasSignificantChange = false;
+      
+      if (isUpdate && userNutritionProfile) {
+        // Check for significant changes (weight difference of 5kg+ or goal change)
+        const weightDiff = Math.abs(profile.weight - userNutritionProfile.weight);
+        const goalChanged = profile.goal !== userNutritionProfile.goal;
+        
+        hasSignificantChange = weightDiff >= 5 || goalChanged;
+        
+        if (hasSignificantChange) {
+          console.log('🔄 Significant profile change detected:', {
+            weightDiff,
+            goalChanged,
+            oldWeight: userNutritionProfile.weight,
+            newWeight: profile.weight,
+            oldGoal: userNutritionProfile.goal,
+            newGoal: profile.goal
+          });
+        }
+      }
+      
       const apiPayload = {
         userId: user.id,
         age: profile.age,
@@ -325,7 +348,7 @@ export default function VoedingsplannenPage() {
       
       if (response.ok && data.success) {
         console.log('✅ Profile saved successfully');
-        toast.success('Je voedingsprofiel is opgeslagen!');
+        
         // Update local state with API response
         if (data.profile) {
           setUserNutritionProfile({
@@ -338,6 +361,16 @@ export default function VoedingsplannenPage() {
             height: data.profile.height,
             goal: profile.goal
           });
+        }
+        
+        // Show appropriate success message based on whether there were significant changes
+        if (hasSignificantChange) {
+          toast.success(
+            'Je voedingsprofiel is bijgewerkt! Let op: je hebt significante wijzigingen gemaakt in je gewicht of doel. Je aangepaste plannen behouden hun huidige instellingen. Voor automatisch herberekende plannen, bekijk je voedingsplannen opnieuw.',
+            { duration: 8000 }
+          );
+        } else {
+          toast.success('Je voedingsprofiel is opgeslagen!');
         }
       } else {
         throw new Error(data.error || 'Failed to save profile');

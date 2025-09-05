@@ -127,6 +127,8 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    console.log('📝 Creating new nutrition plan:', body);
+    
     const { 
       name, 
       description, 
@@ -136,33 +138,125 @@ export async function POST(request: NextRequest) {
       target_fat, 
       duration_weeks, 
       difficulty, 
-      goal 
+      goal,
+      fitness_goal,
+      daily_plans
     } = body;
+
+    // Generate plan_id from name
+    const plan_id = name.toLowerCase()
+      .replace(/[^a-z0-9\s]/g, '')
+      .replace(/\s+/g, '-')
+      .trim();
+
+    // Transform daily_plans to weekly_plan structure for frontend compatibility
+    const weeklyPlan = {};
+    const dayMapping = {
+      'monday': 'monday',
+      'tuesday': 'tuesday', 
+      'wednesday': 'wednesday',
+      'thursday': 'thursday',
+      'friday': 'friday',
+      'saturday': 'saturday',
+      'sunday': 'sunday'
+    };
+
+    if (daily_plans && Array.isArray(daily_plans)) {
+      daily_plans.forEach(dailyPlan => {
+        const dayKey = dayMapping[dailyPlan.day];
+        if (dayKey && dailyPlan.meals) {
+          weeklyPlan[dayKey] = {
+            ontbijt: dailyPlan.meals.ontbijt?.ingredients || [],
+            ochtend_snack: dailyPlan.meals.ochtend_snack?.ingredients || [],
+            lunch: dailyPlan.meals.lunch?.ingredients || [],
+            lunch_snack: dailyPlan.meals.lunch_snack?.ingredients || [],
+            diner: dailyPlan.meals.diner?.ingredients || [],
+            avond_snack: dailyPlan.meals.avond_snack?.ingredients || [],
+            dailyTotals: {
+              calories: (dailyPlan.meals.ontbijt?.calories || 0) + 
+                       (dailyPlan.meals.ochtend_snack?.calories || 0) +
+                       (dailyPlan.meals.lunch?.calories || 0) + 
+                       (dailyPlan.meals.lunch_snack?.calories || 0) +
+                       (dailyPlan.meals.diner?.calories || 0) + 
+                       (dailyPlan.meals.avond_snack?.calories || 0),
+              protein: (dailyPlan.meals.ontbijt?.protein || 0) + 
+                      (dailyPlan.meals.ochtend_snack?.protein || 0) +
+                      (dailyPlan.meals.lunch?.protein || 0) + 
+                      (dailyPlan.meals.lunch_snack?.protein || 0) +
+                      (dailyPlan.meals.diner?.protein || 0) + 
+                      (dailyPlan.meals.avond_snack?.protein || 0),
+              carbs: (dailyPlan.meals.ontbijt?.carbs || 0) + 
+                    (dailyPlan.meals.ochtend_snack?.carbs || 0) +
+                    (dailyPlan.meals.lunch?.carbs || 0) + 
+                    (dailyPlan.meals.lunch_snack?.carbs || 0) +
+                    (dailyPlan.meals.diner?.carbs || 0) + 
+                    (dailyPlan.meals.avond_snack?.carbs || 0),
+              fat: (dailyPlan.meals.ontbijt?.fat || 0) + 
+                  (dailyPlan.meals.ochtend_snack?.fat || 0) +
+                  (dailyPlan.meals.lunch?.fat || 0) + 
+                  (dailyPlan.meals.lunch_snack?.fat || 0) +
+                  (dailyPlan.meals.diner?.fat || 0) + 
+                  (dailyPlan.meals.avond_snack?.fat || 0)
+            }
+          };
+        }
+      });
+    }
+
+    // Calculate weekly averages
+    const days = Object.keys(weeklyPlan);
+    let totalCalories = 0, totalProtein = 0, totalCarbs = 0, totalFat = 0;
+    
+    days.forEach(day => {
+      const dayTotals = weeklyPlan[day].dailyTotals;
+      totalCalories += dayTotals.calories;
+      totalProtein += dayTotals.protein;
+      totalCarbs += dayTotals.carbs;
+      totalFat += dayTotals.fat;
+    });
+
+    const weeklyAverages = {
+      calories: days.length > 0 ? Math.round(totalCalories / days.length) : target_calories || 2000,
+      protein: days.length > 0 ? Math.round((totalProtein / days.length) * 10) / 10 : target_protein || 150,
+      carbs: days.length > 0 ? Math.round((totalCarbs / days.length) * 10) / 10 : target_carbs || 200,
+      fat: days.length > 0 ? Math.round((totalFat / days.length) * 10) / 10 : target_fat || 70
+    };
+
+    // Create meals object for frontend compatibility
+    const mealsData = {
+      target_calories: target_calories || weeklyAverages.calories,
+      target_protein: target_protein || weeklyAverages.protein,
+      target_carbs: target_carbs || weeklyAverages.carbs,
+      target_fat: target_fat || weeklyAverages.fat,
+      goal: goal || fitness_goal || 'maintenance',
+      fitness_goal: fitness_goal || goal,
+      weekly_plan: weeklyPlan,
+      weekly_averages: weeklyAverages
+    };
 
     const { data: plan, error } = await supabaseAdmin
       .from('nutrition_plans')
       .insert({
+        plan_id,
         name,
         description,
-        target_calories,
-        target_protein,
-        target_carbs,
-        target_fat,
-        duration_weeks,
-        difficulty,
-        goal
+        meals: mealsData,
+        is_active: true,
+        is_featured: true,
+        is_public: true
       })
       .select()
       .single();
 
     if (error) {
-      console.error('Error creating nutrition plan:', error);
+      console.error('❌ Error creating nutrition plan:', error);
       return NextResponse.json({ error: 'Failed to create nutrition plan' }, { status: 500 });
     }
 
+    console.log('✅ Nutrition plan created successfully:', plan.plan_id);
     return NextResponse.json({ success: true, plan });
   } catch (error) {
-    console.error('Error in nutrition plans API:', error);
+    console.error('❌ Error in nutrition plans POST API:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -170,27 +264,143 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    const { id, ...updateData } = body;
+    console.log('✏️ Updating nutrition plan:', body);
+    
+    const { id, daily_plans, ...updateData } = body;
 
     if (!id) {
       return NextResponse.json({ error: 'ID is required for update' }, { status: 400 });
     }
 
+    // Get current plan data
+    const { data: currentPlan, error: fetchError } = await supabaseAdmin
+      .from('nutrition_plans')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (fetchError || !currentPlan) {
+      console.error('❌ Error fetching current plan for update:', fetchError);
+      return NextResponse.json({ error: 'Plan not found' }, { status: 404 });
+    }
+
+    let finalUpdateData = { ...updateData };
+
+    // If daily_plans are provided, transform them to weekly_plan structure
+    if (daily_plans && Array.isArray(daily_plans)) {
+      console.log('🔄 Transforming daily_plans to weekly_plan structure');
+      
+      const weeklyPlan = {};
+      const dayMapping = {
+        'monday': 'monday',
+        'tuesday': 'tuesday', 
+        'wednesday': 'wednesday',
+        'thursday': 'thursday',
+        'friday': 'friday',
+        'saturday': 'saturday',
+        'sunday': 'sunday'
+      };
+
+      daily_plans.forEach(dailyPlan => {
+        const dayKey = dayMapping[dailyPlan.day];
+        if (dayKey && dailyPlan.meals) {
+          weeklyPlan[dayKey] = {
+            ontbijt: dailyPlan.meals.ontbijt?.ingredients || [],
+            ochtend_snack: dailyPlan.meals.ochtend_snack?.ingredients || [],
+            lunch: dailyPlan.meals.lunch?.ingredients || [],
+            lunch_snack: dailyPlan.meals.lunch_snack?.ingredients || [],
+            diner: dailyPlan.meals.diner?.ingredients || [],
+            avond_snack: dailyPlan.meals.avond_snack?.ingredients || [],
+            dailyTotals: {
+              calories: (dailyPlan.meals.ontbijt?.calories || 0) + 
+                       (dailyPlan.meals.ochtend_snack?.calories || 0) +
+                       (dailyPlan.meals.lunch?.calories || 0) + 
+                       (dailyPlan.meals.lunch_snack?.calories || 0) +
+                       (dailyPlan.meals.diner?.calories || 0) + 
+                       (dailyPlan.meals.avond_snack?.calories || 0),
+              protein: (dailyPlan.meals.ontbijt?.protein || 0) + 
+                      (dailyPlan.meals.ochtend_snack?.protein || 0) +
+                      (dailyPlan.meals.lunch?.protein || 0) + 
+                      (dailyPlan.meals.lunch_snack?.protein || 0) +
+                      (dailyPlan.meals.diner?.protein || 0) + 
+                      (dailyPlan.meals.avond_snack?.protein || 0),
+              carbs: (dailyPlan.meals.ontbijt?.carbs || 0) + 
+                    (dailyPlan.meals.ochtend_snack?.carbs || 0) +
+                    (dailyPlan.meals.lunch?.carbs || 0) + 
+                    (dailyPlan.meals.lunch_snack?.carbs || 0) +
+                    (dailyPlan.meals.diner?.carbs || 0) + 
+                    (dailyPlan.meals.avond_snack?.carbs || 0),
+              fat: (dailyPlan.meals.ontbijt?.fat || 0) + 
+                  (dailyPlan.meals.ochtend_snack?.fat || 0) +
+                  (dailyPlan.meals.lunch?.fat || 0) + 
+                  (dailyPlan.meals.lunch_snack?.fat || 0) +
+                  (dailyPlan.meals.diner?.fat || 0) + 
+                  (dailyPlan.meals.avond_snack?.fat || 0)
+            }
+          };
+        }
+      });
+
+      // Calculate weekly averages
+      const days = Object.keys(weeklyPlan);
+      let totalCalories = 0, totalProtein = 0, totalCarbs = 0, totalFat = 0;
+      
+      days.forEach(day => {
+        const dayTotals = weeklyPlan[day].dailyTotals;
+        totalCalories += dayTotals.calories;
+        totalProtein += dayTotals.protein;
+        totalCarbs += dayTotals.carbs;
+        totalFat += dayTotals.fat;
+      });
+
+      const weeklyAverages = {
+        calories: days.length > 0 ? Math.round(totalCalories / days.length) : finalUpdateData.target_calories || 2000,
+        protein: days.length > 0 ? Math.round((totalProtein / days.length) * 10) / 10 : finalUpdateData.target_protein || 150,
+        carbs: days.length > 0 ? Math.round((totalCarbs / days.length) * 10) / 10 : finalUpdateData.target_carbs || 200,
+        fat: days.length > 0 ? Math.round((totalFat / days.length) * 10) / 10 : finalUpdateData.target_fat || 70
+      };
+
+      // Update meals object while preserving existing data
+      const currentMeals = currentPlan.meals || {};
+      finalUpdateData.meals = {
+        ...currentMeals,
+        target_calories: finalUpdateData.target_calories || weeklyAverages.calories,
+        target_protein: finalUpdateData.target_protein || weeklyAverages.protein,
+        target_carbs: finalUpdateData.target_carbs || weeklyAverages.carbs,
+        target_fat: finalUpdateData.target_fat || weeklyAverages.fat,
+        goal: finalUpdateData.goal || finalUpdateData.fitness_goal || currentMeals.goal,
+        fitness_goal: finalUpdateData.fitness_goal || finalUpdateData.goal || currentMeals.fitness_goal,
+        weekly_plan: weeklyPlan,
+        weekly_averages: weeklyAverages
+      };
+
+      // Update plan_id if name changed
+      if (finalUpdateData.name && finalUpdateData.name !== currentPlan.name) {
+        finalUpdateData.plan_id = finalUpdateData.name.toLowerCase()
+          .replace(/[^a-z0-9\s]/g, '')
+          .replace(/\s+/g, '-')
+          .trim();
+      }
+    }
+
+    finalUpdateData.updated_at = new Date().toISOString();
+
     const { data: plan, error } = await supabaseAdmin
       .from('nutrition_plans')
-      .update(updateData)
+      .update(finalUpdateData)
       .eq('id', id)
       .select()
       .single();
 
     if (error) {
-      console.error('Error updating nutrition plan:', error);
+      console.error('❌ Error updating nutrition plan:', error);
       return NextResponse.json({ error: 'Failed to update nutrition plan' }, { status: 500 });
     }
 
+    console.log('✅ Nutrition plan updated successfully:', plan.plan_id);
     return NextResponse.json({ success: true, plan });
   } catch (error) {
-    console.error('Error in nutrition plans API:', error);
+    console.error('❌ Error in nutrition plans PUT API:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

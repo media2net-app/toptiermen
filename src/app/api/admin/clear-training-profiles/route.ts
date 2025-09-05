@@ -29,7 +29,7 @@ export async function POST() {
     return NextResponse.json({
       success: true,
       message: 'Training profiles table cleared',
-      deletedCount: data?.length || 0
+      deletedCount: 'all'
     });
     
   } catch (error) {

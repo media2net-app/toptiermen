@@ -174,10 +174,70 @@ export async function GET(request: NextRequest) {
 
     console.log('✅ Customized plan loaded successfully');
 
+    // Reconstruct the full plan data structure that the frontend expects
+    const customizedPlan = data.week_plan;
+    
+    // If the stored data is already in the correct format, return it directly
+    if (customizedPlan && customizedPlan.planId && customizedPlan.userProfile && customizedPlan.weekPlan) {
+      console.log('✅ Returning stored customized plan with full structure');
+      
+      // But first update the userProfile with latest data if available
+      const updatedPlan = {
+        ...customizedPlan,
+        userProfile: data.user_data ? {
+          age: data.user_data.age,
+          weight: data.user_data.weight,
+          height: data.user_data.height,
+          goal: data.user_data.goal,
+          targetCalories: data.nutrition_goals?.calories || customizedPlan.userProfile.targetCalories,
+          targetProtein: data.nutrition_goals?.protein || customizedPlan.userProfile.targetProtein,
+          targetCarbs: data.nutrition_goals?.carbs || customizedPlan.userProfile.targetCarbs,
+          targetFat: data.nutrition_goals?.fat || customizedPlan.userProfile.targetFat
+        } : customizedPlan.userProfile
+      };
+      
+      return NextResponse.json({
+        success: true,
+        hasCustomizedPlan: true,
+        customizedPlan: updatedPlan,
+        lastUpdated: data.updated_at
+      });
+    }
+    
+    // If the stored data is incomplete, reconstruct it
+    console.log('🔄 Reconstructing plan data structure');
+    const reconstructedPlan = {
+      planId: planId,
+      planName: `Custom ${planId}`,
+      userProfile: data.user_data || {
+        age: 30,
+        weight: 70,
+        height: 175,
+        goal: 'maintenance',
+        targetCalories: data.nutrition_goals?.calories || 2000,
+        targetProtein: data.nutrition_goals?.protein || 150,
+        targetCarbs: data.nutrition_goals?.carbs || 200,
+        targetFat: data.nutrition_goals?.fat || 70
+      },
+      scalingInfo: {
+        basePlanCalories: 1800,
+        scaleFactor: 1.0,
+        targetCalories: data.nutrition_goals?.calories || 2000
+      },
+      weekPlan: customizedPlan && customizedPlan.weekPlan ? customizedPlan.weekPlan : customizedPlan,
+      weeklyAverages: customizedPlan?.weeklyAverages || {
+        calories: data.nutrition_goals?.calories || 2000,
+        protein: data.nutrition_goals?.protein || 150,
+        carbs: data.nutrition_goals?.carbs || 200,
+        fat: data.nutrition_goals?.fat || 70
+      },
+      generatedAt: data.updated_at
+    };
+
     return NextResponse.json({
       success: true,
       hasCustomizedPlan: true,
-      customizedPlan: data.week_plan, // Use week_plan instead of customized_data
+      customizedPlan: reconstructedPlan,
       lastUpdated: data.updated_at
     });
 

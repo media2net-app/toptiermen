@@ -3,12 +3,14 @@ import { supabaseAdmin } from '@/lib/supabase-admin';
 
 export async function GET(request: NextRequest) {
   try {
+    console.log('📊 Frontend fetching nutrition plans from database...');
+    
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
     const goal = searchParams.get('goal');
     const featured = searchParams.get('featured');
 
-    // Build query
+    // Get all plans from nutrition_plans table (same as admin interface)
     let query = supabaseAdmin
       .from('nutrition_plans')
       .select('*')
@@ -19,27 +21,53 @@ export async function GET(request: NextRequest) {
       query = query.eq('category', category);
     }
     if (goal) {
-      query = query.eq('goal', goal);
+      // For goal filtering, check both 'goal' and 'meals.goal' fields
+      query = query.or(`goal.eq.${goal},meals->goal.eq.${goal}`);
     }
     if (featured === 'true') {
-      query = query.eq('is_active', true);
+      query = query.eq('is_featured', true);
     }
 
-    // Execute query
-    const { data: plans, error } = await query.order('created_at', { ascending: false });
+    // Execute query with proper ordering
+    const { data: plans, error } = await query.order('name');
 
     if (error) {
-      console.error('Error fetching nutrition plans:', error);
+      console.error('❌ Error fetching nutrition plans:', error);
       return NextResponse.json({ error: 'Failed to fetch nutrition plans' }, { status: 500 });
     }
 
+    // Transform the data to include frontend-compatible fields
+    const transformedPlans = (plans || []).map(plan => ({
+      id: plan.id,
+      plan_id: plan.plan_id,
+      name: plan.name,
+      subtitle: plan.subtitle,
+      description: plan.description,
+      icon: plan.icon,
+      color: plan.color,
+      meals: plan.meals,
+      is_active: plan.is_active,
+      is_featured: plan.is_featured || false,
+      is_public: plan.is_public || true,
+      goal: plan.meals?.goal || plan.goal,
+      fitness_goal: plan.meals?.fitness_goal || plan.fitness_goal,
+      target_calories: plan.meals?.target_calories || plan.target_calories,
+      target_protein: plan.meals?.target_protein || plan.target_protein,
+      target_carbs: plan.meals?.target_carbs || plan.target_carbs,
+      target_fat: plan.meals?.target_fat || plan.target_fat,
+      created_at: plan.created_at,
+      updated_at: plan.updated_at
+    }));
+
+    console.log(`✅ Frontend nutrition plans fetched successfully: ${transformedPlans.length} plans`);
+    
     return NextResponse.json({ 
       success: true, 
-      plans: plans || [] 
+      plans: transformedPlans
     });
 
   } catch (error) {
-    console.error('Error in nutrition plans API:', error);
+    console.error('❌ Error in nutrition plans API:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

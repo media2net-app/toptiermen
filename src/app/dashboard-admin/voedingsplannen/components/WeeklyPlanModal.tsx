@@ -75,6 +75,8 @@ export default function WeeklyPlanModal({ isOpen, onClose, plan }: WeeklyPlanMod
 
   // Convert meals data from database to DayPlan format
   const convertMealsDataToDayPlan = (mealsData: any): DayPlan[] => {
+    console.log('🔄 Converting meals data to day plan format');
+    console.log('📊 Input meals data:', mealsData);
     const nutritionDB: Record<string, { calories: number; protein: number; carbs: number; fat: number }> = {
       'Ribeye Steak': { calories: 250, protein: 26, carbs: 0, fat: 15 },
       'Biefstuk': { calories: 250, protein: 26, carbs: 0, fat: 15 },
@@ -152,8 +154,13 @@ export default function WeeklyPlanModal({ isOpen, onClose, plan }: WeeklyPlanMod
     };
 
     return daysOfWeek.map(day => {
-      const dayData = mealsData[day.key];
+      console.log(`📅 Processing day: ${day.key} (${day.name})`);
+      
+      const dayData = mealsData.weekly_plan ? mealsData.weekly_plan[day.key] : mealsData[day.key];
+      console.log(`📊 Day data for ${day.key}:`, dayData);
+      
       if (!dayData) {
+        console.log(`⚠️ No data found for ${day.key}, returning empty day`);
         // Return empty day if no data
         return {
           day: day.key,
@@ -172,72 +179,116 @@ export default function WeeklyPlanModal({ isOpen, onClose, plan }: WeeklyPlanMod
         };
       }
 
-      // Convert ingredients format
+      // Convert ingredients format with actual nutrition values from database
       const convertIngredients = (ingredients: any[]) => {
         return ingredients.map(ing => ({
           name: ing.name,
           amount: ing.amount,
           unit: ing.unit,
-          calories: 0, // Will be calculated
-          protein: 0,
-          carbs: 0,
-          fat: 0
+          calories: ing.calories || 0,
+          protein: ing.protein || 0,
+          carbs: ing.carbs || 0,
+          fat: ing.fat || 0
         }));
+      };
+
+      // Calculate actual nutrition from ingredient data or use calculated values
+      const calculateActualNutrition = (ingredients: any[]) => {
+        if (!ingredients || !Array.isArray(ingredients)) {
+          return { calories: 0, protein: 0, carbs: 0, fat: 0 };
+        }
+
+        let totalCalories = 0;
+        let totalProtein = 0;
+        let totalCarbs = 0;
+        let totalFat = 0;
+
+        ingredients.forEach(ingredient => {
+          // Use nutrition values from ingredient if available, otherwise calculate
+          if (ingredient.calories) {
+            totalCalories += ingredient.calories;
+          } else {
+            // Fallback to nutrition database calculation
+            const nutrition = calculateMealNutrition([ingredient]);
+            totalCalories += nutrition.calories;
+          }
+          
+          if (ingredient.protein) {
+            totalProtein += ingredient.protein;
+          }
+          if (ingredient.carbs) {
+            totalCarbs += ingredient.carbs;
+          }
+          if (ingredient.fat) {
+            totalFat += ingredient.fat;
+          }
+        });
+
+        return {
+          calories: Math.round(totalCalories),
+          protein: Math.round(totalProtein * 10) / 10,
+          carbs: Math.round(totalCarbs * 10) / 10,
+          fat: Math.round(totalFat * 10) / 10
+        };
       };
 
       const ontbijtIngredients = convertIngredients(dayData.ontbijt || []);
       const lunchIngredients = convertIngredients(dayData.lunch || []);
       const dinerIngredients = convertIngredients(dayData.diner || []);
 
-      const ontbijtNutrition = calculateMealNutrition(dayData.ontbijt || []);
-      const lunchNutrition = calculateMealNutrition(dayData.lunch || []);
-      const dinerNutrition = calculateMealNutrition(dayData.diner || []);
+      // Use actual nutrition from database or calculate
+      const ontbijtNutrition = calculateActualNutrition(dayData.ontbijt || []);
+      const lunchNutrition = calculateActualNutrition(dayData.lunch || []);
+      const dinerNutrition = calculateActualNutrition(dayData.diner || []);
+
+      // Handle snacks from 6-meal structure
+      const ochtendSnackIngredients = convertIngredients(dayData.ochtend_snack || []);
+      const lunchSnackIngredients = convertIngredients(dayData.lunch_snack || []);
+      const avondSnackIngredients = convertIngredients(dayData.avond_snack || []);
+
+      const ochtendSnackNutrition = calculateActualNutrition(dayData.ochtend_snack || []);
+      const lunchSnackNutrition = calculateActualNutrition(dayData.lunch_snack || []);
+      const avondSnackNutrition = calculateActualNutrition(dayData.avond_snack || []);
 
       return {
         day: day.key,
         dayName: day.name,
         meals: {
           ontbijt: {
-            name: 'Carnivoor Ontbijt',
+            name: ontbijtIngredients.length > 0 ? 'Carnivoor Ontbijt' : 'Geen ontbijt',
             time: '08:00',
             ingredients: ontbijtIngredients,
             ...ontbijtNutrition
           },
           snack1: {
-            name: 'Geen snack',
+            name: ochtendSnackIngredients.length > 0 ? 'Ochtend Snack' : 'Geen ochtend snack',
             time: '10:00',
-            ingredients: [],
-            calories: 0,
-            protein: 0,
-            carbs: 0,
-            fat: 0
+            ingredients: ochtendSnackIngredients,
+            ...ochtendSnackNutrition
           },
           lunch: {
-            name: 'Carnivoor Lunch',
+            name: lunchIngredients.length > 0 ? 'Carnivoor Lunch' : 'Geen lunch',
             time: '13:00',
             ingredients: lunchIngredients,
             ...lunchNutrition
           },
           snack2: {
-            name: 'Geen snack',
+            name: lunchSnackIngredients.length > 0 ? 'Lunch Snack' : 'Geen lunch snack',
             time: '16:00',
-            ingredients: [],
-            calories: 0,
-            protein: 0,
-            carbs: 0,
-            fat: 0
+            ingredients: lunchSnackIngredients,
+            ...lunchSnackNutrition
           },
           diner: {
-            name: 'Carnivoor Diner',
+            name: dinerIngredients.length > 0 ? 'Carnivoor Diner' : 'Geen diner',
             time: '19:00',
             ingredients: dinerIngredients,
             ...dinerNutrition
           }
         },
-        totalCalories: ontbijtNutrition.calories + lunchNutrition.calories + dinerNutrition.calories,
-        totalProtein: Math.round((ontbijtNutrition.protein + lunchNutrition.protein + dinerNutrition.protein) * 10) / 10,
-        totalCarbs: Math.round((ontbijtNutrition.carbs + lunchNutrition.carbs + dinerNutrition.carbs) * 10) / 10,
-        totalFat: Math.round((ontbijtNutrition.fat + lunchNutrition.fat + dinerNutrition.fat) * 10) / 10
+        totalCalories: ontbijtNutrition.calories + ochtendSnackNutrition.calories + lunchNutrition.calories + lunchSnackNutrition.calories + dinerNutrition.calories + avondSnackNutrition.calories,
+        totalProtein: Math.round((ontbijtNutrition.protein + ochtendSnackNutrition.protein + lunchNutrition.protein + lunchSnackNutrition.protein + dinerNutrition.protein + avondSnackNutrition.protein) * 10) / 10,
+        totalCarbs: Math.round((ontbijtNutrition.carbs + ochtendSnackNutrition.carbs + lunchNutrition.carbs + lunchSnackNutrition.carbs + dinerNutrition.carbs + avondSnackNutrition.carbs) * 10) / 10,
+        totalFat: Math.round((ontbijtNutrition.fat + ochtendSnackNutrition.fat + lunchNutrition.fat + lunchSnackNutrition.fat + dinerNutrition.fat + avondSnackNutrition.fat) * 10) / 10
       };
     });
   };
@@ -249,20 +300,47 @@ export default function WeeklyPlanModal({ isOpen, onClose, plan }: WeeklyPlanMod
   }, [isOpen, plan]);
 
   const generateWeeklyPlan = async () => {
-    if (!plan) return;
+    if (!plan) {
+      console.log('⚠️ No plan provided to generateWeeklyPlan');
+      return;
+    }
     
     setIsLoading(true);
     try {
       console.log('🗓️ Loading weekly plan for:', plan.name);
+      console.log('📋 Full plan object:', plan);
       
       // Check if plan has meals data (new format)
       if ((plan as any).meals) {
         console.log('📊 Using plan meals data from database');
+        console.log('🔍 Meals data structure:', (plan as any).meals);
+        
         const mealsData = (plan as any).meals;
+        
+        // Check for weekly_plan in meals data
+        if (mealsData.weekly_plan) {
+          console.log('✅ Found weekly_plan in meals data');
+          console.log('📅 Weekly plan keys:', Object.keys(mealsData.weekly_plan));
+          
+          // Log Monday data for debugging
+          if (mealsData.weekly_plan.monday) {
+            console.log('📊 Monday data:', mealsData.weekly_plan.monday);
+            console.log('🍳 Monday ontbijt:', mealsData.weekly_plan.monday.ontbijt);
+          }
+        } else {
+          console.log('⚠️ No weekly_plan found in meals data');
+          console.log('🔍 Available meals data keys:', Object.keys(mealsData));
+        }
+        
         const convertedPlan = convertMealsDataToDayPlan(mealsData);
+        console.log('🔄 Converted plan result:', convertedPlan);
+        
         setWeeklyPlan(convertedPlan);
         setIsLoading(false);
         return;
+      } else {
+        console.log('⚠️ No meals property found in plan');
+        console.log('🔍 Available plan keys:', Object.keys(plan));
       }
       
       // Fallback: Generate plan if no meals data

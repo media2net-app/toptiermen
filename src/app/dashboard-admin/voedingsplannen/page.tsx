@@ -152,6 +152,26 @@ export default function AdminVoedingsplannenPage() {
         return;
       }
       
+      console.log('✅ Raw plans response:', result);
+      console.log('📋 Plans array:', result.plans);
+      
+      // Debug specific plan
+      const carnivoorPlan = result.plans?.find((p: any) => p.plan_id === 'carnivoor-droogtrainen');
+      if (carnivoorPlan) {
+        console.log('🥩 Carnivoor-droogtrainen plan found:');
+        console.log('📊 Plan details:', carnivoorPlan);
+        console.log('🍽️ Meals data:', carnivoorPlan.meals);
+        
+        if (carnivoorPlan.meals && carnivoorPlan.meals.weekly_plan) {
+          console.log('📅 Weekly plan data:', carnivoorPlan.meals.weekly_plan);
+          console.log('🗓️ Monday data:', carnivoorPlan.meals.weekly_plan.monday);
+        } else {
+          console.log('⚠️ No weekly_plan found in carnivoor plan meals data');
+        }
+      } else {
+        console.log('❌ Carnivoor-droogtrainen plan not found in response');
+      }
+      
       setPlans(result.plans || []);
       console.log('✅ Plans loaded:', result.plans?.length || 0);
     } catch (err) {

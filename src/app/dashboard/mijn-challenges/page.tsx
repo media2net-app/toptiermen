@@ -107,7 +107,7 @@ const initialChallenges = [
 ];
 
 export default function MijnChallenges() {
-  const [challenges, setChallenges] = useState([]);
+  const [challenges, setChallenges] = useState<any[]>([]);
   const [filter, setFilter] = useState('actief');
   const [showChallengeManager, setShowChallengeManager] = useState(false);
   const [showAddChallenge, setShowAddChallenge] = useState(false);

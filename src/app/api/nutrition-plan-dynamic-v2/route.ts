@@ -33,6 +33,20 @@ const INGREDIENT_DATABASE = {
   'Rookworst': { calories: 300, protein: 20, carbs: 0, fat: 25 },
   'Garnalen': { calories: 106, protein: 20, carbs: 1, fat: 2 },
   'Ribeye': { calories: 250, protein: 26, carbs: 0, fat: 15 },
+  'Ribeye Steak': { calories: 250, protein: 26, carbs: 0, fat: 15 },
+  'Mager Rundergehakt': { calories: 220, protein: 22, carbs: 0, fat: 14 },
+  'Rundergehakt (20% vet)': { calories: 272, protein: 19, carbs: 0, fat: 21 },
+  'Gerookte zalm': { calories: 117, protein: 18, carbs: 0, fat: 4 },
+  'Goudse kaas': { calories: 356, protein: 25, carbs: 2, fat: 27 },
+  'Roomboter': { calories: 717, protein: 0.9, carbs: 0.1, fat: 81 },
+  'Droge worst': { calories: 336, protein: 20, carbs: 0, fat: 28 },
+  'Worst': { calories: 300, protein: 20, carbs: 0, fat: 25 },
+  'T-Bone Steak': { calories: 247, protein: 24, carbs: 0, fat: 16 },
+  'Zalm (Wild)': { calories: 208, protein: 25, carbs: 0, fat: 12 },
+  'Kalkoenfilet (Gegrild)': { calories: 135, protein: 30, carbs: 0, fat: 1 },
+  'Lamskotelet': { calories: 294, protein: 25, carbs: 0, fat: 21 },
+  'Kipfilet (Gegrild)': { calories: 165, protein: 31, carbs: 0, fat: 4 },
+  'Tonijn in Olijfolie': { calories: 189, protein: 25, carbs: 0, fat: 9 },
 
   // Voedingsplan op maat ingrediënten
   'Havermout': { calories: 68, protein: 2.4, carbs: 12, fat: 1.4 },
@@ -152,22 +166,51 @@ function calculatePlanTotalCalories(planMeals: any) {
   let totalCalories = 0;
   let dayCount = 0;
   
+  if (!planMeals) {
+    console.log('⚠️ No plan meals data provided');
+    return 0;
+  }
+  
   Object.keys(planMeals).forEach(day => {
     let dayCalories = 0;
     const dayData = planMeals[day];
     
-    ['ontbijt', 'lunch', 'diner'].forEach(mealType => {
-      if (dayData[mealType] && dayData[mealType].ingredients) {
-        const mealNutrition = calculateMealNutrition(dayData[mealType].ingredients);
-        dayCalories += mealNutrition.calories;
+    if (!dayData) {
+      console.log(`⚠️ No data for ${day}`);
+      return;
+    }
+    
+    // Check different meal structure formats
+    const mealTypes = ['ontbijt', 'lunch_snack', 'lunch', 'avond_snack', 'diner'];
+    
+    mealTypes.forEach(mealType => {
+      if (dayData[mealType]) {
+        // Handle array of ingredients (database format)
+        if (Array.isArray(dayData[mealType])) {
+          const mealNutrition = calculateMealNutrition(dayData[mealType]);
+          dayCalories += mealNutrition.calories;
+        }
+        // Handle object with ingredients property
+        else if (dayData[mealType].ingredients) {
+          const mealNutrition = calculateMealNutrition(dayData[mealType].ingredients);
+          dayCalories += mealNutrition.calories;
+        }
       }
     });
     
+    // Also check dailyTotals if available
+    if (dayData.dailyTotals && dayData.dailyTotals.calories) {
+      dayCalories = dayData.dailyTotals.calories;
+    }
+    
+    console.log(`📊 ${day} total calories: ${dayCalories}`);
     totalCalories += dayCalories;
     dayCount++;
   });
   
-  return dayCount > 0 ? Math.round(totalCalories / dayCount) : 0;
+  const averageCalories = dayCount > 0 ? Math.round(totalCalories / dayCount) : 0;
+  console.log(`📊 Average daily calories across ${dayCount} days: ${averageCalories}`);
+  return averageCalories;
 }
 
 // Schaal ingrediënten op basis van calorie behoefte
@@ -217,20 +260,42 @@ export async function GET(request: NextRequest) {
 
     console.log('🥗 Generating dynamic nutrition plan for:', { userId, planId });
 
-    // Skip user profile lookup entirely - use fallback profile for plan display
-    console.log('🚀 NEW DEPLOYMENT: Using fallback profile - no user profile required');
-    
-    const profile = {
-      age: 30,
-      weight: 70,
-      height: 175,
-      activity_level: 'moderate',
-      goal: 'maintenance',
-      target_calories: 2000,
-      target_protein: 150,
-      target_carbs: 200,
-      target_fat: 70
-    };
+    // Get user's nutrition profile from database
+    const { data: userProfile, error: profileError } = await supabase
+      .from('nutrition_profiles')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+
+    let profile;
+    if (profileError || !userProfile) {
+      console.log('⚠️ User profile not found, using fallback profile');
+      // Fallback profile if user hasn't filled out their details yet
+      profile = {
+        age: 30,
+        weight: 70,
+        height: 175,
+        activity_level: 'moderate',
+        goal: 'maintenance', 
+        target_calories: 2000,
+        target_protein: 150,
+        target_carbs: 200,
+        target_fat: 70
+      };
+    } else {
+      console.log('✅ User profile found, using real data');
+      profile = {
+        age: userProfile.age,
+        weight: userProfile.weight,
+        height: userProfile.height,
+        activity_level: userProfile.activity_level,
+        goal: userProfile.goal,
+        target_calories: userProfile.target_calories,
+        target_protein: userProfile.target_protein,
+        target_carbs: userProfile.target_carbs,
+        target_fat: userProfile.target_fat
+      };
+    }
 
     // Get the nutrition plan from database
     const { data: planData, error: planError } = await supabase
@@ -265,8 +330,8 @@ export async function GET(request: NextRequest) {
       goal: planData.goal
     });
 
-    // Calculate base plan calories
-    const basePlanCalories = calculatePlanTotalCalories(planData.meals);
+    // Calculate base plan calories from weekly_plan
+    const basePlanCalories = calculatePlanTotalCalories(planData.meals.weekly_plan || planData.meals);
     console.log('📊 Base plan average daily calories:', basePlanCalories);
 
     // Calculate scale factor with more flexible limits for better calorie matching
@@ -291,21 +356,36 @@ export async function GET(request: NextRequest) {
 
     // Generate scaled meal plan
     const scaledPlan = {};
-    const days = Object.keys(planData.meals);
+    const weeklyPlan = planData.meals.weekly_plan || planData.meals;
+    const days = Object.keys(weeklyPlan);
+    
+    console.log('🔄 Scaling plan for days:', days);
     
     days.forEach(day => {
-      const dayData = planData.meals[day];
+      const dayData = weeklyPlan[day];
       scaledPlan[day] = {};
       
-      ['ontbijt', 'lunch', 'diner'].forEach(mealType => {
-        if (dayData[mealType] && dayData[mealType].ingredients) {
-          const scaledIngredients = scaleIngredientAmounts(dayData[mealType].ingredients, scaleFactor);
+      if (!dayData) {
+        console.log(`⚠️ No data for ${day}, skipping`);
+        return;
+      }
+      
+      const mealTypes = ['ontbijt', 'lunch_snack', 'lunch', 'avond_snack', 'diner'];
+      
+      mealTypes.forEach(mealType => {
+        if (dayData[mealType] && Array.isArray(dayData[mealType])) {
+          const scaledIngredients = scaleIngredientAmounts(dayData[mealType], scaleFactor);
           const mealNutrition = calculateMealNutrition(scaledIngredients);
           
-          scaledPlan[day][mealType] = {
-            ingredients: scaledIngredients,
-            nutrition: mealNutrition
-          };
+          scaledPlan[day][mealType] = scaledIngredients.map(ing => ({
+            ...ing,
+            calories: Math.round((INGREDIENT_DATABASE[ing.name]?.calories || 0) * (ing.unit === 'stuks' ? ing.amount : ing.amount / 100)),
+            protein: Math.round(((INGREDIENT_DATABASE[ing.name]?.protein || 0) * (ing.unit === 'stuks' ? ing.amount : ing.amount / 100)) * 10) / 10,
+            carbs: Math.round(((INGREDIENT_DATABASE[ing.name]?.carbs || 0) * (ing.unit === 'stuks' ? ing.amount : ing.amount / 100)) * 10) / 10,
+            fat: Math.round(((INGREDIENT_DATABASE[ing.name]?.fat || 0) * (ing.unit === 'stuks' ? ing.amount : ing.amount / 100)) * 10) / 10
+          }));
+          
+          console.log(`📊 ${day} ${mealType}: ${mealNutrition.calories} kcal (${scaledIngredients.length} ingredients)`);
         }
       });
       
@@ -315,13 +395,14 @@ export async function GET(request: NextRequest) {
       let dailyCarbs = 0;
       let dailyFat = 0;
       
-      ['ontbijt', 'lunch', 'diner'].forEach(mealType => {
-        if (scaledPlan[day][mealType]) {
-          const meal = scaledPlan[day][mealType];
-          dailyCalories += meal.nutrition.calories;
-          dailyProtein += meal.nutrition.protein;
-          dailyCarbs += meal.nutrition.carbs;
-          dailyFat += meal.nutrition.fat;
+      mealTypes.forEach(mealType => {
+        if (scaledPlan[day][mealType] && Array.isArray(scaledPlan[day][mealType])) {
+          scaledPlan[day][mealType].forEach(ingredient => {
+            dailyCalories += ingredient.calories || 0;
+            dailyProtein += ingredient.protein || 0;
+            dailyCarbs += ingredient.carbs || 0;
+            dailyFat += ingredient.fat || 0;
+          });
         }
       });
       

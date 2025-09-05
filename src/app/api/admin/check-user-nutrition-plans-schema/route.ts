@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
         'data'
       ];
 
-      const availableColumns = [];
+      const availableColumns: string[] = [];
       
       for (const col of alternativeColumns) {
         const testRecordWithCol = {

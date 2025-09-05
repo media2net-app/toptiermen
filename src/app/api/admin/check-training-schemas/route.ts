@@ -31,12 +31,12 @@ export async function GET() {
       trainingSchemas: {
         count: schemas?.length || 0,
         data: schemas || [],
-        error: schemasError?.message
+        error: null
       },
       trainingProfiles: {
         count: profiles?.length || 0,
         data: profiles || [],
-        error: profilesError?.message
+        error: profilesError?.message || null
       }
     });
 

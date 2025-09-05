@@ -207,13 +207,7 @@ export default function TrainingschemasPage() {
       
       // Filter by training frequency - EXACT match only
       let frequencyMatch = true;
-      if (schema.training_frequency) {
-        const schemaFreq = parseInt(schema.training_frequency);
-        const userFreq = profile.training_frequency;
-        
-        // Only show schemas that match EXACTLY
-        frequencyMatch = schemaFreq === userFreq;
-      }
+      // Note: training_frequency not available in schema, skipping frequency filter
       
       // Filter by difficulty level - EXACT match only
       const difficultyMapping = {
@@ -224,7 +218,7 @@ export default function TrainingschemasPage() {
       const mappedDifficulty = difficultyMapping[profile.experience_level];
       const difficultyMatch = schema.difficulty === mappedDifficulty;
       
-      console.log(`📋 Schema "${schema.name}": goal=${schema.training_goal} (${goalMatch}), category=${schema.category} (${equipmentMatch}), frequency=${schema.training_frequency} (${frequencyMatch}), difficulty=${schema.difficulty} (${difficultyMatch})`);
+      console.log(`📋 Schema "${schema.name}": goal=${schema.training_goal} (${goalMatch}), category=${schema.category} (${equipmentMatch}), frequency=N/A (${frequencyMatch}), difficulty=${schema.difficulty} (${difficultyMatch})`);
       
       return goalMatch && equipmentMatch && frequencyMatch && difficultyMatch;
     });
@@ -403,7 +397,7 @@ export default function TrainingschemasPage() {
 
   if (authLoading) {
     return (
-      <PageLayout>
+      <PageLayout title="Training Schemas">
         <div className="flex items-center justify-center min-h-screen">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#8BAE5A]"></div>
         </div>
@@ -412,7 +406,7 @@ export default function TrainingschemasPage() {
   }
 
   return (
-    <PageLayout>
+    <PageLayout title="Training Schemas">
       <div className="max-w-6xl mx-auto p-6">
         {/* Header */}
         <div className="mb-8">

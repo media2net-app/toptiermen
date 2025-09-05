@@ -11,7 +11,7 @@ export const getStripeServer = () => {
       throw new Error('STRIPE_SECRET_KEY is not configured');
     }
     stripeInstance = new Stripe(secretKey, {
-      apiVersion: '2025-06-30.basil',
+      apiVersion: '2025-08-27.basil',
     });
   }
   return stripeInstance;

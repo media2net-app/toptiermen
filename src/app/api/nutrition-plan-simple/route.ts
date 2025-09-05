@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
 
     console.log('🥗 Getting simple nutrition plan data for:', { planId });
 
-    // Get the nutrition plan from database
+    // Get the nutrition plan from database (same table as admin interface)
     const { data: planData, error: planError } = await supabase
       .from('nutrition_plans')
       .select('*')
@@ -28,16 +28,18 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (planError || !planData) {
+      console.log(`❌ Plan '${planId}' not found in database:`, planError?.message);
       return NextResponse.json({
         success: false,
         error: `Nutrition plan '${planId}' not found`
       }, { status: 404 });
     }
 
-    if (!planData.meals) {
+    if (!planData.meals || !planData.meals.weekly_plan) {
+      console.log(`⚠️ Plan '${planId}' has no weekly meal data`);
       return NextResponse.json({
         success: false,
-        error: 'Plan has no meal data'
+        error: 'Plan has no weekly meal data'
       }, { status: 400 });
     }
 
@@ -61,7 +63,7 @@ export async function GET(request: NextRequest) {
         targetCalories: planData.meals.target_calories || 2000
       },
       weekPlan: planData.meals.weekly_plan || {},
-      weeklyAverages: {
+      weeklyAverages: planData.meals.weekly_averages || {
         calories: planData.meals.target_calories || 2000,
         protein: planData.meals.target_protein || 150,
         carbs: planData.meals.target_carbs || 200,

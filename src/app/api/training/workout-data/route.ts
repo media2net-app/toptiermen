@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
     const transformedExercises = exercisesData.map((ex, index) => ({
       id: ex.id,
       name: ex.exercise_name,
-      sets: ex.sets || ex.target_sets || 4,
+      targetSets: ex.sets || ex.target_sets || 4,
       reps: ex.reps?.toString() || ex.target_reps || '8-12',
       rest: `${ex.rest_time || ex.rest_time_seconds || 90}s`,
       completed: false,

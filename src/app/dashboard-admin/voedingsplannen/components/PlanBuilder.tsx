@@ -84,13 +84,47 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
     }
   };
 
+  // Standaard profiel: Man 30 jaar, 90kg, 192cm
+  const getStandardProfile = (fitnessGoal: 'droogtrainen' | 'spiermassa' | 'onderhoud' = 'spiermassa') => {
+    // Realistische waarden gebaseerd op Top Tier Men standaarden
+    const configs = {
+      droogtrainen: {
+        calories: 1900, // Agressief deficit voor droogtrainen
+        protein: 180,   // Hoog eiwit voor spierretentie
+        carbs: 20,      // Zeer laag voor carnivoor/keto
+        description: 'Vetverlies met behoud van spiermassa'
+      },
+      spiermassa: {
+        calories: 2800, // Surplus voor groei
+        protein: 180,   // Hoog eiwit voor groei
+        carbs: 300,     // Meer carbs voor energie
+        description: 'Spiergroei en krachttoename'
+      },
+      onderhoud: {
+        calories: 2400, // Onderhoudscalorieën
+        protein: 160,   // Matig eiwit
+        carbs: 200,     // Gematigde carbs
+        description: 'Behoud van lichaamscompositie'
+      }
+    };
+    
+    const config = configs[fitnessGoal];
+    const remainingCalories = config.calories - (config.protein * 4) - (config.carbs * 4);
+    const fat = Math.round(remainingCalories / 9);
+    
+    return {
+      target_calories: config.calories,
+      target_protein: config.protein,
+      target_carbs: config.carbs,
+      target_fat: Math.max(fat, 60), // Minimum 60g vet
+      description: config.description
+    };
+  };
+
   const [formData, setFormData] = useState<NutritionPlan>({
     name: '',
     description: '',
-    target_calories: 2200,
-    target_protein: 165,
-    target_carbs: 220,
-    target_fat: 73,
+    ...getStandardProfile('spiermassa'), // Default naar spiermassa
     duration_weeks: 12,
     difficulty: 'beginner',
     goal: 'spiermassa',
@@ -107,28 +141,152 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
   const [editingMeal, setEditingMeal] = useState<any>(null);
   const [editingMealType, setEditingMealType] = useState<string>('');
 
+  // Convert weekly_plan format to daily_plans format
+  const convertWeeklyPlanToDailyPlans = (weeklyPlan: any): DailyPlan[] => {
+    console.log('🔄 Converting weekly_plan to daily_plans format');
+    
+    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    const dayNames = ['Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag', 'Zondag'];
+    
+    return days.map((dayKey, index) => {
+      const dayData = weeklyPlan[dayKey];
+      console.log(`📅 Processing ${dayKey}:`, dayData);
+      
+      if (!dayData) {
+        console.log(`⚠️ No data for ${dayKey}, using defaults`);
+        return {
+          day: dayKey,
+          theme: 'Training Dag',
+          focus: 'protein',
+          meals: {
+            ontbijt: { name: 'Ontbijt', calories: 0, protein: 0, carbs: 0, fat: 0, suggestions: [] },
+            snack1: { name: 'Ochtend Snack', calories: 0, protein: 0, carbs: 0, fat: 0, suggestions: [] },
+            lunch: { name: 'Lunch', calories: 0, protein: 0, carbs: 0, fat: 0, suggestions: [] },
+            snack2: { name: 'Middag Snack', calories: 0, protein: 0, carbs: 0, fat: 0, suggestions: [] },
+            diner: { name: 'Diner', calories: 0, protein: 0, carbs: 0, fat: 0, suggestions: [] }
+          }
+        };
+      }
+      
+      // Calculate nutrition for each meal type
+      const calculateMealNutrition = (ingredients: any[]) => {
+        if (!ingredients || !Array.isArray(ingredients)) {
+          return { calories: 0, protein: 0, carbs: 0, fat: 0 };
+        }
+        
+        let totalCalories = 0;
+        let totalProtein = 0;
+        let totalCarbs = 0;
+        let totalFat = 0;
+        
+        ingredients.forEach(ingredient => {
+          totalCalories += ingredient.calories || 0;
+          totalProtein += ingredient.protein || 0;
+          totalCarbs += ingredient.carbs || 0;
+          totalFat += ingredient.fat || 0;
+        });
+        
+        return {
+          calories: Math.round(totalCalories),
+          protein: Math.round(totalProtein * 10) / 10,
+          carbs: Math.round(totalCarbs * 10) / 10,
+          fat: Math.round(totalFat * 10) / 10
+        };
+      };
+      
+      // Convert ingredients to suggestions format
+      const convertToSuggestions = (ingredients: any[]) => {
+        if (!ingredients || !Array.isArray(ingredients)) return [];
+        
+        return ingredients.map(ingredient => `${ingredient.name} (${ingredient.amount}${ingredient.unit})`);
+      };
+      
+      const ontbijtNutrition = calculateMealNutrition(dayData.ontbijt || []);
+      const lunchNutrition = calculateMealNutrition(dayData.lunch || []);
+      const dinerNutrition = calculateMealNutrition(dayData.diner || []);
+      const ochtendSnackNutrition = calculateMealNutrition(dayData.ochtend_snack || []);
+      const lunchSnackNutrition = calculateMealNutrition(dayData.lunch_snack || []);
+      
+      return {
+        day: dayKey,
+        theme: `${dayNames[index]} Plan`,
+        focus: 'protein',
+        meals: {
+          ontbijt: {
+            name: dayData.ontbijt?.length > 0 ? 'Carnivoor Ontbijt' : 'Ontbijt',
+            ...ontbijtNutrition,
+            suggestions: convertToSuggestions(dayData.ontbijt || [])
+          },
+          snack1: {
+            name: dayData.ochtend_snack?.length > 0 ? 'Ochtend Snack' : 'Ochtend Snack',
+            ...ochtendSnackNutrition,
+            suggestions: convertToSuggestions(dayData.ochtend_snack || [])
+          },
+          lunch: {
+            name: dayData.lunch?.length > 0 ? 'Carnivoor Lunch' : 'Lunch',
+            ...lunchNutrition,
+            suggestions: convertToSuggestions(dayData.lunch || [])
+          },
+          snack2: {
+            name: dayData.lunch_snack?.length > 0 ? 'Lunch Snack' : 'Middag Snack',
+            ...lunchSnackNutrition,
+            suggestions: convertToSuggestions(dayData.lunch_snack || [])
+          },
+          diner: {
+            name: dayData.diner?.length > 0 ? 'Carnivoor Diner' : 'Diner',
+            ...dinerNutrition,
+            suggestions: convertToSuggestions(dayData.diner || [])
+          }
+        }
+      };
+    });
+  };
+
   // Initialize form data when plan changes
   useEffect(() => {
     if (plan) {
+      console.log('📝 PlanBuilder: Loading plan for editing:', plan.name);
+      console.log('🔍 PlanBuilder: Full plan object:', plan);
+      console.log('🍽️ PlanBuilder: Plan meals data:', (plan as any).meals);
+      
       // Determine fitness goal from plan name
       const fitnessGoal = plan.name?.toLowerCase().includes('droogtrainen') ? 'droogtrainen' :
                          plan.name?.toLowerCase().includes('spiermassa') ? 'spiermassa' : 'onderhoud';
+      
+      // Check if we have existing daily_plans or need to generate from meals data
+      let existingDailyPlans = plan.daily_plans;
+      
+      if (!existingDailyPlans && (plan as any).meals && (plan as any).meals.weekly_plan) {
+        console.log('📊 PlanBuilder: Found weekly_plan in plan meals, converting to daily_plans');
+        console.log('📅 PlanBuilder: Weekly plan data:', (plan as any).meals.weekly_plan);
+        existingDailyPlans = convertWeeklyPlanToDailyPlans((plan as any).meals.weekly_plan);
+        console.log('✅ PlanBuilder: Converted to daily_plans:', existingDailyPlans);
+      } else if (!existingDailyPlans) {
+        console.log('📋 PlanBuilder: No existing daily_plans, generating defaults');
+        existingDailyPlans = generateDefaultDailyPlans();
+      } else {
+        console.log('✅ PlanBuilder: Using existing daily_plans from plan');
+      }
+      
+      // Get macro targets from database or calculate based on plan type
+      const mealTargets = (plan as any).meals;
+      const standardProfile = getStandardProfile(fitnessGoal);
       
       setFormData({
         id: plan.id,
         name: plan.name || '',
         description: plan.description || '',
-        target_calories: plan.target_calories || 2200,
-        target_protein: plan.target_protein || 165,
-        target_carbs: plan.target_carbs || 220,
-        target_fat: plan.target_fat || 73,
+        target_calories: mealTargets?.target_calories || plan.target_calories || standardProfile.target_calories,
+        target_protein: mealTargets?.target_protein || plan.target_protein || standardProfile.target_protein,
+        target_carbs: mealTargets?.target_carbs || plan.target_carbs || standardProfile.target_carbs,
+        target_fat: mealTargets?.target_fat || plan.target_fat || standardProfile.target_fat,
         duration_weeks: plan.duration_weeks || 12,
         difficulty: plan.difficulty || 'intermediate',
         goal: plan.goal || fitnessGoal,
         fitness_goal: fitnessGoal,
         is_featured: plan.is_featured || false,
         is_public: plan.is_public !== false,
-        daily_plans: plan.daily_plans || generateDefaultDailyPlans()
+        daily_plans: existingDailyPlans
       });
     } else {
       setFormData({
@@ -232,13 +390,12 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
         updated.fitness_goal = fitnessGoal;
         updated.goal = fitnessGoal;
         
-        // Set calories based on fitness goal
-        const baseCalories = 2200;
-        const config = fitnessGoalConfigs[fitnessGoal];
-        updated.target_calories = Math.round(baseCalories * config.calories_multiplier);
-        updated.target_protein = Math.round(165 * config.protein_multiplier);
-        updated.target_carbs = Math.round(220 * config.carbs_multiplier);
-        updated.target_fat = Math.round(73 * config.fat_multiplier);
+        // Set macro's based on fitness goal using standard profile
+        const standardProfile = getStandardProfile(fitnessGoal);
+        updated.target_calories = standardProfile.target_calories;
+        updated.target_protein = standardProfile.target_protein;
+        updated.target_carbs = standardProfile.target_carbs;
+        updated.target_fat = standardProfile.target_fat;
       }
       
       return updated;
@@ -274,10 +431,93 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
 
     setIsLoading(true);
     try {
-      await onSave(formData);
+      console.log('💾 Saving nutrition plan with daily_plans:', formData);
+      
+      // Transform daily_plans back to weekly_plan structure for database storage
+      const weeklyPlan: any = {};
+      const dailyTotals: any = {};
+      
+      formData.daily_plans?.forEach(dayPlan => {
+        const dayKey = dayPlan.day;
+        
+        // Map meal types from UI to database format
+        const dayMeals: any = {};
+        
+        if (dayPlan.meals.ontbijt?.ingredients?.length > 0) {
+          dayMeals.ontbijt = dayPlan.meals.ontbijt.ingredients;
+        }
+        if (dayPlan.meals.snack1?.ingredients?.length > 0) {
+          dayMeals.ochtend_snack = dayPlan.meals.snack1.ingredients;
+        }
+        if (dayPlan.meals.lunch?.ingredients?.length > 0) {
+          dayMeals.lunch = dayPlan.meals.lunch.ingredients;
+        }
+        if (dayPlan.meals.snack2?.ingredients?.length > 0) {
+          dayMeals.lunch_snack = dayPlan.meals.snack2.ingredients;
+        }
+        if (dayPlan.meals.diner?.ingredients?.length > 0) {
+          dayMeals.diner = dayPlan.meals.diner.ingredients;
+        }
+        
+        // Calculate daily totals
+        const totalCalories = (dayPlan.meals.ontbijt?.calories || 0) + 
+                             (dayPlan.meals.snack1?.calories || 0) + 
+                             (dayPlan.meals.lunch?.calories || 0) + 
+                             (dayPlan.meals.snack2?.calories || 0) + 
+                             (dayPlan.meals.diner?.calories || 0);
+        
+        const totalProtein = (dayPlan.meals.ontbijt?.protein || 0) + 
+                            (dayPlan.meals.snack1?.protein || 0) + 
+                            (dayPlan.meals.lunch?.protein || 0) + 
+                            (dayPlan.meals.snack2?.protein || 0) + 
+                            (dayPlan.meals.diner?.protein || 0);
+        
+        const totalCarbs = (dayPlan.meals.ontbijt?.carbs || 0) + 
+                          (dayPlan.meals.snack1?.carbs || 0) + 
+                          (dayPlan.meals.lunch?.carbs || 0) + 
+                          (dayPlan.meals.snack2?.carbs || 0) + 
+                          (dayPlan.meals.diner?.carbs || 0);
+        
+        const totalFat = (dayPlan.meals.ontbijt?.fat || 0) + 
+                        (dayPlan.meals.snack1?.fat || 0) + 
+                        (dayPlan.meals.lunch?.fat || 0) + 
+                        (dayPlan.meals.snack2?.fat || 0) + 
+                        (dayPlan.meals.diner?.fat || 0);
+        
+        dayMeals.dailyTotals = {
+          calories: Math.round(totalCalories),
+          protein: Math.round(totalProtein * 10) / 10,
+          carbs: Math.round(totalCarbs * 10) / 10,
+          fat: Math.round(totalFat * 10) / 10
+        };
+        
+        weeklyPlan[dayKey] = dayMeals;
+        dailyTotals[dayKey] = dayMeals.dailyTotals;
+      });
+      
+      // Calculate weekly averages
+      const daysCount = Object.keys(dailyTotals).length || 7;
+      const weeklyAverages = {
+        calories: Math.round(Object.values(dailyTotals).reduce((sum: number, day: any) => sum + day.calories, 0) / daysCount),
+        protein: Math.round((Object.values(dailyTotals).reduce((sum: number, day: any) => sum + day.protein, 0) / daysCount) * 10) / 10,
+        carbs: Math.round((Object.values(dailyTotals).reduce((sum: number, day: any) => sum + day.carbs, 0) / daysCount) * 10) / 10,
+        fat: Math.round((Object.values(dailyTotals).reduce((sum: number, day: any) => sum + day.fat, 0) / daysCount) * 10) / 10
+      };
+      
+      // Prepare final form data with converted structure
+      const finalFormData = {
+        ...formData,
+        daily_plans: formData.daily_plans // Keep daily_plans for API processing
+        // Remove weekly_plan and weekly_averages from top level - they will be handled by the API
+      };
+      
+      console.log('🔄 Converted weekly plan:', weeklyPlan);
+      console.log('📊 Weekly averages:', weeklyAverages);
+      
+      await onSave(finalFormData);
       onClose();
     } catch (error) {
-      console.error('Error saving plan:', error);
+      console.error('❌ Error saving plan:', error);
       alert('Fout bij opslaan van plan');
     } finally {
       setIsLoading(false);
@@ -285,17 +525,34 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
   };
 
   const handleEditMeal = (mealType: string) => {
+    console.log('🍽️ Editing meal:', mealType, 'for day:', selectedDay);
+    
+    // Get current meal data for editing
+    const currentDay = getCurrentDayPlan();
+    const currentMeal = currentDay?.meals?.[mealType as keyof typeof currentDay.meals];
+    
+    console.log('📊 Current meal data:', currentMeal);
+    
     setEditingMealType(mealType);
-    setEditingMeal(null); // For new meal
+    setEditingMeal(currentMeal || null);
     setIsMealModalOpen(true);
   };
 
   const handleSaveMeal = async (meal: any) => {
+    console.log('💾 Saving meal:', meal);
+    console.log('📅 Selected day:', selectedDay);
+    console.log('🍽️ Meal type:', editingMealType);
+    
     // Update the form data with the new meal
     setFormData(prev => ({
       ...prev,
       daily_plans: prev.daily_plans?.map(dailyPlan => {
         if (dailyPlan.day === selectedDay) {
+          // Convert ingredients to suggestions format for display
+          const suggestions = meal.ingredients?.map((ing: any) => 
+            `${ing.name} (${ing.amount}${ing.unit})`
+          ) || [];
+          
           return {
             ...dailyPlan,
             meals: {
@@ -306,7 +563,8 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
                 protein: meal.protein,
                 carbs: meal.carbs,
                 fat: meal.fat,
-                ingredients: meal.ingredients
+                ingredients: meal.ingredients,
+                suggestions: suggestions
               }
             }
           };
@@ -314,6 +572,13 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
         return dailyPlan;
       })
     }));
+    
+    // Close the modal
+    setIsMealModalOpen(false);
+    setEditingMeal(null);
+    setEditingMealType('');
+    
+    console.log('✅ Meal saved successfully');
   };
 
   const handleDeleteMeal = async (mealId: string) => {
@@ -566,7 +831,24 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
 
               {/* Macro Summary */}
               <div className="bg-[#181F17] rounded-lg p-4 border border-[#3A4D23]">
-                <h4 className="text-[#8BAE5A] font-semibold mb-3">Macro Overzicht</h4>
+                <div className="flex justify-between items-center mb-3">
+                  <h4 className="text-[#8BAE5A] font-semibold">Macro Overzicht</h4>
+                  <button
+                    onClick={() => {
+                      const standardProfile = getStandardProfile(formData.fitness_goal || 'spiermassa');
+                      setFormData(prev => ({
+                        ...prev,
+                        target_calories: standardProfile.target_calories,
+                        target_protein: standardProfile.target_protein,
+                        target_carbs: standardProfile.target_carbs,
+                        target_fat: standardProfile.target_fat
+                      }));
+                    }}
+                    className="px-3 py-1 bg-[#8BAE5A] text-[#181F17] rounded text-sm font-semibold hover:bg-[#B6C948] transition-colors"
+                  >
+                    ⚖️ Herbereken
+                  </button>
+                </div>
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <div>
                     <div className="text-[#8BAE5A] font-semibold">{formData.target_protein}g</div>
@@ -584,6 +866,9 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
                 <div className="mt-3 text-center">
                   <div className="text-[#8BAE5A] font-semibold">{formData.target_calories} calorieën</div>
                   <div className="text-[#B6C948] text-sm">Totaal per dag</div>
+                </div>
+                <div className="mt-3 text-xs text-[#B6C948] text-center">
+                  💡 Standaard profiel: Man 30 jaar, 90kg, 192cm - Klik "Herbereken" om naar standaard waarden terug te gaan
                 </div>
               </div>
             </div>
@@ -626,22 +911,34 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
                     </div>
                   </div>
 
-                  {/* Meals */}
+                  {/* Meals - Now showing actual ingredients from database */}
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {['ontbijt', 'lunch', 'diner', 'snack1'].map((mealType) => {
+                    {['ontbijt', 'snack1', 'lunch', 'snack2', 'diner'].map((mealType) => {
                       const currentDay = getCurrentDayPlan();
                       const meal = currentDay?.meals?.[mealType as keyof typeof currentDay.meals];
                       const mealNames = {
                         ontbijt: 'Ontbijt',
+                        snack1: 'Ochtend Snack',
                         lunch: 'Lunch', 
-                        diner: 'Diner',
-                        snack1: 'Snacks'
+                        snack2: 'Middag Snack',
+                        diner: 'Diner'
                       };
+                      
+                      // Get suggestions (which are the actual ingredients from database)
+                      const ingredients = meal?.suggestions || [];
+                      const hasIngredients = ingredients.length > 0;
                       
                       return (
                         <div key={mealType} className="bg-[#181F17] rounded-lg p-4 border border-[#3A4D23]">
                           <div className="flex items-center justify-between mb-3">
-                            <h4 className="text-[#8BAE5A] font-semibold">{mealNames[mealType as keyof typeof mealNames]}</h4>
+                            <h4 className="text-[#8BAE5A] font-semibold flex items-center gap-2">
+                              {mealType === 'ontbijt' && '🍳'}
+                              {mealType === 'snack1' && '🥜'}
+                              {mealType === 'lunch' && '🥩'}
+                              {mealType === 'snack2' && '🧀'}
+                              {mealType === 'diner' && '🍽️'}
+                              {mealNames[mealType as keyof typeof mealNames]}
+                            </h4>
                             <div className="flex gap-2">
                               <button 
                                 onClick={() => handleEditMeal(mealType)}
@@ -652,23 +949,47 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
                               </button>
                             </div>
                           </div>
+                          
                           <div className="space-y-3">
+                            {/* Meal name and nutrition */}
                             <div className="text-[#B6C948] font-medium">
                               {meal?.name || `${mealNames[mealType as keyof typeof mealNames]} - Nog niet ingesteld`}
                             </div>
-                            <div className="text-[#8BAE5A] text-sm">
-                              {meal?.calories || 0} cal • {meal?.protein || 0}g protein • {meal?.carbs || 0}g carbs • {meal?.fat || 0}g fat
-                            </div>
-                            {meal?.ingredients && meal.ingredients.length > 0 && (
-                              <div className="text-xs text-gray-400 space-y-1">
-                                {meal.ingredients.map((ingredient: any, idx: number) => (
-                                  <div key={idx}>• {ingredient.name} ({ingredient.amount}{ingredient.unit})</div>
-                                ))}
+                            
+                            {/* Nutrition info */}
+                            <div className="bg-[#0F150E] rounded-lg p-3 border border-[#2A3520]">
+                              <div className="grid grid-cols-2 gap-2 text-xs">
+                                <div className="text-[#8BAE5A]">
+                                  <span className="font-semibold">{meal?.calories || 0}</span> cal
+                                </div>
+                                <div className="text-[#8BAE5A]">
+                                  <span className="font-semibold">{meal?.protein || 0}g</span> protein
+                                </div>
+                                <div className="text-[#8BAE5A]">
+                                  <span className="font-semibold">{meal?.carbs || 0}g</span> carbs
+                                </div>
+                                <div className="text-[#8BAE5A]">
+                                  <span className="font-semibold">{meal?.fat || 0}g</span> fat
+                                </div>
                               </div>
-                            )}
-                            {(!meal?.ingredients || meal.ingredients.length === 0) && (
-                              <div className="text-xs text-gray-400">
-                                Klik op bewerken om ingrediënten toe te voegen
+                            </div>
+                            
+                            {/* Ingredients from database */}
+                            {hasIngredients ? (
+                              <div className="space-y-2">
+                                <div className="text-xs text-[#8BAE5A] font-semibold">Ingrediënten:</div>
+                                <div className="space-y-1">
+                                  {ingredients.map((ingredient: string, idx: number) => (
+                                    <div key={idx} className="text-xs text-[#B6C948] flex items-center gap-2">
+                                      <span className="w-1 h-1 bg-[#8BAE5A] rounded-full"></span>
+                                      {ingredient}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="text-xs text-gray-500 italic p-3 bg-[#0F150E] rounded border border-[#2A3520]">
+                                💡 Geen ingrediënten gevonden - klik op bewerken om toe te voegen
                               </div>
                             )}
                           </div>
@@ -679,54 +1000,59 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
 
                   {/* Daily Nutrition Summary */}
                   <div className="bg-[#181F17] rounded-lg p-4 border border-[#3A4D23]">
-                    <h4 className="text-[#8BAE5A] font-semibold mb-3">Dagelijkse Voeding Overzicht</h4>
-                    <div className="grid grid-cols-4 gap-4 text-center">
-                      <div>
-                        <div className="text-[#8BAE5A] font-semibold">
-                          {getCurrentDayPlan()?.meals?.ontbijt?.calories || 520} + 
-                          {getCurrentDayPlan()?.meals?.lunch?.calories || 650} + 
-                          {getCurrentDayPlan()?.meals?.diner?.calories || 580} + 
-                          {getCurrentDayPlan()?.meals?.snack1?.calories || 280} + 
-                          {getCurrentDayPlan()?.meals?.snack2?.calories || 320} = 
-                          {((getCurrentDayPlan()?.meals?.ontbijt?.calories || 520) + 
-                            (getCurrentDayPlan()?.meals?.lunch?.calories || 650) + 
-                            (getCurrentDayPlan()?.meals?.diner?.calories || 580) + 
-                            (getCurrentDayPlan()?.meals?.snack1?.calories || 280) + 
-                            (getCurrentDayPlan()?.meals?.snack2?.calories || 320))}
+                    <h4 className="text-[#8BAE5A] font-semibold mb-3 flex items-center gap-2">
+                      📊 Dagelijkse Voeding Overzicht - {dayNames[selectedDay as keyof typeof dayNames]}
+                    </h4>
+                    
+                    {(() => {
+                      const currentDay = getCurrentDayPlan();
+                      const meals = currentDay?.meals;
+                      
+                      const totalCalories = (meals?.ontbijt?.calories || 0) + 
+                                          (meals?.snack1?.calories || 0) + 
+                                          (meals?.lunch?.calories || 0) + 
+                                          (meals?.snack2?.calories || 0) + 
+                                          (meals?.diner?.calories || 0);
+                      
+                      const totalProtein = (meals?.ontbijt?.protein || 0) + 
+                                         (meals?.snack1?.protein || 0) + 
+                                         (meals?.lunch?.protein || 0) + 
+                                         (meals?.snack2?.protein || 0) + 
+                                         (meals?.diner?.protein || 0);
+                      
+                      const totalCarbs = (meals?.ontbijt?.carbs || 0) + 
+                                       (meals?.snack1?.carbs || 0) + 
+                                       (meals?.lunch?.carbs || 0) + 
+                                       (meals?.snack2?.carbs || 0) + 
+                                       (meals?.diner?.carbs || 0);
+                      
+                      const totalFat = (meals?.ontbijt?.fat || 0) + 
+                                     (meals?.snack1?.fat || 0) + 
+                                     (meals?.lunch?.fat || 0) + 
+                                     (meals?.snack2?.fat || 0) + 
+                                     (meals?.diner?.fat || 0);
+                      
+                      return (
+                        <div className="grid grid-cols-4 gap-4 text-center">
+                          <div className="bg-[#0F150E] p-3 rounded border border-[#2A3520]">
+                            <div className="text-[#8BAE5A] font-bold text-lg">{Math.round(totalCalories)}</div>
+                            <div className="text-[#B6C948] text-sm">Totaal Calorieën</div>
+                          </div>
+                          <div className="bg-[#0F150E] p-3 rounded border border-[#2A3520]">
+                            <div className="text-[#8BAE5A] font-bold text-lg">{Math.round(totalProtein * 10) / 10}g</div>
+                            <div className="text-[#B6C948] text-sm">Totaal Protein</div>
+                          </div>
+                          <div className="bg-[#0F150E] p-3 rounded border border-[#2A3520]">
+                            <div className="text-[#8BAE5A] font-bold text-lg">{Math.round(totalCarbs * 10) / 10}g</div>
+                            <div className="text-[#B6C948] text-sm">Totaal Carbs</div>
+                          </div>
+                          <div className="bg-[#0F150E] p-3 rounded border border-[#2A3520]">
+                            <div className="text-[#8BAE5A] font-bold text-lg">{Math.round(totalFat * 10) / 10}g</div>
+                            <div className="text-[#B6C948] text-sm">Totaal Fat</div>
+                          </div>
                         </div>
-                        <div className="text-[#B6C948] text-sm">Totaal Calorieën</div>
-                      </div>
-                      <div>
-                        <div className="text-[#8BAE5A] font-semibold">
-                          {((getCurrentDayPlan()?.meals?.ontbijt?.protein || 42) + 
-                            (getCurrentDayPlan()?.meals?.lunch?.protein || 45) + 
-                            (getCurrentDayPlan()?.meals?.diner?.protein || 58) + 
-                            (getCurrentDayPlan()?.meals?.snack1?.protein || 22) + 
-                            (getCurrentDayPlan()?.meals?.snack2?.protein || 18))}
-                        </div>
-                        <div className="text-[#B6C948] text-sm">Totaal Protein (g)</div>
-                      </div>
-                      <div>
-                        <div className="text-[#8BAE5A] font-semibold">
-                          {((getCurrentDayPlan()?.meals?.ontbijt?.carbs || 8) + 
-                            (getCurrentDayPlan()?.meals?.lunch?.carbs || 0) + 
-                            (getCurrentDayPlan()?.meals?.diner?.carbs || 15) + 
-                            (getCurrentDayPlan()?.meals?.snack1?.carbs || 0) + 
-                            (getCurrentDayPlan()?.meals?.snack2?.carbs || 2))}
-                        </div>
-                        <div className="text-[#B6C948] text-sm">Totaal Carbs (g)</div>
-                      </div>
-                      <div>
-                        <div className="text-[#8BAE5A] font-semibold">
-                          {((getCurrentDayPlan()?.meals?.ontbijt?.fat || 35) + 
-                            (getCurrentDayPlan()?.meals?.lunch?.fat || 50) + 
-                            (getCurrentDayPlan()?.meals?.diner?.fat || 35) + 
-                            (getCurrentDayPlan()?.meals?.snack1?.fat || 20) + 
-                            (getCurrentDayPlan()?.meals?.snack2?.fat || 25))}
-                        </div>
-                        <div className="text-[#B6C948] text-sm">Totaal Fat (g)</div>
-                      </div>
-                    </div>
+                      );
+                    })()}
                     <div className="mt-3 text-center">
                       <div className="text-[#8BAE5A] text-sm font-semibold">
                         🥩 100% Carnivor Animal Based Compliant
