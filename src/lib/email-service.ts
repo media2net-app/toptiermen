@@ -933,25 +933,27 @@ class EmailService {
                     🎥 PLATFORM SNEAK PREVIEW VIDEO
                   </h3>
                   
-                  <!-- Video Placeholder/Thumbnail -->
-                  <div style="position: relative; background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%); border-radius: 12px; overflow: hidden; margin: 20px 0;">
-                    <div style="width: 100%; height: 300px; background: linear-gradient(45deg, #232D1A, #3A4D23); display: flex; align-items: center; justify-content: center; position: relative;">
-                      <!-- Play Button -->
-                      <div style="width: 80px; height: 80px; background: rgba(139, 174, 90, 0.9); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 8px 25px rgba(139, 174, 90, 0.3);">
+                  <!-- Video Preview Image -->
+                  <div style="position: relative; border-radius: 12px; overflow: hidden; margin: 20px 0;">
+                    <a href="https://platform.toptiermen.eu/sneakpreview" style="display: block; position: relative;">
+                      <img src="https://platform.toptiermen.eu/platform-preview.png" alt="Top Tier Men Platform Preview" style="width: 100%; height: auto; display: block; border-radius: 12px;" />
+                      
+                      <!-- Play Button Overlay -->
+                      <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80px; height: 80px; background: rgba(139, 174, 90, 0.9); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);">
                         <div style="width: 0; height: 0; border-left: 24px solid white; border-top: 12px solid transparent; border-bottom: 12px solid transparent; margin-left: 6px;"></div>
                       </div>
                       
                       <!-- Video overlay text -->
-                      <div style="position: absolute; bottom: 15px; left: 15px; right: 15px;">
+                      <div style="position: absolute; bottom: 15px; left: 15px; right: 15px; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); padding: 15px 0 0 0; border-radius: 0 0 12px 12px;">
                         <p style="color: white; font-size: 14px; font-weight: 600; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.7);">
                           🎯 Ontdek de Academy, Voedingsplannen, Trainingsschema's en Community Features
                         </p>
                       </div>
-                    </div>
+                    </a>
                   </div>
                   
                   <!-- CTA Button for Video -->
-                  <a href="\${variables.videoUrl || 'https://platform.toptiermen.eu/preview'}" 
+                  <a href="\${variables.videoUrl || 'https://platform.toptiermen.eu/sneakpreview'}" 
                      style="display: inline-block; background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%); color: white; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 16px; margin: 20px 0; box-shadow: 0 6px 20px rgba(139, 174, 90, 0.3); transition: all 0.3s ease;">
                     🎬 BEKIJK SNEAK PREVIEW VIDEO
                   </a>
@@ -1071,7 +1073,7 @@ class EmailService {
             </div>
           </div>
         `,
-        text: \`
+        text: `
 🎬 EXCLUSIEVE SNEAK PREVIEW - Eerste blik op het Top Tier Men Platform
 
 Beste \${variables.name && variables.name.trim() !== '' ? variables.name : ''},
@@ -1079,7 +1081,7 @@ Beste \${variables.name && variables.name.trim() !== '' ? variables.name : ''},
 Als onderdeel van onze exclusieve pre-launch community ben je een van de eerste die een kijkje mag nemen achter de schermen van het Top Tier Men platform. Deze sneak preview is alleen beschikbaar voor een selecte groep leden - jij bent een van hen.
 
 🎥 PLATFORM SNEAK PREVIEW VIDEO
-Bekijk de video hier: \${variables.videoUrl || 'https://platform.toptiermen.eu/preview'}
+Bekijk de video hier: \${variables.videoUrl || 'https://platform.toptiermen.eu/sneakpreview'}
 
 WAT JE IN DE VIDEO ZIET:
 📚 Academy Modules - Complete trainings voor persoonlijke ontwikkeling
@@ -1105,7 +1107,7 @@ Het Top Tier Men Team
 © 2024 Top Tier Men - Exclusieve Broederschap voor Top Performers
 Website: https://platform.toptiermen.eu
 Contact: platform@toptiermen.eu
-        \`
+        `
       }
     };
 
@@ -1116,7 +1118,7 @@ Contact: platform@toptiermen.eu
     let text = emailTemplate.text;
     
     Object.entries(variables).forEach(([key, value]) => {
-      const regex = new RegExp(`\\$\\{${key}\\}`, 'g');
+      const regex = new RegExp('\\$\\{' + key + '\\}', 'g');
       html = html.replace(regex, value);
       text = text.replace(regex, value);
     });
@@ -1171,12 +1173,12 @@ Contact: platform@toptiermen.eu
         username: this.config.smtpUsername,
         to,
         subject,
-        from: `${this.config.fromName} <${this.config.fromEmail}>`
+        from: this.config.fromName + ' <' + this.config.fromEmail + '>'
       });
 
       // Create email message
       const message = {
-        from: `${this.config.fromName} <${this.config.fromEmail}>`,
+        from: this.config.fromName + ' <' + this.config.fromEmail + '>',
         to: to,
         subject: subject,
         html: html,
