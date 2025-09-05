@@ -226,7 +226,7 @@ Contact: platform@toptiermen.eu
                 <!-- Video Section -->
                 <div style="text-align: center; margin: 30px 0;">
                   <a href="\${videoUrl}" style="display: block; position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-                    <img src="https://platform.toptiermen.eu/platform-preview.png" alt="Platform Preview" style="width: 100%; height: auto; display: block;">
+                    <img src="https://platform.toptiermen.eu/Scherm­afbeelding 2025-09-05 om 17.34.54.png" alt="Platform Preview" style="width: 100%; height: auto; display: block;">
                     <!-- Play Button Overlay -->
                     <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 70px; height: 70px; background: rgba(139, 174, 90, 0.95); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 25px rgba(0,0,0,0.4);">
                       <div style="width: 0; height: 0; border-left: 22px solid white; border-top: 12px solid transparent; border-bottom: 12px solid transparent; margin-left: 4px;"></div>
