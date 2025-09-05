@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { emailService } from '@/lib/email-service';
-import { getSneakPreviewEmailTemplate } from '@/lib/email-templates';
+import { EmailService } from '@/lib/email-service';
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,7 +9,7 @@ export async function POST(request: NextRequest) {
     const { 
       email,
       name = 'Top Tier Man',
-      videoUrl = 'https://platform.toptiermen.eu/preview'
+      videoUrl = 'https://platform.toptiermen.eu/sneakpreview'
     } = body;
 
     if (!email) {
@@ -22,21 +21,22 @@ export async function POST(request: NextRequest) {
 
     console.log('📧 Sneak preview email request:', { email, name, videoUrl });
 
-    // Get email template
-    const emailTemplate = getSneakPreviewEmailTemplate(name, videoUrl);
+    // Create email service instance
+    const emailService = new EmailService();
 
-    // Send email using email service with custom template
-    const result = await emailService.sendEmail({
-      to: email,
-      template: 'sneak_preview', // Use the new template
-      variables: {
+    // Send email using new email service
+    const result = await emailService.sendEmail(
+      email,
+      '🎬 EXCLUSIEVE VIDEO - Eerste kijk in het Top Tier Men Platform',
+      'sneak_preview',
+      {
         name: name,
         videoUrl: videoUrl
+      },
+      {
+        tracking: true
       }
-    }, {
-      campaign_id: 'sneak-preview-campaign',
-      template_type: 'sneak_preview'
-    });
+    );
 
     if (result) {
       console.log('✅ Sneak preview email sent successfully');
