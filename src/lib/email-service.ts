@@ -443,3 +443,24 @@ Het Top Tier Men Team
     }
   }
 }
+
+// Legacy wrapper class for backwards compatibility
+class LegacyEmailService extends EmailService {
+  async sendEmail(options: {
+    to: string;
+    template: string;
+    variables: Record<string, string>;
+  }, trackingOptions?: any): Promise<boolean> {
+    // Convert old interface to new interface
+    return super.sendEmail(
+      options.to,
+      '', // subject will be from template
+      options.template,
+      options.variables,
+      { tracking: true }
+    );
+  }
+}
+
+// Export a default instance for backwards compatibility
+export const emailService = new LegacyEmailService();
