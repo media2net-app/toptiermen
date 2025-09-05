@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import AdminCard from '@/components/admin/AdminCard';
 import { toast } from 'react-hot-toast';
-import { ArrowPathIcon } from '@heroicons/react/24/outline';
+import { ArrowPathIcon, EyeIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 interface BulkEmailCampaign {
   id: string;
@@ -40,17 +40,26 @@ interface BulkEmailRecipient {
 
 export default function EmailTrechterPage() {
   const [campaigns, setCampaigns] = useState<BulkEmailCampaign[]>([]);
+  const [campaigns2, setCampaigns2] = useState<BulkEmailCampaign[]>([]);
   const [recipients, setRecipients] = useState<BulkEmailRecipient[]>([]);
+  const [recipients2, setRecipients2] = useState<BulkEmailRecipient[]>([]);
   const [loadingCampaigns, setLoadingCampaigns] = useState(true);
+  const [loadingCampaigns2, setLoadingCampaigns2] = useState(true);
   const [loadingRecipients, setLoadingRecipients] = useState(false);
+  const [loadingRecipients2, setLoadingRecipients2] = useState(false);
   const [activeTab, setActiveTab] = useState<'campaign' | 'recipients'>('campaign');
+  const [activeTab2, setActiveTab2] = useState<'campaign' | 'recipients'>('campaign');
+  const [activeCampaign, setActiveCampaign] = useState<1 | 2>(1);
   const [refreshing, setRefreshing] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
   const [showOpensModal, setShowOpensModal] = useState(false);
+  const [showEmailPreviewModal, setShowEmailPreviewModal] = useState(false);
+  const [currentEmailTemplate, setCurrentEmailTemplate] = useState('');
 
-  // Official campaign ID
+  // Campaign IDs
   const OFFICIAL_CAMPAIGN_ID = '3c599791-0268-4980-914f-a599be42139b';
+  const SNEAK_PREVIEW_CAMPAIGN_ID = ''; // To be set up later
 
   // Fetch campaigns data
   const fetchCampaigns = async () => {
@@ -91,6 +100,21 @@ export default function EmailTrechterPage() {
     }
   };
 
+  // Fetch campaigns 2 data (Sneak Preview)
+  const fetchCampaigns2 = async () => {
+    try {
+      setLoadingCampaigns2(true);
+      // For now, set empty since campaign 2 is not set up yet
+      setCampaigns2([]);
+      console.log('📊 Campaign 2 (Sneak Preview) not set up yet');
+    } catch (error) {
+      console.error('Error fetching campaigns 2:', error);
+      toast.error('Error loading campaign 2 data');
+    } finally {
+      setLoadingCampaigns2(false);
+    }
+  };
+
   // Fetch recipients data
   const fetchRecipients = async () => {
     try {
@@ -114,11 +138,92 @@ export default function EmailTrechterPage() {
     }
   };
 
+  // Fetch recipients 2 data (Sneak Preview)
+  const fetchRecipients2 = async () => {
+    try {
+      setLoadingRecipients2(true);
+      // For now, set empty since campaign 2 is not set up yet
+      setRecipients2([]);
+      console.log('📊 Recipients 2 (Sneak Preview) not set up yet');
+    } catch (error) {
+      console.error('Error fetching recipients 2:', error);
+      toast.error('Error loading recipient 2 data');
+    } finally {
+      setLoadingRecipients2(false);
+    }
+  };
+
+  // Show email preview modal
+  const showEmailPreview = (campaignType: 'welcome' | 'sneak_preview') => {
+    if (campaignType === 'welcome') {
+      // Get welcome email template
+      setCurrentEmailTemplate(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Welkom bij Top Tier Men</title>
+        </head>
+        <body style="font-family: Arial, sans-serif; background: #181F17; color: white; margin: 0; padding: 40px;">
+          <div style="max-width: 600px; margin: 0 auto; background: #0F1419; border-radius: 16px; overflow: hidden;">
+            <div style="background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%); padding: 40px; text-align: center;">
+              <h1 style="color: white; margin: 0; font-size: 28px;">🎯 Welkom bij Top Tier Men</h1>
+              <p style="color: rgba(255,255,255,0.95); margin: 12px 0 0 0;">Jouw reis naar excellentie begint hier</p>
+            </div>
+            <div style="padding: 40px;">
+              <p style="font-size: 18px; color: #8BAE5A; margin: 0 0 24px 0;">Beste [NAAM],</p>
+              <p style="line-height: 1.6; margin: 0 0 24px 0;">Welkom bij Top Tier Men! 🚀</p>
+              <p style="line-height: 1.6; margin: 0 0 24px 0;">We zijn verheugd dat je interesse hebt getoond in onze exclusieve broederschap van top performers.</p>
+              <div style="text-align: center; margin: 40px 0;">
+                <a href="#" style="background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%); color: white; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: bold;">Start Je Transformatie</a>
+              </div>
+            </div>
+          </div>
+        </body>
+        </html>
+      `);
+    } else {
+      // Get sneak preview email template
+      setCurrentEmailTemplate(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Sneak Preview - Top Tier Men</title>
+        </head>
+        <body style="font-family: Arial, sans-serif; background: #181F17; color: white; margin: 0; padding: 40px;">
+          <div style="max-width: 600px; margin: 0 auto; background: #0F1419; border-radius: 16px; overflow: hidden;">
+            <div style="background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%); padding: 40px; text-align: center;">
+              <h1 style="color: white; margin: 0; font-size: 28px;">🎬 EXCLUSIEVE SNEAK PREVIEW</h1>
+              <p style="color: rgba(255,255,255,0.95); margin: 12px 0 0 0;">Eerste blik op het Top Tier Men Platform</p>
+            </div>
+            <div style="padding: 40px;">
+              <p style="font-size: 18px; color: #8BAE5A; margin: 0 0 24px 0;">Beste [NAAM],</p>
+              <p style="line-height: 1.6; margin: 0 0 24px 0;">Als onderdeel van onze exclusieve pre-launch community ben je een van de eerste die een kijkje mag nemen achter de schermen.</p>
+              <div style="background: rgba(139, 174, 90, 0.1); border: 2px solid #8BAE5A; border-radius: 16px; padding: 30px; margin: 30px 0; text-align: center;">
+                <h3 style="color: #8BAE5A; margin: 0 0 20px 0;">🎥 PLATFORM SNEAK PREVIEW VIDEO</h3>
+                <div style="background: #232D1A; height: 200px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 20px 0;">
+                  <div style="color: #8BAE5A;">▶ Video Preview</div>
+                </div>
+                <a href="#" style="background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%); color: white; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: bold;">🎬 BEKIJK SNEAK PREVIEW NU</a>
+              </div>
+            </div>
+          </div>
+        </body>
+        </html>
+      `);
+    }
+    setShowEmailPreviewModal(true);
+  };
+
   // Refresh all data
   const refreshData = async () => {
     setRefreshing(true);
     setLastRefresh(new Date());
-    await Promise.all([fetchCampaigns(), fetchRecipients()]);
+    await Promise.all([
+      fetchCampaigns(), 
+      fetchRecipients(),
+      fetchCampaigns2(),
+      fetchRecipients2()
+    ]);
     setRefreshing(false);
   };
 
@@ -126,6 +231,8 @@ export default function EmailTrechterPage() {
   useEffect(() => {
     fetchCampaigns();
     fetchRecipients();
+    fetchCampaigns2();
+    fetchRecipients2();
   }, []);
 
   // Auto-refresh every 30 seconds
@@ -141,8 +248,13 @@ export default function EmailTrechterPage() {
     return () => clearInterval(interval);
   }, [autoRefresh]);
 
-  // Calculate statistics
-  const campaign = campaigns[0];
+  // Calculate statistics based on active campaign
+  const currentCampaigns = activeCampaign === 1 ? campaigns : campaigns2;
+  const currentRecipients = activeCampaign === 1 ? recipients : recipients2;
+  const currentLoading = activeCampaign === 1 ? loadingCampaigns : loadingCampaigns2;
+  const currentActiveTab = activeCampaign === 1 ? activeTab : activeTab2;
+  
+  const campaign = currentCampaigns[0];
   const totalRecipients = campaign?.total_recipients || 0;
   const sentCount = campaign?.sent_count || 0;
   const openCount = campaign?.open_count || 0;
@@ -154,7 +266,7 @@ export default function EmailTrechterPage() {
   const clickRate = sentCount > 0 ? ((clickCount / sentCount) * 100).toFixed(1) : '0.0';
   const deliveryRate = totalRecipients > 0 ? ((sentCount / totalRecipients) * 100).toFixed(1) : '0.0';
 
-  if (loadingCampaigns) {
+  if (currentLoading) {
     return (
       <div className="min-h-screen bg-gray-900 p-6">
         <div className="max-w-7xl mx-auto">
@@ -179,8 +291,45 @@ export default function EmailTrechterPage() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">Email Marketing Dashboard</h1>
-            <h2 className="text-xl text-gray-400">Officiële Campagne 1 - Welkom & Introductie</h2>
-            <p className="text-sm text-gray-500 mt-1">
+            
+            {/* Campaign Selector */}
+            <div className="flex items-center space-x-4 mb-4">
+              <button
+                onClick={() => setActiveCampaign(1)}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  activeCampaign === 1
+                    ? 'bg-green-600 text-white'
+                    : 'bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700'
+                }`}
+              >
+                📧 Campagne 1 - Welkom & Introductie
+              </button>
+              <button
+                onClick={() => setActiveCampaign(2)}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  activeCampaign === 2
+                    ? 'bg-green-600 text-white'
+                    : 'bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700'
+                }`}
+              >
+                🎬 Campagne 2 - Sneak Preview (Setup)
+              </button>
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              <h2 className="text-xl text-gray-400">
+                {activeCampaign === 1 ? 'Officiële Campagne 1 - Welkom & Introductie' : 'Campagne 2 - Sneak Preview (Setup Required)'}
+              </h2>
+              <button
+                onClick={() => showEmailPreview(activeCampaign === 1 ? 'welcome' : 'sneak_preview')}
+                className="flex items-center px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm transition-colors"
+              >
+                <EyeIcon className="w-4 h-4 mr-1" />
+                Bekijk E-mail
+              </button>
+            </div>
+            
+            <p className="text-sm text-gray-500 mt-2">
               Laatste update: {lastRefresh.toLocaleTimeString()} 
               {autoRefresh && ' • Auto-refresh actief (30s)'}
             </p>
@@ -271,9 +420,15 @@ export default function EmailTrechterPage() {
         {/* Tabs */}
         <div className="flex space-x-1 mb-6">
           <button
-            onClick={() => setActiveTab('campaign')}
+            onClick={() => {
+              if (activeCampaign === 1) {
+                setActiveTab('campaign');
+              } else {
+                setActiveTab2('campaign');
+              }
+            }}
             className={`px-4 py-2 rounded-lg font-medium ${
-              activeTab === 'campaign'
+              currentActiveTab === 'campaign'
                 ? 'bg-green-600 text-white'
                 : 'bg-gray-800 text-gray-400 hover:text-white'
             }`}
@@ -281,19 +436,45 @@ export default function EmailTrechterPage() {
             Campaign Details
           </button>
           <button
-            onClick={() => setActiveTab('recipients')}
+            onClick={() => {
+              if (activeCampaign === 1) {
+                setActiveTab('recipients');
+              } else {
+                setActiveTab2('recipients');
+              }
+            }}
             className={`px-4 py-2 rounded-lg font-medium ${
-              activeTab === 'recipients'
+              currentActiveTab === 'recipients'
                 ? 'bg-green-600 text-white'
                 : 'bg-gray-800 text-gray-400 hover:text-white'
             }`}
           >
-            Recipients ({recipients.length})
+            Recipients ({currentRecipients.length})
           </button>
         </div>
 
         {/* Campaign Details Tab */}
-        {activeTab === 'campaign' && campaign && (
+        {currentActiveTab === 'campaign' && (
+          activeCampaign === 2 && !campaign ? (
+            <AdminCard title="Campaign 2 Setup Required">
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4">🎬</div>
+                <h3 className="text-xl font-semibold text-white mb-4">Sneak Preview Campagne Setup</h3>
+                <p className="text-gray-400 mb-6">
+                  Deze campagne is nog niet opgezet. Configureer eerst de campagne voordat je ontvangers kunt toevoegen.
+                </p>
+                <div className="bg-gray-800 p-4 rounded-lg text-left max-w-md mx-auto">
+                  <h4 className="text-white font-medium mb-2">Setup Stappen:</h4>
+                  <ul className="text-sm text-gray-300 space-y-1">
+                    <li>1. Configureer campagne ID in database</li>
+                    <li>2. Upload sneak preview video</li>
+                    <li>3. Test email template</li>
+                    <li>4. Voeg ontvangers toe</li>
+                  </ul>
+                </div>
+              </div>
+            </AdminCard>
+          ) : campaign && (
           <AdminCard title="Campaign Details">
             <div className="space-y-6">
               {/* Campaign Info */}
@@ -368,12 +549,32 @@ export default function EmailTrechterPage() {
               </div>
             </div>
           </AdminCard>
+          )
         )}
 
         {/* Recipients Tab */}
-        {activeTab === 'recipients' && (
+        {currentActiveTab === 'recipients' && (
+          activeCampaign === 2 ? (
+            <AdminCard title="Campaign 2 Recipients">
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4">📧</div>
+                <h3 className="text-xl font-semibold text-white mb-4">Geen Ontvangers Geconfigureerd</h3>
+                <p className="text-gray-400 mb-6">
+                  Voor campagne 2 zijn nog geen ontvangers toegevoegd. Setup eerst de campagne.
+                </p>
+                <div className="bg-gray-800 p-4 rounded-lg text-left max-w-md mx-auto">
+                  <h4 className="text-white font-medium mb-2">Voor je ontvangers kunt toevoegen:</h4>
+                  <ul className="text-sm text-gray-300 space-y-1">
+                    <li>• Campagne moet geconfigureerd zijn</li>
+                    <li>• Email template moet getest zijn</li>
+                    <li>• Video URL moet beschikbaar zijn</li>
+                  </ul>
+                </div>
+              </div>
+            </AdminCard>
+          ) : (
           <AdminCard title="Recipients">
-            {loadingRecipients ? (
+            {(activeCampaign === 1 ? loadingRecipients : loadingRecipients2) ? (
               <div className="animate-pulse">
                 <div className="h-8 bg-gray-800 rounded w-1/4 mb-4"></div>
                 <div className="space-y-3">
@@ -395,7 +596,7 @@ export default function EmailTrechterPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {recipients.map((recipient) => (
+                    {currentRecipients.map((recipient) => (
                       <tr key={recipient.id} className="border-b border-gray-800">
                         <td className="py-3 px-4 text-white">{recipient.email}</td>
                         <td className="py-3 px-4 text-white">{recipient.full_name || 'N/A'}</td>
@@ -422,6 +623,7 @@ export default function EmailTrechterPage() {
               </div>
             )}
           </AdminCard>
+          )
         )}
       </div>
 
@@ -447,7 +649,7 @@ export default function EmailTrechterPage() {
 
             {/* Modal Content */}
             <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-              {loadingRecipients ? (
+              {(activeCampaign === 1 ? loadingRecipients : loadingRecipients2) ? (
                 <div className="animate-pulse space-y-3">
                   {[...Array(5)].map((_, i) => (
                     <div key={i} className="h-16 bg-gray-800 rounded"></div>
@@ -462,12 +664,12 @@ export default function EmailTrechterPage() {
                       <div className="text-sm text-gray-400">Totaal geopend</div>
                     </div>
                     <div className="bg-gray-800 p-4 rounded-lg">
-                      <div className="text-2xl font-bold text-blue-400">{recipients.filter(r => r.status === 'opened').length}</div>
+                      <div className="text-2xl font-bold text-blue-400">{currentRecipients.filter(r => r.status === 'opened').length}</div>
                       <div className="text-sm text-gray-400">Unieke ontvangers</div>
                     </div>
                     <div className="bg-gray-800 p-4 rounded-lg">
                       <div className="text-2xl font-bold text-yellow-400">
-                        {openCount > 0 ? Math.round((openCount / recipients.filter(r => r.status === 'opened').length) * 10) / 10 : 0}
+                        {openCount > 0 ? Math.round((openCount / currentRecipients.filter(r => r.status === 'opened').length) * 10) / 10 : 0}
                       </div>
                       <div className="text-sm text-gray-400">Gemiddeld per persoon</div>
                     </div>
@@ -491,7 +693,7 @@ export default function EmailTrechterPage() {
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-700">
-                          {recipients
+                          {currentRecipients
                             .filter(r => r.status === 'opened')
                             .sort((a, b) => new Date(b.opened_at || 0).getTime() - new Date(a.opened_at || 0).getTime())
                             .map((recipient) => (
@@ -530,6 +732,52 @@ export default function EmailTrechterPage() {
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Email Preview Modal */}
+      {showEmailPreviewModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
+          <div className="bg-gray-900 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-700">
+              <div>
+                <h2 className="text-2xl font-bold text-white">Email Preview</h2>
+                <p className="text-gray-400 mt-1">
+                  {activeCampaign === 1 ? 'Welkom & Introductie Email' : 'Sneak Preview Email'}
+                </p>
+              </div>
+              <button
+                onClick={() => setShowEmailPreviewModal(false)}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <XMarkIcon className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+              <div className="bg-white rounded-lg overflow-hidden">
+                <iframe 
+                  srcDoc={currentEmailTemplate}
+                  className="w-full h-[600px] border-0"
+                  title="Email Preview"
+                />
+              </div>
+              
+              <div className="mt-6 bg-gray-800 p-4 rounded-lg">
+                <h4 className="text-white font-medium mb-2">Email Template Info</h4>
+                <div className="text-sm text-gray-300 space-y-1">
+                  <p>• Deze preview toont hoe de email eruit ziet voor ontvangers</p>
+                  <p>• [NAAM] wordt vervangen door de echte naam van de ontvanger</p>
+                  <p>• Links en buttons zijn functioneel in de echte email</p>
+                  {activeCampaign === 2 && (
+                    <p>• Video URL wordt ingesteld bij het versturen van de campagne</p>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>

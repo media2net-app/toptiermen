@@ -4,6 +4,422 @@ export interface EmailTemplate {
   text: string;
 }
 
+export const getSneakPreviewEmailTemplate = (name: string, videoUrl: string): EmailTemplate => ({
+  subject: '🎬 EXCLUSIEVE SNEAK PREVIEW - Eerste blik op het Top Tier Men Platform',
+  html: `
+    <!DOCTYPE html>
+    <html lang="nl">
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Sneak Preview - Top Tier Men Platform</title>
+      <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+          line-height: 1.6; 
+          color: #ffffff; 
+          background-color: #181F17;
+          margin: 0;
+          padding: 0;
+        }
+        .email-container { 
+          width: 100%; 
+          max-width: 100%; 
+          margin: 0; 
+          background: #181F17;
+          border-radius: 0;
+          overflow: hidden;
+        }
+        .header { 
+          background: linear-gradient(135deg, #1a2e1a 0%, #2d4a2d 50%, #3a5f3a 100%); 
+          padding: 40px 30px;
+          text-align: center;
+          position: relative;
+        }
+        .header::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.1)"/><circle cx="10" cy="60" r="0.5" fill="rgba(255,255,255,0.1)"/><circle cx="90" cy="40" r="0.5" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+          opacity: 0.3;
+        }
+        .logo {
+          width: 120px;
+          height: 60px;
+          background: linear-gradient(45deg, #8bae5a, #b6c948);
+          border-radius: 8px;
+          margin: 0 auto 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: bold;
+          font-size: 18px;
+          color: white;
+          position: relative;
+          z-index: 1;
+        }
+        .header h1 { 
+          color: white; 
+          font-size: 32px; 
+          font-weight: 700;
+          margin-bottom: 10px;
+          position: relative;
+          z-index: 1;
+        }
+        .header p { 
+          color: #e8f5e8; 
+          font-size: 18px;
+          position: relative;
+          z-index: 1;
+        }
+        .content { 
+          padding: 40px 30px; 
+          background: #181F17;
+        }
+        .greeting {
+          font-size: 24px;
+          font-weight: 600;
+          color: #ffffff;
+          margin-bottom: 20px;
+        }
+        .intro-text {
+          font-size: 16px;
+          color: #B6C948;
+          margin-bottom: 30px;
+          line-height: 1.8;
+        }
+        .video-section {
+          background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+          padding: 30px;
+          border-radius: 12px;
+          margin: 30px 0;
+          text-align: center;
+          border: 2px solid #8BAE5A;
+        }
+        .video-thumbnail {
+          position: relative;
+          background: linear-gradient(45deg, #1a2e1a, #2d4a2d);
+          height: 250px;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 20px 0;
+        }
+        .play-button {
+          width: 70px;
+          height: 70px;
+          background: rgba(139, 174, 90, 0.9);
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+        }
+        .play-icon {
+          width: 0;
+          height: 0;
+          border-left: 20px solid white;
+          border-top: 10px solid transparent;
+          border-bottom: 10px solid transparent;
+          margin-left: 4px;
+        }
+        .features-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 15px;
+          margin: 30px 0;
+        }
+        .feature-item {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 15px;
+          background: rgba(139, 174, 90, 0.05);
+          border-left: 4px solid #8BAE5A;
+          border-radius: 0 8px 8px 0;
+        }
+        .feature-icon {
+          width: 30px;
+          height: 30px;
+          background: #8BAE5A;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 16px;
+        }
+        .feature-text {
+          color: #D1D5DB;
+          font-size: 15px;
+        }
+        .feature-title {
+          color: #B6C948;
+          font-weight: 600;
+        }
+        .timeline-section {
+          background: rgba(139, 174, 90, 0.1);
+          padding: 25px;
+          border-radius: 12px;
+          margin: 30px 0;
+          text-align: center;
+        }
+        .timeline-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 10px 0;
+          border-bottom: 1px solid rgba(139, 174, 90, 0.2);
+        }
+        .timeline-item:last-child {
+          border-bottom: none;
+        }
+        .timeline-week {
+          color: #8BAE5A;
+          font-weight: 600;
+        }
+        .timeline-desc {
+          color: #D1D5DB;
+        }
+        .cta-section {
+          text-align: center;
+          margin: 40px 0;
+        }
+        .cta-button {
+          display: inline-block;
+          background: linear-gradient(135deg, #8bae5a 0%, #b6c948 100%);
+          color: white;
+          padding: 18px 36px;
+          text-decoration: none;
+          border-radius: 12px;
+          font-weight: 700;
+          font-size: 18px;
+          transition: all 0.3s ease;
+          box-shadow: 0 8px 25px rgba(139, 174, 90, 0.3);
+        }
+        .cta-button:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 10px 30px rgba(139, 174, 90, 0.4);
+        }
+        .exclusive-note {
+          background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%);
+          border: 1px solid #8BAE5A;
+          border-radius: 12px;
+          padding: 20px;
+          margin: 30px 0;
+          text-align: center;
+        }
+        .footer { 
+          background: #232D1A; 
+          color: #8BAE5A; 
+          padding: 30px;
+          text-align: center;
+          font-size: 14px;
+        }
+        .footer a {
+          color: #8bae5a;
+          text-decoration: none;
+        }
+        @media (max-width: 600px) {
+          .header h1 {
+            font-size: 24px;
+          }
+          .content {
+            padding: 20px;
+          }
+          .video-thumbnail {
+            height: 200px;
+          }
+          .play-button {
+            width: 60px;
+            height: 60px;
+          }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="email-container">
+        <div class="header">
+          <div class="logo">TOP TIER MEN</div>
+          <h1>🎬 EXCLUSIEVE SNEAK PREVIEW</h1>
+          <p>Eerste blik op het Top Tier Men Platform</p>
+        </div>
+        
+        <div class="content">
+          <div class="greeting">Beste ${name},</div>
+          
+          <div class="intro-text">
+            Als onderdeel van onze exclusieve pre-launch community ben je een van de eerste die een kijkje mag nemen achter de schermen van het Top Tier Men platform. Deze sneak preview is alleen beschikbaar voor een selecte groep leden - jij bent een van hen.
+          </div>
+          
+          <div class="video-section">
+            <h3 style="color: #8BAE5A; font-size: 20px; font-weight: 700; margin: 0 0 20px 0;">
+              🎥 PLATFORM SNEAK PREVIEW VIDEO
+            </h3>
+            
+            <div class="video-thumbnail">
+              <div class="play-button">
+                <div class="play-icon"></div>
+              </div>
+            </div>
+            
+            <a href="${videoUrl}" class="cta-button" style="margin: 20px 0; display: inline-block;">
+              🎬 BEKIJK SNEAK PREVIEW VIDEO
+            </a>
+            
+            <p style="color: #B6C948; font-size: 14px; margin: 15px 0 0 0;">
+              ⏱️ Duurtijd: ~3 minuten | 🔒 Exclusief voor pre-launch leden
+            </p>
+          </div>
+          
+          <div style="background: rgba(139, 174, 90, 0.05); border-left: 4px solid #8BAE5A; padding: 25px; margin: 30px 0; border-radius: 0 8px 8px 0;">
+            <h3 style="color: #8BAE5A; font-size: 18px; font-weight: 700; margin: 0 0 20px 0;">
+              🚀 WAT JE IN DE VIDEO ZIET:
+            </h3>
+            
+            <div class="features-grid">
+              <div class="feature-item">
+                <div class="feature-icon">📚</div>
+                <div>
+                  <div class="feature-title">Academy Modules</div>
+                  <div class="feature-text">Complete trainings voor persoonlijke ontwikkeling</div>
+                </div>
+              </div>
+              
+              <div class="feature-item">
+                <div class="feature-icon">🍽️</div>
+                <div>
+                  <div class="feature-title">Voedingsplannen</div>
+                  <div class="feature-text">Gepersonaliseerde voeding voor jouw doelen</div>
+                </div>
+              </div>
+              
+              <div class="feature-item">
+                <div class="feature-icon">💪</div>
+                <div>
+                  <div class="feature-title">Trainingsschema's</div>
+                  <div class="feature-text">Workouts afgestemd op jouw niveau</div>
+                </div>
+              </div>
+              
+              <div class="feature-item">
+                <div class="feature-icon">🤝</div>
+                <div>
+                  <div class="feature-title">Brotherhood</div>
+                  <div class="feature-text">Community van gelijkgestemde top performers</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="timeline-section">
+            <h3 style="color: #B6C948; font-size: 18px; font-weight: 700; margin: 0 0 20px 0;">
+              ⏰ EXCLUSIEVE TOEGANG TIMELINE
+            </h3>
+            
+            <div class="timeline-item">
+              <span class="timeline-week">✅ Week 1:</span>
+              <span class="timeline-desc">Platform Preview Video</span>
+            </div>
+            <div class="timeline-item">
+              <span class="timeline-week">📋 Week 2:</span>
+              <span class="timeline-desc">Academy Content Sneak Peek</span>
+            </div>
+            <div class="timeline-item">
+              <span class="timeline-week">🎯 Week 3:</span>
+              <span class="timeline-desc">Beta Toegang Uitnodiging</span>
+            </div>
+            <div class="timeline-item">
+              <span style="color: #B6C948; font-weight: 700;">🚀 Week 4:</span>
+              <span style="color: #FFFFFF; font-weight: 600;">VOLLEDIGE PLATFORM LAUNCH</span>
+            </div>
+          </div>
+          
+          <div class="cta-section">
+            <a href="${videoUrl}" class="cta-button">
+              🎬 BEKIJK SNEAK PREVIEW NU
+            </a>
+            
+            <p style="color: #8BAE5A; font-size: 14px; margin: 16px 0 0 0;">
+              💡 Tip: Bekijk de video in fullscreen voor de beste ervaring
+            </p>
+          </div>
+          
+          <div class="exclusive-note">
+            <p style="color: #B6C948; font-size: 15px; font-weight: 600; margin: 0 0 8px 0;">
+              🔒 EXCLUSIEVE PRE-LAUNCH TOEGANG
+            </p>
+            <p style="color: #D1D5DB; font-size: 14px; margin: 0;">
+              Deze video is alleen beschikbaar voor pre-launch leden. Deel de link niet met anderen om de exclusiviteit te behouden.
+            </p>
+          </div>
+          
+          <p style="font-size: 16px; color: #D1D5DB; margin: 30px 0 0 0;">
+            Heel binnenkort krijg je toegang tot het volledige platform. Stay tuned voor meer exclusieve content en updates!
+          </p>
+          
+          <p style="font-size: 16px; color: #8BAE5A; font-weight: 600; margin: 24px 0 0 0;">
+            Met vriendelijke groet,<br>
+            Het Top Tier Men Team
+          </p>
+        </div>
+        
+        <div class="footer">
+          <p style="margin: 0 0 16px 0;">
+            © 2024 Top Tier Men - Exclusieve Broederschap voor Top Performers
+          </p>
+          <p style="color: #6B7280; font-size: 12px; margin: 0;">
+            Vragen? Stuur een email naar <a href="mailto:platform@toptiermen.eu">platform@toptiermen.eu</a>
+          </p>
+          <p style="color: #6B7280; font-size: 12px; margin: 8px 0 0 0;">
+            <a href="https://platform.toptiermen.eu">platform.toptiermen.eu</a>
+          </p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `,
+  text: `
+🎬 EXCLUSIEVE SNEAK PREVIEW - Eerste blik op het Top Tier Men Platform
+
+Beste ${name},
+
+Als onderdeel van onze exclusieve pre-launch community ben je een van de eerste die een kijkje mag nemen achter de schermen van het Top Tier Men platform. Deze sneak preview is alleen beschikbaar voor een selecte groep leden - jij bent een van hen.
+
+🎥 PLATFORM SNEAK PREVIEW VIDEO
+Bekijk de video hier: ${videoUrl}
+
+WAT JE IN DE VIDEO ZIET:
+📚 Academy Modules - Complete trainings voor persoonlijke ontwikkeling
+🍽️ Voedingsplannen - Gepersonaliseerde voeding voor jouw doelen  
+💪 Trainingsschema's - Workouts afgestemd op jouw niveau
+🤝 Brotherhood - Community van gelijkgestemde top performers
+
+⏰ EXCLUSIEVE TOEGANG TIMELINE:
+✅ Week 1: Platform Preview Video
+📋 Week 2: Academy Content Sneak Peek
+🎯 Week 3: Beta Toegang Uitnodiging
+🚀 Week 4: VOLLEDIGE PLATFORM LAUNCH
+
+🔒 EXCLUSIEVE PRE-LAUNCH TOEGANG
+Deze video is alleen beschikbaar voor pre-launch leden. Deel de link niet met anderen om de exclusiviteit te behouden.
+
+Heel binnenkort krijg je toegang tot het volledige platform. Stay tuned voor meer exclusieve content en updates!
+
+Met vriendelijke groet,
+Het Top Tier Men Team
+
+---
+© 2024 Top Tier Men - Exclusieve Broederschap voor Top Performers
+Website: https://platform.toptiermen.eu
+Contact: platform@toptiermen.eu
+  `
+});
+
 export const getWelcomeEmailTemplate = (name: string, dashboardUrl: string): EmailTemplate => ({
   subject: 'Welkom bij Top Tier Men - Jouw reis naar succes begint hier',
   html: `

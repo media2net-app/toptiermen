@@ -28,6 +28,9 @@ const INGREDIENT_DATABASE = {
   'Salami': { calories: 336, protein: 20, carbs: 0, fat: 28 },
   'Makreel': { calories: 205, protein: 19, carbs: 0, fat: 14 },
   'Lamsvlees': { calories: 294, protein: 25, carbs: 0, fat: 21 },
+  'Ribeye Steak': { calories: 250, protein: 26, carbs: 0, fat: 15 },
+  'Gerookte Zalm': { calories: 117, protein: 18, carbs: 0, fat: 4 }, // Alias met hoofdletter
+  'Runderlever': { calories: 165, protein: 26, carbs: 4, fat: 4 }, // Orgaanvlees
   
   // Voedingsplan op maat ingrediënten
   'Havermout': { calories: 68, protein: 2.4, carbs: 12, fat: 1.4 },

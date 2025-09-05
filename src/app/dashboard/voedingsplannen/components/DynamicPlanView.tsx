@@ -102,7 +102,7 @@ const calculateDailyTotals = (dayPlan: DayPlan): MealNutrition => {
     dayPlan.diner_snack
   ].filter(Boolean); // Remove undefined meals
 
-  return meals.reduce((totals, meal) => {
+  const totals = meals.reduce((totals, meal) => {
     if (meal && meal.nutrition) {
       totals.calories += meal.nutrition.calories;
       totals.protein += meal.nutrition.protein;
@@ -111,6 +111,14 @@ const calculateDailyTotals = (dayPlan: DayPlan): MealNutrition => {
     }
     return totals;
   }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
+  
+  // Round to prevent floating point precision issues
+  return {
+    calories: Math.round(totals.calories),
+    protein: Math.round(totals.protein * 10) / 10, // Max 1 decimal
+    carbs: Math.round(totals.carbs * 10) / 10, // Max 1 decimal  
+    fat: Math.round(totals.fat * 10) / 10 // Max 1 decimal
+  };
 };
 
 // Function to transform new 6-meal structure to component format
@@ -164,13 +172,21 @@ const transformMealData = (mealData: any): Meal => {
 
   // Calculate nutrition if not already provided
   if (nutritionData.calories === 0) {
-    nutritionData = ingredientsArray.reduce((totals: any, item: any) => {
+    const rawTotals = ingredientsArray.reduce((totals: any, item: any) => {
       totals.calories += item.calories || 0;
       totals.protein += item.protein || 0;
       totals.carbs += item.carbs || 0;
       totals.fat += item.fat || 0;
       return totals;
     }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
+    
+    // Round to prevent floating point precision issues
+    nutritionData = {
+      calories: Math.round(rawTotals.calories),
+      protein: Math.round(rawTotals.protein * 10) / 10, // Max 1 decimal
+      carbs: Math.round(rawTotals.carbs * 10) / 10, // Max 1 decimal
+      fat: Math.round(rawTotals.fat * 10) / 10 // Max 1 decimal
+    };
   }
 
   return { ingredients, nutrition: nutritionData };
@@ -216,6 +232,12 @@ const transformPlanData = (data: any): PlanData => {
     ...data,
     weekPlan: transformedWeekPlan
   };
+};
+
+// Helper function to format nutrition values with max 1 decimal
+const formatNutritionValue = (value: number): string => {
+  if (value === null || value === undefined || isNaN(value)) return '0';
+  return (Math.round(value * 10) / 10).toString();
 };
 
 export default function DynamicPlanView({ planId, planName, userId, onBack }: DynamicPlanViewProps) {
@@ -390,7 +412,7 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
       // If no customized plan, load the default plan data
       console.log('🆕 No customized plan found, loading default plan data');
       
-      const response = await fetch(`/api/nutrition-plan-simple?planId=${planId}`);
+      const response = await fetch(`/api/nutrition-plan-simple?planId=${planId}&userId=${userId}`);
       
       if (!response.ok) {
         const errorData = await response.json();
@@ -581,6 +603,9 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
       'Rookworst': { calories: 300, protein: 20, carbs: 0, fat: 25 },
       'Garnalen': { calories: 106, protein: 20, carbs: 1, fat: 2 },
       'Ribeye': { calories: 250, protein: 26, carbs: 0, fat: 15 },
+      'Ribeye Steak': { calories: 250, protein: 26, carbs: 0, fat: 15 },
+      'Gerookte Zalm': { calories: 117, protein: 18, carbs: 0, fat: 4 }, // Alias met hoofdletter
+      'Runderlever': { calories: 165, protein: 26, carbs: 4, fat: 4 }, // Orgaanvlees
 
       // Voedingsplan op maat ingrediënten
       'Havermout': { calories: 68, protein: 2.4, carbs: 12, fat: 1.4 },
@@ -1091,17 +1116,17 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
           </div>
           <div className="bg-[#181F17] rounded-lg p-4 text-center">
             <h4 className="text-[#8BAE5A] font-semibold mb-1 text-sm">Eiwitten</h4>
-            <p className="text-2xl font-bold text-white">{planData.weeklyAverages.protein}g</p>
+            <p className="text-2xl font-bold text-white">{formatNutritionValue(planData.weeklyAverages.protein)}g</p>
             <p className="text-xs text-gray-400">per dag</p>
           </div>
           <div className="bg-[#181F17] rounded-lg p-4 text-center">
             <h4 className="text-[#8BAE5A] font-semibold mb-1 text-sm">Koolhydraten</h4>
-            <p className="text-2xl font-bold text-white">{planData.weeklyAverages.carbs}g</p>
+            <p className="text-2xl font-bold text-white">{formatNutritionValue(planData.weeklyAverages.carbs)}g</p>
             <p className="text-xs text-gray-400">per dag</p>
           </div>
           <div className="bg-[#181F17] rounded-lg p-4 text-center">
             <h4 className="text-[#8BAE5A] font-semibold mb-1 text-sm">Vetten</h4>
-            <p className="text-2xl font-bold text-white">{planData.weeklyAverages.fat}g</p>
+            <p className="text-2xl font-bold text-white">{formatNutritionValue(planData.weeklyAverages.fat)}g</p>
             <p className="text-xs text-gray-400">per dag</p>
           </div>
         </div>
@@ -1175,15 +1200,15 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
                     </div>
                     <div className="bg-[#181F17] rounded-lg p-4 text-center">
                       <h4 className="text-[#8BAE5A] font-semibold mb-1 text-sm">Eiwitten</h4>
-                      <p className="text-xl font-bold text-white">{dailyTotals.protein}g</p>
+                      <p className="text-xl font-bold text-white">{formatNutritionValue(dailyTotals.protein)}g</p>
                     </div>
                     <div className="bg-[#181F17] rounded-lg p-4 text-center">
                       <h4 className="text-[#8BAE5A] font-semibold mb-1 text-sm">Koolhydraten</h4>
-                      <p className="text-xl font-bold text-white">{dailyTotals.carbs}g</p>
+                      <p className="text-xl font-bold text-white">{formatNutritionValue(dailyTotals.carbs)}g</p>
                     </div>
                     <div className="bg-[#181F17] rounded-lg p-4 text-center">
                       <h4 className="text-[#8BAE5A] font-semibold mb-1 text-sm">Vetten</h4>
-                      <p className="text-xl font-bold text-white">{dailyTotals.fat}g</p>
+                      <p className="text-xl font-bold text-white">{formatNutritionValue(dailyTotals.fat)}g</p>
                     </div>
                   </>
                 );
@@ -1244,19 +1269,19 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
                     <div className="text-center">
                       <p className="text-gray-400">Eiwit</p>
                       <p className="text-white font-semibold">
-                        {(meal as any)?.nutrition?.protein || (meal as any)?.protein || 0}g
+                        {formatNutritionValue((meal as any)?.nutrition?.protein || (meal as any)?.protein || 0)}g
                       </p>
                     </div>
                     <div className="text-center">
                       <p className="text-gray-400">KH</p>
                       <p className="text-white font-semibold">
-                        {(meal as any)?.nutrition?.carbs || (meal as any)?.carbs || 0}g
+                        {formatNutritionValue((meal as any)?.nutrition?.carbs || (meal as any)?.carbs || 0)}g
                       </p>
                     </div>
                     <div className="text-center">
                       <p className="text-gray-400">Vet</p>
                       <p className="text-white font-semibold">
-                        {(meal as any)?.nutrition?.fat || (meal as any)?.fat || 0}g
+                        {formatNutritionValue((meal as any)?.nutrition?.fat || (meal as any)?.fat || 0)}g
                       </p>
                     </div>
                   </div>
