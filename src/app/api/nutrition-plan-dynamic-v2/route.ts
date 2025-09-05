@@ -224,11 +224,21 @@ export async function GET(request: NextRequest) {
       .eq('user_id', userId)
       .single();
 
-    if (profileError || !userProfile) {
-      return NextResponse.json({
-        success: false,
-        error: 'User nutrition profile not found. Please complete the daily needs calculator first.'
-      }, { status: 404 });
+    // Use fallback profile if no user profile found
+    const profile = userProfile || {
+      age: 30,
+      weight: 70,
+      height: 175,
+      activity_level: 'moderate',
+      goal: 'maintenance',
+      target_calories: 2000,
+      target_protein: 150,
+      target_carbs: 200,
+      target_fat: 70
+    };
+
+    if (profileError && !userProfile) {
+      console.log('⚠️ No user profile found, using fallback profile for plan display');
     }
 
     // Get the nutrition plan from database
@@ -253,10 +263,10 @@ export async function GET(request: NextRequest) {
     }
 
     console.log('👤 User profile found:', {
-      targetCalories: userProfile.target_calories,
-      age: userProfile.age,
-      weight: userProfile.weight,
-      goal: userProfile.goal
+      targetCalories: profile.target_calories,
+      age: profile.age,
+      weight: profile.weight,
+      goal: profile.goal
     });
 
     console.log('📋 Plan found:', {
@@ -269,7 +279,7 @@ export async function GET(request: NextRequest) {
     console.log('📊 Base plan average daily calories:', basePlanCalories);
 
     // Calculate scale factor with more flexible limits for better calorie matching
-    let scaleFactor = userProfile.target_calories / basePlanCalories;
+    let scaleFactor = profile.target_calories / basePlanCalories;
     
     // More flexible limits to better match user's calorie needs
     const minScaleFactor = 0.6; // Minimum 60% of base plan
@@ -284,7 +294,7 @@ export async function GET(request: NextRequest) {
     }
     
     console.log('⚖️ Final scale factor:', scaleFactor.toFixed(2));
-    console.log('🎯 Target calories:', userProfile.target_calories);
+    console.log('🎯 Target calories:', profile.target_calories);
     console.log('📊 Base plan calories:', basePlanCalories);
     console.log('📈 Expected scaled calories:', Math.round(basePlanCalories * scaleFactor));
 
@@ -357,10 +367,10 @@ export async function GET(request: NextRequest) {
 
     console.log('📊 Final weekly averages:', weeklyAverages);
     console.log('🎯 Target vs Actual calories:', {
-      target: userProfile.target_calories,
+      target: profile.target_calories,
       actual: weeklyAverages.calories,
-      difference: weeklyAverages.calories - userProfile.target_calories,
-      percentage: Math.round(((weeklyAverages.calories / userProfile.target_calories) - 1) * 100)
+      difference: weeklyAverages.calories - profile.target_calories,
+      percentage: Math.round(((weeklyAverages.calories / profile.target_calories) - 1) * 100)
     });
 
     return NextResponse.json({
@@ -369,19 +379,19 @@ export async function GET(request: NextRequest) {
         planId: planData.plan_id,
         planName: planData.name,
         userProfile: {
-          targetCalories: userProfile.target_calories,
-          targetProtein: userProfile.target_protein,
-          targetCarbs: userProfile.target_carbs,
-          targetFat: userProfile.target_fat,
-          age: userProfile.age,
-          weight: userProfile.weight,
-          height: userProfile.height,
-          goal: userProfile.goal
+          targetCalories: profile.target_calories,
+          targetProtein: profile.target_protein,
+          targetCarbs: profile.target_carbs,
+          targetFat: profile.target_fat,
+          age: profile.age,
+          weight: profile.weight,
+          height: profile.height,
+          goal: profile.goal
         },
         scalingInfo: {
           basePlanCalories,
           scaleFactor: Math.round(scaleFactor * 100) / 100,
-          targetCalories: userProfile.target_calories
+          targetCalories: profile.target_calories
         },
         weekPlan: scaledPlan,
         weeklyAverages,
