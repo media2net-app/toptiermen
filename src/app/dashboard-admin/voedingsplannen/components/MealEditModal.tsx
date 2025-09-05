@@ -71,6 +71,27 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
   const [availableMeals, setAvailableMeals] = useState<DatabaseMeal[]>([]);
   const [showMealSelector, setShowMealSelector] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [ingredientsDatabase, setIngredientsDatabase] = useState<any[]>([]);
+
+  // Load ingredients database once when modal opens
+  useEffect(() => {
+    const loadIngredientsDatabase = async () => {
+      try {
+        const response = await fetch('/api/admin/nutrition-ingredients');
+        const result = await response.json();
+        if (result.success && result.ingredients) {
+          setIngredientsDatabase(result.ingredients);
+          console.log('✅ Ingredients database loaded:', result.ingredients.length, 'ingredients');
+        }
+      } catch (error) {
+        console.error('❌ Error loading ingredients database:', error);
+      }
+    };
+
+    if (isOpen) {
+      loadIngredientsDatabase();
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     console.log('🍽️ MealEditModal: Loading meal data:', meal);
@@ -120,7 +141,10 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
           ingredients: convertedIngredients
         });
       } else {
-        setFormData(meal);
+        setFormData({
+          ...meal,
+          ingredients: meal.ingredients || []
+        });
       }
     } else {
       setFormData({
@@ -162,10 +186,13 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
       // Filter by diet type if planType is specified
       if (planType && planType.includes('Carnivoor')) {
         ingredients = ingredients.filter((ing: any) => 
-          ing.diet_type === 'Carnivoor' || 
-          ['vlees', 'vis', 'eieren', 'zuivel'].includes(ing.category?.toLowerCase())
+          ing.is_carnivore === true || 
+          ['vlees', 'vis', 'eieren', 'zuivel', 'orgaanvlees'].includes(ing.category?.toLowerCase())
         );
         console.log('🥩 Filtering for Carnivore ingredients:', ingredients.length);
+      } else if (planType && planType.includes('Voedingsplan op Maat')) {
+        // For regular diet plans, show all ingredients
+        console.log('🥗 Showing all ingredients for regular diet plan:', ingredients.length);
       }
       
       // Convert ingredients to meal format for compatibility
@@ -174,20 +201,20 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
         name: ingredient.name,
         description: ingredient.description || `${ingredient.name} ingredient`,
         nutrition_info: {
-          calories: ingredient.calories || 0,
-          protein: ingredient.protein || 0,
-          carbs: ingredient.carbs || 0,
-          fat: ingredient.fat || 0
+          calories: ingredient.calories_per_100g || 0,
+          protein: ingredient.protein_per_100g || 0,
+          carbs: ingredient.carbs_per_100g || 0,
+          fat: ingredient.fat_per_100g || 0
         },
         ingredients: [{
           id: ingredient.id,
           name: ingredient.name,
           amount: 100,
           unit: ingredient.unit || 'g',
-          calories: ingredient.calories || 0,
-          protein: ingredient.protein || 0,
-          carbs: ingredient.carbs || 0,
-          fat: ingredient.fat || 0
+          calories: ingredient.calories_per_100g || 0,
+          protein: ingredient.protein_per_100g || 0,
+          carbs: ingredient.carbs_per_100g || 0,
+          fat: ingredient.fat_per_100g || 0
         }],
         prep_time: 5,
         difficulty: 'easy'
@@ -227,7 +254,7 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
   };
 
   const handleIngredientChange = (index: number, field: keyof Ingredient, value: string | number) => {
-    const updatedIngredients = [...formData.ingredients];
+    const updatedIngredients = [...(formData.ingredients || [])];
     updatedIngredients[index] = {
       ...updatedIngredients[index],
       [field]: field === 'amount' ? Number(value) : value
@@ -246,54 +273,57 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
     }));
   };
 
-  // Calculate nutrition values based on ingredients
+  // Calculate nutrition values based on ingredients using loaded database
   const calculateNutritionFromIngredients = (ingredients: Ingredient[]) => {
-    // Carnivor ingredient nutrition database (per 100g or per unit)
-    const nutritionDB: Record<string, { calories: number; protein: number; carbs: number; fat: number }> = {
-      'Ribeye Steak': { calories: 250, protein: 26, carbs: 0, fat: 15 },
-      'Eieren': { calories: 155, protein: 13, carbs: 1, fat: 11 }, // per egg
-      'Roomboter': { calories: 717, protein: 1, carbs: 0, fat: 81 },
-      'Runderlever': { calories: 135, protein: 20, carbs: 4, fat: 4 },
-      'Runderhart': { calories: 112, protein: 17, carbs: 0, fat: 4 },
-      'Gerookte Zalm': { calories: 208, protein: 25, carbs: 0, fat: 12 },
-      'Spek': { calories: 541, protein: 37, carbs: 0, fat: 42 },
-      'Lamskotelet': { calories: 294, protein: 25, carbs: 0, fat: 21 },
-      'Kipfilet': { calories: 165, protein: 31, carbs: 0, fat: 4 },
-      'Honing': { calories: 304, protein: 0, carbs: 82, fat: 0 },
-      'Talow': { calories: 902, protein: 0, carbs: 0, fat: 100 },
-      'Goudse Kaas': { calories: 356, protein: 25, carbs: 2, fat: 27 },
-      'Griekse Yoghurt': { calories: 59, protein: 10, carbs: 4, fat: 0 },
-      'Droge Worst': { calories: 300, protein: 20, carbs: 0, fat: 25 },
-      'Lamsvlees': { calories: 294, protein: 25, carbs: 0, fat: 21 },
-      'Entrecote': { calories: 271, protein: 26, carbs: 0, fat: 18 },
-      'Gans': { calories: 305, protein: 29, carbs: 0, fat: 22 },
-      'Eendenborst': { calories: 337, protein: 19, carbs: 0, fat: 28 },
-      'Zalmfilet': { calories: 208, protein: 25, carbs: 0, fat: 12 },
-      'Kippenlever': { calories: 167, protein: 26, carbs: 1, fat: 6 },
-      'Rundernieren': { calories: 99, protein: 17, carbs: 0, fat: 3 }
-    };
-
     let totalCalories = 0;
     let totalProtein = 0;
     let totalCarbs = 0;
     let totalFat = 0;
 
-    ingredients.forEach(ingredient => {
-      const nutrition = nutritionDB[ingredient.name];
-      if (nutrition) {
-        const multiplier = ingredient.unit === 'stuks' ? ingredient.amount : ingredient.amount / 100;
-        totalCalories += nutrition.calories * multiplier;
-        totalProtein += nutrition.protein * multiplier;
-        totalCarbs += nutrition.carbs * multiplier;
-        totalFat += nutrition.fat * multiplier;
+    // Use loaded ingredients database for nutrition calculation
+    for (const ingredient of ingredients || []) {
+      // Find matching ingredient in database (flexible matching)
+      const dbIngredient = ingredientsDatabase.find((dbIng: any) => 
+        dbIng.name.toLowerCase() === ingredient.name.toLowerCase() ||
+        dbIng.name.toLowerCase().includes(ingredient.name.toLowerCase()) ||
+        ingredient.name.toLowerCase().includes(dbIng.name.toLowerCase())
+      );
+      
+      if (dbIngredient) {
+        // Calculate based on unit type
+        let multiplier = 1;
+        if (ingredient.unit === 'stuks' && ingredient.name.toLowerCase().includes('ei')) {
+          // Special case for eggs: 1 egg = ~50g
+          multiplier = (ingredient.amount * 50) / 100;
+        } else if (ingredient.unit === 'stuks') {
+          // General case for pieces: assume per piece values if available
+          multiplier = ingredient.amount;
+        } else {
+          // Weight-based: calculate per 100g
+          multiplier = ingredient.amount / 100;
+        }
+        
+        totalCalories += (dbIngredient.calories_per_100g || 0) * multiplier;
+        totalProtein += (dbIngredient.protein_per_100g || 0) * multiplier;
+        totalCarbs += (dbIngredient.carbs_per_100g || 0) * multiplier;
+        totalFat += (dbIngredient.fat_per_100g || 0) * multiplier;
+        
+        console.log(`✅ Found nutrition for ${ingredient.name}:`, {
+          amount: ingredient.amount,
+          unit: ingredient.unit,
+          multiplier,
+          calories: (dbIngredient.calories_per_100g || 0) * multiplier
+        });
+      } else {
+        console.warn(`⚠️ No nutrition data found for ingredient: ${ingredient.name}`);
       }
-    });
+    }
 
     return {
       calories: Math.round(totalCalories),
-      protein: Math.round(totalProtein),
-      carbs: Math.round(totalCarbs),
-      fat: Math.round(totalFat)
+      protein: Math.round(totalProtein * 10) / 10,
+      carbs: Math.round(totalCarbs * 10) / 10,
+      fat: Math.round(totalFat * 10) / 10
     };
   };
 
@@ -309,7 +339,7 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
       fat: 0 
     };
     
-    const updatedIngredients = [...formData.ingredients, newIngredient];
+    const updatedIngredients = [...(formData.ingredients || []), newIngredient];
     const nutrition = calculateNutritionFromIngredients(updatedIngredients);
     
     setFormData(prev => ({
@@ -336,7 +366,7 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
       fat: dbIngredient.fat || 0
     };
     
-    const updatedIngredients = [...formData.ingredients, newIngredient];
+    const updatedIngredients = [...(formData.ingredients || []), newIngredient];
     const nutrition = calculateNutritionFromIngredients(updatedIngredients);
     
     setFormData(prev => ({
@@ -352,7 +382,7 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
   };
 
   const removeIngredient = (index: number) => {
-    const newIngredients = formData.ingredients.filter((_, i) => i !== index);
+    const newIngredients = (formData.ingredients || []).filter((_, i) => i !== index);
     const nutrition = calculateNutritionFromIngredients(newIngredients);
     setFormData(prev => ({
       ...prev,
@@ -370,7 +400,7 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
       return;
     }
 
-    if (formData.ingredients.length === 0) {
+    if (!formData.ingredients || formData.ingredients.length === 0) {
       alert('Voeg minimaal één ingrediënt toe');
       return;
     }
@@ -569,7 +599,7 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
             </div>
             
             <div className="space-y-3">
-              {formData.ingredients.map((ingredient, index) => (
+              {(formData.ingredients || []).map((ingredient, index) => (
                 <div key={index} className="flex items-center gap-3">
                   <input
                     type="text"
@@ -607,7 +637,7 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
                 </div>
               ))}
               
-              {formData.ingredients.length === 0 && (
+              {(!formData.ingredients || formData.ingredients.length === 0) && (
                 <div className="text-[#B6C948] text-sm text-center py-4">
                   Nog geen ingrediënten toegevoegd
                 </div>
@@ -643,7 +673,7 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
                   {filteredMeals.slice(0, 20).map((dbMeal, index) => (
                     <button
                       key={index}
-                      onClick={() => addIngredientFromDatabase(dbMeal.ingredients[0])}
+                      onClick={() => addIngredientFromDatabase(dbMeal.ingredients?.[0] || dbMeal)}
                       className="w-full text-left px-3 py-2 text-sm bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] rounded hover:bg-[#3A4D23] transition-colors"
                     >
                       <div className="font-medium">{dbMeal.name}</div>

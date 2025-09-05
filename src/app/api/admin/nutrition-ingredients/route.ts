@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
     
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
-    const limit = parseInt(searchParams.get('limit') || '100');
+    const limit = parseInt(searchParams.get('limit') || '1000');
     const offset = parseInt(searchParams.get('offset') || '0');
 
     let query = supabaseAdmin

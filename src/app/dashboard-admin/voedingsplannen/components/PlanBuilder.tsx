@@ -84,26 +84,43 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
     }
   };
 
-  // Standaard profiel: Man 30 jaar, 90kg, 192cm
-  const getStandardProfile = (fitnessGoal: 'droogtrainen' | 'spiermassa' | 'onderhoud' = 'spiermassa') => {
-    // Realistische waarden gebaseerd op Top Tier Men standaarden
+  // Standaard profiel: Man 40 jaar, 100kg, 190cm, Licht actief
+  const getStandardProfile = (fitnessGoal: 'droogtrainen' | 'spiermassa' | 'onderhoud' = 'spiermassa', isCarnivore: boolean = false) => {
+    const standardWeight = 100; // kg - standaard man profiel
+    const standardAge = 40; // jaar
+    const standardHeight = 190; // cm
+    
+    // Rick's gewenste eiwit factoren:
+    // - Normale plannen: 2.2x gewicht  
+    // - Carnivoor plannen: 3.0x gewicht
+    const proteinFactor = isCarnivore ? 3.0 : 2.2;
+    const baseProtein = Math.round(standardWeight * proteinFactor);
+    
+    // Calculate BMR using Mifflin-St Jeor equation for men
+    const bmr = 10 * standardWeight + 6.25 * standardHeight - 5 * standardAge + 5;
+    
+    // Activity multiplier for "licht actief" (light active: 1-3x sport per week)
+    const activityMultiplier = 1.375;
+    const tdee = bmr * activityMultiplier;
+    
+    // Realistische waarden gebaseerd op TDEE berekening
     const configs = {
       droogtrainen: {
-        calories: 1900, // Agressief deficit voor droogtrainen
-        protein: 180,   // Hoog eiwit voor spierretentie
-        carbs: 20,      // Zeer laag voor carnivoor/keto
+        calories: Math.round(tdee * 0.8), // 20% deficit voor droogtrainen
+        protein: baseProtein, // 2.2x of 3.0x gewicht afhankelijk van plan type
+        carbs: isCarnivore ? 5 : 80,      // Zeer laag voor carnivoor, matig voor normaal
         description: 'Vetverlies met behoud van spiermassa'
       },
       spiermassa: {
-        calories: 2800, // Surplus voor groei
-        protein: 180,   // Hoog eiwit voor groei
-        carbs: 300,     // Meer carbs voor energie
+        calories: Math.round(tdee * 1.15), // 15% surplus voor groei
+        protein: baseProtein, // 2.2x of 3.0x gewicht afhankelijk van plan type
+        carbs: isCarnivore ? 10 : 350,     // Minimaal voor carnivoor, hoog voor normaal
         description: 'Spiergroei en krachttoename'
       },
       onderhoud: {
-        calories: 2400, // Onderhoudscalorieën
-        protein: 160,   // Matig eiwit
-        carbs: 200,     // Gematigde carbs
+        calories: Math.round(tdee), // Onderhoudscalorieën = TDEE
+        protein: baseProtein, // 2.2x of 3.0x gewicht afhankelijk van plan type
+        carbs: isCarnivore ? 8 : 200,     // Laag voor carnivoor, gematigde voor normaal
         description: 'Behoud van lichaamscompositie'
       }
     };
@@ -123,7 +140,7 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
 
   const [formData, setFormData] = useState<NutritionPlan>({
     name: '',
-    ...getStandardProfile('spiermassa'), // Default naar spiermassa
+    ...getStandardProfile('spiermassa', false), // Default naar spiermassa, niet-carnivoor
     duration_weeks: 12,
     difficulty: 'beginner',
     goal: 'spiermassa',
@@ -269,7 +286,8 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
       
       // Get macro targets from database or calculate based on plan type
       const mealTargets = (plan as any).meals;
-      const standardProfile = getStandardProfile(fitnessGoal);
+      const isCarnivore = plan.name?.toLowerCase().includes('carnivoor') || false;
+      const standardProfile = getStandardProfile(fitnessGoal, isCarnivore);
       
       setFormData({
         id: plan.id,
@@ -390,7 +408,8 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
         updated.goal = fitnessGoal;
         
         // Set macro's based on fitness goal using standard profile
-        const standardProfile = getStandardProfile(fitnessGoal);
+        const isCarnivore = value.toLowerCase().includes('carnivoor');
+        const standardProfile = getStandardProfile(fitnessGoal, isCarnivore);
         updated.target_calories = standardProfile.target_calories;
         updated.target_protein = standardProfile.target_protein;
         updated.target_carbs = standardProfile.target_carbs;
@@ -834,7 +853,8 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
                   <h4 className="text-[#8BAE5A] font-semibold">Macro Overzicht</h4>
                   <button
                     onClick={() => {
-                      const standardProfile = getStandardProfile(formData.fitness_goal || 'spiermassa');
+                      const isCarnivore = formData.name?.toLowerCase().includes('carnivoor') || false;
+                      const standardProfile = getStandardProfile(formData.fitness_goal || 'spiermassa', isCarnivore);
                       setFormData(prev => ({
                         ...prev,
                         target_calories: standardProfile.target_calories,

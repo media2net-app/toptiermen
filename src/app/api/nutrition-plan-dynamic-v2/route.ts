@@ -37,6 +37,8 @@ const INGREDIENT_DATABASE = {
   'Mager Rundergehakt': { calories: 220, protein: 22, carbs: 0, fat: 14 },
   'Rundergehakt (20% vet)': { calories: 272, protein: 19, carbs: 0, fat: 21 },
   'Gerookte zalm': { calories: 117, protein: 18, carbs: 0, fat: 4 },
+  'Gerookte Zalm': { calories: 117, protein: 18, carbs: 0, fat: 4 }, // Alias met hoofdletter
+  'Runderlever': { calories: 165, protein: 26, carbs: 4, fat: 4 }, // Orgaanvlees
   'Goudse kaas': { calories: 356, protein: 25, carbs: 2, fat: 27 },
   'Roomboter': { calories: 717, protein: 0.9, carbs: 0.1, fat: 81 },
   'Droge worst': { calories: 336, protein: 20, carbs: 0, fat: 28 },
@@ -330,9 +332,15 @@ export async function GET(request: NextRequest) {
       goal: planData.goal
     });
 
-    // Calculate base plan calories from weekly_plan
-    const basePlanCalories = calculatePlanTotalCalories(planData.meals.weekly_plan || planData.meals);
-    console.log('📊 Base plan average daily calories:', basePlanCalories);
+    // Use plan's designed target calories, fallback to calculated if not available
+    const planTargetCalories = planData.meals.target_calories || planData.target_calories;
+    const calculatedPlanCalories = calculatePlanTotalCalories(planData.meals.weekly_plan || planData.meals);
+    
+    const basePlanCalories = planTargetCalories || calculatedPlanCalories;
+    
+    console.log('📊 Plan target calories:', planTargetCalories);
+    console.log('📊 Calculated plan calories:', calculatedPlanCalories);
+    console.log('📊 Using base plan calories:', basePlanCalories);
 
     // Calculate scale factor with more flexible limits for better calorie matching
     let scaleFactor = profile.target_calories / basePlanCalories;

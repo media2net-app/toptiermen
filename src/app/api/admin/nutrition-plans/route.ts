@@ -8,8 +8,7 @@ export async function GET(request: NextRequest) {
     // First try to get from nutrition_plans table
     let { data: plans, error } = await supabaseAdmin
       .from('nutrition_plans')
-      .select('*')
-      .order('name');
+      .select('*');
 
     // If no plans in nutrition_plans, try nutrition_weekplans table
     if (!plans || plans.length === 0) {
@@ -17,8 +16,7 @@ export async function GET(request: NextRequest) {
       
       const { data: weekplans, error: weekplansError } = await supabaseAdmin
         .from('nutrition_weekplans')
-        .select('*')
-        .order('name');
+        .select('*');
         
       if (weekplansError) {
         console.error('❌ Error fetching nutrition weekplans:', weekplansError);
@@ -116,8 +114,52 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    console.log('✅ Nutrition plans fetched successfully:', plans?.length || 0, 'plans');
-    return NextResponse.json({ success: true, plans: plans || [] });
+    // Custom sorting order: Carnivoor plans first (droogtrainen, balans, spiermassa), then regular plans in same order
+    const sortOrder = [
+      'carnivoor-droogtrainen',
+      'carnivoor-balans', 
+      'carnivoor-spiermassa',
+      'voedingsplan-droogtrainen',
+      'voedingsplan-balans',
+      'voedingsplan-spiermassa'
+    ];
+    
+    if (plans && plans.length > 0) {
+      plans.sort((a, b) => {
+        const aIndex = sortOrder.indexOf(a.plan_id);
+        const bIndex = sortOrder.indexOf(b.plan_id);
+        
+        // If both plans are in the sort order, sort by their index
+        if (aIndex !== -1 && bIndex !== -1) {
+          return aIndex - bIndex;
+        }
+        
+        // If only one is in the sort order, prioritize it
+        if (aIndex !== -1) return -1;
+        if (bIndex !== -1) return 1;
+        
+        // If neither is in the sort order, fall back to alphabetical sorting
+        return (a.name || '').localeCompare(b.name || '');
+      });
+      
+      console.log('🔄 Plans sorted in custom order:', plans.map(p => p.plan_id || p.name));
+    }
+
+    // Transform plans to expose weekly_plan at top level for frontend compatibility
+    const transformedPlans = plans?.map(plan => {
+      const transformed = { ...plan };
+      
+      // If weekly_plan is nested in meals, bring it to top level
+      if (plan.meals && plan.meals.weekly_plan && !plan.weekly_plan) {
+        transformed.weekly_plan = plan.meals.weekly_plan;
+        console.log(`🔄 Exposed weekly_plan for plan: ${plan.name}`);
+      }
+      
+      return transformed;
+    }) || [];
+
+    console.log('✅ Nutrition plans fetched successfully:', transformedPlans?.length || 0, 'plans');
+    return NextResponse.json({ success: true, plans: transformedPlans });
   } catch (error) {
     console.error('❌ Error in nutrition plans API:', error);
     return NextResponse.json({ error: `Internal server error: ${error instanceof Error ? error.message : 'Unknown error'}` }, { status: 500 });

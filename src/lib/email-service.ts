@@ -899,6 +899,213 @@ class EmailService {
           Website: https://platform.toptiermen.eu
           Contact: platform@toptiermen.eu
         `
+      },
+      sneak_preview: {
+        subject: '🎬 EXCLUSIEVE SNEAK PREVIEW - Eerste blik op het Top Tier Men Platform',
+        html: `
+          <div style="background: linear-gradient(135deg, #0F1419 0%, #1F2D17 100%); min-height: 100vh; padding: 40px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+            <div style="max-width: 600px; margin: 0 auto; background: #0F1419; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
+              
+              <!-- Header -->
+              <div style="background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%); padding: 40px 30px; text-align: center;">
+                <img src="https://platform.toptiermen.eu/logo_white-full.svg" alt="Top Tier Men Logo" style="width: 200px; height: auto; margin-bottom: 20px;">
+                <h1 style="color: white; font-size: 28px; font-weight: 700; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                  🎬 EXCLUSIEVE SNEAK PREVIEW
+                </h1>
+                <p style="color: rgba(255,255,255,0.95); font-size: 16px; margin: 12px 0 0 0; font-weight: 500;">
+                  Eerste blik op het Top Tier Men Platform
+                </p>
+              </div>
+
+              <!-- Content -->
+              <div style="padding: 40px 30px; color: #E5E7EB;">
+                <p style="font-size: 18px; color: #8BAE5A; font-weight: 600; margin: 0 0 24px 0;">
+                  Beste \${variables.name && variables.name.trim() !== '' ? variables.name : ''},
+                </p>
+                
+                <p style="font-size: 16px; line-height: 1.6; margin: 0 0 24px 0;">
+                  Als onderdeel van onze exclusieve pre-launch community ben je een van de eerste die een kijkje mag nemen achter de schermen van het Top Tier Men platform. Deze sneak preview is alleen beschikbaar voor een selecte groep leden - jij bent een van hen.
+                </p>
+
+                <!-- Video Section -->
+                <div style="background: rgba(139, 174, 90, 0.1); border: 2px solid #8BAE5A; border-radius: 16px; padding: 30px; margin: 30px 0; text-align: center;">
+                  <h3 style="color: #8BAE5A; font-size: 20px; font-weight: 700; margin: 0 0 20px 0;">
+                    🎥 PLATFORM SNEAK PREVIEW VIDEO
+                  </h3>
+                  
+                  <!-- Video Placeholder/Thumbnail -->
+                  <div style="position: relative; background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%); border-radius: 12px; overflow: hidden; margin: 20px 0;">
+                    <div style="width: 100%; height: 300px; background: linear-gradient(45deg, #232D1A, #3A4D23); display: flex; align-items: center; justify-content: center; position: relative;">
+                      <!-- Play Button -->
+                      <div style="width: 80px; height: 80px; background: rgba(139, 174, 90, 0.9); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 8px 25px rgba(139, 174, 90, 0.3);">
+                        <div style="width: 0; height: 0; border-left: 24px solid white; border-top: 12px solid transparent; border-bottom: 12px solid transparent; margin-left: 6px;"></div>
+                      </div>
+                      
+                      <!-- Video overlay text -->
+                      <div style="position: absolute; bottom: 15px; left: 15px; right: 15px;">
+                        <p style="color: white; font-size: 14px; font-weight: 600; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.7);">
+                          🎯 Ontdek de Academy, Voedingsplannen, Trainingsschema's en Community Features
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- CTA Button for Video -->
+                  <a href="\${variables.videoUrl || 'https://platform.toptiermen.eu/preview'}" 
+                     style="display: inline-block; background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%); color: white; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 16px; margin: 20px 0; box-shadow: 0 6px 20px rgba(139, 174, 90, 0.3); transition: all 0.3s ease;">
+                    🎬 BEKIJK SNEAK PREVIEW VIDEO
+                  </a>
+                  
+                  <p style="color: #B6C948; font-size: 14px; margin: 15px 0 0 0; line-height: 1.5;">
+                    ⏱️ Duurtijd: ~3 minuten | 🔒 Exclusief voor pre-launch leden
+                  </p>
+                </div>
+
+                <!-- Features Preview -->
+                <div style="background: rgba(139, 174, 90, 0.05); border-left: 4px solid #8BAE5A; padding: 25px; margin: 30px 0; border-radius: 0 8px 8px 0;">
+                  <h3 style="color: #8BAE5A; font-size: 18px; font-weight: 700; margin: 0 0 16px 0;">
+                    🚀 WAT JE IN DE VIDEO ZIET:
+                  </h3>
+                  
+                  <div style="display: grid; gap: 16px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                      <div style="width: 24px; height: 24px; background: #8BAE5A; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px;">📚</div>
+                      <p style="margin: 0; color: #D1D5DB; font-size: 15px; line-height: 1.4;">
+                        <strong style="color: #B6C948;">Academy Modules</strong> - Complete trainings voor persoonlijke ontwikkeling
+                      </p>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                      <div style="width: 24px; height: 24px; background: #8BAE5A; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px;">🍽️</div>
+                      <p style="margin: 0; color: #D1D5DB; font-size: 15px; line-height: 1.4;">
+                        <strong style="color: #B6C948;">Voedingsplannen</strong> - Gepersonaliseerde voeding voor jouw doelen
+                      </p>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                      <div style="width: 24px; height: 24px; background: #8BAE5A; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px;">💪</div>
+                      <p style="margin: 0; color: #D1D5DB; font-size: 15px; line-height: 1.4;">
+                        <strong style="color: #B6C948;">Trainingsschema's</strong> - Workouts afgestemd op jouw niveau
+                      </p>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                      <div style="width: 24px; height: 24px; background: #8BAE5A; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px;">🤝</div>
+                      <p style="margin: 0; color: #D1D5DB; font-size: 15px; line-height: 1.4;">
+                        <strong style="color: #B6C948;">Brotherhood</strong> - Community van gelijkgestemde top performers
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Timeline Info -->
+                <div style="text-align: center; background: rgba(139, 174, 90, 0.1); padding: 25px; border-radius: 12px; margin: 30px 0;">
+                  <h3 style="color: #B6C948; font-size: 18px; font-weight: 700; margin: 0 0 16px 0;">
+                    ⏰ EXCLUSIEVE TOEGANG TIMELINE
+                  </h3>
+                  
+                  <div style="display: grid; gap: 12px; text-align: left; max-width: 400px; margin: 0 auto;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(139, 174, 90, 0.2);">
+                      <span style="color: #8BAE5A; font-weight: 600;">✅ Week 1:</span>
+                      <span style="color: #D1D5DB;">Platform Preview Video</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(139, 174, 90, 0.2);">
+                      <span style="color: #8BAE5A; font-weight: 600;">📋 Week 2:</span>
+                      <span style="color: #D1D5DB;">Academy Content Sneak Peek</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(139, 174, 90, 0.2);">
+                      <span style="color: #8BAE5A; font-weight: 600;">🎯 Week 3:</span>
+                      <span style="color: #D1D5DB;">Beta Toegang Uitnodiging</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0;">
+                      <span style="color: #B6C948; font-weight: 700;">🚀 Week 4:</span>
+                      <span style="color: #FFFFFF; font-weight: 600;">VOLLEDIGE PLATFORM LAUNCH</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Call to Action -->
+                <div style="text-align: center; margin: 40px 0;">
+                  <a href="\${variables.videoUrl || 'https://platform.toptiermen.eu/preview'}" 
+                     style="display: inline-block; background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%); color: white; padding: 18px 36px; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 18px; box-shadow: 0 8px 25px rgba(139, 174, 90, 0.3); transition: all 0.3s ease;">
+                    🎬 BEKIJK SNEAK PREVIEW NU
+                  </a>
+                  
+                  <p style="color: #8BAE5A; font-size: 14px; margin: 16px 0 0 0; line-height: 1.5;">
+                    💡 Tip: Bekijk de video in fullscreen voor de beste ervaring
+                  </p>
+                </div>
+
+                <!-- Exclusive Note -->
+                <div style="background: linear-gradient(135deg, #232D1A 0%, #3A4D23 100%); border: 1px solid #8BAE5A; border-radius: 12px; padding: 20px; margin: 30px 0; text-align: center;">
+                  <p style="color: #B6C948; font-size: 15px; font-weight: 600; margin: 0 0 8px 0;">
+                    🔒 EXCLUSIEVE PRE-LAUNCH TOEGANG
+                  </p>
+                  <p style="color: #D1D5DB; font-size: 14px; margin: 0; line-height: 1.5;">
+                    Deze video is alleen beschikbaar voor pre-launch leden. Deel de link niet met anderen om de exclusiviteit te behouden.
+                  </p>
+                </div>
+
+                <p style="font-size: 16px; line-height: 1.6; margin: 30px 0 0 0; color: #D1D5DB;">
+                  Heel binnenkort krijg je toegang tot het volledige platform. Stay tuned voor meer exclusieve content en updates!
+                </p>
+                
+                <p style="font-size: 16px; line-height: 1.6; margin: 24px 0 0 0; color: #8BAE5A; font-weight: 600;">
+                  Met vriendelijke groet,<br>
+                  Het Top Tier Men Team
+                </p>
+              </div>
+
+              <!-- Footer -->
+              <div style="background: #232D1A; padding: 30px; text-align: center; border-top: 1px solid #3A4D23;">
+                <p style="color: #8BAE5A; font-size: 14px; margin: 0 0 16px 0;">
+                  © 2024 Top Tier Men - Exclusieve Broederschap voor Top Performers
+                </p>
+                <p style="color: #6B7280; font-size: 12px; margin: 0;">
+                  Vragen? Stuur een email naar <a href="mailto:platform@toptiermen.eu" style="color: #8BAE5A; text-decoration: none;">platform@toptiermen.eu</a>
+                </p>
+                <p style="color: #6B7280; font-size: 12px; margin: 8px 0 0 0;">
+                  <a href="https://platform.toptiermen.eu" style="color: #8BAE5A; text-decoration: none;">platform.toptiermen.eu</a>
+                </p>
+              </div>
+            </div>
+          </div>
+        `,
+        text: \`
+🎬 EXCLUSIEVE SNEAK PREVIEW - Eerste blik op het Top Tier Men Platform
+
+Beste \${variables.name && variables.name.trim() !== '' ? variables.name : ''},
+
+Als onderdeel van onze exclusieve pre-launch community ben je een van de eerste die een kijkje mag nemen achter de schermen van het Top Tier Men platform. Deze sneak preview is alleen beschikbaar voor een selecte groep leden - jij bent een van hen.
+
+🎥 PLATFORM SNEAK PREVIEW VIDEO
+Bekijk de video hier: \${variables.videoUrl || 'https://platform.toptiermen.eu/preview'}
+
+WAT JE IN DE VIDEO ZIET:
+📚 Academy Modules - Complete trainings voor persoonlijke ontwikkeling
+🍽️ Voedingsplannen - Gepersonaliseerde voeding voor jouw doelen  
+💪 Trainingsschema's - Workouts afgestemd op jouw niveau
+🤝 Brotherhood - Community van gelijkgestemde top performers
+
+⏰ EXCLUSIEVE TOEGANG TIMELINE:
+✅ Week 1: Platform Preview Video
+📋 Week 2: Academy Content Sneak Peek
+🎯 Week 3: Beta Toegang Uitnodiging
+🚀 Week 4: VOLLEDIGE PLATFORM LAUNCH
+
+🔒 EXCLUSIEVE PRE-LAUNCH TOEGANG
+Deze video is alleen beschikbaar voor pre-launch leden. Deel de link niet met anderen om de exclusiviteit te behouden.
+
+Heel binnenkort krijg je toegang tot het volledige platform. Stay tuned voor meer exclusieve content en updates!
+
+Met vriendelijke groet,
+Het Top Tier Men Team
+
+---
+© 2024 Top Tier Men - Exclusieve Broederschap voor Top Performers
+Website: https://platform.toptiermen.eu
+Contact: platform@toptiermen.eu
+        \`
       }
     };
 

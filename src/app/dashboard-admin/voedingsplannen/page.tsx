@@ -8,7 +8,8 @@ import {
   ChartBarIcon,
   BoltIcon,
   LightBulbIcon,
-  UserGroupIcon
+  UserGroupIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 import { createClient } from '@supabase/supabase-js';
 import PlanBuilder from './components/PlanBuilder';
@@ -369,7 +370,7 @@ export default function AdminVoedingsplannenPage() {
       }
 
       console.log('✅ Food item saved successfully:', result);
-      await fetchAllData();
+      await fetchFoodItems();
       setShowFoodItemModal(false);
       setSelectedFoodItem(null);
       
@@ -385,12 +386,13 @@ export default function AdminVoedingsplannenPage() {
     }
 
     try {
-      const response = await fetch('/api/admin/nutrition-ingredients', {
+      console.log('🗑️ Deleting ingredient with ID:', foodItemId);
+      
+      const response = await fetch(`/api/admin/nutrition-ingredients?id=${foodItemId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ id: foodItemId })
+        }
       });
 
       const result = await response.json();
@@ -402,7 +404,7 @@ export default function AdminVoedingsplannenPage() {
       }
 
       console.log('✅ Food item deleted successfully:', result);
-      await fetchAllData();
+      await fetchFoodItems();
       
     } catch (error) {
       console.error('❌ Error deleting food item:', error);
@@ -510,12 +512,36 @@ export default function AdminVoedingsplannenPage() {
             <MagnifyingGlassIcon className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
             <input
               type="text"
-              placeholder="Zoeken..."
+              placeholder="Zoeken naar ingrediënten, voedingsplannen, maaltijden..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white placeholder-gray-400 focus:border-[#8BAE5A] focus:outline-none"
+              className="w-full pl-10 pr-12 py-2 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white placeholder-gray-400 focus:border-[#8BAE5A] focus:outline-none"
             />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                className="absolute right-3 top-3 w-5 h-5 text-gray-400 hover:text-[#8BAE5A] transition-colors"
+                title="Wis zoekterm"
+              >
+                <XMarkIcon className="w-5 h-5" />
+              </button>
+            )}
           </div>
+          {searchTerm && (
+            <div className="mt-2 text-sm text-gray-400">
+              Zoekresultaten voor: <span className="text-[#8BAE5A] font-medium">"{searchTerm}"</span>
+              {activeTab === 'ingredienten' && filteredFoodItems.length === 0 && (
+                <span className="text-red-400 ml-2">
+                  • Geen ingrediënten gevonden. <button 
+                    onClick={() => setSearchTerm('')} 
+                    className="text-[#8BAE5A] underline hover:text-[#B6C948]"
+                  >
+                    Wis zoekopdracht
+                  </button> om alle ingrediënten te zien.
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Content based on active tab */}
@@ -623,56 +649,136 @@ export default function AdminVoedingsplannenPage() {
             {filteredFoodItems.length === 0 ? (
               <div className="text-center py-12">
                 <BoltIcon className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-300">Geen ingrediënten</h3>
-                <p className="mt-1 text-sm text-gray-400">
-                  Voeg je eerste ingrediënt toe om te beginnen.
-                </p>
+                {searchTerm ? (
+                  <>
+                    <h3 className="mt-2 text-sm font-medium text-gray-300">Geen ingrediënten gevonden</h3>
+                    <p className="mt-1 text-sm text-gray-400">
+                      Er zijn geen ingrediënten die overeenkomen met "{searchTerm}".
+                    </p>
+                    <button
+                      onClick={() => setSearchTerm('')}
+                      className="mt-3 px-4 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#B6C948] transition-colors font-medium"
+                    >
+                      Toon alle ingrediënten ({foodItems.length})
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <h3 className="mt-2 text-sm font-medium text-gray-300">Geen ingrediënten</h3>
+                    <p className="mt-1 text-sm text-gray-400">
+                      Voeg je eerste ingrediënt toe om te beginnen.
+                    </p>
+                  </>
+                )}
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                 {filteredFoodItems.map((item) => (
-                   <AdminCard key={item.id} className="p-6">
-                     <h3 className="text-lg font-semibold text-[#8BAE5A] mb-2">{item.name}</h3>
-                     <p className="text-gray-300 text-sm mb-2">Categorie: {item.category}</p>
-                     <p className="text-gray-300 text-sm mb-4">
-                       {item.calories_per_100g} kcal per 100g
-                     </p>
-                     
-                     <div className="grid grid-cols-2 gap-4 text-sm mb-4">
-                       <div>
-                         <span className="text-gray-400">Eiwit:</span>
-                         <span className="ml-2 font-medium text-white">{item.protein_per_100g}g</span>
-                       </div>
-                       <div>
-                         <span className="text-gray-400">Koolhydraten:</span>
-                         <span className="ml-2 font-medium text-white">{item.carbs_per_100g}g</span>
-                       </div>
-                       <div>
-                         <span className="text-gray-400">Vet:</span>
-                         <span className="ml-2 font-medium text-white">{item.fat_per_100g}g</span>
-                       </div>
-                     </div>
-                     
-                     <div className="flex space-x-2">
-                       <AdminButton
-                         onClick={() => handleEditFoodItem(item)}
-                         variant="secondary"
-                         size="sm"
-                         icon={<PencilIcon className="w-4 h-4" />}
-                       >
-                         Bewerken
-                       </AdminButton>
-                       <AdminButton
-                         onClick={() => handleDeleteFoodItem(item.id)}
-                         variant="danger"
-                         size="sm"
-                         icon={<TrashIcon className="w-4 h-4" />}
-                       >
-                         Verwijderen
-                       </AdminButton>
-                     </div>
-                   </AdminCard>
-                 ))}
+              <div className="bg-[#232D1A] rounded-lg border border-[#3A4D23]/40 overflow-hidden">
+                {/* Desktop Table Header */}
+                <div className="hidden lg:grid grid-cols-12 gap-4 p-4 bg-[#1A2313] border-b border-[#3A4D23]/40 text-sm font-semibold text-[#8BAE5A]">
+                  <div className="col-span-3">Naam</div>
+                  <div className="col-span-2">Categorie</div>
+                  <div className="col-span-1">Kcal/100g</div>
+                  <div className="col-span-1">Eiwit</div>
+                  <div className="col-span-1">KH</div>
+                  <div className="col-span-1">Vet</div>
+                  <div className="col-span-3">Acties</div>
+                </div>
+                
+                {/* Table Body */}
+                <div className="divide-y divide-[#3A4D23]/40">
+                  {filteredFoodItems.map((item) => (
+                    <div key={item.id}>
+                      {/* Desktop View */}
+                      <div className="hidden lg:grid grid-cols-12 gap-4 p-4 hover:bg-[#1A2313] transition-colors">
+                        <div className="col-span-3">
+                          <h3 className="text-white font-medium">{item.name}</h3>
+                        </div>
+                        <div className="col-span-2">
+                          <span className="text-gray-300 text-sm capitalize">{item.category}</span>
+                        </div>
+                        <div className="col-span-1 text-center">
+                          <span className="text-white font-medium">{item.calories_per_100g || 0}</span>
+                        </div>
+                        <div className="col-span-1 text-center">
+                          <span className="text-white">{item.protein_per_100g || 0}g</span>
+                        </div>
+                        <div className="col-span-1 text-center">
+                          <span className="text-white">{item.carbs_per_100g || 0}g</span>
+                        </div>
+                        <div className="col-span-1 text-center">
+                          <span className="text-white">{item.fat_per_100g || 0}g</span>
+                        </div>
+                        <div className="col-span-3">
+                          <div className="flex gap-2">
+                            <AdminButton
+                              onClick={() => handleEditFoodItem(item)}
+                              variant="secondary"
+                              size="sm"
+                              icon={<PencilIcon className="w-4 h-4" />}
+                            >
+                              Bewerken
+                            </AdminButton>
+                            <AdminButton
+                              onClick={() => handleDeleteFoodItem(item.id)}
+                              variant="danger"
+                              size="sm"
+                              icon={<TrashIcon className="w-4 h-4" />}
+                            >
+                              Verwijderen
+                            </AdminButton>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Mobile/Tablet View */}
+                      <div className="lg:hidden p-4 hover:bg-[#1A2313] transition-colors">
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <h3 className="text-white font-medium text-lg">{item.name}</h3>
+                            <p className="text-gray-300 text-sm capitalize">{item.category}</p>
+                          </div>
+                          <div className="flex gap-2">
+                            <AdminButton
+                              onClick={() => handleEditFoodItem(item)}
+                              variant="secondary"
+                              size="sm"
+                              icon={<PencilIcon className="w-4 h-4" />}
+                            >
+                              Bewerken
+                            </AdminButton>
+                            <AdminButton
+                              onClick={() => handleDeleteFoodItem(item.id)}
+                              variant="danger"
+                              size="sm"
+                              icon={<TrashIcon className="w-4 h-4" />}
+                            >
+                              Verwijderen
+                            </AdminButton>
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-4 gap-4 text-sm">
+                          <div className="text-center">
+                            <div className="text-gray-400 text-xs">Kcal/100g</div>
+                            <div className="text-white font-medium">{item.calories_per_100g || 0}</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-gray-400 text-xs">Eiwit</div>
+                            <div className="text-white">{item.protein_per_100g || 0}g</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-gray-400 text-xs">KH</div>
+                            <div className="text-white">{item.carbs_per_100g || 0}g</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-gray-400 text-xs">Vet</div>
+                            <div className="text-white">{item.fat_per_100g || 0}g</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -779,8 +885,9 @@ export default function AdminVoedingsplannenPage() {
           <FoodItemModal
             isOpen={showFoodItemModal}
             foodItem={selectedFoodItem}
-            onSave={() => {
-              fetchAllData();
+            onSave={async () => {
+              console.log('🔄 Refreshing ingredient data after save...');
+              await fetchFoodItems();
               setShowFoodItemModal(false);
               setSelectedFoodItem(null);
             }}

@@ -74,13 +74,13 @@ export async function POST(request: NextRequest) {
     // Adjust calories based on goal
     let targetCalories = tdee;
     if (goal === 'cut') {
-      targetCalories = tdee - 400; // 400 calorie deficit
+      targetCalories = tdee * 0.8; // 20% deficit for cutting
     } else if (goal === 'bulk') {
-      targetCalories = tdee + 300; // 300 calorie surplus
+      targetCalories = tdee * 1.15; // 15% surplus for bulking
     }
 
     // Calculate macros
-    const targetProtein = Math.round(weight * 1.8); // 1.8g per kg bodyweight
+    const targetProtein = Math.round(weight * 2.2); // 2.2g per kg bodyweight (updated per Rick's request)
     const targetFat = Math.round(weight * 1.0); // 1g per kg bodyweight
     const proteinCalories = targetProtein * 4;
     const fatCalories = targetFat * 9;
@@ -114,7 +114,11 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('Error saving nutrition profile:', error);
-      return NextResponse.json({ error: 'Failed to save nutrition profile' }, { status: 500 });
+      return NextResponse.json({ 
+        error: 'Failed to save nutrition profile', 
+        details: error.message,
+        code: error.code
+      }, { status: 500 });
     }
 
     return NextResponse.json({ 

@@ -80,6 +80,7 @@ export default function VoedingsplannenPage() {
     age: '',
     weight: '',
     height: '',
+    activityLevel: '', // sedentary, light, moderate, active
     goal: '' // droogtrainen, behoud, spiermassa
   });
 
@@ -171,11 +172,24 @@ export default function VoedingsplannenPage() {
           age: data.profile.age,
           weight: data.profile.weight,
           height: data.profile.height,
-          goal: data.profile.goal === 'cut' ? 'droogtrainen' : data.profile.goal === 'bulk' ? 'spiermassa' : 'behoud'
+          goal: data.profile.goal === 'cut' ? 'droogtrainen' : data.profile.goal === 'bulk' ? 'spiermassa' : 'behoud',
+          activityLevel: data.profile.activity_level
         };
         console.log('✅ Profile found, setting user profile:', profile);
         setUserNutritionProfile(profile);
         setShowRequiredIntake(false);
+        
+        // Pre-populate calculator form with existing data
+        setCalculatorData({
+          age: data.profile.age?.toString() || '',
+          weight: data.profile.weight?.toString() || '',
+          height: data.profile.height?.toString() || '',
+          activityLevel: data.profile.activity_level || 'moderate', // Default to moderate if not set
+          goal: data.profile.goal === 'cut' ? 'droogtrainen' : 
+                data.profile.goal === 'bulk' ? 'spiermassa' : 
+                data.profile.goal === 'maintenance' ? 'behoud' : ''
+        });
+        console.log('📝 Calculator form pre-populated with existing profile data');
         
         // Also fetch the active nutrition plan
         try {
@@ -232,67 +246,74 @@ export default function VoedingsplannenPage() {
     checkUserNutritionProfile();
   };
 
-  const calculateNutrition = () => {
-    const { age, weight, height, goal } = calculatorData;
+  const calculateNutrition = async () => {
+    const { age, weight, height, activityLevel, goal } = calculatorData;
     
     console.log('🧮 Calculating nutrition with data:', calculatorData);
     
-    if (!age || !weight || !height || !goal) {
+    if (!age || !weight || !height || !activityLevel || !goal) {
       toast.error('Vul alle velden in om je dagelijkse behoefte te berekenen');
       return;
     }
 
-    // Calculate BMR using Mifflin-St Jeor equation (for men)
-    const bmr = 10 * parseFloat(weight) + 6.25 * parseFloat(height) - 5 * parseFloat(age) + 5;
-    
-    // Activity factor (assuming moderate activity)
-    const activityFactor = 1.55;
-    const tdee = bmr * activityFactor;
+    try {
+      // Map frontend goal to API goal format
+      const apiGoal = goal === 'droogtrainen' ? 'cut' : 
+                     goal === 'spiermassa' ? 'bulk' : 'maintenance';
 
-    // Adjust based on goal
-    let calories = tdee;
-    let protein, carbs, fats;
+      // Use the API for calculation
+      const response = await fetch('/api/nutrition-profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user?.id,
+          age: parseInt(age),
+          height: parseInt(height),
+          weight: parseFloat(weight),
+          gender: 'male', // Assuming male for now, could be added to form
+          activityLevel,
+          goal: apiGoal
+        }),
+      });
 
-    switch (goal) {
-      case 'droogtrainen':
-        calories = tdee * 0.8; // 20% deficit
-        protein = parseFloat(weight) * 2.2; // High protein for cutting
-        fats = parseFloat(weight) * 0.8;
-        carbs = (calories - (protein * 4) - (fats * 9)) / 4;
-        break;
-      case 'behoud':
-        calories = tdee; // Maintenance
-        protein = parseFloat(weight) * 1.8;
-        fats = parseFloat(weight) * 1.0;
-        carbs = (calories - (protein * 4) - (fats * 9)) / 4;
-        break;
-      case 'spiermassa':
-        calories = tdee * 1.1; // 10% surplus
-        protein = parseFloat(weight) * 2.0;
-        fats = parseFloat(weight) * 1.2;
-        carbs = (calories - (protein * 4) - (fats * 9)) / 4;
-        break;
-      default:
-        return;
+      if (!response.ok) {
+        throw new Error('Failed to calculate nutrition');
+      }
+
+      const data = await response.json();
+      
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to calculate nutrition');
+      }
+
+      const profile = {
+        dailyCalories: data.calculations.targetCalories,
+        protein: data.calculations.targetProtein,
+        carbs: data.calculations.targetCarbs,
+        fats: data.calculations.targetFat,
+        age: parseInt(age),
+        weight: parseFloat(weight),
+        height: parseFloat(height),
+        goal,
+        activityLevel,
+        bmr: data.calculations.bmr,
+        tdee: data.calculations.tdee
+      };
+
+      console.log('💾 Profile calculated via API:', profile);
+      setUserNutritionProfile(profile);
+      setShowRequiredIntake(false);
+      // Reset calculator data
+      setCalculatorData({ age: '', weight: '', height: '', activityLevel: '', goal: '' });
+      
+      toast.success('Dagelijkse behoefte berekend! 📊');
+      
+    } catch (error) {
+      console.error('Error calculating nutrition:', error);
+      toast.error('Fout bij berekenen van dagelijkse behoefte');
     }
-
-    const profile = {
-      dailyCalories: Math.round(calories),
-      protein: Math.round(protein),
-      carbs: Math.round(Math.max(0, carbs)),
-      fats: Math.round(fats),
-      age: parseInt(age),
-      weight: parseFloat(weight),
-      height: parseFloat(height),
-      goal
-    };
-
-    console.log('💾 Saving profile locally and to API:', profile);
-    setUserNutritionProfile(profile);
-    setShowRequiredIntake(false);
-    // Reset calculator data
-    setCalculatorData({ age: '', weight: '', height: '', goal: '' });
-    saveNutritionProfile(profile);
   };
 
   const saveNutritionProfile = async (profile: any) => {
@@ -495,41 +516,71 @@ export default function VoedingsplannenPage() {
               <div className="bg-[#232D1A] rounded-2xl p-8 border border-[#3A4D23]">
                 <div className="grid md:grid-cols-2 gap-6 mb-6">
                   <div>
-                    <label className="block text-white font-semibold mb-2">Leeftijd</label>
+                    <label className="block text-white font-semibold mb-2">
+                      Leeftijd <span className="text-red-400">*</span>
+                    </label>
                     <input
                       type="number"
                       placeholder="bijv. 30"
                       value={calculatorData.age}
                       onChange={(e) => setCalculatorData(prev => ({ ...prev, age: e.target.value }))}
                       className="w-full px-4 py-3 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#8BAE5A]"
+                      required
                     />
                   </div>
                   <div>
-                    <label className="block text-white font-semibold mb-2">Gewicht (kg)</label>
+                    <label className="block text-white font-semibold mb-2">
+                      Gewicht (kg) <span className="text-red-400">*</span>
+                    </label>
                     <input
                       type="number"
                       placeholder="bijv. 80"
                       value={calculatorData.weight}
                       onChange={(e) => setCalculatorData(prev => ({ ...prev, weight: e.target.value }))}
                       className="w-full px-4 py-3 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#8BAE5A]"
+                      required
                     />
                   </div>
                   <div>
-                    <label className="block text-white font-semibold mb-2">Lengte (cm)</label>
+                    <label className="block text-white font-semibold mb-2">
+                      Lengte (cm) <span className="text-red-400">*</span>
+                    </label>
                     <input
                       type="number"
                       placeholder="bijv. 180"
                       value={calculatorData.height}
                       onChange={(e) => setCalculatorData(prev => ({ ...prev, height: e.target.value }))}
                       className="w-full px-4 py-3 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-[#8BAE5A]"
+                      required
                     />
                   </div>
                   <div>
-                    <label className="block text-white font-semibold mb-2">Doel</label>
+                    <label className="block text-white font-semibold mb-2">
+                      Dagelijkse Activiteit <span className="text-red-400">*</span>
+                    </label>
+                    <select
+                      value={calculatorData.activityLevel}
+                      onChange={(e) => setCalculatorData(prev => ({ ...prev, activityLevel: e.target.value }))}
+                      className="w-full px-4 py-3 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A]"
+                      required
+                    >
+                      <option value="">Selecteer je activiteitsniveau</option>
+                      <option value="sedentary">Zittend werk (kantoor, weinig beweging)</option>
+                      <option value="light">Licht actief (1-3x sport per week)</option>
+                      <option value="moderate">Matig actief (3-5x sport per week)</option>
+                      <option value="active">Zeer actief (6-7x sport per week)</option>
+                      <option value="very_active">Extreem actief (2x/dag sport, fysiek werk)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-white font-semibold mb-2">
+                      Doel <span className="text-red-400">*</span>
+                    </label>
                     <select
                       value={calculatorData.goal}
                       onChange={(e) => setCalculatorData(prev => ({ ...prev, goal: e.target.value }))}
                       className="w-full px-4 py-3 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A]"
+                      required
                     >
                       <option value="">Selecteer je doel</option>
                       <option value="droogtrainen">Droogtrainen (Vetverbranding)</option>
@@ -544,7 +595,18 @@ export default function VoedingsplannenPage() {
                     onClick={calculateNutrition}
                     className="px-8 py-4 bg-[#8BAE5A] text-[#232D1A] rounded-xl hover:bg-[#B6C948] transition-colors font-bold text-lg"
                   >
-                    {userNutritionProfile ? 'Update Mijn Dagelijkse Behoefte' : 'Bereken Mijn Dagelijkse Behoefte'}
+{(() => {
+                      // Check if we have filled form data that differs from existing profile  
+                      const hasFormData = calculatorData.age || calculatorData.weight || calculatorData.height || calculatorData.activityLevel || calculatorData.goal;
+                      
+                      if (userNutritionProfile && hasFormData) {
+                        return '🔄 Update Mijn Dagelijkse Behoefte';
+                      } else if (userNutritionProfile) {
+                        return '📝 Wijzig Mijn Gegevens';
+                      } else {
+                        return '🧮 Bereken Mijn Dagelijkse Behoefte';
+                      }
+                    })()}
                   </button>
                 </div>
               </div>
