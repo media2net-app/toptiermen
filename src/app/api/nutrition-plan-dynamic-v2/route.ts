@@ -238,7 +238,7 @@ export async function GET(request: NextRequest) {
     };
 
     if (profileError && !userProfile) {
-      console.log('⚠️ No user profile found, using fallback profile for plan display');
+      console.log('⚠️ No user profile found, using fallback profile for plan display', new Date().toISOString());
     }
 
     // Get the nutrition plan from database
