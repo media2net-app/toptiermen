@@ -149,14 +149,28 @@ const transformPlanData = (data: any): PlanData => {
   Object.keys(data.weekPlan).forEach(day => {
     const dayData = data.weekPlan[day];
     
-    transformedWeekPlan[day] = {
-      ontbijt: transformMealData(dayData.ontbijt),
-      lunch: transformMealData(dayData.lunch),
-      diner: transformMealData(dayData.diner),
-      ontbijt_snack: transformMealData(dayData.ochtend_snack),
-      lunch_snack: transformMealData(dayData.lunch_snack),
-      diner_snack: transformMealData(dayData.avond_snack)
-    };
+    if (dayData) {
+      transformedWeekPlan[day] = {
+        ontbijt: transformMealData(dayData.ontbijt),
+        lunch: transformMealData(dayData.lunch),
+        diner: transformMealData(dayData.diner),
+        ontbijt_snack: transformMealData(dayData.ochtend_snack),
+        lunch_snack: transformMealData(dayData.lunch_snack),
+        diner_snack: transformMealData(dayData.avond_snack)
+      };
+    }
+  });
+
+  // Ensure all 7 days exist with default empty meals if missing
+  const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+  days.forEach(day => {
+    if (!transformedWeekPlan[day]) {
+      transformedWeekPlan[day] = {
+        ontbijt: { ingredients: [], nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0 } },
+        lunch: { ingredients: [], nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0 } },
+        diner: { ingredients: [], nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0 } }
+      };
+    }
   });
 
   return {
@@ -198,9 +212,11 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
         
         if (customizedData.success && customizedData.hasCustomizedPlan) {
           console.log('📋 Found customized plan, loading...');
-          setPlanData(customizedData.customizedPlan);
+          // Transform the customized plan data as well
+          const transformedCustomizedData = transformPlanData(customizedData.customizedPlan);
+          setPlanData(transformedCustomizedData);
           setHasUnsavedChanges(false); // It's saved
-          console.log('✅ Customized plan loaded');
+          console.log('✅ Customized plan loaded and transformed');
           setLoading(false);
           return;
         }
@@ -753,6 +769,28 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
   }
 
   const selectedDayPlan = planData.weekPlan[selectedDay];
+
+  if (!selectedDayPlan) {
+    return (
+      <div className="w-full">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center">
+            <button
+              onClick={onBack}
+              className="flex items-center text-[#8BAE5A] hover:text-[#B6C948] transition-colors mr-6"
+            >
+              <ArrowLeftIcon className="w-5 h-5 mr-2" />
+              Terug naar overzicht
+            </button>
+          </div>
+        </div>
+        <div className="text-center py-12">
+          <h2 className="text-2xl font-bold text-white mb-4">Geen data beschikbaar</h2>
+          <p className="text-gray-400">Er zijn geen maaltijden beschikbaar voor {DAYS_NL[selectedDay]}.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full">
