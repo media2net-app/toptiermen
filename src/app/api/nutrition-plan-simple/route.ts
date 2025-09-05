@@ -69,7 +69,11 @@ export async function GET(request: NextRequest) {
       age: 30,
       weight: 70,
       height: 175,
-      goal: 'maintenance'
+      goal: 'maintenance',
+      target_calories: 2000,
+      target_protein: 150,
+      target_carbs: 200,
+      target_fat: 70
     };
 
     if (userId) {
@@ -82,6 +86,54 @@ export async function GET(request: NextRequest) {
 
       if (!profileError && profileData) {
         console.log('✅ User profile found, using real data');
+        
+        // Calculate macros if not stored in database (fallback for legacy profiles)
+        let targetCalories = profileData.target_calories;
+        let targetProtein = profileData.target_protein;
+        let targetCarbs = profileData.target_carbs;
+        let targetFat = profileData.target_fat;
+        
+        if (!targetCalories || !targetProtein || !targetCarbs || !targetFat) {
+          console.log('🔧 Calculating missing nutrition targets from profile data');
+          
+          // Calculate BMR using Mifflin-St Jeor equation
+          let bmr = 0;
+          if (profileData.gender === 'male') {
+            bmr = 10 * profileData.weight + 6.25 * profileData.height - 5 * profileData.age + 5;
+          } else {
+            bmr = 10 * profileData.weight + 6.25 * profileData.height - 5 * profileData.age - 161;
+          }
+
+          // Activity multipliers
+          const activityMultipliers: { [key: string]: number } = {
+            sedentary: 1.2,
+            light: 1.375,
+            moderate: 1.55,
+            active: 1.725,
+            very_active: 1.9
+          };
+
+          // Calculate TDEE
+          const tdee = bmr * (activityMultipliers[profileData.activity_level] || 1.375);
+
+          // Adjust calories based on goal
+          targetCalories = tdee;
+          if (profileData.goal === 'cut') {
+            targetCalories = tdee * 0.8; // 20% deficit for cutting
+          } else if (profileData.goal === 'bulk') {
+            targetCalories = tdee * 1.15; // 15% surplus for bulking
+          }
+
+          // Calculate macros
+          targetProtein = Math.round(profileData.weight * 2.2); // 2.2g per kg bodyweight
+          targetFat = Math.round(profileData.weight * 1.0); // 1g per kg bodyweight
+          const proteinCalories = targetProtein * 4;
+          const fatCalories = targetFat * 9;
+          targetCarbs = Math.round((targetCalories - proteinCalories - fatCalories) / 4);
+          
+          targetCalories = Math.round(targetCalories);
+        }
+        
         userProfile = {
           age: profileData.age,
           weight: profileData.weight,
@@ -89,10 +141,10 @@ export async function GET(request: NextRequest) {
           goal: profileData.goal === 'cut' ? 'droogtrainen' : 
                 profileData.goal === 'bulk' ? 'spiermassa' : 
                 profileData.goal === 'maintenance' ? 'onderhoud' : profileData.goal,
-          target_calories: profileData.target_calories,
-          target_protein: profileData.target_protein,
-          target_carbs: profileData.target_carbs,
-          target_fat: profileData.target_fat
+          target_calories: targetCalories,
+          target_protein: targetProtein,
+          target_carbs: targetCarbs,
+          target_fat: targetFat
         };
       } else {
         console.log('⚠️ User profile not found, using default values');
