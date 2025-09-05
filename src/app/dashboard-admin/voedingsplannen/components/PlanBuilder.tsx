@@ -123,7 +123,6 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
 
   const [formData, setFormData] = useState<NutritionPlan>({
     name: '',
-    description: '',
     ...getStandardProfile('spiermassa'), // Default naar spiermassa
     duration_weeks: 12,
     difficulty: 'beginner',
@@ -443,19 +442,19 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
         // Map meal types from UI to database format
         const dayMeals: any = {};
         
-        if (dayPlan.meals.ontbijt?.ingredients?.length > 0) {
+        if (dayPlan.meals.ontbijt?.ingredients && dayPlan.meals.ontbijt.ingredients.length > 0) {
           dayMeals.ontbijt = dayPlan.meals.ontbijt.ingredients;
         }
-        if (dayPlan.meals.snack1?.ingredients?.length > 0) {
+        if (dayPlan.meals.snack1?.ingredients && dayPlan.meals.snack1.ingredients.length > 0) {
           dayMeals.ochtend_snack = dayPlan.meals.snack1.ingredients;
         }
-        if (dayPlan.meals.lunch?.ingredients?.length > 0) {
+        if (dayPlan.meals.lunch?.ingredients && dayPlan.meals.lunch.ingredients.length > 0) {
           dayMeals.lunch = dayPlan.meals.lunch.ingredients;
         }
-        if (dayPlan.meals.snack2?.ingredients?.length > 0) {
+        if (dayPlan.meals.snack2?.ingredients && dayPlan.meals.snack2.ingredients.length > 0) {
           dayMeals.lunch_snack = dayPlan.meals.snack2.ingredients;
         }
-        if (dayPlan.meals.diner?.ingredients?.length > 0) {
+        if (dayPlan.meals.diner?.ingredients && dayPlan.meals.diner.ingredients.length > 0) {
           dayMeals.diner = dayPlan.meals.diner.ingredients;
         }
         
@@ -498,10 +497,10 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
       // Calculate weekly averages
       const daysCount = Object.keys(dailyTotals).length || 7;
       const weeklyAverages = {
-        calories: Math.round(Object.values(dailyTotals).reduce((sum: number, day: any) => sum + day.calories, 0) / daysCount),
-        protein: Math.round((Object.values(dailyTotals).reduce((sum: number, day: any) => sum + day.protein, 0) / daysCount) * 10) / 10,
-        carbs: Math.round((Object.values(dailyTotals).reduce((sum: number, day: any) => sum + day.carbs, 0) / daysCount) * 10) / 10,
-        fat: Math.round((Object.values(dailyTotals).reduce((sum: number, day: any) => sum + day.fat, 0) / daysCount) * 10) / 10
+        calories: Math.round((Object.values(dailyTotals) as any[]).reduce((sum: number, day: any) => sum + day.calories, 0) / daysCount),
+        protein: Math.round(((Object.values(dailyTotals) as any[]).reduce((sum: number, day: any) => sum + day.protein, 0) / daysCount) * 10) / 10,
+        carbs: Math.round(((Object.values(dailyTotals) as any[]).reduce((sum: number, day: any) => sum + day.carbs, 0) / daysCount) * 10) / 10,
+        fat: Math.round(((Object.values(dailyTotals) as any[]).reduce((sum: number, day: any) => sum + day.fat, 0) / daysCount) * 10) / 10
       };
       
       // Prepare final form data with converted structure
