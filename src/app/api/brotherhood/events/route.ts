@@ -2,65 +2,58 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 
-// GET - Fetch user's challenges
+// GET - Fetch brotherhood events
 export async function GET(request: NextRequest) {
   try {
     const supabase = createRouteHandlerClient({ cookies });
     
-    // Get current user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const { searchParams } = new URL(request.url);
+    const groupId = searchParams.get('group_id');
     const status = searchParams.get('status');
-    const type = searchParams.get('type');
 
     let query = supabase
-      .from('challenges')
+      .from('brotherhood_events')
       .select(`
         *,
-        challenge_categories (
+        brotherhood_groups (
           name,
-          icon,
-          color
+          category
         )
       `)
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
+      .eq('is_public', true)
+      .order('date', { ascending: true });
+
+    if (groupId) {
+      query = query.eq('group_id', groupId);
+    }
 
     if (status) {
       query = query.eq('status', status);
     }
 
-    if (type) {
-      query = query.eq('type', type);
-    }
-
-    const { data: challenges, error } = await query;
+    const { data: events, error } = await query;
 
     if (error) {
-      console.error('Error fetching challenges:', error);
+      console.error('Error fetching brotherhood events:', error);
       return NextResponse.json({ 
-        error: 'Failed to fetch challenges' 
+        error: 'Failed to fetch events' 
       }, { status: 500 });
     }
 
     return NextResponse.json({ 
       success: true, 
-      challenges 
+      events 
     });
 
   } catch (error) {
-    console.error('Error in challenges GET:', error);
+    console.error('Error in brotherhood events GET:', error);
     return NextResponse.json({ 
       error: 'Internal server error' 
     }, { status: 500 });
   }
 }
 
-// POST - Create new challenge
+// POST - Create new brotherhood event
 export async function POST(request: NextRequest) {
   try {
     const supabase = createRouteHandlerClient({ cookies });
@@ -75,62 +68,61 @@ export async function POST(request: NextRequest) {
     const {
       title,
       type,
-      total_days,
+      date,
+      time,
+      location,
       description,
-      category,
-      difficulty = 'medium',
-      shared = false,
-      accountability_partner,
-      icon,
-      badge
+      host,
+      max_attendees = 20,
+      group_id,
+      is_public = true,
+      agenda = [],
+      doelgroep,
+      leerdoelen = []
     } = body;
 
     // Validate required fields
-    if (!title || !type || !total_days) {
+    if (!title || !type || !date) {
       return NextResponse.json({ 
-        error: 'Missing required fields: title, type, total_days' 
+        error: 'Missing required fields: title, type, date' 
       }, { status: 400 });
     }
 
-    // Calculate end date
-    const startDate = new Date();
-    const endDate = new Date();
-    endDate.setDate(startDate.getDate() + total_days);
-
-    const { data: challenge, error } = await supabase
-      .from('challenges')
+    const { data: event, error } = await supabase
+      .from('brotherhood_events')
       .insert({
-        user_id: user.id,
         title,
         type,
-        total_days,
+        date,
+        time,
+        location,
         description,
-        category,
-        difficulty,
-        shared,
-        accountability_partner,
-        icon,
-        badge,
-        start_date: startDate.toISOString().split('T')[0],
-        end_date: endDate.toISOString().split('T')[0]
+        host,
+        host_id: user.id,
+        max_attendees,
+        group_id,
+        is_public,
+        agenda,
+        doelgroep,
+        leerdoelen
       })
       .select()
       .single();
 
     if (error) {
-      console.error('Error creating challenge:', error);
+      console.error('Error creating brotherhood event:', error);
       return NextResponse.json({ 
-        error: 'Failed to create challenge' 
+        error: 'Failed to create event' 
       }, { status: 500 });
     }
 
     return NextResponse.json({ 
       success: true, 
-      challenge 
+      event 
     });
 
   } catch (error) {
-    console.error('Error in challenges POST:', error);
+    console.error('Error in brotherhood events POST:', error);
     return NextResponse.json({ 
       error: 'Internal server error' 
     }, { status: 500 });

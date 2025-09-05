@@ -107,7 +107,7 @@ const initialChallenges = [
 ];
 
 export default function MijnChallenges() {
-  const [challenges, setChallenges] = useState(initialChallenges);
+  const [challenges, setChallenges] = useState([]);
   const [filter, setFilter] = useState('actief');
   const [showChallengeManager, setShowChallengeManager] = useState(false);
   const [showAddChallenge, setShowAddChallenge] = useState(false);
@@ -119,9 +119,10 @@ export default function MijnChallenges() {
     shared: false 
   });
   const [mainGoal, setMainGoal] = useState('Financiële Vrijheid');
-  const [activeChallenges, setActiveChallenges] = useState(2);
-  const [completedChallenges, setCompletedChallenges] = useState(1);
-  const [totalChallenges, setTotalChallenges] = useState(4);
+  const [activeChallenges, setActiveChallenges] = useState(0);
+  const [completedChallenges, setCompletedChallenges] = useState(0);
+  const [totalChallenges, setTotalChallenges] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   // Load main goal from localStorage
   useEffect(() => {
@@ -129,65 +130,167 @@ export default function MijnChallenges() {
     if (savedGoal) setMainGoal(savedGoal);
   }, []);
 
-  const startChallenge = (challengeId: number) => {
-    setChallenges(challenges.map(challenge => {
-      if (challenge.id === challengeId) {
-        return { 
-          ...challenge, 
-          status: 'active',
-          startDate: new Date().toISOString().split('T')[0],
-          currentDay: 1,
-          progress: 0
-        };
+  // Load challenges from database
+  useEffect(() => {
+    loadChallenges();
+  }, []);
+
+  const loadChallenges = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/challenges');
+      const result = await response.json();
+      
+      if (result.success) {
+        setChallenges(result.challenges);
+        
+        // Calculate stats
+        const active = result.challenges.filter(c => c.status === 'active').length;
+        const completed = result.challenges.filter(c => c.status === 'completed').length;
+        const total = result.challenges.length;
+        
+        setActiveChallenges(active);
+        setCompletedChallenges(completed);
+        setTotalChallenges(total);
+      } else {
+        console.error('Failed to load challenges:', result.error);
+        // Fallback to initial challenges if database fails
+        setChallenges(initialChallenges);
+        setActiveChallenges(2);
+        setCompletedChallenges(1);
+        setTotalChallenges(4);
       }
-      return challenge;
-    }));
-    toast.success('🎯 Challenge gestart! Succes met je uitdaging!');
+    } catch (error) {
+      console.error('Error loading challenges:', error);
+      // Fallback to initial challenges if API fails
+      setChallenges(initialChallenges);
+      setActiveChallenges(2);
+      setCompletedChallenges(1);
+      setTotalChallenges(4);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const completeChallenge = (challengeId: number) => {
-    setChallenges(challenges.map(challenge => {
-      if (challenge.id === challengeId) {
-        return { 
-          ...challenge, 
+  const startChallenge = async (challengeId: string) => {
+    try {
+      const response = await fetch(`/api/challenges/${challengeId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          status: 'active',
+          current_day: 1,
+          progress: 0,
+          streak: 1
+        })
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        setChallenges(challenges.map(challenge => {
+          if (challenge.id === challengeId) {
+            return { 
+              ...challenge, 
+              status: 'active',
+              start_date: new Date().toISOString().split('T')[0],
+              current_day: 1,
+              progress: 0,
+              streak: 1
+            };
+          }
+          return challenge;
+        }));
+        toast.success('🎯 Challenge gestart! Succes met je uitdaging!');
+        loadChallenges(); // Reload to get updated stats
+      } else {
+        toast.error('Fout bij starten van challenge');
+      }
+    } catch (error) {
+      console.error('Error starting challenge:', error);
+      toast.error('Fout bij starten van challenge');
+    }
+  };
+
+  const completeChallenge = async (challengeId: string) => {
+    try {
+      const challenge = challenges.find(c => c.id === challengeId);
+      if (!challenge) return;
+
+      const response = await fetch(`/api/challenges/${challengeId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           status: 'completed',
           progress: 100,
-          currentDay: challenge.totalDays
-        };
+          current_day: challenge.total_days
+        })
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        setChallenges(challenges.map(challenge => {
+          if (challenge.id === challengeId) {
+            return { 
+              ...challenge, 
+              status: 'completed',
+              progress: 100,
+              current_day: challenge.total_days
+            };
+          }
+          return challenge;
+        }));
+        toast.success('🏆 Challenge voltooid! Je hebt jezelf overtroffen!');
+        loadChallenges(); // Reload to get updated stats
+      } else {
+        toast.error('Fout bij voltooien van challenge');
       }
-      return challenge;
-    }));
-    toast.success('🏆 Challenge voltooid! Je hebt jezelf overtroffen!');
+    } catch (error) {
+      console.error('Error completing challenge:', error);
+      toast.error('Fout bij voltooien van challenge');
+    }
   };
 
-  const addChallenge = () => {
+  const addChallenge = async () => {
     if (!newChallenge.title.trim()) return;
     
-    const challenge = {
-      id: Date.now(),
-      title: newChallenge.title,
-      type: newChallenge.type,
-      status: 'pending',
-      progress: 0,
-      totalDays: parseInt(newChallenge.duration.split(' ')[0]),
-      currentDay: 0,
-      icon: '🎯',
-      badge: 'Custom Badge',
-      difficulty: newChallenge.difficulty,
-      shared: newChallenge.shared,
-      accountabilityPartner: null,
-      startDate: '',
-      endDate: '',
-      streak: 0,
-      description: 'Een persoonlijke uitdaging om jezelf te verbeteren.'
-    };
-    
-    setChallenges([...challenges, challenge]);
-    setNewChallenge({ title: '', type: 'Fysieke Uitdagingen', difficulty: 'Medium', duration: '21 dagen', shared: false });
-    setShowAddChallenge(false);
-    
-    if (newChallenge.shared) {
-      toast('🔥 Je challenge is gedeeld met de Brotherhood!');
+    try {
+      const totalDays = parseInt(newChallenge.duration.split(' ')[0]);
+      
+      const response = await fetch('/api/challenges', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: newChallenge.title,
+          type: newChallenge.type,
+          total_days: totalDays,
+          description: 'Een persoonlijke uitdaging om jezelf te verbeteren.',
+          category: newChallenge.type,
+          difficulty: newChallenge.difficulty,
+          shared: newChallenge.shared,
+          icon: '🎯',
+          badge: 'Custom Badge'
+        })
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        setNewChallenge({ title: '', type: 'Fysieke Uitdagingen', difficulty: 'Medium', duration: '21 dagen', shared: false });
+        setShowAddChallenge(false);
+        toast.success('🎯 Nieuwe challenge toegevoegd!');
+        loadChallenges(); // Reload to get updated data
+        
+        if (newChallenge.shared) {
+          toast('🔥 Je challenge is gedeeld met de Brotherhood!');
+        }
+      } else {
+        toast.error('Fout bij toevoegen van challenge');
+      }
+    } catch (error) {
+      console.error('Error adding challenge:', error);
+      toast.error('Fout bij toevoegen van challenge');
     }
   };
 
