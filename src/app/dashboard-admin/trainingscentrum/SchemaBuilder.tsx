@@ -91,15 +91,17 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
             day_number: day.day_number,
             name: day.name,
             description: day.description,
-            exercises: day.exercises?.map((exercise: any) => ({
-              id: exercise.id,
-              exercise_id: exercise.exercise_id,
-              exercise_name: exercise.exercise_name,
-              sets: exercise.sets,
-              reps: exercise.reps,
-              rest_time: exercise.rest_time,
-              order_index: exercise.order_index
-            })) || []
+            exercises: (day.exercises || [])
+              .sort((a: any, b: any) => (a.order_index ?? 0) - (b.order_index ?? 0))
+              .map((exercise: any) => ({
+                id: exercise.id,
+                exercise_id: exercise.exercise_id,
+                exercise_name: exercise.exercise_name,
+                sets: exercise.sets,
+                reps: exercise.reps,
+                rest_time: exercise.rest_time,
+                order_index: exercise.order_index ?? 0
+              }))
           })) || [],
           status: schema.status
         };
