@@ -56,9 +56,9 @@ export async function GET(request: NextRequest) {
           name: 'Carnivoor - Onderhoud',
           description: 'Carnivoor dieet voor behoud van huidige lichaamscompositie. Gebalanceerde macro-verdeling binnen carnivoor kader.',
           target_calories: 2860,
-          target_protein: 322, // 45% van calories (2860 * 0.45 / 4)
+          target_protein: 250, // 35% van calories (2860 * 0.35 / 4)
           target_carbs: 36, // 5% van calories (2860 * 0.05 / 4)
-          target_fat: 159, // 50% van calories (2860 * 0.50 / 9)
+          target_fat: 191, // 60% van calories (2860 * 0.60 / 9)
           duration_weeks: 12,
           difficulty: 'intermediate',
           goal: 'Onderhoud',
@@ -68,10 +68,10 @@ export async function GET(request: NextRequest) {
         {
           name: 'Carnivoor - Droogtrainen',
           description: 'Carnivoor dieet geoptimaliseerd voor vetverlies met behoud van spiermassa. Focus op hoge eiwitinname en lage koolhydraten.',
-          target_calories: 2360,
-          target_protein: 266, // 45% van calories (2360 * 0.45 / 4)
-          target_carbs: 30, // 5% van calories (2360 * 0.05 / 4)
-          target_fat: 131, // 50% van calories (2360 * 0.50 / 9)
+          target_calories: 2500,
+          target_protein: 219, // 35% van calories (2500 * 0.35 / 4)
+          target_carbs: 31, // 5% van calories (2500 * 0.05 / 4)
+          target_fat: 167, // 60% van calories (2500 * 0.60 / 9)
           duration_weeks: 12,
           difficulty: 'intermediate',
           goal: 'Droogtrainen',
