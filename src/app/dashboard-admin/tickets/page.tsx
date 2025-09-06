@@ -55,9 +55,19 @@ export default function AdminTicketsPage() {
     try {
       const response = await fetch('/api/tickets?admin=true');
       const data = await response.json();
-      setTickets(data);
+      
+      // Ensure we always set an array
+      if (Array.isArray(data)) {
+        setTickets(data);
+      } else if (data && Array.isArray(data.tickets)) {
+        setTickets(data.tickets);
+      } else {
+        console.error('Invalid tickets data:', data);
+        setTickets([]);
+      }
     } catch (error) {
       console.error('Error fetching tickets:', error);
+      setTickets([]);
     } finally {
       setLoading(false);
     }
@@ -101,9 +111,9 @@ export default function AdminTicketsPage() {
     }
   };
 
-  const filteredTickets = tickets.filter(ticket => 
+  const filteredTickets = Array.isArray(tickets) ? tickets.filter(ticket => 
     filter === 'all' || ticket.status === filter
-  );
+  ) : [];
 
   const getStatusIcon = (status: Ticket['status']) => {
     switch (status) {
@@ -165,25 +175,25 @@ export default function AdminTicketsPage() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <AdminCard
           icon={<ClockIcon className="w-6 h-6" />}
-          value={tickets.filter(t => t.status === 'open').length}
+          value={Array.isArray(tickets) ? tickets.filter(t => t.status === 'open').length : 0}
           title="Open Tickets"
           color="green"
         />
         <AdminCard
           icon={<ExclamationTriangleIcon className="w-6 h-6" />}
-          value={tickets.filter(t => t.status === 'in_progress').length}
+          value={Array.isArray(tickets) ? tickets.filter(t => t.status === 'in_progress').length : 0}
           title="In Behandeling"
           color="yellow"
         />
         <AdminCard
           icon={<CheckCircleIcon className="w-6 h-6" />}
-          value={tickets.filter(t => t.status === 'resolved').length}
+          value={Array.isArray(tickets) ? tickets.filter(t => t.status === 'resolved').length : 0}
           title="Opgelost"
           color="blue"
         />
         <AdminCard
           icon={<TicketIcon className="w-6 h-6" />}
-          value={tickets.length}
+          value={Array.isArray(tickets) ? tickets.length : 0}
           title="Totaal Tickets"
           color="purple"
         />
