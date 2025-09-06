@@ -170,42 +170,41 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
   };
 
   const calculateNutritionForAmount = (ingredient: DatabaseIngredient, amount: number) => {
-    // For per_piece and per_handful items, database values are per unit, not per 100g
+    console.log(`🧮 Calculating nutrition for ${ingredient.name}:`, {
+      amount,
+      unit_type: ingredient.unit_type,
+      calories_per_100g: ingredient.calories_per_100g,
+      protein_per_100g: ingredient.protein_per_100g
+    });
+
+    let factor: number;
+
+    // Calculate the correct factor based on unit type
     if (ingredient.unit_type === 'per_piece') {
-      // Database values are already per piece
-      return {
-        calories: Math.round((ingredient.calories_per_100g || 0) * amount),
-        protein: Math.round(((ingredient.protein_per_100g || 0) * amount) * 10) / 10,
-        carbs: Math.round(((ingredient.carbs_per_100g || 0) * amount) * 10) / 10,
-        fat: Math.round(((ingredient.fat_per_100g || 0) * amount) * 10) / 10
-      };
+      // For pieces, we need to know the weight per piece
+      // Assuming average piece weights: egg = 50g, apple = 150g, etc.
+      // For now, use a default of 100g per piece (can be improved later)
+      factor = amount / 100;
     } else if (ingredient.unit_type === 'per_handful') {
-      // Database values are already per handful
-      return {
-        calories: Math.round((ingredient.calories_per_100g || 0) * amount),
-        protein: Math.round(((ingredient.protein_per_100g || 0) * amount) * 10) / 10,
-        carbs: Math.round(((ingredient.carbs_per_100g || 0) * amount) * 10) / 10,
-        fat: Math.round(((ingredient.fat_per_100g || 0) * amount) * 10) / 10
-      };
+      // 1 handful = 25g
+      factor = (amount * 25) / 100;
     } else if (ingredient.unit_type === 'per_30g') {
-      // Database values are per 30g, so calculate proportion
-      const factor = amount / 30;
-      return {
-        calories: Math.round((ingredient.calories_per_100g || 0) * factor),
-        protein: Math.round(((ingredient.protein_per_100g || 0) * factor) * 10) / 10,
-        carbs: Math.round(((ingredient.carbs_per_100g || 0) * factor) * 10) / 10,
-        fat: Math.round(((ingredient.fat_per_100g || 0) * factor) * 10) / 10
-      };
+      // 1 scoop = 30g
+      factor = (amount * 30) / 100;
     } else {
-      // per_100g: Calculate based on grams
-      const factor = amount / 100;
-      return {
-        calories: Math.round((ingredient.calories_per_100g || 0) * factor),
-        protein: Math.round(((ingredient.protein_per_100g || 0) * factor) * 10) / 10,
-        carbs: Math.round(((ingredient.carbs_per_100g || 0) * factor) * 10) / 10,
-        fat: Math.round(((ingredient.fat_per_100g || 0) * factor) * 10) / 10
-      };
+      // per_100g: amount is already in grams
+      factor = amount / 100;
     }
+
+    const result = {
+      calories: Math.round((ingredient.calories_per_100g || 0) * factor),
+      protein: Math.round(((ingredient.protein_per_100g || 0) * factor) * 10) / 10,
+      carbs: Math.round(((ingredient.carbs_per_100g || 0) * factor) * 10) / 10,
+      fat: Math.round(((ingredient.fat_per_100g || 0) * factor) * 10) / 10
+    };
+
+    console.log(`✅ Calculated nutrition:`, result);
+    return result;
   };
 
   // Load ingredients database once when modal opens
@@ -247,9 +246,17 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
         
         // Apply legacy unit corrections if needed
         const correctedIngredients = correctLegacyIngredientUnits(meal.ingredients);
+        
+        // Calculate nutrition from corrected ingredients
+        const nutrition = calculateNutritionFromIngredients(correctedIngredients);
+        
         setFormData({
           ...meal,
-          ingredients: correctedIngredients
+          ingredients: correctedIngredients,
+          calories: nutrition.calories,
+          protein: nutrition.protein,
+          carbs: nutrition.carbs,
+          fat: nutrition.fat
         });
       }
       // Second priority: convert suggestions to ingredients (legacy format)
@@ -275,23 +282,23 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
               unit = 'handje';
             } else {
               // Default to grams
-              const amountMatch = amountWithUnit.match(/^([\d.,]+)(\w+)$/);
-              if (amountMatch) {
+            const amountMatch = amountWithUnit.match(/^([\d.,]+)(\w+)$/);
+            if (amountMatch) {
                 amount = parseFloat(amountMatch[1].replace(',', '.'));
                 unit = amountMatch[2];
               }
             }
             
-            return {
-              id: `ingredient-${index}`,
-              name: name.trim(),
+              return {
+                id: `ingredient-${index}`,
+                name: name.trim(),
               amount: amount,
-              unit: unit,
-              calories: 0, // Will be calculated
-              protein: 0,
-              carbs: 0,
-              fat: 0
-            };
+                unit: unit,
+                calories: 0, // Will be calculated
+                protein: 0,
+                carbs: 0,
+                fat: 0
+              };
           }
           
           // Fallback for malformed suggestions
@@ -309,9 +316,17 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
         
         // Apply legacy unit corrections to converted ingredients too
         const correctedIngredients = correctLegacyIngredientUnits(convertedIngredients);
+        
+        // Calculate nutrition from corrected ingredients
+        const nutrition = calculateNutritionFromIngredients(correctedIngredients);
+        
         setFormData({
           ...meal,
-          ingredients: correctedIngredients
+          ingredients: correctedIngredients,
+          calories: nutrition.calories,
+          protein: nutrition.protein,
+          carbs: nutrition.carbs,
+          fat: nutrition.fat
         });
       } else {
         // No ingredients or suggestions, start fresh
@@ -344,7 +359,7 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
         ...nutrition
       }));
     }
-  }, [ingredientsDatabase, formData.ingredients.length]);
+  }, [ingredientsDatabase, formData.ingredients]);
 
   // Load available meals from database
   useEffect(() => {
@@ -441,6 +456,8 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
 
   // Calculate nutrition values based on ingredients using loaded database
   const calculateNutritionFromIngredients = (ingredients: Ingredient[]) => {
+    console.log('🧮 Calculating nutrition from ingredients:', ingredients);
+    
     let totalCalories = 0;
     let totalProtein = 0;
     let totalCarbs = 0;
@@ -468,19 +485,24 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
           amount: ingredient.amount,
           unit: ingredient.unit,
           unit_type: dbIngredient.unit_type,
-          calories: nutrition.calories
+          calories: nutrition.calories,
+          protein: nutrition.protein
         });
       } else {
         console.warn(`⚠️ No nutrition data found for ingredient: ${ingredient.name}`);
+        console.log('Available ingredients:', ingredientsDatabase.map(ing => ing.name));
       }
     }
 
-    return {
+    const result = {
       calories: Math.round(totalCalories),
       protein: Math.round(totalProtein * 10) / 10,
       carbs: Math.round(totalCarbs * 10) / 10,
       fat: Math.round(totalFat * 10) / 10
     };
+
+    console.log('📊 Total calculated nutrition:', result);
+    return result;
   };
 
 
@@ -878,15 +900,15 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
             {!showAllIngredients ? (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                 {getSmartSuggestions().map((suggestion, index) => (
-                  <button
-                    key={index}
+                    <button
+                      key={index}
                     onClick={() => addIngredientFromDatabase(suggestion)}
                     className="px-3 py-2 text-sm bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] rounded hover:bg-[#3A4D23] transition-colors"
-                  >
+                    >
                     {suggestion.name} ({suggestion.amount}{suggestion.unit})
-                  </button>
-                ))}
-              </div>
+                    </button>
+                  ))}
+                    </div>
             ) : (
               <div className="space-y-3">
                 <div className="relative">
@@ -900,16 +922,16 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
                 </div>
                 <div className="max-h-40 overflow-y-auto grid grid-cols-2 md:grid-cols-3 gap-2">
                   {getFilteredIngredients().map((ingredient, index) => (
-                    <button
-                      key={index}
+                 <button
+                   key={index}
                       onClick={() => addIngredientFromDatabase(ingredient)}
                       className="px-3 py-2 text-sm bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] rounded hover:bg-[#3A4D23] transition-colors text-left"
-                    >
+                 >
                       <div className="font-medium">{ingredient.name}</div>
                       <div className="text-xs text-[#B6C948]">{ingredient.category}</div>
-                    </button>
-                  ))}
-                </div>
+                 </button>
+               ))}
+            </div>
               </div>
             )}
           </div>
