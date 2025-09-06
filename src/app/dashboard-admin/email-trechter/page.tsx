@@ -58,6 +58,14 @@ export default function EmailTrechterPage() {
   const [recipients, setRecipients] = useState<BulkEmailRecipient[]>([]);
   const [recipients2, setRecipients2] = useState<BulkEmailRecipient[]>([]);
   const [loadingCampaigns, setLoadingCampaigns] = useState(true);
+  
+  // 🚨 EMERGENCY ALERT - Show warning about disabled email campaigns
+  useEffect(() => {
+    toast.error('🚨 EMAIL CAMPAGNES GEDEACTIVEERD - Gebruik externe platforms zoals MailChimp!', {
+      duration: 10000,
+      position: 'top-center'
+    });
+  }, []);
   const [loadingCampaigns2, setLoadingCampaigns2] = useState(true);
   const [loadingRecipients, setLoadingRecipients] = useState(false);
   const [loadingRecipients2, setLoadingRecipients2] = useState(false);
@@ -632,6 +640,20 @@ export default function EmailTrechterPage() {
   return (
     <div className="min-h-screen bg-gray-900 p-6">
       <div className="max-w-7xl mx-auto">
+        {/* 🚨 EMERGENCY WARNING BANNER */}
+        <div className="mb-6 p-4 bg-red-600 border border-red-500 rounded-lg">
+          <div className="flex items-center">
+            <div className="text-white text-2xl mr-3">🚨</div>
+            <div>
+              <h3 className="text-white font-bold text-lg">EMAIL CAMPAGNES GEDEACTIVEERD</h3>
+              <p className="text-red-100 text-sm mt-1">
+                Bulk email verzending is uitgeschakeld vanwege duplicaat verzendingen. 
+                Gebruik externe platforms zoals MailChimp voor email campagnes.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
