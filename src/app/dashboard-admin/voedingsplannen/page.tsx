@@ -786,8 +786,8 @@ export default function AdminVoedingsplannenPage() {
                   <div className="col-span-2">Naam</div>
                   <div className="col-span-2">Categorie</div>
                   <div className="col-span-1">Carnivoor</div>
-                  <div className="col-span-1">Type</div>
-                  <div className="col-span-1">Kcal/100g<br/><span className="text-xs text-[#8BAE5A]/60">(per handje 25g)</span></div>
+                  <div className="col-span-1">Type<br/><span className="text-xs text-[#8BAE5A]/60">(per handje 25g)</span></div>
+                  <div className="col-span-1">Kcal/100g</div>
                   <div className="col-span-1">Protein</div>
                   <div className="col-span-1">Carbs</div>
                   <div className="col-span-1">Fat</div>
