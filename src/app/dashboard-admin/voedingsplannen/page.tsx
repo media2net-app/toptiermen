@@ -307,8 +307,20 @@ export default function AdminVoedingsplannenPage() {
 
       console.log('✅ Plan saved successfully:', result);
       await fetchAllData();
+      
+      // Use a small delay to ensure state has updated, then find the updated plan
+      setTimeout(() => {
+        const updatedPlan = plans.find((p: any) => p.id === selectedPlan?.id);
+        if (updatedPlan) {
+          console.log('🔄 Keeping updated plan selected:', updatedPlan.name);
+          setSelectedPlan(updatedPlan);
+        } else {
+          console.log('⚠️ Could not find updated plan, resetting selection');
+          setSelectedPlan(null);
+        }
+      }, 100);
+      
       setShowPlanBuilder(false);
-      setSelectedPlan(null);
       
     } catch (error) {
       console.error('❌ Error saving plan:', error);

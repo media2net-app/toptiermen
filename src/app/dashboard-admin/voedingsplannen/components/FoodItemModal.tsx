@@ -38,7 +38,7 @@ export default function FoodItemModal({ isOpen, onClose, foodItem, onSave }: Foo
   const [error, setError] = useState('');
 
   const categories = [
-    'Granen', 'Eiwitten', 'Vetten', 'Fruit', 'Zuivel', 'Vlees', 'Vis', 'Groente', 'Noten'
+    'Granen', 'Eiwitten', 'Vetten', 'Fruit', 'Zuivel', 'Vlees', 'Vis', 'Groente', 'Noten', 'Carnivoor', 'Eieren'
   ];
 
   useEffect(() => {
