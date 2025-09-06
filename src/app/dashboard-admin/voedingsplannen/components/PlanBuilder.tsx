@@ -302,7 +302,7 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
       calculatedFat = (config as any).fat; // Gebruik de 50% fat berekening
     } else {
       // Standaard berekening voor andere plannen
-      const remainingCalories = config.calories - (config.protein * 4) - (config.carbs * 4);
+    const remainingCalories = config.calories - (config.protein * 4) - (config.carbs * 4);
       calculatedFat = Math.max(Math.round(remainingCalories / 9), 60); // Minimum 60g vet
     }
     
@@ -1634,11 +1634,10 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
 
                                             if (dbIngredient) {
                                               const correctUnit = dbIngredient.unit_type === 'per_piece' ? 'stuk' :
-                                                                 dbIngredient.unit_type === 'per_handful' ? 'handje' :
-                                                                 dbIngredient.unit_type === 'per_30g' ? 'g' : 'g';
-                                              const correctAmount = dbIngredient.unit_type === 'per_piece' ? 1 :
-                                                                   dbIngredient.unit_type === 'per_handful' ? 1 :
-                                                                   dbIngredient.unit_type === 'per_30g' ? 30 : ingredient.amount;
+                                                 dbIngredient.unit_type === 'per_handful' ? 'handje' :
+                                                 dbIngredient.unit_type === 'per_30g' ? 'g' : 'g';
+                                              // ALWAYS keep original amount - never reset to 1
+                                              const correctAmount = ingredient.amount;
 
                                               // Check if current ingredient has wrong unit for per_piece items
                                               if (dbIngredient.unit_type === 'per_piece' && ingredient.unit === 'g') {
@@ -1676,10 +1675,19 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                                           // Calculate nutrition based on unit_type from database
                                           if (estimatedNutrition.unit_type === 'per_piece' && unit === 'stuk') {
                                             // For per_piece items, database values are already per piece
+                                            // ALWAYS use fresh database values, ignore stored meal values
                                             calories = Math.round(estimatedNutrition.calories * amount);
                                             protein = Math.round(estimatedNutrition.protein * amount * 10) / 10;
                                             carbs = Math.round(estimatedNutrition.carbs * amount * 10) / 10;
                                             fat = Math.round(estimatedNutrition.fat * amount * 10) / 10;
+                                            
+                                            console.log(`🥚 Per piece calculation for ${ingredient.name}:`, {
+                                              originalAmount: ingredient.amount,
+                                              correctedAmount: amount,
+                                              unit: unit,
+                                              dbValues: estimatedNutrition,
+                                              calculated: { calories, protein, carbs, fat }
+                                            });
                                           } else if (estimatedNutrition.unit_type === 'per_handful' && unit === 'handje') {
                                             // For per_handful items, database values are per handful
                                             calories = Math.round(estimatedNutrition.calories * amount);
@@ -1721,7 +1729,7 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                                           return (
                                             <tr key={idx} className="border-b border-[#3A4D23] hover:bg-[#232D1A]/50">
                                               <td className="p-2 text-[#B6C948]">{correctedIngredient.name}</td>
-                                              <td className="p-2 text-center text-[#8BAE5A]">{amount}{correctedIngredient.unit || 'g'}</td>
+                                              <td className="p-2 text-center text-[#8BAE5A]">{correctedIngredient.amount}{correctedIngredient.unit || 'g'}</td>
                                               <td className="p-2 text-center text-[#8BAE5A]">{calories}</td>
                                               <td className="p-2 text-center text-[#8BAE5A]">{protein}g</td>
                                               <td className="p-2 text-center text-[#8BAE5A]">{carbs}g</td>
