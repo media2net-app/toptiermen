@@ -196,7 +196,7 @@ export async function POST(request: NextRequest) {
     console.log('📧 Test email request:', { to, name });
     
     // Generate unique tracking ID for this email (include email for tracking)
-    const campaignId = template === 'sneak_preview' ? '84bceade-eec6-4349-958f-6b04be0d3003' : null;
+    const finalCampaignId = campaignId || (template === 'sneak_preview' ? '84bceade-eec6-4349-958f-6b04be0d3003' : null);
     const trackingId = `test_${Date.now()}_${to.replace('@', '_at_').replace('.', '_dot_')}_${Math.random().toString(36).substr(2, 9)}`;
     
     // Send test email via SMTP (reliable for testing)
@@ -206,7 +206,7 @@ export async function POST(request: NextRequest) {
       variables: {
         name: name,
         trackingId: trackingId,
-        campaignId: campaignId,
+        campaignId: finalCampaignId,
         ...variables
       }
     });
@@ -215,12 +215,12 @@ export async function POST(request: NextRequest) {
       console.log('✅ Test email sent successfully');
       
       // Store test email in database for tracking
-      if (campaignId) {
+      if (finalCampaignId) {
         try {
           const { data, error } = await supabaseAdmin
             .from('test_email_tracking')
             .insert({
-              campaign_id: campaignId,
+              campaign_id: finalCampaignId,
               email: to,
               name: name,
               tracking_id: trackingId,
