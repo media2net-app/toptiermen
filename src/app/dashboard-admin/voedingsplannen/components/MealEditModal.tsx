@@ -92,7 +92,8 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
 
       if (dbIngredient) {
         const correctUnit = getUnitLabel(dbIngredient);
-        const correctAmount = getDefaultAmountForUnit(dbIngredient);
+        // ALWAYS keep original amount - never reset to default!
+        const correctAmount = ingredient.amount;
 
         // Check if current ingredient has wrong unit for per_piece items
         if (dbIngredient.unit_type === 'per_piece' && ingredient.unit === 'g') {
@@ -169,28 +170,42 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
   };
 
   const calculateNutritionForAmount = (ingredient: DatabaseIngredient, amount: number) => {
-    // Convert user input (handje/stuk/gram) to grams for nutrition calculation
-    let gramAmount = amount;
-    
-    if (ingredient.unit_type === 'per_handful') {
-      gramAmount = amount * 25; // Each handje = 25g
-    } else if (ingredient.unit_type === 'per_piece') {
-      const weightPerPiece = getWeightPerPiece(ingredient);
-      gramAmount = amount * weightPerPiece; // Each stuk = specific weight
+    // For per_piece and per_handful items, database values are per unit, not per 100g
+    if (ingredient.unit_type === 'per_piece') {
+      // Database values are already per piece
+      return {
+        calories: Math.round((ingredient.calories_per_100g || 0) * amount),
+        protein: Math.round(((ingredient.protein_per_100g || 0) * amount) * 10) / 10,
+        carbs: Math.round(((ingredient.carbs_per_100g || 0) * amount) * 10) / 10,
+        fat: Math.round(((ingredient.fat_per_100g || 0) * amount) * 10) / 10
+      };
+    } else if (ingredient.unit_type === 'per_handful') {
+      // Database values are already per handful
+      return {
+        calories: Math.round((ingredient.calories_per_100g || 0) * amount),
+        protein: Math.round(((ingredient.protein_per_100g || 0) * amount) * 10) / 10,
+        carbs: Math.round(((ingredient.carbs_per_100g || 0) * amount) * 10) / 10,
+        fat: Math.round(((ingredient.fat_per_100g || 0) * amount) * 10) / 10
+      };
     } else if (ingredient.unit_type === 'per_30g') {
-      gramAmount = amount; // Direct gram amount (30g = 30g)
+      // Database values are per 30g, so calculate proportion
+      const factor = amount / 30;
+      return {
+        calories: Math.round((ingredient.calories_per_100g || 0) * factor),
+        protein: Math.round(((ingredient.protein_per_100g || 0) * factor) * 10) / 10,
+        carbs: Math.round(((ingredient.carbs_per_100g || 0) * factor) * 10) / 10,
+        fat: Math.round(((ingredient.fat_per_100g || 0) * factor) * 10) / 10
+      };
+    } else {
+      // per_100g: Calculate based on grams
+      const factor = amount / 100;
+      return {
+        calories: Math.round((ingredient.calories_per_100g || 0) * factor),
+        protein: Math.round(((ingredient.protein_per_100g || 0) * factor) * 10) / 10,
+        carbs: Math.round(((ingredient.carbs_per_100g || 0) * factor) * 10) / 10,
+        fat: Math.round(((ingredient.fat_per_100g || 0) * factor) * 10) / 10
+      };
     }
-    // per_100g: gramAmount stays as entered by user
-    
-    // Calculate nutrition based on the gram amount (database values are per 100g)
-    const factor = gramAmount / 100;
-    
-    return {
-      calories: Math.round((ingredient.calories_per_100g || 0) * factor),
-      protein: Math.round(((ingredient.protein_per_100g || 0) * factor) * 10) / 10,
-      carbs: Math.round(((ingredient.carbs_per_100g || 0) * factor) * 10) / 10,
-      fat: Math.round(((ingredient.fat_per_100g || 0) * factor) * 10) / 10
-    };
   };
 
   // Load ingredients database once when modal opens
