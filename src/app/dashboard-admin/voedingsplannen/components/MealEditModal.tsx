@@ -185,11 +185,11 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
       // So we use the amount directly
       factor = amount;
     } else if (ingredient.unit_type === 'per_handful') {
-      // 1 handful = 25g, so convert to 100g basis
-      factor = (amount * 25) / 100;
+      // Database values are now per handje (25g), so use amount directly
+      factor = amount;
     } else if (ingredient.unit_type === 'per_30g') {
-      // 1 scoop = 30g, so convert to 100g basis
-      factor = (amount * 30) / 100;
+      // Database values are now per 30g, so use amount directly
+      factor = amount;
     } else {
       // per_100g: amount is already in grams
       factor = amount / 100;
@@ -199,8 +199,8 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
     // So we need to handle this differently
     let result;
     
-    if (ingredient.unit_type === 'per_piece') {
-      // Database values are already per piece, so multiply by amount directly
+    if (ingredient.unit_type === 'per_piece' || ingredient.unit_type === 'per_handful' || ingredient.unit_type === 'per_30g') {
+      // Database values are already per piece/handje, so multiply by amount directly
       result = {
         calories: Math.round((ingredient.calories_per_100g || 0) * amount),
         protein: Math.round(((ingredient.protein_per_100g || 0) * amount) * 10) / 10,
