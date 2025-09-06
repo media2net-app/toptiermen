@@ -285,7 +285,7 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
       const carbs5 = Math.round((targetCalories * 0.05) / 4);    // 5% van calories
       const fat50 = Math.round((targetCalories * 0.50) / 9);     // 50% van calories
       
-      configs[fitnessGoal] = {
+      (configs[fitnessGoal] as any) = {
         ...configs[fitnessGoal],
         protein: protein45,
         carbs: carbs5,
@@ -297,8 +297,8 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
     
     // Voor carnivoor plannen met custom macro verdeling, gebruik de voorgedefinieerde fat waarde
     let calculatedFat;
-    if (isCarnivore && (fitnessGoal === 'droogtrainen' || fitnessGoal === 'onderhoud') && config.fat) {
-      calculatedFat = config.fat; // Gebruik de 50% fat berekening
+    if (isCarnivore && (fitnessGoal === 'droogtrainen' || fitnessGoal === 'onderhoud') && (config as any).fat) {
+      calculatedFat = (config as any).fat; // Gebruik de 50% fat berekening
     } else {
       // Standaard berekening voor andere plannen
       const remainingCalories = config.calories - (config.protein * 4) - (config.carbs * 4);
