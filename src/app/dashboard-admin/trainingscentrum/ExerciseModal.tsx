@@ -11,17 +11,19 @@ interface ExerciseModalProps {
   onClose: () => void;
   onSave: (exerciseData: any) => void;
   exercise?: any; // For editing
+  muscleGroups?: string[]; // Dynamic muscle groups from database
 }
 
-const muscleGroups = [
-  'Borst', 'Rug', 'Benen', 'Schouders', 'Armen', 'Core', 'Buik', 'Trapezius'
+// Muscle groups will be fetched from database via props
+const fallbackMuscleGroups = [
+  'Bilspieren', 'Benen', 'Biceps', 'Borst', 'Buikspieren', 'Cardio', 'Core', 'Full Body', 'Kuiten', 'Rug', 'Schouders', 'Triceps', 'Trapezius'
 ];
 
 const equipmentTypes = [
   'Barbell', 'Dumbbell', 'Machine', 'Cable', 'Bodyweight', 'Kettlebell', 'Resistance Band', 'Cable Machine', 'Leg Press Machine', 'Lat Pulldown Machine', 'Leg Extension Machine', 'Leg Curl Machine', 'Calf Machine', 'Pull-up Bar', 'Dip Bars'
 ];
 
-export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: ExerciseModalProps) {
+export default function ExerciseModal({ isOpen, onClose, onSave, exercise, muscleGroups }: ExerciseModalProps) {
   const [formData, setFormData] = useState({
     name: '',
     primary_muscle: '',
@@ -35,6 +37,9 @@ export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: Exe
   const [newSecondaryMuscle, setNewSecondaryMuscle] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [isAutoSaving, setIsAutoSaving] = useState(false);
+
+  // Use dynamic muscle groups if available, otherwise fallback
+  const availableMuscleGroups = muscleGroups && muscleGroups.length > 0 ? muscleGroups : fallbackMuscleGroups;
 
   useEffect(() => {
     console.log('🔄 ExerciseModal useEffect triggered');
@@ -231,7 +236,7 @@ export default function ExerciseModal({ isOpen, onClose, onSave, exercise }: Exe
               disabled={isUploading}
             >
               <option value="">Selecteer spiergroep</option>
-              {muscleGroups.map(group => (
+              {availableMuscleGroups.map(group => (
                 <option key={group} value={group}>{group}</option>
               ))}
             </select>
