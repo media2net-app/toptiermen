@@ -11,7 +11,8 @@ import {
   FireIcon,
   BookOpenIcon,
   EnvelopeIcon,
-  DocumentTextIcon
+  DocumentTextIcon,
+  PaperAirplaneIcon
 } from '@heroicons/react/24/outline';
 
 interface SupportButtonProps {
