@@ -3,12 +3,14 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaCheck, FaArrowRight, FaClock, FaUsers, FaDumbbell, FaBrain, FaChartLine } from 'react-icons/fa';
-import CheckoutModal from '@/components/CheckoutModal';
+import CheckoutSection from '@/components/CheckoutSection';
 
 export default function MaandelijksPakketPage() {
   const router = useRouter();
   const [isHovered, setIsHovered] = useState(false);
-  const [showCheckout, setShowCheckout] = useState(false);
+  const scrollToCheckout = () => {
+    document.getElementById('checkout-section')?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   const packageData = {
     id: 'monthly',
@@ -133,7 +135,7 @@ export default function MaandelijksPakketPage() {
             </div>
 
             <button
-              onClick={() => setShowCheckout(true)}
+              onClick={scrollToCheckout}
               onMouseEnter={() => setIsHovered(true)}
               onMouseLeave={() => setIsHovered(false)}
               className="group relative px-12 py-4 bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] text-[#181F17] font-bold text-lg rounded-xl shadow-2xl hover:shadow-[#B6C948]/25 transition-all duration-300 transform hover:scale-105"
@@ -246,7 +248,7 @@ export default function MaandelijksPakketPage() {
                 <div className="text-[#8BAE5A]">€47 per maand × 6 maanden = €282 totaal</div>
               </div>
               <button
-                onClick={() => setShowCheckout(true)}
+                onClick={scrollToCheckout}
                 className="px-8 py-3 bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] text-[#181F17] font-bold rounded-lg hover:shadow-lg transition-all duration-300"
               >
                 Start nu
@@ -261,15 +263,9 @@ export default function MaandelijksPakketPage() {
       </div>
 
       {/* Checkout Modal */}
-      <CheckoutModal
-        isOpen={showCheckout}
-        onClose={() => setShowCheckout(false)}
-        package={packageData}
-        onPaymentSuccess={(paymentData) => {
-          console.log('Payment successful:', paymentData);
-          setShowCheckout(false);
-        }}
-      />
+      <div id="checkout-section">
+        <CheckoutSection packageData={packageData} />
+      </div>
     </div>
   );
 }
