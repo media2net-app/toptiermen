@@ -246,10 +246,10 @@ export async function POST(request: NextRequest) {
         success: true,
         message: 'Dry run completed successfully',
         campaign: campaign.name,
-        recipientCount: recipients.length,
+        recipientCount: recipients?.length || 0,
         template: template,
         dryRun: true,
-        recipients: recipients.slice(0, 5).map(r => ({ 
+        recipients: recipients?.slice(0, 5).map(r => ({ 
           email: r.lead?.email, 
           name: r.lead?.name 
         })) // Show first 5 for preview
