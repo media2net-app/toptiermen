@@ -606,50 +606,42 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
           
           let proteinPercent, carbsPercent, fatPercent;
           
-          // Always use the current percentages from the UI, not recalculate them
-          if (currentCaloriesFromMacros > 0) {
-            // Use existing percentages from current macro values
-            proteinPercent = (currentProtein * 4) / currentCaloriesFromMacros;
-            carbsPercent = (currentCarbs * 4) / currentCaloriesFromMacros;
-            fatPercent = (currentFat * 9) / currentCaloriesFromMacros;
-          } else {
-            // Fallback to default percentages based on plan type
-            const isCarnivore = prev.name?.toLowerCase().includes('carnivoor') || false;
-            const fitnessGoal = prev.fitness_goal || 'onderhoud';
-            
-            if (isCarnivore) {
-              // Check if it's Spiermassa (keep 45/5/50) or Droogtrainen/Onderhoud (use 35/5/60)
-              if (prev.name?.toLowerCase().includes('spiermassa')) {
-                // Carnivoor - Spiermassa: 45% protein, 5% carbs, 50% fat
-                proteinPercent = 0.45;
-                carbsPercent = 0.05;
-                fatPercent = 0.50;
-              } else {
-                // Carnivoor - Droogtrainen & Onderhoud: 35% protein, 5% carbs, 60% fat
-                proteinPercent = 0.35;
-                carbsPercent = 0.05;
-                fatPercent = 0.60;
-              }
+          // Always use the correct default percentages based on plan type
+          const isCarnivore = prev.name?.toLowerCase().includes('carnivoor') || false;
+          const fitnessGoal = prev.fitness_goal || 'onderhoud';
+          
+          if (isCarnivore) {
+            // Check if it's Spiermassa (keep 45/5/50) or Droogtrainen/Onderhoud (use 35/5/60)
+            if (prev.name?.toLowerCase().includes('spiermassa')) {
+              // Carnivoor - Spiermassa: 45% protein, 5% carbs, 50% fat
+              proteinPercent = 0.45;
+              carbsPercent = 0.05;
+              fatPercent = 0.50;
             } else {
-              // Normal meal plans based on fitness goal
-              switch (fitnessGoal) {
-                case 'droogtrainen':
-                  proteinPercent = 0.40;
-                  carbsPercent = 0.40;
-                  fatPercent = 0.20;
-                  break;
-                case 'spiermassa':
-                  proteinPercent = 0.30;
-                  carbsPercent = 0.50;
-                  fatPercent = 0.20;
-                  break;
-                case 'onderhoud':
-                default:
-                  proteinPercent = 0.35;
-                  carbsPercent = 0.40;
-                  fatPercent = 0.25;
-                  break;
-              }
+              // Carnivoor - Droogtrainen & Onderhoud: 35% protein, 5% carbs, 60% fat
+              proteinPercent = 0.35;
+              carbsPercent = 0.05;
+              fatPercent = 0.60;
+            }
+          } else {
+            // Normal meal plans based on fitness goal
+            switch (fitnessGoal) {
+              case 'droogtrainen':
+                proteinPercent = 0.40;
+                carbsPercent = 0.40;
+                fatPercent = 0.20;
+                break;
+              case 'spiermassa':
+                proteinPercent = 0.30;
+                carbsPercent = 0.50;
+                fatPercent = 0.20;
+                break;
+              case 'onderhoud':
+              default:
+                proteinPercent = 0.35;
+                carbsPercent = 0.40;
+                fatPercent = 0.25;
+                break;
             }
           }
           
