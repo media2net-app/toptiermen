@@ -233,15 +233,17 @@ const mapDbSchemaToForm = (dbSchema: any) => ({
     day_number: day.day_number,
     name: day.name,
     description: day.description,
-    exercises: (day.training_schema_exercises || []).map((ex: any) => ({
-      id: ex.id,
-      exercise_id: ex.exercise_id,
-      exercise_name: ex.exercise_name,
-      sets: ex.sets,
-      reps: ex.reps,
-      rest_time: ex.rest_time,
-      order_index: ex.order_index ?? 0,
-    })),
+    exercises: (day.training_schema_exercises || [])
+      .sort((a: any, b: any) => (a.order_index ?? 0) - (b.order_index ?? 0))
+      .map((ex: any) => ({
+        id: ex.id,
+        exercise_id: ex.exercise_id,
+        exercise_name: ex.exercise_name,
+        sets: ex.sets,
+        reps: ex.reps,
+        rest_time: ex.rest_time,
+        order_index: ex.order_index ?? 0,
+      })),
   })),
 });
 
@@ -318,7 +320,7 @@ export default function TrainingscentrumBeheer() {
     try {
       const { data, error } = await supabase
         .from('training_schemas')
-        .select(`*,training_schema_days (id,day_number,name,training_schema_exercises (id,exercise_name,sets,reps,rest_time))`)
+        .select(`*,training_schema_days (id,day_number,name,training_schema_exercises (id,exercise_id,exercise_name,sets,reps,rest_time,order_index))`)
         .order('created_at', { ascending: false });
       if (error) {
         setErrorSchemas('Fout bij het laden van trainingsschema\'s');
