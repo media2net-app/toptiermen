@@ -1219,10 +1219,9 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                   </div>
                   <input
                     type="number"
-                    value={macroPercentages.protein.toFixed(1).replace('.', ',')}
+                    value={Math.round(macroPercentages.protein)}
                     onChange={(e) => {
-                      const value = e.target.value.replace(',', '.');
-                      const newPercent = parseFloat(value) || 0;
+                      const newPercent = parseInt(e.target.value) || 0;
                       setMacroPercentages(prev => ({ ...prev, protein: newPercent }));
                       const newProtein = Math.round(((formData.target_calories || 2500) * newPercent / 100) / 4);
                       handleInputChange('target_protein', newProtein);
@@ -1230,7 +1229,7 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                     className="w-full px-4 py-3 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
                     min="0"
                     max="100"
-                    step="0.1"
+                    step="1"
                     placeholder="0"
                   />
                   <div className="text-[#B6C948] text-sm mt-1">{formData.target_protein}g eiwit</div>
@@ -1244,10 +1243,9 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                   </div>
                   <input
                     type="number"
-                    value={macroPercentages.carbs.toFixed(1).replace('.', ',')}
+                    value={Math.round(macroPercentages.carbs)}
                     onChange={(e) => {
-                      const value = e.target.value.replace(',', '.');
-                      const newPercent = parseFloat(value) || 0;
+                      const newPercent = parseInt(e.target.value) || 0;
                       setMacroPercentages(prev => ({ ...prev, carbs: newPercent }));
                       const newCarbs = Math.round(((formData.target_calories || 2500) * newPercent / 100) / 4);
                       handleInputChange('target_carbs', newCarbs);
@@ -1255,7 +1253,7 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                     className="w-full px-4 py-3 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
                     min="0"
                     max="100"
-                    step="0.1"
+                    step="1"
                     placeholder="0"
                   />
                   <div className="text-[#B6C948] text-sm mt-1">{formData.target_carbs}g koolhydraten</div>
@@ -1269,10 +1267,9 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                   </div>
                   <input
                     type="number"
-                    value={macroPercentages.fat.toFixed(1).replace('.', ',')}
+                    value={Math.round(macroPercentages.fat)}
                     onChange={(e) => {
-                      const value = e.target.value.replace(',', '.');
-                      const newPercent = parseFloat(value) || 0;
+                      const newPercent = parseInt(e.target.value) || 0;
                       setMacroPercentages(prev => ({ ...prev, fat: newPercent }));
                       const newFat = Math.round(((formData.target_calories || 2500) * newPercent / 100) / 9);
                       handleInputChange('target_fat', newFat);
@@ -1280,7 +1277,7 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                     className="w-full px-4 py-3 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
                     min="0"
                     max="100"
-                    step="0.1"
+                    step="1"
                     placeholder="0"
                   />
                   <div className="text-[#B6C948] text-sm mt-1">{formData.target_fat}g vet</div>
@@ -1289,8 +1286,8 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
 
               {/* Macro Total Warning */}
               {(() => {
-                const totalPct = macroPercentages.protein + macroPercentages.carbs + macroPercentages.fat;
-                if (Math.abs(totalPct - 100) > 0.1) {
+                const totalPct = Math.round(macroPercentages.protein) + Math.round(macroPercentages.carbs) + Math.round(macroPercentages.fat);
+                if (Math.abs(totalPct - 100) > 0) {
                   return (
                     <div className="bg-[#4A1A1A] border border-[#7F1D1D] rounded-lg p-4 mb-6">
                       <div className="flex items-center">
@@ -1298,7 +1295,7 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                         <div>
                           <h4 className="text-[#FCA5A5] font-semibold mb-1">Macro percentages totaal niet 100%</h4>
                           <p className="text-[#FCA5A5] text-sm">
-                            Huidige totaal: {totalPct.toFixed(1)}% (moet 100% zijn)
+                            Huidige totaal: {totalPct}% (moet 100% zijn)
                           </p>
                           <p className="text-[#FCA5A5] text-sm mt-1">
                             Pas de percentages aan zodat ze samen 100% vormen voor correcte macro berekeningen.
