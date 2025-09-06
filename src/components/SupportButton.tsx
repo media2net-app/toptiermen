@@ -110,7 +110,7 @@ const supportCategories: SupportCategory[] = [
       },
       {
         question: 'Kan ik mijn eigen voedingsplan maken?',
-        answer: 'Ja, ga naar "Voedingsplannen" en klik op "Nieuw Plan". Je kunt ingrediënten toevoegen, maaltijden plannen en je macro's aanpassen. Het systeem helpt je met suggesties en berekeningen.'
+        answer: 'Ja, ga naar "Voedingsplannen" en klik op "Nieuw Plan". Je kunt ingrediënten toevoegen, maaltijden plannen en je macro\'s aanpassen. Het systeem helpt je met suggesties en berekeningen.'
       },
       {
         question: 'Hoe werkt de progressie tracking?',
@@ -206,7 +206,7 @@ export default function SupportButton({ className = '' }: SupportButtonProps) {
       {/* Support Modal */}
       {isOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-[#232D1A] rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+          <div className="bg-[#232D1A] rounded-xl max-w-5xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-[#3A4D23]/40">
               <div className="flex items-center gap-4">
@@ -239,21 +239,21 @@ export default function SupportButton({ className = '' }: SupportButtonProps) {
             {/* Content */}
             <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
               {!selectedCategory && !showContactForm && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto">
                   {supportCategories.map((category) => {
                     const Icon = category.icon;
                     return (
                       <button
                         key={category.id}
                         onClick={() => handleCategorySelect(category.id)}
-                        className="flex items-center gap-4 p-4 bg-[#1A2313] rounded-lg hover:bg-[#3A4D23]/50 transition-colors text-left"
+                        className="flex items-center gap-4 p-4 bg-[#1A2313] rounded-lg hover:bg-[#3A4D23]/50 transition-all text-left group border border-transparent hover:border-[#8BAE5A]/30"
                       >
-                        <div className="w-12 h-12 bg-[#8BAE5A]/20 rounded-lg flex items-center justify-center">
-                          <Icon className="w-6 h-6 text-[#8BAE5A]" />
+                        <div className="w-12 h-12 bg-[#8BAE5A]/20 rounded-lg flex items-center justify-center group-hover:bg-[#8BAE5A]/30 transition-colors">
+                          <Icon className="w-6 h-6 text-[#8BAE5A] group-hover:text-[#B6C948] transition-colors" />
                         </div>
                         <div>
-                          <h3 className="text-lg font-semibold text-white">{category.title}</h3>
-                          <p className="text-sm text-[#8BAE5A]">{category.faqs.length} veelgestelde vragen</p>
+                          <h3 className="text-lg font-semibold text-white group-hover:text-[#B6C948] transition-colors">{category.title}</h3>
+                          <p className="text-sm text-[#8BAE5A] group-hover:text-[#B6C948]/80 transition-colors">{category.faqs.length} veelgestelde vragen</p>
                         </div>
                       </button>
                     );
@@ -262,14 +262,14 @@ export default function SupportButton({ className = '' }: SupportButtonProps) {
                   {/* Contact Support Button */}
                   <button
                     onClick={handleContactSupport}
-                    className="flex items-center gap-4 p-4 bg-gradient-to-br from-[#8BAE5A]/20 to-[#B6C948]/20 border-2 border-[#8BAE5A]/30 rounded-lg hover:from-[#8BAE5A]/30 hover:to-[#B6C948]/30 transition-all text-left"
+                    className="flex items-center gap-4 p-4 bg-gradient-to-br from-[#8BAE5A]/20 to-[#B6C948]/20 border-2 border-[#8BAE5A]/30 rounded-lg hover:from-[#8BAE5A]/30 hover:to-[#B6C948]/30 transition-all text-left group"
                   >
-                    <div className="w-12 h-12 bg-[#8BAE5A]/30 rounded-lg flex items-center justify-center">
-                      <EnvelopeIcon className="w-6 h-6 text-[#8BAE5A]" />
+                    <div className="w-12 h-12 bg-[#8BAE5A]/30 rounded-lg flex items-center justify-center group-hover:bg-[#8BAE5A]/40 transition-colors">
+                      <EnvelopeIcon className="w-6 h-6 text-[#8BAE5A] group-hover:text-[#B6C948] transition-colors" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-white">Schrijf een bericht</h3>
-                      <p className="text-sm text-[#8BAE5A]">Direct contact met ons support team</p>
+                      <h3 className="text-lg font-semibold text-white group-hover:text-[#B6C948] transition-colors">Schrijf een bericht</h3>
+                      <p className="text-sm text-[#8BAE5A] group-hover:text-[#B6C948]/80 transition-colors">Direct contact met ons support team</p>
                     </div>
                   </button>
                 </div>
@@ -280,18 +280,18 @@ export default function SupportButton({ className = '' }: SupportButtonProps) {
                 <div className="space-y-4">
                   <button
                     onClick={handleBackToCategories}
-                    className="flex items-center gap-2 text-[#8BAE5A] hover:text-[#B6C948] transition-colors mb-6"
+                    className="flex items-center gap-2 text-[#8BAE5A] hover:text-[#B6C948] transition-colors mb-6 group"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                     </svg>
                     Terug naar categorieën
                   </button>
 
-                  <div className="space-y-4">
+                  <div className="space-y-4 max-w-4xl mx-auto">
                     {selectedCategoryData.faqs.map((faq, index) => (
-                      <div key={index} className="bg-[#1A2313] rounded-lg p-4">
-                        <h4 className="text-lg font-semibold text-white mb-2">{faq.question}</h4>
+                      <div key={index} className="bg-[#1A2313] rounded-lg p-6 border border-[#3A4D23]/30 hover:border-[#8BAE5A]/30 transition-colors">
+                        <h4 className="text-lg font-semibold text-white mb-3">{faq.question}</h4>
                         <p className="text-[#8BAE5A] leading-relaxed">{faq.answer}</p>
                       </div>
                     ))}
@@ -315,22 +315,22 @@ export default function SupportButton({ className = '' }: SupportButtonProps) {
                 <div className="space-y-6">
                   <button
                     onClick={handleBackToCategories}
-                    className="flex items-center gap-2 text-[#8BAE5A] hover:text-[#B6C948] transition-colors mb-6"
+                    className="flex items-center gap-2 text-[#8BAE5A] hover:text-[#B6C948] transition-colors mb-6 group"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                     </svg>
                     Terug naar categorieën
                   </button>
 
-                  <div className="bg-[#1A2313] rounded-lg p-6">
-                    <h3 className="text-xl font-semibold text-white mb-4">Stuur ons een bericht</h3>
-                    <form className="space-y-4">
+                  <div className="bg-[#1A2313] rounded-lg p-6 max-w-3xl mx-auto">
+                    <h3 className="text-xl font-semibold text-white mb-6 text-center">Stuur ons een bericht</h3>
+                    <form className="space-y-6">
                       <div>
                         <label className="block text-sm font-medium text-[#8BAE5A] mb-2">
                           Onderwerp
                         </label>
-                        <select className="w-full px-4 py-3 bg-[#3A4D23] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A]">
+                        <select className="w-full px-4 py-3 bg-[#3A4D23] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A] transition-colors">
                           <option value="">Selecteer een onderwerp</option>
                           <option value="technical">Technische problemen</option>
                           <option value="billing">Facturatie & Betalingen</option>
@@ -348,7 +348,7 @@ export default function SupportButton({ className = '' }: SupportButtonProps) {
                         </label>
                         <input
                           type="email"
-                          className="w-full px-4 py-3 bg-[#3A4D23] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A]"
+                          className="w-full px-4 py-3 bg-[#3A4D23] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A] transition-colors"
                           placeholder="jouw@email.com"
                         />
                       </div>
@@ -366,8 +366,9 @@ export default function SupportButton({ className = '' }: SupportButtonProps) {
                       
                       <button
                         type="submit"
-                        className="w-full bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] text-[#181F17] font-semibold py-3 px-6 rounded-lg hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all duration-300"
+                        className="w-full bg-gradient-to-r from-[#8BAE5A] to-[#B6C948] text-[#181F17] font-semibold py-3 px-6 rounded-lg hover:from-[#B6C948] hover:to-[#8BAE5A] transition-all duration-300 flex items-center justify-center gap-2 hover:shadow-lg hover:scale-[1.02]"
                       >
+                        <PaperAirplaneIcon className="w-5 h-5" />
                         Verstuur bericht
                       </button>
                     </form>

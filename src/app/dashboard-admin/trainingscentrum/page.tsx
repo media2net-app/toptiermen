@@ -787,33 +787,25 @@ export default function TrainingscentrumBeheer() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <AdminStatsCard
           icon={<CalendarIcon className="w-6 h-6" />}
-          value={loadingStats ? (
-            <div className="h-8 bg-[#3A4D23] rounded w-12 animate-pulse"></div>
-          ) : stats.totalSchemas}
+          value={loadingStats ? "..." : stats.totalSchemas}
           title="Trainingsschema's"
           color="blue"
         />
         <AdminStatsCard
           icon={<PlayIcon className="w-6 h-6" />}
-          value={loadingStats ? (
-            <div className="h-8 bg-[#3A4D23] rounded w-12 animate-pulse"></div>
-          ) : stats.totalExercises}
+          value={loadingStats ? "..." : stats.totalExercises}
           title="Oefeningen"
           color="green"
         />
         <AdminStatsCard
           icon={<FireIcon className="w-6 h-6" />}
-          value={loadingStats ? (
-            <div className="h-8 bg-[#3A4D23] rounded w-12 animate-pulse"></div>
-          ) : stats.totalChallenges}
+          value={loadingStats ? "..." : stats.totalChallenges}
           title="Challenges"
           color="orange"
         />
         <AdminStatsCard
           icon={<UserGroupIcon className="w-6 h-6" />}
-          value={loadingStats ? (
-            <div className="h-8 bg-[#3A4D23] rounded w-12 animate-pulse"></div>
-          ) : stats.activeUsers.toLocaleString('nl-NL')}
+          value={loadingStats ? "..." : stats.activeUsers.toLocaleString('nl-NL')}
           title="Actieve Gebruikers"
           color="purple"
         />
@@ -956,7 +948,7 @@ export default function TrainingscentrumBeheer() {
                 <p className="text-red-400 text-lg mb-2">Fout bij het laden</p>
                 <p className="text-[#B6C948]/70 text-sm mb-4">{errorSchemas}</p>
                 <AdminButton
-                  onClick={fetchSchemas}
+                  onClick={() => fetchSchemas()}
                   variant="primary"
                 >
                   <ArrowPathIcon className="w-4 h-4 mr-2" />
