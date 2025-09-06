@@ -91,45 +91,103 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
   useEffect(() => {
     if (isOpen && plan) {
       console.log('🔄 PlanBuilder: Loading existing plan data:', plan.name);
-      console.log('📊 Plan target macros:', {
+      console.log('📊 Plan target macros from prop:', {
         calories: (plan as any).meals?.target_calories || plan.target_calories,
         protein: (plan as any).meals?.target_protein || plan.target_protein,
         carbs: (plan as any).meals?.target_carbs || plan.target_carbs,
         fat: (plan as any).meals?.target_fat || plan.target_fat
       });
 
-      // Use data from plan.meals if available, otherwise fallback to plan properties
-      const targetCalories = (plan as any).meals?.target_calories || plan.target_calories || 2200;
-      const targetProtein = (plan as any).meals?.target_protein || plan.target_protein || 165;
-      const targetCarbs = (plan as any).meals?.target_carbs || plan.target_carbs || 220;
-      const targetFat = (plan as any).meals?.target_fat || plan.target_fat || 73;
+      // For carnivore plans, force refresh from database to get latest values
+      const isCarnivore = plan.name?.toLowerCase().includes('carnivoor');
+      
+      if (isCarnivore) {
+        console.log('🥩 Carnivore plan detected, fetching fresh data from database...');
+        
+        // Fetch fresh data from database for carnivore plans
+        fetch('/api/admin/nutrition-plans')
+          .then(res => res.json())
+          .then(data => {
+            if (data.success && data.plans) {
+              const freshPlan = data.plans.find((p: any) => p.id === plan.id || p.name === plan.name);
+              if (freshPlan) {
+                console.log('✅ Fresh carnivore plan data loaded:', {
+                  name: freshPlan.name,
+                  calories: freshPlan.target_calories,
+                  protein: freshPlan.target_protein,
+                  carbs: freshPlan.target_carbs,
+                  fat: freshPlan.target_fat
+                });
+                
+                setFormData({
+                  id: freshPlan.id,
+                  name: freshPlan.name || '',
+                  description: freshPlan.description || '',
+                  target_calories: freshPlan.target_calories,
+                  target_protein: freshPlan.target_protein,
+                  target_carbs: freshPlan.target_carbs,
+                  target_fat: freshPlan.target_fat,
+                  duration_weeks: freshPlan.duration_weeks || 12,
+                  difficulty: freshPlan.difficulty || 'beginner',
+                  goal: freshPlan.goal || 'spiermassa',
+                  fitness_goal: (freshPlan.goal?.toLowerCase().includes('droog') ? 'droogtrainen' : 
+                                freshPlan.goal?.toLowerCase().includes('massa') ? 'spiermassa' : 'onderhoud') as any,
+                  is_featured: freshPlan.is_featured || false,
+                  is_public: freshPlan.is_public !== false,
+                  daily_plans: (freshPlan as any).meals?.weekly_plan 
+                    ? convertWeeklyPlanToDailyPlans((freshPlan as any).meals.weekly_plan)
+                    : []
+                });
+                return;
+              }
+            }
+            
+            // Fallback to prop data if API fails
+            console.log('⚠️ Using fallback prop data for carnivore plan');
+            loadPlanFromProps();
+          })
+          .catch(error => {
+            console.error('❌ Error fetching fresh carnivore data:', error);
+            loadPlanFromProps();
+          });
+      } else {
+        loadPlanFromProps();
+      }
 
-      setFormData({
-        id: plan.id,
-        name: plan.name || '',
-        description: plan.description || '',
-        target_calories: targetCalories,
-        target_protein: targetProtein,
-        target_carbs: targetCarbs,
-        target_fat: targetFat,
-        duration_weeks: plan.duration_weeks || 12,
-        difficulty: plan.difficulty || 'beginner',
-        goal: plan.goal || 'spiermassa',
-        fitness_goal: (plan.goal?.toLowerCase().includes('droog') ? 'droogtrainen' : 
-                      plan.goal?.toLowerCase().includes('massa') ? 'spiermassa' : 'onderhoud') as any,
-        is_featured: plan.is_featured || false,
-        is_public: plan.is_public !== false,
-        daily_plans: (plan as any).meals?.weekly_plan 
-          ? convertWeeklyPlanToDailyPlans((plan as any).meals.weekly_plan)
-          : []
-      });
+      function loadPlanFromProps() {
+        // Use data from plan.meals if available, otherwise fallback to plan properties
+        const targetCalories = (plan as any).meals?.target_calories || plan.target_calories || 2200;
+        const targetProtein = (plan as any).meals?.target_protein || plan.target_protein || 165;
+        const targetCarbs = (plan as any).meals?.target_carbs || plan.target_carbs || 220;
+        const targetFat = (plan as any).meals?.target_fat || plan.target_fat || 73;
 
-      console.log('✅ PlanBuilder: Plan data loaded with macros:', {
-        calories: targetCalories,
-        protein: targetProtein,
-        carbs: targetCarbs,
-        fat: targetFat
-      });
+        setFormData({
+          id: plan.id,
+          name: plan.name || '',
+          description: plan.description || '',
+          target_calories: targetCalories,
+          target_protein: targetProtein,
+          target_carbs: targetCarbs,
+          target_fat: targetFat,
+          duration_weeks: plan.duration_weeks || 12,
+          difficulty: plan.difficulty || 'beginner',
+          goal: plan.goal || 'spiermassa',
+          fitness_goal: (plan.goal?.toLowerCase().includes('droog') ? 'droogtrainen' : 
+                        plan.goal?.toLowerCase().includes('massa') ? 'spiermassa' : 'onderhoud') as any,
+          is_featured: plan.is_featured || false,
+          is_public: plan.is_public !== false,
+          daily_plans: (plan as any).meals?.weekly_plan 
+            ? convertWeeklyPlanToDailyPlans((plan as any).meals.weekly_plan)
+            : []
+        });
+
+        console.log('✅ PlanBuilder: Plan data loaded with macros:', {
+          calories: targetCalories,
+          protein: targetProtein,
+          carbs: targetCarbs,
+          fat: targetFat
+        });
+      }
     } else if (isOpen && !plan) {
       // Reset to default when opening without a plan
       console.log('🔄 PlanBuilder: Resetting to default values');
@@ -216,15 +274,40 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
       }
     };
     
+    // Voor carnivoor plannen: gebruik 45/5/50% verdeling voor droogtrainen en onderhoud
+    if (isCarnivore && (fitnessGoal === 'droogtrainen' || fitnessGoal === 'onderhoud')) {
+      const targetCalories = configs[fitnessGoal].calories;
+      
+      // 45% eiwit, 5% koolhydraten, 50% vet
+      const protein45 = Math.round((targetCalories * 0.45) / 4); // 45% van calories
+      const carbs5 = Math.round((targetCalories * 0.05) / 4);    // 5% van calories
+      const fat50 = Math.round((targetCalories * 0.50) / 9);     // 50% van calories
+      
+      configs[fitnessGoal] = {
+        ...configs[fitnessGoal],
+        protein: protein45,
+        carbs: carbs5,
+        fat: fat50
+      };
+    }
+    
     const config = configs[fitnessGoal];
-    const remainingCalories = config.calories - (config.protein * 4) - (config.carbs * 4);
-    const fat = Math.round(remainingCalories / 9);
+    
+    // Voor carnivoor plannen met custom macro verdeling, gebruik de voorgedefinieerde fat waarde
+    let calculatedFat;
+    if (isCarnivore && (fitnessGoal === 'droogtrainen' || fitnessGoal === 'onderhoud') && config.fat) {
+      calculatedFat = config.fat; // Gebruik de 50% fat berekening
+    } else {
+      // Standaard berekening voor andere plannen
+      const remainingCalories = config.calories - (config.protein * 4) - (config.carbs * 4);
+      calculatedFat = Math.max(Math.round(remainingCalories / 9), 60); // Minimum 60g vet
+    }
     
     return {
       target_calories: config.calories,
       target_protein: config.protein,
       target_carbs: config.carbs,
-      target_fat: Math.max(fat, 60), // Minimum 60g vet
+      target_fat: calculatedFat,
       description: config.description
     };
   };
@@ -706,6 +789,8 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
     const currentMeal = currentDay?.meals?.[mealType as keyof typeof currentDay.meals];
     
     console.log('📊 Current meal data:', currentMeal);
+    console.log('🧩 Current meal ingredients structure:', currentMeal?.ingredients);
+    console.log('🧩 Current meal suggestions structure:', (currentMeal as any)?.suggestions);
     
     setEditingMealType(mealType);
     setEditingMeal(currentMeal || null);
@@ -716,6 +801,7 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
     console.log('💾 Saving meal:', meal);
     console.log('📅 Selected day:', selectedDay);
     console.log('🍽️ Meal type:', editingMealType);
+    console.log('🧩 Saving meal ingredients with units:', meal.ingredients?.map(ing => ({name: ing.name, amount: ing.amount, unit: ing.unit})));
     
     // Update the form data with the new meal
     setFormData(prev => ({
@@ -791,6 +877,24 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
   };
 
   const { proteinPct, carbsPct, fatPct } = calculateMacroPercentages();
+  
+  // Debug logging for macro percentages
+  console.log('🧮 PlanBuilder current formData macros:', {
+    calories: formData.target_calories,
+    protein: formData.target_protein,
+    carbs: formData.target_carbs,
+    fat: formData.target_fat,
+    percentages: { proteinPct, carbsPct, fatPct }
+  });
+  
+  // Extra debugging for carnivore plans
+  if (formData.name?.toLowerCase().includes('carnivoor')) {
+    const isCarnivoreExpected = (proteinPct === 45 && carbsPct === 5 && fatPct === 50);
+    console.log(`🥩 Carnivore plan "${formData.name}" percentages ${isCarnivoreExpected ? '✅ CORRECT' : '❌ WRONG'}:`, {
+      expected: '45% protein, 5% carbs, 50% fat',
+      actual: `${proteinPct}% protein, ${carbsPct}% carbs, ${fatPct}% fat`
+    });
+  }
 
   const getCurrentDayPlan = () => {
     return formData.daily_plans?.find(dp => dp.day === selectedDay);
@@ -1503,9 +1607,48 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                                       </thead>
                                       <tbody>
                                         {meal.ingredients.map((ingredient: any, idx: number) => {
+                                          // Apply legacy unit correction for display
+                                          const correctedIngredient = (() => {
+                                            // Check if this ingredient exists in database with different unit_type
+                                            const dbIngredient = localFoodItems.find(db => 
+                                              db.name.toLowerCase() === ingredient.name.toLowerCase()
+                                            );
+
+                                            if (dbIngredient) {
+                                              const correctUnit = dbIngredient.unit_type === 'per_piece' ? 'stuk' :
+                                                                 dbIngredient.unit_type === 'per_handful' ? 'handje' :
+                                                                 dbIngredient.unit_type === 'per_30g' ? 'g' : 'g';
+                                              const correctAmount = dbIngredient.unit_type === 'per_piece' ? 1 :
+                                                                   dbIngredient.unit_type === 'per_handful' ? 1 :
+                                                                   dbIngredient.unit_type === 'per_30g' ? 30 : ingredient.amount;
+
+                                              // Check if current ingredient has wrong unit for per_piece items
+                                              if (dbIngredient.unit_type === 'per_piece' && ingredient.unit === 'g') {
+                                                console.log(`🔧 Daily Plans: Correcting ${ingredient.name} from ${ingredient.amount}g to ${correctAmount}${correctUnit}`);
+                                                return {
+                                                  ...ingredient,
+                                                  amount: correctAmount,
+                                                  unit: correctUnit
+                                                };
+                                              }
+                                              
+                                              // Check if current ingredient has wrong unit for per_handful items
+                                              if (dbIngredient.unit_type === 'per_handful' && ingredient.unit === 'g') {
+                                                console.log(`🔧 Daily Plans: Correcting ${ingredient.name} from ${ingredient.amount}g to ${correctAmount}${correctUnit}`);
+                                                return {
+                                                  ...ingredient,
+                                                  amount: correctAmount,
+                                                  unit: correctUnit
+                                                };
+                                              }
+                                            }
+
+                                            return ingredient;
+                                          })();
+
                                           // Calculate nutrition values for this ingredient based on unit type
-                                          const amount = ingredient.amount || 0;
-                                          const unit = ingredient.unit || 'g';
+                                          const amount = correctedIngredient.amount || 0;
+                                          const unit = correctedIngredient.unit || 'g';
                                           
                                           // Calculate multiplier based on unit type
                                           let multiplier = amount / 100; // default per 100g basis
@@ -1536,8 +1679,8 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                                           
                                           return (
                                             <tr key={idx} className="border-b border-[#3A4D23] hover:bg-[#232D1A]/50">
-                                              <td className="p-2 text-[#B6C948]">{ingredient.name}</td>
-                                              <td className="p-2 text-center text-[#8BAE5A]">{amount}{ingredient.unit || 'g'}</td>
+                                              <td className="p-2 text-[#B6C948]">{correctedIngredient.name}</td>
+                                              <td className="p-2 text-center text-[#8BAE5A]">{amount}{correctedIngredient.unit || 'g'}</td>
                                               <td className="p-2 text-center text-[#8BAE5A]">{calories}</td>
                                               <td className="p-2 text-center text-[#8BAE5A]">{protein}g</td>
                                               <td className="p-2 text-center text-[#8BAE5A]">{carbs}g</td>

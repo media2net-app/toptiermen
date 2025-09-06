@@ -78,6 +78,59 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
     }
   };
 
+  // Function to detect and correct legacy ingredient units
+  const correctLegacyIngredientUnits = (ingredients: any[]) => {
+    if (!ingredients || ingredients.length === 0 || ingredientsDatabase.length === 0) return ingredients;
+
+    console.log('🔧 Checking for legacy unit corrections...');
+    
+    const correctedIngredients = ingredients.map((ingredient) => {
+      // Check if this ingredient exists in database with different unit_type
+      const dbIngredient = ingredientsDatabase.find(db => 
+        db.name.toLowerCase() === ingredient.name.toLowerCase()
+      );
+
+      if (dbIngredient) {
+        const correctUnit = getUnitLabel(dbIngredient);
+        const correctAmount = getDefaultAmountForUnit(dbIngredient);
+
+        // Check if current ingredient has wrong unit for per_piece items
+        if (dbIngredient.unit_type === 'per_piece' && ingredient.unit === 'g') {
+          console.log(`🔧 Correcting legacy unit for ${ingredient.name}: ${ingredient.amount}g → ${correctAmount} ${correctUnit}`);
+          return {
+            ...ingredient,
+            amount: correctAmount,
+            unit: correctUnit
+          };
+        }
+        
+        // Check if current ingredient has wrong unit for per_handful items
+        if (dbIngredient.unit_type === 'per_handful' && ingredient.unit === 'g') {
+          console.log(`🔧 Correcting legacy unit for ${ingredient.name}: ${ingredient.amount}g → ${correctAmount} ${correctUnit}`);
+          return {
+            ...ingredient,
+            amount: correctAmount,
+            unit: correctUnit
+          };
+        }
+        
+        // Check if current ingredient has wrong unit for per_30g items
+        if (dbIngredient.unit_type === 'per_30g' && ingredient.unit !== 'g') {
+          console.log(`🔧 Correcting legacy unit for ${ingredient.name}: ${ingredient.amount}${ingredient.unit} → ${correctAmount}g`);
+          return {
+            ...ingredient,
+            amount: correctAmount,
+            unit: 'g'
+          };
+        }
+      }
+
+      return ingredient;
+    });
+
+    return correctedIngredients;
+  };
+
   const getDefaultAmountForUnit = (ingredient: DatabaseIngredient) => {
     switch (ingredient.unit_type) {
       case 'per_piece': return 1; // 1 stuk
@@ -164,33 +217,66 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
   }, [isOpen]);
 
   useEffect(() => {
+    // Only process meal data when ingredients database is loaded
+    if (!meal || ingredientsDatabase.length === 0) return;
+    
     console.log('🍽️ MealEditModal: Loading meal data:', meal);
     console.log('🔍 MealEditModal: Meal type:', mealType);
+    console.log('🧩 MealEditModal: Meal ingredients structure:', meal?.ingredients);
+    console.log('🧩 MealEditModal: Meal suggestions structure:', (meal as any)?.suggestions);
     
     if (meal) {
-      // If meal has suggestions (from daily_plans conversion), convert them to ingredients
-      if ((meal as any).suggestions && Array.isArray((meal as any).suggestions) && (meal as any).suggestions.length > 0) {
+      // First priority: use meal.ingredients if they exist and have valid data
+      if (meal.ingredients && Array.isArray(meal.ingredients) && meal.ingredients.length > 0) {
+        console.log('📋 Using existing meal ingredients:', meal.ingredients);
+        
+        // Apply legacy unit corrections if needed
+        const correctedIngredients = correctLegacyIngredientUnits(meal.ingredients);
+        setFormData({
+          ...meal,
+          ingredients: correctedIngredients
+        });
+      }
+      // Second priority: convert suggestions to ingredients (legacy format)
+      else if ((meal as any).suggestions && Array.isArray((meal as any).suggestions) && (meal as any).suggestions.length > 0) {
         console.log('📋 Converting suggestions to ingredients:', (meal as any).suggestions);
         
         const convertedIngredients = (meal as any).suggestions.map((suggestion: string, index: number) => {
-          // Parse suggestion format: "Runderlever (43.35g)"
+          // Parse suggestion format: "Runderlever (43.35g)" or "1 Ei (1stuk)" 
           const match = suggestion.match(/^(.+)\s*\((.+)\)$/);
           if (match) {
             const [, name, amountWithUnit] = match;
-            const amountMatch = amountWithUnit.match(/^([\d.,]+)(\w+)$/);
-            if (amountMatch) {
-              const [, amount, unit] = amountMatch;
-              return {
-                id: `ingredient-${index}`,
-                name: name.trim(),
-                amount: parseFloat(amount.replace(',', '.')),
-                unit: unit,
-                calories: 0, // Will be calculated
-                protein: 0,
-                carbs: 0,
-                fat: 0
-              };
+            // Handle different formats: "43.35g", "1stuk", "1handje", "30g"
+            let amount = 1;
+            let unit = 'g';
+            
+            if (amountWithUnit.includes('stuk')) {
+              const amountMatch = amountWithUnit.match(/^([\d.,]+)stuk$/);
+              amount = amountMatch ? parseFloat(amountMatch[1].replace(',', '.')) : 1;
+              unit = 'stuk';
+            } else if (amountWithUnit.includes('handje')) {
+              const amountMatch = amountWithUnit.match(/^([\d.,]+)handje$/);
+              amount = amountMatch ? parseFloat(amountMatch[1].replace(',', '.')) : 1;
+              unit = 'handje';
+            } else {
+              // Default to grams
+              const amountMatch = amountWithUnit.match(/^([\d.,]+)(\w+)$/);
+              if (amountMatch) {
+                amount = parseFloat(amountMatch[1].replace(',', '.'));
+                unit = amountMatch[2];
+              }
             }
+            
+            return {
+              id: `ingredient-${index}`,
+              name: name.trim(),
+              amount: amount,
+              unit: unit,
+              calories: 0, // Will be calculated
+              protein: 0,
+              carbs: 0,
+              fat: 0
+            };
           }
           
           // Fallback for malformed suggestions
@@ -206,14 +292,17 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
           };
         });
         
+        // Apply legacy unit corrections to converted ingredients too
+        const correctedIngredients = correctLegacyIngredientUnits(convertedIngredients);
         setFormData({
           ...meal,
-          ingredients: convertedIngredients
+          ingredients: correctedIngredients
         });
       } else {
+        // No ingredients or suggestions, start fresh
         setFormData({
           ...meal,
-          ingredients: meal.ingredients || []
+          ingredients: []
         });
       }
     } else {
@@ -228,7 +317,7 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
         ingredients: []
       });
     }
-  }, [meal, mealType]);
+  }, [meal, mealType, ingredientsDatabase]);
 
   // Recalculate nutrition when ingredients database is loaded and we have ingredients
   useEffect(() => {
@@ -408,7 +497,7 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
       fat: totalNutrition.fat
     }));
     
-    console.log('✅ Added ingredient from database:', dbIngredient.name);
+    console.log('✅ Added ingredient from database:', dbIngredient.name, 'with unit:', unit, 'amount:', defaultAmount);
   };
 
   const removeIngredient = (index: number) => {
