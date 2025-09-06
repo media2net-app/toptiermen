@@ -1219,9 +1219,10 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                   </div>
                   <input
                     type="number"
-                    value={macroPercentages.protein.toFixed(1)}
+                    value={macroPercentages.protein.toFixed(1).replace('.', ',')}
                     onChange={(e) => {
-                      const newPercent = parseFloat(e.target.value) || 0;
+                      const value = e.target.value.replace(',', '.');
+                      const newPercent = parseFloat(value) || 0;
                       setMacroPercentages(prev => ({ ...prev, protein: newPercent }));
                       const newProtein = Math.round(((formData.target_calories || 2500) * newPercent / 100) / 4);
                       handleInputChange('target_protein', newProtein);
@@ -1243,9 +1244,10 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                   </div>
                   <input
                     type="number"
-                    value={macroPercentages.carbs.toFixed(1)}
+                    value={macroPercentages.carbs.toFixed(1).replace('.', ',')}
                     onChange={(e) => {
-                      const newPercent = parseFloat(e.target.value) || 0;
+                      const value = e.target.value.replace(',', '.');
+                      const newPercent = parseFloat(value) || 0;
                       setMacroPercentages(prev => ({ ...prev, carbs: newPercent }));
                       const newCarbs = Math.round(((formData.target_calories || 2500) * newPercent / 100) / 4);
                       handleInputChange('target_carbs', newCarbs);
@@ -1267,9 +1269,10 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                   </div>
                   <input
                     type="number"
-                    value={macroPercentages.fat.toFixed(1)}
+                    value={macroPercentages.fat.toFixed(1).replace('.', ',')}
                     onChange={(e) => {
-                      const newPercent = parseFloat(e.target.value) || 0;
+                      const value = e.target.value.replace(',', '.');
+                      const newPercent = parseFloat(value) || 0;
                       setMacroPercentages(prev => ({ ...prev, fat: newPercent }));
                       const newFat = Math.round(((formData.target_calories || 2500) * newPercent / 100) / 9);
                       handleInputChange('target_fat', newFat);
