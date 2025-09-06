@@ -777,33 +777,38 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
           ontbijt: createMealObject(dayPlan.meals.ontbijt, '07:00'),
           lunch: createMealObject(dayPlan.meals.lunch, '12:00'),
           diner: createMealObject(dayPlan.meals.diner, '18:00'),
-          snack: createMealObject(dayPlan.meals.snack1, '15:00') // Use snack1 as main snack
+          snack: createMealObject(dayPlan.meals.snack1, '15:00'), // Use snack1 as main snack
+          avondsnack: createMealObject(dayPlan.meals.avondsnack, '21:30') // Add avondsnack
         };
         
-        // Calculate daily totals
+        // Calculate daily totals (including avondsnack)
         const totalCalories = (dayPlan.meals.ontbijt?.calories || 0) + 
                              (dayPlan.meals.snack1?.calories || 0) + 
                              (dayPlan.meals.lunch?.calories || 0) + 
                              (dayPlan.meals.snack2?.calories || 0) + 
-                             (dayPlan.meals.diner?.calories || 0);
+                             (dayPlan.meals.diner?.calories || 0) + 
+                             (dayPlan.meals.avondsnack?.calories || 0);
         
         const totalProtein = (dayPlan.meals.ontbijt?.protein || 0) + 
                             (dayPlan.meals.snack1?.protein || 0) + 
                             (dayPlan.meals.lunch?.protein || 0) + 
                             (dayPlan.meals.snack2?.protein || 0) + 
-                            (dayPlan.meals.diner?.protein || 0);
+                            (dayPlan.meals.diner?.protein || 0) + 
+                            (dayPlan.meals.avondsnack?.protein || 0);
         
         const totalCarbs = (dayPlan.meals.ontbijt?.carbs || 0) + 
                           (dayPlan.meals.snack1?.carbs || 0) + 
                           (dayPlan.meals.lunch?.carbs || 0) + 
                           (dayPlan.meals.snack2?.carbs || 0) + 
-                          (dayPlan.meals.diner?.carbs || 0);
+                          (dayPlan.meals.diner?.carbs || 0) + 
+                          (dayPlan.meals.avondsnack?.carbs || 0);
         
         const totalFat = (dayPlan.meals.ontbijt?.fat || 0) + 
                         (dayPlan.meals.snack1?.fat || 0) + 
                         (dayPlan.meals.lunch?.fat || 0) + 
                         (dayPlan.meals.snack2?.fat || 0) + 
-                        (dayPlan.meals.diner?.fat || 0);
+                        (dayPlan.meals.diner?.fat || 0) + 
+                        (dayPlan.meals.avondsnack?.fat || 0);
         
         dayMeals.dailyTotals = {
           calories: Math.round(totalCalories),

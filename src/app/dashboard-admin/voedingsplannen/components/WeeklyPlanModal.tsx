@@ -283,6 +283,12 @@ export default function WeeklyPlanModal({ isOpen, onClose, plan }: WeeklyPlanMod
             time: '19:00',
             ingredients: dinerIngredients,
             ...dinerNutrition
+          },
+          avondsnack: {
+            name: avondSnackIngredients.length > 0 ? 'Avond Snack' : 'Geen avond snack',
+            time: '21:30',
+            ingredients: avondSnackIngredients,
+            ...avondSnackNutrition
           }
         },
         totalCalories: ontbijtNutrition.calories + ochtendSnackNutrition.calories + lunchNutrition.calories + lunchSnackNutrition.calories + dinerNutrition.calories + avondSnackNutrition.calories,
