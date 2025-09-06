@@ -74,6 +74,7 @@ export default function AdminVoedingsplannenPage() {
   const [selectedFoodItem, setSelectedFoodItem] = useState<FoodItem | null>(null);
   const [selectedMeal, setSelectedMeal] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [carnivoreFilter, setCarnivoreFilter] = useState<'all' | 'yes' | 'no'>('all');
   const [plans, setPlans] = useState<NutritionPlan[]>([]);
   const [weekplans, setWeekplans] = useState<any[]>([]);
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
@@ -448,10 +449,18 @@ export default function AdminVoedingsplannenPage() {
     plan.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const filteredFoodItems = foodItems.filter(item =>
-    item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.category.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredFoodItems = foodItems.filter(item => {
+    // Text search filter
+    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.category.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // Carnivore filter
+    const matchesCarnivore = carnivoreFilter === 'all' || 
+      (carnivoreFilter === 'yes' && (item as any).is_carnivore === true) ||
+      (carnivoreFilter === 'no' && (item as any).is_carnivore !== true);
+    
+    return matchesSearch && matchesCarnivore;
+  });
 
   const filteredMeals = meals.filter(meal =>
     meal.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -525,7 +534,13 @@ export default function AdminVoedingsplannenPage() {
           ].map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => {
+                setActiveTab(tab.id);
+                // Reset carnivore filter when switching tabs
+                if (tab.id !== 'ingredienten') {
+                  setCarnivoreFilter('all');
+                }
+              }}
               className={`px-4 py-2 rounded-lg transition-colors ${
                 activeTab === tab.id
                   ? 'bg-[#8BAE5A] text-[#181F17] font-semibold'
@@ -539,36 +554,75 @@ export default function AdminVoedingsplannenPage() {
 
         {/* Search Bar */}
         <div className="mb-6">
-          <div className="relative">
-            <MagnifyingGlassIcon className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Zoeken naar ingrediënten, voedingsplannen, maaltijden..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-12 py-2 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white placeholder-gray-400 focus:border-[#8BAE5A] focus:outline-none"
-            />
-            {searchTerm && (
-              <button
-                onClick={() => setSearchTerm('')}
-                className="absolute right-3 top-3 w-5 h-5 text-gray-400 hover:text-[#8BAE5A] transition-colors"
-                title="Wis zoekterm"
-              >
-                <XMarkIcon className="w-5 h-5" />
-              </button>
+          <div className="flex gap-4">
+            <div className="relative flex-1">
+              <MagnifyingGlassIcon className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Zoeken naar ingrediënten, voedingsplannen, maaltijden..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-12 py-2 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white placeholder-gray-400 focus:border-[#8BAE5A] focus:outline-none"
+              />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-3 top-3 w-5 h-5 text-gray-400 hover:text-[#8BAE5A] transition-colors"
+                  title="Wis zoekterm"
+                >
+                  <XMarkIcon className="w-5 h-5" />
+                </button>
+              )}
+            </div>
+            
+            {/* Carnivore Filter - Only show on ingredients tab */}
+            {activeTab === 'ingredienten' && (
+              <div className="min-w-[200px]">
+                <select
+                  value={carnivoreFilter}
+                  onChange={(e) => setCarnivoreFilter(e.target.value as 'all' | 'yes' | 'no')}
+                  className="w-full py-2 px-3 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
+                >
+                  <option value="all">Alle ingrediënten</option>
+                  <option value="yes">Alleen carnivoor</option>
+                  <option value="no">Alleen standaard</option>
+                </select>
+              </div>
             )}
           </div>
-          {searchTerm && (
+          {(searchTerm || (activeTab === 'ingredienten' && carnivoreFilter !== 'all')) && (
             <div className="mt-2 text-sm text-gray-400">
-              Zoekresultaten voor: <span className="text-[#8BAE5A] font-medium">"{searchTerm}"</span>
+              {searchTerm && (
+                <span>
+                  Zoekresultaten voor: <span className="text-[#8BAE5A] font-medium">"{searchTerm}"</span>
+                </span>
+              )}
+              {activeTab === 'ingredienten' && carnivoreFilter !== 'all' && (
+                <span className={searchTerm ? 'ml-3' : ''}>
+                  Filter: <span className="text-[#8BAE5A] font-medium">
+                    {carnivoreFilter === 'yes' ? 'Alleen carnivoor' : 'Alleen standaard'}
+                  </span>
+                </span>
+              )}
               {activeTab === 'ingredienten' && filteredFoodItems.length === 0 && (
-                <span className="text-red-400 ml-2">
-                  • Geen ingrediënten gevonden. <button 
-                    onClick={() => setSearchTerm('')} 
-                    className="text-[#8BAE5A] underline hover:text-[#B6C948]"
-                  >
-                    Wis zoekopdracht
-                  </button> om alle ingrediënten te zien.
+                <span className="text-red-400 ml-2 block mt-1">
+                  • Geen ingrediënten gevonden. 
+                  {searchTerm && (
+                    <button 
+                      onClick={() => setSearchTerm('')} 
+                      className="text-[#8BAE5A] underline hover:text-[#B6C948] ml-1"
+                    >
+                      Wis zoekopdracht
+                    </button>
+                  )}
+                  {carnivoreFilter !== 'all' && (
+                    <button 
+                      onClick={() => setCarnivoreFilter('all')} 
+                      className="text-[#8BAE5A] underline hover:text-[#B6C948] ml-1"
+                    >
+                      Wis filter
+                    </button>
+                  )}
                 </span>
               )}
             </div>
