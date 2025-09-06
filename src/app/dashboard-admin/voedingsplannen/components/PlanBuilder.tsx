@@ -1018,11 +1018,11 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                   step="50"
                 />
                 <div className="text-sm mt-1 space-y-1">
-                  {formData.fitness_goal && (
+                {formData.fitness_goal && (
                     <div className="text-[#8BAE5A]">
-                      💡 Calorieën zijn vooraf ingesteld op basis van het fitness doel
-                    </div>
-                  )}
+                    💡 Calorieën zijn vooraf ingesteld op basis van het fitness doel
+                  </div>
+                )}
                   <div className="text-[#B6C948]">
                     🧮 Macro's worden automatisch herberekend bij aanpassing (verhoudingen behouden)
                   </div>
@@ -1203,8 +1203,14 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                     </div>
                     <div className="flex gap-2 mb-4">
                       <span className="px-2 py-1 bg-[#8BAE5A] text-[#181F17] rounded text-xs font-semibold">
-                        Carnivor Animal Based
+                        {formData.name || 'Voedingsplan'}
                       </span>
+                      {formData.fitness_goal && (
+                        <span className="px-2 py-1 bg-[#B6C948] text-[#181F17] rounded text-xs font-semibold">
+                          {formData.fitness_goal === 'droogtrainen' ? '🔥 Droogtrainen' : 
+                           formData.fitness_goal === 'spiermassa' ? '💪 Spiermassa' : '⚖️ Onderhoud'}
+                        </span>
+                      )}
                     </div>
 
                     {/* Daily Totals Summary */}
@@ -1236,10 +1242,10 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                                      (meals?.snack2?.fat || 0) + 
                                      (meals?.diner?.fat || 0);
 
-                      // Get standard profile for comparison
+                      // Get target values from actual plan or fallback to standard profile
                       const isCarnivore = formData.name?.toLowerCase().includes('carnivoor') || false;
                       const standardProfile = getStandardProfile(formData.fitness_goal || 'spiermassa', isCarnivore);
-                      const targetCalories = standardProfile.target_calories;
+                      const targetCalories = formData.target_calories || standardProfile.target_calories;
                       const caloriesDifference = Math.round(totalCalories - targetCalories);
                       const percentageOfTarget = targetCalories > 0 ? Math.round((totalCalories / targetCalories) * 100) : 0;
                       
@@ -1284,19 +1290,19 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                               </div>
                               <div className="grid grid-cols-4 gap-3">
                                 <div className="bg-[#181F17] rounded-lg p-3 border border-[#3A4D23] text-center">
-                                  <div className="text-[#8BAE5A] font-bold text-lg">{targetCalories}</div>
+                                  <div className="text-[#8BAE5A] font-bold text-lg">{formData.target_calories || targetCalories}</div>
                                   <div className="text-[#B6C948] text-xs">Calorieën</div>
                                 </div>
                                 <div className="bg-[#181F17] rounded-lg p-3 border border-[#3A4D23] text-center">
-                                  <div className="text-[#8BAE5A] font-bold text-lg">{standardProfile.target_protein}g</div>
+                                  <div className="text-[#8BAE5A] font-bold text-lg">{formData.target_protein || standardProfile.target_protein}g</div>
                                   <div className="text-[#B6C948] text-xs">Protein</div>
                                 </div>
                                 <div className="bg-[#181F17] rounded-lg p-3 border border-[#3A4D23] text-center">
-                                  <div className="text-[#8BAE5A] font-bold text-lg">{standardProfile.target_carbs}g</div>
+                                  <div className="text-[#8BAE5A] font-bold text-lg">{formData.target_carbs || standardProfile.target_carbs}g</div>
                                   <div className="text-[#B6C948] text-xs">Carbs</div>
                                 </div>
                                 <div className="bg-[#181F17] rounded-lg p-3 border border-[#3A4D23] text-center">
-                                  <div className="text-[#8BAE5A] font-bold text-lg">{standardProfile.target_fat}g</div>
+                                  <div className="text-[#8BAE5A] font-bold text-lg">{formData.target_fat || standardProfile.target_fat}g</div>
                                   <div className="text-[#B6C948] text-xs">Fat</div>
                                 </div>
                               </div>
@@ -1322,49 +1328,73 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                                   )}
                                 </div>
                                 <div className="bg-[#181F17] rounded-lg p-3 border border-[#3A4D23] text-center">
-                                  <div className={`font-bold text-lg ${
-                                    Math.abs(totalProtein - standardProfile.target_protein) > (standardProfile.target_protein * 0.2) ? 'text-red-400' : 
-                                    (totalProtein - standardProfile.target_protein) >= 0 ? 'text-[#8BAE5A]' : 'text-orange-400'
-                                  }`}>
-                                    {(totalProtein - standardProfile.target_protein) >= 0 ? '+' : ''}{Math.round((totalProtein - standardProfile.target_protein) * 10) / 10}g
-                                  </div>
-                                  <div className="text-[#B6C948] text-xs">Protein</div>
-                                  <div className="text-xs text-gray-400">
-                                    {standardProfile.target_protein > 0 ? Math.round((totalProtein / standardProfile.target_protein) * 100) : 0}%
-                                  </div>
-                                  {Math.abs(totalProtein - standardProfile.target_protein) > (standardProfile.target_protein * 0.2) && (
-                                    <div className="text-xs text-red-400 mt-1 font-semibold">⚠️ BUITEN MARGE</div>
-                                  )}
+                                  {(() => {
+                                    const targetProtein = formData.target_protein || standardProfile.target_protein;
+                                    const proteinDiff = totalProtein - targetProtein;
+                                    return (
+                                      <>
+                                        <div className={`font-bold text-lg ${
+                                          Math.abs(proteinDiff) > (targetProtein * 0.2) ? 'text-red-400' : 
+                                          proteinDiff >= 0 ? 'text-[#8BAE5A]' : 'text-orange-400'
+                                        }`}>
+                                          {proteinDiff >= 0 ? '+' : ''}{Math.round(proteinDiff * 10) / 10}g
+                                        </div>
+                                        <div className="text-[#B6C948] text-xs">Protein</div>
+                                        <div className="text-xs text-gray-400">
+                                          {targetProtein > 0 ? Math.round((totalProtein / targetProtein) * 100) : 0}%
+                                        </div>
+                                        {Math.abs(proteinDiff) > (targetProtein * 0.2) && (
+                                          <div className="text-xs text-red-400 mt-1 font-semibold">⚠️ BUITEN MARGE</div>
+                                        )}
+                                      </>
+                                    );
+                                  })()}
                                 </div>
                                 <div className="bg-[#181F17] rounded-lg p-3 border border-[#3A4D23] text-center">
-                                  <div className={`font-bold text-lg ${
-                                    Math.abs(totalCarbs - standardProfile.target_carbs) > Math.max(5, standardProfile.target_carbs * 0.5) ? 'text-red-400' : 
-                                    (totalCarbs - standardProfile.target_carbs) >= 0 ? 'text-[#8BAE5A]' : 'text-orange-400'
-                                  }`}>
-                                    {(totalCarbs - standardProfile.target_carbs) >= 0 ? '+' : ''}{Math.round((totalCarbs - standardProfile.target_carbs) * 10) / 10}g
-                                  </div>
-                                  <div className="text-[#B6C948] text-xs">Carbs</div>
-                                  <div className="text-xs text-gray-400">
-                                    {standardProfile.target_carbs > 0 ? Math.round((totalCarbs / standardProfile.target_carbs) * 100) : 0}%
-                                  </div>
-                                  {Math.abs(totalCarbs - standardProfile.target_carbs) > Math.max(5, standardProfile.target_carbs * 0.5) && (
-                                    <div className="text-xs text-red-400 mt-1 font-semibold">⚠️ BUITEN MARGE</div>
-                                  )}
+                                  {(() => {
+                                    const targetCarbs = formData.target_carbs || standardProfile.target_carbs;
+                                    const carbsDiff = totalCarbs - targetCarbs;
+                                    return (
+                                      <>
+                                        <div className={`font-bold text-lg ${
+                                          Math.abs(carbsDiff) > Math.max(5, targetCarbs * 0.5) ? 'text-red-400' : 
+                                          carbsDiff >= 0 ? 'text-[#8BAE5A]' : 'text-orange-400'
+                                        }`}>
+                                          {carbsDiff >= 0 ? '+' : ''}{Math.round(carbsDiff * 10) / 10}g
+                                        </div>
+                                        <div className="text-[#B6C948] text-xs">Carbs</div>
+                                        <div className="text-xs text-gray-400">
+                                          {targetCarbs > 0 ? Math.round((totalCarbs / targetCarbs) * 100) : 0}%
+                                        </div>
+                                        {Math.abs(carbsDiff) > Math.max(5, targetCarbs * 0.5) && (
+                                          <div className="text-xs text-red-400 mt-1 font-semibold">⚠️ BUITEN MARGE</div>
+                                        )}
+                                      </>
+                                    );
+                                  })()}
                                 </div>
                                 <div className="bg-[#181F17] rounded-lg p-3 border border-[#3A4D23] text-center">
-                                  <div className={`font-bold text-lg ${
-                                    Math.abs(totalFat - standardProfile.target_fat) > (standardProfile.target_fat * 0.25) ? 'text-red-400' : 
-                                    (totalFat - standardProfile.target_fat) >= 0 ? 'text-[#8BAE5A]' : 'text-orange-400'
-                                  }`}>
-                                    {(totalFat - standardProfile.target_fat) >= 0 ? '+' : ''}{Math.round((totalFat - standardProfile.target_fat) * 10) / 10}g
-                                  </div>
-                                  <div className="text-[#B6C948] text-xs">Fat</div>
-                                  <div className="text-xs text-gray-400">
-                                    {standardProfile.target_fat > 0 ? Math.round((totalFat / standardProfile.target_fat) * 100) : 0}%
-                                  </div>
-                                  {Math.abs(totalFat - standardProfile.target_fat) > (standardProfile.target_fat * 0.25) && (
-                                    <div className="text-xs text-red-400 mt-1 font-semibold">⚠️ BUITEN MARGE</div>
-                                  )}
+                                  {(() => {
+                                    const targetFat = formData.target_fat || standardProfile.target_fat;
+                                    const fatDiff = totalFat - targetFat;
+                                    return (
+                                      <>
+                                        <div className={`font-bold text-lg ${
+                                          Math.abs(fatDiff) > (targetFat * 0.25) ? 'text-red-400' : 
+                                          fatDiff >= 0 ? 'text-[#8BAE5A]' : 'text-orange-400'
+                                        }`}>
+                                          {fatDiff >= 0 ? '+' : ''}{Math.round(fatDiff * 10) / 10}g
+                                        </div>
+                                        <div className="text-[#B6C948] text-xs">Fat</div>
+                                        <div className="text-xs text-gray-400">
+                                          {targetFat > 0 ? Math.round((totalFat / targetFat) * 100) : 0}%
+                                        </div>
+                                        {Math.abs(fatDiff) > (targetFat * 0.25) && (
+                                          <div className="text-xs text-red-400 mt-1 font-semibold">⚠️ BUITEN MARGE</div>
+                                        )}
+                                      </>
+                                    );
+                                  })()}
                                 </div>
                               </div>
                             </div>
@@ -1517,7 +1547,7 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                                         })}
                                       </tbody>
                                     </table>
-                                  </div>
+                                    </div>
                                 </div>
                               </div>
                             ) : (
