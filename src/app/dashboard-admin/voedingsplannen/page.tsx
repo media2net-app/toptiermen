@@ -37,9 +37,20 @@ interface FoodItem {
   description: string;
   is_active: boolean;
   is_carnivore?: boolean;
+  unit_type?: 'per_100g' | 'per_piece' | 'per_handful' | 'per_30g';
   created_at: string;
   updated_at: string;
 }
+
+const getUnitTypeLabel = (unitType?: 'per_100g' | 'per_piece' | 'per_handful' | 'per_30g') => {
+  switch (unitType) {
+    case 'per_piece': return 'Per stuk';
+    case 'per_handful': return 'Per handje';
+    case 'per_30g': return 'Per 30 gram';
+    case 'per_100g':
+    default: return 'Per 100 gram';
+  }
+};
 
 interface MealStructure {
   mealType: string;
@@ -661,28 +672,28 @@ export default function AdminVoedingsplannenPage() {
                      <h3 className="text-lg font-semibold text-[#8BAE5A] mb-2">{plan.name}</h3>
                      <p className="text-gray-300 text-sm mb-4">{plan.description}</p>
                      
-                     {plan.target_calories && (
+                     {((plan as any).meals?.target_calories || plan.target_calories) && (
                        <div className="grid grid-cols-2 gap-4 text-sm mb-4">
                          <div>
                            <span className="text-gray-400">Calorieën:</span>
-                           <span className="ml-2 font-medium text-white">{plan.target_calories} kcal</span>
+                           <span className="ml-2 font-medium text-white">{(plan as any).meals?.target_calories || plan.target_calories} kcal</span>
                          </div>
-                         {plan.target_protein && (
+                         {((plan as any).meals?.target_protein || plan.target_protein) && (
                            <div>
                              <span className="text-gray-400">Eiwit:</span>
-                             <span className="ml-2 font-medium text-white">{plan.target_protein}g</span>
+                             <span className="ml-2 font-medium text-white">{(plan as any).meals?.target_protein || plan.target_protein}g</span>
                            </div>
                          )}
-                         {plan.target_carbs && (
+                         {((plan as any).meals?.target_carbs || plan.target_carbs) && (
                            <div>
                              <span className="text-gray-400">Koolhydraten:</span>
-                             <span className="ml-2 font-medium text-white">{plan.target_carbs}g</span>
+                             <span className="ml-2 font-medium text-white">{(plan as any).meals?.target_carbs || plan.target_carbs}g</span>
                            </div>
                          )}
-                         {plan.target_fat && (
+                         {((plan as any).meals?.target_fat || plan.target_fat) && (
                            <div>
                              <span className="text-gray-400">Vet:</span>
-                             <span className="ml-2 font-medium text-white">{plan.target_fat}g</span>
+                             <span className="ml-2 font-medium text-white">{(plan as any).meals?.target_fat || plan.target_fat}g</span>
                            </div>
                          )}
                        </div>
@@ -759,10 +770,11 @@ export default function AdminVoedingsplannenPage() {
             ) : (
               <div className="bg-[#232D1A] rounded-lg border border-[#3A4D23]/40 overflow-hidden">
                 {/* Desktop Table Header */}
-                <div className="hidden lg:grid grid-cols-12 gap-3 p-4 bg-[#1A2313] border-b border-[#3A4D23]/40 text-sm font-semibold text-[#8BAE5A]">
+                <div className="hidden lg:grid grid-cols-13 gap-3 p-4 bg-[#1A2313] border-b border-[#3A4D23]/40 text-sm font-semibold text-[#8BAE5A]">
                   <div className="col-span-2">Naam</div>
                   <div className="col-span-2">Categorie</div>
                   <div className="col-span-1">Carnivoor</div>
+                  <div className="col-span-1">Type</div>
                   <div className="col-span-1">Kcal/100g</div>
                   <div className="col-span-1">Protein</div>
                   <div className="col-span-1">Carbs</div>
@@ -775,7 +787,7 @@ export default function AdminVoedingsplannenPage() {
                   {filteredFoodItems.map((item) => (
                     <div key={item.id}>
                       {/* Desktop View */}
-                      <div className="hidden lg:grid grid-cols-12 gap-3 p-4 hover:bg-[#1A2313] transition-colors">
+                      <div className="hidden lg:grid grid-cols-13 gap-3 p-4 hover:bg-[#1A2313] transition-colors">
                         <div className="col-span-2">
                           <h3 className="text-white font-medium">{item.name}</h3>
                         </div>
@@ -789,6 +801,11 @@ export default function AdminVoedingsplannenPage() {
                               : 'bg-gray-600/20 text-gray-400 border border-gray-600/30'
                           }`}>
                             {(item as any).is_carnivore ? 'Ja' : 'Nee'}
+                          </span>
+                        </div>
+                        <div className="col-span-1 text-center">
+                          <span className="text-xs px-2 py-1 rounded-md bg-blue-600/20 text-blue-400 border border-blue-600/30 font-medium">
+                            {getUnitTypeLabel((item as any).unit_type)}
                           </span>
                         </div>
                         <div className="col-span-1 text-center">
@@ -838,6 +855,9 @@ export default function AdminVoedingsplannenPage() {
                                   : 'bg-gray-600/20 text-gray-400 border border-gray-600/30'
                               }`}>
                                 {(item as any).is_carnivore ? 'Carnivoor' : 'Standaard'}
+                              </span>
+                              <span className="text-xs px-2 py-1 rounded-md bg-blue-600/20 text-blue-400 border border-blue-600/30 font-medium">
+                                {getUnitTypeLabel((item as any).unit_type)}
                               </span>
                             </div>
                           </div>

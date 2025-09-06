@@ -13,6 +13,7 @@ interface FoodItem {
   description: string;
   is_active: boolean;
   is_carnivore?: boolean;
+  unit_type?: 'per_100g' | 'per_piece' | 'per_handful' | 'per_30g';
   created_at: string;
   updated_at: string;
 }
@@ -34,14 +35,35 @@ export default function FoodItemModal({ isOpen, onClose, foodItem, onSave }: Foo
     fat_per_100g: 0,
     description: '',
     is_active: true,
-    is_carnivore: false
+    is_carnivore: false,
+    unit_type: 'per_100g'
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
   const categories = [
-    'Granen', 'Eiwitten', 'Vetten', 'Fruit', 'Zuivel', 'Vlees', 'Vis', 'Groente', 'Noten', 'Carnivoor', 'Eieren'
+    'Granen', 'Eiwitten', 'Vetten', 'Fruit', 'Zuivel', 'Vlees', 'Vis', 'Groente', 'Noten', 'Carnivoor', 'Eieren', 'Supplementen'
   ];
+
+  const getUnitLabel = (unitType: string) => {
+    switch (unitType) {
+      case 'per_piece': return 'per stuk';
+      case 'per_handful': return 'per handje';
+      case 'per_30g': return 'per 30g';
+      case 'per_100g':
+      default: return 'per 100g';
+    }
+  };
+
+  const getNutritionLabel = (unitType: string) => {
+    switch (unitType) {
+      case 'per_piece': return 'Kcal (per stuk)';
+      case 'per_handful': return 'Kcal (per handje)';
+      case 'per_30g': return 'Kcal (per 30g)';
+      case 'per_100g':
+      default: return 'Kcal (per 100g)';
+    }
+  };
 
   useEffect(() => {
     if (foodItem) {
@@ -54,7 +76,8 @@ export default function FoodItemModal({ isOpen, onClose, foodItem, onSave }: Foo
         fat_per_100g: foodItem.fat_per_100g,
         description: foodItem.description,
         is_active: foodItem.is_active,
-        is_carnivore: foodItem.is_carnivore || false
+        is_carnivore: foodItem.is_carnivore || false,
+        unit_type: foodItem.unit_type || 'per_100g'
       });
     } else {
       setFormData({
@@ -73,10 +96,35 @@ export default function FoodItemModal({ isOpen, onClose, foodItem, onSave }: Foo
   }, [foodItem]);
 
   const handleInputChange = (field: keyof FoodItem, value: any) => {
-    setFormData(prev => ({
-      ...prev,
+    let updatedData = {
+      ...formData,
       [field]: value
-    }));
+    };
+
+    // Auto-detect unit_type based on category and name
+    if (field === 'category') {
+      if (value === 'Fruit') {
+        updatedData.unit_type = 'per_piece';
+      } else if (value === 'Noten') {
+        updatedData.unit_type = 'per_handful';
+      } else if (value === 'Eieren') {
+        updatedData.unit_type = 'per_piece';
+      } else if (value === 'Supplementen') {
+        updatedData.unit_type = 'per_piece'; // Capsules, scoops, tablets per stuk
+      } else {
+        updatedData.unit_type = 'per_100g';
+      }
+    }
+
+    // Special case: Check for whey protein when name changes
+    if (field === 'name' && typeof value === 'string') {
+      const name = value.toLowerCase();
+      if ((name.includes('whey') || name.includes('wei')) && (name.includes('eiwit') || name.includes('protein') || name.includes('shake'))) {
+        updatedData.unit_type = 'per_30g'; // Whey protein per 30g serving
+      }
+    }
+
+    setFormData(updatedData);
   };
 
   const handleSave = async () => {
@@ -193,6 +241,25 @@ export default function FoodItemModal({ isOpen, onClose, foodItem, onSave }: Foo
 
             <div>
               <label className="block text-sm font-medium text-[#8BAE5A] mb-1">
+                Eenheid Type *
+              </label>
+              <select
+                value={formData.unit_type || 'per_100g'}
+                onChange={(e) => handleInputChange('unit_type', e.target.value)}
+                className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] focus:border-[#8BAE5A] transition-colors"
+              >
+                <option value="per_100g">Per 100 gram</option>
+                <option value="per_30g">Per 30 gram</option>
+                <option value="per_piece">Per stuk</option>
+                <option value="per_handful">Per handje</option>
+              </select>
+              <p className="text-xs text-gray-400 mt-1">
+                Bepaalt hoe voedingswaarden worden weergegeven (auto-detectie op basis van categorie)
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-[#8BAE5A] mb-1">
                 Carnivoor Geschikt *
               </label>
               <select
@@ -228,7 +295,7 @@ export default function FoodItemModal({ isOpen, onClose, foodItem, onSave }: Foo
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-[#8BAE5A] mb-1">
-                Kcal (per 100g)
+                {getNutritionLabel(formData.unit_type || 'per_100g')}
               </label>
               <input
                 type="number"
@@ -242,7 +309,7 @@ export default function FoodItemModal({ isOpen, onClose, foodItem, onSave }: Foo
             <div className="grid grid-cols-3 gap-2">
               <div>
                 <label className="block text-sm font-medium text-[#8BAE5A] mb-1">
-                  Protein (g)
+                  Protein (g) {getUnitLabel(formData.unit_type || 'per_100g')}
                 </label>
                 <input
                   type="number"
@@ -255,7 +322,7 @@ export default function FoodItemModal({ isOpen, onClose, foodItem, onSave }: Foo
               </div>
               <div>
                 <label className="block text-sm font-medium text-[#8BAE5A] mb-1">
-                  Carbs (g)
+                  Carbs (g) {getUnitLabel(formData.unit_type || 'per_100g')}
                 </label>
                 <input
                   type="number"
@@ -268,7 +335,7 @@ export default function FoodItemModal({ isOpen, onClose, foodItem, onSave }: Foo
               </div>
               <div>
                 <label className="block text-sm font-medium text-[#8BAE5A] mb-1">
-                  Fat (g)
+                  Fat (g) {getUnitLabel(formData.unit_type || 'per_100g')}
                 </label>
                 <input
                   type="number"

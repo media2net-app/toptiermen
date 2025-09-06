@@ -51,7 +51,8 @@ export async function POST(request: NextRequest) {
       sodium_per_100g, 
       description, 
       image_url,
-      is_carnivore 
+      is_carnivore,
+      unit_type
     } = body;
 
     const { data: ingredient, error } = await supabaseAdmin
@@ -68,7 +69,8 @@ export async function POST(request: NextRequest) {
         sodium_per_100g,
         description,
         image_url,
-        is_carnivore: is_carnivore || false
+        is_carnivore: is_carnivore || false,
+        unit_type: unit_type || 'per_100g'
       })
       .select()
       .single();
