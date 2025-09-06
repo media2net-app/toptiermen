@@ -232,7 +232,7 @@ export async function POST(request: NextRequest) {
     
     console.log(`📊 Found ${recipients?.length || 0} active recipients for campaign: ${campaign.name}`);
     
-    if (!recipients || recipients.length === 0) {
+    if (!recipients || recipients?.length === 0) {
       return NextResponse.json(
         { error: 'No active or pending recipients found for this campaign' },
         { status: 400 }
