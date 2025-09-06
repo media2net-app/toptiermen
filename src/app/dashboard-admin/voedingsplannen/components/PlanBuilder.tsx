@@ -1198,16 +1198,16 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                   </div>
                   <input
                     type="number"
-                    value={Math.round(proteinPct)}
+                    value={proteinPct.toFixed(1)}
                     onChange={(e) => {
-                      const newPercent = parseInt(e.target.value) || 0;
+                      const newPercent = parseFloat(e.target.value) || 0;
                       const newProtein = Math.round(((formData.target_calories || 2500) * newPercent / 100) / 4);
                       handleInputChange('target_protein', newProtein);
                     }}
                     className="w-full px-4 py-3 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
                     min="0"
                     max="100"
-                    step="1"
+                    step="0.1"
                     placeholder="0"
                   />
                   <div className="text-[#B6C948] text-sm mt-1">{formData.target_protein}g eiwit</div>
@@ -1221,16 +1221,16 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                   </div>
                   <input
                     type="number"
-                    value={Math.round(carbsPct)}
+                    value={carbsPct.toFixed(1)}
                     onChange={(e) => {
-                      const newPercent = parseInt(e.target.value) || 0;
+                      const newPercent = parseFloat(e.target.value) || 0;
                       const newCarbs = Math.round(((formData.target_calories || 2500) * newPercent / 100) / 4);
                       handleInputChange('target_carbs', newCarbs);
                     }}
                     className="w-full px-4 py-3 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
                     min="0"
                     max="100"
-                    step="1"
+                    step="0.1"
                     placeholder="0"
                   />
                   <div className="text-[#B6C948] text-sm mt-1">{formData.target_carbs}g koolhydraten</div>
@@ -1244,16 +1244,16 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                   </div>
                   <input
                     type="number"
-                    value={Math.round(fatPct)}
+                    value={fatPct.toFixed(1)}
                     onChange={(e) => {
-                      const newPercent = parseInt(e.target.value) || 0;
+                      const newPercent = parseFloat(e.target.value) || 0;
                       const newFat = Math.round(((formData.target_calories || 2500) * newPercent / 100) / 9);
                       handleInputChange('target_fat', newFat);
                     }}
                     className="w-full px-4 py-3 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
                     min="0"
                     max="100"
-                    step="1"
+                    step="0.1"
                     placeholder="0"
                   />
                   <div className="text-[#B6C948] text-sm mt-1">{formData.target_fat}g vet</div>
@@ -1262,8 +1262,8 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
 
               {/* Macro Total Warning */}
               {(() => {
-                const totalPct = Math.round(proteinPct) + Math.round(carbsPct) + Math.round(fatPct);
-                if (totalPct !== 100) {
+                const totalPct = proteinPct + carbsPct + fatPct;
+                if (Math.abs(totalPct - 100) > 0.1) {
                   return (
                     <div className="bg-[#4A1A1A] border border-[#7F1D1D] rounded-lg p-4 mb-6">
                       <div className="flex items-center">
@@ -1271,7 +1271,7 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                         <div>
                           <h4 className="text-[#FCA5A5] font-semibold mb-1">Macro percentages totaal niet 100%</h4>
                           <p className="text-[#FCA5A5] text-sm">
-                            Huidige totaal: {totalPct}% (moet 100% zijn)
+                            Huidige totaal: {totalPct.toFixed(1)}% (moet 100% zijn)
                           </p>
                           <p className="text-[#FCA5A5] text-sm mt-1">
                             Pas de percentages aan zodat ze samen 100% vormen voor correcte macro berekeningen.
