@@ -647,10 +647,7 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
       return;
     }
 
-    if (!formData.ingredients || formData.ingredients.length === 0) {
-      alert('Voeg minimaal één ingrediënt toe');
-      return;
-    }
+    // Allow empty meals - no minimum ingredient requirement
 
     setIsLoading(true);
     try {
