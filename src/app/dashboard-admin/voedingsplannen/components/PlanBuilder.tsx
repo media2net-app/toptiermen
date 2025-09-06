@@ -592,22 +592,52 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
       }
 
       // Auto-calculate macros when calories change, maintaining current ratios
-      if (field === 'target_calories' && value && prev.target_protein && prev.target_carbs && prev.target_fat) {
+      if (field === 'target_calories' && value) {
         const newCalories = parseInt(value);
-        const currentProtein = prev.target_protein;
-        const currentCarbs = prev.target_carbs;
-        const currentFat = prev.target_fat;
         
-        // Calculate current total calories from macros (4 cal/g for protein and carbs, 9 cal/g for fat)
-        const currentCaloriesFromMacros = (currentProtein * 4) + (currentCarbs * 4) + (currentFat * 9);
-        
-        if (currentCaloriesFromMacros > 0 && newCalories > 0) {
-          // Calculate current percentages
-          const proteinPercent = (currentProtein * 4) / currentCaloriesFromMacros;
-          const carbsPercent = (currentCarbs * 4) / currentCaloriesFromMacros;
-          const fatPercent = (currentFat * 9) / currentCaloriesFromMacros;
+        if (newCalories > 0) {
+          // Check if we have existing macro values to maintain ratios
+          const currentProtein = prev.target_protein || 0;
+          const currentCarbs = prev.target_carbs || 0;
+          const currentFat = prev.target_fat || 0;
           
-          // Apply same percentages to new calorie amount
+          // Calculate current total calories from macros (4 cal/g for protein and carbs, 9 cal/g for fat)
+          const currentCaloriesFromMacros = (currentProtein * 4) + (currentCarbs * 4) + (currentFat * 9);
+          
+          // Always use the correct percentages based on plan type, not existing values
+          const isCarnivore = prev.name?.toLowerCase().includes('carnivoor') || false;
+          const fitnessGoal = prev.fitness_goal || 'onderhoud';
+          
+          let proteinPercent, carbsPercent, fatPercent;
+          
+          if (isCarnivore) {
+            // Carnivoor: 45% protein, 5% carbs, 50% fat
+            proteinPercent = 0.45;
+            carbsPercent = 0.05;
+            fatPercent = 0.50;
+          } else {
+            // Normal meal plans based on fitness goal
+            switch (fitnessGoal) {
+              case 'droogtrainen':
+                proteinPercent = 0.40;
+                carbsPercent = 0.40;
+                fatPercent = 0.20;
+                break;
+              case 'spiermassa':
+                proteinPercent = 0.30;
+                carbsPercent = 0.50;
+                fatPercent = 0.20;
+                break;
+              case 'onderhoud':
+              default:
+                proteinPercent = 0.35;
+                carbsPercent = 0.40;
+                fatPercent = 0.25;
+                break;
+            }
+          }
+          
+          // Calculate macros based on correct percentages
           const newProteinCals = newCalories * proteinPercent;
           const newCarbsCals = newCalories * carbsPercent;
           const newFatCals = newCalories * fatPercent;
@@ -617,10 +647,12 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
           updated.target_carbs = Math.round(newCarbsCals / 4);
           updated.target_fat = Math.round(newFatCals / 9);
           
-          console.log('🧮 Auto-calculated macros for', newCalories, 'kcal:', {
+          console.log('🧮 Auto-calculated macros for', newCalories, 'kcal (correct percentages):', {
             protein: `${updated.target_protein}g (${Math.round(proteinPercent * 100)}%)`,
             carbs: `${updated.target_carbs}g (${Math.round(carbsPercent * 100)}%)`,
-            fat: `${updated.target_fat}g (${Math.round(fatPercent * 100)}%)`
+            fat: `${updated.target_fat}g (${Math.round(fatPercent * 100)}%)`,
+            planType: isCarnivore ? 'Carnivoor' : 'Maaltijdplan normaal',
+            fitnessGoal: fitnessGoal
           });
         }
       }
