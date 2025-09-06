@@ -1183,7 +1183,7 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                   </div>
                 )}
                   <div className="text-[#B6C948]">
-                    🧮 Pas percentages aan en gram waarden worden automatisch berekend
+                    🧮 Vul percentages vrij in (0-100%) en gram waarden worden automatisch berekend
                   </div>
                 </div>
               </div>
@@ -1205,8 +1205,8 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                       handleInputChange('target_protein', newProtein);
                     }}
                     className="w-full px-4 py-3 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                    min="10"
-                    max="60"
+                    min="0"
+                    max="100"
                     step="1"
                     placeholder="0"
                   />
@@ -1229,7 +1229,7 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                     }}
                     className="w-full px-4 py-3 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
                     min="0"
-                    max="60"
+                    max="100"
                     step="1"
                     placeholder="0"
                   />
@@ -1251,14 +1251,38 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                       handleInputChange('target_fat', newFat);
                     }}
                     className="w-full px-4 py-3 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                    min="10"
-                    max="70"
+                    min="0"
+                    max="100"
                     step="1"
                     placeholder="0"
                   />
                   <div className="text-[#B6C948] text-sm mt-1">{formData.target_fat}g vet</div>
                 </div>
               </div>
+
+              {/* Macro Total Warning */}
+              {(() => {
+                const totalPct = Math.round(proteinPct) + Math.round(carbsPct) + Math.round(fatPct);
+                if (totalPct !== 100) {
+                  return (
+                    <div className="bg-[#4A1A1A] border border-[#7F1D1D] rounded-lg p-4 mb-6">
+                      <div className="flex items-center">
+                        <div className="text-[#FCA5A5] text-lg mr-3">⚠️</div>
+                        <div>
+                          <h4 className="text-[#FCA5A5] font-semibold mb-1">Macro percentages totaal niet 100%</h4>
+                          <p className="text-[#FCA5A5] text-sm">
+                            Huidige totaal: {totalPct}% (moet 100% zijn)
+                          </p>
+                          <p className="text-[#FCA5A5] text-sm mt-1">
+                            Pas de percentages aan zodat ze samen 100% vormen voor correcte macro berekeningen.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
 
               {/* Standard Profile Info */}
               <div className="bg-[#232D1A] rounded-lg p-4 border border-[#3A4D23] mb-6">
