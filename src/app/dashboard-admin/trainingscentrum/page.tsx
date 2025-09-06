@@ -209,7 +209,7 @@ const mockProgress = {
 };
 
 const categories = ['Gym', 'Outdoor', 'Bodyweight'];
-const muscleGroups = ['Borst', 'Rug', 'Benen', 'Schouders', 'Armen', 'Core', 'Glutes', 'Buik', 'Trapezius'];
+// Dynamic muscle groups will be fetched from database
 const equipment = ['Barbell', 'Dumbbell', 'Bodyweight', 'Machine', 'Cable', 'Kettlebell'];
 
 // Equipment categories for filtering
@@ -270,6 +270,7 @@ export default function TrainingscentrumBeheer() {
   const [loadingSchemas, setLoadingSchemas] = useState(true);
   const [errorExercises, setErrorExercises] = useState<string | null>(null);
   const [errorSchemas, setErrorSchemas] = useState<string | null>(null);
+  const [muscleGroups, setMuscleGroups] = useState<string[]>([]);
   
   // Stats state
   const [stats, setStats] = useState({
@@ -305,6 +306,13 @@ export default function TrainingscentrumBeheer() {
         toast.error('Fout bij het laden van oefeningen');
       } else {
         setExercises(data || []);
+        // Extract unique muscle groups from exercises
+        const uniqueMuscles = Array.from(new Set(
+          (data || [])
+            .map(exercise => exercise.primary_muscle)
+            .filter(muscle => muscle && muscle.trim() !== '')
+        )).sort();
+        setMuscleGroups(uniqueMuscles);
       }
     } catch (err) {
       setErrorExercises('Fout bij het laden van oefeningen');
@@ -1552,6 +1560,7 @@ export default function TrainingscentrumBeheer() {
           }
         }}
         exercise={editingExercise}
+        muscleGroups={muscleGroups}
       />
     </div>
   );
