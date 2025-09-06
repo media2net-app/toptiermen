@@ -3,10 +3,33 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaCheck, FaArrowRight, FaClock, FaUsers, FaDumbbell, FaBrain, FaChartLine } from 'react-icons/fa';
+import CheckoutModal from '@/components/CheckoutModal';
 
 export default function MaandelijksPakketPage() {
   const router = useRouter();
   const [isHovered, setIsHovered] = useState(false);
+  const [showCheckout, setShowCheckout] = useState(false);
+
+  const packageData = {
+    id: 'monthly',
+    name: 'Maandelijks Pakket',
+    description: 'Minimaal 6 maanden commitment voor echte transformatie',
+    monthlyPrice: 47,
+    yearlyPrice: 508, // 10% korting
+    features: [
+      'Toegang tot alle content modules',
+      'Live training sessies',
+      'Exclusieve Brotherhood community',
+      'Persoonlijke coaching calls',
+      'Voedingsplannen op maat',
+      'Mindset & discipline training',
+      'Financiële educatie',
+      'Business & carrière coaching',
+      '24/7 community support',
+      'Maandelijkse progressie reviews'
+    ],
+    badge: 'Populair'
+  };
 
   const benefits = [
     {
@@ -110,7 +133,7 @@ export default function MaandelijksPakketPage() {
             </div>
 
             <button
-              onClick={() => router.push('/prelaunch')}
+              onClick={() => setShowCheckout(true)}
               onMouseEnter={() => setIsHovered(true)}
               onMouseLeave={() => setIsHovered(false)}
               className="group relative px-12 py-4 bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] text-[#181F17] font-bold text-lg rounded-xl shadow-2xl hover:shadow-[#B6C948]/25 transition-all duration-300 transform hover:scale-105"
@@ -223,7 +246,7 @@ export default function MaandelijksPakketPage() {
                 <div className="text-[#8BAE5A]">€47 per maand × 6 maanden = €282 totaal</div>
               </div>
               <button
-                onClick={() => router.push('/prelaunch')}
+                onClick={() => setShowCheckout(true)}
                 className="px-8 py-3 bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] text-[#181F17] font-bold rounded-lg hover:shadow-lg transition-all duration-300"
               >
                 Start nu
@@ -236,6 +259,17 @@ export default function MaandelijksPakketPage() {
           </p>
         </div>
       </div>
+
+      {/* Checkout Modal */}
+      <CheckoutModal
+        isOpen={showCheckout}
+        onClose={() => setShowCheckout(false)}
+        package={packageData}
+        onPaymentSuccess={(paymentData) => {
+          console.log('Payment successful:', paymentData);
+          setShowCheckout(false);
+        }}
+      />
     </div>
   );
 }

@@ -3,10 +3,33 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaCheck, FaArrowRight, FaInfinity, FaUsers, FaDumbbell, FaBrain, FaChartLine, FaCrown, FaStar, FaGift } from 'react-icons/fa';
+import CheckoutModal from '@/components/CheckoutModal';
 
 export default function LifetimePakketPage() {
   const router = useRouter();
   const [isHovered, setIsHovered] = useState(false);
+  const [showCheckout, setShowCheckout] = useState(false);
+
+  const packageData = {
+    id: 'lifetime',
+    name: 'Lifetime Pakket',
+    description: 'Eénmalige betaling, levenslang toegang tot alle content en updates',
+    monthlyPrice: 1997,
+    yearlyPrice: 1997, // Same price for lifetime
+    features: [
+      'Levenslang toegang tot alle content',
+      'Alle toekomstige updates en modules',
+      'Exclusieve VIP community access',
+      'Voorrang bij alle events en meetups',
+      'Directe toegang tot alle experts',
+      'Lifetime coaching support',
+      'Exclusieve founder events',
+      'Alle bonus content (huidig + toekomstig)',
+      'Speciale founder badges en status',
+      'Lifetime toegang tot alle platforms'
+    ],
+    badge: 'Exclusief'
+  };
 
   const benefits = [
     {
@@ -115,7 +138,7 @@ export default function LifetimePakketPage() {
             </div>
 
             <button
-              onClick={() => router.push('/prelaunch')}
+              onClick={() => setShowCheckout(true)}
               onMouseEnter={() => setIsHovered(true)}
               onMouseLeave={() => setIsHovered(false)}
               className="group relative px-12 py-4 bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] text-[#181F17] font-bold text-lg rounded-xl shadow-2xl hover:shadow-[#B6C948]/25 transition-all duration-300 transform hover:scale-105"
@@ -289,7 +312,7 @@ export default function LifetimePakketPage() {
                 <div className="text-[#B6C948] text-sm">Bespaar €3.643 in 10 jaar</div>
               </div>
               <button
-                onClick={() => router.push('/prelaunch')}
+                onClick={() => setShowCheckout(true)}
                 className="px-8 py-3 bg-gradient-to-r from-[#B6C948] to-[#8BAE5A] text-[#181F17] font-bold rounded-lg hover:shadow-lg transition-all duration-300"
               >
                 Word Founder
@@ -302,6 +325,17 @@ export default function LifetimePakketPage() {
           </p>
         </div>
       </div>
+
+      {/* Checkout Modal */}
+      <CheckoutModal
+        isOpen={showCheckout}
+        onClose={() => setShowCheckout(false)}
+        package={packageData}
+        onPaymentSuccess={(paymentData) => {
+          console.log('Payment successful:', paymentData);
+          setShowCheckout(false);
+        }}
+      />
     </div>
   );
 }
