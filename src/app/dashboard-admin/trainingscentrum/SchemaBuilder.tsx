@@ -254,12 +254,18 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
   };
 
   const handleDragEnd = (result: DropResult) => {
+    console.log('🎯 Drag end result:', result);
     const { source, destination } = result;
 
     // Dropped outside the list
     if (!destination) {
+      console.log('❌ No destination - drag cancelled');
       return;
     }
+
+    console.log('📊 Source:', source);
+    console.log('📍 Destination:', destination);
+    console.log('📋 Form data days:', formData.days.length);
 
     // Check if dragging from library
     if (source.droppableId === 'library') {
@@ -267,6 +273,18 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
       const exercise = exercises.find(e => e.id === exerciseId);
       const destDayIndex = parseInt(destination.droppableId);
       const destExerciseIndex = destination.index;
+
+      console.log('📚 Dragging from library:');
+      console.log('  - Exercise ID:', exerciseId);
+      console.log('  - Exercise found:', !!exercise);
+      console.log('  - Dest day index:', destDayIndex);
+      console.log('  - Dest exercise index:', destExerciseIndex);
+
+      // Validate destination day index
+      if (isNaN(destDayIndex) || destDayIndex < 0 || destDayIndex >= formData.days.length) {
+        console.error('❌ Invalid destination day index:', destDayIndex);
+        return;
+      }
 
       if (exercise) {
         const newExercise: SchemaExercise = {
@@ -302,6 +320,22 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
     const destDayIndex = parseInt(destination.droppableId);
     const sourceExerciseIndex = source.index;
     const destExerciseIndex = destination.index;
+
+    console.log('🔄 Moving between days:');
+    console.log('  - Source day index:', sourceDayIndex);
+    console.log('  - Dest day index:', destDayIndex);
+    console.log('  - Source exercise index:', sourceExerciseIndex);
+    console.log('  - Dest exercise index:', destExerciseIndex);
+
+    // Validate indices
+    if (isNaN(sourceDayIndex) || sourceDayIndex < 0 || sourceDayIndex >= formData.days.length) {
+      console.error('❌ Invalid source day index:', sourceDayIndex);
+      return;
+    }
+    if (isNaN(destDayIndex) || destDayIndex < 0 || destDayIndex >= formData.days.length) {
+      console.error('❌ Invalid dest day index:', destDayIndex);
+      return;
+    }
 
     // Same day, reorder within the day
     if (sourceDayIndex === destDayIndex) {
@@ -538,7 +572,7 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
           </button>
         </div>
 
-        <DragDropContext onDragEnd={handleDragEnd}>
+        <DragDropContext onDragEnd={handleDragEnd} key={`schema-${formData.id || 'new'}-${formData.days.length}`}>
           <div className="flex h-[calc(90vh-120px)]">
             {/* Left side - Schema details and days */}
             <div className="w-2/3 p-6 overflow-y-auto">
@@ -632,7 +666,7 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
                 </div>
 
                 {formData.days.map((day, dayIndex) => (
-                  <div key={dayIndex} className="border border-gray-700 rounded-lg p-4">
+                  <div key={`day-${day.id || dayIndex}-${dayIndex}`} className="border border-gray-700 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex-1">
                         <input
@@ -780,11 +814,11 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
                     {...provided.droppableProps}
                     className="space-y-2"
                   >
-                    {filteredExercises.map((exercise) => (
+                    {filteredExercises.map((exercise, index) => (
                       <Draggable
                         key={`library-${exercise.id}`}
                         draggableId={`library-${exercise.id}`}
-                        index={exercise.id}
+                        index={index}
                         isDragDisabled={formData.days.length === 0}
                       >
                         {(provided, snapshot) => (

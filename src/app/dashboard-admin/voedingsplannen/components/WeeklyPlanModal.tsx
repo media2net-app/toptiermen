@@ -448,6 +448,11 @@ export default function WeeklyPlanModal({ isOpen, onClose, plan }: WeeklyPlanMod
         { name: 'Carnivoor Diner', time: '19:00' },
         { name: 'Ribeye Steak', time: '19:00' },
         { name: 'Gegrilde Zalm', time: '19:00' }
+      ],
+      avondsnack: [
+        { name: 'Avond Protein', time: '21:30' },
+        { name: 'Kaas & Spek', time: '21:30' },
+        { name: 'Carnivoor Avond Snack', time: '21:30' }
       ]
     };
 

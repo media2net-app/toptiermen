@@ -31,6 +31,7 @@ interface DailyPlan {
     lunch: MealPlan;
     snack2: MealPlan;
     diner: MealPlan;
+    avondsnack: MealPlan;
   };
 }
 
@@ -356,7 +357,8 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
             snack1: { name: 'Ochtend Snack', calories: 0, protein: 0, carbs: 0, fat: 0, suggestions: [], ingredients: [] },
             lunch: { name: 'Lunch', calories: 0, protein: 0, carbs: 0, fat: 0, suggestions: [], ingredients: [] },
             snack2: { name: 'Middag Snack', calories: 0, protein: 0, carbs: 0, fat: 0, suggestions: [], ingredients: [] },
-            diner: { name: 'Diner', calories: 0, protein: 0, carbs: 0, fat: 0, suggestions: [], ingredients: [] }
+            diner: { name: 'Diner', calories: 0, protein: 0, carbs: 0, fat: 0, suggestions: [], ingredients: [] },
+            avondsnack: { name: 'Avond Snack', calories: 0, protein: 0, carbs: 0, fat: 0, suggestions: [], ingredients: [] }
           }
         };
       }
@@ -408,7 +410,8 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
           snack1: convertMeal(dayData.ochtend_snack, 'Ochtend Snack'),
           lunch: convertMeal(dayData.lunch, 'Carnivoor Lunch'),
           snack2: convertMeal(dayData.lunch_snack, 'Middag Snack'),
-          diner: convertMeal(dayData.diner, 'Carnivoor Diner')
+          diner: convertMeal(dayData.diner, 'Carnivoor Diner'),
+          avondsnack: convertMeal(dayData.avond_snack, 'Avond Snack')
         }
       };
     });
@@ -530,11 +533,20 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
         },
         diner: {
           name: `${themes[index]} Diner`,
-          calories: Math.round((formData.target_calories || 2200) * 0.25),
-          protein: Math.round((formData.target_protein || 165) * 0.25),
-          carbs: Math.round((formData.target_carbs || 220) * 0.25),
-          fat: Math.round((formData.target_fat || 73) * 0.25),
+          calories: Math.round((formData.target_calories || 2200) * 0.20),
+          protein: Math.round((formData.target_protein || 165) * 0.20),
+          carbs: Math.round((formData.target_carbs || 220) * 0.20),
+          fat: Math.round((formData.target_fat || 73) * 0.20),
           suggestions: getMealSuggestions(formData.name, 'diner', focuses[index]),
+          ingredients: []
+        },
+        avondsnack: {
+          name: `${themes[index]} Avond Snack`,
+          calories: Math.round((formData.target_calories || 2200) * 0.05),
+          protein: Math.round((formData.target_protein || 165) * 0.05),
+          carbs: Math.round((formData.target_carbs || 220) * 0.05),
+          fat: Math.round((formData.target_fat || 73) * 0.05),
+          suggestions: getMealSuggestions(formData.name, 'snack', focuses[index]),
           ingredients: []
         }
       }
@@ -935,7 +947,8 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
         calories: dbIngredient.calories_per_100g || 0,
         protein: dbIngredient.protein_per_100g || 0,
         carbs: dbIngredient.carbs_per_100g || 0,
-        fat: dbIngredient.fat_per_100g || 0
+        fat: dbIngredient.fat_per_100g || 0,
+        unit_type: dbIngredient.unit_type || 'per_100g'
       };
     }
     
@@ -950,7 +963,8 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
         calories: partialMatch.calories_per_100g || 0,
         protein: partialMatch.protein_per_100g || 0,
         carbs: partialMatch.carbs_per_100g || 0,
-        fat: partialMatch.fat_per_100g || 0
+        fat: partialMatch.fat_per_100g || 0,
+        unit_type: partialMatch.unit_type || 'per_100g'
       };
     }
     
@@ -977,18 +991,18 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
     
     // Try exact match in fallback data
     if (nutritionData[normalizedName]) {
-      return nutritionData[normalizedName];
+      return { ...nutritionData[normalizedName], unit_type: 'per_100g' };
     }
     
     // Try partial matches in fallback data
     for (const [key, value] of Object.entries(nutritionData)) {
       if (normalizedName.includes(key) || key.includes(normalizedName)) {
-        return value;
+        return { ...value, unit_type: 'per_100g' };
       }
     }
     
     // Final fallback for unknown ingredients
-    return { calories: 250, protein: 20.0, carbs: 0, fat: 18.0 };
+    return { calories: 250, protein: 20.0, carbs: 0, fat: 18.0, unit_type: 'per_100g' };
   };
 
   if (!isOpen) return null;
@@ -1529,7 +1543,7 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
 
                   {/* Meals - Now showing actual ingredients from database */}
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {['ontbijt', 'snack1', 'lunch', 'snack2', 'diner'].map((mealType) => {
+                    {['ontbijt', 'snack1', 'lunch', 'snack2', 'diner', 'avondsnack'].map((mealType) => {
                       const currentDay = getCurrentDayPlan();
                       const meal = currentDay?.meals?.[mealType as keyof typeof currentDay.meals];
                       const mealNames = {
@@ -1537,7 +1551,8 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                         snack1: 'Ochtend Snack',
                         lunch: 'Lunch', 
                         snack2: 'Middag Snack',
-                        diner: 'Diner'
+                        diner: 'Diner',
+                        avondsnack: 'Avond Snack'
                       };
                       
                       // Get suggestions (which are the actual ingredients from database)
@@ -1553,6 +1568,7 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                               {mealType === 'lunch' && '🥩'}
                               {mealType === 'snack2' && '🧀'}
                               {mealType === 'diner' && '🍽️'}
+                              {mealType === 'avondsnack' && '🌙'}
                               {mealNames[mealType as keyof typeof mealNames]}
                             </h4>
                             <div className="flex gap-2">
@@ -1652,32 +1668,55 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                                           const amount = correctedIngredient.amount || 0;
                                           const unit = correctedIngredient.unit || 'g';
                                           
-                                          // Calculate multiplier based on unit type
-                                          let multiplier = amount / 100; // default per 100g basis
-                                          
-                                          if (unit === 'stuk') {
-                                            // For pieces, convert to grams first
-                                            let gramsPerPiece = 100; // default
-                                            if (ingredient.name.toLowerCase().includes('ei')) gramsPerPiece = 50;
-                                            else if (ingredient.name.toLowerCase().includes('banaan')) gramsPerPiece = 118;
-                                            else if (ingredient.name.toLowerCase().includes('appel')) gramsPerPiece = 182;
-                                            multiplier = (amount * gramsPerPiece) / 100;
-                                          } else if (unit === 'handje') {
-                                            // 1 handje = approximately 25g
-                                            multiplier = (amount * 25) / 100;
-                                          } else if (unit === 'kg') {
-                                            multiplier = (amount * 1000) / 100;
-                                          } else {
-                                            // g, ml, l, etc - assume gram basis
-                                            multiplier = amount / 100;
-                                          }
-                                          
-                                          // Estimated values - these should come from ingredient database
+                                          // Get nutrition data from database
                                           const estimatedNutrition = getEstimatedNutrition(ingredient.name);
-                                          const calories = Math.round(estimatedNutrition.calories * multiplier);
-                                          const protein = Math.round(estimatedNutrition.protein * multiplier * 10) / 10;
-                                          const carbs = Math.round(estimatedNutrition.carbs * multiplier * 10) / 10;
-                                          const fat = Math.round(estimatedNutrition.fat * multiplier * 10) / 10;
+                                          
+                                          let calories, protein, carbs, fat;
+                                          
+                                          // Calculate nutrition based on unit_type from database
+                                          if (estimatedNutrition.unit_type === 'per_piece' && unit === 'stuk') {
+                                            // For per_piece items, database values are already per piece
+                                            calories = Math.round(estimatedNutrition.calories * amount);
+                                            protein = Math.round(estimatedNutrition.protein * amount * 10) / 10;
+                                            carbs = Math.round(estimatedNutrition.carbs * amount * 10) / 10;
+                                            fat = Math.round(estimatedNutrition.fat * amount * 10) / 10;
+                                          } else if (estimatedNutrition.unit_type === 'per_handful' && unit === 'handje') {
+                                            // For per_handful items, database values are per handful
+                                            calories = Math.round(estimatedNutrition.calories * amount);
+                                            protein = Math.round(estimatedNutrition.protein * amount * 10) / 10;
+                                            carbs = Math.round(estimatedNutrition.carbs * amount * 10) / 10;
+                                            fat = Math.round(estimatedNutrition.fat * amount * 10) / 10;
+                                          } else if (estimatedNutrition.unit_type === 'per_30g') {
+                                            // For per_30g items, database values are per 30g
+                                            const multiplier = amount / 30;
+                                            calories = Math.round(estimatedNutrition.calories * multiplier);
+                                            protein = Math.round(estimatedNutrition.protein * multiplier * 10) / 10;
+                                            carbs = Math.round(estimatedNutrition.carbs * multiplier * 10) / 10;
+                                            fat = Math.round(estimatedNutrition.fat * multiplier * 10) / 10;
+                                          } else {
+                                            // For per_100g items (default), calculate based on grams
+                                            let gramAmount = amount;
+                                            if (unit === 'kg') gramAmount = amount * 1000;
+                                            else if (unit === 'handje') gramAmount = amount * 25;
+                                            else if (unit === 'stuk') {
+                                              // Use database unit conversion if available
+                                              const dbIngredient = localFoodItems.find(item => 
+                                                item.name.toLowerCase().trim() === ingredient.name.toLowerCase().trim()
+                                              );
+                                              if (dbIngredient?.unit_type === 'per_piece') {
+                                                // This shouldn't happen, but fallback to estimation
+                                                gramAmount = amount * 50; // default piece weight
+                                              } else {
+                                                gramAmount = amount; // assume grams
+                                              }
+                                            }
+                                            
+                                            const multiplier = gramAmount / 100;
+                                            calories = Math.round(estimatedNutrition.calories * multiplier);
+                                            protein = Math.round(estimatedNutrition.protein * multiplier * 10) / 10;
+                                            carbs = Math.round(estimatedNutrition.carbs * multiplier * 10) / 10;
+                                            fat = Math.round(estimatedNutrition.fat * multiplier * 10) / 10;
+                                          }
                                           
                                           return (
                                             <tr key={idx} className="border-b border-[#3A4D23] hover:bg-[#232D1A]/50">
