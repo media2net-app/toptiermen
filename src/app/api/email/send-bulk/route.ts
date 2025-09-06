@@ -273,7 +273,7 @@ export async function POST(request: NextRequest) {
     const MAX_EMAILS = 32; // SEND REMAINING 32 EMAILS
     
     console.log(`🚀 ========== BULK EMAIL CAMPAIGN - FINAL SEND ==========`);
-    console.log(`📊 Total recipients available: ${recipients.length}`);
+    console.log(`📊 Total recipients available: ${recipients?.length || 0}`);
     console.log(`📦 SENDING ALL REMAINING ${MAX_EMAILS} EMAILS`);
     console.log(`⚠️ SKIPPING FIRST ${SKIP_FIRST} (Already sent)`);
     console.log(`⚡ NO INTERVALS - FULL SPEED SEND`);
@@ -284,13 +284,13 @@ export async function POST(request: NextRequest) {
     
     // Skip first 6 recipients (already sent) and process remaining emails
     const startIndex = SKIP_FIRST;
-    const endIndex = Math.min(startIndex + MAX_EMAILS, recipients.length);
+    const endIndex = Math.min(startIndex + MAX_EMAILS, recipients?.length || 0);
     
     console.log(`📧 Processing recipients ${startIndex + 1} to ${endIndex} (${endIndex - startIndex} emails)`);
     console.log('');
     
     for (let i = startIndex; i < endIndex; i += BATCH_SIZE) {
-      const batch = recipients.slice(i, Math.min(i + BATCH_SIZE, endIndex));
+      const batch = recipients?.slice(i, Math.min(i + BATCH_SIZE, endIndex)) || [];
       const batchNumber = 1; // All in one final batch
       const totalBatches = 1;
       
@@ -382,7 +382,7 @@ export async function POST(request: NextRequest) {
       console.log('');
       
       // Delay between batches (except for the last batch)
-      if (i + BATCH_SIZE < recipients.length) {
+      if (i + BATCH_SIZE < (recipients?.length || 0)) {
         console.log(`⏳ Waiting ${BATCH_DELAY_MS / 1000} seconds before next batch...`);
         console.log(`⏰ Next batch starts at: ${new Date(Date.now() + BATCH_DELAY_MS).toLocaleTimeString('nl-NL')}`);
         console.log('');
