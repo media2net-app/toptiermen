@@ -415,6 +415,8 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
     console.log('- Database total:', ingredientsDatabase.length);
     console.log('- Meal type:', mealType);
     console.log('- Plan type:', planType);
+    console.log('- Plan type (lowercase):', planType?.toLowerCase());
+    console.log('- Contains carnivoor?:', planType?.toLowerCase().includes('carnivoor'));
     console.log('- Is carnivore:', isCarnivore);
     
     // Check if test1234 or test 1234 exists in database
@@ -517,10 +519,14 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
     
     // Filter by plan type if carnivore
     const isCarnivore = planType?.toLowerCase().includes('carnivoor');
+    console.log('🔍 getFilteredIngredients DEBUG:');
+    console.log('- Plan type:', planType);
+    console.log('- Is carnivore plan:', isCarnivore);
+    console.log('- Before carnivore filter:', filtered.length);
+    
     if (isCarnivore) {
-      filtered = filtered.filter(ing => 
-        ['vlees', 'vis', 'eieren', 'zuivel', 'carnivoor', 'vetten', 'Vlees', 'Vis', 'Eieren', 'Zuivel', 'Carnivoor', 'Vetten'].includes(ing.category)
-      );
+      filtered = filtered.filter(ing => ing.is_carnivore === true);
+      console.log('- After carnivore filter:', filtered.length);
     }
     
     return filtered.slice(0, 50); // Limit to 50 for performance
