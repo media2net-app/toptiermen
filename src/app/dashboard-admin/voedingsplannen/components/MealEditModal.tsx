@@ -181,29 +181,46 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
 
     // Calculate the correct factor based on unit type
     if (ingredient.unit_type === 'per_piece') {
-      // For pieces, we need to know the weight per piece
-      // Assuming average piece weights: egg = 50g, apple = 150g, etc.
-      // For now, use a default of 100g per piece (can be improved later)
-      factor = amount / 100;
+      // For pieces, database values are already per piece (not per 100g)
+      // So we use the amount directly
+      factor = amount;
     } else if (ingredient.unit_type === 'per_handful') {
-      // 1 handful = 25g
+      // 1 handful = 25g, so convert to 100g basis
       factor = (amount * 25) / 100;
     } else if (ingredient.unit_type === 'per_30g') {
-      // 1 scoop = 30g
+      // 1 scoop = 30g, so convert to 100g basis
       factor = (amount * 30) / 100;
     } else {
       // per_100g: amount is already in grams
       factor = amount / 100;
     }
 
-    const result = {
-      calories: Math.round((ingredient.calories_per_100g || 0) * factor),
-      protein: Math.round(((ingredient.protein_per_100g || 0) * factor) * 10) / 10,
-      carbs: Math.round(((ingredient.carbs_per_100g || 0) * factor) * 10) / 10,
-      fat: Math.round(((ingredient.fat_per_100g || 0) * factor) * 10) / 10
-    };
+    // For per_piece items, the database values are already per piece, not per 100g
+    // So we need to handle this differently
+    let result;
+    
+    if (ingredient.unit_type === 'per_piece') {
+      // Database values are already per piece, so multiply by amount directly
+      result = {
+        calories: Math.round((ingredient.calories_per_100g || 0) * amount),
+        protein: Math.round(((ingredient.protein_per_100g || 0) * amount) * 10) / 10,
+        carbs: Math.round(((ingredient.carbs_per_100g || 0) * amount) * 10) / 10,
+        fat: Math.round(((ingredient.fat_per_100g || 0) * amount) * 10) / 10
+      };
+    } else {
+      // For other unit types, use the factor calculation
+      result = {
+        calories: Math.round((ingredient.calories_per_100g || 0) * factor),
+        protein: Math.round(((ingredient.protein_per_100g || 0) * factor) * 10) / 10,
+        carbs: Math.round(((ingredient.carbs_per_100g || 0) * factor) * 10) / 10,
+        fat: Math.round(((ingredient.fat_per_100g || 0) * factor) * 10) / 10
+      };
+    }
 
-    console.log(`✅ Calculated nutrition:`, result);
+    console.log(`✅ Calculated nutrition for ${amount} ${ingredient.unit_type}:`, {
+      factor,
+      result
+    });
     return result;
   };
 
