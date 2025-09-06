@@ -1200,7 +1200,7 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                     type="number"
                     value={Math.round(proteinPct)}
                     onChange={(e) => {
-                      const newPercent = parseInt(e.target.value);
+                      const newPercent = parseInt(e.target.value) || 0;
                       const newProtein = Math.round(((formData.target_calories || 2500) * newPercent / 100) / 4);
                       handleInputChange('target_protein', newProtein);
                     }}
@@ -1208,6 +1208,7 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                     min="10"
                     max="60"
                     step="1"
+                    placeholder="0"
                   />
                   <div className="text-[#B6C948] text-sm mt-1">{formData.target_protein}g eiwit</div>
                 </div>
@@ -1222,7 +1223,7 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                     type="number"
                     value={Math.round(carbsPct)}
                     onChange={(e) => {
-                      const newPercent = parseInt(e.target.value);
+                      const newPercent = parseInt(e.target.value) || 0;
                       const newCarbs = Math.round(((formData.target_calories || 2500) * newPercent / 100) / 4);
                       handleInputChange('target_carbs', newCarbs);
                     }}
@@ -1230,6 +1231,7 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                     min="0"
                     max="60"
                     step="1"
+                    placeholder="0"
                   />
                   <div className="text-[#B6C948] text-sm mt-1">{formData.target_carbs}g koolhydraten</div>
                 </div>
@@ -1244,7 +1246,7 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                     type="number"
                     value={Math.round(fatPct)}
                     onChange={(e) => {
-                      const newPercent = parseInt(e.target.value);
+                      const newPercent = parseInt(e.target.value) || 0;
                       const newFat = Math.round(((formData.target_calories || 2500) * newPercent / 100) / 9);
                       handleInputChange('target_fat', newFat);
                     }}
@@ -1252,6 +1254,7 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                     min="10"
                     max="70"
                     step="1"
+                    placeholder="0"
                   />
                   <div className="text-[#B6C948] text-sm mt-1">{formData.target_fat}g vet</div>
                 </div>
