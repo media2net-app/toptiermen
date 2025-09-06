@@ -432,6 +432,28 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
     }
   }, [ingredientsDatabase]);
 
+  // CRITICAL FIX: Force nutrition update when modal opens with existing ingredients
+  useEffect(() => {
+    if (isOpen && ingredientsDatabase.length > 0 && formData.ingredients.length > 0) {
+      console.log('🚨 CRITICAL FIX: Force updating nutrition on modal open');
+      const nutrition = calculateNutritionFromIngredients(formData.ingredients);
+      console.log('📊 CRITICAL nutrition calculation:', nutrition);
+      
+      // Force immediate update
+      setFormData(prev => {
+        const updated = {
+          ...prev,
+          calories: nutrition.calories,
+          protein: nutrition.protein,
+          carbs: nutrition.carbs,
+          fat: nutrition.fat
+        };
+        console.log('📊 CRITICAL formData update:', updated);
+        return updated;
+      });
+    }
+  }, [isOpen, ingredientsDatabase]);
+
   // Recalculate nutrition when ingredients database is loaded and we have ingredients
   useEffect(() => {
     if (ingredientsDatabase.length > 0 && formData.ingredients.length > 0) {
@@ -547,7 +569,8 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
 
   // Calculate nutrition values based on ingredients using loaded database
   const calculateNutritionFromIngredients = (ingredients: Ingredient[]) => {
-    console.log('🧮 Calculating nutrition from ingredients:', ingredients);
+    console.log('🧮 CRITICAL: Calculating nutrition from ingredients:', ingredients);
+    console.log('🧮 CRITICAL: Ingredients database length:', ingredientsDatabase.length);
     
     let totalCalories = 0;
     let totalProtein = 0;
@@ -556,6 +579,8 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
 
     // Use loaded ingredients database for nutrition calculation
     for (const ingredient of ingredients || []) {
+      console.log(`🔍 CRITICAL: Looking for ingredient: "${ingredient.name}"`);
+      
       // Find matching ingredient in database (flexible matching)
       const dbIngredient = ingredientsDatabase.find((dbIng: any) => 
         dbIng.name.toLowerCase() === ingredient.name.toLowerCase() ||
@@ -564,6 +589,13 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
       );
       
       if (dbIngredient) {
+        console.log(`✅ CRITICAL: Found database ingredient:`, {
+          name: dbIngredient.name,
+          unit_type: dbIngredient.unit_type,
+          calories_per_100g: dbIngredient.calories_per_100g,
+          protein_per_100g: dbIngredient.protein_per_100g
+        });
+        
         // Use the same nutrition calculation as for adding ingredients
         const nutrition = calculateNutritionForAmount(dbIngredient, ingredient.amount);
         
@@ -572,15 +604,17 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
         totalCarbs += nutrition.carbs;
         totalFat += nutrition.fat;
         
-        console.log(`✅ Found nutrition for ${ingredient.name}:`, {
+        console.log(`✅ CRITICAL: Calculated nutrition for ${ingredient.name}:`, {
           amount: ingredient.amount,
           unit: ingredient.unit,
           unit_type: dbIngredient.unit_type,
           calories: nutrition.calories,
-          protein: nutrition.protein
+          protein: nutrition.protein,
+          carbs: nutrition.carbs,
+          fat: nutrition.fat
         });
       } else {
-        console.warn(`⚠️ No nutrition data found for ingredient: ${ingredient.name}`);
+        console.warn(`⚠️ CRITICAL: No nutrition data found for ingredient: ${ingredient.name}`);
         console.log('Available ingredients:', ingredientsDatabase.map(ing => ing.name));
       }
     }
@@ -592,7 +626,7 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
       fat: Math.round(totalFat * 10) / 10
     };
 
-    console.log('📊 Total calculated nutrition:', result);
+    console.log('📊 CRITICAL: Total calculated nutrition:', result);
     return result;
   };
 
