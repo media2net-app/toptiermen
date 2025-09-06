@@ -1,138 +1,62 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { createClient } from '@supabase/supabase-js';
 
-// GET - Fetch user's challenges
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
-    
-    // Get current user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const { searchParams } = new URL(request.url);
-    const status = searchParams.get('status');
     const type = searchParams.get('type');
+    const active = searchParams.get('active');
 
     let query = supabase
       .from('challenges')
-      .select(`
-        *,
-        challenge_categories (
-          name,
-          icon,
-          color
-        )
-      `)
-      .eq('user_id', user.id)
+      .select('*')
       .order('created_at', { ascending: false });
 
-    if (status) {
-      query = query.eq('status', status);
-    }
-
-    if (type) {
+    if (type && type !== 'all') {
       query = query.eq('type', type);
     }
 
-    const { data: challenges, error } = await query;
+    if (active !== null) {
+      query = query.eq('is_active', active === 'true');
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error('Error fetching challenges:', error);
-      return NextResponse.json({ 
-        error: 'Failed to fetch challenges' 
-      }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to fetch challenges' }, { status: 500 });
     }
 
-    return NextResponse.json({ 
-      success: true, 
-      challenges 
-    });
-
+    return NextResponse.json({ challenges: data || [] });
   } catch (error) {
-    console.error('Error in challenges GET:', error);
-    return NextResponse.json({ 
-      error: 'Internal server error' 
-    }, { status: 500 });
+    console.error('Error in challenges API:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
-// POST - Create new challenge
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
-    
-    // Get current user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const body = await request.json();
-    const {
-      title,
-      type,
-      total_days,
-      description,
-      category,
-      difficulty = 'medium',
-      shared = false,
-      accountability_partner,
-      icon,
-      badge
-    } = body;
-
-    // Validate required fields
-    if (!title || !type || !total_days) {
-      return NextResponse.json({ 
-        error: 'Missing required fields: title, type, total_days' 
-      }, { status: 400 });
-    }
-
-    // Calculate end date
-    const startDate = new Date();
-    const endDate = new Date();
-    endDate.setDate(startDate.getDate() + total_days);
-
-    const { data: challenge, error } = await supabase
+    
+    const { data, error } = await supabase
       .from('challenges')
-      .insert({
-        user_id: user.id,
-        title,
-        type,
-        total_days,
-        description,
-        category,
-        difficulty,
-        shared,
-        accountability_partner,
-        icon,
-        badge,
-        start_date: startDate.toISOString().split('T')[0],
-        end_date: endDate.toISOString().split('T')[0]
-      })
+      .insert([body])
       .select()
       .single();
 
     if (error) {
       console.error('Error creating challenge:', error);
-      return NextResponse.json({ 
-        error: 'Failed to create challenge' 
-      }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to create challenge' }, { status: 500 });
     }
 
-    return NextResponse.json({ 
-      success: true, 
-      challenge 
-    });
-
+    return NextResponse.json({ challenge: data });
   } catch (error) {
-    console.error('Error in challenges POST:', error);
-    return NextResponse.json({ 
-      error: 'Internal server error' 
-    }, { status: 500 });
+    console.error('Error in challenges POST API:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

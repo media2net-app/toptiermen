@@ -1,183 +1,256 @@
 'use client';
-
 import { useState, useEffect } from 'react';
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
-import { toast } from 'react-hot-toast';
-import ClientLayout from '@/app/components/ClientLayout';
+import { 
+  TrophyIcon, 
+  CalendarIcon, 
+  ClockIcon, 
+  FireIcon,
+  StarIcon,
+  CheckCircleIcon,
+  PlayIcon,
+  PauseIcon
+} from '@heroicons/react/24/outline';
+import { createClient } from '@supabase/supabase-js';
+import AdminCard from '@/components/admin/AdminCard';
+import AdminButton from '@/components/admin/AdminButton';
+import Breadcrumb, { createBreadcrumbs, BREADCRUMB_CONFIGS } from '@/components/Breadcrumb';
+import ChallengeDetailModal from './components/ChallengeDetailModal';
 
+// Supabase client
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
+// Types
 interface Challenge {
   id: string;
   title: string;
   description: string;
-  category: string;
-  difficulty: string;
-  durationDays: number;
-  xpReward: number;
-  badgeName: string;
-  badgeIcon: string;
-  isCommunityChallenge: boolean;
-  status: 'available' | 'active' | 'completed';
-  progress: number;
-  currentStreak: number;
-  daysRemaining: number;
-  isCompletedToday: boolean;
-  startDate?: string;
-  completionDate?: string;
-}
-
-interface ChallengeSummary {
-  totalChallenges: number;
-  activeChallenges: number;
-  completedChallenges: number;
-  totalXpEarned: number;
-  dailyXpEarned: number;
-  completedXp: number;
-  averageProgress: number;
+  type: 'weekly' | 'monthly' | 'special';
+  difficulty: 'easy' | 'medium' | 'hard';
+  duration_days: number;
+  points_reward: number;
+  is_active: boolean;
+  start_date: string;
+  end_date: string;
+  requirements: string[];
+  rewards: string[];
+  participants_count: number;
+  completion_rate: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export default function ChallengesPage() {
-  const { user } = useSupabaseAuth();
   const [challenges, setChallenges] = useState<Challenge[]>([]);
-  const [summary, setSummary] = useState<ChallengeSummary | null>(null);
   const [loading, setLoading] = useState(true);
-  const [joiningChallenge, setJoiningChallenge] = useState<string | null>(null);
-  const [completingChallenge, setCompletingChallenge] = useState<string | null>(null);
-  const [undoingChallenge, setUndoingChallenge] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'all' | 'weekly' | 'monthly' | 'special'>('all');
+  const [selectedChallenge, setSelectedChallenge] = useState<Challenge | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+
+  // Mock data for now - will be replaced with real data from database
+  const mockChallenges: Challenge[] = [
+    {
+      id: '1',
+      title: '30-Day Push-up Challenge',
+      description: 'Doe elke dag push-ups en bouw je kracht op. Start met 10 en werk toe naar 50 per dag.',
+      type: 'monthly',
+      difficulty: 'medium',
+      duration_days: 30,
+      points_reward: 500,
+      is_active: true,
+      start_date: '2024-01-01',
+      end_date: '2024-01-31',
+      requirements: ['Dagelijks push-ups doen', 'Foto uploaden van je progressie', 'Log je aantal push-ups'],
+      rewards: ['500 punten', 'Push-up Master badge', 'Kracht boost in je profiel'],
+      participants_count: 1247,
+      completion_rate: 68,
+      created_at: '2024-01-01T00:00:00Z',
+      updated_at: '2024-01-01T00:00:00Z'
+    },
+    {
+      id: '2',
+      title: 'Week van de Gezonde Maaltijden',
+      description: 'Eet deze week alleen maar zelfgemaakte, gezonde maaltijden. Geen fastfood of bewerkte voeding.',
+      type: 'weekly',
+      difficulty: 'easy',
+      duration_days: 7,
+      points_reward: 150,
+      is_active: true,
+      start_date: '2024-01-15',
+      end_date: '2024-01-22',
+      requirements: ['7 dagen gezonde maaltijden', 'Foto van elke maaltijd', 'Recept delen'],
+      rewards: ['150 punten', 'Healthy Eater badge', 'Voedingskennis boost'],
+      participants_count: 892,
+      completion_rate: 82,
+      created_at: '2024-01-15T00:00:00Z',
+      updated_at: '2024-01-15T00:00:00Z'
+    },
+    {
+      id: '3',
+      title: 'Iron Will Challenge',
+      description: 'De ultieme test van discipline: 21 dagen zonder sociale media, suiker en klagen.',
+      type: 'special',
+      difficulty: 'hard',
+      duration_days: 21,
+      points_reward: 1000,
+      is_active: true,
+      start_date: '2024-02-01',
+      end_date: '2024-02-22',
+      requirements: ['Geen sociale media', 'Geen toegevoegde suikers', 'Geen klagen', 'Dagelijks reflectie'],
+      rewards: ['1000 punten', 'Iron Will badge', 'Discipline Master titel', 'Exclusieve content toegang'],
+      participants_count: 156,
+      completion_rate: 23,
+      created_at: '2024-02-01T00:00:00Z',
+      updated_at: '2024-02-01T00:00:00Z'
+    },
+    {
+      id: '4',
+      title: 'Morning Warrior Week',
+      description: 'Start elke dag om 6:00 en doe een ochtendroutine. Transformeer je dag met vroege opstaan.',
+      type: 'weekly',
+      difficulty: 'medium',
+      duration_days: 7,
+      points_reward: 200,
+      is_active: true,
+      start_date: '2024-01-22',
+      end_date: '2024-01-29',
+      requirements: ['Elke dag om 6:00 opstaan', 'Ochtendroutine voltooien', 'Progressie bijhouden'],
+      rewards: ['200 punten', 'Early Bird badge', 'Productiviteit boost'],
+      participants_count: 634,
+      completion_rate: 71,
+      created_at: '2024-01-22T00:00:00Z',
+      updated_at: '2024-01-22T00:00:00Z'
+    },
+    {
+      id: '5',
+      title: 'Hydration Hero Month',
+      description: 'Drink elke dag 3 liter water en transformeer je gezondheid. Water is leven!',
+      type: 'monthly',
+      difficulty: 'easy',
+      duration_days: 30,
+      points_reward: 300,
+      is_active: true,
+      start_date: '2024-02-01',
+      end_date: '2024-03-02',
+      requirements: ['3 liter water per dag', 'Water intake loggen', 'Hydratietips delen'],
+      rewards: ['300 punten', 'Hydration Hero badge', 'Gezondheid boost'],
+      participants_count: 2156,
+      completion_rate: 89,
+      created_at: '2024-02-01T00:00:00Z',
+      updated_at: '2024-02-01T00:00:00Z'
+    }
+  ];
 
   useEffect(() => {
-    if (user) {
-      loadChallenges();
-    }
-  }, [user]);
+    // Load challenges from database or use mock data
+    const loadChallenges = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('challenges')
+          .select('*')
+          .eq('is_active', true)
+          .order('created_at', { ascending: false });
 
-  const loadChallenges = async () => {
-    if (!user) return;
-    
-    try {
-      const response = await fetch(`/api/challenges?userId=${user.id}`);
-      const data = await response.json();
-      
-      if (data.challenges) {
-        setChallenges(data.challenges);
-        setSummary(data.summary);
-      }
-    } catch (error) {
-      console.error('Error loading challenges:', error);
-      toast.error('Fout bij het laden van challenges');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const joinChallenge = async (challengeId: string) => {
-    if (!user) return;
-    
-    setJoiningChallenge(challengeId);
-    try {
-      const response = await fetch('/api/challenges', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'join',
-          userId: user.id,
-          challengeId
-        })
-      });
-
-      const data = await response.json();
-      
-      if (data.success) {
-        toast.success(data.message);
-        loadChallenges(); // Reload to update status
-      } else {
-        toast.error(data.message);
-      }
-    } catch (error) {
-      console.error('Error joining challenge:', error);
-      toast.error('Fout bij het starten van challenge');
-    } finally {
-      setJoiningChallenge(null);
-    }
-  };
-
-  const completeDay = async (challengeId: string) => {
-    if (!user) return;
-    
-    setCompletingChallenge(challengeId);
-    try {
-      const response = await fetch('/api/challenges', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'complete-day',
-          userId: user.id,
-          challengeId,
-          notes: 'Dag voltooid'
-        })
-      });
-
-      const data = await response.json();
-      
-      if (data.success) {
-        toast.success(data.message);
-        if (data.challengeCompleted) {
-          toast.success(`🎉 Challenge voltooid! +${data.xpEarned} XP verdiend!`);
+        if (error) {
+          console.error('Error loading challenges:', error);
+          // Fallback to mock data
+          setChallenges(mockChallenges);
+        } else {
+          // Transform database data to match our interface
+          const transformedChallenges = data.map(challenge => ({
+            ...challenge,
+            difficulty: challenge.difficulty || 'medium',
+            requirements: challenge.requirements || [],
+            rewards: challenge.rewards || [],
+            participants_count: challenge.participants_count || 0,
+            completion_rate: challenge.completion_rate || 0
+          }));
+          setChallenges(transformedChallenges.length > 0 ? transformedChallenges : mockChallenges);
         }
-        loadChallenges(); // Reload to update progress
-      } else {
-        toast.error(data.message);
+      } catch (error) {
+        console.error('Error loading challenges:', error);
+        // Fallback to mock data
+        setChallenges(mockChallenges);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error('Error completing day:', error);
-      toast.error('Fout bij het voltooien van dag');
-    } finally {
-      setCompletingChallenge(null);
+    };
+
+    loadChallenges();
+  }, []);
+
+  const filteredChallenges = challenges.filter(challenge => {
+    if (activeTab === 'all') return true;
+    return challenge.type === activeTab;
+  });
+
+  const handleChallengeClick = (challenge: Challenge) => {
+    setSelectedChallenge(challenge);
+    setShowDetailModal(true);
+  };
+
+  const handleStartChallenge = async (challengeId: string) => {
+    // TODO: Implement challenge participation logic
+    console.log('Starting challenge:', challengeId);
+    // Close modal after starting
+    setShowDetailModal(false);
+    setSelectedChallenge(null);
+  };
+
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case 'easy': return 'bg-green-600/20 text-green-400 border-green-600/30';
+      case 'medium': return 'bg-yellow-600/20 text-yellow-400 border-yellow-600/30';
+      case 'hard': return 'bg-red-600/20 text-red-400 border-red-600/30';
+      default: return 'bg-gray-600/20 text-gray-400 border-gray-600/30';
     }
   };
 
-  const undoDay = async (challengeId: string) => {
-    if (!user) return;
-    
-    setUndoingChallenge(challengeId);
-    try {
-      const response = await fetch('/api/challenges', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'undo-day',
-          userId: user.id,
-          challengeId
-        })
-      });
-
-      const data = await response.json();
-      
-      if (data.success) {
-        toast.success(data.message);
-        loadChallenges(); // Reload to update progress
-      } else {
-        toast.error(data.message);
-      }
-    } catch (error) {
-      console.error('Error undoing day:', error);
-      toast.error('Fout bij het ongedaan maken van dag');
-    } finally {
-      setUndoingChallenge(null);
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'weekly': return CalendarIcon;
+      case 'monthly': return ClockIcon;
+      case 'special': return StarIcon;
+      default: return TrophyIcon;
     }
+  };
+
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'weekly': return 'bg-blue-600/20 text-blue-400 border-blue-600/30';
+      case 'monthly': return 'bg-purple-600/20 text-purple-400 border-purple-600/30';
+      case 'special': return 'bg-orange-600/20 text-orange-400 border-orange-600/30';
+      default: return 'bg-gray-600/20 text-gray-400 border-gray-600/30';
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('nl-NL', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#0F1419] to-[#1A1F2E] p-6">
-        <div className="max-w-6xl mx-auto">
+      <div className="min-h-screen bg-[#181F17] p-6">
+        <div className="max-w-7xl mx-auto">
           <div className="animate-pulse">
-            <div className="h-8 bg-gray-700 rounded w-1/4 mb-6"></div>
+            <div className="h-8 bg-[#3A4D23] rounded w-64 mb-6"></div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-6">
-                  <div className="h-4 bg-gray-700 rounded w-3/4 mb-4"></div>
-                  <div className="h-3 bg-gray-700 rounded w-1/2 mb-2"></div>
-                  <div className="h-3 bg-gray-700 rounded w-2/3"></div>
+                <div key={i} className="bg-[#232D1A] rounded-lg p-6">
+                  <div className="h-6 bg-[#3A4D23] rounded w-3/4 mb-4"></div>
+                  <div className="h-4 bg-[#3A4D23] rounded w-full mb-2"></div>
+                  <div className="h-4 bg-[#3A4D23] rounded w-2/3 mb-4"></div>
+                  <div className="flex gap-2 mb-4">
+                    <div className="h-6 bg-[#3A4D23] rounded w-16"></div>
+                    <div className="h-6 bg-[#3A4D23] rounded w-20"></div>
+                  </div>
+                  <div className="h-10 bg-[#3A4D23] rounded w-full"></div>
                 </div>
               ))}
             </div>
@@ -188,223 +261,213 @@ export default function ChallengesPage() {
   }
 
   return (
-    <ClientLayout>
-      <div className="w-full max-w-7xl mx-auto">
-        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 drop-shadow-lg">Challenges</h1>
-        <p className="text-[#8BAE5A] text-lg mb-8">Neem deel aan uitdagingen en verdien XP, badges en rangen</p>
-
-        {/* Summary Cards */}
-        {summary && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 text-center">
-              <div className="text-2xl font-bold text-[#FFD700]">{summary.totalChallenges}</div>
-              <div className="text-[#8BAE5A] text-sm">Totaal Challenges</div>
+    <div className="min-h-screen bg-[#181F17] p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <Breadcrumb items={createBreadcrumbs('Challenges', BREADCRUMB_CONFIGS.challenges.parent, BREADCRUMB_CONFIGS.challenges.parentHref)} />
+          
+          <div className="flex items-center gap-4 mt-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-[#8BAE5A] to-[#B6C948] rounded-xl flex items-center justify-center">
+              <TrophyIcon className="w-6 h-6 text-[#181F17]" />
             </div>
-
-            <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 text-center">
-              <div className="text-2xl font-bold text-[#FFD700]">{summary.activeChallenges}</div>
-              <div className="text-[#8BAE5A] text-sm">Actieve Challenges</div>
+            <div>
+              <h1 className="text-3xl font-bold text-white">Challenges</h1>
+              <p className="text-[#8BAE5A] mt-1">Test jezelf en verdien punten met uitdagende missies</p>
             </div>
+          </div>
+        </div>
 
-            <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 text-center">
-              <div className="text-2xl font-bold text-[#FFD700]">{summary.completedChallenges}</div>
-              <div className="text-[#8BAE5A] text-sm">Voltooid</div>
-            </div>
-
-            <div className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-4 text-center">
-              <div className="text-2xl font-bold text-[#FFD700]">{summary.totalXpEarned}</div>
-              <div className="text-[#8BAE5A] text-sm">XP Verdiend</div>
-              <div className="text-xs text-gray-400 mt-1">
-                {summary.dailyXpEarned > 0 && `+${summary.dailyXpEarned} dagelijks`}
-                {summary.completedXp > 0 && summary.dailyXpEarned > 0 && ' • '}
-                {summary.completedXp > 0 && `+${summary.completedXp} voltooid`}
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <AdminCard>
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-blue-600/20 rounded-lg flex items-center justify-center">
+                <CalendarIcon className="w-6 h-6 text-blue-400" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-white">{challenges.filter(c => c.type === 'weekly').length}</div>
+                <div className="text-sm text-[#8BAE5A]">Wekelijkse Challenges</div>
               </div>
             </div>
-          </div>
-        )}
+          </AdminCard>
 
-        {/* Available Challenges */}
-        {challenges.filter(c => c.status === 'available').length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-white mb-4">Beschikbare Challenges</h2>
-            <div className="space-y-4">
-              {challenges.filter(c => c.status === 'available').map((challenge) => (
-                <div
-                  key={challenge.id}
-                  className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-6 hover:border-[#8BAE5A]/50 transition-all duration-200"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className="text-3xl">{challenge.badgeIcon}</div>
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-white">{challenge.title}</h3>
-                        <p className="text-gray-400 text-sm mt-1">{challenge.description}</p>
-                        <div className="flex items-center space-x-4 mt-2">
-                          <span className="text-sm text-[#8BAE5A]">{challenge.category}</span>
-                          <span className="text-sm text-gray-400">{challenge.difficulty}</span>
-                          <span className="text-sm text-gray-400">{challenge.durationDays} dagen</span>
-                          {challenge.isCommunityChallenge && (
-                            <span className="text-sm text-[#FFD700]">👥 Community</span>
-                          )}
-                        </div>
-                      </div>
+          <AdminCard>
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-purple-600/20 rounded-lg flex items-center justify-center">
+                <ClockIcon className="w-6 h-6 text-purple-400" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-white">{challenges.filter(c => c.type === 'monthly').length}</div>
+                <div className="text-sm text-[#8BAE5A]">Maandelijkse Challenges</div>
+              </div>
+            </div>
+          </AdminCard>
+
+          <AdminCard>
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-orange-600/20 rounded-lg flex items-center justify-center">
+                <StarIcon className="w-6 h-6 text-orange-400" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-white">{challenges.filter(c => c.type === 'special').length}</div>
+                <div className="text-sm text-[#8BAE5A]">Speciale Challenges</div>
+              </div>
+            </div>
+          </AdminCard>
+
+          <AdminCard>
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-green-600/20 rounded-lg flex items-center justify-center">
+                <FireIcon className="w-6 h-6 text-green-400" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-white">
+                  {challenges.reduce((sum, c) => sum + c.participants_count, 0).toLocaleString()}
+                </div>
+                <div className="text-sm text-[#8BAE5A]">Totaal Deelnemers</div>
+              </div>
+            </div>
+          </AdminCard>
+        </div>
+
+        {/* Filter Tabs */}
+        <div className="flex gap-2 mb-8">
+          {[
+            { key: 'all', label: 'Alle Challenges', icon: TrophyIcon },
+            { key: 'weekly', label: 'Wekelijks', icon: CalendarIcon },
+            { key: 'monthly', label: 'Maandelijks', icon: ClockIcon },
+            { key: 'special', label: 'Speciaal', icon: StarIcon }
+          ].map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key as any)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+                  activeTab === tab.key
+                    ? 'bg-[#8BAE5A] text-[#181F17]'
+                    : 'bg-[#232D1A] text-[#8BAE5A] hover:bg-[#3A4D23]'
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Challenges Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredChallenges.map((challenge) => {
+            const TypeIcon = getTypeIcon(challenge.type);
+            return (
+              <AdminCard key={challenge.id} className="hover:scale-105 transition-transform">
+                <div className="space-y-4">
+                  {/* Header */}
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold text-white mb-2">{challenge.title}</h3>
+                      <p className="text-[#8BAE5A] text-sm leading-relaxed">{challenge.description}</p>
                     </div>
-                    <div className="flex items-center space-x-4">
-                      <div className="text-right">
-                        <div className="text-lg font-bold text-[#FFD700]">+{challenge.xpReward} XP</div>
-                        <div className="text-sm text-gray-400">{challenge.badgeName}</div>
-                      </div>
-                      <button
-                        onClick={() => joinChallenge(challenge.id)}
-                        disabled={joiningChallenge === challenge.id}
-                        className="bg-gradient-to-r from-[#8BAE5A] to-[#6B8E3A] hover:from-[#7A9D4A] hover:to-[#5A7D2A] text-white font-semibold px-4 py-2 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {joiningChallenge === challenge.id ? 'Starten...' : 'Start Challenge'}
-                      </button>
+                    <div className="w-10 h-10 bg-gradient-to-br from-[#8BAE5A] to-[#B6C948] rounded-lg flex items-center justify-center ml-4">
+                      <TypeIcon className="w-5 h-5 text-[#181F17]" />
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
-        {/* Active Challenges */}
-        {challenges.filter(c => c.status === 'active').length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-white mb-4">Actieve Challenges</h2>
-            <div className="space-y-4">
-              {challenges.filter(c => c.status === 'active').map((challenge) => (
-                <div
-                  key={challenge.id}
-                  className="bg-gradient-to-br from-[#181F17] to-[#232D1A] border border-[#3A4D23]/30 rounded-xl p-6 hover:border-[#8BAE5A]/50 transition-all duration-200"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className="text-3xl">{challenge.badgeIcon}</div>
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-white">{challenge.title}</h3>
-                        <p className="text-gray-400 text-sm mt-1">{challenge.description}</p>
-                        <div className="flex items-center space-x-4 mt-2">
-                          <span className="text-sm text-[#8BAE5A]">{challenge.category}</span>
-                          <span className="text-sm text-gray-400">{challenge.difficulty}</span>
-                          <span className="text-sm text-gray-400">{challenge.daysRemaining} dagen resterend</span>
-                        </div>
-                        
-                        {/* Progress Bar */}
-                        <div className="mt-3">
-                          <div className="flex justify-between text-sm text-gray-400 mb-1">
-                            <span>Voortgang</span>
-                            <span>{challenge.progress}%</span>
-                          </div>
-                          <div className="w-full bg-[#0F1419] rounded-full h-2">
-                            <div 
-                              className="bg-gradient-to-r from-[#8BAE5A] to-[#6B8E3A] h-2 rounded-full transition-all duration-300"
-                              style={{ width: `${challenge.progress}%` }}
-                            ></div>
-                          </div>
-                        </div>
+                  {/* Badges */}
+                  <div className="flex gap-2 flex-wrap">
+                    <span className={`text-xs px-2 py-1 rounded-full font-medium border ${getTypeColor(challenge.type)}`}>
+                      {challenge.type === 'weekly' ? 'Wekelijks' : 
+                       challenge.type === 'monthly' ? 'Maandelijks' : 'Speciaal'}
+                    </span>
+                    <span className={`text-xs px-2 py-1 rounded-full font-medium border ${getDifficultyColor(challenge.difficulty)}`}>
+                      {challenge.difficulty === 'easy' ? 'Makkelijk' : 
+                       challenge.difficulty === 'medium' ? 'Gemiddeld' : 'Moeilijk'}
+                    </span>
+                  </div>
 
-                        <div className="flex items-center space-x-4 mt-2">
-                          <span className="text-sm text-[#FFD700]">🔥 {challenge.currentStreak} dagen streak</span>
-                          {challenge.startDate && (
-                            <span className="text-sm text-gray-400">
-                              Gestart: {new Date(challenge.startDate).toLocaleDateString('nl-NL')}
-                            </span>
-                          )}
-                        </div>
-                      </div>
+                  {/* Duration & Points */}
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-1 text-[#8BAE5A]">
+                      <ClockIcon className="w-4 h-4" />
+                      {challenge.duration_days} dagen
                     </div>
-                    <div className="flex items-center space-x-4">
-                      <div className="text-right">
-                        <div className="text-lg font-bold text-[#FFD700]">+{challenge.xpReward} XP</div>
-                        <div className="text-sm text-gray-400">{challenge.badgeName}</div>
-                      </div>
-                      <div className="flex flex-col space-y-2">
-                        <button
-                          onClick={() => completeDay(challenge.id)}
-                          disabled={completingChallenge === challenge.id || challenge.isCompletedToday}
-                          className={`font-semibold px-4 py-2 rounded-lg transition-all duration-200 ${
-                            challenge.isCompletedToday
-                              ? 'bg-gradient-to-r from-gray-600 to-gray-700 text-gray-300 cursor-not-allowed'
-                              : 'bg-gradient-to-r from-[#8BAE5A] to-[#6B8E3A] hover:from-[#7A9D4A] hover:to-[#5A7D2A] text-white'
-                          }`}
-                        >
-                          {completingChallenge === challenge.id 
-                            ? 'Voltooien...' 
-                            : challenge.isCompletedToday 
-                              ? '✅ Vandaag voltooid' 
-                              : 'Dag voltooien (+10 XP)'}
-                        </button>
-                        {challenge.currentStreak > 0 && (
-                          <button
-                            onClick={() => undoDay(challenge.id)}
-                            disabled={undoingChallenge === challenge.id}
-                            className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-semibold px-4 py-2 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                          >
-                            {undoingChallenge === challenge.id ? 'Ongedaan maken...' : 'Ongedaan (-10 XP)'}
-                          </button>
-                        )}
-                      </div>
+                    <div className="flex items-center gap-1 text-[#B6C948] font-semibold">
+                      <TrophyIcon className="w-4 h-4" />
+                      {challenge.points_reward} punten
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
-        {/* Completed Challenges */}
-        {challenges.filter(c => c.status === 'completed').length > 0 && (
-          <div>
-            <h2 className="text-2xl font-bold text-white mb-4">Voltooide Challenges</h2>
-            <div className="space-y-4">
-              {challenges.filter(c => c.status === 'completed').map((challenge) => (
-                <div
-                  key={challenge.id}
-                  className="bg-gradient-to-br from-[#1A1F2E] to-[#232D1A] border border-[#3A4D23]/50 rounded-xl p-6 opacity-75"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className="text-3xl">{challenge.badgeIcon}</div>
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-white line-through">{challenge.title}</h3>
-                        <p className="text-gray-400 text-sm mt-1">{challenge.description}</p>
-                        <div className="flex items-center space-x-4 mt-2">
-                          <span className="text-sm text-[#8BAE5A]">{challenge.category}</span>
-                          <span className="text-sm text-gray-400">{challenge.difficulty}</span>
-                          <span className="text-sm text-gray-400">{challenge.durationDays} dagen</span>
-                        </div>
-                        {challenge.completionDate && (
-                          <p className="text-sm text-gray-400 mt-1">
-                            Voltooid op: {new Date(challenge.completionDate).toLocaleDateString('nl-NL')}
-                          </p>
-                        )}
-                      </div>
+                  {/* Dates */}
+                  <div className="text-xs text-[#8BAE5A]">
+                    <div>Start: {formatDate(challenge.start_date)}</div>
+                    <div>Eind: {formatDate(challenge.end_date)}</div>
+                  </div>
+
+                  {/* Stats */}
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="text-[#8BAE5A]">
+                      {challenge.participants_count.toLocaleString()} deelnemers
                     </div>
-                    <div className="flex items-center space-x-4">
-                      <div className="text-right">
-                        <div className="text-lg font-bold text-[#FFD700]">+{challenge.xpReward} XP</div>
-                        <div className="text-sm text-gray-400">{challenge.badgeName}</div>
-                      </div>
-                      <div className="text-4xl">🏆</div>
+                    <div className="text-[#B6C948]">
+                      {challenge.completion_rate}% voltooid
                     </div>
                   </div>
+
+                  {/* Requirements Preview */}
+                  <div>
+                    <div className="text-sm font-medium text-white mb-2">Vereisten:</div>
+                    <div className="space-y-1">
+                      {challenge.requirements.slice(0, 2).map((req, index) => (
+                        <div key={index} className="flex items-center gap-2 text-xs text-[#8BAE5A]">
+                          <CheckCircleIcon className="w-3 h-3 text-green-400 flex-shrink-0" />
+                          {req}
+                        </div>
+                      ))}
+                      {challenge.requirements.length > 2 && (
+                        <div className="text-xs text-[#8BAE5A]/60">
+                          +{challenge.requirements.length - 2} meer vereisten
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Action Button */}
+                  <AdminButton
+                    className="w-full"
+                    variant="primary"
+                    icon={<PlayIcon className="w-4 h-4" />}
+                    onClick={() => handleChallengeClick(challenge)}
+                  >
+                    Bekijk Details
+                  </AdminButton>
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
+              </AdminCard>
+            );
+          })}
+        </div>
 
         {/* Empty State */}
-        {challenges.length === 0 && (
+        {filteredChallenges.length === 0 && (
           <div className="text-center py-12">
-            <div className="text-6xl mb-4">🎯</div>
-            <h3 className="text-xl font-semibold text-white mb-2">Geen challenges beschikbaar</h3>
-            <p className="text-gray-400">Er zijn momenteel geen challenges beschikbaar. Check later terug!</p>
+            <TrophyIcon className="w-16 h-16 text-[#3A4D23] mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-white mb-2">Geen challenges gevonden</h3>
+            <p className="text-[#8BAE5A]">Er zijn momenteel geen {activeTab === 'all' ? '' : activeTab} challenges beschikbaar.</p>
           </div>
         )}
       </div>
-    </ClientLayout>
+
+      {/* Challenge Detail Modal */}
+      <ChallengeDetailModal
+        isOpen={showDetailModal}
+        onClose={() => {
+          setShowDetailModal(false);
+          setSelectedChallenge(null);
+        }}
+        challenge={selectedChallenge}
+        onStartChallenge={handleStartChallenge}
+      />
+    </div>
   );
-} 
+}
