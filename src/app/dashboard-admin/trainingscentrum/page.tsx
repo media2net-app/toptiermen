@@ -209,7 +209,7 @@ const mockProgress = {
 };
 
 const categories = ['Gym', 'Outdoor', 'Bodyweight'];
-const muscleGroups = ['Borst', 'Rug', 'Benen', 'Schouders', 'Armen', 'Core', 'Glutes', 'Buik'];
+const muscleGroups = ['Borst', 'Rug', 'Benen', 'Schouders', 'Armen', 'Core', 'Glutes', 'Buik', 'Trapezius'];
 const equipment = ['Barbell', 'Dumbbell', 'Bodyweight', 'Machine', 'Cable', 'Kettlebell'];
 
 // Equipment categories for filtering
