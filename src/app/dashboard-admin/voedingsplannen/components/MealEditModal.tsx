@@ -24,6 +24,7 @@ interface DatabaseIngredient {
   carbs_per_100g: number;
   fat_per_100g: number;
   is_carnivore?: boolean;
+  unit_type?: 'per_100g' | 'per_piece' | 'per_handful' | 'per_30g';
 }
 
 interface Meal {
@@ -65,6 +66,79 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
   const [ingredientsDatabase, setIngredientsDatabase] = useState<DatabaseIngredient[]>([]);
   const [showAllIngredients, setShowAllIngredients] = useState(false);
   const [ingredientSearchTerm, setIngredientSearchTerm] = useState('');
+
+  // Unit conversion utilities
+  const getUnitLabel = (ingredient: DatabaseIngredient) => {
+    switch (ingredient.unit_type) {
+      case 'per_piece': return 'stuk';
+      case 'per_handful': return 'handje';
+      case 'per_30g': return 'g';
+      case 'per_100g':
+      default: return 'g';
+    }
+  };
+
+  const getDefaultAmountForUnit = (ingredient: DatabaseIngredient) => {
+    switch (ingredient.unit_type) {
+      case 'per_piece': return 1; // 1 stuk
+      case 'per_handful': return 1; // 1 handje
+      case 'per_30g': return 30; // 30 gram (voor whey protein)
+      case 'per_100g':
+      default: return 100; // 100 gram
+    }
+  };
+
+  const getWeightPerPiece = (ingredient: DatabaseIngredient) => {
+    const name = ingredient.name.toLowerCase();
+    const category = ingredient.category?.toLowerCase();
+    
+    // Special case for whey protein (per_100g but shown as gram amounts)
+    if ((name.includes('whey') || name.includes('wei')) && (name.includes('eiwit') || name.includes('protein') || name.includes('shake'))) {
+      return 1; // 1 gram = 1 gram (direct weight)
+    }
+    
+    // Supplementen have very small weights per piece
+    if (category === 'supplementen') {
+      if (name.includes('capsule') || name.includes('tablet') || name.includes('pil')) return 0.5; // 0.5g per capsule/tablet
+      if (name.includes('scoop') || name.includes('schep')) return 30; // 30g per scoop
+      return 1; // 1g default voor supplementen
+    }
+    
+    // Specific weights per piece based on common Dutch food standards
+    if (name.includes('ei')) return 50; // 1 ei = 50g
+    if (name.includes('appel')) return 182; // 1 appel = 182g gemiddeld
+    if (name.includes('banaan')) return 118; // 1 banaan = 118g gemiddeld
+    if (name.includes('sinaasappel')) return 154; // 1 sinaasappel = 154g gemiddeld
+    if (name.includes('peer')) return 178; // 1 peer = 178g gemiddeld
+    
+    // Default for unknown pieces
+    return 100; // 100g default
+  };
+
+  const calculateNutritionForAmount = (ingredient: DatabaseIngredient, amount: number) => {
+    // Convert user input (handje/stuk/gram) to grams for nutrition calculation
+    let gramAmount = amount;
+    
+    if (ingredient.unit_type === 'per_handful') {
+      gramAmount = amount * 25; // Each handje = 25g
+    } else if (ingredient.unit_type === 'per_piece') {
+      const weightPerPiece = getWeightPerPiece(ingredient);
+      gramAmount = amount * weightPerPiece; // Each stuk = specific weight
+    } else if (ingredient.unit_type === 'per_30g') {
+      gramAmount = amount; // Direct gram amount (30g = 30g)
+    }
+    // per_100g: gramAmount stays as entered by user
+    
+    // Calculate nutrition based on the gram amount (database values are per 100g)
+    const factor = gramAmount / 100;
+    
+    return {
+      calories: Math.round((ingredient.calories_per_100g || 0) * factor),
+      protein: Math.round(((ingredient.protein_per_100g || 0) * factor) * 10) / 10,
+      carbs: Math.round(((ingredient.carbs_per_100g || 0) * factor) * 10) / 10,
+      fat: Math.round(((ingredient.fat_per_100g || 0) * factor) * 10) / 10
+    };
+  };
 
   // Load ingredients database once when modal opens
   useEffect(() => {
@@ -278,29 +352,19 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
       );
       
       if (dbIngredient) {
-        // Calculate based on unit type
-        let multiplier = 1;
-        if (ingredient.unit === 'stuks' && ingredient.name.toLowerCase().includes('ei')) {
-          // Special case for eggs: 1 egg = ~50g
-          multiplier = (ingredient.amount * 50) / 100;
-        } else if (ingredient.unit === 'stuks') {
-          // General case for pieces: assume per piece values if available
-          multiplier = ingredient.amount;
-        } else {
-          // Weight-based: calculate per 100g
-          multiplier = ingredient.amount / 100;
-        }
+        // Use the same nutrition calculation as for adding ingredients
+        const nutrition = calculateNutritionForAmount(dbIngredient, ingredient.amount);
         
-        totalCalories += (dbIngredient.calories_per_100g || 0) * multiplier;
-        totalProtein += (dbIngredient.protein_per_100g || 0) * multiplier;
-        totalCarbs += (dbIngredient.carbs_per_100g || 0) * multiplier;
-        totalFat += (dbIngredient.fat_per_100g || 0) * multiplier;
+        totalCalories += nutrition.calories;
+        totalProtein += nutrition.protein;
+        totalCarbs += nutrition.carbs;
+        totalFat += nutrition.fat;
         
         console.log(`✅ Found nutrition for ${ingredient.name}:`, {
           amount: ingredient.amount,
           unit: ingredient.unit,
-          multiplier,
-          calories: (dbIngredient.calories_per_100g || 0) * multiplier
+          unit_type: dbIngredient.unit_type,
+          calories: nutrition.calories
         });
       } else {
         console.warn(`⚠️ No nutrition data found for ingredient: ${ingredient.name}`);
@@ -316,28 +380,32 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
   };
 
 
-  const addIngredientFromDatabase = (dbIngredient: any) => {
+  const addIngredientFromDatabase = (dbIngredient: DatabaseIngredient) => {
+    const defaultAmount = getDefaultAmountForUnit(dbIngredient);
+    const unit = getUnitLabel(dbIngredient);
+    const nutrition = calculateNutritionForAmount(dbIngredient, defaultAmount);
+    
     const newIngredient = {
       id: `ingredient-${Date.now()}`,
       name: dbIngredient.name,
-      amount: 100,
-      unit: dbIngredient.unit || 'g',
-      calories: dbIngredient.calories || 0,
-      protein: dbIngredient.protein || 0,
-      carbs: dbIngredient.carbs || 0,
-      fat: dbIngredient.fat || 0
-    };
-    
-    const updatedIngredients = [...(formData.ingredients || []), newIngredient];
-    const nutrition = calculateNutritionFromIngredients(updatedIngredients);
-    
-    setFormData(prev => ({
-      ...prev,
-      ingredients: updatedIngredients,
+      amount: defaultAmount,
+      unit: unit,
       calories: nutrition.calories,
       protein: nutrition.protein,
       carbs: nutrition.carbs,
       fat: nutrition.fat
+    };
+    
+    const updatedIngredients = [...(formData.ingredients || []), newIngredient];
+    const totalNutrition = calculateNutritionFromIngredients(updatedIngredients);
+    
+    setFormData(prev => ({
+      ...prev,
+      ingredients: updatedIngredients,
+      calories: totalNutrition.calories,
+      protein: totalNutrition.protein,
+      carbs: totalNutrition.carbs,
+      fat: totalNutrition.fat
     }));
     
     console.log('✅ Added ingredient from database:', dbIngredient.name);
@@ -473,11 +541,11 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
     const selectedIngredients = getMealPreferences(mealType);
     console.log('- Final selected ingredients:', selectedIngredients.map(ing => `${ing.name} (${ing.protein_per_100g}g protein)`));
     
-    // Convert to suggestion format with smart default amounts
+    // Convert to suggestion format with smart default amounts based on unit_type
     return selectedIngredients.map(ing => ({
-      name: ing.name,
-      amount: getDefaultAmount(ing.name),
-      unit: 'g'
+      ...ing, // Include all ingredient properties
+      amount: getDefaultAmountForUnit(ing),
+      unit: getUnitLabel(ing)
     }));
   };
 
@@ -660,7 +728,8 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
                     <option value="kg">kg</option>
                     <option value="ml">ml</option>
                     <option value="l">l</option>
-                    <option value="stuks">stuks</option>
+                    <option value="stuk">stuk</option>
+                    <option value="handje">handje</option>
                     <option value="eetlepel">eetlepel</option>
                     <option value="theelepel">theelepel</option>
                   </select>
@@ -728,11 +797,7 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
                   {getFilteredIngredients().map((ingredient, index) => (
                     <button
                       key={index}
-                      onClick={() => addIngredientFromDatabase({ 
-                        name: ingredient.name, 
-                        amount: getDefaultAmount(ingredient.name), 
-                        unit: 'g' 
-                      })}
+                      onClick={() => addIngredientFromDatabase(ingredient)}
                       className="px-3 py-2 text-sm bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] rounded hover:bg-[#3A4D23] transition-colors text-left"
                     >
                       <div className="font-medium">{ingredient.name}</div>

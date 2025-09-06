@@ -87,6 +87,66 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
     loadFreshIngredients();
   }, [isOpen, foodItems]);
 
+  // Load plan data when component opens with existing plan
+  useEffect(() => {
+    if (isOpen && plan) {
+      console.log('🔄 PlanBuilder: Loading existing plan data:', plan.name);
+      console.log('📊 Plan target macros:', {
+        calories: (plan as any).meals?.target_calories || plan.target_calories,
+        protein: (plan as any).meals?.target_protein || plan.target_protein,
+        carbs: (plan as any).meals?.target_carbs || plan.target_carbs,
+        fat: (plan as any).meals?.target_fat || plan.target_fat
+      });
+
+      // Use data from plan.meals if available, otherwise fallback to plan properties
+      const targetCalories = (plan as any).meals?.target_calories || plan.target_calories || 2200;
+      const targetProtein = (plan as any).meals?.target_protein || plan.target_protein || 165;
+      const targetCarbs = (plan as any).meals?.target_carbs || plan.target_carbs || 220;
+      const targetFat = (plan as any).meals?.target_fat || plan.target_fat || 73;
+
+      setFormData({
+        id: plan.id,
+        name: plan.name || '',
+        description: plan.description || '',
+        target_calories: targetCalories,
+        target_protein: targetProtein,
+        target_carbs: targetCarbs,
+        target_fat: targetFat,
+        duration_weeks: plan.duration_weeks || 12,
+        difficulty: plan.difficulty || 'beginner',
+        goal: plan.goal || 'spiermassa',
+        fitness_goal: (plan.goal?.toLowerCase().includes('droog') ? 'droogtrainen' : 
+                      plan.goal?.toLowerCase().includes('massa') ? 'spiermassa' : 'onderhoud') as any,
+        is_featured: plan.is_featured || false,
+        is_public: plan.is_public !== false,
+        daily_plans: (plan as any).meals?.weekly_plan 
+          ? convertWeeklyPlanToDailyPlans((plan as any).meals.weekly_plan)
+          : []
+      });
+
+      console.log('✅ PlanBuilder: Plan data loaded with macros:', {
+        calories: targetCalories,
+        protein: targetProtein,
+        carbs: targetCarbs,
+        fat: targetFat
+      });
+    } else if (isOpen && !plan) {
+      // Reset to default when opening without a plan
+      console.log('🔄 PlanBuilder: Resetting to default values');
+      setFormData({
+        name: '',
+        ...getStandardProfile('spiermassa', false),
+        duration_weeks: 12,
+        difficulty: 'beginner',
+        goal: 'spiermassa',
+        fitness_goal: 'spiermassa',
+        is_featured: false,
+        is_public: true,
+        daily_plans: []
+      });
+    }
+  }, [isOpen, plan]);
+
   // Fitness goal configurations
   const fitnessGoalConfigs = {
     droogtrainen: {
@@ -432,6 +492,40 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
         updated.target_protein = standardProfile.target_protein;
         updated.target_carbs = standardProfile.target_carbs;
         updated.target_fat = standardProfile.target_fat;
+      }
+
+      // Auto-calculate macros when calories change, maintaining current ratios
+      if (field === 'target_calories' && value && prev.target_protein && prev.target_carbs && prev.target_fat) {
+        const newCalories = parseInt(value);
+        const currentProtein = prev.target_protein;
+        const currentCarbs = prev.target_carbs;
+        const currentFat = prev.target_fat;
+        
+        // Calculate current total calories from macros (4 cal/g for protein and carbs, 9 cal/g for fat)
+        const currentCaloriesFromMacros = (currentProtein * 4) + (currentCarbs * 4) + (currentFat * 9);
+        
+        if (currentCaloriesFromMacros > 0 && newCalories > 0) {
+          // Calculate current percentages
+          const proteinPercent = (currentProtein * 4) / currentCaloriesFromMacros;
+          const carbsPercent = (currentCarbs * 4) / currentCaloriesFromMacros;
+          const fatPercent = (currentFat * 9) / currentCaloriesFromMacros;
+          
+          // Apply same percentages to new calorie amount
+          const newProteinCals = newCalories * proteinPercent;
+          const newCarbsCals = newCalories * carbsPercent;
+          const newFatCals = newCalories * fatPercent;
+          
+          // Convert back to grams
+          updated.target_protein = Math.round(newProteinCals / 4);
+          updated.target_carbs = Math.round(newCarbsCals / 4);
+          updated.target_fat = Math.round(newFatCals / 9);
+          
+          console.log('🧮 Auto-calculated macros for', newCalories, 'kcal:', {
+            protein: `${updated.target_protein}g (${Math.round(proteinPercent * 100)}%)`,
+            carbs: `${updated.target_carbs}g (${Math.round(carbsPercent * 100)}%)`,
+            fat: `${updated.target_fat}g (${Math.round(fatPercent * 100)}%)`
+          });
+        }
       }
       
       return updated;
@@ -923,11 +1017,16 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                   max="5000"
                   step="50"
                 />
-                {formData.fitness_goal && (
-                  <div className="text-sm mt-1 text-[#8BAE5A]">
-                    💡 Calorieën zijn vooraf ingesteld op basis van het fitness doel
+                <div className="text-sm mt-1 space-y-1">
+                  {formData.fitness_goal && (
+                    <div className="text-[#8BAE5A]">
+                      💡 Calorieën zijn vooraf ingesteld op basis van het fitness doel
+                    </div>
+                  )}
+                  <div className="text-[#B6C948]">
+                    🧮 Macro's worden automatisch herberekend bij aanpassing (verhoudingen behouden)
                   </div>
-                )}
+                </div>
               </div>
 
               {/* Macro Distribution */}
@@ -1001,8 +1100,21 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                     <div className="text-[#B6C948] text-xs">3-5x per week sporten</div>
                   </div>
                 </div>
-                <div className="mt-3 text-xs text-[#B6C948] text-center">
-                  📊 Alle voedingsplannen zijn gebaseerd op dit standaard profiel voor consistentie
+                <div className="mt-4 text-xs text-[#B6C948] space-y-2">
+                  <div className="text-center font-semibold text-[#8BAE5A]">🧮 Formule Berekening</div>
+                  <div className="bg-[#0F150E] rounded p-3 border border-[#2A3520] space-y-1">
+                    <div><span className="text-[#8BAE5A]">BMR (Mannen):</span> 10 × gewicht + 6.25 × lengte - 5 × leeftijd + 5</div>
+                    <div><span className="text-[#8BAE5A]">BMR:</span> 10 × 100 + 6.25 × 190 - 5 × 40 + 5 = <span className="text-[#B6C948] font-semibold">1,993 kcal</span></div>
+                    <div><span className="text-[#8BAE5A]">TDEE:</span> BMR × 1.55 (Matig Actief) = 1,993 × 1.55 = <span className="text-[#B6C948] font-semibold">3,089 kcal</span></div>
+                    <div className="border-t border-[#3A4D23] pt-2 mt-2">
+                      <div><span className="text-[#8BAE5A]">🔥 Droogtrainen:</span> 3,089 × 0.8 = <span className="text-yellow-400 font-semibold">2,471 kcal</span> (-20%)</div>
+                      <div><span className="text-[#8BAE5A]">⚖️ Onderhoud:</span> 3,089 × 1.0 = <span className="text-green-400 font-semibold">3,089 kcal</span> (0%)</div>
+                      <div><span className="text-[#8BAE5A]">💪 Spiermassa:</span> 3,089 × 1.15 = <span className="text-blue-400 font-semibold">3,552 kcal</span> (+15%)</div>
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    📊 Alle voedingsplannen zijn gebaseerd op dit standaard profiel voor consistentie
+                  </div>
                 </div>
               </div>
 
@@ -1361,10 +1473,29 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                                       </thead>
                                       <tbody>
                                         {meal.ingredients.map((ingredient: any, idx: number) => {
-                                          // Calculate nutrition values for this ingredient
-                                          // This is a simplified calculation - in real implementation you'd fetch from database
+                                          // Calculate nutrition values for this ingredient based on unit type
                                           const amount = ingredient.amount || 0;
-                                          const multiplier = amount / 100; // per 100g basis
+                                          const unit = ingredient.unit || 'g';
+                                          
+                                          // Calculate multiplier based on unit type
+                                          let multiplier = amount / 100; // default per 100g basis
+                                          
+                                          if (unit === 'stuk') {
+                                            // For pieces, convert to grams first
+                                            let gramsPerPiece = 100; // default
+                                            if (ingredient.name.toLowerCase().includes('ei')) gramsPerPiece = 50;
+                                            else if (ingredient.name.toLowerCase().includes('banaan')) gramsPerPiece = 118;
+                                            else if (ingredient.name.toLowerCase().includes('appel')) gramsPerPiece = 182;
+                                            multiplier = (amount * gramsPerPiece) / 100;
+                                          } else if (unit === 'handje') {
+                                            // 1 handje = approximately 25g
+                                            multiplier = (amount * 25) / 100;
+                                          } else if (unit === 'kg') {
+                                            multiplier = (amount * 1000) / 100;
+                                          } else {
+                                            // g, ml, l, etc - assume gram basis
+                                            multiplier = amount / 100;
+                                          }
                                           
                                           // Estimated values - these should come from ingredient database
                                           const estimatedNutrition = getEstimatedNutrition(ingredient.name);
@@ -1376,7 +1507,7 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                                           return (
                                             <tr key={idx} className="border-b border-[#3A4D23] hover:bg-[#232D1A]/50">
                                               <td className="p-2 text-[#B6C948]">{ingredient.name}</td>
-                                              <td className="p-2 text-center text-[#8BAE5A]">{amount}g</td>
+                                              <td className="p-2 text-center text-[#8BAE5A]">{amount}{ingredient.unit || 'g'}</td>
                                               <td className="p-2 text-center text-[#8BAE5A]">{calories}</td>
                                               <td className="p-2 text-center text-[#8BAE5A]">{protein}g</td>
                                               <td className="p-2 text-center text-[#8BAE5A]">{carbs}g</td>

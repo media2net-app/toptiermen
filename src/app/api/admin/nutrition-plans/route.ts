@@ -47,18 +47,31 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: `Failed to fetch nutrition plans: ${error.message}` }, { status: 500 });
     }
 
-    // If no plans exist, create the default Carnivoor plans
+    // If no plans exist, create the default nutrition plans
     if (!plans || plans.length === 0) {
-      console.log('🔄 Creating default Carnivoor plans...');
+      console.log('🔄 Creating default nutrition plans...');
       
-      const carnivoorPlans = [
+      const nutritionPlans = [
+        {
+          name: 'Carnivoor - Onderhoud',
+          description: 'Carnivoor dieet voor behoud van huidige lichaamscompositie. Gebalanceerde macro-verdeling binnen carnivoor kader.',
+          target_calories: 2860,
+          target_protein: 300, // 3x gewicht (100kg)
+          target_carbs: 249,
+          target_fat: 74,
+          duration_weeks: 12,
+          difficulty: 'intermediate',
+          goal: 'Onderhoud',
+          is_featured: true,
+          is_public: true
+        },
         {
           name: 'Carnivoor - Droogtrainen',
           description: 'Carnivoor dieet geoptimaliseerd voor vetverlies met behoud van spiermassa. Focus op hoge eiwitinname en lage koolhydraten.',
-          target_calories: 1870,
-          target_protein: 198,
-          target_carbs: 154,
-          target_fat: 66,
+          target_calories: 2360,
+          target_protein: 300, // 3x gewicht (100kg)
+          target_carbs: 102,
+          target_fat: 84,
           duration_weeks: 12,
           difficulty: 'intermediate',
           goal: 'Droogtrainen',
@@ -66,12 +79,25 @@ export async function GET(request: NextRequest) {
           is_public: true
         },
         {
-          name: 'Carnivoor - Onderhoud',
-          description: 'Carnivoor dieet voor behoud van huidige lichaamscompositie. Gebalanceerde macro-verdeling binnen carnivoor kader.',
-          target_calories: 2200,
-          target_protein: 165,
-          target_carbs: 220,
-          target_fat: 73,
+          name: 'Carnivoor - Spiermassa',
+          description: 'Carnivoor dieet geoptimaliseerd voor spiergroei en krachttoename. Verhoogde calorie- en eiwitinname.',
+          target_calories: 3260,
+          target_protein: 300, // 3x gewicht (100kg)
+          target_carbs: 335,
+          target_fat: 80,
+          duration_weeks: 12,
+          difficulty: 'intermediate',
+          goal: 'Spiermassa',
+          is_featured: true,
+          is_public: true
+        },
+        {
+          name: 'Maaltijdplan normaal - Onderhoud',
+          description: 'Gebalanceerd voedingsplan voor behoud van huidige lichaamscompositie. Mix van alle macronutriënten voor optimale gezondheid.',
+          target_calories: 2860,
+          target_protein: 250, // 35% van calories (2860 * 0.35 / 4)
+          target_carbs: 286, // 40% van calories (2860 * 0.40 / 4)
+          target_fat: 79, // 25% van calories (2860 * 0.25 / 9)
           duration_weeks: 12,
           difficulty: 'beginner',
           goal: 'Onderhoud',
@@ -79,12 +105,25 @@ export async function GET(request: NextRequest) {
           is_public: true
         },
         {
-          name: 'Carnivoor - Spiermassa',
-          description: 'Carnivoor dieet geoptimaliseerd voor spiergroei en krachttoename. Verhoogde calorie- en eiwitinname.',
-          target_calories: 2530,
-          target_protein: 215,
-          target_carbs: 264,
-          target_fat: 80,
+          name: 'Maaltijdplan normaal - Droogtrainen',
+          description: 'Gebalanceerd voedingsplan geoptimaliseerd voor vetverlies. Gezonde mix van alle voedingsgroepen voor duurzaam gewichtsverlies.',
+          target_calories: 2360,
+          target_protein: 236, // 40% van calories (2360 * 0.40 / 4)
+          target_carbs: 236, // 40% van calories (2360 * 0.40 / 4)
+          target_fat: 52, // 20% van calories (2360 * 0.20 / 9)
+          duration_weeks: 12,
+          difficulty: 'intermediate',
+          goal: 'Droogtrainen',
+          is_featured: true,
+          is_public: true
+        },
+        {
+          name: 'Maaltijdplan normaal - Spiermassa',
+          description: 'Gebalanceerd voedingsplan geoptimaliseerd voor spiergroei. Verhoogde calorie-inname met focus op kwaliteitsvoeding.',
+          target_calories: 3260,
+          target_protein: 245, // 30% van calories (3260 * 0.30 / 4)
+          target_carbs: 408, // 50% van calories (3260 * 0.50 / 4)
+          target_fat: 72, // 20% van calories (3260 * 0.20 / 9)
           duration_weeks: 12,
           difficulty: 'intermediate',
           goal: 'Spiermassa',
@@ -96,19 +135,19 @@ export async function GET(request: NextRequest) {
       try {
         const { data: newPlans, error: insertError } = await supabaseAdmin
           .from('nutrition_plans')
-          .insert(carnivoorPlans)
+          .insert(nutritionPlans)
           .select();
           
         if (insertError) {
-          console.error('❌ Error creating Carnivoor plans:', insertError);
+          console.error('❌ Error creating nutrition plans:', insertError);
           // Return empty plans instead of error
           return NextResponse.json({ success: true, plans: [] });
         }
         
-        console.log('✅ Carnivoor plans created successfully:', newPlans?.length || 0, 'plans');
+        console.log('✅ Nutrition plans created successfully:', newPlans?.length || 0, 'plans');
         return NextResponse.json({ success: true, plans: newPlans || [] });
       } catch (error) {
-        console.error('❌ Exception creating Carnivoor plans:', error);
+        console.error('❌ Exception creating nutrition plans:', error);
         // Return empty plans instead of error
         return NextResponse.json({ success: true, plans: [] });
       }
