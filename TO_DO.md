@@ -4,10 +4,10 @@
 
 ### ✅ Voltooid
 - [x] **Challenges pagina** - Complete challenges overzicht met wekelijkse, maandelijkse en speciale challenges
+- [x] **Permanente support / FAQ optie** - Floating support button met FAQ categorieën en contact formulier
 
 ### 🔥 Hoge Prioriteit
 - [ ] **Checkout fixen per pakket** - Betalingssysteem per abonnementspakket repareren
-- [ ] **Permanente support / FAQ optie** - Helpdesk en veelgestelde vragen sectie
 - [ ] **Onboarding** - Gebruikers onboarding flow verbeteren
 - [ ] **Test users** - Test gebruikers systeem implementeren
 
@@ -37,10 +37,17 @@
 - ✅ Mock data voor testing
 - 🔄 Nog te doen: Echte database integratie en challenge participation
 
+### Support/FAQ Status
+- ✅ Floating support button (rechts onder)
+- ✅ 6 FAQ categorieën (Technisch, Facturatie, Account, Training, Challenges, Academy)
+- ✅ Contact formulier voor directe support
+- ✅ Geïntegreerd in dashboard en admin panel
+- ✅ Responsive design en moderne UI
+
 ### Volgende Stappen
 1. **Checkout systeem** - Kritiek voor monetisatie
-2. **Support/FAQ** - Essentieel voor gebruikerservaring
-3. **Onboarding** - Belangrijk voor nieuwe gebruikers
+2. **Onboarding** - Belangrijk voor nieuwe gebruikers
+3. **Test users** - Gebruikers feedback systeem
 4. **Forum** - Community building
 
 ---

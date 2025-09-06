@@ -30,6 +30,7 @@ import CacheIssueHelper from '@/components/CacheIssueHelper';
 import OnboardingBanner from '@/components/OnboardingBanner';
 import NotificationBell from '@/components/NotificationBell';
 import InboxIcon from '@/components/InboxIcon';
+import SupportButton from '@/components/SupportButton';
 
 // 2.0.1: Dashboard menu configuration
 const menu = [
@@ -728,6 +729,9 @@ function DashboardContentInner({ children }: { children: React.ReactNode }) {
         
         {/* 2.0.1: Cache issue helper - DISABLED TO PREVENT INFINITE MODAL */}
         {/* <CacheIssueHelper /> */}
+        
+        {/* Support Button - Fixed position */}
+        <SupportButton />
       </div>
     </>
   );

@@ -38,6 +38,7 @@ import {
 import { SwipeIndicator } from '@/components/ui';
 import SessionMonitor from '@/components/SessionMonitor';
 import AuthDebugPanel from '@/components/AuthDebugPanel';
+import SupportButton from '@/components/SupportButton';
 
 // Type definitions for menu items
 interface MenuItem {
@@ -595,6 +596,9 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
       
       {/* Auth Debug Panel - Only visible in development or when debug is enabled */}
       <AuthDebugPanel isVisible={process.env.NODE_ENV === 'development' || showDebug} />
+      
+      {/* Support Button - Fixed position */}
+      <SupportButton />
     </div>
   );
 } 
