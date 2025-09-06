@@ -208,10 +208,20 @@ export default function SupportButton({ className = '' }: SupportButtonProps) {
       const userId = localStorage.getItem('userId') || 'demo-user-id';
       
       const response = await fetch(`/api/tickets?userId=${userId}`);
-      const tickets = await response.json();
-      setUserTickets(tickets);
+      const data = await response.json();
+      
+      // Ensure we always set an array
+      if (Array.isArray(data)) {
+        setUserTickets(data);
+      } else if (data && Array.isArray(data.tickets)) {
+        setUserTickets(data.tickets);
+      } else {
+        console.error('Invalid tickets data:', data);
+        setUserTickets([]);
+      }
     } catch (error) {
       console.error('Error fetching tickets:', error);
+      setUserTickets([]);
     } finally {
       setLoadingTickets(false);
     }
@@ -404,7 +414,7 @@ export default function SupportButton({ className = '' }: SupportButtonProps) {
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
                         <p className="text-[#8BAE5A]">Tickets worden geladen...</p>
                       </div>
-                    ) : userTickets.length === 0 ? (
+                    ) : !Array.isArray(userTickets) || userTickets.length === 0 ? (
                       <div className="text-center py-8">
                         <DocumentTextIcon className="w-16 h-16 text-[#8BAE5A]/50 mx-auto mb-4" />
                         <p className="text-[#8BAE5A] text-lg mb-2">Geen tickets gevonden</p>
