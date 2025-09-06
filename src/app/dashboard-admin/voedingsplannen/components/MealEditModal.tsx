@@ -606,6 +606,7 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
           return ontbijtFiltered.slice(0, 6);
         case 'snack1':
         case 'snack2':
+        case 'avondsnack':
           const snackFiltered = availableIngredients
             .filter(ing => ing.protein_per_100g > 15 || ['kaas', 'zalm', 'spek', 'boter'].some(keyword => 
               ing.name.toLowerCase().includes(keyword)));
