@@ -366,15 +366,46 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
     }
   }, [meal, mealType, ingredientsDatabase]);
 
+  // Force recalculate nutrition when meal data is loaded and ingredients database is available
+  useEffect(() => {
+    if (ingredientsDatabase.length > 0 && formData.ingredients.length > 0 && meal) {
+      console.log('🔄 Force recalculating nutrition for loaded meal...');
+      const nutrition = calculateNutritionFromIngredients(formData.ingredients);
+      console.log('📊 Force calculated nutrition:', nutrition);
+      console.log('📊 Current formData nutrition:', {
+        calories: formData.calories,
+        protein: formData.protein,
+        carbs: formData.carbs,
+        fat: formData.fat
+      });
+      
+      setFormData(prev => ({
+        ...prev,
+        calories: nutrition.calories,
+        protein: nutrition.protein,
+        carbs: nutrition.carbs,
+        fat: nutrition.fat
+      }));
+    }
+  }, [meal, ingredientsDatabase]);
+
   // Recalculate nutrition when ingredients database is loaded and we have ingredients
   useEffect(() => {
     if (ingredientsDatabase.length > 0 && formData.ingredients.length > 0) {
       console.log('🔄 Recalculating nutrition with loaded database...');
       const nutrition = calculateNutritionFromIngredients(formData.ingredients);
-      setFormData(prev => ({
-        ...prev,
-        ...nutrition
-      }));
+      
+      // Only update if the calculated nutrition is different from current values
+      if (nutrition.calories !== formData.calories || 
+          nutrition.protein !== formData.protein || 
+          nutrition.carbs !== formData.carbs || 
+          nutrition.fat !== formData.fat) {
+        console.log('📊 Updating nutrition values:', nutrition);
+        setFormData(prev => ({
+          ...prev,
+          ...nutrition
+        }));
+      }
     }
   }, [ingredientsDatabase, formData.ingredients]);
 
