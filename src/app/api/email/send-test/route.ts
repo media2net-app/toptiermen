@@ -176,7 +176,15 @@ export async function POST(request: NextRequest) {
     console.log('🧪 Sending test email...');
     
     const body = await request.json();
-    const { to, name = 'Test User', template = 'test', variables = {} } = body;
+    const { to, name = 'Test User', template = 'test', variables = {}, campaignId } = body;
+    
+    // 🚨 EMERGENCY DISABLE: Block campaign test emails
+    if (campaignId && (template === 'sneak_preview' || campaignId === '84bceade-eec6-4349-958f-6b04be0d3003')) {
+      console.log('🚨 BLOCKED: Campaign test email blocked for safety');
+      return NextResponse.json({ 
+        error: 'Campaign test emails zijn gedeactiveerd vanwege veiligheidsproblemen. Gebruik externe platforms.' 
+      }, { status: 503 });
+    }
     
     if (!to) {
       return NextResponse.json(

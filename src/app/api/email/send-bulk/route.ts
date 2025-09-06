@@ -172,6 +172,11 @@ function getEmailTemplate(template: string, variables: Record<string, string>) {
 }
 
 export async function POST(request: NextRequest) {
+  // 🚨 EMERGENCY DISABLE: Email campaigns deactivated due to duplicate sends
+  return NextResponse.json({ 
+    error: 'Email campaigns have been disabled for safety. Contact administrator.' 
+  }, { status: 503 });
+  
   try {
     console.log('📧 Starting bulk email send...');
     
