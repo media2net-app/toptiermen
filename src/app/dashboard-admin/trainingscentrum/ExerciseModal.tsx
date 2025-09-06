@@ -14,7 +14,7 @@ interface ExerciseModalProps {
 }
 
 const muscleGroups = [
-  'Borst', 'Rug', 'Benen', 'Schouders', 'Armen', 'Core', 'Buik'
+  'Borst', 'Rug', 'Benen', 'Schouders', 'Armen', 'Core', 'Buik', 'Trapezius'
 ];
 
 const equipmentTypes = [
