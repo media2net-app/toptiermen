@@ -322,18 +322,35 @@ export default function TrainingscentrumBeheer() {
     }
   }, []);
 
-  const fetchSchemas = useCallback(async () => {
+  const fetchSchemas = useCallback(async (retryCount = 0) => {
     setLoadingSchemas(true);
     setErrorSchemas(null);
+    
+    const maxRetries = 3;
+    const retryDelay = 1000 * (retryCount + 1); // Exponential backoff
+    
     try {
+      console.log(`🔄 Fetching training schemas (attempt ${retryCount + 1}/${maxRetries + 1})...`);
+      
       const { data, error } = await supabase
         .from('training_schemas')
         .select(`*,training_schema_days (id,day_number,name,training_schema_exercises (id,exercise_id,exercise_name,sets,reps,rest_time,order_index))`)
         .order('created_at', { ascending: false });
+        
       if (error) {
+        console.error('❌ Error fetching schemas:', error);
+        
+        if (retryCount < maxRetries) {
+          console.log(`⏳ Retrying in ${retryDelay}ms...`);
+          setTimeout(() => fetchSchemas(retryCount + 1), retryDelay);
+          return;
+        }
+        
         setErrorSchemas('Fout bij het laden van trainingsschema\'s');
         toast.error('Fout bij het laden van trainingsschema\'s');
       } else {
+        console.log(`✅ Successfully fetched ${data?.length || 0} training schemas`);
+        
         // Sort schemas by number of days (ascending)
         const sortedSchemas = (data || []).sort((a, b) => {
           const daysA = a.training_schema_days?.length || 0;
@@ -343,10 +360,20 @@ export default function TrainingscentrumBeheer() {
         setSchemas(sortedSchemas);
       }
     } catch (err) {
+      console.error('❌ Exception fetching schemas:', err);
+      
+      if (retryCount < maxRetries) {
+        console.log(`⏳ Retrying in ${retryDelay}ms...`);
+        setTimeout(() => fetchSchemas(retryCount + 1), retryDelay);
+        return;
+      }
+      
       setErrorSchemas('Fout bij het laden van trainingsschema\'s');
       toast.error('Fout bij het laden van trainingsschema\'s');
     } finally {
-      setLoadingSchemas(false);
+      if (retryCount === 0 || retryCount === maxRetries) {
+        setLoadingSchemas(false);
+      }
     }
   }, []);
 
@@ -405,42 +432,65 @@ export default function TrainingscentrumBeheer() {
     }
   }, []);
 
-  // Load data when component mounts
+  // Load data when component mounts - parallel loading for better performance
   useEffect(() => {
     if (mounted) {
-      fetchExercises();
-      fetchSchemas();
-      fetchStats();
+      console.log('🚀 Starting parallel data loading...');
+      
+      // Load all data in parallel for faster loading
+      Promise.all([
+        fetchExercises(),
+        fetchSchemas(),
+        fetchStats()
+      ]).then(() => {
+        console.log('✅ All data loaded successfully');
+      }).catch((error) => {
+        console.error('❌ Error loading data:', error);
+        toast.error('Fout bij het laden van data');
+      });
     }
   }, [mounted, fetchExercises, fetchSchemas, fetchStats]);
 
-  // Lazy load thumbnails one by one
+  // Lazy load thumbnails one by one - only for exercises with videos
   useEffect(() => {
     if (!mounted || exercises.length === 0) return;
 
+    // Only show video loading overlay if there are exercises with videos
+    const exercisesWithVideos = exercises.filter(ex => 
+      ex.video_url && 
+      ex.video_url !== '/video-placeholder.jpg' && 
+      ex.video_url !== 'video-placeholder.jpg'
+    );
+
+    if (exercisesWithVideos.length === 0) {
+      console.log('📹 No videos to load, skipping video loading overlay');
+      return;
+    }
+
     let isCancelled = false;
     const loadThumbnailsSequentially = async () => {
-      console.log('🎬 Starting sequential thumbnail loading...');
+      console.log(`🎬 Starting sequential thumbnail loading for ${exercisesWithVideos.length} videos...`);
       setThumbnailLoadingStarted(true);
       setShowVideoLoadingOverlay(true); // Show overlay when starting to load videos
       
-      for (let i = 0; i < exercises.length; i++) {
+      for (let i = 0; i < exercisesWithVideos.length; i++) {
         if (isCancelled) break;
         
-        const exercise = exercises[i];
-        console.log(`📹 Loading thumbnail ${i + 1}/${exercises.length}: ${exercise.name}`);
+        const exercise = exercisesWithVideos[i];
+        console.log(`📹 Loading thumbnail ${i + 1}/${exercisesWithVideos.length}: ${exercise.name}`);
         
         // Add exercise to visible set to trigger thumbnail loading
         setVisibleExercises(prev => new Set([...prev, exercise.id]));
         
         // Small delay between each thumbnail to prevent overwhelming
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 150));
       }
       
       // Hide overlay after all videos are loaded (with a small delay to ensure smooth transition)
       setTimeout(() => {
         if (!isCancelled) {
           setShowVideoLoadingOverlay(false);
+          console.log('✅ Video loading overlay hidden');
         }
       }, 500);
     };
@@ -737,25 +787,33 @@ export default function TrainingscentrumBeheer() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <AdminStatsCard
           icon={<CalendarIcon className="w-6 h-6" />}
-          value={loadingStats ? "..." : stats.totalSchemas}
+          value={loadingStats ? (
+            <div className="h-8 bg-[#3A4D23] rounded w-12 animate-pulse"></div>
+          ) : stats.totalSchemas}
           title="Trainingsschema's"
           color="blue"
         />
         <AdminStatsCard
           icon={<PlayIcon className="w-6 h-6" />}
-          value={loadingStats ? "..." : stats.totalExercises}
+          value={loadingStats ? (
+            <div className="h-8 bg-[#3A4D23] rounded w-12 animate-pulse"></div>
+          ) : stats.totalExercises}
           title="Oefeningen"
           color="green"
         />
         <AdminStatsCard
           icon={<FireIcon className="w-6 h-6" />}
-          value={loadingStats ? "..." : stats.totalChallenges}
+          value={loadingStats ? (
+            <div className="h-8 bg-[#3A4D23] rounded w-12 animate-pulse"></div>
+          ) : stats.totalChallenges}
           title="Challenges"
           color="orange"
         />
         <AdminStatsCard
           icon={<UserGroupIcon className="w-6 h-6" />}
-          value={loadingStats ? "..." : stats.activeUsers.toLocaleString('nl-NL')}
+          value={loadingStats ? (
+            <div className="h-8 bg-[#3A4D23] rounded w-12 animate-pulse"></div>
+          ) : stats.activeUsers.toLocaleString('nl-NL')}
           title="Actieve Gebruikers"
           color="purple"
         />
@@ -863,9 +921,34 @@ export default function TrainingscentrumBeheer() {
 
           {/* Schemas Table */}
           {loadingSchemas ? (
-            <div className="text-center py-12">
-              <LoadingSpinner size="lg" text="Trainingsschema's laden..." />
-            </div>
+            <AdminCard>
+              <div className="space-y-4">
+                {/* Skeleton Header */}
+                <div className="flex items-center justify-between">
+                  <div className="h-6 bg-[#3A4D23] rounded w-48 animate-pulse"></div>
+                  <div className="h-6 bg-[#3A4D23] rounded w-32 animate-pulse"></div>
+                </div>
+                
+                {/* Skeleton Rows */}
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="flex items-center space-x-4 p-4 border-b border-[#3A4D23]">
+                    <div className="w-12 h-12 bg-[#3A4D23] rounded-xl animate-pulse"></div>
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 bg-[#3A4D23] rounded w-3/4 animate-pulse"></div>
+                      <div className="h-3 bg-[#3A4D23] rounded w-1/2 animate-pulse"></div>
+                    </div>
+                    <div className="h-6 bg-[#3A4D23] rounded w-16 animate-pulse"></div>
+                    <div className="h-6 bg-[#3A4D23] rounded w-12 animate-pulse"></div>
+                    <div className="h-6 bg-[#3A4D23] rounded w-12 animate-pulse"></div>
+                    <div className="flex space-x-2">
+                      <div className="h-8 bg-[#3A4D23] rounded w-16 animate-pulse"></div>
+                      <div className="h-8 bg-[#3A4D23] rounded w-16 animate-pulse"></div>
+                      <div className="h-8 bg-[#3A4D23] rounded w-16 animate-pulse"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </AdminCard>
           ) : errorSchemas ? (
             <AdminCard>
               <div className="text-center">
@@ -1063,8 +1146,37 @@ export default function TrainingscentrumBeheer() {
 
           {/* Exercises Grid */}
           {loadingExercises ? (
-            <div className="text-center py-12">
-              <LoadingSpinner size="lg" text="Oefeningen laden..." />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23]">
+                  {/* Video Skeleton */}
+                  <div className="mb-4 aspect-video bg-[#3A4D23] rounded-xl animate-pulse"></div>
+                  
+                  {/* Content Skeleton */}
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="w-12 h-12 bg-[#3A4D23] rounded-xl animate-pulse"></div>
+                    <div className="flex space-x-2">
+                      <div className="w-8 h-8 bg-[#3A4D23] rounded-xl animate-pulse"></div>
+                      <div className="w-8 h-8 bg-[#3A4D23] rounded-xl animate-pulse"></div>
+                    </div>
+                  </div>
+                  
+                  <div className="h-6 bg-[#3A4D23] rounded w-3/4 mb-2 animate-pulse"></div>
+                  <div className="h-4 bg-[#3A4D23] rounded w-full mb-2 animate-pulse"></div>
+                  <div className="h-4 bg-[#3A4D23] rounded w-2/3 mb-4 animate-pulse"></div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <div className="h-4 bg-[#3A4D23] rounded w-24 animate-pulse"></div>
+                      <div className="h-4 bg-[#3A4D23] rounded w-16 animate-pulse"></div>
+                    </div>
+                    <div className="flex justify-between">
+                      <div className="h-4 bg-[#3A4D23] rounded w-20 animate-pulse"></div>
+                      <div className="h-4 bg-[#3A4D23] rounded w-12 animate-pulse"></div>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           ) : errorExercises ? (
             <AdminCard>
