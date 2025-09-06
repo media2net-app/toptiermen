@@ -50,7 +50,8 @@ export async function POST(request: NextRequest) {
       sugar_per_100g, 
       sodium_per_100g, 
       description, 
-      image_url 
+      image_url,
+      is_carnivore 
     } = body;
 
     const { data: ingredient, error } = await supabaseAdmin
@@ -66,7 +67,8 @@ export async function POST(request: NextRequest) {
         sugar_per_100g,
         sodium_per_100g,
         description,
-        image_url
+        image_url,
+        is_carnivore: is_carnivore || false
       })
       .select()
       .single();

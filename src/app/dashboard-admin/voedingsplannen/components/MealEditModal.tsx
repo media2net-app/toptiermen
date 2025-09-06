@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { XMarkIcon, PlusIcon, TrashIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, TrashIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import AdminButton from '@/components/admin/AdminButton';
 import { createClient } from '@supabase/supabase-js';
 
@@ -13,6 +13,17 @@ interface Ingredient {
   name: string;
   amount: number;
   unit: string;
+}
+
+interface DatabaseIngredient {
+  id: string;
+  name: string;
+  category: string;
+  calories_per_100g: number;
+  protein_per_100g: number;
+  carbs_per_100g: number;
+  fat_per_100g: number;
+  is_carnivore?: boolean;
 }
 
 interface Meal {
@@ -51,7 +62,7 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
   });
 
   const [isLoading, setIsLoading] = useState(false);
-  const [ingredientsDatabase, setIngredientsDatabase] = useState<any[]>([]);
+  const [ingredientsDatabase, setIngredientsDatabase] = useState<DatabaseIngredient[]>([]);
   const [showAllIngredients, setShowAllIngredients] = useState(false);
   const [ingredientSearchTerm, setIngredientSearchTerm] = useState('');
 
@@ -304,32 +315,6 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
     };
   };
 
-  const addIngredient = () => {
-    const newIngredient = { 
-      id: `ingredient-${Date.now()}`, 
-      name: '', 
-      amount: 100, 
-      unit: 'g', 
-      calories: 0, 
-      protein: 0, 
-      carbs: 0, 
-      fat: 0 
-    };
-    
-    const updatedIngredients = [...(formData.ingredients || []), newIngredient];
-    const nutrition = calculateNutritionFromIngredients(updatedIngredients);
-    
-    setFormData(prev => ({
-      ...prev,
-      ingredients: updatedIngredients,
-      calories: nutrition.calories,
-      protein: nutrition.protein,
-      carbs: nutrition.carbs,
-      fat: nutrition.fat
-    }));
-    
-    console.log('➕ Added new ingredient to meal');
-  };
 
   const addIngredientFromDatabase = (dbIngredient: any) => {
     const newIngredient = {
@@ -426,51 +411,72 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
   const getSmartSuggestions = () => {
     const isCarnivore = planType?.toLowerCase().includes('carnivoor');
     
-    // Base suggestions per meal type
-    const suggestions = {
-      ontbijt: [
-        { name: 'Eieren', amount: 200, unit: 'g' },
-        { name: 'Spek', amount: 50, unit: 'g' },
-        { name: 'Boter', amount: 15, unit: 'g' },
-        { name: 'Gerookte Zalm', amount: 80, unit: 'g' },
-        { name: 'Roomboter', amount: 20, unit: 'g' },
-        { name: 'Goudse kaas', amount: 30, unit: 'g' }
-      ],
-      snack1: [
-        { name: 'Goudse kaas', amount: 30, unit: 'g' },
-        { name: 'Roomboter', amount: 15, unit: 'g' },
-        { name: 'Gerookte Zalm', amount: 60, unit: 'g' },
-        { name: 'Spek', amount: 30, unit: 'g' },
-        { name: 'Boter', amount: 20, unit: 'g' },
-        { name: 'Honing', amount: 10, unit: 'g' }
-      ],
-      lunch: [
-        { name: 'Ribeye Steak', amount: 200, unit: 'g' },
-        { name: 'Kipfilet', amount: 200, unit: 'g' },
-        { name: 'Runderlever', amount: 150, unit: 'g' },
-        { name: 'Lamskotelet', amount: 200, unit: 'g' },
-        { name: 'Boter', amount: 15, unit: 'g' },
-        { name: 'Olijfolie', amount: 10, unit: 'g' }
-      ],
-      snack2: [
-        { name: 'Gerookte Zalm', amount: 80, unit: 'g' },
-        { name: 'Spek', amount: 40, unit: 'g' },
-        { name: 'Goudse kaas', amount: 40, unit: 'g' },
-        { name: 'Honing', amount: 15, unit: 'g' },
-        { name: 'Roomboter', amount: 20, unit: 'g' },
-        { name: 'Eieren', amount: 100, unit: 'g' }
-      ],
-      diner: [
-        { name: 'Ribeye Steak', amount: 250, unit: 'g' },
-        { name: 'Lamskotelet', amount: 250, unit: 'g' },
-        { name: 'Kipfilet', amount: 200, unit: 'g' },
-        { name: 'Runderlever', amount: 180, unit: 'g' },
-        { name: 'Spek', amount: 40, unit: 'g' },
-        { name: 'Olijfolie', amount: 15, unit: 'g' }
-      ]
+    console.log('🔍 getSmartSuggestions DEBUG:');
+    console.log('- Database total:', ingredientsDatabase.length);
+    console.log('- Meal type:', mealType);
+    console.log('- Plan type:', planType);
+    console.log('- Is carnivore:', isCarnivore);
+    
+    // Check if test1234 or test 1234 exists in database
+    const test1234 = ingredientsDatabase.find(ing => ing.name.toLowerCase().includes('test1234') || ing.name.toLowerCase().includes('test 1234'));
+    console.log('- test1234/test 1234 found:', test1234 ? `${test1234.name} (${test1234.protein_per_100g}g protein, category: ${test1234.category})` : 'NOT FOUND');
+    
+    // Filter database ingredients for this meal type and plan type
+    let availableIngredients = ingredientsDatabase;
+    
+    // Filter by plan type if carnivore
+    if (isCarnivore) {
+      availableIngredients = availableIngredients.filter(ing => 
+        ing.is_carnivore === true
+      );
+      console.log('- After carnivore filter (using is_carnivore flag):', availableIngredients.length);
+      
+      // Check if test1234/test 1234 survived carnivore filter
+      const test1234AfterFilter = availableIngredients.find(ing => ing.name.toLowerCase().includes('test1234') || ing.name.toLowerCase().includes('test 1234'));
+      console.log('- test1234/test 1234 after carnivore filter:', test1234AfterFilter ? 'STILL THERE' : 'FILTERED OUT');
+    }
+    
+    // Get meal-specific preferences based on protein content and meal type
+    const getMealPreferences = (mealType: string) => {
+      switch (mealType) {
+        case 'ontbijt':
+          const ontbijtFiltered = availableIngredients
+            .filter(ing => ing.protein_per_100g > 10 || ['eieren', 'spek', 'boter', 'zalm', 'kaas'].some(keyword => 
+              ing.name.toLowerCase().includes(keyword)));
+          console.log('- Ontbijt filtered (>10g protein):', ontbijtFiltered.length);
+          return ontbijtFiltered.slice(0, 6);
+        case 'snack1':
+        case 'snack2':
+          const snackFiltered = availableIngredients
+            .filter(ing => ing.protein_per_100g > 15 || ['kaas', 'zalm', 'spek', 'boter'].some(keyword => 
+              ing.name.toLowerCase().includes(keyword)));
+          console.log('- Snack filtered (>15g protein):', snackFiltered.length);
+          const test1234InSnack = snackFiltered.find(ing => ing.name.toLowerCase().includes('test1234') || ing.name.toLowerCase().includes('test 1234'));
+          console.log('- test1234/test 1234 in snack filter:', test1234InSnack ? 'YES' : 'NO');
+          return snackFiltered.slice(0, 6);
+        case 'lunch':
+        case 'diner':
+          const mainFiltered = availableIngredients
+            .filter(ing => ing.protein_per_100g > 20 || ['ribeye', 'kipfilet', 'runderlever', 'lamskotelet', 'biefstuk'].some(keyword => 
+              ing.name.toLowerCase().includes(keyword)));
+          console.log('- Main meal filtered (>20g protein):', mainFiltered.length);
+          const test1234InMain = mainFiltered.find(ing => ing.name.toLowerCase().includes('test1234') || ing.name.toLowerCase().includes('test 1234'));
+          console.log('- test1234/test 1234 in main filter:', test1234InMain ? 'YES' : 'NO');
+          return mainFiltered.slice(0, 6);
+        default:
+          return availableIngredients.slice(0, 6);
+      }
     };
-
-    return suggestions[mealType] || suggestions.lunch;
+    
+    const selectedIngredients = getMealPreferences(mealType);
+    console.log('- Final selected ingredients:', selectedIngredients.map(ing => `${ing.name} (${ing.protein_per_100g}g protein)`));
+    
+    // Convert to suggestion format with smart default amounts
+    return selectedIngredients.map(ing => ({
+      name: ing.name,
+      amount: getDefaultAmount(ing.name),
+      unit: 'g'
+    }));
   };
 
   const getDefaultAmount = (ingredientName: string) => {
@@ -617,15 +623,9 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
 
           {/* Ingredients */}
           <div className="bg-[#232D1A] rounded-lg p-4 border border-[#3A4D23]">
-            <div className="flex items-center justify-between mb-4">
+            <div className="mb-4">
               <h3 className="text-[#8BAE5A] font-semibold">Ingrediënten</h3>
-              <button
-                onClick={addIngredient}
-                className="flex items-center gap-2 text-[#8BAE5A] hover:text-[#7A9D4B] text-sm"
-              >
-                <PlusIcon className="w-4 h-4" />
-                Toevoegen
-              </button>
+              <p className="text-xs text-gray-400 mt-1">Kies ingrediënten uit de database hieronder</p>
             </div>
             
             <div className="space-y-3">
@@ -679,7 +679,14 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
           {/* Smart Ingredient Suggestions */}
           <div className="bg-[#232D1A] rounded-lg p-4 border border-[#3A4D23]">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-[#8BAE5A] font-semibold">Aanbevolen voor {getMealTypeName()}</h3>
+              <div>
+                <h3 className="text-[#8BAE5A] font-semibold">Aanbevolen voor {getMealTypeName()}</h3>
+                <p className="text-xs text-gray-400 mt-1">
+                  Database: {ingredientsDatabase.length} ingrediënten | 
+                  Gefilterd: {getFilteredIngredients().length} ingrediënten |
+                  Suggesties: {getSmartSuggestions().length}
+                </p>
+              </div>
               <button
                 onClick={() => setShowAllIngredients(!showAllIngredients)}
                 className="text-[#8BAE5A] hover:text-[#7A9D4B] text-sm border border-[#3A4D23] px-3 py-1 rounded transition-colors"
