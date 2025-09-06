@@ -45,7 +45,7 @@ interface FoodItem {
 const getUnitTypeLabel = (unitType?: 'per_100g' | 'per_piece' | 'per_handful' | 'per_30g') => {
   switch (unitType) {
     case 'per_piece': return 'Per stuk';
-    case 'per_handful': return 'Per handje';
+    case 'per_handful': return 'Per handje (25g)';
     case 'per_30g': return 'Per 30 gram';
     case 'per_100g':
     default: return 'Per 100 gram';
@@ -786,7 +786,7 @@ export default function AdminVoedingsplannenPage() {
                   <div className="col-span-2">Naam</div>
                   <div className="col-span-2">Categorie</div>
                   <div className="col-span-1">Carnivoor</div>
-                  <div className="col-span-1">Type<br/><span className="text-xs text-[#8BAE5A]/60">(per handje 25g)</span></div>
+                  <div className="col-span-1">Type</div>
                   <div className="col-span-1">Kcal</div>
                   <div className="col-span-1">Protein</div>
                   <div className="col-span-1">Carbs</div>
