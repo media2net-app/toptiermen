@@ -52,10 +52,41 @@ interface PlanBuilderProps {
   isOpen: boolean;
   onClose: () => void;
   plan?: NutritionPlan | null;
+  foodItems?: any[];
   onSave: (plan: NutritionPlan) => void;
 }
 
-export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuilderProps) {
+export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onSave }: PlanBuilderProps) {
+  // Local state for fresh ingredients database
+  const [localFoodItems, setLocalFoodItems] = useState<any[]>(foodItems);
+
+  // Update local food items when modal opens to get fresh data
+  useEffect(() => {
+    const loadFreshIngredients = async () => {
+      if (isOpen) {
+        try {
+          console.log('🔄 PlanBuilder: Loading fresh ingredients database...');
+          const response = await fetch('/api/admin/nutrition-ingredients');
+          const result = await response.json();
+          if (result.success && result.ingredients) {
+            setLocalFoodItems(result.ingredients);
+            console.log('✅ PlanBuilder: Fresh ingredients loaded:', result.ingredients.length, 'ingredients');
+          } else {
+            console.error('❌ PlanBuilder: Failed to load fresh ingredients:', result.error);
+            // Fallback to prop data
+            setLocalFoodItems(foodItems);
+          }
+        } catch (error) {
+          console.error('❌ PlanBuilder: Error loading fresh ingredients:', error);
+          // Fallback to prop data
+          setLocalFoodItems(foodItems);
+        }
+      }
+    };
+
+    loadFreshIngredients();
+  }, [isOpen, foodItems]);
+
   // Fitness goal configurations
   const fitnessGoalConfigs = {
     droogtrainen: {
@@ -691,54 +722,72 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
     zondag: 'Dag 7'
   };
 
-  // Helper function to get estimated nutrition values for ingredients
+  // Helper function to get nutrition values from database
   const getEstimatedNutrition = (ingredientName: string) => {
-    // Basic nutrition database for common carnivore ingredients (per 100g)
+    // First try to find exact match in database
+    const dbIngredient = localFoodItems.find(item => 
+      item.name.toLowerCase().trim() === ingredientName.toLowerCase().trim()
+    );
+    
+    if (dbIngredient) {
+      console.log('🎯 Found exact match for', ingredientName, ':', dbIngredient);
+      return {
+        calories: dbIngredient.calories_per_100g || 0,
+        protein: dbIngredient.protein_per_100g || 0,
+        carbs: dbIngredient.carbs_per_100g || 0,
+        fat: dbIngredient.fat_per_100g || 0
+      };
+    }
+    
+    // Try partial matches in database
+    const partialMatch = localFoodItems.find(item => 
+      item.name.toLowerCase().includes(ingredientName.toLowerCase()) ||
+      ingredientName.toLowerCase().includes(item.name.toLowerCase())
+    );
+    
+    if (partialMatch) {
+      return {
+        calories: partialMatch.calories_per_100g || 0,
+        protein: partialMatch.protein_per_100g || 0,
+        carbs: partialMatch.carbs_per_100g || 0,
+        fat: partialMatch.fat_per_100g || 0
+      };
+    }
+    
+    // Fallback to hardcoded values for common ingredients
     const nutritionData: { [key: string]: { calories: number; protein: number; carbs: number; fat: number } } = {
-      // Vlees
       'ribeye steak': { calories: 291, protein: 25.0, carbs: 0, fat: 21.0 },
       'ribeye': { calories: 291, protein: 25.0, carbs: 0, fat: 21.0 },
       'runderlever': { calories: 135, protein: 20.4, carbs: 3.9, fat: 3.6 },
       'lamskotelet': { calories: 294, protein: 25.6, carbs: 0, fat: 20.9 },
       'kipfilet': { calories: 165, protein: 31.0, carbs: 0, fat: 3.6 },
       'spek': { calories: 541, protein: 37.0, carbs: 1.4, fat: 42.0 },
-      
-      // Vis
       'gerookte zalm': { calories: 142, protein: 25.4, carbs: 0, fat: 4.3 },
       'zalm': { calories: 208, protein: 20.4, carbs: 0, fat: 13.4 },
-      
-      // Zuivel
       'goudse kaas': { calories: 356, protein: 25.0, carbs: 2.2, fat: 27.4 },
       'roomboter': { calories: 717, protein: 0.9, carbs: 0.7, fat: 81.1 },
       'boter': { calories: 717, protein: 0.9, carbs: 0.7, fat: 81.1 },
-      
-      // Eieren
       'eieren': { calories: 155, protein: 13.0, carbs: 1.1, fat: 11.0 },
-      
-      // Vetten
       'olijfolie': { calories: 884, protein: 0, carbs: 0, fat: 100.0 },
       'honing': { calories: 304, protein: 0.3, carbs: 82.4, fat: 0 },
-      
-      // Orgaanvlees
       'biefstuk': { calories: 271, protein: 26.0, carbs: 0, fat: 18.0 },
     };
     
-    // Normalize ingredient name for lookup
     const normalizedName = ingredientName.toLowerCase().trim();
     
-    // Try exact match first
+    // Try exact match in fallback data
     if (nutritionData[normalizedName]) {
       return nutritionData[normalizedName];
     }
     
-    // Try partial matches
+    // Try partial matches in fallback data
     for (const [key, value] of Object.entries(nutritionData)) {
       if (normalizedName.includes(key) || key.includes(normalizedName)) {
         return value;
       }
     }
     
-    // Default fallback for unknown ingredients (generic meat values)
+    // Final fallback for unknown ingredients
     return { calories: 250, protein: 20.0, carbs: 0, fat: 18.0 };
   };
 
@@ -1148,47 +1197,81 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
                               </div>
                               <div className="grid grid-cols-4 gap-3">
                                 <div className="bg-[#181F17] rounded-lg p-3 border border-[#3A4D23] text-center">
-                                  <div className={`font-bold text-lg ${caloriesDifference >= 0 ? 'text-[#8BAE5A]' : 'text-orange-400'}`}>
+                                  <div className={`font-bold text-lg ${
+                                    Math.abs(caloriesDifference) > 200 ? 'text-red-400' : 
+                                    caloriesDifference >= 0 ? 'text-[#8BAE5A]' : 'text-orange-400'
+                                  }`}>
                                     {caloriesDifference >= 0 ? '+' : ''}{caloriesDifference}
                                   </div>
                                   <div className="text-[#B6C948] text-xs">Calorieën</div>
                                   <div className="text-xs text-gray-400">{percentageOfTarget}%</div>
+                                  {Math.abs(caloriesDifference) > 200 && (
+                                    <div className="text-xs text-red-400 mt-1 font-semibold">⚠️ BUITEN MARGE</div>
+                                  )}
                                 </div>
                                 <div className="bg-[#181F17] rounded-lg p-3 border border-[#3A4D23] text-center">
-                                  <div className={`font-bold text-lg ${(totalProtein - standardProfile.target_protein) >= 0 ? 'text-[#8BAE5A]' : 'text-orange-400'}`}>
+                                  <div className={`font-bold text-lg ${
+                                    Math.abs(totalProtein - standardProfile.target_protein) > (standardProfile.target_protein * 0.2) ? 'text-red-400' : 
+                                    (totalProtein - standardProfile.target_protein) >= 0 ? 'text-[#8BAE5A]' : 'text-orange-400'
+                                  }`}>
                                     {(totalProtein - standardProfile.target_protein) >= 0 ? '+' : ''}{Math.round((totalProtein - standardProfile.target_protein) * 10) / 10}g
                                   </div>
                                   <div className="text-[#B6C948] text-xs">Protein</div>
                                   <div className="text-xs text-gray-400">
                                     {standardProfile.target_protein > 0 ? Math.round((totalProtein / standardProfile.target_protein) * 100) : 0}%
                                   </div>
+                                  {Math.abs(totalProtein - standardProfile.target_protein) > (standardProfile.target_protein * 0.2) && (
+                                    <div className="text-xs text-red-400 mt-1 font-semibold">⚠️ BUITEN MARGE</div>
+                                  )}
                                 </div>
                                 <div className="bg-[#181F17] rounded-lg p-3 border border-[#3A4D23] text-center">
-                                  <div className={`font-bold text-lg ${(totalCarbs - standardProfile.target_carbs) >= 0 ? 'text-[#8BAE5A]' : 'text-orange-400'}`}>
+                                  <div className={`font-bold text-lg ${
+                                    Math.abs(totalCarbs - standardProfile.target_carbs) > Math.max(5, standardProfile.target_carbs * 0.5) ? 'text-red-400' : 
+                                    (totalCarbs - standardProfile.target_carbs) >= 0 ? 'text-[#8BAE5A]' : 'text-orange-400'
+                                  }`}>
                                     {(totalCarbs - standardProfile.target_carbs) >= 0 ? '+' : ''}{Math.round((totalCarbs - standardProfile.target_carbs) * 10) / 10}g
                                   </div>
                                   <div className="text-[#B6C948] text-xs">Carbs</div>
                                   <div className="text-xs text-gray-400">
                                     {standardProfile.target_carbs > 0 ? Math.round((totalCarbs / standardProfile.target_carbs) * 100) : 0}%
                                   </div>
+                                  {Math.abs(totalCarbs - standardProfile.target_carbs) > Math.max(5, standardProfile.target_carbs * 0.5) && (
+                                    <div className="text-xs text-red-400 mt-1 font-semibold">⚠️ BUITEN MARGE</div>
+                                  )}
                                 </div>
                                 <div className="bg-[#181F17] rounded-lg p-3 border border-[#3A4D23] text-center">
-                                  <div className={`font-bold text-lg ${(totalFat - standardProfile.target_fat) >= 0 ? 'text-[#8BAE5A]' : 'text-orange-400'}`}>
+                                  <div className={`font-bold text-lg ${
+                                    Math.abs(totalFat - standardProfile.target_fat) > (standardProfile.target_fat * 0.25) ? 'text-red-400' : 
+                                    (totalFat - standardProfile.target_fat) >= 0 ? 'text-[#8BAE5A]' : 'text-orange-400'
+                                  }`}>
                                     {(totalFat - standardProfile.target_fat) >= 0 ? '+' : ''}{Math.round((totalFat - standardProfile.target_fat) * 10) / 10}g
                                   </div>
                                   <div className="text-[#B6C948] text-xs">Fat</div>
                                   <div className="text-xs text-gray-400">
                                     {standardProfile.target_fat > 0 ? Math.round((totalFat / standardProfile.target_fat) * 100) : 0}%
                                   </div>
+                                  {Math.abs(totalFat - standardProfile.target_fat) > (standardProfile.target_fat * 0.25) && (
+                                    <div className="text-xs text-red-400 mt-1 font-semibold">⚠️ BUITEN MARGE</div>
+                                  )}
                                 </div>
                               </div>
                             </div>
 
-                            <div className="text-xs text-[#B6C948] text-center">
-                              💡 Profiel: 40 jaar, 100kg, 190cm, Matig actief • 
-                              {caloriesDifference > 100 ? ' Plan zit boven calorie doel' : 
-                               caloriesDifference < -100 ? ' Plan zit onder calorie doel' : 
-                               ' Plan zit dicht bij calorie doel'}
+                            <div className="text-xs text-center">
+                              <div className="text-[#B6C948] mb-1">
+                                💡 Profiel: 40 jaar, 100kg, 190cm, Matig actief
+                              </div>
+                              <div className={`font-semibold ${
+                                Math.abs(caloriesDifference) > 200 ? 'text-red-400' : 
+                                Math.abs(caloriesDifference) <= 200 ? 'text-[#8BAE5A]' : 'text-orange-400'
+                              }`}>
+                                {Math.abs(caloriesDifference) > 200 ? 
+                                  `⚠️ WAARSCHUWING: ${Math.abs(caloriesDifference)} kcal buiten veilige marge (±200 kcal)` :
+                                  Math.abs(caloriesDifference) <= 200 ? 
+                                    '✅ Plan zit binnen veilige marge (±200 kcal)' : 
+                                    'Plan zit dicht bij doel'
+                                }
+                              </div>
                             </div>
                           </div>
                         </div>

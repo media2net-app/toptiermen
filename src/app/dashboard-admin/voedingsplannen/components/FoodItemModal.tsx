@@ -12,6 +12,7 @@ interface FoodItem {
   fat_per_100g: number;
   description: string;
   is_active: boolean;
+  is_carnivore?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -32,7 +33,8 @@ export default function FoodItemModal({ isOpen, onClose, foodItem, onSave }: Foo
     carbs_per_100g: 0,
     fat_per_100g: 0,
     description: '',
-    is_active: true
+    is_active: true,
+    is_carnivore: false
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -51,7 +53,8 @@ export default function FoodItemModal({ isOpen, onClose, foodItem, onSave }: Foo
         carbs_per_100g: foodItem.carbs_per_100g,
         fat_per_100g: foodItem.fat_per_100g,
         description: foodItem.description,
-        is_active: foodItem.is_active
+        is_active: foodItem.is_active,
+        is_carnivore: foodItem.is_carnivore || false
       });
     } else {
       setFormData({
@@ -62,7 +65,8 @@ export default function FoodItemModal({ isOpen, onClose, foodItem, onSave }: Foo
         carbs_per_100g: 0,
         fat_per_100g: 0,
         description: '',
-        is_active: true
+        is_active: true,
+        is_carnivore: false
       });
     }
     setError('');
@@ -189,6 +193,23 @@ export default function FoodItemModal({ isOpen, onClose, foodItem, onSave }: Foo
 
             <div>
               <label className="block text-sm font-medium text-[#8BAE5A] mb-1">
+                Carnivoor Geschikt *
+              </label>
+              <select
+                value={formData.is_carnivore ? 'true' : 'false'}
+                onChange={(e) => handleInputChange('is_carnivore', e.target.value === 'true')}
+                className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] focus:border-[#8BAE5A] transition-colors"
+              >
+                <option value="false">Nee - Niet carnivoor geschikt</option>
+                <option value="true">Ja - Carnivoor geschikt</option>
+              </select>
+              <p className="text-xs text-gray-400 mt-1">
+                Bepaalt of dit ingredient wordt getoond in carnivoor voedingsplannen
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-[#8BAE5A] mb-1">
                 Beschrijving
               </label>
               <textarea
@@ -207,7 +228,7 @@ export default function FoodItemModal({ isOpen, onClose, foodItem, onSave }: Foo
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-[#8BAE5A] mb-1">
-                Calorieën (per 100g)
+                Kcal (per 100g)
               </label>
               <input
                 type="number"
@@ -221,7 +242,7 @@ export default function FoodItemModal({ isOpen, onClose, foodItem, onSave }: Foo
             <div className="grid grid-cols-3 gap-2">
               <div>
                 <label className="block text-sm font-medium text-[#8BAE5A] mb-1">
-                  Eiwit (g)
+                  Protein (g)
                 </label>
                 <input
                   type="number"
@@ -234,7 +255,7 @@ export default function FoodItemModal({ isOpen, onClose, foodItem, onSave }: Foo
               </div>
               <div>
                 <label className="block text-sm font-medium text-[#8BAE5A] mb-1">
-                  Koolhydraten (g)
+                  Carbs (g)
                 </label>
                 <input
                   type="number"
@@ -247,7 +268,7 @@ export default function FoodItemModal({ isOpen, onClose, foodItem, onSave }: Foo
               </div>
               <div>
                 <label className="block text-sm font-medium text-[#8BAE5A] mb-1">
-                  Vet (g)
+                  Fat (g)
                 </label>
                 <input
                   type="number"

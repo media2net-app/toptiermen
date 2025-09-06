@@ -36,6 +36,7 @@ interface FoodItem {
   fat_per_100g: number;
   description: string;
   is_active: boolean;
+  is_carnivore?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -704,13 +705,14 @@ export default function AdminVoedingsplannenPage() {
             ) : (
               <div className="bg-[#232D1A] rounded-lg border border-[#3A4D23]/40 overflow-hidden">
                 {/* Desktop Table Header */}
-                <div className="hidden lg:grid grid-cols-12 gap-4 p-4 bg-[#1A2313] border-b border-[#3A4D23]/40 text-sm font-semibold text-[#8BAE5A]">
-                  <div className="col-span-3">Naam</div>
+                <div className="hidden lg:grid grid-cols-12 gap-3 p-4 bg-[#1A2313] border-b border-[#3A4D23]/40 text-sm font-semibold text-[#8BAE5A]">
+                  <div className="col-span-2">Naam</div>
                   <div className="col-span-2">Categorie</div>
+                  <div className="col-span-1">Carnivoor</div>
                   <div className="col-span-1">Kcal/100g</div>
-                  <div className="col-span-1">Eiwit</div>
-                  <div className="col-span-1">KH</div>
-                  <div className="col-span-1">Vet</div>
+                  <div className="col-span-1">Protein</div>
+                  <div className="col-span-1">Carbs</div>
+                  <div className="col-span-1">Fat</div>
                   <div className="col-span-3">Acties</div>
                 </div>
                 
@@ -719,12 +721,21 @@ export default function AdminVoedingsplannenPage() {
                   {filteredFoodItems.map((item) => (
                     <div key={item.id}>
                       {/* Desktop View */}
-                      <div className="hidden lg:grid grid-cols-12 gap-4 p-4 hover:bg-[#1A2313] transition-colors">
-                        <div className="col-span-3">
+                      <div className="hidden lg:grid grid-cols-12 gap-3 p-4 hover:bg-[#1A2313] transition-colors">
+                        <div className="col-span-2">
                           <h3 className="text-white font-medium">{item.name}</h3>
                         </div>
                         <div className="col-span-2">
                           <span className="text-gray-300 text-sm capitalize">{item.category}</span>
+                        </div>
+                        <div className="col-span-1 text-center">
+                          <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                            (item as any).is_carnivore 
+                              ? 'bg-green-600/20 text-green-400 border border-green-600/30' 
+                              : 'bg-gray-600/20 text-gray-400 border border-gray-600/30'
+                          }`}>
+                            {(item as any).is_carnivore ? 'Ja' : 'Nee'}
+                          </span>
                         </div>
                         <div className="col-span-1 text-center">
                           <span className="text-white font-medium">{item.calories_per_100g || 0}</span>
@@ -765,7 +776,16 @@ export default function AdminVoedingsplannenPage() {
                         <div className="flex justify-between items-start mb-3">
                           <div>
                             <h3 className="text-white font-medium text-lg">{item.name}</h3>
-                            <p className="text-gray-300 text-sm capitalize">{item.category}</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <p className="text-gray-300 text-sm capitalize">{item.category}</p>
+                              <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                                (item as any).is_carnivore 
+                                  ? 'bg-green-600/20 text-green-400 border border-green-600/30' 
+                                  : 'bg-gray-600/20 text-gray-400 border border-gray-600/30'
+                              }`}>
+                                {(item as any).is_carnivore ? 'Carnivoor' : 'Standaard'}
+                              </span>
+                            </div>
                           </div>
                           <div className="flex gap-2">
                             <AdminButton
@@ -793,15 +813,15 @@ export default function AdminVoedingsplannenPage() {
                             <div className="text-white font-medium">{item.calories_per_100g || 0}</div>
                           </div>
                           <div className="text-center">
-                            <div className="text-gray-400 text-xs">Eiwit</div>
+                            <div className="text-gray-400 text-xs">Protein</div>
                             <div className="text-white">{item.protein_per_100g || 0}g</div>
                           </div>
                           <div className="text-center">
-                            <div className="text-gray-400 text-xs">KH</div>
+                            <div className="text-gray-400 text-xs">Carbs</div>
                             <div className="text-white">{item.carbs_per_100g || 0}g</div>
                           </div>
                           <div className="text-center">
-                            <div className="text-gray-400 text-xs">Vet</div>
+                            <div className="text-gray-400 text-xs">Fat</div>
                             <div className="text-white">{item.fat_per_100g || 0}g</div>
                           </div>
                         </div>
@@ -903,6 +923,7 @@ export default function AdminVoedingsplannenPage() {
           <PlanBuilder
             isOpen={showPlanBuilder}
             plan={selectedPlan}
+            foodItems={foodItems}
             onSave={handleSavePlan}
             onClose={() => {
               setShowPlanBuilder(false);
