@@ -350,7 +350,7 @@ export async function POST(request: NextRequest) {
             
             if (trackingError) {
               console.error('❌ Failed to store tracking info:', trackingError);
-              results.errors.push(`Failed to store tracking for ${lead.email}: ${trackingError.message}`);
+              results.errors.push(`Failed to store tracking for ${lead.email}: ${trackingError?.message || 'Unknown error'}`);
             } else {
               console.log(`✅ Email sent and tracked successfully!`);
               results.sent++;
