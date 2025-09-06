@@ -787,7 +787,7 @@ export default function AdminVoedingsplannenPage() {
                   <div className="col-span-2">Categorie</div>
                   <div className="col-span-1">Carnivoor</div>
                   <div className="col-span-1">Type<br/><span className="text-xs text-[#8BAE5A]/60">(per handje 25g)</span></div>
-                  <div className="col-span-1">Kcal/100g</div>
+                  <div className="col-span-1">Kcal</div>
                   <div className="col-span-1">Protein</div>
                   <div className="col-span-1">Carbs</div>
                   <div className="col-span-1">Fat</div>
@@ -895,7 +895,11 @@ export default function AdminVoedingsplannenPage() {
                         
                         <div className="grid grid-cols-4 gap-4 text-sm">
                           <div className="text-center">
-                            <div className="text-gray-400 text-xs">Kcal/100g</div>
+                            <div className="text-gray-400 text-xs">
+                              {item.unit_type === 'per_handful' ? 'Kcal/handje' : 
+                               item.unit_type === 'per_piece' ? 'Kcal/stuk' : 
+                               item.unit_type === 'per_30g' ? 'Kcal/30g' : 'Kcal/100g'}
+                            </div>
                             <div className="text-white font-medium">{item.calories_per_100g || 0}</div>
                           </div>
                           <div className="text-center">
