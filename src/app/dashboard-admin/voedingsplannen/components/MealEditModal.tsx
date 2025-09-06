@@ -379,6 +379,7 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
         fat: formData.fat
       });
       
+      // Force update nutrition values
       setFormData(prev => ({
         ...prev,
         calories: nutrition.calories,
@@ -388,6 +389,48 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
       }));
     }
   }, [meal, ingredientsDatabase]);
+
+  // Additional useEffect to ensure nutrition values are always correct when modal opens
+  useEffect(() => {
+    if (isOpen && ingredientsDatabase.length > 0 && formData.ingredients.length > 0) {
+      console.log('🔄 Modal opened - recalculating nutrition values...');
+      const nutrition = calculateNutritionFromIngredients(formData.ingredients);
+      console.log('📊 Modal nutrition calculation:', nutrition);
+      
+      // Force update if values are incorrect
+      if (formData.calories !== nutrition.calories || 
+          formData.protein !== nutrition.protein || 
+          formData.carbs !== nutrition.carbs || 
+          formData.fat !== nutrition.fat) {
+        console.log('📊 Updating incorrect nutrition values in modal');
+        setFormData(prev => ({
+          ...prev,
+          calories: nutrition.calories,
+          protein: nutrition.protein,
+          carbs: nutrition.carbs,
+          fat: nutrition.fat
+        }));
+      }
+    }
+  }, [isOpen, ingredientsDatabase, formData.ingredients]);
+
+  // Force nutrition recalculation when ingredients database is loaded
+  useEffect(() => {
+    if (ingredientsDatabase.length > 0 && formData.ingredients.length > 0) {
+      console.log('🔄 Ingredients database loaded - force recalculating nutrition...');
+      const nutrition = calculateNutritionFromIngredients(formData.ingredients);
+      console.log('📊 Force nutrition calculation result:', nutrition);
+      
+      // Always update nutrition values when database is loaded
+      setFormData(prev => ({
+        ...prev,
+        calories: nutrition.calories,
+        protein: nutrition.protein,
+        carbs: nutrition.carbs,
+        fat: nutrition.fat
+      }));
+    }
+  }, [ingredientsDatabase]);
 
   // Recalculate nutrition when ingredients database is loaded and we have ingredients
   useEffect(() => {
