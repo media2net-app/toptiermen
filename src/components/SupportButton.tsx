@@ -174,6 +174,9 @@ export default function SupportButton({ className = '' }: SupportButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showContactForm, setShowContactForm] = useState(false);
+  const [showMyTickets, setShowMyTickets] = useState(false);
+  const [userTickets, setUserTickets] = useState<any[]>([]);
+  const [loadingTickets, setLoadingTickets] = useState(false);
 
   const handleCategorySelect = (categoryId: string) => {
     setSelectedCategory(categoryId);
@@ -183,11 +186,65 @@ export default function SupportButton({ className = '' }: SupportButtonProps) {
   const handleContactSupport = () => {
     setShowContactForm(true);
     setSelectedCategory(null);
+    setShowMyTickets(false);
   };
 
   const handleBackToCategories = () => {
     setSelectedCategory(null);
     setShowContactForm(false);
+    setShowMyTickets(false);
+  };
+
+  const handleMyTickets = async () => {
+    setShowMyTickets(true);
+    setSelectedCategory(null);
+    setShowContactForm(false);
+    setLoadingTickets(true);
+    
+    try {
+      // Get current user ID from auth context or localStorage
+      const userId = localStorage.getItem('userId') || 'demo-user-id';
+      
+      const response = await fetch(`/api/tickets?userId=${userId}`);
+      const tickets = await response.json();
+      setUserTickets(tickets);
+    } catch (error) {
+      console.error('Error fetching tickets:', error);
+    } finally {
+      setLoadingTickets(false);
+    }
+  };
+
+  const handleSubmitTicket = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget as HTMLFormElement);
+    
+    const ticketData = {
+      userId: localStorage.getItem('userId') || 'demo-user-id',
+      subject: formData.get('subject') as string,
+      message: formData.get('message') as string,
+      category: formData.get('category') as string
+    };
+
+    try {
+      const response = await fetch('/api/tickets', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(ticketData),
+      });
+
+      if (response.ok) {
+        alert('Je ticket is succesvol aangemaakt! We nemen zo snel mogelijk contact met je op.');
+        handleBackToCategories();
+      } else {
+        throw new Error('Failed to create ticket');
+      }
+    } catch (error) {
+      console.error('Error creating ticket:', error);
+      alert('Er is een fout opgetreden bij het aanmaken van je ticket. Probeer het opnieuw.');
+    }
   };
 
   const selectedCategoryData = supportCategories.find(cat => cat.id === selectedCategory);
@@ -259,6 +316,20 @@ export default function SupportButton({ className = '' }: SupportButtonProps) {
                     );
                   })}
                   
+                  {/* My Tickets Button */}
+                  <button
+                    onClick={handleMyTickets}
+                    className="flex items-center gap-4 p-4 bg-gradient-to-br from-[#8BAE5A]/20 to-[#B6C948]/20 border-2 border-[#8BAE5A]/30 rounded-lg hover:from-[#8BAE5A]/30 hover:to-[#B6C948]/30 transition-all text-left group"
+                  >
+                    <div className="w-12 h-12 bg-[#8BAE5A]/30 rounded-lg flex items-center justify-center group-hover:bg-[#8BAE5A]/40 transition-colors">
+                      <DocumentTextIcon className="w-6 h-6 text-[#8BAE5A] group-hover:text-[#B6C948] transition-colors" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-white group-hover:text-[#B6C948] transition-colors">Mijn Tickets</h3>
+                      <p className="text-sm text-[#8BAE5A] group-hover:text-[#B6C948]/80 transition-colors">Bekijk je support tickets</p>
+                    </div>
+                  </button>
+
                   {/* Contact Support Button */}
                   <button
                     onClick={handleContactSupport}
@@ -310,6 +381,72 @@ export default function SupportButton({ className = '' }: SupportButtonProps) {
                 </div>
               )}
 
+              {/* My Tickets */}
+              {showMyTickets && (
+                <div className="space-y-6">
+                  <button
+                    onClick={handleBackToCategories}
+                    className="flex items-center gap-2 text-[#8BAE5A] hover:text-[#B6C948] transition-colors mb-6 group"
+                  >
+                    <svg className="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Terug naar categorieën
+                  </button>
+
+                  <div className="max-w-4xl mx-auto">
+                    <h3 className="text-xl font-semibold text-white mb-6 text-center">Mijn Support Tickets</h3>
+                    
+                    {loadingTickets ? (
+                      <div className="text-center py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#8BAE5A] mx-auto mb-4"></div>
+                        <p className="text-[#8BAE5A]">Tickets worden geladen...</p>
+                      </div>
+                    ) : userTickets.length === 0 ? (
+                      <div className="text-center py-8">
+                        <DocumentTextIcon className="w-16 h-16 text-[#8BAE5A]/50 mx-auto mb-4" />
+                        <p className="text-[#8BAE5A] text-lg mb-2">Geen tickets gevonden</p>
+                        <p className="text-[#8BAE5A]/70">Je hebt nog geen support tickets aangemaakt.</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {userTickets.map((ticket) => (
+                          <div key={ticket.id} className="bg-[#1A2313] rounded-lg p-6 border border-[#3A4D23]/30">
+                            <div className="flex items-start justify-between mb-4">
+                              <div>
+                                <h4 className="text-lg font-semibold text-white mb-1">{ticket.subject}</h4>
+                                <div className="flex items-center gap-4 text-sm">
+                                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                    ticket.status === 'open' ? 'bg-green-500/20 text-green-400' :
+                                    ticket.status === 'in_progress' ? 'bg-yellow-500/20 text-yellow-400' :
+                                    ticket.status === 'resolved' ? 'bg-blue-500/20 text-blue-400' :
+                                    'bg-gray-500/20 text-gray-400'
+                                  }`}>
+                                    {ticket.status === 'open' ? 'Open' :
+                                     ticket.status === 'in_progress' ? 'In behandeling' :
+                                     ticket.status === 'resolved' ? 'Opgelost' : 'Gesloten'}
+                                  </span>
+                                  <span className="text-[#8BAE5A]">{new Date(ticket.created_at).toLocaleDateString('nl-NL')}</span>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <p className="text-[#8BAE5A] mb-4">{ticket.message}</p>
+                            
+                            {ticket.admin_response && (
+                              <div className="bg-[#3A4D23]/20 rounded-lg p-4 border-l-4 border-[#8BAE5A]">
+                                <h5 className="text-white font-medium mb-2">Reactie van support:</h5>
+                                <p className="text-[#8BAE5A]">{ticket.admin_response}</p>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Contact Form */}
               {showContactForm && (
                 <div className="space-y-6">
@@ -325,13 +462,26 @@ export default function SupportButton({ className = '' }: SupportButtonProps) {
 
                   <div className="bg-[#1A2313] rounded-lg p-6 max-w-3xl mx-auto">
                     <h3 className="text-xl font-semibold text-white mb-6 text-center">Stuur ons een bericht</h3>
-                    <form className="space-y-6">
+                    <form onSubmit={handleSubmitTicket} className="space-y-6">
                       <div>
                         <label className="block text-sm font-medium text-[#8BAE5A] mb-2">
                           Onderwerp
                         </label>
-                        <select className="w-full px-4 py-3 bg-[#3A4D23] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A] transition-colors">
-                          <option value="">Selecteer een onderwerp</option>
+                        <input
+                          type="text"
+                          name="subject"
+                          required
+                          className="w-full px-4 py-3 bg-[#3A4D23] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A] transition-colors"
+                          placeholder="Korte beschrijving van je vraag"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-[#8BAE5A] mb-2">
+                          Categorie
+                        </label>
+                        <select name="category" required className="w-full px-4 py-3 bg-[#3A4D23] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A] transition-colors">
+                          <option value="">Selecteer een categorie</option>
                           <option value="technical">Technische problemen</option>
                           <option value="billing">Facturatie & Betalingen</option>
                           <option value="account">Account & Profiel</option>
@@ -342,24 +492,16 @@ export default function SupportButton({ className = '' }: SupportButtonProps) {
                         </select>
                       </div>
                       
-                      <div>
-                        <label className="block text-sm font-medium text-[#8BAE5A] mb-2">
-                          E-mailadres
-                        </label>
-                        <input
-                          type="email"
-                          className="w-full px-4 py-3 bg-[#3A4D23] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A] transition-colors"
-                          placeholder="jouw@email.com"
-                        />
-                      </div>
                       
                       <div>
                         <label className="block text-sm font-medium text-[#8BAE5A] mb-2">
                           Bericht
                         </label>
                         <textarea
+                          name="message"
                           rows={6}
-                          className="w-full px-4 py-3 bg-[#3A4D23] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A] resize-none"
+                          required
+                          className="w-full px-4 py-3 bg-[#3A4D23] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A] transition-colors resize-none"
                           placeholder="Beschrijf je vraag of probleem zo gedetailleerd mogelijk..."
                         />
                       </div>

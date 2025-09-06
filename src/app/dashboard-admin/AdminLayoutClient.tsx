@@ -33,7 +33,8 @@ import {
   EyeIcon,
   UserIcon,
   BellIcon,
-  ArrowPathIcon
+  ArrowPathIcon,
+  TicketIcon
 } from '@heroicons/react/24/outline';
 import { SwipeIndicator } from '@/components/ui';
 import SessionMonitor from '@/components/SessionMonitor';
@@ -121,6 +122,7 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
       label: 'COMMUNITY', 
       type: 'section',
       items: [
+        { label: 'Support Tickets', icon: TicketIcon, href: '/dashboard-admin/tickets', badge: 'NEW' },
         { label: 'Forum Moderatie', icon: ChatBubbleLeftRightIcon, href: '/dashboard-admin/forum-moderatie' },
         { label: 'Social Feed', icon: ChatBubbleLeftRightIcon, href: '/dashboard-admin/social-feed' },
         { label: 'Evenementenbeheer', icon: CalendarIcon, href: '/dashboard-admin/evenementenbeheer' },
