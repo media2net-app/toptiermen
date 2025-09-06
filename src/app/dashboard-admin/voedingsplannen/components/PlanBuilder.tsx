@@ -155,6 +155,8 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
       }
 
       function loadPlanFromProps() {
+        if (!plan) return;
+        
         // Use data from plan.meals if available, otherwise fallback to plan properties
         const targetCalories = (plan as any).meals?.target_calories || plan.target_calories || 2200;
         const targetProtein = (plan as any).meals?.target_protein || plan.target_protein || 165;
