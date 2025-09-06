@@ -337,25 +337,46 @@ export async function PUT(request: NextRequest) {
       
       const weeklyPlan = {};
       const dayMapping = {
-        'monday': 'monday',
-        'tuesday': 'tuesday', 
-        'wednesday': 'wednesday',
-        'thursday': 'thursday',
-        'friday': 'friday',
-        'saturday': 'saturday',
-        'sunday': 'sunday'
+        'maandag': 'maandag',
+        'dinsdag': 'dinsdag', 
+        'woensdag': 'woensdag',
+        'donderdag': 'donderdag',
+        'vrijdag': 'vrijdag',
+        'zaterdag': 'zaterdag',
+        'zondag': 'zondag'
       };
 
       daily_plans.forEach(dailyPlan => {
         const dayKey = dayMapping[dailyPlan.day];
         if (dayKey && dailyPlan.meals) {
+          // Create meal objects in the correct format for database storage
+          const createMealObject = (meal: any, defaultTime: string) => {
+            if (!meal) {
+              return {
+                time: defaultTime,
+                ingredients: [],
+                nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0 }
+              };
+            }
+            
+            return {
+              time: defaultTime,
+              ingredients: meal.ingredients || [],
+              nutrition: {
+                calories: meal.calories || 0,
+                protein: meal.protein || 0,
+                carbs: meal.carbs || 0,
+                fat: meal.fat || 0
+              }
+            };
+          };
+          
           weeklyPlan[dayKey] = {
-            ontbijt: dailyPlan.meals.ontbijt?.ingredients || [],
-            ochtend_snack: dailyPlan.meals.snack1?.ingredients || dailyPlan.meals.ochtend_snack?.ingredients || [],
-            lunch: dailyPlan.meals.lunch?.ingredients || [],
-            lunch_snack: dailyPlan.meals.snack2?.ingredients || dailyPlan.meals.lunch_snack?.ingredients || [],
-            diner: dailyPlan.meals.diner?.ingredients || [],
-            avond_snack: dailyPlan.meals.avond_snack?.ingredients || [],
+            ontbijt: createMealObject(dailyPlan.meals.ontbijt, '07:00'),
+            ochtend_snack: createMealObject(dailyPlan.meals.snack1, '10:00'),
+            lunch: createMealObject(dailyPlan.meals.lunch, '12:00'),
+            lunch_snack: createMealObject(dailyPlan.meals.snack2, '15:00'),
+            diner: createMealObject(dailyPlan.meals.diner, '18:00'),
             dailyTotals: {
               calories: (dailyPlan.meals.ontbijt?.calories || 0) + 
                        (dailyPlan.meals.snack1?.calories || dailyPlan.meals.ochtend_snack?.calories || 0) +
@@ -429,6 +450,27 @@ export async function PUT(request: NextRequest) {
     }
 
     finalUpdateData.updated_at = new Date().toISOString();
+
+    // Convert target values to integers for database (it expects integer type)
+    if (finalUpdateData.target_calories !== undefined) {
+      finalUpdateData.target_calories = Math.round(finalUpdateData.target_calories);
+    }
+    if (finalUpdateData.target_protein !== undefined) {
+      finalUpdateData.target_protein = Math.round(finalUpdateData.target_protein);
+    }
+    if (finalUpdateData.target_carbs !== undefined) {
+      finalUpdateData.target_carbs = Math.round(finalUpdateData.target_carbs);
+    }
+    if (finalUpdateData.target_fat !== undefined) {
+      finalUpdateData.target_fat = Math.round(finalUpdateData.target_fat);
+    }
+
+    console.log('🔄 Final update data with integer targets:', {
+      target_calories: finalUpdateData.target_calories,
+      target_protein: finalUpdateData.target_protein,
+      target_carbs: finalUpdateData.target_carbs,
+      target_fat: finalUpdateData.target_fat
+    });
 
     const { data: plan, error } = await supabaseAdmin
       .from('nutrition_plans')

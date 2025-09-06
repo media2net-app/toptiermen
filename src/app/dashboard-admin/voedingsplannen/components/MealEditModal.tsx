@@ -37,23 +37,6 @@ interface MealEditModalProps {
   planType?: string; // 'Carnivoor' of 'Voedingsplan op Maat'
 }
 
-interface DatabaseMeal {
-  id: string;
-  name: string;
-  description: string;
-  meal_type: string;
-  category: string;
-  ingredients: Ingredient[];
-  instructions: string[];
-  nutrition_info: {
-    calories: number;
-    protein: number;
-    carbs: number;
-    fat: number;
-  };
-  prep_time: number;
-  difficulty: string;
-}
 
 export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave, onDelete, baseCalories, planType }: MealEditModalProps) {
   const [formData, setFormData] = useState<Meal>({
@@ -68,20 +51,22 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
   });
 
   const [isLoading, setIsLoading] = useState(false);
-  const [availableMeals, setAvailableMeals] = useState<DatabaseMeal[]>([]);
-  const [showMealSelector, setShowMealSelector] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
   const [ingredientsDatabase, setIngredientsDatabase] = useState<any[]>([]);
+  const [showAllIngredients, setShowAllIngredients] = useState(false);
+  const [ingredientSearchTerm, setIngredientSearchTerm] = useState('');
 
   // Load ingredients database once when modal opens
   useEffect(() => {
     const loadIngredientsDatabase = async () => {
       try {
+        console.log('🔍 Loading nutrition ingredients database...');
         const response = await fetch('/api/admin/nutrition-ingredients');
         const result = await response.json();
         if (result.success && result.ingredients) {
           setIngredientsDatabase(result.ingredients);
-          console.log('✅ Ingredients database loaded:', result.ingredients.length, 'ingredients');
+          console.log('✅ Nutrition ingredients database loaded:', result.ingredients.length, 'ingredients');
+        } else {
+          console.error('❌ Failed to load ingredients:', result.error);
         }
       } catch (error) {
         console.error('❌ Error loading ingredients database:', error);
@@ -160,6 +145,18 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
     }
   }, [meal, mealType]);
 
+  // Recalculate nutrition when ingredients database is loaded and we have ingredients
+  useEffect(() => {
+    if (ingredientsDatabase.length > 0 && formData.ingredients.length > 0) {
+      console.log('🔄 Recalculating nutrition with loaded database...');
+      const nutrition = calculateNutritionFromIngredients(formData.ingredients);
+      setFormData(prev => ({
+        ...prev,
+        ...nutrition
+      }));
+    }
+  }, [ingredientsDatabase, formData.ingredients.length]);
+
   // Load available meals from database
   useEffect(() => {
     if (isOpen && mealType) {
@@ -186,8 +183,7 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
       // Filter by diet type if planType is specified
       if (planType && planType.includes('Carnivoor')) {
         ingredients = ingredients.filter((ing: any) => 
-          ing.is_carnivore === true || 
-          ['vlees', 'vis', 'eieren', 'zuivel', 'orgaanvlees'].includes(ing.category?.toLowerCase())
+          ['vlees', 'vis', 'eieren', 'zuivel', 'carnivoor', 'vetten', 'Vlees', 'Vis', 'Eieren', 'Zuivel', 'Carnivoor', 'Vetten'].includes(ing.category)
         );
         console.log('🥩 Filtering for Carnivore ingredients:', ingredients.length);
       } else if (planType && planType.includes('Voedingsplan op Maat')) {
@@ -220,31 +216,12 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
         difficulty: 'easy'
       }));
       
-      setAvailableMeals(convertedMeals);
       console.log('✅ Available ingredients loaded:', convertedMeals.length);
     } catch (error) {
       console.error('❌ Error loading ingredients:', error);
     }
   };
 
-  const selectMealFromDatabase = (dbMeal: DatabaseMeal) => {
-    setFormData({
-      id: dbMeal.id,
-      name: dbMeal.name,
-      time: '08:00', // Default time
-      calories: dbMeal.nutrition_info.calories,
-      protein: dbMeal.nutrition_info.protein,
-      carbs: dbMeal.nutrition_info.carbs,
-      fat: dbMeal.nutrition_info.fat,
-      ingredients: dbMeal.ingredients
-    });
-    setShowMealSelector(false);
-  };
-
-  const filteredMeals = availableMeals.filter(meal =>
-    meal.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    meal.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   const handleInputChange = (field: keyof Meal, value: any) => {
     setFormData(prev => ({
@@ -434,6 +411,115 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
     }
   };
 
+  // Helper functions for smart suggestions
+  const getMealTypeName = () => {
+    const mealNames = {
+      'ontbijt': 'Ontbijt',
+      'snack1': 'Ochtend Snack', 
+      'lunch': 'Lunch',
+      'snack2': 'Middag Snack',
+      'diner': 'Diner'
+    };
+    return mealNames[mealType] || 'Maaltijd';
+  };
+
+  const getSmartSuggestions = () => {
+    const isCarnivore = planType?.toLowerCase().includes('carnivoor');
+    
+    // Base suggestions per meal type
+    const suggestions = {
+      ontbijt: [
+        { name: 'Eieren', amount: 200, unit: 'g' },
+        { name: 'Spek', amount: 50, unit: 'g' },
+        { name: 'Boter', amount: 15, unit: 'g' },
+        { name: 'Gerookte Zalm', amount: 80, unit: 'g' },
+        { name: 'Roomboter', amount: 20, unit: 'g' },
+        { name: 'Goudse kaas', amount: 30, unit: 'g' }
+      ],
+      snack1: [
+        { name: 'Goudse kaas', amount: 30, unit: 'g' },
+        { name: 'Roomboter', amount: 15, unit: 'g' },
+        { name: 'Gerookte Zalm', amount: 60, unit: 'g' },
+        { name: 'Spek', amount: 30, unit: 'g' },
+        { name: 'Boter', amount: 20, unit: 'g' },
+        { name: 'Honing', amount: 10, unit: 'g' }
+      ],
+      lunch: [
+        { name: 'Ribeye Steak', amount: 200, unit: 'g' },
+        { name: 'Kipfilet', amount: 200, unit: 'g' },
+        { name: 'Runderlever', amount: 150, unit: 'g' },
+        { name: 'Lamskotelet', amount: 200, unit: 'g' },
+        { name: 'Boter', amount: 15, unit: 'g' },
+        { name: 'Olijfolie', amount: 10, unit: 'g' }
+      ],
+      snack2: [
+        { name: 'Gerookte Zalm', amount: 80, unit: 'g' },
+        { name: 'Spek', amount: 40, unit: 'g' },
+        { name: 'Goudse kaas', amount: 40, unit: 'g' },
+        { name: 'Honing', amount: 15, unit: 'g' },
+        { name: 'Roomboter', amount: 20, unit: 'g' },
+        { name: 'Eieren', amount: 100, unit: 'g' }
+      ],
+      diner: [
+        { name: 'Ribeye Steak', amount: 250, unit: 'g' },
+        { name: 'Lamskotelet', amount: 250, unit: 'g' },
+        { name: 'Kipfilet', amount: 200, unit: 'g' },
+        { name: 'Runderlever', amount: 180, unit: 'g' },
+        { name: 'Spek', amount: 40, unit: 'g' },
+        { name: 'Olijfolie', amount: 15, unit: 'g' }
+      ]
+    };
+
+    return suggestions[mealType] || suggestions.lunch;
+  };
+
+  const getDefaultAmount = (ingredientName: string) => {
+    // Default amounts based on ingredient type
+    const defaults = {
+      'eieren': 200,
+      'spek': 50,
+      'ribeye': 200,
+      'kipfilet': 200,
+      'lamskotelet': 200,
+      'runderlever': 150,
+      'zalm': 120,
+      'kaas': 30,
+      'boter': 15,
+      'olijfolie': 10,
+      'honing': 15
+    };
+    
+    const lowerName = ingredientName.toLowerCase();
+    for (const [key, amount] of Object.entries(defaults)) {
+      if (lowerName.includes(key)) {
+        return amount;
+      }
+    }
+    return 100; // Default fallback
+  };
+
+  const getFilteredIngredients = () => {
+    let filtered = ingredientsDatabase;
+    
+    // Filter by search term
+    if (ingredientSearchTerm) {
+      filtered = filtered.filter(ing => 
+        ing.name.toLowerCase().includes(ingredientSearchTerm.toLowerCase()) ||
+        ing.category.toLowerCase().includes(ingredientSearchTerm.toLowerCase())
+      );
+    }
+    
+    // Filter by plan type if carnivore
+    const isCarnivore = planType?.toLowerCase().includes('carnivoor');
+    if (isCarnivore) {
+      filtered = filtered.filter(ing => 
+        ['vlees', 'vis', 'eieren', 'zuivel', 'carnivoor', 'vetten', 'Vlees', 'Vis', 'Eieren', 'Zuivel', 'Carnivoor', 'Vetten'].includes(ing.category)
+      );
+    }
+    
+    return filtered.slice(0, 50); // Limit to 50 for performance
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -454,62 +540,6 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
 
         {/* Content */}
         <div className="p-6 space-y-6">
-          {/* Meal Selector */}
-          <div className="bg-[#232D1A] rounded-lg p-4 border border-[#3A4D23]">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-[#8BAE5A] font-semibold">Kies uit Carnivor Maaltijden</h3>
-              <button
-                onClick={() => setShowMealSelector(!showMealSelector)}
-                className="text-[#8BAE5A] hover:text-[#7A9D4B] transition-colors"
-              >
-                {showMealSelector ? 'Verberg' : 'Toon'} Database
-              </button>
-            </div>
-            
-            {showMealSelector && (
-              <div className="space-y-4">
-                <div className="relative">
-                  <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#8BAE5A]" />
-                  <input
-                    type="text"
-                    placeholder="Zoek maaltijden..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                  />
-                </div>
-                
-                <div className="max-h-60 overflow-y-auto space-y-2">
-                  {filteredMeals.length > 0 ? (
-                    filteredMeals.map((dbMeal) => (
-                      <button
-                        key={dbMeal.id}
-                        onClick={() => selectMealFromDatabase(dbMeal)}
-                        className="w-full text-left p-3 rounded-lg bg-[#181F17] border border-[#3A4D23] hover:border-[#8BAE5A] transition-colors"
-                      >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <div className="text-[#8BAE5A] font-semibold">{dbMeal.name}</div>
-                            <div className="text-[#B6C948] text-sm">{dbMeal.description}</div>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-[#8BAE5A] font-semibold">{dbMeal.nutrition_info.calories} cal</div>
-                            <div className="text-[#B6C948] text-xs">
-                              P: {dbMeal.nutrition_info.protein}g | C: {dbMeal.nutrition_info.carbs}g | F: {dbMeal.nutrition_info.fat}g
-                            </div>
-                          </div>
-                        </div>
-                      </button>
-                    ))
-                  ) : (
-                    <div className="text-center text-[#B6C948] py-4">
-                      {searchTerm ? 'Geen maaltijden gevonden' : 'Laden...'}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
 
           {/* Basic Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -645,78 +675,60 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
             </div>
           </div>
 
-          {/* Database Ingredients Selector */}
+
+          {/* Smart Ingredient Suggestions */}
           <div className="bg-[#232D1A] rounded-lg p-4 border border-[#3A4D23]">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-[#8BAE5A] font-semibold">Ingrediënten uit Database</h3>
+              <h3 className="text-[#8BAE5A] font-semibold">Aanbevolen voor {getMealTypeName()}</h3>
               <button
-                onClick={() => setShowMealSelector(!showMealSelector)}
-                className="text-[#8BAE5A] hover:text-[#7A9D4B] text-sm"
+                onClick={() => setShowAllIngredients(!showAllIngredients)}
+                className="text-[#8BAE5A] hover:text-[#7A9D4B] text-sm border border-[#3A4D23] px-3 py-1 rounded transition-colors"
               >
-                {showMealSelector ? 'Verbergen' : 'Tonen'}
+                {showAllIngredients ? 'Verberg alle' : 'Bekijk alle beschikbare ingrediënten'}
               </button>
             </div>
             
-            {showMealSelector && (
-              <>
-                <div className="mb-3">
+            {!showAllIngredients ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                {getSmartSuggestions().map((suggestion, index) => (
+                  <button
+                    key={index}
+                    onClick={() => addIngredientFromDatabase(suggestion)}
+                    className="px-3 py-2 text-sm bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] rounded hover:bg-[#3A4D23] transition-colors"
+                  >
+                    {suggestion.name} ({suggestion.amount}{suggestion.unit})
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="relative">
                   <input
                     type="text"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full px-3 py-2 rounded bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-1 focus:ring-[#8BAE5A]"
                     placeholder="Zoek ingrediënten..."
+                    value={ingredientSearchTerm}
+                    onChange={(e) => setIngredientSearchTerm(e.target.value)}
+                    className="w-full px-3 py-2 rounded bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-1 focus:ring-[#8BAE5A]"
                   />
                 </div>
-                
-                <div className="max-h-40 overflow-y-auto space-y-2">
-                  {filteredMeals.slice(0, 20).map((dbMeal, index) => (
+                <div className="max-h-40 overflow-y-auto grid grid-cols-2 md:grid-cols-3 gap-2">
+                  {getFilteredIngredients().map((ingredient, index) => (
                     <button
                       key={index}
-                      onClick={() => addIngredientFromDatabase(dbMeal.ingredients?.[0] || dbMeal)}
-                      className="w-full text-left px-3 py-2 text-sm bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] rounded hover:bg-[#3A4D23] transition-colors"
+                      onClick={() => addIngredientFromDatabase({ 
+                        name: ingredient.name, 
+                        amount: getDefaultAmount(ingredient.name), 
+                        unit: 'g' 
+                      })}
+                      className="px-3 py-2 text-sm bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] rounded hover:bg-[#3A4D23] transition-colors text-left"
                     >
-                      <div className="font-medium">{dbMeal.name}</div>
-                      <div className="text-xs text-[#B6C948]">
-                        {dbMeal.nutrition_info.calories} cal • {dbMeal.nutrition_info.protein}g protein
-                      </div>
+                      <div className="font-medium">{ingredient.name}</div>
+                      <div className="text-xs text-[#B6C948]">{ingredient.category}</div>
                     </button>
                   ))}
-                  
-                  {filteredMeals.length === 0 && (
-                    <div className="text-[#B6C948] text-sm text-center py-4">
-                      Geen ingrediënten gevonden
-                    </div>
-                  )}
                 </div>
-              </>
+              </div>
             )}
-          </div>
-
-          {/* Quick Add Carnivor Ingredients */}
-          <div className="bg-[#232D1A] rounded-lg p-4 border border-[#3A4D23]">
-            <h3 className="text-[#8BAE5A] font-semibold mb-3">Snelle Toevoeging - Populaire Ingrediënten</h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                             {[
-                 { name: 'Ribeye Steak', amount: 200, unit: 'g' },
-                 { name: 'Eieren', amount: 3, unit: 'stuks' },
-                 { name: 'Roomboter', amount: 30, unit: 'g' },
-                 { name: 'Runderlever', amount: 100, unit: 'g' },
-                 { name: 'Gerookte Zalm', amount: 120, unit: 'g' },
-                 { name: 'Spek', amount: 80, unit: 'g' },
-                 { name: 'Lamskotelet', amount: 250, unit: 'g' },
-                 { name: 'Kipfilet', amount: 200, unit: 'g' },
-                 { name: 'Honing', amount: 15, unit: 'g' }
-               ].map((quickIngredient, index) => (
-                 <button
-                   key={index}
-                   onClick={() => addIngredientFromDatabase(quickIngredient)}
-                   className="px-3 py-2 text-sm bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] rounded hover:bg-[#3A4D23] transition-colors"
-                 >
-                   {quickIngredient.name} ({quickIngredient.amount}{quickIngredient.unit})
-                 </button>
-               ))}
-            </div>
           </div>
         </div>
 

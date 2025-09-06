@@ -84,7 +84,7 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
     }
   };
 
-  // Standaard profiel: Man 40 jaar, 100kg, 190cm, Licht actief
+  // Standaard profiel: Man 40 jaar, 100kg, 190cm, Matig actief
   const getStandardProfile = (fitnessGoal: 'droogtrainen' | 'spiermassa' | 'onderhoud' = 'spiermassa', isCarnivore: boolean = false) => {
     const standardWeight = 100; // kg - standaard man profiel
     const standardAge = 40; // jaar
@@ -99,8 +99,8 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
     // Calculate BMR using Mifflin-St Jeor equation for men
     const bmr = 10 * standardWeight + 6.25 * standardHeight - 5 * standardAge + 5;
     
-    // Activity multiplier for "licht actief" (light active: 1-3x sport per week)
-    const activityMultiplier = 1.375;
+    // Activity multiplier for "matig actief" (moderate active: 3-5x sport per week)
+    const activityMultiplier = 1.55;
     const tdee = bmr * activityMultiplier;
     
     // Realistische waarden gebaseerd op TDEE berekening
@@ -152,7 +152,7 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
 
   const [activeTab, setActiveTab] = useState('basic');
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedDay, setSelectedDay] = useState<string>('monday');
+  const [selectedDay, setSelectedDay] = useState<string>('maandag');
   const [isMealModalOpen, setIsMealModalOpen] = useState(false);
   const [editingMeal, setEditingMeal] = useState<any>(null);
   const [editingMealType, setEditingMealType] = useState<string>('');
@@ -160,13 +160,14 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
   // Convert weekly_plan format to daily_plans format
   const convertWeeklyPlanToDailyPlans = (weeklyPlan: any): DailyPlan[] => {
     console.log('🔄 Converting weekly_plan to daily_plans format');
+    console.log('🔍 Available days in weeklyPlan:', Object.keys(weeklyPlan));
     
-    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    const days = ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag'];
     const dayNames = ['Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag', 'Zondag'];
     
     return days.map((dayKey, index) => {
       const dayData = weeklyPlan[dayKey];
-      console.log(`📅 Processing ${dayKey}:`, dayData);
+      console.log(`📅 Processing ${dayKey}:`, !!dayData);
       
       if (!dayData) {
         console.log(`⚠️ No data for ${dayKey}, using defaults`);
@@ -184,80 +185,54 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
         };
       }
       
-      // Calculate nutrition for each meal type
-      const calculateMealNutrition = (ingredients: any[]) => {
-        if (!ingredients || !Array.isArray(ingredients)) {
-          return { calories: 0, protein: 0, carbs: 0, fat: 0 };
+      // Convert meal data from new weekly_plan format
+      const convertMeal = (mealData: any, defaultName: string) => {
+        if (!mealData) {
+          return {
+            name: defaultName,
+            calories: 0,
+            protein: 0,
+            carbs: 0,
+            fat: 0,
+            suggestions: [],
+            ingredients: []
+          };
         }
         
-        let totalCalories = 0;
-        let totalProtein = 0;
-        let totalCarbs = 0;
-        let totalFat = 0;
+        // Extract nutrition from the meal data
+        const nutrition = mealData.nutrition || { calories: 0, protein: 0, carbs: 0, fat: 0 };
         
-        ingredients.forEach(ingredient => {
-          totalCalories += ingredient.calories || 0;
-          totalProtein += ingredient.protein || 0;
-          totalCarbs += ingredient.carbs || 0;
-          totalFat += ingredient.fat || 0;
-        });
+        // Convert ingredients format for PlanBuilder
+        const ingredients = (mealData.ingredients || []).map((ing: any) => ({
+          name: ing.name,
+          amount: ing.amount,
+          unit: 'g'
+        }));
+        
+        // Create suggestions format
+        const suggestions = ingredients.map((ing: any) => `${ing.name} (${ing.amount}g)`);
         
         return {
-          calories: Math.round(totalCalories),
-          protein: Math.round(totalProtein * 10) / 10,
-          carbs: Math.round(totalCarbs * 10) / 10,
-          fat: Math.round(totalFat * 10) / 10
+          name: defaultName,
+          calories: Math.round(nutrition.calories || 0),
+          protein: Math.round((nutrition.protein || 0) * 10) / 10,
+          carbs: Math.round((nutrition.carbs || 0) * 10) / 10,
+          fat: Math.round((nutrition.fat || 0) * 10) / 10,
+          suggestions,
+          ingredients
         };
       };
-      
-      // Convert ingredients to suggestions format
-      const convertToSuggestions = (ingredients: any[]) => {
-        if (!ingredients || !Array.isArray(ingredients)) return [];
-        
-        return ingredients.map(ingredient => `${ingredient.name} (${ingredient.amount}${ingredient.unit})`);
-      };
-      
-      const ontbijtNutrition = calculateMealNutrition(dayData.ontbijt || []);
-      const lunchNutrition = calculateMealNutrition(dayData.lunch || []);
-      const dinerNutrition = calculateMealNutrition(dayData.diner || []);
-      const ochtendSnackNutrition = calculateMealNutrition(dayData.ochtend_snack || []);
-      const lunchSnackNutrition = calculateMealNutrition(dayData.lunch_snack || []);
       
       return {
         day: dayKey,
         theme: `${dayNames[index]} Plan`,
         focus: 'protein',
         meals: {
-          ontbijt: {
-            name: dayData.ontbijt?.length > 0 ? 'Carnivoor Ontbijt' : 'Ontbijt',
-            ...ontbijtNutrition,
-            suggestions: convertToSuggestions(dayData.ontbijt || []),
-            ingredients: dayData.ontbijt || []
-          },
-          snack1: {
-            name: dayData.ochtend_snack?.length > 0 ? 'Ochtend Snack' : 'Ochtend Snack',
-            ...ochtendSnackNutrition,
-            suggestions: convertToSuggestions(dayData.ochtend_snack || []),
-            ingredients: dayData.ochtend_snack || []
-          },
-          lunch: {
-            name: dayData.lunch?.length > 0 ? 'Carnivoor Lunch' : 'Lunch',
-            ...lunchNutrition,
-            suggestions: convertToSuggestions(dayData.lunch || []),
-            ingredients: dayData.lunch || []
-          },
-          snack2: {
-            name: dayData.lunch_snack?.length > 0 ? 'Lunch Snack' : 'Middag Snack',
-            ...lunchSnackNutrition,
-            suggestions: convertToSuggestions(dayData.lunch_snack || []),
-            ingredients: dayData.lunch_snack || []
-          },
-          diner: {
-            name: dayData.diner?.length > 0 ? 'Carnivoor Diner' : 'Diner',
-            ...dinerNutrition,
-            suggestions: convertToSuggestions(dayData.diner || []),
-            ingredients: dayData.diner || []
-          }
+          ontbijt: convertMeal(dayData.ontbijt, 'Carnivoor Ontbijt'),
+          snack1: convertMeal(dayData.ochtend_snack, 'Ochtend Snack'),
+          lunch: convertMeal(dayData.lunch, 'Carnivoor Lunch'),
+          snack2: convertMeal(dayData.lunch_snack, 'Middag Snack'),
+          diner: convertMeal(dayData.diner, 'Carnivoor Diner')
         }
       };
     });
@@ -467,8 +442,8 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
       const weeklyPlan: any = {};
       const dailyTotals: any = {};
       
-      // Ensure we have all 7 days - fill missing days with empty structure
-      const allDays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+      // Use Dutch days to match database structure
+      const allDays = ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag'];
       const dailyPlansMap = new Map();
       
       // Create map of existing daily plans
@@ -491,13 +466,36 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
           }
         };
         
-        // Map meal types from UI to database format - ALWAYS include all meals (even if empty)
+        // Create meal objects in database format (with ingredients, nutrition, and time)
+        const createMealObject = (meal: any, defaultTime: string) => {
+          if (!meal || !meal.ingredients || meal.ingredients.length === 0) {
+            return {
+              time: defaultTime,
+              ingredients: [],
+              nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0 }
+            };
+          }
+          
+          return {
+            time: defaultTime,
+            ingredients: meal.ingredients.map((ing: any) => ({
+              name: ing.name,
+              amount: ing.amount
+            })),
+            nutrition: {
+              calories: meal.calories || 0,
+              protein: meal.protein || 0,
+              carbs: meal.carbs || 0,
+              fat: meal.fat || 0
+            }
+          };
+        };
+        
         const dayMeals: any = {
-          ontbijt: dayPlan.meals.ontbijt?.ingredients || [],
-          ochtend_snack: dayPlan.meals.snack1?.ingredients || [],
-          lunch: dayPlan.meals.lunch?.ingredients || [],
-          lunch_snack: dayPlan.meals.snack2?.ingredients || [],
-          diner: dayPlan.meals.diner?.ingredients || []
+          ontbijt: createMealObject(dayPlan.meals.ontbijt, '07:00'),
+          lunch: createMealObject(dayPlan.meals.lunch, '12:00'),
+          diner: createMealObject(dayPlan.meals.diner, '18:00'),
+          snack: createMealObject(dayPlan.meals.snack1, '15:00') // Use snack1 as main snack
         };
         
         // Calculate daily totals
@@ -545,15 +543,25 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
         fat: Math.round(((Object.values(dailyTotals) as any[]).reduce((sum: number, day: any) => sum + day.fat, 0) / daysCount) * 10) / 10
       };
       
-      // Prepare final form data with converted structure
+      // Prepare final form data - send only essential data to avoid conflicts
       const finalFormData = {
-        ...formData,
-        daily_plans: formData.daily_plans // Keep daily_plans for API processing
-        // Remove weekly_plan and weekly_averages from top level - they will be handled by the API
+        id: formData.id,
+        name: formData.name,
+        description: formData.description,
+        target_calories: formData.target_calories,
+        target_protein: formData.target_protein,
+        target_carbs: formData.target_carbs,
+        target_fat: formData.target_fat,
+        goal: formData.goal,
+        fitness_goal: formData.fitness_goal,
+        difficulty: formData.difficulty,
+        duration_weeks: formData.duration_weeks,
+        daily_plans: formData.daily_plans,
+        updated_at: new Date().toISOString()
       };
       
-      console.log('🔄 Converted weekly plan:', weeklyPlan);
-      console.log('📊 Weekly averages:', weeklyAverages);
+      console.log('🔄 Sending plan data:', finalFormData);
+      console.log('📊 Daily plans count:', finalFormData.daily_plans?.length || 0);
       
       await onSave(finalFormData);
       onClose();
@@ -664,23 +672,74 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
   };
 
   const dayNames = {
-    monday: 'Maandag',
-    tuesday: 'Dinsdag', 
-    wednesday: 'Woensdag',
-    thursday: 'Donderdag',
-    friday: 'Vrijdag',
-    saturday: 'Zaterdag',
-    sunday: 'Zondag'
+    maandag: 'Maandag',
+    dinsdag: 'Dinsdag', 
+    woensdag: 'Woensdag',
+    donderdag: 'Donderdag',
+    vrijdag: 'Vrijdag',
+    zaterdag: 'Zaterdag',
+    zondag: 'Zondag'
   };
 
   const dayThemes = {
-    monday: 'Dag 1',
-    tuesday: 'Dag 2', 
-    wednesday: 'Dag 3',
-    thursday: 'Dag 4',
-    friday: 'Dag 5',
-    saturday: 'Dag 6',
-    sunday: 'Dag 7'
+    maandag: 'Dag 1',
+    dinsdag: 'Dag 2', 
+    woensdag: 'Dag 3',
+    donderdag: 'Dag 4',
+    vrijdag: 'Dag 5',
+    zaterdag: 'Dag 6',
+    zondag: 'Dag 7'
+  };
+
+  // Helper function to get estimated nutrition values for ingredients
+  const getEstimatedNutrition = (ingredientName: string) => {
+    // Basic nutrition database for common carnivore ingredients (per 100g)
+    const nutritionData: { [key: string]: { calories: number; protein: number; carbs: number; fat: number } } = {
+      // Vlees
+      'ribeye steak': { calories: 291, protein: 25.0, carbs: 0, fat: 21.0 },
+      'ribeye': { calories: 291, protein: 25.0, carbs: 0, fat: 21.0 },
+      'runderlever': { calories: 135, protein: 20.4, carbs: 3.9, fat: 3.6 },
+      'lamskotelet': { calories: 294, protein: 25.6, carbs: 0, fat: 20.9 },
+      'kipfilet': { calories: 165, protein: 31.0, carbs: 0, fat: 3.6 },
+      'spek': { calories: 541, protein: 37.0, carbs: 1.4, fat: 42.0 },
+      
+      // Vis
+      'gerookte zalm': { calories: 142, protein: 25.4, carbs: 0, fat: 4.3 },
+      'zalm': { calories: 208, protein: 20.4, carbs: 0, fat: 13.4 },
+      
+      // Zuivel
+      'goudse kaas': { calories: 356, protein: 25.0, carbs: 2.2, fat: 27.4 },
+      'roomboter': { calories: 717, protein: 0.9, carbs: 0.7, fat: 81.1 },
+      'boter': { calories: 717, protein: 0.9, carbs: 0.7, fat: 81.1 },
+      
+      // Eieren
+      'eieren': { calories: 155, protein: 13.0, carbs: 1.1, fat: 11.0 },
+      
+      // Vetten
+      'olijfolie': { calories: 884, protein: 0, carbs: 0, fat: 100.0 },
+      'honing': { calories: 304, protein: 0.3, carbs: 82.4, fat: 0 },
+      
+      // Orgaanvlees
+      'biefstuk': { calories: 271, protein: 26.0, carbs: 0, fat: 18.0 },
+    };
+    
+    // Normalize ingredient name for lookup
+    const normalizedName = ingredientName.toLowerCase().trim();
+    
+    // Try exact match first
+    if (nutritionData[normalizedName]) {
+      return nutritionData[normalizedName];
+    }
+    
+    // Try partial matches
+    for (const [key, value] of Object.entries(nutritionData)) {
+      if (normalizedName.includes(key) || key.includes(normalizedName)) {
+        return value;
+      }
+    }
+    
+    // Default fallback for unknown ingredients (generic meat values)
+    return { calories: 250, protein: 20.0, carbs: 0, fat: 18.0 };
   };
 
   if (!isOpen) return null;
@@ -870,6 +929,34 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
                 </div>
               </div>
 
+              {/* Standard Profile Info */}
+              <div className="bg-[#232D1A] rounded-lg p-4 border border-[#3A4D23] mb-6">
+                <h4 className="text-[#8BAE5A] font-semibold mb-3 flex items-center">
+                  👤 Standaard Profiel Basis
+                </h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                  <div className="bg-[#181F17] rounded-lg p-3 border border-[#3A4D23]">
+                    <div className="text-[#8BAE5A] font-semibold text-lg">40</div>
+                    <div className="text-[#B6C948] text-sm">Jaar</div>
+                  </div>
+                  <div className="bg-[#181F17] rounded-lg p-3 border border-[#3A4D23]">
+                    <div className="text-[#8BAE5A] font-semibold text-lg">100kg</div>
+                    <div className="text-[#B6C948] text-sm">Gewicht</div>
+                  </div>
+                  <div className="bg-[#181F17] rounded-lg p-3 border border-[#3A4D23]">
+                    <div className="text-[#8BAE5A] font-semibold text-lg">190cm</div>
+                    <div className="text-[#B6C948] text-sm">Lengte</div>
+                  </div>
+                  <div className="bg-[#181F17] rounded-lg p-3 border border-[#3A4D23]">
+                    <div className="text-[#8BAE5A] font-semibold text-sm">Matig Actief</div>
+                    <div className="text-[#B6C948] text-xs">3-5x per week sporten</div>
+                  </div>
+                </div>
+                <div className="mt-3 text-xs text-[#B6C948] text-center">
+                  📊 Alle voedingsplannen zijn gebaseerd op dit standaard profiel voor consistentie
+                </div>
+              </div>
+
               {/* Macro Summary */}
               <div className="bg-[#181F17] rounded-lg p-4 border border-[#3A4D23]">
                 <div className="flex justify-between items-center mb-3">
@@ -895,22 +982,29 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
                   <div>
                     <div className="text-[#8BAE5A] font-semibold">{formData.target_protein}g</div>
                     <div className="text-[#B6C948] text-sm">Protein</div>
+                    <div className="text-xs text-gray-400 mt-1">{proteinPct}%</div>
                   </div>
                   <div>
                     <div className="text-[#8BAE5A] font-semibold">{formData.target_carbs}g</div>
                     <div className="text-[#B6C948] text-sm">Carbs</div>
+                    <div className="text-xs text-gray-400 mt-1">{carbsPct}%</div>
                   </div>
                   <div>
                     <div className="text-[#8BAE5A] font-semibold">{formData.target_fat}g</div>
                     <div className="text-[#B6C948] text-sm">Fat</div>
+                    <div className="text-xs text-gray-400 mt-1">{fatPct}%</div>
                   </div>
                 </div>
-                <div className="mt-3 text-center">
-                  <div className="text-[#8BAE5A] font-semibold">{formData.target_calories} calorieën</div>
-                  <div className="text-[#B6C948] text-sm">Totaal per dag</div>
+                <div className="mt-4 text-center bg-[#232D1A] rounded-lg p-3 border border-[#3A4D23]">
+                  <div className="text-[#8BAE5A] font-bold text-xl">{formData.target_calories}</div>
+                  <div className="text-[#B6C948] text-sm">Calorieën per dag</div>
+                  <div className="text-xs text-gray-400 mt-1">
+                    Gebaseerd op {formData.fitness_goal === 'droogtrainen' ? 'vetverlies' : 
+                                 formData.fitness_goal === 'spiermassa' ? 'spiergroei' : 'onderhoud'} doel
+                  </div>
                 </div>
                 <div className="mt-3 text-xs text-[#B6C948] text-center">
-                  💡 Standaard profiel: Man 30 jaar, 90kg, 192cm - Klik "Herbereken" om naar standaard waarden terug te gaan
+                  💡 Klik "Herbereken" om terug te gaan naar de standaard waarden voor dit fitness doel
                 </div>
               </div>
             </div>
@@ -946,11 +1040,160 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
                         {dayNames[selectedDay as keyof typeof dayNames]} - {dayThemes[selectedDay as keyof typeof dayThemes]}
                       </h3>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 mb-4">
                       <span className="px-2 py-1 bg-[#8BAE5A] text-[#181F17] rounded text-xs font-semibold">
                         Carnivor Animal Based
                       </span>
                     </div>
+
+                    {/* Daily Totals Summary */}
+                    {(() => {
+                      const currentDay = getCurrentDayPlan();
+                      const meals = currentDay?.meals;
+                      
+                      const totalCalories = (meals?.ontbijt?.calories || 0) + 
+                                          (meals?.snack1?.calories || 0) + 
+                                          (meals?.lunch?.calories || 0) + 
+                                          (meals?.snack2?.calories || 0) + 
+                                          (meals?.diner?.calories || 0);
+                      
+                      const totalProtein = (meals?.ontbijt?.protein || 0) + 
+                                         (meals?.snack1?.protein || 0) + 
+                                         (meals?.lunch?.protein || 0) + 
+                                         (meals?.snack2?.protein || 0) + 
+                                         (meals?.diner?.protein || 0);
+                      
+                      const totalCarbs = (meals?.ontbijt?.carbs || 0) + 
+                                       (meals?.snack1?.carbs || 0) + 
+                                       (meals?.lunch?.carbs || 0) + 
+                                       (meals?.snack2?.carbs || 0) + 
+                                       (meals?.diner?.carbs || 0);
+                      
+                      const totalFat = (meals?.ontbijt?.fat || 0) + 
+                                     (meals?.snack1?.fat || 0) + 
+                                     (meals?.lunch?.fat || 0) + 
+                                     (meals?.snack2?.fat || 0) + 
+                                     (meals?.diner?.fat || 0);
+
+                      // Get standard profile for comparison
+                      const isCarnivore = formData.name?.toLowerCase().includes('carnivoor') || false;
+                      const standardProfile = getStandardProfile(formData.fitness_goal || 'spiermassa', isCarnivore);
+                      const targetCalories = standardProfile.target_calories;
+                      const caloriesDifference = Math.round(totalCalories - targetCalories);
+                      const percentageOfTarget = targetCalories > 0 ? Math.round((totalCalories / targetCalories) * 100) : 0;
+                      
+                      return (
+                        <div className="space-y-4">
+                          {/* Daily Totals */}
+                          <div className="bg-[#232D1A] rounded-lg p-4 border border-[#3A4D23]">
+                            <h4 className="text-[#8BAE5A] font-semibold mb-3 flex items-center gap-2">
+                              📊 Dagelijkse Totalen - {dayNames[selectedDay as keyof typeof dayNames]}
+                            </h4>
+                            <div className="grid grid-cols-4 gap-3">
+                              <div className="bg-[#181F17] p-3 rounded border border-[#3A4D23] text-center">
+                                <div className="text-[#8BAE5A] font-bold text-lg">{Math.round(totalCalories)}</div>
+                                <div className="text-[#B6C948] text-xs">Calorieën</div>
+                              </div>
+                              <div className="bg-[#181F17] p-3 rounded border border-[#3A4D23] text-center">
+                                <div className="text-[#8BAE5A] font-bold text-lg">{Math.round(totalProtein * 10) / 10}g</div>
+                                <div className="text-[#B6C948] text-xs">Protein</div>
+                              </div>
+                              <div className="bg-[#181F17] p-3 rounded border border-[#3A4D23] text-center">
+                                <div className="text-[#8BAE5A] font-bold text-lg">{Math.round(totalCarbs * 10) / 10}g</div>
+                                <div className="text-[#B6C948] text-xs">Carbs</div>
+                              </div>
+                              <div className="bg-[#181F17] p-3 rounded border border-[#3A4D23] text-center">
+                                <div className="text-[#8BAE5A] font-bold text-lg">{Math.round(totalFat * 10) / 10}g</div>
+                                <div className="text-[#B6C948] text-xs">Fat</div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Standard Profile Comparison */}
+                          <div className="bg-[#232D1A] rounded-lg p-4 border border-[#3A4D23]">
+                            <h4 className="text-[#8BAE5A] font-semibold mb-3 flex items-center gap-2">
+                              👤 Standaard Profiel Vergelijking
+                            </h4>
+                            
+                            {/* Target Values Row */}
+                            <div className="mb-4">
+                              <div className="text-[#B6C948] text-sm mb-2 text-center">
+                                🎯 Dagelijkse Doelen ({formData.fitness_goal === 'droogtrainen' ? 'Droogtrainen' : 
+                                                      formData.fitness_goal === 'spiermassa' ? 'Spiermassa' : 'Onderhoud'})
+                              </div>
+                              <div className="grid grid-cols-4 gap-3">
+                                <div className="bg-[#181F17] rounded-lg p-3 border border-[#3A4D23] text-center">
+                                  <div className="text-[#8BAE5A] font-bold text-lg">{targetCalories}</div>
+                                  <div className="text-[#B6C948] text-xs">Calorieën</div>
+                                </div>
+                                <div className="bg-[#181F17] rounded-lg p-3 border border-[#3A4D23] text-center">
+                                  <div className="text-[#8BAE5A] font-bold text-lg">{standardProfile.target_protein}g</div>
+                                  <div className="text-[#B6C948] text-xs">Protein</div>
+                                </div>
+                                <div className="bg-[#181F17] rounded-lg p-3 border border-[#3A4D23] text-center">
+                                  <div className="text-[#8BAE5A] font-bold text-lg">{standardProfile.target_carbs}g</div>
+                                  <div className="text-[#B6C948] text-xs">Carbs</div>
+                                </div>
+                                <div className="bg-[#181F17] rounded-lg p-3 border border-[#3A4D23] text-center">
+                                  <div className="text-[#8BAE5A] font-bold text-lg">{standardProfile.target_fat}g</div>
+                                  <div className="text-[#B6C948] text-xs">Fat</div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Difference Values Row */}
+                            <div className="mb-3">
+                              <div className="text-[#B6C948] text-sm mb-2 text-center">
+                                📊 Verschil (Plan vs Doel)
+                              </div>
+                              <div className="grid grid-cols-4 gap-3">
+                                <div className="bg-[#181F17] rounded-lg p-3 border border-[#3A4D23] text-center">
+                                  <div className={`font-bold text-lg ${caloriesDifference >= 0 ? 'text-[#8BAE5A]' : 'text-orange-400'}`}>
+                                    {caloriesDifference >= 0 ? '+' : ''}{caloriesDifference}
+                                  </div>
+                                  <div className="text-[#B6C948] text-xs">Calorieën</div>
+                                  <div className="text-xs text-gray-400">{percentageOfTarget}%</div>
+                                </div>
+                                <div className="bg-[#181F17] rounded-lg p-3 border border-[#3A4D23] text-center">
+                                  <div className={`font-bold text-lg ${(totalProtein - standardProfile.target_protein) >= 0 ? 'text-[#8BAE5A]' : 'text-orange-400'}`}>
+                                    {(totalProtein - standardProfile.target_protein) >= 0 ? '+' : ''}{Math.round((totalProtein - standardProfile.target_protein) * 10) / 10}g
+                                  </div>
+                                  <div className="text-[#B6C948] text-xs">Protein</div>
+                                  <div className="text-xs text-gray-400">
+                                    {standardProfile.target_protein > 0 ? Math.round((totalProtein / standardProfile.target_protein) * 100) : 0}%
+                                  </div>
+                                </div>
+                                <div className="bg-[#181F17] rounded-lg p-3 border border-[#3A4D23] text-center">
+                                  <div className={`font-bold text-lg ${(totalCarbs - standardProfile.target_carbs) >= 0 ? 'text-[#8BAE5A]' : 'text-orange-400'}`}>
+                                    {(totalCarbs - standardProfile.target_carbs) >= 0 ? '+' : ''}{Math.round((totalCarbs - standardProfile.target_carbs) * 10) / 10}g
+                                  </div>
+                                  <div className="text-[#B6C948] text-xs">Carbs</div>
+                                  <div className="text-xs text-gray-400">
+                                    {standardProfile.target_carbs > 0 ? Math.round((totalCarbs / standardProfile.target_carbs) * 100) : 0}%
+                                  </div>
+                                </div>
+                                <div className="bg-[#181F17] rounded-lg p-3 border border-[#3A4D23] text-center">
+                                  <div className={`font-bold text-lg ${(totalFat - standardProfile.target_fat) >= 0 ? 'text-[#8BAE5A]' : 'text-orange-400'}`}>
+                                    {(totalFat - standardProfile.target_fat) >= 0 ? '+' : ''}{Math.round((totalFat - standardProfile.target_fat) * 10) / 10}g
+                                  </div>
+                                  <div className="text-[#B6C948] text-xs">Fat</div>
+                                  <div className="text-xs text-gray-400">
+                                    {standardProfile.target_fat > 0 ? Math.round((totalFat / standardProfile.target_fat) * 100) : 0}%
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="text-xs text-[#B6C948] text-center">
+                              💡 Profiel: 40 jaar, 100kg, 190cm, Matig actief • 
+                              {caloriesDifference > 100 ? ' Plan zit boven calorie doel' : 
+                               caloriesDifference < -100 ? ' Plan zit onder calorie doel' : 
+                               ' Plan zit dicht bij calorie doel'}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
 
                   {/* Meals - Now showing actual ingredients from database */}
@@ -1016,17 +1259,51 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
                               </div>
                             </div>
                             
-                            {/* Ingredients from database */}
-                            {hasIngredients ? (
+                            {/* Ingredients Table */}
+                            {meal?.ingredients && meal.ingredients.length > 0 ? (
                               <div className="space-y-2">
                                 <div className="text-xs text-[#8BAE5A] font-semibold">Ingrediënten:</div>
-                                <div className="space-y-1">
-                                  {ingredients.map((ingredient: string, idx: number) => (
-                                    <div key={idx} className="text-xs text-[#B6C948] flex items-center gap-2">
-                                      <span className="w-1 h-1 bg-[#8BAE5A] rounded-full"></span>
-                                      {ingredient}
-                                    </div>
-                                  ))}
+                                <div className="bg-[#0F150E] rounded-lg border border-[#2A3520] overflow-hidden">
+                                  <div className="overflow-x-auto">
+                                    <table className="w-full text-xs">
+                                      <thead>
+                                        <tr className="bg-[#232D1A] border-b border-[#3A4D23]">
+                                          <th className="text-left p-2 text-[#8BAE5A] font-semibold">Ingrediënt</th>
+                                          <th className="text-center p-2 text-[#8BAE5A] font-semibold">Hoeveelheid</th>
+                                          <th className="text-center p-2 text-[#8BAE5A] font-semibold">Kcal</th>
+                                          <th className="text-center p-2 text-[#8BAE5A] font-semibold">Protein</th>
+                                          <th className="text-center p-2 text-[#8BAE5A] font-semibold">Carbs</th>
+                                          <th className="text-center p-2 text-[#8BAE5A] font-semibold">Fat</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        {meal.ingredients.map((ingredient: any, idx: number) => {
+                                          // Calculate nutrition values for this ingredient
+                                          // This is a simplified calculation - in real implementation you'd fetch from database
+                                          const amount = ingredient.amount || 0;
+                                          const multiplier = amount / 100; // per 100g basis
+                                          
+                                          // Estimated values - these should come from ingredient database
+                                          const estimatedNutrition = getEstimatedNutrition(ingredient.name);
+                                          const calories = Math.round(estimatedNutrition.calories * multiplier);
+                                          const protein = Math.round(estimatedNutrition.protein * multiplier * 10) / 10;
+                                          const carbs = Math.round(estimatedNutrition.carbs * multiplier * 10) / 10;
+                                          const fat = Math.round(estimatedNutrition.fat * multiplier * 10) / 10;
+                                          
+                                          return (
+                                            <tr key={idx} className="border-b border-[#3A4D23] hover:bg-[#232D1A]/50">
+                                              <td className="p-2 text-[#B6C948]">{ingredient.name}</td>
+                                              <td className="p-2 text-center text-[#8BAE5A]">{amount}g</td>
+                                              <td className="p-2 text-center text-[#8BAE5A]">{calories}</td>
+                                              <td className="p-2 text-center text-[#8BAE5A]">{protein}g</td>
+                                              <td className="p-2 text-center text-[#8BAE5A]">{carbs}g</td>
+                                              <td className="p-2 text-center text-[#8BAE5A]">{fat}g</td>
+                                            </tr>
+                                          );
+                                        })}
+                                      </tbody>
+                                    </table>
+                                  </div>
                                 </div>
                               </div>
                             ) : (
