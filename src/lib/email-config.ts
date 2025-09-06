@@ -49,13 +49,13 @@ export const mailgunConfig: EmailConfig = {
 // Function to get current email configuration
 export function getEmailConfig(): EmailConfig {
   // You can switch providers here by changing the return value
-  return currentSmtpConfig; // Currently using SMTP
+  // return currentSmtpConfig; // Previously using SMTP
   
   // To use SendGrid:
   // return sendgridConfig;
   
   // To use Mailgun:
-  // return mailgunConfig;
+  return mailgunConfig; // NOW USING MAILGUN FOR BULK CAMPAIGNS
 }
 
 // Function to create nodemailer config for SMTP

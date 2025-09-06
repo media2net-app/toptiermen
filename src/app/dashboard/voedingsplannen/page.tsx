@@ -644,6 +644,7 @@ export default function VoedingsplannenPage() {
                         age: userNutritionProfile.age?.toString() || '',
                         weight: userNutritionProfile.weight?.toString() || '',
                         height: userNutritionProfile.height?.toString() || '',
+                        activityLevel: userNutritionProfile.activity_level || 'moderate',
                         goal: userNutritionProfile.goal || ''
                       });
                       setShowRequiredIntake(true);

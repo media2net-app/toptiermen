@@ -264,12 +264,23 @@ export default function AdminVoedingsplannenPage() {
 
   const handleSavePlan = async (planData: any) => {
     try {
+      console.log('🔍 DEBUG: Starting handleSavePlan...');
+      console.log('🔍 DEBUG: planData received:', planData);
+      console.log('🔍 DEBUG: selectedPlan:', selectedPlan);
+      
       const method = selectedPlan ? 'PUT' : 'POST';
       const url = '/api/admin/nutrition-plans';
       
       const payload = selectedPlan 
         ? { ...planData, id: selectedPlan.id }
         : planData;
+        
+      console.log('🔍 DEBUG: Method determined:', method);
+      console.log('🔍 DEBUG: URL:', url);
+
+      console.log('🔍 DEBUG: Saving plan with method:', method);
+      console.log('🔍 DEBUG: Payload:', JSON.stringify(payload, null, 2));
+      console.log('🔍 DEBUG: Selected plan ID:', selectedPlan?.id);
 
       const response = await fetch(url, {
         method,
@@ -279,11 +290,18 @@ export default function AdminVoedingsplannenPage() {
         body: JSON.stringify(payload)
       });
 
+      console.log('🔍 DEBUG: Response status:', response.status);
+      console.log('🔍 DEBUG: Response headers:', Object.fromEntries(response.headers.entries()));
+
       const result = await response.json();
+      console.log('🔍 DEBUG: Response body:', result);
       
       if (!response.ok) {
         console.error('❌ Error saving plan:', result.error);
-        alert('Fout bij opslaan van plan: ' + (result.error || 'Onbekende fout'));
+        console.error('❌ Full error response:', result);
+        console.error('❌ Response status:', response.status);
+        console.error('❌ Response statusText:', response.statusText);
+        alert('Fout bij opslaan van plan: ' + (result.error || result.message || `HTTP ${response.status}: ${response.statusText}`));
         return;
       }
 
@@ -294,7 +312,8 @@ export default function AdminVoedingsplannenPage() {
       
     } catch (error) {
       console.error('❌ Error saving plan:', error);
-      alert('Fout bij opslaan van plan');
+      console.error('❌ Error details:', error);
+      alert('Fout bij opslaan van plan: ' + (error instanceof Error ? error.message : 'Onbekende fout'));
     }
   };
 
@@ -304,12 +323,11 @@ export default function AdminVoedingsplannenPage() {
     }
 
     try {
-      const response = await fetch('/api/admin/nutrition-plans', {
+      const response = await fetch(`/api/admin/nutrition-plans?id=${planId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ id: planId })
+        }
       });
 
       const result = await response.json();

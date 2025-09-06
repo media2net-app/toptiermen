@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get current SMTP configuration
-    const smtpConfig = emailService.getSmtpConfig();
+    const smtpConfig = await emailService.getSmtpConfig();
 
     // Test sending a simple email
     const testEmailResult = await emailService.sendEmail({
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   try {
     // Return current SMTP configuration (without sensitive data)
-    const smtpConfig = emailService.getSmtpConfig();
+    const smtpConfig = await emailService.getSmtpConfig();
     
     return NextResponse.json({
       success: true,

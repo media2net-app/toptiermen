@@ -155,7 +155,7 @@ export class EmailService {
               <div style="background: rgba(139, 174, 90, 0.1); padding: 30px; text-align: center; border-top: 1px solid rgba(139, 174, 90, 0.2);">
                 <img src="https://platform.toptiermen.eu/logo_white-full.svg" alt="Top Tier Men Logo" style="width: 150px; height: auto; margin-bottom: 15px; opacity: 0.8;">
                 <p style="color: #8BAE5A; font-size: 14px; font-weight: 600; margin: 0 0 8px 0;">
-                  © 2024 Top Tier Men - Exclusieve Broederschap voor Top Performers
+                  © 2025 Top Tier Men - Exclusieve Broederschap voor Top Performers
                 </p>
                 <p style="color: #D1D5DB; font-size: 12px; margin: 0;">
                   Website: <a href="https://platform.toptiermen.eu" style="color: #8BAE5A; text-decoration: none;">platform.toptiermen.eu</a> | 
@@ -194,7 +194,7 @@ Met respect en waardering,
 Rick Cuijpers & Het Top Tier Men Team
 
 ---
-© 2024 Top Tier Men - Exclusieve Broederschap voor Top Performers
+© 2025 Top Tier Men - Exclusieve Broederschap voor Top Performers
 Website: https://platform.toptiermen.eu
 Contact: platform@toptiermen.eu
         `
@@ -202,7 +202,8 @@ Contact: platform@toptiermen.eu
       sneak_preview: {
         subject: '🎬 EXCLUSIEVE VIDEO - Eerste kijk in het Top Tier Men Platform',
         html: `
-          <div style="background: linear-gradient(135deg, #0F1419 0%, #1F2D17 100%); min-height: 100vh; padding: 40px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+          <style>@import url('https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800;900&display=swap');</style>
+          <div style="background: linear-gradient(135deg, #0F1419 0%, #1F2D17 100%); min-height: 100vh; padding: 40px 0; font-family: 'Figtree', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
             <div style="max-width: 600px; margin: 0 auto; background: #0F1419; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
               
               <!-- Header -->
@@ -219,50 +220,109 @@ Contact: platform@toptiermen.eu
                   Hey \${name}!
                 </p>
 
-                <p style="font-size: 16px; line-height: 1.6; margin: 0 0 30px 0; color: #FFFFFF;">
+                <p style="font-size: 16px; line-height: 1.6; margin: 0 0 20px 0; color: #FFFFFF;">
                   Je behoort tot een <strong style="color: #8BAE5A;">selectieve groep</strong> die als eerste het Top Tier Men platform mag zien. 
                 </p>
 
+                <!-- Countdown Section -->
+                <div style="background: rgba(139, 174, 90, 0.1); border-left: 4px solid #8BAE5A; padding: 20px; margin: 20px 0; border-radius: 0 8px 8px 0;">
+                  <div style="text-align: center;">
+                    <p style="color: #B6C948; font-weight: 700; font-size: 18px; margin: 0 0 8px 0;">
+                      ⏰ Nog <strong style="color: #FFFFFF; font-size: 24px;">\${daysUntilLaunch}</strong> dagen tot de officiële launch!
+                    </p>
+                    <p style="color: #8BAE5A; font-size: 14px; margin: 0;">
+                      10 september 2025
+                    </p>
+                  </div>
+                </div>
+
+                <!-- What Top Tier Men Means -->
+                <div style="background: rgba(139, 174, 90, 0.05); border: 1px solid rgba(139, 174, 90, 0.2); padding: 24px; margin: 20px 0; border-radius: 12px;">
+                  <h3 style="color: #8BAE5A; font-size: 18px; font-weight: 700; margin: 0 0 12px 0;">
+                    Wat betekent Top Tier Men voor jou?
+                  </h3>
+                  <p style="font-size: 15px; line-height: 1.6; margin: 0 0 16px 0; color: #D1D5DB;">
+                    Top Tier Men is meer dan een platform - het is jouw persoonlijke transformatiepartner. We bieden een complete aanpak die jou helpt om:
+                  </p>
+                  
+                  <div style="margin: 20px 0;">
+                    <div style="display: flex; align-items: flex-start; margin: 12px 0;">
+                      <span style="color: #8BAE5A; font-weight: 700; margin-right: 12px;">•</span>
+                      <div>
+                        <strong style="color: #B6C948;">FYSIEK:</strong> 
+                        <span style="color: #D1D5DB;">Persoonlijke voedings- en trainingsplannen die echt werken</span>
+                      </div>
+                    </div>
+                    <div style="display: flex; align-items: flex-start; margin: 12px 0;">
+                      <span style="color: #8BAE5A; font-weight: 700; margin-right: 12px;">•</span>
+                      <div>
+                        <strong style="color: #B6C948;">MENTAAL:</strong> 
+                        <span style="color: #D1D5DB;">Bewezen strategieën voor focus, discipline en mindset</span>
+                      </div>
+                    </div>
+                    <div style="display: flex; align-items: flex-start; margin: 12px 0;">
+                      <span style="color: #8BAE5A; font-weight: 700; margin-right: 12px;">•</span>
+                      <div>
+                        <strong style="color: #B6C948;">PROFESSIONEEL:</strong> 
+                        <span style="color: #D1D5DB;">Business tools en netwerk om jouw carrière te versnellen</span>
+                      </div>
+                    </div>
+                    <div style="display: flex; align-items: flex-start; margin: 12px 0;">
+                      <span style="color: #8BAE5A; font-weight: 700; margin-right: 12px;">•</span>
+                      <div>
+                        <strong style="color: #B6C948;">COMMUNITY:</strong> 
+                        <span style="color: #D1D5DB;">Een broederschap van gelijkgestemde mannen die elkaar naar succes duwen</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <!-- Video Section -->
                 <div style="text-align: center; margin: 30px 0;">
-                  <a href="\${videoUrl}" style="display: block; position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                  <a href="https://platform.toptiermen.eu/sneakpreview" style="display: block; position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
                     <img src="https://platform.toptiermen.eu/Scherm­afbeelding 2025-09-05 om 17.34.54.png" alt="Platform Preview" style="width: 100%; height: auto; display: block;">
-                    <!-- Play Button Overlay -->
-                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 70px; height: 70px; background: rgba(139, 174, 90, 0.95); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 25px rgba(0,0,0,0.4);">
-                      <div style="width: 0; height: 0; border-left: 22px solid white; border-top: 12px solid transparent; border-bottom: 12px solid transparent; margin-left: 4px;"></div>
+                    <!-- Centered Play Button Overlay -->
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80px; height: 80px; background: rgba(139, 174, 90, 0.95); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 25px rgba(0,0,0,0.4);">
+                      <div style="width: 0; height: 0; border-left: 26px solid white; border-top: 16px solid transparent; border-bottom: 16px solid transparent; margin-left: 6px;"></div>
                     </div>
                   </a>
                 </div>
                 
                 <!-- CTA Button -->
-                <div style="text-align: center; margin: 25px 0;">
-                  <a href="\${videoUrl}" 
-                     style="display: inline-block; background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%); color: white; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 16px; box-shadow: 0 6px 20px rgba(139, 174, 90, 0.3); transition: all 0.3s ease;">
-                    ▶️ BEKIJK DE VIDEO
+                <div style="text-align: center; margin: 30px 0;">
+                  <a href="https://platform.toptiermen.eu/sneakpreview" style="display: inline-block; background: linear-gradient(135deg, #8BAE5A 0%, #B6C948 100%); color: white; padding: 18px 36px; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 18px; box-shadow: 0 8px 25px rgba(139, 174, 90, 0.3); transition: all 0.3s ease;">
+                    🎬 BEKIJK DE EXCLUSIEVE VIDEO
                   </a>
                 </div>
 
-                <!-- Exclusivity -->
-                <div style="background: rgba(139, 174, 90, 0.1); border-left: 4px solid #8BAE5A; padding: 20px; margin: 25px 0; border-radius: 0 8px 8px 0;">
-                  <p style="font-size: 14px; line-height: 1.5; margin: 0; color: #D1D5DB; text-align: center;">
-                    🔒 <strong style="color: #8BAE5A;">Exclusief voor pre-launch leden</strong><br>
-                    Deel deze video niet - houd het onder ons!
+                <!-- Exclusive Note -->
+                <div style="background: rgba(139, 174, 90, 0.1); border: 1px solid #8BAE5A; border-radius: 12px; padding: 20px; margin: 30px 0; text-align: center;">
+                  <p style="color: #B6C948; font-size: 14px; font-weight: 600; margin: 0 0 8px 0;">
+                    🔒 Exclusief voor pre-launch leden
+                  </p>
+                  <p style="color: #D1D5DB; font-size: 14px; margin: 0;">
+                    Deel deze video niet, houd het onder ons!
                   </p>
                 </div>
 
-                <p style="font-size: 15px; line-height: 1.6; margin: 25px 0 0 0; color: #8BAE5A; text-align: center;">
-                  Groet,<br>
-                  <strong>Het Top Tier Men Team</strong>
-                </p>
+                <!-- Closing -->
+                <div style="margin: 30px 0; text-align: center;">
+                  <p style="color: #D1D5DB; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
+                    Groet,<br>
+                    <strong>Het Top Tier Men Team</strong>
+                  </p>
+                </div>
               </div>
 
               <!-- Footer -->
               <div style="background: rgba(139, 174, 90, 0.1); padding: 20px; text-align: center; border-top: 1px solid rgba(139, 174, 90, 0.2);">
                 <p style="color: #8BAE5A; font-size: 12px; margin: 0;">
-                  © 2024 Top Tier Men | <a href="https://platform.toptiermen.eu" style="color: #8BAE5A; text-decoration: none;">platform.toptiermen.eu</a>
+                  © 2025 Top Tier Men | <a href="https://platform.toptiermen.eu" style="color: #8BAE5A; text-decoration: none;">platform.toptiermen.eu</a>
                 </p>
               </div>
             </div>
+            <!-- Email Tracking Pixel -->
+            <img src="https://platform.toptiermen.eu/email-track/open?trackingId=\${trackingId}" alt="" style="display:none;width:1px;height:1px;" />
           </div>
         `,
         text: `
@@ -272,8 +332,19 @@ Hey \${name}!
 
 Je behoort tot een selectieve groep die als eerste het Top Tier Men platform mag zien.
 
+⏰ NOG \${daysUntilLaunch} DAGEN TOT DE OFFICIËLE LAUNCH!
+10 september 2025
+
+WAT BETEKENT TOP TIER MEN VOOR JOU?
+Top Tier Men is meer dan een platform - het is jouw persoonlijke transformatiepartner. We bieden een complete aanpak die jou helpt om:
+
+• FYSIEK: Persoonlijke voedings- en trainingsplannen die echt werken
+• MENTAAL: Bewezen strategieën voor focus, discipline en mindset  
+• PROFESSIONEEL: Business tools en netwerk om jouw carrière te versnellen
+• COMMUNITY: Een broederschap van gelijkgestemde mannen die elkaar naar succes duwen
+
 🎥 BEKIJK DE VIDEO:
-\${videoUrl}
+https://platform.toptiermen.eu/sneakpreview
 
 🔒 Exclusief voor pre-launch leden - Deel deze video niet, houd het onder ons!
 
@@ -281,7 +352,7 @@ Groet,
 Het Top Tier Men Team
 
 ---
-© 2024 Top Tier Men | platform.toptiermen.eu
+© 2025 Top Tier Men | platform.toptiermen.eu
         `
       }
     };
@@ -389,15 +460,79 @@ class LegacyEmailService extends EmailService {
     to: string;
     template: string;
     variables: Record<string, string>;
-  }, trackingOptions?: any): Promise<boolean> {
-    // Convert old interface to new interface
-    return super.sendEmail(
-      options.to,
-      '', // subject will be from template
-      options.template,
-      options.variables,
-      { tracking: true }
-    );
+  }, trackingOptions?: any): Promise<boolean>;
+  async sendEmail(to: string, subject: string, template: string, variables: Record<string, string>, options?: { tracking?: boolean }): Promise<boolean>;
+  async sendEmail(
+    optionsOrTo: { to: string; template: string; variables: Record<string, string> } | string,
+    subjectOrTracking?: string | any,
+    template?: string,
+    variables?: Record<string, string>,
+    options?: { tracking?: boolean }
+  ): Promise<boolean> {
+    // Handle both old and new interface
+    if (typeof optionsOrTo === 'string') {
+      // New interface: sendEmail(to, subject, template, variables, options)
+      return super.sendEmail(optionsOrTo, subjectOrTracking, template!, variables!, options);
+    } else {
+      // Old interface: sendEmail(options, trackingOptions)
+      return super.sendEmail(
+        optionsOrTo.to,
+        '', // subject will be from template
+        optionsOrTo.template,
+        optionsOrTo.variables,
+        { tracking: true }
+      );
+    }
+  }
+
+  async testSmtpConnection(): Promise<boolean> {
+    try {
+      const config = await this.getConfig();
+      
+      if (config.provider !== 'smtp' || !config.useManualSmtp) {
+        console.log('📧 SMTP not configured, skipping connection test');
+        return false;
+      }
+
+      console.log('📧 Testing SMTP connection...');
+      
+      const nodemailer = require('nodemailer');
+      const transporter = nodemailer.createTransporter({
+        host: config.smtpHost,
+        port: parseInt(config.smtpPort || '465'),
+        secure: config.smtpSecure,
+        auth: {
+          user: config.smtpUsername,
+          pass: config.smtpPassword
+        }
+      });
+
+      await transporter.verify();
+      console.log('✅ SMTP connection test successful');
+      return true;
+    } catch (error) {
+      console.error('❌ SMTP connection test failed:', error);
+      return false;
+    }
+  }
+
+  async getSmtpConfig(): Promise<{
+    host: string;
+    port: string;
+    secure: boolean;
+    username: string;
+    fromEmail: string;
+    fromName: string;
+  }> {
+    const config = await this.getConfig();
+    return {
+      host: config.smtpHost || '',
+      port: config.smtpPort || '465',
+      secure: config.smtpSecure || true,
+      username: config.smtpUsername || '',
+      fromEmail: config.fromEmail || '',
+      fromName: config.fromName || ''
+    };
   }
 }
 

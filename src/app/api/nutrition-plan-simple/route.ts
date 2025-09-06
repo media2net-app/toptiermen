@@ -156,9 +156,9 @@ export async function GET(request: NextRequest) {
     // Determine data source (custom plan if available, otherwise base plan)
     let weekPlanData, weeklyAveragesData;
     
-    if (customPlanData && customPlanData.week_plan) {
+    if (customPlanData && typeof customPlanData === 'object' && 'week_plan' in customPlanData) {
       console.log('📋 Using custom plan data for user');
-      const customPlan = customPlanData.week_plan;
+      const customPlan = (customPlanData as any).week_plan;
       weekPlanData = customPlan.weekPlan || customPlan.meals?.weekly_plan || {};
       weeklyAveragesData = customPlan.weeklyAverages || customPlan.meals?.weekly_averages || {
         calories: userProfile.target_calories || 2000,

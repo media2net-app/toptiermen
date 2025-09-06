@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { emailService } from '@/lib/email-service';
+import { mailgunEmailService } from '@/lib/mailgun-email-service';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 
-// Import the template function from bulk email API
+// Email template function
 function getEmailTemplate(template: string, variables: Record<string, string>) {
   if (template === 'sneak_preview') {
     const html = `
@@ -165,7 +165,7 @@ function getEmailTemplate(template: string, variables: Record<string, string>) {
 
   // Default template
   return {
-    subject: 'Top Tier Men Test',
+    subject: 'Top Tier Men',
     html: `<p>Hello ${variables.name || '[NAAM]'}</p>`,
     text: `Hello ${variables.name || '[NAAM]'}`
   };
@@ -173,117 +173,270 @@ function getEmailTemplate(template: string, variables: Record<string, string>) {
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('🧪 Sending test email...');
+    console.log('📧 Starting bulk email send...');
     
     const body = await request.json();
-    const { to, name = 'Test User', template = 'test', variables = {} } = body;
+    const { 
+      campaignId,
+      template = 'sneak_preview',
+      variables = {},
+      dryRun = false // Safety flag to prevent accidental sends
+    } = body;
     
-    if (!to) {
+    if (!campaignId) {
       return NextResponse.json(
-        { error: 'Email address is required' },
+        { error: 'Campaign ID is required' },
         { status: 400 }
       );
     }
     
-    console.log('📧 Test email request:', { to, name });
+    console.log('📊 Bulk email request:', { campaignId, template, dryRun });
     
-    // Generate unique tracking ID for this email (include email for tracking)
-    const campaignId = template === 'sneak_preview' ? '84bceade-eec6-4349-958f-6b04be0d3003' : null;
-    const trackingId = `test_${Date.now()}_${to.replace('@', '_at_').replace('.', '_dot_')}_${Math.random().toString(36).substr(2, 9)}`;
-    
-    // Send test email via SMTP (reliable for testing)
-    const result = await emailService.sendEmail({
-      to: to,
-      template: template,
-      variables: {
-        name: name,
-        trackingId: trackingId,
-        campaignId: campaignId,
-        ...variables
-      }
-    });
-    
-    if (result) {
-      console.log('✅ Test email sent successfully');
+    // Get campaign details
+    const { data: campaign, error: campaignError } = await supabaseAdmin
+      .from('bulk_email_campaigns')
+      .select('*')
+      .eq('id', campaignId)
+      .single();
       
-      // Store test email in database for tracking
-      if (campaignId) {
-        try {
-          const { data, error } = await supabaseAdmin
-            .from('test_email_tracking')
-            .insert({
-              campaign_id: campaignId,
-              email: to,
-              name: name,
-              tracking_id: trackingId,
-              template: template,
-              sent_at: new Date().toISOString()
-            })
-            .select();
-          
-          if (error) {
-            console.error('❌ Failed to store test email tracking:', error);
-          } else {
-            console.log('✅ Test email tracking stored in database:', data);
-          }
-        } catch (dbError) {
-          console.error('❌ Database error storing test email:', dbError);
-        }
-      }
-      
-      return NextResponse.json({
-        success: true,
-        message: 'Test email sent successfully',
-        to: to,
-        template: template,
-        trackingId: trackingId
-      });
-    } else {
-      console.log('❌ Test email failed');
+    if (campaignError || !campaign) {
+      console.error('❌ Campaign not found:', campaignError);
       return NextResponse.json(
-        { error: 'Failed to send test email' },
+        { error: 'Campaign not found' },
+        { status: 404 }
+      );
+    }
+    
+    // Get recipients for this campaign
+    const { data: recipients, error: recipientsError } = await supabaseAdmin
+      .from('bulk_email_recipients')
+      .select(`
+        *,
+        lead:leads(*)
+      `)
+      .eq('campaign_id', campaignId)
+      .in('status', ['active', 'pending']);
+      
+    if (recipientsError) {
+      console.error('❌ Error fetching recipients:', recipientsError);
+      return NextResponse.json(
+        { error: 'Failed to fetch recipients' },
         { status: 500 }
       );
     }
     
+    console.log(`📊 Found ${recipients?.length || 0} active recipients for campaign: ${campaign.name}`);
+    
+    if (!recipients || recipients.length === 0) {
+      return NextResponse.json(
+        { error: 'No active or pending recipients found for this campaign' },
+        { status: 400 }
+      );
+    }
+    
+    // Safety check for dry run
+    if (dryRun) {
+      console.log('🧪 DRY RUN MODE - No emails will be sent');
+      return NextResponse.json({
+        success: true,
+        message: 'Dry run completed successfully',
+        campaign: campaign.name,
+        recipientCount: recipients.length,
+        template: template,
+        dryRun: true,
+        recipients: recipients.slice(0, 5).map(r => ({ 
+          email: r.lead?.email, 
+          name: r.lead?.name 
+        })) // Show first 5 for preview
+      });
+    }
+    
+    // Create bulk email tracking table if it doesn't exist
+    await supabaseAdmin.rpc('create_bulk_email_tracking_if_not_exists');
+    
+    const results = {
+      sent: 0,
+      failed: 0,
+      errors: [] as string[]
+    };
+    
+    // Send ALL remaining emails - NO INTERVALS, FULL SPEED
+    const BATCH_SIZE = 38; // ALL EMAILS IN ONE BATCH
+    const BATCH_DELAY_MS = 0; // NO DELAY
+    const EMAIL_DELAY_MS = 100; // MINIMAL 100ms between emails
+    const SKIP_FIRST = 6; // SKIP FIRST 6 (ALREADY SENT)
+    const MAX_EMAILS = 32; // SEND REMAINING 32 EMAILS
+    
+    console.log(`🚀 ========== BULK EMAIL CAMPAIGN - FINAL SEND ==========`);
+    console.log(`📊 Total recipients available: ${recipients.length}`);
+    console.log(`📦 SENDING ALL REMAINING ${MAX_EMAILS} EMAILS`);
+    console.log(`⚠️ SKIPPING FIRST ${SKIP_FIRST} (Already sent)`);
+    console.log(`⚡ NO INTERVALS - FULL SPEED SEND`);
+    console.log(`📧 Template: ${template}`);
+    console.log(`🎯 Campaign: ${campaign.name}`);
+    console.log(`🔥 THIS IS THE OFFICIAL CAMPAIGN - FINAL BATCH!`);
+    console.log('');
+    
+    // Skip first 6 recipients (already sent) and process remaining emails
+    const startIndex = SKIP_FIRST;
+    const endIndex = Math.min(startIndex + MAX_EMAILS, recipients.length);
+    
+    console.log(`📧 Processing recipients ${startIndex + 1} to ${endIndex} (${endIndex - startIndex} emails)`);
+    console.log('');
+    
+    for (let i = startIndex; i < endIndex; i += BATCH_SIZE) {
+      const batch = recipients.slice(i, Math.min(i + BATCH_SIZE, endIndex));
+      const batchNumber = 1; // All in one final batch
+      const totalBatches = 1;
+      
+      console.log(`📦 ========== BATCH ${batchNumber}/${totalBatches} ==========`);
+      console.log(`📧 Processing ${batch.length} recipients...`);
+      console.log(`⏰ Started at: ${new Date().toLocaleTimeString('nl-NL')}`);
+      console.log('');
+      
+      for (let j = 0; j < batch.length; j++) {
+        const recipient = batch[j];
+        try {
+          const lead = recipient.lead;
+          if (!lead?.email) {
+            console.warn('⚠️ Skipping recipient with no email:', recipient.id);
+            continue;
+          }
+          
+          // Generate unique tracking ID for this email
+          const trackingId = `bulk_${Date.now()}_${lead.email.replace('@', '_at_').replace(/\./g, '_dot_')}_${Math.random().toString(36).substr(2, 9)}`;
+          
+          console.log(`📧 [${j + 1}/${batch.length}] Sending to: ${lead.email}`);
+          console.log(`👤 Personal greeting: "Hey ${lead.name || lead.email.split('@')[0]}!"`);
+          console.log(`🔗 Tracking ID: ${trackingId}`);
+          
+          // Get email template content with personalized name
+          const emailTemplate = getEmailTemplate(template, {
+            name: lead.name || lead.email.split('@')[0], // Use name or email prefix
+            trackingId: trackingId,
+            campaignId: campaignId,
+            ...variables
+          });
+          
+          // Send email via Mailgun (with SMTP fallback)
+          const emailResult = await mailgunEmailService.sendEmail(
+            lead.email,
+            emailTemplate.subject,
+            emailTemplate.html,
+            emailTemplate.text,
+            trackingId
+          );
+          
+          if (emailResult) {
+            // Store tracking info in database
+            const { error: trackingError } = await supabaseAdmin
+              .from('bulk_email_tracking')
+              .insert({
+                campaign_id: campaignId,
+                recipient_id: recipient.id,
+                lead_id: lead.id,
+                email: lead.email,
+                name: lead.name,
+                tracking_id: trackingId,
+                template: template,
+                sent_at: new Date().toISOString(),
+                status: 'sent'
+              });
+            
+            if (trackingError) {
+              console.error('❌ Failed to store tracking info:', trackingError);
+              results.errors.push(`Failed to store tracking for ${lead.email}: ${trackingError.message}`);
+            } else {
+              console.log(`✅ Email sent and tracked successfully!`);
+              results.sent++;
+            }
+          } else {
+            console.error(`❌ Failed to send email`);
+            results.failed++;
+            results.errors.push(`Failed to send to ${lead.email}`);
+          }
+          
+          console.log('');
+          
+          // Delay between individual emails
+          if (EMAIL_DELAY_MS > 0 && j < batch.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, EMAIL_DELAY_MS));
+          }
+          
+        } catch (error) {
+          console.error(`❌ Error processing recipient:`, error);
+          results.failed++;
+          results.errors.push(`Error processing recipient: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          console.log('');
+        }
+      }
+      
+      console.log(`📊 Batch ${batchNumber}/${totalBatches} completed at ${new Date().toLocaleTimeString('nl-NL')}:`);
+      console.log(`✅ Total sent so far: ${results.sent}`);
+      console.log(`❌ Total failed so far: ${results.failed}`);
+      console.log('');
+      
+      // Delay between batches (except for the last batch)
+      if (i + BATCH_SIZE < recipients.length) {
+        console.log(`⏳ Waiting ${BATCH_DELAY_MS / 1000} seconds before next batch...`);
+        console.log(`⏰ Next batch starts at: ${new Date(Date.now() + BATCH_DELAY_MS).toLocaleTimeString('nl-NL')}`);
+        console.log('');
+        await new Promise(resolve => setTimeout(resolve, BATCH_DELAY_MS));
+      }
+    }
+    
+    console.log(`🎉 ========== CAMPAIGN COMPLETED ==========`);
+    console.log(`⏰ Finished at: ${new Date().toLocaleTimeString('nl-NL')}`);
+    console.log(`📊 Final Results:`);
+    console.log(`✅ Successfully sent: ${results.sent} emails`);
+    console.log(`❌ Failed: ${results.failed} emails`);
+    console.log(`📧 Template used: ${template}`);
+    console.log(`🎯 Campaign: ${campaign.name}`);
+    if (results.errors.length > 0) {
+      console.log(`⚠️ Errors encountered:`);
+      results.errors.forEach((error, index) => {
+        console.log(`   ${index + 1}. ${error}`);
+      });
+    }
+    console.log(`🎉 ========================================`);
+    
+    // Update campaign status
+    await supabaseAdmin
+      .from('bulk_email_campaigns')
+      .update({ 
+        last_sent_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', campaignId);
+    
+    return NextResponse.json({
+      success: true,
+      message: 'Bulk email send completed',
+      campaign: campaign.name,
+      results: results,
+      template: template
+    });
+    
   } catch (error) {
-    console.error('❌ Error sending test email:', error);
+    console.error('❌ Error in bulk email send:', error);
     return NextResponse.json(
-      { error: 'Failed to send test email' },
+      { error: 'Failed to send bulk emails' },
       { status: 500 }
     );
   }
 }
 
 export async function GET() {
-  try {
-    // Return current email configuration (without sensitive data)
-    const config = await emailService.getConfig();
-    
-    return NextResponse.json({
-      success: true,
-      message: 'Email service is ready for testing',
-      smtpConfig: {
-        host: config.smtpHost,
-        port: config.smtpPort,
-        secure: config.smtpSecure,
-        username: config.smtpUsername,
-        fromEmail: config.fromEmail,
-        fromName: config.fromName
-      },
-      testEndpoint: '/api/email/send-test',
-      testMethod: 'POST',
-      testBody: {
-        to: 'your-email@example.com',
-        name: 'Your Name'
-      }
-    });
-    
-  } catch (error) {
-    console.error('❌ Error getting email configuration:', error);
-    return NextResponse.json(
-      { error: 'Failed to get email configuration' },
-      { status: 500 }
-    );
-  }
+  return NextResponse.json({
+    success: true,
+    message: 'Bulk email service is ready',
+    endpoint: '/api/email/send-bulk',
+    method: 'POST',
+    body: {
+      campaignId: 'campaign-uuid',
+      template: 'sneak_preview',
+      variables: { daysUntilLaunch: '4' },
+      dryRun: true // Set to false to actually send emails
+    }
+  });
 }
