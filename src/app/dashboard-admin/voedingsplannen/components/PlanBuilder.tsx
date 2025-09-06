@@ -604,36 +604,52 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
           // Calculate current total calories from macros (4 cal/g for protein and carbs, 9 cal/g for fat)
           const currentCaloriesFromMacros = (currentProtein * 4) + (currentCarbs * 4) + (currentFat * 9);
           
-          // Always use the correct percentages based on plan type, not existing values
-          const isCarnivore = prev.name?.toLowerCase().includes('carnivoor') || false;
-          const fitnessGoal = prev.fitness_goal || 'onderhoud';
-          
           let proteinPercent, carbsPercent, fatPercent;
           
-          if (isCarnivore) {
-            // Carnivoor: 45% protein, 5% carbs, 50% fat
-            proteinPercent = 0.45;
-            carbsPercent = 0.05;
-            fatPercent = 0.50;
+          // Always use the current percentages from the UI, not recalculate them
+          if (currentCaloriesFromMacros > 0) {
+            // Use existing percentages from current macro values
+            proteinPercent = (currentProtein * 4) / currentCaloriesFromMacros;
+            carbsPercent = (currentCarbs * 4) / currentCaloriesFromMacros;
+            fatPercent = (currentFat * 9) / currentCaloriesFromMacros;
           } else {
-            // Normal meal plans based on fitness goal
-            switch (fitnessGoal) {
-              case 'droogtrainen':
-                proteinPercent = 0.40;
-                carbsPercent = 0.40;
-                fatPercent = 0.20;
-                break;
-              case 'spiermassa':
-                proteinPercent = 0.30;
-                carbsPercent = 0.50;
-                fatPercent = 0.20;
-                break;
-              case 'onderhoud':
-              default:
+            // Fallback to default percentages based on plan type
+            const isCarnivore = prev.name?.toLowerCase().includes('carnivoor') || false;
+            const fitnessGoal = prev.fitness_goal || 'onderhoud';
+            
+            if (isCarnivore) {
+              // Check if it's Spiermassa (keep 45/5/50) or Droogtrainen/Onderhoud (use 35/5/60)
+              if (prev.name?.toLowerCase().includes('spiermassa')) {
+                // Carnivoor - Spiermassa: 45% protein, 5% carbs, 50% fat
+                proteinPercent = 0.45;
+                carbsPercent = 0.05;
+                fatPercent = 0.50;
+              } else {
+                // Carnivoor - Droogtrainen & Onderhoud: 35% protein, 5% carbs, 60% fat
                 proteinPercent = 0.35;
-                carbsPercent = 0.40;
-                fatPercent = 0.25;
-                break;
+                carbsPercent = 0.05;
+                fatPercent = 0.60;
+              }
+            } else {
+              // Normal meal plans based on fitness goal
+              switch (fitnessGoal) {
+                case 'droogtrainen':
+                  proteinPercent = 0.40;
+                  carbsPercent = 0.40;
+                  fatPercent = 0.20;
+                  break;
+                case 'spiermassa':
+                  proteinPercent = 0.30;
+                  carbsPercent = 0.50;
+                  fatPercent = 0.20;
+                  break;
+                case 'onderhoud':
+                default:
+                  proteinPercent = 0.35;
+                  carbsPercent = 0.40;
+                  fatPercent = 0.25;
+                  break;
+              }
             }
           }
           
@@ -647,13 +663,12 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
           updated.target_carbs = Math.round(newCarbsCals / 4);
           updated.target_fat = Math.round(newFatCals / 9);
           
-          console.log('🧮 Auto-calculated macros for', newCalories, 'kcal (correct percentages):', {
-            protein: `${updated.target_protein}g (${Math.round(proteinPercent * 100)}%)`,
-            carbs: `${updated.target_carbs}g (${Math.round(carbsPercent * 100)}%)`,
-            fat: `${updated.target_fat}g (${Math.round(fatPercent * 100)}%)`,
-            planType: isCarnivore ? 'Carnivoor' : 'Maaltijdplan normaal',
-            fitnessGoal: fitnessGoal
-          });
+            console.log('🧮 Auto-calculated macros for', newCalories, 'kcal (maintaining percentages):', {
+              protein: `${updated.target_protein}g (${Math.round(proteinPercent * 100)}%)`,
+              carbs: `${updated.target_carbs}g (${Math.round(carbsPercent * 100)}%)`,
+              fat: `${updated.target_fat}g (${Math.round(fatPercent * 100)}%)`,
+              planType: prev.name?.toLowerCase().includes('carnivoor') ? 'Carnivoor' : 'Maaltijdplan normaal'
+            });
         }
       }
       
@@ -1176,7 +1191,7 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                   </div>
                 )}
                   <div className="text-[#B6C948]">
-                    🧮 Macro's worden automatisch herberekend bij aanpassing (verhoudingen behouden)
+                    🧮 Pas percentages aan en gram waarden worden automatisch berekend
                   </div>
                 </div>
               </div>
@@ -1184,48 +1199,69 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
               {/* Macro Distribution */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                  <label className="block text-[#8BAE5A] font-semibold mb-2">
-                    Eiwitten (g)
+                  <div className="mb-2">
+                    <label className="block text-[#8BAE5A] font-semibold">
+                      Eiwitten (%)
                   </label>
+                  </div>
                   <input
                     type="number"
-                    value={formData.target_protein}
-                    onChange={(e) => handleInputChange('target_protein', parseInt(e.target.value))}
+                    value={Math.round(proteinPct)}
+                    onChange={(e) => {
+                      const newPercent = parseInt(e.target.value);
+                      const newProtein = Math.round(((formData.target_calories || 2500) * newPercent / 100) / 4);
+                      handleInputChange('target_protein', newProtein);
+                    }}
                     className="w-full px-4 py-3 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                    min="50"
-                    max="300"
+                    min="10"
+                    max="60"
+                    step="1"
                   />
-                  <div className="text-[#B6C948] text-sm mt-1">{proteinPct}% van totale calorieën</div>
+                  <div className="text-[#B6C948] text-sm mt-1">{formData.target_protein}g eiwit</div>
                 </div>
 
                 <div>
-                  <label className="block text-[#8BAE5A] font-semibold mb-2">
-                    Koolhydraten (g)
+                  <div className="mb-2">
+                    <label className="block text-[#8BAE5A] font-semibold">
+                      Koolhydraten (%)
                   </label>
+                  </div>
                   <input
                     type="number"
-                    value={formData.target_carbs}
-                    onChange={(e) => handleInputChange('target_carbs', parseInt(e.target.value))}
+                    value={Math.round(carbsPct)}
+                    onChange={(e) => {
+                      const newPercent = parseInt(e.target.value);
+                      const newCarbs = Math.round(((formData.target_calories || 2500) * newPercent / 100) / 4);
+                      handleInputChange('target_carbs', newCarbs);
+                    }}
                     className="w-full px-4 py-3 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
                     min="0"
-                    max="500"
+                    max="60"
+                    step="1"
                   />
-                  <div className="text-[#B6C948] text-sm mt-1">{carbsPct}% van totale calorieën</div>
+                  <div className="text-[#B6C948] text-sm mt-1">{formData.target_carbs}g koolhydraten</div>
                 </div>
 
                 <div>
-                  <label className="block text-[#8BAE5A] font-semibold mb-2">
-                    Vetten (g)
+                  <div className="mb-2">
+                    <label className="block text-[#8BAE5A] font-semibold">
+                      Vetten (%)
                   </label>
+                  </div>
                   <input
                     type="number"
-                    value={formData.target_fat}
-                    onChange={(e) => handleInputChange('target_fat', parseInt(e.target.value))}
+                    value={Math.round(fatPct)}
+                    onChange={(e) => {
+                      const newPercent = parseInt(e.target.value);
+                      const newFat = Math.round(((formData.target_calories || 2500) * newPercent / 100) / 9);
+                      handleInputChange('target_fat', newFat);
+                    }}
                     className="w-full px-4 py-3 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                    min="20"
-                    max="200"
+                    min="10"
+                    max="70"
+                    step="1"
                   />
-                  <div className="text-[#B6C948] text-sm mt-1">{fatPct}% van totale calorieën</div>
+                  <div className="text-[#B6C948] text-sm mt-1">{formData.target_fat}g vet</div>
                 </div>
               </div>
 

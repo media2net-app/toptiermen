@@ -455,10 +455,22 @@ export default function AdminVoedingsplannenPage() {
     }
   };
 
-  const filteredPlans = plans.filter(plan =>
-    plan.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    plan.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredPlans = plans
+    .filter(plan =>
+      plan.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      plan.description.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .sort((a, b) => {
+      // First sort by type: Carnivoor plans first, then normal meal plans
+      const aIsCarnivore = a.name.toLowerCase().includes('carnivoor');
+      const bIsCarnivore = b.name.toLowerCase().includes('carnivoor');
+      
+      if (aIsCarnivore && !bIsCarnivore) return -1;
+      if (!aIsCarnivore && bIsCarnivore) return 1;
+      
+      // Within each type, sort by calories (low to high)
+      return (a.target_calories || 0) - (b.target_calories || 0);
+    });
 
   const filteredFoodItems = foodItems.filter(item => {
     // Text search filter
@@ -672,28 +684,28 @@ export default function AdminVoedingsplannenPage() {
                      <h3 className="text-lg font-semibold text-[#8BAE5A] mb-2">{plan.name}</h3>
                      <p className="text-gray-300 text-sm mb-4">{plan.description}</p>
                      
-                     {((plan as any).meals?.target_calories || plan.target_calories) && (
+                     {plan.target_calories && (
                        <div className="grid grid-cols-2 gap-4 text-sm mb-4">
                          <div>
                            <span className="text-gray-400">Calorieën:</span>
-                           <span className="ml-2 font-medium text-white">{(plan as any).meals?.target_calories || plan.target_calories} kcal</span>
+                           <span className="ml-2 font-medium text-white">{plan.target_calories} kcal</span>
                          </div>
-                         {((plan as any).meals?.target_protein || plan.target_protein) && (
+                         {plan.target_protein && (
                            <div>
                              <span className="text-gray-400">Eiwit:</span>
-                             <span className="ml-2 font-medium text-white">{(plan as any).meals?.target_protein || plan.target_protein}g</span>
+                             <span className="ml-2 font-medium text-white">{plan.target_protein}g</span>
                            </div>
                          )}
-                         {((plan as any).meals?.target_carbs || plan.target_carbs) && (
+                         {plan.target_carbs && (
                            <div>
                              <span className="text-gray-400">Koolhydraten:</span>
-                             <span className="ml-2 font-medium text-white">{(plan as any).meals?.target_carbs || plan.target_carbs}g</span>
+                             <span className="ml-2 font-medium text-white">{plan.target_carbs}g</span>
                            </div>
                          )}
-                         {((plan as any).meals?.target_fat || plan.target_fat) && (
+                         {plan.target_fat && (
                            <div>
                              <span className="text-gray-400">Vet:</span>
-                             <span className="ml-2 font-medium text-white">{(plan as any).meals?.target_fat || plan.target_fat}g</span>
+                             <span className="ml-2 font-medium text-white">{plan.target_fat}g</span>
                            </div>
                          )}
                        </div>
