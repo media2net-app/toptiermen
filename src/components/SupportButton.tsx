@@ -10,7 +10,8 @@ import {
   AcademicCapIcon,
   FireIcon,
   BookOpenIcon,
-  EnvelopeIcon
+  EnvelopeIcon,
+  DocumentTextIcon
 } from '@heroicons/react/24/outline';
 
 interface SupportButtonProps {
