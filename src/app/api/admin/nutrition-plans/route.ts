@@ -252,32 +252,32 @@ export async function POST(request: NextRequest) {
             lunch: dailyPlan.meals.lunch?.ingredients || [],
             lunch_snack: dailyPlan.meals.snack2?.ingredients || dailyPlan.meals.lunch_snack?.ingredients || [],
             diner: dailyPlan.meals.diner?.ingredients || [],
-            avond_snack: dailyPlan.meals.avond_snack?.ingredients || [],
+            avond_snack: dailyPlan.meals.avondsnack?.ingredients || dailyPlan.meals.avond_snack?.ingredients || [],
             dailyTotals: {
               calories: (dailyPlan.meals.ontbijt?.calories || 0) + 
                        (dailyPlan.meals.snack1?.calories || dailyPlan.meals.ochtend_snack?.calories || 0) +
                        (dailyPlan.meals.lunch?.calories || 0) + 
                        (dailyPlan.meals.snack2?.calories || dailyPlan.meals.lunch_snack?.calories || 0) +
                        (dailyPlan.meals.diner?.calories || 0) + 
-                       (dailyPlan.meals.avond_snack?.calories || 0),
+                       (dailyPlan.meals.avondsnack?.calories || dailyPlan.meals.avond_snack?.calories || 0),
               protein: (dailyPlan.meals.ontbijt?.protein || 0) + 
                       (dailyPlan.meals.snack1?.protein || dailyPlan.meals.ochtend_snack?.protein || 0) +
                       (dailyPlan.meals.lunch?.protein || 0) + 
                       (dailyPlan.meals.snack2?.protein || dailyPlan.meals.lunch_snack?.protein || 0) +
                       (dailyPlan.meals.diner?.protein || 0) + 
-                      (dailyPlan.meals.avond_snack?.protein || 0),
+                      (dailyPlan.meals.avondsnack?.protein || dailyPlan.meals.avond_snack?.protein || 0),
               carbs: (dailyPlan.meals.ontbijt?.carbs || 0) + 
                     (dailyPlan.meals.snack1?.carbs || dailyPlan.meals.ochtend_snack?.carbs || 0) +
                     (dailyPlan.meals.lunch?.carbs || 0) + 
                     (dailyPlan.meals.snack2?.carbs || dailyPlan.meals.lunch_snack?.carbs || 0) +
                     (dailyPlan.meals.diner?.carbs || 0) + 
-                    (dailyPlan.meals.avond_snack?.carbs || 0),
+                    (dailyPlan.meals.avondsnack?.carbs || dailyPlan.meals.avond_snack?.carbs || 0),
               fat: (dailyPlan.meals.ontbijt?.fat || 0) + 
                   (dailyPlan.meals.snack1?.fat || dailyPlan.meals.ochtend_snack?.fat || 0) +
                   (dailyPlan.meals.lunch?.fat || 0) + 
                   (dailyPlan.meals.snack2?.fat || dailyPlan.meals.lunch_snack?.fat || 0) +
                   (dailyPlan.meals.diner?.fat || 0) + 
-                  (dailyPlan.meals.avond_snack?.fat || 0)
+                    (dailyPlan.meals.avondsnack?.fat || dailyPlan.meals.avond_snack?.fat || 0)
             }
           };
         }
@@ -416,31 +416,32 @@ export async function PUT(request: NextRequest) {
             lunch: createMealObject(dailyPlan.meals.lunch, '12:00'),
             lunch_snack: createMealObject(dailyPlan.meals.snack2, '15:00'),
             diner: createMealObject(dailyPlan.meals.diner, '18:00'),
+            avond_snack: createMealObject(dailyPlan.meals.avondsnack, '21:30'),
             dailyTotals: {
               calories: (dailyPlan.meals.ontbijt?.calories || 0) + 
                        (dailyPlan.meals.snack1?.calories || dailyPlan.meals.ochtend_snack?.calories || 0) +
                        (dailyPlan.meals.lunch?.calories || 0) + 
                        (dailyPlan.meals.snack2?.calories || dailyPlan.meals.lunch_snack?.calories || 0) +
                        (dailyPlan.meals.diner?.calories || 0) + 
-                       (dailyPlan.meals.avond_snack?.calories || 0),
+                       (dailyPlan.meals.avondsnack?.calories || dailyPlan.meals.avond_snack?.calories || 0),
               protein: (dailyPlan.meals.ontbijt?.protein || 0) + 
                       (dailyPlan.meals.snack1?.protein || dailyPlan.meals.ochtend_snack?.protein || 0) +
                       (dailyPlan.meals.lunch?.protein || 0) + 
                       (dailyPlan.meals.snack2?.protein || dailyPlan.meals.lunch_snack?.protein || 0) +
                       (dailyPlan.meals.diner?.protein || 0) + 
-                      (dailyPlan.meals.avond_snack?.protein || 0),
+                      (dailyPlan.meals.avondsnack?.protein || dailyPlan.meals.avond_snack?.protein || 0),
               carbs: (dailyPlan.meals.ontbijt?.carbs || 0) + 
                     (dailyPlan.meals.snack1?.carbs || dailyPlan.meals.ochtend_snack?.carbs || 0) +
                     (dailyPlan.meals.lunch?.carbs || 0) + 
                     (dailyPlan.meals.snack2?.carbs || dailyPlan.meals.lunch_snack?.carbs || 0) +
                     (dailyPlan.meals.diner?.carbs || 0) + 
-                    (dailyPlan.meals.avond_snack?.carbs || 0),
+                    (dailyPlan.meals.avondsnack?.carbs || dailyPlan.meals.avond_snack?.carbs || 0),
               fat: (dailyPlan.meals.ontbijt?.fat || 0) + 
                   (dailyPlan.meals.snack1?.fat || dailyPlan.meals.ochtend_snack?.fat || 0) +
                   (dailyPlan.meals.lunch?.fat || 0) + 
                   (dailyPlan.meals.snack2?.fat || dailyPlan.meals.lunch_snack?.fat || 0) +
                   (dailyPlan.meals.diner?.fat || 0) + 
-                  (dailyPlan.meals.avond_snack?.fat || 0)
+                    (dailyPlan.meals.avondsnack?.fat || dailyPlan.meals.avond_snack?.fat || 0)
             }
           };
         }
