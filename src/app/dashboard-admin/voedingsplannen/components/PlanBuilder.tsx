@@ -175,11 +175,11 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
           theme: 'Training Dag',
           focus: 'protein',
           meals: {
-            ontbijt: { name: 'Ontbijt', calories: 0, protein: 0, carbs: 0, fat: 0, suggestions: [] },
-            snack1: { name: 'Ochtend Snack', calories: 0, protein: 0, carbs: 0, fat: 0, suggestions: [] },
-            lunch: { name: 'Lunch', calories: 0, protein: 0, carbs: 0, fat: 0, suggestions: [] },
-            snack2: { name: 'Middag Snack', calories: 0, protein: 0, carbs: 0, fat: 0, suggestions: [] },
-            diner: { name: 'Diner', calories: 0, protein: 0, carbs: 0, fat: 0, suggestions: [] }
+            ontbijt: { name: 'Ontbijt', calories: 0, protein: 0, carbs: 0, fat: 0, suggestions: [], ingredients: [] },
+            snack1: { name: 'Ochtend Snack', calories: 0, protein: 0, carbs: 0, fat: 0, suggestions: [], ingredients: [] },
+            lunch: { name: 'Lunch', calories: 0, protein: 0, carbs: 0, fat: 0, suggestions: [], ingredients: [] },
+            snack2: { name: 'Middag Snack', calories: 0, protein: 0, carbs: 0, fat: 0, suggestions: [], ingredients: [] },
+            diner: { name: 'Diner', calories: 0, protein: 0, carbs: 0, fat: 0, suggestions: [], ingredients: [] }
           }
         };
       }
@@ -231,27 +231,32 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
           ontbijt: {
             name: dayData.ontbijt?.length > 0 ? 'Carnivoor Ontbijt' : 'Ontbijt',
             ...ontbijtNutrition,
-            suggestions: convertToSuggestions(dayData.ontbijt || [])
+            suggestions: convertToSuggestions(dayData.ontbijt || []),
+            ingredients: dayData.ontbijt || []
           },
           snack1: {
             name: dayData.ochtend_snack?.length > 0 ? 'Ochtend Snack' : 'Ochtend Snack',
             ...ochtendSnackNutrition,
-            suggestions: convertToSuggestions(dayData.ochtend_snack || [])
+            suggestions: convertToSuggestions(dayData.ochtend_snack || []),
+            ingredients: dayData.ochtend_snack || []
           },
           lunch: {
             name: dayData.lunch?.length > 0 ? 'Carnivoor Lunch' : 'Lunch',
             ...lunchNutrition,
-            suggestions: convertToSuggestions(dayData.lunch || [])
+            suggestions: convertToSuggestions(dayData.lunch || []),
+            ingredients: dayData.lunch || []
           },
           snack2: {
             name: dayData.lunch_snack?.length > 0 ? 'Lunch Snack' : 'Middag Snack',
             ...lunchSnackNutrition,
-            suggestions: convertToSuggestions(dayData.lunch_snack || [])
+            suggestions: convertToSuggestions(dayData.lunch_snack || []),
+            ingredients: dayData.lunch_snack || []
           },
           diner: {
             name: dayData.diner?.length > 0 ? 'Carnivoor Diner' : 'Diner',
             ...dinerNutrition,
-            suggestions: convertToSuggestions(dayData.diner || [])
+            suggestions: convertToSuggestions(dayData.diner || []),
+            ingredients: dayData.diner || []
           }
         }
       };
@@ -275,8 +280,10 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
       if (!existingDailyPlans && (plan as any).meals && (plan as any).meals.weekly_plan) {
         console.log('📊 PlanBuilder: Found weekly_plan in plan meals, converting to daily_plans');
         console.log('📅 PlanBuilder: Weekly plan data:', (plan as any).meals.weekly_plan);
+        console.log('🔍 PlanBuilder: Monday ingredients before conversion:', (plan as any).meals.weekly_plan.monday?.ontbijt);
         existingDailyPlans = convertWeeklyPlanToDailyPlans((plan as any).meals.weekly_plan);
         console.log('✅ PlanBuilder: Converted to daily_plans:', existingDailyPlans);
+        console.log('🔍 PlanBuilder: Monday ontbijt after conversion:', existingDailyPlans[0]?.meals?.ontbijt);
       } else if (!existingDailyPlans) {
         console.log('📋 PlanBuilder: No existing daily_plans, generating defaults');
         existingDailyPlans = generateDefaultDailyPlans();
@@ -340,7 +347,8 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
           protein: Math.round((formData.target_protein || 165) * 0.25),
           carbs: Math.round((formData.target_carbs || 220) * 0.25),
           fat: Math.round((formData.target_fat || 73) * 0.25),
-          suggestions: getMealSuggestions(formData.name, 'ontbijt', focuses[index])
+          suggestions: getMealSuggestions(formData.name, 'ontbijt', focuses[index]),
+          ingredients: []
         },
         snack1: {
           name: `${themes[index]} Snack`,
@@ -348,7 +356,8 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
           protein: Math.round((formData.target_protein || 165) * 0.10),
           carbs: Math.round((formData.target_carbs || 220) * 0.10),
           fat: Math.round((formData.target_fat || 73) * 0.10),
-          suggestions: getMealSuggestions(formData.name, 'snack', focuses[index])
+          suggestions: getMealSuggestions(formData.name, 'snack', focuses[index]),
+          ingredients: []
         },
         lunch: {
           name: `${themes[index]} Lunch`,
@@ -356,7 +365,8 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
           protein: Math.round((formData.target_protein || 165) * 0.30),
           carbs: Math.round((formData.target_carbs || 220) * 0.30),
           fat: Math.round((formData.target_fat || 73) * 0.30),
-          suggestions: getMealSuggestions(formData.name, 'lunch', focuses[index])
+          suggestions: getMealSuggestions(formData.name, 'lunch', focuses[index]),
+          ingredients: []
         },
         snack2: {
           name: `${themes[index]} Snack`,
@@ -364,7 +374,8 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
           protein: Math.round((formData.target_protein || 165) * 0.10),
           carbs: Math.round((formData.target_carbs || 220) * 0.10),
           fat: Math.round((formData.target_fat || 73) * 0.10),
-          suggestions: getMealSuggestions(formData.name, 'snack', focuses[index])
+          suggestions: getMealSuggestions(formData.name, 'snack', focuses[index]),
+          ingredients: []
         },
         diner: {
           name: `${themes[index]} Diner`,
@@ -372,7 +383,8 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
           protein: Math.round((formData.target_protein || 165) * 0.25),
           carbs: Math.round((formData.target_carbs || 220) * 0.25),
           fat: Math.round((formData.target_fat || 73) * 0.25),
-          suggestions: getMealSuggestions(formData.name, 'diner', focuses[index])
+          suggestions: getMealSuggestions(formData.name, 'diner', focuses[index]),
+          ingredients: []
         }
       }
     }));
@@ -455,27 +467,38 @@ export default function PlanBuilder({ isOpen, onClose, plan, onSave }: PlanBuild
       const weeklyPlan: any = {};
       const dailyTotals: any = {};
       
+      // Ensure we have all 7 days - fill missing days with empty structure
+      const allDays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+      const dailyPlansMap = new Map();
+      
+      // Create map of existing daily plans
       formData.daily_plans?.forEach(dayPlan => {
-        const dayKey = dayPlan.day;
+        dailyPlansMap.set(dayPlan.day, dayPlan);
+      });
+      
+      // Process all 7 days, creating empty structure for missing days
+      allDays.forEach(dayKey => {
+        const dayPlan = dailyPlansMap.get(dayKey) || {
+          day: dayKey,
+          theme: 'Training Dag',
+          focus: 'protein',
+          meals: {
+            ontbijt: { ingredients: [], calories: 0, protein: 0, carbs: 0, fat: 0 },
+            snack1: { ingredients: [], calories: 0, protein: 0, carbs: 0, fat: 0 },
+            lunch: { ingredients: [], calories: 0, protein: 0, carbs: 0, fat: 0 },
+            snack2: { ingredients: [], calories: 0, protein: 0, carbs: 0, fat: 0 },
+            diner: { ingredients: [], calories: 0, protein: 0, carbs: 0, fat: 0 }
+          }
+        };
         
-        // Map meal types from UI to database format
-        const dayMeals: any = {};
-        
-        if (dayPlan.meals.ontbijt?.ingredients && dayPlan.meals.ontbijt.ingredients.length > 0) {
-          dayMeals.ontbijt = dayPlan.meals.ontbijt.ingredients;
-        }
-        if (dayPlan.meals.snack1?.ingredients && dayPlan.meals.snack1.ingredients.length > 0) {
-          dayMeals.ochtend_snack = dayPlan.meals.snack1.ingredients;
-        }
-        if (dayPlan.meals.lunch?.ingredients && dayPlan.meals.lunch.ingredients.length > 0) {
-          dayMeals.lunch = dayPlan.meals.lunch.ingredients;
-        }
-        if (dayPlan.meals.snack2?.ingredients && dayPlan.meals.snack2.ingredients.length > 0) {
-          dayMeals.lunch_snack = dayPlan.meals.snack2.ingredients;
-        }
-        if (dayPlan.meals.diner?.ingredients && dayPlan.meals.diner.ingredients.length > 0) {
-          dayMeals.diner = dayPlan.meals.diner.ingredients;
-        }
+        // Map meal types from UI to database format - ALWAYS include all meals (even if empty)
+        const dayMeals: any = {
+          ontbijt: dayPlan.meals.ontbijt?.ingredients || [],
+          ochtend_snack: dayPlan.meals.snack1?.ingredients || [],
+          lunch: dayPlan.meals.lunch?.ingredients || [],
+          lunch_snack: dayPlan.meals.snack2?.ingredients || [],
+          diner: dayPlan.meals.diner?.ingredients || []
+        };
         
         // Calculate daily totals
         const totalCalories = (dayPlan.meals.ontbijt?.calories || 0) + 
