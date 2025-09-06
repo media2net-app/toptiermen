@@ -82,9 +82,9 @@ export async function GET(request: NextRequest) {
           name: 'Carnivoor - Spiermassa',
           description: 'Carnivoor dieet geoptimaliseerd voor spiergroei en krachttoename. Verhoogde calorie- en eiwitinname.',
           target_calories: 3260,
-          target_protein: 300, // 3x gewicht (100kg)
-          target_carbs: 335,
-          target_fat: 80,
+          target_protein: 367, // 45% van calories (3260 * 0.45 / 4)
+          target_carbs: 41, // 5% van calories (3260 * 0.05 / 4)
+          target_fat: 181, // 50% van calories (3260 * 0.50 / 9)
           duration_weeks: 12,
           difficulty: 'intermediate',
           goal: 'Spiermassa',
