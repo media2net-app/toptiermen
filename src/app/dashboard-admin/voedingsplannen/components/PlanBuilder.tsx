@@ -327,12 +327,33 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
     daily_plans: []
   });
 
+  // Separate state for macro percentages to avoid calculation conflicts
+  const [macroPercentages, setMacroPercentages] = useState({
+    protein: 0,
+    carbs: 0,
+    fat: 0
+  });
+
   const [activeTab, setActiveTab] = useState('basic');
   const [isLoading, setIsLoading] = useState(false);
   const [selectedDay, setSelectedDay] = useState<string>('maandag');
   const [isMealModalOpen, setIsMealModalOpen] = useState(false);
   const [editingMeal, setEditingMeal] = useState<any>(null);
   const [editingMealType, setEditingMealType] = useState<string>('');
+
+  // Initialize macro percentages when plan is loaded
+  useEffect(() => {
+    if (plan && plan.target_calories && plan.target_protein && plan.target_carbs && plan.target_fat) {
+      const total = (plan.target_protein * 4) + (plan.target_carbs * 4) + (plan.target_fat * 9);
+      if (total > 0) {
+        setMacroPercentages({
+          protein: ((plan.target_protein * 4 / total) * 100),
+          carbs: ((plan.target_carbs * 4 / total) * 100),
+          fat: ((plan.target_fat * 9 / total) * 100)
+        });
+      }
+    }
+  }, [plan]);
 
   // Convert weekly_plan format to daily_plans format
   const convertWeeklyPlanToDailyPlans = (weeklyPlan: any): DailyPlan[] => {
@@ -1198,9 +1219,10 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                   </div>
                   <input
                     type="number"
-                    value={proteinPct.toFixed(1)}
+                    value={macroPercentages.protein.toFixed(1)}
                     onChange={(e) => {
                       const newPercent = parseFloat(e.target.value) || 0;
+                      setMacroPercentages(prev => ({ ...prev, protein: newPercent }));
                       const newProtein = Math.round(((formData.target_calories || 2500) * newPercent / 100) / 4);
                       handleInputChange('target_protein', newProtein);
                     }}
@@ -1221,9 +1243,10 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                   </div>
                   <input
                     type="number"
-                    value={carbsPct.toFixed(1)}
+                    value={macroPercentages.carbs.toFixed(1)}
                     onChange={(e) => {
                       const newPercent = parseFloat(e.target.value) || 0;
+                      setMacroPercentages(prev => ({ ...prev, carbs: newPercent }));
                       const newCarbs = Math.round(((formData.target_calories || 2500) * newPercent / 100) / 4);
                       handleInputChange('target_carbs', newCarbs);
                     }}
@@ -1244,9 +1267,10 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                   </div>
                   <input
                     type="number"
-                    value={fatPct.toFixed(1)}
+                    value={macroPercentages.fat.toFixed(1)}
                     onChange={(e) => {
                       const newPercent = parseFloat(e.target.value) || 0;
+                      setMacroPercentages(prev => ({ ...prev, fat: newPercent }));
                       const newFat = Math.round(((formData.target_calories || 2500) * newPercent / 100) / 9);
                       handleInputChange('target_fat', newFat);
                     }}
@@ -1262,7 +1286,7 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
 
               {/* Macro Total Warning */}
               {(() => {
-                const totalPct = proteinPct + carbsPct + fatPct;
+                const totalPct = macroPercentages.protein + macroPercentages.carbs + macroPercentages.fat;
                 if (Math.abs(totalPct - 100) > 0.1) {
                   return (
                     <div className="bg-[#4A1A1A] border border-[#7F1D1D] rounded-lg p-4 mb-6">
