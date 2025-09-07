@@ -230,7 +230,8 @@ export default function AdminTicketsPage() {
       {/* Tickets Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredTickets.map((ticket) => (
-          <AdminCard key={ticket.id} className="cursor-pointer hover:border-[#8BAE5A]/50" onClick={() => setSelectedTicket(ticket)}>
+          <div key={ticket.id} onClick={() => setSelectedTicket(ticket)} className="cursor-pointer">
+            <AdminCard className="hover:border-[#8BAE5A]/50">
             <div className="space-y-4">
               <div className="flex items-start justify-between">
                 <h3 className="text-lg font-semibold text-white line-clamp-2">{ticket.subject}</h3>
@@ -263,7 +264,8 @@ export default function AdminTicketsPage() {
                 </div>
               </div>
             </div>
-          </AdminCard>
+            </AdminCard>
+          </div>
         ))}
       </div>
 
