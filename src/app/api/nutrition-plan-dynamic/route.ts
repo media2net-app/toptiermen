@@ -316,10 +316,10 @@ export async function GET(request: NextRequest) {
         gender: 'male',
         activity_level: 'moderate',
         fitness_goal: 'spiermassa',
-        target_calories: 2000,
-        target_protein: 150,
-        target_carbs: 200,
-        target_fat: 67,
+        target_calories: planData.target_calories,
+        target_protein: planData.target_protein,
+        target_carbs: planData.target_carbs,
+        target_fat: planData.target_fat,
         is_carnivore: true
       };
     }
