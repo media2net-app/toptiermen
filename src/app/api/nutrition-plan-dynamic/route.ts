@@ -70,13 +70,22 @@ const BASE_CARNIVOOR_DROOGTRAINEN_PLAN = {
       { name: '1 Ei', baseAmount: 3, unit: 'stuks' },
       { name: 'Spek', baseAmount: 50, unit: 'gram' }
     ],
+    ontbijt_snack: [
+      { name: '1 Handje Macadamia Noten', baseAmount: 1, unit: 'handje' }
+    ],
     lunch: [
       { name: 'Kipfilet (Gegrild)', baseAmount: 150, unit: 'gram' },
       { name: '1 Handje Walnoten', baseAmount: 1, unit: 'handje' }
     ],
+    lunch_snack: [
+      { name: '1 Handje Pistachenoten', baseAmount: 1, unit: 'handje' }
+    ],
     diner: [
       { name: 'Ribeye Steak', baseAmount: 200, unit: 'gram' },
       { name: 'Orgaanvlees (Lever)', baseAmount: 50, unit: 'gram' }
+    ],
+    diner_snack: [
+      { name: '1 Handje Macadamia Noten', baseAmount: 1, unit: 'handje' }
     ]
   },
   tuesday: {
@@ -172,7 +181,7 @@ function calculateBasePlanCalories() {
   
   days.forEach(day => {
     const dayPlan = BASE_CARNIVOOR_DROOGTRAINEN_PLAN[day];
-    ['ontbijt', 'lunch', 'diner'].forEach(mealType => {
+    ['ontbijt', 'lunch', 'diner', 'ontbijt_snack', 'lunch_snack', 'diner_snack'].forEach(mealType => {
       dayPlan[mealType].forEach(ingredient => {
         const nutritionData = CARNIVOOR_INGREDIENTS[ingredient.name];
         if (nutritionData) {
@@ -311,28 +320,35 @@ export async function GET(request: NextRequest) {
       const dayPlan = BASE_CARNIVOOR_DROOGTRAINEN_PLAN[day];
       scaledPlan[day] = {};
       
-      ['ontbijt', 'lunch', 'diner'].forEach(mealType => {
-        const scaledIngredients = scaleIngredientAmounts(dayPlan[mealType], scaleFactor);
-        const mealNutrition = calculateMealNutrition(scaledIngredients);
-        
-        scaledPlan[day][mealType] = {
-          ingredients: scaledIngredients,
-          nutrition: mealNutrition
-        };
+      // Process all 6 meal types including snacks
+      const mealTypes = ['ontbijt', 'lunch', 'diner', 'ontbijt_snack', 'lunch_snack', 'diner_snack'];
+      
+      mealTypes.forEach(mealType => {
+        if (dayPlan[mealType]) {
+          const scaledIngredients = scaleIngredientAmounts(dayPlan[mealType], scaleFactor);
+          const mealNutrition = calculateMealNutrition(scaledIngredients);
+          
+          scaledPlan[day][mealType] = {
+            ingredients: scaledIngredients,
+            nutrition: mealNutrition
+          };
+        }
       });
       
-      // Calculate daily totals
+      // Calculate daily totals including all meals and snacks
       let dailyCalories = 0;
       let dailyProtein = 0;
       let dailyCarbs = 0;
       let dailyFat = 0;
       
-      ['ontbijt', 'lunch', 'diner'].forEach(mealType => {
+      mealTypes.forEach(mealType => {
         const meal = scaledPlan[day][mealType];
-        dailyCalories += meal.nutrition.calories;
-        dailyProtein += meal.nutrition.protein;
-        dailyCarbs += meal.nutrition.carbs;
-        dailyFat += meal.nutrition.fat;
+        if (meal && meal.nutrition) {
+          dailyCalories += meal.nutrition.calories;
+          dailyProtein += meal.nutrition.protein;
+          dailyCarbs += meal.nutrition.carbs;
+          dailyFat += meal.nutrition.fat;
+        }
       });
       
       scaledPlan[day].dailyTotals = {
