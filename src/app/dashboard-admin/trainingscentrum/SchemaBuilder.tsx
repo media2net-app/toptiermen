@@ -308,11 +308,13 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
       day.day_number = index + 1;
     });
 
-    console.log('✅ Day order updated:', newOrder.map(d => d.name));
+    console.log('✅ Day order updated:', newOrder.map((d, i) => `${i + 1}: ${d.name} (day_number: ${d.day_number})`));
     setTempDayOrder(newOrder);
   };
 
   const saveDayOrder = () => {
+    console.log('💾 Saving day order:', tempDayOrder.map((d, i) => `${i + 1}: ${d.name} (day_number: ${d.day_number})`));
+    
     setFormData(prev => ({
       ...prev,
       days: tempDayOrder
@@ -558,7 +560,12 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
       // Save days
       for (let i = 0; i < formData.days.length; i++) {
         const day = formData.days[i];
-        console.log(`Saving day ${i + 1}:`, day);
+        console.log(`Saving day ${i + 1}:`, {
+          id: day.id,
+          day_number: day.day_number,
+          name: day.name,
+          exercises_count: day.exercises.length
+        });
 
         const { data: dayData, error: dayError } = await supabase
           .from('training_schema_days')
