@@ -34,9 +34,9 @@ function VideoPlayer({ src, poster }: VideoPlayerProps) {
     if (retryCount < 2) {
       // Try alternative video sources
       const alternatives = [
-        '/platform-preview.mp4',
         '/welkom-v2.MP4',
-        '/welkom.MP4'
+        '/welkom.MP4',
+        '/testgebruikers-v2.mp4'
       ];
       
       const nextSrc = alternatives[retryCount + 1];
@@ -179,7 +179,7 @@ export default function SneakPreviewPage() {
             {/* Video Section */}
             <div className="mb-16">
               <VideoPlayer 
-                src="/platform-preview.mp4"
+                src="/welkom-v2.MP4"
                 poster="/platform-preview.png"
               />
             </div>
