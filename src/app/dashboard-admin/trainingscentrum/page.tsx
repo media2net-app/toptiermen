@@ -289,6 +289,7 @@ export default function TrainingscentrumBeheer() {
   const [videoErrors, setVideoErrors] = useState<Set<number>>(new Set());
   const [thumbnailLoadingStarted, setThumbnailLoadingStarted] = useState(false);
   const [showVideoLoadingOverlay, setShowVideoLoadingOverlay] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -328,57 +329,59 @@ export default function TrainingscentrumBeheer() {
     setLoadingSchemas(true);
     setErrorSchemas(null);
     
-    const maxRetries = 3;
-    const retryDelay = 1000 * (retryCount + 1); // Exponential backoff
+    const maxRetries = 2; // Reduced retries for faster failure
+    const retryDelay = 500 * (retryCount + 1); // Faster retry
     
     try {
       console.log(`🔄 Fetching training schemas (attempt ${retryCount + 1}/${maxRetries + 1})...`);
       
-      const { data, error } = await supabase
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Request timeout')), 10000)
+      );
+      
+      const fetchPromise = supabase
         .from('training_schemas')
         .select(`*,training_schema_days (id,day_number,name,training_schema_exercises (id,exercise_id,exercise_name,sets,reps,rest_time,order_index))`)
         .order('created_at', { ascending: false });
+      
+      const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
         
       if (error) {
         console.error('❌ Error fetching schemas:', error);
-        
-        if (retryCount < maxRetries) {
-          console.log(`⏳ Retrying in ${retryDelay}ms...`);
-          setTimeout(() => fetchSchemas(retryCount + 1), retryDelay);
-          return;
-        }
-        
-        setErrorSchemas('Fout bij het laden van trainingsschema\'s');
-        toast.error('Fout bij het laden van trainingsschema\'s');
-      } else {
-        console.log(`✅ Successfully fetched ${data?.length || 0} training schemas`);
-        
-        // Sort schemas by number of days (ascending) and sort days within each schema by day_number
-        const sortedSchemas = (data || []).map(schema => ({
-          ...schema,
-          training_schema_days: (schema.training_schema_days || []).sort((a, b) => (a.day_number || 0) - (b.day_number || 0))
-        })).sort((a, b) => {
-          const daysA = a.training_schema_days?.length || 0;
-          const daysB = b.training_schema_days?.length || 0;
-          return daysA - daysB;
-        });
-        setSchemas(sortedSchemas);
+        throw error;
       }
+      
+      console.log(`✅ Successfully fetched ${data?.length || 0} training schemas`);
+      
+      // Sort schemas by number of days (ascending) and sort days within each schema by day_number
+      const sortedSchemas = (data || []).map(schema => ({
+        ...schema,
+        training_schema_days: (schema.training_schema_days || []).sort((a, b) => (a.day_number || 0) - (b.day_number || 0))
+      })).sort((a, b) => {
+        const daysA = a.training_schema_days?.length || 0;
+        const daysB = b.training_schema_days?.length || 0;
+        return daysA - daysB;
+      });
+      
+      setSchemas(sortedSchemas);
+      setErrorSchemas(null);
+      
     } catch (err) {
       console.error('❌ Exception fetching schemas:', err);
       
       if (retryCount < maxRetries) {
         console.log(`⏳ Retrying in ${retryDelay}ms...`);
-        setTimeout(() => fetchSchemas(retryCount + 1), retryDelay);
-        return;
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
+        return fetchSchemas(retryCount + 1);
       }
       
-      setErrorSchemas('Fout bij het laden van trainingsschema\'s');
-      toast.error('Fout bij het laden van trainingsschema\'s');
+      const errorMessage = 'Fout bij het laden van trainingsschema\'s';
+      setErrorSchemas(errorMessage);
+      toast.error(errorMessage);
+      throw err; // Re-throw to be caught by parent
     } finally {
-      if (retryCount === 0 || retryCount === maxRetries) {
-        setLoadingSchemas(false);
-      }
+      setLoadingSchemas(false);
     }
   }, []);
 
@@ -437,24 +440,52 @@ export default function TrainingscentrumBeheer() {
     }
   }, []);
 
-  // Load data when component mounts - parallel loading for better performance
+  // Load data when component mounts - improved error handling and retry logic
   useEffect(() => {
-    if (mounted) {
-      console.log('🚀 Starting parallel data loading...');
-      
-      // Load all data in parallel for faster loading
-      Promise.all([
+    if (!mounted) return;
+    
+    console.log('🚀 Starting data loading...');
+    
+    const loadData = async () => {
+      try {
+        // Load data sequentially to avoid overwhelming the database
+        console.log('📊 Loading exercises...');
+        await fetchExercises();
+        
+        console.log('📋 Loading schemas...');
+        await fetchSchemas();
+        
+        console.log('📈 Loading stats...');
+        await fetchStats();
+        
+        console.log('✅ All data loaded successfully');
+      } catch (error) {
+        console.error('❌ Error loading data:', error);
+        toast.error('Fout bij het laden van data. Probeer de pagina te verversen.');
+      }
+    };
+    
+    loadData();
+  }, [mounted, fetchExercises, fetchSchemas, fetchStats]);
+
+  // Manual refresh function
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      console.log('🔄 Manual refresh triggered...');
+      await Promise.all([
         fetchExercises(),
         fetchSchemas(),
         fetchStats()
-      ]).then(() => {
-        console.log('✅ All data loaded successfully');
-      }).catch((error) => {
-        console.error('❌ Error loading data:', error);
-        toast.error('Fout bij het laden van data');
-      });
+      ]);
+      toast.success('Data succesvol ververst!');
+    } catch (error) {
+      console.error('❌ Error during refresh:', error);
+      toast.error('Fout bij het verversen van data');
+    } finally {
+      setIsRefreshing(false);
     }
-  }, [mounted, fetchExercises, fetchSchemas, fetchStats]);
+  };
 
   // Lazy load thumbnails one by one - only for exercises with videos
   useEffect(() => {
@@ -904,16 +935,26 @@ export default function TrainingscentrumBeheer() {
                 ))}
               </select>
             </div>
-            <AdminButton
-              onClick={() => { 
-                console.log('Open SchemaBuilder modal');
-                setShowNewSchemaModal(true);
-              }}
-              variant="primary"
-              icon={<PlusIcon className="w-5 h-5" />}
-            >
-              Nieuw Trainingsschema
-            </AdminButton>
+            <div className="flex gap-3">
+              <AdminButton
+                onClick={handleRefresh}
+                variant="secondary"
+                icon={<ArrowPathIcon className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />}
+                disabled={isRefreshing}
+              >
+                {isRefreshing ? 'Verversen...' : 'Verversen'}
+              </AdminButton>
+              <AdminButton
+                onClick={() => { 
+                  console.log('Open SchemaBuilder modal');
+                  setShowNewSchemaModal(true);
+                }}
+                variant="primary"
+                icon={<PlusIcon className="w-5 h-5" />}
+              >
+                Nieuw Trainingsschema
+              </AdminButton>
+            </div>
           </div>
 
           {/* Schemas Table */}
