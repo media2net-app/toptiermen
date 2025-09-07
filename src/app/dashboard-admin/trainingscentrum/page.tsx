@@ -336,7 +336,7 @@ export default function TrainingscentrumBeheer() {
       console.log(`🔄 Fetching training schemas (attempt ${retryCount + 1}/${maxRetries + 1})...`);
       
       // Add timeout to prevent hanging
-      const timeoutPromise = new Promise((_, reject) => 
+      const timeoutPromise = new Promise<never>((_, reject) => 
         setTimeout(() => reject(new Error('Request timeout')), 10000)
       );
       
@@ -345,7 +345,8 @@ export default function TrainingscentrumBeheer() {
         .select(`*,training_schema_days (id,day_number,name,training_schema_exercises (id,exercise_id,exercise_name,sets,reps,rest_time,order_index))`)
         .order('created_at', { ascending: false });
       
-      const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
+      const result = await Promise.race([fetchPromise, timeoutPromise]);
+      const { data, error } = result;
         
       if (error) {
         console.error('❌ Error fetching schemas:', error);
