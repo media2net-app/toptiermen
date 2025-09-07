@@ -338,8 +338,8 @@ export async function GET(request: NextRequest) {
     const basePlanCalories = calculateBasePlanCaloriesFromDatabase(basePlan);
     console.log('📊 Base plan average daily calories:', basePlanCalories);
 
-    // Calculate scale factor
-    const scaleFactor = profile.target_calories / basePlanCalories;
+    // Calculate scale factor - use plan target calories, not user profile
+    const scaleFactor = planData.target_calories / basePlanCalories;
     console.log('⚖️ Scale factor:', scaleFactor.toFixed(2));
 
     // Generate scaled meal plan
@@ -455,15 +455,25 @@ export async function GET(request: NextRequest) {
 function calculateBasePlanCaloriesFromDatabase(basePlan) {
   const days = Object.keys(basePlan);
   let totalCalories = 0;
+  let daysWithData = 0;
   
   days.forEach(day => {
     const dayPlan = basePlan[day];
+    let dayCalories = 0;
+    
     ['ontbijt', 'lunch', 'diner', 'avondsnack'].forEach(mealType => {
       if (dayPlan[mealType] && dayPlan[mealType].calories) {
-        totalCalories += dayPlan[mealType].calories;
+        dayCalories += dayPlan[mealType].calories;
       }
     });
+    
+    // Only count days that have actual data (calories > 0)
+    if (dayCalories > 0) {
+      totalCalories += dayCalories;
+      daysWithData++;
+    }
   });
   
-  return totalCalories / days.length;
+  // Return average of days with data, or 0 if no days have data
+  return daysWithData > 0 ? totalCalories / daysWithData : 0;
 }
