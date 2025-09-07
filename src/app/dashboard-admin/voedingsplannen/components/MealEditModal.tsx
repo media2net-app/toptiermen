@@ -188,8 +188,8 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
       // Database values are now per handje (25g), so use amount directly
       factor = amount;
     } else if (ingredient.unit_type === 'per_30g') {
-      // Database values are now per 30g, so use amount directly
-      factor = amount;
+      // Database values are per 30g, so calculate factor based on 30g units
+      factor = amount / 30;
     } else {
       // per_100g: amount is already in grams
       factor = amount / 100;
@@ -199,13 +199,22 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
     // So we need to handle this differently
     let result;
     
-    if (ingredient.unit_type === 'per_piece' || ingredient.unit_type === 'per_handful' || ingredient.unit_type === 'per_30g') {
+    if (ingredient.unit_type === 'per_piece' || ingredient.unit_type === 'per_handful') {
       // Database values are already per piece/handje, so multiply by amount directly
       result = {
         calories: Math.round((ingredient.calories_per_100g || 0) * amount),
         protein: Math.round(((ingredient.protein_per_100g || 0) * amount) * 10) / 10,
         carbs: Math.round(((ingredient.carbs_per_100g || 0) * amount) * 10) / 10,
         fat: Math.round(((ingredient.fat_per_100g || 0) * amount) * 10) / 10
+      };
+    } else if (ingredient.unit_type === 'per_30g') {
+      // Database values are per 30g, so calculate based on amount in grams
+      const factor = amount / 30; // Convert grams to 30g units
+      result = {
+        calories: Math.round((ingredient.calories_per_100g || 0) * factor),
+        protein: Math.round(((ingredient.protein_per_100g || 0) * factor) * 10) / 10,
+        carbs: Math.round(((ingredient.carbs_per_100g || 0) * factor) * 10) / 10,
+        fat: Math.round(((ingredient.fat_per_100g || 0) * factor) * 10) / 10
       };
     } else {
       // For other unit types, use the factor calculation

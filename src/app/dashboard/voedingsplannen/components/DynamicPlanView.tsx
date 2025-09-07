@@ -700,6 +700,9 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
           multiplier = ingredient.amount;
         } else if (ingredient.unit === 'ml') {
           multiplier = ingredient.amount / 100;
+        } else if (ingredient.name.toLowerCase().includes('whey') || ingredient.name.toLowerCase().includes('protein')) {
+          // Whey protein is per 30g, so calculate based on 30g units
+          multiplier = ingredient.amount / 30;
         } else {
           // gram
           multiplier = ingredient.amount / 100;
