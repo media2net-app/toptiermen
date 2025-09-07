@@ -271,7 +271,7 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
     if (source.droppableId === 'library') {
       const exerciseId = parseInt(result.draggableId.replace('library-', ''));
       const exercise = exercises.find(e => e.id === exerciseId);
-      const destDayIndex = parseInt(destination.droppableId);
+      const destDayIndex = parseInt(destination.droppableId.replace('day-', ''));
       const destExerciseIndex = destination.index;
 
       console.log('📚 Dragging from library:');
@@ -316,8 +316,8 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
       return;
     }
 
-    const sourceDayIndex = parseInt(source.droppableId);
-    const destDayIndex = parseInt(destination.droppableId);
+    const sourceDayIndex = parseInt(source.droppableId.replace('day-', ''));
+    const destDayIndex = parseInt(destination.droppableId.replace('day-', ''));
     const sourceExerciseIndex = source.index;
     const destExerciseIndex = destination.index;
 
@@ -696,7 +696,7 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
                     </div>
 
                     {/* Exercises in this day */}
-                    <Droppable droppableId={dayIndex.toString()}>
+                    <Droppable droppableId={`day-${dayIndex}`}>
                       {(provided, snapshot) => (
                         <div
                           ref={provided.innerRef}
@@ -715,8 +715,8 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
                           
                           {day.exercises.map((exercise, exerciseIndex) => (
                             <Draggable
-                              key={`${dayIndex}-${exerciseIndex}`}
-                              draggableId={`${dayIndex}-${exerciseIndex}`}
+                              key={`day-${dayIndex}-exercise-${exerciseIndex}`}
+                              draggableId={`day-${dayIndex}-exercise-${exerciseIndex}`}
                               index={exerciseIndex}
                             >
                               {(provided, snapshot) => (
