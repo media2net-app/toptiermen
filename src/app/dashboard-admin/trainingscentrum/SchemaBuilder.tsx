@@ -917,6 +917,7 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
                             className={`p-3 bg-gray-800 rounded border cursor-grab active:cursor-grabbing ${
                               snapshot.isDragging ? 'shadow-lg transform rotate-2' : 'hover:bg-gray-700'
                             } ${formData.days.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            onClick={() => showDaySelectorForExercise(exercise)}
                           >
                             <div className="font-medium text-white">{exercise.name}</div>
                             <div className="text-sm text-gray-400">{exercise.primary_muscle}</div>
