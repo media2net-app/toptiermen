@@ -1925,12 +1925,16 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                       );
                     })()}
                     <div className="mt-3 text-center">
-                      <div className="text-[#8BAE5A] text-sm font-semibold">
-                        🥩 100% Carnivor Animal Based Compliant
-                      </div>
-                      <div className="text-[#B6C948] text-xs">
-                        Orgaanvlees • Vette vis • Dierlijke vetten • Beperkte koolhydraten
-                      </div>
+                      {plan?.name?.toLowerCase().includes('carnivoor') && (
+                        <>
+                          <div className="text-[#8BAE5A] text-sm font-semibold">
+                            🥩 100% Carnivor Animal Based Compliant
+                          </div>
+                          <div className="text-[#B6C948] text-xs">
+                            Orgaanvlees • Vette vis • Dierlijke vetten • Beperkte koolhydraten
+                          </div>
+                        </>
+                      )}
                       <div className="text-[#B6C948] text-xs mt-2">
                         💡 Tip: Wijzig dagelijkse calorieën om portie groottes automatisch aan te passen
                       </div>
