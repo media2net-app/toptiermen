@@ -60,7 +60,11 @@ const CARNIVOOR_INGREDIENTS = {
   '1 Handje Hazelnoten': { calories: 25, protein: 0.6, carbs: 0.7, fat: 2.4 },
   '1 Handje Pecannoten': { calories: 28, protein: 0.4, carbs: 0.6, fat: 2.8 },
   '1 Handje Pistachenoten': { calories: 23, protein: 0.8, carbs: 1.1, fat: 1.8 },
-  '1 Handje Macadamia Noten': { calories: 30, protein: 0.3, carbs: 0.6, fat: 3.0 }
+  '1 Handje Macadamia Noten': { calories: 30, protein: 0.3, carbs: 0.6, fat: 3.0 },
+  
+  // Supplements
+  'Whey Eiwit Shakes': { calories: 120, protein: 25, carbs: 3, fat: 1 },
+  'Whey Protein': { calories: 120, protein: 25, carbs: 3, fat: 1 }
 };
 
 // Basis weekplan voor Carnivoor - Droogtrainen (met verhoudingen)
@@ -239,6 +243,9 @@ function calculateMealNutrition(ingredients) {
       let multiplier = 0;
       
       if (ingredient.unit === 'stuks' && ingredient.name === '1 Ei') {
+        multiplier = ingredient.amount;
+      } else if (ingredient.unit === 'stuks' && (ingredient.name.includes('Whey') || ingredient.name.includes('Protein'))) {
+        // Whey protein is per scoop (stuk)
         multiplier = ingredient.amount;
       } else if (ingredient.unit === 'handje') {
         multiplier = ingredient.amount;

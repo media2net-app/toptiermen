@@ -632,6 +632,10 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
       'Kalkoen': { calories: 135, protein: 30, carbs: 0, fat: 1 },
       'Hummus': { calories: 166, protein: 8, carbs: 14, fat: 10 },
       'Paprika': { calories: 31, protein: 1, carbs: 7, fat: 0.3 },
+      
+      // Supplements
+      'Whey Eiwit Shakes': { calories: 120, protein: 25, carbs: 3, fat: 1 },
+      'Whey Protein': { calories: 120, protein: 25, carbs: 3, fat: 1 },
       'Aardappel': { calories: 77, protein: 2, carbs: 17, fat: 0.1 },
       'Courgette': { calories: 17, protein: 1.2, carbs: 3.1, fat: 0.3 },
       'Kruidenolie': { calories: 884, protein: 0, carbs: 0, fat: 100 },
