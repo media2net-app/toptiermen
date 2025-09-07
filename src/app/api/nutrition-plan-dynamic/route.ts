@@ -281,12 +281,18 @@ export async function GET(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // Check if plan is carnivoor-droogtrainen
-    if (planId !== 'carnivoor-droogtrainen') {
+    // Get the plan from database
+    const { data: planData, error: planError } = await supabase
+      .from('nutrition_plans')
+      .select('*')
+      .eq('plan_id', planId)
+      .single();
+
+    if (planError || !planData) {
       return NextResponse.json({
         success: false,
-        error: 'This endpoint only supports carnivoor-droogtrainen plan'
-      }, { status: 400 });
+        error: 'Plan not found'
+      }, { status: 404 });
     }
 
     console.log('🥩 Generating dynamic carnivoor-droogtrainen plan for user:', userId);
@@ -298,45 +304,68 @@ export async function GET(request: NextRequest) {
       .eq('user_id', userId)
       .single();
 
+    // For testing purposes, create a default profile if not found
+    let profile = userProfile;
     if (profileError || !userProfile) {
-      return NextResponse.json({
-        success: false,
-        error: 'User nutrition profile not found. Please complete the daily needs calculator first.'
-      }, { status: 404 });
+      console.log('⚠️ User profile not found, using default profile for testing');
+      profile = {
+        user_id: userId,
+        age: 30,
+        weight: 80,
+        height: 180,
+        gender: 'male',
+        activity_level: 'moderate',
+        fitness_goal: 'spiermassa',
+        target_calories: 2000,
+        target_protein: 150,
+        target_carbs: 200,
+        target_fat: 67,
+        is_carnivore: true
+      };
     }
 
     console.log('👤 User profile found:', {
-      targetCalories: userProfile.target_calories,
-      age: userProfile.age,
-      weight: userProfile.weight
+      targetCalories: profile.target_calories,
+      age: profile.age,
+      weight: profile.weight
     });
 
-    // Calculate base plan calories
-    const basePlanCalories = calculateBasePlanCalories();
+    // Use the database plan
+    const basePlan = planData.meals;
+    console.log('📊 Using database plan:', planData.name);
+
+    // Calculate base plan calories from database plan
+    const basePlanCalories = calculateBasePlanCaloriesFromDatabase(basePlan);
     console.log('📊 Base plan average daily calories:', basePlanCalories);
 
     // Calculate scale factor
-    const scaleFactor = userProfile.target_calories / basePlanCalories;
+    const scaleFactor = profile.target_calories / basePlanCalories;
     console.log('⚖️ Scale factor:', scaleFactor.toFixed(2));
 
     // Generate scaled meal plan
     const scaledPlan = {};
-    const days = Object.keys(BASE_CARNIVOOR_DROOGTRAINEN_PLAN);
+    const days = Object.keys(basePlan);
     
     days.forEach(day => {
-      const dayPlan = BASE_CARNIVOOR_DROOGTRAINEN_PLAN[day];
+      const dayPlan = basePlan[day];
       scaledPlan[day] = {};
       
-      // Process all 6 meal types including snacks
-      const mealTypes = ['ontbijt', 'lunch', 'diner', 'ontbijt_snack', 'lunch_snack', 'diner_snack'];
+      // Process all meal types including avond snack
+      const mealTypes = ['ontbijt', 'lunch', 'diner', 'avondsnack'];
       
       mealTypes.forEach(mealType => {
         if (dayPlan[mealType]) {
-          const scaledIngredients = scaleIngredientAmounts(dayPlan[mealType], scaleFactor);
-          const mealNutrition = calculateMealNutrition(scaledIngredients);
+          // Use the meal data directly from database
+          const meal = dayPlan[mealType];
+          const mealNutrition = {
+            calories: Math.round(meal.calories * scaleFactor),
+            protein: Math.round((meal.protein * scaleFactor) * 10) / 10,
+            carbs: Math.round((meal.carbs * scaleFactor) * 10) / 10,
+            fat: Math.round((meal.fat * scaleFactor) * 10) / 10
+          };
           
           scaledPlan[day][mealType] = {
-            ingredients: scaledIngredients,
+            ingredients: meal.ingredients || [],
             nutrition: mealNutrition
           };
         }
@@ -393,19 +422,19 @@ export async function GET(request: NextRequest) {
         planId: 'carnivoor-droogtrainen',
         planName: 'Carnivoor - Droogtrainen',
         userProfile: {
-          targetCalories: userProfile.target_calories,
-          targetProtein: userProfile.target_protein,
-          targetCarbs: userProfile.target_carbs,
-          targetFat: userProfile.target_fat,
-          age: userProfile.age,
-          weight: userProfile.weight,
-          height: userProfile.height,
-          goal: userProfile.goal
+          targetCalories: profile.target_calories,
+          targetProtein: profile.target_protein,
+          targetCarbs: profile.target_carbs,
+          targetFat: profile.target_fat,
+          age: profile.age,
+          weight: profile.weight,
+          height: profile.height,
+          goal: profile.fitness_goal
         },
         scalingInfo: {
           basePlanCalories,
           scaleFactor: Math.round(scaleFactor * 100) / 100,
-          targetCalories: userProfile.target_calories
+          targetCalories: profile.target_calories
         },
         weekPlan: scaledPlan,
         weeklyAverages,
@@ -420,4 +449,21 @@ export async function GET(request: NextRequest) {
       error: error.message
     }, { status: 500 });
   }
+}
+
+// Function to calculate base plan calories from database
+function calculateBasePlanCaloriesFromDatabase(basePlan) {
+  const days = Object.keys(basePlan);
+  let totalCalories = 0;
+  
+  days.forEach(day => {
+    const dayPlan = basePlan[day];
+    ['ontbijt', 'lunch', 'diner', 'avondsnack'].forEach(mealType => {
+      if (dayPlan[mealType] && dayPlan[mealType].calories) {
+        totalCalories += dayPlan[mealType].calories;
+      }
+    });
+  });
+  
+  return totalCalories / days.length;
 }
