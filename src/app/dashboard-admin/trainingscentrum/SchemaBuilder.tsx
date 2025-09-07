@@ -258,24 +258,26 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
           description: schema.description,
           category: schema.category,
           difficulty: schema.difficulty,
-          days: schema.days?.map((day: any) => ({
-            id: day.id,
-            schema_id: day.schema_id,
-            day_number: day.day_number,
-            name: day.name,
-            description: day.description,
-            exercises: (day.exercises || [])
-              .sort((a: any, b: any) => (a.order_index ?? 0) - (b.order_index ?? 0))
-              .map((exercise: any) => ({
-                id: exercise.id,
-                exercise_id: exercise.exercise_id,
-                exercise_name: exercise.exercise_name,
-                sets: exercise.sets,
-                reps: exercise.reps,
-                rest_time: exercise.rest_time,
-                order_index: exercise.order_index ?? 0
-              }))
-          })) || [],
+          days: schema.days
+            ?.sort((a: any, b: any) => (a.day_number ?? 0) - (b.day_number ?? 0))
+            ?.map((day: any) => ({
+              id: day.id,
+              schema_id: day.schema_id,
+              day_number: day.day_number,
+              name: day.name,
+              description: day.description,
+              exercises: (day.exercises || [])
+                .sort((a: any, b: any) => (a.order_index ?? 0) - (b.order_index ?? 0))
+                .map((exercise: any) => ({
+                  id: exercise.id,
+                  exercise_id: exercise.exercise_id,
+                  exercise_name: exercise.exercise_name,
+                  sets: exercise.sets,
+                  reps: exercise.reps,
+                  rest_time: exercise.rest_time,
+                  order_index: exercise.order_index ?? 0
+                }))
+            })) || [],
           status: schema.status
         };
         setFormData(transformedSchema);
@@ -623,7 +625,7 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
       addProgressLog(`📅 Starting to save ${formData.days.length} days...`);
       for (let i = 0; i < formData.days.length; i++) {
         const day = formData.days[i];
-        const dayNumber = i + 1; // Ensure day_number starts from 1
+        const dayNumber = day.day_number || (i + 1); // Use day.day_number if set, otherwise use array index + 1
         
         addProgressLog(`💾 Saving day ${dayNumber}: "${day.name}" (${day.exercises.length} exercises)`);
 
