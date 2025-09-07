@@ -86,7 +86,7 @@ export default function VoedingsplannenBackupPage() {
     });
   };
 
-  const calculateDayTotal = (dayPlan: any) => {
+  const calculateDayTotal = (dayPlan: any): { calories: number; protein: number; carbs: number; fat: number } => {
     // Handle new weekly_plan structure
     if (dayPlan.dailyTotals) {
       return {
