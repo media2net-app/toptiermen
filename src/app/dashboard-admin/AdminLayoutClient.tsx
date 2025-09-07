@@ -114,6 +114,7 @@ const SidebarContent = ({ pathname }: { pathname: string }) => {
         { label: 'Ebooks Setup', icon: BookOpenIcon, href: '/dashboard-admin/ebooks-setup', badge: 'NEW' },
         { label: 'Trainingscentrum', icon: FireIcon, href: '/dashboard-admin/trainingscentrum' },
         { label: 'Voedingsplannen', icon: BookOpenIcon, href: '/dashboard-admin/voedingsplannen' },
+        { label: 'Voedingsplannen Backup', icon: DocumentTextIcon, href: '/dashboard-admin/voedingsplannen-backup', badge: 'BACKUP' },
         { label: 'Boekenkamer', icon: BookOpenIcon, href: '/dashboard-admin/boekenkamer' },
         { label: 'Badges & Rangen', icon: StarIcon, href: '/dashboard-admin/badges-rangen' }
       ]

@@ -506,22 +506,32 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
 
         const dayId = dayData.id;
 
-        // Save exercises for this day
+        // First, delete all existing exercises for this day
+        const { error: deleteError } = await supabase
+          .from('training_schema_exercises')
+          .delete()
+          .eq('schema_day_id', dayId);
+
+        if (deleteError) {
+          console.error(`Delete exercises error for day ${i + 1}:`, deleteError);
+          throw new Error(`Delete exercises failed: ${deleteError.message}`);
+        }
+
+        // Then save all current exercises for this day
         for (let j = 0; j < day.exercises.length; j++) {
           const exercise = day.exercises[j];
           console.log(`Saving exercise ${j + 1} for day ${i + 1}:`, exercise);
 
           const { error: exerciseError } = await supabase
             .from('training_schema_exercises')
-            .upsert({
-              id: exercise.id,
+            .insert({
               schema_day_id: dayId,
               exercise_id: exercise.exercise_id,
               exercise_name: exercise.exercise_name,
               sets: exercise.sets,
               reps: exercise.reps,
               rest_time: exercise.rest_time,
-              order_index: exercise.order_index
+              order_index: j // Use array index as order_index
             });
 
           if (exerciseError) {

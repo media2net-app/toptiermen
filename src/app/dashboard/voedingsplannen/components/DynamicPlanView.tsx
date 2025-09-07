@@ -211,7 +211,13 @@ const transformPlanData = (data: any): PlanData => {
         diner: transformMealData(dayData.diner),
         ontbijt_snack: transformMealData(dayData.ochtend_snack),
         lunch_snack: transformMealData(dayData.lunch_snack),
-        diner_snack: transformMealData(dayData.avond_snack)
+        diner_snack: transformMealData(dayData.avond_snack || dayData.avondsnack),
+        dailyTotals: dayData.dailyTotals ? {
+          calories: dayData.dailyTotals.calories || 0,
+          protein: dayData.dailyTotals.protein || 0,
+          carbs: dayData.dailyTotals.carbs || 0,
+          fat: dayData.dailyTotals.fat || 0
+        } : undefined
       };
     }
   });
@@ -223,7 +229,10 @@ const transformPlanData = (data: any): PlanData => {
       transformedWeekPlan[day] = {
         ontbijt: { ingredients: [], nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0 } },
         lunch: { ingredients: [], nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0 } },
-        diner: { ingredients: [], nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0 } }
+        diner: { ingredients: [], nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0 } },
+        ontbijt_snack: { ingredients: [], nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0 } },
+        lunch_snack: { ingredients: [], nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0 } },
+        diner_snack: { ingredients: [], nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0 } }
       };
     }
   });
@@ -331,10 +340,10 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
       const dayPlan = planData.weekPlan[day];
       
       if (dayPlan) {
-        // Recalculate daily totals for each day
-        const dailyTotals = calculateDailyTotals(dayPlan);
+        // Use existing dailyTotals from API if available, otherwise calculate
+        const dailyTotals = dayPlan.dailyTotals || calculateDailyTotals(dayPlan);
         
-        // Update the daily totals in the plan
+        // Update the daily totals in the plan (preserve API values)
         dayPlan.dailyTotals = dailyTotals;
         
         // Only count days with actual calories
@@ -412,7 +421,7 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
       // If no customized plan, load the default plan data
       console.log('🆕 No customized plan found, loading default plan data');
       
-      const response = await fetch(`/api/nutrition-plan-simple?planId=${planId}&userId=${userId}`);
+      const response = await fetch(`/api/nutrition-plan-dynamic?planId=${planId}&userId=${userId}`);
       
       if (!response.ok) {
         const errorData = await response.json();
