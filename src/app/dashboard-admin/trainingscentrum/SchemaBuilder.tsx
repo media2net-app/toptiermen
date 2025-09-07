@@ -8,7 +8,6 @@ import {
   ArrowsUpDownIcon,
   Bars3Icon
 } from '@heroicons/react/24/outline';
-import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import {
   DndContext,
   closestCenter,
@@ -17,6 +16,7 @@ import {
   useSensor,
   useSensors,
   DragEndEvent,
+  DragOverEvent,
 } from '@dnd-kit/core';
 import {
   arrayMove,
@@ -25,6 +25,7 @@ import {
   verticalListSortingStrategy,
   useSortable,
 } from '@dnd-kit/sortable';
+import { useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'react-hot-toast';
@@ -363,148 +364,20 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
     }));
   };
 
-  const handleDragEnd = (result: DropResult) => {
-    console.log('🎯 Drag end result:', result);
-    const { source, destination } = result;
 
-    // Dropped outside the list
-    if (!destination) {
+  // Simplified drag end handler for @dnd-kit
+  const handleExerciseDragEnd = (event: DragEndEvent) => {
+    console.log('🎯 Exercise drag end event:', event);
+    const { active, over } = event;
+
+    if (!over) {
       console.log('❌ No destination - drag cancelled');
       return;
     }
 
-    // Check if we have any days
-    if (formData.days.length === 0) {
-      console.log('❌ No days available for drag and drop');
-      return;
-    }
-
-    console.log('📊 Source:', source);
-    console.log('📍 Destination:', destination);
-    console.log('📋 Form data days:', formData.days.length);
-
-
-    // Check if dragging from library
-    if (source.droppableId === 'library') {
-      const exerciseId = parseInt(result.draggableId.replace('library-', ''));
-      const exercise = exercises.find(e => e.id === exerciseId);
-      const destDayIndex = parseInt(destination.droppableId.replace('day-', ''));
-      const destExerciseIndex = destination.index;
-
-      console.log('📚 Dragging from library:');
-      console.log('  - Exercise ID:', exerciseId);
-      console.log('  - Exercise found:', !!exercise);
-      console.log('  - Dest day index:', destDayIndex);
-      console.log('  - Dest exercise index:', destExerciseIndex);
-
-      // Validate destination day index
-      if (isNaN(destDayIndex) || destDayIndex < 0 || destDayIndex >= formData.days.length) {
-        console.error('❌ Invalid destination day index:', destDayIndex);
-        return;
-      }
-
-      if (exercise) {
-        const newExercise: SchemaExercise = {
-          exercise_id: exercise.id,
-          exercise_name: exercise.name,
-          sets: 3,
-          reps: '8-12',
-          rest_time: 90,
-          order_index: destExerciseIndex,
-          exercise: exercise
-        };
-
-        setFormData(prev => ({
-          ...prev,
-          days: prev.days.map((day, index) => {
-            if (index === destDayIndex) {
-              const newExercises = Array.from(day.exercises);
-              newExercises.splice(destExerciseIndex, 0, newExercise);
-              // Update order_index for all exercises
-              newExercises.forEach((ex, exIndex) => {
-                ex.order_index = exIndex;
-              });
-              return { ...day, exercises: newExercises };
-            }
-            return day;
-          })
-        }));
-      }
-      return;
-    }
-
-    const sourceDayIndex = parseInt(source.droppableId.replace('day-', ''));
-    const destDayIndex = parseInt(destination.droppableId.replace('day-', ''));
-    const sourceExerciseIndex = source.index;
-    const destExerciseIndex = destination.index;
-
-    console.log('🔄 Moving between days:');
-    console.log('  - Source day index:', sourceDayIndex);
-    console.log('  - Dest day index:', destDayIndex);
-    console.log('  - Source exercise index:', sourceExerciseIndex);
-    console.log('  - Dest exercise index:', destExerciseIndex);
-
-    // Validate indices
-    if (isNaN(sourceDayIndex) || sourceDayIndex < 0 || sourceDayIndex >= formData.days.length) {
-      console.error('❌ Invalid source day index:', sourceDayIndex);
-      return;
-    }
-    if (isNaN(destDayIndex) || destDayIndex < 0 || destDayIndex >= formData.days.length) {
-      console.error('❌ Invalid dest day index:', destDayIndex);
-      return;
-    }
-
-    // Same day, reorder within the day
-    if (sourceDayIndex === destDayIndex) {
-      const day = formData.days[sourceDayIndex];
-      const newExercises = Array.from(day.exercises);
-      const [removed] = newExercises.splice(sourceExerciseIndex, 1);
-      newExercises.splice(destExerciseIndex, 0, removed);
-
-      // Update order_index for all exercises in this day
-      newExercises.forEach((exercise, index) => {
-        exercise.order_index = index;
-      });
-
-      setFormData(prev => ({
-        ...prev,
-        days: prev.days.map((day, index) => 
-          index === sourceDayIndex 
-            ? { ...day, exercises: newExercises }
-            : day
-        )
-      }));
-    } else {
-      // Different days, move between days
-      const sourceDay = formData.days[sourceDayIndex];
-      const destDay = formData.days[destDayIndex];
-      
-      const sourceExercises = Array.from(sourceDay.exercises);
-      const destExercises = Array.from(destDay.exercises);
-      
-      const [movedExercise] = sourceExercises.splice(sourceExerciseIndex, 1);
-      destExercises.splice(destExerciseIndex, 0, movedExercise);
-
-      // Update order_index for both days
-      sourceExercises.forEach((exercise, index) => {
-        exercise.order_index = index;
-      });
-      destExercises.forEach((exercise, index) => {
-        exercise.order_index = index;
-      });
-
-      setFormData(prev => ({
-        ...prev,
-        days: prev.days.map((day, index) => {
-          if (index === sourceDayIndex) {
-            return { ...day, exercises: sourceExercises };
-          } else if (index === destDayIndex) {
-            return { ...day, exercises: destExercises };
-          }
-          return day;
-        })
-      }));
-    }
+    // For now, we'll use the click to add functionality
+    // The drag and drop will be implemented later if needed
+    console.log('ℹ️ Using click to add functionality for exercises');
   };
 
   const validateSchema = (schema: TrainingSchema): string | null => {
@@ -667,7 +540,11 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
           </button>
         </div>
 
-        <DragDropContext onDragEnd={handleDragEnd}>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleExerciseDragEnd}
+        >
           <div className="flex h-[calc(90vh-120px)]">
             {/* Left side - Schema details and days */}
             <div className="w-2/3 p-6 overflow-y-auto">
@@ -791,13 +668,7 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
                       </div>
 
                       {/* Exercises in this day */}
-                      <Droppable droppableId={`day-${dayIndex}`}>
-                        {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.droppableProps}
-                            className={`space-y-2 min-h-[50px] ${snapshot.isDraggingOver ? 'bg-[#8BAE5A]/10 rounded-lg' : ''}`}
-                          >
+                      <div className="space-y-2 min-h-[50px]">
                             {/* Column headers */}
                             <div className="flex items-center space-x-2 p-2 bg-gray-700 rounded text-xs text-gray-300 font-medium">
                               <div className="w-6"></div> {/* Drag handle space */}
@@ -809,23 +680,8 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
                             </div>
                             
                             {day.exercises.map((exercise, exerciseIndex) => (
-                              <Draggable
-                                key={`day-${dayIndex}-exercise-${exerciseIndex}`}
-                                draggableId={`day-${dayIndex}-exercise-${exerciseIndex}`}
-                                index={exerciseIndex}
-                              >
-                                {(provided, snapshot) => (
-                                  <div
-                                    ref={provided.innerRef}
-                                    {...provided.draggableProps}
-                                    className={`flex items-center space-x-2 p-2 bg-gray-800 rounded ${
-                                      snapshot.isDragging ? 'shadow-lg transform rotate-2' : ''
-                                    }`}
-                                  >
-                                    <div
-                                      {...provided.dragHandleProps}
-                                      className="p-1 text-gray-400 hover:text-white cursor-grab active:cursor-grabbing"
-                                    >
+                                  <div className="flex items-center space-x-2 p-2 bg-gray-800 rounded">
+                                    <div className="p-1 text-gray-400 hover:text-white cursor-grab active:cursor-grabbing">
                                       <ArrowsUpDownIcon className="h-4 w-4" />
                                     </div>
                                     <div className="flex-1">
@@ -860,13 +716,8 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
                                       <TrashIcon className="h-4 w-4" />
                                     </button>
                                   </div>
-                                )}
-                              </Draggable>
                             ))}
-                            {provided.placeholder}
-                          </div>
-                        )}
-                      </Droppable>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -903,43 +754,23 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
               </div>
 
               {/* Exercise list */}
-              <Droppable droppableId="library" isDropDisabled={true}>
-                {(provided) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                    className="space-y-2"
-                  >
+              <div className="space-y-2">
                     {filteredExercises.map((exercise, index) => (
-                      <Draggable
-                        key={`library-${exercise.id}`}
-                        draggableId={`library-${exercise.id}`}
-                        index={index}
-                        isDragDisabled={formData.days.length === 0}
-                      >
-                        {(provided, snapshot) => (
                           <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            className={`p-3 bg-gray-800 rounded border cursor-grab active:cursor-grabbing ${
-                              snapshot.isDragging ? 'shadow-lg transform rotate-2' : 'hover:bg-gray-700'
-                            } ${formData.days.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            className={`p-3 bg-gray-800 rounded border cursor-grab active:cursor-grabbing hover:bg-gray-700 ${
+                              formData.days.length === 0 ? 'opacity-50 cursor-not-allowed' : ''
+                            }`}
                             onClick={() => showDaySelectorForExercise(exercise)}
                           >
                             <div className="font-medium text-white">{exercise.name}</div>
                             <div className="text-sm text-gray-400">{exercise.primary_muscle}</div>
                             <div className="text-xs text-gray-500">{exercise.equipment} • {exercise.difficulty}</div>
                           </div>
-                        )}
-                      </Draggable>
                     ))}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
+              </div>
             </div>
           </div>
-        </DragDropContext>
+        </DndContext>
 
         {/* Footer */}
         <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-700 sticky bottom-0 bg-gray-900 z-10">
