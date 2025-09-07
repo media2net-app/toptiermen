@@ -5,9 +5,27 @@ import {
   PlusIcon, 
   TrashIcon,
   MagnifyingGlassIcon,
-  ArrowsUpDownIcon
+  ArrowsUpDownIcon,
+  Bars3Icon
 } from '@heroicons/react/24/outline';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'react-hot-toast';
 
@@ -51,6 +69,47 @@ interface TrainingSchema {
   status: 'draft' | 'published' | 'archived';
 }
 
+// Sortable Day Item Component for Day Order Modal
+function SortableDayItem({ day, index }: { day: TrainingDay; index: number }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: `day-${day.id || index}` });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`flex items-center p-3 bg-gray-800 rounded border ${
+        isDragging ? 'bg-gray-700 shadow-lg transform rotate-1' : 'hover:bg-gray-750'
+      }`}
+    >
+      <div
+        {...attributes}
+        {...listeners}
+        className="mr-3 p-1 text-gray-400 hover:text-[#8BAE5A] cursor-grab active:cursor-grabbing"
+      >
+        <Bars3Icon className="h-5 w-5" />
+      </div>
+      <div className="flex-1">
+        <div className="font-medium text-white">{day.name}</div>
+        <div className="text-sm text-gray-400">
+          {day.exercises.length} oefening{day.exercises.length !== 1 ? 'en' : ''}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 interface SchemaBuilderProps {
   isOpen: boolean;
   onClose: () => void;
@@ -65,6 +124,16 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
   const [selectedMuscle, setSelectedMuscle] = useState<string>('');
   const [showDaySelector, setShowDaySelector] = useState(false);
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
+  const [showDayOrderModal, setShowDayOrderModal] = useState(false);
+  const [tempDayOrder, setTempDayOrder] = useState<TrainingDay[]>([]);
+
+  // DnD Kit sensors for day order modal
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
   const [formData, setFormData] = useState<TrainingSchema>({
     name: '',
     description: '',
@@ -121,24 +190,21 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
 
   const fetchExercises = async () => {
     try {
-      console.log('🔍 SchemaBuilder: Fetching exercises from database...');
       const { data, error } = await supabase
         .from('exercises')
         .select('*')
         .order('name');
 
       if (error) {
-        console.error('❌ SchemaBuilder: Error fetching exercises:', error);
-        toast.error('Fout bij het ophalen van oefeningen');
+        console.error('Error fetching exercises:', error);
+        toast.error('Fout bij ophalen oefeningen');
         return;
       }
-      
-      console.log('✅ SchemaBuilder: Successfully fetched', data?.length || 0, 'exercises');
-      console.log('📋 SchemaBuilder: First few exercises:', data?.slice(0, 3));
+
       setExercises(data || []);
     } catch (error) {
-      console.error('❌ SchemaBuilder: Exception fetching exercises:', error);
-      toast.error('Fout bij het ophalen van oefeningen');
+      console.error('Error:', error);
+      toast.error('Fout bij ophalen oefeningen');
     }
   };
 
@@ -162,7 +228,6 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
     const newDay: TrainingDay = {
       day_number: formData.days.length + 1,
       name: `Dag ${formData.days.length + 1}`,
-      description: '',
       exercises: []
     };
     setFormData(prev => ({
@@ -213,6 +278,49 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
     setSelectedExercise(null);
   };
 
+  const openDayOrderModal = () => {
+    setTempDayOrder([...formData.days]);
+    setShowDayOrderModal(true);
+  };
+
+  const handleDayOrderDragEnd = (event: DragEndEvent) => {
+    console.log('🎯 Day order drag end:', event);
+    
+    const { active, over } = event;
+    
+    if (!over || active.id === over.id) {
+      console.log('❌ No destination or same position - drag cancelled');
+      return;
+    }
+
+    const oldIndex = tempDayOrder.findIndex(day => `day-${day.id || tempDayOrder.indexOf(day)}` === active.id);
+    const newIndex = tempDayOrder.findIndex(day => `day-${day.id || tempDayOrder.indexOf(day)}` === over.id);
+
+    if (oldIndex === -1 || newIndex === -1) {
+      console.log('❌ Invalid indices');
+      return;
+    }
+
+    const newOrder = arrayMove(tempDayOrder, oldIndex, newIndex);
+
+    // Update day numbers
+    newOrder.forEach((day, index) => {
+      day.day_number = index + 1;
+    });
+
+    console.log('✅ Day order updated:', newOrder.map(d => d.name));
+    setTempDayOrder(newOrder);
+  };
+
+  const saveDayOrder = () => {
+    setFormData(prev => ({
+      ...prev,
+      days: tempDayOrder
+    }));
+    setShowDayOrderModal(false);
+    toast.success('Dag volgorde bijgewerkt!');
+  };
+
   const removeExerciseFromDay = (dayIndex: number, exerciseIndex: number) => {
     setFormData(prev => ({
       ...prev,
@@ -229,8 +337,8 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
       ...prev,
       days: prev.days.map((day, index) => 
         index === dayIndex 
-          ? {
-              ...day,
+          ? { 
+              ...day, 
               exercises: day.exercises.map((exercise, exIndex) => 
                 exIndex === exerciseIndex 
                   ? { ...exercise, [field]: value }
@@ -272,6 +380,7 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
     console.log('📊 Source:', source);
     console.log('📍 Destination:', destination);
     console.log('📋 Form data days:', formData.days.length);
+
 
     // Check if dragging from library
     if (source.droppableId === 'library') {
@@ -398,40 +507,19 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
 
   const validateSchema = (schema: TrainingSchema): string | null => {
     if (!schema.name.trim()) {
-      return 'Vul een naam in voor het schema';
+      return 'Schema naam is verplicht';
     }
-
     if (schema.days.length === 0) {
-      return 'Voeg minimaal één dag toe aan het schema';
+      return 'Minimaal één dag is verplicht';
     }
-
-    for (let i = 0; i < schema.days.length; i++) {
-      const day = schema.days[i];
+    for (const day of schema.days) {
       if (!day.name.trim()) {
-        return `Dag ${i + 1} heeft geen naam`;
+        return `Dag ${day.day_number} naam is verplicht`;
       }
-
       if (day.exercises.length === 0) {
-        return `Dag ${i + 1} heeft geen oefeningen`;
-      }
-
-      for (let j = 0; j < day.exercises.length; j++) {
-        const exercise = day.exercises[j];
-        if (!exercise.exercise_name.trim()) {
-          return `Oefening ${j + 1} in dag ${i + 1} heeft geen naam`;
-        }
-        if (exercise.sets <= 0) {
-          return `Oefening ${j + 1} in dag ${i + 1} heeft ongeldig aantal sets`;
-        }
-        if (!exercise.reps.trim()) {
-          return `Oefening ${j + 1} in dag ${i + 1} heeft geen reps`;
-        }
-        if (exercise.rest_time < 0) {
-          return `Oefening ${j + 1} in dag ${i + 1} heeft ongeldige rusttijd`;
-        }
+        return `Dag ${day.day_number} moet minimaal één oefening hebben`;
       }
     }
-
     return null;
   };
 
@@ -444,15 +532,7 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
 
     setLoading(true);
     try {
-      // Save schema
-      console.log('Saving schema with data:', {
-        id: formData.id,
-        name: formData.name,
-        description: formData.description,
-        category: formData.category,
-        difficulty: formData.difficulty,
-        status: formData.status
-      });
+      console.log('💾 Saving schema:', formData);
 
       const { data: schemaData, error: schemaError } = await supabase
         .from('training_schemas')
@@ -472,11 +552,8 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
         throw new Error(`Schema save failed: ${schemaError.message}`);
       }
 
-      if (!schemaData) {
-        throw new Error('No schema data returned after save');
-      }
-
       const schemaId = schemaData.id;
+      console.log('✅ Schema saved with ID:', schemaId);
 
       // Save days
       for (let i = 0; i < formData.days.length; i++) {
@@ -498,10 +575,6 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
         if (dayError) {
           console.error(`Day ${i + 1} save error:`, dayError);
           throw new Error(`Day save failed: ${dayError.message}`);
-        }
-
-        if (!dayData) {
-          throw new Error(`No day data returned for day ${i + 1}`);
         }
 
         const dayId = dayData.id;
@@ -557,14 +630,12 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
         if (error.message.includes('duplicate key')) {
           toast.error('Schema naam bestaat al. Kies een andere naam.');
         } else if (error.message.includes('foreign key')) {
-          toast.error('Ongeldige oefening geselecteerd. Controleer je schema.');
-        } else if (error.message.includes('not null')) {
-          toast.error('Vul alle verplichte velden in.');
+          toast.error('Er is een probleem met de database relaties. Probeer opnieuw.');
         } else {
-          toast.error(`Fout bij het opslaan van het schema: ${error.message}`);
+          toast.error(`Fout bij opslaan: ${error.message}`);
         }
       } else {
-        toast.error('Fout bij het opslaan van het schema');
+        toast.error('Onbekende fout bij opslaan schema');
       }
     } finally {
       setLoading(false);
@@ -574,15 +645,16 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-[#181F17] rounded-lg w-full max-w-6xl max-h-[90vh] overflow-hidden">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-gray-900 rounded-lg shadow-xl w-[95vw] h-[95vh] flex flex-col">
+        {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-700">
-          <h2 className="text-xl font-bold text-white">
-            {schema ? 'Bewerk Training Schema' : 'Nieuw Training Schema'}
+          <h2 className="text-xl font-semibold text-white">
+            {schema ? 'Schema Bewerken' : 'Nieuw Schema'}
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-white"
+            className="p-2 text-gray-400 hover:text-white"
           >
             <XMarkIcon className="h-6 w-6" />
           </button>
@@ -651,145 +723,146 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
                     </select>
                   </div>
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                  <div>
-                    <label className="block text-sm font-medium text-white mb-1">Status</label>
-                    <select
-                      className="w-full rounded-lg border border-gray-700 bg-[#232B1A] text-white p-2 focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                      value={formData.status}
-                      onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as 'draft' | 'published' | 'archived' }))}
-                    >
-                      <option value="draft">Concept</option>
-                      <option value="published">Gepubliceerd</option>
-                      <option value="archived">Gearchiveerd</option>
-                    </select>
-                  </div>
-                </div>
               </div>
 
               {/* Days */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-semibold text-white">Training Dagen</h3>
-                  <button
-                    onClick={addDay}
-                    className="flex items-center px-3 py-2 bg-[#8BAE5A] text-[#181F17] rounded-md hover:bg-[#B6C948]"
-                  >
-                    <PlusIcon className="h-4 w-4 mr-2" />
-                    Dag Toevoegen
-                  </button>
+                  <div className="flex space-x-2">
+                    {formData.days.length > 1 && (
+                      <button
+                        onClick={openDayOrderModal}
+                        className="flex items-center px-3 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600"
+                      >
+                        <ArrowsUpDownIcon className="h-4 w-4 mr-2" />
+                        Wijzig Volgorde
+                      </button>
+                    )}
+                    <button
+                      onClick={addDay}
+                      className="flex items-center px-3 py-2 bg-[#8BAE5A] text-[#181F17] rounded-md hover:bg-[#B6C948]"
+                    >
+                      <PlusIcon className="h-4 w-4 mr-2" />
+                      Dag Toevoegen
+                    </button>
+                  </div>
                 </div>
 
-                {formData.days.map((day, dayIndex) => (
-                  <div key={`day-${day.id || dayIndex}-${dayIndex}`} className="border border-gray-700 rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex-1">
-                        <input
-                          type="text"
-                          value={day.name}
-                          onChange={(e) => updateDay(dayIndex, 'name', e.target.value)}
+                <div className="space-y-4">
+                  {formData.days.map((day, dayIndex) => (
+                    <div
+                      key={`day-${day.id || dayIndex}-${dayIndex}`}
+                      className="border border-gray-700 rounded-lg p-4 bg-gray-900"
+                    >
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex-1">
+                          <input
+                            type="text"
+                            value={day.name}
+                            onChange={(e) => updateDay(dayIndex, 'name', e.target.value)}
+                            className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-[#8BAE5A] focus:ring-2"
+                            placeholder="Dag naam"
+                          />
+                        </div>
+                        <button
+                          onClick={() => removeDay(dayIndex)}
+                          className="ml-2 p-2 text-red-400 hover:text-red-300"
+                        >
+                          <TrashIcon className="h-5 w-5" />
+                        </button>
+                      </div>
+
+                      <div className="mb-4">
+                        <textarea
+                          value={day.description || ''}
+                          onChange={(e) => updateDay(dayIndex, 'description', e.target.value)}
                           className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-[#8BAE5A] focus:ring-2"
-                          placeholder="Dag naam"
+                          rows={2}
+                          placeholder="Dag beschrijving (optioneel)"
                         />
                       </div>
-                      <button
-                        onClick={() => removeDay(dayIndex)}
-                        className="ml-2 p-2 text-red-400 hover:text-red-300"
-                      >
-                        <TrashIcon className="h-5 w-5" />
-                      </button>
-                    </div>
 
-                    <div className="mb-4">
-                      <textarea
-                        value={day.description || ''}
-                        onChange={(e) => updateDay(dayIndex, 'description', e.target.value)}
-                        className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-[#8BAE5A] focus:ring-2"
-                        rows={2}
-                        placeholder="Dag beschrijving (optioneel)"
-                      />
-                    </div>
-
-                    {/* Exercises in this day */}
-                    <Droppable droppableId={`day-${dayIndex}`}>
-                      {(provided, snapshot) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.droppableProps}
-                          className={`space-y-2 min-h-[50px] ${snapshot.isDraggingOver ? 'bg-[#8BAE5A]/10 rounded-lg' : ''}`}
-                        >
-                          {/* Column headers */}
-                          <div className="flex items-center space-x-2 p-2 bg-gray-700 rounded text-xs text-gray-300 font-medium">
-                            <div className="w-6"></div> {/* Drag handle space */}
-                            <div className="flex-1">Oefening</div>
-                            <div className="w-16 text-center">Sets</div>
-                            <div className="w-20 text-center">Reps</div>
-                            <div className="w-20 text-center">Rust (s)</div>
-                            <div className="w-6"></div> {/* Delete button space */}
-                          </div>
-                          
-                          {day.exercises.map((exercise, exerciseIndex) => (
-                            <Draggable
-                              key={`day-${dayIndex}-exercise-${exerciseIndex}`}
-                              draggableId={`day-${dayIndex}-exercise-${exerciseIndex}`}
-                              index={exerciseIndex}
-                            >
-                              {(provided, snapshot) => (
-                                <div
-                                  ref={provided.innerRef}
-                                  {...provided.draggableProps}
-                                  className={`flex items-center space-x-2 p-2 bg-gray-800 rounded ${
-                                    snapshot.isDragging ? 'shadow-lg transform rotate-2' : ''
-                                  }`}
-                                >
+                      {/* Exercises in this day */}
+                      <Droppable droppableId={`day-${dayIndex}`}>
+                        {(provided, snapshot) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.droppableProps}
+                            className={`space-y-2 min-h-[50px] ${snapshot.isDraggingOver ? 'bg-[#8BAE5A]/10 rounded-lg' : ''}`}
+                          >
+                            {/* Column headers */}
+                            <div className="flex items-center space-x-2 p-2 bg-gray-700 rounded text-xs text-gray-300 font-medium">
+                              <div className="w-6"></div> {/* Drag handle space */}
+                              <div className="flex-1">Oefening</div>
+                              <div className="w-16 text-center">Sets</div>
+                              <div className="w-20 text-center">Reps</div>
+                              <div className="w-20 text-center">Rust (s)</div>
+                              <div className="w-6"></div> {/* Delete button space */}
+                            </div>
+                            
+                            {day.exercises.map((exercise, exerciseIndex) => (
+                              <Draggable
+                                key={`day-${dayIndex}-exercise-${exerciseIndex}`}
+                                draggableId={`day-${dayIndex}-exercise-${exerciseIndex}`}
+                                index={exerciseIndex}
+                              >
+                                {(provided, snapshot) => (
                                   <div
-                                    {...provided.dragHandleProps}
-                                    className="p-1 text-gray-400 hover:text-white cursor-grab active:cursor-grabbing"
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    className={`flex items-center space-x-2 p-2 bg-gray-800 rounded ${
+                                      snapshot.isDragging ? 'shadow-lg transform rotate-2' : ''
+                                    }`}
                                   >
-                                    <ArrowsUpDownIcon className="h-4 w-4" />
+                                    <div
+                                      {...provided.dragHandleProps}
+                                      className="p-1 text-gray-400 hover:text-white cursor-grab active:cursor-grabbing"
+                                    >
+                                      <ArrowsUpDownIcon className="h-4 w-4" />
+                                    </div>
+                                    <div className="flex-1">
+                                      <div className="text-sm font-medium text-white">{exercise.exercise_name}</div>
+                                      <div className="text-xs text-gray-400">{exercise.exercise?.primary_muscle}</div>
+                                    </div>
+                                    <input
+                                      type="number"
+                                      value={exercise.sets}
+                                      onChange={(e) => updateExerciseInDay(dayIndex, exerciseIndex, 'sets', parseInt(e.target.value))}
+                                      className="w-16 px-2 py-1 bg-gray-700 border border-gray-600 rounded text-white text-center"
+                                      placeholder="Sets"
+                                    />
+                                    <input
+                                      type="text"
+                                      value={exercise.reps}
+                                      onChange={(e) => updateExerciseInDay(dayIndex, exerciseIndex, 'reps', e.target.value)}
+                                      className="w-20 px-2 py-1 bg-gray-700 border border-gray-600 rounded text-white text-center"
+                                      placeholder="Reps"
+                                    />
+                                    <input
+                                      type="number"
+                                      value={exercise.rest_time}
+                                      onChange={(e) => updateExerciseInDay(dayIndex, exerciseIndex, 'rest_time', parseInt(e.target.value))}
+                                      className="w-20 px-2 py-1 bg-gray-700 border border-gray-600 rounded text-white text-center"
+                                      placeholder="Rest (s)"
+                                    />
+                                    <button
+                                      onClick={() => removeExerciseFromDay(dayIndex, exerciseIndex)}
+                                      className="p-1 text-red-400 hover:text-red-300"
+                                    >
+                                      <TrashIcon className="h-4 w-4" />
+                                    </button>
                                   </div>
-                                  <div className="flex-1">
-                                    <div className="text-sm font-medium text-white">{exercise.exercise_name}</div>
-                                    <div className="text-xs text-gray-400">{exercise.exercise?.primary_muscle}</div>
-                                  </div>
-                                  <input
-                                    type="number"
-                                    value={exercise.sets}
-                                    onChange={(e) => updateExerciseInDay(dayIndex, exerciseIndex, 'sets', parseInt(e.target.value))}
-                                    className="w-16 px-2 py-1 bg-gray-700 border border-gray-600 rounded text-white text-center"
-                                    placeholder="Sets"
-                                  />
-                                  <input
-                                    type="text"
-                                    value={exercise.reps}
-                                    onChange={(e) => updateExerciseInDay(dayIndex, exerciseIndex, 'reps', e.target.value)}
-                                    className="w-20 px-2 py-1 bg-gray-700 border border-gray-600 rounded text-white text-center"
-                                    placeholder="Reps"
-                                  />
-                                  <input
-                                    type="number"
-                                    value={exercise.rest_time}
-                                    onChange={(e) => updateExerciseInDay(dayIndex, exerciseIndex, 'rest_time', parseInt(e.target.value))}
-                                    className="w-20 px-2 py-1 bg-gray-700 border border-gray-600 rounded text-white text-center"
-                                    placeholder="Rest (s)"
-                                  />
-                                  <button
-                                    onClick={() => removeExerciseFromDay(dayIndex, exerciseIndex)}
-                                    className="p-1 text-red-400 hover:text-red-300"
-                                  >
-                                    <TrashIcon className="h-4 w-4" />
-                                  </button>
-                                </div>
-                              )}
-                            </Draggable>
-                          ))}
-                          {provided.placeholder}
-                        </div>
-                      )}
-                    </Droppable>
-                  </div>
-                ))}
+                                )}
+                              </Draggable>
+                            ))}
+                            {provided.placeholder}
+                          </div>
+                        )}
+                      </Droppable>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -841,15 +914,9 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
                           <div
                             ref={provided.innerRef}
                             {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            className={`p-3 bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-700 transition-colors ${
-                              snapshot.isDragging ? 'shadow-lg transform rotate-2' : ''
+                            className={`p-3 bg-gray-800 rounded border cursor-grab active:cursor-grabbing ${
+                              snapshot.isDragging ? 'shadow-lg transform rotate-2' : 'hover:bg-gray-700'
                             } ${formData.days.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
-                            onClick={() => {
-                              if (formData.days.length > 0) {
-                                showDaySelectorForExercise(exercise);
-                              }
-                            }}
                           >
                             <div className="font-medium text-white">{exercise.name}</div>
                             <div className="text-sm text-gray-400">{exercise.primary_muscle}</div>
@@ -877,35 +944,23 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
           <button
             onClick={handleSave}
             disabled={loading}
-            className="px-6 py-2 bg-[#8BAE5A] text-[#181F17] rounded-md hover:bg-[#B6C948] disabled:opacity-50"
+            className="px-6 py-2 bg-[#8BAE5A] text-[#181F17] rounded-md hover:bg-[#B6C948] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Opslaan...' : 'Opslaan'}
           </button>
         </div>
       </div>
 
-      {/* Day Selector Modal */}
-      {showDaySelector && selectedExercise && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-          onClick={() => {
-            setShowDaySelector(false);
-            setSelectedExercise(null);
-          }}
-        >
-          <div 
-            className="bg-gray-900 rounded-lg p-6 max-w-md w-full mx-4 border border-gray-700"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="text-center mb-6">
-              <h3 className="text-lg font-semibold text-white mb-2">
-                Kies een dag voor {selectedExercise.name}
-              </h3>
-              <p className="text-gray-400 text-sm">
-                Selecteer naar welke dag je deze oefening wilt toevoegen
-              </p>
-            </div>
-
+      {/* Day selector modal */}
+      {showDaySelector && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60">
+          <div className="bg-gray-900 rounded-lg p-6 w-96">
+            <h3 className="text-lg font-semibold text-white mb-4">
+              Oefening toevoegen
+            </h3>
+            <p className="text-gray-300 mb-6">
+              Selecteer naar welke dag je deze oefening wilt toevoegen
+            </p>
             <div className="grid grid-cols-1 gap-3 mb-6">
               {formData.days.map((day, index) => (
                 <button
@@ -921,7 +976,6 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
                 </button>
               ))}
             </div>
-
             <div className="flex justify-end space-x-3">
               <button
                 onClick={() => {
@@ -936,6 +990,56 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
           </div>
         </div>
       )}
+
+      {/* Day order modal */}
+      {showDayOrderModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60">
+          <div className="bg-gray-900 rounded-lg p-6 w-[500px] max-h-[80vh] overflow-y-auto">
+            <h3 className="text-lg font-semibold text-white mb-4">
+              Wijzig Dag Volgorde
+            </h3>
+            <p className="text-gray-300 mb-6">
+              Sleep de dagen om de volgorde te wijzigen
+            </p>
+            
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDayOrderDragEnd}
+            >
+              <SortableContext
+                items={tempDayOrder.map((day, index) => `day-${day.id || index}`)}
+                strategy={verticalListSortingStrategy}
+              >
+                <div className="space-y-2 mb-6 min-h-[200px]">
+                  {tempDayOrder.map((day, index) => (
+                    <SortableDayItem
+                      key={`day-${day.id || index}`}
+                      day={day}
+                      index={index}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
+
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setShowDayOrderModal(false)}
+                className="px-4 py-2 text-gray-300 hover:text-white"
+              >
+                Annuleren
+              </button>
+              <button
+                onClick={saveDayOrder}
+                className="px-4 py-2 bg-[#8BAE5A] text-[#181F17] rounded-md hover:bg-[#B6C948]"
+              >
+                Opslaan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
-} 
+}
