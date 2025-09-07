@@ -14,8 +14,8 @@ export default function PaymentSuccessPage() {
   const [loading, setLoading] = useState(true);
   const [paymentData, setPaymentData] = useState<any>(null);
 
-  const packageId = searchParams.get('package');
-  const period = searchParams.get('period');
+  const packageId = searchParams?.get('package');
+  const period = searchParams?.get('period');
 
   useEffect(() => {
     // Simulate loading payment data
