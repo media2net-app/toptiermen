@@ -46,6 +46,8 @@ function SortableExerciseItem({
   updateExerciseInDay, 
   removeExerciseFromDay 
 }: SortableExerciseItemProps) {
+  const exerciseId = `exercise-${dayIndex}-${exerciseIndex}`;
+  
   const {
     attributes,
     listeners,
@@ -53,13 +55,16 @@ function SortableExerciseItem({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: `exercise-${dayIndex}-${exerciseIndex}` });
+  } = useSortable({ id: exerciseId });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
   };
+
+  // Debug logging
+  console.log(`🔧 SortableExerciseItem rendered: ${exerciseId}, isDragging: ${isDragging}`);
 
   return (
     <div
@@ -473,6 +478,8 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
   // Drag end handler for exercises within a day
   const handleExerciseDragEnd = (event: DragEndEvent) => {
     console.log('🎯 Exercise drag end event:', event);
+    console.log('🎯 Active ID:', event.active.id);
+    console.log('🎯 Over ID:', event.over?.id);
     const { active, over } = event;
 
     if (!over) {
@@ -884,6 +891,13 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
                                 />
                               ))}
                             </SortableContext>
+                            
+                            {/* Debug info */}
+                            {day.exercises.length > 0 && (
+                              <div className="mt-2 p-2 bg-blue-900/20 rounded text-xs text-blue-300">
+                                Debug: {day.exercises.length} oefeningen, IDs: {day.exercises.map((_, i) => `exercise-${dayIndex}-${i}`).join(', ')}
+                              </div>
+                            )}
                       </div>
                     </div>
                   ))}
