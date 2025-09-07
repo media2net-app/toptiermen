@@ -115,7 +115,7 @@ export default function VoedingsplannenBackupPage() {
       const days = Object.values(weeklyPlan);
       const totals = days.map((dayPlan: any) => calculateDayTotal(dayPlan));
       
-      return totals.reduce((total, dayTotal) => ({
+      return totals.reduce((total: { calories: number; protein: number; carbs: number; fat: number }, dayTotal: { calories: number; protein: number; carbs: number; fat: number }) => ({
         calories: total.calories + dayTotal.calories,
         protein: total.protein + dayTotal.protein,
         carbs: total.carbs + dayTotal.carbs,
