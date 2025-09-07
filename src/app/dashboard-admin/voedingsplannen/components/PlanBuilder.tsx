@@ -507,7 +507,7 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
   }, [plan]);
 
   const generateDefaultDailyPlans = (): DailyPlan[] => {
-    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    const days = ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag'];
     const themes = ['Training Dag', 'Herstel', 'Rust Dag', 'Training Dag', 'Herstel', 'Weekend', 'Rust'];
     const focuses = ['protein', 'protein', 'protein', 'protein', 'protein', 'protein', 'protein'];
     
@@ -1927,12 +1927,12 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                     <div className="mt-3 text-center">
                       {plan?.name?.toLowerCase().includes('carnivoor') && (
                         <>
-                          <div className="text-[#8BAE5A] text-sm font-semibold">
-                            🥩 100% Carnivor Animal Based Compliant
-                          </div>
-                          <div className="text-[#B6C948] text-xs">
-                            Orgaanvlees • Vette vis • Dierlijke vetten • Beperkte koolhydraten
-                          </div>
+                      <div className="text-[#8BAE5A] text-sm font-semibold">
+                        🥩 100% Carnivor Animal Based Compliant
+                      </div>
+                      <div className="text-[#B6C948] text-xs">
+                        Orgaanvlees • Vette vis • Dierlijke vetten • Beperkte koolhydraten
+                      </div>
                         </>
                       )}
                       <div className="text-[#B6C948] text-xs mt-2">
