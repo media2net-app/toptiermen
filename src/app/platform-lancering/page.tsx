@@ -33,28 +33,34 @@ export default function PlatformLanceringPage() {
 
   // Start timeline animation on component mount
   useEffect(() => {
+    console.log('Timeline animation starting...');
+    
     const startTimeline = () => {
+      console.log('Setting showTimeline to true');
       setShowTimeline(true);
       
       // Animate through timeline items
       const animateTimeline = () => {
+        console.log('Starting timeline animation');
         let index = 0;
         const interval = setInterval(() => {
+          console.log(`Timeline item ${index + 1}/${timelineData.length}`);
           if (index < timelineData.length) {
             setCurrentTimelineIndex(index);
             index++;
           } else {
+            console.log('Timeline animation complete, showing launch button');
             clearInterval(interval);
             // Show launch button after timeline completes
             setTimeout(() => {
               setShowLaunchButton(true);
             }, 1000);
           }
-        }, 800); // 800ms between each timeline item
+        }, 600); // 600ms between each timeline item (faster for testing)
       };
 
       // Start animation after a short delay
-      setTimeout(animateTimeline, 1000);
+      setTimeout(animateTimeline, 500);
     };
 
     startTimeline();
@@ -141,8 +147,25 @@ export default function PlatformLanceringPage() {
               Klik op de knop hieronder om je reis naar het volgende niveau te beginnen.
             </p>
 
+            {/* Debug Info */}
+            <div className="mb-4 p-4 bg-black/20 rounded-lg text-white text-sm">
+              <p>Debug: showTimeline={showTimeline.toString()}, currentIndex={currentTimelineIndex}, showButton={showLaunchButton.toString()}</p>
+            </div>
+
             {/* Timeline Section */}
             <div className="mb-16">
+              {!showTimeline && (
+                <div className="text-center">
+                  <p className="text-white">Timeline wordt geladen...</p>
+                  <button 
+                    onClick={() => setShowTimeline(true)}
+                    className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                  >
+                    Start Timeline Manueel
+                  </button>
+                </div>
+              )}
+              
               {showTimeline && (
                 <div className="max-w-4xl mx-auto">
                   <div className="text-center mb-8">
