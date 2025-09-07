@@ -1292,7 +1292,7 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
                 </div>
 
                 {/* Snack for this meal */}
-                {snack && (snack as any)?.ingredients?.length > 0 ? (
+                {snack && (snack as any)?.ingredients?.length > 0 && (
                   <div className="bg-[#232D1A] rounded-2xl p-6 border border-[#3A4D23] ml-4">
                     <div className="flex items-center justify-between mb-4">
                       <h4 className="text-lg font-bold text-white flex items-center">
@@ -1351,7 +1351,7 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
                       </div>
                     </div>
                   </div>
-                ) : (
+                ) || (
                   /* Add Snack Button */
                   <div className="bg-[#232D1A] rounded-2xl p-4 border-2 border-dashed border-[#3A4D23] hover:border-[#8BAE5A]/50 transition-colors ml-4">
                     <div className="text-center">

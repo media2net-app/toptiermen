@@ -781,7 +781,7 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
           avondsnack: createMealObject(dayPlan.meals.avondsnack, '21:30') // Add avondsnack
         };
         
-        // Calculate daily totals (including avondsnack)
+        // Calculate daily totals
         const totalCalories = (dayPlan.meals.ontbijt?.calories || 0) + 
                              (dayPlan.meals.snack1?.calories || 0) + 
                              (dayPlan.meals.lunch?.calories || 0) + 
