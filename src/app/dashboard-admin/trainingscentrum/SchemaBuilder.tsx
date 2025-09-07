@@ -164,7 +164,7 @@ function SortableDayItem({ day, index }: { day: TrainingDay; index: number }) {
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: `day-${day.id || index}` });
+  } = useSortable({ id: `day-${index}` });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -391,6 +391,8 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
 
   const handleDayOrderDragEnd = (event: DragEndEvent) => {
     console.log('🎯 Day order drag end:', event);
+    console.log('🎯 Active ID:', event.active.id);
+    console.log('🎯 Over ID:', event.over?.id);
     
     const { active, over } = event;
     
@@ -399,13 +401,19 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
       return;
     }
 
-    const oldIndex = tempDayOrder.findIndex(day => `day-${day.id || tempDayOrder.indexOf(day)}` === active.id);
-    const newIndex = tempDayOrder.findIndex(day => `day-${day.id || tempDayOrder.indexOf(day)}` === over.id);
+    // Parse the IDs to get day indices
+    const activeMatch = active.id.toString().match(/day-(\d+)/);
+    const overMatch = over.id.toString().match(/day-(\d+)/);
 
-    if (oldIndex === -1 || newIndex === -1) {
-      console.log('❌ Invalid indices');
+    if (!activeMatch || !overMatch) {
+      console.log('❌ Invalid day IDs');
       return;
     }
+
+    const oldIndex = parseInt(activeMatch[1]);
+    const newIndex = parseInt(overMatch[1]);
+
+    console.log(`🔄 Moving day from position ${oldIndex} to ${newIndex}`);
 
     const newOrder = arrayMove(tempDayOrder, oldIndex, newIndex);
 
@@ -1027,13 +1035,13 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
               onDragEnd={handleDayOrderDragEnd}
             >
               <SortableContext
-                items={tempDayOrder.map((day, index) => `day-${day.id || index}`)}
+                items={tempDayOrder.map((day, index) => `day-${index}`)}
                 strategy={verticalListSortingStrategy}
               >
                 <div className="space-y-2 mb-6 min-h-[200px]">
                   {tempDayOrder.map((day, index) => (
                     <SortableDayItem
-                      key={`day-${day.id || index}`}
+                      key={`day-${index}`}
                       day={day}
                       index={index}
                     />
