@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
     }
 
     console.error('❌ Error creating unit type:', dedicatedError);
-    return NextResponse.json({ error: dedicatedError.message }, { status: 500 });
+    return NextResponse.json({ error: dedicatedError?.message || 'Unknown error' }, { status: 500 });
   } catch (error) {
     console.error('❌ Exception creating unit type:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

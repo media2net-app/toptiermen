@@ -6,6 +6,7 @@ import { XMarkIcon, PlusIcon } from '@heroicons/react/24/outline';
 interface Category {
   id?: number;
   name: string;
+  value?: string;
   description?: string;
   created_at?: string;
   updated_at?: string;
@@ -21,6 +22,7 @@ interface CategoryModalProps {
 export default function CategoryModal({ isOpen, onClose, onSave, category }: CategoryModalProps) {
   const [formData, setFormData] = useState({
     name: '',
+    value: '',
     description: ''
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -33,11 +35,13 @@ export default function CategoryModal({ isOpen, onClose, onSave, category }: Cat
       if (category) {
         setFormData({
           name: category.name || '',
+          value: category.value || '',
           description: category.description || ''
         });
       } else {
         setFormData({
           name: '',
+          value: '',
           description: ''
         });
       }
