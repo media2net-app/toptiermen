@@ -175,28 +175,36 @@ export default function AdminTicketsPage() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <AdminCard
           icon={<ClockIcon className="w-6 h-6" />}
-          value={Array.isArray(tickets) ? tickets.filter(t => t.status === 'open').length : 0}
           title="Open Tickets"
-          color="green"
-        />
+        >
+          <div className="text-3xl font-bold text-green-400">
+            {Array.isArray(tickets) ? tickets.filter(t => t.status === 'open').length : 0}
+          </div>
+        </AdminCard>
         <AdminCard
           icon={<ExclamationTriangleIcon className="w-6 h-6" />}
-          value={Array.isArray(tickets) ? tickets.filter(t => t.status === 'in_progress').length : 0}
           title="In Behandeling"
-          color="yellow"
-        />
+        >
+          <div className="text-3xl font-bold text-yellow-400">
+            {Array.isArray(tickets) ? tickets.filter(t => t.status === 'in_progress').length : 0}
+          </div>
+        </AdminCard>
         <AdminCard
           icon={<CheckCircleIcon className="w-6 h-6" />}
-          value={Array.isArray(tickets) ? tickets.filter(t => t.status === 'resolved').length : 0}
           title="Opgelost"
-          color="blue"
-        />
+        >
+          <div className="text-3xl font-bold text-blue-400">
+            {Array.isArray(tickets) ? tickets.filter(t => t.status === 'resolved').length : 0}
+          </div>
+        </AdminCard>
         <AdminCard
           icon={<TicketIcon className="w-6 h-6" />}
-          value={Array.isArray(tickets) ? tickets.length : 0}
           title="Totaal Tickets"
-          color="purple"
-        />
+        >
+          <div className="text-3xl font-bold text-purple-400">
+            {Array.isArray(tickets) ? tickets.length : 0}
+          </div>
+        </AdminCard>
       </div>
 
       {/* Filters */}
