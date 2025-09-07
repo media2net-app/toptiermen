@@ -263,6 +263,12 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
       return;
     }
 
+    // Check if we have any days
+    if (formData.days.length === 0) {
+      console.log('❌ No days available for drag and drop');
+      return;
+    }
+
     console.log('📊 Source:', source);
     console.log('📍 Destination:', destination);
     console.log('📋 Form data days:', formData.days.length);
@@ -572,7 +578,7 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
           </button>
         </div>
 
-        <DragDropContext onDragEnd={handleDragEnd} key={`schema-${formData.id || 'new'}-${formData.days.length}`}>
+        <DragDropContext onDragEnd={handleDragEnd}>
           <div className="flex h-[calc(90vh-120px)]">
             {/* Left side - Schema details and days */}
             <div className="w-2/3 p-6 overflow-y-auto">
