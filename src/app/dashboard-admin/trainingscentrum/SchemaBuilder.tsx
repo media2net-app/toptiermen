@@ -251,33 +251,14 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
     if (isOpen) {
       fetchExercises();
       if (schema) {
-        // Transform database schema to form data
+        // The schema data is already transformed by mapDbSchemaToForm, so use it directly
         const transformedSchema: TrainingSchema = {
           id: schema.id,
           name: schema.name,
           description: schema.description,
           category: schema.category,
           difficulty: schema.difficulty,
-          days: schema.days
-            ?.sort((a: any, b: any) => (a.day_number ?? 0) - (b.day_number ?? 0))
-            ?.map((day: any) => ({
-              id: day.id,
-              schema_id: day.schema_id,
-              day_number: day.day_number,
-              name: day.name,
-              description: day.description,
-              exercises: (day.exercises || [])
-                .sort((a: any, b: any) => (a.order_index ?? 0) - (b.order_index ?? 0))
-                .map((exercise: any) => ({
-                  id: exercise.id,
-                  exercise_id: exercise.exercise_id,
-                  exercise_name: exercise.exercise_name,
-                  sets: exercise.sets,
-                  reps: exercise.reps,
-                  rest_time: exercise.rest_time,
-                  order_index: exercise.order_index ?? 0
-                }))
-            })) || [],
+          days: schema.days || [], // Data is already sorted and transformed
           status: schema.status
         };
         setFormData(transformedSchema);
