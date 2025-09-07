@@ -47,6 +47,10 @@ next-env.d.ts
 *.mp4
 *.mov
 *.avi
+
+# Exception: sneak preview video files
+!public/platform-preview.mp4
+!public/platform-preview.png
 *.mkv
 *.webm
 *.flv
