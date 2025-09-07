@@ -208,13 +208,13 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
         fat: Math.round(((ingredient.fat_per_100g || 0) * amount) * 10) / 10
       };
     } else if (ingredient.unit_type === 'per_30g') {
-      // Database values are per 30g, so calculate based on amount in grams
-      const factor = amount / 30; // Convert grams to 30g units
+      // Database values are per 30g, so calculate based on 30g units
+      const units = amount / 30; // Convert grams to 30g units
       result = {
-        calories: Math.round((ingredient.calories_per_100g || 0) * factor),
-        protein: Math.round(((ingredient.protein_per_100g || 0) * factor) * 10) / 10,
-        carbs: Math.round(((ingredient.carbs_per_100g || 0) * factor) * 10) / 10,
-        fat: Math.round(((ingredient.fat_per_100g || 0) * factor) * 10) / 10
+        calories: Math.round((ingredient.calories_per_100g || 0) * units),
+        protein: Math.round(((ingredient.protein_per_100g || 0) * units) * 10) / 10,
+        carbs: Math.round(((ingredient.carbs_per_100g || 0) * units) * 10) / 10,
+        fat: Math.round(((ingredient.fat_per_100g || 0) * units) * 10) / 10
       };
     } else {
       // For other unit types, use the factor calculation
