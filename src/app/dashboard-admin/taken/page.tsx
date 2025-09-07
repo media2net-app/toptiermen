@@ -418,24 +418,24 @@ export default function TakenPage() {
 
   const tableData = currentTasks.map(task => [
     (
-      <div className="max-w-xs">
+      <div key={`title-${task.id}`} className="max-w-xs">
         <div className="font-medium text-white truncate">{task.title}</div>
         <div className="text-sm text-gray-500 truncate">{task.description}</div>
       </div>
     ),
     (
-      <div className="flex items-center gap-2">
+      <div key={`assigned-${task.id}`} className="flex items-center gap-2">
         <UserIcon className="w-4 h-4 text-gray-400" />
         <span>{task.assigned_to}</span>
       </div>
     ),
     (
-      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPriorityColor(task.priority)}`}>
+      <span key={`priority-${task.id}`} className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPriorityColor(task.priority)}`}>
         {task.priority}
       </span>
     ),
     (
-      <div className="flex items-center gap-2">
+      <div key={`status-${task.id}`} className="flex items-center gap-2">
         {task.status === 'completed' ? (
           <div className="flex items-center gap-2 completed-status-indicator">
             <div className="w-5 h-5 rounded-full bg-[#8BAE5A] flex items-center justify-center completed-status-circle">
@@ -454,13 +454,13 @@ export default function TakenPage() {
       </div>
     ),
     (
-      <div className="flex items-center gap-2">
+      <div key={`category-${task.id}`} className="flex items-center gap-2">
         <TagIcon className="w-4 h-4 text-gray-400" />
         <span className="capitalize">{task.category}</span>
       </div>
     ),
     (
-      <div className="flex items-center gap-2">
+      <div key={`date-${task.id}`} className="flex items-center gap-2">
         <CalendarIcon className="w-4 h-4 text-gray-400" />
         <span>{new Date(task.due_date).toLocaleDateString('nl-NL')}</span>
       </div>

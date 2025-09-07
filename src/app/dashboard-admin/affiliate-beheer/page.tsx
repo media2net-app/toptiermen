@@ -593,9 +593,9 @@ export default function AffiliateBeheer() {
       <AdminCard title="Affiliates Overzicht" icon={<UserGroupIcon className="w-6 h-6" />}>
         <AdminTable
           headers={['Affiliate', 'Affiliate Code', 'Referrals', 'Verdiensten', 'Status']}
-          data={filteredAffiliates.map(affiliate => [
+          data={filteredAffiliates.map((affiliate, index) => [
             (
-              <div className="flex items-center">
+              <div key={`affiliate-${index}`} className="flex items-center">
                 <div className="w-10 h-10 bg-[#8BAE5A] rounded-full flex items-center justify-center mr-3">
                   <span className="text-white font-semibold">
                     {affiliate.user_name.charAt(0)}
@@ -608,22 +608,22 @@ export default function AffiliateBeheer() {
               </div>
             ),
             (
-              <span className="text-sm text-white font-mono">{affiliate.affiliate_code}</span>
+              <span key={`code-${index}`} className="text-sm text-white font-mono">{affiliate.affiliate_code}</span>
             ),
             (
-              <div>
+              <div key={`referrals-${index}`}>
                 <div className="text-sm text-white">{affiliate.total_referrals}</div>
                 <div className="text-xs text-[#8BAE5A]">{affiliate.active_referrals} actief</div>
               </div>
             ),
             (
-              <div>
+              <div key={`earnings-${index}`}>
                 <div className="text-sm font-medium text-white">€{affiliate.total_earned}</div>
                 <div className="text-xs text-[#8BAE5A]">€{affiliate.monthly_earnings}/maand</div>
               </div>
             ),
             (
-              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(affiliate.status)}`}>
+              <span key={`status-${index}`} className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(affiliate.status)}`}>
                 {getStatusText(affiliate.status)}
               </span>
             )
