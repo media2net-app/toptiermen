@@ -30,6 +30,87 @@ import { CSS } from '@dnd-kit/utilities';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'react-hot-toast';
 
+// Sortable Exercise Item Component
+interface SortableExerciseItemProps {
+  exercise: SchemaExercise;
+  dayIndex: number;
+  exerciseIndex: number;
+  updateExerciseInDay: (dayIndex: number, exerciseIndex: number, field: string, value: any) => void;
+  removeExerciseFromDay: (dayIndex: number, exerciseIndex: number) => void;
+}
+
+function SortableExerciseItem({ 
+  exercise, 
+  dayIndex, 
+  exerciseIndex, 
+  updateExerciseInDay, 
+  removeExerciseFromDay 
+}: SortableExerciseItemProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: `exercise-${dayIndex}-${exerciseIndex}` });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`flex items-center space-x-2 p-2 bg-gray-800 rounded ${
+        isDragging ? 'shadow-lg border-2 border-[#8BAE5A]' : ''
+      }`}
+    >
+      <div
+        {...attributes}
+        {...listeners}
+        className="p-1 text-gray-400 hover:text-white cursor-grab active:cursor-grabbing"
+      >
+        <ArrowsUpDownIcon className="h-4 w-4" />
+      </div>
+      <div className="flex-1">
+        <div className="text-sm font-medium text-white">{exercise.exercise_name}</div>
+        <div className="text-xs text-gray-400">{exercise.exercise?.primary_muscle}</div>
+      </div>
+      <input
+        type="number"
+        value={exercise.sets}
+        onChange={(e) => updateExerciseInDay(dayIndex, exerciseIndex, 'sets', parseInt(e.target.value))}
+        className="w-16 px-2 py-1 bg-gray-700 border border-gray-600 rounded text-white text-center"
+        placeholder="Sets"
+      />
+      <input
+        type="text"
+        value={exercise.reps}
+        onChange={(e) => updateExerciseInDay(dayIndex, exerciseIndex, 'reps', e.target.value)}
+        className="w-20 px-2 py-1 bg-gray-700 border border-gray-600 rounded text-white text-center"
+        placeholder="Reps"
+      />
+      <input
+        type="number"
+        value={exercise.rest_time}
+        onChange={(e) => updateExerciseInDay(dayIndex, exerciseIndex, 'rest_time', parseInt(e.target.value))}
+        className="w-20 px-2 py-1 bg-gray-700 border border-gray-600 rounded text-white text-center"
+        placeholder="Rest (s)"
+      />
+      <button
+        onClick={() => removeExerciseFromDay(dayIndex, exerciseIndex)}
+        className="p-1 text-red-400 hover:text-red-300"
+      >
+        <TrashIcon className="h-4 w-4" />
+      </button>
+    </div>
+  );
+}
+
 interface Exercise {
   id: number;
   name: string;
@@ -389,7 +470,7 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
   };
 
 
-  // Simplified drag end handler for @dnd-kit
+  // Drag end handler for exercises within a day
   const handleExerciseDragEnd = (event: DragEndEvent) => {
     console.log('🎯 Exercise drag end event:', event);
     const { active, over } = event;
@@ -399,9 +480,65 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
       return;
     }
 
-    // For now, we'll use the click to add functionality
-    // The drag and drop will be implemented later if needed
-    console.log('ℹ️ Using click to add functionality for exercises');
+    const activeId = active.id as string;
+    const overId = over.id as string;
+
+    // Parse the IDs to get day index and exercise index
+    const activeMatch = activeId.match(/exercise-(\d+)-(\d+)/);
+    const overMatch = overId.match(/exercise-(\d+)-(\d+)/);
+
+    if (!activeMatch || !overMatch) {
+      console.log('❌ Invalid exercise IDs');
+      return;
+    }
+
+    const activeDayIndex = parseInt(activeMatch[1]);
+    const activeExerciseIndex = parseInt(activeMatch[2]);
+    const overDayIndex = parseInt(overMatch[1]);
+    const overExerciseIndex = parseInt(overMatch[2]);
+
+    // Only allow reordering within the same day
+    if (activeDayIndex !== overDayIndex) {
+      console.log('❌ Cannot move exercises between different days');
+      return;
+    }
+
+    // Don't do anything if dropped on the same position
+    if (activeExerciseIndex === overExerciseIndex) {
+      console.log('ℹ️ Exercise dropped on same position');
+      return;
+    }
+
+    console.log(`🔄 Moving exercise from position ${activeExerciseIndex} to ${overExerciseIndex} in day ${activeDayIndex}`);
+
+    // Update the exercises array with new order
+    const updatedDays = [...formData.days];
+    const dayExercises = [...updatedDays[activeDayIndex].exercises];
+    
+    // Remove the exercise from its current position
+    const [movedExercise] = dayExercises.splice(activeExerciseIndex, 1);
+    
+    // Insert it at the new position
+    dayExercises.splice(overExerciseIndex, 0, movedExercise);
+    
+    // Update the order_index for all exercises
+    dayExercises.forEach((exercise, index) => {
+      exercise.order_index = index;
+    });
+
+    // Update the day with the new exercise order
+    updatedDays[activeDayIndex] = {
+      ...updatedDays[activeDayIndex],
+      exercises: dayExercises
+    };
+
+    // Update the form data
+    setFormData({
+      ...formData,
+      days: updatedDays
+    });
+
+    console.log('✅ Exercise order updated successfully');
   };
 
   const validateSchema = (schema: TrainingSchema): string | null => {
@@ -732,44 +869,21 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
                               <div className="w-6"></div> {/* Delete button space */}
                             </div>
                             
-                            {day.exercises.map((exercise, exerciseIndex) => (
-                                  <div key={exerciseIndex} className="flex items-center space-x-2 p-2 bg-gray-800 rounded">
-                                    <div className="p-1 text-gray-400 hover:text-white cursor-grab active:cursor-grabbing">
-                                      <ArrowsUpDownIcon className="h-4 w-4" />
-                                    </div>
-                                    <div className="flex-1">
-                                      <div className="text-sm font-medium text-white">{exercise.exercise_name}</div>
-                                      <div className="text-xs text-gray-400">{exercise.exercise?.primary_muscle}</div>
-                                    </div>
-                                    <input
-                                      type="number"
-                                      value={exercise.sets}
-                                      onChange={(e) => updateExerciseInDay(dayIndex, exerciseIndex, 'sets', parseInt(e.target.value))}
-                                      className="w-16 px-2 py-1 bg-gray-700 border border-gray-600 rounded text-white text-center"
-                                      placeholder="Sets"
-                                    />
-                                    <input
-                                      type="text"
-                                      value={exercise.reps}
-                                      onChange={(e) => updateExerciseInDay(dayIndex, exerciseIndex, 'reps', e.target.value)}
-                                      className="w-20 px-2 py-1 bg-gray-700 border border-gray-600 rounded text-white text-center"
-                                      placeholder="Reps"
-                                    />
-                                    <input
-                                      type="number"
-                                      value={exercise.rest_time}
-                                      onChange={(e) => updateExerciseInDay(dayIndex, exerciseIndex, 'rest_time', parseInt(e.target.value))}
-                                      className="w-20 px-2 py-1 bg-gray-700 border border-gray-600 rounded text-white text-center"
-                                      placeholder="Rest (s)"
-                                    />
-                                    <button
-                                      onClick={() => removeExerciseFromDay(dayIndex, exerciseIndex)}
-                                      className="p-1 text-red-400 hover:text-red-300"
-                                    >
-                                      <TrashIcon className="h-4 w-4" />
-                                    </button>
-                                  </div>
-                            ))}
+                            <SortableContext 
+                              items={day.exercises.map((_, exerciseIndex) => `exercise-${dayIndex}-${exerciseIndex}`)}
+                              strategy={verticalListSortingStrategy}
+                            >
+                              {day.exercises.map((exercise, exerciseIndex) => (
+                                <SortableExerciseItem
+                                  key={`exercise-${dayIndex}-${exerciseIndex}`}
+                                  exercise={exercise}
+                                  dayIndex={dayIndex}
+                                  exerciseIndex={exerciseIndex}
+                                  updateExerciseInDay={updateExerciseInDay}
+                                  removeExerciseFromDay={removeExerciseFromDay}
+                                />
+                              ))}
+                            </SortableContext>
                       </div>
                     </div>
                   ))}
