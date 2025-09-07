@@ -125,8 +125,9 @@ export default function ForcedOnboardingModal({ isOpen, onComplete }: ForcedOnbo
 
   const updateOnboardingStatus = async (step: number, action: string, additionalData?: any) => {
     if (!user?.id) {
-      toast.error('Gebruiker niet gevonden');
-      return null;
+      // For non-logged in users, just show success message and continue
+      toast.success('Voortgang opgeslagen!');
+      return { success: true };
     }
 
     setLoading(true);

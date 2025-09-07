@@ -33,29 +33,32 @@ export default function TestUserVideoModal({ isOpen, onComplete }: TestUserVideo
   }, [isOpen]);
 
   const handleVideoComplete = async () => {
-    if (!user?.id) return;
-
     setLoading(true);
     try {
-      // Mark test video as watched by setting current_step to 1
-      const response = await fetch('/api/onboarding', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: user.id,
-          action: 'watch_welcome_video',
-          step: 0
-        }),
-      });
+      if (user?.id) {
+        // Mark test video as watched by setting current_step to 1
+        const response = await fetch('/api/onboarding', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: user.id,
+            action: 'watch_welcome_video',
+            step: 0
+          }),
+        });
 
-      if (response.ok) {
-        toast.success('Test video bekeken! Je kunt nu beginnen met onboarding.');
-        onComplete();
+        if (response.ok) {
+          toast.success('Test video bekeken! Je kunt nu beginnen met onboarding.');
+        } else {
+          throw new Error('Failed to update test video status');
+        }
       } else {
-        throw new Error('Failed to update test video status');
+        // For non-logged in users, just show success message
+        toast.success('Video bekeken! Bedankt voor het kijken.');
       }
+      onComplete();
     } catch (error) {
       console.error('Error updating test video status:', error);
       toast.error('Er is een fout opgetreden. Probeer het opnieuw.');
