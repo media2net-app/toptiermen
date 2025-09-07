@@ -1189,7 +1189,7 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
             
             {/* Calorie Warning */}
             {(() => {
-              const dailyTotals = selectedDayPlan.dailyTotals || calculateDailyTotals(selectedDayPlan);
+              const dailyTotals = calculateDailyTotals(selectedDayPlan);
               const warning = getCalorieWarning(dailyTotals.calories, planData.userProfile.targetCalories);
               if (warning) {
                 return (
@@ -1206,7 +1206,7 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
             
             <div className="grid md:grid-cols-4 gap-4">
               {(() => {
-                const dailyTotals = selectedDayPlan.dailyTotals || calculateDailyTotals(selectedDayPlan);
+                const dailyTotals = calculateDailyTotals(selectedDayPlan);
                 return (
                   <>
                     <div className="bg-[#181F17] rounded-lg p-4 text-center">
