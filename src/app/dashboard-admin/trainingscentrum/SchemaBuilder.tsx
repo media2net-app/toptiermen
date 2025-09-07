@@ -733,7 +733,7 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
                             </div>
                             
                             {day.exercises.map((exercise, exerciseIndex) => (
-                                  <div className="flex items-center space-x-2 p-2 bg-gray-800 rounded">
+                                  <div key={exerciseIndex} className="flex items-center space-x-2 p-2 bg-gray-800 rounded">
                                     <div className="p-1 text-gray-400 hover:text-white cursor-grab active:cursor-grabbing">
                                       <ArrowsUpDownIcon className="h-4 w-4" />
                                     </div>
@@ -810,6 +810,7 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
               <div className="space-y-2">
                     {filteredExercises.map((exercise, index) => (
                           <div
+                            key={index}
                             className={`p-3 bg-gray-800 rounded border cursor-grab active:cursor-grabbing hover:bg-gray-700 ${
                               formData.days.length === 0 ? 'opacity-50 cursor-not-allowed' : ''
                             }`}
