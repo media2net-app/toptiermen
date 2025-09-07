@@ -999,6 +999,25 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
     zondag: 'Dag 7'
   };
 
+  // Helper function to get unit label from unit_type
+  const getUnitLabelFromType = (unitType: string) => {
+    // Dynamic mapping based on unit_type from database
+    const unitTypeMap: { [key: string]: string } = {
+      'per_100g': 'g',
+      'per_30g': 'g', 
+      'per_piece': 'stuk',
+      'per_handful': 'handje',
+      'per_plakje': 'plakje'
+    };
+    
+    // For any new unit types, extract the unit from the type name
+    if (!unitTypeMap[unitType] && unitType.startsWith('per_')) {
+      return unitType.replace('per_', '');
+    }
+    
+    return unitTypeMap[unitType] || 'g';
+  };
+
   // Helper function to get nutrition values from database
   const getEstimatedNutrition = (ingredientName: string) => {
     // First try to find exact match in database
@@ -1224,9 +1243,10 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                   </div>
                   <input
                     type="number"
-                    value={Math.round(macroPercentages.protein)}
+                    value={macroPercentages.protein === 0 ? '' : Math.round(macroPercentages.protein)}
                     onChange={(e) => {
-                      const newPercent = parseInt(e.target.value) || 0;
+                      const inputValue = e.target.value;
+                      const newPercent = inputValue === '' ? 0 : Math.max(0, Math.min(100, parseInt(inputValue) || 0));
                       setMacroPercentages(prev => ({ ...prev, protein: newPercent }));
                       const newProtein = Math.round(((formData.target_calories || 2500) * newPercent / 100) / 4);
                       handleInputChange('target_protein', newProtein);
@@ -1248,9 +1268,10 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                   </div>
                   <input
                     type="number"
-                    value={Math.round(macroPercentages.carbs)}
+                    value={macroPercentages.carbs === 0 ? '' : Math.round(macroPercentages.carbs)}
                     onChange={(e) => {
-                      const newPercent = parseInt(e.target.value) || 0;
+                      const inputValue = e.target.value;
+                      const newPercent = inputValue === '' ? 0 : Math.max(0, Math.min(100, parseInt(inputValue) || 0));
                       setMacroPercentages(prev => ({ ...prev, carbs: newPercent }));
                       const newCarbs = Math.round(((formData.target_calories || 2500) * newPercent / 100) / 4);
                       handleInputChange('target_carbs', newCarbs);
@@ -1272,9 +1293,10 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                   </div>
                   <input
                     type="number"
-                    value={Math.round(macroPercentages.fat)}
+                    value={macroPercentages.fat === 0 ? '' : Math.round(macroPercentages.fat)}
                     onChange={(e) => {
-                      const newPercent = parseInt(e.target.value) || 0;
+                      const inputValue = e.target.value;
+                      const newPercent = inputValue === '' ? 0 : Math.max(0, Math.min(100, parseInt(inputValue) || 0));
                       setMacroPercentages(prev => ({ ...prev, fat: newPercent }));
                       const newFat = Math.round(((formData.target_calories || 2500) * newPercent / 100) / 9);
                       handleInputChange('target_fat', newFat);
@@ -1458,25 +1480,29 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                                           (meals?.snack1?.calories || 0) + 
                                           (meals?.lunch?.calories || 0) + 
                                           (meals?.snack2?.calories || 0) + 
-                                          (meals?.diner?.calories || 0);
+                                          (meals?.diner?.calories || 0) + 
+                                          (meals?.avondsnack?.calories || 0);
                       
                       const totalProtein = (meals?.ontbijt?.protein || 0) + 
                                          (meals?.snack1?.protein || 0) + 
                                          (meals?.lunch?.protein || 0) + 
                                          (meals?.snack2?.protein || 0) + 
-                                         (meals?.diner?.protein || 0);
+                                         (meals?.diner?.protein || 0) + 
+                                         (meals?.avondsnack?.protein || 0);
                       
                       const totalCarbs = (meals?.ontbijt?.carbs || 0) + 
                                        (meals?.snack1?.carbs || 0) + 
                                        (meals?.lunch?.carbs || 0) + 
                                        (meals?.snack2?.carbs || 0) + 
-                                       (meals?.diner?.carbs || 0);
+                                       (meals?.diner?.carbs || 0) + 
+                                       (meals?.avondsnack?.carbs || 0);
                       
                       const totalFat = (meals?.ontbijt?.fat || 0) + 
                                      (meals?.snack1?.fat || 0) + 
                                      (meals?.lunch?.fat || 0) + 
                                      (meals?.snack2?.fat || 0) + 
-                                     (meals?.diner?.fat || 0);
+                                     (meals?.diner?.fat || 0) + 
+                                     (meals?.avondsnack?.fat || 0);
 
                       // Get target values from actual plan or fallback to standard profile
                       const isCarnivore = formData.name?.toLowerCase().includes('carnivoor') || false;
@@ -1749,25 +1775,14 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                                             );
 
                                             if (dbIngredient) {
-                                              const correctUnit = dbIngredient.unit_type === 'per_piece' ? 'stuk' :
-                                                 dbIngredient.unit_type === 'per_handful' ? 'handje' :
-                                                 dbIngredient.unit_type === 'per_30g' ? 'g' : 'g';
+                                              const correctUnit = getUnitLabelFromType(dbIngredient.unit_type);
                                               // ALWAYS keep original amount - never reset to 1
                                               const correctAmount = ingredient.amount;
 
-                                              // Check if current ingredient has wrong unit for per_piece items
-                                              if (dbIngredient.unit_type === 'per_piece' && ingredient.unit === 'g') {
-                                                console.log(`🔧 Daily Plans: Correcting ${ingredient.name} from ${ingredient.amount}g to ${correctAmount}${correctUnit}`);
-                                                return {
-                                                  ...ingredient,
-                                                  amount: correctAmount,
-                                                  unit: correctUnit
-                                                };
-                                              }
-                                              
-                                              // Check if current ingredient has wrong unit for per_handful items
-                                              if (dbIngredient.unit_type === 'per_handful' && ingredient.unit === 'g') {
-                                                console.log(`🔧 Daily Plans: Correcting ${ingredient.name} from ${ingredient.amount}g to ${correctAmount}${correctUnit}`);
+                                              // Dynamic unit correction for any unit type
+                                              // If current unit is 'g' but database has a different unit_type, correct it
+                                              if (ingredient.unit === 'g' && dbIngredient.unit_type !== 'per_100g' && dbIngredient.unit_type !== 'per_30g') {
+                                                console.log(`🔧 Daily Plans: Correcting ${ingredient.name} from ${ingredient.amount}g to ${correctAmount}${correctUnit} (${dbIngredient.unit_type})`);
                                                 return {
                                                   ...ingredient,
                                                   amount: correctAmount,
@@ -1789,35 +1804,15 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                                           let calories, protein, carbs, fat;
                                           
                                           // Calculate nutrition based on unit_type from database
-                                          if (estimatedNutrition.unit_type === 'per_piece' && unit === 'stuk') {
-                                            // For per_piece items, database values are already per piece
-                                            // ALWAYS use fresh database values, ignore stored meal values
-                                            calories = Math.round(estimatedNutrition.calories * amount);
-                                            protein = Math.round(estimatedNutrition.protein * amount * 10) / 10;
-                                            carbs = Math.round(estimatedNutrition.carbs * amount * 10) / 10;
-                                            fat = Math.round(estimatedNutrition.fat * amount * 10) / 10;
-                                            
-                                            console.log(`🥚 Per piece calculation for ${ingredient.name}:`, {
-                                              originalAmount: ingredient.amount,
-                                              correctedAmount: amount,
-                                              unit: unit,
-                                              dbValues: estimatedNutrition,
-                                              calculated: { calories, protein, carbs, fat }
-                                            });
-                                          } else if (estimatedNutrition.unit_type === 'per_handful' && unit === 'handje') {
-                                            // For per_handful items, database values are per handful
-                                            calories = Math.round(estimatedNutrition.calories * amount);
-                                            protein = Math.round(estimatedNutrition.protein * amount * 10) / 10;
-                                            carbs = Math.round(estimatedNutrition.carbs * amount * 10) / 10;
-                                            fat = Math.round(estimatedNutrition.fat * amount * 10) / 10;
-                                          } else if (estimatedNutrition.unit_type === 'per_30g') {
+                                          // Dynamic calculation for all unit types
+                                          if (estimatedNutrition.unit_type === 'per_30g') {
                                             // For per_30g items, database values are per 30g
                                             const multiplier = amount / 30;
                                             calories = Math.round(estimatedNutrition.calories * multiplier);
                                             protein = Math.round(estimatedNutrition.protein * multiplier * 10) / 10;
                                             carbs = Math.round(estimatedNutrition.carbs * multiplier * 10) / 10;
                                             fat = Math.round(estimatedNutrition.fat * multiplier * 10) / 10;
-                                          } else {
+                                          } else if (estimatedNutrition.unit_type === 'per_100g') {
                                             // For per_100g items (default), calculate based on grams
                                             let gramAmount = amount;
                                             if (unit === 'kg') gramAmount = amount * 1000;
@@ -1840,6 +1835,22 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                                             protein = Math.round(estimatedNutrition.protein * multiplier * 10) / 10;
                                             carbs = Math.round(estimatedNutrition.carbs * multiplier * 10) / 10;
                                             fat = Math.round(estimatedNutrition.fat * multiplier * 10) / 10;
+                                          } else {
+                                            // For all other unit types (per_piece, per_handful, per_plakje, etc.)
+                                            // Database values are already per unit, so multiply by amount directly
+                                            calories = Math.round(estimatedNutrition.calories * amount);
+                                            protein = Math.round(estimatedNutrition.protein * amount * 10) / 10;
+                                            carbs = Math.round(estimatedNutrition.carbs * amount * 10) / 10;
+                                            fat = Math.round(estimatedNutrition.fat * amount * 10) / 10;
+                                            
+                                            console.log(`🔧 Dynamic calculation for ${ingredient.name} (${estimatedNutrition.unit_type}):`, {
+                                              originalAmount: ingredient.amount,
+                                              correctedAmount: amount,
+                                              unit: unit,
+                                              unitType: estimatedNutrition.unit_type,
+                                              dbValues: estimatedNutrition,
+                                              calculated: { calories, protein, carbs, fat }
+                                            });
                                           }
                                           
                                           return (

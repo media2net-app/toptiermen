@@ -1,6 +1,8 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { XMarkIcon, CheckIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, CheckIcon, PlusIcon } from '@heroicons/react/24/outline';
+import UnitTypeModal from './UnitTypeModal';
+import CategoryModal from './CategoryModal';
 
 interface FoodItem {
   id: string;
@@ -13,7 +15,7 @@ interface FoodItem {
   description: string;
   is_active: boolean;
   is_carnivore?: boolean;
-  unit_type?: 'per_100g' | 'per_piece' | 'per_handful' | 'per_30g';
+  unit_type?: string;
   created_at: string;
   updated_at: string;
 }
@@ -40,27 +42,102 @@ export default function FoodItemModal({ isOpen, onClose, foodItem, onSave }: Foo
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [unitTypes, setUnitTypes] = useState<any[]>([]);
+  const [showUnitTypeModal, setShowUnitTypeModal] = useState(false);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
 
-  const categories = [
+  // Fallback categories if API fails
+  const fallbackCategories = [
     'Granen', 'Eiwitten', 'Vetten', 'Fruit', 'Zuivel', 'Vlees', 'Vis', 'Groente', 'Noten', 'Carnivoor', 'Eieren', 'Supplementen'
   ];
 
+  // Fetch unit types and categories when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      fetchUnitTypes();
+      fetchCategories();
+    }
+  }, [isOpen]);
+
+  const fetchUnitTypes = async () => {
+    try {
+      const response = await fetch('/api/admin/unit-types');
+      const result = await response.json();
+      
+      if (response.ok) {
+        setUnitTypes(result.unitTypes || []);
+      } else {
+        console.error('Error fetching unit types:', result.error);
+        // Fallback to hardcoded unit types if API fails
+        setUnitTypes([
+          { name: 'Per 100 gram', value: 'per_100g' },
+          { name: 'Per 30 gram', value: 'per_30g' },
+          { name: 'Per stuk', value: 'per_piece' },
+          { name: 'Per handje', value: 'per_handful' }
+        ]);
+      }
+    } catch (error) {
+      console.error('Exception fetching unit types:', error);
+      // Fallback to hardcoded unit types
+      setUnitTypes([
+        { name: 'Per 100 gram', value: 'per_100g' },
+        { name: 'Per 30 gram', value: 'per_30g' },
+        { name: 'Per stuk', value: 'per_piece' },
+        { name: 'Per handje', value: 'per_handful' }
+      ]);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch('/api/admin/categories');
+      const result = await response.json();
+      
+      if (response.ok) {
+        setCategories(result.categories || []);
+      } else {
+        console.error('Error fetching categories:', result.error);
+        // Fallback to hardcoded categories if API fails
+        setCategories(fallbackCategories.map(name => ({ name, value: name })));
+      }
+    } catch (error) {
+      console.error('Exception fetching categories:', error);
+      // Fallback to hardcoded categories
+      setCategories(fallbackCategories.map(name => ({ name, value: name })));
+    }
+  };
+
   const getUnitLabel = (unitType: string) => {
+    // First try to find in the dynamic unit types
+    const unitTypeObj = unitTypes.find(ut => ut.value === unitType);
+    if (unitTypeObj) {
+      return unitTypeObj.name;
+    }
+    
+    // Fallback to hardcoded mapping
     switch (unitType) {
-      case 'per_piece': return 'per stuk';
-      case 'per_handful': return 'per handje';
-      case 'per_30g': return 'per 30g';
-      case 'per_100g':
-      default: return 'per 100g';
+      case 'per_piece': return 'Per stuk';
+      case 'per_handful': return 'Per handje';
+      case 'per_30g': return 'Per 30 gram';
+      case 'per_100g': return 'Per 100 gram';
+      default: return unitType || 'Per 100 gram';
     }
   };
 
   const getNutritionLabel = (unitType: string) => {
+    // First try to find in the dynamic unit types
+    const unitTypeObj = unitTypes.find(ut => ut.value === unitType);
+    if (unitTypeObj) {
+      return `Kcal (${unitTypeObj.name.toLowerCase()})`;
+    }
+    
+    // Fallback to hardcoded mapping
     switch (unitType) {
       case 'per_piece': return 'Kcal (per stuk)';
       case 'per_handful': return 'Kcal (per handje)';
       case 'per_30g': return 'Kcal (per 30g)';
-      case 'per_100g':
+      case 'per_100g': return 'Kcal (per 100g)';
       default: return 'Kcal (per 100g)';
     }
   };
@@ -224,9 +301,19 @@ export default function FoodItemModal({ isOpen, onClose, foodItem, onSave }: Foo
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[#8BAE5A] mb-1">
-                Categorie *
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-sm font-medium text-[#8BAE5A]">
+                  Categorie *
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowCategoryModal(true)}
+                  className="text-xs text-[#8BAE5A] hover:text-[#B6C948] transition-colors flex items-center gap-1"
+                >
+                  <PlusIcon className="w-3 h-3" />
+                  Nieuwe categorie
+                </button>
+              </div>
               <select
                 value={formData.category || ''}
                 onChange={(e) => handleInputChange('category', e.target.value)}
@@ -234,24 +321,37 @@ export default function FoodItemModal({ isOpen, onClose, foodItem, onSave }: Foo
               >
                 <option value="">Selecteer categorie</option>
                 {categories.map(category => (
-                  <option key={category} value={category}>{category}</option>
+                  <option key={category.name || category} value={category.name || category}>
+                    {category.name || category}
+                  </option>
                 ))}
               </select>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[#8BAE5A] mb-1">
-                Eenheid Type *
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-sm font-medium text-[#8BAE5A]">
+                  Eenheid Type *
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowUnitTypeModal(true)}
+                  className="text-xs text-[#8BAE5A] hover:text-[#B6C948] transition-colors flex items-center gap-1"
+                >
+                  <PlusIcon className="w-3 h-3" />
+                  Nieuwe eenheid
+                </button>
+              </div>
               <select
                 value={formData.unit_type || 'per_100g'}
                 onChange={(e) => handleInputChange('unit_type', e.target.value)}
                 className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] focus:border-[#8BAE5A] transition-colors"
               >
-                <option value="per_100g">Per 100 gram</option>
-                <option value="per_30g">Per 30 gram</option>
-                <option value="per_piece">Per stuk</option>
-                <option value="per_handful">Per handje</option>
+                {unitTypes.map((unitType) => (
+                  <option key={unitType.value} value={unitType.value}>
+                    {unitType.name}
+                  </option>
+                ))}
               </select>
               <p className="text-xs text-gray-400 mt-1">
                 Bepaalt hoe voedingswaarden worden weergegeven (auto-detectie op basis van categorie)
@@ -379,6 +479,26 @@ export default function FoodItemModal({ isOpen, onClose, foodItem, onSave }: Foo
           </button>
         </div>
       </div>
+
+      {/* Unit Type Modal */}
+      <UnitTypeModal
+        isOpen={showUnitTypeModal}
+        onClose={() => setShowUnitTypeModal(false)}
+        onSave={() => {
+          fetchUnitTypes(); // Refresh unit types after saving
+          setShowUnitTypeModal(false);
+        }}
+      />
+
+      {/* Category Modal */}
+      <CategoryModal
+        isOpen={showCategoryModal}
+        onClose={() => setShowCategoryModal(false)}
+        onSave={() => {
+          fetchCategories(); // Refresh categories after saving
+          setShowCategoryModal(false);
+        }}
+      />
     </div>
   );
 }

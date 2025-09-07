@@ -37,19 +37,22 @@ interface FoodItem {
   description: string;
   is_active: boolean;
   is_carnivore?: boolean;
-  unit_type?: 'per_100g' | 'per_piece' | 'per_handful' | 'per_30g';
+  unit_type?: string;
   created_at: string;
   updated_at: string;
 }
 
-const getUnitTypeLabel = (unitType?: 'per_100g' | 'per_piece' | 'per_handful' | 'per_30g') => {
-  switch (unitType) {
-    case 'per_piece': return 'Per stuk';
-    case 'per_handful': return 'Per handje (25g)';
-    case 'per_30g': return 'Per 30 gram';
-    case 'per_100g':
-    default: return 'Per 100 gram';
-  }
+const getUnitTypeLabel = (unitType?: string) => {
+  // Dynamic mapping for all unit types
+  const unitTypeMap: { [key: string]: string } = {
+    'per_100g': 'Per 100 gram',
+    'per_30g': 'Per 30 gram',
+    'per_piece': 'Per stuk',
+    'per_handful': 'Per handje',
+    'per_plakje': 'Per plakje'
+  };
+  
+  return unitTypeMap[unitType || 'per_100g'] || unitType || 'Per 100 gram';
 };
 
 interface MealStructure {
@@ -898,6 +901,7 @@ export default function AdminVoedingsplannenPage() {
                             <div className="text-gray-400 text-xs">
                               {item.unit_type === 'per_handful' ? 'Kcal/handje' : 
                                item.unit_type === 'per_piece' ? 'Kcal/stuk' : 
+                               item.unit_type === 'per_plakje' ? 'Kcal/plakje' :
                                item.unit_type === 'per_30g' ? 'Kcal/30g' : 'Kcal/100g'}
                             </div>
                             <div className="text-white font-medium">{item.calories_per_100g || 0}</div>

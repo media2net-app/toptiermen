@@ -10,9 +10,14 @@ const supabase = createClient(
 );
 
 interface Ingredient {
+  id?: string;
   name: string;
   amount: number;
   unit: string;
+  calories?: number;
+  protein?: number;
+  carbs?: number;
+  fat?: number;
 }
 
 interface DatabaseIngredient {
@@ -24,7 +29,7 @@ interface DatabaseIngredient {
   carbs_per_100g: number;
   fat_per_100g: number;
   is_carnivore?: boolean;
-  unit_type?: 'per_100g' | 'per_piece' | 'per_handful' | 'per_30g';
+  unit_type?: string;
 }
 
 interface Meal {
@@ -73,9 +78,32 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
       case 'per_piece': return 'stuk';
       case 'per_handful': return 'handje';
       case 'per_30g': return 'g';
+      case 'per_plakje': return 'plakje';
       case 'per_100g':
       default: return 'g';
     }
+  };
+
+  // Get all available unit types from database
+  const getAvailableUnitTypes = () => {
+    const unitTypes = new Set<string>();
+    ingredientsDatabase.forEach(ingredient => {
+      if (ingredient.unit_type) {
+        unitTypes.add(ingredient.unit_type);
+      }
+    });
+    
+    // Convert to display format
+    return Array.from(unitTypes).map(unitType => {
+      switch (unitType) {
+        case 'per_piece': return { value: 'stuk', label: 'stuk' };
+        case 'per_handful': return { value: 'handje', label: 'handje' };
+        case 'per_30g': return { value: 'g', label: 'g' };
+        case 'per_plakje': return { value: 'plakje', label: 'plakje' };
+        case 'per_100g':
+        default: return { value: 'g', label: 'g' };
+      }
+    });
   };
 
   // Function to detect and correct legacy ingredient units
@@ -97,21 +125,49 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
 
         // Check if current ingredient has wrong unit for per_piece items
         if (dbIngredient.unit_type === 'per_piece' && ingredient.unit === 'g') {
+          const correctAmount = 1; // Always 1 piece
+          const nutrition = calculateNutritionForAmount(dbIngredient, correctAmount);
           console.log(`🔧 Correcting legacy unit for ${ingredient.name}: ${ingredient.amount}g → ${correctAmount} ${correctUnit}`);
           return {
             ...ingredient,
             amount: correctAmount,
-            unit: correctUnit
+            unit: correctUnit,
+            calories: nutrition.calories,
+            protein: nutrition.protein,
+            carbs: nutrition.carbs,
+            fat: nutrition.fat
           };
         }
         
         // Check if current ingredient has wrong unit for per_handful items
         if (dbIngredient.unit_type === 'per_handful' && ingredient.unit === 'g') {
+          const correctAmount = 1; // Always 1 handful
+          const nutrition = calculateNutritionForAmount(dbIngredient, correctAmount);
           console.log(`🔧 Correcting legacy unit for ${ingredient.name}: ${ingredient.amount}g → ${correctAmount} ${correctUnit}`);
           return {
             ...ingredient,
             amount: correctAmount,
-            unit: correctUnit
+            unit: correctUnit,
+            calories: nutrition.calories,
+            protein: nutrition.protein,
+            carbs: nutrition.carbs,
+            fat: nutrition.fat
+          };
+        }
+        
+        // Check if current ingredient has wrong unit for per_plakje items
+        if (dbIngredient.unit_type === 'per_plakje' && ingredient.unit === 'g') {
+          const correctAmount = 1; // Always 1 slice
+          const nutrition = calculateNutritionForAmount(dbIngredient, correctAmount);
+          console.log(`🔧 Correcting legacy unit for ${ingredient.name}: ${ingredient.amount}g → ${correctAmount} ${correctUnit}`);
+          return {
+            ...ingredient,
+            amount: correctAmount,
+            unit: correctUnit,
+            calories: nutrition.calories,
+            protein: nutrition.protein,
+            carbs: nutrition.carbs,
+            fat: nutrition.fat
           };
         }
         
@@ -136,6 +192,7 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
     switch (ingredient.unit_type) {
       case 'per_piece': return 1; // 1 stuk
       case 'per_handful': return 1; // 1 handje
+      case 'per_plakje': return 1; // 1 plakje
       case 'per_30g': return 30; // 30 gram (voor whey protein)
       case 'per_100g':
       default: return 100; // 100 gram
@@ -170,66 +227,62 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
   };
 
   const calculateNutritionForAmount = (ingredient: DatabaseIngredient, amount: number) => {
-    console.log(`🧮 Calculating nutrition for ${ingredient.name}:`, {
+    console.log(`🧮 DEBUG: Calculating nutrition for ${ingredient.name}:`, {
       amount,
       unit_type: ingredient.unit_type,
       calories_per_100g: ingredient.calories_per_100g,
-      protein_per_100g: ingredient.protein_per_100g
+      protein_per_100g: ingredient.protein_per_100g,
+      carbs_per_100g: ingredient.carbs_per_100g,
+      fat_per_100g: ingredient.fat_per_100g
     });
+    console.log('🧮 DEBUG: Full ingredient object:', JSON.stringify(ingredient, null, 2));
 
     let factor: number;
 
     // Calculate the correct factor based on unit type
-    if (ingredient.unit_type === 'per_piece') {
-      // For pieces, database values are already per piece (not per 100g)
-      // So we use the amount directly
+    if (ingredient.unit_type === 'per_piece' || ingredient.unit_type === 'per_handful' || ingredient.unit_type === 'per_plakje') {
+      // For pieces, handfuls, and plakjes, database values are already per unit
+      // So we use the amount directly (no conversion needed)
       factor = amount;
-    } else if (ingredient.unit_type === 'per_handful') {
-      // Database values are now per handje (25g), so use amount directly
-      factor = amount;
+      console.log(`🔍 DEBUG: per_piece/handful/plakje - using amount directly: ${amount}`);
     } else if (ingredient.unit_type === 'per_30g') {
       // Database values are per 30g, so calculate factor based on 30g units
       factor = amount / 30;
+      console.log(`🔍 DEBUG: per_30g - factor = ${amount} / 30 = ${factor}`);
     } else {
-      // per_100g: amount is already in grams
+      // per_100g: amount is in grams, so convert to per 100g factor
       factor = amount / 100;
+      console.log(`🔍 DEBUG: per_100g - factor = ${amount} / 100 = ${factor}`);
     }
 
     // For per_piece items, the database values are already per piece, not per 100g
     // So we need to handle this differently
     let result;
     
-    if (ingredient.unit_type === 'per_piece' || ingredient.unit_type === 'per_handful') {
-      // Database values are already per piece/handje, so multiply by amount directly
-      result = {
-        calories: Math.round((ingredient.calories_per_100g || 0) * amount),
-        protein: Math.round(((ingredient.protein_per_100g || 0) * amount) * 10) / 10,
-        carbs: Math.round(((ingredient.carbs_per_100g || 0) * amount) * 10) / 10,
-        fat: Math.round(((ingredient.fat_per_100g || 0) * amount) * 10) / 10
-      };
-    } else if (ingredient.unit_type === 'per_30g') {
-      // Database values are per 30g, so calculate based on 30g units
-      const units = amount / 30; // Convert grams to 30g units
-      result = {
-        calories: Math.round((ingredient.calories_per_100g || 0) * units),
-        protein: Math.round(((ingredient.protein_per_100g || 0) * units) * 10) / 10,
-        carbs: Math.round(((ingredient.carbs_per_100g || 0) * units) * 10) / 10,
-        fat: Math.round(((ingredient.fat_per_100g || 0) * units) * 10) / 10
-      };
-    } else {
-      // For other unit types, use the factor calculation
-      result = {
-        calories: Math.round((ingredient.calories_per_100g || 0) * factor),
-        protein: Math.round(((ingredient.protein_per_100g || 0) * factor) * 10) / 10,
-        carbs: Math.round(((ingredient.carbs_per_100g || 0) * factor) * 10) / 10,
-        fat: Math.round(((ingredient.fat_per_100g || 0) * factor) * 10) / 10
-      };
-    }
-
-    console.log(`✅ Calculated nutrition for ${amount} ${ingredient.unit_type}:`, {
-      factor,
-      result
+    // Use the calculated factor for all unit types
+    result = {
+      calories: Math.round((ingredient.calories_per_100g || 0) * factor),
+      protein: Math.round(((ingredient.protein_per_100g || 0) * factor) * 10) / 10,
+      carbs: Math.round(((ingredient.carbs_per_100g || 0) * factor) * 10) / 10,
+      fat: Math.round(((ingredient.fat_per_100g || 0) * factor) * 10) / 10
+    };
+    
+    console.log(`🔍 DEBUG: Result calculation:`, {
+      calories: `${ingredient.calories_per_100g} * ${factor} = ${result.calories}`,
+      protein: `${ingredient.protein_per_100g} * ${factor} = ${result.protein}`,
+      carbs: `${ingredient.carbs_per_100g} * ${factor} = ${result.carbs}`,
+      fat: `${ingredient.fat_per_100g} * ${factor} = ${result.fat}`
     });
+
+    console.log(`✅ DEBUG: Calculated nutrition for ${amount} ${ingredient.unit_type}:`, {
+      factor,
+      result,
+      final_calories: result.calories,
+      final_protein: result.protein,
+      final_carbs: result.carbs,
+      final_fat: result.fat
+    });
+    console.log('✅ DEBUG: Full result object:', JSON.stringify(result, null, 2));
     return result;
   };
 
@@ -558,12 +611,52 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
 
   const handleIngredientChange = (index: number, field: keyof Ingredient, value: string | number) => {
     const updatedIngredients = [...(formData.ingredients || [])];
+    const ingredient = updatedIngredients[index];
+    
+    // Update the ingredient field
     updatedIngredients[index] = {
-      ...updatedIngredients[index],
+      ...ingredient,
       [field]: field === 'amount' ? Number(value) : value
     };
     
-    // Calculate nutrition based on ingredients
+    // If amount or unit changed, recalculate nutrition for this ingredient
+    if (field === 'amount' || field === 'unit') {
+      const dbIngredient = ingredientsDatabase.find(db => 
+        db.name.toLowerCase() === ingredient.name.toLowerCase()
+      );
+      
+      console.log(`🔍 DEBUG: handleIngredientChange - field: ${field}, value: ${value}`, {
+        ingredient: ingredient.name,
+        dbIngredient: dbIngredient ? {
+          name: dbIngredient.name,
+          unit_type: dbIngredient.unit_type,
+          calories_per_100g: dbIngredient.calories_per_100g
+        } : 'NOT FOUND'
+      });
+      
+      if (dbIngredient) {
+        const newAmount = field === 'amount' ? Number(value) : ingredient.amount;
+        const newUnit = field === 'unit' ? value as string : ingredient.unit;
+        const nutrition = calculateNutritionForAmount(dbIngredient, newAmount);
+        
+        console.log(`🔍 DEBUG: Recalculated nutrition for ingredient:`, {
+          name: ingredient.name,
+          newAmount,
+          newUnit,
+          nutrition
+        });
+        
+        updatedIngredients[index] = {
+          ...updatedIngredients[index],
+          calories: nutrition.calories,
+          protein: nutrition.protein,
+          carbs: nutrition.carbs,
+          fat: nutrition.fat
+        };
+      }
+    }
+    
+    // Calculate total nutrition based on all ingredients
     const nutrition = calculateNutritionFromIngredients(updatedIngredients);
     
     setFormData(prev => ({
@@ -604,6 +697,7 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
           calories_per_100g: dbIngredient.calories_per_100g,
           protein_per_100g: dbIngredient.protein_per_100g
         });
+        console.log('✅ CRITICAL: Full database ingredient:', JSON.stringify(dbIngredient, null, 2));
         
         // Use the same nutrition calculation as for adding ingredients
         const nutrition = calculateNutritionForAmount(dbIngredient, ingredient.amount);
@@ -622,6 +716,7 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
           carbs: nutrition.carbs,
           fat: nutrition.fat
         });
+        console.log('✅ CRITICAL: Full nutrition object:', JSON.stringify(nutrition, null, 2));
       } else {
         console.warn(`⚠️ CRITICAL: No nutrition data found for ingredient: ${ingredient.name}`);
         console.log('Available ingredients:', ingredientsDatabase.map(ing => ing.name));
@@ -645,6 +740,14 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
     const unit = getUnitLabel(dbIngredient);
     const nutrition = calculateNutritionForAmount(dbIngredient, defaultAmount);
     
+    console.log(`🔍 DEBUG: Adding ingredient from database:`, {
+      name: dbIngredient.name,
+      unit_type: dbIngredient.unit_type,
+      defaultAmount,
+      unit,
+      nutrition
+    });
+    
     const newIngredient = {
       id: `ingredient-${Date.now()}`,
       name: dbIngredient.name,
@@ -655,6 +758,9 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
       carbs: nutrition.carbs,
       fat: nutrition.fat
     };
+    
+    console.log(`🔍 DEBUG: Created new ingredient object:`, newIngredient);
+    console.log('🔍 DEBUG: Full new ingredient object:', JSON.stringify(newIngredient, null, 2));
     
     const updatedIngredients = [...(formData.ingredients || []), newIngredient];
     const totalNutrition = calculateNutritionFromIngredients(updatedIngredients);
@@ -807,8 +913,13 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
     }));
   };
 
-  const getDefaultAmount = (ingredientName: string) => {
-    // Default amounts based on ingredient type
+  const getDefaultAmount = (ingredientName: string, unitType?: string) => {
+    // For per_piece, per_handful, per_plakje items, always use 1
+    if (unitType === 'per_piece' || unitType === 'per_handful' || unitType === 'per_plakje') {
+      return 1;
+    }
+    
+    // Default amounts based on ingredient type (for per_100g items)
     const defaults = {
       'eieren': 200,
       'spek': 50,
@@ -829,7 +940,7 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
         return amount;
       }
     }
-    return 100; // Default fallback
+    return 100; // Default fallback for per_100g items
   };
 
   const getFilteredIngredients = () => {
@@ -982,14 +1093,11 @@ export default function MealEditModal({ isOpen, onClose, meal, mealType, onSave,
                     onChange={(e) => handleIngredientChange(index, 'unit', e.target.value)}
                     className="px-3 py-2 rounded bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-1 focus:ring-[#8BAE5A]"
                   >
-                    <option value="g">g</option>
-                    <option value="kg">kg</option>
-                    <option value="ml">ml</option>
-                    <option value="l">l</option>
-                    <option value="stuk">stuk</option>
-                    <option value="handje">handje</option>
-                    <option value="eetlepel">eetlepel</option>
-                    <option value="theelepel">theelepel</option>
+                    {getAvailableUnitTypes().map((unitType, unitIndex) => (
+                      <option key={unitIndex} value={unitType.value}>
+                        {unitType.label}
+                      </option>
+                    ))}
                   </select>
                   <button
                     onClick={() => removeIngredient(index)}

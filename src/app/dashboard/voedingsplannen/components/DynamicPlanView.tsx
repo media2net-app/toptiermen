@@ -93,6 +93,17 @@ const MEAL_TYPES_NL = {
 
 // Function to calculate daily totals from meals
 const calculateDailyTotals = (dayPlan: DayPlan): MealNutrition => {
+  // Use pre-calculated dailyTotals if available (from API)
+  if (dayPlan.dailyTotals) {
+    return {
+      calories: dayPlan.dailyTotals.calories || 0,
+      protein: dayPlan.dailyTotals.protein || 0,
+      carbs: dayPlan.dailyTotals.carbs || 0,
+      fat: dayPlan.dailyTotals.fat || 0
+    };
+  }
+
+  // Fallback: calculate from individual meals
   const meals = [
     dayPlan.ontbijt,
     dayPlan.lunch,
@@ -211,7 +222,7 @@ const transformPlanData = (data: any): PlanData => {
         diner: transformMealData(dayData.diner),
         ontbijt_snack: transformMealData(dayData.ochtend_snack),
         lunch_snack: transformMealData(dayData.lunch_snack),
-        diner_snack: transformMealData(dayData.avond_snack || dayData.avondsnack),
+        diner_snack: transformMealData(dayData.avond_snack || dayData.avondsnack || dayData.diner_snack),
         dailyTotals: dayData.dailyTotals ? {
           calories: dayData.dailyTotals.calories || 0,
           protein: dayData.dailyTotals.protein || 0,
@@ -452,11 +463,11 @@ export default function DynamicPlanView({ planId, planName, userId, onBack }: Dy
   };
 
   const formatAmount = (amount: number, unit: string) => {
-    if (unit === 'stuks') {
-      return `${amount} ${unit}`;
-    } else if (unit === 'handje') {
+    // For unit types that need a space (per piece, per handful, per slice)
+    if (unit === 'stuk' || unit === 'stuks' || unit === 'handje' || unit === 'plakje') {
       return `${amount} ${unit}`;
     } else {
+      // For unit types that don't need a space (g, kg, ml, l)
       return `${amount}${unit}`;
     }
   };
