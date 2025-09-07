@@ -314,11 +314,17 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
   };
 
   const saveDayOrder = () => {
-    console.log('💾 Saving day order:', tempDayOrder.map((d, i) => `${i + 1}: ${d.name} (day_number: ${d.day_number})`));
+    // Update day_number for each day based on new order
+    const updatedDays = tempDayOrder.map((day, index) => ({
+      ...day,
+      day_number: index + 1
+    }));
+    
+    console.log('💾 Saving day order:', updatedDays.map((d, i) => `${i + 1}: ${d.name} (day_number: ${d.day_number})`));
     
     setFormData(prev => ({
       ...prev,
-      days: tempDayOrder
+      days: updatedDays
     }));
     setShowDayOrderModal(false);
     toast.success('Dag volgorde bijgewerkt!');
@@ -430,22 +436,36 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
       const schemaId = schemaData.id;
       console.log('✅ Schema saved with ID:', schemaId);
 
-      // Save days
+      // First, delete all existing days for this schema to avoid constraint conflicts
+      const { error: deleteError } = await supabase
+        .from('training_schema_days')
+        .delete()
+        .eq('schema_id', schemaId);
+
+      if (deleteError) {
+        console.error('Delete existing days error:', deleteError);
+        throw new Error(`Delete existing days failed: ${deleteError.message}`);
+      }
+
+      console.log('🗑️ Deleted existing days for schema:', schemaId);
+
+      // Save days with correct day_number
       for (let i = 0; i < formData.days.length; i++) {
         const day = formData.days[i];
-        console.log(`Saving day ${i + 1}:`, {
+        const dayNumber = i + 1; // Ensure day_number starts from 1
+        
+        console.log(`Saving day ${dayNumber}:`, {
           id: day.id,
-          day_number: day.day_number,
+          day_number: dayNumber,
           name: day.name,
           exercises_count: day.exercises.length
         });
 
         const { data: dayData, error: dayError } = await supabase
           .from('training_schema_days')
-          .upsert({
-            id: day.id,
+          .insert({
             schema_id: schemaId,
-            day_number: day.day_number,
+            day_number: dayNumber,
             name: day.name,
             description: day.description
           })
