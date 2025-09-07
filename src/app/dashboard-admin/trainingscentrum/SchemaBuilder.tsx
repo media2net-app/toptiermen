@@ -127,6 +127,16 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
   const [showDayOrderModal, setShowDayOrderModal] = useState(false);
   const [tempDayOrder, setTempDayOrder] = useState<TrainingDay[]>([]);
+  const [showSaveProgress, setShowSaveProgress] = useState(false);
+  const [saveProgress, setSaveProgress] = useState<string[]>([]);
+
+  // Function to add progress log
+  const addProgressLog = (message: string) => {
+    const timestamp = new Date().toLocaleTimeString();
+    const logMessage = `[${timestamp}] ${message}`;
+    setSaveProgress(prev => [...prev, logMessage]);
+    console.log(logMessage);
+  };
 
   // DnD Kit sensors for day order modal
   const sensors = useSensors(
@@ -412,9 +422,15 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
     }
 
     setLoading(true);
+    setShowSaveProgress(true);
+    setSaveProgress([]);
+    
     try {
-      console.log('💾 Saving schema:', formData);
+      addProgressLog('🚀 Starting schema save operation...');
+      addProgressLog(`📋 Schema: ${formData.name}`);
+      addProgressLog(`📅 Days to save: ${formData.days.length}`);
 
+      addProgressLog('💾 Saving schema to database...');
       const { data: schemaData, error: schemaError } = await supabase
         .from('training_schemas')
         .upsert({
@@ -429,37 +445,34 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
         .single();
 
       if (schemaError) {
-        console.error('Schema save error:', schemaError);
+        addProgressLog(`❌ Schema save error: ${schemaError.message}`);
         throw new Error(`Schema save failed: ${schemaError.message}`);
       }
 
       const schemaId = schemaData.id;
-      console.log('✅ Schema saved with ID:', schemaId);
+      addProgressLog(`✅ Schema saved with ID: ${schemaId}`);
 
       // First, delete all existing days for this schema to avoid constraint conflicts
+      addProgressLog('🗑️ Deleting existing days to avoid conflicts...');
       const { error: deleteError } = await supabase
         .from('training_schema_days')
         .delete()
         .eq('schema_id', schemaId);
 
       if (deleteError) {
-        console.error('Delete existing days error:', deleteError);
+        addProgressLog(`❌ Delete existing days error: ${deleteError.message}`);
         throw new Error(`Delete existing days failed: ${deleteError.message}`);
       }
 
-      console.log('🗑️ Deleted existing days for schema:', schemaId);
+      addProgressLog('✅ Existing days deleted successfully');
 
       // Save days with correct day_number
+      addProgressLog(`📅 Starting to save ${formData.days.length} days...`);
       for (let i = 0; i < formData.days.length; i++) {
         const day = formData.days[i];
         const dayNumber = i + 1; // Ensure day_number starts from 1
         
-        console.log(`Saving day ${dayNumber}:`, {
-          id: day.id,
-          day_number: dayNumber,
-          name: day.name,
-          exercises_count: day.exercises.length
-        });
+        addProgressLog(`💾 Saving day ${dayNumber}: "${day.name}" (${day.exercises.length} exercises)`);
 
         const { data: dayData, error: dayError } = await supabase
           .from('training_schema_days')
@@ -473,27 +486,31 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
           .single();
 
         if (dayError) {
-          console.error(`Day ${i + 1} save error:`, dayError);
+          addProgressLog(`❌ Day ${dayNumber} save error: ${dayError.message}`);
           throw new Error(`Day save failed: ${dayError.message}`);
         }
 
         const dayId = dayData.id;
+        addProgressLog(`✅ Day ${dayNumber} saved with ID: ${dayId}`);
 
         // First, delete all existing exercises for this day
-        const { error: deleteError } = await supabase
-          .from('training_schema_exercises')
-          .delete()
-          .eq('schema_day_id', dayId);
+        if (day.exercises.length > 0) {
+          addProgressLog(`🗑️ Deleting existing exercises for day ${dayNumber}...`);
+          const { error: deleteError } = await supabase
+            .from('training_schema_exercises')
+            .delete()
+            .eq('schema_day_id', dayId);
 
-        if (deleteError) {
-          console.error(`Delete exercises error for day ${i + 1}:`, deleteError);
-          throw new Error(`Delete exercises failed: ${deleteError.message}`);
-        }
+          if (deleteError) {
+            addProgressLog(`❌ Delete exercises error for day ${dayNumber}: ${deleteError.message}`);
+            throw new Error(`Delete exercises failed: ${deleteError.message}`);
+          }
 
-        // Then save all current exercises for this day
-        for (let j = 0; j < day.exercises.length; j++) {
-          const exercise = day.exercises[j];
-          console.log(`Saving exercise ${j + 1} for day ${i + 1}:`, exercise);
+          // Then save all current exercises for this day
+          addProgressLog(`💪 Saving ${day.exercises.length} exercises for day ${dayNumber}...`);
+          for (let j = 0; j < day.exercises.length; j++) {
+            const exercise = day.exercises[j];
+            addProgressLog(`  💾 Saving exercise ${j + 1}/${day.exercises.length}: "${exercise.exercise_name}"`);
 
           const { error: exerciseError } = await supabase
             .from('training_schema_exercises')
@@ -507,17 +524,24 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
               order_index: j // Use array index as order_index
             });
 
-          if (exerciseError) {
-            console.error(`Exercise ${j + 1} save error:`, exerciseError);
-            throw new Error(`Exercise save failed: ${exerciseError.message}`);
+            if (exerciseError) {
+              addProgressLog(`❌ Exercise ${j + 1} save error for day ${dayNumber}: ${exerciseError.message}`);
+              throw new Error(`Exercise save failed: ${exerciseError.message}`);
+            }
           }
+          addProgressLog(`✅ All exercises saved for day ${dayNumber}`);
+        } else {
+          addProgressLog(`ℹ️ No exercises to save for day ${dayNumber}`);
         }
       }
 
+      addProgressLog('🎉 Schema save completed successfully!');
       toast.success('Schema succesvol opgeslagen!');
       onSave({ ...formData, id: schemaId });
+      setShowSaveProgress(false);
       onClose();
     } catch (error) {
+      addProgressLog(`❌ Save operation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
       console.error('Error saving schema:', error);
       console.error('Error details:', {
         message: error instanceof Error ? error.message : 'Unknown error',
@@ -539,6 +563,7 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
       }
     } finally {
       setLoading(false);
+      setShowSaveProgress(false);
     }
   };
 
@@ -895,6 +920,32 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
               >
                 Opslaan
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Save Progress Modal */}
+      {showSaveProgress && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-70">
+          <div className="bg-gray-900 rounded-lg p-6 w-[600px] max-h-[80vh] overflow-y-auto">
+            <h3 className="text-lg font-semibold text-white mb-4">
+              💾 Schema Opslaan...
+            </h3>
+            <div className="bg-gray-800 rounded-lg p-4 max-h-[400px] overflow-y-auto">
+              <div className="space-y-1 text-sm font-mono">
+                {saveProgress.map((log, index) => (
+                  <div key={index} className="text-gray-300">
+                    {log}
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="mt-4 flex justify-center">
+              <div className="flex items-center space-x-2 text-[#8BAE5A]">
+                <div className="w-4 h-4 border-2 border-[#8BAE5A] border-t-transparent rounded-full animate-spin"></div>
+                <span className="text-sm">Bezig met opslaan...</span>
+              </div>
             </div>
           </div>
         </div>
