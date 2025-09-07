@@ -63,8 +63,7 @@ function SortableExerciseItem({
     opacity: isDragging ? 0.5 : 1,
   };
 
-  // Debug logging
-  console.log(`🔧 SortableExerciseItem rendered: ${exerciseId}, isDragging: ${isDragging}`);
+  // Debug logging removed for production
 
   return (
     <div
@@ -892,12 +891,7 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
                               ))}
                             </SortableContext>
                             
-                            {/* Debug info */}
-                            {day.exercises.length > 0 && (
-                              <div className="mt-2 p-2 bg-blue-900/20 rounded text-xs text-blue-300">
-                                Debug: {day.exercises.length} oefeningen, IDs: {day.exercises.map((_, i) => `exercise-${dayIndex}-${i}`).join(', ')}
-                              </div>
-                            )}
+                            {/* Debug info removed for production */}
                       </div>
                     </div>
                   ))}
