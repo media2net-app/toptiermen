@@ -1883,25 +1883,29 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
                                           (meals?.snack1?.calories || 0) + 
                                           (meals?.lunch?.calories || 0) + 
                                           (meals?.snack2?.calories || 0) + 
-                                          (meals?.diner?.calories || 0);
+                                          (meals?.diner?.calories || 0) + 
+                                          (meals?.avondsnack?.calories || 0);
                       
                       const totalProtein = (meals?.ontbijt?.protein || 0) + 
                                          (meals?.snack1?.protein || 0) + 
                                          (meals?.lunch?.protein || 0) + 
                                          (meals?.snack2?.protein || 0) + 
-                                         (meals?.diner?.protein || 0);
+                                         (meals?.diner?.protein || 0) + 
+                                         (meals?.avondsnack?.protein || 0);
                       
                       const totalCarbs = (meals?.ontbijt?.carbs || 0) + 
                                        (meals?.snack1?.carbs || 0) + 
                                        (meals?.lunch?.carbs || 0) + 
                                        (meals?.snack2?.carbs || 0) + 
-                                       (meals?.diner?.carbs || 0);
+                                       (meals?.diner?.carbs || 0) + 
+                                       (meals?.avondsnack?.carbs || 0);
                       
                       const totalFat = (meals?.ontbijt?.fat || 0) + 
                                      (meals?.snack1?.fat || 0) + 
                                      (meals?.lunch?.fat || 0) + 
                                      (meals?.snack2?.fat || 0) + 
-                                     (meals?.diner?.fat || 0);
+                                     (meals?.diner?.fat || 0) + 
+                                     (meals?.avondsnack?.fat || 0);
                       
                       return (
                         <div className="grid grid-cols-4 gap-4 text-center">
