@@ -106,7 +106,7 @@ export default function VoedingsplannenBackupPage() {
     }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
   };
 
-  const calculatePlanTotal = (plan: NutritionPlan) => {
+  const calculatePlanTotal = (plan: NutritionPlan): { calories: number; protein: number; carbs: number; fat: number } => {
     if (!plan.meals) return { calories: 0, protein: 0, carbs: 0, fat: 0 };
     
     // Handle new weekly_plan structure
