@@ -98,7 +98,7 @@ export default function VoedingsplannenBackupPage() {
     }
     
     // Handle old structure
-    return Object.values(dayPlan).reduce((total: any, meal: any) => ({
+    return Object.values(dayPlan).reduce((total: { calories: number; protein: number; carbs: number; fat: number }, meal: any) => ({
       calories: total.calories + (meal.calories || 0),
       protein: total.protein + (meal.protein || 0),
       carbs: total.carbs + (meal.carbs || 0),
