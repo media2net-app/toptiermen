@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { 
   XMarkIcon, 
   PlusIcon, 
@@ -129,6 +129,7 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
   const [tempDayOrder, setTempDayOrder] = useState<TrainingDay[]>([]);
   const [showSaveProgress, setShowSaveProgress] = useState(false);
   const [saveProgress, setSaveProgress] = useState<string[]>([]);
+  const progressScrollRef = useRef<HTMLDivElement>(null);
 
   // Function to add progress log
   const addProgressLog = (message: string) => {
@@ -137,6 +138,13 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
     setSaveProgress(prev => [...prev, logMessage]);
     console.log(logMessage);
   };
+
+  // Auto-scroll to bottom when new logs are added
+  useEffect(() => {
+    if (progressScrollRef.current) {
+      progressScrollRef.current.scrollTop = progressScrollRef.current.scrollHeight;
+    }
+  }, [saveProgress]);
 
   // DnD Kit sensors for day order modal
   const sensors = useSensors(
@@ -932,7 +940,10 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
             <h3 className="text-lg font-semibold text-white mb-4">
               💾 Schema Opslaan...
             </h3>
-            <div className="bg-gray-800 rounded-lg p-4 max-h-[400px] overflow-y-auto">
+            <div 
+              ref={progressScrollRef}
+              className="bg-gray-800 rounded-lg p-4 max-h-[400px] overflow-y-auto"
+            >
               <div className="space-y-1 text-sm font-mono">
                 {saveProgress.map((log, index) => (
                   <div key={index} className="text-gray-300">
