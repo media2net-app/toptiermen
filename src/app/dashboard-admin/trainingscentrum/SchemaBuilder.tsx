@@ -544,6 +544,8 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
       days: updatedDays
     });
 
+    console.log(`✅ Exercise order updated:`, dayExercises.map((ex, i) => `${i}: ${ex.exercise_name} (order: ${ex.order_index})`));
+
     console.log('✅ Exercise order updated successfully');
   };
 
@@ -661,7 +663,7 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
           addProgressLog(`💪 Saving ${day.exercises.length} exercises for day ${dayNumber}...`);
           for (let j = 0; j < day.exercises.length; j++) {
             const exercise = day.exercises[j];
-            addProgressLog(`  💾 Saving exercise ${j + 1}/${day.exercises.length}: "${exercise.exercise_name}"`);
+            addProgressLog(`  💾 Saving exercise ${j + 1}/${day.exercises.length}: "${exercise.exercise_name}" (order: ${exercise.order_index})`);
 
           const { error: exerciseError } = await supabase
             .from('training_schema_exercises')
@@ -672,7 +674,7 @@ export default function SchemaBuilder({ isOpen, onClose, schema, onSave }: Schem
               sets: exercise.sets,
               reps: exercise.reps,
               rest_time: exercise.rest_time,
-              order_index: j // Use array index as order_index
+              order_index: exercise.order_index || j // Use exercise.order_index if set, otherwise use array index
             });
 
             if (exerciseError) {
