@@ -227,24 +227,26 @@ const mapDbSchemaToForm = (dbSchema: any) => ({
   category: dbSchema.category,
   difficulty: dbSchema.difficulty,
   status: dbSchema.status,
-  days: (dbSchema.training_schema_days || []).map((day: any) => ({
-    id: day.id,
-    schema_id: dbSchema.id,
-    day_number: day.day_number,
-    name: day.name,
-    description: day.description,
-    exercises: (day.training_schema_exercises || [])
-      .sort((a: any, b: any) => (a.order_index ?? 0) - (b.order_index ?? 0))
-      .map((ex: any) => ({
-        id: ex.id,
-        exercise_id: ex.exercise_id,
-        exercise_name: ex.exercise_name,
-        sets: ex.sets,
-        reps: ex.reps,
-        rest_time: ex.rest_time,
-        order_index: ex.order_index ?? 0,
-      })),
-  })),
+  days: (dbSchema.training_schema_days || [])
+    .sort((a: any, b: any) => (a.day_number ?? 0) - (b.day_number ?? 0))
+    .map((day: any) => ({
+      id: day.id,
+      schema_id: dbSchema.id,
+      day_number: day.day_number,
+      name: day.name,
+      description: day.description,
+      exercises: (day.training_schema_exercises || [])
+        .sort((a: any, b: any) => (a.order_index ?? 0) - (b.order_index ?? 0))
+        .map((ex: any) => ({
+          id: ex.id,
+          exercise_id: ex.exercise_id,
+          exercise_name: ex.exercise_name,
+          sets: ex.sets,
+          reps: ex.reps,
+          rest_time: ex.rest_time,
+          order_index: ex.order_index ?? 0,
+        })),
+    })),
 });
 
 export default function TrainingscentrumBeheer() {
@@ -351,8 +353,11 @@ export default function TrainingscentrumBeheer() {
       } else {
         console.log(`✅ Successfully fetched ${data?.length || 0} training schemas`);
         
-        // Sort schemas by number of days (ascending)
-        const sortedSchemas = (data || []).sort((a, b) => {
+        // Sort schemas by number of days (ascending) and sort days within each schema by day_number
+        const sortedSchemas = (data || []).map(schema => ({
+          ...schema,
+          training_schema_days: (schema.training_schema_days || []).sort((a, b) => (a.day_number || 0) - (b.day_number || 0))
+        })).sort((a, b) => {
           const daysA = a.training_schema_days?.length || 0;
           const daysB = b.training_schema_days?.length || 0;
           return daysA - daysB;
