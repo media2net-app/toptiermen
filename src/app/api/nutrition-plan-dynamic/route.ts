@@ -519,9 +519,9 @@ function scaleIngredientAmounts(ingredients, scaleFactor) {
       
       // Round to reasonable values based on unit type
       if (ingredient.unit === 'per_piece' || ingredient.unit === 'stuk') {
-        // For pieces, round to nearest 0.5 (half pieces)
-        scaledAmount = Math.round(scaledAmount * 2) / 2;
-        scaledAmount = Math.max(0.5, scaledAmount); // Minimum 0.5 pieces
+        // For pieces, round to nearest whole number, minimum 1
+        scaledAmount = Math.round(scaledAmount);
+        scaledAmount = Math.max(1, scaledAmount); // Minimum 1 piece
       } else if (ingredient.unit === 'per_100g' || ingredient.unit === 'g') {
         // For grams, round to nearest 5g
         scaledAmount = Math.round(scaledAmount / 5) * 5;
