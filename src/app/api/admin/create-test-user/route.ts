@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     if (authData.user) {
       console.log('✅ Auth user created:', authData.user.email);
       
-      // Create user profile using admin client
+      // Create user profile using admin client (bypass RLS with service role)
       const { error: profileError } = await supabase
         .from('profiles')
         .insert([
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
         ])
         .select();
 
-      // Also create user record in users table with role
+      // Also create user record in users table with role (bypass RLS with service role)
       const { error: userError } = await supabase
         .from('users')
         .insert([
@@ -58,17 +58,21 @@ export async function POST(request: NextRequest) {
 
       if (profileError) {
         console.error('❌ Error creating profile:', profileError);
+        console.error('Profile error details:', JSON.stringify(profileError, null, 2));
         return NextResponse.json({
           success: false,
-          error: 'Auth user created but failed to create profile'
+          error: 'Auth user created but failed to create profile',
+          details: profileError.message
         }, { status: 400 });
       }
 
       if (userError) {
         console.error('❌ Error creating user record:', userError);
+        console.error('User error details:', JSON.stringify(userError, null, 2));
         return NextResponse.json({
           success: false,
-          error: 'Profile created but failed to create user record'
+          error: 'Profile created but failed to create user record',
+          details: userError.message
         }, { status: 400 });
       }
 
