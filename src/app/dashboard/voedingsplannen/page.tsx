@@ -736,11 +736,9 @@ export default function VoedingsplannenPage() {
                       required
                     >
                       <option value="">Selecteer je activiteitsniveau</option>
-                      <option value="sedentary">Zittend werk (kantoor, weinig beweging)</option>
-                      <option value="light">Licht actief (1-3x sport per week)</option>
-                      <option value="moderate">Matig actief (3-5x sport per week)</option>
-                      <option value="active">Zeer actief (6-7x sport per week)</option>
-                      <option value="very_active">Extreem actief (2x/dag sport, fysiek werk)</option>
+                      <option value="sedentary">Zittend (Licht actief) - Kantoorbaan, weinig beweging</option>
+                      <option value="moderate">Staand (Matig actief) - Staand werk, matige beweging</option>
+                      <option value="very_active">Lopend (Zeer actief) - Fysiek werk, veel beweging</option>
                     </select>
                   </div>
                   <div>

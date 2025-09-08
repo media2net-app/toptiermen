@@ -40,33 +40,21 @@ interface NutritionIntakeProps {
 const activityLevels = [
   { 
     value: 'sedentary', 
-    label: 'Zittend werk', 
-    description: 'Weinig tot geen beweging, kantoorbaan',
-    multiplier: 1.2
-  },
-  { 
-    value: 'light', 
-    label: 'Licht actief', 
-    description: '1-3x per week sporten of lichte beweging',
-    multiplier: 1.375
+    label: 'Zittend (Licht actief)', 
+    description: 'Kantoorbaan, weinig beweging',
+    multiplier: 1.1
   },
   { 
     value: 'moderate', 
-    label: 'Matig actief', 
-    description: '3-5x per week sporten of matige beweging',
-    multiplier: 1.55
-  },
-  { 
-    value: 'active', 
-    label: 'Actief', 
-    description: '6-7x per week sporten of zware beweging',
-    multiplier: 1.725
+    label: 'Staand (Matig actief)', 
+    description: 'Staand werk, matige beweging',
+    multiplier: 1.3
   },
   { 
     value: 'very_active', 
-    label: 'Zeer actief', 
-    description: 'Dagelijks intensief sporten of fysiek werk',
-    multiplier: 1.9
+    label: 'Lopend (Zeer actief)', 
+    description: 'Fysiek werk, veel beweging',
+    multiplier: 1.6
   }
 ];
 

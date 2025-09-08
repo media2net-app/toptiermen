@@ -104,17 +104,15 @@ export async function GET(request: NextRequest) {
             bmr = 10 * profileData.weight + 6.25 * profileData.height - 5 * profileData.age - 161;
           }
 
-          // Activity multipliers
+          // Activity multipliers (nieuwe 3-niveau structuur)
           const activityMultipliers: { [key: string]: number } = {
-            sedentary: 1.2,
-            light: 1.375,
-            moderate: 1.55,
-            active: 1.725,
-            very_active: 1.9
+            sedentary: 1.1,  // Zittend (Licht actief)
+            moderate: 1.3,   // Staand (Matig actief)
+            very_active: 1.6 // Lopend (Zeer actief)
           };
 
-          // Calculate TDEE
-          const tdee = bmr * (activityMultipliers[profileData.activity_level] || 1.375);
+          // Calculate TDEE - Nieuwe berekening: Gewicht x 22 x activiteitniveau
+          const tdee = profileData.weight * 22 * (activityMultipliers[profileData.activity_level] || 1.3);
 
           // Adjust calories based on goal
           targetCalories = tdee;

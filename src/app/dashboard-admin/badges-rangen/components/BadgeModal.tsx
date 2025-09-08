@@ -95,7 +95,7 @@ const getIconDisplay = (iconName: string): string => {
     'FaDollarSign': '💰',
     'FaClock': '⏰',
     'FaCheck': '✅',
-    'FaTarget': '🎯',
+    'FaBullseye': '🎯',
     'FaLightbulb': '💡',
     'FaShield': '🛡️',
     'FaCrown': '👑',
@@ -110,7 +110,7 @@ const AVAILABLE_ICONS = [
   'FaBolt', 'FaFire', 'FaBookOpen', 'FaRunning', 'FaDumbbell', 
   'FaSnowflake', 'FaMedal', 'FaUsers', 'FaTrophy', 'FaStar',
   'FaHeart', 'FaBrain', 'FaDollarSign', 'FaClock', 'FaCheck',
-  'FaTarget', 'FaLightbulb', 'FaShield', 'FaCrown', 'FaGem'
+  'FaBullseye', 'FaLightbulb', 'FaShield', 'FaCrown', 'FaGem'
 ];
 
 export default function BadgeModal({ 

@@ -7,14 +7,11 @@ import {
   TrashIcon,
   ChartBarIcon,
   BoltIcon,
-  LightBulbIcon,
-  UserGroupIcon,
   XMarkIcon
 } from '@heroicons/react/24/outline';
 import { createClient } from '@supabase/supabase-js';
 import PlanBuilder from './components/PlanBuilder';
 import FoodItemModal from './components/FoodItemModal';
-import MealModal from '@/components/admin/MealModal';
 import AdminCard from '@/components/admin/AdminCard';
 import AdminStatsCard from '@/components/admin/AdminStatsCard';
 import AdminButton from '@/components/admin/AdminButton';
@@ -61,7 +58,8 @@ interface MealStructure {
 }
 
 interface NutritionPlan {
-  id: string;
+  id?: string;
+  plan_id?: string;
   name: string;
   description: string;
   target_calories?: number;
@@ -71,30 +69,157 @@ interface NutritionPlan {
   duration_weeks?: number;
   difficulty?: string;
   goal?: string;
+  fitness_goal?: 'droogtrainen' | 'spiermassa' | 'onderhoud';
   is_featured?: boolean;
   is_public?: boolean;
   created_at?: string;
   updated_at?: string;
-  meals?: MealStructure[];
+  meals?: {
+    weekly_plan: {
+      [key: string]: {
+        [key: string]: {
+          time: string;
+          ingredients: Array<{
+            id: string;
+            name: string;
+            amount: number;
+            unit: string;
+            calories_per_100g: number;
+            protein_per_100g: number;
+            carbs_per_100g: number;
+            fat_per_100g: number;
+          }>;
+          nutrition: {
+            calories: number;
+            protein: number;
+            carbs: number;
+            fat: number;
+          };
+        };
+      };
+    };
+    weekly_averages: {
+      calories: number;
+      protein: number;
+      carbs: number;
+      fat: number;
+    };
+  };
 }
 
 export default function AdminVoedingsplannenPage() {
   const [activeTab, setActiveTab] = useState('voeding');
-  const [mealsFilter, setMealsFilter] = useState('alle');
-  const [showPlanBuilder, setShowPlanBuilder] = useState(false);
+  const [editMode, setEditMode] = useState(false);
   const [showFoodItemModal, setShowFoodItemModal] = useState(false);
-  const [showMealModal, setShowMealModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<NutritionPlan | null>(null);
+  const [savingBeforeBack, setSavingBeforeBack] = useState(false);
   const [selectedFoodItem, setSelectedFoodItem] = useState<FoodItem | null>(null);
-  const [selectedMeal, setSelectedMeal] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [carnivoreFilter, setCarnivoreFilter] = useState<'all' | 'yes' | 'no'>('all');
   const [plans, setPlans] = useState<NutritionPlan[]>([]);
-  const [weekplans, setWeekplans] = useState<any[]>([]);
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
-  const [meals, setMeals] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingFoodItems, setIsLoadingFoodItems] = useState(true);
+
+  // Helper function to calculate plan completion status
+  const getPlanStatus = (plan: NutritionPlan) => {
+    if (!plan.meals || !plan.meals.weekly_plan) {
+      return { completion: 0, quality: 0, status: 'empty', label: 'Leeg' };
+    }
+
+    const weeklyPlan = plan.meals.weekly_plan;
+    const days = ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag'];
+    const meals = ['ontbijt', 'ontbijt_snack', 'lunch', 'lunch_snack', 'diner', 'diner_snack'];
+    
+    let totalMeals = 0;
+    let filledMeals = 0;
+    let totalCalories = 0;
+    let totalProtein = 0;
+    let totalCarbs = 0;
+    let totalFat = 0;
+
+    days.forEach(day => {
+      meals.forEach(meal => {
+        totalMeals++;
+        if (weeklyPlan[day] && weeklyPlan[day][meal] && weeklyPlan[day][meal].ingredients && weeklyPlan[day][meal].ingredients.length > 0) {
+          filledMeals++;
+          // Use the new database structure - nutrition is directly in the meal object
+          if (weeklyPlan[day][meal].nutrition) {
+            totalCalories += weeklyPlan[day][meal].nutrition.calories || 0;
+            totalProtein += weeklyPlan[day][meal].nutrition.protein || 0;
+            totalCarbs += weeklyPlan[day][meal].nutrition.carbs || 0;
+            totalFat += weeklyPlan[day][meal].nutrition.fat || 0;
+          }
+        }
+      });
+    });
+
+    const completion = Math.round((filledMeals / totalMeals) * 100);
+    const avgCalories = totalCalories / 7; // Average per day
+    const avgProtein = totalProtein / 7;
+    const avgCarbs = totalCarbs / 7;
+    const avgFat = totalFat / 7;
+
+    // Calculate quality based on how close we are to targets
+    let qualityScore = 0;
+    if (plan.target_calories) {
+      const calorieAccuracy = Math.max(0, 100 - Math.abs((avgCalories - plan.target_calories) / plan.target_calories * 100));
+      qualityScore += calorieAccuracy * 0.4; // 40% weight for calories
+    }
+    if (plan.target_protein) {
+      const proteinAccuracy = Math.max(0, 100 - Math.abs((avgProtein - plan.target_protein) / plan.target_protein * 100));
+      qualityScore += proteinAccuracy * 0.2; // 20% weight for protein
+    }
+    if (plan.target_carbs) {
+      const carbsAccuracy = Math.max(0, 100 - Math.abs((avgCarbs - plan.target_carbs) / plan.target_carbs * 100));
+      qualityScore += carbsAccuracy * 0.2; // 20% weight for carbs
+    }
+    if (plan.target_fat) {
+      const fatAccuracy = Math.max(0, 100 - Math.abs((avgFat - plan.target_fat) / plan.target_fat * 100));
+      qualityScore += fatAccuracy * 0.2; // 20% weight for fat
+    }
+
+    const quality = Math.round(qualityScore);
+
+    // Determine status
+    let status = 'empty';
+    let label = 'Leeg';
+    let color = 'gray';
+
+    if (completion === 0) {
+      status = 'empty';
+      label = 'Leeg';
+      color = 'gray';
+    } else if (completion < 25) {
+      status = 'started';
+      label = 'Gestart';
+      color = 'red';
+    } else if (completion < 75) {
+      status = 'partial';
+      label = 'Gedeeltelijk';
+      color = 'yellow';
+    } else if (completion < 100) {
+      status = 'almost';
+      label = 'Bijna klaar';
+      color = 'blue';
+    } else {
+      status = 'complete';
+      label = 'Volledig';
+      color = 'green';
+    }
+
+    return { 
+      completion, 
+      quality, 
+      status, 
+      label, 
+      color,
+      avgCalories: Math.round(avgCalories),
+      avgProtein: Math.round(avgProtein * 10) / 10,
+      avgCarbs: Math.round(avgCarbs * 10) / 10,
+      avgFat: Math.round(avgFat * 10) / 10
+    };
+  };
 
   // Fetch all data functions
   const fetchFoodItems = async () => {
@@ -119,43 +244,6 @@ export default function AdminVoedingsplannenPage() {
     }
   };
 
-  const fetchMeals = async () => {
-    try {
-      console.log('🍽️ Fetching meals from database...');
-      
-      const response = await fetch('/api/admin/meals');
-      const result = await response.json();
-      
-      if (!response.ok) {
-        console.error('❌ Error fetching meals:', result.error);
-        return;
-      }
-      
-      setMeals(result.meals || []);
-      console.log('✅ Meals loaded:', result.meals?.length || 0);
-    } catch (err) {
-      console.error('❌ Exception fetching meals:', err);
-    }
-  };
-
-  const fetchWeekplans = async () => {
-    try {
-      console.log('📊 Fetching nutrition weekplans from database...');
-      
-      const response = await fetch('/api/admin/nutrition-weekplans');
-      const result = await response.json();
-      
-      if (!response.ok) {
-        console.error('❌ Error fetching weekplans:', result.error);
-        return;
-      }
-      
-      setWeekplans(result.weekplans || []);
-      console.log('✅ Weekplans loaded:', result.weekplans?.length || 0);
-    } catch (err) {
-      console.error('❌ Exception fetching weekplans:', err);
-    }
-  };
 
   const fetchPlans = async () => {
     try {
@@ -220,8 +308,6 @@ export default function AdminVoedingsplannenPage() {
     try {
       // Fetch data sequentially to avoid race conditions
       await fetchPlans();
-      await fetchWeekplans();
-      await fetchMeals();
       await fetchFoodItems();
     } catch (error) {
       console.error('❌ Error fetching all data:', error);
@@ -246,11 +332,9 @@ export default function AdminVoedingsplannenPage() {
     console.log('🔍 Admin page state:', {
       plans: plans.length,
       foodItems: foodItems.length,
-      meals: meals.length,
-      weekplans: weekplans.length,
       isLoading
     });
-  }, [plans.length, foodItems.length, meals.length, weekplans.length, isLoading]);
+  }, [plans.length, foodItems.length, isLoading]);
 
   // Force data loading on page load
   useEffect(() => {
@@ -296,72 +380,6 @@ export default function AdminVoedingsplannenPage() {
     return () => clearTimeout(emergencyTimer);
   }, []);
 
-  const handleSaveMeal = async (mealData: any) => {
-    try {
-      const method = selectedMeal ? 'PUT' : 'POST';
-      const url = '/api/admin/meals';
-      
-      const payload = selectedMeal 
-        ? { ...mealData, id: selectedMeal.id }
-        : mealData;
-
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload)
-      });
-
-      const result = await response.json();
-      
-      if (!response.ok) {
-        console.error('❌ Error saving meal:', result.error);
-        alert('Fout bij opslaan van maaltijd: ' + (result.error || 'Onbekende fout'));
-        return;
-      }
-
-      console.log('✅ Meal saved successfully:', result);
-      await fetchAllData();
-      setShowMealModal(false);
-      setSelectedMeal(null);
-      
-    } catch (error) {
-      console.error('❌ Error saving meal:', error);
-      alert('Fout bij opslaan van maaltijd');
-    }
-  };
-
-  const handleDeleteMeal = async (mealId: string) => {
-    if (!confirm('Weet je zeker dat je deze maaltijd wilt verwijderen?')) {
-      return;
-    }
-
-    try {
-      const response = await fetch('/api/admin/meals', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ id: mealId })
-      });
-
-      const result = await response.json();
-      
-      if (!response.ok) {
-        console.error('❌ Error deleting meal:', result.error);
-        alert('Fout bij verwijderen van maaltijd: ' + (result.error || 'Onbekende fout'));
-        return;
-      }
-
-      console.log('✅ Meal deleted successfully:', result);
-      await fetchAllData();
-      
-    } catch (error) {
-      console.error('❌ Error deleting meal:', error);
-      alert('Fout bij verwijderen van maaltijd');
-    }
-  };
 
   const handleSavePlan = async (planData: any) => {
     try {
@@ -372,9 +390,12 @@ export default function AdminVoedingsplannenPage() {
       const method = selectedPlan ? 'PUT' : 'POST';
       const url = '/api/admin/nutrition-plans';
       
+      // Clean payload - remove invalid columns and only include valid database fields
+      const { weekly_plan, created_at, updated_at, ...cleanPlanData } = planData;
+      
       const payload = selectedPlan 
-        ? { ...planData, id: selectedPlan.id }
-        : planData;
+        ? { ...cleanPlanData, id: selectedPlan.id }
+        : cleanPlanData;
         
       console.log('🔍 DEBUG: Method determined:', method);
       console.log('🔍 DEBUG: URL:', url);
@@ -421,7 +442,7 @@ export default function AdminVoedingsplannenPage() {
         }
       }, 100);
       
-      setShowPlanBuilder(false);
+      // Keep edit mode open, just refresh the data
       
     } catch (error) {
       console.error('❌ Error saving plan:', error);
@@ -460,15 +481,59 @@ export default function AdminVoedingsplannenPage() {
     }
   };
 
-  const handleEditPlan = (plan: NutritionPlan) => {
-    setSelectedPlan(plan);
-    setShowPlanBuilder(true);
+  const handleEditPlan = async (plan: NutritionPlan) => {
+    console.log('🔄 Opening plan for editing:', plan.name);
+    
+    // Load fresh data from the new API to ensure we have the latest
+    try {
+      const response = await fetch(`/api/admin/plan-meals?planId=${plan.id}`);
+      const result = await response.json();
+      
+      if (result.success && result.plan) {
+        console.log('✅ Fresh plan data loaded:', result.plan.name);
+        setSelectedPlan(result.plan);
+      } else {
+        console.log('⚠️ Using cached plan data:', plan.name);
+        setSelectedPlan(plan);
+      }
+    } catch (error) {
+      console.error('❌ Error loading fresh plan data:', error);
+      console.log('⚠️ Using cached plan data as fallback:', plan.name);
+      setSelectedPlan(plan);
+    }
+    
+    setEditMode(true);
   };
 
-  const handleEditMeal = (meal: any) => {
-    setSelectedMeal(meal);
-    setShowMealModal(true);
+  const handleBackToOverview = async () => {
+    console.log('🔄 handleBackToOverview called');
+    
+    // If we have a selected plan, save it before going back
+    if (selectedPlan) {
+      setSavingBeforeBack(true);
+      console.log('💾 Saving plan before going back to overview...');
+      try {
+        // Use the new plan-meals API to ensure correct data
+        const response = await fetch(`/api/admin/plan-meals?planId=${selectedPlan.id}`);
+        const result = await response.json();
+        
+        if (result.success) {
+          console.log('✅ Plan data verified before going back');
+        } else {
+          console.log('⚠️ Could not verify plan data:', result.error);
+        }
+      } catch (error) {
+        console.error('❌ Error verifying plan before going back:', error);
+        // Still go back even if verification fails
+      } finally {
+        setSavingBeforeBack(false);
+      }
+    }
+    
+    setEditMode(false);
+    setSelectedPlan(null);
   };
+
 
   const handleEditFoodItem = (foodItem: FoodItem) => {
     setSelectedFoodItem(foodItem);
@@ -573,15 +638,6 @@ export default function AdminVoedingsplannenPage() {
     return matchesSearch && matchesCarnivore;
   });
 
-  const filteredMeals = meals.filter(meal =>
-    meal.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    meal.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const filteredWeekplans = weekplans.filter(weekplan =>
-    weekplan.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    weekplan.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   if (isLoading) {
     return (
@@ -593,6 +649,7 @@ export default function AdminVoedingsplannenPage() {
       </div>
     );
   }
+
 
   return (
     <div className="min-h-screen bg-[#181F17] text-white">
@@ -621,46 +678,20 @@ export default function AdminVoedingsplannenPage() {
             icon={<BoltIcon className="w-6 h-6" />}
             color="green"
           />
-          <AdminStatsCard
-            title="Maaltijden"
-            value={meals.length.toString()}
-            icon={<LightBulbIcon className="w-6 h-6" />}
-            color="orange"
-          />
-          <AdminStatsCard
-            title="Weekplannen"
-            value={weekplans.length.toString()}
-            icon={<UserGroupIcon className="w-6 h-6" />}
-            color="purple"
-          />
         </div>
 
         {/* Navigation Tabs */}
         <div className="flex space-x-1 mb-8">
-          {[
-            { id: 'voeding', label: 'Voedingsplannen' },
-            { id: 'ingredienten', label: 'Ingrediënten' },
-            { id: 'maaltijden', label: 'Maaltijden' },
-            { id: 'weekplannen', label: 'Weekplannen' }
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => {
-                setActiveTab(tab.id);
-                // Reset carnivore filter when switching tabs
-                if (tab.id !== 'ingredienten') {
-                  setCarnivoreFilter('all');
-                }
-              }}
-              className={`px-4 py-2 rounded-lg transition-colors ${
-                activeTab === tab.id
-                  ? 'bg-[#8BAE5A] text-[#181F17] font-semibold'
-                  : 'bg-[#232D1A] text-gray-300 hover:bg-[#2A3420]'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+          <button
+            onClick={() => setActiveTab('voeding')}
+            className={`px-4 py-2 rounded-lg transition-colors ${
+              activeTab === 'voeding'
+                ? 'bg-[#8BAE5A] text-[#181F17] font-semibold'
+                : 'bg-[#232D1A] text-gray-300 hover:bg-[#2A3420]'
+            }`}
+          >
+            Voedingsplannen
+          </button>
         </div>
 
         {/* Search Bar */}
@@ -686,56 +717,12 @@ export default function AdminVoedingsplannenPage() {
               )}
             </div>
             
-            {/* Carnivore Filter - Only show on ingredients tab */}
-            {activeTab === 'ingredienten' && (
-              <div className="min-w-[200px]">
-                <select
-                  value={carnivoreFilter}
-                  onChange={(e) => setCarnivoreFilter(e.target.value as 'all' | 'yes' | 'no')}
-                  className="w-full py-2 px-3 bg-[#232D1A] border border-[#3A4D23] rounded-lg text-white focus:border-[#8BAE5A] focus:outline-none"
-                >
-                  <option value="all">Alle ingrediënten</option>
-                  <option value="yes">Alleen carnivoor</option>
-                  <option value="no">Alleen standaard</option>
-                </select>
-              </div>
-            )}
           </div>
-          {(searchTerm || (activeTab === 'ingredienten' && carnivoreFilter !== 'all')) && (
+          {searchTerm && (
             <div className="mt-2 text-sm text-gray-400">
-              {searchTerm && (
-                <span>
-                  Zoekresultaten voor: <span className="text-[#8BAE5A] font-medium">"{searchTerm}"</span>
-                </span>
-              )}
-              {activeTab === 'ingredienten' && carnivoreFilter !== 'all' && (
-                <span className={searchTerm ? 'ml-3' : ''}>
-                  Filter: <span className="text-[#8BAE5A] font-medium">
-                    {carnivoreFilter === 'yes' ? 'Alleen carnivoor' : 'Alleen standaard'}
-                  </span>
-                </span>
-              )}
-              {activeTab === 'ingredienten' && filteredFoodItems.length === 0 && (
-                <span className="text-red-400 ml-2 block mt-1">
-                  • Geen ingrediënten gevonden. 
-                  {searchTerm && (
-                    <button 
-                      onClick={() => setSearchTerm('')} 
-                      className="text-[#8BAE5A] underline hover:text-[#B6C948] ml-1"
-                    >
-                      Wis zoekopdracht
-                    </button>
-                  )}
-                  {carnivoreFilter !== 'all' && (
-                    <button 
-                      onClick={() => setCarnivoreFilter('all')} 
-                      className="text-[#8BAE5A] underline hover:text-[#B6C948] ml-1"
-                    >
-                      Wis filter
-                    </button>
-                  )}
-                </span>
-              )}
+              <span>
+                Zoekresultaten voor: <span className="text-[#8BAE5A] font-medium">"{searchTerm}"</span>
+              </span>
             </div>
           )}
         </div>
@@ -743,19 +730,53 @@ export default function AdminVoedingsplannenPage() {
         {/* Content based on active tab */}
         {activeTab === 'voeding' && (
           <div>
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold">Voedingsplannen</h2>
-              <AdminButton
-                onClick={() => {
-                  setSelectedPlan(null);
-                  setShowPlanBuilder(true);
-                }}
-                icon={<PlusIcon className="w-4 h-4" />}
-                variant="primary"
-              >
-                + Nieuw Plan
-              </AdminButton>
-            </div>
+            {editMode && selectedPlan ? (
+              // Edit Mode - Show PlanBuilder integrated in content
+              <div>
+                {/* Back Button */}
+                <div className="mb-6">
+                  <button
+                    onClick={handleBackToOverview}
+                    disabled={savingBeforeBack}
+                    className="flex items-center space-x-2 text-[#8BAE5A] hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {savingBeforeBack ? (
+                      <div className="w-5 h-5 border-2 border-[#8BAE5A] border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    )}
+                    <span>{savingBeforeBack ? 'Opslaan...' : 'Terug naar overzicht'}</span>
+                  </button>
+                </div>
+                
+                {/* PlanBuilder integrated in content */}
+                <div className="bg-[#0F150E] rounded-xl border border-[#3A4D23]">
+                  <PlanBuilder
+                    plan={selectedPlan}
+                    onSave={handleSavePlan}
+                    onClose={handleBackToOverview}
+                    isPageMode={true}
+                  />
+                </div>
+              </div>
+            ) : (
+              // Overview Mode - Show plans list
+              <div>
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-xl font-semibold">Voedingsplannen</h2>
+                  <AdminButton
+                    onClick={() => {
+                      setSelectedPlan(null);
+                      setEditMode(true);
+                    }}
+                    icon={<PlusIcon className="w-4 h-4" />}
+                    variant="primary"
+                  >
+                    + Nieuw Plan
+                  </AdminButton>
+                </div>
 
             {filteredPlans.length === 0 ? (
               <div className="text-center py-12">
@@ -767,349 +788,148 @@ export default function AdminVoedingsplannenPage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                 {filteredPlans.map((plan) => (
-                   <AdminCard key={plan.id} className="p-6">
-                     <h3 className="text-lg font-semibold text-[#8BAE5A] mb-2">{plan.name}</h3>
-                     <p className="text-gray-300 text-sm mb-4">{plan.description}</p>
-                     
-                     {plan.target_calories && (
-                       <div className="grid grid-cols-2 gap-4 text-sm mb-4">
-                         <div>
-                           <span className="text-gray-400">Calorieën:</span>
-                           <span className="ml-2 font-medium text-white">{plan.target_calories} kcal</span>
+                                 {filteredPlans.map((plan) => {
+                   const planStatus = getPlanStatus(plan);
+                   return (
+                   <div key={plan.id} className="bg-[#181F17] rounded-xl border border-[#3A4D23] overflow-hidden hover:border-[#8BAE5A]/50 transition-all duration-200 group">
+                     {/* Header */}
+                     <div className="bg-gradient-to-r from-[#8BAE5A]/10 to-[#B6C948]/10 p-4 border-b border-[#3A4D23]">
+                       <div className="flex items-start justify-between">
+                         <div className="flex-1">
+                           <h3 className="text-lg font-bold text-[#8BAE5A] mb-1">{plan.name}</h3>
+                           <p className="text-gray-300 text-sm leading-relaxed">{plan.description}</p>
                          </div>
-                         {plan.target_protein && (
-                           <div>
-                             <span className="text-gray-400">Eiwit:</span>
-                             <span className="ml-2 font-medium text-white">{plan.target_protein}g</span>
+                         {/* Status Badge */}
+                         <div className="ml-4 flex flex-col items-end space-y-1">
+                           <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+                             planStatus.color === 'green' ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
+                             planStatus.color === 'blue' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
+                             planStatus.color === 'yellow' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
+                             planStatus.color === 'red' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
+                             'bg-gray-500/20 text-gray-400 border border-gray-500/30'
+                           }`}>
+                             {planStatus.label}
                            </div>
-                         )}
-                         {plan.target_carbs && (
-                           <div>
-                             <span className="text-gray-400">Koolhydraten:</span>
-                             <span className="ml-2 font-medium text-white">{plan.target_carbs}g</span>
+                           <div className="text-xs text-gray-400">
+                             {planStatus.completion}% voltooid
                            </div>
-                         )}
-                         {plan.target_fat && (
-                           <div>
-                             <span className="text-gray-400">Vet:</span>
-                             <span className="ml-2 font-medium text-white">{plan.target_fat}g</span>
+                         </div>
+                       </div>
+                     </div>
+                     
+                     {/* Profile Data */}
+                     <div className="p-4 border-b border-[#3A4D23]">
+                       <div className="bg-[#0F150E] rounded-lg p-3 border border-[#2A3520]">
+                         <div className="flex items-center justify-center space-x-2">
+                           <div className="w-2 h-2 bg-[#8BAE5A] rounded-full"></div>
+                           <span className="text-xs text-[#8BAE5A] font-medium">Gebaseerd op profieldata</span>
+                         </div>
+                         <div className="text-xs text-[#B6C948] text-center mt-1">100kg - Staand (Matig actief)</div>
+                       </div>
+                     </div>
+                     
+                     {/* Nutrition Overview */}
+                     {plan.target_calories && (
+                       <div className="p-4">
+                         <div className="space-y-3">
+                           {/* Calories */}
+                           <div className="text-center">
+                             <div className="text-2xl font-bold text-white">{plan.target_calories}</div>
+                             <div className="text-sm text-gray-400">kcal per dag</div>
                            </div>
-                         )}
+                           
+                           {/* Macros Grid */}
+                           <div className="grid grid-cols-3 gap-3">
+                             {plan.target_protein && (
+                               <div className="text-center">
+                                 <div className="text-lg font-semibold text-white">{plan.target_protein}g</div>
+                                 <div className="text-xs text-[#8BAE5A] font-medium">
+                                   {Math.round((plan.target_protein * 4 / plan.target_calories) * 100)}%
+                                 </div>
+                                 <div className="text-xs text-gray-400">Eiwit</div>
+                               </div>
+                             )}
+                             {plan.target_carbs && (
+                               <div className="text-center">
+                                 <div className="text-lg font-semibold text-white">{plan.target_carbs}g</div>
+                                 <div className="text-xs text-[#8BAE5A] font-medium">
+                                   {Math.round((plan.target_carbs * 4 / plan.target_calories) * 100)}%
+                                 </div>
+                                 <div className="text-xs text-gray-400">Koolhydraten</div>
+                               </div>
+                             )}
+                             {plan.target_fat && (
+                               <div className="text-center">
+                                 <div className="text-lg font-semibold text-white">{plan.target_fat}g</div>
+                                 <div className="text-xs text-[#8BAE5A] font-medium">
+                                   {Math.round((plan.target_fat * 9 / plan.target_calories) * 100)}%
+                                 </div>
+                                 <div className="text-xs text-gray-400">Vet</div>
+                               </div>
+                             )}
+                           </div>
+
+                           {/* Quality Indicator */}
+                           {planStatus.completion > 0 && (
+                             <div className="mt-4 pt-3 border-t border-[#3A4D23]">
+                               <div className="text-center">
+                                 <div className="text-sm text-gray-400 mb-2">Kwaliteit vs Target</div>
+                                 <div className="flex items-center justify-center space-x-2">
+                                   <div className="text-lg font-bold text-white">{planStatus.quality}%</div>
+                                   <div className="w-16 bg-[#0F150E] rounded-full h-2">
+                                     <div 
+                                       className={`h-2 rounded-full transition-all duration-300 ${
+                                         planStatus.quality >= 95 ? 'bg-green-500' :
+                                         planStatus.quality >= 90 ? 'bg-orange-500' : 'bg-red-500'
+                                       }`}
+                                       style={{ width: `${Math.min(planStatus.quality, 100)}%` }}
+                                     ></div>
+                                   </div>
+                                 </div>
+                                 <div className="text-xs text-gray-500 mt-1">
+                                   {planStatus.avgCalories && planStatus.avgCalories > 0 && (
+                                     <span>Gemiddeld: {planStatus.avgCalories} kcal/dag</span>
+                                   )}
+                                 </div>
+                               </div>
+                             </div>
+                           )}
+                         </div>
                        </div>
                      )}
                      
-                     <div className="flex justify-between items-center">
+                     {/* Actions */}
+                     <div className="p-4 bg-[#0F150E] border-t border-[#3A4D23]">
                        <div className="flex space-x-2">
-                         <AdminButton
+                         <button
                            onClick={() => handleEditPlan(plan)}
-                           variant="secondary"
-                           size="sm"
-                           icon={<PencilIcon className="w-4 h-4" />}
+                           className="flex-1 bg-[#8BAE5A] hover:bg-[#8BAE5A]/80 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center space-x-2"
                          >
-                           Bewerken
-                         </AdminButton>
-                         <AdminButton
-                           onClick={() => handleDeletePlan(plan.id)}
-                           variant="danger"
-                           size="sm"
-                           icon={<TrashIcon className="w-4 h-4" />}
+                           <PencilIcon className="w-4 h-4" />
+                           <span>Bewerken</span>
+                         </button>
+                         <button
+                           onClick={() => plan.id && handleDeletePlan(plan.id)}
+                           className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center space-x-2"
                          >
-                           Verwijderen
-                         </AdminButton>
+                           <TrashIcon className="w-4 h-4" />
+                           <span>Verwijderen</span>
+                         </button>
                        </div>
                      </div>
-                   </AdminCard>
-                 ))}
+                   </div>
+                   );
+                 })}
+              </div>
+            )}
               </div>
             )}
           </div>
         )}
 
-        {activeTab === 'ingredienten' && (
-          <div>
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold">Ingrediënten</h2>
-              <AdminButton
-                onClick={() => {
-                  setSelectedFoodItem(null);
-                  setShowFoodItemModal(true);
-                }}
-                icon={<PlusIcon className="w-4 h-4" />}
-                variant="primary"
-              >
-                + Nieuw Ingrediënt
-              </AdminButton>
-            </div>
 
-            {filteredFoodItems.length === 0 ? (
-              <div className="text-center py-12">
-                <BoltIcon className="mx-auto h-12 w-12 text-gray-400" />
-                {searchTerm ? (
-                  <>
-                    <h3 className="mt-2 text-sm font-medium text-gray-300">Geen ingrediënten gevonden</h3>
-                    <p className="mt-1 text-sm text-gray-400">
-                      Er zijn geen ingrediënten die overeenkomen met "{searchTerm}".
-                    </p>
-                    <button
-                      onClick={() => setSearchTerm('')}
-                      className="mt-3 px-4 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#B6C948] transition-colors font-medium"
-                    >
-                      Toon alle ingrediënten ({foodItems.length})
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <h3 className="mt-2 text-sm font-medium text-gray-300">Geen ingrediënten</h3>
-                    <p className="mt-1 text-sm text-gray-400">
-                      Voeg je eerste ingrediënt toe om te beginnen.
-                    </p>
-                  </>
-                )}
-              </div>
-            ) : (
-              <div className="bg-[#232D1A] rounded-lg border border-[#3A4D23]/40 overflow-hidden">
-                {/* Desktop Table Header */}
-                <div className="hidden lg:grid grid-cols-13 gap-3 p-4 bg-[#1A2313] border-b border-[#3A4D23]/40 text-sm font-semibold text-[#8BAE5A]">
-                  <div className="col-span-2">Naam</div>
-                  <div className="col-span-2">Categorie</div>
-                  <div className="col-span-1">Carnivoor</div>
-                  <div className="col-span-1">Type</div>
-                  <div className="col-span-1">Kcal</div>
-                  <div className="col-span-1">Protein</div>
-                  <div className="col-span-1">Carbs</div>
-                  <div className="col-span-1">Fat</div>
-                  <div className="col-span-3">Acties</div>
-                </div>
-                
-                {/* Table Body */}
-                <div className="divide-y divide-[#3A4D23]/40">
-                  {filteredFoodItems.map((item) => (
-                    <div key={item.id}>
-                      {/* Desktop View */}
-                      <div className="hidden lg:grid grid-cols-13 gap-3 p-4 hover:bg-[#1A2313] transition-colors">
-                        <div className="col-span-2">
-                          <h3 className="text-white font-medium">{item.name}</h3>
-                        </div>
-                        <div className="col-span-2">
-                          <span className="text-gray-300 text-sm capitalize">{item.category}</span>
-                        </div>
-                        <div className="col-span-1 text-center">
-                          <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                            (item as any).is_carnivore 
-                              ? 'bg-green-600/20 text-green-400 border border-green-600/30' 
-                              : 'bg-gray-600/20 text-gray-400 border border-gray-600/30'
-                          }`}>
-                            {(item as any).is_carnivore ? 'Ja' : 'Nee'}
-                          </span>
-                        </div>
-                        <div className="col-span-1 text-center">
-                          <span className="text-xs px-2 py-1 rounded-md bg-blue-600/20 text-blue-400 border border-blue-600/30 font-medium">
-                            {getUnitTypeLabel((item as any).unit_type)}
-                          </span>
-                        </div>
-                        <div className="col-span-1 text-center">
-                          <span className="text-white font-medium">{item.calories_per_100g || 0}</span>
-                        </div>
-                        <div className="col-span-1 text-center">
-                          <span className="text-white">{item.protein_per_100g || 0}g</span>
-                        </div>
-                        <div className="col-span-1 text-center">
-                          <span className="text-white">{item.carbs_per_100g || 0}g</span>
-                        </div>
-                        <div className="col-span-1 text-center">
-                          <span className="text-white">{item.fat_per_100g || 0}g</span>
-                        </div>
-                        <div className="col-span-3">
-                          <div className="flex gap-2">
-                            <AdminButton
-                              onClick={() => handleEditFoodItem(item)}
-                              variant="secondary"
-                              size="sm"
-                              icon={<PencilIcon className="w-4 h-4" />}
-                            >
-                              Bewerken
-                            </AdminButton>
-                            <AdminButton
-                              onClick={() => handleDeleteFoodItem(item.id)}
-                              variant="danger"
-                              size="sm"
-                              icon={<TrashIcon className="w-4 h-4" />}
-                            >
-                              Verwijderen
-                            </AdminButton>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {/* Mobile/Tablet View */}
-                      <div className="lg:hidden p-4 hover:bg-[#1A2313] transition-colors">
-                        <div className="flex justify-between items-start mb-3">
-                          <div>
-                            <h3 className="text-white font-medium text-lg">{item.name}</h3>
-                            <div className="flex items-center gap-2 mt-1">
-                              <p className="text-gray-300 text-sm capitalize">{item.category}</p>
-                              <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                                (item as any).is_carnivore 
-                                  ? 'bg-green-600/20 text-green-400 border border-green-600/30' 
-                                  : 'bg-gray-600/20 text-gray-400 border border-gray-600/30'
-                              }`}>
-                                {(item as any).is_carnivore ? 'Carnivoor' : 'Standaard'}
-                              </span>
-                              <span className="text-xs px-2 py-1 rounded-md bg-blue-600/20 text-blue-400 border border-blue-600/30 font-medium">
-                                {getUnitTypeLabel((item as any).unit_type)}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="flex gap-2">
-                            <AdminButton
-                              onClick={() => handleEditFoodItem(item)}
-                              variant="secondary"
-                              size="sm"
-                              icon={<PencilIcon className="w-4 h-4" />}
-                            >
-                              Bewerken
-                            </AdminButton>
-                            <AdminButton
-                              onClick={() => handleDeleteFoodItem(item.id)}
-                              variant="danger"
-                              size="sm"
-                              icon={<TrashIcon className="w-4 h-4" />}
-                            >
-                              Verwijderen
-                            </AdminButton>
-                          </div>
-                        </div>
-                        
-                        <div className="grid grid-cols-4 gap-4 text-sm">
-                          <div className="text-center">
-                            <div className="text-gray-400 text-xs">
-                              {item.unit_type === 'per_handful' ? 'Kcal/handje' : 
-                               item.unit_type === 'per_piece' ? 'Kcal/stuk' : 
-                               item.unit_type === 'per_plakje' ? 'Kcal/plakje' :
-                               item.unit_type === 'per_30g' ? 'Kcal/30g' : 'Kcal/100g'}
-                            </div>
-                            <div className="text-white font-medium">{item.calories_per_100g || 0}</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="text-gray-400 text-xs">Protein</div>
-                            <div className="text-white">{item.protein_per_100g || 0}g</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="text-gray-400 text-xs">Carbs</div>
-                            <div className="text-white">{item.carbs_per_100g || 0}g</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="text-gray-400 text-xs">Fat</div>
-                            <div className="text-white">{item.fat_per_100g || 0}g</div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === 'maaltijden' && (
-          <div>
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold">Maaltijden</h2>
-              <AdminButton
-                onClick={() => {
-                  setSelectedMeal(null);
-                  setShowMealModal(true);
-                }}
-                icon={<PlusIcon className="w-4 h-4" />}
-                variant="primary"
-              >
-                + Nieuwe Maaltijd
-              </AdminButton>
-            </div>
-
-            {filteredMeals.length === 0 ? (
-              <div className="text-center py-12">
-                <LightBulbIcon className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-300">Geen maaltijden</h3>
-                <p className="mt-1 text-sm text-gray-400">
-                  Maak je eerste maaltijd aan om te beginnen.
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                 {filteredMeals.map((meal) => (
-                   <AdminCard key={meal.id} className="p-6">
-                     <h3 className="text-lg font-semibold text-[#8BAE5A] mb-2">{meal.name}</h3>
-                     <p className="text-gray-300 text-sm mb-2">Type: {meal.meal_type}</p>
-                     <p className="text-gray-300 text-sm mb-4">{meal.description}</p>
-                     
-                     <div className="flex space-x-2">
-                       <AdminButton
-                         onClick={() => handleEditMeal(meal)}
-                         variant="secondary"
-                         size="sm"
-                         icon={<PencilIcon className="w-4 h-4" />}
-                       >
-                         Bewerken
-                       </AdminButton>
-                       <AdminButton
-                         onClick={() => handleDeleteMeal(meal.id)}
-                         variant="danger"
-                         size="sm"
-                         icon={<TrashIcon className="w-4 h-4" />}
-                       >
-                         Verwijderen
-                       </AdminButton>
-                     </div>
-                   </AdminCard>
-                 ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === 'weekplannen' && (
-          <div>
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold">Weekplannen</h2>
-            </div>
-
-            {filteredWeekplans.length === 0 ? (
-              <div className="text-center py-12">
-                <UserGroupIcon className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-300">Geen weekplannen</h3>
-                <p className="mt-1 text-sm text-gray-400">
-                  Er zijn nog geen weekplannen beschikbaar.
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                 {filteredWeekplans.map((weekplan) => (
-                   <AdminCard key={weekplan.id} className="p-6">
-                     <h3 className="text-lg font-semibold text-[#8BAE5A] mb-2">{weekplan.name}</h3>
-                     <p className="text-gray-300 text-sm mb-4">{weekplan.description}</p>
-                   </AdminCard>
-                 ))}
-              </div>
-            )}
-          </div>
-        )}
 
         {/* Modals */}
-        {showPlanBuilder && (
-          <PlanBuilder
-            isOpen={showPlanBuilder}
-            plan={selectedPlan}
-            foodItems={foodItems}
-            onSave={handleSavePlan}
-            onClose={() => {
-              setShowPlanBuilder(false);
-              setSelectedPlan(null);
-            }}
-          />
-        )}
 
         {showFoodItemModal && (
           <FoodItemModal
@@ -1128,17 +948,6 @@ export default function AdminVoedingsplannenPage() {
           />
         )}
 
-        {showMealModal && (
-          <MealModal
-            isOpen={showMealModal}
-            meal={selectedMeal}
-            onSave={handleSaveMeal}
-            onClose={() => {
-              setShowMealModal(false);
-              setSelectedMeal(null);
-            }}
-          />
-        )}
       </div>
     </div>
   );

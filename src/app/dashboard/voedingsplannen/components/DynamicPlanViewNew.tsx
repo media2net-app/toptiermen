@@ -436,7 +436,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                 </div>
 
                 {/* Ingredients */}
-                {meal.ingredients && meal.ingredients.length > 0 && (
+                {'ingredients' in meal && meal.ingredients && meal.ingredients.length > 0 && (
                   <div className="mb-4">
                     <h5 className="text-sm font-semibold text-gray-300 mb-2">Ingrediënten:</h5>
                     <div className="flex flex-wrap gap-2">

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { FaCheck, FaArrowRight, FaUsers, FaDumbbell, FaBrain, FaChartLine, FaCrown, FaStar, FaGift, FaBook, FaTools, FaComments, FaTarget, FaTrophy, FaBookOpen, FaUtensils, FaDumbbell as FaDumbbellIcon, FaInfinity } from 'react-icons/fa';
+import { FaCheck, FaArrowRight, FaUsers, FaDumbbell, FaBrain, FaChartLine, FaCrown, FaStar, FaGift, FaBook, FaTools, FaComments, FaBullseye, FaTrophy, FaBookOpen, FaUtensils, FaDumbbell as FaDumbbellIcon, FaInfinity } from 'react-icons/fa';
 import CheckoutSection from '@/components/CheckoutSection';
 
 export default function LifetimeTierPage() {

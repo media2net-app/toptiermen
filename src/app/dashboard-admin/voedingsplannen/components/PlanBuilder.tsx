@@ -1,11 +1,21 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { XMarkIcon, PlusIcon, TrashIcon, CalendarIcon, PencilIcon } from '@heroicons/react/24/outline';
 import AdminButton from '@/components/admin/AdminButton';
 import MealEditModal from './MealEditModal';
 
+// Simple debounce function
+function debounce<T extends (...args: any[]) => any>(func: T, wait: number): T {
+  let timeout: NodeJS.Timeout;
+  return ((...args: any[]) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  }) as T;
+}
+
 interface NutritionPlan {
   id?: string;
+  plan_id?: string;
   name: string;
   description: string;
   target_calories?: number;
@@ -18,2001 +28,1339 @@ interface NutritionPlan {
   fitness_goal?: 'droogtrainen' | 'spiermassa' | 'onderhoud';
   is_featured?: boolean;
   is_public?: boolean;
-  daily_plans?: DailyPlan[];
-}
-
-interface DailyPlan {
-  day: string;
-  theme: string;
-  focus: string;
-  meals: {
-    ontbijt: MealPlan;
-    snack1: MealPlan;
-    lunch: MealPlan;
-    snack2: MealPlan;
-    diner: MealPlan;
-    avondsnack: MealPlan;
+  meals?: {
+    weekly_plan: {
+      [key: string]: {
+        [key: string]: {
+          time: string;
+          ingredients: Array<{
+            id: string;
+            name: string;
+            amount: number;
+            unit: string;
+            calories_per_100g: number;
+            protein_per_100g: number;
+            carbs_per_100g: number;
+            fat_per_100g: number;
+          }>;
+          nutrition: {
+            calories: number;
+            protein: number;
+            carbs: number;
+            fat: number;
+          };
+        };
+      };
+    };
+    weekly_averages: {
+      calories: number;
+      protein: number;
+      carbs: number;
+      fat: number;
+    };
   };
 }
 
-interface MealPlan {
+interface Ingredient {
+  id: string;
   name: string;
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-  suggestions: string[];
-  ingredients?: Array<{
-    name: string;
-    amount: number;
-    unit: string;
-  }>;
+  category: string;
+  calories_per_100g: number;
+  protein_per_100g: number;
+  carbs_per_100g: number;
+  fat_per_100g: number;
+  description?: string;
+  is_carnivore: boolean;
+  unit_type: string;
 }
 
 interface PlanBuilderProps {
-  isOpen: boolean;
+  plan: NutritionPlan;
   onClose: () => void;
-  plan?: NutritionPlan | null;
-  foodItems?: any[];
   onSave: (plan: NutritionPlan) => void;
+  isPageMode?: boolean;
 }
 
-export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onSave }: PlanBuilderProps) {
-  // Local state for fresh ingredients database
-  const [localFoodItems, setLocalFoodItems] = useState<any[]>(foodItems);
+const DAYS = [
+  { key: 'maandag', label: 'Maandag', theme: 'Energie Boost', focus: 'Start de week sterk' },
+  { key: 'dinsdag', label: 'Dinsdag', theme: 'Consistentie', focus: 'Behoud momentum' },
+  { key: 'woensdag', label: 'Woensdag', theme: 'Middenweek Push', focus: 'Over de helft' },
+  { key: 'donderdag', label: 'Donderdag', theme: 'Doorzetten', focus: 'Bijna weekend' },
+  { key: 'vrijdag', label: 'Vrijdag', theme: 'Weekend Voorbereiding', focus: 'Klaar voor rust' },
+  { key: 'zaterdag', label: 'Zaterdag', theme: 'Herstel & Groei', focus: 'Tijd voor herstel' },
+  { key: 'zondag', label: 'Zondag', theme: 'Voorbereiding', focus: 'Nieuwe week voorbereiden' }
+];
 
-  // Update local food items when modal opens to get fresh data
-  useEffect(() => {
-    const loadFreshIngredients = async () => {
-      if (isOpen) {
-        try {
-          console.log('🔄 PlanBuilder: Loading fresh ingredients database...');
-          const response = await fetch('/api/admin/nutrition-ingredients');
-          const result = await response.json();
-          if (result.success && result.ingredients) {
-            setLocalFoodItems(result.ingredients);
-            console.log('✅ PlanBuilder: Fresh ingredients loaded:', result.ingredients.length, 'ingredients');
-          } else {
-            console.error('❌ PlanBuilder: Failed to load fresh ingredients:', result.error);
-            // Fallback to prop data
-            setLocalFoodItems(foodItems);
-          }
-        } catch (error) {
-          console.error('❌ PlanBuilder: Error loading fresh ingredients:', error);
-          // Fallback to prop data
-          setLocalFoodItems(foodItems);
-        }
-      }
-    };
+const MEALS = [
+  { key: 'ontbijt', label: 'Ontbijt', time: '08:00', icon: '🌅' },
+  { key: 'ochtend_snack', label: 'Ochtend Snack', time: '10:00', icon: '🥜' },
+  { key: 'lunch', label: 'Lunch', time: '12:30', icon: '🍽️' },
+  { key: 'lunch_snack', label: 'Lunch Snack', time: '15:00', icon: '🍎' },
+  { key: 'diner', label: 'Diner', time: '18:30', icon: '🌙' },
+  { key: 'avond_snack', label: 'Avond Snack', time: '21:00', icon: '🌙' }
+];
 
-    loadFreshIngredients();
-  }, [isOpen, foodItems]);
-
-  // Load plan data when component opens with existing plan
-  useEffect(() => {
-    if (isOpen && plan) {
-      console.log('🔄 PlanBuilder: Loading existing plan data:', plan.name);
-      console.log('📊 Plan target macros from prop:', {
-        calories: (plan as any).meals?.target_calories || plan.target_calories,
-        protein: (plan as any).meals?.target_protein || plan.target_protein,
-        carbs: (plan as any).meals?.target_carbs || plan.target_carbs,
-        fat: (plan as any).meals?.target_fat || plan.target_fat
-      });
-
-      // For carnivore plans, force refresh from database to get latest values
-      const isCarnivore = plan.name?.toLowerCase().includes('carnivoor');
-      
-      if (isCarnivore) {
-        console.log('🥩 Carnivore plan detected, fetching fresh data from database...');
-        
-        // Fetch fresh data from database for carnivore plans
-        fetch('/api/admin/nutrition-plans')
-          .then(res => res.json())
-          .then(data => {
-            if (data.success && data.plans) {
-              const freshPlan = data.plans.find((p: any) => p.id === plan.id || p.name === plan.name);
-              if (freshPlan) {
-                console.log('✅ Fresh carnivore plan data loaded:', {
-                  name: freshPlan.name,
-                  calories: freshPlan.target_calories,
-                  protein: freshPlan.target_protein,
-                  carbs: freshPlan.target_carbs,
-                  fat: freshPlan.target_fat
-                });
-                
-                setFormData({
-                  id: freshPlan.id,
-                  name: freshPlan.name || '',
-                  description: freshPlan.description || '',
-                  target_calories: freshPlan.target_calories,
-                  target_protein: freshPlan.target_protein,
-                  target_carbs: freshPlan.target_carbs,
-                  target_fat: freshPlan.target_fat,
-                  duration_weeks: freshPlan.duration_weeks || 12,
-                  difficulty: freshPlan.difficulty || 'beginner',
-                  goal: freshPlan.goal || 'spiermassa',
-                  fitness_goal: (freshPlan.goal?.toLowerCase().includes('droog') ? 'droogtrainen' : 
-                                freshPlan.goal?.toLowerCase().includes('massa') ? 'spiermassa' : 'onderhoud') as any,
-                  is_featured: freshPlan.is_featured || false,
-                  is_public: freshPlan.is_public !== false,
-                  daily_plans: (freshPlan as any).meals?.weekly_plan 
-                    ? convertWeeklyPlanToDailyPlans((freshPlan as any).meals.weekly_plan)
-                    : []
-                });
-                return;
-              }
-            }
-            
-            // Fallback to prop data if API fails
-            console.log('⚠️ Using fallback prop data for carnivore plan');
-            loadPlanFromProps();
-          })
-          .catch(error => {
-            console.error('❌ Error fetching fresh carnivore data:', error);
-            loadPlanFromProps();
-          });
-      } else {
-        loadPlanFromProps();
-      }
-
-      function loadPlanFromProps() {
-        if (!plan) return;
-        
-        // Use data from plan.meals if available, otherwise fallback to plan properties
-        const targetCalories = (plan as any).meals?.target_calories || plan.target_calories || 2200;
-        const targetProtein = (plan as any).meals?.target_protein || plan.target_protein || 165;
-        const targetCarbs = (plan as any).meals?.target_carbs || plan.target_carbs || 220;
-        const targetFat = (plan as any).meals?.target_fat || plan.target_fat || 73;
-
-        setFormData({
-          id: plan.id,
-          name: plan.name || '',
-          description: plan.description || '',
-          target_calories: targetCalories,
-          target_protein: targetProtein,
-          target_carbs: targetCarbs,
-          target_fat: targetFat,
-          duration_weeks: plan.duration_weeks || 12,
-          difficulty: plan.difficulty || 'beginner',
-          goal: plan.goal || 'spiermassa',
-          fitness_goal: (plan.goal?.toLowerCase().includes('droog') ? 'droogtrainen' : 
-                        plan.goal?.toLowerCase().includes('massa') ? 'spiermassa' : 'onderhoud') as any,
-          is_featured: plan.is_featured || false,
-          is_public: plan.is_public !== false,
-          daily_plans: (plan as any).meals?.weekly_plan 
-            ? convertWeeklyPlanToDailyPlans((plan as any).meals.weekly_plan)
-            : []
-        });
-
-        console.log('✅ PlanBuilder: Plan data loaded with macros:', {
-          calories: targetCalories,
-          protein: targetProtein,
-          carbs: targetCarbs,
-          fat: targetFat
-        });
-      }
-    } else if (isOpen && !plan) {
-      // Reset to default when opening without a plan
-      console.log('🔄 PlanBuilder: Resetting to default values');
-      setFormData({
-        name: '',
-        ...getStandardProfile('spiermassa', false),
-        duration_weeks: 12,
-        difficulty: 'beginner',
-        goal: 'spiermassa',
-        fitness_goal: 'spiermassa',
-        is_featured: false,
-        is_public: true,
-        daily_plans: []
-      });
-    }
-  }, [isOpen, plan]);
-
-  // Fitness goal configurations
-  const fitnessGoalConfigs = {
-    droogtrainen: {
-      calories_multiplier: 0.85,
-      protein_multiplier: 1.2,
-      carbs_multiplier: 0.7,
-      fat_multiplier: 0.9,
-      description: 'Focus op vetverlies met behoud van spiermassa',
-      color: 'text-red-400'
-    },
-    spiermassa: {
-      calories_multiplier: 1.15,
-      protein_multiplier: 1.3,
-      carbs_multiplier: 1.2,
-      fat_multiplier: 1.1,
-      description: 'Focus op spiergroei en krachttoename',
-      color: 'text-green-400'
-    },
-    onderhoud: {
-      calories_multiplier: 1.0,
-      protein_multiplier: 1.0,
-      carbs_multiplier: 1.0,
-      fat_multiplier: 1.0,
-      description: 'Behoud van huidige lichaamscompositie',
-      color: 'text-blue-400'
-    }
-  };
-
-  // Standaard profiel: Man 40 jaar, 100kg, 190cm, Matig actief
-  const getStandardProfile = (fitnessGoal: 'droogtrainen' | 'spiermassa' | 'onderhoud' = 'spiermassa', isCarnivore: boolean = false) => {
-    const standardWeight = 100; // kg - standaard man profiel
-    const standardAge = 40; // jaar
-    const standardHeight = 190; // cm
-    
-    // Rick's gewenste eiwit factoren:
-    // - Normale plannen: 2.2x gewicht  
-    // - Carnivoor plannen: 3.0x gewicht
-    const proteinFactor = isCarnivore ? 3.0 : 2.2;
-    const baseProtein = Math.round(standardWeight * proteinFactor);
-    
-    // Calculate BMR using Mifflin-St Jeor equation for men
-    const bmr = 10 * standardWeight + 6.25 * standardHeight - 5 * standardAge + 5;
-    
-    // Activity multiplier for "matig actief" (moderate active: 3-5x sport per week)
-    const activityMultiplier = 1.55;
-    const tdee = bmr * activityMultiplier;
-    
-    // Realistische waarden gebaseerd op TDEE berekening
-    const configs = {
-      droogtrainen: {
-        calories: Math.round(tdee * 0.8), // 20% deficit voor droogtrainen
-        protein: baseProtein, // 2.2x of 3.0x gewicht afhankelijk van plan type
-        carbs: isCarnivore ? 5 : 80,      // Zeer laag voor carnivoor, matig voor normaal
-        description: 'Vetverlies met behoud van spiermassa'
-      },
-      spiermassa: {
-        calories: Math.round(tdee * 1.15), // 15% surplus voor groei
-        protein: baseProtein, // 2.2x of 3.0x gewicht afhankelijk van plan type
-        carbs: isCarnivore ? 10 : 350,     // Minimaal voor carnivoor, hoog voor normaal
-        description: 'Spiergroei en krachttoename'
-      },
-      onderhoud: {
-        calories: Math.round(tdee), // Onderhoudscalorieën = TDEE
-        protein: baseProtein, // 2.2x of 3.0x gewicht afhankelijk van plan type
-        carbs: isCarnivore ? 8 : 200,     // Laag voor carnivoor, gematigde voor normaal
-        description: 'Behoud van lichaamscompositie'
-      }
-    };
-    
-    // Voor carnivoor plannen: gebruik 45/5/50% verdeling voor droogtrainen en onderhoud
-    if (isCarnivore && (fitnessGoal === 'droogtrainen' || fitnessGoal === 'onderhoud')) {
-      const targetCalories = configs[fitnessGoal].calories;
-      
-      // 45% eiwit, 5% koolhydraten, 50% vet
-      const protein45 = Math.round((targetCalories * 0.45) / 4); // 45% van calories
-      const carbs5 = Math.round((targetCalories * 0.05) / 4);    // 5% van calories
-      const fat50 = Math.round((targetCalories * 0.50) / 9);     // 50% van calories
-      
-      (configs[fitnessGoal] as any) = {
-        ...configs[fitnessGoal],
-        protein: protein45,
-        carbs: carbs5,
-        fat: fat50
-      };
-    }
-    
-    const config = configs[fitnessGoal];
-    
-    // Voor carnivoor plannen met custom macro verdeling, gebruik de voorgedefinieerde fat waarde
-    let calculatedFat;
-    if (isCarnivore && (fitnessGoal === 'droogtrainen' || fitnessGoal === 'onderhoud') && (config as any).fat) {
-      calculatedFat = (config as any).fat; // Gebruik de 50% fat berekening
-    } else {
-      // Standaard berekening voor andere plannen
-    const remainingCalories = config.calories - (config.protein * 4) - (config.carbs * 4);
-      calculatedFat = Math.max(Math.round(remainingCalories / 9), 60); // Minimum 60g vet
-    }
-    
-    return {
-      target_calories: config.calories,
-      target_protein: config.protein,
-      target_carbs: config.carbs,
-      target_fat: calculatedFat,
-      description: config.description
-    };
-  };
-
-  const [formData, setFormData] = useState<NutritionPlan>({
-    name: '',
-    ...getStandardProfile('spiermassa', false), // Default naar spiermassa, niet-carnivoor
-    duration_weeks: 12,
-    difficulty: 'beginner',
-    goal: 'spiermassa',
-    fitness_goal: 'spiermassa',
-    is_featured: false,
-    is_public: true,
-    daily_plans: []
-  });
-
-  // Separate state for macro percentages to avoid calculation conflicts
-  const [macroPercentages, setMacroPercentages] = useState({
-    protein: 0,
-    carbs: 0,
-    fat: 0
-  });
-
-  const [activeTab, setActiveTab] = useState('basic');
-  const [isLoading, setIsLoading] = useState(false);
+export default function PlanBuilder({ plan, onClose, onSave, isPageMode = false }: PlanBuilderProps) {
+  const [formData, setFormData] = useState<NutritionPlan>(plan);
+  const [activeTab, setActiveTab] = useState<'overview' | 'daily_plans' | 'ingredients'>('overview');
   const [selectedDay, setSelectedDay] = useState<string>('maandag');
-  const [isMealModalOpen, setIsMealModalOpen] = useState(false);
-  const [editingMeal, setEditingMeal] = useState<any>(null);
-  const [editingMealType, setEditingMealType] = useState<string>('');
+  const [selectedMeal, setSelectedMeal] = useState<string>('ontbijt');
+  const [showMealModal, setShowMealModal] = useState(false);
+  const [ingredients, setIngredients] = useState<Ingredient[]>([]);
+  const [loading, setLoading] = useState(false);
+  // AutoSaveStatus removed for better performance
+  
+  // Ingredients management state
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCarnivoreFilter, setSelectedCarnivoreFilter] = useState('all');
+  const [showIngredientModal, setShowIngredientModal] = useState(false);
+  const [editingIngredient, setEditingIngredient] = useState<any>(null);
+  const [ingredientForm, setIngredientForm] = useState({
+    name: '',
+    category: '',
+    is_carnivore: false,
+    unit_type: 'per_100g',
+    calories_per_100g: '',
+    protein_per_100g: '',
+    carbs_per_100g: '',
+    fat_per_100g: ''
+  });
+  const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
+  const [showAddUnitTypeModal, setShowAddUnitTypeModal] = useState(false);
+  const [showCopyDayModal, setShowCopyDayModal] = useState(false);
+  const [newCategory, setNewCategory] = useState('');
+  const [newUnitType, setNewUnitType] = useState('');
+  const [selectedSourceDay, setSelectedSourceDay] = useState('');
+  const [copyingDay, setCopyingDay] = useState(false);
+  const [mealsData, setMealsData] = useState<any>(null);
+  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
+  const [availableUnitTypes, setAvailableUnitTypes] = useState<string[]>([]);
 
-  // Initialize macro percentages when plan is loaded
   useEffect(() => {
-    if (plan && plan.target_calories && plan.target_protein && plan.target_carbs && plan.target_fat) {
-      const total = (plan.target_protein * 4) + (plan.target_carbs * 4) + (plan.target_fat * 9);
-      if (total > 0) {
-        setMacroPercentages({
-          protein: ((plan.target_protein * 4 / total) * 100),
-          carbs: ((plan.target_carbs * 4 / total) * 100),
-          fat: ((plan.target_fat * 9 / total) * 100)
-        });
-      }
-    }
-  }, [plan]);
+    fetchIngredients();
+  }, []);
 
-  // Convert weekly_plan format to daily_plans format
-  const convertWeeklyPlanToDailyPlans = (weeklyPlan: any): DailyPlan[] => {
-    console.log('🔄 Converting weekly_plan to daily_plans format');
-    console.log('🔍 Available days in weeklyPlan:', Object.keys(weeklyPlan));
-    
-    const days = ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag'];
-    const dayNames = ['Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag', 'Zondag'];
-    
-    return days.map((dayKey, index) => {
-      const dayData = weeklyPlan[dayKey];
-      console.log(`📅 Processing ${dayKey}:`, !!dayData);
-      
-      if (!dayData) {
-        console.log(`⚠️ No data for ${dayKey}, using defaults`);
-        return {
-          day: dayKey,
-          theme: 'Training Dag',
-          focus: 'protein',
-          meals: {
-            ontbijt: { name: 'Ontbijt', calories: 0, protein: 0, carbs: 0, fat: 0, suggestions: [], ingredients: [] },
-            snack1: { name: 'Ochtend Snack', calories: 0, protein: 0, carbs: 0, fat: 0, suggestions: [], ingredients: [] },
-            lunch: { name: 'Lunch', calories: 0, protein: 0, carbs: 0, fat: 0, suggestions: [], ingredients: [] },
-            snack2: { name: 'Middag Snack', calories: 0, protein: 0, carbs: 0, fat: 0, suggestions: [], ingredients: [] },
-            diner: { name: 'Diner', calories: 0, protein: 0, carbs: 0, fat: 0, suggestions: [], ingredients: [] },
-            avondsnack: { name: 'Avond Snack', calories: 0, protein: 0, carbs: 0, fat: 0, suggestions: [], ingredients: [] }
-          }
-        };
-      }
-      
-      // Convert meal data from new weekly_plan format
-      const convertMeal = (mealData: any, defaultName: string) => {
-        if (!mealData) {
-          return {
-            name: defaultName,
-            calories: 0,
-            protein: 0,
-            carbs: 0,
-            fat: 0,
-            suggestions: [],
-            ingredients: []
-          };
-        }
-        
-        // Handle both formats: direct meal data OR meal data with nutrition object
-        let nutrition, ingredients;
-        
-        if (mealData.nutrition) {
-          // Format 1: mealData.nutrition (most days)
-          nutrition = mealData.nutrition;
-          ingredients = mealData.ingredients || [];
-        } else {
-          // Format 2: direct properties (maandag format)
-          nutrition = {
-            calories: mealData.calories || 0,
-            protein: mealData.protein || 0,
-            carbs: mealData.carbs || 0,
-            fat: mealData.fat || 0
-          };
-          ingredients = mealData.ingredients || [];
-        }
-        
-        // Convert ingredients format for PlanBuilder
-        const convertedIngredients = ingredients.map((ing: any) => ({
-          name: ing.name,
-          amount: ing.amount,
-          unit: ing.unit || 'g'
-        }));
-        
-        // Create suggestions format
-        const suggestions = convertedIngredients.map((ing: any) => `${ing.name} (${ing.amount}${ing.unit})`);
-        
-        const result = {
-          name: mealData.name || defaultName,
-          calories: Math.round((nutrition.calories || 0) * 10) / 10,
-          protein: Math.round((nutrition.protein || 0) * 10) / 10,
-          carbs: Math.round((nutrition.carbs || 0) * 10) / 10,
-          fat: Math.round((nutrition.fat || 0) * 10) / 10,
-          suggestions,
-          ingredients: convertedIngredients
-        };
-        
-        return result;
-      };
-      
-      return {
-        day: dayKey,
-        theme: `${dayNames[index]} Plan`,
-        focus: 'protein',
-        meals: {
-          ontbijt: convertMeal(dayData.meals?.ontbijt || dayData.ontbijt, 'Carnivoor Ontbijt'),
-          snack1: convertMeal(dayData.meals?.snack1 || dayData.ochtend_snack, 'Ochtend Snack'),
-          lunch: convertMeal(dayData.meals?.lunch || dayData.lunch, 'Carnivoor Lunch'),
-          snack2: convertMeal(dayData.meals?.snack2 || dayData.lunch_snack, 'Middag Snack'),
-          diner: convertMeal(dayData.meals?.diner || dayData.diner, 'Carnivoor Diner'),
-          avondsnack: convertMeal(dayData.meals?.avondsnack || dayData.avond_snack, 'Avond Snack')
-        }
-      };
-    });
-  };
-
-  // Initialize form data when plan changes
+  // Initialize formData and mealsData when plan changes
   useEffect(() => {
     if (plan) {
-      console.log('📝 PlanBuilder: Loading plan for editing:', plan.name);
-      console.log('🔍 PlanBuilder: Full plan object:', plan);
-      console.log('🍽️ PlanBuilder: Plan meals data:', (plan as any).meals);
-      
-      // Determine fitness goal from plan name
-      const fitnessGoal = plan.name?.toLowerCase().includes('droogtrainen') ? 'droogtrainen' :
-                         plan.name?.toLowerCase().includes('spiermassa') ? 'spiermassa' : 'onderhoud';
-      
-      // Check if we have existing daily_plans or need to generate from meals data
-      let existingDailyPlans = plan.daily_plans;
-      
-      if (!existingDailyPlans && (plan as any).meals && (plan as any).meals.weekly_plan) {
-        console.log('📊 PlanBuilder: Found weekly_plan in plan meals, converting to daily_plans');
-        console.log('📅 PlanBuilder: Weekly plan data:', (plan as any).meals.weekly_plan);
-        console.log('🔍 PlanBuilder: Monday ingredients before conversion:', (plan as any).meals.weekly_plan.monday?.ontbijt);
-        existingDailyPlans = convertWeeklyPlanToDailyPlans((plan as any).meals.weekly_plan);
-        console.log('✅ PlanBuilder: Converted to daily_plans:', existingDailyPlans);
-        console.log('🔍 PlanBuilder: Monday ontbijt after conversion:', existingDailyPlans[0]?.meals?.ontbijt);
-      } else if (!existingDailyPlans) {
-        console.log('📋 PlanBuilder: No existing daily_plans, generating defaults');
-        existingDailyPlans = generateDefaultDailyPlans();
-      } else {
-        console.log('✅ PlanBuilder: Using existing daily_plans from plan');
+      console.log('🔄 PlanBuilder: Plan changed, updating formData:', plan.name);
+      setFormData(plan);
+      if (plan.meals) {
+        setMealsData(plan.meals);
+        console.log('🍽️ PlanBuilder: Meals data updated:', plan.meals);
       }
-      
-      // Get macro targets from database or calculate based on plan type
-      const mealTargets = (plan as any).meals;
-      const isCarnivore = plan.name?.toLowerCase().includes('carnivoor') || false;
-      const standardProfile = getStandardProfile(fitnessGoal, isCarnivore);
-      
-      setFormData({
-        id: plan.id,
-        name: plan.name || '',
-        description: plan.description || '',
-        target_calories: mealTargets?.target_calories || plan.target_calories || standardProfile.target_calories,
-        target_protein: mealTargets?.target_protein || plan.target_protein || standardProfile.target_protein,
-        target_carbs: mealTargets?.target_carbs || plan.target_carbs || standardProfile.target_carbs,
-        target_fat: mealTargets?.target_fat || plan.target_fat || standardProfile.target_fat,
-        duration_weeks: plan.duration_weeks || 12,
-        difficulty: plan.difficulty || 'intermediate',
-        goal: plan.goal || fitnessGoal,
-        fitness_goal: fitnessGoal,
-        is_featured: plan.is_featured || false,
-        is_public: plan.is_public !== false,
-        daily_plans: existingDailyPlans
-      });
-    } else {
-      setFormData({
-        name: '',
-        description: '',
-        target_calories: 2200,
-        target_protein: 165,
-        target_carbs: 220,
-        target_fat: 73,
-        duration_weeks: 12,
-        difficulty: 'intermediate',
-        goal: 'onderhoud',
-        fitness_goal: 'onderhoud',
-        is_featured: false,
-        is_public: true,
-        daily_plans: generateDefaultDailyPlans()
-      });
     }
   }, [plan]);
 
-  const generateDefaultDailyPlans = (): DailyPlan[] => {
-    const days = ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag'];
-    const themes = ['Training Dag', 'Herstel', 'Rust Dag', 'Training Dag', 'Herstel', 'Weekend', 'Rust'];
-    const focuses = ['protein', 'protein', 'protein', 'protein', 'protein', 'protein', 'protein'];
-    
-    return days.map((day, index) => ({
-      day,
-      theme: themes[index],
-      focus: focuses[index],
-      meals: {
-        ontbijt: {
-          name: 'Ontbijt',
-          calories: 0,
-          protein: 0,
-          carbs: 0,
-          fat: 0,
-          suggestions: [],
-          ingredients: []
-        },
-        snack1: {
-          name: 'Ochtend Snack',
-          calories: 0,
-          protein: 0,
-          carbs: 0,
-          fat: 0,
-          suggestions: [],
-          ingredients: []
-        },
-        lunch: {
-          name: 'Lunch',
-          calories: 0,
-          protein: 0,
-          carbs: 0,
-          fat: 0,
-          suggestions: [],
-          ingredients: []
-        },
-        snack2: {
-          name: 'Middag Snack',
-          calories: 0,
-          protein: 0,
-          carbs: 0,
-          fat: 0,
-          suggestions: [],
-          ingredients: []
-        },
-        diner: {
-          name: 'Diner',
-          calories: 0,
-          protein: 0,
-          carbs: 0,
-          fat: 0,
-          suggestions: [],
-          ingredients: []
-        },
-        avondsnack: {
-          name: 'Avond Snack',
-          calories: 0,
-          protein: 0,
-          carbs: 0,
-          fat: 0,
-          suggestions: [],
-          ingredients: []
-        }
-      }
-    }));
-  };
-
-  const getMealSuggestions = (dietName: string, mealType: string, focus: string): string[] => {
-    if (dietName === 'Carnivoor (Rick\'s Aanpak)') {
-      const carnivoreSuggestions = {
-        ontbijt: ['Orgaanvlees Mix', 'Gegrilde T-Bone Steak', 'Eieren met Spek'],
-        lunch: ['Gegrilde T-Bone Steak', 'Gans met Eendenborst', 'Ribeye Steak'],
-        diner: ['Gans met Eendenborst', 'T-Bone Steak', 'Orgaanvlees Mix'],
-        snack: ['Spek', 'Kaas', 'Eieren']
-      };
-      return carnivoreSuggestions[mealType as keyof typeof carnivoreSuggestions] || ['Vlees'];
+  // Initialize mealsData when formData changes
+  useEffect(() => {
+    if (formData.meals) {
+      setMealsData(formData.meals);
     }
-    
-    // Default suggestions for other diets
-    return ['Standaard maaltijd'];
+  }, [formData.meals]);
+
+  // Update available categories and unit types when ingredients change
+  useEffect(() => {
+    const categories = [...new Set(ingredients.map(ingredient => ingredient.category))];
+    const unitTypes = [...new Set(ingredients.map(ingredient => ingredient.unit_type))];
+    setAvailableCategories(categories);
+    setAvailableUnitTypes(unitTypes);
+  }, [ingredients]);
+
+  // Autosave disabled for better performance - use manual save button instead
+
+
+  const fetchIngredients = async () => {
+    try {
+      const response = await fetch('/api/admin/nutrition-ingredients');
+      const result = await response.json();
+      if (result.success) {
+        setIngredients(result.ingredients);
+      }
+    } catch (error) {
+      console.error('Error fetching ingredients:', error);
+    }
   };
 
-  const handleInputChange = (field: keyof NutritionPlan, value: any) => {
-    setFormData(prev => {
-      const updated = {
-        ...prev,
-        [field]: value
-      };
+  const refreshPlanData = async () => {
+    try {
+      console.log('🔄 Refreshing plan data from database...');
+      const response = await fetch(`/api/admin/plan-meals?planId=${plan.id}`);
+      const result = await response.json();
       
-      if (field === 'name' && typeof value === 'string') {
-        const fitnessGoal = value.toLowerCase().includes('droogtrainen') ? 'droogtrainen' :
-                           value.toLowerCase().includes('spiermassa') ? 'spiermassa' : 'onderhoud';
-        
-        updated.fitness_goal = fitnessGoal;
-        updated.goal = fitnessGoal;
-        
-        // Set macro's based on fitness goal using standard profile
-        const isCarnivore = value.toLowerCase().includes('carnivoor');
-        const standardProfile = getStandardProfile(fitnessGoal, isCarnivore);
-        updated.target_calories = standardProfile.target_calories;
-        updated.target_protein = standardProfile.target_protein;
-        updated.target_carbs = standardProfile.target_carbs;
-        updated.target_fat = standardProfile.target_fat;
-      }
-
-      // Auto-calculate macros when calories change, maintaining current ratios
-      if (field === 'target_calories' && value) {
-        const newCalories = parseInt(value);
-        
-        if (newCalories > 0) {
-          // Check if we have existing macro values to maintain ratios
-          const currentProtein = prev.target_protein || 0;
-          const currentCarbs = prev.target_carbs || 0;
-          const currentFat = prev.target_fat || 0;
-          
-          // Calculate current total calories from macros (4 cal/g for protein and carbs, 9 cal/g for fat)
-          const currentCaloriesFromMacros = (currentProtein * 4) + (currentCarbs * 4) + (currentFat * 9);
-          
-          let proteinPercent, carbsPercent, fatPercent;
-          
-          // Always use the correct default percentages based on plan type
-          const isCarnivore = prev.name?.toLowerCase().includes('carnivoor') || false;
-          const fitnessGoal = prev.fitness_goal || 'onderhoud';
-          
-          if (isCarnivore) {
-            // Check if it's Spiermassa (keep 45/5/50) or Droogtrainen/Onderhoud (use 35/5/60)
-            if (prev.name?.toLowerCase().includes('spiermassa')) {
-              // Carnivoor - Spiermassa: 45% protein, 5% carbs, 50% fat
-              proteinPercent = 0.45;
-              carbsPercent = 0.05;
-              fatPercent = 0.50;
-            } else {
-              // Carnivoor - Droogtrainen & Onderhoud: 35% protein, 5% carbs, 60% fat
-              proteinPercent = 0.35;
-              carbsPercent = 0.05;
-              fatPercent = 0.60;
-            }
-          } else {
-            // Normal meal plans based on fitness goal
-            switch (fitnessGoal) {
-              case 'droogtrainen':
-                proteinPercent = 0.40;
-                carbsPercent = 0.40;
-                fatPercent = 0.20;
-                break;
-              case 'spiermassa':
-                proteinPercent = 0.30;
-                carbsPercent = 0.50;
-                fatPercent = 0.20;
-                break;
-              case 'onderhoud':
-              default:
-                proteinPercent = 0.35;
-                carbsPercent = 0.40;
-                fatPercent = 0.25;
-                break;
-            }
-          }
-          
-          // Calculate macros based on correct percentages
-          const newProteinCals = newCalories * proteinPercent;
-          const newCarbsCals = newCalories * carbsPercent;
-          const newFatCals = newCalories * fatPercent;
-          
-          // Convert back to grams
-          updated.target_protein = Math.round(newProteinCals / 4);
-          updated.target_carbs = Math.round(newCarbsCals / 4);
-          updated.target_fat = Math.round(newFatCals / 9);
-          
-            console.log('🧮 Auto-calculated macros for', newCalories, 'kcal (maintaining percentages):', {
-              protein: `${updated.target_protein}g (${Math.round(proteinPercent * 100)}%)`,
-              carbs: `${updated.target_carbs}g (${Math.round(carbsPercent * 100)}%)`,
-              fat: `${updated.target_fat}g (${Math.round(fatPercent * 100)}%)`,
-              planType: prev.name?.toLowerCase().includes('carnivoor') ? 'Carnivoor' : 'Maaltijdplan normaal'
-            });
+      if (result.success && result.plan) {
+        console.log('✅ Plan data refreshed:', result.plan.name);
+        setFormData(result.plan);
+        if (result.plan.meals) {
+          setMealsData(result.plan.meals);
+          console.log('🍽️ Meals data refreshed:', result.plan.meals);
         }
+      } else {
+        console.error('❌ Failed to refresh plan data:', result.error);
+        alert('Fout bij vernieuwen van data: ' + (result.error || 'Onbekende fout'));
       }
-      
-      return updated;
-    });
-  };
-
-  const handleMealChange = (day: string, mealType: string, field: keyof MealPlan, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      daily_plans: prev.daily_plans?.map(dailyPlan => {
-        if (dailyPlan.day === day) {
-          return {
-            ...dailyPlan,
-            meals: {
-              ...dailyPlan.meals,
-              [mealType]: {
-                ...dailyPlan.meals[mealType as keyof typeof dailyPlan.meals],
-                [field]: value
-              }
-            }
-          };
-        }
-        return dailyPlan;
-      })
-    }));
+    } catch (error) {
+      console.error('❌ Error refreshing plan data:', error);
+      alert('Fout bij vernieuwen van data: ' + error.message);
+    }
   };
 
   const handleSave = async () => {
-    if (!formData.name.trim()) {
-      alert('Plan naam is verplicht');
+    try {
+      console.log('💾 Manual save initiated...');
+      
+      // Clean payload - remove invalid columns and only include valid database fields
+      const { weekly_plan, created_at, updated_at, ...cleanFormData } = formData as any;
+      const requestBody = { ...cleanFormData, id: plan.id };
+      
+      const response = await fetch('/api/admin/nutrition-plans', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody)
+      });
+      
+      if (response.ok) {
+        console.log('✅ Plan saved successfully via manual save button');
+        onSave(formData);
+        alert('Plan succesvol opgeslagen!');
+      } else {
+        const errorText = await response.text();
+        console.error('❌ Save failed:', {
+          status: response.status,
+          statusText: response.statusText,
+          errorText: errorText
+        });
+        alert('Fout bij opslaan van plan: ' + errorText);
+      }
+    } catch (error) {
+      console.error('💥 Save error:', error);
+      alert('Fout bij opslaan van plan: ' + error.message);
+    }
+  };
+
+  const handleMealEdit = (day: string, meal: string) => {
+    setSelectedDay(day);
+    setSelectedMeal(meal);
+    setShowMealModal(true);
+  };
+
+  const handleMealSave = async (ingredients: any[]) => {
+    console.log('🍽️ PlanBuilder handleMealSave called with ingredients:', ingredients);
+    try {
+      const response = await fetch('/api/admin/plan-meals', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          planId: plan.id,
+          day: selectedDay,
+          meal: selectedMeal,
+          ingredients: ingredients
+        })
+      });
+      
+      const result = await response.json();
+
+      if (result.success) {
+        console.log('✅ Meal save successful, updating state...');
+        // Update the formData with the new meals data
+        setFormData(prevData => ({
+          ...prevData,
+          meals: result.meals
+        }));
+        // Also update the mealsData state for immediate UI updates
+        setMealsData(result.meals);
+        setShowMealModal(false);
+        console.log('✅ State updated, modal closed');
+      } else {
+        console.error('❌ Meal save failed:', result);
+        alert('Fout bij opslaan van maaltijd: ' + (result.error || 'Onbekende fout'));
+      }
+    } catch (error) {
+      console.error('💥 Error saving meal:', error);
+      alert('Fout bij opslaan van maaltijd: ' + error.message);
+    }
+  };
+
+  const getMealData = (day: string, meal: string) => {
+    const meals = mealsData || formData.meals;
+    const mealData = meals?.weekly_plan?.[day]?.[meal] || {
+      time: MEALS.find(m => m.key === meal)?.time || '12:00',
+      ingredients: [],
+      nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0 }
+    };
+    
+    return mealData;
+  };
+
+  const getDayTotal = (day: string) => {
+    let total = { calories: 0, protein: 0, carbs: 0, fat: 0 };
+    MEALS.forEach(meal => {
+      const mealData = getMealData(day, meal.key);
+      total.calories += mealData.nutrition.calories;
+      total.protein += mealData.nutrition.protein;
+      total.carbs += mealData.nutrition.carbs;
+      total.fat += mealData.nutrition.fat;
+    });
+    
+    return total;
+  };
+
+  const getWeeklyTotal = () => {
+    let total = { calories: 0, protein: 0, carbs: 0, fat: 0 };
+    DAYS.forEach(day => {
+      const dayTotal = getDayTotal(day.key);
+      total.calories += dayTotal.calories;
+      total.protein += dayTotal.protein;
+      total.carbs += dayTotal.carbs;
+      total.fat += dayTotal.fat;
+    });
+    return {
+      calories: Math.round(total.calories / 7),
+      protein: Math.round((total.protein / 7) * 10) / 10,
+      carbs: Math.round((total.carbs / 7) * 10) / 10,
+      fat: Math.round((total.fat / 7) * 10) / 10
+    };
+  };
+
+  // Helper function to get progress bar color based on target accuracy
+  const getProgressBarColor = (current: number, target: number) => {
+    if (!target || target === 0) return 'bg-gray-500';
+    
+    const percentage = (current / target) * 100;
+    const deviation = Math.abs(percentage - 100);
+    
+    if (deviation <= 5) {
+      return 'bg-green-500'; // ±5% = Groen
+    } else if (deviation <= 10) {
+      return 'bg-orange-500'; // ±10% = Oranje
+    } else {
+      return 'bg-red-500'; // >10% = Rood
+    }
+  };
+
+  // Helper function to get unit type label in Dutch
+  const getUnitTypeLabel = (unitType: string) => {
+    switch (unitType) {
+      case 'per_piece': return 'per stuk';
+      case 'per_handful': return 'per handje';
+      case 'per_plakje': return 'per plakje';
+      case 'per_30g': return 'per 30g';
+      case 'per_100g': return 'per 100g';
+      default: return 'per 100g';
+    }
+  };
+
+  // Ingredients management functions
+  const handleAddIngredient = () => {
+    setEditingIngredient(null);
+    setIngredientForm({
+      name: '',
+      category: '',
+      is_carnivore: false,
+      unit_type: 'per_100g',
+      calories_per_100g: '',
+      protein_per_100g: '',
+      carbs_per_100g: '',
+      fat_per_100g: ''
+    });
+    setShowIngredientModal(true);
+  };
+
+  const handleEditIngredient = (ingredient: any) => {
+    setEditingIngredient(ingredient);
+    setIngredientForm({
+      name: ingredient.name,
+      category: ingredient.category,
+      is_carnivore: ingredient.is_carnivore,
+      unit_type: ingredient.unit_type,
+      calories_per_100g: ingredient.calories_per_100g?.toString() || '',
+      protein_per_100g: ingredient.protein_per_100g?.toString() || '',
+      carbs_per_100g: ingredient.carbs_per_100g?.toString() || '',
+      fat_per_100g: ingredient.fat_per_100g?.toString() || ''
+    });
+    setShowIngredientModal(true);
+  };
+
+  const handleSaveIngredient = async () => {
+    try {
+      const url = '/api/admin/nutrition-ingredients';
+      const method = editingIngredient ? 'PUT' : 'POST';
+      
+      // Convert string values to numbers for the API
+      const formData = {
+        ...ingredientForm,
+        calories_per_100g: parseFloat(ingredientForm.calories_per_100g) || 0,
+        protein_per_100g: parseFloat(ingredientForm.protein_per_100g) || 0,
+        carbs_per_100g: parseFloat(ingredientForm.carbs_per_100g) || 0,
+        fat_per_100g: parseFloat(ingredientForm.fat_per_100g) || 0
+      };
+      
+      // Add ID to body for PUT requests
+      if (editingIngredient) {
+        (formData as any).id = editingIngredient.id;
+      }
+      
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        setShowIngredientModal(false);
+        setEditingIngredient(null);
+        fetchIngredients(); // Refresh the list
+        console.log('✅ Ingredient saved successfully');
+      } else {
+        console.error('❌ Error saving ingredient:', result.error);
+        alert('Fout bij opslaan van ingrediënt: ' + (result.error || 'Onbekende fout'));
+      }
+    } catch (error) {
+      console.error('💥 Error saving ingredient:', error);
+      alert('Fout bij opslaan van ingrediënt: ' + error.message);
+    }
+  };
+
+  const handleDeleteIngredient = async (ingredientId: string) => {
+    if (!confirm('Weet je zeker dat je dit ingrediënt wilt verwijderen?')) {
       return;
     }
 
-    setIsLoading(true);
     try {
-      console.log('💾 Saving nutrition plan with daily_plans:', formData);
-      
-      // Transform daily_plans back to weekly_plan structure for database storage
-      const weeklyPlan: any = {};
-      const dailyTotals: any = {};
-      
-      // Use Dutch days to match database structure
-      const allDays = ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag'];
-      const dailyPlansMap = new Map();
-      
-      // Create map of existing daily plans
-      formData.daily_plans?.forEach(dayPlan => {
-        dailyPlansMap.set(dayPlan.day, dayPlan);
+      const response = await fetch(`/api/admin/nutrition-ingredients?id=${ingredientId}`, {
+        method: 'DELETE',
       });
+
+      const result = await response.json();
       
-      // Process all 7 days, creating empty structure for missing days
-      allDays.forEach(dayKey => {
-        const dayPlan = dailyPlansMap.get(dayKey) || {
-          day: dayKey,
-          theme: 'Training Dag',
-          focus: 'protein',
-          meals: {
-            ontbijt: { ingredients: [], calories: 0, protein: 0, carbs: 0, fat: 0 },
-            snack1: { ingredients: [], calories: 0, protein: 0, carbs: 0, fat: 0 },
-            lunch: { ingredients: [], calories: 0, protein: 0, carbs: 0, fat: 0 },
-            snack2: { ingredients: [], calories: 0, protein: 0, carbs: 0, fat: 0 },
-            diner: { ingredients: [], calories: 0, protein: 0, carbs: 0, fat: 0 }
-          }
-        };
-        
-        // Create meal objects in database format (with ingredients, nutrition, and time)
-        const createMealObject = (meal: any, defaultTime: string) => {
-          if (!meal || !meal.ingredients || meal.ingredients.length === 0) {
-            return {
-              time: defaultTime,
-              ingredients: [],
-              nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0 }
-            };
-          }
-          
-          return {
-            time: defaultTime,
-            ingredients: meal.ingredients.map((ing: any) => ({
-              name: ing.name,
-              amount: ing.amount
-            })),
-            nutrition: {
-              calories: meal.calories || 0,
-              protein: meal.protein || 0,
-              carbs: meal.carbs || 0,
-              fat: meal.fat || 0
-            }
-          };
-        };
-        
-        const dayMeals: any = {
-          ontbijt: createMealObject(dayPlan.meals.ontbijt, '07:00'),
-          lunch: createMealObject(dayPlan.meals.lunch, '12:00'),
-          diner: createMealObject(dayPlan.meals.diner, '18:00'),
-          snack: createMealObject(dayPlan.meals.snack1, '15:00'), // Use snack1 as main snack
-          avondsnack: createMealObject(dayPlan.meals.avondsnack, '21:30') // Add avondsnack
-        };
-        
-        // Calculate daily totals
-        const totalCalories = (dayPlan.meals.ontbijt?.calories || 0) + 
-                             (dayPlan.meals.snack1?.calories || 0) + 
-                             (dayPlan.meals.lunch?.calories || 0) + 
-                             (dayPlan.meals.snack2?.calories || 0) + 
-                             (dayPlan.meals.diner?.calories || 0) + 
-                             (dayPlan.meals.avondsnack?.calories || 0);
-        
-        const totalProtein = (dayPlan.meals.ontbijt?.protein || 0) + 
-                            (dayPlan.meals.snack1?.protein || 0) + 
-                            (dayPlan.meals.lunch?.protein || 0) + 
-                            (dayPlan.meals.snack2?.protein || 0) + 
-                            (dayPlan.meals.diner?.protein || 0) + 
-                            (dayPlan.meals.avondsnack?.protein || 0);
-        
-        const totalCarbs = (dayPlan.meals.ontbijt?.carbs || 0) + 
-                          (dayPlan.meals.snack1?.carbs || 0) + 
-                          (dayPlan.meals.lunch?.carbs || 0) + 
-                          (dayPlan.meals.snack2?.carbs || 0) + 
-                          (dayPlan.meals.diner?.carbs || 0) + 
-                          (dayPlan.meals.avondsnack?.carbs || 0);
-        
-        const totalFat = (dayPlan.meals.ontbijt?.fat || 0) + 
-                        (dayPlan.meals.snack1?.fat || 0) + 
-                        (dayPlan.meals.lunch?.fat || 0) + 
-                        (dayPlan.meals.snack2?.fat || 0) + 
-                        (dayPlan.meals.diner?.fat || 0) + 
-                        (dayPlan.meals.avondsnack?.fat || 0);
-        
-        dayMeals.dailyTotals = {
-          calories: Math.round(totalCalories),
-          protein: Math.round(totalProtein * 10) / 10,
-          carbs: Math.round(totalCarbs * 10) / 10,
-          fat: Math.round(totalFat * 10) / 10
-        };
-        
-        weeklyPlan[dayKey] = dayMeals;
-        dailyTotals[dayKey] = dayMeals.dailyTotals;
-      });
-      
-      // Calculate weekly averages
-      const daysCount = Object.keys(dailyTotals).length || 7;
-      const weeklyAverages = {
-        calories: Math.round((Object.values(dailyTotals) as any[]).reduce((sum: number, day: any) => sum + day.calories, 0) / daysCount),
-        protein: Math.round(((Object.values(dailyTotals) as any[]).reduce((sum: number, day: any) => sum + day.protein, 0) / daysCount) * 10) / 10,
-        carbs: Math.round(((Object.values(dailyTotals) as any[]).reduce((sum: number, day: any) => sum + day.carbs, 0) / daysCount) * 10) / 10,
-        fat: Math.round(((Object.values(dailyTotals) as any[]).reduce((sum: number, day: any) => sum + day.fat, 0) / daysCount) * 10) / 10
-      };
-      
-      // Prepare final form data - send only essential data to avoid conflicts
-      const finalFormData = {
-        id: formData.id,
-        name: formData.name,
-        description: formData.description,
-        target_calories: formData.target_calories,
-        target_protein: formData.target_protein,
-        target_carbs: formData.target_carbs,
-        target_fat: formData.target_fat,
-        goal: formData.goal,
-        fitness_goal: formData.fitness_goal,
-        difficulty: formData.difficulty,
-        duration_weeks: formData.duration_weeks,
-        daily_plans: formData.daily_plans,
-        updated_at: new Date().toISOString()
-      };
-      
-      console.log('🔄 Sending plan data:', finalFormData);
-      console.log('📊 Daily plans count:', finalFormData.daily_plans?.length || 0);
-      
-      await onSave(finalFormData);
-      onClose();
-    } catch (error) {
-      console.error('❌ Error saving plan:', error);
-      alert('Fout bij opslaan van plan');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleEditMeal = (mealType: string) => {
-    console.log('🍽️ Editing meal:', mealType, 'for day:', selectedDay);
-    
-    // Get current meal data for editing
-    const currentDay = getCurrentDayPlan();
-    const currentMeal = currentDay?.meals?.[mealType as keyof typeof currentDay.meals];
-    
-    console.log('📊 Current meal data:', currentMeal);
-    console.log('🧩 Current meal ingredients structure:', currentMeal?.ingredients);
-    console.log('🧩 Current meal suggestions structure:', (currentMeal as any)?.suggestions);
-    
-    setEditingMealType(mealType);
-    setEditingMeal(currentMeal || null);
-    setIsMealModalOpen(true);
-  };
-
-  const handleSaveMeal = async (meal: any) => {
-    console.log('💾 Saving meal:', meal);
-    console.log('📅 Selected day:', selectedDay);
-    console.log('🍽️ Meal type:', editingMealType);
-    console.log('🧩 Saving meal ingredients with units:', meal.ingredients?.map(ing => ({name: ing.name, amount: ing.amount, unit: ing.unit})));
-    
-    // Update the form data with the new meal
-    setFormData(prev => ({
-      ...prev,
-      daily_plans: prev.daily_plans?.map(dailyPlan => {
-        if (dailyPlan.day === selectedDay) {
-          // Convert ingredients to suggestions format for display
-          const suggestions = meal.ingredients?.map((ing: any) => 
-            `${ing.name} (${ing.amount}${ing.unit})`
-          ) || [];
-          
-          return {
-            ...dailyPlan,
-            meals: {
-              ...dailyPlan.meals,
-              [editingMealType]: {
-                name: meal.name,
-                calories: meal.calories,
-                protein: meal.protein,
-                carbs: meal.carbs,
-                fat: meal.fat,
-                ingredients: meal.ingredients,
-                suggestions: suggestions
-              }
-            }
-          };
-        }
-        return dailyPlan;
-      })
-    }));
-    
-    // Close the modal
-    setIsMealModalOpen(false);
-    setEditingMeal(null);
-    setEditingMealType('');
-    
-    console.log('✅ Meal saved successfully');
-  };
-
-  const handleDeleteMeal = async (mealId: string) => {
-    // Remove the meal from the current day
-    setFormData(prev => ({
-      ...prev,
-      daily_plans: prev.daily_plans?.map(dailyPlan => {
-        if (dailyPlan.day === selectedDay) {
-          return {
-            ...dailyPlan,
-            meals: {
-              ...dailyPlan.meals,
-              [editingMealType]: {
-                name: '',
-                calories: 0,
-                protein: 0,
-                carbs: 0,
-                fat: 0,
-                ingredients: []
-              }
-            }
-          };
-        }
-        return dailyPlan;
-      })
-    }));
-  };
-
-  const calculateMacroPercentages = () => {
-    const total = (formData.target_protein || 0) * 4 + (formData.target_carbs || 0) * 4 + (formData.target_fat || 0) * 9;
-    const proteinPct = total > 0 ? Math.round(((formData.target_protein || 0) * 4 / total) * 100) : 0;
-    const carbsPct = total > 0 ? Math.round(((formData.target_carbs || 0) * 4 / total) * 100) : 0;
-    const fatPct = total > 0 ? Math.round(((formData.target_fat || 0) * 9 / total) * 100) : 0;
-    
-    return { proteinPct, carbsPct, fatPct };
-  };
-
-  const { proteinPct, carbsPct, fatPct } = calculateMacroPercentages();
-  
-  // Debug logging for macro percentages
-  console.log('🧮 PlanBuilder current formData macros:', {
-    calories: formData.target_calories,
-    protein: formData.target_protein,
-    carbs: formData.target_carbs,
-    fat: formData.target_fat,
-    percentages: { proteinPct, carbsPct, fatPct }
-  });
-  
-  // Extra debugging for carnivore plans
-  if (formData.name?.toLowerCase().includes('carnivoor')) {
-    const isCarnivoreExpected = (proteinPct === 45 && carbsPct === 5 && fatPct === 50);
-    console.log(`🥩 Carnivore plan "${formData.name}" percentages ${isCarnivoreExpected ? '✅ CORRECT' : '❌ WRONG'}:`, {
-      expected: '45% protein, 5% carbs, 50% fat',
-      actual: `${proteinPct}% protein, ${carbsPct}% carbs, ${fatPct}% fat`
-    });
-  }
-
-  const getCurrentDayPlan = () => {
-    return formData.daily_plans?.find(dp => dp.day === selectedDay);
-  };
-
-  const dayNames = {
-    maandag: 'Maandag',
-    dinsdag: 'Dinsdag', 
-    woensdag: 'Woensdag',
-    donderdag: 'Donderdag',
-    vrijdag: 'Vrijdag',
-    zaterdag: 'Zaterdag',
-    zondag: 'Zondag'
-  };
-
-  const dayThemes = {
-    maandag: 'Dag 1',
-    dinsdag: 'Dag 2', 
-    woensdag: 'Dag 3',
-    donderdag: 'Dag 4',
-    vrijdag: 'Dag 5',
-    zaterdag: 'Dag 6',
-    zondag: 'Dag 7'
-  };
-
-  // Helper function to get unit label from unit_type
-  const getUnitLabelFromType = (unitType: string) => {
-    // Dynamic mapping based on unit_type from database
-    const unitTypeMap: { [key: string]: string } = {
-      'per_100g': 'g',
-      'per_30g': 'g', 
-      'per_piece': 'stuk',
-      'per_handful': 'handje',
-      'per_plakje': 'plakje'
-    };
-    
-    // For any new unit types, extract the unit from the type name
-    if (!unitTypeMap[unitType] && unitType.startsWith('per_')) {
-      return unitType.replace('per_', '');
-    }
-    
-    return unitTypeMap[unitType] || 'g';
-  };
-
-  // Helper function to get nutrition values from database
-  const getEstimatedNutrition = (ingredientName: string) => {
-    // First try to find exact match in database
-    const dbIngredient = localFoodItems.find(item => 
-      item.name.toLowerCase().trim() === ingredientName.toLowerCase().trim()
-    );
-    
-    if (dbIngredient) {
-      console.log('🎯 Found exact match for', ingredientName, ':', dbIngredient);
-      return {
-        calories: dbIngredient.calories_per_100g || 0,
-        protein: dbIngredient.protein_per_100g || 0,
-        carbs: dbIngredient.carbs_per_100g || 0,
-        fat: dbIngredient.fat_per_100g || 0,
-        unit_type: dbIngredient.unit_type || 'per_100g'
-      };
-    }
-    
-    // Try partial matches in database
-    const partialMatch = localFoodItems.find(item => 
-      item.name.toLowerCase().includes(ingredientName.toLowerCase()) ||
-      ingredientName.toLowerCase().includes(item.name.toLowerCase())
-    );
-    
-    if (partialMatch) {
-      return {
-        calories: partialMatch.calories_per_100g || 0,
-        protein: partialMatch.protein_per_100g || 0,
-        carbs: partialMatch.carbs_per_100g || 0,
-        fat: partialMatch.fat_per_100g || 0,
-        unit_type: partialMatch.unit_type || 'per_100g'
-      };
-    }
-    
-    // Fallback to hardcoded values for common ingredients
-    const nutritionData: { [key: string]: { calories: number; protein: number; carbs: number; fat: number } } = {
-      'ribeye steak': { calories: 291, protein: 25.0, carbs: 0, fat: 21.0 },
-      'ribeye': { calories: 291, protein: 25.0, carbs: 0, fat: 21.0 },
-      'runderlever': { calories: 135, protein: 20.4, carbs: 3.9, fat: 3.6 },
-      'lamskotelet': { calories: 294, protein: 25.6, carbs: 0, fat: 20.9 },
-      'kipfilet': { calories: 165, protein: 31.0, carbs: 0, fat: 3.6 },
-      'spek': { calories: 541, protein: 37.0, carbs: 1.4, fat: 42.0 },
-      'gerookte zalm': { calories: 142, protein: 25.4, carbs: 0, fat: 4.3 },
-      'zalm': { calories: 208, protein: 20.4, carbs: 0, fat: 13.4 },
-      'goudse kaas': { calories: 356, protein: 25.0, carbs: 2.2, fat: 27.4 },
-      'roomboter': { calories: 717, protein: 0.9, carbs: 0.7, fat: 81.1 },
-      'boter': { calories: 717, protein: 0.9, carbs: 0.7, fat: 81.1 },
-      'eieren': { calories: 155, protein: 13.0, carbs: 1.1, fat: 11.0 },
-      'olijfolie': { calories: 884, protein: 0, carbs: 0, fat: 100.0 },
-      'honing': { calories: 304, protein: 0.3, carbs: 82.4, fat: 0 },
-      'biefstuk': { calories: 271, protein: 26.0, carbs: 0, fat: 18.0 },
-    };
-    
-    const normalizedName = ingredientName.toLowerCase().trim();
-    
-    // Try exact match in fallback data
-    if (nutritionData[normalizedName]) {
-      return { ...nutritionData[normalizedName], unit_type: 'per_100g' };
-    }
-    
-    // Try partial matches in fallback data
-    for (const [key, value] of Object.entries(nutritionData)) {
-      if (normalizedName.includes(key) || key.includes(normalizedName)) {
-        return { ...value, unit_type: 'per_100g' };
+      if (result.success) {
+        fetchIngredients(); // Refresh the list
+      } else {
+        console.error('Error deleting ingredient:', result.error);
       }
+    } catch (error) {
+      console.error('Error deleting ingredient:', error);
     }
-    
-    // Final fallback for unknown ingredients
-    return { calories: 250, protein: 20.0, carbs: 0, fat: 18.0, unit_type: 'per_100g' };
   };
 
-  if (!isOpen) return null;
+  // Filter ingredients based on search and filters
+  const filteredIngredients = ingredients.filter(ingredient => {
+    const matchesSearch = ingredient.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === 'all' || ingredient.category === selectedCategory;
+    const matchesCarnivore = selectedCarnivoreFilter === 'all' || 
+      (selectedCarnivoreFilter === 'carnivore' && ingredient.is_carnivore) ||
+      (selectedCarnivoreFilter === 'standard' && !ingredient.is_carnivore);
+    
+    return matchesSearch && matchesCategory && matchesCarnivore;
+  });
+
+  // Categories and unit types are now managed via state (availableCategories, availableUnitTypes)
+
+  // Add new category
+  const handleAddCategory = () => {
+    if (newCategory.trim()) {
+      const categoryName = newCategory.trim();
+      setIngredientForm({ ...ingredientForm, category: categoryName });
+      // Add to available categories immediately
+      setAvailableCategories(prev => [...prev, categoryName]);
+      setNewCategory('');
+      setShowAddCategoryModal(false);
+    }
+  };
+
+  // Add new unit type
+  const handleAddUnitType = () => {
+    if (newUnitType.trim()) {
+      const unitTypeName = newUnitType.trim();
+      setIngredientForm({ ...ingredientForm, unit_type: unitTypeName });
+      // Add to available unit types immediately
+      setAvailableUnitTypes(prev => [...prev, unitTypeName]);
+      setNewUnitType('');
+      setShowAddUnitTypeModal(false);
+    }
+  };
+
+  // Copy day plan from another day
+  const handleCopyDayPlan = async () => {
+    if (!selectedSourceDay || !selectedDay) {
+      alert('Selecteer een bron dag om te kopiëren');
+      return;
+    }
+
+    if (selectedSourceDay === selectedDay) {
+      alert('Je kunt niet een dag naar zichzelf kopiëren');
+      return;
+    }
+
+    setCopyingDay(true);
+
+    try {
+      // Get the source day's meal data
+      const sourceMealsData = mealsData?.weekly_plan?.[selectedSourceDay] || {};
+
+      if (!sourceMealsData || Object.keys(sourceMealsData).length === 0) {
+        alert(`Geen maaltijddata gevonden voor ${DAYS.find(d => d.key === selectedSourceDay)?.label}`);
+        return;
+      }
+
+      // Create updated meals data with copied day
+      const updatedMeals = {
+        ...mealsData,
+        weekly_plan: {
+          ...mealsData?.weekly_plan,
+          [selectedDay]: sourceMealsData
+        }
+      };
+
+      // Update local state immediately
+      setMealsData(updatedMeals);
+      setFormData(prevData => ({
+        ...prevData,
+        meals: updatedMeals
+      }));
+
+      // Save to database using the nutrition-plans API instead of daily-plans
+      const response = await fetch('/api/admin/nutrition-plans', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: formData.id,
+          meals: updatedMeals
+        }),
+      });
+
+      if (response.ok) {
+        setShowCopyDayModal(false);
+        setSelectedSourceDay('');
+      } else {
+        const errorText = await response.text();
+        console.error('❌ Failed to copy day plan:', {
+          status: response.status,
+          statusText: response.statusText,
+          errorText: errorText
+        });
+        alert('Er is een fout opgetreden bij het kopiëren van de dag');
+      }
+    } catch (error) {
+      console.error('💥 Error copying day plan:', error);
+      alert('Er is een fout opgetreden bij het kopiëren van de dag');
+    } finally {
+      setCopyingDay(false);
+    }
+  };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-[#232D1A] rounded-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+    <div className={isPageMode ? "flex flex-col" : "fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"}>
+      <div className={`${isPageMode ? "" : "bg-[#0F150E] rounded-xl border border-[#3A4D23] w-full max-w-7xl h-[90vh]"} flex flex-col`}>
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-[#3A4D23]">
-          <h2 className="text-[#8BAE5A] font-semibold text-xl">
-            {plan ? 'Bewerk Voedingsplan' : 'Nieuw Voedingsplan'}
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-[#B6C948] hover:text-[#8BAE5A] transition-colors"
-          >
-            <XMarkIcon className="w-6 h-6" />
-          </button>
+          <div>
+            <h2 className="text-2xl font-bold text-[#8BAE5A]">{formData.name}</h2>
+            <p className="text-gray-300 mt-1">{formData.description}</p>
+          </div>
+            <div className="flex items-center space-x-4">
+              {/* Manual Save Button */}
+              <button
+                onClick={handleSave}
+                className="px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2 bg-[#8BAE5A] text-[#232D1A] hover:bg-[#B6C948]"
+                title="Opslaan naar database"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                </svg>
+                <span>Opslaan</span>
+              </button>
+            
+            {/* Refresh Button */}
+            <button
+              onClick={refreshPlanData}
+              className="flex items-center space-x-2 px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+              title="Vernieuw data vanuit database"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              <span>Vernieuwen</span>
+            </button>
+            {!isPageMode && (
+              <button
+                onClick={onClose}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <XMarkIcon className="w-6 h-6" />
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Tabs */}
         <div className="flex border-b border-[#3A4D23]">
           {[
-            { id: 'basic', label: 'Basis Info', icon: '📋' },
-            { id: 'macros', label: 'Macro\'s', icon: '⚖️' },
-            { id: 'daily', label: 'Dagelijkse Plannen', icon: '📅' },
-            { id: 'settings', label: 'Instellingen', icon: '⚙️' }
-          ].map((tab) => (
+            { key: 'overview', label: 'Overzicht', icon: '📊' },
+            { key: 'daily_plans', label: 'Dagelijkse Plannen', icon: '📅' },
+            { key: 'ingredients', label: 'Ingredienten', icon: '🥗' }
+          ].map(tab => (
             <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 px-4 py-3 font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
-                activeTab === tab.id
-                  ? 'bg-[#8BAE5A] text-[#181F17]'
-                  : 'text-[#8BAE5A] hover:bg-[#181F17]'
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key as any)}
+              className={`px-6 py-4 text-sm font-medium transition-colors ${
+                activeTab === tab.key
+                  ? 'text-[#8BAE5A] border-b-2 border-[#8BAE5A] bg-[#8BAE5A]/5'
+                  : 'text-gray-400 hover:text-white'
               }`}
             >
-              <span>{tab.icon}</span>
+              <span className="mr-2">{tab.icon}</span>
               {tab.label}
             </button>
           ))}
         </div>
 
         {/* Content */}
-        <div className="p-6">
-          {activeTab === 'basic' && (
-            <div className="space-y-6">
-              {/* Basic Info */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-[#8BAE5A] font-semibold mb-2">
-                    Plan Naam *
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => handleInputChange('name', e.target.value)}
-                    className="w-full px-4 py-3 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                    placeholder="Bijv. Carnivoor - Droogtrainen, Carnivoor - Spiermassa..."
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[#8BAE5A] font-semibold mb-2">
-                    Duur (weken)
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.duration_weeks}
-                    onChange={(e) => handleInputChange('duration_weeks', parseInt(e.target.value))}
-                    className="w-full px-4 py-3 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                    min="1"
-                    max="52"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[#8BAE5A] font-semibold mb-2">
-                  Beschrijving
-                </label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => handleInputChange('description', e.target.value)}
-                  rows={4}
-                  className="w-full px-4 py-3 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A] resize-none"
-                  placeholder="Beschrijf het voedingsplan..."
-                />
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'macros' && (
-            <div className="space-y-6">
-              {/* Fitness Goal Display - Read Only */}
-              <div>
-                <label className="block text-[#8BAE5A] font-semibold mb-3">
-                  Fitness Doel (Automatisch bepaald op basis van plan naam)
-                </label>
-                <div className="p-4 rounded-lg bg-[#232D1A] border border-[#3A4D23]">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl">
-                      {formData.fitness_goal === 'droogtrainen' ? '🔥' : 
-                       formData.fitness_goal === 'spiermassa' ? '💪' : '⚖️'}
-                    </span>
-                    <div className="font-semibold text-[#8BAE5A] capitalize">
-                      {formData.fitness_goal || 'Onderhoud'}
-                    </div>
-                  </div>
-                  <div className="text-sm text-gray-400 mt-1">
-                    {formData.fitness_goal === 'droogtrainen' ? 'Vetverlies met behoud van spiermassa' :
-                     formData.fitness_goal === 'spiermassa' ? 'Spiergroei en krachttoename' :
-                     'Behoud van lichaamscompositie'}
-                  </div>
-                  <div className="text-xs mt-2 text-[#B6C948]">
-                    💡 Het fitness doel wordt automatisch bepaald op basis van de plan naam (Carnivoor - Droogtrainen/Onderhoud/Spiermassa)
-                  </div>
-                </div>
-              </div>
-
-              {/* Daily Calories */}
-              <div>
-                <label className="block text-[#8BAE5A] font-semibold mb-2">
-                  Dagelijkse Calorieën
-                </label>
-                <input
-                  type="number"
-                  value={formData.target_calories}
-                  onChange={(e) => handleInputChange('target_calories', parseInt(e.target.value))}
-                  className="w-full px-4 py-3 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                  min="1000"
-                  max="5000"
-                  step="50"
-                />
-                <div className="text-sm mt-1 space-y-1">
-                {formData.fitness_goal && (
-                    <div className="text-[#8BAE5A]">
-                    💡 Calorieën zijn vooraf ingesteld op basis van het fitness doel
-                  </div>
-                )}
-                  <div className="text-[#B6C948]">
-                    🧮 Vul percentages vrij in (0-100%) en gram waarden worden automatisch berekend
-                  </div>
-                </div>
-              </div>
-
-              {/* Macro Distribution */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <div className="mb-2">
-                    <label className="block text-[#8BAE5A] font-semibold">
-                      Eiwitten (%)
-                  </label>
-                  </div>
-                  <input
-                    type="number"
-                    value={macroPercentages.protein === 0 ? '' : Math.round(macroPercentages.protein)}
-                    onChange={(e) => {
-                      const inputValue = e.target.value;
-                      const newPercent = inputValue === '' ? 0 : Math.max(0, Math.min(100, parseInt(inputValue) || 0));
-                      setMacroPercentages(prev => ({ ...prev, protein: newPercent }));
-                      const newProtein = Math.round(((formData.target_calories || 2500) * newPercent / 100) / 4);
-                      handleInputChange('target_protein', newProtein);
-                    }}
-                    className="w-full px-4 py-3 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                    min="0"
-                    max="100"
-                    step="1"
-                    placeholder="0"
-                  />
-                  <div className="text-[#B6C948] text-sm mt-1">{formData.target_protein}g eiwit</div>
-                </div>
-
-                <div>
-                  <div className="mb-2">
-                    <label className="block text-[#8BAE5A] font-semibold">
-                      Koolhydraten (%)
-                  </label>
-                  </div>
-                  <input
-                    type="number"
-                    value={macroPercentages.carbs === 0 ? '' : Math.round(macroPercentages.carbs)}
-                    onChange={(e) => {
-                      const inputValue = e.target.value;
-                      const newPercent = inputValue === '' ? 0 : Math.max(0, Math.min(100, parseInt(inputValue) || 0));
-                      setMacroPercentages(prev => ({ ...prev, carbs: newPercent }));
-                      const newCarbs = Math.round(((formData.target_calories || 2500) * newPercent / 100) / 4);
-                      handleInputChange('target_carbs', newCarbs);
-                    }}
-                    className="w-full px-4 py-3 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                    min="0"
-                    max="100"
-                    step="1"
-                    placeholder="0"
-                  />
-                  <div className="text-[#B6C948] text-sm mt-1">{formData.target_carbs}g koolhydraten</div>
-                </div>
-
-                <div>
-                  <div className="mb-2">
-                    <label className="block text-[#8BAE5A] font-semibold">
-                      Vetten (%)
-                  </label>
-                  </div>
-                  <input
-                    type="number"
-                    value={macroPercentages.fat === 0 ? '' : Math.round(macroPercentages.fat)}
-                    onChange={(e) => {
-                      const inputValue = e.target.value;
-                      const newPercent = inputValue === '' ? 0 : Math.max(0, Math.min(100, parseInt(inputValue) || 0));
-                      setMacroPercentages(prev => ({ ...prev, fat: newPercent }));
-                      const newFat = Math.round(((formData.target_calories || 2500) * newPercent / 100) / 9);
-                      handleInputChange('target_fat', newFat);
-                    }}
-                    className="w-full px-4 py-3 rounded-lg bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] focus:outline-none focus:ring-2 focus:ring-[#8BAE5A]"
-                    min="0"
-                    max="100"
-                    step="1"
-                    placeholder="0"
-                  />
-                  <div className="text-[#B6C948] text-sm mt-1">{formData.target_fat}g vet</div>
-                </div>
-              </div>
-
-              {/* Macro Total Warning */}
-              {(() => {
-                const totalPct = Math.round(macroPercentages.protein) + Math.round(macroPercentages.carbs) + Math.round(macroPercentages.fat);
-                if (Math.abs(totalPct - 100) > 0) {
-                  return (
-                    <div className="bg-[#4A1A1A] border border-[#7F1D1D] rounded-lg p-4 mb-6">
-                      <div className="flex items-center">
-                        <div className="text-[#FCA5A5] text-lg mr-3">⚠️</div>
-                        <div>
-                          <h4 className="text-[#FCA5A5] font-semibold mb-1">Macro percentages totaal niet 100%</h4>
-                          <p className="text-[#FCA5A5] text-sm">
-                            Huidige totaal: {totalPct}% (moet 100% zijn)
-                          </p>
-                          <p className="text-[#FCA5A5] text-sm mt-1">
-                            Pas de percentages aan zodat ze samen 100% vormen voor correcte macro berekeningen.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                }
-                return null;
-              })()}
-
-              {/* Standard Profile Info */}
-              <div className="bg-[#232D1A] rounded-lg p-4 border border-[#3A4D23] mb-6">
-                <h4 className="text-[#8BAE5A] font-semibold mb-3 flex items-center">
-                  👤 Standaard Profiel Basis
-                </h4>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                  <div className="bg-[#181F17] rounded-lg p-3 border border-[#3A4D23]">
-                    <div className="text-[#8BAE5A] font-semibold text-lg">40</div>
-                    <div className="text-[#B6C948] text-sm">Jaar</div>
-                  </div>
-                  <div className="bg-[#181F17] rounded-lg p-3 border border-[#3A4D23]">
-                    <div className="text-[#8BAE5A] font-semibold text-lg">100kg</div>
-                    <div className="text-[#B6C948] text-sm">Gewicht</div>
-                  </div>
-                  <div className="bg-[#181F17] rounded-lg p-3 border border-[#3A4D23]">
-                    <div className="text-[#8BAE5A] font-semibold text-lg">190cm</div>
-                    <div className="text-[#B6C948] text-sm">Lengte</div>
-                  </div>
-                  <div className="bg-[#181F17] rounded-lg p-3 border border-[#3A4D23]">
-                    <div className="text-[#8BAE5A] font-semibold text-sm">Matig Actief</div>
-                    <div className="text-[#B6C948] text-xs">3-5x per week sporten</div>
-                  </div>
-                </div>
-                <div className="mt-4 text-xs text-[#B6C948] space-y-2">
-                  <div className="text-center font-semibold text-[#8BAE5A]">🧮 Formule Berekening</div>
-                  <div className="bg-[#0F150E] rounded p-3 border border-[#2A3520] space-y-1">
-                    <div><span className="text-[#8BAE5A]">BMR (Mannen):</span> 10 × gewicht + 6.25 × lengte - 5 × leeftijd + 5</div>
-                    <div><span className="text-[#8BAE5A]">BMR:</span> 10 × 100 + 6.25 × 190 - 5 × 40 + 5 = <span className="text-[#B6C948] font-semibold">1,993 kcal</span></div>
-                    <div><span className="text-[#8BAE5A]">TDEE:</span> BMR × 1.55 (Matig Actief) = 1,993 × 1.55 = <span className="text-[#B6C948] font-semibold">3,089 kcal</span></div>
-                    <div className="border-t border-[#3A4D23] pt-2 mt-2">
-                      <div><span className="text-[#8BAE5A]">🔥 Droogtrainen:</span> 3,089 × 0.8 = <span className="text-yellow-400 font-semibold">2,471 kcal</span> (-20%)</div>
-                      <div><span className="text-[#8BAE5A]">⚖️ Onderhoud:</span> 3,089 × 1.0 = <span className="text-green-400 font-semibold">3,089 kcal</span> (0%)</div>
-                      <div><span className="text-[#8BAE5A]">💪 Spiermassa:</span> 3,089 × 1.15 = <span className="text-blue-400 font-semibold">3,552 kcal</span> (+15%)</div>
-                    </div>
-                  </div>
+        <div className="flex-1 overflow-hidden">
+          {activeTab === 'overview' && (
+            <div className="p-6 h-full overflow-y-auto">
+              {/* Weekly Summary - Compact Version */}
+              <div className="bg-[#181F17] rounded-lg p-4 border border-[#3A4D23] mb-6">
+                <h3 className="text-lg font-semibold text-[#8BAE5A] mb-4">Wekelijks Overzicht</h3>
+                
+                {/* Weekly Progress Dashboard - Compact */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                  {/* Weekly Calories Average */}
                   <div className="text-center">
-                    📊 Alle voedingsplannen zijn gebaseerd op dit standaard profiel voor consistentie
-                  </div>
-                </div>
-              </div>
-
-              {/* Macro Summary */}
-              <div className="bg-[#181F17] rounded-lg p-4 border border-[#3A4D23]">
-                <div className="flex justify-between items-center mb-3">
-                  <h4 className="text-[#8BAE5A] font-semibold">Macro Overzicht</h4>
-                  <button
-                    onClick={() => {
-                      const isCarnivore = formData.name?.toLowerCase().includes('carnivoor') || false;
-                      const standardProfile = getStandardProfile(formData.fitness_goal || 'spiermassa', isCarnivore);
-                      setFormData(prev => ({
-                        ...prev,
-                        target_calories: standardProfile.target_calories,
-                        target_protein: standardProfile.target_protein,
-                        target_carbs: standardProfile.target_carbs,
-                        target_fat: standardProfile.target_fat
-                      }));
-                    }}
-                    className="px-3 py-1 bg-[#8BAE5A] text-[#181F17] rounded text-sm font-semibold hover:bg-[#B6C948] transition-colors"
-                  >
-                    ⚖️ Herbereken
-                  </button>
-                </div>
-                <div className="grid grid-cols-3 gap-4 text-center">
-                  <div>
-                    <div className="text-[#8BAE5A] font-semibold">{formData.target_protein}g</div>
-                    <div className="text-[#B6C948] text-sm">Protein</div>
-                    <div className="text-xs text-gray-400 mt-1">{proteinPct}%</div>
-                  </div>
-                  <div>
-                    <div className="text-[#8BAE5A] font-semibold">{formData.target_carbs}g</div>
-                    <div className="text-[#B6C948] text-sm">Carbs</div>
-                    <div className="text-xs text-gray-400 mt-1">{carbsPct}%</div>
-                  </div>
-                  <div>
-                    <div className="text-[#8BAE5A] font-semibold">{formData.target_fat}g</div>
-                    <div className="text-[#B6C948] text-sm">Fat</div>
-                    <div className="text-xs text-gray-400 mt-1">{fatPct}%</div>
-                  </div>
-                </div>
-                <div className="mt-4 text-center bg-[#232D1A] rounded-lg p-3 border border-[#3A4D23]">
-                  <div className="text-[#8BAE5A] font-bold text-xl">{formData.target_calories}</div>
-                  <div className="text-[#B6C948] text-sm">Calorieën per dag</div>
-                  <div className="text-xs text-gray-400 mt-1">
-                    Gebaseerd op {formData.fitness_goal === 'droogtrainen' ? 'vetverlies' : 
-                                 formData.fitness_goal === 'spiermassa' ? 'spiergroei' : 'onderhoud'} doel
-                  </div>
-                </div>
-                <div className="mt-3 text-xs text-[#B6C948] text-center">
-                  💡 Klik "Herbereken" om terug te gaan naar de standaard waarden voor dit fitness doel
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'daily' && (
-            <div className="space-y-6">
-              {/* Day Selector */}
-              <div className="flex gap-2 overflow-x-auto pb-2">
-                {Object.entries(dayNames).map(([dayKey, dayName]) => (
-                  <button
-                    key={dayKey}
-                    onClick={() => setSelectedDay(dayKey)}
-                    className={`flex-shrink-0 px-4 py-2 rounded-lg font-semibold transition-all duration-200 ${
-                      selectedDay === dayKey
-                        ? 'bg-[#8BAE5A] text-[#181F17]'
-                        : 'bg-[#181F17] text-[#8BAE5A] border border-[#3A4D23] hover:bg-[#232D1A]'
-                    }`}
-                  >
-                    {dayName}
-                  </button>
-                ))}
-              </div>
-
-              {/* Daily Plan Editor */}
-              {getCurrentDayPlan() && (
-                <div className="space-y-6">
-                  {/* Day Header */}
-                  <div className="bg-[#181F17] rounded-lg p-4 border border-[#3A4D23]">
-                    <div className="flex items-center gap-3 mb-3">
-                      <CalendarIcon className="w-6 h-6 text-[#8BAE5A]" />
-                      <h3 className="text-[#8BAE5A] font-semibold text-lg">
-                        {dayNames[selectedDay as keyof typeof dayNames]} - {dayThemes[selectedDay as keyof typeof dayThemes]}
-                      </h3>
+                    <div className="text-2xl font-bold text-[#8BAE5A] mb-1">
+                      {getWeeklyTotal().calories}
                     </div>
-                    <div className="flex gap-2 mb-4">
-                      <span className="px-2 py-1 bg-[#8BAE5A] text-[#181F17] rounded text-xs font-semibold">
-                        {formData.name || 'Voedingsplan'}
-                      </span>
-                      {formData.fitness_goal && (
-                        <span className="px-2 py-1 bg-[#B6C948] text-[#181F17] rounded text-xs font-semibold">
-                          {formData.fitness_goal === 'droogtrainen' ? '🔥 Droogtrainen' : 
-                           formData.fitness_goal === 'spiermassa' ? '💪 Spiermassa' : '⚖️ Onderhoud'}
-                        </span>
-                      )}
+                    <div className="text-xs text-gray-400 mb-1">kcal gemiddeld</div>
+                    <div className="text-xs text-[#B6C948]">
+                      {formData.target_calories ? 
+                        `${Math.round((getWeeklyTotal().calories / formData.target_calories) * 100)}% van doel` : 
+                        'Geen doel'
+                      }
                     </div>
-
-                    {/* Daily Totals Summary */}
-                    {(() => {
-                      const currentDay = getCurrentDayPlan();
-                      const meals = currentDay?.meals;
-                      
-                      const totalCalories = (meals?.ontbijt?.calories || 0) + 
-                                          (meals?.snack1?.calories || 0) + 
-                                          (meals?.lunch?.calories || 0) + 
-                                          (meals?.snack2?.calories || 0) + 
-                                          (meals?.diner?.calories || 0) + 
-                                          (meals?.avondsnack?.calories || 0);
-                      
-                      const totalProtein = (meals?.ontbijt?.protein || 0) + 
-                                         (meals?.snack1?.protein || 0) + 
-                                         (meals?.lunch?.protein || 0) + 
-                                         (meals?.snack2?.protein || 0) + 
-                                         (meals?.diner?.protein || 0) + 
-                                         (meals?.avondsnack?.protein || 0);
-                      
-                      const totalCarbs = (meals?.ontbijt?.carbs || 0) + 
-                                       (meals?.snack1?.carbs || 0) + 
-                                       (meals?.lunch?.carbs || 0) + 
-                                       (meals?.snack2?.carbs || 0) + 
-                                       (meals?.diner?.carbs || 0) + 
-                                       (meals?.avondsnack?.carbs || 0);
-                      
-                      const totalFat = (meals?.ontbijt?.fat || 0) + 
-                                     (meals?.snack1?.fat || 0) + 
-                                     (meals?.lunch?.fat || 0) + 
-                                     (meals?.snack2?.fat || 0) + 
-                                     (meals?.diner?.fat || 0) + 
-                                     (meals?.avondsnack?.fat || 0);
-
-                      // Get target values from actual plan or fallback to standard profile
-                      const isCarnivore = formData.name?.toLowerCase().includes('carnivoor') || false;
-                      const standardProfile = getStandardProfile(formData.fitness_goal || 'spiermassa', isCarnivore);
-                      const targetCalories = formData.target_calories || standardProfile.target_calories;
-                      const caloriesDifference = Math.round(totalCalories - targetCalories);
-                      const percentageOfTarget = targetCalories > 0 ? Math.round((totalCalories / targetCalories) * 100) : 0;
-                      
-                      return (
-                        <div className="space-y-4">
-                          {/* Daily Totals */}
-                          <div className="bg-[#232D1A] rounded-lg p-4 border border-[#3A4D23]">
-                            <h4 className="text-[#8BAE5A] font-semibold mb-3 flex items-center gap-2">
-                              📊 Dagelijkse Totalen - {dayNames[selectedDay as keyof typeof dayNames]}
-                            </h4>
-                            <div className="grid grid-cols-4 gap-3">
-                              <div className="bg-[#181F17] p-3 rounded border border-[#3A4D23] text-center">
-                                <div className="text-[#8BAE5A] font-bold text-lg">{Math.round(totalCalories)}</div>
-                                <div className="text-[#B6C948] text-xs">Calorieën</div>
-                              </div>
-                              <div className="bg-[#181F17] p-3 rounded border border-[#3A4D23] text-center">
-                                <div className="text-[#8BAE5A] font-bold text-lg">{Math.round(totalProtein * 10) / 10}g</div>
-                                <div className="text-[#B6C948] text-xs">Protein</div>
-                              </div>
-                              <div className="bg-[#181F17] p-3 rounded border border-[#3A4D23] text-center">
-                                <div className="text-[#8BAE5A] font-bold text-lg">{Math.round(totalCarbs * 10) / 10}g</div>
-                                <div className="text-[#B6C948] text-xs">Carbs</div>
-                              </div>
-                              <div className="bg-[#181F17] p-3 rounded border border-[#3A4D23] text-center">
-                                <div className="text-[#8BAE5A] font-bold text-lg">{Math.round(totalFat * 10) / 10}g</div>
-                                <div className="text-[#B6C948] text-xs">Fat</div>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Standard Profile Comparison */}
-                          <div className="bg-[#232D1A] rounded-lg p-4 border border-[#3A4D23]">
-                            <h4 className="text-[#8BAE5A] font-semibold mb-3 flex items-center gap-2">
-                              👤 Standaard Profiel Vergelijking
-                            </h4>
-                            
-                            {/* Target Values Row */}
-                            <div className="mb-4">
-                              <div className="text-[#B6C948] text-sm mb-2 text-center">
-                                🎯 Dagelijkse Doelen ({formData.fitness_goal === 'droogtrainen' ? 'Droogtrainen' : 
-                                                      formData.fitness_goal === 'spiermassa' ? 'Spiermassa' : 'Onderhoud'})
-                              </div>
-                              <div className="grid grid-cols-4 gap-3">
-                                <div className="bg-[#181F17] rounded-lg p-3 border border-[#3A4D23] text-center">
-                                  <div className="text-[#8BAE5A] font-bold text-lg">{formData.target_calories || targetCalories}</div>
-                                  <div className="text-[#B6C948] text-xs">Calorieën</div>
-                                </div>
-                                <div className="bg-[#181F17] rounded-lg p-3 border border-[#3A4D23] text-center">
-                                  <div className="text-[#8BAE5A] font-bold text-lg">{formData.target_protein || standardProfile.target_protein}g</div>
-                                  <div className="text-[#B6C948] text-xs">Protein</div>
-                                </div>
-                                <div className="bg-[#181F17] rounded-lg p-3 border border-[#3A4D23] text-center">
-                                  <div className="text-[#8BAE5A] font-bold text-lg">{formData.target_carbs || standardProfile.target_carbs}g</div>
-                                  <div className="text-[#B6C948] text-xs">Carbs</div>
-                                </div>
-                                <div className="bg-[#181F17] rounded-lg p-3 border border-[#3A4D23] text-center">
-                                  <div className="text-[#8BAE5A] font-bold text-lg">{formData.target_fat || standardProfile.target_fat}g</div>
-                                  <div className="text-[#B6C948] text-xs">Fat</div>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Difference Values Row */}
-                            <div className="mb-3">
-                              <div className="text-[#B6C948] text-sm mb-2 text-center">
-                                📊 Verschil (Plan vs Doel)
-                              </div>
-                              <div className="grid grid-cols-4 gap-3">
-                                <div className="bg-[#181F17] rounded-lg p-3 border border-[#3A4D23] text-center">
-                                  <div className={`font-bold text-lg ${
-                                    Math.abs(caloriesDifference) > 200 ? 'text-red-400' : 
-                                    caloriesDifference >= 0 ? 'text-[#8BAE5A]' : 'text-orange-400'
-                                  }`}>
-                                    {caloriesDifference >= 0 ? '+' : ''}{caloriesDifference}
-                                  </div>
-                                  <div className="text-[#B6C948] text-xs">Calorieën</div>
-                                  <div className="text-xs text-gray-400">{percentageOfTarget}%</div>
-                                  {Math.abs(caloriesDifference) > 200 && (
-                                    <div className="text-xs text-red-400 mt-1 font-semibold">⚠️ BUITEN MARGE</div>
-                                  )}
-                                </div>
-                                <div className="bg-[#181F17] rounded-lg p-3 border border-[#3A4D23] text-center">
-                                  {(() => {
-                                    const targetProtein = formData.target_protein || standardProfile.target_protein;
-                                    const proteinDiff = totalProtein - targetProtein;
-                                    return (
-                                      <>
-                                        <div className={`font-bold text-lg ${
-                                          Math.abs(proteinDiff) > (targetProtein * 0.2) ? 'text-red-400' : 
-                                          proteinDiff >= 0 ? 'text-[#8BAE5A]' : 'text-orange-400'
-                                        }`}>
-                                          {proteinDiff >= 0 ? '+' : ''}{Math.round(proteinDiff * 10) / 10}g
-                                        </div>
-                                        <div className="text-[#B6C948] text-xs">Protein</div>
-                                        <div className="text-xs text-gray-400">
-                                          {targetProtein > 0 ? Math.round((totalProtein / targetProtein) * 100) : 0}%
-                                        </div>
-                                        {Math.abs(proteinDiff) > (targetProtein * 0.2) && (
-                                          <div className="text-xs text-red-400 mt-1 font-semibold">⚠️ BUITEN MARGE</div>
-                                        )}
-                                      </>
-                                    );
-                                  })()}
-                                </div>
-                                <div className="bg-[#181F17] rounded-lg p-3 border border-[#3A4D23] text-center">
-                                  {(() => {
-                                    const targetCarbs = formData.target_carbs || standardProfile.target_carbs;
-                                    const carbsDiff = totalCarbs - targetCarbs;
-                                    return (
-                                      <>
-                                        <div className={`font-bold text-lg ${
-                                          Math.abs(carbsDiff) > Math.max(5, targetCarbs * 0.5) ? 'text-red-400' : 
-                                          carbsDiff >= 0 ? 'text-[#8BAE5A]' : 'text-orange-400'
-                                        }`}>
-                                          {carbsDiff >= 0 ? '+' : ''}{Math.round(carbsDiff * 10) / 10}g
-                                        </div>
-                                        <div className="text-[#B6C948] text-xs">Carbs</div>
-                                        <div className="text-xs text-gray-400">
-                                          {targetCarbs > 0 ? Math.round((totalCarbs / targetCarbs) * 100) : 0}%
-                                        </div>
-                                        {Math.abs(carbsDiff) > Math.max(5, targetCarbs * 0.5) && (
-                                          <div className="text-xs text-red-400 mt-1 font-semibold">⚠️ BUITEN MARGE</div>
-                                        )}
-                                      </>
-                                    );
-                                  })()}
-                                </div>
-                                <div className="bg-[#181F17] rounded-lg p-3 border border-[#3A4D23] text-center">
-                                  {(() => {
-                                    const targetFat = formData.target_fat || standardProfile.target_fat;
-                                    const fatDiff = totalFat - targetFat;
-                                    return (
-                                      <>
-                                        <div className={`font-bold text-lg ${
-                                          Math.abs(fatDiff) > (targetFat * 0.25) ? 'text-red-400' : 
-                                          fatDiff >= 0 ? 'text-[#8BAE5A]' : 'text-orange-400'
-                                        }`}>
-                                          {fatDiff >= 0 ? '+' : ''}{Math.round(fatDiff * 10) / 10}g
-                                        </div>
-                                        <div className="text-[#B6C948] text-xs">Fat</div>
-                                        <div className="text-xs text-gray-400">
-                                          {targetFat > 0 ? Math.round((totalFat / targetFat) * 100) : 0}%
-                                        </div>
-                                        {Math.abs(fatDiff) > (targetFat * 0.25) && (
-                                          <div className="text-xs text-red-400 mt-1 font-semibold">⚠️ BUITEN MARGE</div>
-                                        )}
-                                      </>
-                                    );
-                                  })()}
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="text-xs text-center">
-                              <div className="text-[#B6C948] mb-1">
-                                💡 Profiel: 40 jaar, 100kg, 190cm, Matig actief
-                              </div>
-                              <div className={`font-semibold ${
-                                Math.abs(caloriesDifference) > 200 ? 'text-red-400' : 
-                                Math.abs(caloriesDifference) <= 200 ? 'text-[#8BAE5A]' : 'text-orange-400'
-                              }`}>
-                                {Math.abs(caloriesDifference) > 200 ? 
-                                  `⚠️ WAARSCHUWING: ${Math.abs(caloriesDifference)} kcal buiten veilige marge (±200 kcal)` :
-                                  Math.abs(caloriesDifference) <= 200 ? 
-                                    '✅ Plan zit binnen veilige marge (±200 kcal)' : 
-                                    'Plan zit dicht bij doel'
-                                }
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })()}
+                    {formData.target_calories && (
+                      <div className="w-full bg-[#0F150E] rounded-full h-1.5 mt-1">
+                        <div 
+                          className={`h-1.5 rounded-full transition-all duration-300 ${getProgressBarColor(getWeeklyTotal().calories, formData.target_calories)}`}
+                          style={{ 
+                            width: `${Math.min((getWeeklyTotal().calories / formData.target_calories) * 100, 100)}%`
+                          }}
+                        ></div>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Meals - Now showing actual ingredients from database */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {['ontbijt', 'snack1', 'lunch', 'snack2', 'diner', 'avondsnack'].map((mealType) => {
-                      const currentDay = getCurrentDayPlan();
-                      const meal = currentDay?.meals?.[mealType as keyof typeof currentDay.meals];
-                      const mealNames = {
-                        ontbijt: 'Ontbijt',
-                        snack1: 'Ochtend Snack',
-                        lunch: 'Lunch', 
-                        snack2: 'Middag Snack',
-                        diner: 'Diner',
-                        avondsnack: 'Avond Snack'
-                      };
-                      
-                      // Get suggestions (which are the actual ingredients from database)
-                      const ingredients = meal?.suggestions || [];
-                      const hasIngredients = ingredients.length > 0;
-                      
+                  {/* Weekly Protein Average */}
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-blue-400 mb-1">
+                      {Math.round(getWeeklyTotal().protein * 10) / 10}g
+                    </div>
+                    <div className="text-xs text-gray-400 mb-1">Eiwit gemiddeld</div>
+                    <div className="text-xs text-[#B6C948]">
+                      {formData.target_protein ? 
+                        `${Math.round((getWeeklyTotal().protein / formData.target_protein) * 100)}% van doel` : 
+                        'Geen doel'
+                      }
+                    </div>
+                    {formData.target_protein && (
+                      <div className="w-full bg-[#0F150E] rounded-full h-1.5 mt-1">
+                        <div 
+                          className={`h-1.5 rounded-full transition-all duration-300 ${getProgressBarColor(getWeeklyTotal().protein, formData.target_protein)}`}
+                          style={{ 
+                            width: `${Math.min((getWeeklyTotal().protein / formData.target_protein) * 100, 100)}%` 
+                          }}
+                        ></div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Weekly Carbs Average */}
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-orange-400 mb-1">
+                      {Math.round(getWeeklyTotal().carbs * 10) / 10}g
+                    </div>
+                    <div className="text-xs text-gray-400 mb-1">Koolhydraten gemiddeld</div>
+                    <div className="text-xs text-[#B6C948]">
+                      {formData.target_carbs ? 
+                        `${Math.round((getWeeklyTotal().carbs / formData.target_carbs) * 100)}% van doel` : 
+                        'Geen doel'
+                      }
+                    </div>
+                    {formData.target_carbs && (
+                      <div className="w-full bg-[#0F150E] rounded-full h-1.5 mt-1">
+                        <div 
+                          className={`h-1.5 rounded-full transition-all duration-300 ${getProgressBarColor(getWeeklyTotal().carbs, formData.target_carbs)}`}
+                          style={{ 
+                            width: `${Math.min((getWeeklyTotal().carbs / formData.target_carbs) * 100, 100)}%` 
+                          }}
+                        ></div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Weekly Fat Average */}
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-yellow-400 mb-1">
+                      {Math.round(getWeeklyTotal().fat * 10) / 10}g
+                    </div>
+                    <div className="text-xs text-gray-400 mb-1">Vet gemiddeld</div>
+                    <div className="text-xs text-[#B6C948]">
+                      {formData.target_fat ? 
+                        `${Math.round((getWeeklyTotal().fat / formData.target_fat) * 100)}% van doel` : 
+                        'Geen doel'
+                      }
+                    </div>
+                    {formData.target_fat && (
+                      <div className="w-full bg-[#0F150E] rounded-full h-1.5 mt-1">
+                        <div 
+                          className={`h-1.5 rounded-full transition-all duration-300 ${getProgressBarColor(getWeeklyTotal().fat, formData.target_fat)}`}
+                          style={{ 
+                            width: `${Math.min((getWeeklyTotal().fat / formData.target_fat) * 100, 100)}%` 
+                          }}
+                        ></div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Daily Breakdown - Compact */}
+                <div className="border-t border-[#3A4D23] pt-4">
+                  <h4 className="text-sm font-semibold text-[#8BAE5A] mb-3">Dagelijkse Breakdown</h4>
+                  <div className="grid grid-cols-7 gap-2">
+                    {DAYS.map(day => {
+                      const dayTotal = getDayTotal(day.key);
                       return (
-                        <div key={mealType} className="bg-[#181F17] rounded-lg p-4 border border-[#3A4D23]">
-                          <div className="flex items-center justify-between mb-3">
-                            <h4 className="text-[#8BAE5A] font-semibold flex items-center gap-2">
-                              {mealType === 'ontbijt' && '🍳'}
-                              {mealType === 'snack1' && '🥜'}
-                              {mealType === 'lunch' && '🥩'}
-                              {mealType === 'snack2' && '🧀'}
-                              {mealType === 'diner' && '🍽️'}
-                              {mealType === 'avondsnack' && '🌙'}
-                              {mealNames[mealType as keyof typeof mealNames]}
-                            </h4>
-                            <div className="flex gap-2">
-                              <button 
-                                onClick={() => handleEditMeal(mealType)}
-                                className="text-[#8BAE5A] hover:text-[#7A9D4B] text-sm"
-                                title="Maaltijd bewerken"
-                              >
-                                <PencilIcon className="w-4 h-4" />
-                              </button>
+                        <div key={day.key} className="text-center">
+                          <div className="text-xs font-medium text-[#8BAE5A] mb-1">{day.label}</div>
+                          <div className="bg-[#0F150E] rounded p-2 border border-[#3A4D23]">
+                            <div className="text-sm font-bold text-white">{dayTotal.calories}</div>
+                            <div className="text-xs text-gray-400">kcal</div>
+                            <div className="text-xs text-[#B6C948] mt-1">
+                              Eiwit: {Math.round(dayTotal.protein * 10) / 10}g | Koolhydraten: {Math.round(dayTotal.carbs * 10) / 10}g | Vet: {Math.round(dayTotal.fat * 10) / 10}g
                             </div>
-                          </div>
-                          
-                          <div className="space-y-3">
-                            {/* Meal name and nutrition */}
-                            <div className="text-[#B6C948] font-medium">
-                              {meal?.name || `${mealNames[mealType as keyof typeof mealNames]} - Nog niet ingesteld`}
-                            </div>
-                            
-                            {/* Nutrition info */}
-                            <div className="bg-[#0F150E] rounded-lg p-3 border border-[#2A3520]">
-                              <div className="grid grid-cols-2 gap-2 text-xs">
-                                <div className="text-[#8BAE5A]">
-                                  <span className="font-semibold">{meal?.calories || 0}</span> cal
-                                </div>
-                                <div className="text-[#8BAE5A]">
-                                  <span className="font-semibold">{meal?.protein || 0}g</span> protein
-                                </div>
-                                <div className="text-[#8BAE5A]">
-                                  <span className="font-semibold">{meal?.carbs || 0}g</span> carbs
-                                </div>
-                                <div className="text-[#8BAE5A]">
-                                  <span className="font-semibold">{meal?.fat || 0}g</span> fat
-                                </div>
-                              </div>
-                            </div>
-                            
-                            {/* Ingredients Table */}
-                            {meal?.ingredients && meal.ingredients.length > 0 ? (
-                              <div className="space-y-2">
-                                <div className="text-xs text-[#8BAE5A] font-semibold">Ingrediënten:</div>
-                                <div className="bg-[#0F150E] rounded-lg border border-[#2A3520] overflow-hidden">
-                                  <div className="overflow-x-auto">
-                                    <table className="w-full text-xs">
-                                      <thead>
-                                        <tr className="bg-[#232D1A] border-b border-[#3A4D23]">
-                                          <th className="text-left p-2 text-[#8BAE5A] font-semibold">Ingrediënt</th>
-                                          <th className="text-center p-2 text-[#8BAE5A] font-semibold">Hoeveelheid</th>
-                                          <th className="text-center p-2 text-[#8BAE5A] font-semibold">Kcal</th>
-                                          <th className="text-center p-2 text-[#8BAE5A] font-semibold">Protein</th>
-                                          <th className="text-center p-2 text-[#8BAE5A] font-semibold">Carbs</th>
-                                          <th className="text-center p-2 text-[#8BAE5A] font-semibold">Fat</th>
-                                        </tr>
-                                      </thead>
-                                      <tbody>
-                                        {meal.ingredients.map((ingredient: any, idx: number) => {
-                                          // Apply legacy unit correction for display
-                                          const correctedIngredient = (() => {
-                                            // Check if this ingredient exists in database with different unit_type
-                                            const dbIngredient = localFoodItems.find(db => 
-                                              db.name.toLowerCase() === ingredient.name.toLowerCase()
-                                            );
-
-                                            if (dbIngredient) {
-                                              const correctUnit = getUnitLabelFromType(dbIngredient.unit_type);
-                                              // ALWAYS keep original amount - never reset to 1
-                                              const correctAmount = ingredient.amount;
-
-                                              // Dynamic unit correction for any unit type
-                                              // If current unit is 'g' but database has a different unit_type, correct it
-                                              if (ingredient.unit === 'g' && dbIngredient.unit_type !== 'per_100g' && dbIngredient.unit_type !== 'per_30g') {
-                                                console.log(`🔧 Daily Plans: Correcting ${ingredient.name} from ${ingredient.amount}g to ${correctAmount}${correctUnit} (${dbIngredient.unit_type})`);
-                                                return {
-                                                  ...ingredient,
-                                                  amount: correctAmount,
-                                                  unit: correctUnit
-                                                };
-                                              }
-                                            }
-
-                                            return ingredient;
-                                          })();
-
-                                          // Calculate nutrition values for this ingredient based on unit type
-                                          const amount = correctedIngredient.amount || 0;
-                                          const unit = correctedIngredient.unit || 'g';
-                                          
-                                          // Get nutrition data from database
-                                          const estimatedNutrition = getEstimatedNutrition(ingredient.name);
-                                          
-                                          let calories, protein, carbs, fat;
-                                          
-                                          // Calculate nutrition based on unit_type from database
-                                          // Dynamic calculation for all unit types
-                                          if (estimatedNutrition.unit_type === 'per_30g') {
-                                            // For per_30g items, database values are per 30g
-                                            const multiplier = amount / 30;
-                                            calories = Math.round(estimatedNutrition.calories * multiplier);
-                                            protein = Math.round(estimatedNutrition.protein * multiplier * 10) / 10;
-                                            carbs = Math.round(estimatedNutrition.carbs * multiplier * 10) / 10;
-                                            fat = Math.round(estimatedNutrition.fat * multiplier * 10) / 10;
-                                          } else if (estimatedNutrition.unit_type === 'per_100g') {
-                                            // For per_100g items (default), calculate based on grams
-                                            let gramAmount = amount;
-                                            if (unit === 'kg') gramAmount = amount * 1000;
-                                            else if (unit === 'handje') gramAmount = amount * 25;
-                                            else if (unit === 'stuk') {
-                                              // Use database unit conversion if available
-                                              const dbIngredient = localFoodItems.find(item => 
-                                                item.name.toLowerCase().trim() === ingredient.name.toLowerCase().trim()
-                                              );
-                                              if (dbIngredient?.unit_type === 'per_piece') {
-                                                // This shouldn't happen, but fallback to estimation
-                                                gramAmount = amount * 50; // default piece weight
-                                              } else {
-                                                gramAmount = amount; // assume grams
-                                              }
-                                            }
-                                            
-                                            const multiplier = gramAmount / 100;
-                                            calories = Math.round(estimatedNutrition.calories * multiplier);
-                                            protein = Math.round(estimatedNutrition.protein * multiplier * 10) / 10;
-                                            carbs = Math.round(estimatedNutrition.carbs * multiplier * 10) / 10;
-                                            fat = Math.round(estimatedNutrition.fat * multiplier * 10) / 10;
-                                          } else {
-                                            // For all other unit types (per_piece, per_handful, per_plakje, etc.)
-                                            // Database values are already per unit, so multiply by amount directly
-                                            calories = Math.round(estimatedNutrition.calories * amount);
-                                            protein = Math.round(estimatedNutrition.protein * amount * 10) / 10;
-                                            carbs = Math.round(estimatedNutrition.carbs * amount * 10) / 10;
-                                            fat = Math.round(estimatedNutrition.fat * amount * 10) / 10;
-                                            
-                                            console.log(`🔧 Dynamic calculation for ${ingredient.name} (${estimatedNutrition.unit_type}):`, {
-                                              originalAmount: ingredient.amount,
-                                              correctedAmount: amount,
-                                              unit: unit,
-                                              unitType: estimatedNutrition.unit_type,
-                                              dbValues: estimatedNutrition,
-                                              calculated: { calories, protein, carbs, fat }
-                                            });
-                                          }
-                                          
-                                          return (
-                                            <tr key={idx} className="border-b border-[#3A4D23] hover:bg-[#232D1A]/50">
-                                              <td className="p-2 text-[#B6C948]">{correctedIngredient.name}</td>
-                                              <td className="p-2 text-center text-[#8BAE5A]">{correctedIngredient.amount}{correctedIngredient.unit || 'g'}</td>
-                                              <td className="p-2 text-center text-[#8BAE5A]">{calories}</td>
-                                              <td className="p-2 text-center text-[#8BAE5A]">{protein}g</td>
-                                              <td className="p-2 text-center text-[#8BAE5A]">{carbs}g</td>
-                                              <td className="p-2 text-center text-[#8BAE5A]">{fat}g</td>
-                                            </tr>
-                                          );
-                                        })}
-                                      </tbody>
-                                    </table>
-                                    </div>
-                                </div>
-                              </div>
-                            ) : (
-                              <div className="text-xs text-gray-500 italic p-3 bg-[#0F150E] rounded border border-[#2A3520]">
-                                💡 Geen ingrediënten gevonden - klik op bewerken om toe te voegen
-                              </div>
-                            )}
                           </div>
                         </div>
                       );
                     })}
                   </div>
+                </div>
+              </div>
 
-                  {/* Daily Nutrition Summary */}
-                  <div className="bg-[#181F17] rounded-lg p-4 border border-[#3A4D23]">
-                    <h4 className="text-[#8BAE5A] font-semibold mb-3 flex items-center gap-2">
-                      📊 Dagelijkse Voeding Overzicht - {dayNames[selectedDay as keyof typeof dayNames]}
-                    </h4>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Plan Details */}
+                <div className="bg-[#181F17] rounded-lg p-6 border border-[#3A4D23]">
+                  <h3 className="text-lg font-semibold text-[#8BAE5A] mb-4">Plan Details</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-1">Naam</label>
+                      <input
+                        type="text"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        className="w-full px-3 py-2 bg-[#0F150E] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-1">Beschrijving</label>
+                      <textarea
+                        value={formData.description}
+                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        rows={3}
+                        className="w-full px-3 py-2 bg-[#0F150E] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-1">Doel</label>
+                      <select
+                        value={formData.goal || ''}
+                        onChange={(e) => setFormData({ ...formData, goal: e.target.value })}
+                        className="w-full px-3 py-2 bg-[#0F150E] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A]"
+                      >
+                        <option value="Droogtrainen">Droogtrainen</option>
+                        <option value="Onderhoud">Onderhoud</option>
+                        <option value="Spiermassa">Spiermassa</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Target Macros */}
+                <div className="bg-[#181F17] rounded-lg p-6 border border-[#3A4D23]">
+                  <h3 className="text-lg font-semibold text-[#8BAE5A] mb-4">Target Macros</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-1">Calorieën</label>
+                      <input
+                        type="number"
+                        value={formData.target_calories || ''}
+                        onChange={(e) => setFormData({ ...formData, target_calories: parseInt(e.target.value) })}
+                        className="w-full px-3 py-2 bg-[#0F150E] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-1">
+                        Eiwit (g) 
+                        {formData.target_calories && formData.target_protein && (
+                          <span className="text-xs text-[#B6C948] ml-2">
+                            ({Math.round((formData.target_protein * 4 / formData.target_calories) * 100)}%)
+                          </span>
+                        )}
+                      </label>
+                      <input
+                        type="number"
+                        value={formData.target_protein || ''}
+                        onChange={(e) => setFormData({ ...formData, target_protein: parseInt(e.target.value) })}
+                        className="w-full px-3 py-2 bg-[#0F150E] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-1">
+                        Koolhydraten (g)
+                        {formData.target_calories && formData.target_carbs && (
+                          <span className="text-xs text-[#B6C948] ml-2">
+                            ({Math.round((formData.target_carbs * 4 / formData.target_calories) * 100)}%)
+                          </span>
+                        )}
+                      </label>
+                      <input
+                        type="number"
+                        value={formData.target_carbs || ''}
+                        onChange={(e) => setFormData({ ...formData, target_carbs: parseInt(e.target.value) })}
+                        className="w-full px-3 py-2 bg-[#0F150E] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-1">
+                        Vet (g)
+                        {formData.target_calories && formData.target_fat && (
+                          <span className="text-xs text-[#B6C948] ml-2">
+                            ({Math.round((formData.target_fat * 9 / formData.target_calories) * 100)}%)
+                          </span>
+                        )}
+                      </label>
+                      <input
+                        type="number"
+                        value={formData.target_fat || ''}
+                        onChange={(e) => setFormData({ ...formData, target_fat: parseInt(e.target.value) })}
+                        className="w-full px-3 py-2 bg-[#0F150E] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A]"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Formula Calculation */}
+                <div className="bg-[#181F17] rounded-lg p-6 border border-[#3A4D23]">
+                  <h3 className="text-lg font-semibold text-[#8BAE5A] mb-4">Formule Berekening</h3>
+                  <div className="space-y-4">
+                    <div className="bg-[#0F150E] rounded-lg p-4 border border-[#3A4D23]">
+                      <div className="text-sm font-medium text-[#8BAE5A] mb-2">Dagelijkse Calorieën</div>
+                      <div className="text-lg font-bold text-white mb-1">
+                        Gewicht × 22 × Activiteitniveau
+                      </div>
+                      <div className="text-xs text-gray-400">
+                        Voorbeeld: 100kg × 22 × 1.3 = 2,860 kcal
+                      </div>
+                    </div>
                     
-                    {(() => {
-                      const currentDay = getCurrentDayPlan();
-                      const meals = currentDay?.meals;
+                    <div className="space-y-3">
+                      <div className="text-sm font-medium text-[#8BAE5A] mb-2">Activiteitsniveaus</div>
                       
-                      const totalCalories = (meals?.ontbijt?.calories || 0) + 
-                                          (meals?.snack1?.calories || 0) + 
-                                          (meals?.lunch?.calories || 0) + 
-                                          (meals?.snack2?.calories || 0) + 
-                                          (meals?.diner?.calories || 0) + 
-                                          (meals?.avondsnack?.calories || 0);
-                      
-                      const totalProtein = (meals?.ontbijt?.protein || 0) + 
-                                         (meals?.snack1?.protein || 0) + 
-                                         (meals?.lunch?.protein || 0) + 
-                                         (meals?.snack2?.protein || 0) + 
-                                         (meals?.diner?.protein || 0) + 
-                                         (meals?.avondsnack?.protein || 0);
-                      
-                      const totalCarbs = (meals?.ontbijt?.carbs || 0) + 
-                                       (meals?.snack1?.carbs || 0) + 
-                                       (meals?.lunch?.carbs || 0) + 
-                                       (meals?.snack2?.carbs || 0) + 
-                                       (meals?.diner?.carbs || 0) + 
-                                       (meals?.avondsnack?.carbs || 0);
-                      
-                      const totalFat = (meals?.ontbijt?.fat || 0) + 
-                                     (meals?.snack1?.fat || 0) + 
-                                     (meals?.lunch?.fat || 0) + 
-                                     (meals?.snack2?.fat || 0) + 
-                                     (meals?.diner?.fat || 0) + 
-                                     (meals?.avondsnack?.fat || 0);
-                      
-                      return (
-                        <div className="grid grid-cols-4 gap-4 text-center">
-                          <div className="bg-[#0F150E] p-3 rounded border border-[#2A3520]">
-                            <div className="text-[#8BAE5A] font-bold text-lg">{Math.round(totalCalories)}</div>
-                            <div className="text-[#B6C948] text-sm">Totaal Calorieën</div>
-                          </div>
-                          <div className="bg-[#0F150E] p-3 rounded border border-[#2A3520]">
-                            <div className="text-[#8BAE5A] font-bold text-lg">{Math.round(totalProtein * 10) / 10}g</div>
-                            <div className="text-[#B6C948] text-sm">Totaal Protein</div>
-                          </div>
-                          <div className="bg-[#0F150E] p-3 rounded border border-[#2A3520]">
-                            <div className="text-[#8BAE5A] font-bold text-lg">{Math.round(totalCarbs * 10) / 10}g</div>
-                            <div className="text-[#B6C948] text-sm">Totaal Carbs</div>
-                          </div>
-                          <div className="bg-[#0F150E] p-3 rounded border border-[#2A3520]">
-                            <div className="text-[#8BAE5A] font-bold text-lg">{Math.round(totalFat * 10) / 10}g</div>
-                            <div className="text-[#B6C948] text-sm">Totaal Fat</div>
-                          </div>
+                      <div className="flex items-center justify-between p-3 bg-[#0F150E] rounded-lg border border-[#3A4D23]">
+                        <div>
+                          <div className="text-sm font-medium text-white">Zittend (Licht actief)</div>
+                          <div className="text-xs text-gray-400">Kantoorbaan, weinig beweging</div>
                         </div>
-                      );
-                    })()}
-                    <div className="mt-3 text-center">
-                      {plan?.name?.toLowerCase().includes('carnivoor') && (
-                        <>
-                      <div className="text-[#8BAE5A] text-sm font-semibold">
-                        🥩 100% Carnivor Animal Based Compliant
+                        <div className="text-lg font-bold text-[#8BAE5A]">1.1</div>
                       </div>
-                      <div className="text-[#B6C948] text-xs">
-                        Orgaanvlees • Vette vis • Dierlijke vetten • Beperkte koolhydraten
+                      
+                      <div className="flex items-center justify-between p-3 bg-[#0F150E] rounded-lg border border-[#3A4D23]">
+                        <div>
+                          <div className="text-sm font-medium text-white">Staand (Matig actief)</div>
+                          <div className="text-xs text-gray-400">Staand werk, matige beweging</div>
+                        </div>
+                        <div className="text-lg font-bold text-[#8BAE5A]">1.3</div>
                       </div>
-                        </>
-                      )}
-                      <div className="text-[#B6C948] text-xs mt-2">
-                        💡 Tip: Wijzig dagelijkse calorieën om portie groottes automatisch aan te passen
+                      
+                      <div className="flex items-center justify-between p-3 bg-[#0F150E] rounded-lg border border-[#3A4D23]">
+                        <div>
+                          <div className="text-sm font-medium text-white">Lopend (Zeer actief)</div>
+                          <div className="text-xs text-gray-400">Fysiek werk, veel beweging</div>
+                        </div>
+                        <div className="text-lg font-bold text-[#8BAE5A]">1.6</div>
+                      </div>
+                    </div>
+
+                    <div className="bg-[#0F150E] rounded-lg p-4 border border-[#3A4D23]">
+                      <div className="text-sm font-medium text-[#8BAE5A] mb-2">Calorie Doelen</div>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-gray-300">Droogtrainen:</span>
+                          <span className="text-white font-medium">-500 kcal van onderhoud</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-300">Onderhoud:</span>
+                          <span className="text-white font-medium">Dagelijkse calorieën</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-300">Spiermassa:</span>
+                          <span className="text-white font-medium">+400 kcal van onderhoud</span>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              )}
+
+              </div>
             </div>
           )}
 
-          {activeTab === 'settings' && (
-            <div className="space-y-6">
-              {/* Visibility Settings */}
-              <div className="space-y-4">
-                <h4 className="text-[#8BAE5A] font-semibold">Zichtbaarheid</h4>
-                
-                <div className="flex items-center justify-between p-4 bg-[#181F17] rounded-lg border border-[#3A4D23]">
-                  <div>
-                    <div className="text-[#8BAE5A] font-semibold">Openbaar Plan</div>
-                    <div className="text-[#B6C948] text-sm">Zichtbaar voor alle gebruikers</div>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={formData.is_public}
-                      onChange={(e) => handleInputChange('is_public', e.target.checked)}
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-[#3A4D23] peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#8BAE5A]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#8BAE5A]"></div>
-                  </label>
+          {activeTab === 'daily_plans' && (
+            <div className="flex-1 overflow-hidden">
+              {/* Horizontal Day Navigation */}
+              <div className="p-6 border-b border-[#3A4D23]">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-[#8BAE5A]">Selecteer Dag</h3>
+                  <button
+                    onClick={() => setShowCopyDayModal(true)}
+                    className="px-4 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#B6C948] transition-colors text-sm font-medium flex items-center gap-2"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    Plan kopieren van andere dag
+                  </button>
                 </div>
+                <div className="flex space-x-2 overflow-x-auto">
+                  {DAYS.map(day => (
+                    <button
+                      key={day.key}
+                      onClick={() => setSelectedDay(day.key)}
+                      className={`flex-shrink-0 p-3 rounded-lg text-center transition-colors min-w-[100px] ${
+                        selectedDay === day.key
+                          ? 'bg-[#8BAE5A] text-white'
+                          : 'bg-[#0F150E] text-gray-300 hover:bg-[#3A4D23]'
+                      }`}
+                    >
+                      <div className="font-medium text-sm">{day.label}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-                <div className="flex items-center justify-between p-4 bg-[#181F17] rounded-lg border border-[#3A4D23]">
-                  <div>
-                    <div className="text-[#8BAE5A] font-semibold">Uitgelicht Plan</div>
-                    <div className="text-[#B6C948] text-sm">Toon als aanbevolen plan</div>
+              {/* Meals Table */}
+              <div className="flex-1 overflow-y-auto">
+                <div className="p-6">
+                  <div className="mb-6">
+                    <h3 className="text-lg font-semibold text-[#8BAE5A] mb-4">
+                      {DAYS.find(d => d.key === selectedDay)?.label} - Maaltijden
+                    </h3>
+                    
+                    {/* Daily Progress Section */}
+                    <div className="bg-[#181F17] rounded-lg border border-[#3A4D23] p-6 mb-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {/* Calories Progress */}
+                        <div className="text-center">
+                          <div className="text-3xl font-bold text-[#8BAE5A] mb-2">
+                            {getDayTotal(selectedDay).calories}
+                          </div>
+                          <div className="text-sm text-gray-400 mb-1">kcal</div>
+                          <div className="text-xs text-[#B6C948]">
+                            {formData.target_calories ? 
+                              `${Math.round((getDayTotal(selectedDay).calories / formData.target_calories) * 100)}% van doel` : 
+                              'Geen doel ingesteld'
+                            }
+                          </div>
+                          {formData.target_calories && (
+                            <div className="w-full bg-[#0F150E] rounded-full h-2 mt-2">
+                              <div 
+                                className={`h-2 rounded-full transition-all duration-300 ${getProgressBarColor(getDayTotal(selectedDay).calories, formData.target_calories)}`}
+                                style={{ 
+                                  width: `${Math.min((getDayTotal(selectedDay).calories / formData.target_calories) * 100, 100)}%`
+                                }}
+                              ></div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Protein Progress */}
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-blue-400 mb-2">
+                            {Math.round(getDayTotal(selectedDay).protein * 10) / 10}g
+                          </div>
+                          <div className="text-sm text-gray-400 mb-1">Eiwit</div>
+                          <div className="text-xs text-[#B6C948]">
+                            {formData.target_protein ? 
+                              `${Math.round((getDayTotal(selectedDay).protein / formData.target_protein) * 100)}% van doel` : 
+                              'Geen doel ingesteld'
+                            }
+                          </div>
+                          {formData.target_protein && (
+                            <div className="w-full bg-[#0F150E] rounded-full h-2 mt-2">
+                              <div 
+                                className={`h-2 rounded-full transition-all duration-300 ${getProgressBarColor(getDayTotal(selectedDay).protein, formData.target_protein)}`}
+                                style={{ 
+                                  width: `${Math.min((getDayTotal(selectedDay).protein / formData.target_protein) * 100, 100)}%` 
+                                }}
+                              ></div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Carbs Progress */}
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-orange-400 mb-2">
+                            {Math.round(getDayTotal(selectedDay).carbs * 10) / 10}g
+                          </div>
+                          <div className="text-sm text-gray-400 mb-1">Koolhydraten</div>
+                          <div className="text-xs text-[#B6C948]">
+                            {formData.target_carbs ? 
+                              `${Math.round((getDayTotal(selectedDay).carbs / formData.target_carbs) * 100)}% van doel` : 
+                              'Geen doel ingesteld'
+                            }
+                          </div>
+                          {formData.target_carbs && (
+                            <div className="w-full bg-[#0F150E] rounded-full h-2 mt-2">
+                              <div 
+                                className={`h-2 rounded-full transition-all duration-300 ${getProgressBarColor(getDayTotal(selectedDay).carbs, formData.target_carbs)}`}
+                                style={{ 
+                                  width: `${Math.min((getDayTotal(selectedDay).carbs / formData.target_carbs) * 100, 100)}%` 
+                                }}
+                              ></div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Fat Progress */}
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-yellow-400 mb-2">
+                            {Math.round(getDayTotal(selectedDay).fat * 10) / 10}g
+                          </div>
+                          <div className="text-sm text-gray-400 mb-1">Vet</div>
+                          <div className="text-xs text-[#B6C948]">
+                            {formData.target_fat ? 
+                              `${Math.round((getDayTotal(selectedDay).fat / formData.target_fat) * 100)}% van doel` : 
+                              'Geen doel ingesteld'
+                            }
+                          </div>
+                          {formData.target_fat && (
+                            <div className="w-full bg-[#0F150E] rounded-full h-2 mt-2">
+                              <div 
+                                className={`h-2 rounded-full transition-all duration-300 ${getProgressBarColor(getDayTotal(selectedDay).fat, formData.target_fat)}`}
+                                style={{ 
+                                  width: `${Math.min((getDayTotal(selectedDay).fat / formData.target_fat) * 100, 100)}%` 
+                                }}
+                              ></div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={formData.is_featured}
-                      onChange={(e) => handleInputChange('is_featured', e.target.checked)}
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-[#3A4D23] peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#8BAE5A]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#8BAE5A]"></div>
-                  </label>
+
+                  {/* Compact Meals Table */}
+                  <div className="bg-[#181F17] rounded-lg border border-[#3A4D23] overflow-hidden">
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead className="bg-[#0F150E] border-b border-[#3A4D23]">
+                          <tr>
+                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Maaltijd</th>
+                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">Tijd</th>
+                            <th className="px-4 py-3 text-center text-sm font-medium text-gray-300">Calorieën</th>
+                            <th className="px-4 py-3 text-center text-sm font-medium text-gray-300">Eiwit</th>
+                            <th className="px-4 py-3 text-center text-sm font-medium text-gray-300">Koolhydraten</th>
+                            <th className="px-4 py-3 text-center text-sm font-medium text-gray-300">Vet</th>
+                            <th className="px-4 py-3 text-center text-sm font-medium text-gray-300">Ingredienten</th>
+                            <th className="px-4 py-3 text-center text-sm font-medium text-gray-300">Acties</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-[#3A4D23]">
+                          {MEALS.map(meal => {
+                            const mealData = getMealData(selectedDay, meal.key);
+                            const hasIngredients = mealData.ingredients.length > 0;
+                            
+                            return (
+                              <tr key={meal.key} className="hover:bg-[#0F150E]/50 transition-colors">
+                                <td className="px-4 py-3">
+                                  <div className="flex items-center space-x-3">
+                                    <span className="text-xl">{meal.icon}</span>
+                                    <span className="font-medium text-white">{meal.label}</span>
+                                  </div>
+                                </td>
+                                <td className="px-4 py-3 text-gray-300">{meal.time}</td>
+                                <td className="px-4 py-3 text-center">
+                                  <span className={`font-semibold ${hasIngredients ? 'text-[#8BAE5A]' : 'text-gray-500'}`}>
+                                    {mealData.nutrition.calories} kcal
+                                  </span>
+                                </td>
+                                <td className="px-4 py-3 text-center text-blue-400">{Math.round(mealData.nutrition.protein * 10) / 10}g</td>
+                                <td className="px-4 py-3 text-center text-orange-400">{Math.round(mealData.nutrition.carbs * 10) / 10}g</td>
+                                <td className="px-4 py-3 text-center text-yellow-400">{Math.round(mealData.nutrition.fat * 10) / 10}g</td>
+                                <td className="px-4 py-3 text-center">
+                                  <span className={`text-sm ${hasIngredients ? 'text-white' : 'text-gray-500'}`}>
+                                    {mealData.ingredients.length}
+                                  </span>
+                                </td>
+                                <td className="px-4 py-3 text-center">
+                                  <button
+                                    onClick={() => handleMealEdit(selectedDay, meal.key)}
+                                    className="p-2 bg-[#8BAE5A] hover:bg-[#8BAE5A]/80 text-white rounded-lg transition-colors"
+                                  >
+                                    <PencilIcon className="w-4 h-4" />
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* Ingredients Details for Selected Meal (if any) */}
+                  {MEALS.some(meal => getMealData(selectedDay, meal.key).ingredients.length > 0) && (
+                    <div className="mt-6">
+                      <h4 className="text-md font-semibold text-[#8BAE5A] mb-3">Ingredienten Details</h4>
+                      <div className="space-y-3">
+                        {MEALS.map(meal => {
+                          const mealData = getMealData(selectedDay, meal.key);
+                          if (mealData.ingredients.length === 0) return null;
+                          
+                          return (
+                            <div key={meal.key} className="bg-[#181F17] rounded-lg border border-[#3A4D23] p-4">
+                              <div className="flex items-center space-x-2 mb-3">
+                                <span className="text-lg">{meal.icon}</span>
+                                <span className="font-medium text-white">{meal.label}</span>
+                                <span className="text-sm text-gray-400">({mealData.ingredients.length} ingredienten)</span>
+                              </div>
+                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                                {mealData.ingredients.map((ingredient, index) => (
+                                  <div
+                                    key={index}
+                                    className="flex items-center justify-between p-2 bg-[#0F150E] rounded border border-[#3A4D23]"
+                                  >
+                                    <div className="flex-1">
+                                      <div className="text-sm font-medium text-white">{ingredient.name}</div>
+                                      <div className="text-xs text-gray-400">
+                                        {ingredient.amount} {ingredient.unit === 'per_piece' ? 'stuk' : 
+                                                         ingredient.unit === 'per_handful' ? 'handje' : 
+                                                         ingredient.unit === 'per_plakje' ? 'plakje' : 
+                                                         ingredient.unit === 'per_30g' ? '30g' : 
+                                                         ingredient.unit === 'per_100g' ? '100g' : ingredient.unit}
+                                      </div>
+                                    </div>
+                                    <div className="text-right">
+                                      <div className="text-sm font-medium text-[#8BAE5A]">
+                                        {ingredient.unit === 'per_100g' 
+                                          ? Math.round((ingredient.calories_per_100g * ingredient.amount) / 100)
+                                          : Math.round(ingredient.calories_per_100g * ingredient.amount)
+                                        } kcal
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'ingredients' && (
+            <div className="p-6 h-full overflow-y-auto">
+              {/* Ingredienten Management Header */}
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-lg font-semibold text-[#8BAE5A]">Ingrediënten Beheer</h3>
+                <button
+                  onClick={handleAddIngredient}
+                  className="px-4 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#B6C948] transition-colors font-medium flex items-center space-x-2"
+                >
+                  <span>+</span>
+                  <span>Nieuw Ingrediënt</span>
+                </button>
+              </div>
+
+              {/* Search and Filter */}
+              <div className="mb-6 space-y-4">
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Zoeken naar ingrediënten..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full px-4 py-2 pl-10 bg-[#0F150E] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A]"
+                  />
+                  <svg className="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                
+                <div className="flex gap-4">
+                  <select 
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="px-3 py-2 bg-[#0F150E] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A]"
+                  >
+                    <option value="all">Alle categorieën</option>
+                    {availableCategories.map(category => (
+                      <option key={category} value={category}>{category}</option>
+                    ))}
+                  </select>
+                  
+                  <select 
+                    value={selectedCarnivoreFilter}
+                    onChange={(e) => setSelectedCarnivoreFilter(e.target.value)}
+                    className="px-3 py-2 bg-[#0F150E] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A]"
+                  >
+                    <option value="all">Alle ingrediënten</option>
+                    <option value="carnivore">Alleen carnivoor</option>
+                    <option value="standard">Alleen standaard</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Ingredients Table */}
+              <div className="bg-[#181F17] rounded-lg border border-[#3A4D23] overflow-hidden">
+                {/* Desktop Table Header */}
+                <div className="hidden lg:grid grid-cols-13 gap-3 p-4 bg-[#1A2313] border-b border-[#3A4D23] text-sm font-semibold text-[#8BAE5A]">
+                  <div className="col-span-2">Naam</div>
+                  <div className="col-span-2">Categorie</div>
+                  <div className="col-span-1">Carnivoor</div>
+                  <div className="col-span-1">Type</div>
+                  <div className="col-span-1">Kcal</div>
+                  <div className="col-span-1">Protein</div>
+                  <div className="col-span-1">Carbs</div>
+                  <div className="col-span-1">Fat</div>
+                  <div className="col-span-3">Acties</div>
+                </div>
+                
+                {/* Table Body */}
+                <div className="divide-y divide-[#3A4D23]">
+                  {filteredIngredients.map((item) => (
+                    <div key={item.id}>
+                      {/* Desktop View */}
+                      <div className="hidden lg:grid grid-cols-13 gap-3 p-4 hover:bg-[#1A2313] transition-colors">
+                        <div className="col-span-2">
+                          <h3 className="text-white font-medium">{item.name}</h3>
+                        </div>
+                        <div className="col-span-2">
+                          <span className="text-gray-300 text-sm capitalize">{item.category}</span>
+                        </div>
+                        <div className="col-span-1 text-center">
+                          <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                            item.is_carnivore 
+                              ? 'bg-green-600/20 text-green-400 border border-green-600/30' 
+                              : 'bg-gray-600/20 text-gray-400 border border-gray-600/30'
+                          }`}>
+                            {item.is_carnivore ? 'Ja' : 'Nee'}
+                          </span>
+                        </div>
+                        <div className="col-span-1 text-center">
+                          <span className="text-xs px-2 py-1 rounded-md bg-blue-600/20 text-blue-400 border border-blue-600/30 font-medium">
+                            {getUnitTypeLabel(item.unit_type)}
+                          </span>
+                        </div>
+                        <div className="col-span-1 text-center">
+                          <span className="text-white font-medium">{item.calories_per_100g || 0}</span>
+                        </div>
+                        <div className="col-span-1 text-center">
+                          <span className="text-white">{item.protein_per_100g || 0}g</span>
+                        </div>
+                        <div className="col-span-1 text-center">
+                          <span className="text-white">{item.carbs_per_100g || 0}g</span>
+                        </div>
+                        <div className="col-span-1 text-center">
+                          <span className="text-white">{item.fat_per_100g || 0}g</span>
+                        </div>
+                        <div className="col-span-3">
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleEditIngredient(item)}
+                              className="px-3 py-1 bg-[#8BAE5A] text-[#232D1A] rounded text-xs hover:bg-[#B6C948] transition-colors"
+                            >
+                              Bewerken
+                            </button>
+                            <button
+                              onClick={() => handleDeleteIngredient(item.id)}
+                              className="px-3 py-1 bg-red-600 text-white rounded text-xs hover:bg-red-700 transition-colors"
+                            >
+                              Verwijderen
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Mobile/Tablet View */}
+                      <div className="lg:hidden p-4 hover:bg-[#1A2313] transition-colors">
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <h3 className="text-white font-medium text-lg">{item.name}</h3>
+                            <div className="flex items-center gap-2 mt-1">
+                              <p className="text-gray-300 text-sm capitalize">{item.category}</p>
+                              <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                                item.is_carnivore 
+                                  ? 'bg-green-600/20 text-green-400 border border-green-600/30' 
+                                  : 'bg-gray-600/20 text-gray-400 border border-gray-600/30'
+                              }`}>
+                                {item.is_carnivore ? 'Carnivoor' : 'Standaard'}
+                              </span>
+                              <span className="text-xs px-2 py-1 rounded-md bg-blue-600/20 text-blue-400 border border-blue-600/30 font-medium">
+                                {getUnitTypeLabel(item.unit_type)}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleEditIngredient(item)}
+                              className="px-3 py-1 bg-[#8BAE5A] text-[#232D1A] rounded text-xs hover:bg-[#B6C948] transition-colors"
+                            >
+                              Bewerken
+                            </button>
+                            <button
+                              onClick={() => handleDeleteIngredient(item.id)}
+                              className="px-3 py-1 bg-red-600 text-white rounded text-xs hover:bg-red-700 transition-colors"
+                            >
+                              Verwijderen
+                            </button>
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-4 gap-4 text-sm">
+                          <div className="text-center">
+                            <div className="text-gray-400 text-xs">
+                              {item.unit_type === 'per_handful' ? 'Kcal/handje' : 
+                               item.unit_type === 'per_piece' ? 'Kcal/stuk' : 
+                               item.unit_type === 'per_plakje' ? 'Kcal/plakje' :
+                               item.unit_type === 'per_30g' ? 'Kcal/30g' : 'Kcal/100g'}
+                            </div>
+                            <div className="text-white font-medium">{item.calories_per_100g || 0}</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-gray-400 text-xs">Protein</div>
+                            <div className="text-white">{item.protein_per_100g || 0}g</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-gray-400 text-xs">Carbs</div>
+                            <div className="text-white">{item.carbs_per_100g || 0}g</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-gray-400 text-xs">Fat</div>
+                            <div className="text-white">{item.fat_per_100g || 0}g</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -2020,35 +1368,374 @@ export default function PlanBuilder({ isOpen, onClose, plan, foodItems = [], onS
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 p-6 border-t border-[#3A4D23]">
-          <AdminButton
-            onClick={onClose}
-            variant="secondary"
-            disabled={isLoading}
-          >
-            Annuleren
-          </AdminButton>
-          <AdminButton
-            onClick={handleSave}
-            variant="primary"
-            disabled={isLoading}
-          >
-            {isLoading ? 'Opslaan...' : (plan ? 'Bijwerken' : 'Aanmaken')}
-          </AdminButton>
+        <div className="flex items-center justify-between p-6 border-t border-[#3A4D23]">
+          <div className="text-sm text-gray-400">
+            {activeTab === 'daily_plans' && (
+              <div>
+                <div className="font-medium text-white mb-1">
+                  {DAYS.find(d => d.key === selectedDay)?.label} - Dagelijkse Totaal
+                </div>
+                <div className="text-xs">
+                  {getDayTotal(selectedDay).calories} kcal | 
+                  Eiwit: {getDayTotal(selectedDay).protein}g | 
+                  Koolhydraten: {getDayTotal(selectedDay).carbs}g | 
+                  Vet: {getDayTotal(selectedDay).fat}g
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-                  {/* Meal Edit Modal */}
-            <MealEditModal
-              isOpen={isMealModalOpen}
-              onClose={() => setIsMealModalOpen(false)}
-              meal={editingMeal}
-              mealType={editingMealType}
-              onSave={handleSaveMeal}
-              onDelete={handleDeleteMeal}
-              baseCalories={formData.target_calories}
-              planType={plan?.name}
-            />
+      {/* Meal Edit Modal */}
+      {showMealModal && (
+        <MealEditModal
+          day={selectedDay}
+          meal={selectedMeal}
+          ingredients={getMealData(selectedDay, selectedMeal).ingredients}
+          availableIngredients={ingredients}
+          onSave={handleMealSave}
+          onClose={() => setShowMealModal(false)}
+        />
+      )}
+
+      {/* Ingredient Modal */}
+      {showIngredientModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#0F150E] rounded-xl border border-[#3A4D23] w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-6 border-b border-[#3A4D23]">
+              <h3 className="text-xl font-bold text-[#8BAE5A]">
+                {editingIngredient ? 'Ingrediënt Bewerken' : 'Nieuw Ingrediënt'}
+              </h3>
+              <button
+                onClick={() => setShowIngredientModal(false)}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <XMarkIcon className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Naam</label>
+                <input
+                  type="text"
+                  value={ingredientForm.name}
+                  onChange={(e) => setIngredientForm({ ...ingredientForm, name: e.target.value })}
+                  className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A]"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Categorie</label>
+                <div className="flex gap-2">
+                  <select
+                    value={ingredientForm.category}
+                    onChange={(e) => setIngredientForm({ ...ingredientForm, category: e.target.value })}
+                    className="flex-1 px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A]"
+                  >
+                    <option value="">Selecteer categorie</option>
+                    {availableCategories.map(category => (
+                      <option key={category} value={category}>{category}</option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => setShowAddCategoryModal(true)}
+                    className="px-3 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#B6C948] transition-colors text-sm font-medium"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Type</label>
+                <div className="flex gap-2">
+                  <select
+                    value={ingredientForm.unit_type}
+                    onChange={(e) => setIngredientForm({ ...ingredientForm, unit_type: e.target.value })}
+                    className="flex-1 px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A]"
+                  >
+                    <option value="">Selecteer type</option>
+                    <option value="per_100g">per 100g</option>
+                    <option value="per_piece">per stuk</option>
+                    <option value="per_handful">per handje</option>
+                    <option value="per_plakje">per plakje</option>
+                    <option value="per_30g">per 30g</option>
+                    {availableUnitTypes.filter(type => !['per_100g', 'per_piece', 'per_handful', 'per_plakje', 'per_30g'].includes(type)).map(type => (
+                      <option key={type} value={type}>{getUnitTypeLabel(type)}</option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => setShowAddUnitTypeModal(true)}
+                    className="px-3 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#B6C948] transition-colors text-sm font-medium"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="is_carnivore"
+                  checked={ingredientForm.is_carnivore}
+                  onChange={(e) => setIngredientForm({ ...ingredientForm, is_carnivore: e.target.checked })}
+                  className="w-4 h-4 text-[#8BAE5A] bg-[#181F17] border-[#3A4D23] rounded focus:ring-[#8BAE5A]"
+                />
+                <label htmlFor="is_carnivore" className="text-sm text-gray-300">Carnivoor</label>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">Calorieën</label>
+                  <input
+                    type="number"
+                    value={ingredientForm.calories_per_100g}
+                    onChange={(e) => setIngredientForm({ ...ingredientForm, calories_per_100g: e.target.value })}
+                    placeholder="0"
+                    className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">Eiwit (g)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={ingredientForm.protein_per_100g}
+                    onChange={(e) => setIngredientForm({ ...ingredientForm, protein_per_100g: e.target.value })}
+                    placeholder="0"
+                    className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">Koolhydraten (g)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={ingredientForm.carbs_per_100g}
+                    onChange={(e) => setIngredientForm({ ...ingredientForm, carbs_per_100g: e.target.value })}
+                    placeholder="0"
+                    className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">Vet (g)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={ingredientForm.fat_per_100g}
+                    onChange={(e) => setIngredientForm({ ...ingredientForm, fat_per_100g: e.target.value })}
+                    placeholder="0"
+                    className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A]"
+                  />
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-end gap-4 p-6 border-t border-[#3A4D23]">
+              <button
+                onClick={() => setShowIngredientModal(false)}
+                className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
+              >
+                Annuleren
+              </button>
+              <button
+                onClick={handleSaveIngredient}
+                className="px-4 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#B6C948] transition-colors font-medium"
+              >
+                {editingIngredient ? 'Bijwerken' : 'Toevoegen'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Category Modal */}
+      {showAddCategoryModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#0F150E] rounded-xl border border-[#3A4D23] w-full max-w-md">
+            <div className="flex items-center justify-between p-6 border-b border-[#3A4D23]">
+              <h3 className="text-xl font-bold text-[#8BAE5A]">Nieuwe Categorie</h3>
+              <button
+                onClick={() => {
+                  setShowAddCategoryModal(false);
+                  setNewCategory('');
+                }}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <XMarkIcon className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="p-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Categorie Naam</label>
+                <input
+                  type="text"
+                  value={newCategory}
+                  onChange={(e) => setNewCategory(e.target.value)}
+                  placeholder="Bijv. Groenten, Vlees, etc."
+                  className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A]"
+                />
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-end gap-4 p-6 border-t border-[#3A4D23]">
+              <button
+                onClick={() => {
+                  setShowAddCategoryModal(false);
+                  setNewCategory('');
+                }}
+                className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
+              >
+                Annuleren
+              </button>
+              <button
+                onClick={handleAddCategory}
+                className="px-4 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#B6C948] transition-colors font-medium"
+              >
+                Toevoegen
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Unit Type Modal */}
+      {showAddUnitTypeModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#0F150E] rounded-xl border border-[#3A4D23] w-full max-w-md">
+            <div className="flex items-center justify-between p-6 border-b border-[#3A4D23]">
+              <h3 className="text-xl font-bold text-[#8BAE5A]">Nieuw Type</h3>
+              <button
+                onClick={() => {
+                  setShowAddUnitTypeModal(false);
+                  setNewUnitType('');
+                }}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <XMarkIcon className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="p-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Type Naam</label>
+                <input
+                  type="text"
+                  value={newUnitType}
+                  onChange={(e) => setNewUnitType(e.target.value)}
+                  placeholder="Bijv. per_100g, per_piece, etc."
+                  className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A]"
+                />
+                <p className="text-xs text-gray-400 mt-1">
+                  Gebruik underscore voor spaties (bijv. per_100g, per_piece)
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-end gap-4 p-6 border-t border-[#3A4D23]">
+              <button
+                onClick={() => {
+                  setShowAddUnitTypeModal(false);
+                  setNewUnitType('');
+                }}
+                className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
+              >
+                Annuleren
+              </button>
+              <button
+                onClick={handleAddUnitType}
+                className="px-4 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#B6C948] transition-colors font-medium"
+              >
+                Toevoegen
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Copy Day Plan Modal */}
+      {showCopyDayModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#0F150E] rounded-xl border border-[#3A4D23] w-full max-w-md">
+            <div className="flex items-center justify-between p-6 border-b border-[#3A4D23]">
+              <h3 className="text-xl font-bold text-[#8BAE5A]">Plan Kopiëren</h3>
+              <button
+                onClick={() => {
+                  setShowCopyDayModal(false);
+                  setSelectedSourceDay('');
+                }}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <XMarkIcon className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="p-6">
+              <div className="mb-4">
+                <p className="text-gray-300 mb-4">
+                  Kopieer de maaltijden van een andere dag naar <strong className="text-[#8BAE5A]">{DAYS.find(d => d.key === selectedDay)?.label}</strong>
+                </p>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Selecteer bron dag:</label>
+                <select
+                  value={selectedSourceDay}
+                  onChange={(e) => setSelectedSourceDay(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#181F17] border border-[#3A4D23] rounded-lg text-white focus:outline-none focus:border-[#8BAE5A]"
+                >
+                  <option value="">Selecteer een dag</option>
+                  {DAYS.filter(day => day.key !== selectedDay).map(day => {
+                    const hasData = mealsData?.weekly_plan?.[day.key] && Object.keys(mealsData.weekly_plan[day.key]).length > 0;
+                    return (
+                      <option key={day.key} value={day.key}>
+                        {day.label} {hasData ? '✓' : '(leeg)'}
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+
+              {selectedSourceDay && (
+                <div className="mt-4 p-4 bg-[#181F17] rounded-lg border border-[#3A4D23]">
+                  <h4 className="text-sm font-medium text-[#8BAE5A] mb-2">Waarschuwing:</h4>
+                  <p className="text-sm text-gray-300">
+                    Dit zal alle bestaande maaltijden van <strong className="text-white">{DAYS.find(d => d.key === selectedDay)?.label}</strong> overschrijven 
+                    met de maaltijden van <strong className="text-white">{DAYS.find(d => d.key === selectedSourceDay)?.label}</strong>.
+                  </p>
+                </div>
+              )}
+            </div>
+            
+            <div className="flex items-center justify-end gap-4 p-6 border-t border-[#3A4D23]">
+              <button
+                onClick={() => {
+                  setShowCopyDayModal(false);
+                  setSelectedSourceDay('');
+                }}
+                className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
+              >
+                Annuleren
+              </button>
+              <button
+                onClick={handleCopyDayPlan}
+                disabled={!selectedSourceDay || copyingDay}
+                className="px-4 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#B6C948] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {copyingDay && (
+                  <div className="w-4 h-4 border-2 border-[#232D1A] border-t-transparent rounded-full animate-spin"></div>
+                )}
+                {copyingDay ? 'Kopiëren...' : 'Kopiëren'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
-} 
+}

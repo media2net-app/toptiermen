@@ -73,16 +73,15 @@ export async function POST(request: NextRequest) {
         bmr = 10 * weight + 6.25 * height - 5 * age - 161;
       }
       
-      // Activity multipliers
+      // Activity multipliers (nieuwe 3-niveau structuur)
       const activityMultipliers = {
-        sedentary: 1.2,
-        light: 1.375,
-        moderate: 1.55,
-        active: 1.725,
-        very_active: 1.9
+        sedentary: 1.1,  // Zittend (Licht actief)
+        moderate: 1.3,   // Staand (Matig actief)
+        very_active: 1.6 // Lopend (Zeer actief)
       };
       
-      const tdee = bmr * activityMultipliers[activityLevel as keyof typeof activityMultipliers];
+      // Nieuwe berekening: Gewicht x 22 x activiteitniveau
+      const tdee = weight * 22 * activityMultipliers[activityLevel as keyof typeof activityMultipliers];
       
       // Adjust calories based on goal
       if (goal === 'cut') {
@@ -102,16 +101,15 @@ export async function POST(request: NextRequest) {
       bmr = 10 * weight + 6.25 * height - 5 * age - 161;
     }
     
-    // Activity multipliers for TDEE calculation
+    // Activity multipliers for TDEE calculation (nieuwe 3-niveau structuur)
     const activityMultipliers = {
-      sedentary: 1.2,
-      light: 1.375,
-      moderate: 1.55,
-      active: 1.725,
-      very_active: 1.9
+      sedentary: 1.1,  // Zittend (Licht actief)
+      moderate: 1.3,   // Staand (Matig actief) 
+      very_active: 1.6 // Lopend (Zeer actief)
     };
     
-    const tdee = bmr * activityMultipliers[activityLevel as keyof typeof activityMultipliers];
+    // Nieuwe berekening: Gewicht x 22 x activiteitniveau
+    const tdee = weight * 22 * activityMultipliers[activityLevel as keyof typeof activityMultipliers];
 
     // Calculate macros
     const targetProtein = Math.round(weight * 2.2); // 2.2g per kg bodyweight (updated per Rick's request)

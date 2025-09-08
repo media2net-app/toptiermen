@@ -3,56 +3,75 @@ import { supabaseAdmin } from '@/lib/supabase-admin';
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('📊 Fetching nutrition plans from database...');
+    console.log('📊 Fetching nutrition plans...');
     
-    // First try to get from nutrition_plans table
-    let { data: plans, error } = await supabaseAdmin
+    // Get all nutrition plans from database with explicit column selection
+    const { data: plans, error } = await supabaseAdmin
       .from('nutrition_plans')
-      .select('*');
-
-    // If no plans in nutrition_plans, try nutrition_weekplans table
-    if (!plans || plans.length === 0) {
-      console.log('📊 No plans in nutrition_plans, trying nutrition_weekplans...');
-      
-      const { data: weekplans, error: weekplansError } = await supabaseAdmin
-        .from('nutrition_weekplans')
-        .select('*');
-        
-      if (weekplansError) {
-        console.error('❌ Error fetching nutrition weekplans:', weekplansError);
-        return NextResponse.json({ error: `Failed to fetch nutrition plans: ${weekplansError.message}` }, { status: 500 });
-      }
-      
-      // Convert weekplans to nutrition plans format
-      plans = weekplans?.map(weekplan => ({
-        id: weekplan.id,
-        name: weekplan.name,
-        description: weekplan.description,
-        target_calories: weekplan.target_calories,
-        target_protein: weekplan.target_protein,
-        target_carbs: weekplan.target_carbs,
-        target_fat: weekplan.target_fat,
-        duration_weeks: weekplan.duration_weeks,
-        difficulty: weekplan.difficulty,
-        goal: weekplan.goal,
-        is_featured: weekplan.is_featured,
-        is_public: weekplan.is_public,
-        created_at: weekplan.created_at,
-        updated_at: weekplan.updated_at
-      })) || [];
-    }
-
+      .select(`
+        id,
+        plan_id,
+        name,
+        description,
+        target_calories,
+        target_protein,
+        target_carbs,
+        target_fat,
+        duration_weeks,
+        difficulty,
+        goal,
+        is_featured,
+        is_public,
+        meals,
+        created_at,
+        updated_at
+      `)
+      .order('created_at', { ascending: true });
+    
     if (error) {
       console.error('❌ Error fetching nutrition plans:', error);
       return NextResponse.json({ error: `Failed to fetch nutrition plans: ${error.message}` }, { status: 500 });
     }
 
-    // If no plans exist, create the default nutrition plans
+    // If no plans exist, create the default 6 nutrition plans
     if (!plans || plans.length === 0) {
       console.log('🔄 Creating default nutrition plans...');
       
-      const nutritionPlans = [
+      const defaultPlans = [
         {
+          plan_id: 'carnivoor-droogtrainen',
+          name: 'Carnivoor - Droogtrainen',
+          description: 'Carnivoor dieet geoptimaliseerd voor vetverlies met behoud van spiermassa. Focus op hoge eiwitinname en lage koolhydraten.',
+          target_calories: 2360,
+          target_protein: 207, // 35% van calories (2360 * 0.35 / 4)
+          target_carbs: 30, // 5% van calories (2360 * 0.05 / 4)
+          target_fat: 157, // 60% van calories (2360 * 0.60 / 9)
+          duration_weeks: 12,
+          difficulty: 'intermediate',
+          goal: 'Droogtrainen',
+          is_featured: true,
+          is_public: true,
+          meals: {
+            target_calories: 2360,
+            target_protein: 207,
+            target_carbs: 30,
+            target_fat: 157,
+            goal: 'Droogtrainen',
+            fitness_goal: 'droogtrainen',
+            weekly_plan: {
+              maandag: {},
+              dinsdag: {},
+              woensdag: {},
+              donderdag: {},
+              vrijdag: {},
+              zaterdag: {},
+              zondag: {}
+            },
+            weekly_averages: { calories: 0, protein: 0, carbs: 0, fat: 0 }
+          }
+        },
+        {
+          plan_id: 'carnivoor-onderhoud',
           name: 'Carnivoor - Onderhoud',
           description: 'Carnivoor dieet voor behoud van huidige lichaamscompositie. Gebalanceerde macro-verdeling binnen carnivoor kader.',
           target_calories: 2860,
@@ -63,103 +82,199 @@ export async function GET(request: NextRequest) {
           difficulty: 'intermediate',
           goal: 'Onderhoud',
           is_featured: true,
-          is_public: true
+          is_public: true,
+          meals: {
+            target_calories: 2860,
+            target_protein: 250,
+            target_carbs: 36,
+            target_fat: 191,
+            goal: 'Onderhoud',
+            fitness_goal: 'onderhoud',
+            weekly_plan: {
+              maandag: {},
+              dinsdag: {},
+              woensdag: {},
+              donderdag: {},
+              vrijdag: {},
+              zaterdag: {},
+              zondag: {}
+            },
+            weekly_averages: { calories: 0, protein: 0, carbs: 0, fat: 0 }
+          }
         },
         {
-          name: 'Carnivoor - Droogtrainen',
-          description: 'Carnivoor dieet geoptimaliseerd voor vetverlies met behoud van spiermassa. Focus op hoge eiwitinname en lage koolhydraten.',
-          target_calories: 2500,
-          target_protein: 219, // 35% van calories (2500 * 0.35 / 4)
-          target_carbs: 31, // 5% van calories (2500 * 0.05 / 4)
-          target_fat: 167, // 60% van calories (2500 * 0.60 / 9)
-          duration_weeks: 12,
-          difficulty: 'intermediate',
-          goal: 'Droogtrainen',
-          is_featured: true,
-          is_public: true
-        },
-        {
+          plan_id: 'carnivoor-spiermassa',
           name: 'Carnivoor - Spiermassa',
-          description: 'Carnivoor dieet geoptimaliseerd voor spiergroei en krachttoename. Verhoogde calorie- en eiwitinname.',
+          description: 'Carnivoor dieet geoptimaliseerd voor spiergroei en krachttoename. Verhoogde calorie-inname met focus op eiwitrijke voeding.',
           target_calories: 3260,
-          target_protein: 367, // 45% van calories (3260 * 0.45 / 4)
+          target_protein: 285, // 35% van calories (3260 * 0.35 / 4)
           target_carbs: 41, // 5% van calories (3260 * 0.05 / 4)
-          target_fat: 181, // 50% van calories (3260 * 0.50 / 9)
+          target_fat: 218, // 60% van calories (3260 * 0.60 / 9)
           duration_weeks: 12,
           difficulty: 'intermediate',
           goal: 'Spiermassa',
           is_featured: true,
-          is_public: true
+          is_public: true,
+          meals: {
+            target_calories: 3260,
+            target_protein: 285,
+            target_carbs: 41,
+            target_fat: 218,
+            goal: 'Spiermassa',
+            fitness_goal: 'spiermassa',
+            weekly_plan: {
+              maandag: {},
+              dinsdag: {},
+              woensdag: {},
+              donderdag: {},
+              vrijdag: {},
+              zaterdag: {},
+              zondag: {}
+            },
+            weekly_averages: { calories: 0, protein: 0, carbs: 0, fat: 0 }
+          }
         },
         {
-          name: 'Maaltijdplan normaal - Onderhoud',
-          description: 'Gebalanceerd voedingsplan voor behoud van huidige lichaamscompositie. Mix van alle macronutriënten voor optimale gezondheid.',
-          target_calories: 2860,
-          target_protein: 250, // 35% van calories (2860 * 0.35 / 4)
-          target_carbs: 286, // 40% van calories (2860 * 0.40 / 4)
-          target_fat: 79, // 25% van calories (2860 * 0.25 / 9)
-          duration_weeks: 12,
-          difficulty: 'beginner',
-          goal: 'Onderhoud',
-          is_featured: true,
-          is_public: true
-        },
-        {
-          name: 'Maaltijdplan normaal - Droogtrainen',
-          description: 'Gebalanceerd voedingsplan geoptimaliseerd voor vetverlies. Gezonde mix van alle voedingsgroepen voor duurzaam gewichtsverlies.',
+          plan_id: 'voedingsplan-droogtrainen',
+          name: 'Voedingsplan - Droogtrainen',
+          description: 'Gebalanceerd voedingsplan voor vetverlies met behoud van spiermassa. Focus op eiwitrijke voeding en gecontroleerde calorie-inname.',
           target_calories: 2360,
           target_protein: 236, // 40% van calories (2360 * 0.40 / 4)
           target_carbs: 236, // 40% van calories (2360 * 0.40 / 4)
-          target_fat: 52, // 20% van calories (2360 * 0.20 / 9)
+          target_fat: 79, // 20% van calories (2360 * 0.20 / 9)
           duration_weeks: 12,
           difficulty: 'intermediate',
           goal: 'Droogtrainen',
           is_featured: true,
-          is_public: true
+          is_public: true,
+          meals: {
+            target_calories: 2360,
+            target_protein: 236,
+            target_carbs: 236,
+            target_fat: 79,
+            goal: 'Droogtrainen',
+            fitness_goal: 'droogtrainen',
+            weekly_plan: {
+              maandag: {},
+              dinsdag: {},
+              woensdag: {},
+              donderdag: {},
+              vrijdag: {},
+              zaterdag: {},
+              zondag: {}
+            },
+            weekly_averages: { calories: 0, protein: 0, carbs: 0, fat: 0 }
+          }
         },
         {
-          name: 'Maaltijdplan normaal - Spiermassa',
-          description: 'Gebalanceerd voedingsplan geoptimaliseerd voor spiergroei. Verhoogde calorie-inname met focus op kwaliteitsvoeding.',
+          plan_id: 'voedingsplan-onderhoud',
+          name: 'Voedingsplan - Onderhoud',
+          description: 'Gebalanceerd voedingsplan voor behoud van huidige lichaamscompositie. Geoptimaliseerde macro-verdeling voor duurzaam resultaat.',
+          target_calories: 2860,
+          target_protein: 214, // 30% van calories (2860 * 0.30 / 4)
+          target_carbs: 357, // 50% van calories (2860 * 0.50 / 4)
+          target_fat: 95, // 20% van calories (2860 * 0.20 / 9)
+          duration_weeks: 12,
+          difficulty: 'intermediate',
+          goal: 'Onderhoud',
+          is_featured: true,
+          is_public: true,
+          meals: {
+            target_calories: 2860,
+            target_protein: 214,
+            target_carbs: 357,
+            target_fat: 95,
+            goal: 'Onderhoud',
+            fitness_goal: 'onderhoud',
+            weekly_plan: {
+              maandag: {},
+              dinsdag: {},
+              woensdag: {},
+              donderdag: {},
+              vrijdag: {},
+              zaterdag: {},
+              zondag: {}
+            },
+            weekly_averages: { calories: 0, protein: 0, carbs: 0, fat: 0 }
+          }
+        },
+        {
+          plan_id: 'voedingsplan-spiermassa',
+          name: 'Voedingsplan - Spiermassa',
+          description: 'Gebalanceerd voedingsplan voor spiergroei en krachttoename. Verhoogde calorie-inname met focus op eiwitrijke voeding en complexe koolhydraten.',
           target_calories: 3260,
           target_protein: 245, // 30% van calories (3260 * 0.30 / 4)
           target_carbs: 408, // 50% van calories (3260 * 0.50 / 4)
-          target_fat: 72, // 20% van calories (3260 * 0.20 / 9)
+          target_fat: 108, // 20% van calories (3260 * 0.20 / 9)
           duration_weeks: 12,
           difficulty: 'intermediate',
           goal: 'Spiermassa',
           is_featured: true,
-          is_public: true
+          is_public: true,
+          meals: {
+            target_calories: 3260,
+            target_protein: 245,
+            target_carbs: 408,
+            target_fat: 108,
+            goal: 'Spiermassa',
+            fitness_goal: 'spiermassa',
+            weekly_plan: {
+              maandag: {},
+              dinsdag: {},
+              woensdag: {},
+              donderdag: {},
+              vrijdag: {},
+              zaterdag: {},
+              zondag: {}
+            },
+            weekly_averages: { calories: 0, protein: 0, carbs: 0, fat: 0 }
+          }
         }
       ];
       
       try {
         const { data: newPlans, error: insertError } = await supabaseAdmin
           .from('nutrition_plans')
-          .insert(nutritionPlans)
-          .select();
+          .insert(defaultPlans)
+          .select(`
+            id,
+            plan_id,
+            name,
+            description,
+            target_calories,
+            target_protein,
+            target_carbs,
+            target_fat,
+            duration_weeks,
+            difficulty,
+            goal,
+            is_featured,
+            is_public,
+            meals,
+            created_at,
+            updated_at
+          `);
           
         if (insertError) {
           console.error('❌ Error creating nutrition plans:', insertError);
-          // Return empty plans instead of error
-          return NextResponse.json({ success: true, plans: [] });
+          return NextResponse.json({ error: `Failed to create nutrition plans: ${insertError.message}` }, { status: 500 });
         }
         
         console.log('✅ Nutrition plans created successfully:', newPlans?.length || 0, 'plans');
         return NextResponse.json({ success: true, plans: newPlans || [] });
       } catch (error) {
         console.error('❌ Exception creating nutrition plans:', error);
-        // Return empty plans instead of error
-        return NextResponse.json({ success: true, plans: [] });
+        return NextResponse.json({ error: `Failed to create nutrition plans: ${error.message}` }, { status: 500 });
       }
     }
 
-    // Custom sorting order: Carnivoor plans first (droogtrainen, balans, spiermassa), then regular plans in same order
+    // Custom sorting order: Carnivoor plans first, then regular plans
     const sortOrder = [
       'carnivoor-droogtrainen',
-      'carnivoor-balans', 
+      'carnivoor-onderhoud', 
       'carnivoor-spiermassa',
       'voedingsplan-droogtrainen',
-      'voedingsplan-balans',
+      'voedingsplan-onderhoud',
       'voedingsplan-spiermassa'
     ];
     
@@ -168,16 +283,13 @@ export async function GET(request: NextRequest) {
         const aIndex = sortOrder.indexOf(a.plan_id);
         const bIndex = sortOrder.indexOf(b.plan_id);
         
-        // If both plans are in the sort order, sort by their index
         if (aIndex !== -1 && bIndex !== -1) {
           return aIndex - bIndex;
         }
         
-        // If only one is in the sort order, prioritize it
         if (aIndex !== -1) return -1;
         if (bIndex !== -1) return 1;
         
-        // If neither is in the sort order, fall back to alphabetical sorting
         return (a.name || '').localeCompare(b.name || '');
       });
       
@@ -189,130 +301,63 @@ export async function GET(request: NextRequest) {
       const transformed = { ...plan };
       
       // If weekly_plan is nested in meals, bring it to top level
-      if (plan.meals && plan.meals.weekly_plan && !plan.weekly_plan) {
-        transformed.weekly_plan = plan.meals.weekly_plan;
+      if (plan.meals && (plan.meals as any).weekly_plan && !(plan as any).weekly_plan) {
+        (transformed as any).weekly_plan = (plan.meals as any).weekly_plan;
         console.log(`🔄 Exposed weekly_plan for plan: ${plan.name}`);
       }
       
       return transformed;
     }) || [];
 
-    console.log('✅ Nutrition plans fetched successfully:', transformedPlans?.length || 0, 'plans');
+    console.log('✅ Successfully fetched nutrition plans:', transformedPlans.length);
     return NextResponse.json({ success: true, plans: transformedPlans });
+    
   } catch (error) {
-    console.error('❌ Error in nutrition plans API:', error);
-    return NextResponse.json({ error: `Internal server error: ${error instanceof Error ? error.message : 'Unknown error'}` }, { status: 500 });
+    console.error('❌ Unexpected error in GET /api/admin/nutrition-plans:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    console.log('📝 Creating new nutrition plan:', body);
-    
-    const { 
-      name, 
-      description, 
-      target_calories, 
-      target_protein, 
-      target_carbs, 
-      target_fat, 
-      duration_weeks, 
-      difficulty, 
+    const {
+      name,
+      description,
+      target_calories,
+      target_protein,
+      target_carbs,
+      target_fat,
+      duration_weeks,
+      difficulty,
       goal,
-      fitness_goal,
-      daily_plans
+      is_featured,
+      is_public
     } = body;
 
     // Generate plan_id from name
     const plan_id = name.toLowerCase()
       .replace(/[^a-z0-9\s]/g, '')
-      .replace(/\s+/g, '-')
-      .trim();
+      .replace(/\s+/g, '-');
 
-    // Transform daily_plans to weekly_plan structure for frontend compatibility
-    const weeklyPlan = {};
-    const dayMapping = {
-      'monday': 'monday',
-      'tuesday': 'tuesday', 
-      'wednesday': 'wednesday',
-      'thursday': 'thursday',
-      'friday': 'friday',
-      'saturday': 'saturday',
-      'sunday': 'sunday'
-    };
-
-    if (daily_plans && Array.isArray(daily_plans)) {
-      daily_plans.forEach(dailyPlan => {
-        const dayKey = dayMapping[dailyPlan.day];
-        if (dayKey && dailyPlan.meals) {
-          weeklyPlan[dayKey] = {
-            ontbijt: dailyPlan.meals.ontbijt?.ingredients || [],
-            ochtend_snack: dailyPlan.meals.snack1?.ingredients || dailyPlan.meals.ochtend_snack?.ingredients || [],
-            lunch: dailyPlan.meals.lunch?.ingredients || [],
-            lunch_snack: dailyPlan.meals.snack2?.ingredients || dailyPlan.meals.lunch_snack?.ingredients || [],
-            diner: dailyPlan.meals.diner?.ingredients || [],
-            avond_snack: dailyPlan.meals.avondsnack?.ingredients || dailyPlan.meals.avond_snack?.ingredients || [],
-            dailyTotals: {
-              calories: (dailyPlan.meals.ontbijt?.calories || 0) + 
-                       (dailyPlan.meals.snack1?.calories || dailyPlan.meals.ochtend_snack?.calories || 0) +
-                       (dailyPlan.meals.lunch?.calories || 0) + 
-                       (dailyPlan.meals.snack2?.calories || dailyPlan.meals.lunch_snack?.calories || 0) +
-                       (dailyPlan.meals.diner?.calories || 0) + 
-                       (dailyPlan.meals.avondsnack?.calories || dailyPlan.meals.avond_snack?.calories || 0),
-              protein: (dailyPlan.meals.ontbijt?.protein || 0) + 
-                      (dailyPlan.meals.snack1?.protein || dailyPlan.meals.ochtend_snack?.protein || 0) +
-                      (dailyPlan.meals.lunch?.protein || 0) + 
-                      (dailyPlan.meals.snack2?.protein || dailyPlan.meals.lunch_snack?.protein || 0) +
-                      (dailyPlan.meals.diner?.protein || 0) + 
-                      (dailyPlan.meals.avondsnack?.protein || dailyPlan.meals.avond_snack?.protein || 0),
-              carbs: (dailyPlan.meals.ontbijt?.carbs || 0) + 
-                    (dailyPlan.meals.snack1?.carbs || dailyPlan.meals.ochtend_snack?.carbs || 0) +
-                    (dailyPlan.meals.lunch?.carbs || 0) + 
-                    (dailyPlan.meals.snack2?.carbs || dailyPlan.meals.lunch_snack?.carbs || 0) +
-                    (dailyPlan.meals.diner?.carbs || 0) + 
-                    (dailyPlan.meals.avondsnack?.carbs || dailyPlan.meals.avond_snack?.carbs || 0),
-              fat: (dailyPlan.meals.ontbijt?.fat || 0) + 
-                  (dailyPlan.meals.snack1?.fat || dailyPlan.meals.ochtend_snack?.fat || 0) +
-                  (dailyPlan.meals.lunch?.fat || 0) + 
-                  (dailyPlan.meals.snack2?.fat || dailyPlan.meals.lunch_snack?.fat || 0) +
-                  (dailyPlan.meals.diner?.fat || 0) + 
-                    (dailyPlan.meals.avondsnack?.fat || dailyPlan.meals.avond_snack?.fat || 0)
-            }
-          };
-        }
-      });
-    }
-
-    // Calculate weekly averages
-    const days = Object.keys(weeklyPlan);
-    let totalCalories = 0, totalProtein = 0, totalCarbs = 0, totalFat = 0;
-    
-    days.forEach(day => {
-      const dayTotals = weeklyPlan[day].dailyTotals;
-      totalCalories += dayTotals.calories;
-      totalProtein += dayTotals.protein;
-      totalCarbs += dayTotals.carbs;
-      totalFat += dayTotals.fat;
-    });
-
-    const weeklyAverages = {
-      calories: days.length > 0 ? Math.round(totalCalories / days.length) : target_calories || 2000,
-      protein: days.length > 0 ? Math.round((totalProtein / days.length) * 10) / 10 : target_protein || 150,
-      carbs: days.length > 0 ? Math.round((totalCarbs / days.length) * 10) / 10 : target_carbs || 200,
-      fat: days.length > 0 ? Math.round((totalFat / days.length) * 10) / 10 : target_fat || 70
-    };
-
-    // Create meals object for frontend compatibility
-    const mealsData = {
-      target_calories: target_calories || weeklyAverages.calories,
-      target_protein: target_protein || weeklyAverages.protein,
-      target_carbs: target_carbs || weeklyAverages.carbs,
-      target_fat: target_fat || weeklyAverages.fat,
-      goal: goal || fitness_goal || 'maintenance',
-      fitness_goal: fitness_goal || goal,
-      weekly_plan: weeklyPlan,
-      weekly_averages: weeklyAverages
+    // Create meals object with empty weekly plan
+    const meals = {
+      target_calories: target_calories || 2200,
+      target_protein: target_protein || 165,
+      target_carbs: target_carbs || 220,
+      target_fat: target_fat || 73,
+      goal: goal || 'onderhoud',
+      fitness_goal: goal || 'onderhoud',
+      weekly_plan: {
+        maandag: {},
+        dinsdag: {},
+        woensdag: {},
+        donderdag: {},
+        vrijdag: {},
+        zaterdag: {},
+        zondag: {}
+      },
+      weekly_averages: { calories: 0, protein: 0, carbs: 0, fat: 0 }
     };
 
     const { data: plan, error } = await supabaseAdmin
@@ -321,23 +366,46 @@ export async function POST(request: NextRequest) {
         plan_id,
         name,
         description,
-        meals: mealsData,
-        is_active: true,
-        is_featured: true,
-        is_public: true
+        target_calories: target_calories || 2200,
+        target_protein: target_protein || 165,
+        target_carbs: target_carbs || 220,
+        target_fat: target_fat || 73,
+        duration_weeks: duration_weeks || 12,
+        difficulty: difficulty || 'intermediate',
+        goal: goal || 'onderhoud',
+        is_featured: is_featured || false,
+        is_public: is_public || true,
+        meals
       })
-      .select()
+      .select(`
+        id,
+        plan_id,
+        name,
+        description,
+        target_calories,
+        target_protein,
+        target_carbs,
+        target_fat,
+        duration_weeks,
+        difficulty,
+        goal,
+        is_featured,
+        is_public,
+        meals,
+        created_at,
+        updated_at
+      `)
       .single();
 
     if (error) {
       console.error('❌ Error creating nutrition plan:', error);
-      return NextResponse.json({ error: 'Failed to create nutrition plan' }, { status: 500 });
+      return NextResponse.json({ error: `Failed to create nutrition plan: ${error.message}` }, { status: 500 });
     }
 
     console.log('✅ Nutrition plan created successfully:', plan.plan_id);
     return NextResponse.json({ success: true, plan });
   } catch (error) {
-    console.error('❌ Error in nutrition plans POST API:', error);
+    console.error('❌ Unexpected error in POST /api/admin/nutrition-plans:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -345,189 +413,98 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    console.log('✏️ Updating nutrition plan:', body);
-    console.log('🔍 DEBUG: Request method:', request.method);
-    console.log('🔍 DEBUG: Request headers:', Object.fromEntries(request.headers.entries()));
-    console.log('🔍 DEBUG: Request body keys:', Object.keys(body));
-    
-    const { id, daily_plans, ...updateData } = body;
+    const { id, ...updateData } = body;
 
     if (!id) {
       return NextResponse.json({ error: 'ID is required for update' }, { status: 400 });
     }
 
-    // Get current plan data
+    // Get current plan data with explicit column selection
     const { data: currentPlan, error: fetchError } = await supabaseAdmin
       .from('nutrition_plans')
-      .select('*')
+      .select(`
+        id,
+        plan_id,
+        name,
+        description,
+        target_calories,
+        target_protein,
+        target_carbs,
+        target_fat,
+        duration_weeks,
+        difficulty,
+        goal,
+        is_featured,
+        is_public,
+        meals,
+        created_at,
+        updated_at
+      `)
       .eq('id', id)
       .single();
 
-    if (fetchError || !currentPlan) {
-      console.error('❌ Error fetching current plan for update:', fetchError);
+    if (fetchError) {
+      console.error('❌ Error fetching current plan:', fetchError);
+      return NextResponse.json({ error: `Failed to fetch current plan: ${fetchError.message}` }, { status: 500 });
+    }
+
+    if (!currentPlan) {
       return NextResponse.json({ error: 'Plan not found' }, { status: 404 });
     }
 
-    let finalUpdateData = { ...updateData };
+    // Prepare update data
+    const finalUpdateData = { ...updateData };
 
-    // If daily_plans are provided, transform them to weekly_plan structure
-    if (daily_plans && Array.isArray(daily_plans)) {
-      console.log('🔄 Transforming daily_plans to weekly_plan structure');
-      
-      const weeklyPlan = {};
-      const dayMapping = {
-        'maandag': 'maandag',
-        'dinsdag': 'dinsdag', 
-        'woensdag': 'woensdag',
-        'donderdag': 'donderdag',
-        'vrijdag': 'vrijdag',
-        'zaterdag': 'zaterdag',
-        'zondag': 'zondag'
-      };
+    // Update plan_id if name changed
+    if (finalUpdateData.name && finalUpdateData.name !== currentPlan.name) {
+      finalUpdateData.plan_id = finalUpdateData.name.toLowerCase()
+        .replace(/[^a-z0-9\s]/g, '')
+        .replace(/\s+/g, '-');
+    }
 
-      daily_plans.forEach(dailyPlan => {
-        const dayKey = dayMapping[dailyPlan.day];
-        if (dayKey && dailyPlan.meals) {
-          // Create meal objects in the correct format for database storage
-          const createMealObject = (meal: any, defaultTime: string) => {
-            if (!meal) {
-              return {
-                time: defaultTime,
-                ingredients: [],
-                nutrition: { calories: 0, protein: 0, carbs: 0, fat: 0 }
-              };
-            }
-            
-            return {
-              time: defaultTime,
-              ingredients: meal.ingredients || [],
-              nutrition: {
-                calories: meal.calories || 0,
-                protein: meal.protein || 0,
-                carbs: meal.carbs || 0,
-                fat: meal.fat || 0
-              }
-            };
-          };
-          
-          weeklyPlan[dayKey] = {
-            ontbijt: createMealObject(dailyPlan.meals.ontbijt, '07:00'),
-            ochtend_snack: createMealObject(dailyPlan.meals.snack1, '10:00'),
-            lunch: createMealObject(dailyPlan.meals.lunch, '12:00'),
-            lunch_snack: createMealObject(dailyPlan.meals.snack2, '15:00'),
-            diner: createMealObject(dailyPlan.meals.diner, '18:00'),
-            avond_snack: createMealObject(dailyPlan.meals.avondsnack, '21:30'),
-            dailyTotals: {
-              calories: (dailyPlan.meals.ontbijt?.calories || 0) + 
-                       (dailyPlan.meals.snack1?.calories || dailyPlan.meals.ochtend_snack?.calories || 0) +
-                       (dailyPlan.meals.lunch?.calories || 0) + 
-                       (dailyPlan.meals.snack2?.calories || dailyPlan.meals.lunch_snack?.calories || 0) +
-                       (dailyPlan.meals.diner?.calories || 0) + 
-                       (dailyPlan.meals.avondsnack?.calories || dailyPlan.meals.avond_snack?.calories || 0),
-              protein: (dailyPlan.meals.ontbijt?.protein || 0) + 
-                      (dailyPlan.meals.snack1?.protein || dailyPlan.meals.ochtend_snack?.protein || 0) +
-                      (dailyPlan.meals.lunch?.protein || 0) + 
-                      (dailyPlan.meals.snack2?.protein || dailyPlan.meals.lunch_snack?.protein || 0) +
-                      (dailyPlan.meals.diner?.protein || 0) + 
-                      (dailyPlan.meals.avondsnack?.protein || dailyPlan.meals.avond_snack?.protein || 0),
-              carbs: (dailyPlan.meals.ontbijt?.carbs || 0) + 
-                    (dailyPlan.meals.snack1?.carbs || dailyPlan.meals.ochtend_snack?.carbs || 0) +
-                    (dailyPlan.meals.lunch?.carbs || 0) + 
-                    (dailyPlan.meals.snack2?.carbs || dailyPlan.meals.lunch_snack?.carbs || 0) +
-                    (dailyPlan.meals.diner?.carbs || 0) + 
-                    (dailyPlan.meals.avondsnack?.carbs || dailyPlan.meals.avond_snack?.carbs || 0),
-              fat: (dailyPlan.meals.ontbijt?.fat || 0) + 
-                  (dailyPlan.meals.snack1?.fat || dailyPlan.meals.ochtend_snack?.fat || 0) +
-                  (dailyPlan.meals.lunch?.fat || 0) + 
-                  (dailyPlan.meals.snack2?.fat || dailyPlan.meals.lunch_snack?.fat || 0) +
-                  (dailyPlan.meals.diner?.fat || 0) + 
-                    (dailyPlan.meals.avondsnack?.fat || dailyPlan.meals.avond_snack?.fat || 0)
-            }
-          };
-        }
-      });
-
-      // Calculate weekly averages
-      const days = Object.keys(weeklyPlan);
-      let totalCalories = 0, totalProtein = 0, totalCarbs = 0, totalFat = 0;
-      
-      days.forEach(day => {
-        const dayTotals = weeklyPlan[day].dailyTotals;
-        totalCalories += dayTotals.calories;
-        totalProtein += dayTotals.protein;
-        totalCarbs += dayTotals.carbs;
-        totalFat += dayTotals.fat;
-      });
-
-      const weeklyAverages = {
-        calories: days.length > 0 ? Math.round(totalCalories / days.length) : finalUpdateData.target_calories || 2000,
-        protein: days.length > 0 ? Math.round((totalProtein / days.length) * 10) / 10 : finalUpdateData.target_protein || 150,
-        carbs: days.length > 0 ? Math.round((totalCarbs / days.length) * 10) / 10 : finalUpdateData.target_carbs || 200,
-        fat: days.length > 0 ? Math.round((totalFat / days.length) * 10) / 10 : finalUpdateData.target_fat || 70
-      };
-
-      // Update meals object while preserving existing data
+    // If meals data is being updated, ensure proper structure
+    if (finalUpdateData.meals) {
       const currentMeals = currentPlan.meals || {};
       finalUpdateData.meals = {
         ...currentMeals,
-        target_calories: finalUpdateData.target_calories || weeklyAverages.calories,
-        target_protein: finalUpdateData.target_protein || weeklyAverages.protein,
-        target_carbs: finalUpdateData.target_carbs || weeklyAverages.carbs,
-        target_fat: finalUpdateData.target_fat || weeklyAverages.fat,
-        goal: finalUpdateData.goal || finalUpdateData.fitness_goal || currentMeals.goal,
-        fitness_goal: finalUpdateData.fitness_goal || finalUpdateData.goal || currentMeals.fitness_goal,
-        weekly_plan: weeklyPlan,
-        weekly_averages: weeklyAverages
+        ...finalUpdateData.meals
       };
-
-      // Update plan_id if name changed
-      if (finalUpdateData.name && finalUpdateData.name !== currentPlan.name) {
-        finalUpdateData.plan_id = finalUpdateData.name.toLowerCase()
-          .replace(/[^a-z0-9\s]/g, '')
-          .replace(/\s+/g, '-')
-          .trim();
-      }
     }
 
-    finalUpdateData.updated_at = new Date().toISOString();
-
-    // Convert target values to integers for database (it expects integer type)
-    if (finalUpdateData.target_calories !== undefined) {
-      finalUpdateData.target_calories = Math.round(finalUpdateData.target_calories);
-    }
-    if (finalUpdateData.target_protein !== undefined) {
-      finalUpdateData.target_protein = Math.round(finalUpdateData.target_protein);
-    }
-    if (finalUpdateData.target_carbs !== undefined) {
-      finalUpdateData.target_carbs = Math.round(finalUpdateData.target_carbs);
-    }
-    if (finalUpdateData.target_fat !== undefined) {
-      finalUpdateData.target_fat = Math.round(finalUpdateData.target_fat);
-    }
-
-    console.log('🔄 Final update data with integer targets:', {
-      target_calories: finalUpdateData.target_calories,
-      target_protein: finalUpdateData.target_protein,
-      target_carbs: finalUpdateData.target_carbs,
-      target_fat: finalUpdateData.target_fat
-    });
-
+    // Explicitly select all columns to refresh schema cache
     const { data: plan, error } = await supabaseAdmin
       .from('nutrition_plans')
       .update(finalUpdateData)
       .eq('id', id)
-      .select()
+      .select(`
+        id,
+        plan_id,
+        name,
+        description,
+        target_calories,
+        target_protein,
+        target_carbs,
+        target_fat,
+        duration_weeks,
+        difficulty,
+        goal,
+        is_featured,
+        is_public,
+        meals,
+        created_at,
+        updated_at
+      `)
       .single();
 
     if (error) {
       console.error('❌ Error updating nutrition plan:', error);
-      return NextResponse.json({ error: 'Failed to update nutrition plan' }, { status: 500 });
+      return NextResponse.json({ error: `Failed to update nutrition plan: ${error.message}` }, { status: 500 });
     }
 
     console.log('✅ Nutrition plan updated successfully:', plan.plan_id);
     return NextResponse.json({ success: true, plan });
   } catch (error) {
-    console.error('❌ Error in nutrition plans PUT API:', error);
+    console.error('❌ Unexpected error in PUT /api/admin/nutrition-plans:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -547,13 +524,14 @@ export async function DELETE(request: NextRequest) {
       .eq('id', id);
 
     if (error) {
-      console.error('Error deleting nutrition plan:', error);
-      return NextResponse.json({ error: 'Failed to delete nutrition plan' }, { status: 500 });
+      console.error('❌ Error deleting nutrition plan:', error);
+      return NextResponse.json({ error: `Failed to delete nutrition plan: ${error.message}` }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, message: 'Nutrition plan deleted successfully' });
+    console.log('✅ Nutrition plan deleted successfully:', id);
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error in nutrition plans API:', error);
+    console.error('❌ Unexpected error in DELETE /api/admin/nutrition-plans:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-} 
+}

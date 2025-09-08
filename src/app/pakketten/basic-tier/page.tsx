@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { FaCheck, FaArrowRight, FaUsers, FaDumbbell, FaBrain, FaChartLine, FaCrown, FaStar, FaGift, FaBook, FaTools, FaComments, FaTarget, FaTrophy, FaBookOpen } from 'react-icons/fa';
+import { FaCheck, FaArrowRight, FaUsers, FaDumbbell, FaBrain, FaChartLine, FaCrown, FaStar, FaGift, FaBook, FaTools, FaComments, FaBullseye, FaTrophy, FaBookOpen } from 'react-icons/fa';
 import CheckoutSection from '@/components/CheckoutSection';
 
 export default function BasicTierPage() {
@@ -52,7 +52,7 @@ export default function BasicTierPage() {
       description: 'Meditatie oefeningen, goal setting tools en productiviteit systemen'
     },
     {
-      icon: FaTarget,
+      icon: FaBullseye,
       title: 'Challenges',
       description: 'Dagelijkse uitdagingen en achievement badges voor motivatie'
     },
