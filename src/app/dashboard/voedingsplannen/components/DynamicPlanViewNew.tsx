@@ -707,7 +707,10 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
               } else if (isOver) {
                 statusText = `${Math.abs(difference)} kcal te veel (${percentage}%)`;
                 // Over target - use percentage-based colors
-                if (percentage <= 110) {
+                if (percentage <= 105) {
+                  statusColor = 'text-green-400';
+                  progressColor = 'bg-green-500';
+                } else if (percentage <= 110) {
                   statusColor = 'text-orange-400';
                   progressColor = 'bg-orange-500';
                 } else {
@@ -740,7 +743,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                   <div className="w-full bg-gray-700 rounded-full h-3">
                     <div 
                       className={`h-3 rounded-full transition-all duration-300 ${progressColor}`}
-                      style={{ width: `${Math.min(percentage, 120)}%` }}
+                      style={{ width: `${Math.min(percentage, 100)}%` }}
                     ></div>
                   </div>
                 </div>
@@ -767,8 +770,17 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                 progressColor = 'bg-green-500';
               } else if (isOver) {
                 statusText = `${Math.abs(Math.round(difference * 10) / 10)}g te veel (${percentage}%)`;
-                statusColor = 'text-red-400';
-                progressColor = 'bg-red-500';
+                // Over target - use percentage-based colors
+                if (percentage <= 105) {
+                  statusColor = 'text-green-400';
+                  progressColor = 'bg-green-500';
+                } else if (percentage <= 110) {
+                  statusColor = 'text-orange-400';
+                  progressColor = 'bg-orange-500';
+                } else {
+                  statusColor = 'text-red-400';
+                  progressColor = 'bg-red-500';
+                }
               } else {
                 // Under target - use percentage-based colors
                 if (percentage >= 95) {
@@ -795,7 +807,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                   <div className="w-full bg-gray-700 rounded-full h-3">
                     <div 
                       className={`h-3 rounded-full transition-all duration-300 ${progressColor}`}
-                      style={{ width: `${Math.min(percentage, 120)}%` }}
+                      style={{ width: `${Math.min(percentage, 100)}%` }}
                     ></div>
               </div>
             </div>
@@ -822,8 +834,17 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                 progressColor = 'bg-green-500';
               } else if (isOver) {
                 statusText = `${Math.abs(Math.round(difference * 10) / 10)}g te veel (${percentage}%)`;
-                statusColor = 'text-red-400';
-                progressColor = 'bg-red-500';
+                // Over target - use percentage-based colors
+                if (percentage <= 105) {
+                  statusColor = 'text-green-400';
+                  progressColor = 'bg-green-500';
+                } else if (percentage <= 110) {
+                  statusColor = 'text-orange-400';
+                  progressColor = 'bg-orange-500';
+                } else {
+                  statusColor = 'text-red-400';
+                  progressColor = 'bg-red-500';
+                }
               } else {
                 // Under target - use percentage-based colors
                 if (percentage >= 95) {
@@ -850,7 +871,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                   <div className="w-full bg-gray-700 rounded-full h-3">
                     <div 
                       className={`h-3 rounded-full transition-all duration-300 ${progressColor}`}
-                      style={{ width: `${Math.min(percentage, 120)}%` }}
+                      style={{ width: `${Math.min(percentage, 100)}%` }}
                     ></div>
                   </div>
             </div>
@@ -877,8 +898,17 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                 progressColor = 'bg-green-500';
               } else if (isOver) {
                 statusText = `${Math.abs(Math.round(difference * 10) / 10)}g te veel (${percentage}%)`;
-                statusColor = 'text-red-400';
-                progressColor = 'bg-red-500';
+                // Over target - use percentage-based colors
+                if (percentage <= 105) {
+                  statusColor = 'text-green-400';
+                  progressColor = 'bg-green-500';
+                } else if (percentage <= 110) {
+                  statusColor = 'text-orange-400';
+                  progressColor = 'bg-orange-500';
+                } else {
+                  statusColor = 'text-red-400';
+                  progressColor = 'bg-red-500';
+                }
               } else {
                 // Under target - use percentage-based colors
                 if (percentage >= 95) {
@@ -905,7 +935,7 @@ export default function DynamicPlanViewNew({ planId, planName, userId, onBack }:
                   <div className="w-full bg-gray-700 rounded-full h-3">
                     <div 
                       className={`h-3 rounded-full transition-all duration-300 ${progressColor}`}
-                      style={{ width: `${Math.min(percentage, 120)}%` }}
+                      style={{ width: `${Math.min(percentage, 100)}%` }}
                     ></div>
             </div>
             </div>
