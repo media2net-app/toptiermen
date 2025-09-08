@@ -73,6 +73,12 @@ interface DailyPlan {
   meals: any;
 }
 
+interface MealPlan {
+  time: string;
+  ingredients: any[];
+  nutrition: any;
+}
+
 interface PlanBuilderProps {
   isOpen: boolean;
   onClose: () => void;
