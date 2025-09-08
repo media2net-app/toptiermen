@@ -32,24 +32,7 @@ interface MealEditModalProps {
   onSave: (ingredients: MealIngredient[]) => void;
 }
 
-// Available ingredients database
-const INGREDIENT_DATABASE = {
-  'Ei': { calories_per_100g: 155, protein_per_100g: 13, carbs_per_100g: 1.1, fat_per_100g: 11, unit_type: 'per_piece' },
-  'Melk': { calories_per_100g: 42, protein_per_100g: 3.4, carbs_per_100g: 5, fat_per_100g: 1, unit_type: 'per_100g' },
-  'Roomboter': { calories_per_100g: 717, protein_per_100g: 0.9, carbs_per_100g: 0.1, fat_per_100g: 81, unit_type: 'per_100g' },
-  'Kaas': { calories_per_100g: 402, protein_per_100g: 25, carbs_per_100g: 1.3, fat_per_100g: 33, unit_type: 'per_100g' },
-  'Banaan': { calories_per_100g: 89, protein_per_100g: 1.1, carbs_per_100g: 23, fat_per_100g: 0.3, unit_type: 'per_piece' },
-  'Brood': { calories_per_100g: 265, protein_per_100g: 9, carbs_per_100g: 49, fat_per_100g: 3.2, unit_type: 'per_piece' },
-  'Kipfilet': { calories_per_100g: 165, protein_per_100g: 31, carbs_per_100g: 0, fat_per_100g: 3.6, unit_type: 'per_100g' },
-  'Rijst': { calories_per_100g: 130, protein_per_100g: 2.7, carbs_per_100g: 28, fat_per_100g: 0.3, unit_type: 'per_100g' },
-  'Zalm': { calories_per_100g: 208, protein_per_100g: 25, carbs_per_100g: 0, fat_per_100g: 12, unit_type: 'per_100g' },
-  'Avocado': { calories_per_100g: 160, protein_per_100g: 2, carbs_per_100g: 9, fat_per_100g: 15, unit_type: 'per_piece' },
-  'Havermout': { calories_per_100g: 389, protein_per_100g: 17, carbs_per_100g: 66, fat_per_100g: 7, unit_type: 'per_100g' },
-  'Amandelen': { calories_per_100g: 579, protein_per_100g: 21, carbs_per_100g: 22, fat_per_100g: 50, unit_type: 'per_100g' },
-  'Yoghurt': { calories_per_100g: 59, protein_per_100g: 10, carbs_per_100g: 3.6, fat_per_100g: 0.4, unit_type: 'per_100g' },
-  'Quinoa': { calories_per_100g: 120, protein_per_100g: 4.4, carbs_per_100g: 22, fat_per_100g: 1.9, unit_type: 'per_100g' },
-  'Zoete aardappel': { calories_per_100g: 86, protein_per_100g: 1.6, carbs_per_100g: 20, fat_per_100g: 0.1, unit_type: 'per_piece' }
-};
+// Ingredient database will be loaded from API
 
 const MEAL_TYPES_NL = {
   ontbijt: 'Ontbijt',
@@ -82,6 +65,7 @@ export default function MealEditModal({
   const [searchTerm, setSearchTerm] = useState('');
   const [showIngredientSearch, setShowIngredientSearch] = useState(false);
   const [ingredientDatabase, setIngredientDatabase] = useState<any>({});
+  const [isDatabaseLoaded, setIsDatabaseLoaded] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -97,6 +81,7 @@ export default function MealEditModal({
         const data = await response.json();
         if (data.success && data.ingredients) {
           setIngredientDatabase(data.ingredients);
+          setIsDatabaseLoaded(true);
           console.log('✅ MealEditModal loaded ingredient database:', Object.keys(data.ingredients).length, 'ingredients');
         }
       } catch (error) {
@@ -108,8 +93,11 @@ export default function MealEditModal({
   }, []);
 
   const calculateIngredientNutrition = (ingredient: MealIngredient) => {
+    if (!isDatabaseLoaded || !ingredientDatabase[ingredient.name]) {
+      return { calories: 0, protein: 0, carbs: 0, fat: 0 };
+    }
+    
     const data = ingredientDatabase[ingredient.name];
-    if (!data) return { calories: 0, protein: 0, carbs: 0, fat: 0 };
 
     let multiplier = 1;
     if (ingredient.unit === 'per_100g' && data.unit_type === 'per_100g') {
@@ -259,10 +247,15 @@ export default function MealEditModal({
               <h3 className="text-lg font-semibold text-white">Huidige Ingrediënten</h3>
               <button
                 onClick={() => setShowIngredientSearch(true)}
-                className="flex items-center gap-2 px-3 py-2 bg-[#8BAE5A] text-[#232D1A] rounded-lg hover:bg-[#7A9D4A] transition-colors text-sm font-semibold"
+                disabled={!isDatabaseLoaded}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm font-semibold ${
+                  isDatabaseLoaded 
+                    ? 'bg-[#8BAE5A] text-[#232D1A] hover:bg-[#7A9D4A]' 
+                    : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                }`}
               >
                 <PlusIcon className="w-4 h-4" />
-                Ingrediënt Toevoegen
+                {isDatabaseLoaded ? 'Ingrediënt Toevoegen' : 'Database Laden...'}
               </button>
             </div>
 
@@ -360,7 +353,7 @@ export default function MealEditModal({
                   >
                     <div className="font-medium text-white">{ingredientName}</div>
                     <div className="text-sm text-gray-400">
-                      {INGREDIENT_DATABASE[ingredientName as keyof typeof INGREDIENT_DATABASE].calories_per_100g} kcal per 100g
+                      {ingredientDatabase[ingredientName]?.calories_per_100g || 0} kcal per 100g
                     </div>
                   </button>
                 ))}
